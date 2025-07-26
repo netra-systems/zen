@@ -12,9 +12,7 @@ from sqlmodel import Session, select
 from ..db import models_postgres
 from ..db import models_clickhouse
 from ..config import settings
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from ..logging_config_custom.logger import logger
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -70,7 +68,7 @@ class SecurityService:
         
         db_session.commit()
 
-    def get_user_credentials(self, user_id: int, db_session: Session) -> Optional[models_postgres.ClickHouseCredentials]:
+    def get_user_credentials(self, user_id: int, db_session: Session) -> Optional[models_clickhouse.ClickHouseCredentials]:
         secrets = db_session.exec(select(models_postgres.Secret).where(models_postgres.Secret.user_id == user_id)).all()
         if not secrets:
             return None
