@@ -6,7 +6,6 @@ from sqlmodel import SQLModel, Field
 
 # TBD merge understand these models / things
 
-# v2/app/db/models_clickhouse_v2_4.py
 
 LOGS_TABLE_NAME = 'netra_app_internal_logs'
 
@@ -48,6 +47,13 @@ ORDER BY (id);
 # Note: These are SQLModels used for data validation and structure, not for table creation
 # with SQLModel's metadata.create_all, as it doesn't support ClickHouse.
 # The table schema is defined in data_enricher.py.
+
+class ClickHouseCredentials(SQLModel):
+    host: str
+    port: int
+    user: str
+    password: str
+    database: str
 
 class ModelIdentifier(SQLModel):
     provider: str
