@@ -1,4 +1,4 @@
-# /v2/app/pipeline.py
+# v2/app/pipeline_v2_4.py
 import os
 import logging
 import json
@@ -18,8 +18,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - 
 
 def run_full_analysis_pipeline(run_id: str, user_id: int):
     """
-    Orchestrates the entire analysis workflow.
-    This function is run in the background.
+    Orchestrates the entire analysis workflow with robust logging and status updates.
     """
     logging.info(f"Starting Netra Log Ingest and Analysis Pipeline for run_id: {run_id}, user_id: {user_id}")
     
@@ -31,7 +30,7 @@ def run_full_analysis_pipeline(run_id: str, user_id: int):
         timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
         log_entry = f"[{timestamp}] {message}\n"
         run.execution_log = (run.execution_log or "") + log_entry
-        db_session.commit()
+        db_session.commit() # Commit each log entry to provide real-time updates
         logging.info(f"Run {run_id}: {message}")
 
     try:
@@ -59,7 +58,7 @@ def run_full_analysis_pipeline(run_id: str, user_id: int):
 
         log_to_run("Starting data copy...")
         with DataCopier(source_creds=customer_creds, dest_creds=netra_creds, customer_id=str(user_id)) as copier:
-            source_table_name = run.config.get('source_table', 'logs') 
+            source_table_name = run.config.get('source_table', 'logs')
             raw_dest_db, raw_dest_table = copier.copy_data(source_table_name=source_table_name)
         log_to_run(f"Data copied to {raw_dest_db}.{raw_dest_table}.")
         
@@ -92,7 +91,9 @@ def run_full_analysis_pipeline(run_id: str, user_id: int):
             run.status = 'failed'
             log_to_run(error_message)
     finally:
+        # This block ensures that the final state of the run is always saved.
         if run:
             run.completed_at = datetime.utcnow()
             db_session.commit()
         db_session.close()
+        logging.info(f"Pipeline finished for run_id: {run_id} with final status: {run.status if run else 'UNKNOWN'}")

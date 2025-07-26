@@ -4,6 +4,45 @@ import time
 from typing import Dict, Any, List, Optional, Literal
 from sqlmodel import SQLModel, Field
 
+# v2/app/db/models_clickhouse_v2_4.py
+
+LOGS_TABLE_NAME = 'netra_app_internal_logs'
+
+# Schema for the main application logs, based on the Log model in app/logging/logger.py
+LOGS_TABLE_SCHEMA = f"""
+CREATE TABLE IF NOT EXISTS {LOGS_TABLE_NAME}
+(
+    `request_id` UUID,
+    `timestamp` DateTime64(3, 'UTC'),
+    `level` String,
+    `message` String,
+    `module` Nullable(String),
+    `function` Nullable(String),
+    `line_no` Nullable(UInt32),
+    `process_name` Nullable(String),
+    `thread_name` Nullable(String),
+    `extra` Map(String, String)
+)
+ENGINE = MergeTree()
+ORDER BY (timestamp, level)
+"""
+
+# Schema for the LLM supply catalog, remains unchanged
+SUPPLY_TABLE_NAME = 'netra_global_supply_catalog'
+SUPPLY_TABLE_SCHEMA = f"""
+CREATE TABLE IF NOT EXISTS {SUPPLY_TABLE_NAME} (
+    id UUID,
+    provider String,
+    family String,
+    name String,
+    cost_per_million_tokens_usd Map(String, Float64),
+    quality_score Float64,
+    updated_at DateTime DEFAULT now()
+) ENGINE = ReplacingMergeTree(updated_at)
+ORDER BY (id);
+"""
+
+
 # Note: These are SQLModels used for data validation and structure, not for table creation
 # with SQLModel's metadata.create_all, as it doesn't support ClickHouse.
 # The table schema is defined in data_enricher.py.
