@@ -1,0 +1,5 @@
+pydantic
+faker
+pyyaml
+rich
+python-dotenv
