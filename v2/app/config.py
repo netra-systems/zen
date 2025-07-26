@@ -1,6 +1,9 @@
 import os
 from functools import lru_cache
 from pydantic_settings import BaseSettings  # <-- CORRECTED IMPORT
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Settings(BaseSettings):
     """
