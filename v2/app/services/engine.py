@@ -1,3 +1,4 @@
+# /v2/app/services/engine.py
 
 import os
 import sys
@@ -7,19 +8,22 @@ import json
 import logging
 import random
 import asyncio
-from typing import Dict, Any, List, Optional, Literal, Callable
+from typing import Dict, Any, List, Optional, Callable
 from functools import wraps
 
-# --- Third-Party Imports ---
 import httpx
 import numpy as np
 import pandas as pd
 from sklearn.cluster import KMeans
-from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
-# --- Local Service Imports ---
-from .supply_catalog_service import SupplyCatalog, SupplyOption, ModelIdentifier
+from .supply_catalog_service import SupplyCatalogService
+from ..db.models_clickhouse import (
+    UnifiedLogEntry, AnalysisRequest, AnalysisResult, DiscoveredPattern,
+    PredictedOutcome, LearnedPolicy, BaselineMetrics, CostComparison, EnrichedMetrics,
+    ModelIdentifier, RequestData, TraceContext, EventMetadata
+)
+from ..db.models_postgres import SupplyOption
 
 # --- Configuration ---
 load_dotenv()
@@ -95,94 +99,8 @@ def extract_json_from_response(text: str) -> Optional[Dict]:
         logger.error(f"JSON parsing failed: {e}. Original text: '{text[:200]}...'")
     return None
 
-# --- Pydantic Schemas ---
-class EventMetadata(BaseModel):
-    log_schema_version: str = "23.4.0"
-    event_id: str = Field(default_factory=lambda: f"evt_{uuid.uuid4().hex[:8]}")
-    timestamp_utc: int = Field(default_factory=lambda: int(time.time()))
-
-class TraceContext(BaseModel):
-    trace_id: str
-    span_id: str = Field(default_factory=lambda: f"span_{uuid.uuid4().hex[:8]}")
-    parent_span_id: Optional[str] = None
-
-class RequestData(BaseModel):
-    model: ModelIdentifier
-    prompt_text: str
-    user_goal: Literal["cost", "latency", "quality"] = "quality"
-
-class EnrichedMetrics(BaseModel):
-    prefill_ratio: float
-    generation_ratio: float
-    throughput_tokens_per_sec: float
-    inter_token_latency_ms: Optional[float] = None
-
-class UnifiedLogEntry(BaseModel):
-    event_metadata: EventMetadata = Field(default_factory=EventMetadata)
-    trace_context: TraceContext
-    request: RequestData
-    performance: Dict[str, Any]
-    finops: Dict[str, Any]
-    response: Dict[str, Any]
-    workloadName: str = "Unknown"
-    enriched_metrics: Optional[EnrichedMetrics] = None
-    embedding: Optional[List[float]] = None
-
-class DiscoveredPattern(BaseModel):
-    pattern_id: str = Field(default_factory=lambda: f"pat_{uuid.uuid4().hex[:8]}")
-    pattern_name: str
-    pattern_description: str
-    centroid_features: Dict[str, float]
-    member_span_ids: List[str]
-    member_count: int
-
-class PredictedOutcome(BaseModel):
-    supply_option_id: str
-    predicted_cost_usd: float
-    predicted_latency_ms: int
-    predicted_quality_score: float
-    utility_score: float
-    explanation: str
-    confidence: float
-
-class BaselineMetrics(BaseModel):
-    avg_cost_usd: float
-    avg_latency_ms: int
-    avg_quality_score: float
-
-class LearnedPolicy(BaseModel):
-    pattern_id: str
-    optimal_supply_option_id: str
-    predicted_outcome: PredictedOutcome
-    alternative_outcomes: List[PredictedOutcome]
-    baseline_metrics: BaselineMetrics
-    pattern_impact_fraction: float
-
-class CostComparison(BaseModel):
-    prior_monthly_spend: float
-    projected_monthly_spend: float
-    projected_monthly_savings: float
-    delta_percent: float
-
-class AnalysisRequest(BaseModel):
-    workloads: List[Dict]
-    debug_mode: bool = False
-    constraints: Optional[Dict[str, bool]] = None
-    negotiated_discount_percent: float = Field(0.0, ge=0, le=100)
-
-class AnalysisResult(BaseModel):
-    run_id: str
-    discovered_patterns: List[DiscoveredPattern]
-    learned_policies: List[LearnedPolicy]
-    supply_catalog: List[SupplyOption]
-    cost_comparison: CostComparison
-    execution_log: List[Dict]
-    debug_mode: bool
-    span_map: Dict[str, UnifiedLogEntry]
-
 # --- Connectors ---
 class GeminiLLMConnector:
-    # (Content is identical to previous version, omitted for brevity)
     def __init__(self, api_key: str, async_client: httpx.AsyncClient):
         self.api_key = api_key
         self.async_client = async_client
@@ -208,7 +126,6 @@ class GeminiLLMConnector:
 
 # --- Core Modules ---
 class LogEnrichmentModule:
-    # (Content is identical to previous version)
     def enrich_spans(self, spans: List[UnifiedLogEntry]) -> List[UnifiedLogEntry]:
         for span in spans:
             usage = span.response.get('usage', {})
@@ -231,7 +148,6 @@ class LogEnrichmentModule:
         return spans
 
 class PatternDiscoverer:
-    # (Content is identical to previous version)
     def __init__(self, llm_connector: GeminiLLMConnector):
         self.llm = llm_connector
 
@@ -281,9 +197,8 @@ class PatternDiscoverer:
 
 
 class SimulationEngine:
-    # (Content is identical to previous version)
-    def __init__(self, supply_catalog: SupplyCatalog, llm_connector: GeminiLLMConnector, discount_percent: float):
-        self.supply_catalog = supply_catalog
+    def __init__(self, supply_catalog_service: SupplyCatalogService, llm_connector: GeminiLLMConnector, discount_percent: float):
+        self.supply_catalog_service = supply_catalog_service
         self.llm = llm_connector
         self.discount_factor = 1.0 - (discount_percent / 100.0)
 
@@ -324,33 +239,35 @@ class SimulationEngine:
                 quality=sim_data.get('predicted_quality_score', 0),
                 confidence=sim_data.get('confidence', 0.85)
             )
-            return PredictedOutcome(supply_option_id=supply.option_id, utility_score=utility_score, **sim_data)
+            return PredictedOutcome(supply_option_id=str(supply.id), utility_score=utility_score, **sim_data)
         except Exception as e:
             logger.error(f"Pydantic validation failed for simulation outcome: {e}, data: {sim_data}")
             return None
 
-    async def generate_policies(self, patterns: List[DiscoveredPattern], span_map: Dict[str, UnifiedLogEntry]) -> List[LearnedPolicy]:
-        policy_tasks = [self._generate_policy_for_pattern(p, span_map) for p in patterns]
+    async def generate_policies(self, db_session, patterns: List[DiscoveredPattern], span_map: Dict[str, UnifiedLogEntry]) -> List[LearnedPolicy]:
+        policy_tasks = [self._generate_policy_for_pattern(db_session, p, span_map) for p in patterns]
         policies = await asyncio.gather(*policy_tasks)
         return [p for p in policies if p]
 
-    async def _generate_policy_for_pattern(self, pattern: DiscoveredPattern, span_map: Dict[str, UnifiedLogEntry]) -> Optional[LearnedPolicy]:
+    async def _generate_policy_for_pattern(self, db_session, pattern: DiscoveredPattern, span_map: Dict[str, UnifiedLogEntry]) -> Optional[LearnedPolicy]:
         member_spans = [span_map[sid] for sid in pattern.member_span_ids if sid in span_map]
         if not member_spans: return None
         
         representative_span = member_spans[0]
         
+        all_options = self.supply_catalog_service.get_all_options(db_session)
+
         baseline_metrics = BaselineMetrics(
             avg_cost_usd=np.mean([s.finops['total_cost_usd'] for s in member_spans]),
             avg_latency_ms=int(np.mean([s.performance['latency_ms']['total_e2e_ms'] for s in member_spans])),
-            avg_quality_score=np.mean([self.supply_catalog.get_option_by_name(s.request.model.name).quality_score if self.supply_catalog.get_option_by_name(s.request.model.name) else 0.8 for s in member_spans])
+            avg_quality_score=np.mean([self.supply_catalog_service.get_option_by_name(db_session, s.request.model.name).quality_score if self.supply_catalog_service.get_option_by_name(db_session, s.request.model.name) else 0.8 for s in member_spans])
         )
         
         pattern_spend = sum(s.finops['total_cost_usd'] for s in member_spans)
         all_spans_spend = sum(s.finops['total_cost_usd'] for s in span_map.values())
         pattern_impact_fraction = (pattern_spend / all_spans_spend) if all_spans_spend > 0 else 0
 
-        sim_tasks = [self._simulate_single_case(pattern, supply, representative_span) for supply in self.supply_catalog.get_all_options()]
+        sim_tasks = [self._simulate_single_case(pattern, supply, representative_span) for supply in all_options]
         outcomes = [o for o in await asyncio.gather(*sim_tasks) if o]
         if not outcomes: return None
         
@@ -397,15 +314,16 @@ class SimulationEngine:
 
 # --- Analysis Pipeline ---
 class AnalysisPipeline:
-    def __init__(self, run_id: str, request: AnalysisRequest, preloaded_spans: Optional[List[UnifiedLogEntry]] = None):
+    def __init__(self, run_id: str, request: AnalysisRequest, db_session, preloaded_spans: Optional[List[UnifiedLogEntry]] = None):
         self.run_id = run_id
         self.request = request
         self.preloaded_spans = preloaded_spans
+        self.db_session = db_session
         self.async_client = httpx.AsyncClient()
         self.llm_connector = GeminiLLMConnector(api_key=config.GEMINI_API_KEY, async_client=self.async_client)
-        self.supply_catalog = SupplyCatalog()
+        self.supply_catalog_service = SupplyCatalogService()
         self.pattern_discoverer = PatternDiscoverer(self.llm_connector)
-        self.simulation_engine = SimulationEngine(self.supply_catalog, self.llm_connector, request.negotiated_discount_percent)
+        self.simulation_engine = SimulationEngine(self.supply_catalog_service, self.llm_connector, request.negotiated_discount_percent)
         self.log_enricher = LogEnrichmentModule()
 
     async def run(self):
@@ -418,7 +336,6 @@ class AnalysisPipeline:
                 all_spans = [span for wl in self.request.workloads for span in self._generate_spans_for_workload(wl, f"trace_{uuid.uuid4().hex[:8]}")]
                 update_run_status(self.run_id, 'running', f"Generated {len(all_spans)} total spans.")
             
-            # (Rest of the pipeline logic is identical to previous version)
             step_name = "Log Enrichment"
             start_time = time.perf_counter()
             update_run_status(self.run_id, 'running', log_message=f"Starting: {step_name}...")
@@ -440,7 +357,7 @@ class AnalysisPipeline:
                 update_run_status(self.run_id, 'running', f"Starting analysis attempt {attempt + 1}/{max_retries}...")
                 patterns = await timed_discover(all_spans)
                 if patterns:
-                    policies = await timed_simulate(patterns, span_map)
+                    policies = await timed_simulate(self.db_session, patterns, span_map)
                 else:
                     update_run_status(self.run_id, 'running', "No patterns discovered.")
                 
@@ -468,13 +385,13 @@ class AnalysisPipeline:
                 run_id=self.run_id,
                 discovered_patterns=patterns,
                 learned_policies=policies,
-                supply_catalog=self.supply_catalog.get_all_options(),
+                supply_catalog=self.supply_catalog_service.get_all_options(self.db_session),
                 cost_comparison=cost_comparison,
                 execution_log=final_log,
                 debug_mode=self.request.debug_mode,
-                span_map={k: v.dict() for k, v in span_map.items()}
+                span_map=span_map
             )
-            update_run_status(self.run_id, 'completed', "Analysis complete.", result=result.model_dump())
+            update_run_status(self.run_id, 'completed', "Analysis complete.", result=result.model_dump(exclude_none=True))
 
         except Exception as e:
             logger.error(f"An error occurred during trace analysis run {self.run_id}: {e}", exc_info=True)
@@ -483,7 +400,6 @@ class AnalysisPipeline:
             await self.async_client.aclose()
 
     def _generate_spans_for_workload(self, workload: Dict, trace_id: str, num_spans: int = 25) -> List[UnifiedLogEntry]:
-        # (Content is identical to previous version)
         spans = []
         workload_name = workload.get('name', 'Unknown Workload')
         model_name = workload.get('model', 'gpt-4o')
