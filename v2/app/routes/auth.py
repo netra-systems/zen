@@ -1,32 +1,32 @@
-# /v2.1/routes/auth.py
+# /v2/app/routes/auth.py
 import logging
 from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlmodel import Session
+from sqlmodel import Session, select
 
-from .. import models
-from ..dependencies import get_current_active_user, DbDep, ActiveUserDep
+from ..db import models_postgres
+from ..dependencies import DbDep, ActiveUserDep
 from ..config import settings
-from ..database import get_db
 from ..services.security_service import create_access_token, get_password_hash, verify_password
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-router = APIRouter(tags=["Authentication"])
+router = APIRouter()
 
 OAuthFormDep = Annotated[OAuth2PasswordRequestForm, Depends()]
 
-@router.post("/token", response_model=models.Token)
+@router.post("/token", response_model=models_postgres.Token)
 def login_for_access_token(form_data: OAuthFormDep, db: DbDep):
     """
     Provides a JWT access token for a valid user.
     """
-    user = db.get(models.User, form_data.username) # Get user by email (PK)
+    statement = select(models_postgres.User).where(models_postgres.User.email == form_data.username)
+    user = db.exec(statement).first()
+
     if not user or not verify_password(form_data.password, user.hashed_password):
         logger.warning(f"Failed login attempt for email: {form_data.username}")
         raise HTTPException(
@@ -47,20 +47,19 @@ def login_for_access_token(form_data: OAuthFormDep, db: DbDep):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/users", response_model=models.UserPublic, status_code=status.HTTP_201_CREATED)
-def create_user(user: models.UserCreate, db: DbDep):
+@router.post("/users", response_model=models_postgres.UserPublic, status_code=status.HTTP_201_CREATED)
+def create_user(user: models_postgres.UserCreate, db: DbDep):
     """
     Creates a new user in the database.
     """
-    db_user = db.get(models.User, user.email)
+    statement = select(models_postgres.User).where(models_postgres.User.email == user.email)
+    db_user = db.exec(statement).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
     hashed_password = get_password_hash(user.password)
-    # Use .model_dump() to create a dict from the Pydantic model
     user_data = user.model_dump()
-    # Create the SQLModel User instance
-    user_to_add = models.User(**user_data, hashed_password=hashed_password)
+    user_to_add = models_postgres.User(**user_data, hashed_password=hashed_password)
     
     db.add(user_to_add)
     db.commit()
@@ -69,9 +68,9 @@ def create_user(user: models.UserCreate, db: DbDep):
     return user_to_add
 
 
-@router.get("/users/me", response_model=models.UserPublic)
+@router.get("/users/me", response_model=models_postgres.UserPublic)
 def read_users_me(current_user: ActiveUserDep):
     """
-    Returns the public information for the currently authenticated and active user.
+    Returns the public information for the currently authenticated user.
     """
     return current_user
