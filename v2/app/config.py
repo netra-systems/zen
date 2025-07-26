@@ -6,6 +6,9 @@ from pydantic_settings import BaseSettings
 IS_SCHEMA_GENERATION = os.environ.get("GENERATE_SCHEMA_MODE") == "1"
 
 class Settings(BaseSettings):
+    FERNET_KEY: str
+    JWT_SECRET_KEY: str
+    ALGORITHM: str
     """
     Defines the application settings.
     These can be loaded from a .env file or environment variables.
@@ -37,7 +40,9 @@ if IS_SCHEMA_GENERATION:
     os.environ["CLICKHOUSE_PASSWORD"] = "password"
     os.environ["CLICKHOUSE_DB"] = "netra"
     os.environ["SECRET_KEY"] = "a-super-secret-key-for-dev-and-schema-generation"
-
+    os.environ["FERNET_KEY"] = "dBQKEflQr-6hue28u-BBHy29R6NUhidhJArmKJcLwxg="
+    os.environ["JWT_SECRET_KEY"] = "your_super_secret_jwt_key_here"
+    os.environ["ALGORITHM"] = "HS256"
 # Instantiate Settings.
 # In normal operation, it loads from the environment or a .env file.
 # If IS_SCHEMA_GENERATION is true, it loads from the dummy environment
