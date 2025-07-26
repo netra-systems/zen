@@ -1,24 +1,23 @@
-# /v2.1/routes/analysis.py
+# /v2/app/routes/analysis.py
 import logging
 import uuid
-from typing import List, Annotated
+from typing import List
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlmodel import Session, select
 
-from .. import models
+from ..db import models_postgres
 from ..dependencies import ActiveUserDep, DbDep
 from ..pipeline import run_full_analysis_pipeline
 from ..services.security_service import security_service
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v2", tags=["Analysis & Credentials"])
+router = APIRouter()
 
 @router.post("/credentials", status_code=status.HTTP_204_NO_CONTENT)
-def save_credentials(creds: models.ClickHouseCredentials, db: DbDep, current_user: ActiveUserDep):
+def save_credentials(creds: models_postgres.ClickHouseCredentials, db: DbDep, current_user: ActiveUserDep):
     """Saves or updates the user's ClickHouse credentials securely."""
     try:
         security_service.save_user_credentials(user_id=current_user.id, credentials=creds, db_session=db)
@@ -28,7 +27,7 @@ def save_credentials(creds: models.ClickHouseCredentials, db: DbDep, current_use
         raise HTTPException(status_code=500, detail="Could not save credentials.")
 
 
-@router.get("/credentials", response_model=models.ClickHouseCredentials)
+@router.get("/credentials", response_model=models_postgres.ClickHouseCredentials)
 def get_credentials(db: DbDep, current_user: ActiveUserDep):
     """Retrieves the user's saved ClickHouse credentials."""
     creds = security_service.get_user_credentials(user_id=current_user.id, db_session=db)
@@ -37,15 +36,15 @@ def get_credentials(db: DbDep, current_user: ActiveUserDep):
     return creds
 
 
-@router.post("/runs", response_model=models.AnalysisRunPublic, status_code=status.HTTP_202_ACCEPTED)
+@router.post("/runs", response_model=models_postgres.AnalysisRunPublic, status_code=status.HTTP_202_ACCEPTED)
 def start_new_analysis_run(
-    run_create: models.AnalysisRunCreate,
+    run_create: models_postgres.AnalysisRunCreate,
     background_tasks: BackgroundTasks,
     db: DbDep,
     current_user: ActiveUserDep
 ):
     """Creates an analysis run record and starts the pipeline in the background."""
-    new_run = models.AnalysisRun(
+    new_run = models_postgres.AnalysisRun(
         user_id=current_user.id,
         config={"source_table": run_create.source_table}
     )
@@ -58,13 +57,13 @@ def start_new_analysis_run(
     return new_run
 
 
-@router.get("/runs/{run_id}", response_model=models.AnalysisRunPublic)
+@router.get("/runs/{run_id}", response_model=models_postgres.AnalysisRunPublic)
 def get_run_status(run_id: uuid.UUID, db: DbDep, current_user: ActiveUserDep):
     """Retrieves the status and details of a specific analysis run."""
     run = db.exec(
-        select(models.AnalysisRun).where(
-            models.AnalysisRun.id == run_id,
-            models.AnalysisRun.user_id == current_user.id
+        select(models_postgres.AnalysisRun).where(
+            models_postgres.AnalysisRun.id == run_id,
+            models_postgres.AnalysisRun.user_id == current_user.id
         )
     ).first()
 
@@ -73,8 +72,12 @@ def get_run_status(run_id: uuid.UUID, db: DbDep, current_user: ActiveUserDep):
     return run
 
 
-@router.get("/runs", response_model=List[models.AnalysisRunPublic])
+@router.get("/runs", response_model=List[models_postgres.AnalysisRunPublic])
 def get_all_user_runs(db: DbDep, current_user: ActiveUserDep):
     """Retrieves all analysis runs for the current user."""
-    runs = current_user.runs
+    runs = db.exec(
+        select(models_postgres.AnalysisRun)
+        .where(models_postgres.AnalysisRun.user_id == current_user.id)
+        .order_by(models_postgres.AnalysisRun.created_at.desc())
+    ).all()
     return runs
