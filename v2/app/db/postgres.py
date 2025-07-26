@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from ..config import settings
-from app.logging_config_custom import logger
+from app.logging_config_custom.logger import logger
 
 engine = create_engine(settings.database_url, echo=True)
 

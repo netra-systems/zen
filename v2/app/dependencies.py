@@ -10,9 +10,7 @@ from sqlmodel import Session, select
 from .config import settings
 from .db.postgres import SessionLocal
 from .db.models_postgres import User
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from .logging_config_custom.logger import logger
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
