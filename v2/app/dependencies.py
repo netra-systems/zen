@@ -8,7 +8,7 @@ from jose import JWTError, jwt
 from sqlmodel import Session, select
 
 from .config import settings
-from .db.database import SessionLocal
+from .db.postgres import SessionLocal
 from .db.models_postgres import User
 
 logging.basicConfig(level=logging.INFO)
