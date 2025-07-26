@@ -6,13 +6,14 @@ from sqlmodel import Session
 from ..db import models_postgres
 from ..dependencies import DbDep
 from ..services.supply_catalog_service import SupplyCatalogService
+from .. import schema
 
 router = APIRouter()
 catalog_service = SupplyCatalogService()
 
-@router.post("/supply-catalog/", response_model=models_postgres.SupplyOption, status_code=status.HTTP_201_CREATED)
+@router.post("/supply-catalog/", response_model=schema.SupplyOption, status_code=status.HTTP_201_CREATED)
 def create_supply_option(
-    option_create: models_postgres.SupplyOptionCreate,
+    option_create: schema.SupplyOptionCreate,
     db: DbDep,
 ):
     """
