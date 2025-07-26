@@ -7,7 +7,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlmodel import Session, select
 
 from .. import schema
-
+from ..db import models_clickhouse
 
 from ..dependencies import ActiveUserDep, DbDep
 from ..pipeline import run_full_analysis_pipeline
@@ -17,7 +17,7 @@ from ..services.security_service import security_service
 router = APIRouter()
 
 @router.post("/credentials", status_code=status.HTTP_204_NO_CONTENT)
-def save_credentials(creds: schema.ClickHouseCredentials, db: DbDep, current_user: ActiveUserDep):
+def save_credentials(creds: models_clickhouse.ClickHouseCredentials, db: DbDep, current_user: ActiveUserDep):
     """Saves or updates the user's ClickHouse credentials securely."""
     try:
         security_service.save_user_credentials(user_id=current_user.id, credentials=creds, db_session=db)
@@ -27,7 +27,7 @@ def save_credentials(creds: schema.ClickHouseCredentials, db: DbDep, current_use
         raise HTTPException(status_code=500, detail="Could not save credentials.")
 
 
-@router.get("/credentials", response_model=schema.ClickHouseCredentials)
+@router.get("/credentials", response_model=models_clickhouse.ClickHouseCredentials)
 def get_credentials(db: DbDep, current_user: ActiveUserDep):
     """Retrieves the user's saved ClickHouse credentials."""
     creds = security_service.get_user_credentials(user_id=current_user.id, db_session=db)

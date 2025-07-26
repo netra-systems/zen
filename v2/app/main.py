@@ -4,12 +4,11 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
 from app.routes import auth, supply, analysis
-from app.db.database import Database
 from app.db.clickhouse import ClickHouseClient
 from app.db.models_clickhouse import SUPPLY_TABLE_SCHEMA, LOGS_TABLE_SCHEMA
 from app.config import settings
-from app.logging_config import logger
-from app.logging_config.clickhouse_logger import ClickHouseLogHandler
+from app.logging_config_custom.logger import logger
+from app.logging_config_custom.clickhouse_logger import ClickHouseLogHandler
 
 def setup_logging():
     """Initializes the application's logging configuration."""
@@ -19,8 +18,7 @@ def setup_logging():
 def initialize_databases(app: FastAPI):
     """Initializes and connects to PostgreSQL and ClickHouse."""
     # Initialize PostgreSQL
-    Database.initialize(settings.DATABASE_URL)
-    logger.info("Postgres initialized.")
+    # TBD
 
     # Initialize and connect to ClickHouse
     ch_client = ClickHouseClient(
@@ -67,7 +65,9 @@ async def lifespan(app: FastAPI):
     # Startup
     setup_logging()
     logger.info("Application startup...")
-    initialize_databases(app)
+
+    if settings.app_env != "development":
+        initialize_databases(app)
     
     yield
     

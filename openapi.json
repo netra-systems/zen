@@ -1,0 +1,891 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FastAPI",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/auth/token": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login For Access Token",
+        "description": "Provides a JWT access token for a valid user.",
+        "operationId": "login_for_access_token_auth_token_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_login_for_access_token_auth_token_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/users": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Create User",
+        "description": "Creates a new user in the database.",
+        "operationId": "create_user_auth_users_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/users/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Read Users Me",
+        "description": "Returns the public information for the currently authenticated user.",
+        "operationId": "read_users_me_auth_users_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPublic"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/supply/supply-catalog/": {
+      "get": {
+        "tags": [
+          "supply"
+        ],
+        "summary": "Read Supply Catalog",
+        "description": "Retrieves a list of all models in the supply catalog.",
+        "operationId": "read_supply_catalog_supply_supply_catalog__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SupplyOption"
+                  },
+                  "type": "array",
+                  "title": "Response Read Supply Catalog Supply Supply Catalog  Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "supply"
+        ],
+        "summary": "Create Supply Option",
+        "description": "Creates a new supply option in the catalog.",
+        "operationId": "create_supply_option_supply_supply_catalog__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplyOptionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplyOption"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/supply/supply-catalog/{option_id}": {
+      "get": {
+        "tags": [
+          "supply"
+        ],
+        "summary": "Read Supply Option",
+        "description": "Retrieves a single supply option by its ID.",
+        "operationId": "read_supply_option_supply_supply_catalog__option_id__get",
+        "parameters": [
+          {
+            "name": "option_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Option Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplyOption"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analysis/credentials": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Get Credentials",
+        "description": "Retrieves the user's saved ClickHouse credentials.",
+        "operationId": "get_credentials_analysis_credentials_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClickHouseCredentials"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Save Credentials",
+        "description": "Saves or updates the user's ClickHouse credentials securely.",
+        "operationId": "save_credentials_analysis_credentials_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClickHouseCredentials"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/analysis/runs": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Get All User Runs",
+        "description": "Retrieves all analysis runs for the current user.",
+        "operationId": "get_all_user_runs_analysis_runs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AnalysisRunPublic"
+                  },
+                  "type": "array",
+                  "title": "Response Get All User Runs Analysis Runs Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Start New Analysis Run",
+        "description": "Creates an analysis run record and starts the pipeline in the background.",
+        "operationId": "start_new_analysis_run_analysis_runs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalysisRunCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisRunPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/analysis/runs/{run_id}": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Get Run Status",
+        "description": "Retrieves the status and details of a specific analysis run.",
+        "operationId": "get_run_status_analysis_runs__run_id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisRunPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Read Root",
+        "operationId": "read_root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnalysisRunCreate": {
+        "properties": {
+          "source_table": {
+            "type": "string",
+            "title": "Source Table",
+            "description": "The full name of the source table to analyze, e.g., 'mydatabase.mytable'"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_table"
+        ],
+        "title": "AnalysisRunCreate"
+      },
+      "AnalysisRunPublic": {
+        "properties": {
+          "config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Config",
+            "description": "Configuration parameters for the analysis run."
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "execution_log": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Log"
+          },
+          "result_summary": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result Summary"
+          },
+          "result_details": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result Details"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "status",
+          "created_at"
+        ],
+        "title": "AnalysisRunPublic"
+      },
+      "Body_login_for_access_token_auth_token_post": {
+        "properties": {
+          "grant_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^password$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grant Type"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "title": "Password"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "default": ""
+          },
+          "client_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
+          },
+          "client_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "format": "password",
+            "title": "Client Secret"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "Body_login_for_access_token_auth_token_post"
+      },
+      "ClickHouseCredentials": {
+        "properties": {
+          "host": {
+            "type": "string",
+            "title": "Host"
+          },
+          "port": {
+            "type": "integer",
+            "title": "Port"
+          },
+          "user": {
+            "type": "string",
+            "title": "User"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "database": {
+            "type": "string",
+            "title": "Database"
+          }
+        },
+        "type": "object",
+        "required": [
+          "host",
+          "port",
+          "user",
+          "password",
+          "database"
+        ],
+        "title": "ClickHouseCredentials"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "SupplyOption": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "family": {
+            "type": "string",
+            "title": "Family"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The unique name/identifier for the model, e.g., 'gpt-4-turbo'"
+          },
+          "hosting_type": {
+            "type": "string",
+            "title": "Hosting Type",
+            "default": "api_provider"
+          },
+          "cost_per_million_tokens_usd": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Cost Per Million Tokens Usd",
+            "example": {
+              "completion": 15.0,
+              "prompt": 5.0
+            }
+          },
+          "quality_score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Quality Score",
+            "description": "A normalized quality score between 0 and 1."
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "provider",
+          "family",
+          "name",
+          "cost_per_million_tokens_usd",
+          "quality_score",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "SupplyOption"
+      },
+      "SupplyOptionCreate": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "family": {
+            "type": "string",
+            "title": "Family"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The unique name/identifier for the model, e.g., 'gpt-4-turbo'"
+          },
+          "hosting_type": {
+            "type": "string",
+            "title": "Hosting Type",
+            "default": "api_provider"
+          },
+          "cost_per_million_tokens_usd": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Cost Per Million Tokens Usd",
+            "example": {
+              "completion": 15.0,
+              "prompt": 5.0
+            }
+          },
+          "quality_score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Quality Score",
+            "description": "A normalized quality score between 0 and 1."
+          }
+        },
+        "type": "object",
+        "required": [
+          "provider",
+          "family",
+          "name",
+          "cost_per_million_tokens_usd",
+          "quality_score"
+        ],
+        "title": "SupplyOptionCreate"
+      },
+      "Token": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "token_type"
+        ],
+        "title": "Token"
+      },
+      "UserCreate": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "UserCreate"
+      },
+      "UserPublic": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "id",
+          "created_at"
+        ],
+        "title": "UserPublic"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2PasswordBearer": {
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "scopes": {},
+            "tokenUrl": "/token"
+          }
+        }
+      }
+    }
+  }
+}
