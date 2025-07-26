@@ -14,62 +14,51 @@ from .db import models_postgres
 from .config import settings
 
 load_dotenv()
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - %(message)s')
 
-def run_full_analysis_pipeline(run_id: str, user_id: int):
+def run_full_analysis_pipeline(run_id: uuid.UUID, user_id: str):
     """
-    Orchestrates the entire analysis workflow with robust logging and status updates.
+    The main function that orchestrates the analysis pipeline.
+    It's designed to be run in the background.
     """
-    logging.info(f"Starting Netra Log Ingest and Analysis Pipeline for run_id: {run_id}, user_id: {user_id}")
+    logger.info(f"Starting pipeline for run_id: {run_id}")
+    db: Session = SessionLocal()
     
-    db_session = next(database.get_db())
-    run = db_session.get(models_postgres.AnalysisRun, run_id)
-
-    def log_to_run(message: str):
-        nonlocal run
-        timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
-        log_entry = f"[{timestamp}] {message}\n"
-        run.execution_log = (run.execution_log or "") + log_entry
-        db_session.commit() # Commit each log entry to provide real-time updates
-        logging.info(f"Run {run_id}: {message}")
-
     try:
+        # 1. Fetch the AnalysisRun object
+        run = db.get(AnalysisRun, run_id)
         if not run:
-            logging.error(f"AnalysisRun with id {run_id} not found. Aborting pipeline.")
+            logger.error(f"Run with ID {run_id} not found. Aborting pipeline.")
             return
 
-        run.status = 'running'
-        db_session.commit()
+        run.status = "running"
+        db.add(run)
+        db.commit()
 
-        log_to_run("Fetching credentials...")
-        customer_creds_model = security_service.get_user_credentials(user_id=user_id, db_session=db_session)
-        if not customer_creds_model:
-            raise ValueError(f"Could not find or access credentials for user {user_id}.")
-        customer_creds = customer_creds_model.model_dump()
+        # 2. Retrieve user's ClickHouse credentials
+        credentials = security_service.get_user_credentials(user_id=user_id, db_session=db)
+        if not credentials:
+            raise ValueError("ClickHouse credentials not found for user.")
 
-        netra_creds = {
-            "host": settings.CLICKHOUSE_HOST,
-            "port": settings.CLICKHOUSE_PORT,
-            "user": settings.CLICKHOUSE_USER,
-            "password": settings.CLICKHOUSE_PASSWORD,
-            "database": settings.CLICKHOUSE_DB
-        }
-        log_to_run("Credentials fetched successfully.")
-
-        log_to_run("Starting data copy...")
-        with DataCopier(source_creds=customer_creds, dest_creds=netra_creds, customer_id=str(user_id)) as copier:
-            source_table_name = run.config.get('source_table', 'logs')
-            raw_dest_db, raw_dest_table = copier.copy_data(source_table_name=source_table_name)
-        log_to_run(f"Data copied to {raw_dest_db}.{raw_dest_table}.")
+        # 3. Initialize and run the analysis
+        source_table = run.config.get("source_table")
+        if not source_table:
+            raise ValueError("source_table not defined in run configuration.")
+            
+        runner = AnalysisRunner(
+            run_id=str(run_id),
+            source_table=source_table,
+            clickhouse_creds=credentials
+        )
         
-        log_to_run("Starting data enrichment...")
-        with DataEnricher(netra_creds=netra_creds, customer_id=str(user_id)) as enricher:
-            enriched_db, enriched_table = enricher.enrich_data(source_db=raw_dest_db, source_table=raw_dest_table)
-        log_to_run(f"Data enriched into {enriched_db}.{enriched_table}.")
+        # This is the main execution block
+        analysis_result = runner.execute()
 
-        log_to_run("Starting pattern analysis...")
-        analysis_runner = AnalysisRunner(netra_creds=netra_creds, db_session=db_session)
-        analysis_results = analysis_runner.run_analysis(database=enriched_db, table=enriched_table)
+        # 4. Update the AnalysisRun with results
+        run.status = "completed"
+        run.completed_at = datetime.utcnow()
+        run.result_summary = analysis_result.cost_comparison.model_dump()
+        run.result_details = analysis_result.model_dump(exclude={'span_map'}) # Exclude large fields from details
+        run.execution_log = "\n".join(f"{log['timestamp']}: {log['message']}" for log in analysis_result.execution_log)
         
         if analysis_results:
             log_to_run("Analysis completed successfully.")
