@@ -1,5 +1,3 @@
-# main.py
-#
 # A Complete Synthetic Data Generation System for the Unified LLM Operations Schema v3.0
 #
 # This script generates realistic, multi-step LLM operation traces based on the detailed
