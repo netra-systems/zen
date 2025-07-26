@@ -1,3 +1,4 @@
+# v2/app/main_v2_5.py
 import logging
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
@@ -8,18 +9,20 @@ from app.db.clickhouse import ClickHouseClient
 from app.db.models_clickhouse import SUPPLY_TABLE_SCHEMA, LOGS_TABLE_SCHEMA
 from app.config import settings
 from app.logging.logger import logger
+from app.logging.clickhouse_logger import ClickHouseLogHandler
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup
+def setup_logging():
+    """Initializes the application's logging configuration."""
     logger.setup_logging(level=settings.LOG_LEVEL, log_file_path=settings.LOG_FILE_PATH)
-    logger.info("Application startup...")
+    logger.info("Logging configured.")
 
-    # Initialize databases
+def initialize_databases(app: FastAPI):
+    """Initializes and connects to PostgreSQL and ClickHouse."""
+    # Initialize PostgreSQL
     Database.initialize(settings.DATABASE_URL)
     logger.info("Postgres initialized.")
 
+    # Initialize and connect to ClickHouse
     ch_client = ClickHouseClient(
         host=settings.CLICKHOUSE_HOST,
         port=settings.CLICKHOUSE_PORT,
@@ -35,20 +38,42 @@ async def lifespan(app: FastAPI):
         ch_client.create_table_if_not_exists(SUPPLY_TABLE_SCHEMA)
         ch_client.create_table_if_not_exists(LOGS_TABLE_SCHEMA)
         app.state.clickhouse_client = ch_client
+
+        # Add the ClickHouse handler to the root logger for the application
+        ch_handler = ClickHouseLogHandler(client=ch_client)
+        logging.getLogger("netra-core").addHandler(ch_handler)
+        logger.info("ClickHouse logging handler initialized.")
+
     except Exception as e:
         logger.error(f"Failed to connect or setup ClickHouse: {e}", exc_info=True)
-        # Depending on the application's requirements, you might want to exit here
-        # raise
+        # Re-raise the exception to prevent the application from starting in a bad state
+        raise
 
-    yield
-
-    # Shutdown
-    logger.info("Application shutdown...")
+def shutdown_resources(app: FastAPI):
+    """Gracefully disconnects from all databases."""
+    logger.info("Shutting down resources...")
     if hasattr(app.state, 'clickhouse_client') and app.state.clickhouse_client.is_connected():
         app.state.clickhouse_client.disconnect()
         logger.info("ClickHouse disconnected.")
     Database.close()
     logger.info("Postgres connection closed.")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Manages the application's startup and shutdown events.
+    """
+    # Startup
+    setup_logging()
+    logger.info("Application startup...")
+    initialize_databases(app)
+    
+    yield
+    
+    # Shutdown
+    logger.info("Application shutdown...")
+    shutdown_resources(app)
 
 
 app = FastAPI(lifespan=lifespan)
