@@ -2,9 +2,12 @@
 import logging
 from typing import Dict, Tuple
 from clickhouse_driver import Client
+# For using remote() copy between clickhouse the driver is better then connect it seems.
 from sqlmodel import Session
 from ..db.models_postgres import SupplyOption
-from ..db.clickhouse import SUPPLY_TABLE_NAME
+from ..db.models_clickhouse import SUPPLY_TABLE_NAME
+
+# TBD if this should use clickhouse driver or connect
 
 logger = logging.getLogger(__name__)
 
