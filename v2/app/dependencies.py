@@ -60,4 +60,4 @@ def get_current_active_user(current_user: CurrentUserDep) -> User:
     return current_user
 
 ActiveUserDep = Annotated[User, Depends(get_current_active_user)]
-ActiveUserDep = Annotated[models_postgres.User, Depends(get_current_active_user)]
+
