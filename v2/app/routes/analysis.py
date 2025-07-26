@@ -8,6 +8,7 @@ from sqlmodel import Session, select
 
 from .. import schema
 from ..db import models_clickhouse
+from ..logging_config_custom.logger import logger
 
 from ..dependencies import ActiveUserDep, DbDep
 from ..pipeline import run_full_analysis_pipeline

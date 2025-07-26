@@ -11,6 +11,7 @@ from .data.data_enricher import DataEnricher
 from .services.analysis_runner import AnalysisRunner
 from .db import models_postgres
 from .config import settings
+from .logging_config_custom.logger import logger
 
 def run_full_analysis_pipeline(run_id: uuid.UUID, user_id: str):
     """
