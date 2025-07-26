@@ -6,7 +6,7 @@ from ..config import settings
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-engine = create_engine(settings.DATABASE_URL, echo=True)
+engine = create_engine(settings.database_url, echo=True)
 
 def create_postgres_db_and_tables():
     """

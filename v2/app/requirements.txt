@@ -21,3 +21,4 @@ scikit-learn>=1.0.0
 httpx>=0.23.0
 clickhouse-connect
 cryptography>=3.4.0
+asyncpg
