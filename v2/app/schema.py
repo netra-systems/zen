@@ -61,6 +61,9 @@ class SupplyOption(SupplyOptionBase):
     created_at: datetime
     updated_at: datetime
 
+    class Config:
+        orm_mode = True
+
 
 # --- AnalysisRun Schemas ---
 class AnalysisRunBase(BaseModel):

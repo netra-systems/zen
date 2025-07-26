@@ -22,7 +22,7 @@ def create_supply_option(
     return catalog_service.create_option(db_session=db, option_data=option_create)
 
 
-@router.get("/supply-catalog/", response_model=List[models_postgres.SupplyOption])
+@router.get("/supply-catalog/", response_model=List[schema.SupplyOption])
 def read_supply_catalog(
     db: DbDep
 ):
@@ -32,7 +32,7 @@ def read_supply_catalog(
     return catalog_service.get_all_options(db_session=db)
 
 
-@router.get("/supply-catalog/{option_id}", response_model=models_postgres.SupplyOption)
+@router.get("/supply-catalog/{option_id}", response_model=schema.SupplyOption)
 def read_supply_option(option_id: int, db: DbDep):
     """
     Retrieves a single supply option by its ID.
