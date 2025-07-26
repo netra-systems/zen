@@ -1,83 +1,59 @@
-# /api.py
-import os
+# /v2/api.py
 import logging
-import uuid
-from typing import Dict, List
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, Request
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks, Request
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
-from dotenv import load_dotenv
-from authlib.integrations.starlette_client import OAuth
 from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy.orm import Session
+from authlib.integrations.starlette_client import OAuth
 
-# Import all services and database components
-from services.credential_manager import get_credentials, MOCK_SECRET_STORE
-from services.data.database import SessionLocal, create_db_and_tables
-from services.supply_catalog_service import SupplyCatalog, SupplyOption, SupplyOptionCreate
+from . import database as db, pydantic_models as schemas
+from .config import settings
+from .services.supply_catalog_service import SupplyCatalogService
+from .services.security_service import security_service
+# Import other services and the main analysis function as needed
 
-# --- Configuration & App Initialization ---
-load_dotenv()
+# --- App Initialization ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - %(message)s')
+app = FastAPI(title="Netra API V2", version="2.0.0")
 
-# On startup, create the database and tables if they don't exist
-create_db_and_tables()
-
-app = FastAPI(
-    title="Netra Log Analysis API",
-    description="API to manage customer credentials, supply catalog, and trigger analysis.",
-    version="1.1.0"
-)
-
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET_KEY", "a_very_secret_key_for_dev"))
+# --- Middleware ---
+app.add_middleware(SessionMiddleware, secret_key=settings.SESSION_SECRET_KEY)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-# --- OAuth and Pydantic Models ---
-# (Content is identical to previous version, omitted for brevity)
+# --- OAuth Setup ---
 oauth = OAuth()
 oauth.register(
     name='google',
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_id=os.getenv('GOOGLE_CLIENT_ID'),
-    client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
+    client_id=settings.GOOGLE_CLIENT_ID,
+    client_secret=settings.GOOGLE_CLIENT_SECRET,
     client_kwargs={'scope': 'openid email profile'}
 )
 
-class ClickHouseCredentials(BaseModel):
-    host: str; port: int = 9440; user: str; password: str = Field(..., min_length=1); database: str
-
-class AnalysisRun(BaseModel):
-    run_id: str; status: str = "pending"; message: str
-
-analysis_statuses: Dict[str, Dict] = {}
-
-# --- Database Dependency ---
+# --- Dependencies ---
 def get_db():
-    """Dependency to get a DB session for each request."""
-    db = SessionLocal()
+    database = db.SessionLocal()
     try:
-        yield db
+        yield database
     finally:
-        db.close()
+        database.close()
 
-# --- Helper Functions and Auth Endpoints ---
-# (get_user_from_session, login, auth, logout, get_me are identical, omitted for brevity)
-def get_user_from_session(request: Request) -> Dict:
-    user = request.session.get('user')
-    if not user: raise HTTPException(status_code=401, detail="Not authenticated")
+def get_current_user(request: Request, db_session: Session = Depends(get_db)) -> db.User:
+    user_info = request.session.get('user')
+    if not user_info:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    user = db_session.query(db.User).filter(db.User.email == user_info['email']).first()
+    if not user:
+        # Auto-provision user on first login
+        user = db.User(email=user_info['email'], full_name=user_info.get('name'))
+        db_session.add(user)
+        db_session.commit()
+        db_session.refresh(user)
     return user
 
-def run_full_analysis_pipeline(customer_id: str, creds: Dict):
-    # This function now needs to create its own DB session for the background task
-    db = SessionLocal()
-    try:
-        run_id = f"run_{uuid.uuid4().hex[:12]}"
-        analysis_statuses[run_id] = {"status": "starting", "customer_id": customer_id}
-        # ... (rest of the pipeline logic is identical)
-    finally:
-        db.close()
-
+# --- Auth Endpoints ---
 @app.get("/login/google")
 async def login_via_google(request: Request):
     redirect_uri = request.url_for('auth_via_google')
@@ -87,80 +63,103 @@ async def login_via_google(request: Request):
 async def auth_via_google(request: Request):
     try:
         token = await oauth.google.authorize_access_token(request)
-        user = token.get('userinfo')
-        if user: request.session['user'] = dict(user)
+        user_info = token.get('userinfo')
+        if user_info:
+            request.session['user'] = dict(user_info)
     except Exception as e:
+        logging.error(f"Authentication failed: {e}")
         return RedirectResponse(url="/?error=auth_failed")
-    return RedirectResponse(url="/")
+    return RedirectResponse(url="/") # Redirect to frontend
 
 @app.get("/logout")
 async def logout(request: Request):
     request.session.pop('user', None)
     return RedirectResponse(url="/")
 
-@app.get("/api/me")
-async def get_me(user: Dict = Depends(get_user_from_session)):
-    return JSONResponse(user)
+@app.get(f"{settings.API_V2_STR}/me", response_model=schemas.User)
+async def get_me(current_user: db.User = Depends(get_current_user)):
+    return current_user
 
-# --- Core API Endpoints ---
-@app.post("/api/credentials")
-async def save_credentials(creds: ClickHouseCredentials, user: Dict = Depends(get_user_from_session)):
-    customer_id = user.get('email')
-    secret_name = f"{customer_id}_ch_creds"
-    MOCK_SECRET_STORE[secret_name] = creds.dict()
-    return JSONResponse({"message": "Credentials stored successfully."})
+# --- Supply Catalog API ---
+catalog_service = SupplyCatalogService()
 
-@app.post("/api/analyze", response_model=AnalysisRun)
-async def start_analysis(background_tasks: BackgroundTasks, user: Dict = Depends(get_user_from_session)):
-    customer_id = user.get('email')
-    secret_name = f"{customer_id}_ch_creds"
-    try:
-        creds = get_credentials(secret_name)
-    except ValueError:
-        raise HTTPException(status_code=404, detail="Credentials not found.")
+@app.post(f"{settings.API_V2_STR}/supply", response_model=schemas.SupplyOption, status_code=201)
+def create_supply_option(option: schemas.SupplyOptionCreate, db_session: Session = Depends(get_db)):
+    return catalog_service.create_option(db_session, option)
+
+@app.get(f"{settings.API_V2_STR}/supply", response_model=list[schemas.SupplyOption])
+def read_supply_options(db_session: Session = Depends(get_db)):
+    return catalog_service.get_all_options(db_session)
     
-    background_tasks.add_task(run_full_analysis_pipeline, customer_id, creds)
-    run_id = f"run_init_{uuid.uuid4().hex[:4]}"
-    return AnalysisRun(run_id=run_id, message="Analysis initiated.")
+@app.put(f"{settings.API_V2_STR}/supply/autofill", status_code=200)
+def autofill_supply_options(db_session: Session = Depends(get_db)):
+    catalog_service.autofill_catalog(db_session)
+    return {"message": "Supply catalog autofill process completed."}
 
-@app.get("/api/status/{run_id}")
-async def get_analysis_status(run_id: str, user: Dict = Depends(get_user_from_session)):
-    status = analysis_statuses.get(run_id)
-    if not status or status.get("customer_id") != user.get("email"):
-        raise HTTPException(status_code=404, detail="Analysis run not found or not authorized.")
-    return JSONResponse(status)
+# --- Analysis Endpoints (Placeholder) ---
+@app.post(f"{settings.API_V2_STR}/analysis/start", response_model=schemas.AnalysisRun)
+async def start_analysis(
+    request: schemas.AnalysisRunCreate,
+    background_tasks: BackgroundTasks,
+    current_user: db.User = Depends(get_current_user),
+    db_session: Session = Depends(get_db)
+):
+    # 1. Create a record for the analysis run
+    new_run = db.AnalysisRun(user_id=current_user.id, status="pending", config=request.config)
+    db_session.add(new_run)
+    db_session.commit()
+    db_session.refresh(new_run)
+    
+    # 2. Add the actual analysis task to the background
+    # background_tasks.add_task(run_full_analysis_pipeline, run_id=new_run.id, user_id=current_user.id)
+    
+    # For now, we'll just simulate completion
+    background_tasks.add_task(simulate_analysis, run_id=new_run.id)
 
-# --- NEW: Supply Catalog API Endpoints ---
-@app.get("/api/supply", response_model=List[SupplyOption])
-async def get_supply_options(db: Session = Depends(get_db)):
-    """Get all available supply options."""
-    catalog = SupplyCatalog(db)
-    return catalog.get_all_options()
+    return new_run
 
-@app.post("/api/supply", response_model=SupplyOption, status_code=201)
-async def create_supply_option(option: SupplyOptionCreate, db: Session = Depends(get_db)):
-    """Create a new supply option."""
-    catalog = SupplyCatalog(db)
-    return catalog.add_option(option)
+@app.get(f"{settings.API_V2_STR}/analysis/status/{{run_id}}", response_model=schemas.AnalysisRun)
+def get_analysis_status(run_id: str, current_user: db.User = Depends(get_current_user), db_session: Session = Depends(get_db)):
+    run = db_session.query(db.AnalysisRun).filter(db.AnalysisRun.id == run_id).first()
+    if not run or run.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Analysis run not found")
+    return run
+    
+# --- Placeholder for background task simulation ---
+import time
+import json
+from datetime import datetime
 
-@app.put("/api/supply/{option_id}", response_model=SupplyOption)
-async def update_supply_option(option_id: str, option: SupplyOptionCreate, db: Session = Depends(get_db)):
-    """Update an existing supply option by its ID."""
-    catalog = SupplyCatalog(db)
-    updated_option = catalog.update_option(option_id, option)
-    if not updated_option:
-        raise HTTPException(status_code=404, detail="Supply option not found.")
-    return updated_option
+def simulate_analysis(run_id: str):
+    db_session = next(get_db())
+    try:
+        run = db_session.query(db.AnalysisRun).filter(db.AnalysisRun.id == run_id).first()
+        if not run: return
 
-@app.delete("/api/supply/{option_id}", status_code=204)
-async def delete_supply_option(option_id: str, db: Session = Depends(get_db)):
-    """Delete a supply option by its ID."""
-    catalog = SupplyCatalog(db)
-    if not catalog.delete_option(option_id):
-        raise HTTPException(status_code=404, detail="Supply option not found.")
-    return
+        run.status = "running"
+        run.execution_log = "Starting analysis...\n"
+        db_session.commit()
+        time.sleep(5)
 
-# --- Main Entry Point for development ---
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+        run.execution_log += "Data enrichment complete...\n"
+        db_session.commit()
+        time.sleep(5)
+        
+        run.execution_log += "Pattern discovery complete.\n"
+        run.status = "completed"
+        run.completed_at = datetime.utcnow()
+        run.result_summary = {"projected_monthly_savings": 4356.21, "delta_percent": 28.7}
+        run.result_details = {"message": "Detailed results would go here."}
+        db_session.commit()
+
+    finally:
+        db_session.close()
+
+# --- On Startup ---
+@app.on_event("startup")
+def on_startup():
+    db.create_db_and_tables()
+    # Autofill the catalog on first startup if empty
+    db_session = next(get_db())
+    catalog_service.autofill_catalog(db_session)
+    db_session.close()
