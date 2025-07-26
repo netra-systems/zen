@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from ..config import settings
 from app.logging_config_custom.logger import logger
 
@@ -32,7 +33,9 @@ except Exception as e:
     AsyncSessionLocal = None
 
 
-async def get_async_db() -> AsyncSession:
+from typing import AsyncGenerator
+
+async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
     """
     Dependency to get an async database session.
     """
