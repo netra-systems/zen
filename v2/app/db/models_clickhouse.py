@@ -4,6 +4,8 @@ import time
 from typing import Dict, Any, List, Optional, Literal
 from sqlmodel import SQLModel, Field
 
+# TBD merge understand these models / things
+
 # v2/app/db/models_clickhouse_v2_4.py
 
 LOGS_TABLE_NAME = 'netra_app_internal_logs'

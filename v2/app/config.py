@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     CLICKHOUSE_USER: str
     CLICKHOUSE_PASSWORD: str
     CLICKHOUSE_DB: str
+    DATABASE_URL: str
 
     class Config:
         # Specifies the file to load environment variables from.

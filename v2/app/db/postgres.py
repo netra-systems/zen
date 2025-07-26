@@ -6,8 +6,7 @@ from ..config import settings
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-connect_args = {"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {}
-engine = create_engine(settings.DATABASE_URL, echo=True, connect_args=connect_args)
+engine = create_engine(settings.DATABASE_URL, echo=True)
 
 def create_postgres_db_and_tables():
     """
