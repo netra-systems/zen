@@ -1,9 +1,5 @@
 import os
-from functools import lru_cache
-from pydantic_settings import BaseSettings  # <-- CORRECTED IMPORT
-from dotenv import load_dotenv
-
-load_dotenv()
+from pydantic_settings import BaseSettings
 
 # Check if the script is being run for OpenAPI schema generation.
 # The `generate_openAPI_schema.py` script will set this environment variable.
@@ -11,40 +7,40 @@ IS_SCHEMA_GENERATION = os.environ.get("GENERATE_SCHEMA_MODE") == "1"
 
 class Settings(BaseSettings):
     """
-    Manages application settings and environment variables.
-    It automatically reads variables from a .env file or the environment.
+    Defines the application settings.
+    These can be loaded from a .env file or environment variables.
     """
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_DB: str
-    POSTGRES_HOST: str
-    POSTGRES_PORT: int
-    CLICKHOUSE_HOST: str
-    CLICKHOUSE_PORT: int
-    CLICKHOUSE_USER: str
-    CLICKHOUSE_PASSWORD: str
-    CLICKHOUSE_DB: str
-    DATABASE_URL: str
+    app_env: str = "development"
+    database_url: str
+    clickhouse_host: str
+    clickhouse_port: int
+    clickhouse_user: str
+    clickhouse_password: str
+    clickhouse_db: str
+    secret_key: str
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
 
     class Config:
-        # Specifies the file to load environment variables from.
+        # In normal operation, load settings from a .env file.
         env_file = ".env"
 
 # When generating the OpenAPI schema, we don't need real credentials.
-# We can instantiate Settings with dummy values to prevent errors about
-# missing environment variables or a missing .env file.
+# We can programmatically set dummy environment variables before Pydantic
+# attempts to load them. This avoids validation errors and uses the
+# intended mechanism of pydantic-settings.
 if IS_SCHEMA_GENERATION:
-    settings = Settings(
-        database_url="postgresql+asyncpg://user:pass@dummy-postgres:5432/netra",
-        clickhouse_host="dummy-clickhouse",
-        clickhouse_port=9000,
-        clickhouse_user="user",
-        clickhouse_password="password",
-        clickhouse_db="netra",
-        secret_key="a-super-secret-key-for-dev-and-schema-generation"
-    )
-else:
-    # In normal operation (e.g., when running the web server),
-    # load the settings from the environment. Pydantic will raise
-    # an error if required settings are not found.
-    settings = Settings()
+    os.environ["DATABASE_URL"] = "postgresql+asyncpg://user:pass@dummy-postgres:5432/netra"
+    os.environ["CLICKHOUSE_HOST"] = "dummy-clickhouse"
+    os.environ["CLICKHOUSE_PORT"] = "9000"  # Env vars must be strings
+    os.environ["CLICKHOUSE_USER"] = "user"
+    os.environ["CLICKHOUSE_PASSWORD"] = "password"
+    os.environ["CLICKHOUSE_DB"] = "netra"
+    os.environ["SECRET_KEY"] = "a-super-secret-key-for-dev-and-schema-generation"
+
+# Instantiate Settings.
+# In normal operation, it loads from the environment or a .env file.
+# If IS_SCHEMA_GENERATION is true, it loads from the dummy environment
+# variables that were set in the block above. Pydantic will raise
+# an error if required settings are not found from any source.
+settings = Settings()
