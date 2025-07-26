@@ -21,12 +21,14 @@ COPY ./v2/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code
+# Copy the rest of the application code into the container
+# The source path is relative to the build context (the root of the repo)
 COPY ./v2 /app/v2
 
 # Expose the port the app runs on
 EXPOSE 8000
 
 # Run the application using Uvicorn
-# This will run the FastAPI app defined in /app/v2/api.py
-CMD ["uvicorn", "v2.api:app", "--host", "0.0.0.0", "--port", "8000"]
+# The entry point is now the 'app' object in /app/v2/main.py
+# --reload is added for easier development; consider removing for production.
+CMD ["uvicorn", "v2.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
