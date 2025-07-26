@@ -6,6 +6,7 @@ from sqlalchemy import (
     Boolean,
     ForeignKey,
     JSON,
+    Float,
     ARRAY,
 )
 from sqlalchemy.orm import relationship
@@ -55,3 +56,16 @@ class AnalysisResult(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     analysis = relationship("Analysis", back_populates="results")
+
+
+class SupplyOption(Base):
+    __tablename__ = "supply_options"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    provider = Column(String, nullable=False)
+    family = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True, index=True)
+    hosting_type = Column(String, default="api_provider")
+    cost_per_million_tokens_usd = Column(JSON, nullable=False)
+    quality_score = Column(Float, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
