@@ -2,18 +2,14 @@
 import os
 import logging
 import json
-from dotenv import load_dotenv
 from datetime import datetime
 
 from .services.security_service import security_service
 from .data.data_copier import DataCopier
 from .data.data_enricher import DataEnricher
 from .services.analysis_runner import AnalysisRunner
-from . import database
 from .db import models_postgres
 from .config import settings
-
-load_dotenv()
 
 def run_full_analysis_pipeline(run_id: uuid.UUID, user_id: str):
     """
