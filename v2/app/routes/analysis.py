@@ -8,7 +8,7 @@ from sqlmodel import Session, select
 
 from .. import schema
 
-from ..db import schema
+
 from ..dependencies import ActiveUserDep, DbDep
 from ..pipeline import run_full_analysis_pipeline
 from ..services.security_service import security_service
