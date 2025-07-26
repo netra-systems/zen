@@ -1,15 +1,4 @@
 
-# ==============================================================================
-# Netra Apex v23.4 - Adapted for Production Workflow
-#
-# This file is an adaptation of the original v23.py.
-# Key Changes:
-# - Removed FastAPI server components.
-# - Modified AnalysisPipeline to accept pre-loaded spans instead of generating them.
-# - Refactored SupplyCatalog into its own service for better modularity.
-# ==============================================================================
-
-# --- Core Imports ---
 import os
 import sys
 import time
