@@ -47,7 +47,7 @@ class SupplyOptionBase(SQLModel):
     provider: str
     family: str
     name: str = Field(..., description="The unique name/identifier for the model, e.g., 'gpt-4-turbo'")
-    cost_per_million_tokens_usd: Dict[str, float] = Field(..., sa_column=Column(JSON), example={"prompt": 5.00, "completion": 15.00})
+    cost_per_million_tokens_usd: Dict[str, float] = Field(..., sa_column=Column(JSON))
     quality_score: float = Field(..., ge=0, le=1, description="A normalized quality score between 0 and 1.")
 
 class SupplyOption(SupplyOptionBase, table=True):

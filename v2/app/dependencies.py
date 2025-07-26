@@ -7,7 +7,7 @@ from jose import JWTError, jwt
 from sqlmodel import Session
 
 from .db import models_postgres
-from .database import get_db
+from .db.database import get_db
 from .config import settings
 
 logging.basicConfig(level=logging.INFO)

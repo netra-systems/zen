@@ -1,7 +1,7 @@
 # /v2/app/database.py
 import logging
-from .db.postgres import create_postgres_db_and_tables, get_db_session
-from .db.clickhouse import create_clickhouse_db_and_tables, get_clickhouse_client
+from .postgres import create_postgres_db_and_tables, get_db_session
+from .clickhouse import create_clickhouse_db_and_tables, get_clickhouse_client
 
 def init_databases():
     """

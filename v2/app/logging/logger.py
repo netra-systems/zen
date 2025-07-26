@@ -48,6 +48,8 @@ class Logger:
         self.service_name = service_name
         self.logger = logging.getLogger(service_name)
 
+
+    # Multiple logging streams, e.g. console, file, ClickHouse
     def setup_logging(self, level: str = "INFO", log_file_path: Optional[str] = None):
         """
         Configures the logging for the entire application.
