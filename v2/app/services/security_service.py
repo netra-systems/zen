@@ -1,17 +1,20 @@
-# /v2/services/security_service.py
+# /v2.1/services/security_service.py
+import logging
 import os
-import json
 from datetime import datetime, timedelta
 from typing import Optional
 
 from cryptography.fernet import Fernet
-from fastapi import HTTPException, status
-from jose import JWTError, jwt
+from jose import jwt
 from passlib.context import CryptContext
 from sqlmodel import Session, select
 
 from .. import models
 from ..config import settings
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # --- Password Hashing ---
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -25,75 +28,75 @@ def get_password_hash(password: str) -> str:
 # --- JWT Token Creation ---
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.ALGORITHM)
-    return encoded_jwt
+    return jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.ALGORITHM)
 
 # --- Credentials Encryption and Management ---
 class SecurityService:
     def __init__(self):
-        key = settings.FERNET_KEY.encode()
-        self.fernet = Fernet(key)
+        try:
+            key = settings.FERNET_KEY.encode()
+            self.fernet = Fernet(key)
+        except Exception as e:
+            logger.critical(f"FATAL: Could not initialize Fernet. FERNET_KEY may be invalid. Error: {e}")
+            raise
 
     def encrypt(self, value: str) -> bytes:
-        return self.fernet.encrypt(value.encode())
+        return self.fernet.encrypt(value.encode('utf-8'))
 
     def decrypt(self, encrypted_value: bytes) -> str:
-        return self.fernet.decrypt(encrypted_value).decode()
+        return self.fernet.decrypt(encrypted_value).decode('utf-8')
 
     def save_user_credentials(self, user_id: int, credentials: models.ClickHouseCredentials, db_session: Session):
+        """
+        Efficiently saves user credentials by fetching all existing secrets at once,
+        then updating or creating them in a single transaction.
+        """
+        # Fetch all existing secrets for the user in one query
+        existing_secrets_query = select(models.Secret).where(models.Secret.user_id == user_id)
+        existing_secrets_list = db_session.exec(existing_secrets_query).all()
+        existing_secrets_map = {secret.key: secret for secret in existing_secrets_list}
+
         creds_dict = credentials.model_dump()
         for key, value in creds_dict.items():
-            encrypted_value = self.encrypt(str(value)) # Ensure value is string
-            
-            # Check if a secret with this key already exists for the user
-            statement = select(models.Secret).where(models.Secret.user_id == user_id, models.Secret.key == key)
-            db_secret = db_session.exec(statement).first()
+            encrypted_value = self.encrypt(str(value))
 
-            if db_secret:
-                # Update existing secret
-                db_secret.encrypted_value = encrypted_value
+            if key in existing_secrets_map:
+                # Update existing secret if the value has changed
+                if existing_secrets_map[key].encrypted_value != encrypted_value:
+                    existing_secrets_map[key].encrypted_value = encrypted_value
+                    db_session.add(existing_secrets_map[key])
             else:
-                # Create new secret
-                db_secret = models.Secret(user_id=user_id, key=key, encrypted_value=encrypted_value)
-            
-            db_session.add(db_secret)
+                # Create a new secret
+                new_secret = models.Secret(user_id=user_id, key=key, encrypted_value=encrypted_value)
+                db_session.add(new_secret)
         
         db_session.commit()
 
+
     def get_user_credentials(self, user_id: int, db_session: Session) -> Optional[models.ClickHouseCredentials]:
-        statement = select(models.Secret).where(models.Secret.user_id == user_id)
-        secrets = db_session.exec(statement).all()
+        """
+        Retrieves and decrypts all secrets for a user to reconstruct the credentials model.
+        """
+        secrets = db_session.exec(select(models.Secret).where(models.Secret.user_id == user_id)).all()
         if not secrets:
             return None
             
         decrypted_creds = {}
-        for secret in secrets:
-            decrypted_creds[secret.key] = self.decrypt(secret.encrypted_value)
-        
+        try:
+            for secret in secrets:
+                decrypted_creds[secret.key] = self.decrypt(secret.encrypted_value)
+        except Exception as e:
+            logger.error(f"Failed to decrypt credentials for user_id {user_id}: {e}")
+            return None
+
         # Validate that all necessary keys are present before creating the model
         required_keys = models.ClickHouseCredentials.model_fields.keys()
         if not all(key in decrypted_creds for key in required_keys):
+            logger.warning(f"Incomplete credentials found for user_id {user_id}")
             return None
             
         return models.ClickHouseCredentials(**decrypted_creds)
-
-    def get_netra_credentials(self) -> Optional[models.ClickHouseCredentials]:
-        """Retrieves Netra's internal credentials from environment variables."""
-        try:
-            return models.ClickHouseCredentials(
-                host=os.environ["NETRA_CLICKHOUSE_HOST"],
-                port=int(os.environ["NETRA_CLICKHOUSE_PORT"]),
-                user=os.environ["NETRA_CLICKHOUSE_USER"],
-                password=os.environ["NETRA_CLICKHOUSE_PASSWORD"],
-                database=os.environ["NETRA_CLICKHOUSE_DATABASE"],
-            )
-        except (KeyError, ValueError) as e:
-            print(f"Error loading Netra credentials from environment: {e}")
-            return None
 
 security_service = SecurityService()
