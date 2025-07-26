@@ -3,6 +3,10 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 import uuid
 
+# schema.py is for API schema
+# See db/models_clickhouse.py for ClickHouse schema
+# See db/models_postgres.py for Postgres schema
+
 # --- User Schemas ---
 class UserBase(BaseModel):
     email: EmailStr
