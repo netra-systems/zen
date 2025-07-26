@@ -1,64 +1,64 @@
-# /v2/app/main.py
 import logging
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.sessions import SessionMiddleware
+from contextlib import asynccontextmanager
 
-from . import database
-from .config import settings
-from .db import models_postgres
-from .services.supply_catalog_service import SupplyCatalogService
-from .routes import auth, supply, analysis
-
-# --- App Initialization ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - %(message)s')
-
-app = FastAPI(
-    title="Netra API V2.4",
-    version="2.4.0",
-    description="API for Netra workload analysis and optimization with dual database support."
-)
-
-# --- Middleware ---
-app.add_middleware(
-    SessionMiddleware, 
-    secret_key=settings.SESSION_SECRET_KEY
-)
-app.add_middleware(
-    CORSMiddleware, 
-    allow_origins=["*"],
-    allow_credentials=True, 
-    allow_methods=["*"], 
-    allow_headers=["*"]
-)
-
-# --- API Routers ---
-app.include_router(auth.router, tags=["Authentication"])
-app.include_router(analysis.router, prefix=settings.API_V2_STR, tags=["Analysis & Credentials"])
-app.include_router(supply.router, prefix=settings.API_V2_STR, tags=["Supply Catalog"])
+from app.routes import auth, supply, analysis
+from app.db.database import Database
+from app.db.clickhouse import ClickHouseClient
+from app.db.models_clickhouse import SUPPLY_TABLE_SCHEMA, LOGS_TABLE_SCHEMA
+from app.config import settings
+from app.logging.logger import logger
 
 
-# --- Health Check Endpoint ---
-@app.get("/", tags=["Root"])
-def read_root():
-    """A simple health check endpoint."""
-    return {"status": "ok", "message": "Welcome to Netra API V2.4"}
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    logger.setup_logging(level=settings.LOG_LEVEL, log_file_path=settings.LOG_FILE_PATH)
+    logger.info("Application startup...")
 
-# --- On Startup Event ---
-@app.on_event("startup")
-def on_startup():
-    """
-    Actions to perform on application startup.
-    - Create database tables if they don't exist.
-    - Autofill the supply catalog with default models.
-    """
-    logging.info("Executing startup events...")
-    database.init_databases()
-    
-    db_session = next(database.get_db())
+    # Initialize databases
+    Database.initialize(settings.DATABASE_URL)
+    logger.info("Postgres initialized.")
+
+    ch_client = ClickHouseClient(
+        host=settings.CLICKHOUSE_HOST,
+        port=settings.CLICKHOUSE_PORT,
+        database=settings.CLICKHOUSE_DATABASE,
+        user=settings.CLICKHOUSE_USER,
+        password=settings.CLICKHOUSE_PASSWORD
+    )
+    logger.info(f"Connecting to ClickHouse at {settings.CLICKHOUSE_HOST}:{settings.CLICKHOUSE_PORT}")
     try:
-        catalog_service = SupplyCatalogService()
-        catalog_service.autofill_catalog(db_session)
-    finally:
-        db_session.close()
-    logging.info("Startup events completed.")
+        ch_client.connect()
+        logger.info("ClickHouse connected.")
+        # Create tables if they don't exist
+        ch_client.create_table_if_not_exists(SUPPLY_TABLE_SCHEMA)
+        ch_client.create_table_if_not_exists(LOGS_TABLE_SCHEMA)
+        app.state.clickhouse_client = ch_client
+    except Exception as e:
+        logger.error(f"Failed to connect or setup ClickHouse: {e}", exc_info=True)
+        # Depending on the application's requirements, you might want to exit here
+        # raise
+
+    yield
+
+    # Shutdown
+    logger.info("Application shutdown...")
+    if hasattr(app.state, 'clickhouse_client') and app.state.clickhouse_client.is_connected():
+        app.state.clickhouse_client.disconnect()
+        logger.info("ClickHouse disconnected.")
+    Database.close()
+    logger.info("Postgres connection closed.")
+
+
+app = FastAPI(lifespan=lifespan)
+
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(supply.router, prefix="/supply", tags=["supply"])
+app.include_router(analysis.router, prefix="/analysis", tags=["analysis"])
+
+
+@app.get("/")
+def read_root():
+    logger.info("Root endpoint was hit.")
+    return {"message": "Welcome to Netra API v2"}
