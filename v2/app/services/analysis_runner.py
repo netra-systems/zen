@@ -7,7 +7,15 @@ import pandas as pd
 from typing import Dict, List, Any
 from clickhouse_driver import Client
 from .engine import AnalysisPipeline
-from ..db.models_clickhouse import UnifiedLogEntry, AnalysisRequest
+from ..db.models_clickhouse import (
+    UnifiedLogEntry,
+    AnalysisRequest,
+    AnalysisResult,
+    ClickHouseCredentials,
+    DiscoveredPattern,
+    LearnedPolicy,
+    CostComparison,
+)
 
 class AnalysisRunner:
     """

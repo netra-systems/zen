@@ -2,6 +2,11 @@
 import logging
 from typing import Dict, Tuple
 from clickhouse_driver import Client
+from sqlmodel import Session
+from ..db.models_postgres import SupplyOption
+from ..db.clickhouse import SUPPLY_TABLE_NAME
+
+logger = logging.getLogger(__name__)
 
 class DataCopier:
     """
