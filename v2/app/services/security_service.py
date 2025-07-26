@@ -10,6 +10,7 @@ from passlib.context import CryptContext
 from sqlmodel import Session, select
 
 from ..db import models_postgres
+from ..db import models_clickhouse
 from ..config import settings
 
 logging.basicConfig(level=logging.INFO)
@@ -48,7 +49,7 @@ class SecurityService:
     def decrypt(self, encrypted_value: bytes) -> str:
         return self.fernet.decrypt(encrypted_value).decode('utf-8')
 
-    def save_user_credentials(self, user_id: int, credentials: models_postgres.ClickHouseCredentials, db_session: Session):
+    def save_user_credentials(self, user_id: int, credentials: models_clickhouse.ClickHouseCredentials, db_session: Session):
         existing_secrets_query = select(models_postgres.Secret).where(models_postgres.Secret.user_id == user_id)
         existing_secrets_list = db_session.exec(existing_secrets_query).all()
         existing_secrets_map = {secret.key: secret for secret in existing_secrets_list}
