@@ -145,6 +145,9 @@ class Logger:
         """Logs a message with level DEBUG."""
         return self._log("DEBUG", message, extra, exc_info=False)
 
+    def critical(self, message: str, extra: Optional[Dict[str, Any]] = None) -> Log:
+        """Logs a message with level CRITICAL."""
+        return self._log("CRITICAL", message, extra, exc_info=False)
 
 # --- Module-level Singleton Instance ---
 
