@@ -45,11 +45,13 @@ class Logger:
         return cls._instance
 
     def __init__(self, service_name: str = "netra-core"):
+        # Check if already initialized to prevent re-creating handlers
+        if hasattr(self, 'logger'):
+            return
         self.service_name = service_name
         self.logger = logging.getLogger(service_name)
+        self.setup_logging()
 
-
-    # Multiple logging streams, e.g. console, file, ClickHouse
     def setup_logging(self, level: str = "INFO", log_file_path: Optional[str] = None):
         """
         Configures the logging for the entire application.
@@ -57,18 +59,21 @@ class Logger:
         log_level = getattr(logging, level.upper(), logging.INFO)
         self.logger.setLevel(log_level)
 
+        # Clear existing handlers to avoid duplicate logs
+        if self.logger.hasHandlers():
+            self.logger.handlers.clear()
+
         formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         )
 
         # Console handler
-        if not any(isinstance(h, logging.StreamHandler) for h in self.logger.handlers):
-            stream_handler = logging.StreamHandler(sys.stdout)
-            stream_handler.setFormatter(formatter)
-            self.logger.addHandler(stream_handler)
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setFormatter(formatter)
+        self.logger.addHandler(stream_handler)
 
         # File handler
-        if log_file_path and not any(isinstance(h, logging.FileHandler) for h in self.logger.handlers):
+        if log_file_path:
             file_handler = logging.FileHandler(log_file_path)
             file_handler.setFormatter(formatter)
             self.logger.addHandler(file_handler)
@@ -77,11 +82,14 @@ class Logger:
         """
         Internal log method to create and dispatch logs.
         """
-        # Get caller information
-        frame = sys._getframe(2)
-        module = frame.f_globals['__name__']
-        function = frame.f_code.co_name
-        line_no = frame.f_lineno
+        try:
+            # Get caller information
+            frame = sys._getframe(2)
+            module = frame.f_globals.get('__name__', '')
+            function = frame.f_code.co_name
+            line_no = frame.f_lineno
+        except (ValueError, AttributeError):
+            module, function, line_no = "(unknown)", "(unknown)", 0
 
         log_entry = Log(
             level=level,
@@ -107,7 +115,7 @@ class Logger:
     def warning(self, message: str, extra: Optional[Dict[str, Any]] = None) -> Log:
         return self._log("WARNING", message, extra)
 
-    def error(self, message: str, extra: Optional[Dict[str, Any]] = None, exc_info=True) -> Log:
+    def error(self, message: str, extra: Optional[Dict[str, Any]] = None, exc_info=False) -> Log:
         return self._log("ERROR", message, extra, exc_info=exc_info)
 
     def debug(self, message: str, extra: Optional[Dict[str, Any]] = None) -> Log:
