@@ -8,8 +8,8 @@ from app.db.database import Database
 from app.db.clickhouse import ClickHouseClient
 from app.db.models_clickhouse import SUPPLY_TABLE_SCHEMA, LOGS_TABLE_SCHEMA
 from app.config import settings
-from app.logging.logger import logger
-from app.logging.clickhouse_logger import ClickHouseLogHandler
+from app.logging_config import logger
+from app.logging_config.clickhouse_logger import ClickHouseLogHandler
 
 def setup_logging():
     """Initializes the application's logging configuration."""

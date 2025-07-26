@@ -1,71 +1,48 @@
 import logging
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from ..config import settings
+from .base import Base  # Import Base from the new central location.
+from .postgres import get_db  # Continue to import the sync session generator.
+from .clickhouse import get_clickhouse_client
 
-# --- PostgreSQL Imports ---
-# Import and alias from the postgres module to avoid name conflicts.
-# This makes database.py the single, consistent source for DB components.
-from .postgres import (
-    engine as postgres_engine,
-    Base as PostgresBase,
-    SessionLocal as PostgresSessionLocal,
-    create_postgres_db_and_tables,
-)
+# Setup logging
+logger = logging.getLogger(__name__)
 
-# --- ClickHouse Imports ---
-# Import and alias from the clickhouse module.
-from .clickhouse import (
-    engine as clickhouse_engine,
-    Base as ClickHouseBase,
-    SessionLocal as ClickHouseSessionLocal,
-    create_clickhouse_db_and_tables,
-)
+# This file sets up the ASYNCHRONOUS database connection.
 
-# --- Exports for Application-wide Use ---
-# Re-export the main components so other parts of the application (like main.py)
-# can import them from this central module.
-engine = postgres_engine
-Base = PostgresBase
-# clickhouse_engine and ClickHouseBase are already correctly named from the import.
+# PostgreSQL async engine
+try:
+    async_engine = create_async_engine(
+        settings.database_url,
+        echo=True,
+    )
+    AsyncSessionLocal = sessionmaker(
+        bind=async_engine, class_=AsyncSession, expire_on_commit=False
+    )
+    logger.info("PostgreSQL async engine created successfully.")
+except Exception as e:
+    logger.error(f"Failed to create PostgreSQL async engine: {e}")
+    # Handle the error appropriately, maybe exit or use a fallback
+    async_engine = None
+    AsyncSessionLocal = None
 
-# --- Dependency Providers for FastAPI ---
 
-def get_db():
+async def get_async_db() -> AsyncSession:
     """
-    FastAPI dependency that provides a PostgreSQL database session.
-    It ensures the session is properly closed after the request is handled.
+    Dependency to get an async database session.
     """
-    if PostgresSessionLocal is None:
-        logging.error("PostgreSQL session is not available. Connection may have failed at startup.")
-        # The calling endpoint will receive an error.
-        return
+    if AsyncSessionLocal is None:
+        logger.error("AsyncSessionLocal is not initialized.")
+        raise RuntimeError("Database not configured")
 
-    db = PostgresSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-def get_clickhouse_db():
-    """
-    FastAPI dependency that provides a ClickHouse database session.
-    It ensures the session is properly closed after the request is handled.
-    """
-    if ClickHouseSessionLocal is None:
-        logging.error("ClickHouse session is not available. Connection may have failed at startup.")
-        return
-
-    db = ClickHouseSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-# --- Utility Functions ---
-
-def create_all_tables():
-    """
-    A utility function to create all tables in both databases.
-    This is useful for initial application setup or for testing.
-    """
-    logging.info("Attempting to create tables for all configured databases...")
-    create_postgres_db_and_tables()
-    create_clickhouse_db_and_tables()
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception as e:
+            await session.rollback()
+            logger.error(f"Async DB session error: {e}")
+            raise
+        finally:
+            await session.close()
