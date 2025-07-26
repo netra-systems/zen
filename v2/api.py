@@ -1,6 +1,9 @@
-# /v2/api.py
+# /v2.1/api.py
 import logging
-from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks, Request
+import time
+import json
+from datetime import datetime
+from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks, Request, Response
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -15,7 +18,7 @@ from .services.security_service import security_service
 
 # --- App Initialization ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - %(message)s')
-app = FastAPI(title="Netra API V2", version="2.0.0")
+app = FastAPI(title="Netra API V2.1", version="2.1.0")
 
 # --- Middleware ---
 app.add_middleware(SessionMiddleware, secret_key=settings.SESSION_SECRET_KEY)
@@ -80,17 +83,59 @@ async def logout(request: Request):
 async def get_me(current_user: db.User = Depends(get_current_user)):
     return current_user
 
+# --- NEW: Credentials Endpoint ---
+@app.post(f"{settings.API_V2_STR}/credentials", status_code=200)
+def save_credentials(
+    creds: schemas.ClickHouseCredentials,
+    current_user: db.User = Depends(get_current_user)
+):
+    """
+    Saves ClickHouse credentials for the authenticated user.
+    """
+    security_service.create_or_update_secret(
+        user_id=current_user.id, 
+        creds_data=creds
+    )
+    return {"message": "Credentials stored successfully."}
+
 # --- Supply Catalog API ---
 catalog_service = SupplyCatalogService()
 
 @app.post(f"{settings.API_V2_STR}/supply", response_model=schemas.SupplyOption, status_code=201)
-def create_supply_option(option: schemas.SupplyOptionCreate, db_session: Session = Depends(get_db)):
+def create_supply_option(
+    option: schemas.SupplyOptionCreate, 
+    db_session: Session = Depends(get_db)
+):
     return catalog_service.create_option(db_session, option)
 
 @app.get(f"{settings.API_V2_STR}/supply", response_model=list[schemas.SupplyOption])
 def read_supply_options(db_session: Session = Depends(get_db)):
     return catalog_service.get_all_options(db_session)
     
+@app.put(f"{settings.API_V2_STR}/supply/{{option_id}}", response_model=schemas.SupplyOption)
+def update_supply_option(
+    option_id: int,
+    option: schemas.SupplyOptionCreate,
+    db_session: Session = Depends(get_db)
+):
+    """
+    Update an existing supply option by its ID.
+    """
+    updated_option = catalog_service.update_option(db_session, option_id=option_id, option_data=option)
+    if not updated_option:
+        raise HTTPException(status_code=404, detail="Supply option not found.")
+    return updated_option
+
+@app.delete(f"{settings.API_V2_STR}/supply/{{option_id}}", status_code=204)
+def delete_supply_option(option_id: int, db_session: Session = Depends(get_db)):
+    """
+    Delete a supply option by its ID.
+    """
+    success = catalog_service.delete_option(db_session, option_id=option_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Supply option not found.")
+    return Response(status_code=204)
+
 @app.put(f"{settings.API_V2_STR}/supply/autofill", status_code=200)
 def autofill_supply_options(db_session: Session = Depends(get_db)):
     catalog_service.autofill_catalog(db_session)
@@ -119,17 +164,17 @@ async def start_analysis(
     return new_run
 
 @app.get(f"{settings.API_V2_STR}/analysis/status/{{run_id}}", response_model=schemas.AnalysisRun)
-def get_analysis_status(run_id: str, current_user: db.User = Depends(get_current_user), db_session: Session = Depends(get_db)):
+def get_analysis_status(
+    run_id: str, 
+    current_user: db.User = Depends(get_current_user), 
+    db_session: Session = Depends(get_db)
+):
     run = db_session.query(db.AnalysisRun).filter(db.AnalysisRun.id == run_id).first()
     if not run or run.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Analysis run not found")
     return run
     
 # --- Placeholder for background task simulation ---
-import time
-import json
-from datetime import datetime
-
 def simulate_analysis(run_id: str):
     db_session = next(get_db())
     try:
