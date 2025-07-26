@@ -1,49 +1,42 @@
-# /v2/routes/supply.py
+# /v2/app/routes/supply.py
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session, select
+from sqlmodel import Session
 
-from .. import models, dependencies
-from ..database import get_db
+from ..db import models_postgres
+from ..dependencies import DbDep
+from ..services.supply_catalog_service import SupplyCatalogService
 
 router = APIRouter()
+catalog_service = SupplyCatalogService()
 
-@router.post("/supply-catalog/", response_model=models.SupplyModel, status_code=status.HTTP_201_CREATED)
-def create_supply_model(
-    supply_model: models.SupplyModelBase,
-    db: Session = Depends(get_db),
-    # Optional: Add admin-only dependency here later
+@router.post("/supply-catalog/", response_model=models_postgres.SupplyOption, status_code=status.HTTP_201_CREATED)
+def create_supply_option(
+    option_create: models_postgres.SupplyOptionCreate,
+    db: DbDep,
 ):
     """
-    Creates a new supply model in the catalog.
+    Creates a new supply option in the catalog.
     """
-    db_model = models.SupplyModel.model_validate(supply_model)
-    db.add(db_model)
-    db.commit()
-    db.refresh(db_model)
-    return db_model
+    return catalog_service.create_option(db_session=db, option_data=option_create)
 
 
-@router.get("/supply-catalog/", response_model=List[models.SupplyModel])
+@router.get("/supply-catalog/", response_model=List[models_postgres.SupplyOption])
 def read_supply_catalog(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db)
+    db: DbDep
 ):
     """
     Retrieves a list of all models in the supply catalog.
     """
-    statement = select(models.SupplyModel).offset(skip).limit(limit)
-    supply_models = db.exec(statement).all()
-    return supply_models
+    return catalog_service.get_all_options(db_session=db)
 
 
-@router.get("/supply-catalog/{model_id}", response_model=models.SupplyModel)
-def read_supply_model(model_id: int, db: Session = Depends(get_db)):
+@router.get("/supply-catalog/{option_id}", response_model=models_postgres.SupplyOption)
+def read_supply_option(option_id: int, db: DbDep):
     """
-    Retrieves a single supply model by its ID.
+    Retrieves a single supply option by its ID.
     """
-    db_model = db.get(models.SupplyModel, model_id)
-    if not db_model:
-        raise HTTPException(status_code=404, detail="Supply model not found")
-    return db_model
+    db_option = catalog_service.get_option_by_id(db_session=db, option_id=option_id)
+    if not db_option:
+        raise HTTPException(status_code=404, detail="Supply option not found")
+    return db_option
