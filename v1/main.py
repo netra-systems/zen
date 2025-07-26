@@ -3,8 +3,8 @@ import os
 import logging
 from dotenv import load_dotenv
 from services.credential_manager import get_credentials
-from services.data_copier import DataCopier
-from services.data_enricher import DataEnricher # Import the new service
+from services.data.data_copier import DataCopier
+from services.data.data_enricher import DataEnricher # Import the new service
 from services.analysis_runner import AnalysisRunner
 
 # --- Configuration ---

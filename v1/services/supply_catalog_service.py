@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 # Import the database model and Pydantic schema
-from .database import SupplyOptionDB
+from services.data.database import SupplyOptionDB
 
 # --- Pydantic Schemas ---
 # These schemas are used for API validation and response models, not for DB storage.

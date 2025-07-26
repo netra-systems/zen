@@ -7,6 +7,7 @@ import pandas as pd
 from typing import Dict, List, Any
 from clickhouse_driver import Client
 from .engine import AnalysisPipeline, AnalysisRequest, UnifiedLogEntry
+from services.data.database import SupplyOptionDB
 
 class AnalysisRunner:
     """

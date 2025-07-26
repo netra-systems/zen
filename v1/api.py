@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 # Import all services and database components
 from services.credential_manager import get_credentials, MOCK_SECRET_STORE
-from services.database import SessionLocal, create_db_and_tables
+from services.data.database import SessionLocal, create_db_and_tables
 from services.supply_catalog_service import SupplyCatalog, SupplyOption, SupplyOptionCreate
 
 # --- Configuration & App Initialization ---

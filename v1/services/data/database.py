@@ -38,6 +38,9 @@ class SupplyOptionDB(Base):
     base_latency_ms = Column(Integer, nullable=False)
     time_to_first_token_ms = Column(Integer, nullable=False)
     quality_score = Column(Float, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
 
 
 def create_db_and_tables():
