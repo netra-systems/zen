@@ -3,6 +3,8 @@ from config  import settings
 from db.clickhouse import ClickHouseClient
 from data.synthetic.synthetic_data_v1 import SyntheticDataV1
 
+# https://gemini.google.com/u/0/app/1b8b45e460f7556a
+
 def run_ingestion():
     """
     A standalone script to generate synthetic customer data and ingest it
