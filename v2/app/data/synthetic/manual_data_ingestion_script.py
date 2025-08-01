@@ -20,8 +20,8 @@ def run_ingestion():
     6. Prints progress and timing information.
     """
     # --- Configuration ---
-    TOTAL_RECORDS = 1_000_000
-    BATCH_SIZE = 10_000  # Process records in chunks
+    TOTAL_RECORDS = 1
+    BATCH_SIZE = 1  # Process records in chunks
 
     print("Starting data ingestion process...")
 
