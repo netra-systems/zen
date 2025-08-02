@@ -73,12 +73,21 @@ def generate_content_sample(workload_type: str, model, generation_config) -> dic
     If the instructions mention a "context", include the context within the user_prompt.
     """
 
+    if workload_type == 'multi_turn_tool_use':
+        prompt_template += "\nReturn ONLY a JSON object with a single key 'conversation'."
+    else:
+        prompt_template += "\nReturn ONLY a JSON object with two keys: \"user_prompt\" and \"assistant_response\"."
+    
     try:
         response = model.generate_content(prompt_template, generation_config=generation_config)
         # Basic cleaning to handle markdown code blocks
         cleaned_text = response.text.strip().replace("```json", "").replace("```", "").strip()
         content = json.loads(cleaned_text)
-        if "user_prompt" in content and "assistant_response" in content:
+        
+        if workload_type == 'multi_turn_tool_use':
+            if "conversation" in content and isinstance(content["conversation"], list):
+                return {"type": workload_type, "data": content["conversation"]}
+        elif "user_prompt" in content and "assistant_response" in content:
             return {"type": workload_type, "data": (content["user_prompt"], content["assistant_response"]) }
     except Exception as e:
         # This can happen due to API errors, rate limits, or invalid JSON output

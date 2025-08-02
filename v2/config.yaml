@@ -1,11 +1,11 @@
 generation_settings:
   num_traces: 5
   trace_distribution:
-    failed_request: 0.09000000000000001
-    multi_turn_tool_use: 0.1
-    rag_pipeline: 0.27
-    simple_chat: 0.36000000000000004
-    tool_use: 0.18000000000000002
+    failed_request: 0
+    multi_turn_tool_use: 1
+    rag_pipeline: 0
+    simple_chat: 0
+    tool_use: 0
 overrides: {}
 realism:
   applications:
