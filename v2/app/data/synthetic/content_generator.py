@@ -77,7 +77,13 @@ def generate_content_sample(workload_type: str, model, generation_config) -> dic
         
         if workload_type == 'multi_turn_tool_use':
             if "conversation" in content and isinstance(content["conversation"], list):
-                return {"type": workload_type, "data": content["conversation"]}
+                # Validate the structure of the conversation
+                validated_conversation = []
+                for turn in content["conversation"]:
+                    if isinstance(turn, list) and len(turn) == 2 and all(isinstance(i, str) for i in turn):
+                        validated_conversation.append(turn)
+                if validated_conversation:
+                    return {"type": workload_type, "data": validated_conversation}
         elif "user_prompt" in content and "assistant_response" in content:
             return {"type": workload_type, "data": (content["user_prompt"], content["assistant_response"]) }
     except Exception as e:
