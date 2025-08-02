@@ -72,12 +72,24 @@ class SupplyOptionId(BaseModel):
 
 
 # --- AnalysisRun Schemas ---
-class AnalysisRunBase(BaseModel):
+from sqlmodel import SQLModel, Field
+
+class AnalysisRunBase(SQLModel):
     config: Optional[Dict[str, Any]] = Field(None, description="Configuration parameters for the analysis run.")
 
-class AnalysisRunCreate(BaseModel):
-    source_table: str = Field(description="The full name of the source table to analyze, e.g., 'mydatabase.mytable'")
+class AnalysisRun(AnalysisRunBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: str
+    status: str = Field(default="pending")
+    execution_log: Optional[str] = None
+    result_summary: Optional[Dict[str, Any]] = None
+    result_details: Optional[Dict[str, Any]] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    completed_at: Optional[datetime] = None
+    pass
 
+class AnalysisRunCreate(AnalysisRunBase):
+    source_table: str = Field(description="The full name of the source table to analyze, e.g., 'mydatabase.mytable'")
 
 class AnalysisRunPublic(AnalysisRunBase):
     id: uuid.UUID
@@ -88,3 +100,6 @@ class AnalysisRunPublic(AnalysisRunBase):
     result_details: Optional[Dict[str, Any]] = None
     created_at: datetime
     completed_at: Optional[datetime] = None
+
+class AnalysisRun(AnalysisRunPublic):
+    pass

@@ -1,7 +1,7 @@
 import asyncio
 from typing import List, Dict, Any, Optional
 from datetime import datetime
-from deepagents import create_deep_agent
+from app.deepagents import create_deep_agent
 
 import json
 from clickhouse_driver import Client
