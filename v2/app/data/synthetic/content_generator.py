@@ -7,17 +7,7 @@
 # The output of this script is a JSON file (`content_corpus.json`) that can be
 # used by the main `synthetic_data_v2.py` generator to create more varied and
 # realistic synthetic log data.
-#
-# SETUP:
-# 1. Install necessary libraries:
-#    pip install google-generativeai rich
-#
-# 2. Set your Gemini API Key:
-#    export GEMINI_API_KEY="YOUR_API_KEY"
-#
-# USAGE:
-# Run the script from your terminal:
-#    python -m app.data.synthetic.content_generator --samples-per-type 50 --output-file content_corpus.json
+# python -m app.data.synthetic.content_generator --samples-per-type 50 --output-file content_corpus.json
 
 import os
 import json
@@ -54,7 +44,8 @@ META_PROMPTS = {
     "simple_chat": "Generate a realistic user question and a corresponding helpful assistant response. The topic should be related to technology, cloud computing, or artificial intelligence.",
     "rag_pipeline": "Generate a user question that requires a specific piece of information, a short context paragraph containing that information, and an assistant response that answers the question based *only* on the provided context.",
     "tool_use": "Generate a user request that requires calling a fictional API or tool (e.g., a weather API, a calculator, or a flight booking tool). Then, provide an assistant response that acknowledges the request and confirms the parameters before executing the tool call.",
-    "failed_request": "Generate a user prompt that is impossible or unsafe for an AI assistant to fulfill. Then, provide a polite but firm refusal as the assistant's response."
+    "failed_request": "Generate a user prompt that is impossible or unsafe for an AI assistant to fulfill. Then, provide a polite but firm refusal as the assistant's response.",
+    "multi_turn_tool_use": "Generate a realistic, multi-turn conversation between a user and an AI assistant where the assistant uses tools to fulfill the user's request. The conversation should have between 3 and 5 turns. The final output should be a single JSON object with a key 'conversation' which contains a list of lists, where each inner list is a [user_prompt, assistant_response] pair."
 }
 
 def generate_content_sample(workload_type: str, model, generation_config) -> dict:
