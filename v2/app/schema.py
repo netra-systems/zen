@@ -104,3 +104,38 @@ class AnalysisRunPublic(AnalysisRunBase):
 
 class AnalysisRun(AnalysisRunPublic):
     pass
+
+class DiscoveredPattern(BaseModel):
+    pattern_name: str
+    pattern_description: str
+    centroid_features: Dict[str, float]
+    member_span_ids: List[str]
+    member_count: int
+
+class PredictedOutcome(BaseModel):
+    supply_option_name: str
+    utility_score: float
+    predicted_cost_usd: float
+    predicted_latency_ms: int
+    predicted_quality_score: float
+    explanation: str
+    confidence: float
+
+class BaselineMetrics(BaseModel):
+    avg_cost_usd: float
+    avg_latency_ms: int
+    avg_quality_score: float
+
+class LearnedPolicy(BaseModel):
+    pattern_name: str
+    optimal_supply_option_name: str
+    predicted_outcome: PredictedOutcome
+    alternative_outcomes: List[PredictedOutcome]
+    baseline_metrics: BaselineMetrics
+    pattern_impact_fraction: float
+
+class CostComparison(BaseModel):
+    prior_monthly_spend: float
+    projected_monthly_spend: float
+    projected_monthly_savings: float
+    delta_percent: float
