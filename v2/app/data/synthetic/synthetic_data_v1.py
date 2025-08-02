@@ -351,10 +351,11 @@ generation_settings:
   num_traces: 5
   # The distribution of different trace types to generate. Values should sum to 1.0.
   trace_distribution:
-    simple_chat: 0.4
+    simple_chat: 0.3
     rag_pipeline: 0.3
     tool_use: 0.2
     failed_request: 0.1
+    multi_turn_tool_use: 0.1
 
 # --- Realism Engine Settings ---
 # These settings control the data generated for various fields.

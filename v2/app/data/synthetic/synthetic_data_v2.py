@@ -75,19 +75,43 @@ def load_content_corpus(corpus_path: str) -> dict:
 
 # --- 2. CONFIGURATION MANAGEMENT (Identical to v1) ---
 def get_config(config_path="config.yaml"):
-    """Loads configuration from a YAML file."""
+    """Loads configuration from a YAML file, updating it if necessary."""
     if not os.path.exists(config_path):
         console.print(f"[yellow]Config file not found. Creating default '{config_path}'...[/yellow]")
-        # Add the new trace type to the default config
-        default_config_data = yaml.safe_load(DEFAULT_CONFIG)
-        default_config_data['generation_settings']['trace_distribution']['multi_turn_tool_use'] = 0.1
-        # Adjust other weights
-        default_config_data['generation_settings']['trace_distribution']['simple_chat'] = 0.3
         with open(config_path, "w") as f:
-            yaml.dump(default_config_data, f)
+            # Load from the v1 default config string which is now updated
+            f.write(DEFAULT_CONFIG)
     
     with open(config_path, "r") as f:
-        return yaml.safe_load(f)
+        config = yaml.safe_load(f)
+
+    # --- Auto-update logic for existing configs ---
+    generation_settings = config.get('generation_settings', {})
+    trace_distribution = generation_settings.get('trace_distribution', {})
+    
+    if 'multi_turn_tool_use' not in trace_distribution:
+        console.print("[yellow]Updating config file to include 'multi_turn_tool_use' trace type...[/yellow]")
+        trace_distribution['multi_turn_tool_use'] = 0.1 # Add the new key
+        
+        # Renormalize other weights
+        total_weight = sum(trace_distribution.values())
+        renormalization_factor = 0.9 / (total_weight - 0.1)
+        
+        for key, value in trace_distribution.items():
+            if key != 'multi_turn_tool_use':
+                trace_distribution[key] = value * renormalization_factor
+        
+        # Ensure it sums to 1.0
+        total_sum = sum(trace_distribution.values())
+        if total_sum != 1.0:
+            trace_distribution['simple_chat'] += 1.0 - total_sum
+
+        config['generation_settings']['trace_distribution'] = trace_distribution
+        with open(config_path, "w") as f:
+            yaml.dump(config, f)
+        console.print("[green]Config file updated successfully.[/green]")
+
+    return config
 
 # --- 3. VECTORIZED & TRACE DATA GENERATION ---
 
