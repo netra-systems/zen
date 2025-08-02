@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useCallback, FormEvent } from 'react';
 import { Zap, Settings, RefreshCw, BarChart2, DollarSign, HelpCircle, LogOut } from 'lucide-react';
 
-import { config } from '../../config';
-import Card from '../../components/Card';
-import Button from '../../components/Button';
-import Spinner from '../../components/Spinner';
-import Input from '../../components/Input';
-import { useAppStore } from '../../store';
+import { config } from '../../src/config';
+import Card from '../components/Card';
+import Button from '../components/Button';
+import Spinner from '../components/Spinner';
+import Input from '../components/Input';
+import { useAppStore } from '../../src/store';
 
 // --- Type Definitions for API data ---
 interface Job {

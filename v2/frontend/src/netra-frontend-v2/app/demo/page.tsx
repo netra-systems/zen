@@ -3,11 +3,11 @@
 import React, { useState, FormEvent } from 'react';
 import { Send } from 'lucide-react';
 
-import { config } from '../../config';
-import Card from '../../components/Card';
-import Button from '../../components/Button';
-import Input from '../../components/Input';
-import { useAppStore } from '../../store';
+import { config } from '../../src/config';
+import Card from '../components/Card';
+import Button from '../components/Button';
+import Input from '../components/Input';
+import { useAppStore } from '../../src/store';
 
 // --- API Service ---
 const apiService = {
