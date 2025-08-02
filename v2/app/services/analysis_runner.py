@@ -86,7 +86,7 @@ class AnalysisRunner:
         logging.info(f"Aggregated logs into {len(workloads)} workloads.")
         return workloads.to_dict('records')
 
-    def run_analysis(self, database: str, table: str) -> Dict[str, Any]:
+    def execute(self, database: str, table: str, use_deepagents: bool = False, use_deepagents_v2: bool = False) -> Dict[str, Any]:
         """Runs the full analysis pipeline on the pre-enriched data."""
         log_entries = self._fetch_enriched_data(database, table)
         if not log_entries:
@@ -115,9 +115,9 @@ class AnalysisRunner:
             asyncio.set_event_loop(loop)
 
         if loop.is_running():
-            task = loop.create_task(pipeline.run())
+            task = loop.create_task(pipeline.run(use_deepagents=use_deepagents, use_deepagents_v2=use_deepagents_v2))
         else:
-            loop.run_until_complete(pipeline.run())
+            loop.run_until_complete(pipeline.run(use_deepagents=use_deepagents, use_deepagents_v2=use_deepagents_v2))
             
         from .engine import analysis_runs
         

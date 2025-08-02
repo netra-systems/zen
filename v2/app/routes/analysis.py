@@ -41,6 +41,7 @@ def get_credentials(db: DbDep, current_user: ActiveUserDep):
 def start_new_analysis_run(
     run_create: schema.AnalysisRunCreate,
     use_deepagents: bool = False,
+    use_deepagents_v2: bool = False,
     background_tasks: BackgroundTasks,
     db: DbDep,
     current_user: ActiveUserDep
@@ -54,7 +55,7 @@ def start_new_analysis_run(
     db.commit()
     db.refresh(new_run)
 
-    background_tasks.add_task(run_full_analysis_pipeline, run_id=new_run.id, user_id=current_user.id, use_deepagents=use_deepagents)
+    background_tasks.add_task(run_full_analysis_pipeline, run_id=new_run.id, user_id=current_user.id, use_deepagents=use_deepagents, use_deepagents_v2=use_deepagents_v2)
     logger.info(f"Started analysis run {new_run.id} for user {current_user.email}")
     return new_run
 

@@ -1,7 +1,7 @@
 # /v2/app/services/engine.py
 
 import os
-import sys
+
 import time
 import uuid
 import json
@@ -239,7 +239,7 @@ class SimulationEngine:
                 quality=sim_data.get('predicted_quality_score', 0),
                 confidence=sim_data.get('confidence', 0.85)
             )
-            return PredictedOutcome(supply_option_id=str(supply.id), utility_score=utility_score, **sim_data)
+            return PredictedOutcome(supply_option_name=supply.name, utility_score=utility_score, **sim_data)
         except Exception as e:
             logger.error(f"Pydantic validation failed for simulation outcome: {e}, data: {sim_data}")
             return None
@@ -274,7 +274,7 @@ class SimulationEngine:
         sorted_outcomes = sorted(outcomes, key=lambda x: x.utility_score, reverse=True)
         
         return LearnedPolicy(
-            pattern_id=pattern.pattern_id,
+            pattern_name=pattern.pattern_name,
             optimal_supply_option_id=sorted_outcomes[0].supply_option_id,
             predicted_outcome=sorted_outcomes[0],
             alternative_outcomes=sorted_outcomes[1:4],
@@ -290,6 +290,8 @@ class SimulationEngine:
         total_optimal_cost = 0
         total_pattern_fraction = 0
         for policy in policies:
+            if policy.pattern_impact_fraction is None or policy.baseline_metrics.avg_cost_usd is None or policy.predicted_outcome.predicted_cost_usd is None:
+                continue
             pattern_spend_slice = prior_spend * policy.pattern_impact_fraction
             baseline_cost_per_span = policy.baseline_metrics.avg_cost_usd
             optimal_cost_per_span = policy.predicted_outcome.predicted_cost_usd
@@ -315,6 +317,8 @@ class SimulationEngine:
 # --- Analysis Pipeline ---
 from app.services.engine_deepagents import run_analysis_with_deepagents
 
+from app.services.engine_deepagents_v2 import run_analysis_with_deepagents_v2
+
 class AnalysisPipeline:
     def __init__(self, run_id: str, request: AnalysisRequest, db_session, preloaded_spans: Optional[List[UnifiedLogEntry]] = None):
         self.run_id = run_id
@@ -328,9 +332,18 @@ class AnalysisPipeline:
         self.simulation_engine = SimulationEngine(self.supply_catalog_service, self.llm_connector, request.negotiated_discount_percent)
         self.log_enricher = LogEnrichmentModule()
 
-    async def run(self, use_deepagents: bool = False):
+    async def run(self, use_deepagents: bool = False, use_deepagents_v2: bool = False):
+        """Main entry point for running the analysis pipeline."""
+        if use_deepagents_v2:
+            update_run_status(self.run_id, 'running', 'Redirecting to Deep Agents V2 engine.')
+            return await self.run_with_deepagents_v2()
         if use_deepagents:
+            update_run_status(self.run_id, 'running', 'Redirecting to Deep Agents V1 engine.')
             return await self.run_with_deepagents()
+
+        update_run_status(self.run_id, 'running', 'Starting standard analysis engine.')
+        return await self.run_standard_analysis()
+        async def run_standard_analysis(self):
         try:
             if self.preloaded_spans is not None:
                 all_spans = self.preloaded_spans
@@ -402,9 +415,11 @@ class AnalysisPipeline:
             self.run_id, self.request, self.db_session, self.preloaded_spans
         )
 
-        except Exception as e:
-            logger.error(f"An error occurred during trace analysis run {self.run_id}: {e}", exc_info=True)
-            update_run_status(self.run_id, 'failed', log_message=f"An internal error occurred: {e}", error=str(e))
+    async def run_with_deepagents_v2(self):
+        return await run_analysis_with_deepagents_v2(
+            self.run_id, self.request, self.db_session, self.preloaded_spans
+        )
+
         finally:
             await self.async_client.aclose()
 
