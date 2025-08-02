@@ -44,10 +44,11 @@ from .synthetic_data_v1 import UnifiedLogEntry, DEFAULT_CONFIG
 console = Console()
 fake = Faker()
 
-# --- 1. HIGH-PERFORMANCE CONTENT ENGINE --- 
-# Replaces the live Gemini API call with a pre-generated, local corpus.
+# --- 1. HIGH-PERFORMANCE CONTENT ENGINE ---
+# This is the default, fallback corpus. The script will prioritize loading
+# an external corpus if available.
 
-CONTENT_CORPUS = {
+DEFAULT_CONTENT_CORPUS = {
     "simple_chat": [
         ("What are the main benefits of using a unified logging schema for LLM operations?", "A unified logging schema provides consistency, simplifies data analysis, and enables robust monitoring across different model providers."),
         ("Explain the concept of a 'vector database'.", "A vector database is a specialized database designed to store and query high-dimensional vectors, which are mathematical representations of data like text or images. It's essential for tasks like semantic search and retrieval-augmented generation (RAG)."),
@@ -66,22 +67,36 @@ CONTENT_CORPUS = {
     ]
 }
 
+def load_content_corpus(corpus_path: str) -> dict:
+    """Loads the content corpus from a JSON file, falling back to the default."""
+    if os.path.exists(corpus_path):
+        try:
+            with open(corpus_path, 'r') as f:
+                console.print(f"[green]Loading content from external corpus: [cyan]{corpus_path}[/cyan][/green]")
+                return json.load(f)
+        except json.JSONDecodeError:
+            console.print(f"[red]Error: Could not parse '{corpus_path}'. Falling back to default corpus.[/red]")
+            return DEFAULT_CONTENT_CORPUS
+    else:
+        console.print("[yellow]Warning: External content corpus not found. Using default internal corpus.[/yellow]")
+        return DEFAULT_CONTENT_CORPUS
+
 # --- 2. CONFIGURATION MANAGEMENT (Identical to v1) ---
 def get_config(config_path="config.yaml"):
     """Loads configuration from a YAML file."""
     if not os.path.exists(config_path):
-        console.print(f"[yellow]Config file not found. Creating default '{config_path}'...")
+        console.print(f"[yellow]Config file not found. Creating default '{config_path}'...[/yellow]")
         with open(config_path, "w") as f:
             f.write(DEFAULT_CONFIG)
     
     with open(config_path, "r") as f:
         return yaml.safe_load(f)
 
-# --- 3. VECTORIZED DATA GENERATION --- 
+# --- 3. VECTORIZED DATA GENERATION ---
 
 def generate_data_chunk(args):
     """Generates a chunk of data as a Pandas DataFrame. Designed to be run in parallel."""
-    num_logs, config = args
+    num_logs, config, content_corpus = args
     
     # --- Applications and Models ---
     apps = config['realism']['applications']
@@ -97,7 +112,11 @@ def generate_data_chunk(args):
     prompts = []
     responses = []
     for trace_type in chosen_trace_types:
-        prompt, response = random.choice(CONTENT_CORPUS[trace_type])
+        # Ensure the trace type exists in the corpus, otherwise default
+        if trace_type in content_corpus and content_corpus[trace_type]:
+            prompt, response = random.choice(content_corpus[trace_type])
+        else:
+            prompt, response = random.choice(DEFAULT_CONTENT_CORPUS[trace_type])
         prompts.append(prompt)
         responses.append(response)
 
@@ -206,6 +225,7 @@ def main(args):
     start_time = time.time()
 
     config = get_config(args.config)
+    content_corpus = load_content_corpus(args.corpus_file)
     num_traces = args.num_traces
 
     # Determine the number of processes and chunk size
@@ -223,7 +243,9 @@ def main(args):
         with Progress() as progress:
             task = progress.add_task("[green]Generating data chunks...", total=len(chunks))
             results = []
-            for result in pool.imap_unordered(generate_data_chunk, [(chunk, config) for chunk in chunks]):
+            # Pass the content corpus to the worker function
+            worker_args = [(chunk, config, content_corpus) for chunk in chunks]
+            for result in pool.imap_unordered(generate_data_chunk, worker_args):
                 results.append(result)
                 progress.update(task, advance=1)
     
@@ -261,6 +283,8 @@ if __name__ == "__main__":
     parser.add_argument("--num-traces", type=int, default=10000, help="Number of log entries to generate.")
     parser.add_argument("--output-file", default="generated_logs_v2.json", help="Path to the output JSON file.")
     parser.add_argument("--max-cores", type=int, default=cpu_count(), help="Maximum number of CPU cores to use.")
+    parser.add_argument("--corpus-file", default="content_corpus.json", help="Path to the AI-generated content corpus file.")
+
     
     # In some environments, sys.argv might be empty.
     if len(sys.argv) == 1:
