@@ -45,19 +45,14 @@ def get_logger(name: str) -> logging.Logger:
 
 logger = get_logger(__name__)
 
-def time_it(run_id: str, step_name: str):
-    def decorator(func: Callable):
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            start_time = time.perf_counter()
-            update_run_status(run_id, 'running', log_message=f"Starting: {step_name}...")
-            result = await func(*args, **kwargs)
-            end_time = time.perf_counter()
-            duration_ms = (end_time - start_time) * 1000
-            update_run_status(run_id, 'running', log_message=f"Completed: {step_name}", duration_ms=duration_ms)
-            return result
-        return wrapper
-    return decorator
+async def _time_step(self, step_name: str, func: Callable, *args, **kwargs):
+        start_time = time.perf_counter()
+        self.update_run_status('running', log_message=f"Starting: {step_name}...")
+        result = await func(*args, **kwargs)
+        end_time = time.perf_counter()
+        duration_ms = (end_time - start_time) * 1000
+        self.update_run_status('running', log_message=f"Completed: {step_name}", duration_ms=duration_ms)
+        return result
 
 def update_run_status(run_id: str, status: str, log_message: Optional[str] = None, result: Optional[Any] = None, error: Optional[str] = None, duration_ms: Optional[float] = None):
     if run_id not in analysis_runs:
@@ -128,17 +123,22 @@ class GeminiLLMConnector:
 class LogEnrichmentModule:
     def enrich_spans(self, spans: List[UnifiedLogEntry]) -> List[UnifiedLogEntry]:
         for span in spans:
+            # Extract usage and performance data from the span
             usage = span.response.get('usage', {})
             prompt_tokens = usage.get('prompt_tokens', 0)
             completion_tokens = usage.get('completion_tokens', 0)
             total_tokens = prompt_tokens + completion_tokens
-            latency_ms = span.performance['latency_ms']['total_e2e_ms']
-            ttft_ms = span.performance['latency_ms']['time_to_first_token_ms']
+
+            performance = span.performance['latency_ms']
+            latency_ms = performance['total_e2e_ms']
+            ttft_ms = performance['time_to_first_token_ms']
             
+            # Calculate inter-token latency
             inter_token_latency = None
             if completion_tokens > 1 and latency_ms > ttft_ms:
                 inter_token_latency = (latency_ms - ttft_ms) / (completion_tokens - 1)
             
+            # Add enriched metrics to the span
             span.enriched_metrics = EnrichedMetrics(
                 prefill_ratio=prompt_tokens / max(total_tokens, 1),
                 generation_ratio=completion_tokens / max(total_tokens, 1),
@@ -203,27 +203,38 @@ class SimulationEngine:
         self.discount_factor = 1.0 - (discount_percent / 100.0)
 
     def _calculate_utility(self, goal: str, cost: float, latency: int, quality: float, confidence: float) -> float:
+        # Normalize cost and latency to a 0-1 scale
         norm_cost = min(cost / 0.05, 1.0)
         norm_latency = min(latency / 5000, 1.0)
+
+        # Define weights for quality, cost, and latency based on the user's goal
         weights = {"quality": 0.5, "cost": -0.25, "latency": -0.25}
-        if goal == 'cost': weights = {"quality": 0.2, "cost": -0.6, "latency": -0.2}
-        elif goal == 'latency': weights = {"quality": 0.2, "cost": -0.2, "latency": -0.6}
-        return (weights['quality'] * quality + weights['cost'] * norm_cost + weights['latency'] * norm_latency) * confidence
+        if goal == 'cost':
+            weights = {"quality": 0.2, "cost": -0.6, "latency": -0.2}
+        elif goal == 'latency':
+            weights = {"quality": 0.2, "cost": -0.2, "latency": -0.6}
+
+        # Calculate the utility score by multiplying the weights with the corresponding values
+        utility = (weights['quality'] * quality + weights['cost'] * norm_cost + weights['latency'] * norm_latency) * confidence
+        return utility
 
     def _create_simulation_prompt(self, pattern: DiscoveredPattern, supply_option: SupplyOption, span: UnifiedLogEntry) -> str:
-        return f"""
-        As an AI Systems Performance Engineer, predict performance.
-        **Workload Pattern:** {pattern.pattern_name} ({pattern.pattern_description})
-        **Pattern Features:** {json.dumps(pattern.centroid_features, indent=2)}
-        **Representative Span Usage:** Prompt Tokens: {span.response['usage']['prompt_tokens']}, Completion Tokens: {span.response['usage']['completion_tokens']}
-        **Simulating Supply Option:** {supply_option.model_dump_json(indent=2)}
-        **Task:** Predict performance. Calculate cost using the provided token counts and the supply option's cost structure.
-        **Output Format (JSON ONLY):**
-        {{
-            "predicted_cost_usd": <float>, "predicted_latency_ms": <int>, "predicted_quality_score": <float, 0.0-1.0>,
-            "explanation": "<string, concise rationale>", "confidence": <float, 0.0-1.0>
-        }}
-        """
+        return (
+            f"As an AI Systems Performance Engineer, predict performance."
+            f"Workload Pattern: {pattern.pattern_name} ({pattern.pattern_description})"
+            f"Pattern Features: {json.dumps(pattern.centroid_features, indent=2)}"
+            f"Representative Span Usage: Prompt Tokens: {span.response['usage']['prompt_tokens']}, Completion Tokens: {span.response['usage']['completion_tokens']}"
+            f"Simulating Supply Option: {supply_option.model_dump_json(indent=2)}"
+            f"Task: Predict performance. Calculate cost using the provided token counts and the supply option's cost structure."
+            f"Output Format (JSON ONLY):"
+            f"{{"
+            f"    \"predicted_cost_usd\": <float>,"
+            f"    \"predicted_latency_ms\": <int>,"
+            f"    \"predicted_quality_score\": <float, 0.0-1.0>,"
+            f"    \"explanation\": \"<string, concise rationale>\","
+            f"    \"confidence\": <float, 0.0-1.0>"
+            f"}}"
+        )
 
     async def _simulate_single_case(self, pattern: DiscoveredPattern, supply: SupplyOption, span: UnifiedLogEntry) -> Optional[PredictedOutcome]:
         prompt = self._create_simulation_prompt(pattern, supply, span)
@@ -320,6 +331,8 @@ from app.services.engine_deepagents import run_analysis_with_deepagents
 from app.services.engine_deepagents_v2 import run_analysis_with_deepagents_v2
 
 class AnalysisPipeline:
+    analysis_runs: Dict[str, Dict] = {}
+
     def __init__(self, run_id: str, request: AnalysisRequest, db_session, preloaded_spans: Optional[List[UnifiedLogEntry]] = None):
         self.run_id = run_id
         self.request = request
@@ -337,10 +350,10 @@ class AnalysisPipeline:
         try:
             if use_deepagents_v2:
                 update_run_status(self.run_id, 'running', 'Redirecting to Deep Agents V2 engine.')
-                return await self.run_with_deepagents_v2()
+                return await self.run_with_deepagents(run_analysis_with_deepagents_v2)
             if use_deepagents:
                 update_run_status(self.run_id, 'running', 'Redirecting to Deep Agents V1 engine.')
-                return await self.run_with_deepagents()
+                return await self.run_with_deepagents(run_analysis_with_deepagents)
 
             update_run_status(self.run_id, 'running', 'Starting standard analysis engine.')
             return await self.run_standard_analysis()
@@ -350,55 +363,27 @@ class AnalysisPipeline:
     async def run_standard_analysis(self):
         if self.preloaded_spans is not None:
             all_spans = self.preloaded_spans
-            update_run_status(self.run_id, 'running', f"Using {len(all_spans)} pre-loaded spans for analysis.")
+            self.update_run_status('running', f"Using {len(all_spans)} pre-loaded spans for analysis.")
         else:
             if not self.request.workloads: raise ValueError("No workloads provided and no spans pre-loaded.")
-            all_spans = [span for wl in self.request.workloads for span in self._generate_spans_for_workload(wl, f"trace_{uuid.uuid4().hex[:8]}")]
-            update_run_status(self.run_id, 'running', f"Generated {len(all_spans)} total spans.")
+            all_spans = self._generate_spans_for_workload(self.request.workloads)
+            self.update_run_status('running', f"Generated {len(all_spans)} total spans.")
         
-        step_name = "Log Enrichment"
-        start_time = time.perf_counter()
-        update_run_status(self.run_id, 'running', log_message=f"Starting: {step_name}...")
-        all_spans = self.log_enricher.enrich_spans(all_spans)
-        end_time = time.perf_counter()
-        duration_ms = (end_time - start_time) * 1000
-        update_run_status(self.run_id, 'running', log_message=f"Completed: {step_name}", duration_ms=duration_ms)
+        all_spans = await self._time_step("Log Enrichment", self.log_enricher.enrich_spans, all_spans)
 
-        timed_discover = time_it(self.run_id, "Pattern Discovery")(self.pattern_discoverer.discover_patterns_from_spans)
-        timed_simulate = time_it(self.run_id, "Policy Simulation")(self.simulation_engine.generate_policies)
+        patterns = await self._time_step("Pattern Discovery", self.pattern_discoverer.discover_patterns_from_spans, all_spans)
 
-        max_retries = 3
-        cost_comparison = None
-        policies = []
-        patterns = []
-        span_map = {span.trace_context.span_id: span for span in all_spans}
-
-        for attempt in range(max_retries):
-            update_run_status(self.run_id, 'running', f"Starting analysis attempt {attempt + 1}/{max_retries}...")
-            patterns = await timed_discover(all_spans)
-            if patterns:
-                policies = await timed_simulate(self.db_session, patterns, span_map)
-            else:
-                update_run_status(self.run_id, 'running', "No patterns discovered.")
-            
-            cost_comparison = self.simulation_engine.calculate_final_costs(self.request.workloads, policies)
-            update_run_status(self.run_id, 'running', f"Cost comparison calculated for attempt {attempt + 1}.")
-
-            savings_percent = cost_comparison.delta_percent
-            if 5 <= savings_percent <= 95:
-                update_run_status(self.run_id, 'running', f"Validation successful on attempt {attempt + 1}.")
-                break
-            else:
-                log_message = f"Attempt {attempt + 1}/{max_retries} failed: Projected savings ({savings_percent:.2f}%) are outside the expected range."
-                update_run_status(self.run_id, 'running', log_message)
-                if attempt < max_retries - 1:
-                    await asyncio.sleep(1)
-        else:
-            error_message = f"Analysis failed after {max_retries} attempts."
-            update_run_status(self.run_id, 'failed', log_message=error_message, error=error_message)
+        if not patterns:
+            self.update_run_status('running', "No patterns discovered.")
             return
 
-        final_log = analysis_runs[self.run_id]["execution_log"]
+        span_map = {span.trace_context.span_id: span for span in all_spans}
+        policies = await self._time_step("Policy Simulation", self.simulation_engine.generate_policies, self.db_session, patterns, span_map)
+
+        cost_comparison = self.simulation_engine.calculate_final_costs(self.request.workloads, policies)
+        self.update_run_status('running', f"Cost comparison calculated.")
+
+        final_log = self.analysis_runs[self.run_id]["execution_log"]
         
         result = AnalysisResult(
             run_id=self.run_id,
@@ -410,15 +395,10 @@ class AnalysisPipeline:
             debug_mode=self.request.debug_mode,
             span_map=span_map
         )
-        update_run_status(self.run_id, 'completed', "Analysis complete.", result=result.model_dump(exclude_none=True))
+        self.update_run_status('completed', "Analysis complete.", result=result.model_dump(exclude_none=True))
 
-    async def run_with_deepagents(self):
-        return await run_analysis_with_deepagents(
-            self.run_id, self.request, self.db_session, self.preloaded_spans
-        )
-
-    async def run_with_deepagents_v2(self):
-        return await run_analysis_with_deepagents_v2(
+    async def run_with_deepagents(self, analysis_func):
+        return await analysis_func(
             self.run_id, self.request, self.db_session, self.preloaded_spans
         )
 
