@@ -1,2 +1,3 @@
 *.pyc
 *.env
+v2/app/.dev_env

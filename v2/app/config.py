@@ -16,7 +16,9 @@ class AppConfig(BaseSettings):
     access_token_expire_minutes: int = 30
     fernet_key: str
     jwt_secret_key: str
-
+    google_client_id: str
+    google_client_secret: str
+    
     class Config:
         env_file = ".env"
 
