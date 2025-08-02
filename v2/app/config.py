@@ -1,6 +1,6 @@
 import os
 from pydantic import validator
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class AppConfig(BaseSettings):
     """Base configuration class."""
@@ -19,8 +19,7 @@ class AppConfig(BaseSettings):
     fernet_key: str
     jwt_secret_key: str
     
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(env_file='app/.env')
 
 class DevelopmentConfig(AppConfig):
     """Development configuration.
@@ -53,3 +52,4 @@ def get_settings() -> AppConfig:
         return DevelopmentConfig()
 
 settings = get_settings()
+print(settings.model_dump())
