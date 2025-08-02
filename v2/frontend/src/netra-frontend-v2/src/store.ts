@@ -1,6 +1,6 @@
 
-import create from 'zustand';
-import { apiService } from './app/page'; // Assuming apiService is exported from page.tsx
+import { create } from 'zustand';
+import { apiService } from './api'; // Assuming apiService is exported from page.tsx
 import { config } from './config';
 
 interface User {
