@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useCallback, FormEvent } from 'react';
 import { Zap, Settings, RefreshCw, BarChart2, DollarSign, HelpCircle, LogOut } from 'lucide-react';
 
-import { config } from '../../src/config';
+import { config } from '../config';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Spinner from '../components/Spinner';
 import Input from '../components/Input';
-import { useAppStore } from '../../src/store';
+import { useAppStore } from '../store';
 
 // --- Type Definitions for API data ---
 interface Job {
@@ -52,7 +52,7 @@ const apiService = {
     }
 };
 
-export default function GenerationPage() {
+export default function IngestionPage() {
     const { token } = useAppStore();
     const [job, setJob] = useState<Job | null>(null);
     const [isPolling, setIsPolling] = useState(false);
@@ -83,21 +83,21 @@ export default function GenerationPage() {
         };
     }, [isPolling, job, pollStatus]);
 
-    const handleStartGeneration = async (event: FormEvent<HTMLFormElement>) => {
+    const handleStartIngestion = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setIsLoading(true);
         setError(null);
 
         const formData = new FormData(event.currentTarget);
-        const num_traces = parseInt(formData.get('num_traces') as string, 10);
-        const output_file = formData.get('output_file') as string;
+        const data_path = formData.get('data_path') as string;
+        const table_name = formData.get('table_name') as string;
 
         try {
-            const newJob = await apiService.post(`${config.api.baseUrl}/generation/synthetic_data`, { num_traces, output_file }, token);
+            const newJob = await apiService.post(`${config.api.baseUrl}/generation/ingest_data`, { data_path, table_name }, token);
             setJob(newJob);
             setIsPolling(true);
         } catch (err: any) {
-            console.error("Error starting generation:", err);
+            console.error("Error starting ingestion:", err);
             setError(err.message || 'An unexpected error occurred.');
         } finally {
             setIsLoading(false);
@@ -122,23 +122,23 @@ export default function GenerationPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-1">
                             <Card>
-                                <h2 className="text-xl font-semibold text-gray-900">Generate Synthetic Data</h2>
-                                <p className="mt-1 text-sm text-gray-500">Generate synthetic data for your workload settings.</p>
-                                <form onSubmit={handleStartGeneration} className="mt-6 space-y-4">
+                                <h2 className="text-xl font-semibold text-gray-900">Ingest Data</h2>
+                                <p className="mt-1 text-sm text-gray-500">Ingest data from a JSON file into ClickHouse.</p>
+                                <form onSubmit={handleStartIngestion} className="mt-6 space-y-4">
                                     <div>
-                                        <label htmlFor="num_traces" className="block text-sm font-medium text-gray-700">Number of Traces</label>
+                                        <label htmlFor="data_path" className="block text-sm font-medium text-gray-700">Data Path</label>
                                         <div className="mt-1">
-                                            <Input id="num_traces" name="num_traces" type="number" required defaultValue="10000" />
+                                            <Input id="data_path" name="data_path" type="text" required defaultValue="generated_logs_v2.json" />
                                         </div>
                                     </div>
                                     <div>
-                                        <label htmlFor="output_file" className="block text-sm font-medium text-gray-700">Output File Name</label>
+                                        <label htmlFor="table_name" className="block text-sm font-medium text-gray-700">Table Name</label>
                                         <div className="mt-1">
-                                            <Input id="output_file" name="output_file" type="text" required defaultValue="generated_logs_v2.json" />
+                                            <Input id="table_name" name="table_name" type="text" required defaultValue="netra_logs" />
                                         </div>
                                     </div>
                                     <Button type="submit" isLoading={isLoading || isPolling} disabled={isLoading || isPolling} icon={Zap}>
-                                        {isPolling ? 'Generation in Progress...' : 'Start Generation'}
+                                        {isPolling ? 'Ingestion in Progress...' : 'Start Ingestion'}
                                     </Button>
                                 </form>
                             </Card>
@@ -158,8 +158,8 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
         return (
             <Card className="flex flex-col items-center justify-center text-center h-full min-h-[300px]">
                 <HelpCircle className="w-16 h-16 text-gray-300" />
-                <h3 className="mt-4 text-lg font-medium text-gray-900">No Generation Job</h3>
-                <p className="mt-1 text-sm text-gray-500">Start a new generation job to see the status here.</p>
+                <h3 className="mt-4 text-lg font-medium text-gray-900">No Ingestion Job</h3>
+                <p className="mt-1 text-sm text-gray-500">Start a new ingestion job to see the status here.</p>
             </Card>
         );
     }
@@ -167,7 +167,7 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
     if (job.status === 'pending' || job.status === 'running') {
         return (
             <Card className="h-full">
-                <h2 className="text-xl font-semibold text-gray-900">Generation in Progress</h2>
+                <h2 className="text-xl font-semibold text-gray-900">Ingestion in Progress</h2>
                 <div className="mt-4 space-y-2 text-sm text-gray-600">
                     <p><strong>Status:</strong> <span className="capitalize font-medium text-indigo-600">{job.status.toLowerCase()}</span></p>
                     <p><strong>Job ID:</strong> {job.job_id}</p>
@@ -182,7 +182,7 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
     if (job.status === 'failed') {
         return (
             <Card className="h-full bg-red-50 border-red-200 border">
-                <h2 className="text-xl font-semibold text-red-800">Generation Failed</h2>
+                <h2 className="text-xl font-semibold text-red-800">Ingestion Failed</h2>
                 <div className="mt-4 space-y-2 text-sm text-red-700">
                     <p><strong>Job ID:</strong> {job.job_id}</p>
                 </div>
@@ -199,15 +199,11 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
     if (job.status === 'completed') {
         return (
             <Card>
-                <h2 className="text-2xl font-bold text-gray-900">Generation Complete</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Ingestion Complete</h2>
                 <p className="mt-1 text-sm text-gray-500">Job ID: {job.job_id}</p>
                 <div className="mt-6">
-                    <p className="text-sm font-medium text-gray-700">Result Path:</p>
-                    <p className="text-lg font-bold text-gray-800">{job.result_path}</p>
-                </div>
-                <div className="mt-4">
                     <p className="text-sm font-medium text-gray-700">Summary:</p>
-                    <p className="text-lg font-bold text-gray-800">{job.summary?.logs_generated.toLocaleString()} logs generated</p>
+                    <p className="text-lg font-bold text-gray-800">{job.summary?.message}</p>
                 </div>
             </Card>
         );
