@@ -24,3 +24,5 @@ clickhouse-driver
 cryptography>=3.4.0
 asyncpg
 langgraph
+starlette
+itsdangerous
