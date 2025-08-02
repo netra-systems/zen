@@ -1,51 +1,46 @@
 import os
+from pydantic import validator
 from pydantic_settings import BaseSettings
 
-# Check if the script is being run for OpenAPI schema generation.
-# The `generate_openAPI_schema.py` script will set this environment variable.
-IS_SCHEMA_GENERATION = os.environ.get("GENERATE_SCHEMA_MODE") == "1"
-
-class Settings(BaseSettings):
-
-    """
-    Defines the application settings.
-    These can be loaded from a .env file or environment variables.
-    """
+class AppConfig(BaseSettings):
+    """Base configuration class."""
     app_env: str = "development"
-    gemini_api_key: str 
-    clickhouse_host: str 
-    clickhouse_port: int 
-    clickhouse_user: str 
-    clickhouse_password: str 
-    clickhouse_db: str 
-    secret_key: str = "none"
+    gemini_api_key: str
+    clickhouse_host: str
+    clickhouse_port: int
+    clickhouse_user: str
+    clickhouse_password: str
+    clickhouse_db: str
+    secret_key: str
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
-    fernet_key: str = "none"
-    jwt_secret_key: str = "none"
+    fernet_key: str
+    jwt_secret_key: str
 
     class Config:
-        # In normal operation, load settings from a .env file.
         env_file = ".env"
 
-# When generating the OpenAPI schema, we don't need real credentials.
-# We can programmatically set dummy environment variables before Pydantic
-# attempts to load them. This avoids validation errors and uses the
-# intended mechanism of pydantic-settings.
-if IS_SCHEMA_GENERATION:
-    os.environ["DATABASE_URL"] = "postgresql+asyncpg://user:pass@dummy-postgres:5432/netra"
-    os.environ["CLICKHOUSE_HOST"] = "dummy-clickhouse"
-    os.environ["CLICKHOUSE_PORT"] = "9000"  # Env vars must be strings
-    os.environ["CLICKHOUSE_USER"] = "user"
-    os.environ["CLICKHOUSE_PASSWORD"] = "password"
-    os.environ["CLICKHOUSE_DB"] = "netra"
-    os.environ["SECRET_KEY"] = "a-super-secret-key-for-dev-and-schema-generation"
-    os.environ["FERNET_KEY"] = "dBQKEflQr-6hue28u-BBHy29R6NUhidhJArmKJcLwxg="
-    os.environ["JWT_SECRET_KEY"] = "your_super_secret_jwt_key_here"
-    os.environ["ALGORITHM"] = "HS256"
-# Instantiate Settings.
-# In normal operation, it loads from the environment or a .env file.
-# If IS_SCHEMA_GENERATION is true, it loads from the dummy environment
-# variables that were set in the block above. Pydantic will raise
-# an error if required settings are not found from any source.
-settings = Settings()
+class DevelopmentConfig(AppConfig):
+    """Development configuration."""
+    log_level: str = "DEBUG"
+
+class ProductionConfig(AppConfig):
+    """Production configuration."""
+    log_level: str = "INFO"
+
+class TestingConfig(AppConfig):
+    """Testing configuration."""
+    log_level: str = "DEBUG"
+    app_env: str = "testing"
+
+def get_settings() -> AppConfig:
+    """Returns the appropriate configuration class based on the APP_ENV environment variable."""
+    app_env = os.environ.get("APP_ENV", "development")
+    if app_env == "production":
+        return ProductionConfig()
+    elif app_env == "testing":
+        return TestingConfig()
+    else:
+        return DevelopmentConfig()
+
+settings = get_settings()
