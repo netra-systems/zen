@@ -4,33 +4,38 @@ from app.config import settings
 from app.db.clickhouse import get_clickhouse_client
 from app.db.models_clickhouse import LLM_EVENTS_TABLE_SCHEMA
 
-def _flatten_json(nested_json, parent_key='', sep='_'):
+def _flatten_json_first_level(nested_json, sep='_'):
     """
-    Flattens a nested dictionary.
-    If the input `nested_json` is not a dictionary, it returns an empty dictionary
-    to prevent errors and handle malformed records gracefully.
+    Flattens the first level of a nested dictionary.
+    
+    This function iterates through a dictionary and unnests any sub-dictionaries
+    by one level, combining their keys. It's designed to prepare a complex
+    JSON object for ingestion into a flat table structure where top-level
+    JSON keys correspond to columns.
+    
+    Example:
+        Input: {'event': {'id': 1}, 'details': {'user': 'test'}}
+        Output: {'event_id': 1, 'details_user': 'test'}
+
+    Unlike the previous version, this function does not recurse and does not
+    have special handling for lists of dictionaries, as the new schema's
+    JSON column type can handle them directly.
     """
     items = {}
-
-    # FIX: Check if the input is a dictionary. The function is designed to flatten
-    # a dictionary, so if it receives a list or another type (e.g., from a
-    # malformed JSON record), we prevent a crash by returning early.
     if not isinstance(nested_json, dict):
         return {}
 
     for k, v in nested_json.items():
-        new_key = parent_key + sep + k if parent_key else k
         if isinstance(v, dict):
-            items.update(_flatten_json(v, new_key, sep=sep))
-        elif isinstance(v, list) and v and isinstance(v[0], dict):
-            # This part handles lists of dictionaries by creating separate columns
-            # for each key in the nested dictionaries, which is useful for columnar DBs.
-            nested_keys = v[0].keys()
-            for nested_key in nested_keys:
-                column_name = new_key + '_' + nested_key
-                items[column_name] = [item.get(nested_key) for item in v]
+            # If the value is a dictionary, iterate its items
+            for sub_k, sub_v in v.items():
+                # Create a new key by joining the parent and child keys
+                items[f"{k}{sep}{sub_k}"] = sub_v
         else:
-            items[new_key] = v
+            # If the value is not a dictionary (e.g., string, int, list),
+            # keep it as is. This is crucial for inserting into JSON columns.
+            items[k] = v
+            
     return items
 
 
@@ -41,12 +46,8 @@ def run_ingestion():
 
     with get_clickhouse_client() as client:
         
-        print(f"Successfully connected to ClickHouse at {client.database} : {settings.clickhouse_host}:{settings.clickhouse_port}")
-
         client.command(LLM_EVENTS_TABLE_SCHEMA)
-
         start_time = time.time()
-        print(f"Reading records from {JSON_FILE_PATH}...")
         
         with open(JSON_FILE_PATH, 'r') as f:
             records = json.load(f)
@@ -55,13 +56,15 @@ def run_ingestion():
             print("No records found or file format is incorrect. Nothing to insert.")
             return
 
-        print(f"Successfully read {len(records)} records from the file.")
-        print("Flattening records for ingestion...")
+        flattened_records = [_flatten_json_first_level(record[0]) for record in records]
 
-        flattened_records = [_flatten_json(record) for record in records]
+        column_names = set()
+        for record in flattened_records:
+            column_names.update(record.keys())
+        
+        print(f"Discovered column names: {sorted(list(column_names))}")
 
-        print("Inserting records into the 'netra_llm_events' table...")
-        client.insert('netra_llm_events', flattened_records)
+        client.insert_data('JSON_HYBRID_EVENTS', flattened_records, column_names=list(column_names))
         total_inserted = len(flattened_records)
         
         end_time = time.time()

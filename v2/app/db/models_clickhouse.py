@@ -155,72 +155,59 @@ class AnalysisResult(SQLModel, table=False):
 -- flattening the nested JSON structure for easier querying.
 """
 
-LLM_EVENTS_TABLE_NAME = 'netra_llm_events'
+LLM_EVENTS_TABLE_NAME = 'JSON_HYBRID_EVENTS'
 LLM_EVENTS_TABLE_SCHEMA = f"""
 CREATE TABLE IF NOT EXISTS {LLM_EVENTS_TABLE_NAME} (
-    -- Event Metadata: Core information about the event record itself.
+    -- Event Metadata
     event_metadata_log_schema_version String,
     event_metadata_event_id UUID,
-    event_metadata_timestamp_utc DateTime64(3), -- Using DateTime64 to preserve millisecond precision.
+    event_metadata_timestamp_utc DateTime64(3),
     event_metadata_ingestion_source String,
 
-    -- Trace Context: Information for tracing requests across different services.
+    -- Trace Context
     trace_context_trace_id UUID,
     trace_context_span_id UUID,
     trace_context_span_name String,
     trace_context_span_kind String,
 
-    -- Identity Context: Details about the user and authentication.
+    -- Identity Context
     identity_context_user_id UUID,
     identity_context_organization_id String,
     identity_context_api_key_hash String,
     identity_context_auth_method String,
-
-    -- Application Context: Details about the application generating the event.
+    
+    -- Application Context
     application_context_app_name String,
     application_context_service_name String,
     application_context_sdk_version String,
-    application_context_environment LowCardinality(String), -- LowCardinality is good for fields with a limited set of values.
+    application_context_environment LowCardinality(String),
     application_context_client_ip IPv4,
 
-    -- Request Details: Information about the request sent to the LLM.
+    -- Request Details: Nested objects are now stored in JSON columns
     request_model_provider LowCardinality(String),
     request_model_family String,
     request_model_name String,
     request_model_version_id String,
-    request_prompt_messages Nested (
-        role String,
-        content String
-    ),
+    request_prompt_messages JSON, -- UPDATED: from Nested to JSON
     request_generation_config_temperature Float32,
     request_generation_config_max_tokens_to_sample UInt32,
     request_generation_config_is_streaming Bool,
 
-    -- Response Details: Information about the response received from the LLM.
-    response_completion_choices Nested (
-        index UInt8,
-        finish_reason String,
-        message_role String,
-        message_content String
-    ),
+    -- Response Details: Nested objects are now stored in JSON columns
+    response_completion_choices JSON, -- UPDATED: from Nested to JSON
     response_usage_prompt_tokens UInt32,
     response_usage_completion_tokens UInt32,
     response_usage_total_tokens UInt32,
     response_system_provider_request_id String,
-    response_tool_calls Nested (
-        id String,
-        type String,
-        function_name String,
-        function_arguments String
-    ),
+    response_tool_calls JSON, -- UPDATED: from Nested to JSON
 
-    -- Performance Metrics: Latency and timing data.
+    -- Performance Metrics
     performance_latency_ms_total_e2e UInt32,
     performance_latency_ms_time_to_first_token UInt32,
     performance_latency_ms_time_per_output_token Float64,
     performance_latency_ms_decode_duration UInt32,
 
-    -- FinOps (Financial Operations): Cost and pricing information.
+    -- FinOps (Financial Operations)
     finops_cost_total_cost_usd Float64,
     finops_cost_prompt_cost_usd Float64,
     finops_cost_completion_cost_usd Float64,
@@ -232,20 +219,18 @@ CREATE TABLE IF NOT EXISTS {LLM_EVENTS_TABLE_NAME} (
     finops_attribution_team_id String,
     finops_attribution_feature_name String,
 
-    -- Governance: Security, safety, and audit information.
+    -- Governance: Nested objects are now stored in JSON columns
     governance_security_pii_redacted Bool,
     governance_security_prompt_injection_detected Bool,
-    governance_safety_provider_safety_ratings Nested (
-        category String,
-        severity String,
-        was_blocked Bool
-    ),
+    governance_safety_provider_safety_ratings JSON, -- UPDATED: from Nested to JSON
     governance_safety_overall_safety_verdict String,
     governance_audit_context_request_type String,
     governance_audit_context_cache_status String
 
+    -- REMOVED: Redundant columns for unnesting are no longer needed with the JSON type.
+
 ) ENGINE = MergeTree()
-PARTITION BY toYYYYMM(event_metadata_timestamp_utc) -- Partitioning by month is a common and effective strategy for time-series data.
-ORDER BY (application_context_environment, application_context_app_name, event_metadata_timestamp_utc) -- The ORDER BY key determines the primary index and how data is sorted within partitions.
+PARTITION BY toYYYYMM(event_metadata_timestamp_utc)
+ORDER BY (application_context_environment, application_context_app_name, event_metadata_timestamp_utc)
 SETTINGS index_granularity = 8192;
 """
