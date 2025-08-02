@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
     setup_logging()
     logger.info("Application startup...")
 
-    key_manager = KeyManager.load_from_env(settings.app_env)
+    key_manager = KeyManager.load_from_settings(settings)
     app.state.key_manager = key_manager
     app.state.security_service = SecurityService(key_manager)
 
