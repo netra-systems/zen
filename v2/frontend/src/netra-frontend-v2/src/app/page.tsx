@@ -51,6 +51,8 @@ export default function Home() {
         const storedToken = localStorage.getItem('authToken');
         if (storedToken) {
             fetchUser(storedToken);
+        } else {
+            useAppStore.setState({ isLoading: false });
         }
     }, [fetchUser]);
 

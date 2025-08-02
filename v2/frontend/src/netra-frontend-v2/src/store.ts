@@ -29,7 +29,7 @@ export const useAppStore = create<AppState>((set, get) => ({
             set({ user: userData, token });
         } catch (error) {
             console.error("Failed to fetch user, logging out.", error);
-            set({ user: null, token: null });
+            set({ user: null, token: null, isLoading: false });
             if (typeof window !== 'undefined') {
                 localStorage.removeItem('authToken');
             }
@@ -53,7 +53,7 @@ export const useAppStore = create<AppState>((set, get) => ({
             await get().fetchUser(access_token);
         } catch (error: any) {
             console.error(error);
-            set({ authError: error.message || 'An unexpected error occurred during login.' });
+            set({ authError: error.message || 'An unexpected error occurred during login.', isLoading: false });
         }
     },
     logout: () => {
