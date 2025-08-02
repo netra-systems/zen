@@ -14,7 +14,7 @@ from app.logging_config_custom.clickhouse_logger import ClickHouseLogHandler
 
 def setup_logging():
     """Initializes the application's logging configuration."""
-    logger.setup_logging(level=settings.LOG_LEVEL, log_file_path=settings.LOG_FILE_PATH)
+    logger.configure(level=settings.LOG_LEVEL)
     logger.info("Logging configured.")
 
 def initialize_databases(app: FastAPI):

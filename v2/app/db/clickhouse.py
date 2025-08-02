@@ -3,7 +3,7 @@ from clickhouse_connect.driver.client import Client
 from typing import List, Dict, Any
 
 from app.logging_config_custom.logger import logger, Log
-from ..config import settings, IS_SCHEMA_GENERATION
+from ..config import settings
 
 # TBD better difference between "Connect" and "Driver"
 
@@ -23,13 +23,7 @@ class ClickHouseClient:
     def connect(self):
         """
         Establishes a connection to the ClickHouse server.
-        In schema generation mode, this step is skipped to avoid errors.
         """
-        # If running to generate OpenAPI schema, do not attempt to connect.
-        if IS_SCHEMA_GENERATION:
-            logger.info("Skipping ClickHouse connection in schema generation mode.")
-            return
-
         try:
             self.client = clickhouse_connect.get_client(
                 host=self.host,
