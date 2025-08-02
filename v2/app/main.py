@@ -18,7 +18,14 @@ def setup_logging():
 def initialize_databases(app: FastAPI):
     """Initializes and connects to PostgreSQL and ClickHouse."""
     # Initialize PostgreSQL
-    # TBD
+    try:
+        db = Database(settings.DATABASE_URL)
+        db.connect()
+        app.state.db = db
+        logger.info("PostgreSQL connected.")
+    except Exception as e:
+        logger.error(f"Failed to connect to PostgreSQL: {e}", exc_info=True)
+        raise
 
     # Initialize and connect to ClickHouse
     ch_client = ClickHouseClient(

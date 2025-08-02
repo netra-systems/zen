@@ -75,3 +75,37 @@ def read_users_me(current_user: ActiveUserDep):
     Returns the public information for the currently authenticated user.
     """
     return current_user
+
+
+@router.put("/users/me", response_model=schema.UserPublic)
+def update_user_me(
+    user_update: schema.UserUpdate,
+    current_user: ActiveUserDep,
+    db: DbDep,
+):
+    """
+    Updates the current user's information.
+    """
+    user_data = user_update.model_dump(exclude_unset=True)
+    if "password" in user_data:
+        user_data["hashed_password"] = get_password_hash(user_data.pop("password"))
+
+    for key, value in user_data.items():
+        setattr(current_user, key, value)
+
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    logger.info(f"User '{current_user.email}' updated successfully.")
+    return current_user
+
+
+@router.delete("/users/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user_me(current_user: ActiveUserDep, db: DbDep):
+    """
+    Deletes the current user's account.
+    """
+    db.delete(current_user)
+    db.commit()
+    logger.info(f"User '{current_user.email}' deleted successfully.")
+    return None
