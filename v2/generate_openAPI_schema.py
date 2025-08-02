@@ -22,10 +22,10 @@ def generate_openapi_schema():
 
     # Use FastAPI's utility to create the schema dictionary.
     openapi_schema = get_openapi(
-        title=app.title,
-        version=app.version,
-        openapi_version=app.openapi_version,
-        description=app.description,
+        title="Netra API v2",
+        version="2.0.0",
+        openapi_version="3.0.2",
+        description="This is the API for Netra, a platform for AI-powered workload optimization.",
         routes=app.routes,
     )
 

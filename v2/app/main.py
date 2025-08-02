@@ -20,6 +20,7 @@ def setup_logging():
 from app.services.key_manager import KeyManager
 from app.services.security_service import SecurityService
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """

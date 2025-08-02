@@ -83,4 +83,4 @@ class SecurityService:
         
         return models_postgres.ClickHouseCredentials(**decrypted_creds)
 
-security_service = SecurityService()
+security_service = SecurityService(key_manager=KeyManager())

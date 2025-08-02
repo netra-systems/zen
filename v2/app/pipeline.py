@@ -6,7 +6,7 @@ import uuid
 
 from sqlmodel import Session
 
-from .services.security_service import security_service
+
 from .services.analysis_runner import AnalysisRunner
 
 from .schema import AnalysisRun
@@ -14,7 +14,7 @@ from .logging_config_custom.logger import logger
 from .db.models_clickhouse import AnalysisResult
 
 
-def run_full_analysis_pipeline(run_id: uuid.UUID, user_id: str, db: Session, use_deepagents: bool = False, use_deepagents_v2: bool = False):
+def run_full_analysis_pipeline(run_id: uuid.UUID, user_id: str, db: Session, security_service, use_deepagents: bool = False, use_deepagents_v2: bool = False):
     """
     The main function that orchestrates the analysis pipeline.
     It's designed to be run in the background.

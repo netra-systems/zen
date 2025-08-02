@@ -19,7 +19,22 @@ router = APIRouter()
 
 OAuthFormDep = Annotated[OAuth2PasswordRequestForm, Depends()]
 
-@router.post("/token", response_model=schema.Token)
+@router.post("/token", response_model=schema.Token, openapi_extra={
+    "requestBody": {
+        "content": {
+            "application/x-www-form-urlencoded": {
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "username": {"type": "string", "example": "jdoe@example.com"},
+                        "password": {"type": "string", "example": "secret"}
+                    },
+                    "required": ["username", "password"]
+                }
+            }
+        }
+    }
+})
 def login_for_access_token(request: Request, form_data: OAuthFormDep, db: DbDep):
     """
     Provides a JWT access token for a valid user.

@@ -9,14 +9,14 @@ export const metadata: Metadata = {
   description: 'AI-Powered Workload Optimization',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+import { Providers } from "./providers";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>{children}</body>
+    <html lang="en">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

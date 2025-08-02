@@ -32,7 +32,7 @@ try:
     AsyncSessionLocal = sessionmaker(
         bind=async_engine, class_=AsyncSession, expire_on_commit=False
     )
-    print("✅ PostgreSQL async engine created successfully.")
+    print("PostgreSQL async engine created successfully.")
 except Exception as e:
     logger.error(f"Failed to create PostgreSQL async engine: {e}")
     # Handle the error appropriately, maybe exit or use a fallback

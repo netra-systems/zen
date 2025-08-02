@@ -3,7 +3,7 @@ import logging
 import uuid
 from typing import List
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Request
 from sqlmodel import Session, select
 
 from .. import schema
@@ -12,14 +12,15 @@ from ..logging_config_custom.logger import logger
 
 from ..dependencies import ActiveUserDep, DbDep
 from ..pipeline import run_full_analysis_pipeline
-from ..services.security_service import security_service
+
 
 
 router = APIRouter()
 
 @router.post("/credentials", status_code=status.HTTP_204_NO_CONTENT)
-def save_credentials(creds: models_clickhouse.ClickHouseCredentials, db: DbDep, current_user: ActiveUserDep):
+def save_credentials(request: Request, creds: models_clickhouse.ClickHouseCredentials, db: DbDep, current_user: ActiveUserDep):
     """Saves or updates the user's ClickHouse credentials securely."""
+    security_service = request.app.state.security_service
     try:
         security_service.save_user_credentials(user_id=current_user.id, credentials=creds, db_session=db)
         logger.info(f"Credentials saved successfully for user_id: {current_user.id}")
@@ -29,8 +30,9 @@ def save_credentials(creds: models_clickhouse.ClickHouseCredentials, db: DbDep, 
 
 
 @router.get("/credentials", response_model=models_clickhouse.ClickHouseCredentials)
-def get_credentials(db: DbDep, current_user: ActiveUserDep):
+def get_credentials(request: Request, db: DbDep, current_user: ActiveUserDep):
     """Retrieves the user's saved ClickHouse credentials."""
+    security_service = request.app.state.security_service
     creds = security_service.get_user_credentials(user_id=current_user.id, db_session=db)
     if not creds:
         raise HTTPException(status_code=404, detail="Credentials not found for this user.")
@@ -55,7 +57,7 @@ def start_new_analysis_run(
     db.commit()
     db.refresh(new_run)
 
-    background_tasks.add_task(run_full_analysis_pipeline, run_id=new_run.id, user_id=current_user.id, db=db, use_deepagents=use_deepagents, use_deepagents_v2=use_deepagents_v2)
+    background_tasks.add_task(run_full_analysis_pipeline, run_id=new_run.id, user_id=current_user.id, db=db, security_service=request.app.state.security_service, use_deepagents=use_deepagents, use_deepagents_v2=use_deepagents_v2)
     logger.info(f"Started analysis run {new_run.id} for user {current_user.email}")
     return new_run
 
