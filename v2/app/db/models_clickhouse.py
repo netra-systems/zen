@@ -145,3 +145,107 @@ class AnalysisResult(SQLModel, table=False):
     execution_log: List[Dict]
     debug_mode: bool
     span_map: Dict[str, UnifiedLogEntry]
+
+
+
+"""
+-- This statement creates a table named 'llm_events' using the MergeTree engine,
+-- which is optimized for high-performance analytics and large-scale data warehousing.
+-- The schema is designed to store detailed information from Large Language Model (LLM) interactions,
+-- flattening the nested JSON structure for easier querying.
+"""
+
+LLM_EVENTS_TABLE_NAME = 'netra_llm_events'
+LLM_EVENTS_TABLE_SCHEMA = f"""
+CREATE TABLE IF NOT EXISTS {LLM_EVENTS_TABLE_NAME} (
+    -- Event Metadata: Core information about the event record itself.
+    event_metadata_log_schema_version String,
+    event_metadata_event_id UUID,
+    event_metadata_timestamp_utc DateTime64(3), -- Using DateTime64 to preserve millisecond precision.
+    event_metadata_ingestion_source String,
+
+    -- Trace Context: Information for tracing requests across different services.
+    trace_context_trace_id UUID,
+    trace_context_span_id UUID,
+    trace_context_span_name String,
+    trace_context_span_kind String,
+
+    -- Identity Context: Details about the user and authentication.
+    identity_context_user_id UUID,
+    identity_context_organization_id String,
+    identity_context_api_key_hash String,
+    identity_context_auth_method String,
+
+    -- Application Context: Details about the application generating the event.
+    application_context_app_name String,
+    application_context_service_name String,
+    application_context_sdk_version String,
+    application_context_environment LowCardinality(String), -- LowCardinality is good for fields with a limited set of values.
+    application_context_client_ip IPv4,
+
+    -- Request Details: Information about the request sent to the LLM.
+    request_model_provider LowCardinality(String),
+    request_model_family String,
+    request_model_name String,
+    request_model_version_id String,
+    request_prompt_messages Nested (
+        role String,
+        content String
+    ),
+    request_generation_config_temperature Float32,
+    request_generation_config_max_tokens_to_sample UInt32,
+    request_generation_config_is_streaming Bool,
+
+    -- Response Details: Information about the response received from the LLM.
+    response_completion_choices Nested (
+        index UInt8,
+        finish_reason String,
+        message_role String,
+        message_content String
+    ),
+    response_usage_prompt_tokens UInt32,
+    response_usage_completion_tokens UInt32,
+    response_usage_total_tokens UInt32,
+    response_system_provider_request_id String,
+    response_tool_calls Nested (
+        id String,
+        type String,
+        function_name String,
+        function_arguments String
+    ),
+
+    -- Performance Metrics: Latency and timing data.
+    performance_latency_ms_total_e2e UInt32,
+    performance_latency_ms_time_to_first_token UInt32,
+    performance_latency_ms_time_per_output_token Float64,
+    performance_latency_ms_decode_duration UInt32,
+
+    -- FinOps (Financial Operations): Cost and pricing information.
+    finops_cost_total_cost_usd Float64,
+    finops_cost_prompt_cost_usd Float64,
+    finops_cost_completion_cost_usd Float64,
+    finops_pricing_info_provider_rate_id String,
+    finops_pricing_info_prompt_token_rate_usd_per_million Float64,
+    finops_pricing_info_completion_token_rate_usd_per_million Float64,
+    finops_attribution_cost_center_id String,
+    finops_attribution_project_id String,
+    finops_attribution_team_id String,
+    finops_attribution_feature_name String,
+
+    -- Governance: Security, safety, and audit information.
+    governance_security_pii_redacted Bool,
+    governance_security_prompt_injection_detected Bool,
+    governance_safety_provider_safety_ratings Nested (
+        category String,
+        severity String,
+        was_blocked Bool
+    ),
+    governance_safety_overall_safety_verdict String,
+    governance_audit_context_request_type String,
+    governance_audit_context_cache_status String
+
+) ENGINE = MergeTree()
+PARTITION BY toYYYYMM(event_metadata_timestamp_utc) -- Partitioning by month is a common and effective strategy for time-series data.
+ORDER BY (application_context_environment, application_context_app_name, event_metadata_timestamp_utc) -- The ORDER BY key determines the primary index and how data is sorted within partitions.
+SETTINGS index_granularity = 8192;
+"""

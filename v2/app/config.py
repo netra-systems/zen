@@ -6,23 +6,23 @@ from pydantic_settings import BaseSettings
 IS_SCHEMA_GENERATION = os.environ.get("GENERATE_SCHEMA_MODE") == "1"
 
 class Settings(BaseSettings):
-    FERNET_KEY: str
-    JWT_SECRET_KEY: str
-    ALGORITHM: str
+
     """
     Defines the application settings.
     These can be loaded from a .env file or environment variables.
     """
     app_env: str = "development"
-    database_url: str
-    clickhouse_host: str
-    clickhouse_port: int
-    clickhouse_user: str
-    clickhouse_password: str
-    clickhouse_db: str
-    secret_key: str
+    gemini_api_key: str 
+    clickhouse_host: str 
+    clickhouse_port: int 
+    clickhouse_user: str 
+    clickhouse_password: str 
+    clickhouse_db: str 
+    secret_key: str = "none"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
+    fernet_key: str = "none"
+    jwt_secret_key: str = "none"
 
     class Config:
         # In normal operation, load settings from a .env file.

@@ -55,15 +55,15 @@ class ClickHouseClient:
         """Checks if the client is connected and the connection is open."""
         return self.client is not None and self.client.is_open
 
-    def create_table_if_not_exists(self, table_schema: str):
-        """Executes a CREATE TABLE IF NOT EXISTS command."""
+    def command(self, schema: str):
+        """Executes a command."""
         if not self.is_connected():
             raise ConnectionError("Not connected to ClickHouse.")
         try:
-            self.client.command(table_schema)
-            logger.info(f"Table schema executed successfully.")
+            self.client.command(schema)
+            logger.info(f"Schema executed successfully.")
         except Exception as e:
-            logger.error(f"Could not create table with schema '{table_schema[:50]}...': {e}", exc_info=True)
+            logger.error(f"Could not execute schema '{schema[:50]}...': {e}", exc_info=True)
             raise
 
     def insert_data(self, table: str, data: List[List[Any]], column_names: List[str]):

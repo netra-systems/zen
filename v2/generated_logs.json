@@ -1,0 +1,1934 @@
+[
+  [
+    {
+      "event_metadata": {
+        "log_schema_version": "3.0.0",
+        "event_id": "bee4c157-813c-4bfb-80d3-f969807e9a86",
+        "timestamp_utc": 1754092547103,
+        "ingestion_source": "synthetic_generator_v1"
+      },
+      "trace_context": {
+        "trace_id": "2711a0c0-33f2-4c6b-b624-dfac1bf2ac16",
+        "span_id": "dec474a7-a092-41ce-bac8-580ad06d5b57",
+        "span_name": "FunctionCalling",
+        "span_kind": "llm"
+      },
+      "identity_context": {
+        "user_id": "32db222f-e8f0-4c3d-81ea-2b649749ee47",
+        "organization_id": "org_79fb934cf9a4",
+        "api_key_hash": "30197c72131437da3ab20fcc795a2a8d23c8ca2465056281f826908d28a1a9d6",
+        "auth_method": "iam_role"
+      },
+      "application_context": {
+        "app_name": "customer-support-chatbot",
+        "service_name": "history-summarizer",
+        "sdk_version": "python-sdk-2.9.1",
+        "environment": "staging",
+        "client_ip": "207.23.34.123"
+      },
+      "request": {
+        "model": {
+          "provider": "anthropic",
+          "family": "claude-3",
+          "name": "claude-3-opus",
+          "version_id": "claude-3-opus-20240229"
+        },
+        "prompt": {
+          "messages": [
+            {
+              "role": "user",
+              "content": "What's the current stock price of Google (GOOG) and what is the capital of Canada?"
+            }
+          ]
+        },
+        "generation_config": {
+          "temperature": 0.7,
+          "max_tokens_to_sample": 2048,
+          "is_streaming": false
+        }
+      },
+      "response": {
+        "completion": {
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "tool_calls",
+              "message": {
+                "role": "assistant",
+                "content": "The current stock price of Google (GOOG) is $138.50. The capital of Canada is Ottawa."
+              }
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 30,
+          "completion_tokens": 30,
+          "total_tokens": 60
+        },
+        "system": {
+          "provider_request_id": "req_8de7f145-19b7-4e87-bb56-d990ff50c7aa"
+        },
+        "tool_calls": [
+          {
+            "id": "call_b01aec1a",
+            "type": "function",
+            "function": {
+              "name": "get_weather",
+              "arguments": "{\"location\": \"San Francisco, CA\"}"
+            }
+          }
+        ]
+      },
+      "performance": {
+        "latency_ms": {
+          "total_e2e": 1922,
+          "time_to_first_token": 440,
+          "time_per_output_token": 47.074632679105356,
+          "decode_duration": 1412
+        }
+      },
+      "finops": {
+        "cost": {
+          "total_cost_usd": 0.0027,
+          "prompt_cost_usd": 0.00045,
+          "completion_cost_usd": 0.0022500000000000003
+        },
+        "pricing_info": {
+          "provider_rate_id": "rate_e6154436",
+          "prompt_token_rate_usd_per_million": 15.0,
+          "completion_token_rate_usd_per_million": 75.0
+        },
+        "attribution": {
+          "cost_center_id": "CC_468",
+          "project_id": "PROJ_918780",
+          "team_id": "gamma",
+          "feature_name": "search"
+        }
+      },
+      "governance": {
+        "security": {
+          "pii_redacted": false,
+          "prompt_injection_detected": false
+        },
+        "safety": {
+          "provider_safety_ratings": [
+            {
+              "category": "hate_speech",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "harassment",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "sexual_content",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "dangerous_content",
+              "severity": "negligible",
+              "was_blocked": false
+            }
+          ],
+          "overall_safety_verdict": "pass"
+        },
+        "audit_context": {
+          "request_type": "initial",
+          "cache_status": "miss"
+        }
+      }
+    }
+  ],
+  [
+    {
+      "event_metadata": {
+        "log_schema_version": "3.0.0",
+        "event_id": "7570b27d-29ed-49d7-ac47-8a88051175f9",
+        "timestamp_utc": 1754092551050,
+        "ingestion_source": "synthetic_generator_v1"
+      },
+      "trace_context": {
+        "trace_id": "aacef7b9-c16a-447e-babd-f77b1c017ab4",
+        "span_id": "c7641004-67bb-42ba-887b-1ffa5a06e536",
+        "span_name": "UserChat",
+        "span_kind": "llm"
+      },
+      "identity_context": {
+        "user_id": "12756667-8acc-4347-b2cd-d045ec30477d",
+        "organization_id": "org_b1943cdc03e9",
+        "api_key_hash": "035d647884919e9c35e0579e3e9971663e4e16e4b23d7f6d2cf854460743196e",
+        "auth_method": "api_key"
+      },
+      "application_context": {
+        "app_name": "internal-doc-search",
+        "service_name": "query-parser",
+        "sdk_version": "python-sdk-3.9.4",
+        "environment": "staging",
+        "client_ip": "88.73.45.31"
+      },
+      "request": {
+        "model": {
+          "provider": "vllm",
+          "family": "llama-3.1",
+          "name": "llama-3.1-70b-instruct"
+        },
+        "prompt": {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Hey, I'm looking for a quick and easy dessert recipe I can whip up in about 30 minutes. Any ideas?"
+            }
+          ]
+        },
+        "generation_config": {
+          "temperature": 0.7,
+          "max_tokens_to_sample": 2048,
+          "is_streaming": false
+        }
+      },
+      "response": {
+        "completion": {
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "stop_sequence",
+              "message": {
+                "role": "assistant",
+                "content": "Absolutely! For a quick dessert, you could try mug cakes (chocolate or vanilla are popular), microwave apple crisp, or a simple no-bake cheesecake in a cup. They're all super fast and use common ingredients!"
+              }
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 40,
+          "completion_tokens": 68,
+          "total_tokens": 108
+        },
+        "system": {
+          "provider_request_id": "req_dca369fe-cdf2-45ea-88b4-1071d6f4ee4a"
+        }
+      },
+      "performance": {
+        "latency_ms": {
+          "total_e2e": 2305,
+          "time_to_first_token": 398,
+          "time_per_output_token": 27.205294593421698,
+          "decode_duration": 1849
+        }
+      },
+      "finops": {
+        "cost": {
+          "total_cost_usd": 5.4e-05,
+          "prompt_cost_usd": 2e-05,
+          "completion_cost_usd": 3.4e-05
+        },
+        "pricing_info": {
+          "provider_rate_id": "rate_677b2d4b",
+          "prompt_token_rate_usd_per_million": 0.5,
+          "completion_token_rate_usd_per_million": 0.5
+        },
+        "attribution": {
+          "cost_center_id": "CC_599",
+          "project_id": "PROJ_05E0B6",
+          "team_id": "beta",
+          "feature_name": "summarization"
+        }
+      },
+      "governance": {
+        "security": {
+          "pii_redacted": false,
+          "prompt_injection_detected": false
+        },
+        "safety": {
+          "provider_safety_ratings": [
+            {
+              "category": "hate_speech",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "harassment",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "sexual_content",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "dangerous_content",
+              "severity": "low",
+              "was_blocked": false
+            }
+          ],
+          "overall_safety_verdict": "pass"
+        },
+        "audit_context": {
+          "request_type": "initial",
+          "cache_status": "miss"
+        }
+      }
+    }
+  ],
+  [
+    {
+      "event_metadata": {
+        "log_schema_version": "3.0.0",
+        "event_id": "5af3b3c9-d78b-4b35-ba06-8cd0a624c671",
+        "timestamp_utc": 1754092556565,
+        "ingestion_source": "synthetic_generator_v1"
+      },
+      "trace_context": {
+        "trace_id": "0e96de7c-4c52-4287-9590-6a7f7ce55bcc",
+        "span_id": "723237bc-97ea-4506-87f3-60bcc6617af7",
+        "span_name": "RAGWorkflow",
+        "span_kind": "workflow"
+      },
+      "identity_context": {
+        "user_id": "4f5e1a47-58c8-401b-8897-ffd8731ba294",
+        "organization_id": "org_ea9618f8a0c1",
+        "api_key_hash": "e2e87ae76637282679f24f8429ce40e74ea54c3207c04a4155a82c5132d63333",
+        "auth_method": "api_key"
+      },
+      "application_context": {
+        "app_name": "customer-support-chatbot",
+        "service_name": "intent-classifier",
+        "sdk_version": "python-sdk-1.9.2",
+        "environment": "staging",
+        "client_ip": "102.105.54.74"
+      },
+      "request": {
+        "model": {
+          "provider": "openai",
+          "family": "gpt-4",
+          "name": "gpt-4o",
+          "version_id": "gpt-4o-2024-08-06"
+        },
+        "prompt": {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Context: The latest update to our secure messaging platform, Version 3.1, introduces end-to-end encryption for all group chats, ensuring that only participants can read messages. It also includes an enhanced file sharing limit, increasing it from 100MB to 500MB per file. Additionally, the update adds support for voice memos, allowing users to send short audio messages. Question: What new features are included in Version 3.1 of the secure messaging platform?"
+            }
+          ]
+        },
+        "generation_config": {
+          "temperature": 0.7,
+          "max_tokens_to_sample": 2048,
+          "is_streaming": false
+        }
+      },
+      "response": {
+        "completion": {
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "stop_sequence",
+              "message": {
+                "role": "assistant",
+                "content": "Version 3.1 of the secure messaging platform includes end-to-end encryption for all group chats, an enhanced file sharing limit of 500MB per file, and support for voice memos."
+              }
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 140,
+          "completion_tokens": 56,
+          "total_tokens": 196
+        },
+        "system": {
+          "provider_request_id": "req_b9629a3d-a9c4-475a-a393-5e81b36a77d1"
+        }
+      },
+      "performance": {
+        "latency_ms": {
+          "total_e2e": 2222,
+          "time_to_first_token": 709,
+          "time_per_output_token": 24.39391780082919,
+          "decode_duration": 1366
+        }
+      },
+      "finops": {
+        "cost": {
+          "total_cost_usd": 0.00154,
+          "prompt_cost_usd": 0.0006999999999999999,
+          "completion_cost_usd": 0.00084
+        },
+        "pricing_info": {
+          "provider_rate_id": "rate_dc3108f7",
+          "prompt_token_rate_usd_per_million": 5.0,
+          "completion_token_rate_usd_per_million": 15.0
+        },
+        "attribution": {
+          "cost_center_id": "CC_428",
+          "project_id": "PROJ_652D52",
+          "team_id": "gamma",
+          "feature_name": "summarization"
+        }
+      },
+      "governance": {
+        "security": {
+          "pii_redacted": false,
+          "prompt_injection_detected": false
+        },
+        "safety": {
+          "provider_safety_ratings": [
+            {
+              "category": "hate_speech",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "harassment",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "sexual_content",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "dangerous_content",
+              "severity": "negligible",
+              "was_blocked": false
+            }
+          ],
+          "overall_safety_verdict": "pass"
+        },
+        "audit_context": {
+          "request_type": "initial",
+          "cache_status": "miss"
+        }
+      }
+    },
+    {
+      "event_metadata": {
+        "log_schema_version": "3.0.0",
+        "event_id": "f4ea477b-4336-44f2-be03-36fbb9286206",
+        "timestamp_utc": 1754092563304,
+        "ingestion_source": "synthetic_generator_v1"
+      },
+      "trace_context": {
+        "trace_id": "0e96de7c-4c52-4287-9590-6a7f7ce55bcc",
+        "span_id": "4093a70b-b25b-46cc-97a0-ee99849953d6",
+        "parent_span_id": "723237bc-97ea-4506-87f3-60bcc6617af7",
+        "span_name": "VectorDBSearch",
+        "span_kind": "retrieval"
+      },
+      "identity_context": {
+        "user_id": "4bbaa9b3-0869-4cf4-a1d3-994d92fe6ea8",
+        "organization_id": "org_73a09085c9f1",
+        "api_key_hash": "4b08f3fdd12e480702bda4192d4666a84d3970097be298f8a3b4b7a4a08421a7",
+        "auth_method": "iam_role"
+      },
+      "application_context": {
+        "app_name": "internal-doc-search",
+        "service_name": "retrieval-engine",
+        "sdk_version": "python-sdk-2.2.5",
+        "environment": "production",
+        "client_ip": "61.125.134.53"
+      },
+      "request": {
+        "model": {
+          "provider": "anthropic",
+          "family": "claude-3",
+          "name": "claude-3-opus",
+          "version_id": "claude-3-opus-20240229"
+        },
+        "prompt": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "Retrieving documents for query."
+            }
+          ]
+        },
+        "generation_config": {
+          "temperature": 0.7,
+          "max_tokens_to_sample": 2048,
+          "is_streaming": false
+        }
+      },
+      "response": null,
+      "performance": {
+        "latency_ms": {
+          "total_e2e": 186,
+          "time_to_first_token": 392,
+          "time_per_output_token": 49.32090352619029,
+          "decode_duration": 3057
+        }
+      },
+      "finops": {
+        "cost": {
+          "total_cost_usd": 0.007470000000000001,
+          "prompt_cost_usd": 0.00282,
+          "completion_cost_usd": 0.0046500000000000005
+        },
+        "pricing_info": {
+          "provider_rate_id": "rate_1c94c795",
+          "prompt_token_rate_usd_per_million": 15.0,
+          "completion_token_rate_usd_per_million": 75.0
+        },
+        "attribution": {
+          "cost_center_id": "CC_824",
+          "project_id": "PROJ_A6B2F3",
+          "team_id": "alpha",
+          "feature_name": "summarization"
+        }
+      },
+      "governance": {
+        "security": {
+          "pii_redacted": false,
+          "prompt_injection_detected": false
+        },
+        "safety": {
+          "provider_safety_ratings": [
+            {
+              "category": "hate_speech",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "harassment",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "sexual_content",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "dangerous_content",
+              "severity": "negligible",
+              "was_blocked": false
+            }
+          ],
+          "overall_safety_verdict": "pass"
+        },
+        "audit_context": {
+          "request_type": "initial",
+          "cache_status": "miss"
+        }
+      }
+    },
+    {
+      "event_metadata": {
+        "log_schema_version": "3.0.0",
+        "event_id": "e1f13cda-f9a8-4373-9d83-cec3195d2d2e",
+        "timestamp_utc": 1754092567169,
+        "ingestion_source": "synthetic_generator_v1"
+      },
+      "trace_context": {
+        "trace_id": "0e96de7c-4c52-4287-9590-6a7f7ce55bcc",
+        "span_id": "ffe52d0a-5ebe-42f2-98cc-da1910953156",
+        "parent_span_id": "723237bc-97ea-4506-87f3-60bcc6617af7",
+        "span_name": "GenerateFinalAnswer",
+        "span_kind": "llm"
+      },
+      "identity_context": {
+        "user_id": "94d08d79-1c84-4c17-aa61-12b38feceb17",
+        "organization_id": "org_842a2cc5cdf0",
+        "api_key_hash": "8fbbed5863f74bd704f0a91dab1c39a12e9798b8f1ed3a25ac4532d370e92445",
+        "auth_method": "jwt"
+      },
+      "application_context": {
+        "app_name": "internal-doc-search",
+        "service_name": "answer-generator",
+        "sdk_version": "python-sdk-2.7.2",
+        "environment": "staging",
+        "client_ip": "101.35.1.210"
+      },
+      "request": {
+        "model": {
+          "provider": "anthropic",
+          "family": "claude-3",
+          "name": "claude-3-opus",
+          "version_id": "claude-3-opus-20240229"
+        },
+        "prompt": {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Context: The Andromeda Galaxy (M31) is the closest large spiral galaxy to the Milky Way, located approximately 2.537 million light-years away. It is the largest galaxy in our Local Group and is on a collision course with the Milky Way, expected to merge in about 4.5 billion years. Its diameter is estimated to be around 220,000 light-years, containing roughly one trillion stars. For comparison, the Milky Way has about 100-400 billion stars.\n\nQuestion: What is the approximate distance from the Milky Way to the Andromeda Galaxy, and how many stars is it estimated to contain?"
+            }
+          ]
+        },
+        "generation_config": {
+          "temperature": 0.7,
+          "max_tokens_to_sample": 2048,
+          "is_streaming": false
+        }
+      },
+      "response": {
+        "completion": {
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "stop_sequence",
+              "message": {
+                "role": "assistant",
+                "content": "The Andromeda Galaxy is approximately 2.537 million light-years away from the Milky Way, and it is estimated to contain roughly one trillion stars."
+              }
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 190,
+          "completion_tokens": 46,
+          "total_tokens": 236
+        },
+        "system": {
+          "provider_request_id": "req_8b41be84-8f8d-426d-9cc5-8c6a7f2b05a6"
+        }
+      },
+      "performance": {
+        "latency_ms": {
+          "total_e2e": 1941,
+          "time_to_first_token": 752,
+          "time_per_output_token": 24.58312968710903,
+          "decode_duration": 1130
+        }
+      },
+      "finops": {
+        "cost": {
+          "total_cost_usd": 0.0063,
+          "prompt_cost_usd": 0.00285,
+          "completion_cost_usd": 0.00345
+        },
+        "pricing_info": {
+          "provider_rate_id": "rate_92d20d99",
+          "prompt_token_rate_usd_per_million": 15.0,
+          "completion_token_rate_usd_per_million": 75.0
+        },
+        "attribution": {
+          "cost_center_id": "CC_647",
+          "project_id": "PROJ_2EC487",
+          "team_id": "gamma",
+          "feature_name": "summarization"
+        }
+      },
+      "governance": {
+        "security": {
+          "pii_redacted": false,
+          "prompt_injection_detected": false
+        },
+        "safety": {
+          "provider_safety_ratings": [
+            {
+              "category": "hate_speech",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "harassment",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "sexual_content",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "dangerous_content",
+              "severity": "low",
+              "was_blocked": false
+            }
+          ],
+          "overall_safety_verdict": "pass"
+        },
+        "audit_context": {
+          "request_type": "initial",
+          "cache_status": "miss"
+        }
+      }
+    }
+  ],
+  [
+    {
+      "event_metadata": {
+        "log_schema_version": "3.0.0",
+        "event_id": "66336b75-f6a9-414c-ace4-501476fdc3b4",
+        "timestamp_utc": 1754092572678,
+        "ingestion_source": "synthetic_generator_v1"
+      },
+      "trace_context": {
+        "trace_id": "2edc32f9-6bc0-410a-a9cb-30b01e869fb2",
+        "span_id": "9d3f1be1-9af1-4485-9fc0-085c0abfd513",
+        "span_name": "PrimaryModelCall",
+        "span_kind": "llm"
+      },
+      "identity_context": {
+        "user_id": "140fa67e-2fad-43bd-9ceb-2bc68da29a6d",
+        "organization_id": "org_1826891c10f0",
+        "api_key_hash": "031ace8bc6fabb33d342f0bcfb2fdc303eb786dc51fbd02cfb289839e064920d",
+        "auth_method": "iam_role"
+      },
+      "application_context": {
+        "app_name": "internal-doc-search",
+        "service_name": "answer-generator",
+        "sdk_version": "python-sdk-2.4.2",
+        "environment": "development",
+        "client_ip": "214.17.94.154"
+      },
+      "request": {
+        "model": {
+          "provider": "anthropic",
+          "family": "claude-3",
+          "name": "claude-3-opus",
+          "version_id": "claude-3-opus-20240229"
+        },
+        "prompt": {
+          "messages": [
+            {
+              "role": "user",
+              "content": "What are some quick tips for improving my focus while working from home?"
+            }
+          ]
+        },
+        "generation_config": {
+          "temperature": 0.7,
+          "max_tokens_to_sample": 2048,
+          "is_streaming": false
+        }
+      },
+      "response": null,
+      "performance": {
+        "latency_ms": {
+          "total_e2e": 3560,
+          "time_to_first_token": 237,
+          "time_per_output_token": 18.068133088170303,
+          "decode_duration": 3252
+        }
+      },
+      "finops": {
+        "cost": {
+          "total_cost_usd": 0.013890000000000001,
+          "prompt_cost_usd": 0.00039,
+          "completion_cost_usd": 0.013500000000000002
+        },
+        "pricing_info": {
+          "provider_rate_id": "rate_22d7e92c",
+          "prompt_token_rate_usd_per_million": 15.0,
+          "completion_token_rate_usd_per_million": 75.0
+        },
+        "attribution": {
+          "cost_center_id": "CC_911",
+          "project_id": "PROJ_063281",
+          "team_id": "gamma",
+          "feature_name": "search"
+        }
+      },
+      "governance": {
+        "security": {
+          "pii_redacted": false,
+          "prompt_injection_detected": false
+        },
+        "safety": {
+          "provider_safety_ratings": [
+            {
+              "category": "hate_speech",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "harassment",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "sexual_content",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "dangerous_content",
+              "severity": "negligible",
+              "was_blocked": false
+            }
+          ],
+          "overall_safety_verdict": "pass"
+        },
+        "audit_context": {
+          "request_type": "initial",
+          "cache_status": "miss"
+        }
+      }
+    },
+    {
+      "event_metadata": {
+        "log_schema_version": "3.0.0",
+        "event_id": "09262728-65bf-4029-bac4-e199e0484240",
+        "timestamp_utc": 1754092577903,
+        "ingestion_source": "synthetic_generator_v1"
+      },
+      "trace_context": {
+        "trace_id": "2edc32f9-6bc0-410a-a9cb-30b01e869fb2",
+        "span_id": "e921bf0d-1d35-42ef-b758-42917b708028",
+        "parent_span_id": "9d3f1be1-9af1-4485-9fc0-085c0abfd513",
+        "span_name": "FallbackModelCall",
+        "span_kind": "llm"
+      },
+      "identity_context": {
+        "user_id": "2ae2d7ed-5182-4b8c-a8df-b6b53a625c7a",
+        "organization_id": "org_e4dfe39e8f34",
+        "api_key_hash": "9c8e8834b25292c72b1b2214bf9291689d2ef863cdfe7a8db01e73bd80e02427",
+        "auth_method": "jwt"
+      },
+      "application_context": {
+        "app_name": "customer-support-chatbot",
+        "service_name": "chat-responder",
+        "sdk_version": "python-sdk-1.6.4",
+        "environment": "development",
+        "client_ip": "200.134.212.19"
+      },
+      "request": {
+        "model": {
+          "provider": "google",
+          "family": "gemini-2.0",
+          "name": "gemini-2.0-flash"
+        },
+        "prompt": {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Hey, I've noticed my laptop is running really slow lately, especially when I have a lot of tabs open. Any quick tips to speed it up?"
+            }
+          ]
+        },
+        "generation_config": {
+          "temperature": 0.7,
+          "max_tokens_to_sample": 2048,
+          "is_streaming": false
+        }
+      },
+      "response": {
+        "completion": {
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "stop_sequence",
+              "message": {
+                "role": "assistant",
+                "content": "That's a common issue, and there are definitely some quick things you can try! First, close any unnecessary programs or browser tabs you're not actively using. Also, check your computer's 'Task Manager' (on Windows) or 'Activity Monitor' (on Mac) to see if any specific apps are consuming a lot of resources. Clearing your browser's cache and cookies can also help, and make sure your operating system and browser are up to date. Sometimes, a simple restart works wonders too!"
+              }
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 52,
+          "completion_tokens": 158,
+          "total_tokens": 210
+        },
+        "system": {
+          "provider_request_id": "req_ff9e30ff-cbc7-4e16-93f5-8d9f6db511e1"
+        }
+      },
+      "performance": {
+        "latency_ms": {
+          "total_e2e": 7354,
+          "time_to_first_token": 783,
+          "time_per_output_token": 40.78731927502213,
+          "decode_duration": 6444
+        }
+      },
+      "finops": {
+        "cost": {
+          "total_cost_usd": 0.0001288,
+          "prompt_cost_usd": 1.82e-05,
+          "completion_cost_usd": 0.00011059999999999999
+        },
+        "pricing_info": {
+          "provider_rate_id": "rate_1d7d1ce7",
+          "prompt_token_rate_usd_per_million": 0.35,
+          "completion_token_rate_usd_per_million": 0.7
+        },
+        "attribution": {
+          "cost_center_id": "CC_476",
+          "project_id": "PROJ_6DAA1C",
+          "team_id": "beta",
+          "feature_name": "summarization"
+        }
+      },
+      "governance": {
+        "security": {
+          "pii_redacted": false,
+          "prompt_injection_detected": false
+        },
+        "safety": {
+          "provider_safety_ratings": [
+            {
+              "category": "hate_speech",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "harassment",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "sexual_content",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "dangerous_content",
+              "severity": "low",
+              "was_blocked": false
+            }
+          ],
+          "overall_safety_verdict": "pass"
+        },
+        "audit_context": {
+          "request_type": "fallback",
+          "cache_status": "miss",
+          "initial_request_id": "9d3f1be1-9af1-4485-9fc0-085c0abfd513"
+        }
+      }
+    }
+  ],
+  [
+    {
+      "event_metadata": {
+        "log_schema_version": "3.0.0",
+        "event_id": "8e7f67f8-f711-4d45-a89a-76185b66b5bf",
+        "timestamp_utc": 1754092583684,
+        "ingestion_source": "synthetic_generator_v1"
+      },
+      "trace_context": {
+        "trace_id": "147018f8-4313-4c59-b529-c5e4de87d449",
+        "span_id": "410dab5b-bac1-4797-9be6-7ba40cbaddcb",
+        "span_name": "UserChat",
+        "span_kind": "llm"
+      },
+      "identity_context": {
+        "user_id": "33138dff-52bb-41a9-966b-f92066961fcd",
+        "organization_id": "org_08f749c114b7",
+        "api_key_hash": "29a88fcb9445922c21f3af52b5f60196cf432189151ad273f045796c1d3332be",
+        "auth_method": "api_key"
+      },
+      "application_context": {
+        "app_name": "customer-support-chatbot",
+        "service_name": "chat-responder",
+        "sdk_version": "python-sdk-2.6.0",
+        "environment": "production",
+        "client_ip": "92.98.205.188"
+      },
+      "request": {
+        "model": {
+          "provider": "google",
+          "family": "gemini-2.0",
+          "name": "gemini-2.0-flash"
+        },
+        "prompt": {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Hey, I'm trying to plan a short weekend trip but I'm completely stuck on where to go. I'm thinking somewhere relatively close, maybe a 2-3 hour drive from a major city, and I'd love a mix of outdoor activities and good food. Any quick suggestions?"
+            }
+          ]
+        },
+        "generation_config": {
+          "temperature": 0.7,
+          "max_tokens_to_sample": 2048,
+          "is_streaming": false
+        }
+      },
+      "response": {
+        "completion": {
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "stop_sequence",
+              "message": {
+                "role": "assistant",
+                "content": "Sounds like a fun challenge! For a 2-3 hour drive from a major city with a mix of outdoor activities and good food, here are a couple of ideas depending on your starting point:\n\n1.  **Finger Lakes Region, New York:** Beautiful wineries, hiking trails around the gorges (Watkins Glen is amazing!), and plenty of farm-to-table restaurants. You can also do some kayaking or paddleboarding.\n\n2.  **Asheville, North Carolina:** Nestled in the Blue Ridge Mountains, it offers fantastic hiking, a vibrant craft beer scene, and a renowned food culture. Plus, the Biltmore Estate is nearby for a different kind of exploration.\n\n3.  **Santa Barbara, California:** If you're on the West Coast, it's a great option with beaches, charming downtown, wine country just a short drive away (Santa Ynez Valley), and excellent seafood.\n\n4.  **Door County, Wisconsin:** On the shores of Lake Michigan, it's known for its cherry orchards, lighthouses, state parks for hiking/biking, and fish boils! Very picturesque.\n\nDo any of those spark your interest, or do you have a specific major city you're driving from?"
+              }
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 90,
+          "completion_tokens": 350,
+          "total_tokens": 440
+        },
+        "system": {
+          "provider_request_id": "req_4009fcc0-e75a-4e13-8158-28dcebde0ec0"
+        }
+      },
+      "performance": {
+        "latency_ms": {
+          "total_e2e": 9067,
+          "time_to_first_token": 646,
+          "time_per_output_token": 23.660715391312216,
+          "decode_duration": 8281
+        }
+      },
+      "finops": {
+        "cost": {
+          "total_cost_usd": 0.0002765,
+          "prompt_cost_usd": 3.15e-05,
+          "completion_cost_usd": 0.000245
+        },
+        "pricing_info": {
+          "provider_rate_id": "rate_5e54a565",
+          "prompt_token_rate_usd_per_million": 0.35,
+          "completion_token_rate_usd_per_million": 0.7
+        },
+        "attribution": {
+          "cost_center_id": "CC_810",
+          "project_id": "PROJ_B4F41A",
+          "team_id": "alpha",
+          "feature_name": "search"
+        }
+      },
+      "governance": {
+        "security": {
+          "pii_redacted": false,
+          "prompt_injection_detected": false
+        },
+        "safety": {
+          "provider_safety_ratings": [
+            {
+              "category": "hate_speech",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "harassment",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "sexual_content",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "dangerous_content",
+              "severity": "negligible",
+              "was_blocked": false
+            }
+          ],
+          "overall_safety_verdict": "pass"
+        },
+        "audit_context": {
+          "request_type": "initial",
+          "cache_status": "miss"
+        }
+      }
+    }
+  ],
+  [
+    {
+      "event_metadata": {
+        "log_schema_version": "3.0.0",
+        "event_id": "2ab51982-76c0-4a0f-8c60-f957eb215651",
+        "timestamp_utc": 1754092591639,
+        "ingestion_source": "synthetic_generator_v1"
+      },
+      "trace_context": {
+        "trace_id": "24406a72-6bdc-4c8e-9eb5-9fdfafa045d7",
+        "span_id": "3f1e75c3-2bd8-4615-b983-5d8e4093c796",
+        "span_name": "UserChat",
+        "span_kind": "llm"
+      },
+      "identity_context": {
+        "user_id": "66f58eed-7075-4f57-94bb-26754a18dc4a",
+        "organization_id": "org_296a8270446e",
+        "api_key_hash": "2f11b3ce7755482fc7bb682866184145c5f16d14064c85957a5d0a4f102caec9",
+        "auth_method": "api_key"
+      },
+      "application_context": {
+        "app_name": "customer-support-chatbot",
+        "service_name": "chat-responder",
+        "sdk_version": "python-sdk-1.7.4",
+        "environment": "staging",
+        "client_ip": "31.119.152.214"
+      },
+      "request": {
+        "model": {
+          "provider": "openai",
+          "family": "gpt-4",
+          "name": "gpt-4o",
+          "version_id": "gpt-4o-2024-08-06"
+        },
+        "prompt": {
+          "messages": [
+            {
+              "role": "user",
+              "content": "My laptop's fan seems to be running really loud lately, even when I'm just browsing the web. What could be causing that, and is there anything I can do to fix it myself before taking it to a repair shop?"
+            }
+          ]
+        },
+        "generation_config": {
+          "temperature": 0.7,
+          "max_tokens_to_sample": 2048,
+          "is_streaming": false
+        }
+      },
+      "response": {
+        "completion": {
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "stop_sequence",
+              "message": {
+                "role": "assistant",
+                "content": "A loud laptop fan can definitely be annoying and often points to a few common issues, usually related to overheating! Before heading to a repair shop, here are some things you can try yourself:\n\n1.  **Clean the vents:** The most common cause is dust buildup. Get a can of compressed air and carefully blow out the dust from the air vents (usually on the sides, back, or bottom of your laptop).\n2.  **Check background processes:** Open your Task Manager (Windows: Ctrl+Shift+Esc) or Activity Monitor (Mac: Command+Space, type Activity Monitor) and sort processes by CPU usage. If an application is using a lot of CPU even when idle, it can cause the fan to spin up. Close unnecessary or resource-intensive programs.\n3.  **Ensure proper airflow:** Avoid using your laptop on soft surfaces like beds, blankets, or pillows, as these can block the vents and trap heat. Use it on a hard, flat surface, or consider a laptop cooling pad.\n4.  **Update drivers:** Sometimes outdated graphics drivers or chipset drivers can cause inefficient power management, leading to higher temperatures. Check your manufacturer's website for driver updates.\n5.  **Scan for malware:** In rare cases, malware running in the background can consume CPU resources and make the fan work harder. Run a full system scan with your antivirus software.\n\nIf these steps don't resolve the issue, it might indicate a failing fan, dried-out thermal paste, or a more serious internal hardware problem, which would then warrant a professional repair. Good luck!"
+              }
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 80,
+          "completion_tokens": 494,
+          "total_tokens": 574
+        },
+        "system": {
+          "provider_request_id": "req_f83939fa-216b-4db4-b254-4cba69f864f7"
+        }
+      },
+      "performance": {
+        "latency_ms": {
+          "total_e2e": 10012,
+          "time_to_first_token": 399,
+          "time_per_output_token": 19.174602015919323,
+          "decode_duration": 9472
+        }
+      },
+      "finops": {
+        "cost": {
+          "total_cost_usd": 0.00781,
+          "prompt_cost_usd": 0.0004,
+          "completion_cost_usd": 0.00741
+        },
+        "pricing_info": {
+          "provider_rate_id": "rate_28167da9",
+          "prompt_token_rate_usd_per_million": 5.0,
+          "completion_token_rate_usd_per_million": 15.0
+        },
+        "attribution": {
+          "cost_center_id": "CC_507",
+          "project_id": "PROJ_0F994E",
+          "team_id": "gamma",
+          "feature_name": "summarization"
+        }
+      },
+      "governance": {
+        "security": {
+          "pii_redacted": false,
+          "prompt_injection_detected": false
+        },
+        "safety": {
+          "provider_safety_ratings": [
+            {
+              "category": "hate_speech",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "harassment",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "sexual_content",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "dangerous_content",
+              "severity": "negligible",
+              "was_blocked": false
+            }
+          ],
+          "overall_safety_verdict": "pass"
+        },
+        "audit_context": {
+          "request_type": "initial",
+          "cache_status": "miss"
+        }
+      }
+    }
+  ],
+  [
+    {
+      "event_metadata": {
+        "log_schema_version": "3.0.0",
+        "event_id": "04ef2eb9-3459-43c0-b3b5-01ff73969f88",
+        "timestamp_utc": 1754092595124,
+        "ingestion_source": "synthetic_generator_v1"
+      },
+      "trace_context": {
+        "trace_id": "b1fef665-d141-4f80-8b5d-1fb70f8a98d7",
+        "span_id": "bdaa2cd5-605b-4b9d-8244-4976645acdfd",
+        "span_name": "RAGWorkflow",
+        "span_kind": "workflow"
+      },
+      "identity_context": {
+        "user_id": "4e3a3c64-4521-4ddc-a641-1bcf98d45249",
+        "organization_id": "org_b7d06cdd8e07",
+        "api_key_hash": "15869ad35daf40c8a82e49367366a35630c9de239a20ef30e4f0fd853bac37e4",
+        "auth_method": "jwt"
+      },
+      "application_context": {
+        "app_name": "marketing-copy-generator",
+        "service_name": "seo-analyzer",
+        "sdk_version": "python-sdk-1.1.4",
+        "environment": "development",
+        "client_ip": "81.188.249.5"
+      },
+      "request": {
+        "model": {
+          "provider": "vllm",
+          "family": "llama-3.1",
+          "name": "llama-3.1-70b-instruct"
+        },
+        "prompt": {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Context: The recently published 'AI Safety Guidelines v2.0' emphasize the importance of robust adversarial testing for all large language models deployed in production. It also recommends implementing explainability features to allow for better understanding of model decisions, especially in high-stakes applications like healthcare or finance. Furthermore, the guidelines suggest a mandatory quarterly review process for all AI systems to assess their ongoing compliance and performance.\n\nQuestion: What is one of the key recommendations regarding explainability in the AI Safety Guidelines v2.0?"
+            }
+          ]
+        },
+        "generation_config": {
+          "temperature": 0.7,
+          "max_tokens_to_sample": 2048,
+          "is_streaming": false
+        }
+      },
+      "response": {
+        "completion": {
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "stop_sequence",
+              "message": {
+                "role": "assistant",
+                "content": "The AI Safety Guidelines v2.0 recommend implementing explainability features to allow for better understanding of model decisions, especially in high-stakes applications like healthcare or finance."
+              }
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 162,
+          "completion_tokens": 50,
+          "total_tokens": 212
+        },
+        "system": {
+          "provider_request_id": "req_9ca5ebe7-f6e8-44b2-8cc1-633f5c797199"
+        }
+      },
+      "performance": {
+        "latency_ms": {
+          "total_e2e": 2768,
+          "time_to_first_token": 557,
+          "time_per_output_token": 43.15312769395971,
+          "decode_duration": 2157
+        }
+      },
+      "finops": {
+        "cost": {
+          "total_cost_usd": 0.000106,
+          "prompt_cost_usd": 8.1e-05,
+          "completion_cost_usd": 2.5e-05
+        },
+        "pricing_info": {
+          "provider_rate_id": "rate_012eca10",
+          "prompt_token_rate_usd_per_million": 0.5,
+          "completion_token_rate_usd_per_million": 0.5
+        },
+        "attribution": {
+          "cost_center_id": "CC_337",
+          "project_id": "PROJ_795E5A",
+          "team_id": "gamma",
+          "feature_name": "chat"
+        }
+      },
+      "governance": {
+        "security": {
+          "pii_redacted": false,
+          "prompt_injection_detected": false
+        },
+        "safety": {
+          "provider_safety_ratings": [
+            {
+              "category": "hate_speech",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "harassment",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "sexual_content",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "dangerous_content",
+              "severity": "low",
+              "was_blocked": false
+            }
+          ],
+          "overall_safety_verdict": "pass"
+        },
+        "audit_context": {
+          "request_type": "initial",
+          "cache_status": "miss"
+        }
+      }
+    },
+    {
+      "event_metadata": {
+        "log_schema_version": "3.0.0",
+        "event_id": "e5703120-c9dd-43c4-8d73-253a828b377c",
+        "timestamp_utc": 1754092600070,
+        "ingestion_source": "synthetic_generator_v1"
+      },
+      "trace_context": {
+        "trace_id": "b1fef665-d141-4f80-8b5d-1fb70f8a98d7",
+        "span_id": "23d3e246-abd6-45a4-ad2e-14bc3462bc5d",
+        "parent_span_id": "bdaa2cd5-605b-4b9d-8244-4976645acdfd",
+        "span_name": "VectorDBSearch",
+        "span_kind": "retrieval"
+      },
+      "identity_context": {
+        "user_id": "c7e167c1-e0b8-42ab-944b-82d7f53d8da7",
+        "organization_id": "org_3ab1f44c3669",
+        "api_key_hash": "d5658c730670f5a89ac375e68e55a94e30d710d2512e5a2b5be80cf78ae52a31",
+        "auth_method": "iam_role"
+      },
+      "application_context": {
+        "app_name": "customer-support-chatbot",
+        "service_name": "intent-classifier",
+        "sdk_version": "python-sdk-1.6.1",
+        "environment": "production",
+        "client_ip": "71.215.114.188"
+      },
+      "request": {
+        "model": {
+          "provider": "anthropic",
+          "family": "claude-3",
+          "name": "claude-3-opus",
+          "version_id": "claude-3-opus-20240229"
+        },
+        "prompt": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "Retrieving documents for query."
+            }
+          ]
+        },
+        "generation_config": {
+          "temperature": 0.7,
+          "max_tokens_to_sample": 2048,
+          "is_streaming": false
+        }
+      },
+      "response": null,
+      "performance": {
+        "latency_ms": {
+          "total_e2e": 195,
+          "time_to_first_token": 326,
+          "time_per_output_token": 27.502399124787253,
+          "decode_duration": 880
+        }
+      },
+      "finops": {
+        "cost": {
+          "total_cost_usd": 0.00501,
+          "prompt_cost_usd": 0.00261,
+          "completion_cost_usd": 0.0024
+        },
+        "pricing_info": {
+          "provider_rate_id": "rate_6655617f",
+          "prompt_token_rate_usd_per_million": 15.0,
+          "completion_token_rate_usd_per_million": 75.0
+        },
+        "attribution": {
+          "cost_center_id": "CC_601",
+          "project_id": "PROJ_60D033",
+          "team_id": "gamma",
+          "feature_name": "summarization"
+        }
+      },
+      "governance": {
+        "security": {
+          "pii_redacted": false,
+          "prompt_injection_detected": false
+        },
+        "safety": {
+          "provider_safety_ratings": [
+            {
+              "category": "hate_speech",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "harassment",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "sexual_content",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "dangerous_content",
+              "severity": "low",
+              "was_blocked": false
+            }
+          ],
+          "overall_safety_verdict": "pass"
+        },
+        "audit_context": {
+          "request_type": "initial",
+          "cache_status": "miss"
+        }
+      }
+    },
+    {
+      "event_metadata": {
+        "log_schema_version": "3.0.0",
+        "event_id": "a745ea3a-f5df-4203-b09e-16a4f3695a5a",
+        "timestamp_utc": 1754092604084,
+        "ingestion_source": "synthetic_generator_v1"
+      },
+      "trace_context": {
+        "trace_id": "b1fef665-d141-4f80-8b5d-1fb70f8a98d7",
+        "span_id": "33523b78-be04-4942-9aec-645a0075396f",
+        "parent_span_id": "bdaa2cd5-605b-4b9d-8244-4976645acdfd",
+        "span_name": "GenerateFinalAnswer",
+        "span_kind": "llm"
+      },
+      "identity_context": {
+        "user_id": "dcd4c34d-8904-4785-9dbc-239d6e9b963c",
+        "organization_id": "org_636d678ff49f",
+        "api_key_hash": "32477acbeb84e7fb659768e21eaf59bd3382d10ffaeb58397e0e354b11cab3b0",
+        "auth_method": "iam_role"
+      },
+      "application_context": {
+        "app_name": "internal-doc-search",
+        "service_name": "answer-generator",
+        "sdk_version": "python-sdk-2.9.3",
+        "environment": "development",
+        "client_ip": "84.70.115.123"
+      },
+      "request": {
+        "model": {
+          "provider": "vllm",
+          "family": "llama-3.1",
+          "name": "llama-3.1-70b-instruct"
+        },
+        "prompt": {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Context: The 'Phoenix' project's primary goal is to re-engineer the legacy data processing pipeline to improve its scalability and reduce latency. This initiative aims to utilize cloud-native services, specifically serverless functions and managed NoSQL databases, to handle increasing data volumes more efficiently. The project's target completion date is Q3 2024, with initial pilot deployments planned for late Q2. Question: What are the main objectives of the 'Phoenix' project, and which cloud services will it primarily utilize?"
+            }
+          ]
+        },
+        "generation_config": {
+          "temperature": 0.7,
+          "max_tokens_to_sample": 2048,
+          "is_streaming": false
+        }
+      },
+      "response": {
+        "completion": {
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "stop_sequence",
+              "message": {
+                "role": "assistant",
+                "content": "The 'Phoenix' project's main objectives are to re-engineer the legacy data processing pipeline to improve its scalability and reduce latency. It will primarily utilize cloud-native services, specifically serverless functions and managed NoSQL databases."
+              }
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 152,
+          "completion_tokens": 66,
+          "total_tokens": 218
+        },
+        "system": {
+          "provider_request_id": "req_c0ddc826-5c81-4c0c-8de8-5b38ba58e27b"
+        }
+      },
+      "performance": {
+        "latency_ms": {
+          "total_e2e": 3454,
+          "time_to_first_token": 224,
+          "time_per_output_token": 46.6797003086016,
+          "decode_duration": 3080
+        }
+      },
+      "finops": {
+        "cost": {
+          "total_cost_usd": 0.000109,
+          "prompt_cost_usd": 7.6e-05,
+          "completion_cost_usd": 3.3e-05
+        },
+        "pricing_info": {
+          "provider_rate_id": "rate_4feedf89",
+          "prompt_token_rate_usd_per_million": 0.5,
+          "completion_token_rate_usd_per_million": 0.5
+        },
+        "attribution": {
+          "cost_center_id": "CC_246",
+          "project_id": "PROJ_881C53",
+          "team_id": "alpha",
+          "feature_name": "summarization"
+        }
+      },
+      "governance": {
+        "security": {
+          "pii_redacted": false,
+          "prompt_injection_detected": false
+        },
+        "safety": {
+          "provider_safety_ratings": [
+            {
+              "category": "hate_speech",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "harassment",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "sexual_content",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "dangerous_content",
+              "severity": "negligible",
+              "was_blocked": false
+            }
+          ],
+          "overall_safety_verdict": "pass"
+        },
+        "audit_context": {
+          "request_type": "initial",
+          "cache_status": "miss"
+        }
+      }
+    }
+  ],
+  [
+    {
+      "event_metadata": {
+        "log_schema_version": "3.0.0",
+        "event_id": "e15eebb0-4274-41c0-aef5-9616977252e7",
+        "timestamp_utc": 1754092611404,
+        "ingestion_source": "synthetic_generator_v1"
+      },
+      "trace_context": {
+        "trace_id": "40f83a14-0943-4dfa-8696-120630ac7b74",
+        "span_id": "b3a6406f-aab1-4cd7-8bc5-ee21b1594f58",
+        "span_name": "UserChat",
+        "span_kind": "llm"
+      },
+      "identity_context": {
+        "user_id": "0cae7f52-1692-4a6e-a875-b516797bbe35",
+        "organization_id": "org_83a9bbb4fe7b",
+        "api_key_hash": "3d94bcde69ba8425f8ff1b9baa979bb6eec931528c4015ac9bb6b752bf4a6347",
+        "auth_method": "api_key"
+      },
+      "application_context": {
+        "app_name": "customer-support-chatbot",
+        "service_name": "intent-classifier",
+        "sdk_version": "python-sdk-1.10.2",
+        "environment": "staging",
+        "client_ip": "184.18.175.101"
+      },
+      "request": {
+        "model": {
+          "provider": "openai",
+          "family": "gpt-4",
+          "name": "gpt-4o",
+          "version_id": "gpt-4o-2024-08-06"
+        },
+        "prompt": {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Hey, I'm trying to figure out how to reset my password for an online account, but the 'forgot password' link isn't working. Any general tips or common steps I should look for?"
+            }
+          ]
+        },
+        "generation_config": {
+          "temperature": 0.7,
+          "max_tokens_to_sample": 2048,
+          "is_streaming": false
+        }
+      },
+      "response": {
+        "completion": {
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "stop_sequence",
+              "message": {
+                "role": "assistant",
+                "content": "That can be frustrating! When the 'forgot password' link doesn't work, here are some common troubleshooting steps and things to check:\n\n1.  **Check Spam Folder:** Sometimes the password reset email ends up in your spam, junk, or promotions folder. Make sure to check there thoroughly.\n2.  **Verify Email Address:** Double-check that you're using the *exact* email address associated with the account. A typo or using an old email can prevent the link from being sent.\n3.  **Wait a Few Minutes:** Email delivery can sometimes be delayed. Give it 5-10 minutes before trying again or contacting support.\n4.  **Try a Different Browser/Device:** Occasionally, browser extensions or settings can interfere. Try using a different web browser (e.g., Firefox, Edge, Safari if you're on Chrome) or even your phone.\n5.  **Look for Account Recovery Options:** Some services have alternative recovery methods, like answering security questions or using a linked phone number, which might be found on the login page or a 'Help' section.\n6.  **Contact Support:** If all else fails, the best next step is to directly contact the website or service's customer support. They can often manually reset your password or provide specific instructions.\n\nWhich online account are you trying to access? Knowing that might help me offer more specific advice!"
+              }
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 64,
+          "completion_tokens": 418,
+          "total_tokens": 482
+        },
+        "system": {
+          "provider_request_id": "req_87d41139-3d78-4ae2-94b4-e9ee2122518d"
+        }
+      },
+      "performance": {
+        "latency_ms": {
+          "total_e2e": 5663,
+          "time_to_first_token": 710,
+          "time_per_output_token": 11.673892880820961,
+          "decode_duration": 4879
+        }
+      },
+      "finops": {
+        "cost": {
+          "total_cost_usd": 0.00659,
+          "prompt_cost_usd": 0.00031999999999999997,
+          "completion_cost_usd": 0.00627
+        },
+        "pricing_info": {
+          "provider_rate_id": "rate_498c2492",
+          "prompt_token_rate_usd_per_million": 5.0,
+          "completion_token_rate_usd_per_million": 15.0
+        },
+        "attribution": {
+          "cost_center_id": "CC_789",
+          "project_id": "PROJ_538B0B",
+          "team_id": "beta",
+          "feature_name": "search"
+        }
+      },
+      "governance": {
+        "security": {
+          "pii_redacted": false,
+          "prompt_injection_detected": true
+        },
+        "safety": {
+          "provider_safety_ratings": [
+            {
+              "category": "hate_speech",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "harassment",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "sexual_content",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "dangerous_content",
+              "severity": "low",
+              "was_blocked": false
+            }
+          ],
+          "overall_safety_verdict": "pass"
+        },
+        "audit_context": {
+          "request_type": "initial",
+          "cache_status": "miss"
+        }
+      }
+    }
+  ],
+  [
+    {
+      "event_metadata": {
+        "log_schema_version": "3.0.0",
+        "event_id": "92f7e920-d1bc-4814-9389-268246bb6aee",
+        "timestamp_utc": 1754092614711,
+        "ingestion_source": "synthetic_generator_v1"
+      },
+      "trace_context": {
+        "trace_id": "938871b4-cd30-4e53-a5f1-b5432139bc1e",
+        "span_id": "823c2478-cbff-4183-b622-015a3f31a8a0",
+        "span_name": "UserChat",
+        "span_kind": "llm"
+      },
+      "identity_context": {
+        "user_id": "e80d20a5-0991-48b3-8174-c5a5c4362ee6",
+        "organization_id": "org_dafe65a60cf5",
+        "api_key_hash": "0fb898aa44788f60027c1a2c48c57b24b88818159d863a1c4d341193bf123eac",
+        "auth_method": "api_key"
+      },
+      "application_context": {
+        "app_name": "marketing-copy-generator",
+        "service_name": "headline-generator",
+        "sdk_version": "python-sdk-3.1.3",
+        "environment": "development",
+        "client_ip": "147.192.121.168"
+      },
+      "request": {
+        "model": {
+          "provider": "openai",
+          "family": "gpt-4",
+          "name": "gpt-4o",
+          "version_id": "gpt-4o-2024-08-06"
+        },
+        "prompt": {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Hey, I'm trying to get into meditation. Any quick tips for beginners?"
+            }
+          ]
+        },
+        "generation_config": {
+          "temperature": 0.7,
+          "max_tokens_to_sample": 2048,
+          "is_streaming": false
+        }
+      },
+      "response": {
+        "completion": {
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "stop_sequence",
+              "message": {
+                "role": "assistant",
+                "content": "Absolutely! For beginners, start with just 5-10 minutes daily. Find a quiet spot, sit comfortably, and focus gently on your breath. Don't worry if your mind wanders; just gently bring your attention back. There are many guided meditations online too, which can be very helpful!"
+              }
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 24,
+          "completion_tokens": 90,
+          "total_tokens": 114
+        },
+        "system": {
+          "provider_request_id": "req_875a262d-3cf6-4a5c-9d0c-492cf3914f19"
+        }
+      },
+      "performance": {
+        "latency_ms": {
+          "total_e2e": 3309,
+          "time_to_first_token": 537,
+          "time_per_output_token": 29.186369399853827,
+          "decode_duration": 2626
+        }
+      },
+      "finops": {
+        "cost": {
+          "total_cost_usd": 0.0014700000000000002,
+          "prompt_cost_usd": 0.00012,
+          "completion_cost_usd": 0.00135
+        },
+        "pricing_info": {
+          "provider_rate_id": "rate_497fbeb9",
+          "prompt_token_rate_usd_per_million": 5.0,
+          "completion_token_rate_usd_per_million": 15.0
+        },
+        "attribution": {
+          "cost_center_id": "CC_446",
+          "project_id": "PROJ_509A99",
+          "team_id": "alpha",
+          "feature_name": "search"
+        }
+      },
+      "governance": {
+        "security": {
+          "pii_redacted": false,
+          "prompt_injection_detected": false
+        },
+        "safety": {
+          "provider_safety_ratings": [
+            {
+              "category": "hate_speech",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "harassment",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "sexual_content",
+              "severity": "negligible",
+              "was_blocked": false
+            },
+            {
+              "category": "dangerous_content",
+              "severity": "negligible",
+              "was_blocked": false
+            }
+          ],
+          "overall_safety_verdict": "pass"
+        },
+        "audit_context": {
+          "request_type": "initial",
+          "cache_status": "miss"
+        }
+      }
+    }
+  ],
+  [
+    {
+      "event_metadata": {
+        "log_schema_version": "3.0.0",
+        "event_id": "2eb0baeb-5fd0-402e-b3e4-fe6eca42a3e9",
+        "timestamp_utc": 1754092622365,
+        "ingestion_source": "synthetic_generator_v1"
+      },
+      "trace_context": {
+        "trace_id": "7694b7a0-4a89-4352-b98c-f6d28dcd9eb8",
+        "span_id": "b65574e9-10c8-4d63-9bfb-1090418edabd",
+        "span_name": "UserChat",
+        "span_kind": "llm"
+      },
+      "identity_context": {
+        "user_id": "752c8839-badd-437d-9c6c-a420d955cda8",
+        "organization_id": "org_a7d6e92cc015",
+        "api_key_hash": "07398eb03e0681ba35a64c7122f5f5ad4ade21f1445c11902e77cf0b38b66b45",
+        "auth_method": "iam_role"
+      },
+      "application_context": {
+        "app_name": "marketing-copy-generator",
+        "service_name": "seo-analyzer",
+        "sdk_version": "python-sdk-3.1.3",
+        "environment": "staging",
+        "client_ip": "207.247.43.219"
+      },
+      "request": {
+        "model": {
+          "provider": "google",
+          "family": "gemini-2.0",
+          "name": "gemini-2.0-flash"
+        },
+        "prompt": {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Hey, my internet keeps dropping out randomly on my laptop, but my phone's fine. Any ideas what's going on or how I can fix it?"
+            }
+          ]
+        },
+        "generation_config": {
+          "temperature": 0.7,
+          "max_tokens_to_sample": 2048,
+          "is_streaming": false
+        }
+      },
+      "response": {
+        "completion": {
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "stop_sequence",
+              "message": {
+                "role": "assistant",
+                "content": "Hmm, that's frustrating! Since your phone is fine, it sounds like it's specific to your laptop's connection. Here are a few things you can try:\n\n1.  **Restart your laptop and router:** Always the first step, it can clear temporary glitches.\n2.  **Forget and reconnect to Wi-Fi:** Go to your Wi-Fi settings, \"forget\" your network, then reconnect and enter the password again. This refreshes the connection.\n3.  **Update Wi-Fi drivers:** Outdated drivers are a common culprit. Search 'Device Manager' on Windows or check your OS updates on Mac. You might need to visit your laptop manufacturer's website.\n4.  **Change Wi-Fi channel (if you have router access):** Other nearby networks can cause interference. Changing your router's Wi-Fi channel in its admin settings can help.\n5.  **Check for interference:** Physical objects like microwaves, cordless phones, or even thick walls between your laptop and router can disrupt the signal.\n\nTry these out and let me know if any of them help!"
+              }
+            }
+          ]
+        },
+        "usage": {
+          "prompt_tokens": 50,
+          "completion_tokens": 314,
+          "total_tokens": 364
+        },
+        "system": {
+          "provider_request_id": "req_b6213b14-4a2a-4191-95e9-40db1e999105"
+        }
+      },
+      "performance": {
+        "latency_ms": {
+          "total_e2e": 5458,
+          "time_to_first_token": 757,
+          "time_per_output_token": 14.578940619405373,
+          "decode_duration": 4577
+        }
+      },
+      "finops": {
+        "cost": {
+          "total_cost_usd": 0.00023729999999999997,
+          "prompt_cost_usd": 1.75e-05,
+          "completion_cost_usd": 0.00021979999999999998
+        },
+        "pricing_info": {
+          "provider_rate_id": "rate_fadc392f",
+          "prompt_token_rate_usd_per_million": 0.35,
+          "completion_token_rate_usd_per_million": 0.7
+        },
+        "attribution": {
+          "cost_center_id": "CC_239",
+          "project_id": "PROJ_C34932",
+          "team_id": "beta",
+          "feature_name": "chat"
+        }
+      },
+      "governance": {
+        "security": {
+          "pii_redacted": false,
+          "prompt_injection_detected": false
+        },
+        "safety": {
+          "provider_safety_ratings": [
+            {
+              "category": "hate_speech",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "harassment",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "sexual_content",
+              "severity": "low",
+              "was_blocked": false
+            },
+            {
+              "category": "dangerous_content",
+              "severity": "negligible",
+              "was_blocked": false
+            }
+          ],
+          "overall_safety_verdict": "pass"
+        },
+        "audit_context": {
+          "request_type": "initial",
+          "cache_status": "miss"
+        }
+      }
+    }
+  ]
+]
