@@ -58,13 +58,40 @@ def run_ingestion():
 
         flattened_records = [_flatten_json_first_level(record[0]) for record in records]
 
-        column_names = set()
-        for record in flattened_records:
-            column_names.update(record.keys())
-        
-        print(f"Discovered column names: {sorted(list(column_names))}")
+        def prepare_data_for_insert(flattened_records: list[dict]) -> tuple[list[str], list[list]]:
+            """
+            Takes a list of dicts with inconsistent keys and prepares it for DB insertion.
 
-        client.insert_data('JSON_HYBRID_EVENTS', flattened_records, column_names=list(column_names))
+            Args:
+                flattened_records: The raw list of dictionaries.
+
+            Returns:
+                A tuple containing:
+                - ordered_columns (list[str]): A sorted list of column names.
+                - data_for_insert (list[list]): Data formatted as a list of lists.
+            """
+            if not flattened_records:
+                return [], []
+
+            # 1. Discover all unique columns and sort them for consistent order
+            all_column_names = set()
+            for record in flattened_records:
+                all_column_names.update(record.keys())
+            ordered_columns = sorted(list(all_column_names))
+
+            # 2. Normalize and convert data in a single list comprehension
+            data_for_insert = [
+                [record.get(col, None) for col in ordered_columns]
+                for record in flattened_records
+            ]
+
+            return ordered_columns, data_for_insert
+
+        ordered_columns, data_for_insert = prepare_data_for_insert(flattened_records)
+
+        client.insert_data('JSON_HYBRID_EVENTS4',
+            data_for_insert,
+            column_names=ordered_columns)
         total_inserted = len(flattened_records)
         
         end_time = time.time()

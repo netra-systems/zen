@@ -155,10 +155,10 @@ class AnalysisResult(SQLModel, table=False):
 -- flattening the nested JSON structure for easier querying.
 """
 
-LLM_EVENTS_TABLE_NAME = 'JSON_HYBRID_EVENTS'
+LLM_EVENTS_TABLE_NAME = 'JSON_HYBRID_EVENTS4'
 LLM_EVENTS_TABLE_SCHEMA = f"""
 CREATE TABLE IF NOT EXISTS {LLM_EVENTS_TABLE_NAME} (
-    -- Event Metadata
+     -- Event Metadata
     event_metadata_log_schema_version String,
     event_metadata_event_id UUID,
     event_metadata_timestamp_utc DateTime64(3),
@@ -183,52 +183,31 @@ CREATE TABLE IF NOT EXISTS {LLM_EVENTS_TABLE_NAME} (
     application_context_environment LowCardinality(String),
     application_context_client_ip IPv4,
 
-    -- Request Details: Nested objects are now stored in JSON columns
-    request_model_provider LowCardinality(String),
-    request_model_family String,
-    request_model_name String,
-    request_model_version_id String,
-    request_prompt_messages JSON, -- UPDATED: from Nested to JSON
-    request_generation_config_temperature Float32,
-    request_generation_config_max_tokens_to_sample UInt32,
-    request_generation_config_is_streaming Bool,
+    -- Request Details: Consolidated into JSON objects
+    request_model JSON, -- ADDED
+    request_prompt JSON,
+    request_generation_config JSON, -- ADDED
 
-    -- Response Details: Nested objects are now stored in JSON columns
-    response_completion_choices JSON, -- UPDATED: from Nested to JSON
-    response_usage_prompt_tokens UInt32,
-    response_usage_completion_tokens UInt32,
-    response_usage_total_tokens UInt32,
-    response_system_provider_request_id String,
-    response_tool_calls JSON, -- UPDATED: from Nested to JSON
+    -- Response Details: Consolidated into JSON objects
+    response JSON,
+    response_completion JSON,
+    response_tool_calls JSON,
+    response_usage JSON,
+    response_system JSON, -- ADDED
 
     -- Performance Metrics
-    performance_latency_ms_total_e2e UInt32,
-    performance_latency_ms_time_to_first_token UInt32,
-    performance_latency_ms_time_per_output_token Float64,
-    performance_latency_ms_decode_duration UInt32,
+    performance_latency_ms JSON, -- ADDED
 
     -- FinOps (Financial Operations)
-    finops_cost_total_cost_usd Float64,
-    finops_cost_prompt_cost_usd Float64,
-    finops_cost_completion_cost_usd Float64,
-    finops_pricing_info_provider_rate_id String,
-    finops_pricing_info_prompt_token_rate_usd_per_million Float64,
-    finops_pricing_info_completion_token_rate_usd_per_million Float64,
-    finops_attribution_cost_center_id String,
-    finops_attribution_project_id String,
-    finops_attribution_team_id String,
-    finops_attribution_feature_name String,
+    finops_attribution JSON, -- ADDED
+    finops_cost JSON,
+    finops_pricing_info JSON,
 
-    -- Governance: Nested objects are now stored in JSON columns
-    governance_security_pii_redacted Bool,
-    governance_security_prompt_injection_detected Bool,
-    governance_safety_provider_safety_ratings JSON, -- UPDATED: from Nested to JSON
-    governance_safety_overall_safety_verdict String,
-    governance_audit_context_request_type String,
-    governance_audit_context_cache_status String
-
-    -- REMOVED: Redundant columns for unnesting are no longer needed with the JSON type.
-
+    -- Governance
+    governance_audit_context JSON,
+    governance_safety JSON, -- ADDED
+    governance_security JSON
+    
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM(event_metadata_timestamp_utc)
 ORDER BY (application_context_environment, application_context_app_name, event_metadata_timestamp_utc)
