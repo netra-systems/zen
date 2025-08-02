@@ -40,11 +40,11 @@ def get_credentials(db: DbDep, current_user: ActiveUserDep):
 @router.post("/runs", response_model=schema.AnalysisRunPublic, status_code=status.HTTP_202_ACCEPTED)
 def start_new_analysis_run(
     run_create: schema.AnalysisRunCreate,
-    use_deepagents: bool = False,
-    use_deepagents_v2: bool = False,
     background_tasks: BackgroundTasks,
     db: DbDep,
-    current_user: ActiveUserDep
+    current_user: ActiveUserDep,
+    use_deepagents: bool = False,
+    use_deepagents_v2: bool = False
 ):
     """Creates an analysis run record and starts the pipeline in the background."""
     new_run = schema.AnalysisRun(
