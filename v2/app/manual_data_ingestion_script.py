@@ -32,7 +32,7 @@ def run_ingestion():
         synthetic_data_generator = SyntheticDataV1()
         
         print(f"Successfully connected to ClickHouse at {settings.CLICKHOUSE_HOST}:{settings.CLICKHOUSE_PORT}")
-
+        exit()
         # --- Step 2: Ensure the 'customers' table exists ---
         print("Ensuring 'customers' table exists...")
         db.create_table()
