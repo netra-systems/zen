@@ -1,20 +1,5 @@
 # A High-Performance Synthetic Data Generation System for the Unified LLM Operations Schema v3.0
-#
-# This script is a complete redesign of the original generator, focusing on achieving a
-# 100x performance improvement while maintaining data quality and realism.
-#
-# Key Performance Enhancements:
-# 1.  Vectorized Generation: Uses Pandas and NumPy to generate data in large, columnar batches,
-#     avoiding slow, row-by-row Python loops.
-# 2.  No External API Calls: Replaces the live Gemini API calls with a pre-generated, local
-#     corpus of realistic content, eliminating network latency from the critical path.
-# 3.  Parallel Processing: Leverages the `multiprocessing` module to distribute the generation
-#     workload across all available CPU cores.
-# 4.  Delayed Pydantic Validation: Constructs data as Python dictionaries first and performs
-#     Pydantic validation in a single, final pass, minimizing object creation overhead.
-# 5.  Optimized Configuration: Retains the flexibility of YAML-based configuration but applies
-#     it in a more efficient, post-generation step.
-#
+
 # USAGE:
 # 1. A default `config.yaml` will be created on first run. Customize it as needed.
 # 2. Run the script from your terminal:
@@ -24,38 +9,8 @@ import json
 import random
 import uuid
 import time
-import datetime
 import hashlib
 import os
-import sys
-import yaml
-import argparse
-import numpy as np
-import pandas as pd
-from multiprocessing import Pool, cpu_count
-
-from faker import Faker
-from rich.console import Console
-from rich.progress import Progress
-
-# Import the same Pydantic schemas from v1 to ensure compatibility
-from .synthetic_data_v1 import UnifiedLogEntry, DEFAULT_CONFIG
-
-console = Console()
-fake = Faker()
-
-# --- 1. HIGH-PERFORMANCE CONTENT ENGINE ---
-# This is the default, fallback corpus. The script will prioritize loading
-# an external corpus if available.
-
-DEFAULT_import json
-import random
-import uuid
-import time
-import datetime
-import hashlib
-import os
-import sys
 import yaml
 import argparse
 import numpy as np
