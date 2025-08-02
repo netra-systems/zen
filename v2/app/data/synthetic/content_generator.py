@@ -53,9 +53,14 @@ class SingleTurn(BaseModel):
     user_prompt: str = Field(..., description="A realistic user prompt.")
     assistant_response: str = Field(..., description="A plausible response from an AI assistant.")
 
+class Turn(BaseModel):
+    """Schema for a single turn in a conversation."""
+    user_prompt: str = Field(..., description="A realistic user prompt.")
+    assistant_response: str = Field(..., description="A plausible response from an AI assistant.")
+
 class MultiTurnConversation(BaseModel):
     """Schema for a multi-turn conversation, represented as a list of turns."""
-    conversation: List[Tuple[str, str]] = Field(..., description="A list of [user_prompt, assistant_response] pairs.")
+    conversation: List[Turn] = Field(..., description="A list of user and assistant turns.")
 
 # --- 2. Content Generation Prompts ---
 META_PROMPTS = {
@@ -83,17 +88,16 @@ def generate_content_sample(workload_type: str, model, generation_config) -> dic
     
     try:
         # Use the schema as a "tool" to enforce structured output
-        response = model.generate_content(
-            prompt, 
-            generation_config=generation_config, 
-            tools=[genai.Tool.from_pydantic_model(schema)])
+        response = model.generate_content(prompt, generation_config=generation_config, tools=[schema])
         
         # Extract the structured data from the tool call
         tool_call = response.candidates[0].content.parts[0].function_call
         args = tool_call.args
 
         if workload_type == 'multi_turn_tool_use':
-            return {"type": workload_type, "data": args['conversation']}
+            # Convert the list of dicts back to a list of tuples for the corpus
+            convo_tuples = [(turn['user_prompt'], turn['assistant_response']) for turn in args['conversation']]
+            return {"type": workload_type, "data": convo_tuples}
         else:
             return {"type": workload_type, "data": (args['user_prompt'], args['assistant_response']) }
             
