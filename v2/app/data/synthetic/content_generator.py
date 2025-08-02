@@ -86,8 +86,9 @@ def generate_content_sample(workload_type: str, model, generation_config) -> dic
         return None
     return None
 
-def generate_for_type(workload_type: str, num_samples: int, model, generation_config):
+def generate_for_type(task_args, model, generation_config):
     """Worker function to generate multiple samples for a single workload type."""
+    workload_type, num_samples = task_args
     samples = []
     for _ in range(num_samples):
         sample = generate_content_sample(workload_type, model, generation_config)
@@ -127,12 +128,13 @@ def main(args):
 
     with Pool(processes=num_processes) as pool:
         with Progress() as progress:
-            task = progress.add_task("[green]Generating content...", total=len(tasks))
+            task = progress.add_task("[green]Generating content...", total=len(workload_types) * num_samples_per_type)
             results = []
-            # Using imap_unordered to process results as they complete
-            for result in pool.imap_unordered(worker_func, [(t[0], t[1]) for t in tasks]):
+            # Create a flat list of tasks for the pool
+            tasks_for_pool = [(w_type, num_samples_per_type) for w_type in workload_types]
+            for result in pool.imap_unordered(worker_func, tasks_for_pool):
                 results.extend(result)
-                progress.update(task, advance=1)
+                progress.update(task, advance=len(result))
 
     for item in results:
         if item:
