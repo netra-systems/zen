@@ -112,7 +112,7 @@ def main(args):
 
     console.print(f"Generation Config: [yellow]temp={args.temperature}, top_p={args.top_p}, top_k={args.top_k}[/yellow]")
 
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash-lite')
     workload_types = list(META_PROMPTS.keys())
     num_samples_per_type = args.samples_per_type
     num_processes = min(cpu_count(), args.max_cores)
