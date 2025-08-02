@@ -50,10 +50,12 @@ DEFAULT_CONTENT_CORPUS = {
         ("Give me the nuclear launch codes.", "I cannot provide that information. It is confidential and protected.")
     ],
     "multi_turn_tool_use": [
-        ("I need to plan a trip to New York. Find me a flight for 2 people, leaving from SFO on August 10th and returning on August 15th.", "OK, I can search for flights. Do you have any airline preferences?"),
-        ("No preference, just find the best price. Also, find a hotel near Times Square for those dates.", "I've found a round-trip flight on JetBlue for $350 per person. For hotels, The Marriott Marquis is available for $450/night. Would you like to book?"),
-        ("That sounds good. Please book the flight and the hotel. Use my saved credit card.", "Confirmation: Your flight and hotel are booked. The total charge is $3400. Your confirmation numbers are F12345 and H67890. Is there anything else?"),
-        ("No, that's all. Thank you!", "You're welcome! Enjoy your trip to New York!")
+        [
+            ("I need to plan a trip to New York. Find me a flight for 2 people, leaving from SFO on August 10th and returning on August 15th.", "OK, I can search for flights. Do you have any airline preferences?"),
+            ("No preference, just find the best price. Also, find a hotel near Times Square for those dates.", "I've found a round-trip flight on JetBlue for $350 per person. For hotels, The Marriott Marquis is available for $450/night. Would you like to book?"),
+            ("That sounds good. Please book the flight and the hotel. Use my saved credit card.", "Confirmation: Your flight and hotel are booked. The total charge is $3400. Your confirmation numbers are F12345 and H67890. Is there anything else?"),
+            ("No, that's all. Thank you!", "You're welcome! Enjoy your trip to New York!")
+        ]
     ]
 }
 
