@@ -32,12 +32,14 @@ def read_supply_catalog(
     return catalog_service.get_all_options(db_session=db)
 
 
+
 @router.get("/supply-catalog/{option_id}", response_model=schema.SupplyOption)
-def read_supply_option(option_id: int, db: DbDep):
+def read_supply_option(option_id: schema.SupplyOptionId, db: DbDep):
     """
     Retrieves a single supply option by its ID.
     """
-    db_option = catalog_service.get_option_by_id(db_session=db, option_id=option_id)
+    db_option = catalog_service.get_option_by_id(db_session=db, option_id=option_id.option_id)
     if not db_option:
         raise HTTPException(status_code=404, detail="Supply option not found")
     return db_option
+

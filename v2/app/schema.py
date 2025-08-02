@@ -63,6 +63,9 @@ class SupplyOption(SupplyOptionBase):
 
     model_config = ConfigDict(from_attributes=True)
 
+class SupplyOptionId(BaseModel):
+    option_id: int
+
 
 # --- AnalysisRun Schemas ---
 class AnalysisRunBase(BaseModel):

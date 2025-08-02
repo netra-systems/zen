@@ -1,7 +1,7 @@
 # v2/app/main_v2_5.py
 import logging
-from fastapi import FastAPI
-from contextlib import asynccontextmanager
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from app.routes import auth, supply, analysis
 from app.db.clickhouse import ClickHouseClient
@@ -84,6 +84,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(supply.router, prefix="/supply", tags=["supply"])
