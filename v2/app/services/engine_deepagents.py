@@ -28,7 +28,7 @@ async def run_analysis_with_deepagents(
             "description": "Enriches the raw log data with additional metrics.",
             "input_schema": {"spans": "List of raw log entries"},
             "output_schema": {"enriched_spans": "List of enriched log entries"},
-            "function": AnalysisPipeline.log_enricher.enrich_spans,
+            "model": AnalysisPipeline.log_enricher.enrich_spans,
         },
         # Tool for discovering patterns
         {
@@ -36,7 +36,7 @@ async def run_analysis_with_deepagents(
             "description": "Discovers usage patterns in the enriched log data.",
             "input_schema": {"spans": "List of enriched log entries"},
             "output_schema": {"patterns": "List of discovered patterns"},
-            "function": AnalysisPipeline.pattern_discoverer.discover_patterns_from_spans,
+            "model": AnalysisPipeline.pattern_discoverer.discover_patterns_from_spans,
         },
         # Tool for simulating policies
         {
@@ -47,7 +47,7 @@ async def run_analysis_with_deepagents(
                 "span_map": "Map of span IDs to spans",
             },
             "output_schema": {"policies": "List of learned policies"},
-            "function": AnalysisPipeline.simulation_engine.generate_policies,
+            "model": AnalysisPipeline.simulation_engine.generate_policies,
         },
         # Tool for calculating final costs
         {
@@ -58,7 +58,7 @@ async def run_analysis_with_deepagents(
                 "policies": "List of learned policies",
             },
             "output_schema": {"cost_comparison": "The final cost comparison"},
-            "function": AnalysisPipeline.simulation_engine.calculate_final_costs,
+            "model": AnalysisPipeline.simulation_engine.calculate_final_costs,
         },
     ]
 

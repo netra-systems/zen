@@ -107,7 +107,7 @@ function useAppController() {
 
     const fetchUser = useCallback(async (currentToken: string) => {
         try {
-            const userData = await apiService.get('/api/v2/users/me', currentToken);
+            const userData = await apiService.get('/users/me', currentToken);
             setUser(userData);
         } catch (error) {
             // Token is likely invalid, log out
@@ -137,7 +137,7 @@ function useAppController() {
         const formData = new FormData(event.currentTarget);
         
         try {
-            const response = await fetch('/token', {
+            const response = await fetch('/auth/token', {
                 method: 'POST',
                 body: formData,
             });
@@ -226,7 +226,7 @@ const Dashboard = ({ user, onLogout, token }: { user: User; onLogout: () => void
 
     const pollStatus = useCallback(async (runId: string) => {
         try {
-            const data: AnalysisRun = await apiService.get(`/api/v2/runs/${runId}`, token);
+            const data: AnalysisRun = await apiService.get(`/runs/${runId}`, token);
             setAnalysisRun(data);
             if (data.status !== 'RUNNING' && data.status !== 'PENDING') {
                 setIsPolling(false);
@@ -252,7 +252,7 @@ const Dashboard = ({ user, onLogout, token }: { user: User; onLogout: () => void
         setIsLoading(true);
         setError(null);
         try {
-            const run = await apiService.post('/api/v2/runs', { source_table: 'logs' }, token, 202);
+            const run = await apiService.post('/runs', { source_table: 'logs' }, token, 202);
             setAnalysisRun(run);
             setIsPolling(true);
         } catch (err: any) {

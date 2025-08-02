@@ -334,81 +334,83 @@ class AnalysisPipeline:
 
     async def run(self, use_deepagents: bool = False, use_deepagents_v2: bool = False):
         """Main entry point for running the analysis pipeline."""
-        if use_deepagents_v2:
-            update_run_status(self.run_id, 'running', 'Redirecting to Deep Agents V2 engine.')
-            return await self.run_with_deepagents_v2()
-        if use_deepagents:
-            update_run_status(self.run_id, 'running', 'Redirecting to Deep Agents V1 engine.')
-            return await self.run_with_deepagents()
-
-        update_run_status(self.run_id, 'running', 'Starting standard analysis engine.')
-        return await self.run_standard_analysis()
-        async def run_standard_analysis(self):
         try:
-            if self.preloaded_spans is not None:
-                all_spans = self.preloaded_spans
-                update_run_status(self.run_id, 'running', f"Using {len(all_spans)} pre-loaded spans for analysis.")
+            if use_deepagents_v2:
+                update_run_status(self.run_id, 'running', 'Redirecting to Deep Agents V2 engine.')
+                return await self.run_with_deepagents_v2()
+            if use_deepagents:
+                update_run_status(self.run_id, 'running', 'Redirecting to Deep Agents V1 engine.')
+                return await self.run_with_deepagents()
+
+            update_run_status(self.run_id, 'running', 'Starting standard analysis engine.')
+            return await self.run_standard_analysis()
+        finally:
+            await self.async_client.aclose()
+
+    async def run_standard_analysis(self):
+        if self.preloaded_spans is not None:
+            all_spans = self.preloaded_spans
+            update_run_status(self.run_id, 'running', f"Using {len(all_spans)} pre-loaded spans for analysis.")
+        else:
+            if not self.request.workloads: raise ValueError("No workloads provided and no spans pre-loaded.")
+            all_spans = [span for wl in self.request.workloads for span in self._generate_spans_for_workload(wl, f"trace_{uuid.uuid4().hex[:8]}")]
+            update_run_status(self.run_id, 'running', f"Generated {len(all_spans)} total spans.")
+        
+        step_name = "Log Enrichment"
+        start_time = time.perf_counter()
+        update_run_status(self.run_id, 'running', log_message=f"Starting: {step_name}...")
+        all_spans = self.log_enricher.enrich_spans(all_spans)
+        end_time = time.perf_counter()
+        duration_ms = (end_time - start_time) * 1000
+        update_run_status(self.run_id, 'running', log_message=f"Completed: {step_name}", duration_ms=duration_ms)
+
+        timed_discover = time_it(self.run_id, "Pattern Discovery")(self.pattern_discoverer.discover_patterns_from_spans)
+        timed_simulate = time_it(self.run_id, "Policy Simulation")(self.simulation_engine.generate_policies)
+
+        max_retries = 3
+        cost_comparison = None
+        policies = []
+        patterns = []
+        span_map = {span.trace_context.span_id: span for span in all_spans}
+
+        for attempt in range(max_retries):
+            update_run_status(self.run_id, 'running', f"Starting analysis attempt {attempt + 1}/{max_retries}...")
+            patterns = await timed_discover(all_spans)
+            if patterns:
+                policies = await timed_simulate(self.db_session, patterns, span_map)
             else:
-                if not self.request.workloads: raise ValueError("No workloads provided and no spans pre-loaded.")
-                all_spans = [span for wl in self.request.workloads for span in self._generate_spans_for_workload(wl, f"trace_{uuid.uuid4().hex[:8]}")]
-                update_run_status(self.run_id, 'running', f"Generated {len(all_spans)} total spans.")
+                update_run_status(self.run_id, 'running', "No patterns discovered.")
             
-            step_name = "Log Enrichment"
-            start_time = time.perf_counter()
-            update_run_status(self.run_id, 'running', log_message=f"Starting: {step_name}...")
-            all_spans = self.log_enricher.enrich_spans(all_spans)
-            end_time = time.perf_counter()
-            duration_ms = (end_time - start_time) * 1000
-            update_run_status(self.run_id, 'running', log_message=f"Completed: {step_name}", duration_ms=duration_ms)
+            cost_comparison = self.simulation_engine.calculate_final_costs(self.request.workloads, policies)
+            update_run_status(self.run_id, 'running', f"Cost comparison calculated for attempt {attempt + 1}.")
 
-            timed_discover = time_it(self.run_id, "Pattern Discovery")(self.pattern_discoverer.discover_patterns_from_spans)
-            timed_simulate = time_it(self.run_id, "Policy Simulation")(self.simulation_engine.generate_policies)
-
-            max_retries = 3
-            cost_comparison = None
-            policies = []
-            patterns = []
-            span_map = {span.trace_context.span_id: span for span in all_spans}
-
-            for attempt in range(max_retries):
-                update_run_status(self.run_id, 'running', f"Starting analysis attempt {attempt + 1}/{max_retries}...")
-                patterns = await timed_discover(all_spans)
-                if patterns:
-                    policies = await timed_simulate(self.db_session, patterns, span_map)
-                else:
-                    update_run_status(self.run_id, 'running', "No patterns discovered.")
-                
-                cost_comparison = self.simulation_engine.calculate_final_costs(self.request.workloads, policies)
-                update_run_status(self.run_id, 'running', f"Cost comparison calculated for attempt {attempt + 1}.")
-
-                savings_percent = cost_comparison.delta_percent
-                if 5 <= savings_percent <= 95:
-                    update_run_status(self.run_id, 'running', f"Validation successful on attempt {attempt + 1}.")
-                    break
-                else:
-                    log_message = f"Attempt {attempt + 1}/{max_retries} failed: Projected savings ({savings_percent:.2f}%) are outside the expected range."
-                    update_run_status(self.run_id, 'running', log_message)
-                    if attempt < max_retries - 1:
-                        await asyncio.sleep(1)
+            savings_percent = cost_comparison.delta_percent
+            if 5 <= savings_percent <= 95:
+                update_run_status(self.run_id, 'running', f"Validation successful on attempt {attempt + 1}.")
+                break
             else:
-                error_message = f"Analysis failed after {max_retries} attempts."
-                update_run_status(self.run_id, 'failed', log_message=error_message, error=error_message)
-                await self.async_client.aclose()
-                return
+                log_message = f"Attempt {attempt + 1}/{max_retries} failed: Projected savings ({savings_percent:.2f}%) are outside the expected range."
+                update_run_status(self.run_id, 'running', log_message)
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(1)
+        else:
+            error_message = f"Analysis failed after {max_retries} attempts."
+            update_run_status(self.run_id, 'failed', log_message=error_message, error=error_message)
+            return
 
-            final_log = analysis_runs[self.run_id]["execution_log"]
-            
-            result = AnalysisResult(
-                run_id=self.run_id,
-                discovered_patterns=patterns,
-                learned_policies=policies,
-                supply_catalog=self.supply_catalog_service.get_all_options(self.db_session),
-                cost_comparison=cost_comparison,
-                execution_log=final_log,
-                debug_mode=self.request.debug_mode,
-                span_map=span_map
-            )
-            update_run_status(self.run_id, 'completed', "Analysis complete.", result=result.model_dump(exclude_none=True))
+        final_log = analysis_runs[self.run_id]["execution_log"]
+        
+        result = AnalysisResult(
+            run_id=self.run_id,
+            discovered_patterns=patterns,
+            learned_policies=policies,
+            supply_catalog=self.supply_catalog_service.get_all_options(self.db_session),
+            cost_comparison=cost_comparison,
+            execution_log=final_log,
+            debug_mode=self.request.debug_mode,
+            span_map=span_map
+        )
+        update_run_status(self.run_id, 'completed', "Analysis complete.", result=result.model_dump(exclude_none=True))
 
     async def run_with_deepagents(self):
         return await run_analysis_with_deepagents(
@@ -419,9 +421,6 @@ class AnalysisPipeline:
         return await run_analysis_with_deepagents_v2(
             self.run_id, self.request, self.db_session, self.preloaded_spans
         )
-
-        finally:
-            await self.async_client.aclose()
 
     def _generate_spans_for_workload(self, workload: Dict, trace_id: str, num_spans: int = 25) -> List[UnifiedLogEntry]:
         spans = []
