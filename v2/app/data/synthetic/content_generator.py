@@ -1,13 +1,18 @@
-# AI-Powered Content Corpus Generator
+# AI-Powered Content Corpus Generator (V2 with Structured Generation)
 #
 # This script uses a powerful Large Language Model (Gemini) to generate a rich corpus
-# of realistic prompts and responses for various workload types. It leverages
-# multiprocessing to generate content in parallel, making the process highly efficient.
+# of realistic prompts and responses. It leverages structured generation by providing
+# Pydantic models as a schema, ensuring the LLM's output is always in the correct format.
 #
-# The output of this script is a JSON file (`content_corpus.json`) that can be
-# used by the main `synthetic_data_v2.py` generator to create more varied and
-# realistic synthetic log data.
-# python -m app.data.synthetic.content_generator --samples-per-type 50 --output-file content_corpus.json
+# SETUP:
+# 1. Install necessary libraries:
+#    pip install google-generativeai rich pydantic
+#
+# 2. Set your Gemini API Key:
+#    export GEMINI_API_KEY="YOUR_API_KEY"
+#
+# USAGE:
+#    python -m app.data.synthetic.content_generator --samples-per-type 10 --output-file content_corpus.json
 
 import os
 import json
@@ -16,7 +21,9 @@ import argparse
 import sys
 from multiprocessing import Pool, cpu_count
 from functools import partial
+from typing import List, Tuple
 
+from pydantic import BaseModel, Field
 from rich.console import Console
 from rich.progress import Progress
 from dotenv import load_dotenv
@@ -28,6 +35,7 @@ console = Console()
 # --- Gemini Integration ---
 try:
     import google.generativeai as genai
+    from google.generativeai.types import GenerationConfig
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
     if GEMINI_API_KEY:
         genai.configure(api_key=GEMINI_API_KEY)
@@ -38,59 +46,58 @@ except ImportError:
     console.print("[red]google.generativeai not installed. Please run `pip install google-generativeai`[/red]")
     genai = None
 
-# --- Content Generation Prompts ---
-# These are "meta-prompts" designed to instruct the LLM on what kind of content to generate.
+# --- 1. Structured Output Schemas (Pydantic) ---
+
+class SingleTurn(BaseModel):
+    """Schema for a single user prompt and assistant response."""
+    user_prompt: str = Field(..., description="A realistic user prompt.")
+    assistant_response: str = Field(..., description="A plausible response from an AI assistant.")
+
+class MultiTurnConversation(BaseModel):
+    """Schema for a multi-turn conversation, represented as a list of turns."""
+    conversation: List[Tuple[str, str]] = Field(..., description="A list of [user_prompt, assistant_response] pairs.")
+
+# --- 2. Content Generation Prompts ---
 META_PROMPTS = {
-    "simple_chat": "Generate a realistic user question and a corresponding helpful assistant response. The topic should be related to technology, cloud computing, or artificial intelligence.",
-    "rag_pipeline": "Generate a user question that requires a specific piece of information, a short context paragraph containing that information, and an assistant response that answers the question based *only* on the provided context.",
-    "tool_use": "Generate a user request that requires calling a fictional API or tool (e.g., a weather API, a calculator, or a flight booking tool). Then, provide an assistant response that acknowledges the request and confirms the parameters before executing the tool call.",
-    "failed_request": "Generate a user prompt that is impossible or unsafe for an AI assistant to fulfill. Then, provide a polite but firm refusal as the assistant's response.",
-    "multi_turn_tool_use": "Generate a realistic, multi-turn conversation between a user and an AI assistant where the assistant uses tools to fulfill the user's request. The conversation should have between 3 and 5 turns. The final output should be a single JSON object with a key 'conversation' which contains a list of lists, where each inner list is a [user_prompt, assistant_response] pair."
+    "simple_chat": ("Generate a realistic user question and a corresponding helpful assistant response on technology or AI.", SingleTurn),
+    "rag_pipeline": ("Generate a user question, a context paragraph with the answer, and an assistant response based only on the context.", SingleTurn),
+    "tool_use": ("Generate a user request requiring a fictional API call and an assistant response confirming the parameters.", SingleTurn),
+    "failed_request": ("Generate a user prompt that is impossible or unsafe to fulfill, and a polite refusal from the assistant.", SingleTurn),
+    "multi_turn_tool_use": ("Generate a realistic, 3-5 turn conversation where an assistant uses tools to help a user plan a trip.", MultiTurnConversation)
 }
 
+# --- 3. Generation Logic ---
+
 def generate_content_sample(workload_type: str, model, generation_config) -> dict:
-    """Generates a single sample for a given workload type using the LLM."""
+    """Generates a single, schema-guaranteed sample for a given workload type using the LLM."""
     if not model:
         return None
 
-    meta_prompt = META_PROMPTS[workload_type]
+    instruction, schema = META_PROMPTS[workload_type]
     
-    prompt_template = f"""
+    prompt = f"""
     You are a synthetic data generator. Your task is to create a realistic data sample for the workload type: '{workload_type}'.
-
-    Instructions: {meta_prompt}
-
-    Return ONLY a JSON object with two keys: "user_prompt" and "assistant_response".
-    If the instructions mention a "context", include the context within the user_prompt.
+    Instructions: {instruction}
+    Now, call the provided tool with the generated content.
     """
-
-    if workload_type == 'multi_turn_tool_use':
-        prompt_template += "\nReturn ONLY a JSON object with a single key 'conversation'."
-    else:
-        prompt_template += "\nReturn ONLY a JSON object with two keys: \"user_prompt\" and \"assistant_response\"."
     
     try:
-        response = model.generate_content(prompt_template, generation_config=generation_config)
-        # Basic cleaning to handle markdown code blocks
-        cleaned_text = response.text.strip().replace("```json", "").replace("```", "").strip()
-        content = json.loads(cleaned_text)
+        # Use the schema as a "tool" to enforce structured output
+        response = model.generate_content(prompt, generation_config=generation_config, tools=[schema])
         
+        # Extract the structured data from the tool call
+        tool_call = response.candidates[0].content.parts[0].function_call
+        args = tool_call.args
+
         if workload_type == 'multi_turn_tool_use':
-            if "conversation" in content and isinstance(content["conversation"], list):
-                # Validate the structure of the conversation
-                validated_conversation = []
-                for turn in content["conversation"]:
-                    if isinstance(turn, list) and len(turn) == 2 and all(isinstance(i, str) for i in turn):
-                        validated_conversation.append(turn)
-                if validated_conversation:
-                    return {"type": workload_type, "data": validated_conversation}
-        elif "user_prompt" in content and "assistant_response" in content:
-            return {"type": workload_type, "data": (content["user_prompt"], content["assistant_response"]) }
-    except Exception as e:
-        # This can happen due to API errors, rate limits, or invalid JSON output
-        # console.print(f"[yellow]Warning: Failed to generate/parse content for '{workload_type}': {e}[/yellow]")
+            return {"type": workload_type, "data": args['conversation']}
+        else:
+            return {"type": workload_type, "data": (args['user_prompt'], args['assistant_response']) }
+            
+    except (ValueError, IndexError, AttributeError) as e:
+        # This might happen if the model fails to call the tool correctly, though it's less likely with this method.
+        # console.print(f"[yellow]Warning: Failed to generate content for '{workload_type}': {e}[/yellow]")
         return None
-    return None
 
 def generate_for_type(task_args, model, generation_config):
     """Worker function to generate multiple samples for a single workload type."""
@@ -102,15 +109,16 @@ def generate_for_type(task_args, model, generation_config):
             samples.append(sample)
     return samples
 
+# --- 4. Orchestration ---
 def main(args):
     if not genai or not GEMINI_API_KEY:
         console.print("[bold red]Cannot proceed: Gemini API is not configured.[/bold red]")
         sys.exit(1)
 
-    console.print("[bold cyan]Starting AI-Powered Content Corpus Generation...[/bold cyan]")
+    console.print("[bold cyan]Starting AI-Powered Content Corpus Generation (Structured)...[/bold cyan]")
     start_time = time.time()
 
-    generation_config = genai.types.GenerationConfig(
+    gen_config = GenerationConfig(
         temperature=args.temperature,
         top_p=args.top_p,
         top_k=args.top_k
@@ -118,33 +126,26 @@ def main(args):
 
     console.print(f"Generation Config: [yellow]temp={args.temperature}, top_p={args.top_p}, top_k={args.top_k}[/yellow]")
 
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    model = genai.GenerativeModel('gemini-1.5-flash')
     workload_types = list(META_PROMPTS.keys())
     num_samples_per_type = args.samples_per_type
     num_processes = min(cpu_count(), args.max_cores)
-
-    tasks = [(w_type, num_samples_per_type, model, generation_config) for w_type in workload_types]
 
     console.print(f"Using [yellow]{num_processes}[/yellow] cores to generate [yellow]{num_samples_per_type * len(workload_types)}[/yellow] total samples.")
 
     corpus = {key: [] for key in workload_types}
 
-    # Use a partial function to pass the model and config to the worker without pickling issues
-    worker_func = partial(generate_for_type, model=model, generation_config=generation_config)
+    worker_func = partial(generate_for_type, model=model, generation_config=gen_config)
+    tasks_for_pool = [(w_type, num_samples_per_type) for w_type in workload_types]
 
     with Pool(processes=num_processes) as pool:
         with Progress() as progress:
-            task = progress.add_task("[green]Generating content...", total=len(workload_types) * num_samples_per_type)
-            results = []
-            # Create a flat list of tasks for the pool
-            tasks_for_pool = [(w_type, num_samples_per_type) for w_type in workload_types]
+            task = progress.add_task("[green]Generating content...", total=len(tasks_for_pool))
             for result in pool.imap_unordered(worker_func, tasks_for_pool):
-                results.extend(result)
-                progress.update(task, advance=len(result))
-
-    for item in results:
-        if item:
-            corpus[item['type']].append(item['data'])
+                if result:
+                    for item in result:
+                        corpus[item['type']].append(item['data'])
+                progress.update(task, advance=1)
 
     # Save to file
     with open(args.output_file, 'w') as f:
@@ -160,14 +161,13 @@ def main(args):
     console.print(f"Total time: [yellow]{duration:.2f}s[/yellow]")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="AI-Powered Content Corpus Generator")
-    parser.add_argument("--samples-per-type", type=int, default=10, help="Number of prompt/response pairs to generate for each workload type.")
+    parser = argparse.ArgumentParser(description="AI-Powered Content Corpus Generator (Structured)")
+    parser.add_argument("--samples-per-type", type=int, default=10, help="Number of samples to generate for each workload type.")
     parser.add_argument("--output-file", default="content_corpus.json", help="Path to the output JSON file.")
     parser.add_argument("--max-cores", type=int, default=cpu_count(), help="Maximum number of CPU cores to use.")
-    parser.add_argument("--temperature", type=float, default=0.9, help="Controls the randomness of the output. Higher is more creative.")
+    parser.add_argument("--temperature", type=float, default=0.8, help="Controls the randomness of the output.")
     parser.add_argument("--top-p", type=float, default=None, help="Nucleus sampling probability.")
     parser.add_argument("--top-k", type=int, default=None, help="Top-k sampling control.")
-
 
     if len(sys.argv) == 1:
         args = parser.parse_args(['--samples-per-type', '10'])
