@@ -16,7 +16,8 @@ import argparse
 import numpy as np
 import pandas as pd
 from multiprocessing import Pool, cpu_count
-
+import sys
+ 
 from faker import Faker
 from rich.console import Console
 from rich.progress import Progress
@@ -285,7 +286,7 @@ def main(args):
 
     # --- Calculate number of each trace type ---
     trace_dist = config['generation_settings']['trace_distribution']
-    num_multi_turn = int(total_traces * trace_dist.get('multi_turn_tool_use', 0.0))
+    num_multi_turn = round(total_traces * trace_dist.get('multi_turn_tool_use', 0.0))
     num_simple_logs = total_traces - num_multi_turn
 
     console.print(f"Planning to generate [yellow]{num_simple_logs}[/yellow] simple logs and [yellow]{num_multi_turn}[/yellow] multi-turn traces.")
