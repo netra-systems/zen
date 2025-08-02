@@ -399,7 +399,14 @@ class AnalysisPipeline:
 
     async def run_with_deepagents(self, analysis_func):
         return await analysis_func(
-            self.run_id, self.request, self.db_session, self.preloaded_spans
+            self.run_id, 
+            self.request, 
+            self.db_session, 
+            self.preloaded_spans,
+            self.log_enricher.enrich_spans,
+            self.pattern_discoverer.discover_patterns_from_spans,
+            self.simulation_engine.generate_policies,
+            self.simulation_engine.calculate_final_costs
         )
 
     def _generate_spans_for_workload(self, workload: Dict, trace_id: str, num_spans: int = 25) -> List[UnifiedLogEntry]:
