@@ -72,18 +72,19 @@ class SupplyOptionId(BaseModel):
 
 
 # --- AnalysisRun Schemas ---
-from sqlmodel import SQLModel, Field
+from sqlalchemy.dialects.postgresql import JSON
+from sqlmodel import SQLModel, Field, Column
 
 class AnalysisRunBase(SQLModel):
-    config: Optional[Dict[str, Any]] = Field(None, description="Configuration parameters for the analysis run.")
+    config: Optional[Dict[str, Any]] = Field(None, sa_column=Column(JSON), description="Configuration parameters for the analysis run.")
 
 class AnalysisRun(AnalysisRunBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: str
     status: str = Field(default="pending")
     execution_log: Optional[str] = None
-    result_summary: Optional[Dict[str, Any]] = None
-    result_details: Optional[Dict[str, Any]] = None
+    result_summary: Optional[Dict[str, Any]] = Field(None, sa_column=Column(JSON))
+    result_details: Optional[Dict[str, Any]] = Field(None, sa_column=Column(JSON))
     created_at: datetime = Field(default_factory=datetime.utcnow)
     completed_at: Optional[datetime] = None
     pass
