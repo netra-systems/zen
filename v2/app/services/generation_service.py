@@ -14,7 +14,8 @@ from faker import Faker
 
 # Assuming the other scripts are in a sibling directory
 from ..data.synthetic.content_generator import META_PROMPTS, generate_content_sample
-from ..data.synthetic.synthetic_data_v2 import DEFAULT_CONTENT_CORPUS, format_log_entry, get_config
+from ..data.synthetic.synthetic_data_v2 import DEFAULT_CONTENT_CORPUS, format_log_entry, get_config, main as generate_synthetic_data
+from ..db.models_clickhouse import ContentCorpus, CONTENT_CORPUS_TABLE_NAME, CONTENT_CORPUS_TABLE_SCHEMA
 
 # --- Job Management ---
 # In a production system, this would be a database (e.g., Redis, Postgres)
@@ -23,7 +24,7 @@ GENERATION_JOBS = {}
 # --- Content Generation Service ---
 
 def run_content_generation_job(job_id: str, params: dict):
-    """The core worker process for generating a content corpus."""
+    """The core worker process for generating a content corpus.""" 
     try:
         import google.generativeai as genai
         GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -158,5 +159,157 @@ def run_log_generation_job(job_id: str, params: dict):
 
     except Exception as e:
         logging.exception("Error during log generation job")
+        GENERATION_JOBS[job_id]["status"] = "failed"
+        GENERATION_JOBS[job_id]["error"] = str(e)
+
+def run_content_corpus_generation_job(job_id: str, params: dict):
+    """The core worker process for generating a content corpus and storing it in ClickHouse."""
+    try:
+        import google.generativeai as genai
+        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+        if not GEMINI_API_KEY:
+            raise ValueError("GEMINI_API_KEY not set")
+        genai.configure(api_key=GEMINI_API_KEY)
+    except (ImportError, ValueError) as e:
+        GENERATION_JOBS[job_id] = {"status": "failed", "error": str(e)}
+        return
+
+    GENERATION_JOBS[job_id]["status"] = "running"
+    
+    generation_params = {
+        "temperature": params['temperature'],
+        "top_p": params.get('top_p'),
+        "top_k": params.get('top_k')
+    }
+    
+    workload_types = list(META_PROMPTS.keys())
+    num_processes = min(cpu_count(), params['max_cores'])
+    
+    worker_func = partial(generate_content_sample, generation_params=generation_params)
+    tasks = [w_type for w_type in workload_types for _ in range(params['samples_per_type'])]
+
+    corpus = {key: [] for key in workload_types}
+    
+    with Pool(processes=num_processes) as pool:
+        results = pool.map(worker_func, tasks)
+
+    for item in results:
+        if item:
+            corpus[item['type']].append(item['data'])
+
+    # Store in ClickHouse
+    try:
+        client = Client(
+            host=os.getenv("CLICKHOUSE_HOST", "localhost"),
+            port=os.getenv("CLICKHOUSE_PORT", 9000),
+            user=os.getenv("CLICKHOUSE_USER", "default"),
+            password=os.getenv("CLICKHOUSE_PASSWORD", ""),
+            database=os.getenv("CLICKHOUSE_DATABASE", "default"),
+        )
+        client.execute(CONTENT_CORPUS_TABLE_SCHEMA)
+        
+        corpus_id = uuid.uuid4()
+        data_to_insert = []
+        for workload_type, samples in corpus.items():
+            for sample in samples:
+                if isinstance(sample, list):
+                    for s in sample:
+                        data_to_insert.append({
+                            "corpus_id": corpus_id,
+                            "workload_type": workload_type,
+                            "user_prompt": s[0],
+                            "assistant_response": s[1]
+                        })
+                else:
+                    data_to_insert.append({
+                        "corpus_id": corpus_id,
+                        "workload_type": workload_type,
+                        "user_prompt": sample[0],
+                        "assistant_response": sample[1]
+                    })
+        
+        client.execute(f"INSERT INTO {CONTENT_CORPUS_TABLE_NAME} VALUES", data_to_insert)
+
+        GENERATION_JOBS[job_id].update({
+            "status": "completed",
+            "finished_at": time.time(),
+            "summary": {"message": f"Content corpus {corpus_id} generated and stored in ClickHouse."}
+        })
+
+    except Exception as e:
+        logging.exception("Error during content corpus generation job")
+        GENERATION_JOBS[job_id]["status"] = "failed"
+        GENERATION_JOBS[job_id]["error"] = str(e)
+
+
+def run_data_ingestion_job(job_id: str, params: dict):
+    """The core worker process for ingesting data into ClickHouse."""
+    GENERATION_JOBS[job_id]["status"] = "running"
+    
+    try:
+        # This is a placeholder for the actual table schema
+        table_schema = {
+            "event_metadata": "String",
+            "trace_context": "String",
+            "identity_context": "String",
+            "application_context": "String",
+            "request": "String",
+            "response": "String",
+            "performance": "String",
+            "finops": "String",
+            "timestamp_utc": "UInt64"
+        }
+
+        ingestor = DataIngestor(
+            clickhouse_creds={
+                "host": os.getenv("CLICKHOUSE_HOST", "localhost"),
+                "port": os.getenv("CLICKHOUSE_PORT", 9000),
+                "user": os.getenv("CLICKHOUSE_USER", "default"),
+                "password": os.getenv("CLICKHOUSE_PASSWORD", ""),
+                "database": os.getenv("CLICKHOUSE_DATABASE", "default"),
+            },
+            table_name=params['table_name'],
+            table_schema=table_schema
+        )
+        ingestor.create_table_if_not_exists()
+        ingestor.ingest_data(params['data_path'])
+
+        GENERATION_JOBS[job_id].update({
+            "status": "completed",
+            "finished_at": time.time(),
+            "summary": {"message": f"Data from {params['data_path']} ingested into {params['table_name']}"}
+        })
+
+    except Exception as e:
+        logging.exception("Error during data ingestion job")
+        GENERATION_JOBS[job_id]["status"] = "failed"
+        GENERATION_JOBS[job_id]["error"] = str(e)
+
+
+def run_synthetic_data_generation_job(job_id: str, params: dict):
+    """The core worker process for generating a synthetic log set."""
+    GENERATION_JOBS[job_id]["status"] = "running"
+    
+    try:
+        class Args:
+            def __init__(self, num_traces, output_file):
+                self.num_traces = num_traces
+                self.output_file = output_file
+                self.config = "config.yaml"
+                self.max_cores = cpu_count()
+                self.corpus_file = "content_corpus.json"
+
+        args = Args(params['num_traces'], params['output_file'])
+        generate_synthetic_data(args)
+
+        GENERATION_JOBS[job_id].update({
+            "status": "completed",
+            "finished_at": time.time(),
+            "result_path": params['output_file'],
+            "summary": {"logs_generated": params['num_traces']}
+        })
+
+    except Exception as e:
+        logging.exception("Error during synthetic data generation job")
         GENERATION_JOBS[job_id]["status"] = "failed"
         GENERATION_JOBS[job_id]["error"] = str(e)

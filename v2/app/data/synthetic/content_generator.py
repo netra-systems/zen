@@ -73,10 +73,13 @@ META_PROMPTS = {
 
 # --- 3. Generation Logic ---
 
-def generate_content_sample(workload_type: str, model, generation_config) -> dict:
+def generate_content_sample(workload_type: str, generation_params: dict) -> dict:
     """Generates a single, schema-guaranteed sample for a given workload type using the LLM."""
-    if not model:
+    if not genai:
         return None
+
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    generation_config = GenerationConfig(**generation_params)
 
     instruction, schema = META_PROMPTS[workload_type]
     
@@ -106,12 +109,12 @@ def generate_content_sample(workload_type: str, model, generation_config) -> dic
         # console.print(f"[yellow]Warning: Failed to generate content for '{workload_type}': {e}[/yellow]")
         return None
 
-def generate_for_type(task_args, model, generation_config):
+def generate_for_type(task_args, generation_params):
     """Worker function to generate multiple samples for a single workload type."""
     workload_type, num_samples = task_args
     samples = []
     for _ in range(num_samples):
-        sample = generate_content_sample(workload_type, model, generation_config)
+        sample = generate_content_sample(workload_type, generation_params)
         if sample:
             samples.append(sample)
     return samples
@@ -125,15 +128,14 @@ def main(args):
     console.print("[bold cyan]Starting AI-Powered Content Corpus Generation (Structured)...[/bold cyan]")
     start_time = time.time()
 
-    gen_config = GenerationConfig(
-        temperature=args.temperature,
-        top_p=args.top_p,
-        top_k=args.top_k
-    )
+    generation_params = {
+        "temperature": args.temperature,
+        "top_p": args.top_p,
+        "top_k": args.top_k
+    }
 
     console.print(f"Generation Config: [yellow]temp={args.temperature}, top_p={args.top_p}, top_k={args.top_k}[/yellow]")
 
-    model = genai.GenerativeModel('gemini-1.5-flash')
     workload_types = list(META_PROMPTS.keys())
     num_samples_per_type = args.samples_per_type
     num_processes = min(cpu_count(), args.max_cores)
@@ -142,7 +144,7 @@ def main(args):
 
     corpus = {key: [] for key in workload_types}
 
-    worker_func = partial(generate_for_type, model=model, generation_config=gen_config)
+    worker_func = partial(generate_for_type, generation_params=generation_params)
     tasks_for_pool = [(w_type, num_samples_per_type) for w_type in workload_types]
 
     with Pool(processes=num_processes) as pool:

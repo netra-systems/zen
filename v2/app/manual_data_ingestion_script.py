@@ -1,78 +1,35 @@
-import time
-from config  import settings
-from db.clickhouse import ClickHouseClient
-from data.synthetic.synthetic_data_v1 import SyntheticDataV1
+# app/manual_data_ingestion_script.py
 
-# https://gemini.google.com/u/0/app/1b8b45e460f7556a
+import json
+import logging
+from typing import Dict
+from clickhouse_driver import Client
 
-def run_ingestion():
-    """
-    A standalone script to generate synthetic customer data and ingest it
-    into a ClickHouse database.
+logger = logging.getLogger(__name__)
 
-    This script leverages the existing configuration and modules from the Netra V2
-    application to perform the following steps:
-    1. Loads database credentials from the .env file.
-    2. Connects to the ClickHouse database.
-    3. Ensures the 'customers' table exists, creating it if necessary.
-    4. Generates synthetic customer data in batches.
-    5. Inserts each batch into the 'customers' table.
-    6. Prints progress and timing information.
-    """
-    # --- Configuration ---
-    TOTAL_RECORDS = 1
-    BATCH_SIZE = 1  # Process records in chunks
+class DataIngestor:
+    def __init__(self, clickhouse_creds: Dict, table_name: str, table_schema: Dict):
+        self.clickhouse_creds = clickhouse_creds
+        self.table_name = table_name
+        self.table_schema = table_schema
+        self.client = Client(**clickhouse_creds)
 
-    print("Starting data ingestion process...")
+    def __enter__(self):
+        return self
 
-    try:
-        # --- Step 1: Load Settings and Initialize Services ---
-        settings = get_settings()
-        db = ClickHouseDatabase(settings)
-        synthetic_data_generator = SyntheticDataV1()
-        
-        print(f"Successfully connected to ClickHouse at {settings.CLICKHOUSE_HOST}:{settings.CLICKHOUSE_PORT}")
-        exit()
-        # --- Step 2: Ensure the 'customers' table exists ---
-        print("Ensuring 'customers' table exists...")
-        db.create_table()
-        print("'customers' table is ready.")
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.client.disconnect()
 
-        # --- Step 3: Generate and Insert Data in Batches ---
-        start_time = time.time()
-        total_inserted = 0
+    def create_table_if_not_exists(self):
+        """Creates the table in ClickHouse if it doesn't exist."""
+        logging.info(f"Creating table {self.table_name} if it does not exist.")
+        create_table_query = f"CREATE TABLE IF NOT EXISTS {self.table_name} ({', '.join([f'{k} {v}' for k, v in self.table_schema.items()])}) ENGINE = MergeTree() ORDER BY (timestamp_utc)"
+        self.client.execute(create_table_query)
 
-        for i in range(0, TOTAL_RECORDS, BATCH_SIZE):
-            batch_start_time = time.time()
-            num_to_generate = min(BATCH_SIZE, TOTAL_RECORDS - i)
-            
-            print(f"Generating batch {i//BATCH_SIZE + 1}: {num_to_generate} records...")
-            
-            # Generate a batch of records
-            records = synthetic_data_generator.generate_records(num_records=num_to_generate)
-            
-            if not records:
-                print("No records generated, stopping.")
-                break
-
-            # Insert the batch into the database
-            db.insert_data('customers', records)
-            total_inserted += len(records)
-            
-            batch_end_time = time.time()
-            print(f"  -> Inserted batch in {batch_end_time - batch_start_time:.2f} seconds. "
-                  f"Total inserted: {total_inserted}/{TOTAL_RECORDS}")
-
-        end_time = time.time()
-        print("\n--------------------------------------------------")
-        print("Data ingestion completed successfully!")
-        print(f"Total records inserted: {total_inserted}")
-        print(f"Total time taken: {end_time - start_time:.2f} seconds")
-        print("--------------------------------------------------")
-
-    except Exception as e:
-        print(f"\nAn error occurred during the ingestion process: {e}")
-        print("Please check your .env configuration and ensure the ClickHouse Docker container is running.")
-
-if __name__ == "__main__":
-    run_ingestion()
+    def ingest_data(self, data_path: str):
+        """Ingests data from a JSON file into the ClickHouse table."""
+        logging.info(f"Ingesting data from {data_path} into {self.table_name}.")
+        with open(data_path, 'r') as f:
+            data = json.load(f)
+        self.client.execute(f"INSERT INTO {self.table_name} VALUES", data)
+        logging.info("Data ingestion completed successfully.")

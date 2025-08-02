@@ -21,6 +21,8 @@ import sys
 from faker import Faker
 from rich.console import Console
 from rich.progress import Progress
+from clickhouse_driver import Client
+from ..db.models_clickhouse import CONTENT_CORPUS_TABLE_NAME
 
 # Import the same Pydantic schemas from v1 to ensure compatibility
 from .synthetic_data_v1 import UnifiedLogEntry, DEFAULT_CONFIG
@@ -58,6 +60,22 @@ DEFAULT_CONTENT_CORPUS = {
         ]
     ]
 }
+
+def load_content_corpus_from_clickhouse(clickhouse_creds: dict) -> dict:
+    """Loads the content corpus from the ClickHouse database."""
+    client = Client(**clickhouse_creds)
+    query = f"SELECT workload_type, user_prompt, assistant_response FROM {CONTENT_CORPUS_TABLE_NAME}"
+    query_result = client.execute(query)
+
+    corpus = {}
+    for row in query_result:
+        workload_type, user_prompt, assistant_response = row
+        if workload_type not in corpus:
+            corpus[workload_type] = []
+        corpus[workload_type].append((user_prompt, assistant_response))
+
+    return corpus
+
 
 def load_content_corpus(corpus_path: str) -> dict:
     """Loads the content corpus from a JSON file, falling back to the default."""
@@ -307,7 +325,13 @@ def main(args):
     start_time = time.time()
 
     config = get_config(args.config)
-    content_corpus = load_content_corpus(args.corpus_file)
+    content_corpus = load_content_corpus_from_clickhouse({
+        "host": os.getenv("CLICKHOUSE_HOST", "localhost"),
+        "port": os.getenv("CLICKHOUSE_PORT", 9000),
+        "user": os.getenv("CLICKHOUSE_USER", "default"),
+        "password": os.getenv("CLICKHOUSE_PASSWORD", ""),
+        "database": os.getenv("CLICKHOUSE_DATABASE", "default"),
+    })
     total_traces = args.num_traces
 
     # --- Calculate number of each trace type ---

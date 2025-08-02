@@ -44,6 +44,28 @@ ORDER BY (id);
 """
 
 
+CONTENT_CORPUS_TABLE_NAME = 'netra_content_corpus'
+CONTENT_CORPUS_TABLE_SCHEMA = f"""
+CREATE TABLE IF NOT EXISTS {CONTENT_CORPUS_TABLE_NAME} (
+    `corpus_id` UUID,
+    `workload_type` String,
+    `user_prompt` String,
+    `assistant_response` String,
+    `created_at` DateTime DEFAULT now()
+)
+ENGINE = MergeTree()
+ORDER BY (corpus_id, workload_type)
+"""
+
+class ContentCorpus(SQLModel, table=True):
+    __tablename__ = CONTENT_CORPUS_TABLE_NAME
+    corpus_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    workload_type: str
+    user_prompt: str
+    assistant_response: str
+    created_at: int = Field(default_factory=lambda: int(time.time()))
+
+
 # Note: These are SQLModels used for data validation and structure, not for table creation
 # with SQLModel's metadata.create_all, as it doesn't support ClickHouse.
 # The table schema is defined in data_enricher.py.

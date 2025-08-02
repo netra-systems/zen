@@ -202,6 +202,18 @@ const Dashboard = ({ user, onLogout, token }: { user: User; onLogout: () => void
                                     <Button onClick={handleStartAnalysis} isLoading={isLoading || isPolling} disabled={isLoading || isPolling} icon={Zap}>
                                         {isPolling ? 'Analysis in Progress...' : 'Start New Analysis'}
                                     </Button>
+                                    <Button onClick={() => window.location.href = '/admin'} variant="secondary" icon={Settings} disabled={isLoading || isPolling}>
+                                        Admin Panel
+                                    </Button>
+                                    <Button onClick={() => window.location.href = '/generation'} variant="secondary" icon={Settings} disabled={isLoading || isPolling}>
+                                        Generate Synthetic Data
+                                    </Button>
+                                    <Button onClick={() => window.location.href = '/ingestion'} variant="secondary" icon={Settings} disabled={isLoading || isPolling}>
+                                        Ingest Data
+                                    </Button>
+                                    <Button onClick={() => window.location.href = '/demo'} variant="secondary" icon={Settings} disabled={isLoading || isPolling}>
+                                        Demo Agent
+                                    </Button>
                                     <Button onClick={() => alert('This feature is not yet implemented.')} variant="secondary" icon={Settings} disabled={isLoading || isPolling}>
                                         Manage Supply Catalog
                                     </Button>

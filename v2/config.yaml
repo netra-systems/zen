@@ -1,11 +1,11 @@
 generation_settings:
-  num_traces: 5
+  num_traces: 10000
   trace_distribution:
-    failed_request: 0
-    multi_turn_tool_use: 1
-    rag_pipeline: 0
-    simple_chat: 0
-    tool_use: 0
+    simple_chat: 0.25
+    rag_pipeline: 0.25
+    tool_use: 0.25
+    multi_turn_tool_use: 0.20
+    failed_request: 0.05
 overrides: {}
 realism:
   applications:
@@ -24,6 +24,11 @@ realism:
     - query-parser
     - retrieval-engine
     - answer-generator
+  - app_name: financial-forecasting-agent
+    services:
+    - data-retrieval-tool
+    - time-series-analyzer
+    - report-generator
   models:
   - family: gpt-4
     name: gpt-4o
@@ -32,6 +37,13 @@ realism:
     - 15.0
     provider: openai
     version_id: gpt-4o-2024-08-06
+  - family: gpt-4
+    name: gpt-4-turbo
+    pricing:
+    - 10.0
+    - 30.0
+    provider: openai
+    version_id: gpt-4-turbo-2024-04-09
   - family: claude-3
     name: claude-3-opus
     pricing:
@@ -39,17 +51,31 @@ realism:
     - 75.0
     provider: anthropic
     version_id: claude-3-opus-20240229
-  - family: gemini-2.0
-    name: gemini-2.0-flash
+  - family: claude-3
+    name: claude-3-sonnet
     pricing:
-    - 0.35
-    - 0.7
+    - 3.0
+    - 15.0
+    provider: anthropic
+    version_id: claude-3-sonnet-20240229
+  - family: gemini-1.5
+    name: gemini-1.5-pro
+    pricing:
+    - 3.5
+    - 10.5
     provider: google
     version_id: null
   - family: llama-3.1
     name: llama-3.1-70b-instruct
     pricing:
-    - 0.5
-    - 0.5
+    - 0.59
+    - 0.79
+    provider: vllm
+    version_id: null
+  - family: llama-3.1
+    name: llama-3.1-8b-instruct
+    pricing:
+    - 0.2
+    - 0.2
     provider: vllm
     version_id: null
