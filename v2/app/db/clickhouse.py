@@ -89,7 +89,9 @@ class ClickHouseClient:
             logger.error(f"Failed to execute query '{query}': {e}", exc_info=True)
             raise
 
-# Dependency function for FastAPI
+from contextlib import contextmanager
+
+@contextmanager
 def get_clickhouse_client():
     """
     Dependency provider for the ClickHouse client.
@@ -103,7 +105,6 @@ def get_clickhouse_client():
         password=settings.clickhouse_password,
         database=settings.clickhouse_db,
     )
-    # The connect call is now safe during schema generation.
     client.connect()
     try:
         yield client
