@@ -3,7 +3,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
-from starlette.middleware.session import SessionMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.routes import auth, supply, analysis, v3, generation, google_auth
 from app.db.postgres import Database
