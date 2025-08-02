@@ -153,8 +153,11 @@ class TokenizerProfile(BaseModel):
     """
     library: str = Field(..., description="The tokenizer library used (e.g., 'tiktoken', 'sentencepiece').")
     name: str = Field(..., description="The specific vocabulary name (e.g., 'cl100k_base').")
-    algorithm: TokenizerAlgorithm = Field(..., description="The underlying tokenization algorithm.")
+    algorithm: str = Field(..., description="The underlying tokenization algorithm.")
     vocab_size: int = Field(..., gt=0, description="The size of the tokenizer's vocabulary.")
+
+    class Config:
+        arbitrary_types_allowed = True
 
 class SupplyRecord(BaseModel):
     """
@@ -165,7 +168,7 @@ class SupplyRecord(BaseModel):
     supply_id: uuid.UUID = Field(default_factory=uuid.uuid4, description="A unique identifier for this supply option.")
     model_name: str = Field(..., description="The official name of the model.")
     provider: str = Field(..., description="The entity providing the model (e.g., 'OpenAI', 'Self-Hosted').")
-    deployment_type: DeploymentType
+    deployment_type: str
     cost_model: CostModel
     technical_specs: TechnicalSpecs
     # Performance is stored as a live, dynamic attribute updated by the Observability Plane
@@ -174,6 +177,9 @@ class SupplyRecord(BaseModel):
     tokenizer_profile: TokenizerProfile
     is_gauntlet_certified: bool = Field(False, description="True if the model has passed the Adversarial Gauntlet.")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata about the supply option.")
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 # --- Section 4: Multi-Objective Controller Schemas ---

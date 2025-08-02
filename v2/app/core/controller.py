@@ -10,7 +10,7 @@
 # Reference: Section 4: The Multi-Objective Controller.
 
 import math
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from ..models.schemas import WorkloadProfile, SupplyRecord, ParetoSolution
 from .supply_catalog import SupplyCatalog
