@@ -2,7 +2,6 @@ import asyncio
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from deepagents import create_deep_agent
-from app.services.engine import replace
 
 import json
 from clickhouse_driver import Client
@@ -299,7 +298,7 @@ async def draft_configuration_change(
     artifact. It reads a configuration file and generates a proposed change based on
     a policy recommendation, which is then presented to the user for review.
     """
-    return replace(file_path=file_path, old_string=old_string, new_string=new_string)
+    return default_api.replace(file_path=file_path, old_string=old_string, new_string=new_string)
 
 async def request_human_review(
     analysis_summary: str,

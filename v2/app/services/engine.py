@@ -326,8 +326,7 @@ class SimulationEngine:
         )
 
 # --- Analysis Pipeline ---
-from app.services.engine_deepagents import run_analysis_with_deepagents
-
+#from app.services.engine_deepagents import run_analysis_with_deepagents
 from app.services.engine_deepagents_v2 import run_analysis_with_deepagents_v2
 
 class AnalysisPipeline:
