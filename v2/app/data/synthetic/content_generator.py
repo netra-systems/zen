@@ -57,7 +57,7 @@ META_PROMPTS = {
     "failed_request": "Generate a user prompt that is impossible or unsafe for an AI assistant to fulfill. Then, provide a polite but firm refusal as the assistant's response."
 }
 
-def generate_content_sample(workload_type: str, model) -> dict:
+def generate_content_sample(workload_type: str, model, generation_config) -> dict:
     """Generates a single sample for a given workload type using the LLM."""
     if not model:
         return None
@@ -74,7 +74,7 @@ def generate_content_sample(workload_type: str, model) -> dict:
     """
 
     try:
-        response = model.generate_content(prompt_template)
+        response = model.generate_content(prompt_template, generation_config=generation_config)
         # Basic cleaning to handle markdown code blocks
         cleaned_text = response.text.strip().replace("```json", "").replace("```", "").strip()
         content = json.loads(cleaned_text)
@@ -86,11 +86,11 @@ def generate_content_sample(workload_type: str, model) -> dict:
         return None
     return None
 
-def generate_for_type(workload_type: str, num_samples: int, model):
+def generate_for_type(workload_type: str, num_samples: int, model, generation_config):
     """Worker function to generate multiple samples for a single workload type."""
     samples = []
     for _ in range(num_samples):
-        sample = generate_content_sample(workload_type, model)
+        sample = generate_content_sample(workload_type, model, generation_config)
         if sample:
             samples.append(sample)
     return samples
@@ -103,19 +103,27 @@ def main(args):
     console.print("[bold cyan]Starting AI-Powered Content Corpus Generation...[/bold cyan]")
     start_time = time.time()
 
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    generation_config = genai.types.GenerationConfig(
+        temperature=args.temperature,
+        top_p=args.top_p,
+        top_k=args.top_k
+    )
+
+    console.print(f"Generation Config: [yellow]temp={args.temperature}, top_p={args.top_p}, top_k={args.top_k}[/yellow]")
+
+    model = genai.GenerativeModel('gemini-2.5-flash')
     workload_types = list(META_PROMPTS.keys())
     num_samples_per_type = args.samples_per_type
     num_processes = min(cpu_count(), args.max_cores)
 
-    tasks = [(w_type, num_samples_per_type, model) for w_type in workload_types]
+    tasks = [(w_type, num_samples_per_type, model, generation_config) for w_type in workload_types]
 
     console.print(f"Using [yellow]{num_processes}[/yellow] cores to generate [yellow]{num_samples_per_type * len(workload_types)}[/yellow] total samples.")
 
     corpus = {key: [] for key in workload_types}
 
-    # Use a partial function to pass the model to the worker without pickling issues
-    worker_func = partial(generate_for_type, model=model)
+    # Use a partial function to pass the model and config to the worker without pickling issues
+    worker_func = partial(generate_for_type, model=model, generation_config=generation_config)
 
     with Pool(processes=num_processes) as pool:
         with Progress() as progress:
@@ -148,6 +156,10 @@ if __name__ == "__main__":
     parser.add_argument("--samples-per-type", type=int, default=10, help="Number of prompt/response pairs to generate for each workload type.")
     parser.add_argument("--output-file", default="content_corpus.json", help="Path to the output JSON file.")
     parser.add_argument("--max-cores", type=int, default=cpu_count(), help="Maximum number of CPU cores to use.")
+    parser.add_argument("--temperature", type=float, default=0.9, help="Controls the randomness of the output. Higher is more creative.")
+    parser.add_argument("--top-p", type=float, default=None, help="Nucleus sampling probability.")
+    parser.add_argument("--top-k", type=int, default=None, help="Top-k sampling control.")
+
 
     if len(sys.argv) == 1:
         args = parser.parse_args(['--samples-per-type', '10'])

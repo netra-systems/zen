@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 
-from app.routes import auth, supply, analysis, v3
+from app.routes import auth, supply, analysis, v3, generation
 from app.db.postgres import Database
 from app.db.clickhouse import ClickHouseClient
 from app.db.models_clickhouse import SUPPLY_TABLE_SCHEMA, LOGS_TABLE_SCHEMA
@@ -98,6 +98,7 @@ app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(supply.router, prefix="/supply", tags=["supply"])
 app.include_router(analysis.router, prefix="/analysis", tags=["analysis"])
 app.include_router(v3.router, prefix="/v3", tags=["v3"])
+app.include_router(generation.router, prefix="/generation", tags=["generation"])
 
 
 @app.get("/")
