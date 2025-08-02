@@ -1,9 +1,11 @@
-# v2/app/main_v2_5.py
+# v2/app/main.py
 import logging
-from fastapi import FastAPI, Request
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 
-from app.routes import auth, supply, analysis
+from app.routes import auth, supply, analysis, v3
+from app.db.postgres import Database
 from app.db.clickhouse import ClickHouseClient
 from app.db.models_clickhouse import SUPPLY_TABLE_SCHEMA, LOGS_TABLE_SCHEMA
 from app.config import settings
@@ -95,6 +97,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(supply.router, prefix="/supply", tags=["supply"])
 app.include_router(analysis.router, prefix="/analysis", tags=["analysis"])
+app.include_router(v3.router, prefix="/v3", tags=["v3"])
 
 
 @app.get("/")
