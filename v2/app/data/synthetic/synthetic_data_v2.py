@@ -328,8 +328,7 @@ def main(args):
     duration = end_time - start_time
     logs_per_second = len(all_logs) / duration if duration > 0 else 0
 
-    console.print(f"
-[bold green]Successfully generated {len(all_logs)} total log entries.[/bold green]")
+    console.print(f"[bold green]Successfully generated {len(all_logs)} total log entries.[/bold green]")
     console.print(f"Total time: [yellow]{duration:.2f}s[/yellow]")
     console.print(f"Performance: [bold yellow]{logs_per_second:.2f} logs/second[/bold yellow]")
 
