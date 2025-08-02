@@ -5,6 +5,8 @@ from typing import List, Dict, Any
 from app.logging_config_custom.logger import logger, Log
 from ..config import settings, IS_SCHEMA_GENERATION
 
+# TBD better difference between "Connect" and "Driver"
+
 class ClickHouseClient:
     """
     A client for interacting with a ClickHouse database.
@@ -52,8 +54,16 @@ class ClickHouseClient:
             logger.info("ClickHouse connection closed.")
 
     def is_connected(self) -> bool:
-        """Checks if the client is connected and the connection is open."""
-        return self.client is not None and self.client.is_open
+        """
+        Checks if the client is initialized and can connect to the server.
+        """
+        if self.client is None:
+            return False
+        try:
+            # The ping() method returns True on success or raises an exception on failure.
+            return self.client.ping()
+        except Exception:
+            return False
 
     def command(self, schema: str):
         """Executes a command."""

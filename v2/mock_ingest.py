@@ -25,11 +25,10 @@ def run_ingestion():
     print("Starting data ingestion process from local file...")
 
     with get_clickhouse_client() as client:
-        print(f"Successfully connected to ClickHouse at {settings.clickhouse_host}:{settings.clickhouse_port}")
-        print(client)
-        print("Ensuring 'netra_llm_events' table exists...")
-        client.execute(LLM_EVENTS_TABLE_SCHEMA)
-        print("'netra_llm_events' table is ready.")
+        
+        print(f"Successfully connected to ClickHouse at {client.database} : {settings.clickhouse_host}:{settings.clickhouse_port}")
+
+        client.command(LLM_EVENTS_TABLE_SCHEMA)
 
         start_time = time.time()
         print(f"Reading records from {JSON_FILE_PATH}...")
