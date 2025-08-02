@@ -73,4 +73,4 @@ class HumanGovernanceWorkflow:
         print(f"Workload ID: {workload.workload_id}")
         print(f"Approved Supply ID: {decision.supply_id}")
         print(f"Justification: {justification}")
-        print("-
+        print("-"*80)
