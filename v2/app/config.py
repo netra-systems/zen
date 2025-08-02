@@ -21,10 +21,12 @@ class AppConfig(BaseSettings):
         env_file = ".env"
 
 class DevelopmentConfig(AppConfig):
-    """Development configuration."""
+    """Development configuration.
+    Extends AppConfig, so just add other ones:
+    """
     log_level: str = "DEBUG"
     secret_key: str = "secret_key"
-    fernet_key: str = "fernet_key"
+    fernet_key: str = "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw="
     jwt_secret_key: str = "jwt_secret_key"
     database_url: str = "postgresql://postgres:postgres@localhost/netra"
 
@@ -40,6 +42,7 @@ class TestingConfig(AppConfig):
 def get_settings() -> AppConfig:
     """Returns the appropriate configuration class based on the APP_ENV environment variable."""
     app_env = os.environ.get("APP_ENV", "development")
+    print(f"|| {app_env} || Env loading configuration.")
     if app_env == "production":
         return ProductionConfig()
     elif app_env == "testing":

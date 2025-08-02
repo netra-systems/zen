@@ -29,13 +29,13 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.jwt_secret_key, algorithm=settings.algorithm)
     return encoded_jwt
 
 class SecurityService:
     def __init__(self):
         try:
-            key = settings.FERNET_KEY.encode()
+            key = settings.fernet_key.encode()
             self.fernet = Fernet(key)
         except Exception as e:
             logger.critical(f"FATAL: Could not initialize Fernet. FERNET_KEY may be invalid or missing. Error: {e}")
