@@ -1,10 +1,9 @@
 
 import asyncio
-from typing import List, Dict, Any, Optional
-from app.deepagents import create_deep_agent
+from typing import List, Dict, Any, Optional, Callable
+from deepagents import create_deep_agent
 import httpx
 from app.services.engine import (
-    AnalysisPipeline,
     AnalysisRequest,
     UnifiedLogEntry,
     update_run_status,
@@ -13,7 +12,14 @@ from app.services.engine import (
 
 
 async def run_analysis_with_deepagents(
-    run_id: str, request: AnalysisRequest, db_session, preloaded_spans: Optional[List[UnifiedLogEntry]] = None
+    run_id: str, 
+    request: AnalysisRequest, 
+    db_session, 
+    preloaded_spans: Optional[List[UnifiedLogEntry]],
+    enrich_spans: Callable,
+    discover_patterns: Callable,
+    generate_policies: Callable,
+    calculate_costs: Callable
 ):
     """
     Runs the analysis pipeline using a deep agent.
@@ -28,7 +34,7 @@ async def run_analysis_with_deepagents(
             "description": "Enriches the raw log data with additional metrics.",
             "input_schema": {"spans": "List of raw log entries"},
             "output_schema": {"enriched_spans": "List of enriched log entries"},
-            "model": AnalysisPipeline.log_enricher.enrich_spans,
+            "model": enrich_spans,
         },
         # Tool for discovering patterns
         {
@@ -36,7 +42,7 @@ async def run_analysis_with_deepagents(
             "description": "Discovers usage patterns in the enriched log data.",
             "input_schema": {"spans": "List of enriched log entries"},
             "output_schema": {"patterns": "List of discovered patterns"},
-            "model": AnalysisPipeline.pattern_discoverer.discover_patterns_from_spans,
+            "model": discover_patterns,
         },
         # Tool for simulating policies
         {
@@ -47,7 +53,7 @@ async def run_analysis_with_deepagents(
                 "span_map": "Map of span IDs to spans",
             },
             "output_schema": {"policies": "List of learned policies"},
-            "model": AnalysisPipeline.simulation_engine.generate_policies,
+            "model": generate_policies,
         },
         # Tool for calculating final costs
         {
@@ -58,7 +64,7 @@ async def run_analysis_with_deepagents(
                 "policies": "List of learned policies",
             },
             "output_schema": {"cost_comparison": "The final cost comparison"},
-            "model": AnalysisPipeline.simulation_engine.calculate_final_costs,
+            "model": calculate_costs,
         },
     ]
 
