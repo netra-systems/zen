@@ -1,20 +1,27 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from ..config import settings
 from app.logging_config_custom.logger import logger
 
-engine = create_engine(settings.database_url, echo=True)
+class Database:
+    def __init__(self, db_url: str):
+        self.engine = create_engine(db_url, echo=True)
+        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    def connect(self):
+        self.engine.connect()
 
-# Dependency to get a synchronous DB session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    def get_db(self) -> Session:
+        db = self.SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    @staticmethod
+    def close():
+        pass
 
 # PostgreSQL async engine
 try:

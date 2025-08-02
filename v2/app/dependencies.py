@@ -2,13 +2,12 @@
 import logging
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlmodel import Session, select
 
 from .config import settings
-from .db.postgres import SessionLocal
 from .db.models_postgres import User
 from .logging_config_custom.logger import logger
 
@@ -16,13 +15,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 TokenDep = Annotated[str, Depends(oauth2_scheme)]
 
-def get_db():
+def get_db(request: Request):
     """Provides a database session to a dependency."""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    return request.app.state.db.get_db()
 
 DbDep = Annotated[Session, Depends(get_db)]
 
