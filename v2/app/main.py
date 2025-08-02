@@ -17,54 +17,8 @@ def setup_logging():
     logger.configure(level=settings.log_level)
     logger.info("Logging configured.")
 
-def initialize_databases(app: FastAPI):
-    """Initializes and connects to PostgreSQL and ClickHouse."""
-    # Initialize PostgreSQL
-    try:
-        db = Database(settings.DATABASE_URL)
-        db.connect()
-        app.state.db = db
-        logger.info("PostgreSQL connected.")
-    except Exception as e:
-        logger.error(f"Failed to connect to PostgreSQL: {e}", exc_info=True)
-        raise
-
-    # Initialize and connect to ClickHouse
-    ch_client = ClickHouseClient(
-        host=settings.CLICKHOUSE_HOST,
-        port=settings.CLICKHOUSE_PORT,
-        database=settings.CLICKHOUSE_DATABASE,
-        user=settings.CLICKHOUSE_USER,
-        password=settings.CLICKHOUSE_PASSWORD
-    )
-    logger.info(f"Connecting to ClickHouse at {settings.CLICKHOUSE_HOST}:{settings.CLICKHOUSE_PORT}")
-    try:
-        ch_client.connect()
-        logger.info("ClickHouse connected.")
-        # Create tables if they don't exist
-        ch_client.create_table_if_not_exists(SUPPLY_TABLE_SCHEMA)
-        ch_client.create_table_if_not_exists(LOGS_TABLE_SCHEMA)
-        app.state.clickhouse_client = ch_client
-
-        # Add the ClickHouse handler to the root logger for the application
-        ch_handler = ClickHouseLogHandler(client=ch_client)
-        logging.getLogger("netra-core").addHandler(ch_handler)
-        logger.info("ClickHouse logging handler initialized.")
-
-    except Exception as e:
-        logger.error(f"Failed to connect or setup ClickHouse: {e}", exc_info=True)
-        # Re-raise the exception to prevent the application from starting in a bad state
-        raise
-
-def shutdown_resources(app: FastAPI):
-    """Gracefully disconnects from all databases."""
-    logger.info("Shutting down resources...")
-    if hasattr(app.state, 'clickhouse_client') and app.state.clickhouse_client.is_connected():
-        app.state.clickhouse_client.disconnect()
-        logger.info("ClickHouse disconnected.")
-    Database.close()
-    logger.info("Postgres connection closed.")
-
+from app.services.key_manager import KeyManager
+from app.services.security_service import SecurityService
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -75,14 +29,58 @@ async def lifespan(app: FastAPI):
     setup_logging()
     logger.info("Application startup...")
 
+    key_manager = KeyManager.load_from_env(settings.app_env)
+    app.state.key_manager = key_manager
+    app.state.security_service = SecurityService(key_manager)
+
     if settings.app_env != "development":
-        initialize_databases(app)
+        # Initialize PostgreSQL
+        try:
+            db = Database(settings.DATABASE_URL)
+            db.connect()
+            app.state.db = db
+            logger.info("PostgreSQL connected.")
+        except Exception as e:
+            logger.error(f"Failed to connect to PostgreSQL: {e}", exc_info=True)
+            raise
+
+        # Initialize and connect to ClickHouse
+        ch_client = ClickHouseClient(
+            host=settings.CLICKHOUSE_HOST,
+            port=settings.CLICKHOUSE_PORT,
+            database=settings.CLICKHOUSE_DATABASE,
+            user=settings.CLICKHOUSE_USER,
+            password=settings.CLICKHOUSE_PASSWORD
+        )
+        logger.info(f"Connecting to ClickHouse at {settings.CLICKHOUSE_HOST}:{settings.CLICKHOUSE_PORT}")
+        try:
+            ch_client.connect()
+            logger.info("ClickHouse connected.")
+            # Create tables if they don't exist
+            ch_client.create_table_if_not_exists(SUPPLY_TABLE_SCHEMA)
+            ch_client.create_table_if_not_exists(LOGS_TABLE_SCHEMA)
+            app.state.clickhouse_client = ch_client
+
+            # Add the ClickHouse handler to the root logger for the application
+            ch_handler = ClickHouseLogHandler(client=ch_client)
+            logging.getLogger("netra-core").addHandler(ch_handler)
+            logger.info("ClickHouse logging handler initialized.")
+
+        except Exception as e:
+            logger.error(f"Failed to connect or setup ClickHouse: {e}", exc_info=True)
+            # Re-raise the exception to prevent the application from starting in a bad state
+            raise
     
     yield
     
     # Shutdown
     logger.info("Application shutdown...")
-    shutdown_resources(app)
+    if hasattr(app.state, 'clickhouse_client') and app.state.clickhouse_client.is_connected():
+        app.state.clickhouse_client.disconnect()
+        logger.info("ClickHouse disconnected.")
+    if hasattr(app.state, 'db'):
+        Database.close()
+        logger.info("Postgres connection closed.")
 
 
 app = FastAPI(lifespan=lifespan)

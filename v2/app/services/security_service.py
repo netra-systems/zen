@@ -11,8 +11,7 @@ from sqlmodel import Session, select
 
 from ..db import models_postgres
 from ..db import models_clickhouse
-from ..config import settings
-from ..logging_config_custom.logger import logger
+from .key_manager import KeyManager
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -22,24 +21,20 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.jwt_secret_key, algorithm=settings.algorithm)
-    return encoded_jwt
-
 class SecurityService:
-    def __init__(self):
-        try:
-            key = settings.fernet_key.encode()
-            self.fernet = Fernet(key)
-        except Exception as e:
-            logger.critical(f"FATAL: Could not initialize Fernet. FERNET_KEY may be invalid or missing. Error: {e}")
-            raise
+    def __init__(self, key_manager: KeyManager):
+        self.key_manager = key_manager
+        self.fernet = Fernet(self.key_manager.fernet_key)
+
+    def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None):
+        to_encode = data.copy()
+        if expires_delta:
+            expire = datetime.utcnow() + expires_delta
+        else:
+            expire = datetime.utcnow() + timedelta(minutes=15)
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(to_encode, self.key_manager.jwt_secret_key, algorithm="HS256")
+        return encoded_jwt
 
     def encrypt(self, value: str) -> bytes:
         return self.fernet.encrypt(value.encode('utf-8'))
