@@ -23,6 +23,10 @@ class AppConfig(BaseSettings):
 class DevelopmentConfig(AppConfig):
     """Development configuration."""
     log_level: str = "DEBUG"
+    secret_key: str = "secret_key"
+    fernet_key: str = "fernet_key"
+    jwt_secret_key: str = "jwt_secret_key"
+    database_url: str = "postgresql://postgres:postgres@localhost/netra"
 
 class ProductionConfig(AppConfig):
     """Production configuration."""
