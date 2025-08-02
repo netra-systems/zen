@@ -313,6 +313,8 @@ class SimulationEngine:
         )
 
 # --- Analysis Pipeline ---
+from app.services.engine_deepagents import run_analysis_with_deepagents
+
 class AnalysisPipeline:
     def __init__(self, run_id: str, request: AnalysisRequest, db_session, preloaded_spans: Optional[List[UnifiedLogEntry]] = None):
         self.run_id = run_id
@@ -326,7 +328,9 @@ class AnalysisPipeline:
         self.simulation_engine = SimulationEngine(self.supply_catalog_service, self.llm_connector, request.negotiated_discount_percent)
         self.log_enricher = LogEnrichmentModule()
 
-    async def run(self):
+    async def run(self, use_deepagents: bool = False):
+        if use_deepagents:
+            return await self.run_with_deepagents()
         try:
             if self.preloaded_spans is not None:
                 all_spans = self.preloaded_spans
@@ -392,6 +396,11 @@ class AnalysisPipeline:
                 span_map=span_map
             )
             update_run_status(self.run_id, 'completed', "Analysis complete.", result=result.model_dump(exclude_none=True))
+
+    async def run_with_deepagents(self):
+        return await run_analysis_with_deepagents(
+            self.run_id, self.request, self.db_session, self.preloaded_spans
+        )
 
         except Exception as e:
             logger.error(f"An error occurred during trace analysis run {self.run_id}: {e}", exc_info=True)

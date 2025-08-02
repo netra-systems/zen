@@ -9,11 +9,12 @@ from .services.security_service import security_service
 from .data.data_copier import DataCopier
 from .data.data_enricher import DataEnricher
 from .services.analysis_runner import AnalysisRunner
-from .db import models_postgres
+from .db.postgres import SessionLocal
+from .schema import AnalysisRun
 from .config import settings
 from .logging_config_custom.logger import logger
 
-def run_full_analysis_pipeline(run_id: uuid.UUID, user_id: str):
+def run_full_analysis_pipeline(run_id: uuid.UUID, user_id: str, use_deepagents: bool = False):
     """
     The main function that orchestrates the analysis pipeline.
     It's designed to be run in the background.
@@ -49,7 +50,7 @@ def run_full_analysis_pipeline(run_id: uuid.UUID, user_id: str):
         )
         
         # This is the main execution block
-        analysis_result = runner.execute()
+        analysis_result = runner.execute(use_deepagents=use_deepagents)
 
         # 4. Update the AnalysisRun with results
         run.status = "completed"

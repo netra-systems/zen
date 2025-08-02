@@ -40,6 +40,7 @@ def get_credentials(db: DbDep, current_user: ActiveUserDep):
 @router.post("/runs", response_model=schema.AnalysisRunPublic, status_code=status.HTTP_202_ACCEPTED)
 def start_new_analysis_run(
     run_create: schema.AnalysisRunCreate,
+    use_deepagents: bool = False,
     background_tasks: BackgroundTasks,
     db: DbDep,
     current_user: ActiveUserDep
@@ -53,7 +54,7 @@ def start_new_analysis_run(
     db.commit()
     db.refresh(new_run)
 
-    background_tasks.add_task(run_full_analysis_pipeline, run_id=new_run.id, user_id=current_user.id)
+    background_tasks.add_task(run_full_analysis_pipeline, run_id=new_run.id, user_id=current_user.id, use_deepagents=use_deepagents)
     logger.info(f"Started analysis run {new_run.id} for user {current_user.email}")
     return new_run
 
