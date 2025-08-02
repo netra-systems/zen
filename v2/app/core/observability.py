@@ -118,7 +118,7 @@ class ObservabilityPlane:
         # 3. Recalculate and update the statistical profiles in the Supply Catalog
         self._update_supply_catalog_profiles(supply_id, quality_scores)
         
-        print(f"Observability: Processed result for workload {workload.workload_id[:8]} on supply {supply_id[:8]}.")
+        print(f"Observability: Processed result for workload {str(workload.workload_id)[:8]} on supply {str(supply_id)[:8]}.")
 
     def _store_observation(self, supply_id: str, result: Dict[str, Any]):
         """Stores raw metrics for later aggregation."""

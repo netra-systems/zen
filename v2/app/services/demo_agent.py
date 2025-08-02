@@ -1,6 +1,6 @@
 # app/services/demo_agent.py
 
-from deepagents import create_deep_agent, DeepAgentState
+from app.deepagents import create_deep_agent, DeepAgentState
 from app.services.demo_tools import (
     cost_reduction_quality_preservation,
     tool_latency_optimization,

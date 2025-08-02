@@ -22,7 +22,7 @@ from faker import Faker
 from rich.console import Console
 from rich.progress import Progress
 from clickhouse_driver import Client
-from ..db.models_clickhouse import CONTENT_CORPUS_TABLE_NAME
+from app.db.models_clickhouse import CONTENT_CORPUS_TABLE_NAME
 
 # Import the same Pydantic schemas from v1 to ensure compatibility
 from .synthetic_data_v1 import UnifiedLogEntry, DEFAULT_CONFIG
