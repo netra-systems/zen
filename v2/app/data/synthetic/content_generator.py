@@ -83,7 +83,10 @@ def generate_content_sample(workload_type: str, model, generation_config) -> dic
     
     try:
         # Use the schema as a "tool" to enforce structured output
-        response = model.generate_content(prompt, generation_config=generation_config, tools=[schema])
+        response = model.generate_content(
+            prompt, 
+            generation_config=generation_config, 
+            tools=[genai.Tool.from_pydantic_model(schema)])
         
         # Extract the structured data from the tool call
         tool_call = response.candidates[0].content.parts[0].function_call
