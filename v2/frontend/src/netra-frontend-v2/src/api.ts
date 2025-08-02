@@ -1,23 +1,8 @@
 
-import { config } from './config';
+ 
 
 // --- Type Definitions for API data ---
-interface User {
-    full_name?: string;
-    email: string;
-}
-
-interface AnalysisResultSummary {
-    projected_monthly_savings: number;
-    delta_percent: number;
-}
-
-interface AnalysisRun {
-    id: string;
-    status: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED';
-    execution_log: string;
-    result_summary: AnalysisResultSummary | null;
-}
+ 
 
 // --- API Service ---
 // A simple wrapper for fetch to handle common cases
@@ -34,7 +19,7 @@ export const apiService = {
         }
         return response.json();
     },
-    async post(endpoint: string, body: any, token: string | null, expectStatus: number = 200) {
+    async post(endpoint: string, body: Record<string, unknown>, token: string | null, expectStatus: number = 200) {
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {

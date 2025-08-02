@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, FormEvent } from 'react';
-import { Zap, Settings, RefreshCw, BarChart2, DollarSign, HelpCircle, LogOut } from 'lucide-react';
+import { Zap, HelpCircle } from 'lucide-react';
 
 import { config } from '../config';
 import Card from '../components/Card';
@@ -15,9 +15,9 @@ interface Job {
     job_id: string;
     status: 'pending' | 'running' | 'completed' | 'failed';
     type: string;
-    params: any;
+    params: Record<string, unknown>;
     result_path?: string;
-    summary?: any;
+    summary?: { message: string };
     error?: string;
 }
 
@@ -35,7 +35,7 @@ const apiService = {
         }
         return response.json();
     },
-    async post(endpoint: string, body: any, token: string | null, expectStatus: number = 202) {
+    async post(endpoint: string, body: Record<string, unknown>, token: string | null, expectStatus: number = 202) {
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -66,7 +66,7 @@ export default function AdminPage() {
             if (data.status !== 'running' && data.status !== 'pending') {
                 setIsPolling(false);
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Polling failed:", err);
             setError('Could not get job status.');
             setIsPolling(false);
@@ -97,9 +97,9 @@ export default function AdminPage() {
             const newJob = await apiService.post(`${config.api.baseUrl}/generation/content_corpus`, { samples_per_type, temperature, max_cores }, token);
             setJob(newJob);
             setIsPolling(true);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Error starting generation:", err);
-            setError(err.message || 'An unexpected error occurred.');
+            setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
         } finally {
             setIsLoading(false);
         }

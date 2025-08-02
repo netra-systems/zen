@@ -11,7 +11,7 @@ import { useAppStore } from '../store';
 
 // --- API Service ---
 const apiService = {
-    async post(endpoint: string, body: any, token: string | null) {
+    async post(endpoint: string, body: Record<string, unknown>, token: string | null) {
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -28,10 +28,17 @@ const apiService = {
     }
 };
 
+interface AgentResponse {
+    // Define the structure of the agent response here
+    // For example:
+    data: Record<string, unknown>;
+    // Add other properties as needed
+}
+
 export default function DemoPage() {
     const { token } = useAppStore();
     const [query, setQuery] = useState('');
-    const [response, setResponse] = useState<any | null>(null);
+    const [response, setResponse] = useState<AgentResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -43,9 +50,9 @@ export default function DemoPage() {
         try {
             const res = await apiService.post(`${config.api.baseUrl}/generation/demo_agent`, { query }, token);
             setResponse(res);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Error querying agent:", err);
-            setError(err.message || 'An unexpected error occurred.');
+            setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
         } finally {
             setIsLoading(false);
         }

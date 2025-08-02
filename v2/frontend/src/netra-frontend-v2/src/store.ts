@@ -51,9 +51,9 @@ export const useAppStore = create<AppState>((set, get) => ({
             const { access_token } = await response.json();
             localStorage.setItem('authToken', access_token);
             await get().fetchUser(access_token);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(error);
-            set({ authError: error.message || 'An unexpected error occurred during login.', isLoading: false });
+            set({ authError: error instanceof Error ? error.message : 'An unexpected error occurred during login.', isLoading: false });
         }
     },
     logout: () => {
