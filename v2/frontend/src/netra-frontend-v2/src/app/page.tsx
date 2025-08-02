@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useCallback, FormEvent } from 'react';
 import { Zap, Settings, RefreshCw, BarChart2, DollarSign, HelpCircle, LogOut } from 'lucide-react';
 
+import { config } from '../config';
+
 // --- Type Definitions for API data ---
 interface User {
     full_name?: string;
@@ -54,132 +56,41 @@ const apiService = {
 };
 
 
-// --- UI Components ---
-const Card = ({ children, className = '' }: { children: React.ReactNode, className?: string }) => <div className={`bg-white rounded-lg shadow-md p-6 ${className}`}>{children}</div>;
-
-const Button = ({ children, onClick, type = 'button', disabled, isLoading, variant = 'primary', icon: Icon, className = '' }: {
-    children: React.ReactNode;
-    onClick?: () => void;
-    type?: 'button' | 'submit' | 'reset';
-    disabled?: boolean;
-    isLoading?: boolean;
-    variant?: 'primary' | 'secondary' | 'ghost';
-    icon?: React.ElementType;
-    className?: string;
-}) => {
-    const baseClasses = 'w-full inline-flex justify-center items-center px-4 py-2 border text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200';
-    const variantClasses = {
-        primary: 'border-transparent text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed',
-        secondary: 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed',
-        ghost: 'border-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:ring-indigo-500',
-    };
-    return (
-        <button type={type} onClick={onClick} disabled={disabled || isLoading} className={`${baseClasses} ${variantClasses[variant]} ${className}`}>
-            {isLoading ? <RefreshCw className="animate-spin -ml-1 mr-3 h-5 w-5" /> : (Icon && <Icon className="-ml-1 mr-3 h-5 w-5" />)}
-            {children}
-        </button>
-    );
-};
-
-const Spinner = ({ className = '' }: { className?: string }) => (
-    <div className={`flex justify-center items-center h-full ${className}`}>
-        <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-    </div>
-);
-
-const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>((props, ref) => (
-    <input
-        ref={ref}
-        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        {...props}
-    />
-));
-Input.displayName = 'Input';
+import Card from '../components/Card';
+import Button from '../components/Button';
+import Spinner from '../components/Spinner';
+import Input from '../components/Input';
 
 
-// --- Main App State and Logic (using a custom hook for encapsulation) ---
-function useAppController() {
-    const [isMounted, setIsMounted] = useState(false);
-    const [user, setUser] = useState<User | null>(null);
-    const [token, setToken] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [authError, setAuthError] = useState<string | null>(null);
-
-    const fetchUser = useCallback(async (currentToken: string) => {
-        try {
-            const userData = await apiService.get('/users/me', currentToken);
-            setUser(userData);
-        } catch (error) {
-            // Token is likely invalid, log out
-            console.error("Failed to fetch user, logging out.", error);
-            setToken(null);
-            setUser(null);
-            if (typeof window !== 'undefined') {
-                localStorage.removeItem('authToken');
-            }
-        }
-    }, []);
-
-    useEffect(() => {
-        setIsMounted(true);
-        const storedToken = localStorage.getItem('authToken');
-        if (storedToken) {
-            setToken(storedToken);
-            fetchUser(storedToken).finally(() => setIsLoading(false));
-        } else {
-            setIsLoading(false);
-        }
-    }, [fetchUser]);
-
-    const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        setAuthError(null);
-        const formData = new FormData(event.currentTarget);
-        
-        try {
-            const response = await fetch('/auth/token', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                 const errorData = await response.json();
-                throw new Error(errorData.detail || 'Login failed');
-            }
-
-            const { access_token } = await response.json();
-            localStorage.setItem('authToken', access_token);
-            setToken(access_token);
-            await fetchUser(access_token);
-
-        } catch (error: any) {
-            console.error(error);
-            setAuthError(error.message || 'An unexpected error occurred during login.');
-        }
-    };
-
-    const handleLogout = () => {
-        setUser(null);
-        setToken(null);
-        localStorage.removeItem('authToken');
-    };
-
-    return { isMounted, isLoading, user, authError, handleLogin, handleLogout, token };
-}
-
+import { useAppStore } from '../store';
 
 // --- Root Component ---
 export default function Home() {
-    const { isMounted, isLoading, user, authError, handleLogin, handleLogout, token } = useAppController();
+    const {
+        isLoading,
+        user,
+        authError,
+        login,
+        logout,
+        token,
+        fetchUser,
+    } = useAppStore();
 
-    if (!isMounted || isLoading) {
+    useEffect(() => {
+        const storedToken = localStorage.getItem('authToken');
+        if (storedToken) {
+            fetchUser(storedToken);
+        }
+    }, [fetchUser]);
+
+    if (isLoading) {
         return <div className="min-h-screen bg-gray-50"><Spinner className="py-20" /></div>;
     }
 
     return user && token ? (
-        <Dashboard user={user} onLogout={handleLogout} token={token} />
+        <Dashboard user={user} onLogout={logout} token={token} />
     ) : (
-        <LoginPage onLogin={handleLogin} error={authError} />
+        <LoginPage onLogin={login} error={authError} />
     );
 }
 
@@ -226,7 +137,7 @@ const Dashboard = ({ user, onLogout, token }: { user: User; onLogout: () => void
 
     const pollStatus = useCallback(async (runId: string) => {
         try {
-            const data: AnalysisRun = await apiService.get(`/runs/${runId}`, token);
+            const data: AnalysisRun = await apiService.get(`${config.api.endpoints.runs}/${runId}`, token);
             setAnalysisRun(data);
             if (data.status !== 'RUNNING' && data.status !== 'PENDING') {
                 setIsPolling(false);
@@ -252,7 +163,7 @@ const Dashboard = ({ user, onLogout, token }: { user: User; onLogout: () => void
         setIsLoading(true);
         setError(null);
         try {
-            const run = await apiService.post('/runs', { source_table: 'logs' }, token, 202);
+            const run = await apiService.post(config.api.endpoints.runs, { source_table: 'logs' }, token, 202);
             setAnalysisRun(run);
             setIsPolling(true);
         } catch (err: any) {
