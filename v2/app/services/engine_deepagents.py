@@ -1,7 +1,7 @@
 
 import asyncio
 from typing import List, Dict, Any, Optional, Callable
-from deepagents import create_deep_agent
+from app.deepagents import create_deep_agent
 import httpx
 from app.services.engine import (
     AnalysisRequest,
