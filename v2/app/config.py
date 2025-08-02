@@ -28,7 +28,7 @@ class DevelopmentConfig(AppConfig):
     secret_key: str = "secret_key"
     fernet_key: str = "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw="
     jwt_secret_key: str = "jwt_secret_key"
-    database_url: str = "postgresql://postgres:postgres@localhost/netra"
+    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost/netra"
 
 class ProductionConfig(AppConfig):
     """Production configuration."""
