@@ -10,7 +10,7 @@ export const apiService = {
     async get(endpoint: string, token: string | null) {
         const response = await fetch(endpoint, {
             headers: {
-                'Authorization': token
+                'Authorization': `Bearer ${token}`
             }
         });
         if (!response.ok) {

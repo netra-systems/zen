@@ -86,7 +86,7 @@ def create_user(request: Request, user: schema.UserCreate, db: DbDep):
 
 
 @router.get("/users/me", response_model=schema.UserPublic)
-def read_users_me(current_user: ActiveUserDep):
+async def read_users_me(current_user: ActiveUserDep):
     """
     Returns the public information for the currently authenticated user.
     """

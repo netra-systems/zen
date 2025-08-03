@@ -11,15 +11,11 @@ from .config import settings
 from .db.models_postgres import User
 from .logging_config_custom.logger import logger
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 TokenDep = Annotated[str, Depends(oauth2_scheme)]
 
 from .db.postgres import get_async_db
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
-
-TokenDep = Annotated[str, Depends(oauth2_scheme)]
 
 DbDep = Annotated[Session, Depends(get_async_db)]
 
