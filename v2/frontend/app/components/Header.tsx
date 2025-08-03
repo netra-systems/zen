@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from './dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from './avatar';
-import { Sheet, SheetContent, SheetTrigger } from './sheet';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from './sheet';
 import { Icons } from './Icons';
 
 export const Header = () => {
@@ -30,6 +30,7 @@ export const Header = () => {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="flex flex-col">
+          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
           <nav className="grid gap-2 text-lg font-medium">
             <Link href="#" className="flex items-center gap-2 text-lg font-semibold">
               <Icons.logo className="h-6 w-6" />
