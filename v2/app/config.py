@@ -38,21 +38,20 @@ class AppConfig(BaseSettings):
     secret_key: str = "default_secret_key"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
-    fernet_key: str = "default_fernet_key"
-    jwt_secret_key: str = "default_jwt_secret_key"
+    fernet_key: str = "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw="
+    jwt_secret_key: str = "dev_jwt_secretkeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeey"
     api_base_url: str = "http://localhost:8000"
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra"
+    log_level: str = "DEBUG"
 
 class DevelopmentConfig(AppConfig):
     """Development-specific settings can override defaults."""
-    secret_key: str = "dev_secret_key"
-    fernet_key: str = "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw="
-    jwt_secret_key: str = "dev_jwt_secret_key"
+    pass
 
 class ProductionConfig(AppConfig):
     """Production-specific settings."""
     log_level: str = "INFO"
-    # In production, you would likely override keys to be loaded from a secure source
+
 
 class TestingConfig(AppConfig):
     """Testing-specific settings."""
