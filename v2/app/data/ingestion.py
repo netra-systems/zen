@@ -1,8 +1,7 @@
 import json
 import time
 import logging
-from app.db.clickhouse import get_clickhouse_client
-from app.db.models_clickhouse import LLM_EVENTS_TABLE_SCHEMA
+from app.db.clickhouse import ClickHouseClient
 
 def prepare_data_for_insert(flattened_records: list[dict]) -> tuple[list[str], list[list]]:
     """
@@ -47,52 +46,23 @@ def _flatten_json_first_level(nested_json, sep='_'):
             items[k] = v
     return items
 
-def ingest_records(records: list[dict]) -> dict:
+def ingest_records(client: ClickHouseClient, records: list[dict], table_name: str) -> int:
     """
-    Ingests a list of in-memory records into ClickHouse.
-    This is the primary, most efficient ingestion method.
+    Ingests a list of in-memory records into a specified ClickHouse table using an active client.
     """
     if not records or not isinstance(records, list):
-        return {"status": "failed", "message": "No records provided or format is incorrect."}
+        logging.warning("No records provided or format is incorrect. Skipping ingestion.")
+        return 0
 
-    logging.info(f"Starting in-memory data ingestion for {len(records)} records...")
-    start_time = time.time()
+    logging.info(f"Ingesting batch of {len(records)} records into '{table_name}'...")
+    
+    flattened_records = [_flatten_json_first_level(record[0] if isinstance(record, list) and record else record) for record in records]
+    ordered_columns, data_for_insert = prepare_data_for_insert(flattened_records)
 
-    with get_clickhouse_client() as client:
-        client.command(LLM_EVENTS_TABLE_SCHEMA)
-        
-        # The check for record[0] is specific to the current log generation format.
-        # It might need to be generalized if the source format changes.
-        flattened_records = [_flatten_json_first_level(record[0] if isinstance(record, list) and record else record) for record in records]
-        ordered_columns, data_for_insert = prepare_data_for_insert(flattened_records)
+    if not data_for_insert:
+        logging.warning("Data preparation resulted in no records to insert for this batch.")
+        return 0
 
-        if not data_for_insert:
-            return {"status": "failed", "message": "Data preparation resulted in no records to insert."}
-
-        client.insert_data('JSON_HYBRID_EVENTS4', data_for_insert, column_names=ordered_columns)
-        
-        end_time = time.time()
-        summary = {
-            "status": "completed",
-            "total_records_inserted": len(flattened_records),
-            "time_taken_seconds": f"{end_time - start_time:.2f}"
-        }
-        logging.info(f"In-memory data ingestion completed: {summary}")
-        return summary
-
-def ingest_data_from_file(file_path: str) -> dict:
-    """
-    Reads data from a JSON file and ingests it into ClickHouse using the
-    primary in-memory ingestion function.
-    """
-    logging.info(f"Starting data ingestion process from {file_path}...")
-    try:
-        with open(file_path, 'r') as f:
-            records = json.load(f)
-        return ingest_records(records)
-    except FileNotFoundError:
-        logging.error(f"Ingestion failed: File not found at {file_path}")
-        return {"status": "failed", "message": f"File not found: {file_path}"}
-    except json.JSONDecodeError:
-        logging.error(f"Ingestion failed: Could not decode JSON from {file_path}")
-        return {"status": "failed", "message": f"Invalid JSON in file: {file_path}"}
+    client.insert_data(table_name, data_for_insert, column_names=ordered_columns)
+    logging.info(f"Successfully inserted batch of {len(flattened_records)} records.")
+    return len(flattened_records)
