@@ -67,8 +67,9 @@ def run_content_generation_job(job_id: str, params: dict):
     completed_tasks = 0
     with Pool(processes=num_processes) as pool:
         for i, result in enumerate(pool.imap_unordered(worker_func, tasks)):
-            if result and result.get('type') in corpus:
-                corpus[result['type']].append(result['data'])
+            if result:
+                if result.get('type') in corpus:
+                    corpus[result['type']].append(result['data'])
             
             completed_tasks += 1
             if i % 5 == 0 or completed_tasks == len(tasks): # Update every 5 tasks or at the end

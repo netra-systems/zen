@@ -116,7 +116,7 @@ def generate_for_type(task_args, model, generation_config):
         sample = generate_content_sample(workload_type, model, generation_config)
         if sample:
             samples.append(sample)
-    return samples
+    return [s for s in samples if s]
 
 # --- 4. Orchestration ---
 def main(args):
