@@ -49,14 +49,14 @@ def load_content_corpus_from_clickhouse() -> dict:
                 console.print("[yellow]Warning: ClickHouse connection failed. Falling back to default corpus.[/yellow]")
                 return DEFAULT_CONTENT_CORPUS
             
-            query = f"SELECT workload_type, user_prompt, assistant_response FROM {CONTENT_CORPUS_TABLE_NAME}"
+            query = f"SELECT workload_type, prompt, response FROM {CONTENT_CORPUS_TABLE_NAME}"
             query_result = client.execute_query(query)
 
             corpus = {}
             for row in query_result:
                 workload_type = row['workload_type']
-                user_prompt = row['user_prompt']
-                assistant_response = row['assistant_response']
+                user_prompt = row['prompt']
+                assistant_response = row['response']
                 
                 if workload_type not in corpus:
                     corpus[workload_type] = []
@@ -318,11 +318,23 @@ def generate_multi_turn_tool_trace(config, content_corpus) -> list:
 
 # --- 4. ORCHESTRATION ---
 def main(args):
+    """Main function to generate synthetic logs. Can be called from other modules."""
     console.print("[bold cyan]Starting High-Performance Synthetic Log Generation (v2)...[/bold cyan]")
     start_time = time.time()
 
-    config = get_config(args.config)
-    content_corpus = load_content_corpus_from_clickhouse()
+    # Determine if running as a standalone script or called from another module
+    is_standalone = hasattr(args, 'output_file')
+
+    config_path = args.config if hasattr(args, 'config') else "config.yaml"
+    config = get_config(config_path)
+
+    # Use provided corpus if available, otherwise load from ClickHouse
+    if hasattr(args, 'corpus') and args.corpus:
+        content_corpus = args.corpus
+        console.print("[green]Using content corpus provided in arguments.[/green]")
+    else:
+        content_corpus = load_content_corpus_from_clickhouse()
+
     total_traces = args.num_traces
 
     # --- Calculate number of each trace type ---
@@ -335,7 +347,8 @@ def main(args):
     # --- Generate Simple Logs in Parallel ---
     all_logs = []
     if num_simple_logs > 0:
-        num_processes = min(cpu_count(), args.max_cores)
+        max_cores = args.max_cores if hasattr(args, 'max_cores') else cpu_count()
+        num_processes = min(cpu_count(), max_cores)
         chunk_size = num_simple_logs // num_processes
         chunks = [chunk_size] * num_processes
         remainder = num_simple_logs % num_processes
@@ -358,21 +371,23 @@ def main(args):
                 all_logs.extend(generate_multi_turn_tool_trace(config, content_corpus))
                 progress.update(task, advance=1)
 
-    # --- Finalize and Save ---
+    # --- Finalize ---
     console.print("Shuffling all generated logs for realism...")
     random.shuffle(all_logs)
 
-    console.print(f"Saving output to [cyan]{args.output_file}[/cyan]...")
-    with open(args.output_file, 'w') as f:
-        json.dump(all_logs, f, indent=2)
-
-    end_time = time.time()
-    duration = end_time - start_time
+    duration = time.time() - start_time
     logs_per_second = len(all_logs) / duration if duration > 0 else 0
 
     console.print(f"[bold green]Successfully generated {len(all_logs)} total log entries.[/bold green]")
     console.print(f"Total time: [yellow]{duration:.2f}s[/yellow]")
     console.print(f"Performance: [bold yellow]{logs_per_second:.2f} logs/second[/bold yellow]")
+
+    if is_standalone:
+        console.print(f"Saving output to [cyan]{args.output_file}[/cyan]...")
+        with open(args.output_file, 'w') as f:
+            json.dump(all_logs, f, indent=2)
+    
+    return all_logs
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="High-Performance Synthetic Log Generator v2")
@@ -390,5 +405,3 @@ if __name__ == "__main__":
         args = parser.parse_args()
 
     main(args)
-
-
