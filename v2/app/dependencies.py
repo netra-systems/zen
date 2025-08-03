@@ -41,7 +41,7 @@ async def get_current_user(request: Request, token: TokenDep, db: DbDep) -> User
         logger.error(f"JWT Error: {e}")
         raise credentials_exception from e
 
-    result = await db.execute(select(User).where(User.email == email))
+    result = db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
     if user is None:
         logger.warning(f"User with email '{email}' from token not found in DB.")
