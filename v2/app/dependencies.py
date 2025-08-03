@@ -34,6 +34,8 @@ async def get_current_user(token: TokenDep, db: DbDep) -> User:
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        # The token is expected to be in the format "Bearer <token>"
+        # The OAuth2PasswordBearer dependency already handles extracting the token
         payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.algorithm])
         email: str = payload.get("sub")
         if email is None:

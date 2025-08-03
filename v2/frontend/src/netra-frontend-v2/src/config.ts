@@ -6,7 +6,7 @@ export const config = {
         baseUrl: API_BASE_URL,
         endpoints: {
             login: `${API_BASE_URL}/auth/token`,
-            currentUser: `${API_BASE_URL}/users/me`,
+            currentUser: `${API_BASE_URL}/auth/users/me`,
             runs: `${API_BASE_URL}/runs`,
         },
     },
