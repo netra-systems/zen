@@ -1,29 +1,72 @@
 "use client";
 
 import React from 'react';
-import { Button, Card, CardBody, CardHeader } from "@nextui-org/react";
+import { Button } from "./ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
 import { Zap, Settings, RefreshCw, BarChart2, HelpCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export const ControlPanel = () => {
   const router = useRouter();
 
+  const buttons = [
+    { 
+      text: 'Start New Analysis', 
+      icon: <Zap className="mr-2 h-4 w-4" />, 
+      onClick: () => router.push('/analysis'),
+      variant: 'default' as const
+    },
+    { 
+      text: 'Admin Panel', 
+      icon: <Settings className="mr-2 h-4 w-4" />, 
+      onClick: () => router.push('/admin'),
+      variant: 'outline' as const
+    },
+    { 
+      text: 'Generate Synthetic Data', 
+      icon: <RefreshCw className="mr-2 h-4 w-4" />, 
+      onClick: () => router.push('/generation'),
+      variant: 'outline' as const
+    },
+    { 
+      text: 'Ingest Data', 
+      icon: <BarChart2 className="mr-2 h-4 w-4" />, 
+      onClick: () => router.push('/ingestion'),
+      variant: 'outline' as const
+    },
+    { 
+      text: 'Demo Agent', 
+      icon: <HelpCircle className="mr-2 h-4 w-4" />, 
+      onClick: () => router.push('/demo'),
+      variant: 'outline' as const
+    },
+    { 
+      text: 'Manage Supply Catalog', 
+      icon: <Settings className="mr-2 h-4 w-4" />, 
+      onClick: () => router.push('/supply-catalog'),
+      variant: 'outline' as const
+    },
+  ];
+
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-xl font-semibold">Control Panel</h2>
+        <CardTitle>Control Panel</CardTitle>
+        <CardDescription>Start a new analysis or manage settings.</CardDescription>
       </CardHeader>
-      <CardBody>
-        <p className="text-sm text-gray-500">Start a new analysis or manage settings.</p>
-        <div className="mt-6 space-y-4">
-          <Button color="primary" startContent={<Zap />} fullWidth onPress={() => router.push('/analysis')}>Start New Analysis</Button>
-          <Button variant="bordered" startContent={<Settings />} fullWidth onPress={() => router.push('/admin')}>Admin Panel</Button>
-          <Button variant="bordered" startContent={<RefreshCw />} fullWidth onPress={() => router.push('/generation')}>Generate Synthetic Data</Button>
-          <Button variant="bordered" startContent={<BarChart2 />} fullWidth onPress={() => router.push('/ingestion')}>Ingest Data</Button>
-          <Button variant="bordered" startContent={<HelpCircle />} fullWidth onPress={() => router.push('/demo')}>Demo Agent</Button>
-          <Button variant="bordered" startContent={<Settings />} fullWidth onPress={() => router.push('/supply-catalog')}>Manage Supply Catalog</Button>
-        </div>
-      </CardBody>
+      <CardContent className="space-y-4">
+        {buttons.map((button, index) => (
+          <Button 
+            key={index} 
+            variant={button.variant} 
+            className="w-full justify-start"
+            onClick={button.onClick}
+          >
+            {button.icon}
+            {button.text}
+          </Button>
+        ))}
+      </CardContent>
     </Card>
   );
 };

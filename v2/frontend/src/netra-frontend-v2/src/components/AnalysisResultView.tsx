@@ -1,20 +1,19 @@
 "use client";
 
 import React from 'react';
-import { Card, CardBody, CardHeader } from "@nextui-org/react";
+import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 import { HelpCircle } from 'lucide-react';
 
 export const AnalysisResultView = () => (
-  <Card className="h-full">
+  <Card className="h-full flex flex-col">
     <CardHeader>
-      <h2 className="text-xl font-semibold">Analysis Results</h2>
+      <CardTitle>Analysis Results</CardTitle>
     </CardHeader>
-    <CardBody>
-      {/* Placeholder for analysis results */}
-      <div className="text-center text-gray-500">
-        <HelpCircle className="w-16 h-16 mx-auto" />
+    <CardContent className="flex-1 flex flex-col items-center justify-center text-center">
+      <div className="text-muted-foreground">
+        <HelpCircle className="w-16 h-16 mx-auto text-muted-foreground/40" />
         <p className="mt-4">No analysis run yet. Start a new analysis to see results.</p>
       </div>
-    </CardBody>
+    </CardContent>
   </Card>
 );
