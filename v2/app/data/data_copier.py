@@ -2,6 +2,7 @@
 import logging
 from typing import Dict, Tuple
 from clickhouse_driver import Client
+from ..config import settings
 # For using remote() copy between clickhouse the driver is better then connect it seems.
 from sqlmodel import Session
 from ..db.models_postgres import SupplyOption
@@ -15,13 +16,13 @@ class DataCopier:
     """
     Handles the connection to source/destination ClickHouse instances and manages data transfer.
     """
-    def __init__(self, source_creds: Dict, dest_creds: Dict, customer_id: str):
-        self.source_creds = source_creds
-        self.dest_creds = dest_creds
+    def __init__(self, customer_id: str):
+        self.source_creds = settings.clickhouse_native.model_dump()
+        self.dest_creds = settings.clickhouse_native.model_dump()
         self.customer_id = customer_id
         # Use a context manager for connections if possible, or ensure disconnection.
-        self.source_client = Client(**source_creds)
-        self.dest_client = Client(**dest_creds)
+        self.source_client = Client(**self.source_creds)
+        self.dest_client = Client(**self.dest_creds)
         logging.info("DataCopier initialized and clients connected.")
 
     def __enter__(self):

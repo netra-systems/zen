@@ -162,6 +162,8 @@ def run_log_generation_job(job_id: str, params: dict):
         GENERATION_JOBS[job_id]["status"] = "failed"
         GENERATION_JOBS[job_id]["error"] = str(e)
 
+from ..config import settings
+
 def run_content_corpus_generation_job(job_id: str, params: dict):
     """The core worker process for generating a content corpus and storing it in ClickHouse."""
     try:
@@ -199,13 +201,7 @@ def run_content_corpus_generation_job(job_id: str, params: dict):
 
     # Store in ClickHouse
     try:
-        client = Client(
-            host=os.getenv("CLICKHOUSE_HOST", "localhost"),
-            port=os.getenv("CLICKHOUSE_PORT", 9000),
-            user=os.getenv("CLICKHOUSE_USER", "default"),
-            password=os.getenv("CLICKHOUSE_PASSWORD", ""),
-            database=os.getenv("CLICKHOUSE_DATABASE", "default"),
-        )
+        client = Client(**settings.clickhouse_native.model_dump())
         client.execute(CONTENT_CORPUS_TABLE_SCHEMA)
         
         corpus_id = uuid.uuid4()
@@ -242,6 +238,8 @@ def run_content_corpus_generation_job(job_id: str, params: dict):
         GENERATION_JOBS[job_id]["error"] = str(e)
 
 
+from ..config import settings
+
 def run_data_ingestion_job(job_id: str, params: dict):
     """The core worker process for ingesting data into ClickHouse."""
     GENERATION_JOBS[job_id]["status"] = "running"
@@ -261,13 +259,7 @@ def run_data_ingestion_job(job_id: str, params: dict):
         }
 
         ingestor = DataIngestor(
-            clickhouse_creds={
-                "host": os.getenv("CLICKHOUSE_HOST", "localhost"),
-                "port": os.getenv("CLICKHOUSE_PORT", 9000),
-                "user": os.getenv("CLICKHOUSE_USER", "default"),
-                "password": os.getenv("CLICKHOUSE_PASSWORD", ""),
-                "database": os.getenv("CLICKHOUSE_DATABASE", "default"),
-            },
+            clickhouse_creds=settings.clickhouse_native.model_dump(),
             table_name=params['table_name'],
             table_schema=table_schema
         )

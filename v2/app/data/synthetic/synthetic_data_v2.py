@@ -66,7 +66,7 @@ from app.config import settings
 def load_content_corpus_from_clickhouse() -> dict:
     """Loads the content corpus from the ClickHouse database."""
     ch_settings = settings.clickhouse_native.model_dump()
-    client = Client(**ch_settings, secure=True, verify=False)
+    client = Client(**ch_settings)
     query = f"SELECT workload_type, user_prompt, assistant_response FROM {CONTENT_CORPUS_TABLE_NAME}"
     query_result = client.execute(query)
 

@@ -21,9 +21,8 @@ class AnalysisRunner:
     """
     Handles fetching pre-enriched data and running the analysis pipeline.
     """
-    def __init__(self, netra_creds: Dict, db_session):
-        self.netra_creds = netra_creds
-        self.client = Client(**netra_creds)
+    def __init__(self, db_session):
+        self.client = Client(**settings.clickhouse_native.model_dump())
         self.db_session = db_session
         logging.info("AnalysisRunner initialized.")
 

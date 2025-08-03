@@ -4,15 +4,15 @@ import json
 import logging
 from typing import Dict
 from clickhouse_driver import Client
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
 class DataIngestor:
-    def __init__(self, clickhouse_creds: Dict, table_name: str, table_schema: Dict):
-        self.clickhouse_creds = clickhouse_creds
+    def __init__(self, table_name: str, table_schema: Dict):
         self.table_name = table_name
         self.table_schema = table_schema
-        self.client = Client(**clickhouse_creds)
+        self.client = Client(**settings.clickhouse_native.model_dump())
 
     def __enter__(self):
         return self

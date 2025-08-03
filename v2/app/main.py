@@ -37,13 +37,13 @@ async def lifespan(app: FastAPI):
 
     # Initialize and connect to ClickHouse
     ch_client = ClickHouseClient(
-        host=settings.clickhouse_host,
-        port=settings.clickhouse_port,
-        database=settings.clickhouse_db,
-        user=settings.clickhouse_user,
-        password=settings.clickhouse_password
+        host=settings.clickhouse_https.host,
+        port=settings.clickhouse_https.port,
+        database=settings.clickhouse_https.database,
+        user=settings.clickhouse_https.user,
+        password=settings.clickhouse_https.password
     )
-    logger.info(f"Connecting to ClickHouse at {settings.clickhouse_host}:{settings.clickhouse_port}")
+    logger.info(f"Connecting to ClickHouse at {settings.clickhouse_https.host}:{settings.clickhouse_https.port}")
     try:
         ch_client.connect()
         logger.info("ClickHouse connected.")

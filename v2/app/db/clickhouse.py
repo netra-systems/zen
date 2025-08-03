@@ -103,11 +103,11 @@ def get_clickhouse_client():
     This function will be called by FastAPI for routes that need a ClickHouse connection.
     """
     client = ClickHouseClient(
-        host=settings.clickhouse_host,
-        port=settings.clickhouse_port,
-        user=settings.clickhouse_user,
-        password=settings.clickhouse_password,
-        database=settings.clickhouse_db,
+        host=settings.clickhouse_https.host,
+        port=settings.clickhouse_https.port,
+        user=settings.clickhouse_https.user,
+        password=settings.clickhouse_https.password,
+        database=settings.clickhouse_https.database,
     )
     client.connect()
     try:

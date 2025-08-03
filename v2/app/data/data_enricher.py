@@ -2,15 +2,16 @@
 import logging
 from typing import Dict, Tuple
 from clickhouse_driver import Client
+from ..config import settings
 
 class DataEnricher:
     """
     Transforms raw, copied customer data into the structured format required by the analysis engine.
     """
-    def __init__(self, netra_creds: Dict, customer_id: str):
-        self.netra_creds = netra_creds
+    def __init__(self, customer_id: str):
+        self.netra_creds = settings.clickhouse_native.model_dump()
         self.customer_id = customer_id.replace('-', '_') # Sanitize
-        self.client = Client(**netra_creds)
+        self.client = Client(**self.netra_creds)
         logging.info("DataEnricher initialized.")
 
     def __enter__(self):

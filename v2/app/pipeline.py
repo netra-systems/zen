@@ -65,7 +65,6 @@ def run_full_analysis_pipeline(run_id: uuid.UUID, user_id: str, db: Session, sec
         log_to_run(f"Preparing to analyze table: {source_table}")
             
         runner = AnalysisRunner(
-            netra_creds=credentials.model_dump(),
             db_session=db
         )
         

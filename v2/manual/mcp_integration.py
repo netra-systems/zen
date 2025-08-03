@@ -24,7 +24,7 @@ class MCPIntegration:
 
     def __init__(self, db_session):
         self.db_session = db_session
-        self.analysis_runner = AnalysisRunner(netra_creds={}, db_session=self.db_session)
+        self.analysis_runner = AnalysisRunner(db_session=self.db_session)
 
     def get_system_recommendations(self, user_id: int, source_table: str) -> Dict[str, Any]:
         """
