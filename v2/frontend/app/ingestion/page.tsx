@@ -4,11 +4,12 @@ import React, { useState, useEffect, useCallback, FormEvent } from 'react';
 import { Zap, HelpCircle } from 'lucide-react';
 
 import { config } from '../config';
-import Card from '../components/Card';
-import Button from '../components/Button';
-import Spinner from '../components/Spinner';
-import Input from '../components/Input';
+import { Sidebar } from '@/components/Sidebar';
+import { Header } from '@/components/Header';
+import { GenericInput } from '@/components/GenericInput';
 import useAppStore from '../store';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card';
+import Spinner from '@/components/Spinner';
 
 // --- Type Definitions for API data ---
 interface Job {
@@ -105,50 +106,32 @@ export default function IngestionPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <nav className="bg-white shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex items-center">
-                            <h1 className="text-2xl font-bold text-indigo-600">Netra</h1>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            <main className="py-10">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+            <Sidebar />
+            <div className="flex flex-col">
+                <Header />
+                <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
                     {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative mb-6" role="alert">{error}</div>}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-1">
-                            <Card>
-                                <h2 className="text-xl font-semibold text-gray-900">Ingest Data</h2>
-                                <p className="mt-1 text-sm text-gray-500">Ingest data from a JSON file into ClickHouse.</p>
-                                <form onSubmit={handleStartIngestion} className="mt-6 space-y-4">
-                                    <div>
-                                        <label htmlFor="data_path" className="block text-sm font-medium text-gray-700">Data Path</label>
-                                        <div className="mt-1">
-                                            <Input id="data_path" name="data_path" type="text" required defaultValue="generated_logs_v2.json" />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label htmlFor="table_name" className="block text-sm font-medium text-gray-700">Table Name</label>
-                                        <div className="mt-1">
-                                            <Input id="table_name" name="table_name" type="text" required defaultValue="netra_logs" />
-                                        </div>
-                                    </div>
-                                    <Button type="submit" isLoading={isLoading || isPolling} disabled={isLoading || isPolling} icon={Zap}>
-                                        {isPolling ? 'Ingestion in Progress...' : 'Start Ingestion'}
-                                    </Button>
-                                </form>
-                            </Card>
+                            <GenericInput
+                                title="Ingest Data"
+                                description="Ingest data from a JSON file into ClickHouse."
+                                inputFields={[
+                                    { id: 'data_path', name: 'data_path', label: 'Data Path', type: 'text', required: true, defaultValue: 'generated_logs_v2.json' },
+                                    { id: 'table_name', name: 'table_name', label: 'Table Name', type: 'text', required: true, defaultValue: 'netra_logs' },
+                                ]}
+                                onSubmit={handleStartIngestion}
+                                isLoading={isLoading || isPolling}
+                                submitButtonText={isPolling ? 'Ingestion in Progress...' : 'Start Ingestion'}
+                            />
                         </div>
                         <div className="lg:col-span-2">
                             <JobStatusView job={job} />
                         </div>
                     </div>
-                </div>
-            </main>
+                </main>
+            </div>
         </div>
     );
 }
@@ -157,9 +140,13 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
     if (!job) {
         return (
             <Card className="flex flex-col items-center justify-center text-center h-full min-h-[300px]">
-                <HelpCircle className="w-16 h-16 text-gray-300" />
-                <h3 className="mt-4 text-lg font-medium text-gray-900">No Ingestion Job</h3>
-                <p className="mt-1 text-sm text-gray-500">Start a new ingestion job to see the status here.</p>
+                <CardHeader>
+                    <CardTitle>No Ingestion Job</CardTitle>
+                    <CardDescription>Start a new ingestion job to see the status here.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <HelpCircle className="w-16 h-16 text-gray-300" />
+                </CardContent>
             </Card>
         );
     }
@@ -167,14 +154,18 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
     if (job.status === 'pending' || job.status === 'running') {
         return (
             <Card className="h-full">
-                <h2 className="text-xl font-semibold text-gray-900">Ingestion in Progress</h2>
-                <div className="mt-4 space-y-2 text-sm text-gray-600">
-                    <p><strong>Status:</strong> <span className="capitalize font-medium text-indigo-600">{job.status.toLowerCase()}</span></p>
-                    <p><strong>Job ID:</strong> {job.job_id}</p>
-                </div>
-                <div className="mt-6">
-                    <Spinner />
-                </div>
+                <CardHeader>
+                    <CardTitle>Ingestion in Progress</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="mt-4 space-y-2 text-sm text-gray-600">
+                        <p><strong>Status:</strong> <span className="capitalize font-medium text-indigo-600">{job.status.toLowerCase()}</span></p>
+                        <p><strong>Job ID:</strong> {job.job_id}</p>
+                    </div>
+                    <div className="mt-6">
+                        <Spinner />
+                    </div>
+                </CardContent>
             </Card>
         )
     }
@@ -182,16 +173,20 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
     if (job.status === 'failed') {
         return (
             <Card className="h-full bg-red-50 border-red-200 border">
-                <h2 className="text-xl font-semibold text-red-800">Ingestion Failed</h2>
-                <div className="mt-4 space-y-2 text-sm text-red-700">
-                    <p><strong>Job ID:</strong> {job.job_id}</p>
-                </div>
-                <div className="mt-6">
-                    <h3 className="text-sm font-medium text-red-800 mb-2">Error Log</h3>
-                    <pre className="bg-red-100 text-red-900 rounded-md p-4 text-xs max-h-60 overflow-y-auto font-mono">
-                        <code>{job.error || "No detailed error log available."}</code>
-                    </pre>
-                </div>
+                <CardHeader>
+                    <CardTitle>Ingestion Failed</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="mt-4 space-y-2 text-sm text-red-700">
+                        <p><strong>Job ID:</strong> {job.job_id}</p>
+                    </div>
+                    <div className="mt-6">
+                        <h3 className="text-sm font-medium text-red-800 mb-2">Error Log</h3>
+                        <pre className="bg-red-100 text-red-900 rounded-md p-4 text-xs max-h-60 overflow-y-auto font-mono">
+                            <code>{job.error || "No detailed error log available."}</code>
+                        </pre>
+                    </div>
+                </CardContent>
             </Card>
         )
     }
@@ -199,12 +194,16 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
     if (job.status === 'completed') {
         return (
             <Card>
-                <h2 className="text-2xl font-bold text-gray-900">Ingestion Complete</h2>
-                <p className="mt-1 text-sm text-gray-500">Job ID: {job.job_id}</p>
-                <div className="mt-6">
-                    <p className="text-sm font-medium text-gray-700">Summary:</p>
-                    <p className="text-lg font-bold text-gray-800">{job.summary?.message}</p>
-                </div>
+                <CardHeader>
+                    <CardTitle>Ingestion Complete</CardTitle>
+                    <CardDescription>Job ID: {job.job_id}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="mt-6">
+                        <p className="text-sm font-medium text-gray-700">Summary:</p>
+                        <p className="text-lg font-bold text-gray-800">{job.summary?.message}</p>
+                    </div>
+                </CardContent>
             </Card>
         );
     }

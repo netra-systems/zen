@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import useAppStore from '../store';
-import { Button } from './ui/button';
+import { Button } from './button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,9 +11,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+} from './dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from './avatar';
+import { Sheet, SheetContent, SheetTrigger } from './sheet';
 import { Icons } from './Icons';
 
 export const Header = () => {
@@ -73,7 +73,7 @@ export const Header = () => {
                       }}
                     />
                     <AvatarFallback>
-                      {user.full_name
+                      {user.full_name && user.full_name
                         .split(' ')
                         .map((n) => n[0])
                         .join('')}
@@ -81,7 +81,7 @@ export const Header = () => {
                   </>
                 ) : (
                   <AvatarFallback>
-                    {user.full_name
+                    {user.full_name && user.full_name
                       .split(' ')
                       .map((n) => n[0])
                       .join('')}

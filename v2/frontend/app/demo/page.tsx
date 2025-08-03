@@ -4,10 +4,11 @@ import React, { useState, FormEvent } from 'react';
 import { Send } from 'lucide-react';
 
 import { config } from '../config';
-import Card from '../components/Card';
-import Button from '../components/Button';
-import Input from '../components/Input';
+import { Sidebar } from '@/components/Sidebar';
+import { Header } from '@/components/Header';
+import { GenericInput } from '@/components/GenericInput';
 import useAppStore from '../store';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/card';
 
 // --- API Service ---
 const apiService = {
@@ -59,58 +60,37 @@ export default function DemoPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <nav className="bg-white shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex items-center">
-                            <h1 className="text-2xl font-bold text-indigo-600">Netra</h1>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            <main className="py-10">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+            <Sidebar />
+            <div className="flex flex-col">
+                <Header />
+                <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
                     {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative mb-6" role="alert">{error}</div>}
-                    <Card>
-                        <h2 className="text-xl font-semibold text-gray-900">Demo Agent</h2>
-                        <p className="mt-1 text-sm text-gray-500">Interact with the Netra Deep Agent.</p>
-                                                        <form onSubmit={handleQuery} className="mt-6">
-                            <div className="flex items-center">
-                                <Input
-                                    id="query"
-                                    name="query"
-                                    type="text"
-                                    required
-                                    value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
-                                    placeholder="Enter your query..."
-                                    className="flex-grow"
-                                />
-                                <Button type="submit" isLoading={isLoading} disabled={isLoading} icon={Send} className="ml-2">
-                                    Send
-                                </Button>
-                            </div>
-                            <div className="mt-4">
-                                <label className="flex items-center">
-                                    <input type="checkbox" name="debug_mode" className="form-checkbox" />
-                                    <span className="ml-2 text-sm text-gray-600">Debug Mode</span>
-                                </label>
-                            </div>
-                        </form>
-                    </Card>
+                    <GenericInput
+                        title="Demo Agent"
+                        description="Interact with the Netra Deep Agent."
+                        inputFields={[
+                            { id: 'query', name: 'query', label: 'Query', type: 'text', required: true, defaultValue: '' },
+                        ]}
+                        onSubmit={handleQuery}
+                        isLoading={isLoading}
+                        submitButtonText="Send"
+                    />
 
                     {response && (
                         <Card className="mt-8">
-                            <h3 className="text-lg font-medium text-gray-900">Agent Response</h3>
-                            <pre className="mt-2 bg-gray-100 text-gray-800 rounded-md p-4 text-xs max-h-96 overflow-y-auto font-mono">
-                                <code>{JSON.stringify(response, null, 2)}</code>
-                            </pre>
+                            <CardHeader>
+                                <CardTitle>Agent Response</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <pre className="mt-2 bg-gray-100 text-gray-800 rounded-md p-4 text-xs max-h-96 overflow-y-auto font-mono">
+                                    <code>{JSON.stringify(response, null, 2)}</code>
+                                </pre>
+                            </CardContent>
                         </Card>
                     )}
-                </div>
-            </main>
+                </main>
+            </div>
         </div>
     );
 }

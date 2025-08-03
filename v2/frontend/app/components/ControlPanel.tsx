@@ -1,8 +1,8 @@
 "use client";
 
 import React from 'react';
-import { Button } from "./ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
+import { Button } from "./button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./card";
 import { Zap, Settings, RefreshCw, BarChart2, HelpCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
