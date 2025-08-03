@@ -18,7 +18,7 @@ from faker import Faker
 from ..config import settings
 from ..data.synthetic.content_generator import META_PROMPTS, generate_content_sample
 from ..db.clickhouse import ClickHouseClient
-from ..db.models_clickhouse import ContentCorpus, get_content_corpus_schema, LLM_EVENTS_TABLE_SCHEMA
+from ..db.models_clickhouse import ContentCorpus, get_content_corpus_schema, get_llm_events_table_schema
 from ..data.ingestion import ingest_records
 from ..data.content_corpus import DEFAULT_CONTENT_CORPUS
 
@@ -296,9 +296,12 @@ def run_synthetic_data_generation_job(job_id: str, params: dict):
         database=settings.clickhouse_https.database
     )
     client.connect()
-    client.command(LLM_EVENTS_TABLE_SCHEMA) 
-
+    
     try:
+        # Create the destination table
+        table_schema = get_llm_events_table_schema(destination_table)
+        client.command(table_schema)
+
         content_corpus = get_corpus_from_clickhouse(source_table)
         
         class Args:

@@ -172,69 +172,62 @@ class AnalysisResult(SQLModel, table=False):
     span_map: Dict[str, UnifiedLogEntry]
 
 
+def get_llm_events_table_schema(table_name: str) -> str:
+    """Returns the CREATE TABLE statement for the LLM events table with a dynamic name."""
+    return f"""
+    CREATE TABLE IF NOT EXISTS {table_name} (
+        -- Event Metadata
+        event_metadata_log_schema_version String,
+        event_metadata_event_id UUID,
+        event_metadata_timestamp_utc DateTime64(3),
+        event_metadata_ingestion_source String,
 
-"""
--- This statement creates a table named 'llm_events' using the MergeTree engine,
--- which is optimized for high-performance analytics and large-scale data warehousing.
--- The schema is designed to store detailed information from Large Language Model (LLM) interactions,
--- flattening the nested JSON structure for easier querying.
-"""
+        -- Trace Context
+        trace_context_trace_id UUID,
+        trace_context_span_id UUID,
+        trace_context_span_name String,
+        trace_context_span_kind String,
 
-LLM_EVENTS_TABLE_NAME = 'JSON_HYBRID_EVENTS4'
-LLM_EVENTS_TABLE_SCHEMA = f"""
-CREATE TABLE IF NOT EXISTS {LLM_EVENTS_TABLE_NAME} (
-     -- Event Metadata
-    event_metadata_log_schema_version String,
-    event_metadata_event_id UUID,
-    event_metadata_timestamp_utc DateTime64(3),
-    event_metadata_ingestion_source String,
+        -- Identity Context
+        identity_context_user_id UUID,
+        identity_context_organization_id String,
+        identity_context_api_key_hash String,
+        identity_context_auth_method String,
+        
+        -- Application Context
+        application_context_app_name String,
+        application_context_service_name String,
+        application_context_sdk_version String,
+        application_context_environment LowCardinality(String),
+        application_context_client_ip IPv4,
 
-    -- Trace Context
-    trace_context_trace_id UUID,
-    trace_context_span_id UUID,
-    trace_context_span_name String,
-    trace_context_span_kind String,
+        -- Request Details: Consolidated into JSON objects
+        request_model JSON,
+        request_prompt JSON,
+        request_generation_config JSON,
 
-    -- Identity Context
-    identity_context_user_id UUID,
-    identity_context_organization_id String,
-    identity_context_api_key_hash String,
-    identity_context_auth_method String,
-    
-    -- Application Context
-    application_context_app_name String,
-    application_context_service_name String,
-    application_context_sdk_version String,
-    application_context_environment LowCardinality(String),
-    application_context_client_ip IPv4,
+        -- Response Details: Consolidated into JSON objects
+        response JSON,
+        response_completion JSON,
+        response_tool_calls JSON,
+        response_usage JSON,
+        response_system JSON,
 
-    -- Request Details: Consolidated into JSON objects
-    request_model JSON, -- ADDED
-    request_prompt JSON,
-    request_generation_config JSON, -- ADDED
+        -- Performance Metrics
+        performance_latency_ms JSON,
 
-    -- Response Details: Consolidated into JSON objects
-    response JSON,
-    response_completion JSON,
-    response_tool_calls JSON,
-    response_usage JSON,
-    response_system JSON, -- ADDED
+        -- FinOps (Financial Operations)
+        finops_attribution JSON,
+        finops_cost JSON,
+        finops_pricing_info JSON,
 
-    -- Performance Metrics
-    performance_latency_ms JSON, -- ADDED
-
-    -- FinOps (Financial Operations)
-    finops_attribution JSON, -- ADDED
-    finops_cost JSON,
-    finops_pricing_info JSON,
-
-    -- Governance
-    governance_audit_context JSON,
-    governance_safety JSON, -- ADDED
-    governance_security JSON
-    
-) ENGINE = MergeTree()
-PARTITION BY toYYYYMM(event_metadata_timestamp_utc)
-ORDER BY (application_context_environment, application_context_app_name, event_metadata_timestamp_utc)
-SETTINGS index_granularity = 8192;
-"""
+        -- Governance
+        governance_audit_context JSON,
+        governance_safety JSON,
+        governance_security JSON
+        
+    ) ENGINE = MergeTree()
+    PARTITION BY toYYYYMM(event_metadata_timestamp_utc)
+    ORDER BY (application_context_environment, application_context_app_name, event_metadata_timestamp_utc)
+    SETTINGS index_granularity = 8192;
+    """
