@@ -44,21 +44,11 @@ def test_content_generation_with_custom_table(mock_run_job, test_client):
 
     # Poll for job completion
     while True:
-        status_response = test_client.get(f"/generation/jobs/{job_id}")
+        status_response = test_client.get(f"/api/v3/generation/jobs/{job_id}")
         assert status_response.status_code == 200
         job_status = status_response.json()
         if job_status["status"] == "completed":
-                    # Poll for job completion
-        while True:
-            status_response = test_client.get(f"/api/v3/generation/jobs/{job_id}")
-            assert status_response.status_code == 200
-            job_status = status_response.json()
-            if job_status["status"] == "completed":
-                assert f"Corpus generated and saved to {custom_table_name}" in job_status["summary"]["message"]
-                break
-            elif job_status["status"] == "failed":
-                pytest.fail("Content generation job failed")
-            time.sleep(0.1)
+            assert f"Corpus generated and saved to {custom_table_name}" in job_status["summary"]["message"]
             break
         elif job_status["status"] == "failed":
             pytest.fail("Content generation job failed")
