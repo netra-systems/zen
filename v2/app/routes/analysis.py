@@ -1,43 +1,14 @@
 # /v2/app/routes/analysis.py
 import logging
-import uuid
-from typing import List
-
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Request
-from sqlmodel import Session, select
-
-from .. import schema
-from ..db import models_clickhouse
-from ..logging_config_custom.logger import logger
-
-from ..dependencies import ActiveUserDep, DbDep
 from ..pipeline import run_full_analysis_pipeline
-
-
+from typing import List
+import uuid
+from ..dependencies import DbDep, ActiveUserDep
+from .. import schema
+from ..db.models_postgres import Analysis
+from fastapi import APIRouter, status, BackgroundTasks, Request
 
 router = APIRouter()
-
-@router.post("/credentials", status_code=status.HTTP_204_NO_CONTENT)
-def save_credentials(request: Request, creds: models_clickhouse.ClickHouseCredentials, db: DbDep, current_user: ActiveUserDep):
-    """Saves or updates the user's ClickHouse credentials securely."""
-    security_service = request.app.state.security_service
-    try:
-        security_service.save_user_credentials(user_id=current_user.id, credentials=creds, db_session=db)
-        logger.info(f"Credentials saved successfully for user_id: {current_user.id}")
-    except Exception as e:
-        logger.error(f"Failed to save credentials for user_id {current_user.id}: {e}")
-        raise HTTPException(status_code=500, detail="Could not save credentials.")
-
-
-@router.get("/credentials", response_model=models_clickhouse.ClickHouseCredentials)
-def get_credentials(request: Request, db: DbDep, current_user: ActiveUserDep):
-    """Retrieves the user's saved ClickHouse credentials."""
-    security_service = request.app.state.security_service
-    creds = security_service.get_user_credentials(user_id=current_user.id, db_session=db)
-    if not creds:
-        raise HTTPException(status_code=404, detail="Credentials not found for this user.")
-    return creds
-
 
 @router.post("/runs", response_model=schema.AnalysisRunPublic, status_code=status.HTTP_202_ACCEPTED)
 def start_new_analysis_run(
@@ -45,13 +16,15 @@ def start_new_analysis_run(
     background_tasks: BackgroundTasks,
     db: DbDep,
     current_user: ActiveUserDep,
+    request: Request,
     use_deepagents: bool = False,
     use_deepagents_v2: bool = False
 ):
     """Creates an analysis run record and starts the pipeline in the background."""
-    new_run = schema.AnalysisRun(
-        user_id=current_user.id,
-        config={"source_table": run_create.source_table}
+    new_run = Analysis(
+        created_by_id=current_user.id,
+        name=run_create.source_table,
+        description=run_create.source_table
     )
     db.add(new_run)
     db.commit()
