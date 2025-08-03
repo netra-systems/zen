@@ -65,6 +65,7 @@ class ContentCorpusGenParams(BaseModel):
     top_p: Optional[float] = Field(None, ge=0.0, le=1.0, description="Nucleus sampling probability.")
     top_k: Optional[int] = Field(None, ge=0, description="Top-k sampling control.")
     max_cores: int = Field(4, ge=1, le=os.cpu_count(), description="Max CPU cores to use.")
+    clickhouse_table: str = Field('content_corpus', description="The name of the ClickHouse table to store the corpus in.")
 
 
 @router.post("/content_corpus", status_code=status.HTTP_202_ACCEPTED, response_model=Dict[str, str])
@@ -74,14 +75,6 @@ def create_content_corpus(params: ContentCorpusGenParams, background_tasks: Back
     GENERATION_JOBS[job_id] = {"status": "pending", "type": "content_corpus_generation", "params": params.dict()}
     background_tasks.add_task(run_content_generation_job, job_id, params.dict())
     return {"job_id": job_id, "message": "Content corpus generation job started."}
-
-
-@router.post("/demo_agent", status_code=status.HTTP_200_OK)
-async def demo_agent(params: DemoAgentParams):
-    """Interacts with the demo agent."""
-    agent = create_demo_agent(debug_mode=params.debug_mode)
-    response = await agent.invoke({"messages": [{"role": "user", "content": params.query}]})
-    return response
 
 
 @router.post("/ingest_data", status_code=status.HTTP_202_ACCEPTED, response_model=Dict[str, str])

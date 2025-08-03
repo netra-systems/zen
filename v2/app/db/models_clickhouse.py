@@ -45,24 +45,27 @@ ORDER BY (id);
 
 
 CONTENT_CORPUS_TABLE_NAME = 'netra_content_corpus'
-CONTENT_CORPUS_TABLE_SCHEMA = f"""
-CREATE TABLE IF NOT EXISTS {CONTENT_CORPUS_TABLE_NAME} (
-    `corpus_id` UUID,
-    `workload_type` String,
-    `user_prompt` String,
-    `assistant_response` String,
-    `created_at` DateTime DEFAULT now()
-)
-ENGINE = MergeTree()
-ORDER BY (corpus_id, workload_type)
-"""
 
-class ContentCorpus(SQLModel, table=True):
-    __tablename__ = CONTENT_CORPUS_TABLE_NAME
-    corpus_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+def get_content_corpus_schema(table_name: str) -> str:
+    """Returns the CREATE TABLE statement for a content corpus table with a dynamic name."""
+    return f"""
+    CREATE TABLE IF NOT EXISTS {table_name}
+    (
+        `record_id` UUID,
+        `workload_type` String,
+        `prompt` String,
+        `response` String,
+        `created_at` DateTime DEFAULT now()
+    )
+    ENGINE = MergeTree()
+    ORDER BY (created_at, workload_type)
+    """
+
+class ContentCorpus(SQLModel, table=False): # Set table=False as we are manually creating it
+    record_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     workload_type: str
-    user_prompt: str
-    assistant_response: str
+    prompt: str
+    response: str
     created_at: int = Field(default_factory=lambda: int(time.time()))
 
 

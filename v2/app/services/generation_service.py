@@ -14,27 +14,65 @@ import pandas as pd
 import numpy as np
 from faker import Faker
 
-# Assuming the other scripts are in a sibling directory
+from ..config import settings
 from ..data.synthetic.content_generator import META_PROMPTS, generate_content_sample
-from ..data.synthetic.synthetic_data_v2 import DEFAULT_CONTENT_CORPUS, format_log_entry, get_config, main as generate_synthetic_data
-from ..db.models_clickhouse import ContentCorpus, CONTENT_CORPUS_TABLE_NAME, CONTENT_CORPUS_TABLE_SCHEMA
+from ..db.clickhouse import ClickHouseDatabase
+from ..db.models_clickhouse import ContentCorpus, get_content_corpus_schema
 
 # --- Job Management ---
-# In a production system, this would be a database (e.g., Redis, Postgres)
 GENERATION_JOBS = {}
 
-def update_job_status(job_id: str, status: str, progress: dict = None):
-    """Updates the status and progress of a generation job."""
+def update_job_status(job_id: str, status: str, **kwargs):
+    """Updates the status and other attributes of a generation job."""
     if job_id not in GENERATION_JOBS:
         GENERATION_JOBS[job_id] = {}
     
-    GENERATION_JOBS[job_id]['status'] = status
-    GENERATION_JOBS[job_id]['last_updated'] = time.time()
-    if progress:
-        GENERATION_JOBS[job_id]['progress'] = progress
+    job = GENERATION_JOBS[job_id]
+    job['status'] = status
+    job['last_updated'] = time.time()
+    job.update(kwargs)
+
+
+def save_corpus_to_clickhouse(corpus: dict, table_name: str):
+    """Saves the generated content corpus to a specified ClickHouse table."""
+    try:
+        db = ClickHouseDatabase()
+        
+        table_schema = get_content_corpus_schema(table_name)
+        db.create_table_if_not_exists(table_name, table_schema)
+        
+        records = []
+        for w_type, samples in corpus.items():
+            for sample in samples:
+                # Ensure sample is a dictionary, adapt if it's a string or other type
+                if isinstance(sample, str):
+                    # This is a simplistic adaptation. You might need more complex logic
+                    # depending on the actual structure of your generated samples.
+                    sample_data = {'content': sample}
+                else:
+                    sample_data = sample
+
+                records.append(ContentCorpus(
+                    workload_type=w_type,
+                    # Assuming the sample data contains these fields.
+                    # Adjust according to the actual structure of your `sample` dict.
+                    prompt=sample_data.get('prompt', ''),
+                    response=sample_data.get('response', ''),
+                    # Generate a unique ID for each record
+                    record_id=str(uuid.uuid4())
+                ))
+
+        db.insert_data(table_name, [record.dict() for record in records])
+        logging.info(f"Successfully saved {len(records)} records to ClickHouse table: {table_name}")
+
+    except Exception as e:
+        logging.exception(f"Failed to save corpus to ClickHouse table {table_name}")
+        # Depending on requirements, you might want to re-raise the exception
+        # or handle it in a way that informs the job status.
+        raise
+
 
 # --- Content Generation Service ---
-
 def run_content_generation_job(job_id: str, params: dict):
     """The core worker process for generating a content corpus."""
     try:
@@ -44,52 +82,48 @@ def run_content_generation_job(job_id: str, params: dict):
             raise ValueError("GEMINI_API_KEY not set")
         genai.configure(api_key=GEMINI_API_KEY)
     except (ImportError, ValueError) as e:
-        update_job_status(job_id, "failed", progress={'error': str(e)})
+        update_job_status(job_id, "failed", error=str(e))
         return
 
-    update_job_status(job_id, "running", progress={'completed_tasks': 0, 'total_tasks': len(list(META_PROMPTS.keys())) * params['samples_per_type']})
+    total_tasks = len(list(META_PROMPTS.keys())) * params.get('samples_per_type', 10)
+    update_job_status(job_id, "running", progress=0, total_tasks=total_tasks)
 
     generation_config = genai.types.GenerationConfig(
-        temperature=params['temperature'],
+        temperature=params.get('temperature', 0.7),
         top_p=params.get('top_p'),
         top_k=params.get('top_k')
     )
     model = genai.GenerativeModel(settings.corpus_generation_model)
 
     workload_types = list(META_PROMPTS.keys())
-    num_processes = min(cpu_count(), params['max_cores'])
+    num_processes = min(cpu_count(), params.get('max_cores', 4))
 
     worker_func = partial(generate_content_sample, model=model, generation_config=generation_config)
-    tasks = [w_type for w_type in workload_types for _ in range(params['samples_per_type'])]
+    tasks = [w_type for w_type in workload_types for _ in range(params.get('samples_per_type', 10))]
 
     corpus = {key: [] for key in workload_types}
     
     completed_tasks = 0
     with Pool(processes=num_processes) as pool:
         for i, result in enumerate(pool.imap_unordered(worker_func, tasks)):
-            if result:
-                if result.get('type') in corpus:
-                    corpus[result['type']].append(result['data'])
+            if result and result.get('type') in corpus:
+                corpus[result['type']].append(result['data'])
             
             completed_tasks += 1
-            if i % 5 == 0 or completed_tasks == len(tasks): # Update every 5 tasks or at the end
-                update_job_status(job_id, "running", progress={'completed_tasks': completed_tasks, 'total_tasks': len(tasks)})
+            update_job_status(job_id, "running", progress=completed_tasks)
 
+    # Save to ClickHouse
+    clickhouse_table = params.get('clickhouse_table', 'content_corpus')
+    try:
+        save_corpus_to_clickhouse(corpus, clickhouse_table)
+        summary = {
+            "message": f"Corpus generated and saved to {clickhouse_table}",
+            "counts": {w_type: len(samples) for w_type, samples in corpus.items()}
+        }
+        update_job_status(job_id, "completed", summary=summary)
+    except Exception as e:
+        update_job_status(job_id, "failed", error=f"Failed to save to ClickHouse: {e}")
 
-    # Save to file
-    output_dir = os.path.join("app", "data", "generated", "content_corpuses", job_id)
-    os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, "content_corpus.json")
-
-    with open(output_path, 'w') as f:
-        json.dump(corpus, f, indent=2)
-
-    GENERATION_JOBS[job_id].update({
-        "status": "completed",
-        "finished_at": time.time(),
-        "result_path": output_path,
-        "summary": {w_type: len(samples) for w_type, samples in corpus.items()}
-    })
 
 # --- Synthetic Log Generation Service ---
 
