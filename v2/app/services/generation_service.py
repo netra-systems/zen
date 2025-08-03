@@ -19,6 +19,7 @@ from ..data.synthetic.content_generator import META_PROMPTS, generate_content_sa
 from ..db.clickhouse import ClickHouseClient
 from ..db.models_clickhouse import ContentCorpus, get_content_corpus_schema
 from ..data.ingestion import ingest_records
+from ..data.content_corpus import DEFAULT_CONTENT_CORPUS
 
 # --- Job Management ---
 GENERATION_JOBS = {}
