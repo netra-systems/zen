@@ -13,7 +13,7 @@ class TestGenerationService(unittest.TestCase):
 
     @patch('app.services.generation_service.cpu_count')
     @patch('app.services.generation_service.Pool')
-    @patch('app.services.generation_service.genai')
+    @patch('app.data.synthetic.content_generator.genai')
     def test_run_content_generation_job_success(self, mock_genai, mock_pool, mock_cpu_count):
         # Mock the necessary dependencies
         mock_cpu_count.return_value = 4
@@ -62,8 +62,9 @@ class TestGenerationService(unittest.TestCase):
     @patch('app.services.generation_service.cpu_count')
     @patch('app.services.generation_service.Pool')
     @patch('app.services.generation_service.open', new_callable=mock_open, read_data='{}')
+    @patch('app.services.generation_service.get_config')
     @patch('app.services.generation_service.os.path.exists')
-    def test_run_log_generation_job_success(self, mock_exists, mock_file, mock_pool, mock_cpu_count):
+    def test_run_log_generation_job_success(self, mock_exists, mock_get_config, mock_file, mock_pool, mock_cpu_count):
         # Mock the necessary dependencies
         mock_cpu_count.return_value = 4
         mock_exists.return_value = True
@@ -96,7 +97,8 @@ class TestGenerationService(unittest.TestCase):
         # Define the job parameters
         job_id = 'test_log_job_no_corpus'
         params = {
-            'corpus_id': 'non_existent_corpus'
+            'corpus_id': 'non_existent_corpus',
+            'num_logs': 10
         }
 
         # Run the job
