@@ -18,6 +18,7 @@ from ..config import settings
 from ..data.synthetic.content_generator import META_PROMPTS, generate_content_sample
 from ..db.clickhouse import ClickHouseClient
 from ..db.models_clickhouse import ContentCorpus, get_content_corpus_schema
+from ..data.ingestion import ingest_records
 
 # --- Job Management ---
 GENERATION_JOBS = {}
@@ -32,9 +33,9 @@ def update_job_status(job_id: str, status: str, **kwargs):
     job['last_updated'] = time.time()
     job.update(kwargs)
 
-
 def save_corpus_to_clickhouse(corpus: dict, table_name: str):
     """Saves the generated content corpus to a specified ClickHouse table."""
+    db = None  # Initialize db to None
     try:
         db = ClickHouseClient(
             host=settings.clickhouse_https.host,
@@ -51,31 +52,33 @@ def save_corpus_to_clickhouse(corpus: dict, table_name: str):
         records = []
         for w_type, samples in corpus.items():
             for sample in samples:
-                # Ensure sample is a dictionary, adapt if it's a string or other type
-                if isinstance(sample, (list, tuple)) and len(sample) == 2:
-                    sample_data = {'prompt': sample[0], 'response': sample[1]}
-                elif isinstance(sample, str):
-                    sample_data = {'prompt': sample, 'response': ''} # Or handle as an error
+                actual_sample = sample
+                # Unpack if it's a list with a single tuple inside
+                if isinstance(actual_sample, list) and len(actual_sample) == 1 and isinstance(actual_sample[0], tuple):
+                    actual_sample = actual_sample[0]
+
+                if isinstance(actual_sample, (list, tuple)) and len(actual_sample) == 2:
+                    prompt_text, response_text = actual_sample
+                    record = ContentCorpus(
+                        workload_type=w_type,
+                        prompt=prompt_text,
+                        response=response_text,
+                        record_id=str(uuid.uuid4())
+                    )
+                    records.append(record)
                 else:
-                    sample_data = sample
+                    logging.warning(f"Skipping malformed sample for workload '{w_type}': {sample}")
+                    continue
 
-                records.append(ContentCorpus(
-                    workload_type=w_type,
-                    # Assuming the sample data contains these fields.
-                    # Adjust according to the actual structure of your `sample` dict.
-                    prompt=sample_data.get('prompt', ''),
-                    response=sample_data.get('response', ''),
-                    # Generate a unique ID for each record
-                    record_id=str(uuid.uuid4())
-                ))
+        if not records:
+            logging.info(f"No valid records to insert into ClickHouse table: {table_name}")
+            return
 
-        db.insert_data(table_name, [list(record.dict().values()) for record in records], list(ContentCorpus.model_fields.keys()))
+        db.insert_data(table_name, [list(record.model_dump().values()) for record in records], list(ContentCorpus.model_fields.keys()))
         logging.info(f"Successfully saved {len(records)} records to ClickHouse table: {table_name}")
 
     except Exception as e:
         logging.exception(f"Failed to save corpus to ClickHouse table {table_name}")
-        # Depending on requirements, you might want to re-raise the exception
-        # or handle it in a way that informs the job status.
         raise
     finally:
         if db and db.is_connected():
@@ -230,49 +233,24 @@ def run_log_generation_job(job_id: str, params: dict):
         update_job_status(job_id, "failed", progress={'error': str(e)})
 
 
-
-
-from ..config import settings
-
 def run_data_ingestion_job(job_id: str, params: dict):
     """The core worker process for ingesting data into ClickHouse."""
     update_job_status(job_id, "running")
     
     try:
-        # This is a placeholder for the actual table schema
-        table_schema = {
-            "event_metadata": "String",
-            "trace_context": "String",
-            "identity_context": "String",
-            "application_context": "String",
-            "request": "String",
-            "response": "String",
-            "performance": "String",
-            "finops": "String",
-            "timestamp_utc": "UInt64"
-        }
-
-        ingestor = DataIngestor(
-            clickhouse_creds=settings.clickhouse_native.model_dump(),
-            table_name=params['table_name'],
-            table_schema=table_schema
-        )
-        ingestor.create_table_if_not_exists()
-        ingestor.ingest_data(params['data_path'])
-
+        summary = ingest_data_from_file(params['data_path'])
         GENERATION_JOBS[job_id].update({
             "status": "completed",
             "finished_at": time.time(),
-            "summary": {"message": f"Data from {params['data_path']} ingested into {params['table_name']}"}
+            "summary": summary
         })
 
     except Exception as e:
         logging.exception("Error during data ingestion job")
-        update_job_status(job_id, "failed", progress={'error': str(e)})
-
+        update_job_status(job_id, "failed", error=str(e))
 
 def run_synthetic_data_generation_job(job_id: str, params: dict):
-    """The core worker process for generating a synthetic log set."""
+    """The core worker process for generating a synthetic log set and ingesting it."""
     update_job_status(job_id, "running")
     
     try:
@@ -285,15 +263,19 @@ def run_synthetic_data_generation_job(job_id: str, params: dict):
                 self.corpus_file = "content_corpus.json"
 
         args = Args(params['num_traces'], params['output_file'])
-        generate_synthetic_data(args)
+        generated_logs = generate_synthetic_data(args)
+
+        ingestion_summary = ingest_records(generated_logs)
 
         GENERATION_JOBS[job_id].update({
             "status": "completed",
             "finished_at": time.time(),
-            "result_path": params['output_file'],
-            "summary": {"logs_generated": params['num_traces']}
+            "summary": {
+                "logs_generated": len(generated_logs),
+                "ingestion_summary": ingestion_summary
+            }
         })
 
     except Exception as e:
         logging.exception("Error during synthetic data generation job")
-        update_job_status(job_id, "failed", progress={'error': str(e)})
+        update_job_status(job_id, "failed", error=str(e))
