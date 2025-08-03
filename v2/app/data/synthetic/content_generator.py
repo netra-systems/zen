@@ -155,7 +155,8 @@ def main(args):
             for result in pool.imap_unordered(worker_func, tasks_for_pool):
                 if result:
                     for item in result:
-                        corpus[item['type']].append(item['data'])
+                        if item and item.get('type') in corpus:
+                            corpus[item['type']].append(item['data'])
                 progress.update(task, advance=1)
 
     # Save to file
