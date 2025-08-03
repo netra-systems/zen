@@ -36,7 +36,7 @@ def test_supply_catalog_service():
     # Placeholder
     assert True
 
-@patch('app.services.generation_service.genai.GenerativeModel')
+@patch('app.routes.generation.run_content_generation_job')
 def test_generation_api(mock_generative_model, test_client):
     # Mock the generative model
     mock_model_instance = MagicMock()

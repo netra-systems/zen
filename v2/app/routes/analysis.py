@@ -1,5 +1,6 @@
 # /v2/app/routes/analysis.py
 import logging
+from ..logging_config_custom.logger import logger
 from ..pipeline import run_full_analysis_pipeline
 from typing import List
 import uuid
