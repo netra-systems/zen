@@ -35,25 +35,15 @@ async def lifespan(app: FastAPI):
     app.state.key_manager = key_manager
     app.state.security_service = SecurityService(key_manager)
 
-    # Initialize PostgreSQL
-    try:
-        db = Database(settings.DATABASE_URL)
-        db.connect()
-        app.state.db = db
-        logger.info("PostgreSQL connected.")
-    except Exception as e:
-        logger.error(f"Failed to connect to PostgreSQL: {e}", exc_info=True)
-        raise
-
     # Initialize and connect to ClickHouse
     ch_client = ClickHouseClient(
-        host=settings.CLICKHOUSE_HOST,
-        port=settings.CLICKHOUSE_PORT,
-        database=settings.CLICKHOUSE_DATABASE,
-        user=settings.CLICKHOUSE_USER,
-        password=settings.CLICKHOUSE_PASSWORD
+        host=settings.clickhouse_host,
+        port=settings.clickhouse_port,
+        database=settings.clickhouse_db,
+        user=settings.clickhouse_user,
+        password=settings.clickhouse_password
     )
-    logger.info(f"Connecting to ClickHouse at {settings.CLICKHOUSE_HOST}:{settings.CLICKHOUSE_PORT}")
+    logger.info(f"Connecting to ClickHouse at {settings.clickhouse_host}:{settings.clickhouse_port}")
     try:
         ch_client.connect()
         logger.info("ClickHouse connected.")

@@ -21,7 +21,7 @@ def run_real_time_ingestion():
 
     try:
         with get_clickhouse_client() as client:
-            logger.info(f"Successfully connected to ClickHouse at {settings.CLICKHOUSE_HOST}:{settings.CLICKHOUSE_PORT}")
+            logger.info(f"Successfully connected to ClickHouse at {settings.clickhouse_host}:{settings.clickhouse_port}")
 
             client.command(LLM_EVENTS_TABLE_SCHEMA)
             logger.info("Ensured 'LLM_EVENTS' table exists.")

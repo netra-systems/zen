@@ -15,13 +15,15 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 TokenDep = Annotated[str, Depends(oauth2_scheme)]
 
-def get_db(request: Request):
-    """Provides a database session to a dependency."""
-    return request.app.state.db.get_db()
+from .db.postgres import get_async_db
 
-DbDep = Annotated[Session, Depends(get_db)]
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
-def get_current_user(token: TokenDep, db: DbDep) -> User:
+TokenDep = Annotated[str, Depends(oauth2_scheme)]
+
+DbDep = Annotated[Session, Depends(get_async_db)]
+
+async def get_current_user(token: TokenDep, db: DbDep) -> User:
     """
     Decodes the JWT token to get the current user.
     Raises HTTPException if the token is invalid or the user doesn't exist.
@@ -32,7 +34,7 @@ def get_current_user(token: TokenDep, db: DbDep) -> User:
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.algorithm])
         email: str = payload.get("sub")
         if email is None:
             logger.warning("Token payload missing 'sub' (email).")
@@ -41,7 +43,8 @@ def get_current_user(token: TokenDep, db: DbDep) -> User:
         logger.error(f"JWT Error: {e}")
         raise credentials_exception from e
 
-    user = db.exec(select(User).where(User.email == email)).first()
+    result = await db.execute(select(User).where(User.email == email))
+    user = result.scalar_one_or_none()
     if user is None:
         logger.warning(f"User with email '{email}' from token not found in DB.")
         raise credentials_exception

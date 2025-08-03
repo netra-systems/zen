@@ -38,8 +38,8 @@ async def auth_via_google(request: Request, db: DbDep):
             detail="Could not fetch user info from Google"
         )
 
-    statement = select(models_postgres.User).where(models_postgres.User.email == user_info['email'])
-    user = db.exec(statement).first()
+    result = await db.execute(select(models_postgres.User).where(models_postgres.User.email == user_info['email']))
+    user = result.scalar_one_or_none()
 
     if not user:
         user = models_postgres.User(
@@ -49,8 +49,8 @@ async def auth_via_google(request: Request, db: DbDep):
             hashed_password=""
         )
         db.add(user)
-        db.commit()
-        db.refresh(user)
+        await db.commit()
+        await db.refresh(user)
 
     access_token = request.app.state.security_service.create_access_token(data={"sub": user.email})
     response = RedirectResponse(url="/")
