@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, FormEvent } from 'react';
+import React, { useState, useEffect, useCallback, FormEvent, useRef } from 'react';
 import { Zap, HelpCircle } from 'lucide-react';
 
 import { config } from '../config';
@@ -18,8 +18,12 @@ interface Job {
     type: string;
     params: Record<string, unknown>;
     result_path?: string;
-    summary?: { logs_generated: number };
+    summary?: { message: string };
     error?: string;
+    last_updated?: number;
+    progress?: number;
+    total_tasks?: number;
+    records_ingested?: number;
 }
 
 // --- API Service ---
@@ -59,44 +63,73 @@ export default function GenerationPage() {
     const [isPolling, setIsPolling] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [tables, setTables] = useState<string[]>([]);
+    const pollingJobIdRef = useRef<string | null>(null);
 
-    const pollStatus = useCallback(async (jobId: string) => {
+    useEffect(() => {
+        const fetchTables = async () => {
+            try {
+                const data = await apiService.get(`${config.api.baseUrl}/generation/clickhouse_tables`, token);
+                setTables(data);
+            } catch (err) {
+                setError('Could not fetch ClickHouse tables.');
+            }
+        };
+        fetchTables();
+    }, [token]);
+
+    const pollStatus = useCallback(async () => {
+        if (!pollingJobIdRef.current) {
+            setIsPolling(false);
+            return;
+        }
         try {
-            const data: Job = await apiService.get(`${config.api.baseUrl}/generation/jobs/${jobId}`, token);
+            const data: Job = await apiService.get(`${config.api.baseUrl}/generation/jobs/${pollingJobIdRef.current}`, token);
             setJob(data);
             if (data.status !== 'running' && data.status !== 'pending') {
                 setIsPolling(false);
+                pollingJobIdRef.current = null;
             }
         } catch (err: unknown) {
             console.error("Polling failed:", err);
             setError('Could not get job status.');
             setIsPolling(false);
+            pollingJobIdRef.current = null;
         }
-    }, [token]);
+    }, [token, setIsPolling, setJob, setError]);
 
     useEffect(() => {
-        let intervalId: NodeJS.Timeout | null = null;
-        if (isPolling && job?.job_id) {
-            intervalId = setInterval(() => pollStatus(job.job_id), 3000);
+        if (!isPolling) {
+            return;
         }
-        return () => {
-            if (intervalId) clearInterval(intervalId);
-        };
-    }, [isPolling, job, pollStatus]);
+        const intervalId = setInterval(pollStatus, 3000);
+        return () => clearInterval(intervalId);
+    }, [isPolling, pollStatus]);
 
     const handleStartGeneration = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setIsLoading(true);
         setError(null);
+        setJob(null);
+        if (isPolling) {
+            setIsPolling(false);
+        }
+        pollingJobIdRef.current = null;
 
         const formData = new FormData(event.currentTarget);
         const num_traces = parseInt(formData.get('num_traces') as string, 10);
-        const output_file = formData.get('output_file') as string;
+        const source_table = formData.get('source_table') as string;
+        const destination_table = formData.get('destination_table') as string;
 
         try {
-            const newJob = await apiService.post(`${config.api.baseUrl}/generation/synthetic_data`, { num_traces, output_file }, token);
-            setJob(newJob);
-            setIsPolling(true);
+            const newJob = await apiService.post(`${config.api.baseUrl}/generation/synthetic_data`, { num_traces, source_table, destination_table }, token);
+            if (newJob && newJob.job_id) {
+                setJob(newJob);
+                pollingJobIdRef.current = newJob.job_id;
+                setIsPolling(true);
+            } else {
+                setError("Failed to start generation job: No job ID returned.");
+            }
         } catch (err: unknown) {
             console.error("Error starting generation:", err);
             setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
@@ -116,10 +149,11 @@ export default function GenerationPage() {
                         <div className="lg:col-span-1">
                             <GenericInput
                                 title="Generate Synthetic Data"
-                                description="Generate synthetic data for your workload settings."
+                                description="Generate synthetic data from a source table and ingest into a destination table."
                                 inputFields={[
                                     { id: 'num_traces', name: 'num_traces', label: 'Number of Traces', type: 'number', required: true, defaultValue: 10000 },
-                                    { id: 'output_file', name: 'output_file', label: 'Output File Name', type: 'text', required: true, defaultValue: 'generated_logs_v2.json' },
+                                    { id: 'source_table', name: 'source_table', label: 'Source Table', type: 'select', required: true, options: tables, defaultValue: 'content_corpus' },
+                                    { id: 'destination_table', name: 'destination_table', label: 'Destination Table', type: 'text', required: true, defaultValue: 'synthetic_data' },
                                 ]}
                                 onSubmit={handleStartGeneration}
                                 isLoading={isLoading || isPolling}
@@ -151,6 +185,8 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
         );
     }
 
+    const progressPercentage = job.total_tasks ? (job.progress / job.total_tasks) * 100 : 0;
+
     if (job.status === 'pending' || job.status === 'running') {
         return (
             <Card className="h-full">
@@ -161,9 +197,26 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
                     <div className="mt-4 space-y-2 text-sm text-gray-600">
                         <p><strong>Status:</strong> <span className="capitalize font-medium text-indigo-600">{job.status.toLowerCase()}</span></p>
                         <p><strong>Job ID:</strong> {job.job_id}</p>
+                        {job.last_updated && <p><strong>Last Updated:</strong> {new Date(job.last_updated * 1000).toLocaleString()}</p>}
                     </div>
                     <div className="mt-6">
                         <Spinner />
+                        {job.progress !== undefined && job.total_tasks !== undefined && (
+                            <div className="mt-4">
+                                <div className="flex justify-between mb-1">
+                                    <span className="text-sm font-medium text-gray-700">Generation Progress</span>
+                                    <span className="text-sm font-medium text-gray-700">{job.progress} of {job.total_tasks} tasks</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: `${progressPercentage}%` }}></div>
+                                </div>
+                            </div>
+                        )}
+                        {job.records_ingested !== undefined && (
+                            <div className="mt-4">
+                                <p className="text-sm text-gray-600"><strong>Records Ingested:</strong> {job.records_ingested}</p>
+                            </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>
@@ -200,12 +253,8 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
                 </CardHeader>
                 <CardContent>
                     <div className="mt-6">
-                        <p className="text-sm font-medium text-gray-700">Result Path:</p>
-                        <p className="text-lg font-bold text-gray-800">{job.result_path}</p>
-                    </div>
-                    <div className="mt-4">
                         <p className="text-sm font-medium text-gray-700">Summary:</p>
-                        <p className="text-lg font-bold text-gray-800">{job.summary?.logs_generated.toLocaleString()} logs generated</p>
+                        <p className="text-lg font-bold text-gray-800">{job.summary?.message}</p>
                     </div>
                 </CardContent>
             </Card>

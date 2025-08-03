@@ -5,10 +5,11 @@ import os
 import json
 from typing import List, Dict, Any, Optional
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status, Depends
 from pydantic import BaseModel, Field
 
 from ..services.generation_service import run_content_generation_job, run_log_generation_job, run_synthetic_data_generation_job, run_data_ingestion_job, GENERATION_JOBS
+from ..db.clickhouse import get_clickhouse_client, ClickHouseClient
 
 router = APIRouter()
 
@@ -27,7 +28,8 @@ class LogGenParams(BaseModel):
 
 class SyntheticDataGenParams(BaseModel):
     num_traces: int = Field(10000, gt=0, le=100000, description="Number of traces to generate.")
-    output_file: str = Field("generated_logs_v2.json", description="The name of the output file.")
+    source_table: str = Field("content_corpus", description="The name of the source ClickHouse table for the content corpus.")
+    destination_table: str = Field("synthetic_data", description="The name of the destination ClickHouse table for the generated data.")
 
 # --- API Endpoints ---
 
@@ -133,3 +135,12 @@ def list_log_sets() -> List[Dict]:
             if os.path.exists(log_file):
                 log_sets.append({"log_set_id": job_id, "path": log_file})
     return log_sets
+
+@router.get("/clickhouse_tables")
+def list_clickhouse_tables(client: ClickHouseClient = Depends(get_clickhouse_client)) -> List[str]:
+    """Lists all tables in the ClickHouse database."""
+    try:
+        result = client.execute_query("SHOW TABLES")
+        return [row['name'] for row in result]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch tables from ClickHouse: {e}")

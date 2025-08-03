@@ -9,6 +9,7 @@ from multiprocessing import Pool, cpu_count
 from functools import partial
 import random
 import hashlib
+from collections import defaultdict
 
 import pandas as pd
 import numpy as np
@@ -17,7 +18,7 @@ from faker import Faker
 from ..config import settings
 from ..data.synthetic.content_generator import META_PROMPTS, generate_content_sample
 from ..db.clickhouse import ClickHouseClient
-from ..db.models_clickhouse import ContentCorpus, get_content_corpus_schema
+from ..db.models_clickhouse import ContentCorpus, get_content_corpus_schema, LLM_EVENTS_TABLE_SCHEMA
 from ..data.ingestion import ingest_records
 from ..data.content_corpus import DEFAULT_CONTENT_CORPUS
 
@@ -34,9 +35,39 @@ def update_job_status(job_id: str, status: str, **kwargs):
     job['last_updated'] = time.time()
     job.update(kwargs)
 
+def get_corpus_from_clickhouse(table_name: str) -> dict:
+    """Fetches the content corpus from a specified ClickHouse table."""
+    db = None
+    try:
+        db = ClickHouseClient(
+            host=settings.clickhouse_https.host,
+            port=settings.clickhouse_https.port,
+            user=settings.clickhouse_https.user,
+            password=settings.clickhouse_https.password,
+            database=settings.clickhouse_https.database
+        )
+        db.connect()
+        
+        query = f"SELECT workload_type, prompt, response FROM {table_name}"
+        results = db.execute_query(query)
+        
+        corpus = defaultdict(list)
+        for row in results:
+            corpus[row['workload_type']].append((row['prompt'], row['response']))
+            
+        logging.info(f"Successfully loaded {len(results)} records from corpus table {table_name}")
+        return dict(corpus)
+
+    except Exception as e:
+        logging.exception(f"Failed to load corpus from ClickHouse table {table_name}")
+        raise
+    finally:
+        if db and db.is_connected():
+            db.disconnect()
+
 def save_corpus_to_clickhouse(corpus: dict, table_name: str):
     """Saves the generated content corpus to a specified ClickHouse table."""
-    db = None  # Initialize db to None
+    db = None
     try:
         db = ClickHouseClient(
             host=settings.clickhouse_https.host,
@@ -54,7 +85,6 @@ def save_corpus_to_clickhouse(corpus: dict, table_name: str):
         for w_type, samples in corpus.items():
             for sample in samples:
                 actual_sample = sample
-                # Unpack if it's a list with a single tuple inside
                 if isinstance(actual_sample, list) and len(actual_sample) == 1 and isinstance(actual_sample[0], tuple):
                     actual_sample = actual_sample[0]
 
@@ -126,7 +156,6 @@ def run_content_generation_job(job_id: str, params: dict):
             completed_tasks += 1
             update_job_status(job_id, "running", progress=completed_tasks)
 
-    # Save to ClickHouse
     clickhouse_table = params.get('clickhouse_table', 'content_corpus')
     try:
         save_corpus_to_clickhouse(corpus, clickhouse_table)
@@ -155,7 +184,7 @@ def generate_data_chunk_for_service(args):
     prompts, responses = [], []
     for trace_type in chosen_trace_types:
         corpus_to_use = content_corpus if trace_type in content_corpus and content_corpus[trace_type] else DEFAULT_CONTENT_CORPUS
-        prompt, response = random.choice(corpus_to_use[trace_type])
+        prompt, response = random.choice(corpus_to_use.get(trace_type, []))
         prompts.append(prompt)
         responses.append(response)
 
@@ -250,14 +279,14 @@ def run_data_ingestion_job(job_id: str, params: dict):
         logging.exception("Error during data ingestion job")
         update_job_status(job_id, "failed", error=str(e))
 
-from app.data.synthetic.synthetic_data_v2 import main
-from app.db.models_clickhouse import LLM_EVENTS_TABLE_SCHEMA
+from app.data.synthetic.synthetic_data_v2 import main as synthetic_data_main
 
 def run_synthetic_data_generation_job(job_id: str, params: dict):
-    """Generates and ingests synthetic logs in batches."""
+    """Generates and ingests synthetic logs in batches from a ClickHouse corpus."""
     batch_size = params.get('batch_size', 1000)
     total_logs_to_gen = params.get('num_traces', 10000)
-    table_name = params.get('clickhouse_table', 'JSON_HYBRID_EVENTS4')
+    source_table = params.get('source_table', 'content_corpus')
+    destination_table = params.get('destination_table', 'synthetic_data')
     
     update_job_status(job_id, "running", progress=0, total_tasks=total_logs_to_gen, records_ingested=0)
 
@@ -270,36 +299,76 @@ def run_synthetic_data_generation_job(job_id: str, params: dict):
     client.command(LLM_EVENTS_TABLE_SCHEMA) 
 
     try:
-        class Args:
-            def __init__(self, num_traces, output_file):
-                self.num_traces = num_traces
-                self.output_file = output_file
-                self.config = "config.yaml"
-                self.max_cores = cpu_count()
-                self.corpus_file = "content_corpus.json"
-
-        args = Args(total_logs_to_gen, params.get('output_file', 'generated_logs.json'))
+        content_corpus = get_corpus_from_clickhouse(source_table)
         
-        generated_logs = main(args)
+        class Args:
+            def __init__(self, num_traces, config, max_cores, corpus):
+                self.num_traces = num_traces
+                self.config = config
+                self.max_cores = max_cores
+                self.corpus = corpus
+
+        args = Args(total_logs_to_gen, "config.yaml", cpu_count(), content_corpus)
+        
+        generated_logs = synthetic_data_main(args)
         records_ingested = 0
         log_batch = []
 
         for i, log_record in enumerate(generated_logs):
             log_batch.append(log_record)
             if len(log_batch) >= batch_size:
-                ingested_count = ingest_records(client, log_batch, table_name)
+                ingested_count = ingest_records(client, log_batch, destination_table)
                 records_ingested += ingested_count
                 log_batch.clear()
                 update_job_status(job_id, "running", progress=i + 1, records_ingested=records_ingested)
 
-        if log_batch: # Ingest any remaining logs
-            ingested_count = ingest_records(client, log_batch, table_name)
+        if log_batch:
+            ingested_count = ingest_records(client, log_batch, destination_table)
             records_ingested += ingested_count
 
-        update_job_status(job_id, "completed", progress=total_logs_to_gen, records_ingested=records_ingested)
+        summary = {"message": f"Synthetic data generated and saved to {destination_table}", "records_ingested": records_ingested}
+        update_job_status(job_id, "completed", progress=total_logs_to_gen, records_ingested=records_ingested, summary=summary)
 
     except Exception as e:
         logging.exception("Error during synthetic data generation job")
         update_job_status(job_id, "failed", error=str(e))
     finally:
         client.disconnect()
+
+def get_config():
+    """Loads the application configuration from config.yaml."""
+    import yaml
+    with open("config.yaml", 'r') as f:
+        return yaml.safe_load(f)
+
+def format_log_entry(row):
+    """Formats a DataFrame row into a structured log entry."""
+    return {
+        "timestamp": pd.Timestamp.now().isoformat(),
+        "level": "INFO",
+        "message": "API call processed",
+        "trace_id": row['trace_id'],
+        "span_id": row['span_id'],
+        "metadata": {
+            "app_name": row['app_name'],
+            "service_name": row['service_name'],
+            "model_provider": row['model_provider'],
+            "model_name": row['model_name'],
+            "user_id": row['user_id'],
+            "organization_id": row['organization_id']
+        },
+        "llm_event": {
+            "user_prompt": row['user_prompt'],
+            "assistant_response": row['assistant_response'],
+            "prompt_tokens": row['prompt_tokens'],
+            "completion_tokens": row['completion_tokens'],
+            "total_tokens": row['total_tokens'],
+            "total_e2e_ms": row['total_e2e_ms'],
+            "ttft_ms": row['ttft_ms'],
+            "cost": {
+                "prompt_cost": row['prompt_cost'],
+                "completion_cost": row['completion_cost'],
+                "total_cost": row['total_cost']
+            }
+        }
+    }
