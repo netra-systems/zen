@@ -18,6 +18,7 @@ class AppConfig(BaseSettings):
     access_token_expire_minutes: int = 30
     fernet_key: str
     jwt_secret_key: str
+    api_base_url: str = "http://localhost:8000"
     
     model_config = SettingsConfigDict(env_file='app/.env')
 

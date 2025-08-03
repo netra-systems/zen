@@ -19,7 +19,7 @@ from .db.postgres import get_async_db
 
 DbDep = Annotated[Session, Depends(get_async_db)]
 
-async def get_current_user(token: TokenDep, db: DbDep) -> User:
+async def get_current_user(request: Request, token: TokenDep, db: DbDep) -> User:
     """
     Decodes the JWT token to get the current user.
     Raises HTTPException if the token is invalid or the user doesn't exist.
@@ -32,7 +32,7 @@ async def get_current_user(token: TokenDep, db: DbDep) -> User:
     try:
         # The token is expected to be in the format "Bearer <token>"
         # The OAuth2PasswordBearer dependency already handles extracting the token
-        payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.algorithm])
+        payload = jwt.decode(token, request.app.state.security_service.key_manager.jwt_secret_key, algorithms=[settings.algorithm])
         email: str = payload.get("sub")
         if email is None:
             logger.warning("Token payload missing 'sub' (email).")
