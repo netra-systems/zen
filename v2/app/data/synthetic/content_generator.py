@@ -99,10 +99,10 @@ def generate_content_sample(workload_type: str, generation_params: dict) -> dict
 
         if workload_type == 'multi_turn_tool_use':
             # Convert the list of dicts back to a list of tuples for the corpus
-            convo_tuples = [(turn['user_prompt'], turn['assistant_response']) for turn in args['conversation']]
+            convo_tuples = [(turn['user_prompt'], turn.get('assistant_response', '')) for turn in args['conversation']]
             return {"type": workload_type, "data": convo_tuples}
         else:
-            return {"type": workload_type, "data": (args['user_prompt'], args['assistant_response']) }
+            return {"type": workload_type, "data": (args['user_prompt'], args.get('assistant_response', '')) }
             
     except (ValueError, IndexError, AttributeError) as e:
         # This might happen if the model fails to call the tool correctly, though it's less likely with this method.

@@ -24,7 +24,7 @@ GENERATION_JOBS = {}
 # --- Content Generation Service ---
 
 def run_content_generation_job(job_id: str, params: dict):
-    """The core worker process for generating a content corpus.""" 
+    """The core worker process for generating a content corpus."""
     try:
         import google.generativeai as genai
         GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -36,34 +36,34 @@ def run_content_generation_job(job_id: str, params: dict):
         return
 
     GENERATION_JOBS[job_id]["status"] = "running"
-    
+
     generation_config = genai.types.GenerationConfig(
         temperature=params['temperature'],
         top_p=params.get('top_p'),
         top_k=params.get('top_k')
     )
     model = genai.GenerativeModel('gemini-1.5-flash')
-    
+
     workload_types = list(META_PROMPTS.keys())
     num_processes = min(cpu_count(), params['max_cores'])
-    
+
     worker_func = partial(generate_content_sample, model=model, generation_config=generation_config)
     tasks = [w_type for w_type in workload_types for _ in range(params['samples_per_type'])]
 
     corpus = {key: [] for key in workload_types}
-    
+
     with Pool(processes=num_processes) as pool:
         results = pool.map(worker_func, tasks)
 
     for item in results:
-        if item:
+        if item and item.get('type') in corpus:
             corpus[item['type']].append(item['data'])
 
     # Save to file
     output_dir = os.path.join("app", "data", "generated", "content_corpuses", job_id)
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, "content_corpus.json")
-    
+
     with open(output_path, 'w') as f:
         json.dump(corpus, f, indent=2)
 
@@ -162,80 +162,7 @@ def run_log_generation_job(job_id: str, params: dict):
         GENERATION_JOBS[job_id]["status"] = "failed"
         GENERATION_JOBS[job_id]["error"] = str(e)
 
-from ..config import settings
 
-def run_content_corpus_generation_job(job_id: str, params: dict):
-    """The core worker process for generating a content corpus and storing it in ClickHouse."""
-    try:
-        import google.generativeai as genai
-        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-        if not GEMINI_API_KEY:
-            raise ValueError("GEMINI_API_KEY not set")
-        genai.configure(api_key=GEMINI_API_KEY)
-    except (ImportError, ValueError) as e:
-        GENERATION_JOBS[job_id] = {"status": "failed", "error": str(e)}
-        return
-
-    GENERATION_JOBS[job_id]["status"] = "running"
-    
-    generation_params = {
-        "temperature": params['temperature'],
-        "top_p": params.get('top_p'),
-        "top_k": params.get('top_k')
-    }
-    
-    workload_types = list(META_PROMPTS.keys())
-    num_processes = min(cpu_count(), params['max_cores'])
-    
-    worker_func = partial(generate_content_sample, generation_params=generation_params)
-    tasks = [w_type for w_type in workload_types for _ in range(params['samples_per_type'])]
-
-    corpus = {key: [] for key in workload_types}
-    
-    with Pool(processes=num_processes) as pool:
-        results = pool.map(worker_func, tasks)
-
-    for item in results:
-        if item:
-            corpus[item['type']].append(item['data'])
-
-    # Store in ClickHouse
-    try:
-        client = Client(**settings.clickhouse_native.model_dump())
-        client.execute(CONTENT_CORPUS_TABLE_SCHEMA)
-        
-        corpus_id = uuid.uuid4()
-        data_to_insert = []
-        for workload_type, samples in corpus.items():
-            for sample in samples:
-                if isinstance(sample, list):
-                    for s in sample:
-                        data_to_insert.append({
-                            "corpus_id": corpus_id,
-                            "workload_type": workload_type,
-                            "user_prompt": s[0],
-                            "assistant_response": s[1]
-                        })
-                else:
-                    data_to_insert.append({
-                        "corpus_id": corpus_id,
-                        "workload_type": workload_type,
-                        "user_prompt": sample[0],
-                        "assistant_response": sample[1]
-                    })
-        
-        client.execute(f"INSERT INTO {CONTENT_CORPUS_TABLE_NAME} VALUES", data_to_insert)
-
-        GENERATION_JOBS[job_id].update({
-            "status": "completed",
-            "finished_at": time.time(),
-            "summary": {"message": f"Content corpus {corpus_id} generated and stored in ClickHouse."}
-        })
-
-    except Exception as e:
-        logging.exception("Error during content corpus generation job")
-        GENERATION_JOBS[job_id]["status"] = "failed"
-        GENERATION_JOBS[job_id]["error"] = str(e)
 
 
 from ..config import settings
