@@ -6,6 +6,7 @@ import { config } from './config';
 interface User {
     full_name?: string;
     email: string;
+    picture?: string;
 }
 
 interface AppState {

@@ -45,6 +45,7 @@ async def auth_via_google(request: Request, db: DbDep):
         user = models_postgres.User(
             email=user_info['email'],
             full_name=user_info['name'],
+            picture=user_info['picture'],
             is_active=True,
             hashed_password=""
         )
