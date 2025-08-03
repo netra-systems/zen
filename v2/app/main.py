@@ -35,43 +35,42 @@ async def lifespan(app: FastAPI):
     app.state.key_manager = key_manager
     app.state.security_service = SecurityService(key_manager)
 
-    if settings.app_env != "development":
-        # Initialize PostgreSQL
-        try:
-            db = Database(settings.DATABASE_URL)
-            db.connect()
-            app.state.db = db
-            logger.info("PostgreSQL connected.")
-        except Exception as e:
-            logger.error(f"Failed to connect to PostgreSQL: {e}", exc_info=True)
-            raise
+    # Initialize PostgreSQL
+    try:
+        db = Database(settings.DATABASE_URL)
+        db.connect()
+        app.state.db = db
+        logger.info("PostgreSQL connected.")
+    except Exception as e:
+        logger.error(f"Failed to connect to PostgreSQL: {e}", exc_info=True)
+        raise
 
-        # Initialize and connect to ClickHouse
-        ch_client = ClickHouseClient(
-            host=settings.CLICKHOUSE_HOST,
-            port=settings.CLICKHOUSE_PORT,
-            database=settings.CLICKHOUSE_DATABASE,
-            user=settings.CLICKHOUSE_USER,
-            password=settings.CLICKHOUSE_PASSWORD
-        )
-        logger.info(f"Connecting to ClickHouse at {settings.CLICKHOUSE_HOST}:{settings.CLICKHOUSE_PORT}")
-        try:
-            ch_client.connect()
-            logger.info("ClickHouse connected.")
-            # Create tables if they don't exist
-            ch_client.create_table_if_not_exists(SUPPLY_TABLE_SCHEMA)
-            ch_client.create_table_if_not_exists(LOGS_TABLE_SCHEMA)
-            app.state.clickhouse_client = ch_client
+    # Initialize and connect to ClickHouse
+    ch_client = ClickHouseClient(
+        host=settings.CLICKHOUSE_HOST,
+        port=settings.CLICKHOUSE_PORT,
+        database=settings.CLICKHOUSE_DATABASE,
+        user=settings.CLICKHOUSE_USER,
+        password=settings.CLICKHOUSE_PASSWORD
+    )
+    logger.info(f"Connecting to ClickHouse at {settings.CLICKHOUSE_HOST}:{settings.CLICKHOUSE_PORT}")
+    try:
+        ch_client.connect()
+        logger.info("ClickHouse connected.")
+        # Create tables if they don't exist
+        ch_client.create_table_if_not_exists(SUPPLY_TABLE_SCHEMA)
+        ch_client.create_table_if_not_exists(LOGS_TABLE_SCHEMA)
+        app.state.clickhouse_client = ch_client
 
-            # Add the ClickHouse handler to the root logger for the application
-            ch_handler = ClickHouseLogHandler(client=ch_client)
-            logging.getLogger("netra-core").addHandler(ch_handler)
-            logger.info("ClickHouse logging handler initialized.")
+        # Add the ClickHouse handler to the root logger for the application
+        ch_handler = ClickHouseLogHandler(client=ch_client)
+        logging.getLogger("netra-core").addHandler(ch_handler)
+        logger.info("ClickHouse logging handler initialized.")
 
-        except Exception as e:
-            logger.error(f"Failed to connect or setup ClickHouse: {e}", exc_info=True)
-            # Re-raise the exception to prevent the application from starting in a bad state
-            raise
+    except Exception as e:
+        logger.error(f"Failed to connect or setup ClickHouse: {e}", exc_info=True)
+        # Re-raise the exception to prevent the application from starting in a bad state
+        raise
     
     yield
     
