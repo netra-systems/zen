@@ -70,15 +70,5 @@ const useAppStore = create<AppState>((set, get) => ({
     },
 }));
 
-export const useStore = <T>(selector: (state: AppState) => T) => {
-    const store = useAppStore(selector);
-    const [isHydrated, setIsHydrated] = useState(false);
-
-    useEffect(() => {
-        setIsHydrated(true);
-    }, []);
-
-    return isHydrated ? store : (selector({ user: null, token: null, isLoading: true, authError: null } as AppState));
-};
 
 export default useAppStore;

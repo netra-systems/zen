@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import useAppStore, { useStore } from '../store';
+import useAppStore from '../store';
 import { Button } from './ui/button';
 import {
   DropdownMenu,
@@ -18,7 +18,7 @@ import { Icons } from './Icons';
 
 export const Header = () => {
   const { logout } = useAppStore();
-  const user = useStore((state) => state.user);
+  const user = useAppStore((state) => state.user);
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">

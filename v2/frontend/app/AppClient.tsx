@@ -4,13 +4,12 @@ import React, { useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Dashboard } from '@/components/Dashboard';
-import { useStore } from '@/store';
-import { Sidebar } from '@/components/Sidebar';
 import useAppStore from '@/store';
+import { Sidebar } from '@/components/Sidebar';
 
 export default function AppClient() {
   const { fetchUser, setToken, setIsLoading } = useAppStore();
-  const isLoading = useStore((state) => state.isLoading);
+  const isLoading = useAppStore((state) => state.isLoading);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('authToken');

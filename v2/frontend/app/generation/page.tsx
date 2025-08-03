@@ -8,7 +8,7 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import Spinner from '../components/Spinner';
 import Input from '../components/Input';
-import { useAppStore } from '../store';
+import useAppStore from '../store';
 
 // --- Type Definitions for API data ---
 interface Job {
