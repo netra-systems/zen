@@ -30,13 +30,33 @@ export const Header = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.picture} alt={user.full_name} />
-                  <AvatarFallback>
-                    {user.full_name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')}
-                  </AvatarFallback>
+                  {user.picture ? (
+                    <>
+                      <AvatarImage 
+                        src={user.picture.startsWith('http') ? user.picture : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}${user.picture.startsWith('/') ? '' : '/'}${user.picture}`}
+                        alt={user.full_name}
+                        onError={(e) => {
+                          console.error('Error loading profile image:', e);
+                          console.log('Profile image URL:', user.picture);
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                        }}
+                      />
+                      <AvatarFallback>
+                        {user.full_name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')}
+                      </AvatarFallback>
+                    </>
+                  ) : (
+                    <AvatarFallback>
+                      {user.full_name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
