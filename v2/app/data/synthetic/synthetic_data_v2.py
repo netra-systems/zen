@@ -61,9 +61,12 @@ DEFAULT_CONTENT_CORPUS = {
     ]
 }
 
-def load_content_corpus_from_clickhouse(clickhouse_creds: dict) -> dict:
+from app.config import settings
+
+def load_content_corpus_from_clickhouse() -> dict:
     """Loads the content corpus from the ClickHouse database."""
-    client = Client(**clickhouse_creds)
+    ch_settings = settings.clickhouse_native.model_dump()
+    client = Client(**ch_settings, secure=True, verify=False)
     query = f"SELECT workload_type, user_prompt, assistant_response FROM {CONTENT_CORPUS_TABLE_NAME}"
     query_result = client.execute(query)
 
@@ -325,13 +328,7 @@ def main(args):
     start_time = time.time()
 
     config = get_config(args.config)
-    content_corpus = load_content_corpus_from_clickhouse({
-        "host": os.getenv("CLICKHOUSE_HOST", "localhost"),
-        "port": os.getenv("CLICKHOUSE_PORT", 9000),
-        "user": os.getenv("CLICKHOUSE_USER", "default"),
-        "password": os.getenv("CLICKHOUSE_PASSWORD", ""),
-        "database": os.getenv("CLICKHOUSE_DATABASE", "default"),
-    })
+    content_corpus = load_content_corpus_from_clickhouse()
     total_traces = args.num_traces
 
     # --- Calculate number of each trace type ---

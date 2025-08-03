@@ -2,15 +2,29 @@ import os
 from pydantic import validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+model_config = SettingsConfigDict(
+    env_file='app/.env'
+)
+
+class ClickHouseNativeConfig(BaseSettings):
+    host: str
+    port: int = 9440
+    user: str
+    password: str
+    database: str
+
+
+class ClickHouseHTTPSConfig(BaseSettings):
+    host: str
+    port: int = 8443
+    user: str
+    password: str
+    database: str
+
 class AppConfig(BaseSettings):
     """Base configuration class."""
     app_env: str = "development"
     gemini_api_key: str
-    clickhouse_host: str
-    clickhouse_port: int
-    clickhouse_user: str
-    clickhouse_password: str
-    clickhouse_db: str
     secret_key: str
     google_client_id: str
     google_client_secret: str   
@@ -19,13 +33,12 @@ class AppConfig(BaseSettings):
     fernet_key: str
     jwt_secret_key: str
     api_base_url: str = "http://localhost:8000"
-    
-    model_config = SettingsConfigDict(env_file='app/.env')
 
+    clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
+    clickhouse_https: ClickHouseHTTPSConfig = ClickHouseHTTPSConfig()
+    
 class DevelopmentConfig(AppConfig):
-    """Development configuration.
-    Extends AppConfig, so just add other ones:
-    """
+    """Development configuration."""
     log_level: str = "DEBUG"
     secret_key: str = "secret_key"
     fernet_key: str = "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw="
