@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, FormEvent } from 'react';
+import React, { useState, useEffect, useCallback, FormEvent, useRef } from 'react';
 import { Zap, HelpCircle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card';
 
@@ -59,45 +59,62 @@ export default function AdminPage() {
     const [isPolling, setIsPolling] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const pollingJobIdRef = useRef<string | null>(null);
 
-    const pollStatus = useCallback(async (jobId: string) => {
+    const pollStatus = useCallback(async () => {
+        if (!pollingJobIdRef.current) {
+            setIsPolling(false); // Stop polling if job id is missing
+            return;
+        }
         try {
-            const data: Job = await apiService.get(`${config.api.baseUrl}/generation/jobs/${jobId}`, token);
+            const data: Job = await apiService.get(`${config.api.baseUrl}/generation/jobs/${pollingJobIdRef.current}`, token);
             setJob(data);
             if (data.status !== 'running' && data.status !== 'pending') {
                 setIsPolling(false);
+                pollingJobIdRef.current = null;
             }
         } catch (err: unknown) {
             console.error("Polling failed:", err);
             setError('Could not get job status.');
             setIsPolling(false);
+            pollingJobIdRef.current = null;
         }
-    }, [token]);
+    }, [token, setIsPolling, setJob, setError]);
 
     useEffect(() => {
-        let intervalId: NodeJS.Timeout | null = null;
-        if (isPolling && job?.job_id) {
-            intervalId = setInterval(() => pollStatus(job.job_id), 3000);
+        if (!isPolling) {
+            return;
         }
-        return () => {
-            if (intervalId) clearInterval(intervalId);
-        };
-    }, [isPolling, job, pollStatus]);
+        const intervalId = setInterval(pollStatus, 3000);
+        return () => clearInterval(intervalId);
+    }, [isPolling, pollStatus]);
 
     const handleStartGeneration = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setIsLoading(true);
         setError(null);
+        setJob(null);
+        if (isPolling) {
+            setIsPolling(false);
+        }
+        pollingJobIdRef.current = null;
+
 
         const formData = new FormData(event.currentTarget);
         const samples_per_type = parseInt(formData.get('samples_per_type') as string, 10);
         const temperature = parseFloat(formData.get('temperature') as string);
         const max_cores = parseInt(formData.get('max_cores') as string, 10);
+        const clickhouse_table = formData.get('clickhouse_table') as string;
 
         try {
-            const newJob = await apiService.post(`${config.api.baseUrl}/generation/content_corpus`, { samples_per_type, temperature, max_cores }, token);
-            setJob(newJob);
-            setIsPolling(true);
+            const newJob = await apiService.post(`${config.api.baseUrl}/generation/content_corpus`, { samples_per_type, temperature, max_cores, clickhouse_table }, token);
+            if (newJob && newJob.job_id) {
+                setJob(newJob);
+                pollingJobIdRef.current = newJob.job_id;
+                setIsPolling(true);
+            } else {
+                setError("Failed to start generation job: No job ID returned.");
+            }
         } catch (err: unknown) {
             console.error("Error starting generation:", err);
             setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
@@ -122,6 +139,7 @@ export default function AdminPage() {
                                     { id: 'samples_per_type', name: 'samples_per_type', label: 'Samples Per Type', type: 'number', required: true, defaultValue: 10 },
                                     { id: 'temperature', name: 'temperature', label: 'Temperature', type: 'number', required: true, defaultValue: 0.7 },
                                     { id: 'max_cores', name: 'max_cores', label: 'Max Cores', type: 'number', required: true, defaultValue: 4 },
+                                    { id: 'clickhouse_table', name: 'clickhouse_table', label: 'ClickHouse Table', type: 'text', required: true, defaultValue: 'content_corpus' },
                                 ]}
                                 onSubmit={handleStartGeneration}
                                 isLoading={isLoading || isPolling}
