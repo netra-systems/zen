@@ -21,7 +21,7 @@ import sys
 from faker import Faker
 from rich.console import Console
 from rich.progress import Progress
-from clickhouse_driver import Client
+from app.db.clickhouse import get_clickhouse_client
 from app.db.models_clickhouse import CONTENT_CORPUS_TABLE_NAME
 
 # Import the same Pydantic schemas from v1 to ensure compatibility
@@ -40,20 +40,38 @@ fake = Faker()
 from app.config import settings
 
 def load_content_corpus_from_clickhouse() -> dict:
-    """Loads the content corpus from the ClickHouse database."""
-    ch_settings = settings.clickhouse_native.model_dump()
-    client = Client(**ch_settings)
-    query = f"SELECT workload_type, user_prompt, assistant_response FROM {CONTENT_CORPUS_TABLE_NAME}"
-    query_result = client.execute(query)
+    """Loads the content corpus from the ClickHouse database via HTTPS,
+    with a fallback to the default corpus if the connection fails.
+    """
+    try:
+        with get_clickhouse_client() as client:
+            if not client.is_connected():
+                console.print("[yellow]Warning: ClickHouse connection failed. Falling back to default corpus.[/yellow]")
+                return DEFAULT_CONTENT_CORPUS
+            
+            query = f"SELECT workload_type, user_prompt, assistant_response FROM {CONTENT_CORPUS_TABLE_NAME}"
+            query_result = client.execute_query(query)
 
-    corpus = {}
-    for row in query_result:
-        workload_type, user_prompt, assistant_response = row
-        if workload_type not in corpus:
-            corpus[workload_type] = []
-        corpus[workload_type].append((user_prompt, assistant_response))
+            corpus = {}
+            for row in query_result:
+                workload_type = row['workload_type']
+                user_prompt = row['user_prompt']
+                assistant_response = row['assistant_response']
+                
+                if workload_type not in corpus:
+                    corpus[workload_type] = []
+                corpus[workload_type].append((user_prompt, assistant_response))
+            
+            if not corpus:
+                console.print("[yellow]Warning: Content corpus from ClickHouse is empty. Using default corpus.[/yellow]")
+                return DEFAULT_CONTENT_CORPUS
+                
+            console.print("[green]Successfully loaded content corpus from ClickHouse.[/green]")
+            return corpus
 
-    return corpus
+    except Exception as e:
+        console.print(f"[red]Error connecting to ClickHouse: {e}. Falling back to default corpus.[/red]")
+        return DEFAULT_CONTENT_CORPUS
 
 
 def load_content_corpus(corpus_path: str) -> dict:
