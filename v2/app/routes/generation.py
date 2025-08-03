@@ -8,7 +8,7 @@ from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from pydantic import BaseModel, Field
 
-from ..services.generation_service import run_content_generation_job, run_log_generation_job, run_synthetic_data_generation_job, run_data_ingestion_job, run_content_corpus_generation_job, GENERATION_JOBS
+from ..services.generation_service import run_content_generation_job, run_log_generation_job, run_synthetic_data_generation_job, run_data_ingestion_job, GENERATION_JOBS
 
 router = APIRouter()
 
@@ -72,7 +72,7 @@ def create_content_corpus(params: ContentCorpusGenParams, background_tasks: Back
     """Starts a background job to generate a new content corpus and store it in ClickHouse."""
     job_id = str(uuid.uuid4())
     GENERATION_JOBS[job_id] = {"status": "pending", "type": "content_corpus_generation", "params": params.dict()}
-    background_tasks.add_task(run_content_corpus_generation_job, job_id, params.dict())
+    background_tasks.add_task(run_content_generation_job, job_id, params.dict())
     return {"job_id": job_id, "message": "Content corpus generation job started."}
 
 
