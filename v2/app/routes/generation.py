@@ -137,10 +137,11 @@ def list_log_sets() -> List[Dict]:
     return log_sets
 
 @router.get("/clickhouse_tables")
-def list_clickhouse_tables(client: ClickHouseClient = Depends(get_clickhouse_client)) -> List[str]:
+def list_clickhouse_tables() -> List[str]:
     """Lists all tables in the ClickHouse database."""
     try:
-        result = client.execute_query("SHOW TABLES")
-        return [row['name'] for row in result]
+        with get_clickhouse_client() as client:
+            result = client.execute_query("SHOW TABLES")
+            return [row['name'] for row in result]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch tables from ClickHouse: {e}")
