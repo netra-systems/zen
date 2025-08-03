@@ -148,8 +148,8 @@ export default function GenerationPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-1">
                             <GenericInput
-                                title="Generate Synthetic Data"
-                                description="Generate synthetic data from a source table and ingest into a destination table."
+                                title="Create & Ingest Synthetic Data"
+                                description="Create and ingest synthetic data from a source table into a destination table."
                                 inputFields={[
                                     { id: 'num_traces', name: 'num_traces', label: 'Number of Traces', type: 'number', required: true, defaultValue: 10000 },
                                     { id: 'source_table', name: 'source_table', label: 'Source Table', type: 'select', required: true, options: tables, defaultValue: 'content_corpus' },

@@ -17,21 +17,15 @@ export const ControlPanel = () => {
       variant: 'default' as const
     },
     { 
-      text: 'Admin Panel', 
+      text: 'Generate Admin Corpus', 
       icon: <Settings className="mr-2 h-4 w-4" />, 
       onClick: () => router.push('/admin'),
       variant: 'outline' as const
     },
     { 
-      text: 'Generate Synthetic Data', 
+      text: 'Create & Ingest Synthetic Data', 
       icon: <RefreshCw className="mr-2 h-4 w-4" />, 
       onClick: () => router.push('/generation'),
-      variant: 'outline' as const
-    },
-    { 
-      text: 'Ingest Data', 
-      icon: <BarChart2 className="mr-2 h-4 w-4" />, 
-      onClick: () => router.push('/ingestion'),
       variant: 'outline' as const
     },
     { 
