@@ -54,8 +54,7 @@ async def auth_via_google(request: Request, db: DbDep):
         await db.refresh(user)
 
     access_token = request.app.state.security_service.create_access_token(data={"sub": user.email})
-    response = RedirectResponse(url="http://localhost:3000")
-    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
+    response = RedirectResponse(url=f"http://localhost:3000/auth/callback?token={access_token}")
     return response
 
 @router.get("/logout/google")
