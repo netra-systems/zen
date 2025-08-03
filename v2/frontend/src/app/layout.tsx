@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'AI-Powered Workload Optimization',
 };
 
-export const dynamic = 'force-dynamic';
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

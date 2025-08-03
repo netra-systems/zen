@@ -1,7 +1,7 @@
-
 import { create } from 'zustand';
-import { apiService } from './api'; // Assuming apiService is exported from page.tsx
+import { apiService } from './api';
 import { config } from './config';
+import { useEffect, useState } from 'react';
 
 interface User {
     full_name?: string;
@@ -17,17 +17,21 @@ interface AppState {
     fetchUser: (token: string) => Promise<void>;
     login: (formData: FormData) => Promise<void>;
     logout: () => void;
+    setToken: (token: string | null) => void;
+    setIsLoading: (isLoading: boolean) => void;
 }
 
-export const useAppStore = create<AppState>((set, get) => ({
+const useAppStore = create<AppState>((set, get) => ({
     user: null,
     token: null,
     isLoading: true,
     authError: null,
+    setToken: (token) => set({ token }),
+    setIsLoading: (isLoading) => set({ isLoading }),
     fetchUser: async (token) => {
         try {
             const userData = await apiService.get(config.api.endpoints.currentUser, token);
-            set({ user: userData, token });
+            set({ user: userData, token, isLoading: false });
         } catch (error) {
             console.error("Failed to fetch user, logging out.", error);
             set({ user: null, token: null, isLoading: false });
@@ -51,6 +55,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
             const { access_token } = await response.json();
             localStorage.setItem('authToken', access_token);
+            set({ token: access_token });
             await get().fetchUser(access_token);
         } catch (error: unknown) {
             console.error(error);
@@ -59,6 +64,21 @@ export const useAppStore = create<AppState>((set, get) => ({
     },
     logout: () => {
         set({ user: null, token: null });
-        localStorage.removeItem('authToken');
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('authToken');
+        }
     },
 }));
+
+export const useStore = <T>(selector: (state: AppState) => T) => {
+    const store = useAppStore(selector);
+    const [isHydrated, setIsHydrated] = useState(false);
+
+    useEffect(() => {
+        setIsHydrated(true);
+    }, []);
+
+    return isHydrated ? store : (selector({ user: null, token: null, isLoading: true, authError: null } as AppState));
+};
+
+export default useAppStore;
