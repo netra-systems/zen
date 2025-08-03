@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import { Header } from '@/app/components/Header';
-import { Footer } from '@/app/components/Footer';
-import { Dashboard } from '@/app/components/Dashboard';
-import { useStore } from '@/app/store';
-import { Sidebar } from '@/app/components/Sidebar';
-import useAppStore from '@/app/store';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
+import { Dashboard } from '@/components/Dashboard';
+import { useStore } from '@/store';
+import { Sidebar } from '@/components/Sidebar';
+import useAppStore from '@/store';
 
 export default function AppClient() {
   const { fetchUser, setToken, setIsLoading } = useAppStore();

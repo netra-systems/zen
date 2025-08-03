@@ -2,5 +2,5 @@
 
 # Run
 
-cd to netra-frontend-v2/src/app
+cd to netra-frontend-v2/app
 npm run dev -- --turbo

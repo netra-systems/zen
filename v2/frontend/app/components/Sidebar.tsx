@@ -1,6 +1,6 @@
 import { cn } from '@/app/lib/utils';
 import Link from 'next/link';
-import { Icons } from '@/app/components/Icons';
+import { Icons } from '@/components/Icons';
 
 export function Sidebar() {
   return (
