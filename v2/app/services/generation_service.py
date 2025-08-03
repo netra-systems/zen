@@ -16,7 +16,7 @@ from faker import Faker
 
 from ..config import settings
 from ..data.synthetic.content_generator import META_PROMPTS, generate_content_sample
-from ..db.clickhouse import ClickHouseDatabase
+from ..db.clickhouse import ClickHouseClient
 from ..db.models_clickhouse import ContentCorpus, get_content_corpus_schema
 
 # --- Job Management ---
@@ -36,19 +36,26 @@ def update_job_status(job_id: str, status: str, **kwargs):
 def save_corpus_to_clickhouse(corpus: dict, table_name: str):
     """Saves the generated content corpus to a specified ClickHouse table."""
     try:
-        db = ClickHouseDatabase()
+        db = ClickHouseClient(
+            host=settings.clickhouse_https.host,
+            port=settings.clickhouse_https.port,
+            user=settings.clickhouse_https.user,
+            password=settings.clickhouse_https.password,
+            database=settings.clickhouse_https.database
+        )
+        db.connect()
         
         table_schema = get_content_corpus_schema(table_name)
-        db.create_table_if_not_exists(table_name, table_schema)
+        db.command(table_schema)
         
         records = []
         for w_type, samples in corpus.items():
             for sample in samples:
                 # Ensure sample is a dictionary, adapt if it's a string or other type
-                if isinstance(sample, str):
-                    # This is a simplistic adaptation. You might need more complex logic
-                    # depending on the actual structure of your generated samples.
-                    sample_data = {'content': sample}
+                if isinstance(sample, (list, tuple)) and len(sample) == 2:
+                    sample_data = {'prompt': sample[0], 'response': sample[1]}
+                elif isinstance(sample, str):
+                    sample_data = {'prompt': sample, 'response': ''} # Or handle as an error
                 else:
                     sample_data = sample
 
@@ -62,7 +69,7 @@ def save_corpus_to_clickhouse(corpus: dict, table_name: str):
                     record_id=str(uuid.uuid4())
                 ))
 
-        db.insert_data(table_name, [record.dict() for record in records])
+        db.insert_data(table_name, [list(record.dict().values()) for record in records], list(ContentCorpus.model_fields.keys()))
         logging.info(f"Successfully saved {len(records)} records to ClickHouse table: {table_name}")
 
     except Exception as e:
@@ -70,6 +77,9 @@ def save_corpus_to_clickhouse(corpus: dict, table_name: str):
         # Depending on requirements, you might want to re-raise the exception
         # or handle it in a way that informs the job status.
         raise
+    finally:
+        if db and db.is_connected():
+            db.disconnect()
 
 
 # --- Content Generation Service ---
