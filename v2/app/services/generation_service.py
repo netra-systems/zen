@@ -249,10 +249,25 @@ def run_data_ingestion_job(job_id: str, params: dict):
         logging.exception("Error during data ingestion job")
         update_job_status(job_id, "failed", error=str(e))
 
+from app.data.synthetic.synthetic_data_v2 import main
+from app.db.models_clickhouse import LLM_EVENTS_TABLE_SCHEMA
+
 def run_synthetic_data_generation_job(job_id: str, params: dict):
-    """The core worker process for generating a synthetic log set and ingesting it."""
-    update_job_status(job_id, "running")
+    """Generates and ingests synthetic logs in batches."""
+    batch_size = params.get('batch_size', 1000)
+    total_logs_to_gen = params.get('num_traces', 10000)
+    table_name = params.get('clickhouse_table', 'JSON_HYBRID_EVENTS4')
     
+    update_job_status(job_id, "running", progress=0, total_tasks=total_logs_to_gen, records_ingested=0)
+
+    client = ClickHouseClient(
+        host=settings.clickhouse_https.host, port=settings.clickhouse_https.port,
+        user=settings.clickhouse_https.user, password=settings.clickhouse_https.password,
+        database=settings.clickhouse_https.database
+    )
+    client.connect()
+    client.command(LLM_EVENTS_TABLE_SCHEMA) 
+
     try:
         class Args:
             def __init__(self, num_traces, output_file):
@@ -262,20 +277,28 @@ def run_synthetic_data_generation_job(job_id: str, params: dict):
                 self.max_cores = cpu_count()
                 self.corpus_file = "content_corpus.json"
 
-        args = Args(params['num_traces'], params['output_file'])
-        generated_logs = generate_synthetic_data(args)
+        args = Args(total_logs_to_gen, params.get('output_file', 'generated_logs.json'))
+        
+        generated_logs = main(args)
+        records_ingested = 0
+        log_batch = []
 
-        ingestion_summary = ingest_records(generated_logs)
+        for i, log_record in enumerate(generated_logs):
+            log_batch.append(log_record)
+            if len(log_batch) >= batch_size:
+                ingested_count = ingest_records(client, log_batch, table_name)
+                records_ingested += ingested_count
+                log_batch.clear()
+                update_job_status(job_id, "running", progress=i + 1, records_ingested=records_ingested)
 
-        GENERATION_JOBS[job_id].update({
-            "status": "completed",
-            "finished_at": time.time(),
-            "summary": {
-                "logs_generated": len(generated_logs),
-                "ingestion_summary": ingestion_summary
-            }
-        })
+        if log_batch: # Ingest any remaining logs
+            ingested_count = ingest_records(client, log_batch, table_name)
+            records_ingested += ingested_count
+
+        update_job_status(job_id, "completed", progress=total_logs_to_gen, records_ingested=records_ingested)
 
     except Exception as e:
         logging.exception("Error during synthetic data generation job")
         update_job_status(job_id, "failed", error=str(e))
+    finally:
+        client.disconnect()
