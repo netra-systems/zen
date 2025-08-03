@@ -28,6 +28,8 @@ from rich.console import Console
 from rich.progress import Progress
 from dotenv import load_dotenv
 
+from ...config import settings
+
 load_dotenv()
 
 console = Console()
@@ -73,13 +75,10 @@ META_PROMPTS = {
 
 # --- 3. Generation Logic ---
 
-def generate_content_sample(workload_type: str, generation_params: dict) -> dict:
+def generate_content_sample(workload_type: str, model, generation_config) -> dict:
     """Generates a single, schema-guaranteed sample for a given workload type using the LLM."""
     if not genai:
         return None
-
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    generation_config = GenerationConfig(**generation_params)
 
     instruction, schema = META_PROMPTS[workload_type]
     
@@ -109,12 +108,12 @@ def generate_content_sample(workload_type: str, generation_params: dict) -> dict
         # console.print(f"[yellow]Warning: Failed to generate content for '{workload_type}': {e}[/yellow]")
         return None
 
-def generate_for_type(task_args, generation_params):
+def generate_for_type(task_args, model, generation_config):
     """Worker function to generate multiple samples for a single workload type."""
     workload_type, num_samples = task_args
     samples = []
     for _ in range(num_samples):
-        sample = generate_content_sample(workload_type, generation_params)
+        sample = generate_content_sample(workload_type, model, generation_config)
         if sample:
             samples.append(sample)
     return samples
@@ -134,6 +133,9 @@ def main(args):
         "top_k": args.top_k
     }
 
+    model = genai.GenerativeModel(settings.corpus_generation_model)
+    generation_config = GenerationConfig(**generation_params)
+
     console.print(f"Generation Config: [yellow]temp={args.temperature}, top_p={args.top_p}, top_k={args.top_k}[/yellow]")
 
     workload_types = list(META_PROMPTS.keys())
@@ -144,7 +146,7 @@ def main(args):
 
     corpus = {key: [] for key in workload_types}
 
-    worker_func = partial(generate_for_type, generation_params=generation_params)
+    worker_func = partial(generate_for_type, model=model, generation_config=generation_config)
     tasks_for_pool = [(w_type, num_samples_per_type) for w_type in workload_types]
 
     with Pool(processes=num_processes) as pool:

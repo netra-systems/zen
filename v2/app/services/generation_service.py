@@ -7,6 +7,8 @@ import uuid
 import logging
 from multiprocessing import Pool, cpu_count
 from functools import partial
+import random
+import hashlib
 
 import pandas as pd
 import numpy as np
@@ -21,6 +23,16 @@ from ..db.models_clickhouse import ContentCorpus, CONTENT_CORPUS_TABLE_NAME, CON
 # In a production system, this would be a database (e.g., Redis, Postgres)
 GENERATION_JOBS = {}
 
+def update_job_status(job_id: str, status: str, progress: dict = None):
+    """Updates the status and progress of a generation job."""
+    if job_id not in GENERATION_JOBS:
+        GENERATION_JOBS[job_id] = {}
+    
+    GENERATION_JOBS[job_id]['status'] = status
+    GENERATION_JOBS[job_id]['last_updated'] = time.time()
+    if progress:
+        GENERATION_JOBS[job_id]['progress'] = progress
+
 # --- Content Generation Service ---
 
 def run_content_generation_job(job_id: str, params: dict):
@@ -32,17 +44,17 @@ def run_content_generation_job(job_id: str, params: dict):
             raise ValueError("GEMINI_API_KEY not set")
         genai.configure(api_key=GEMINI_API_KEY)
     except (ImportError, ValueError) as e:
-        GENERATION_JOBS[job_id] = {"status": "failed", "error": str(e)}
+        update_job_status(job_id, "failed", progress={'error': str(e)})
         return
 
-    GENERATION_JOBS[job_id]["status"] = "running"
+    update_job_status(job_id, "running", progress={'completed_tasks': 0, 'total_tasks': len(list(META_PROMPTS.keys())) * params['samples_per_type']})
 
     generation_config = genai.types.GenerationConfig(
         temperature=params['temperature'],
         top_p=params.get('top_p'),
         top_k=params.get('top_k')
     )
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel(settings.corpus_generation_model)
 
     workload_types = list(META_PROMPTS.keys())
     num_processes = min(cpu_count(), params['max_cores'])
@@ -51,13 +63,17 @@ def run_content_generation_job(job_id: str, params: dict):
     tasks = [w_type for w_type in workload_types for _ in range(params['samples_per_type'])]
 
     corpus = {key: [] for key in workload_types}
-
+    
+    completed_tasks = 0
     with Pool(processes=num_processes) as pool:
-        results = pool.map(worker_func, tasks)
+        for i, result in enumerate(pool.imap_unordered(worker_func, tasks)):
+            if result and result.get('type') in corpus:
+                corpus[result['type']].append(result['data'])
+            
+            completed_tasks += 1
+            if i % 5 == 0 or completed_tasks == len(tasks): # Update every 5 tasks or at the end
+                update_job_status(job_id, "running", progress={'completed_tasks': completed_tasks, 'total_tasks': len(tasks)})
 
-    for item in results:
-        if item and item.get('type') in corpus:
-            corpus[item['type']].append(item['data'])
 
     # Save to file
     output_dir = os.path.join("app", "data", "generated", "content_corpuses", job_id)
@@ -119,7 +135,7 @@ def generate_data_chunk_for_service(args):
 
 def run_log_generation_job(job_id: str, params: dict):
     """The core worker process for generating a synthetic log set."""
-    GENERATION_JOBS[job_id]["status"] = "running"
+    update_job_status(job_id, "running", progress={'completed_logs': 0, 'total_logs': params['num_logs']})
     
     try:
         config = get_config()
@@ -137,8 +153,15 @@ def run_log_generation_job(job_id: str, params: dict):
         if remainder: chunks.append(remainder)
 
         worker_args = [(chunk, config, content_corpus) for chunk in chunks]
+        
+        results = []
+        completed_logs = 0
         with Pool(processes=num_processes) as pool:
-            results = pool.map(generate_data_chunk_for_service, worker_args)
+            for i, result_df in enumerate(pool.imap_unordered(generate_data_chunk_for_service, worker_args)):
+                results.append(result_df)
+                completed_logs += len(result_df)
+                update_job_status(job_id, "running", progress={'completed_logs': completed_logs, 'total_logs': num_logs})
+
         
         combined_df = pd.concat(results, ignore_index=True)
         all_logs = [format_log_entry(row) for _, row in combined_df.iterrows()]
@@ -159,8 +182,7 @@ def run_log_generation_job(job_id: str, params: dict):
 
     except Exception as e:
         logging.exception("Error during log generation job")
-        GENERATION_JOBS[job_id]["status"] = "failed"
-        GENERATION_JOBS[job_id]["error"] = str(e)
+        update_job_status(job_id, "failed", progress={'error': str(e)})
 
 
 
@@ -169,7 +191,7 @@ from ..config import settings
 
 def run_data_ingestion_job(job_id: str, params: dict):
     """The core worker process for ingesting data into ClickHouse."""
-    GENERATION_JOBS[job_id]["status"] = "running"
+    update_job_status(job_id, "running")
     
     try:
         # This is a placeholder for the actual table schema
@@ -201,13 +223,12 @@ def run_data_ingestion_job(job_id: str, params: dict):
 
     except Exception as e:
         logging.exception("Error during data ingestion job")
-        GENERATION_JOBS[job_id]["status"] = "failed"
-        GENERATION_JOBS[job_id]["error"] = str(e)
+        update_job_status(job_id, "failed", progress={'error': str(e)})
 
 
 def run_synthetic_data_generation_job(job_id: str, params: dict):
     """The core worker process for generating a synthetic log set."""
-    GENERATION_JOBS[job_id]["status"] = "running"
+    update_job_status(job_id, "running")
     
     try:
         class Args:
@@ -230,5 +251,4 @@ def run_synthetic_data_generation_job(job_id: str, params: dict):
 
     except Exception as e:
         logging.exception("Error during synthetic data generation job")
-        GENERATION_JOBS[job_id]["status"] = "failed"
-        GENERATION_JOBS[job_id]["error"] = str(e)
+        update_job_status(job_id, "failed", progress={'error': str(e)})

@@ -43,6 +43,7 @@ class AppConfig(BaseSettings):
     api_base_url: str = "http://localhost:8000"
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra"
     log_level: str = "DEBUG"
+    corpus_generation_model: str = "gemini-2.5-flash-lite"
 
 class DevelopmentConfig(AppConfig):
     """Development-specific settings can override defaults."""
