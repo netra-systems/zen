@@ -98,12 +98,14 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         content={"detail": exc.detail},
     )
 
+
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
-app.include_router(supply.router, prefix="/supply", tags=["supply"])
-app.include_router(analysis.router, prefix="/analysis", tags=["analysis"])
-app.include_router(v3.router, prefix="/v3", tags=["v3"])
-app.include_router(generation.router, prefix="/generation", tags=["generation"])
+app.include_router(supply.router, prefix="/api/v3/supply", tags=["supply"])
+app.include_router(analysis.router, prefix="/api/v3/analysis", tags=["analysis"])
+app.include_router(v3.router, prefix="/api/v3", tags=["v3"])
+app.include_router(generation.router, prefix="/api/v3/generation", tags=["generation"])
 app.include_router(google_auth.router, tags=["google_auth"])
+
 
 
 @app.get("/")

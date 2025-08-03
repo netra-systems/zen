@@ -19,6 +19,9 @@ router = APIRouter()
 
 OAuthFormDep = Annotated[OAuth2PasswordRequestForm, Depends()]
 
+from ..services.security_service import get_password_hash, verify_password
+
+
 @router.post("/token", response_model=schema.Token, openapi_extra={
     "requestBody": {
         "content": {
@@ -41,9 +44,9 @@ def login_for_access_token(request: Request, form_data: OAuthFormDep, db: DbDep)
     """
     security_service = request.app.state.security_service
     statement = select(models_postgres.User).where(models_postgres.User.email == form_data.username)
-    user = db.exec(statement).first()
+    user = db.execute(statement).scalar_one_or_none()
 
-    if not user or not security_service.verify_password(form_data.password, user.hashed_password):
+    if not user or not verify_password(form_data.password, user.hashed_password):
         logger.warning(f"Failed login attempt for email: {form_data.username}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -70,12 +73,13 @@ def create_user(request: Request, user: schema.UserCreate, db: DbDep):
     """
     security_service = request.app.state.security_service
     statement = select(models_postgres.User).where(models_postgres.User.email == user.email)
-    db_user = db.exec(statement).first()
+    db_user = db.execute(statement).scalar_one_or_none()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    hashed_password = security_service.get_password_hash(user.password)
+    hashed_password = get_password_hash(user.password)
     user_data = user.model_dump()
+    user_data.pop("password", None)
     user_to_add = models_postgres.User(**user_data, hashed_password=hashed_password)
     
     db.add(user_to_add)

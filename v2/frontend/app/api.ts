@@ -19,7 +19,11 @@ export const apiService = {
         }
         return response.json();
     },
-    async post(endpoint: string, body: Record<string, unknown>, token: string | null, expectStatus: number = 200) {
+    async post(endpoint: string, body: Record<string, unknown>, token: string | null, expectStatus?: number) {
+        if (endpoint.includes('generation')) {
+            expectStatus = 202;
+        }
+
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -28,7 +32,10 @@ export const apiService = {
             },
             body: JSON.stringify(body),
         });
-        if (response.status !== expectStatus) {
+
+        const finalExpectStatus = expectStatus || 200;
+
+        if (response.status !== finalExpectStatus) {
             const errorData = await response.json().catch(() => ({ detail: 'An unknown error occurred.' }));
             throw new Error(errorData.detail);
         }

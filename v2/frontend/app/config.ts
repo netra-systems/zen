@@ -3,7 +3,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8
 
 export const config = {
     api: {
-        baseUrl: API_BASE_URL,
+        baseUrl: `${API_BASE_URL}/api/v3`,
         endpoints: {
             login: `${API_BASE_URL}/auth/token`,
             currentUser: `${API_BASE_URL}/auth/users/me`,

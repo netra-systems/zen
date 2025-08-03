@@ -1,6 +1,8 @@
 
 import unittest
-from unittest.mock import patch, MagicMock, mock_open
+import pandas as pd
+from unittest.mock import MagicMock, patch, mock_open
+
 import os
 import json
 from app.services.generation_service import run_content_generation_job, run_log_generation_job, GENERATION_JOBS
@@ -69,8 +71,27 @@ class TestGenerationService(unittest.TestCase):
         mock_cpu_count.return_value = 4
         mock_exists.return_value = True
         mock_pool.return_value.__enter__.return_value.imap_unordered.return_value = [
-            # Mock a dataframe
-            MagicMock()
+            pd.DataFrame({
+                'trace_id': ['test_trace'],
+                'span_id': ['test_span'],
+                'app_name': ['test_app'],
+                'service_name': ['test_service'],
+                'model_provider': ['test_provider'],
+                'model_name': ['test_model'],
+                'model_pricing': [[0.0, 0.0]],
+                'user_prompt': ['test_prompt'],
+                'assistant_response': ['test_response'],
+                'prompt_tokens': [1],
+                'completion_tokens': [1],
+                'total_tokens': [2],
+                'prompt_cost': [0.0],
+                'completion_cost': [0.0],
+                'total_cost': [0.0],
+                'total_e2e_ms': [1],
+                'ttft_ms': [1],
+                'user_id': ['test_user'],
+                'organization_id': ['test_org']
+            })
         ]
 
         # Define the job parameters
