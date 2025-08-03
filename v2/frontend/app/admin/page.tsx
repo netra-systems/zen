@@ -20,6 +20,9 @@ interface Job {
     result_path?: string;
     summary?: { message: string };
     error?: string;
+    last_updated?: number;
+    progress?: number;
+    total_tasks?: number;
 }
 
 // --- API Service ---
@@ -171,6 +174,8 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
         );
     }
 
+    const progressPercentage = job.total_tasks ? (job.progress / job.total_tasks) * 100 : 0;
+
     if (job.status === 'pending' || job.status === 'running') {
         return (
             <Card className="h-full">
@@ -181,9 +186,21 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
                     <div className="mt-4 space-y-2 text-sm text-gray-600">
                         <p><strong>Status:</strong> <span className="capitalize font-medium text-indigo-600">{job.status.toLowerCase()}</span></p>
                         <p><strong>Job ID:</strong> {job.job_id}</p>
+                        {job.last_updated && <p><strong>Last Updated:</strong> {new Date(job.last_updated * 1000).toLocaleString()}</p>}
                     </div>
                     <div className="mt-6">
                         <Spinner />
+                        {job.progress !== undefined && job.total_tasks !== undefined && (
+                            <div className="mt-4">
+                                <div className="flex justify-between mb-1">
+                                    <span className="text-sm font-medium text-gray-700">Progress</span>
+                                    <span className="text-sm font-medium text-gray-700">{job.progress} of {job.total_tasks} tasks</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: `${progressPercentage}%` }}></div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>
