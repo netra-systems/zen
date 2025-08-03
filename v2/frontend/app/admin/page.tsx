@@ -23,6 +23,7 @@ interface Job {
     last_updated?: number;
     progress?: number;
     total_tasks?: number;
+    records_ingested?: number;
 }
 
 // --- API Service ---
@@ -193,12 +194,17 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
                         {job.progress !== undefined && job.total_tasks !== undefined && (
                             <div className="mt-4">
                                 <div className="flex justify-between mb-1">
-                                    <span className="text-sm font-medium text-gray-700">Progress</span>
+                                    <span className="text-sm font-medium text-gray-700">Generation Progress</span>
                                     <span className="text-sm font-medium text-gray-700">{job.progress} of {job.total_tasks} tasks</span>
                                 </div>
                                 <div className="w-full bg-gray-200 rounded-full h-2.5">
                                     <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: `${progressPercentage}%` }}></div>
                                 </div>
+                            </div>
+                        )}
+                        {job.records_ingested !== undefined && (
+                            <div className="mt-4">
+                                <p className="text-sm text-gray-600"><strong>Records Ingested:</strong> {job.records_ingested}</p>
                             </div>
                         )}
                     </div>
