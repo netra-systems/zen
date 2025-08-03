@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { Dashboard } from '@/components/Dashboard';
-import { useAppStore } from '@/store';
+import { Header } from '@/app/components/Header';
+import { Footer } from '@/app/components/Footer';
+import { Dashboard } from '@/app/components/Dashboard';
+import { useAppStore } from '@/app/store';
 
 export default function App() {
   const { fetchUser } = useAppStore();
