@@ -3,7 +3,7 @@ import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 # Connect to the default database
-conn = psycopg2.connect(dbname="postgres", user="postgres", host="localhost", password="postgres")
+conn = psycopg2.connect(dbname="postgres", user="postgres", host="localhost", password="123")
 conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 
 # Create a cursor to perform database operations

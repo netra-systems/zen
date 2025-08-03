@@ -48,8 +48,8 @@ async def lifespan(app: FastAPI):
         ch_client.connect()
         logger.info("ClickHouse connected.")
         # Create tables if they don't exist
-        ch_client.create_table_if_not_exists(SUPPLY_TABLE_SCHEMA)
-        ch_client.create_table_if_not_exists(LOGS_TABLE_SCHEMA)
+        ch_client.command(SUPPLY_TABLE_SCHEMA)
+        ch_client.command(LOGS_TABLE_SCHEMA)
         app.state.clickhouse_client = ch_client
 
         # Add the ClickHouse handler to the root logger for the application
