@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useCallback, FormEvent } from 'react';
 import { Zap, HelpCircle } from 'lucide-react';
 
-import { config } from '@/app/config';
+import { config } from '@/config';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Spinner from '../components/Spinner';
 import Input from '../components/Input';
-import { useAppStore } from '@/app/store';
+import { useAppStore } from '@/store';
 
 // --- Type Definitions for API data ---
 interface Job {
