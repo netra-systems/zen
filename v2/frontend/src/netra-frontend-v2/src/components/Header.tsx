@@ -1,7 +1,19 @@
 "use client";
 
 import React from 'react';
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button, Avatar } from "@nextui-org/react";
+import {
+  Navbar,
+  NavbarBrand,
+  NavbarContent,
+  NavbarItem,
+  Link,
+  Button,
+  Avatar,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem
+} from "@nextui-org/react";
 import { useAppStore } from '../store';
 
 export const Header = () => {
@@ -15,13 +27,28 @@ export const Header = () => {
       <NavbarContent justify="end">
         <NavbarItem>
           {user ? (
-            <div className="flex items-center gap-4">
-              <Avatar name={user.full_name} size="sm" />
-              <span>{user.full_name}</span>
-              <Button as={Link} color="primary" href="#" variant="flat" onPress={logout}>
-                Logout
-              </Button>
-            </div>
+            <Dropdown placement="bottom-end">
+              <DropdownTrigger>
+                <Avatar
+                  isBordered
+                  as="button"
+                  className="transition-transform"
+                  color="secondary"
+                  name={user.full_name}
+                  size="sm"
+                  src={user.picture}
+                />
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Profile Actions" variant="flat">
+                <DropdownItem key="profile" className="h-14 gap-2">
+                  <p className="font-semibold">Signed in as</p>
+                  <p className="font-semibold">{user.email}</p>
+                </DropdownItem>
+                <DropdownItem key="logout" color="danger" onPress={logout}>
+                  Log Out
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
           ) : (
             <Button as={Link} color="primary" href="/login" variant="flat">
               Login
