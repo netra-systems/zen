@@ -1,4 +1,4 @@
-'use client';
+''''use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { HelpCircle } from 'lucide-react';
@@ -60,6 +60,7 @@ export default function DeepAgentPage() {
     const [error, setError] = useState<any | null>(null);
     const pollingRunIdRef = useRef<string | null>(null);
     const [exampleQueries, setExampleQueries] = useState<string[]>([]);
+    const [hasLoadedExample, setHasLoadedExample] = useState(false);
 
     useEffect(() => {
         async function fetchExamples() {
@@ -73,52 +74,7 @@ export default function DeepAgentPage() {
         fetchExamples();
     }, [token]);
 
-    const addMessage = (role: 'user' | 'agent', content: React.ReactNode) => {
-        setMessages(prev => [...prev, { role, content }]);
-    };
-
-    const pollStatus = useCallback(async () => {
-        if (!pollingRunIdRef.current) {
-            setIsPolling(false);
-            return;
-        }
-        try {
-            const data: AgentRun = await apiService.get(`${config.api.baseUrl}/agent/${pollingRunIdRef.current}/step`, token);
-
-            if (data.last_step_result) {
-                addMessage('agent', <pre>{JSON.stringify(data.last_step_result, null, 2)}</pre>);
-            }
-
-            if (data.status === 'complete' || data.status === 'failed') {
-                setIsPolling(false);
-                pollingRunIdRef.current = null;
-                if (data.status === 'complete') {
-                    addMessage('agent', data.final_report || 'Analysis complete.');
-                } else {
-                    setError(data.error || 'Unknown error');
-                    addMessage('agent', `Analysis failed.`);
-                }
-                setIsLoading(false);
-            }
-        } catch (err) {
-            console.error("Polling failed:", err);
-            setError(err);
-            addMessage('agent', `Error polling for status.`);
-            setIsPolling(false);
-            pollingRunIdRef.current = null;
-            setIsLoading(false);
-        }
-    }, [token]);
-
-    useEffect(() => {
-        if (!isPolling) {
-            return;
-        }
-        const intervalId = setInterval(pollStatus, 3000);
-        return () => clearInterval(intervalId);
-    }, [isPolling, pollStatus]);
-
-    const handleSendMessage = async (query: string) => {
+    const handleSendMessage = useCallback(async (query: string) => {
         addMessage('user', query);
         setIsLoading(true);
         setError(null);
@@ -126,7 +82,6 @@ export default function DeepAgentPage() {
             setIsPolling(false);
         }
         pollingRunIdRef.current = null;
-        setExampleQueries([]); // Clear examples
 
         const run_id = `run-${Date.now()}`;
         let user_id = useAppStore.getState().user?.id;
@@ -178,7 +133,60 @@ export default function DeepAgentPage() {
             addMessage('agent', `Error starting analysis.`);
             setIsLoading(false);
         }
+    }, [token, isPolling]);
+
+    useEffect(() => {
+        if (exampleQueries.length > 0 && !hasLoadedExample) {
+            handleSendMessage(exampleQueries[0]);
+            setHasLoadedExample(true);
+        }
+    }, [exampleQueries, hasLoadedExample, handleSendMessage]);
+
+
+    const addMessage = (role: 'user' | 'agent', content: React.ReactNode) => {
+        setMessages(prev => [...prev, { role, content }]);
     };
+
+    const pollStatus = useCallback(async () => {
+        if (!pollingRunIdRef.current) {
+            setIsPolling(false);
+            return;
+        }
+        try {
+            const data: AgentRun = await apiService.get(`${config.api.baseUrl}/agent/${pollingRunIdRef.current}/step`, token);
+
+            if (data.last_step_result) {
+                addMessage('agent', <pre>{JSON.stringify(data.last_step_result, null, 2)}</pre>);
+            }
+
+            if (data.status === 'complete' || data.status === 'failed') {
+                setIsPolling(false);
+                pollingRunIdRef.current = null;
+                if (data.status === 'complete') {
+                    addMessage('agent', data.final_report || 'Analysis complete.');
+                } else {
+                    setError(data.error || 'Unknown error');
+                    addMessage('agent', `Analysis failed.`);
+                }
+                setIsLoading(false);
+            }
+        } catch (err) {
+            console.error("Polling failed:", err);
+            setError(err);
+            addMessage('agent', `Error polling for status.`);
+            setIsPolling(false);
+            pollingRunIdRef.current = null;
+            setIsLoading(false);
+        }
+    }, [token]);
+
+    useEffect(() => {
+        if (!isPolling) {
+            return;
+        }
+        const intervalId = setInterval(pollStatus, 3000);
+        return () => clearInterval(intervalId);
+    }, [isPolling, pollStatus]);
 
     return (
         <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -212,4 +220,4 @@ export default function DeepAgentPage() {
             </div>
         </div>
     );
-}
+}''
