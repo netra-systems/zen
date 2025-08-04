@@ -45,9 +45,9 @@ async def test_deep_agent_scenario_unit(scenario_prompt: str, mock_db_session, m
 
     agent = DeepAgentV3(run_id=run_id, request=agent_request, db_session=mock_db_session, llm_connector=mock_llm_connector)
 
-    with patch.object(agent.tools['log_fetcher'], 'execute', new_callable=AsyncMock) as mock_fetch,
-         patch.object(agent.tools['log_pattern_identifier'], 'execute', new_callable=AsyncMock) as mock_identify,
-         patch.object(agent.tools['policy_proposer'], 'execute', new_callable=AsyncMock) as mock_propose:
+    with (patch.object(agent.tools['log_fetcher'], 'execute', new_callable=AsyncMock) as mock_fetch,
+          patch.object(agent.tools['log_pattern_identifier'], 'execute', new_callable=AsyncMock) as mock_identify,
+          patch.object(agent.tools['policy_proposer'], 'execute', new_callable=AsyncMock) as mock_propose):
 
         mock_fetch.return_value = [MagicMock()]
         mock_identify.return_value = [MagicMock()]
