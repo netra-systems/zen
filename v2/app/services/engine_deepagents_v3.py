@@ -211,16 +211,12 @@ class DeepAgentV3:
         if not self.state.policies:
             raise ValueError("Cannot generate a report without policies.")
             
-        report = "Analysis Complete. Recommended Policies:
-"
+        report = "Analysis Complete. Recommended Policies:\n"
         for policy in self.state.policies:
-            report += f"- For pattern '{policy.pattern_name}', recommend using '{policy.optimal_supply_option_name}'.
-"
+            report += f"- For pattern '{policy.pattern_name}', recommend using '{policy.optimal_supply_option_name}'.\n"
         
         if self.state.tool_result:
-            report += "
-Tool Execution Result:
-"
+            report += "\nTool Execution Result:\n"
             report += json.dumps(self.state.tool_result, indent=2)
 
         self.state.final_report = report

@@ -1,7 +1,7 @@
 # /v2/app/routes/analysis.py
 import logging
 from ..logging_config_custom.logger import logger
-from ..pipeline import run_full_analysis_pipeline
+
 from typing import List
 import uuid
 from ..dependencies import DbDep, ActiveUserDep
@@ -31,7 +31,7 @@ def start_new_analysis_run(
     db.commit()
     db.refresh(new_run)
 
-    background_tasks.add_task(run_full_analysis_pipeline, run_id=new_run.id, user_id=current_user.id, db=db, security_service=request.app.state.security_service, use_deepagents=use_deepagents, use_deepagents_v2=use_deepagents_v2)
+    
     logger.info(f"Started analysis run {new_run.id} for user {current_user.email}")
     return new_run
 

@@ -13,14 +13,6 @@ from ..db.clickhouse import get_clickhouse_client, ClickHouseClient
 
 router = APIRouter()
 
-# --- Request Models ---
-class ContentGenParams(BaseModel):
-    samples_per_type: int = Field(10, gt=0, le=100, description="Number of samples to generate for each workload type.")
-    temperature: float = Field(0.7, ge=0.0, le=2.0, description="Controls randomness. Higher is more creative.")
-    top_p: Optional[float] = Field(None, ge=0.0, le=1.0, description="Nucleus sampling probability.")
-    top_k: Optional[int] = Field(None, ge=0, description="Top-k sampling control.")
-    max_cores: int = Field(4, ge=1, le=os.cpu_count(), description="Max CPU cores to use.")
-
 class LogGenParams(BaseModel):
     corpus_id: str = Field(..., description="The ID of the content corpus to use for generation.")
     num_logs: int = Field(1000, gt=0, le=100000, description="Number of log entries to generate.")
@@ -35,6 +27,14 @@ class SyntheticDataGenParams(BaseModel):
     destination_table: str = Field("synthetic_data", description="The name of the destination ClickHouse table for the generated data.")
 
 # --- API Endpoints ---
+
+class ContentGenParams(BaseModel):
+    samples_per_type: int = Field(10, gt=0, le=100, description="Number of samples to generate for each workload type.")
+    temperature: float = Field(0.7, ge=0.0, le=2.0, description="Controls randomness. Higher is more creative.")
+    top_p: Optional[float] = Field(None, ge=0.0, le=1.0, description="Nucleus sampling probability.")
+    top_k: Optional[int] = Field(None, ge=0, description="Top-k sampling control.")
+    max_cores: int = Field(4, ge=1, le=os.cpu_count(), description="Max CPU cores to use.")
+
 
 @router.post("/content", status_code=status.HTTP_202_ACCEPTED, response_model=Dict[str, str])
 def create_content_corpus(params: ContentGenParams, background_tasks: BackgroundTasks):
@@ -57,11 +57,9 @@ class DataIngestionParams(BaseModel):
     table_name: str = Field(..., description="The name of the table to ingest the data into.")
 
 
-from ..services.demo_agent import create_demo_agent
 
-class DemoAgentParams(BaseModel):
-    query: str = Field(..., description="The user's query for the demo agent.")
-    debug_mode: bool = Field(False, description="Enable debug mode for the agent.")
+
+
 
 
 class ContentCorpusGenParams(BaseModel):

@@ -7,7 +7,7 @@ import uuid
 from sqlmodel import Session
 
 
-from .services.analysis_runner import AnalysisRunner
+
 
 from .schema import AnalysisRun
 from .logging_config_custom.logger import logger
@@ -64,34 +64,7 @@ def run_full_analysis_pipeline(run_id: uuid.UUID, user_id: str, db: Session, sec
         
         log_to_run(f"Preparing to analyze table: {source_table}")
             
-        runner = AnalysisRunner(
-            db_session=db
-        )
         
-        # This is the main execution block
-        analysis_result_dict = runner.execute(
-            database=database, 
-            table=table, 
-            use_deepagents=use_deepagents,
-            use_deepagents_v2=use_deepagents_v2
-        )
-        
-        analysis_result = AnalysisResult.model_validate(analysis_result_dict)
-
-        log_to_run("Analysis execution completed.")
-
-        # 4. Update the AnalysisRun with results
-        run.status = "completed"
-        run.completed_at = datetime.utcnow()
-        if analysis_result.cost_comparison:
-            run.result_summary = analysis_result.cost_comparison.model_dump()
-        
-        run.result_details = analysis_result.model_dump(exclude={'span_map'}) 
-        
-        if analysis_result.execution_log:
-             run.execution_log = "\n".join(f"{log.get('timestamp', '')}: {log.get('message', '')}" for log in analysis_result.execution_log)
-        
-        log_to_run("Analysis results processed and saved.")
 
     except Exception as e:
         error_message = f"ERROR: {e}"

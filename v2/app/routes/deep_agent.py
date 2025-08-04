@@ -1,5 +1,5 @@
-
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from pydantic import BaseModel
 from typing import Dict, Any
 
 from app.services.engine_deepagents_v3 import DeepAgentV3
@@ -11,6 +11,9 @@ router = APIRouter()
 # A simple in-memory store for active agent instances
 # In a production environment, this would be replaced with a more robust solution like Redis
 AGENT_INSTANCES: Dict[str, DeepAgentV3] = {}
+
+class ConfirmationRequest(BaseModel):
+    confirmation: bool
 
 @router.post("/agent/create", status_code=202)
 async def create_agent_run(request: AnalysisRequest, background_tasks: BackgroundTasks, db_session: Any = Depends(get_db_session), llm_connector: Any = Depends(get_llm_connector)) -> Dict[str, str]:
@@ -46,14 +49,14 @@ async def get_agent_step(run_id: str) -> Dict[str, Any]:
 
     return {
         "run_id": run_id,
-        "status": "in_progress",
+        "status": agent.status,
         "current_step": agent.current_step_index,
         "total_steps": len(agent.steps),
         "last_step_result": agent.state.messages[-1] if agent.state.messages else None
     }
 
 @router.post("/agent/{run_id}/next")
-async def trigger_agent_next_step(run_id: str) -> Dict[str, Any]:
+async def trigger_agent_next_step(run_id: str, request: ConfirmationRequest) -> Dict[str, Any]:
     """
     Triggers the agent to execute the next step in its analysis pipeline.
     
@@ -68,7 +71,7 @@ async def trigger_agent_next_step(run_id: str) -> Dict[str, Any]:
     if agent.is_complete():
         return {"status": "complete", "message": "Analysis is already complete."}
 
-    result = await agent.run_next_step()
+    result = await agent.run_next_step(request.confirmation)
     return result
 
 @router.get("/agent/{run_id}/history")
