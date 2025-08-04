@@ -11,7 +11,8 @@ interface InputField {
   label: string;
   type: string;
   required: boolean;
-  defaultValue: string | number;
+  value: string | number;
+  onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
 interface GenericInputProps {
@@ -52,7 +53,8 @@ export const GenericInput: React.FC<GenericInputProps> = ({
                   name={field.name}
                   type={field.type}
                   required={field.required}
-                  defaultValue={field.defaultValue}
+                  value={field.value}
+                  onChange={field.onChange}
                 />
               </div>
             </div>

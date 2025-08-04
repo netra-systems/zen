@@ -121,13 +121,10 @@ export default function DeepAgentPage() {
         }
         pollingRunIdRef.current = null;
 
-        const formData = new FormData(event.currentTarget);
-        const currentQuery = formData.get('query') as string;
-        setQuery(currentQuery);
         const run_id = `run-${Date.now()}`;
 
         try {
-            const newRun = await apiService.post(`${config.api.baseUrl}/agent/create`, { run_id, query: currentQuery, data_source: { source_table: 'synthetic_data' }, time_range: { start_time: '2025-01-01T00:00:00Z', end_time: '2025-12-31T23:59:59Z' } }, token);
+            const newRun = await apiService.post(`${config.api.baseUrl}/agent/create`, { run_id, query, data_source: { source_table: 'synthetic_data' }, time_range: { start_time: '2025-01-01T00:00:00Z', end_time: '2025-12-31T23:59:59Z' } }, token);
             if (newRun && newRun.run_id) {
                 setAgentRun({ ...newRun, status: 'in_progress', current_step: 0, total_steps: 5 }); // Assuming 5 steps for now
                 pollingRunIdRef.current = newRun.run_id;
@@ -160,7 +157,7 @@ export default function DeepAgentPage() {
                                 title="Deep Agent Analysis"
                                 description="Start a new deep agent analysis run."
                                 inputFields={[
-                                    { id: 'query', name: 'query', label: 'Your Query', type: 'textarea', required: true, defaultValue: query },
+                                    { id: 'query', name: 'query', label: 'Your Query', type: 'textarea', required: true, value: query, onChange: (e) => setQuery(e.target.value) },
                                 ]}
                                 onSubmit={handleStartAnalysis}
                                 isLoading={isLoading || isPolling}
