@@ -124,7 +124,23 @@ export default function DeepAgentPage() {
         const run_id = `run-${Date.now()}`;
 
         try {
-            const newRun = await apiService.post(`${config.api.baseUrl}/agent/create`, { run_id, query, data_source: { source_table: 'synthetic_data' }, time_range: { start_time: '2025-01-01T00:00:00Z', end_time: '2025-12-31T23:59:59Z' } }, token);
+            const newRun = await apiService.post(
+                `${config.api.baseUrl}/agent/create`,
+                {
+                    workloads: [
+                        {
+                            run_id,
+                            query,
+                            data_source: { source_table: 'synthetic_data' },
+                            time_range: { start_time: '2025-01-01T00:00:00Z', end_time: '2025-12-31T23:59:59Z' }
+                        }
+                    ],
+                    debug_mode: false,
+                    constraints: null,
+                    negotiated_discount_percent: 0
+                },
+                token
+            );
             if (newRun && newRun.run_id) {
                 setAgentRun({ ...newRun, status: 'in_progress', current_step: 0, total_steps: 5 }); // Assuming 5 steps for now
                 pollingRunIdRef.current = newRun.run_id;
