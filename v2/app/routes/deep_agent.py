@@ -4,7 +4,7 @@ from typing import Dict, Any
 
 from app.services.engine_deepagents_v3 import DeepAgentV3
 from app.db.models_clickhouse import AnalysisRequest
-from app.dependencies import get_db_session, get_llm_connector
+from app.dependencies import get_async_db as get_db_session, get_llm_connector
 
 router = APIRouter()
 

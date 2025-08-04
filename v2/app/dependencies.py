@@ -57,3 +57,7 @@ def get_current_active_user(current_user: CurrentUserDep) -> User:
 
 ActiveUserDep = Annotated[User, Depends(get_current_active_user)]
 
+def get_llm_connector():
+    from app.services.engine import GeminiLLMConnector
+    return GeminiLLMConnector()
+

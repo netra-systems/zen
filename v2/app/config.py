@@ -16,6 +16,12 @@ class ClickHouseHTTPSConfig(BaseModel):
     password: str = ""
     database: str = "default"
 
+class LangfuseConfig(BaseSettings):
+    secret_key: str = ""
+    public_key: str = ""
+    host: str = ""
+
+
 class AppConfig(BaseSettings):
     """Base configuration class."""
     # Top-level settings
@@ -33,6 +39,7 @@ class AppConfig(BaseSettings):
 
     clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
     clickhouse_https: ClickHouseHTTPSConfig = ClickHouseHTTPSConfig()
+    langfuse: LangfuseConfig = LangfuseConfig()
 
     # Settings for different environments can have defaults here
     secret_key: str = "default_secret_key"
@@ -47,7 +54,8 @@ class AppConfig(BaseSettings):
 
 class DevelopmentConfig(AppConfig):
     """Development-specific settings can override defaults."""
-    pass
+    google_client_id: str = ""
+    google_client_secret: str = ""
 
 class ProductionConfig(AppConfig):
     """Production-specific settings."""
