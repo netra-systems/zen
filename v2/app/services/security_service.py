@@ -85,8 +85,7 @@ class SecurityService:
 
 # Create a global instance of the security service
 try:
-    from ..config import AppConfig
-    settings = AppConfig()
+    from ..config import settings
     key_manager = KeyManager.load_from_settings(settings)
     security_service = SecurityService(key_manager)
 except (ImportError, ValueError) as e:

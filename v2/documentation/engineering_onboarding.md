@@ -144,14 +144,8 @@ Follow these steps to get the project running on your local machine.
     pip install fastapi "uvicorn[standard]" sqlalchemy psycopg2-binary pydantic-settings python-jose[cryptography] passlib[bcrypt] alembic clickhouse-driver pandas
     ```
 
-4.  **Configure Environment Variables:**
-    *   Create a file named `.env` in the `app/` directory (`app/.env`).
-    *   Add the following required variables. You will need to get the Google credentials from the Google Cloud Console.
-    ```
-    GEMINI_API_KEY="your-gemini-api-key"
-    GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
-    GOOGLE_CLIENT_SECRET="your-google-client-secret"
-    ```
+4.  **Configure Secret Manager Access:**
+   config secret auth for local access 
 
 5.  **Google Cloud Authentication (gcloud CLI):**
     *   Many services in this application interact with Google Cloud APIs (e.g., for authentication or accessing managed services). You must authenticate your local environment.
