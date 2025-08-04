@@ -118,11 +118,14 @@ export default function GenerationPage() {
 
         const formData = new FormData(event.currentTarget);
         const num_traces = parseInt(formData.get('num_traces') as string, 10);
+        const num_users = parseInt(formData.get('num_users') as string, 10);
+        const error_rate = parseFloat(formData.get('error_rate') as string);
+        const event_types = (formData.get('event_types') as string).split(',').map(s => s.trim());
         const source_table = formData.get('source_table') as string;
         const destination_table = formData.get('destination_table') as string;
 
         try {
-            const newJob = await apiService.post(`${config.api.baseUrl}/generation/synthetic_data`, { num_traces, source_table, destination_table }, token);
+            const newJob = await apiService.post(`${config.api.baseUrl}/generation/synthetic_data`, { num_traces, num_users, error_rate, event_types, source_table, destination_table }, token);
             if (newJob && newJob.job_id) {
                 setJob(newJob);
                 pollingJobIdRef.current = newJob.job_id;
@@ -152,6 +155,9 @@ export default function GenerationPage() {
                                 description="Create and ingest synthetic data from a source table into a destination table."
                                 inputFields={[
                                     { id: 'num_traces', name: 'num_traces', label: 'Number of Traces', type: 'number', required: true, defaultValue: 10000 },
+                                    { id: 'num_users', name: 'num_users', label: 'Number of Users', type: 'number', required: true, defaultValue: 100 },
+                                    { id: 'error_rate', name: 'error_rate', label: 'Error Rate', type: 'number', required: true, defaultValue: 0.1, step: 0.01 },
+                                    { id: 'event_types', name: 'event_types', label: 'Event Types (comma-separated)', type: 'text', required: true, defaultValue: 'search,login,checkout' },
                                     { id: 'source_table', name: 'source_table', label: 'Source Table', type: 'select', required: true, options: tables, defaultValue: 'content_corpus' },
                                     { id: 'destination_table', name: 'destination_table', label: 'Destination Table', type: 'text', required: true, defaultValue: 'synthetic_data' },
                                 ]}
