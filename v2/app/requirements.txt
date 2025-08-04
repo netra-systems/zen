@@ -28,3 +28,4 @@ starlette
 itsdangerous
 pytest
 langfuse
+google-cloud-secret-manager
