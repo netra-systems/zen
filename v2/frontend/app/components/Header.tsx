@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import useAppStore from '../store';
-import { Button } from './button';
+import { Button } from './ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
