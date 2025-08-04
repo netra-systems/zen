@@ -29,3 +29,4 @@ itsdangerous
 pytest
 langfuse
 google-cloud-secret-manager
+langchain_google_genai
