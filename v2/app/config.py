@@ -10,6 +10,7 @@ class SecretReference(BaseModel):
     project_id: str = "304612253870"
     version: str = "latest"
 
+# https://console.cloud.google.com/security/secret-manager?inv=1&invt=Ab4muw&project=cryptic-net-466001-n0
 SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="gemini-api-key", target_model="google_model", target_field="gemini_api_key"),
     SecretReference(name="google-client-id", target_model="google_cloud", target_field="google_client_id"),
