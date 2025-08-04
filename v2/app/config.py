@@ -2,21 +2,25 @@ import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import BaseModel
 from google.cloud import secretmanager
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 class SecretReference(BaseModel):
     name: str
-    target_model: str
     target_field: str
-    project_id: str = "cryptic-net-466001-n0"
+    target_model: Optional[str] = None
+    project_id: str = "304612253870"
     version: str = "latest"
 
-# Centralized configuration for secrets.
-# Assumes secret names in Google Cloud match the `name` field (e.g., 'gemini_api_key').
 SECRET_CONFIG: List[SecretReference] = [
-    SecretReference(name="gemini_api_key", target_model="google_model", target_field="gemini_api_key"),
-    SecretReference(name="google_client_id", target_model="google_cloud", target_field="google_client_id"),
-    SecretReference(name="google_client_secret", target_model="google_cloud", target_field="google_client_secret"),
+    SecretReference(name="gemini-api-key", target_model="google_model", target_field="gemini_api_key"),
+    SecretReference(name="google-client-id", target_model="google_cloud", target_field="google_client_id"),
+    SecretReference(name="google-client-secret", target_model="google_cloud", target_field="google_client_secret"),
+    SecretReference(name="langfuse-secret-key", target_model="langfuse", target_field="secret_key"),
+    SecretReference(name="clickhouse-default-password", target_model="clickhouse_native", target_field="password"),
+    SecretReference(name="clickhouse-default-password", target_model="clickhouse_https", target_field="password"),
+    #SecretReference(name="database-url", target_field="database_url"),
+    SecretReference(name="jwt-secret-key", target_field="jwt_secret_key"),
+    SecretReference(name="fernet-key", target_field="fernet_key")
 ]
 
 def get_secret_client() -> secretmanager.SecretManagerServiceClient:
@@ -53,14 +57,14 @@ class GoogleModelConfig(GoogleCloudConfig):
     corpus_generation_model: str = "gemini-2.5-flash-lite"
 
 class ClickHouseNativeConfig(BaseModel):
-    host: str = "localhost"
+    host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
     port: int = 9440
     user: str = "default"
     password: str = ""
     database: str = "default"
 
 class ClickHouseHTTPSConfig(BaseModel):
-    host: str = "localhost"
+    host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
     port: int = 8443
     user: str = "default"
     password: str = ""
@@ -89,10 +93,10 @@ class AppConfig(BaseSettings):
     secret_key: str = "default_secret_key"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
-    fernet_key: str = "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw="
-    jwt_secret_key: str = "dev_jwt_secretkeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeey"
+    fernet_key: str = None
+    jwt_secret_key: str = None
     api_base_url: str = "http://localhost:8000"
-    database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra"
+    database_url: str = None
     log_level: str = "DEBUG"
 
     def load_secrets(self):
@@ -107,17 +111,20 @@ class AppConfig(BaseSettings):
             for secret_ref in SECRET_CONFIG:
                 fetched_value = fetched_secrets.get(secret_ref.name)
                 if fetched_value:
-                    target_model_instance = getattr(self, secret_ref.target_model, None)
-                    if target_model_instance:
-                        setattr(target_model_instance, secret_ref.target_field, fetched_value)
+                    target = self
+                    if secret_ref.target_model:
+                        target = getattr(self, secret_ref.target_model, None)
+                    
+                    if target:
+                        setattr(target, secret_ref.target_field, fetched_value)
                 else:
-                    print(f"secret_ref {secret_ref} failed to fetch value")
+                    print(f"Secret '{secret_ref.name}' not found or failed to fetch.")
             
             print("Secrets loaded.")
 
 class DevelopmentConfig(AppConfig):
     """Development-specific settings can override defaults."""
-    pass
+    database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra"
 
 class ProductionConfig(AppConfig):
     """Production-specific settings."""
@@ -137,8 +144,7 @@ def get_settings() -> AppConfig:
         "testing": TestingConfig,
         "development": DevelopmentConfig
     }
-    default_env = DevelopmentConfig
-    config = config_map.get(app_env, default_env)()
+    config = config_map.get(app_env, DevelopmentConfig)()
     config.load_secrets()
     return config
 
