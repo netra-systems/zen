@@ -16,7 +16,7 @@ class ClickHouseHTTPSConfig(BaseModel):
     password: str = ""
     database: str = "default"
 
-class LangfuseConfig(BaseSettings):
+class LangfuseConfig(BaseModel):
     secret_key: str = ""
     public_key: str = ""
     host: str = ""
