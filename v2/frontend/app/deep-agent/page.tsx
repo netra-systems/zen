@@ -11,6 +11,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { ChatWindow } from '@/components/chat/ChatWindow';
 import { ChatMessageProps } from '@/components/chat/ChatMessage';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
+import { AutoLoadSwitch } from '@/components/AutoLoadSwitch';
 
 // --- Type Definitions for API data ---
 interface AgentRun {
@@ -61,6 +62,7 @@ export default function DeepAgentPage() {
     const pollingRunIdRef = useRef<string | null>(null);
     const [exampleQueries, setExampleQueries] = useState<string[]>([]);
     const [hasLoadedExample, setHasLoadedExample] = useState(false);
+    const [autoLoadExample, setAutoLoadExample] = useState(true);
 
     useEffect(() => {
         async function fetchExamples() {
@@ -136,11 +138,11 @@ export default function DeepAgentPage() {
     }, [token, isPolling]);
 
     useEffect(() => {
-        if (exampleQueries.length > 0 && !hasLoadedExample) {
+        if (autoLoadExample && exampleQueries.length > 0 && !hasLoadedExample) {
             handleSendMessage(exampleQueries[0]);
             setHasLoadedExample(true);
         }
-    }, [exampleQueries, hasLoadedExample, handleSendMessage]);
+    }, [autoLoadExample, exampleQueries, hasLoadedExample, handleSendMessage]);
 
 
     const addMessage = (role: 'user' | 'agent', content: React.ReactNode) => {
@@ -194,6 +196,9 @@ export default function DeepAgentPage() {
             <div className="flex flex-col">
                 <Header />
                 <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+                    <div className="flex justify-end">
+                        <AutoLoadSwitch isAutoLoad={autoLoadExample} onAutoLoadChange={setAutoLoadExample} />
+                    </div>
                     <ErrorDisplay error={error} />
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
                         <div className="lg:col-span-2 h-[calc(100vh-10rem)]">
