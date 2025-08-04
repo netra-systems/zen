@@ -1,6 +1,6 @@
 import json
 from typing import Any, Callable
-from langfuse import Langfuse
+from langfuse import Langfuse, observe
 
 from app.db.models_clickhouse import AnalysisRequest
 from app.db.models_postgres import DeepAgentRun
@@ -53,20 +53,22 @@ class DeepAgentV3:
         self.current_step_index = 0
         self.status = "in_progress"
 
+    @observe()
     async def run_full_analysis(self):
         """Executes the entire analysis pipeline from start to finish."""
-        trace = self.langfuse.trace(id=self.run_id, name="FullAnalysis") if self.langfuse else None
-        
         for step_func in self.steps:
-            result = await self._execute_step(step_func, trace)
+            result = await self._execute_step(step_func)
             if result["status"] == "failed":
                 self.status = "failed"
                 return result
             self.current_step_index += 1
         
         self.status = "complete"
+        if self.langfuse:
+            self.langfuse.flush()
         return self.state.final_report
 
+    @observe()
     async def run_next_step(self, confirmation: bool = True):
         """Executes the next step in the analysis pipeline."""
         if self.is_complete():
@@ -76,35 +78,32 @@ class DeepAgentV3:
             return {"status": "awaiting_confirmation", "message": "Awaiting user confirmation to proceed."}
 
         step_func = self.steps[self.current_step_index]
-        trace = self.langfuse.trace(id=f"{self.run_id}-{self.current_step_index}", name=step_func.__name__)
 
-        result = await self._execute_step(step_func, trace)
+        result = await self._execute_step(step_func)
         self.current_step_index += 1
 
         if self.is_complete():
             self.status = "complete"
         else:
             self.status = "awaiting_confirmation"
+        if self.langfuse:
+            self.langfuse.flush()
 
         return result
 
-    async def _execute_step(self, step_func: Callable, trace: Any):
+    @observe()
+    async def _execute_step(self, step_func: Callable):
         step_name = step_func.__name__
-        span = trace.span(name=step_name) if trace else None
 
         try:
             input_data = self.state.model_dump() # Capture state before the step
             result_message = await step_func(self.state)
             output_data = self.state.model_dump() # Capture state after the step
 
-            if span:
-                span.end(output=output_data)
             self._record_step_history(step_name, input_data, output_data)
 
             return {"status": "awaiting_confirmation", "completed_step": step_name, "result": result_message}
         except Exception as e:
-            if span:
-                span.end(level="ERROR", status_message=str(e))
             self.status = "failed"
             return {"status": "failed", "step": step_name, "error": str(e)}
 
