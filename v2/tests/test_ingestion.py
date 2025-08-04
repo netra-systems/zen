@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock, call
 from fastapi.testclient import TestClient
 from app.main import app
 from app.services.generation_service import GENERATION_JOBS
-from app.db.models_clickhouse import LLM_EVENTS_TABLE_SCHEMA
+from app.db.models_clickhouse import get_llm_events_table_schema
 
 @pytest.fixture(scope="module")
 def test_client():
@@ -35,7 +35,7 @@ def test_batch_ingestion_process(mock_generate_data, mock_clickhouse_client, tes
 
     # Verify ClickHouse calls
     mock_db_instance.connect.assert_called_once()
-    mock_db_instance.command.assert_called_once_with(LLM_EVENTS_TABLE_SCHEMA)
+    mock_db_instance.command.assert_called_once_with(get_llm_events_table_schema('llm_events'))
     
     # 2 batches of 2, 1 batch of 1
     assert mock_db_instance.insert_data.call_count == 3

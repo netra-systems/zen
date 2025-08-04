@@ -5,14 +5,14 @@ from langfuse import Langfuse
 from app.db.models_clickhouse import AnalysisRequest
 from app.db.models_postgres import DeepAgentRun
 from app.services.deep_agent_v3.state import AgentState
-from app.services.deep_agent_v3.steps import (
-    _step_1_fetch_raw_logs,
-    _step_2_enrich_and_cluster,
-    _step_3_propose_optimal_policies,
-    _step_4_dispatch_tool,
-    _step_5_generate_final_report,
-)
 from app.config import settings
+from app.services.deep_agent_v3.tools.log_fetcher import LogFetcher
+from app.services.deep_agent_v3.tools.log_pattern_identifier import LogPatternIdentifier
+from app.services.deep_agent_v3.tools.policy_proposer import PolicyProposer
+from app.services.deep_agent_v3.tools.policy_simulator import PolicySimulator
+from app.services.deep_agent_v3.tools.supply_catalog_search import SupplyCatalogSearch
+from app.services.deep_agent_v3.tools.cost_estimator import CostEstimator
+from app.services.deep_agent_v3.tools.performance_predictor import PerformancePredictor
 
 class DeepAgentV3:
     """
@@ -32,12 +32,21 @@ class DeepAgentV3:
             host=settings.langfuse.host
         )
 
+        self.tools = {
+            "log_fetcher": LogFetcher(self.db_session),
+            "log_pattern_identifier": LogPatternIdentifier(self.llm_connector),
+            "policy_proposer": PolicyProposer(self.db_session, self.llm_connector),
+            "policy_simulator": PolicySimulator(self.llm_connector),
+            "supply_catalog_search": SupplyCatalogSearch(self.db_session),
+            "cost_estimator": CostEstimator(self.llm_connector),
+            "performance_predictor": PerformancePredictor(self.llm_connector),
+        }
+
         self.steps = [
-            self.step_1_fetch_raw_logs,
-            self.step_2_enrich_and_cluster,
-            self.step_3_propose_optimal_policies,
-            self.step_4_dispatch_tool,
-            self.step_5_generate_final_report,
+            self.fetch_raw_logs,
+            self.enrich_and_cluster,
+            self.propose_optimal_policies,
+            self.generate_final_report,
         ]
         self.current_step_index = 0
         self.status = "in_progress"
@@ -83,7 +92,7 @@ class DeepAgentV3:
 
         try:
             input_data = self.state.model_dump() # Capture state before the step
-            result_message = await step_func(self.state, self.db_session, self.llm_connector)
+            result_message = await step_func(self.state)
             output_data = self.state.model_dump() # Capture state after the step
 
             span.end(output=output_data)
@@ -109,17 +118,27 @@ class DeepAgentV3:
         """Checks if the analysis has completed all steps."""
         return self.current_step_index >= len(self.steps)
 
-    async def step_1_fetch_raw_logs(self, state, db_session, llm_connector):
-        return await _step_1_fetch_raw_logs(state, db_session)
+    async def fetch_raw_logs(self, state):
+        tool = self.tools["log_fetcher"]
+        state.raw_logs = await tool.execute(
+            source_table=self.request.data_source["source_table"],
+            start_time=self.request.time_range["start_time"],
+            end_time=self.request.time_range["end_time"],
+        )
+        return f"Fetched {len(state.raw_logs)} raw logs."
 
-    async def step_2_enrich_and_cluster(self, state, db_session, llm_connector):
-        return await _step_2_enrich_and_cluster(state, llm_connector)
+    async def enrich_and_cluster(self, state):
+        tool = self.tools["log_pattern_identifier"]
+        state.patterns = await tool.execute(state.raw_logs, n_patterns=5) # Assuming n_patterns=5 for now
+        state.span_map = {span.trace_context['span_id']: span for span in state.raw_logs}
+        return f"Identified {len(state.patterns)} patterns."
 
-    async def step_3_propose_optimal_policies(self, state, db_session, llm_connector):
-        return await _step_3_propose_optimal_policies(state, db_session, llm_connector)
+    async def propose_optimal_policies(self, state):
+        tool = self.tools["policy_proposer"]
+        state.policies = await tool.execute(state.patterns, state.span_map)
+        return f"Proposed {len(state.policies)} policies."
 
-    async def step_4_dispatch_tool(self, state, db_session, llm_connector):
-        return await _step_4_dispatch_tool(state, llm_connector)
-
-    async def step_5_generate_final_report(self, state, db_session, llm_connector):
-        return await _step_5_generate_final_report(state)
+    async def generate_final_report(self, state):
+        # Placeholder for final report generation
+        state.final_report = "Analysis Complete. Final report to be generated."
+        return state.final_report
