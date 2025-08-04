@@ -28,7 +28,7 @@ async def create_agent_run(request: AnalysisRequest, background_tasks: Backgroun
         raise HTTPException(status_code=400, detail="No workloads provided in the request.")
 
     user_id = request.user_id
-    if settings.environment == "development" and not user_id:
+    if settings.app_env == "development" and not user_id:
         dev_user = get_or_create_dev_user(db_session)
         user_id = dev_user.id
 
