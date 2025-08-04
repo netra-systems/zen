@@ -11,10 +11,12 @@ class SecretReference(BaseModel):
     project_id: str = "cryptic-net-466001-n0"
     version: str = "latest"
 
+# Centralized configuration for secrets.
+# Assumes secret names in Google Cloud match the `name` field (e.g., 'gemini_api_key').
 SECRET_CONFIG: List[SecretReference] = [
-    SecretReference(name="gemini-api-key", target_model="google_model", target_field="gemini_api_key"),
-    SecretReference(name="google-client-id", target_model="google_cloud", target_field="google_client_id"),
-    SecretReference(name="google-client-secret", target_model="google_cloud", target_field="google_client_secret"),
+    SecretReference(name="gemini_api_key", target_model="google_model", target_field="gemini_api_key"),
+    SecretReference(name="google_client_id", target_model="google_cloud", target_field="google_client_id"),
+    SecretReference(name="google_client_secret", target_model="google_cloud", target_field="google_client_secret"),
 ]
 
 def get_secret_client() -> secretmanager.SecretManagerServiceClient:
@@ -67,7 +69,7 @@ class ClickHouseHTTPSConfig(BaseModel):
 class LangfuseConfig(BaseModel):
     secret_key: str = ""
     public_key: str = ""
-    host: str = ""
+    host: str = "https://cloud.langfuse.com/"
 
 class AppConfig(BaseSettings):
     """Base configuration class."""
@@ -103,10 +105,11 @@ class AppConfig(BaseSettings):
             fetched_secrets = fetch_secrets(client, SECRET_CONFIG)
 
             for secret_ref in SECRET_CONFIG:
-                if secret_ref.name in fetched_secrets:
+                fetched_value = fetched_secrets.get(secret_ref.name)
+                if fetched_value:
                     target_model_instance = getattr(self, secret_ref.target_model, None)
                     if target_model_instance:
-                        setattr(target_model_instance, secret_ref.target_field, fetched_secrets[secret_ref.name])
+                        setattr(target_model_instance, secret_ref.target_field, fetched_value)
             
             print("Secrets loaded.")
 
