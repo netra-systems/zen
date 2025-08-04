@@ -13,6 +13,7 @@ from app.db.models_postgres import SupplyOption
 from app.schema import AnalysisRun, DiscoveredPattern, LearnedPolicy, PredictedOutcome, CostComparison
 from app.services.security_service import security_service
 from app.db.clickhouse import get_clickhouse_client
+from app.config import settings
 
 # --- State Management ---
 
@@ -81,9 +82,9 @@ class DeepAgentV3:
         span = trace.span(name=step_name)
 
         try:
-            input_data = self.state.dict() # Capture state before the step
+            input_data = self.state.model_dump() # Capture state before the step
             result = await step_func()
-            output_data = self.state.dict() # Capture state after the step
+            output_data = self.state.model_dump() # Capture state after the step
 
             span.end(output=output_data)
             self._record_step_history(step_name, input_data, output_data)
@@ -274,10 +275,10 @@ async def enrich_and_cluster_logs(
     patterns = []
     for i, centroid in enumerate(centroids):
         cluster_df = df[df['pattern_id_num'] == i]
-        desc_data = descriptions.get(f"pattern_{i}", {{}})
+        desc_data = descriptions.get(f"pattern_{i}", {})
         patterns.append(DiscoveredPattern(
-            pattern_name=desc_data.get('name', f'Pattern {i+1}'),
-            pattern_description=desc_data.get('description', 'A general usage pattern.'),
+            pattern_name=desc_data.get('name', f'Pattern {i+1}') if desc_data else f'Pattern {i+1}',
+            pattern_description=desc_data.get('description', 'A general usage pattern.') if desc_data else 'A general usage pattern.',
             centroid_features=centroid, member_span_ids=cluster_df['span_id'].tolist(),
             member_count=len(cluster_df)
         ))
