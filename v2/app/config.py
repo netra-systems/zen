@@ -42,6 +42,7 @@ def fetch_secrets(client: secretmanager.SecretManagerServiceClient, secret_refer
             name = f"projects/{ref.project_id}/secrets/{ref.name}/versions/{ref.version}"
             response = client.access_secret_version(name=name)
             secrets[ref.name] = response.payload.data.decode("UTF-8")
+            print(secrets[ref.name])
         except Exception as e:
             print(f"Error fetching secret {ref.name}: {e}")
             secrets[ref.name] = None
@@ -75,15 +76,10 @@ class LangfuseConfig(BaseModel):
     public_key: str = ""
     host: str = "https://cloud.langfuse.com/"
 
-class AppConfig(BaseSettings):
+class AppConfig(BaseModel):
     """Base configuration class."""
-    model_config = SettingsConfigDict(
-        env_file="app/.env",
-        case_sensitive=False,
-        env_nested_delimiter='__'    
-    )
-    app_env: str = "development"
 
+    app_env: str = "development"
     google_cloud: GoogleCloudConfig = GoogleCloudConfig()
     google_model: GoogleModelConfig = GoogleModelConfig()
     clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
