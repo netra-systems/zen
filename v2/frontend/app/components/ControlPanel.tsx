@@ -10,12 +10,7 @@ export const ControlPanel = () => {
   const router = useRouter();
 
   const buttons = [
-    { 
-      text: 'Start New Analysis', 
-      icon: <Zap className="mr-2 h-4 w-4" />, 
-      onClick: () => router.push('/analysis'),
-      variant: 'default' as const
-    },
+    
     { 
       text: 'Generate Admin Corpus', 
       icon: <Settings className="mr-2 h-4 w-4" />, 
