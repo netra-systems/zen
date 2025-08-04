@@ -1,0 +1,61 @@
+import asyncio
+import pytest
+from typing import AsyncGenerator, Generator
+
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncEngine
+from sqlalchemy.orm import sessionmaker
+from fastapi.testclient import TestClient
+
+from app.main import app
+from app.config import settings
+from app.db.base import Base
+from app.db.postgres import get_async_db
+
+@pytest.fixture(scope="session")
+def event_loop(request) -> Generator:
+    """Create an instance of the default event loop for each test session."""
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
+
+@pytest.fixture(scope="session")
+async def db_engine() -> AsyncGenerator[AsyncEngine, None]:
+    """
+    Creates a test database engine that is reused across the test session.
+    Creates all tables before running tests, and drops them after.
+    """
+    engine = create_async_engine(settings.database_url)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield engine
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+    await engine.dispose()
+
+@pytest.fixture(scope="function")
+async def db_session(db_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
+    """
+    Provides a transactional session for each test function.
+    It starts a transaction and rolls it back after the test, ensuring isolation.
+    """
+    async with db_engine.connect() as connection:
+        async with connection.begin() as transaction:
+            Session = sessionmaker(bind=connection, class_=AsyncSession, expire_on_commit=False)
+            session = Session()
+            yield session
+            # The transaction is rolled back automatically by the context manager
+            # ensuring a clean state for the next test.
+
+@pytest.fixture(scope="function")
+def client(db_session: AsyncSession) -> Generator[TestClient, None, None]:
+    """
+    Provides a FastAPI TestClient with the database dependency overridden
+    to use the test database session.
+    """
+    async def _override_get_db():
+        yield db_session
+
+    app.dependency_overrides[get_async_db] = _override_get_db
+    with TestClient(app) as c:
+        yield c
+    del app.dependency_overrides[get_async_db]
