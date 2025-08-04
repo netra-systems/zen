@@ -26,11 +26,13 @@ class DeepAgentV3:
         self.db_session = db_session
         self.llm_connector = llm_connector
         self.state = AgentState(messages=[])
-        self.langfuse = Langfuse(
-            secret_key=settings.langfuse.secret_key,
-            public_key=settings.langfuse.public_key,
-            host=settings.langfuse.host
-        )
+        self.langfuse = None
+        if settings.langfuse.secret_key and settings.langfuse.public_key and settings.langfuse.host:
+            self.langfuse = Langfuse(
+                secret_key=settings.langfuse.secret_key,
+                public_key=settings.langfuse.public_key,
+                host=settings.langfuse.host
+            )
 
         self.tools = {
             "log_fetcher": LogFetcher(self.db_session),
@@ -53,7 +55,7 @@ class DeepAgentV3:
 
     async def run_full_analysis(self):
         """Executes the entire analysis pipeline from start to finish."""
-        trace = self.langfuse.trace(id=self.run_id, name="FullAnalysis")
+        trace = self.langfuse.trace(id=self.run_id, name="FullAnalysis") if self.langfuse else None
         
         for step_func in self.steps:
             result = await self._execute_step(step_func, trace)
@@ -88,19 +90,21 @@ class DeepAgentV3:
 
     async def _execute_step(self, step_func: Callable, trace: Any):
         step_name = step_func.__name__
-        span = trace.span(name=step_name)
+        span = trace.span(name=step_name) if trace else None
 
         try:
             input_data = self.state.model_dump() # Capture state before the step
             result_message = await step_func(self.state)
             output_data = self.state.model_dump() # Capture state after the step
 
-            span.end(output=output_data)
+            if span:
+                span.end(output=output_data)
             self._record_step_history(step_name, input_data, output_data)
 
             return {"status": "awaiting_confirmation", "completed_step": step_name, "result": result_message}
         except Exception as e:
-            span.end(level="ERROR", status_message=str(e))
+            if span:
+                span.end(level="ERROR", status_message=str(e))
             self.status = "failed"
             return {"status": "failed", "step": step_name, "error": str(e)}
 

@@ -58,7 +58,7 @@ async def get_agent_step(run_id: str) -> Dict[str, Any]:
         "status": agent.status,
         "current_step": agent.current_step_index,
         "total_steps": len(agent.steps),
-        "last_step_result": agent.state.messages[-1] if agent.state.messages else None
+        "last_step_result": agent.state.get('messages', [])[-1] if agent.state.get('messages') else None
     }
 
 @router.post("/agent/{run_id}/next")
@@ -95,5 +95,5 @@ async def get_agent_history(run_id: str) -> Dict[str, Any]:
     return {
         "run_id": run_id,
         "is_complete": agent.is_complete(),
-        "history": agent.state.dict()
+        "history": agent.state
     }
