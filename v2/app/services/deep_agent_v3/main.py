@@ -51,6 +51,7 @@ class DeepAgentV3:
             if result["status"] == "failed":
                 self.status = "failed"
                 return result
+            self.current_step_index += 1
         
         self.status = "complete"
         return self.state.final_report
