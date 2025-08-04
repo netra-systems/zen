@@ -4,7 +4,7 @@ from app.db.models_clickhouse import UnifiedLogEntry, AnalysisRequest
 from app.schema import DiscoveredPattern, LearnedPolicy, CostComparison
 
 class AgentState(DeepAgentState):
-    """Extends the base state to include analysis-specific data."""}
+    """Extends the base state to include analysis-specific data."""
     request: Optional[AnalysisRequest] = None
     raw_logs: Optional[List[UnifiedLogEntry]] = None
     patterns: Optional[List[DiscoveredPattern]] = None

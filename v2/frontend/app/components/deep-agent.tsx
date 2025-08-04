@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -20,7 +21,7 @@ const exampleQueries = [
 
 export default function DeepAgent() {
   const [runId, setRunId] = useState<string | null>(null);
-  const [prompt, setPrompt] = useState<string>('');
+  const [prompt, setPrompt] = useState<string>(exampleQueries[Math.floor(Math.random() * exampleQueries.length)]);
   const [status, setStatus] = useState<string | null>(null);
   const [step, setStep] = useState<number>(0);
   const [totalSteps, setTotalSteps] = useState<number>(0);
@@ -28,12 +29,6 @@ export default function DeepAgent() {
   const [completedSteps, setCompletedSteps] = useState<any[]>([]);
   const [finalReport, setFinalReport] = useState<string | null>(null);
   const [isAutoProgress, setIsAutoProgress] = useState<boolean>(false);
-
-  useEffect(() => {
-    // Set a random example query on initial load
-    const randomIndex = Math.floor(Math.random() * exampleQueries.length);
-    setPrompt(exampleQueries[randomIndex]);
-  }, []);
 
   const startAnalysis = async () => {
     const response = await fetch('/api/v3/agent/create', {
