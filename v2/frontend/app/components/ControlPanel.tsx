@@ -29,9 +29,9 @@ export const ControlPanel = () => {
       variant: 'outline' as const
     },
     { 
-      text: 'Demo Agent', 
-      icon: <HelpCircle className="mr-2 h-4 w-4" />, 
-      onClick: () => router.push('/demo'),
+      text: 'Deep Agent', 
+      icon: <Zap className="mr-2 h-4 w-4" />, 
+      onClick: () => router.push('/deep-agent'),
       variant: 'outline' as const
     },
     { 
