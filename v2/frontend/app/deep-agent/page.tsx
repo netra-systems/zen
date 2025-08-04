@@ -65,6 +65,13 @@ export default function DeepAgentPage() {
     const [autoLoadExample, setAutoLoadExample] = useState(true);
 
     useEffect(() => {
+        const storedValue = localStorage.getItem('autoLoadExample');
+        if (storedValue !== null) {
+            setAutoLoadExample(JSON.parse(storedValue));
+        }
+    }, []);
+
+    useEffect(() => {
         async function fetchExamples() {
             try {
                 const examples = await apiService.get('/api/examples', token);
@@ -190,6 +197,11 @@ export default function DeepAgentPage() {
         return () => clearInterval(intervalId);
     }, [isPolling, pollStatus]);
 
+    const handleAutoLoadChange = (value: boolean) => {
+        localStorage.setItem('autoLoadExample', JSON.stringify(value));
+        window.location.reload();
+    };
+
     return (
         <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
             <Sidebar />
@@ -197,7 +209,7 @@ export default function DeepAgentPage() {
                 <Header />
                 <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
                     <div className="flex justify-end">
-                        <AutoLoadSwitch isAutoLoad={autoLoadExample} onAutoLoadChange={setAutoLoadExample} />
+                        <AutoLoadSwitch isAutoLoad={autoLoadExample} onAutoLoadChange={handleAutoLoadChange} />
                     </div>
                     <ErrorDisplay error={error} />
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
