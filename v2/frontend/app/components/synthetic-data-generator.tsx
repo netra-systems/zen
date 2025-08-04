@@ -30,6 +30,8 @@ export default function SyntheticDataGenerator({ onGenerationComplete }) {
     num_users: 10,
     error_rate: 0.1,
     workload_pattern: "default",
+    event_types: "search,login",
+    source_table: "default.content_corpus",
     destination_table: `default.synthetic_data_${Date.now()}`,
   });
 
@@ -116,6 +118,26 @@ export default function SyntheticDataGenerator({ onGenerationComplete }) {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="event_types">Event Types (comma-separated)</Label>
+            <Input
+              id="event_types"
+              name="event_types"
+              type="text"
+              value={generationParams.event_types}
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="source_table">Source Table</Label>
+            <Input
+              id="source_table"
+              name="source_table"
+              type="text"
+              value={generationParams.source_table}
+              onChange={handleInputChange}
+            />
           </div>
         </div>
         <Button onClick={generateData} disabled={isLoading} className="w-full">
