@@ -79,13 +79,13 @@ class DeepAgentV3:
 
         try:
             input_data = self.state.model_dump() # Capture state before the step
-            result = await step_func()
+            result_message = await step_func(self.state, self.db_session, self.llm_connector)
             output_data = self.state.model_dump() # Capture state after the step
 
             span.end(output=output_data)
             self._record_step_history(step_name, input_data, output_data)
 
-            return {"status": "awaiting_confirmation", "completed_step": step_name, "result": result}
+            return {"status": "awaiting_confirmation", "completed_step": step_name, "result": result_message}
         except Exception as e:
             span.end(level="ERROR", status_message=str(e))
             self.status = "failed"

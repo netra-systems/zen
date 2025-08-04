@@ -56,6 +56,8 @@ class GoogleCloudConfig(BaseModel):
 class GoogleModelConfig(GoogleCloudConfig):
     gemini_api_key: str = None
     corpus_generation_model: str = "gemini-2.5-flash-lite"
+    analysis_model: str = "gemini-2.5-flash-lite"
+    analysis_model_fallback: str = "gemini-2.5-flash-lite"
 
 class ClickHouseNativeConfig(BaseModel):
     host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"

@@ -1,3 +1,4 @@
+import asyncio
 import json
 from typing import List, Dict, Any, Optional
 from datetime import datetime
@@ -117,7 +118,7 @@ async def enrich_and_cluster_logs(
         **Output Format (JSON ONLY):**
         Respond with a single JSON object where keys are the pattern identifiers (e.g., "pattern_0"). Each value should be an object containing "name" and "description".
         """
-        response = await llm_connector.generate_text_async(prompt, settings.analysis_model, settings.analysis_model_fallback)
+        response = await llm_connector.generate_text_async(prompt, settings.google_model.analysis_model, settings.google_model.analysis_model_fallback)
         descriptions = json.loads(response) if response else {}
 
     patterns = []
@@ -201,7 +202,7 @@ async def simulate_policy_outcome(
         "explanation": "<string, concise rationale>", "confidence": <float, 0.0-1.0>
     }}
     """
-    response_text = await llm_connector.generate_text_async(prompt, settings.analysis_model, settings.analysis_model_fallback)
+    response_text = await llm_connector.generate_text_async(prompt, settings.google_model.analysis_model, settings.google_model.analysis_model_fallback)
     sim_data = json.loads(response_text) if response_text else {}
 
     if not sim_data:
