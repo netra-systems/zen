@@ -1,5 +1,5 @@
 import json
-from typing import List, Dict, Any
+from typing import Any
 
 from app.services.deep_agent_v3.core import (
     query_raw_logs,
@@ -8,12 +8,12 @@ from app.services.deep_agent_v3.core import (
 )
 from app.services.deep_agent_v3.state import AgentState
 from app.services.deep_agent_v3.tools import (
-    cost_reduction_quality_preservation,
-    tool_latency_optimization,
-    cost_simulation_for_increased_usage,
-    advanced_optimization_for_core_function,
-    new_model_effectiveness_analysis,
-    kv_cache_optimization_audit,
+    CostReductionQualityPreservationTool,
+    ToolLatencyOptimizationTool,
+    CostSimulationForIncreasedUsageTool,
+    AdvancedOptimizationForCoreFunctionTool,
+    NewModelEffectivenessAnalysisTool,
+    KVCacheOptimizationAuditTool,
 )
 from app.config import settings
 
@@ -58,22 +58,22 @@ async def _step_4_dispatch_tool(state: AgentState, llm_connector: Any) -> str:
     if not state.request.query:
         return "No query provided, skipping tool dispatch."
 
-    tools = [
-        cost_reduction_quality_preservation,
-        tool_latency_optimization,
-        cost_simulation_for_increased_usage,
-        advanced_optimization_for_core_function,
-        new_model_effectiveness_analysis,
-        kv_cache_optimization_audit,
-    ]
+    tools = {
+        "cost_reduction_quality_preservation": CostReductionQualityPreservationTool(),
+        "tool_latency_optimization": ToolLatencyOptimizationTool(),
+        "cost_simulation_for_increased_usage": CostSimulationForIncreasedUsageTool(),
+        "advanced_optimization_for_core_function": AdvancedOptimizationForCoreFunctionTool(),
+        "new_model_effectiveness_analysis": NewModelEffectivenessAnalysisTool(),
+        "kv_cache_optimization_audit": KVCacheOptimizationAuditTool(),
+    }
 
     tool_defs = [
         {
-            "name": tool.__name__,
-            "description": tool.__doc__,
-            "parameters": tool.__annotations__,
+            "name": name,
+            "description": tool.run.__doc__,
+            "parameters": tool.run.__annotations__,
         }
-        for tool in tools
+        for name, tool in tools.items()
     ]
 
     prompt = f"""
@@ -92,10 +92,9 @@ async def _step_4_dispatch_tool(state: AgentState, llm_connector: Any) -> str:
         tool_name = tool_call["tool_name"]
         arguments = tool_call.get("arguments", {})
         
-        tool_to_call = next((tool for tool in tools if tool.__name__ == tool_name), None)
-
-        if tool_to_call:
-            state.tool_result = tool_to_call(**arguments)
+        if tool_name in tools:
+            tool_to_call = tools[tool_name]
+            state.tool_result = tool_to_call.run(**arguments)
             return f"Executed tool: {tool_name}"
     
     return "No suitable tool found."
