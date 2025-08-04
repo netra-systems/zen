@@ -10,7 +10,7 @@ import { GenericInput } from '@/components/GenericInput';
 import useAppStore from '../store';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/card';
 import { Button } from '@/components/button';
-import { Progress } from '@/components/progress';
+import { Progress } from '@/components/ui/progress';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/tabs';
 
