@@ -327,7 +327,7 @@ class SimulationEngine:
 
 # --- Analysis Pipeline ---
 #from app.services.engine_deepagents import run_analysis_with_deepagents
-from app.services.engine_deepagents_v2 import run_analysis_with_deepagents_v2
+
 
 class AnalysisPipeline:
     analysis_runs: Dict[str, Dict] = {}
@@ -344,20 +344,7 @@ class AnalysisPipeline:
         self.simulation_engine = SimulationEngine(self.supply_catalog_service, self.llm_connector, request.negotiated_discount_percent)
         self.log_enricher = LogEnrichmentModule()
 
-    async def run(self, use_deepagents: bool = False, use_deepagents_v2: bool = False):
-        """Main entry point for running the analysis pipeline."""
-        try:
-            if use_deepagents_v2:
-                update_run_status(self.run_id, 'running', 'Redirecting to Deep Agents V2 engine.')
-                return await self.run_with_deepagents(run_analysis_with_deepagents_v2)
-            if use_deepagents:
-                update_run_status(self.run_id, 'running', 'Redirecting to Deep Agents V1 engine.')
-                return await self.run_with_deepagents(run_analysis_with_deepagents)
-
-            update_run_status(self.run_id, 'running', 'Starting standard analysis engine.')
-            return await self.run_standard_analysis()
-        finally:
-            await self.async_client.aclose()
+    
 
     async def run_standard_analysis(self):
         if self.preloaded_spans is not None:

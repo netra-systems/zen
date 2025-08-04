@@ -27,3 +27,4 @@ langgraph
 starlette
 itsdangerous
 pytest
+langfuse

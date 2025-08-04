@@ -28,6 +28,9 @@ class LogGenParams(BaseModel):
 
 class SyntheticDataGenParams(BaseModel):
     num_traces: int = Field(10000, gt=0, le=100000, description="Number of traces to generate.")
+    num_users: int = Field(100, gt=0, le=10000, description="Number of unique users to simulate.")
+    error_rate: float = Field(0.05, ge=0.0, le=1.0, description="The fraction of traces that should be errors.")
+    event_types: List[str] = Field(default_factory=lambda: ["search", "login", "purchase", "logout"], description="A list of event types to simulate.")
     source_table: str = Field("content_corpus", description="The name of the source ClickHouse table for the content corpus.")
     destination_table: str = Field("synthetic_data", description="The name of the destination ClickHouse table for the generated data.")
 

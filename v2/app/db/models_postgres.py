@@ -71,3 +71,12 @@ class SupplyOption(Base):
     quality_score = Column(Float, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class DeepAgentRun(Base):
+    __tablename__ = "deep_agent_runs"
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id = Column(String, index=True, nullable=False)
+    step_name = Column(String, nullable=False)
+    step_input = Column(JSON, nullable=True)
+    step_output = Column(JSON, nullable=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
