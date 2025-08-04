@@ -20,7 +20,13 @@ async def create_agent_run(request: AnalysisRequest, background_tasks: Backgroun
     """
     Creates and starts a new Deep Agent analysis run in the background.
     """
-    run_id = request.run_id  # Assuming run_id is provided in the request
+    if not request.workloads:
+        raise HTTPException(status_code=400, detail="No workloads provided in the request.")
+    
+    # Assuming a single workload for now, as per the new structure
+    run_id = request.workloads[0].get('run_id')
+    if not run_id:
+        raise HTTPException(status_code=400, detail="run_id not found in workload.")
     agent = DeepAgentV3(run_id=run_id, request=request, db_session=db_session, llm_connector=llm_connector)
     AGENT_INSTANCES[run_id] = agent
 
