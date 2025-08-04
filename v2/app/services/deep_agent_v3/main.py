@@ -47,7 +47,10 @@ class DeepAgentV3:
         trace = self.langfuse.trace(id=self.run_id, name="FullAnalysis")
         
         for step_func in self.steps:
-            await self._execute_step(step_func, trace)
+            result = await self._execute_step(step_func, trace)
+            if result["status"] == "failed":
+                self.status = "failed"
+                return result
         
         self.status = "complete"
         return self.state.final_report
