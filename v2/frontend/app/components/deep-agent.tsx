@@ -1,13 +1,22 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/button';
+import { Input } from '@/components/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/card';
+import { Progress } from '@/components/progress';
+import { Switch } from '@/components/switch';
 import { Label } from '@/components/label';
+
+const exampleQueries = [
+  "Analyze the current state of the S&P 500 and provide a summary of its recent performance.",
+  "What are the latest trends in the technology sector, and which stocks are leading the way?",
+  "Provide a detailed analysis of the real estate market in California, including key metrics and forecasts.",
+  "Compare the financial performance of Apple and Microsoft over the last five years.",
+  "What is the outlook for the energy sector, considering recent geopolitical events?",
+  "Analyze the impact of inflation on consumer spending and the retail industry.",
+  "What are the most promising emerging markets for investment right now?"
+];
 
 export default function DeepAgent() {
   const [runId, setRunId] = useState<string | null>(null);
@@ -19,6 +28,12 @@ export default function DeepAgent() {
   const [completedSteps, setCompletedSteps] = useState<any[]>([]);
   const [finalReport, setFinalReport] = useState<string | null>(null);
   const [isAutoProgress, setIsAutoProgress] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Set a random example query on initial load
+    const randomIndex = Math.floor(Math.random() * exampleQueries.length);
+    setPrompt(exampleQueries[randomIndex]);
+  }, []);
 
   const startAnalysis = async () => {
     const response = await fetch('/api/v3/agent/create', {
@@ -43,6 +58,10 @@ export default function DeepAgent() {
     if (data.completed_step) {
       setCompletedSteps(prev => [...prev, { step: data.completed_step, result: data.result }]);
     }
+  };
+
+  const handleClear = () => {
+    setPrompt('');
   };
 
   useEffect(() => {
@@ -80,6 +99,7 @@ export default function DeepAgent() {
             className="flex-grow"
           />
           <Button onClick={startAnalysis}>Start Analysis</Button>
+          <Button onClick={handleClear} variant="outline">Clear</Button>
         </div>
         <div className="flex items-center space-x-2">
           <Switch id="auto-progress" checked={isAutoProgress} onCheckedChange={setIsAutoProgress} />
