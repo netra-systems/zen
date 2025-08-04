@@ -63,8 +63,9 @@ class SecurityService:
         
         db_session.commit()
 
-    def get_user_credentials(self, user_id: int, db_session: Session) -> Optional[models_clickhouse.ClickHouseCredentials]:
-        secrets = db_session.exec(select(models_postgres.Secret).where(models_postgres.Secret.user_id == user_id)).all()
+    async def get_user_credentials(self, user_id: int, db_session: Session) -> Optional[models_clickhouse.ClickHouseCredentials]:
+        result = await db_session.execute(select(models_postgres.Secret).where(models_postgres.Secret.user_id == user_id))
+        secrets = result.scalars().all()
         if not secrets:
             return None
             
