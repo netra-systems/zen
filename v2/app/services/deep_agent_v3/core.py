@@ -21,7 +21,15 @@ async def query_raw_logs(
     filters: Optional[Dict[str, Any]] = None,
 ) -> List[UnifiedLogEntry]:
     """Connects to ClickHouse to fetch raw log data."""
-    credentials = security_service.get_user_credentials(user_id=db_session.info["user_id"], db_session=db_session)
+    from app.config import settings
+    if settings.app_env == "development":
+        from app.services.deep_agent_v3.dev_utils import get_or_create_dev_user
+        dev_user = get_or_create_dev_user(db_session)
+        user_id = dev_user.id
+    else:
+        user_id = db_session.info["user_id"]
+
+    credentials = security_service.get_user_credentials(user_id=user_id, db_session=db_session)
     if not credentials:
         raise ValueError("ClickHouse credentials not found for user.")
 
