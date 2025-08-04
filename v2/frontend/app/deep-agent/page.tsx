@@ -54,15 +54,7 @@ const apiService = {
     }
 };
 
-const exampleQueries = [
-    "Analyze the current state of the S&P 500 and provide a summary of its recent performance.",
-    "What are the latest trends in the technology sector, and which stocks are leading the way?",
-    "Provide a detailed analysis of the real estate market in California, including key metrics and forecasts.",
-    "Compare the financial performance of Apple and Microsoft over the last five years.",
-    "What is the outlook for the energy sector, considering recent geopolitical events?",
-    "Analyze the impact of inflation on consumer spending and the retail industry.",
-    "What are the most promising emerging markets for investment right now?"
-];
+
 
 export default function DeepAgentPage() {
     const { token } = useAppStore();
@@ -127,11 +119,20 @@ export default function DeepAgentPage() {
         pollingRunIdRef.current = null;
 
         const run_id = `run-${Date.now()}`;
+        const user_id = useAppStore.getState().user?.id;
+
+        if (!user_id) {
+            setError("User not found. Please log in again.");
+            addMessage('agent', "User not found. Please log in again.");
+            setIsLoading(false);
+            return;
+        }
 
         try {
             const newRun = await apiService.post(
                 `${config.api.baseUrl}/agent/create`,
                 {
+                    user_id,
                     workloads: [
                         {
                             run_id,

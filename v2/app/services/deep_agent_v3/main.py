@@ -123,17 +123,18 @@ class DeepAgentV3:
 
     async def fetch_raw_logs(self, state):
         tool = self.tools["log_fetcher"]
+        workload = self.request.workloads[0]  # Assuming single workload
         state.raw_logs = await tool.execute(
-            source_table=self.request.data_source["source_table"],
-            start_time=self.request.time_range["start_time"],
-            end_time=self.request.time_range["end_time"],
+            source_table=workload["data_source"]["source_table"],
+            start_time=workload["time_range"]["start_time"],
+            end_time=workload["time_range"]["end_time"],
         )
         return f"Fetched {len(state.raw_logs)} raw logs."
 
     async def enrich_and_cluster(self, state):
         tool = self.tools["log_pattern_identifier"]
         state.patterns = await tool.execute(state.raw_logs, n_patterns=5) # Assuming n_patterns=5 for now
-        state.span_map = {span.trace_context['span_id']: span for span in state.raw_logs}
+        state.span_map = {span.trace_context.span_id: span for span in state.raw_logs}
         return f"Identified {len(state.patterns)} patterns."
 
     async def propose_optimal_policies(self, state):

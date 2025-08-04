@@ -15,6 +15,8 @@ AGENT_INSTANCES: Dict[str, DeepAgentV3] = {}
 class ConfirmationRequest(BaseModel):
     confirmation: bool
 
+from app.services.security_service import security_service
+
 @router.post("/agent/create", status_code=202)
 async def create_agent_run(request: AnalysisRequest, background_tasks: BackgroundTasks, db_session: Any = Depends(get_db_session), llm_connector: Any = Depends(get_llm_connector)) -> Dict[str, str]:
     """
@@ -22,7 +24,12 @@ async def create_agent_run(request: AnalysisRequest, background_tasks: Backgroun
     """
     if not request.workloads:
         raise HTTPException(status_code=400, detail="No workloads provided in the request.")
-    
+
+    # Pre-flight check for credentials
+    user_id = request.user_id  # Assuming user_id is available in the request
+    if not security_service.get_user_credentials(user_id, db_session):
+        raise HTTPException(status_code=400, detail="User credentials are not configured. Please set them up before running an analysis.")
+
     # Assuming a single workload for now, as per the new structure
     run_id = request.workloads[0].get('run_id')
     if not run_id:
