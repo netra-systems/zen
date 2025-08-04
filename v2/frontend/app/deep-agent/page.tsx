@@ -1,4 +1,4 @@
-''''use client';
+'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { HelpCircle } from 'lucide-react';
@@ -220,4 +220,4 @@ export default function DeepAgentPage() {
             </div>
         </div>
     );
-}''
+}
