@@ -96,7 +96,7 @@ class ClickHouseClient:
 from contextlib import contextmanager
 
 @contextmanager
-def ClickHouseDatabase():
+def get_clickhouse_client():
     """
     Dependency provider for the ClickHouse client.
     Instantiates the client with settings and attempts to connect.
