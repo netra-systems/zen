@@ -10,6 +10,7 @@ import { GenericInput } from '@/components/GenericInput';
 import useAppStore from '../store';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card';
 import Spinner from '@/components/Spinner';
+import { Button } from '@/components/button';
 
 // --- Type Definitions for API data ---
 interface AgentRun {
@@ -59,6 +60,16 @@ const apiService = {
     }
 };
 
+const exampleQueries = [
+    "Analyze the current state of the S&P 500 and provide a summary of its recent performance.",
+    "What are the latest trends in the technology sector, and which stocks are leading the way?",
+    "Provide a detailed analysis of the real estate market in California, including key metrics and forecasts.",
+    "Compare the financial performance of Apple and Microsoft over the last five years.",
+    "What is the outlook for the energy sector, considering recent geopolitical events?",
+    "Analyze the impact of inflation on consumer spending and the retail industry.",
+    "What are the most promising emerging markets for investment right now?"
+];
+
 export default function DeepAgentPage() {
     const { token } = useAppStore();
     const [agentRun, setAgentRun] = useState<AgentRun | null>(null);
@@ -67,6 +78,7 @@ export default function DeepAgentPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const pollingRunIdRef = useRef<string | null>(null);
+    const [query, setQuery] = useState(exampleQueries[Math.floor(Math.random() * exampleQueries.length)]);
 
     const pollStatus = useCallback(async () => {
         if (!pollingRunIdRef.current) {
@@ -110,11 +122,12 @@ export default function DeepAgentPage() {
         pollingRunIdRef.current = null;
 
         const formData = new FormData(event.currentTarget);
-        const query = formData.get('query') as string;
+        const currentQuery = formData.get('query') as string;
+        setQuery(currentQuery);
         const run_id = `run-${Date.now()}`;
 
         try {
-            const newRun = await apiService.post(`${config.api.baseUrl}/agent/create`, { run_id, query, data_source: { source_table: 'synthetic_data' }, time_range: { start_time: '2025-01-01T00:00:00Z', end_time: '2025-12-31T23:59:59Z' } }, token);
+            const newRun = await apiService.post(`${config.api.baseUrl}/agent/create`, { run_id, query: currentQuery, data_source: { source_table: 'synthetic_data' }, time_range: { start_time: '2025-01-01T00:00:00Z', end_time: '2025-12-31T23:59:59Z' } }, token);
             if (newRun && newRun.run_id) {
                 setAgentRun({ ...newRun, status: 'in_progress', current_step: 0, total_steps: 5 }); // Assuming 5 steps for now
                 pollingRunIdRef.current = newRun.run_id;
@@ -130,6 +143,10 @@ export default function DeepAgentPage() {
         }
     };
 
+    const handleClear = () => {
+        setQuery('');
+    }
+
     return (
         <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
             <Sidebar />
@@ -143,11 +160,12 @@ export default function DeepAgentPage() {
                                 title="Deep Agent Analysis"
                                 description="Start a new deep agent analysis run."
                                 inputFields={[
-                                    { id: 'query', name: 'query', label: 'Your Query', type: 'textarea', required: true, placeholder: 'e.g., I need to reduce costs by 20% and improve latency by 2x...' },
+                                    { id: 'query', name: 'query', label: 'Your Query', type: 'textarea', required: true, defaultValue: query },
                                 ]}
                                 onSubmit={handleStartAnalysis}
                                 isLoading={isLoading || isPolling}
                                 submitButtonText={isPolling ? 'Analysis in Progress...' : 'Start Analysis'}
+                                onClear={handleClear}
                             />
                         </div>
                         <div className="lg:col-span-2">

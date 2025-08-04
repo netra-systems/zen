@@ -21,6 +21,7 @@ interface GenericInputProps {
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   isLoading: boolean;
   submitButtonText: string;
+  onClear?: () => void;
 }
 
 export const GenericInput: React.FC<GenericInputProps> = ({
@@ -30,6 +31,7 @@ export const GenericInput: React.FC<GenericInputProps> = ({
   onSubmit,
   isLoading,
   submitButtonText,
+  onClear,
 }) => {
   return (
     <Card>
@@ -55,9 +57,16 @@ export const GenericInput: React.FC<GenericInputProps> = ({
               </div>
             </div>
           ))}
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? 'Loading...' : submitButtonText}
-          </Button>
+          <div className="flex space-x-2">
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Loading...' : submitButtonText}
+            </Button>
+            {onClear && (
+              <Button type="button" variant="outline" onClick={onClear}>
+                Clear
+              </Button>
+            )}
+          </div>
         </form>
       </CardContent>
     </Card>
