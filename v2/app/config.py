@@ -6,8 +6,16 @@ from typing import List, Dict
 
 class SecretReference(BaseModel):
     name: str
+    target_model: str
+    target_field: str
     project_id: str = "cryptic-net-466001-n0"
     version: str = "latest"
+
+SECRET_CONFIG: List[SecretReference] = [
+    SecretReference(name="gemini-api-key", target_model="google_model", target_field="gemini_api_key"),
+    SecretReference(name="google-client-id", target_model="google_cloud", target_field="google_client_id"),
+    SecretReference(name="google-client-secret", target_model="google_cloud", target_field="google_client_secret"),
+]
 
 def get_secret_client() -> secretmanager.SecretManagerServiceClient:
     """Initializes and returns a Secret Manager service client."""
@@ -92,17 +100,13 @@ class AppConfig(BaseSettings):
             if not client:
                 return
 
-            secrets_to_fetch = [
-                SecretReference(name="gemini_api_key", project_id=self.google_cloud.project_id),
-                SecretReference(name="google_client_id", project_id=self.google_cloud.project_id),
-                SecretReference(name="google_client_secret", project_id=self.google_cloud.project_id),
-            ]
-            
-            fetched_secrets = fetch_secrets(client, secrets_to_fetch)
-            
-            self.google_model.gemini_api_key = fetched_secrets.get("gemini_api_key")
-            self.google_model.google_client_id = fetched_secrets.get("google_client_id")
-            self.google_model.google_client_secret = fetched_secrets.get("google_client_secret")
+            fetched_secrets = fetch_secrets(client, SECRET_CONFIG)
+
+            for secret_ref in SECRET_CONFIG:
+                if secret_ref.name in fetched_secrets:
+                    target_model_instance = getattr(self, secret_ref.target_model, None)
+                    if target_model_instance:
+                        setattr(target_model_instance, secret_ref.target_field, fetched_secrets[secret_ref.name])
             
             print("Secrets loaded.")
 
