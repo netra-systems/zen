@@ -156,7 +156,7 @@ class CostComparison(SQLModel, table=False):
     delta_percent: float
 
 class AnalysisRequest(SQLModel, table=False):
-    user_id: int
+    user_id: str
     workloads: List[Dict]
     debug_mode: bool = False
     constraints: Optional[Dict[str, bool]] = None

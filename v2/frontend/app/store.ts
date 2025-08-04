@@ -4,6 +4,7 @@ import { config } from './config';
 import { useEffect, useState } from 'react';
 
 interface User {
+    id: number;
     full_name?: string;
     email: string;
     picture?: string;

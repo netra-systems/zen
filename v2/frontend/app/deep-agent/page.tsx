@@ -54,8 +54,6 @@ const apiService = {
     }
 };
 
-
-
 export default function DeepAgentPage() {
     const { token } = useAppStore();
     const [messages, setMessages] = useState<ChatMessageProps['message'][]>([]);
@@ -63,6 +61,19 @@ export default function DeepAgentPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const pollingRunIdRef = useRef<string | null>(null);
+    const [exampleQueries, setExampleQueries] = useState<string[]>([]);
+
+    useEffect(() => {
+        async function fetchExamples() {
+            try {
+                const examples = await apiService.get('/api/examples', token);
+                setExampleQueries(examples);
+            } catch (error) {
+                console.error("Failed to fetch examples:", error);
+            }
+        }
+        fetchExamples();
+    }, [token]);
 
     const addMessage = (role: 'user' | 'agent', content: React.ReactNode) => {
         setMessages(prev => [...prev, { role, content }]);
@@ -117,6 +128,7 @@ export default function DeepAgentPage() {
             setIsPolling(false);
         }
         pollingRunIdRef.current = null;
+        setExampleQueries([]); // Clear examples
 
         const run_id = `run-${Date.now()}`;
         const user_id = useAppStore.getState().user?.id;

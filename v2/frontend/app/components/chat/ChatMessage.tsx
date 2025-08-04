@@ -21,7 +21,6 @@ export function ChatMessage({ message }: ChatMessageProps) {
         <div className={cn('flex items-start gap-4', isUser ? 'justify-end' : '')}>
             {!isUser && (
                 <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder-user.jpg" alt="Agent" />
                     <AvatarFallback>AG</AvatarFallback>
                 </Avatar>
             )}
@@ -36,7 +35,6 @@ export function ChatMessage({ message }: ChatMessageProps) {
             </Card>
             {isUser && (
                 <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder-user.jpg" alt="User" />
                     <AvatarFallback>YOU</AvatarFallback>
                 </Avatar>
             )}
