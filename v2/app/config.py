@@ -1,5 +1,4 @@
 import os
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import BaseModel
 from google.cloud import secretmanager
 from typing import List, Dict, Optional
@@ -49,7 +48,7 @@ def fetch_secrets(client: secretmanager.SecretManagerServiceClient, secret_refer
     return secrets
 
 class GoogleCloudConfig(BaseModel):
-    project_id: str = os.environ.get("GOOGLE_PROJECT_ID")
+    project_id: str = "cryptic-net-466001-n0"
     google_client_id: str = None
     google_client_secret: str = None
 

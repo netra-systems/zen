@@ -153,7 +153,14 @@ Follow these steps to get the project running on your local machine.
     GOOGLE_CLIENT_SECRET="your-google-client-secret"
     ```
 
-5.  **Set up the Databases:**
+5.  **Google Cloud Authentication (gcloud CLI):**
+    *   Many services in this application interact with Google Cloud APIs (e.g., for authentication or accessing managed services). You must authenticate your local environment.
+    *   Run the following command. This will open a browser window for you to log in with your Google account and grant the CLI permissions.
+    ```bash
+    gcloud auth application-default login
+    ```
+
+6.  **Set up the Databases:
     *   **PostgreSQL:**
         *   Make sure your PostgreSQL server is running.
         *   Run the `create_db.py` script to create the `netra` database:
@@ -170,7 +177,7 @@ Follow these steps to get the project running on your local machine.
             docker run -d -p 8123:8123 -p 9000:9000 --name netra-clickhouse --ulimit nofile=262144:262144 yandex/clickhouse-server
             ```
 
-6.  **Run the Backend Server:**
+7.  **Run the Backend Server:**
     ```bash
     uvicorn app.main:app --reload --port 8000
     ```
