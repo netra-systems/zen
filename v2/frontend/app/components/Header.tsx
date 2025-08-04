@@ -64,11 +64,10 @@ export const Header = () => {
                 {user.picture ? (
                   <>
                     <AvatarImage
-                      src={user.picture.startsWith('http') ? user.picture : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}${user.picture.startsWith('/') ? '' : '/'}${user.picture}`}
-                      alt={user.full_name}
+                      src={user.picture}
+                      alt={user.full_name || 'User'}
                       onError={(e) => {
                         console.error('Error loading profile image:', e);
-                        console.log('Profile image URL:', user.picture);
                         const target = e.target as HTMLImageElement;
                         target.style.display = 'none';
                       }}

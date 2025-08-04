@@ -23,6 +23,9 @@ class UserPublic(UserBase):
     id: str
     created_at: datetime
 
+class UserPublicWithPicture(UserPublic):
+    picture: Optional[str] = None
+
 # --- Token Schemas ---
 class Token(BaseModel):
     access_token: str
