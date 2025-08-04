@@ -33,7 +33,7 @@ async def create_agent_run(request: AnalysisRequest, background_tasks: Backgroun
         user_id = dev_user.id
 
     # Pre-flight check for credentials
-    if not await security_service.get_user_credentials(user_id, db_session):
+    if settings.app_env != "development" and not await security_service.get_user_credentials(user_id, db_session):
         raise HTTPException(status_code=400, detail="User credentials are not configured. Please set them up before running an analysis.")
 
     # Assuming a single workload for now, as per the new structure
