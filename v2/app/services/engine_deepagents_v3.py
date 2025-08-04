@@ -7,7 +7,6 @@ from sklearn.cluster import KMeans
 from langfuse import Langfuse
 
 from app.deepagents.graph import create_deep_agent, DeepAgentState
-from app.services.engine import GeminiLLMConnector, AppConfig
 from app.db.models_clickhouse import UnifiedLogEntry, AnalysisRequest
 from app.db.models_postgres import SupplyOption
 from app.schema import AnalysisRun, DiscoveredPattern, LearnedPolicy, PredictedOutcome, CostComparison
@@ -25,6 +24,7 @@ class AgentState(DeepAgentState):
     policies: Optional[List[LearnedPolicy]] = None
     cost_comparison: Optional[CostComparison] = None
     final_report: Optional[str] = None
+    tool_result: Optional[Dict[str, Any]] = None
 
 # --- V3 Engine ---
 
@@ -36,7 +36,7 @@ class DeepAgentV3:
     This engine is designed for interactive control, monitoring, and extensibility.
     """
 
-    def __init__(self, run_id: str, request: AnalysisRequest, db_session: Any, llm_connector: GeminiLLMConnector):
+    def __init__(self, run_id: str, request: AnalysisRequest, db_session: Any, llm_connector: any):
         self.run_id = run_id
         self.request = request
         self.db_session = db_session
@@ -52,9 +52,11 @@ class DeepAgentV3:
             self._step_1_fetch_raw_logs,
             self._step_2_enrich_and_cluster,
             self._step_3_propose_optimal_policies,
-            self._step_4_generate_final_report,
+            self._step_4_dispatch_tool,
+            self._step_5_generate_final_report,
         ]
         self.current_step_index = 0
+        self.status = "in_progress"
 
     async def run_full_analysis(self):
         """Executes the entire analysis pipeline from start to finish."""
@@ -63,18 +65,28 @@ class DeepAgentV3:
         for step_func in self.steps:
             await self._execute_step(step_func, trace)
         
+        self.status = "complete"
         return self.state.final_report
 
-    async def run_next_step(self):
+    async def run_next_step(self, confirmation: bool = True):
         """Executes the next step in the analysis pipeline."""
         if self.is_complete():
             return {"status": "complete", "message": "Analysis is already complete."}
+
+        if self.status == "awaiting_confirmation" and not confirmation:
+            return {"status": "awaiting_confirmation", "message": "Awaiting user confirmation to proceed."}
 
         step_func = self.steps[self.current_step_index]
         trace = self.langfuse.trace(id=f"{self.run_id}-{self.current_step_index}", name=step_func.__name__)
 
         result = await self._execute_step(step_func, trace)
         self.current_step_index += 1
+
+        if self.is_complete():
+            self.status = "complete"
+        else:
+            self.status = "awaiting_confirmation"
+
         return result
 
     async def _execute_step(self, step_func: Callable, trace: Any):
@@ -89,9 +101,10 @@ class DeepAgentV3:
             span.end(output=output_data)
             self._record_step_history(step_name, input_data, output_data)
 
-            return {"status": "in_progress", "completed_step": step_name, "result": result}
+            return {"status": "awaiting_confirmation", "completed_step": step_name, "result": result}
         except Exception as e:
             span.end(level="ERROR", status_message=str(e))
+            self.status = "failed"
             return {"status": "failed", "step": step_name, "error": str(e)}
 
     def _record_step_history(self, step_name: str, input_data: Dict, output_data: Dict):
@@ -146,18 +159,165 @@ class DeepAgentV3:
         )
         return f"Generated {len(self.state.policies)} optimal policies."
 
-    async def _step_4_generate_final_report(self):
+    async def _step_4_dispatch_tool(self):
+        """Uses an LLM to decide which tool to use based on the user's request."""
+        if not self.request.query:
+            return "No query provided, skipping tool dispatch."
+
+        tools = [
+            self.cost_reduction_quality_preservation,
+            self.tool_latency_optimization,
+            self.cost_simulation_for_increased_usage,
+            self.advanced_optimization_for_core_function,
+            self.new_model_effectiveness_analysis,
+            self.kv_cache_optimization_audit,
+        ]
+
+        tool_defs = [
+            {
+                "name": tool.__name__,
+                "description": tool.__doc__,
+                "parameters": tool.__annotations__,
+            }
+            for tool in tools
+        ]
+
+        prompt = f"""
+        Given the user's query, which of the following tools should be used?
+        User Query: {self.request.query}
+        Available Tools: {json.dumps(tool_defs, indent=2)}
+        
+        Respond with a JSON object containing the tool name and its arguments.
+        Example: {{"tool_name": "cost_reduction_quality_preservation", "arguments": {{"feature_x_latency": 500, "feature_y_latency": 200}}}}
+        """
+        
+        response_text = await self.llm_connector.generate_text_async(prompt, settings.analysis_model, settings.analysis_model_fallback)
+        tool_call = json.loads(response_text) if response_text else {}
+
+        if tool_call and "tool_name" in tool_call:
+            tool_name = tool_call["tool_name"]
+            arguments = tool_call.get("arguments", {})
+            
+            tool_to_call = next((tool for tool in tools if tool.__name__ == tool_name), None)
+
+            if tool_to_call:
+                self.state.tool_result = tool_to_call(**arguments)
+                return f"Executed tool: {tool_name}"
+        
+        return "No suitable tool found."
+
+    async def _step_5_generate_final_report(self):
         """Generates a human-readable summary of the analysis."""
         if not self.state.policies:
             raise ValueError("Cannot generate a report without policies.")
             
-        # This step can be expanded to use an LLM for a more narrative report
-        report = "Analysis Complete. Recommended Policies:\n"
+        report = "Analysis Complete. Recommended Policies:
+"
         for policy in self.state.policies:
-            report += f"- For pattern '{policy.pattern_name}', recommend using '{policy.optimal_supply_option_name}'.\n"
+            report += f"- For pattern '{policy.pattern_name}', recommend using '{policy.optimal_supply_option_name}'.
+"
         
+        if self.state.tool_result:
+            report += "
+Tool Execution Result:
+"
+            report += json.dumps(self.state.tool_result, indent=2)
+
         self.state.final_report = report
         return "Final report generated."
+
+    # --- Demo Tools ---
+
+    def cost_reduction_quality_preservation(self, feature_x_latency: int, feature_y_latency: int) -> Dict[str, Any]:
+        """Analyzes cost reduction opportunities while preserving quality.
+
+        Args:
+            feature_x_latency: The acceptable latency for feature X in milliseconds.
+            feature_y_latency: The acceptable latency for feature Y in milliseconds.
+        """
+        return {
+            "message": f"To reduce costs while maintaining quality, we recommend the following policy: For feature X, use a model with a latency of up to {feature_x_latency}ms. For feature Y, maintain the current model to ensure a latency of {feature_y_latency}ms. This is projected to reduce costs by 15%.",
+            "policy": {
+                "feature_x": {
+                    "max_latency_ms": feature_x_latency,
+                    "model_recommendation": "gpt-4-turbo"
+                },
+                "feature_y": {
+                    "max_latency_ms": feature_y_latency,
+                    "model_recommendation": "claude-3-opus"
+                }
+            }
+        }
+
+    def tool_latency_optimization(self, target_latency_reduction: float) -> Dict[str, Any]:
+        """Finds ways to reduce tool latency while keeping costs similar.
+
+        Args:
+            target_latency_reduction: The target latency reduction factor (e.g., 3 for a 3x reduction).
+        """
+        return {
+            "message": f"To achieve a {target_latency_reduction}x latency reduction, we recommend the following: 1. Replace the current weather API with a faster alternative. 2. Implement a caching layer for frequently used tools. These changes are projected to reduce tool call latency by 60% with a minimal impact on cost.",
+            "recommendations": [
+                "Replace weather API with a faster alternative.",
+                "Implement a caching layer for frequently used tools."
+            ]
+        }
+
+    def cost_simulation_for_increased_usage(self, usage_increase_percent: float) -> Dict[str, Any]:
+        """Simulates the cost and rate limit impact of increased agent usage.
+
+        Args:
+            usage_increase_percent: The projected increase in agent usage as a percentage.
+        """
+        return {
+            "message": f"A {usage_increase_percent}% increase in agent usage is projected to increase monthly costs by ${1000 * (usage_increase_percent / 100)}. No rate limit issues are anticipated at this usage level.",
+            "projected_cost_increase_usd": 1000 * (usage_increase_percent / 100)
+        }
+
+    def advanced_optimization_for_core_function(self, function_name: str) -> Dict[str, Any]:
+        """Suggests advanced optimization methods for a core function.
+
+        Args:
+            function_name: The name of the core function to optimize.
+        """
+        return {
+            "message": f"For the core function '{function_name}', we recommend exploring the following advanced optimization methods: 1. Implement a more efficient algorithm. 2. Utilize a more performant programming language or framework. 3. Explore hardware acceleration options. These methods have the potential to reduce the function's cost by up to 50%.",
+            "recommendations": [
+                "Implement a more efficient algorithm.",
+                "Utilize a more performant programming language or framework.",
+                "Explore hardware acceleration options."
+            ]
+        }
+
+    def new_model_effectiveness_analysis(self, new_models: List[str]) -> Dict[str, Any]:
+        """Analyzes the effectiveness of new models for the current setup.
+
+        Args:
+            new_models: A list of new models to analyze.
+        """
+        return {
+            "message": f"The new models {', '.join(new_models)} have been analyzed. The model 'gpt-4o' shows a 20% improvement in quality with a 10% increase in cost. The model 'claude-3-sonnet' shows a 5% improvement in quality with a 15% reduction in cost. We recommend further testing to validate these findings.",
+            "analysis": {
+                "gpt-4o": {
+                    "quality_improvement": "20%",
+                    "cost_increase": "10%"
+                },
+                "claude-3-sonnet": {
+                    "quality_improvement": "5%",
+                    "cost_reduction": "15%"
+                }
+            }
+        }
+
+    def kv_cache_optimization_audit(self) -> Dict[str, Any]:
+        """Audits all uses of KV caching for optimization opportunities."""
+        return {
+            "message": "The KV cache audit is complete. We have identified several opportunities for optimization. We recommend increasing the cache size for the 'user_profile' cache and implementing a more efficient eviction policy for the 'product_catalog' cache. These changes are projected to improve cache hit rates by 25%.",
+            "recommendations": [
+                "Increase the cache size for the 'user_profile' cache.",
+                "Implement a more efficient eviction policy for the 'product_catalog' cache."
+            ]
+        }
 
 
 # --- Core Tools (Adapted from V2) ---
@@ -211,7 +371,7 @@ async def query_raw_logs(
 async def enrich_and_cluster_logs(
     spans: List[UnifiedLogEntry],
     n_patterns: int = 5,
-    llm_connector: GeminiLLMConnector = None
+    llm_connector: any = None
 ) -> List[DiscoveredPattern]:
     """Enriches logs and applies KMeans clustering."""
     # This function remains largely the same
@@ -264,12 +424,13 @@ async def enrich_and_cluster_logs(
         features_json = json.dumps({f"pattern_{i}": features for i, features in enumerate(centroids)}, indent=2)
         prompt = f"""
         Analyze the following LLM usage pattern features. For each pattern, generate a concise, 2-4 word name and a one-sentence description.
-        **Pattern Features (JSON):**\n{features_json}\n
+        **Pattern Features (JSON):**
+{features_json}
+
         **Output Format (JSON ONLY):**
-        Respond with a single JSON object where keys are the pattern identifiers (e.g., \"pattern_0\"). Each value should be an object containing \"name\" and \"description\".
+        Respond with a single JSON object where keys are the pattern identifiers (e.g., "pattern_0"). Each value should be an object containing "name" and "description".
         """
-        config = AppConfig()
-        response = await llm_connector.generate_text_async(prompt, config.ANALYSIS_MODEL, config.ANALYSIS_MODEL_FALLBACK)
+        response = await llm_connector.generate_text_async(prompt, settings.analysis_model, settings.analysis_model_fallback)
         descriptions = json.loads(response) if response else {}
 
     patterns = []
@@ -289,7 +450,7 @@ async def propose_optimal_policies(
     db_session: Any,
     patterns: List[DiscoveredPattern],
     span_map: Dict[str, UnifiedLogEntry],
-    llm_connector: GeminiLLMConnector
+    llm_connector: any
 ) -> List[LearnedPolicy]:
     """Finds the best routing policies through simulation."""
     # This function remains largely the same
@@ -337,7 +498,7 @@ async def simulate_policy_outcome(
     pattern: DiscoveredPattern,
     supply_option: SupplyOption,
     user_goal: str,
-    llm_connector: GeminiLLMConnector,
+    llm_connector: any,
     span: UnifiedLogEntry
 ) -> PredictedOutcome:
     """Simulates the outcome of a single policy."""
@@ -355,8 +516,7 @@ async def simulate_policy_outcome(
         "explanation": "<string, concise rationale>", "confidence": <float, 0.0-1.0>
     }}
     """
-    config = AppConfig()
-    response_text = await llm_connector.generate_text_async(prompt, config.ANALYSIS_MODEL, config.ANALYSIS_MODEL_FALLBACK)
+    response_text = await llm_connector.generate_text_async(prompt, settings.analysis_model, settings.analysis_model_fallback)
     sim_data = json.loads(response_text) if response_text else {}
 
     if not sim_data:
@@ -373,7 +533,7 @@ async def simulate_policy_outcome(
         weights['quality'] * sim_data.get('predicted_quality_score', 0) + 
         weights['cost'] * norm_cost + 
         weights['latency'] * norm_latency
-    ) * sim_.get('confidence', 0.85)
+    ) * sim_data.get('confidence', 0.85)
 
     return PredictedOutcome(supply_option_name=supply_option.name, utility_score=utility_score, **sim_data)
 
