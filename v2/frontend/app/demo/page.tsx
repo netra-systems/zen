@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, FormEvent, useEffect, useCallback } from 'react';
-import { Play, Pause, FastForward, ChevronRight, ChevronDown, CheckCircle, XCircle, Loader, Settings, BarChart2 } from 'lucide-react';
+import { Play, Pause, FastForward, ChevronRight, ChevronDown, CheckCircle, XCircle, Loader, Settings, BarChart2, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 import { config } from '../config';
 import { Sidebar } from '@/components/Sidebar';
@@ -57,7 +57,7 @@ interface SyntheticDataParams {
 
 interface AgentStep {
     run_id: string;
-    status: 'in_progress' | 'complete' | 'failed';
+    status: 'in_progress' | 'complete' | 'failed' | 'awaiting_confirmation';
     current_step: number;
     total_steps: number;
     last_step_result: any;
@@ -107,7 +107,7 @@ export default function DemoPage() {
                 const history = await apiService.get(`${config.api.baseUrl}/api/v3/agent/${currentRunId}/history`, token);
                 setAgentHistory(history);
                 setIsLoading(false);
-            } else if (autoProgress) {
+            } else if (autoProgress && state.status !== 'awaiting_confirmation') {
                 // Continue polling if auto-progress is on
                 setTimeout(() => pollAgentStatus(currentRunId), 2000);
             }
@@ -164,11 +164,11 @@ export default function DemoPage() {
         }
     };
 
-    const handleNextStep = async () => {
+    const handleNextStep = async (confirmation: boolean) => {
         if (!runId || !token) return;
         setIsLoading(true);
         try {
-            const state = await apiService.post(`${config.api.baseUrl}/api/v3/agent/${runId}/next`, {}, token);
+            const state = await apiService.post(`${config.api.baseUrl}/api/v3/agent/${runId}/next`, { confirmation }, token);
             setAgentState(state);
             if (state.status === 'complete') {
                 const history = await apiService.get(`${config.api.baseUrl}/api/v3/agent/${runId}/history`, token);
@@ -186,6 +186,16 @@ export default function DemoPage() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleCancelAnalysis = () => {
+        // In a real application, you would call an API endpoint to cancel the run.
+        // For this demo, we'll just reset the state.
+        setRunId(null);
+        setAgentState(null);
+        setAgentHistory(null);
+        setError(null);
+        setIsLoading(false);
     };
 
     return (
@@ -272,10 +282,13 @@ export default function DemoPage() {
                                         {autoProgress ? <><Pause className="mr-2 h-4 w-4" /> Auto-Progress ON</> : <><Play className="mr-2 h-4 w-4" /> Auto-Progress OFF</>}
                                     </Button>
                                     {!autoProgress && (
-                                        <Button size="sm" onClick={handleNextStep} disabled={isLoading || agentState?.status === 'complete'}>
+                                        <Button size="sm" onClick={() => handleNextStep(true)} disabled={isLoading || agentState?.status === 'complete' || agentState?.status === 'awaiting_confirmation'}>
                                             <FastForward className="mr-2 h-4 w-4" /> Next Step
                                         </Button>
                                     )}
+                                    <Button variant="destructive" size="sm" onClick={handleCancelAnalysis} disabled={agentState?.status === 'complete'}>
+                                        <XCircle className="mr-2 h-4 w-4" /> Cancel
+                                    </Button>
                                 </div>
                             </CardHeader>
                             <CardContent>
@@ -290,6 +303,16 @@ export default function DemoPage() {
                                             <pre className="mt-2 bg-gray-100 text-gray-800 rounded-md p-4 text-xs max-h-60 overflow-y-auto font-mono">
                                                 <code>{JSON.stringify(agentState.last_step_result, null, 2)}</code>
                                             </pre>
+                                            {agentState.status === 'awaiting_confirmation' && (
+                                                <div className="mt-4 flex space-x-4">
+                                                    <Button size="sm" onClick={() => handleNextStep(true)} disabled={isLoading}>
+                                                        <ThumbsUp className="mr-2 h-4 w-4" /> Confirm & Proceed
+                                                    </Button>
+                                                    <Button size="sm" variant="outline" onClick={() => handleNextStep(false)} disabled={isLoading}>
+                                                        <ThumbsDown className="mr-2 h-4 w-4" /> Reject & Modify
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 )}
