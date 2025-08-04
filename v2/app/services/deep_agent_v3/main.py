@@ -105,17 +105,17 @@ class DeepAgentV3:
         """Checks if the analysis has completed all steps."""
         return self.current_step_index >= len(self.steps)
 
-    async def step_1_fetch_raw_logs(self):
-        return await _step_1_fetch_raw_logs(self.state, self.db_session)
+    async def step_1_fetch_raw_logs(self, state, db_session, llm_connector):
+        return await _step_1_fetch_raw_logs(state, db_session)
 
-    async def step_2_enrich_and_cluster(self):
-        return await _step_2_enrich_and_cluster(self.state, self.llm_connector)
+    async def step_2_enrich_and_cluster(self, state, db_session, llm_connector):
+        return await _step_2_enrich_and_cluster(state, llm_connector)
 
-    async def step_3_propose_optimal_policies(self):
-        return await _step_3_propose_optimal_policies(self.state, self.db_session, self.llm_connector)
+    async def step_3_propose_optimal_policies(self, state, db_session, llm_connector):
+        return await _step_3_propose_optimal_policies(state, db_session, llm_connector)
 
-    async def step_4_dispatch_tool(self):
-        return await _step_4_dispatch_tool(self.state, self.llm_connector)
+    async def step_4_dispatch_tool(self, state, db_session, llm_connector):
+        return await _step_4_dispatch_tool(state, llm_connector)
 
-    async def step_5_generate_final_report(self):
-        return await _step_5_generate_final_report(self.state)
+    async def step_5_generate_final_report(self, state, db_session, llm_connector):
+        return await _step_5_generate_final_report(state)
