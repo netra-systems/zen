@@ -47,6 +47,12 @@ def run_full_analysis_pipeline(run_id: uuid.UUID, user_id: str, db: Session, sec
         log_to_run("Analysis run started.")
 
         # 2. Retrieve user's ClickHouse credentials
+        from app.config import settings
+        if settings.app_env == "development":
+            from app.services.deep_agent_v3.dev_utils import get_or_create_dev_user
+            dev_user = get_or_create_dev_user(db)
+            user_id = dev_user.id
+
         credentials = security_service.get_user_credentials(user_id=user_id, db_session=db)
         if not credentials:
             raise ValueError("ClickHouse credentials not found for user.")
