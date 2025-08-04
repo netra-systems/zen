@@ -5,7 +5,6 @@ from datetime import datetime
 import pandas as pd
 from sklearn.cluster import KMeans
 from langfuse import Langfuse
-from langfuse.model import CreateTrace
 
 from app.deepagents.graph import create_deep_agent, DeepAgentState
 from app.services.engine import GeminiLLMConnector, AppConfig
@@ -42,7 +41,11 @@ class DeepAgentV3:
         self.db_session = db_session
         self.llm_connector = llm_connector
         self.state = AgentState(messages=[])
-        self.langfuse = Langfuse() # Add your Langfuse credentials here
+        self.langfuse = Langfuse(
+            secret_key=settings.langfuse.secret_key,
+            public_key=settings.langfuse.public_key,
+            host=settings.langfuse.host
+        )
 
         self.steps = [
             self._step_1_fetch_raw_logs,
@@ -54,7 +57,7 @@ class DeepAgentV3:
 
     async def run_full_analysis(self):
         """Executes the entire analysis pipeline from start to finish."""
-        trace = self.langfuse.trace(CreateTrace(id=self.run_id, name="FullAnalysis"))
+        trace = self.langfuse.trace(id=self.run_id, name="FullAnalysis")
         
         for step_func in self.steps:
             await self._execute_step(step_func, trace)
@@ -67,7 +70,7 @@ class DeepAgentV3:
             return {"status": "complete", "message": "Analysis is already complete."}
 
         step_func = self.steps[self.current_step_index]
-        trace = self.langfuse.trace(CreateTrace(id=f"{self.run_id}-{self.current_step_index}", name=step_func.__name__))
+        trace = self.langfuse.trace(id=f"{self.run_id}-{self.current_step_index}", name=step_func.__name__)
 
         result = await self._execute_step(step_func, trace)
         self.current_step_index += 1

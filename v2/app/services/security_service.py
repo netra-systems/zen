@@ -73,14 +73,24 @@ class SecurityService:
             for secret in secrets:
                 decrypted_creds[secret.key] = self.decrypt(secret.encrypted_value)
         except Exception as e:
-            logger.error(f"Failed to decrypt credentials for user_id {user_id}: {e}")
+            logging.error(f"Failed to decrypt credentials for user_id {user_id}: {e}")
             return None
         
-        required_keys = models_postgres.ClickHouseCredentials.model_fields.keys()
+        required_keys = models_clickhouse.ClickHouseCredentials.model_fields.keys()
         if not all(key in decrypted_creds for key in required_keys):
-            logger.warning(f"Incomplete credentials found for user_id {user_id}. Missing keys: {required_keys - decrypted_creds.keys()}")
+            logging.warning(f"Incomplete credentials found for user_id {user_id}. Missing keys: {required_keys - decrypted_creds.keys()}")
             # Still return the model, it will raise a validation error on use, which is informative.
         
-        return models_postgres.ClickHouseCredentials(**decrypted_creds)
+        return models_clickhouse.ClickHouseCredentials(**decrypted_creds)
+
+# Create a global instance of the security service
+try:
+    from ..config import AppConfig
+    settings = AppConfig()
+    key_manager = KeyManager.load_from_settings(settings)
+    security_service = SecurityService(key_manager)
+except (ImportError, ValueError) as e:
+    logging.error(f"Failed to initialize SecurityService: {e}")
+    security_service = None
 
 
