@@ -4,21 +4,33 @@ from pydantic import BaseModel
 from google.cloud import secretmanager
 from typing import List, Dict
 
-def get_secrets(secret_ids: List[str], project_id: str, version_id: str = "latest") -> Dict[str, str]:
-    """Fetches multiple secrets from Google Cloud Secret Manager."""
-    secrets = {}
+class SecretReference(BaseModel):
+    name: str
+    project_id: str
+    version: str = "latest"
+
+def get_secret_client() -> secretmanager.SecretManagerServiceClient:
+    """Initializes and returns a Secret Manager service client."""
     try:
-        client = secretmanager.SecretManagerServiceClient()
-        for secret_id in secret_ids:
-            name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
-            try:
-                response = client.access_secret_version(name=name)
-                secrets[secret_id] = response.payload.data.decode("UTF-8")
-            except Exception as e:
-                print(f"Error fetching secret {secret_id}: {e}")
-                secrets[secret_id] = None
+        return secretmanager.SecretManagerServiceClient()
     except Exception as e:
         print(f"Error initializing Secret Manager client: {e}")
+        return None
+
+def fetch_secrets(client: secretmanager.SecretManagerServiceClient, secret_references: List[SecretReference]) -> Dict[str, str]:
+    """Fetches multiple secrets from Google Cloud Secret Manager."""
+    secrets = {}
+    if not client:
+        return secrets
+
+    for ref in secret_references:
+        try:
+            name = f"projects/{ref.project_id}/secrets/{ref.name}/versions/{ref.version}"
+            response = client.access_secret_version(name=name)
+            secrets[ref.name] = response.payload.data.decode("UTF-8")
+        except Exception as e:
+            print(f"Error fetching secret {ref.name}: {e}")
+            secrets[ref.name] = None
     return secrets
 
 class GoogleCloudConfig(BaseModel):
@@ -76,8 +88,17 @@ class AppConfig(BaseSettings):
     def load_secrets(self):
         if self.google_cloud.project_id and self.app_env != "testing":
             print("Loading secrets from Google Cloud Secret Manager...")
-            secrets_to_fetch = ["gemini_api_key", "google_client_id", "google_client_secret"]
-            fetched_secrets = get_secrets(secrets_to_fetch, self.google_cloud.project_id)
+            client = get_secret_client()
+            if not client:
+                return
+
+            secrets_to_fetch = [
+                SecretReference(name="gemini_api_key", project_id=self.google_cloud.project_id),
+                SecretReference(name="google_client_id", project_id=self.google_cloud.project_id),
+                SecretReference(name="google_client_secret", project_id=self.google_cloud.project_id),
+            ]
+            
+            fetched_secrets = fetch_secrets(client, secrets_to_fetch)
             
             self.google_model.gemini_api_key = fetched_secrets.get("gemini_api_key")
             self.google_model.google_client_id = fetched_secrets.get("google_client_id")
