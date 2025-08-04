@@ -13,8 +13,8 @@ class SecretReference(BaseModel):
 # https://console.cloud.google.com/security/secret-manager?inv=1&invt=Ab4muw&project=cryptic-net-466001-n0
 SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="gemini-api-key", target_model="google_model", target_field="gemini_api_key"),
-    SecretReference(name="google-client-id", target_model="google_cloud", target_field="google_client_id"),
-    SecretReference(name="google-client-secret", target_model="google_cloud", target_field="google_client_secret"),
+    SecretReference(name="google-client-id", target_model="google_cloud", target_field="client_id"),
+    SecretReference(name="google-client-secret", target_model="google_cloud", target_field="client_secret"),
     SecretReference(name="langfuse-secret-key", target_model="langfuse", target_field="secret_key"),
     SecretReference(name="clickhouse-default-password", target_model="clickhouse_native", target_field="password"),
     SecretReference(name="clickhouse-default-password", target_model="clickhouse_https", target_field="password"),
@@ -50,8 +50,8 @@ def fetch_secrets(client: secretmanager.SecretManagerServiceClient, secret_refer
 
 class GoogleCloudConfig(BaseModel):
     project_id: str = "cryptic-net-466001-n0"
-    google_client_id: str = None
-    google_client_secret: str = None
+    client_id: str = None
+    client_secret: str = None
 
 class GoogleModelConfig(GoogleCloudConfig):
     gemini_api_key: str = None

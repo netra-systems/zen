@@ -17,8 +17,10 @@ class KeyManager(BaseModel):
         if settings.app_env == "development" and jwt_secret_key == "jwt_secret_key":
             jwt_secret_key = "a_super_secret_jwt_key_for_development_that_is_long_enough"
 
+        fernet_key_bytes = fernet_key.encode() if isinstance(fernet_key, str) else fernet_key
+
         try:
-            return cls(jwt_secret_key=jwt_secret_key, fernet_key=fernet_key.encode())
+            return cls(jwt_secret_key=jwt_secret_key, fernet_key=fernet_key_bytes)
         except ValidationError as e:
             if "jwt_secret_key" in str(e):
                 raise ValueError(
