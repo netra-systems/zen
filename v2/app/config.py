@@ -110,6 +110,8 @@ class AppConfig(BaseSettings):
                     target_model_instance = getattr(self, secret_ref.target_model, None)
                     if target_model_instance:
                         setattr(target_model_instance, secret_ref.target_field, fetched_value)
+                else:
+                    print(f"secret_ref {secret_ref} failed to fetch value")
             
             print("Secrets loaded.")
 
@@ -135,7 +137,8 @@ def get_settings() -> AppConfig:
         "testing": TestingConfig,
         "development": DevelopmentConfig
     }
-    config = config_map.get(app_env, DevelopmentConfig)()
+    default_env = DevelopmentConfig
+    config = config_map.get(app_env, default_env)()
     config.load_secrets()
     return config
 
