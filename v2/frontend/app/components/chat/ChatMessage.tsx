@@ -18,13 +18,13 @@ export function ChatMessage({ message }: ChatMessageProps) {
     const isUser = role === 'user';
 
     return (
-        <div className={cn('flex items-start gap-4', isUser ? 'justify-end' : '')}>
+        <div className={cn('flex items-start gap-4 group', isUser ? 'justify-end' : '')}>
             {!isUser && (
                 <Avatar className="h-8 w-8">
                     <AvatarFallback>AG</AvatarFallback>
                 </Avatar>
             )}
-            <Card className={cn('max-w-[75%]', isUser ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+            <Card className={cn('max-w-[75%] transition-all duration-200 ease-in-out group-hover:scale-105 group-hover:shadow-lg cursor-pointer', isUser ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                 <CardContent className="p-3">
                     {typeof content === 'string' ? (
                         <p className="text-sm">{content}</p>

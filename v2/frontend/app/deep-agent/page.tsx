@@ -8,9 +8,9 @@ import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import useAppStore from '../store';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import Spinner from '@/components/Spinner';
 import { ChatWindow } from '@/components/chat/ChatWindow';
 import { ChatMessageProps } from '@/components/chat/ChatMessage';
+import { ErrorDisplay } from '@/components/ErrorDisplay';
 
 // --- Type Definitions for API data ---
 interface AgentRun {
@@ -20,7 +20,7 @@ interface AgentRun {
     total_steps: number;
     last_step_result?: any;
     final_report?: string;
-    error?: string;
+    error?: any;
 }
 
 // --- API Service ---
@@ -32,8 +32,7 @@ const apiService = {
             }
         });
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ detail: 'An unknown error occurred.' }));
-            throw new Error(errorData.detail);
+            throw await response.json().catch(() => new Error('An unknown error occurred.'));
         }
         return response.json();
     },
@@ -47,8 +46,7 @@ const apiService = {
             body: JSON.stringify(body),
         });
         if (response.status !== expectStatus) {
-            const errorData = await response.json().catch(() => ({ detail: 'An unknown error occurred.' }));
-            throw new Error(errorData.detail);
+            throw await response.json().catch(() => new Error('An unknown error occurred.'));
         }
         return response.json();
     }
@@ -59,7 +57,7 @@ export default function DeepAgentPage() {
     const [messages, setMessages] = useState<ChatMessageProps['message'][]>([]);
     const [isPolling, setIsPolling] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<any | null>(null);
     const pollingRunIdRef = useRef<string | null>(null);
     const [exampleQueries, setExampleQueries] = useState<string[]>([]);
 
@@ -97,15 +95,15 @@ export default function DeepAgentPage() {
                 if (data.status === 'complete') {
                     addMessage('agent', data.final_report || 'Analysis complete.');
                 } else {
-                    addMessage('agent', `Analysis failed: ${data.error || 'Unknown error'}`);
+                    setError(data.error || 'Unknown error');
+                    addMessage('agent', `Analysis failed.`);
                 }
                 setIsLoading(false);
             }
-        } catch (err: unknown) {
+        } catch (err) {
             console.error("Polling failed:", err);
-            const errorMessage = err instanceof Error ? err.message : 'Could not get agent run status.';
-            addMessage('agent', `Error: ${errorMessage}`);
-            setError(errorMessage);
+            setError(err);
+            addMessage('agent', `Error polling for status.`);
             setIsPolling(false);
             pollingRunIdRef.current = null;
             setIsLoading(false);
@@ -131,10 +129,15 @@ export default function DeepAgentPage() {
         setExampleQueries([]); // Clear examples
 
         const run_id = `run-${Date.now()}`;
-        const user_id = useAppStore.getState().user?.id;
+        let user_id = useAppStore.getState().user?.id;
+
+        if (!user_id && process.env.NODE_ENV === 'development') {
+            user_id = 'dev-user'; // Dummy user ID for development
+        }
 
         if (!user_id) {
-            setError("User not found. Please log in again.");
+            const err = { detail: "User not found. Please log in again." };
+            setError(err);
             addMessage('agent', "User not found. Please log in again.");
             setIsLoading(false);
             return;
@@ -164,15 +167,15 @@ export default function DeepAgentPage() {
                 setIsPolling(true);
                 addMessage('agent', `Starting analysis with Run ID: ${newRun.run_id}`);
             } else {
-                setError("Failed to start analysis: No run ID returned.");
+                const err = { detail: "Failed to start analysis: No run ID returned." };
+                setError(err);
                 addMessage('agent', "Failed to start analysis: No run ID returned.");
                 setIsLoading(false);
             }
-        } catch (err: unknown) {
+        } catch (err) {
             console.error("Error starting analysis:", err);
-            const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred.';
-            setError(errorMessage);
-            addMessage('agent', `Error: ${errorMessage}`);
+            setError(err);
+            addMessage('agent', `Error starting analysis.`);
             setIsLoading(false);
         }
     };
@@ -183,7 +186,7 @@ export default function DeepAgentPage() {
             <div className="flex flex-col">
                 <Header />
                 <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-                    {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative mb-6" role="alert">{error}</div>}
+                    <ErrorDisplay error={error} />
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
                         <div className="lg:col-span-2 h-[calc(100vh-10rem)]">
                            <ChatWindow

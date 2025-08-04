@@ -15,12 +15,12 @@ interface ChatWindowProps {
 
 const ExampleQueries = ({ queries, onQueryClick }: { queries: string[], onQueryClick: (query: string) => void }) => (
     <div className="flex-1 overflow-y-auto p-4 flex justify-center">
-        <Card className="w-full max-w-2xl">
+        <Card className="w-full max-w-2xl flex flex-col overflow-hidden">
             <CardHeader>
                 <CardTitle>Welcome to Deep Agent</CardTitle>
                 <CardDescription>Select an example query to start, or type your own message below.</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-y-auto">
                 <div className="space-y-2">
                     {queries.map((q, i) => (
                         <Button key={i} variant="outline" className="w-full justify-start text-left h-auto p-2" onClick={() => onQueryClick(q)} style={{whiteSpace: 'normal', wordWrap: 'break-word'}}>

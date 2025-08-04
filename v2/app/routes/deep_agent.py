@@ -16,6 +16,8 @@ class ConfirmationRequest(BaseModel):
     confirmation: bool
 
 from app.services.security_service import security_service
+from app.config import settings
+from app.services.deep_agent_v3.dev_utils import get_or_create_dev_user
 
 @router.post("/agent/create", status_code=202)
 async def create_agent_run(request: AnalysisRequest, background_tasks: BackgroundTasks, db_session: Any = Depends(get_db_session), llm_connector: Any = Depends(get_llm_connector)) -> Dict[str, str]:
@@ -25,8 +27,12 @@ async def create_agent_run(request: AnalysisRequest, background_tasks: Backgroun
     if not request.workloads:
         raise HTTPException(status_code=400, detail="No workloads provided in the request.")
 
+    user_id = request.user_id
+    if settings.environment == "development" and not user_id:
+        dev_user = get_or_create_dev_user(db_session)
+        user_id = dev_user.id
+
     # Pre-flight check for credentials
-    user_id = request.user_id  # Assuming user_id is available in the request
     if not security_service.get_user_credentials(user_id, db_session):
         raise HTTPException(status_code=400, detail="User credentials are not configured. Please set them up before running an analysis.")
 
