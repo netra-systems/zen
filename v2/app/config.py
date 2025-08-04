@@ -6,7 +6,7 @@ from typing import List, Dict
 
 class SecretReference(BaseModel):
     name: str
-    project_id: str
+    project_id: str = "cryptic-net-466001-n0"
     version: str = "latest"
 
 def get_secret_client() -> secretmanager.SecretManagerServiceClient:
@@ -35,11 +35,11 @@ def fetch_secrets(client: secretmanager.SecretManagerServiceClient, secret_refer
 
 class GoogleCloudConfig(BaseModel):
     project_id: str = os.environ.get("GOOGLE_PROJECT_ID")
-
-class GoogleModelConfig(BaseModel):
-    gemini_api_key: str = None
     google_client_id: str = None
     google_client_secret: str = None
+
+class GoogleModelConfig(GoogleCloudConfig):
+    gemini_api_key: str = None
     corpus_generation_model: str = "gemini-2.5-flash-lite"
 
 class ClickHouseNativeConfig(BaseModel):
