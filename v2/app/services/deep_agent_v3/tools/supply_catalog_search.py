@@ -1,9 +1,9 @@
+from app.db.models_postgres import SupplyOption
+from app.services.supply_catalog_service import SupplyCatalog
 
-from app.services.deep_agent_v3.tools.base import BaseTool
-from app.core.supply_catalog import SupplyCatalog
+class SupplyCatalogSearch:
+    def __init__(self, db_session):
+        self.db_session = db_session
 
-class SupplyCatalogSearch(BaseTool):
-    async def search_supply_catalog(self, query):
-        catalog = SupplyCatalog()
-        records = catalog.list_all_records()
-        return [record for record in records if query in record.model_name]
+    async def execute(self, query: str):
+        return await SupplyCatalog.list_all_records(self.db_session)

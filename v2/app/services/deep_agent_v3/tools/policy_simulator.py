@@ -1,9 +1,8 @@
+from app.services.deep_agent_v3.core import simulate_policy_outcome
 
-import json
-from app.services.deep_agent_v3.tools.base import BaseTool
+class PolicySimulator:
+    def __init__(self, llm_connector):
+        self.llm_connector = llm_connector
 
-class PolicySimulator(BaseTool):
-    async def simulate_policy(self, policy):
-        prompt = f'Simulate the following policy and return the results in JSON format: {policy}'
-        response = await self.llm_connector.generate_text_async(prompt)
-        return json.loads(response)
+    async def execute(self, policy: dict):
+        return await simulate_policy_outcome(policy, self.llm_connector)
