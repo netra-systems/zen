@@ -16,6 +16,7 @@ SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="google-client-id", target_model="google_cloud", target_field="client_id"),
     SecretReference(name="google-client-secret", target_model="google_cloud", target_field="client_secret"),
     SecretReference(name="langfuse-secret-key", target_model="langfuse", target_field="secret_key"),
+    SecretReference(name="langfuse-public-key", target_model="langfuse", target_field="public_key"),
     SecretReference(name="clickhouse-default-password", target_model="clickhouse_native", target_field="password"),
     SecretReference(name="clickhouse-default-password", target_model="clickhouse_https", target_field="password"),
     #SecretReference(name="database-url", target_field="database_url"),
