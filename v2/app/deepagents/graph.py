@@ -1,21 +1,27 @@
-
+import inspect
 from typing import Any, Callable, List, Optional, Sequence, TypedDict, Union
-from langchain_core.messages import HumanMessage, BaseMessage, AIMessage, ToolMessage
+
+from langchain_core.messages import (
+    AIMessage,
+    BaseMessage,
+    HumanMessage,
+    ToolMessage,
+)
 from langchain_core.tools import BaseTool
 from langgraph.graph import END, StateGraph
+
 from app.llm.llm_manager import LLMManager
+
 from .state import DeepAgentState
-from .sub_agent import _create_task_tool
 from .supervisor import create_supervisor_graph
 from .tools import (
-    write_todos,
-    write_file,
-    read_file,
-    ls,
     edit_file,
+    ls,
+    read_file,
     update_todo,
+    write_file,
+    write_todos,
 )
-from langchain_core.runnables import RunnableLambda
 
 class SubAgent(TypedDict):
     name: str
@@ -68,7 +74,6 @@ def create_deep_agent(
     instructions: str,
     llm_manager: LLMManager,
     model_name: str = "default",
-    subagents: list[SubAgent] = None,
     state_schema: Optional[DeepAgentState] = None,
 ):
     base_prompt = """You have access to a number of standard tools to help you manage and plan your work.
@@ -91,66 +96,75 @@ It is critical that you follow this lifecycle for each task:
 2.  When you have completed a task, mark it as "completed".
 
 Do not batch up multiple tasks before marking them as completed.
-
-## `task`
-
-- When doing web search, prefer to use the `task` tool in order to reduce context usage."""
+"""
     prompt = instructions + base_prompt
     built_in_tools = [write_todos, update_todo, write_file, read_file, ls, edit_file]
     model = llm_manager.get_llm(model_name)
-    state_schema = state_schema or DeepAgentState
     all_tools = built_in_tools + list(tools)
-    
-    # Create a new graph
+    model_with_tools = model.bind_tools(all_tools)
+
+    state_schema = state_schema or DeepAgentState
     workflow = StateGraph(state_schema)
 
-    # Add a node for the agent
-    def agent_node(state: DeepAgentState):
-        result = model.invoke(state)
+    async def agent_node(state: DeepAgentState):
+        result = await model_with_tools.ainvoke(state["messages"])
         return {"messages": [result]}
+
     workflow.add_node("agent", agent_node)
 
-    # Add a node for the tools
     def tool_node(state: DeepAgentState):
         tool_calls = state["messages"][-1].tool_calls
         tool_messages = []
+        state_updates = {}
         for tool_call in tool_calls:
-            tool_name = tool_call["name"]
-            tool_args = tool_call["args"]
-            # Find the tool to execute
-            tool_to_execute = next((t for t in all_tools if t.name == tool_name), None)
+            tool_to_execute = next(
+                (t for t in all_tools if t.name == tool_call["name"]), None
+            )
             if tool_to_execute:
-                # Inject state and tool_call_id if the tool needs them
-                tool_kwargs = {}
-                if "state" in tool_to_execute.args:
-                    tool_kwargs["state"] = state
-                if "tool_call_id" in tool_to_execute.args:
-                    tool_kwargs["tool_call_id"] = tool_call["id"]
+                tool_input = tool_call["args"].copy()
                 
-                result = tool_to_execute.invoke({**tool_args, **tool_kwargs})
-                if isinstance(result, BaseMessage):
-                    tool_messages.append(result)
+                sig = inspect.signature(getattr(tool_to_execute, "func", tool_to_execute))
+                if "state" in sig.parameters:
+                    tool_input["state"] = state
+
+                result = tool_to_execute.invoke(tool_input)
+
+                if isinstance(result, dict):
+                    state_updates.update(result)
+                    tool_messages.append(
+                        ToolMessage(
+                            content=f"Tool {tool_call['name']} executed successfully.",
+                            tool_call_id=tool_call["id"],
+                        )
+                    )
                 else:
-                    tool_messages.append(ToolMessage(content=str(result), tool_call_id=tool_call["id"]))
-        return {"messages": tool_messages}
+                    tool_messages.append(
+                        ToolMessage(content=str(result), tool_call_id=tool_call["id"])
+                    )
+            else:
+                tool_messages.append(
+                    ToolMessage(
+                        content=f"Error: Tool '{tool_call['name']}' not found.",
+                        tool_call_id=tool_call["id"],
+                    )
+                )
+        return {**state_updates, "messages": tool_messages}
 
     workflow.add_node("tools", tool_node)
 
-    # Define the conditional logic
     def should_continue(state: DeepAgentState):
         if not state["messages"] or isinstance(state["messages"][-1], ToolMessage):
             return "agent"
-        if state["messages"][-1].tool_calls:
+        if getattr(state["messages"][-1], "tool_calls", None):
             return "tools"
         return END
 
     workflow.add_conditional_edges(
         "agent",
         should_continue,
+        {"agent": "agent", "tools": "tools", END: END},
     )
     workflow.add_edge("tools", "agent")
-
-    # Set the entry point
     workflow.set_entry_point("agent")
 
     return workflow.compile()

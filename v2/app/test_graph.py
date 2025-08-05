@@ -1,18 +1,47 @@
 
+from typing import Any, List
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from langchain_core.messages import HumanMessage, AIMessage, ToolCall
-from langchain_core.runnables import RunnableLambda
+from langchain_core.messages import HumanMessage, AIMessage, ToolCall, BaseMessage
 from .deepagents.graph import create_deep_agent
 from .deepagents.tools import update_todo, write_todos
 from .llm.llm_manager import LLMManager, LLMConfig
 from langchain_core.language_models.chat_models import BaseChatModel
+from langchain_core.outputs import ChatGeneration, ChatResult
+
+class MockChatModel(BaseChatModel):
+    """A mock chat model for testing purposes."""
+    side_effect: List[Any]
+    call_count: int = 0
+
+    def __init__(self, **kwargs: Any):
+        super().__init__(**kwargs)
+
+    async def _agenerate(self, messages, stop=None, run_manager=None, **kwargs):
+        if self.call_count < len(self.side_effect):
+            result = self.side_effect[self.call_count]
+            self.call_count += 1
+            return ChatResult(generations=[ChatGeneration(message=result)])
+        return ChatResult(generations=[ChatGeneration(message=AIMessage(content="No more responses"))])
+
+    def _generate(self, messages, stop=None, run_manager=None, **kwargs):
+        if self.call_count < len(self.side_effect):
+            result = self.side_effect[self.call_count]
+            self.call_count += 1
+            return ChatResult(generations=[ChatGeneration(message=result)])
+        return ChatResult(generations=[ChatGeneration(message=AIMessage(content="No more responses"))])
+
+    def bind_tools(self, tools):
+        return self # Return self to allow chaining
+
+    @property
+    def _llm_type(self) -> str:
+        return "mock_chat_model"
 
 @pytest.mark.asyncio
 async def test_agent_completes_todos():
     # Mock the language model
-    llm = AsyncMock()
-    llm.side_effect = [
+    llm_side_effect = [
         AIMessage(
             content="",
             tool_calls=[
@@ -36,9 +65,7 @@ async def test_agent_completes_todos():
         AIMessage(content="All tasks completed!"),
     ]
 
-    # Create a mock that looks like a BaseChatModel
-    mock_model = MagicMock(spec=BaseChatModel)
-    mock_model.bind_tools.return_value = RunnableLambda(llm)
+    mock_model = MockChatModel(side_effect=llm_side_effect)
 
     # Create a mock LLMManager
     llm_manager = LLMManager({"default": LLMConfig(provider="google", model_name="gemini-1.5-flash-latest")})
@@ -69,8 +96,7 @@ async def test_agent_completes_todos():
 @pytest.mark.asyncio
 async def test_agent_creates_and_completes_todos():
     # Mock the language model
-    llm = AsyncMock()
-    llm.side_effect = [
+    llm_side_effect = [
         AIMessage(
             content="",
             tool_calls=[
@@ -94,9 +120,7 @@ async def test_agent_creates_and_completes_todos():
         AIMessage(content="All tasks completed!"),
     ]
 
-    # Create a mock that looks like a BaseChatModel
-    mock_model = MagicMock(spec=BaseChatModel)
-    mock_model.bind_tools.return_value = RunnableLambda(llm)
+    mock_model = MockChatModel(side_effect=llm_side_effect)
 
     # Create a mock LLMManager
     llm_manager = LLMManager({"default": LLMConfig(provider="google", model_name="gemini-1.5-flash-latest")})
