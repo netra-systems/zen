@@ -40,7 +40,7 @@ export const apiService = {
     },
 
     async startAgent(token: string | null, body: Record<string, unknown>) {
-        return this.post(`${config.api.baseUrl}/api/v3/apex/chat/start_agent`, body, token);
+        return this.post(`${config.api.baseUrl}/apex/chat/start_agent`, body, token);
     },
 
     async getAgentStatus(runId: string, token: string | null) {
