@@ -58,10 +58,10 @@ export default function ApexOptimizerAgentPage() {
         try {
             const newRun = await apiService.startAgent(token, {
                 settings: {
-                    user_id,
                     debug_mode: false,
                 },
                 request: {
+                    user_id,
                     query,
                     workloads: [
                         {
