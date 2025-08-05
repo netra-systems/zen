@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.routes import auth, supply, analysis, v3, generation, google_auth, deep_agent
+from app.routes import auth, supply, v3, generation, google_auth, deep_agent
 from app.db.postgres import Database
 from app.db.clickhouse import ClickHouseClient
 from app.db.models_clickhouse import SUPPLY_TABLE_SCHEMA, LOGS_TABLE_SCHEMA
@@ -103,7 +103,6 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(supply.router, prefix="/api/v3/supply", tags=["supply"])
-app.include_router(analysis.router, prefix="/api/v3/analysis", tags=["analysis"])
 app.include_router(v3.router, prefix="/api/v3", tags=["v3"])
 app.include_router(generation.router, prefix="/api/v3/generation", tags=["generation"])
 app.include_router(google_auth.router, tags=["google_auth"])
