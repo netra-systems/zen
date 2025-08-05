@@ -30,8 +30,7 @@ class ClickHouseClient:
                 port=self.port,
                 database=self.database,
                 username=self.user,
-                password=self.password,
-                driver='httpx'
+                password=self.password
             )
             self.client.ping()
             logger.info(f"Successfully connected to ClickHouse at {self.host}:{self.port}")

@@ -14,7 +14,7 @@ class ScenarioFinder:
             for name, details in SCENARIOS.items()
         ])
 
-    def find_scenario(self, prompt: str) -> Dict[str, Any]:
+    async def find_scenario(self, prompt: str) -> Dict[str, Any]:
         """
         Selects the best scenario based on the user's prompt using a language model,
         providing a confidence score and justification.
@@ -34,7 +34,7 @@ Available Scenarios:
 """
         try:
             llm = self.llm_manager.get_llm("default")
-            response = llm.invoke(prompt, system_prompt=system_prompt)
+            response = await llm.ainvoke(prompt, system_prompt=system_prompt)
             
             response_data = json.loads(response.content)
             scenario_name = response_data.get("scenario_name")
