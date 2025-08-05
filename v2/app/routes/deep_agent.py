@@ -79,9 +79,6 @@ async def get_agent_status(run_id: str) -> Dict[str, Any]:
 
     return {
         "run_id": run_id,
-        "status": agent.state.status,
+        "status": agent.status,
         "current_step": agent.state.current_step,
-        "total_steps": agent.state.total_steps,
-        "last_step_result": agent.state.last_step_result,
-        "final_report": agent.state.final_report,
     }
