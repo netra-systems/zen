@@ -15,6 +15,7 @@ from app.db.models_clickhouse import SUPPLY_TABLE_SCHEMA, LOGS_TABLE_SCHEMA
 from app.config import settings
 from app.logging_config_custom.logger import logger, Formatter
 from app.logging_config_custom.clickhouse_logger import ClickHouseLogHandler
+from app.llm.llm_manager import LLMManager
 
 def setup_logging():
     """Initializes the application's logging configuration."""
@@ -38,6 +39,9 @@ async def lifespan(app: FastAPI):
     key_manager = KeyManager.load_from_settings(settings)
     app.state.key_manager = key_manager
     app.state.security_service = SecurityService(key_manager)
+
+    # Initialize LLMManager
+    app.state.llm_manager = LLMManager(settings.llm_configs)
 
     # Initialize and connect to ClickHouse
     ch_client = ClickHouseClient(

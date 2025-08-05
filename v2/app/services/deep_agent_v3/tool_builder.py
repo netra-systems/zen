@@ -1,5 +1,5 @@
 
-from typing import Any, Dict
+from app.llm.llm_manager import LLMManager
 from app.services.deep_agent_v3.tools.log_fetcher import LogFetcher
 from app.services.deep_agent_v3.tools.log_pattern_identifier import LogPatternIdentifier
 from app.services.deep_agent_v3.tools.policy_proposer import PolicyProposer
@@ -10,13 +10,13 @@ from app.services.deep_agent_v3.tools.performance_predictor import PerformancePr
 
 class ToolBuilder:
     @staticmethod
-    def build_all(db_session: Any, llm_connector: any) -> Dict[str, Any]:
+    def build_all(db_session: any, llm_manager: LLMManager) -> Dict[str, Any]:
         return {
             "log_fetcher": LogFetcher(db_session),
-            "log_pattern_identifier": LogPatternIdentifier(llm_connector),
-            "policy_proposer": PolicyProposer(db_session, llm_connector),
-            "policy_simulator": PolicySimulator(llm_connector),
+            "log_pattern_identifier": LogPatternIdentifier(llm_manager),
+            "policy_proposer": PolicyProposer(db_session, llm_manager),
+            "policy_simulator": PolicySimulator(llm_manager),
             "supply_catalog_search": SupplyCatalogSearch(db_session),
-            "cost_estimator": CostEstimator(llm_connector),
-            "performance_predictor": PerformancePredictor(llm_connector),
+            "cost_estimator": CostEstimator(llm_manager),
+            "performance_predictor": PerformancePredictor(llm_manager),
         }

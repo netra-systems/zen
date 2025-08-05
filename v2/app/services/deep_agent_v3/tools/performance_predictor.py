@@ -20,10 +20,11 @@ class PerformancePredictor(BaseTool):
         Return only the predicted latency as an integer.
         """
         
-        response = await self.llm_connector.get_completion(prediction_prompt)
+        llm = self.get_llm()
+        response = await llm.ainvoke(prediction_prompt)
         
         try:
-            predicted_latency = int(response)
+            predicted_latency = int(response.content)
         except (ValueError, TypeError):
             predicted_latency = 250  # Default value if parsing fails
             

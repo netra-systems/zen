@@ -20,10 +20,11 @@ class CostEstimator(BaseTool):
         Return only the estimated cost as a float.
         """
         
-        response = await self.llm_connector.get_completion(estimation_prompt)
+        llm = self.get_llm()
+        response = await llm.ainvoke(estimation_prompt)
         
         try:
-            estimated_cost = float(response)
+            estimated_cost = float(response.content)
         except (ValueError, TypeError):
             estimated_cost = 0.01  # Default value if parsing fails
             

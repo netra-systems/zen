@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from app.db.models_clickhouse import AnalysisRequest
 from app.db.models_postgres import DeepAgentRun
 from app.services.deep_agent_v3.state import AgentState
-from app.config import settings
+from app.llm.llm_manager import LLMManager
 from app.logging_config_custom.logger import app_logger
 from app.services.deep_agent_v3.core import AgentCore
 from app.services.deep_agent_v3.scenario_finder import ScenarioFinder
@@ -20,15 +20,15 @@ class DeepAgentV3:
     This engine is designed for interactive control, monitoring, and extensibility.
     """
 
-    def __init__(self, run_id: str, request: AnalysisRequest, db_session: Any, llm_connector: any):
+    def __init__(self, run_id: str, request: AnalysisRequest, db_session: Any, llm_manager: LLMManager):
         self.run_id = run_id
         self.request = request
         self.db_session = db_session
-        self.llm_connector = llm_connector
+        self.llm_manager = llm_manager
         self.state = AgentState(messages=[], current_step=None)
         self.langfuse = self._init_langfuse()
         self.tools = self._init_tools()
-        self.agent_core = AgentCore(self.llm_connector, list(self.tools.values()))
+        self.agent_core = AgentCore(self.llm_manager, list(self.tools.values()))
         self.triage_result: Dict[str, Any] | None = None
         self.status = "starting"
         app_logger.info(f"DeepAgentV3 initialized for run_id: {self.run_id}")
@@ -43,7 +43,7 @@ class DeepAgentV3:
         return None
 
     def _init_tools(self) -> Dict[str, Any]:
-        return ToolBuilder.build_all(self.db_session, self.llm_connector)
+        return ToolBuilder.build_all(self.db_session, self.llm_manager)
 
     @observe()
     async def run(self):
@@ -54,7 +54,7 @@ class DeepAgentV3:
         try:
             # 1. Triage
             self.state.current_step = "triage"
-            scenario_finder = ScenarioFinder(self.llm_connector)
+            scenario_finder = ScenarioFinder(self.llm_manager)
             self.triage_result = scenario_finder.find_scenario(self.request.query)
             scenario = self.triage_result["scenario"]
             app_logger.info(f"Scenario selected for run_id {self.run_id}: "

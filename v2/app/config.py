@@ -2,6 +2,7 @@ import os
 from pydantic import BaseModel
 from google.cloud import secretmanager
 from typing import List, Dict, Optional
+from app.llm.llm_manager import LLMConfig
 
 class SecretReference(BaseModel):
     name: str
@@ -114,6 +115,23 @@ class AppConfig(BaseModel):
     log_level: str = "DEBUG"
     log_secrets: bool = False
     run_startup_simulation: bool = False
+
+    llm_configs: Dict[str, LLMConfig] = {
+        "default": LLMConfig(
+            provider="google",
+            model_name="gemini-1.5-flash-latest",
+        ),
+        "analysis": LLMConfig(
+            provider="google",
+            model_name="gemini-2.5-flash-lite",
+            temperature=0.5,
+        ),
+        "gpt-4": LLMConfig(
+            provider="openai",
+            model_name="gpt-4",
+            temperature=0.8,
+        ),
+    }
 
     def load_secrets(self):
         if self.google_cloud.project_id and self.app_env != "testing":

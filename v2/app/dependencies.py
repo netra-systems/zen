@@ -10,6 +10,7 @@ from sqlmodel import Session, select
 from .config import settings
 from .db.models_postgres import User
 from .logging_config_custom.logger import logger
+from .llm.llm_manager import LLMManager
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
@@ -58,8 +59,12 @@ def get_current_active_user(current_user: CurrentUserDep) -> User:
 ActiveUserDep = Annotated[User, Depends(get_current_active_user)]
 
 
-def get_llm_connector():
-    from app.deepagents.model import get_default_model
-    return get_default_model()
+
+
+def get_llm_manager(request: Request) -> LLMManager:
+    return request.app.state.llm_manager
+
+LLMManagerDep = Annotated[LLMManager, Depends(get_llm_manager)]
+
 
 

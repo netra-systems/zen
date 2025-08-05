@@ -5,7 +5,7 @@ from typing import Dict, Any
 from app.services.deep_agent_v3.main import DeepAgentV3
 from app.db.models_clickhouse import AnalysisRequest
 from app.db.session import get_db_session
-from app.dependencies import get_llm_connector
+from app.dependencies import LLMManagerDep
 
 router = APIRouter()
 
@@ -21,7 +21,7 @@ from app.config import settings
 from app.services.deep_agent_v3.dev_utils import get_or_create_dev_user
 
 @router.post("/agent/create", status_code=202)
-async def create_agent_run(request: AnalysisRequest, background_tasks: BackgroundTasks, llm_connector: Any = Depends(get_llm_connector)) -> Dict[str, str]:
+async def create_agent_run(request: AnalysisRequest, background_tasks: BackgroundTasks, llm_manager: LLMManagerDep) -> Dict[str, str]:
     """
     Creates and starts a new Deep Agent analysis run in the background.
     """
@@ -42,7 +42,7 @@ async def create_agent_run(request: AnalysisRequest, background_tasks: Backgroun
         run_id = request.workloads[0].get('run_id')
         if not run_id:
             raise HTTPException(status_code=400, detail="run_id not found in workload.")
-        agent = DeepAgentV3(run_id=run_id, request=request, db_session=db_session, llm_connector=llm_connector)
+        agent = DeepAgentV3(run_id=run_id, request=request, db_session=db_session, llm_manager=llm_manager)
         AGENT_INSTANCES[run_id] = agent
 
         # Run the full analysis in the background to not block the API

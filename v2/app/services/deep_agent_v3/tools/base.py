@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from app.llm.llm_manager import LLMManager
 from typing import Optional
 
 class ToolMetadata(BaseModel):
@@ -9,10 +9,16 @@ class ToolMetadata(BaseModel):
 
 class BaseTool:
     metadata: ToolMetadata
+    llm_name: Optional[str] = None
 
-    def __init__(self, llm_connector=None, db_session=None):
-        self.llm_connector = llm_connector
+    def __init__(self, llm_manager: Optional[LLMManager] = None, db_session=None):
+        self.llm_manager = llm_manager
         self.db_session = db_session
+
+    def get_llm(self):
+        if not self.llm_manager:
+            return None
+        return self.llm_manager.get_llm(self.llm_name or "default")
 
     def get_metadata(self) -> dict:
         return self.metadata.dict()
