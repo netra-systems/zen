@@ -111,7 +111,7 @@ app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(supply.router, prefix="/api/v3/supply", tags=["supply"])
 app.include_router(generation.router, prefix="/api/v3/generation", tags=["generation"])
 app.include_router(google_auth.router, tags=["google_auth"])
-app.include_router(apex_optimizer_agent_route.router, prefix="/api/v3", tags=["apex_optimizer_agent"])
+app.include_router(apex_optimizer_agent_route.router, prefix="/apex", tags=["apex"])
 
 
 

@@ -3,6 +3,7 @@ import uuid
 import time
 from typing import Dict, Any, List, Optional, Literal
 from sqlmodel import SQLModel, Field
+from pydantic import BaseModel
 
 # TBD merge understand these models / things
 
@@ -163,13 +164,11 @@ class CostComparison(SQLModel, table=False):
     projected_monthly_savings: float
     delta_percent: float
 
-class AnalysisRequest(SQLModel, table=False):
+from pydantic import BaseModel, Field
+
+class AnalysisRequest(BaseModel):
     user_id: str
-    workloads: List[Dict]
     query: str
-    debug_mode: bool = False
-    constraints: Optional[Dict[str, bool]] = None
-    negotiated_discount_percent: float = Field(0.0, ge=0, le=100)
 
 class AnalysisResult(SQLModel, table=False):
     run_id: str

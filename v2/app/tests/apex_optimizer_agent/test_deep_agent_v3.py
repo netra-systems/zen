@@ -2,12 +2,11 @@ import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 from fastapi.testclient import TestClient
 from sqlmodel import Session
-
 from app.main import app
 from app.db.models_clickhouse import AnalysisRequest
-from app.services.apex_optimizer_agent.agent import NetraOptimizerAgent
 
-
+# Mark all tests in this module as asyncio
+pytestmark = pytest.mark.asyncio
 
 @pytest.fixture
 def mock_db_session():
@@ -24,134 +23,24 @@ def mock_llm_manager():
         yield mock_llm_manager_instance
 
 @pytest.fixture
-def mock_apex_optimizer_agent():
-    with patch('app.services.apex_optimizer_agent.agent.NetraOptimizerAgent', autospec=True) as mock_agent:
-        mock_instance = mock_agent.return_value
-        mock_instance.start_agent = AsyncMock()
-        yield mock_agent
+def mock_supervisor():
+    with patch('app.routes.apex_optimizer_agent_route.NetraOptimizerAgentSupervisor', autospec=True) as mock_supervisor_class:
+        mock_supervisor_instance = mock_supervisor_class.return_value
+        mock_supervisor_instance.start_agent = AsyncMock(return_value={"result": "success"})
+        yield mock_supervisor_instance
 
-async def test_cost_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
+async def test_start_agent_route(client: TestClient, mock_db_session, mock_llm_manager, mock_supervisor):
     # Given
     request_data = {
         "user_id": "test_user",
-        "query": "I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.",
+        "query": "I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms."
     }
+    analysis_request = AnalysisRequest(**request_data)
 
     # When
-    request_data["workloads"] = []
-    analysis_request = AnalysisRequest(**request_data)
     response = client.post("/apex/start_agent", json=analysis_request.model_dump())
 
     # Then
-    assert response.status_code == 202
-    mock_apex_optimizer_agent.assert_called_once()
-    agent_instance = mock_apex_optimizer_agent.return_value
-    agent_instance.start_agent.assert_awaited_once()
-
-async def test_latency_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
-    # Given
-    request_data = {
-        "user_id": "test_user",
-        "query": "My tools are too slow. I need to reduce the latency by 3x, but I can't spend more money.",
-    }
-
-    # When
-    request_data["workloads"] = []
-    analysis_request = AnalysisRequest(**request_data)
-    response = client.post("/apex/start_agent", json=analysis_request.model_dump())
-
-    # Then
-    assert response.status_code == 202
-    mock_apex_optimizer_agent.assert_called_once()
-    agent_instance = mock_apex_optimizer_agent.return_value
-    agent_instance.start_agent.assert_awaited_once()
-
-async def test_scalability_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
-    # Given
-    request_data = {
-        "user_id": "test_user",
-        "query": "I'm expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?",
-    }
-
-    # When
-    request_data["workloads"] = []
-    analysis_request = AnalysisRequest(**request_data)
-    response = client.post("/apex/start_agent", json=analysis_request.model_dump())
-
-    # Then
-    assert response.status_code == 202
-    mock_apex_optimizer_agent.assert_called_once()
-    agent_instance = mock_apex_optimizer_agent.return_value
-    agent_instance.start_agent.assert_awaited_once()
-
-async def test_code_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
-    # Given
-    request_data = {
-        "user_id": "test_user",
-        "query": "I need to optimize the 'user_authentication' function. What advanced methods can I use?",
-    }
-
-    # When
-    request_data["workloads"] = []
-    analysis_request = AnalysisRequest(**request_data)
-    response = client.post("/apex/start_agent", json=analysis_request.model_dump())
-
-    # Then
-    assert response.status_code == 202
-    mock_apex_optimizer_agent.assert_called_once()
-    agent_instance = mock_apex_optimizer_agent.return_value
-    agent_instance.start_agent.assert_awaited_once()
-
-async def test_model_evaluation_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
-    # Given
-    request_data = {
-        "user_id": "test_user",
-        "query": "I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?",
-    }
-
-    # When
-    request_data["workloads"] = []
-    analysis_request = AnalysisRequest(**request_data)
-    response = client.post("/apex/start_agent", json=analysis_request.model_dump())
-
-    # Then
-    assert response.status_code == 202
-    mock_apex_optimizer_agent.assert_called_once()
-    agent_instance = mock_apex_optimizer_agent.return_value
-    agent_instance.start_agent.assert_awaited_once()
-
-async def test_system_audit_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
-    # Given
-    request_data = {
-        "user_id": "test_user",
-        "query": "I want to audit all uses of KV caching in my system to find optimization opportunities.",
-    }
-
-    # When
-    request_data["workloads"] = []
-    analysis_request = AnalysisRequest(**request_data)
-    response = client.post("/apex/start_agent", json=analysis_request.model_dump())
-
-    # Then
-    assert response.status_code == 202
-    mock_apex_optimizer_agent.assert_called_once()
-    agent_instance = mock_apex_optimizer_agent.return_value
-    agent_instance.start_agent.assert_awaited_once()
-
-async def test_multi_objective_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
-    # Given
-    request_data = {
-        "user_id": "test_user",
-        "query": "I need to reduce costs by 20% and improve latency by 2x. I'm also expecting a 30% increase in usage. What should I do?",
-    }
-
-    # When
-    request_data["workloads"] = []
-    analysis_request = AnalysisRequest(**request_data)
-    response = client.post("/apex/start_agent", json=analysis_request.model_dump())
-
-    # Then
-    assert response.status_code == 202
-    mock_apex_optimizer_agent.assert_called_once()
-    agent_instance = mock_apex_optimizer_agent.return_value
-    agent_instance.start_agent.assert_awaited_once()
+    assert response.status_code == 200
+    assert response.json() == {"result": "success"}
+    mock_supervisor.start_agent.assert_awaited_once_with(analysis_request)

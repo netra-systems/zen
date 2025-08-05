@@ -17,7 +17,7 @@ const ExampleQueries = ({ queries, onQueryClick }: { queries: string[], onQueryC
     <div className="flex-1 overflow-y-auto p-4 flex justify-center">
         <Card className="w-full max-w-2xl flex flex-col overflow-hidden">
             <CardHeader>
-                <CardTitle>Welcome to Deep Agent</CardTitle>
+                <CardTitle>Welcome to Apex Optimizer Agent</CardTitle>
                 <CardDescription>Select an example query to start, or type your own message below.</CardDescription>
             </CardHeader>
             <CardContent className="overflow-y-auto">

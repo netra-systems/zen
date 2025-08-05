@@ -79,7 +79,7 @@ function DeepAgentRunner({ dataSourceTable }: { dataSourceTable: string }) {
   return (
     <Card className="w-full max-w-2xl mx-auto mt-4">
       <CardHeader>
-        <CardTitle>Deep Agent Analysis</CardTitle>
+        <CardTitle>Apex Optimizer Agent Analysis</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {!runId ? (

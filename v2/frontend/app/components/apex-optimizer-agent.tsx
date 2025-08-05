@@ -83,7 +83,7 @@ export default function DeepAgent() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Deep Agent Analysis</CardTitle>
+        <CardTitle>Apex Optimizer Agent Analysis</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center space-x-2">

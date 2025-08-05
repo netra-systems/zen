@@ -24,9 +24,9 @@ export const ControlPanel = () => {
       variant: 'outline' as const
     },
     { 
-      text: 'Deep Agent', 
+      text: 'Apex Optimizer Agent', 
       icon: <Zap className="mr-2 h-4 w-4" />, 
-      onClick: () => router.push('/deep-agent'),
+      onClick: () => router.push('/apex-optimizer-agent'),
       variant: 'outline' as const
     },
     { 

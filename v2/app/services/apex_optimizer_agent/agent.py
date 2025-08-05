@@ -1,24 +1,36 @@
 
-from typing import Any, Dict
-from app.db.models_clickhouse import AnalysisRequest
+from typing import Any, Dict, List
+from langchain_core.tools import tool
 from app.llm.llm_manager import LLMManager
-from app.services.apex_optimizer_agent.state import AgentState
 from app.services.apex_optimizer_agent.triage import Triage
-from app.services.deepagents.sub_agent import SubAgent
-from sqlalchemy.ext.asyncio import AsyncSession
+from app.services.deepagents.graph import SubAgent
 
 
-class NetraOptimizerAgent(SubAgent):
-    def __init__(self, db_session: AsyncSession, llm_manager: LLMManager):
-        super().__init__(
-            name="netra_optimizer_agent",
-            description="An agent for optimizing LLM usage.",
-            prompt="You are an expert in optimizing LLM usage. Your goal is to analyze the user's request and provide a set of recommendations for improving their LLM usage.",
-        )
-        self.db_session = db_session
-        self.llm_manager = llm_manager
-        self.triage = Triage(self.llm_manager)
+def create_netra_optimizer_agent_tools(llm_manager: LLMManager) -> List[Any]:
+    """Creates the tools for the Netra Optimizer Agent."""
+    triage = Triage(llm_manager)
 
-    async def run(self, request: AnalysisRequest) -> Dict[str, Any]:
-        triage_result = await self.triage.triage_request(request.query)
-        return triage_result
+    @tool
+    async def triage_request(query: str) -> Dict[str, Any]:
+        """
+        Analyzes the user's request to determine the primary optimization goal
+        (e.g., cost, latency, quality) and extracts key parameters and constraints.
+        This initial analysis helps route the request to the appropriate
+        specialist agent or tool.
+        """
+        return await triage.triage_request(query)
+
+    return [triage_request]
+
+
+def get_netra_optimizer_agent_definition() -> SubAgent:
+    """Returns the definition of the Netra Optimizer Agent."""
+    return {
+        "name": "netra_optimizer_agent",
+        "description": "An agent for optimizing LLM usage.",
+        "prompt": (
+            "You are an expert in optimizing LLM usage. Your goal is to analyze the user's request "
+            "and provide a set of recommendations for improving their LLM usage. Start by using the "
+            "`triage_request` tool to understand the user's needs."
+        ),
+    }
