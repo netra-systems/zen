@@ -4,7 +4,8 @@ from typing import Dict, Any
 
 from app.services.deep_agent_v3.main import DeepAgentV3
 from app.db.models_clickhouse import AnalysisRequest
-from app.dependencies import get_async_db as get_db_session, get_llm_connector
+from app.db.session import get_db_session
+from app.dependencies import get_llm_connector
 
 router = APIRouter()
 
@@ -20,33 +21,34 @@ from app.config import settings
 from app.services.deep_agent_v3.dev_utils import get_or_create_dev_user
 
 @router.post("/agent/create", status_code=202)
-async def create_agent_run(request: AnalysisRequest, background_tasks: BackgroundTasks, db_session: Any = Depends(get_db_session), llm_connector: Any = Depends(get_llm_connector)) -> Dict[str, str]:
+async def create_agent_run(request: AnalysisRequest, background_tasks: BackgroundTasks, llm_connector: Any = Depends(get_llm_connector)) -> Dict[str, str]:
     """
     Creates and starts a new Deep Agent analysis run in the background.
     """
     if not request.workloads:
         raise HTTPException(status_code=400, detail="No workloads provided in the request.")
 
-    user_id = request.user_id
-    if settings.app_env == "development" and not user_id:
-        dev_user = get_or_create_dev_user(db_session)
-        user_id = dev_user.id
+    async with get_db_session() as db_session:
+        user_id = request.user_id
+        if settings.app_env == "development" and not user_id:
+            dev_user = await get_or_create_dev_user(db_session)
+            user_id = dev_user.id
 
-    # Pre-flight check for credentials
-    if settings.app_env != "development" and not await security_service.get_user_credentials(user_id, db_session):
-        raise HTTPException(status_code=400, detail="User credentials are not configured. Please set them up before running an analysis.")
+        # Pre-flight check for credentials
+        if settings.app_env != "development" and not await security_service.get_user_credentials(user_id, db_session):
+            raise HTTPException(status_code=400, detail="User credentials are not configured. Please set them up before running an analysis.")
 
-    # Assuming a single workload for now, as per the new structure
-    run_id = request.workloads[0].get('run_id')
-    if not run_id:
-        raise HTTPException(status_code=400, detail="run_id not found in workload.")
-    agent = DeepAgentV3(run_id=run_id, request=request, db_session=db_session, llm_connector=llm_connector)
-    AGENT_INSTANCES[run_id] = agent
+        # Assuming a single workload for now, as per the new structure
+        run_id = request.workloads[0].get('run_id')
+        if not run_id:
+            raise HTTPException(status_code=400, detail="run_id not found in workload.")
+        agent = DeepAgentV3(run_id=run_id, request=request, db_session=db_session, llm_connector=llm_connector)
+        AGENT_INSTANCES[run_id] = agent
 
-    # Run the full analysis in the background to not block the API
-    background_tasks.add_task(agent.run_full_analysis)
+        # Run the full analysis in the background to not block the API
+        background_tasks.add_task(agent.run_full_analysis)
 
-    return {"run_id": run_id, "message": "Agent run created and started in the background."}
+        return {"run_id": run_id, "message": "Agent run created and started in the background."}
 
 @router.get("/agent/{run_id}/step")
 async def get_agent_step(run_id: str) -> Dict[str, Any]:

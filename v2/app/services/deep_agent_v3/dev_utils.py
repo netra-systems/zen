@@ -1,15 +1,16 @@
-
-from sqlmodel import Session, select
+from sqlmodel import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models_postgres import User
 
 DEV_USER_EMAIL = "dev@example.com"
 
-def get_or_create_dev_user(db_session: Session) -> User:
+async def get_or_create_dev_user(db_session: AsyncSession) -> User:
     """Get or create a dummy user for development purposes."""
-    user = db_session.exec(select(User).where(User.email == DEV_USER_EMAIL)).first()
+    result = await db_session.execute(select(User).where(User.email == DEV_USER_EMAIL))
+    user = result.scalar_one_or_none()
     if not user:
         user = User(email=DEV_USER_EMAIL, full_name="Development User", is_active=True)
         db_session.add(user)
-        db_session.commit()
-        db_session.refresh(user)
+        await db_session.commit()
+        await db_session.refresh(user)
     return user

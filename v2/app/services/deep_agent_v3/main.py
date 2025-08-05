@@ -12,6 +12,7 @@ from app.services.deep_agent_v3.pipeline import Pipeline
 from app.services.deep_agent_v3.scenario_finder import ScenarioFinder
 from app.services.deep_agent_v3.steps import ALL_STEPS
 from app.services.deep_agent_v3.tool_builder import ToolBuilder
+from app.db.session import get_db_session
 
 class DeepAgentV3:
     """
@@ -122,7 +123,7 @@ class DeepAgentV3:
         }
         app_logger.info(json.dumps(log_message))
 
-        try:
+        async with get_db_session() as db_session:
             new_run = DeepAgentRun(
                 run_id=self.run_id,
                 step_name=step_name,
@@ -130,11 +131,7 @@ class DeepAgentV3:
                 step_output=output_data,
                 run_log=json.dumps(log_message)
             )
-            self.db_session.add(new_run)
-            await self.db_session.commit()
-        except Exception as e:
-            await self.db_session.rollback()
-            app_logger.error(f"Failed to record step history for run_id: {self.run_id}. Error: {e}")
+            db_session.add(new_run)
 
     async def _generate_and_save_run_report(self):
         """Generates a markdown report of the entire run and saves it to the database."""
@@ -144,8 +141,8 @@ class DeepAgentV3:
         report += f"**Status:** {self.status}\n\n"
         report += "## Steps\n\n"
 
-        try:
-            runs_result = await self.db_session.execute(select(DeepAgentRun).where(DeepAgentRun.run_id == self.run_id))
+        async with get_db_session() as db_session:
+            runs_result = await db_session.execute(select(DeepAgentRun).where(DeepAgentRun.run_id == self.run_id))
             runs = runs_result.scalars().all()
             for run in runs:
                 report += f"### {run.step_name}\n\n"
@@ -155,14 +152,10 @@ class DeepAgentV3:
                 if json.loads(run.run_log).get('error'):
                     report += f"**Error:**\n```\n{json.loads(run.run_log).get('error')}\n```\n\n"
 
-            final_run_result = await self.db_session.execute(select(DeepAgentRun).where(DeepAgentRun.run_id == self.run_id).order_by(DeepAgentRun.timestamp.desc()))
+            final_run_result = await db_session.execute(select(DeepAgentRun).where(DeepAgentRun.run_id == self.run_id).order_by(DeepAgentRun.timestamp.desc()))
             final_run = final_run_result.scalar_one_or_none()
             if final_run:
                 final_run.run_report = report
-                await self.db_session.commit()
-        except Exception as e:
-            await self.db_session.rollback()
-            app_logger.error(f"Failed to generate and save run report for run_id: {self.run_id}. Error: {e}")
 
     def is_complete(self) -> bool:
         """Checks if the analysis has completed all steps."""
