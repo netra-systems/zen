@@ -33,7 +33,7 @@ class TestPolicySimulator:
     async def test_simulate_policy(self, mock_llm_connector):
         tool = PolicySimulator(llm_connector=mock_llm_connector)
         policy = {"policy": "test"}
-        result = await tool.simulate_policy(policy)
+        result = await tool.simulate(policy)
         assert result == {"key": "value"}
         mock_llm_connector.generate_text_async.assert_called_once()
 

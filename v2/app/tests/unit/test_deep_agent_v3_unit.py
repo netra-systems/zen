@@ -58,25 +58,16 @@ def sample_log_entries():
 # --- Unit Tests for Helper Functions ---
 
 @pytest.mark.asyncio
-async def test_query_raw_logs_success(mock_db_session):
+async def test_query_raw_logs_success(mock_db_session, mock_request):
     """Tests successful fetching and parsing of raw logs."""
-    with patch('app.services.deep_agent_v3.steps.fetch_raw_logs.get_clickhouse_client') as mock_get_client:
-        mock_client = MagicMock()
-        mock_client.execute.return_value = (
-            [],
-            [('event_metadata_log_schema_version', 'String'), ('event_metadata_event_id', 'UUID'), ('event_metadata_timestamp_utc', 'DateTime64(3)'), ('event_metadata_ingestion_source', 'String'), ('trace_context_trace_id', 'UUID'), ('trace_context_span_id', 'UUID'), ('trace_context_span_name', 'String'), ('trace_context_span_kind', 'String'), ('identity_context_user_id', 'UUID'), ('identity_context_organization_id', 'String'), ('identity_context_api_key_hash', 'String'), ('identity_context_auth_method', 'String'), ('application_context_app_name', 'String'), ('application_context_service_name', 'String'), ('application_context_sdk_version', 'String'), ('application_context_environment', 'LowCardinality(String)'), ('application_context_client_ip', 'IPv4'), ('request_model', 'JSON'), ('request_prompt', 'JSON'), ('request_generation_config', 'JSON'), ('response', 'JSON'), ('response_completion', 'JSON'), ('response_tool_calls', 'JSON'), ('response_usage', 'JSON'), ('response_system', 'JSON'), ('performance_latency_ms', 'JSON'), ('finops_attribution', 'JSON'), ('finops_cost', 'JSON'), ('finops_pricing_info', 'JSON'), ('governance_audit_context', 'JSON'), ('governance_safety', 'JSON'), ('governance_security', 'JSON')]
-        )
-        mock_get_client.return_value = mock_client
+    state = AgentState()
+    log_fetcher = MagicMock()
+    log_fetcher.fetch_logs.return_value = []
+    request = {"time_range": {"start_time": "2025-08-01T00:00:00Z", "end_time": "2025-08-01T01:00:00Z"}}
 
-        with patch('app.services.security_service.SecurityService.get_user_credentials') as mock_get_user_credentials:
-            mock_get_user_credentials.return_value = {"host": "localhost", "port": 9000, "user": "default", "password": "", "database": "default"}
-            
-            logs = await fetch_raw_logs(
-                state=MagicMock(),
-                tools=MagicMock(),
-                request=mock_request(),
-            )
-            assert logs is not None
+    result = await fetch_raw_logs(state, log_fetcher, request)
+
+    assert result == "Raw logs fetched."
 
 @pytest.mark.asyncio
 async def test_enrich_and_cluster_logs_success(sample_log_entries, mock_llm_connector):
@@ -86,7 +77,7 @@ async def test_enrich_and_cluster_logs_success(sample_log_entries, mock_llm_conn
     tools = {"llm_connector": mock_llm_connector}
     request = MagicMock()
 
-    result = await enrich_and_cluster(state, tools, request)
+    result = await enrich_and_cluster(state, tools["llm_connector"])
     assert result["status"] == "success"
     assert len(state.patterns) > 0
 
@@ -101,10 +92,7 @@ async def test_propose_optimal_policies_success(mock_db_session, mock_llm_connec
     tools = {"llm_connector": mock_llm_connector, "db_session": mock_db_session}
     request = MagicMock()
 
-    with patch('app.services.deep_agent_v3.steps.propose_optimal_policies.SupplyCatalog.list_all_records', new_callable=AsyncMock) as mock_list_all_records:
-        mock_list_all_records.return_value = [SupplyOption(id="test-option", name="test-option")]
-        
-        with patch('app.services.deep_agent_v3.steps.propose_optimal_policies.PolicySimulator.run', new_callable=AsyncMock) as mock_simulate:
+    with patch('app.services.deep_agent_v3.steps.propose_optimal_policies.PolicySimulator.run', new_callable=AsyncMock) as mock_simulate:
             mock_simulate.return_value = {"supply_option_id": "test-option", "utility_score": 0.9, "predicted_cost_usd": 0.1, "predicted_latency_ms": 100, "predicted_quality_score": 0.9, "explanation": "test", "confidence": 0.9}
             
             result = await propose_optimal_policies(state, tools, request)
