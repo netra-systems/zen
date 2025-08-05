@@ -36,8 +36,8 @@ class NetraOptimizerAgentSupervisor:
         team = SingleAgentTeam(agent=agent_def, llm_manager=self.llm_manager, tool_dispatcher=tool_dispatcher)
         self.graph = team.create_graph()
         initial_state = {
-            "messages": [HumanMessage(content=request.query)],
-            "workloads": request.workloads,
+            "messages": [HumanMessage(content=request.request.query)],
+            "workloads": request.request.workloads,
             "todo_list": ["triage_request"],
             "completed_steps": []
         }
@@ -45,4 +45,4 @@ class NetraOptimizerAgentSupervisor:
         await self.graph.astart(initial_state, {"recursion_limit": 100})
         
         # Immediately return a response to the user
-        return {"status": "agent_started", "request_id": request.id}
+        return {"status": "agent_started", "request_id": request.request.id}
