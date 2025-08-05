@@ -1,7 +1,12 @@
 from langchain_core.tools import tool
+from typing import List
+from pydantic import BaseModel, Field
+
+class Log(BaseModel):
+    request: dict = Field(..., description="The request data for the log.")
 
 @tool
-async def cost_driver_identifier(logs: list, cost_estimator: any) -> str:
+async def cost_driver_identifier(logs: List[Log], cost_estimator: any) -> str:
     """Identifies the main drivers of cost in the system."""
     cost_drivers = {}
     for log in logs:
