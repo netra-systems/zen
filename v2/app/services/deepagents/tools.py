@@ -14,6 +14,25 @@ from .state import Todo, DeepAgentState
 
 
 @tool
+def update_state(state: dict, completed_step: str, new_todo: list = None) -> dict:
+    """Updates the state of the agent.
+
+    Args:
+        state: The current state of the agent.
+        completed_step: The step that has been completed.
+        new_todo: A new todo list to replace the old one.
+
+    Returns:
+        The updated state.
+    """
+    state["completed_steps"].append(completed_step)
+    if new_todo:
+        state["todo_list"] = new_todo
+    else:
+        state["todo_list"].remove(completed_step)
+    return state
+
+@tool
 def update_todo(
     todo_id: str,
     status: Literal["pending", "in_progress", "completed"],
