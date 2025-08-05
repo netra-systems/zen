@@ -2,6 +2,7 @@ from typing import Any, Dict
 from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
 class CostEstimator(BaseTool):
+    name = "cost_estimator"
     metadata = ToolMetadata(
         name="CostEstimator",
         description="Estimates the cost of a given prompt using the llm_connector.",

@@ -2,6 +2,7 @@ from typing import Any, Dict
 from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
 class PerformancePredictor(BaseTool):
+    name = "performance_predictor"
     metadata = ToolMetadata(
         name="PerformancePredictor",
         description="Predicts the performance of a given prompt using the llm_connector.",

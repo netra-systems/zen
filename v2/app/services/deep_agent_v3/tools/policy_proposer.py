@@ -7,6 +7,7 @@ from sqlalchemy.future import select
 from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
 class PolicyProposer(BaseTool):
+    name = "policy_proposer"
     metadata = ToolMetadata(
         name="PolicyProposer",
         description="Finds the best routing policies through simulation.",

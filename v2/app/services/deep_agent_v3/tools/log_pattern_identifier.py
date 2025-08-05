@@ -7,6 +7,7 @@ from app.config import settings
 from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
 class LogPatternIdentifier(BaseTool):
+    name = "log_pattern_identifier"
     metadata = ToolMetadata(
         name="LogPatternIdentifier",
         description="Identifies patterns in the enriched logs.",

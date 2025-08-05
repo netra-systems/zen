@@ -8,6 +8,7 @@ from app.db.clickhouse import get_clickhouse_client
 from app.config import settings
 
 class LogFetcher:
+    name = "log_fetcher"
     def __init__(self, db_session: Any):
         self.db_session = db_session
 

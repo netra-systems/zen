@@ -5,6 +5,7 @@ from sqlmodel import select
 from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
 class SupplyCatalogSearch(BaseTool):
+    name = "supply_catalog_search"
     metadata = ToolMetadata(
         name="SupplyCatalogSearch",
         description="Searches the supply catalog for available models and resources.",

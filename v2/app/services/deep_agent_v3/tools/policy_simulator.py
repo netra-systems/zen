@@ -6,6 +6,7 @@ from app.config import settings
 from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
 class PolicySimulator(BaseTool):
+    name = "policy_simulator"
     metadata = ToolMetadata(
         name="PolicySimulator",
         description="Simulates the outcome of a single policy.",
