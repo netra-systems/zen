@@ -29,14 +29,10 @@ class LLMManager:
             final_generation_config.update(generation_config)
 
         if config.provider == "google":
-            # It's assumed the google api key is set in the "google" config
-            google_api_key = self.settings.llm_configs.get("google").api_key
-            api_key = config.api_key or google_api_key
-            
-            if not api_key:
-                 raise ValueError("Gemini API key not found in config.")
+            if not config.api_key:
+                raise ValueError("Gemini API key not found in config.")
 
-            genai.configure(api_key=api_key)
+            genai.configure(api_key=config.api_key)
             llm = ChatGoogleGenerativeAI(
                 model=config.model_name, **final_generation_config
             )

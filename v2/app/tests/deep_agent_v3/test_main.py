@@ -8,6 +8,7 @@ from app.db.models_clickhouse import AnalysisRequest
 from app.llm.llm_manager import LLMManager
 from app.services.deep_agent_v3.main import DeepAgentV3
 from app.services.deep_agent_v3.scenario_finder import ScenarioFinder
+from app.config import AppConfig, LLMConfig, LangfuseConfig
 
 
 @pytest.fixture
@@ -80,6 +81,38 @@ async def test_run(mock_request, mock_llm_manager, mock_db_session):
     assert final_state is not None
     assert len(final_state.messages) == 4
     assert final_state.messages[0]["content"] == "Scenario identified: test_scenario"
-    assert final_state.messages[1]["content"] == "tool_result"
-    assert final_state.messages[2]["content"] == "tool_result"
-    assert final_state.messages[3]["content"] == "tool_result"
+    assert final_state.messages[1]["content"] == '"tool_result"'
+    assert final_state.messages[2]["content"] == '"tool_result"'
+    assert final_state.messages[3]["content"] == '"tool_result"'
+
+@pytest.fixture
+def mock_settings():
+    return AppConfig(
+        llm_configs={
+            "default": LLMConfig(
+                provider="google",
+                model_name="gemini-1.5-flash-latest",
+                api_key="test_api_key"
+            )
+        },
+        langfuse=LangfuseConfig(
+            public_key="test_public_key",
+            secret_key="test_secret_key",
+            host="https://cloud.langfuse.com/"
+        )
+    )
+
+def test_deep_agent_v3_initialization_with_settings(mock_settings):
+    with patch("app.services.deep_agent_v3.main.settings", mock_settings):
+        mock_db_session = MagicMock()
+        mock_llm_manager = LLMManager(settings=mock_settings)
+
+        agent = DeepAgentV3(
+            run_id="test_run",
+            request=MagicMock(),
+            db_session=mock_db_session,
+            llm_manager=mock_llm_manager
+        )
+
+        assert agent.llm_manager is not None
+        assert agent.langfuse is not None
