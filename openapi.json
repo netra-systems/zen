@@ -119,7 +119,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserPublic"
+                  "$ref": "#/components/schemas/UserPublicWithPicture"
                 }
               }
             }
@@ -195,14 +195,14 @@
         ]
       }
     },
-    "/supply/supply-catalog/": {
+    "/api/v3/supply/supply-catalog/": {
       "get": {
         "tags": [
           "supply"
         ],
         "summary": "Read Supply Catalog",
         "description": "Retrieves a list of all models in the supply catalog.",
-        "operationId": "read_supply_catalog_supply_supply_catalog__get",
+        "operationId": "read_supply_catalog_api_v3_supply_supply_catalog__get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -213,7 +213,7 @@
                     "$ref": "#/components/schemas/SupplyOption"
                   },
                   "type": "array",
-                  "title": "Response Read Supply Catalog Supply Supply Catalog  Get"
+                  "title": "Response Read Supply Catalog Api V3 Supply Supply Catalog  Get"
                 }
               }
             }
@@ -226,7 +226,7 @@
         ],
         "summary": "Create Supply Option",
         "description": "Creates a new supply option in the catalog.",
-        "operationId": "create_supply_option_supply_supply_catalog__post",
+        "operationId": "create_supply_option_api_v3_supply_supply_catalog__post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -261,14 +261,14 @@
         }
       }
     },
-    "/supply/supply-catalog/{option_id}": {
+    "/api/v3/supply/supply-catalog/{option_id}": {
       "get": {
         "tags": [
           "supply"
         ],
         "summary": "Read Supply Option",
         "description": "Retrieves a single supply option by its ID.",
-        "operationId": "read_supply_option_supply_supply_catalog__option_id__get",
+        "operationId": "read_supply_option_api_v3_supply_supply_catalog__option_id__get",
         "parameters": [
           {
             "name": "option_id",
@@ -304,306 +304,14 @@
         }
       }
     },
-    "/analysis/credentials": {
-      "get": {
-        "tags": [
-          "analysis"
-        ],
-        "summary": "Get Credentials",
-        "description": "Retrieves the user's saved ClickHouse credentials.",
-        "operationId": "get_credentials_analysis_credentials_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClickHouseCredentials"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ]
-      },
-      "post": {
-        "tags": [
-          "analysis"
-        ],
-        "summary": "Save Credentials",
-        "description": "Saves or updates the user's ClickHouse credentials securely.",
-        "operationId": "save_credentials_analysis_credentials_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ClickHouseCredentials"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ]
-      }
-    },
-    "/analysis/runs": {
-      "post": {
-        "tags": [
-          "analysis"
-        ],
-        "summary": "Start New Analysis Run",
-        "description": "Creates an analysis run record and starts the pipeline in the background.",
-        "operationId": "start_new_analysis_run_analysis_runs_post",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "use_deepagents",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false,
-              "title": "Use Deepagents"
-            }
-          },
-          {
-            "name": "use_deepagents_v2",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false,
-              "title": "Use Deepagents V2"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AnalysisRunCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AnalysisRunPublic"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "analysis"
-        ],
-        "summary": "Get All User Runs",
-        "description": "Retrieves all analysis runs for the current user.",
-        "operationId": "get_all_user_runs_analysis_runs_get",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AnalysisRunPublic"
-                  },
-                  "title": "Response Get All User Runs Analysis Runs Get"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/analysis/runs/{run_id}": {
-      "get": {
-        "tags": [
-          "analysis"
-        ],
-        "summary": "Get Run Status",
-        "description": "Retrieves the status and details of a specific analysis run.",
-        "operationId": "get_run_status_analysis_runs__run_id__get",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "run_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Run Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AnalysisRunPublic"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v3/run": {
-      "post": {
-        "tags": [
-          "v3"
-        ],
-        "summary": "Run V3 Simulation",
-        "description": "Triggers a single workload simulation of the V3 architecture.",
-        "operationId": "run_v3_simulation_v3_run_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/V3RunRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v3/validate": {
-      "post": {
-        "tags": [
-          "v3"
-        ],
-        "summary": "Start Validation Run",
-        "description": "Starts a background task to run a validation simulation against a generated log set.",
-        "operationId": "start_validation_run_v3_validate_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/V3ValidationRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "202": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/generation/content": {
+    "/api/v3/generation/content": {
       "get": {
         "tags": [
           "generation"
         ],
         "summary": "List Content Corpuses",
         "description": "Lists all available, successfully generated content corpuses.",
-        "operationId": "list_content_corpuses_generation_content_get",
+        "operationId": "list_content_corpuses_api_v3_generation_content_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -615,7 +323,7 @@
                     "type": "object"
                   },
                   "type": "array",
-                  "title": "Response List Content Corpuses Generation Content Get"
+                  "title": "Response List Content Corpuses Api V3 Generation Content Get"
                 }
               }
             }
@@ -628,7 +336,7 @@
         ],
         "summary": "Create Content Corpus",
         "description": "Starts a background job to generate a new content corpus.",
-        "operationId": "create_content_corpus_generation_content_post",
+        "operationId": "create_content_corpus_api_v3_generation_content_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -649,7 +357,7 @@
                     "type": "string"
                   },
                   "type": "object",
-                  "title": "Response Create Content Corpus Generation Content Post"
+                  "title": "Response Create Content Corpus Api V3 Generation Content Post"
                 }
               }
             }
@@ -667,14 +375,14 @@
         }
       }
     },
-    "/generation/logs": {
+    "/api/v3/generation/logs": {
       "get": {
         "tags": [
           "generation"
         ],
         "summary": "List Log Sets",
         "description": "Lists all available, successfully generated synthetic log sets.",
-        "operationId": "list_log_sets_generation_logs_get",
+        "operationId": "list_log_sets_api_v3_generation_logs_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -686,7 +394,7 @@
                     "type": "object"
                   },
                   "type": "array",
-                  "title": "Response List Log Sets Generation Logs Get"
+                  "title": "Response List Log Sets Api V3 Generation Logs Get"
                 }
               }
             }
@@ -699,7 +407,7 @@
         ],
         "summary": "Create Synthetic Logs",
         "description": "Starts a background job to generate a new set of synthetic logs.",
-        "operationId": "create_synthetic_logs_generation_logs_post",
+        "operationId": "create_synthetic_logs_api_v3_generation_logs_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -720,7 +428,7 @@
                     "type": "string"
                   },
                   "type": "object",
-                  "title": "Response Create Synthetic Logs Generation Logs Post"
+                  "title": "Response Create Synthetic Logs Api V3 Generation Logs Post"
                 }
               }
             }
@@ -738,14 +446,14 @@
         }
       }
     },
-    "/generation/content_corpus": {
+    "/api/v3/generation/content_corpus": {
       "post": {
         "tags": [
           "generation"
         ],
         "summary": "Create Content Corpus",
         "description": "Starts a background job to generate a new content corpus and store it in ClickHouse.",
-        "operationId": "create_content_corpus_generation_content_corpus_post",
+        "operationId": "create_content_corpus_api_v3_generation_content_corpus_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -766,7 +474,7 @@
                     "type": "string"
                   },
                   "type": "object",
-                  "title": "Response Create Content Corpus Generation Content Corpus Post"
+                  "title": "Response Create Content Corpus Api V3 Generation Content Corpus Post"
                 }
               }
             }
@@ -784,24 +492,117 @@
         }
       }
     },
-    "/generation/demo_agent": {
+    "/api/v3/generation/ingest_data": {
       "post": {
         "tags": [
           "generation"
         ],
-        "summary": "Demo Agent",
-        "description": "Interacts with the demo agent.",
-        "operationId": "demo_agent_generation_demo_agent_post",
+        "summary": "Ingest Data",
+        "description": "Starts a background job to ingest data into ClickHouse.",
+        "operationId": "ingest_data_api_v3_generation_ingest_data_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DemoAgentParams"
+                "$ref": "#/components/schemas/DataIngestionParams"
               }
             }
           },
           "required": true
         },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Ingest Data Api V3 Generation Ingest Data Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v3/generation/synthetic_data": {
+      "post": {
+        "tags": [
+          "generation"
+        ],
+        "summary": "Create Synthetic Data",
+        "description": "Starts a background job to generate new synthetic data.",
+        "operationId": "create_synthetic_data_api_v3_generation_synthetic_data_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyntheticDataGenParams"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Create Synthetic Data Api V3 Generation Synthetic Data Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v3/generation/jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "generation"
+        ],
+        "summary": "Get Job Status",
+        "description": "Retrieves the status of a generation job.",
+        "operationId": "get_job_status_api_v3_generation_jobs__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -824,117 +625,107 @@
         }
       }
     },
-    "/generation/ingest_data": {
-      "post": {
-        "tags": [
-          "generation"
-        ],
-        "summary": "Ingest Data",
-        "description": "Starts a background job to ingest data into ClickHouse.",
-        "operationId": "ingest_data_generation_ingest_data_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DataIngestionParams"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "202": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "type": "object",
-                  "title": "Response Ingest Data Generation Ingest Data Post"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/generation/synthetic_data": {
-      "post": {
-        "tags": [
-          "generation"
-        ],
-        "summary": "Create Synthetic Data",
-        "description": "Starts a background job to generate new synthetic data.",
-        "operationId": "create_synthetic_data_generation_synthetic_data_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SyntheticDataGenParams"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "202": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "type": "object",
-                  "title": "Response Create Synthetic Data Generation Synthetic Data Post"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/generation/jobs/{job_id}": {
+    "/api/v3/generation/clickhouse_tables": {
       "get": {
         "tags": [
           "generation"
         ],
-        "summary": "Get Job Status",
-        "description": "Retrieves the status of a generation job.",
-        "operationId": "get_job_status_generation_jobs__job_id__get",
-        "parameters": [
-          {
-            "name": "job_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Job Id"
+        "summary": "List Clickhouse Tables",
+        "description": "Lists all tables in the ClickHouse database.",
+        "operationId": "list_clickhouse_tables_api_v3_generation_clickhouse_tables_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "title": "Response List Clickhouse Tables Api V3 Generation Clickhouse Tables Get"
+                }
+              }
             }
           }
+        }
+      }
+    },
+    "/login/google": {
+      "get": {
+        "tags": [
+          "google_auth"
         ],
+        "summary": "Login Via Google",
+        "operationId": "login_via_google_login_google_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/google": {
+      "get": {
+        "tags": [
+          "google_auth"
+        ],
+        "summary": "Auth Via Google",
+        "operationId": "auth_via_google_auth_google_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout/google": {
+      "get": {
+        "tags": [
+          "google_auth"
+        ],
+        "summary": "Logout Via Google",
+        "operationId": "logout_via_google_logout_google_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v3/apex/chat/start_agent": {
+      "post": {
+        "tags": [
+          "apex/chat"
+        ],
+        "summary": "Start Agent",
+        "description": "Starts the Netra Optimizer Agent to analyze the user's request.\n\nArgs:\n    request (AnalysisRequest): The user's request to the agent.\n    db (AsyncSession, optional): The database session. Defaults to Depends(get_db_session).\n    llm_manager (LLMManager, optional): The LLM manager. Defaults to Depends(LLMManager).\n\nRaises:\n    HTTPException: If there is an error running the agent.\n\nReturns:\n    dict: The result of the agent's analysis.",
+        "operationId": "start_agent_api_v3_apex_chat_start_agent_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_start_agent_api_v3_apex_chat_start_agent_post"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -976,122 +767,154 @@
   },
   "components": {
     "schemas": {
-      "AnalysisRunCreate": {
+      "AnalysisRequest": {
         "properties": {
-          "config": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Config",
-            "description": "Configuration parameters for the analysis run."
-          },
-          "source_table": {
-            "type": "string",
-            "title": "Source Table",
-            "description": "The full name of the source table to analyze, e.g., 'mydatabase.mytable'"
-          }
-        },
-        "type": "object",
-        "required": [
-          "source_table"
-        ],
-        "title": "AnalysisRunCreate"
-      },
-      "AnalysisRunPublic": {
-        "properties": {
-          "config": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Config",
-            "description": "Configuration parameters for the analysis run."
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
           "user_id": {
             "type": "string",
             "title": "User Id"
           },
-          "status": {
+          "query": {
             "type": "string",
-            "title": "Status"
-          },
-          "execution_log": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Execution Log"
-          },
-          "result_summary": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Result Summary"
-          },
-          "result_details": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Result Details"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
-          },
-          "completed_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Completed At"
+            "title": "Query"
           }
         },
         "type": "object",
         "required": [
-          "id",
           "user_id",
-          "status",
-          "created_at"
+          "query"
         ],
-        "title": "AnalysisRunPublic"
+        "title": "AnalysisRequest"
+      },
+      "AppConfig": {
+        "properties": {
+          "app_env": {
+            "type": "string",
+            "title": "App Env",
+            "default": "development"
+          },
+          "google_cloud": {
+            "$ref": "#/components/schemas/GoogleCloudConfig",
+            "default": {
+              "project_id": "cryptic-net-466001-n0"
+            }
+          },
+          "clickhouse_native": {
+            "$ref": "#/components/schemas/ClickHouseNativeConfig",
+            "default": {
+              "host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
+              "port": 9440,
+              "user": "default",
+              "password": "",
+              "database": "default"
+            }
+          },
+          "clickhouse_https": {
+            "$ref": "#/components/schemas/ClickHouseHTTPSConfig",
+            "default": {
+              "host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
+              "port": 8443,
+              "user": "default",
+              "password": "",
+              "database": "default"
+            }
+          },
+          "clickhouse_https_dev": {
+            "$ref": "#/components/schemas/ClickHouseHTTPSDevConfig",
+            "default": {
+              "host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
+              "port": 8443,
+              "user": "development_user",
+              "password": "",
+              "database": "development"
+            }
+          },
+          "langfuse": {
+            "$ref": "#/components/schemas/LangfuseConfig",
+            "default": {
+              "secret_key": "",
+              "public_key": "",
+              "host": "https://cloud.langfuse.com/"
+            }
+          },
+          "secret_key": {
+            "type": "string",
+            "title": "Secret Key",
+            "default": "default_secret_key"
+          },
+          "algorithm": {
+            "type": "string",
+            "title": "Algorithm",
+            "default": "HS256"
+          },
+          "access_token_expire_minutes": {
+            "type": "integer",
+            "title": "Access Token Expire Minutes",
+            "default": 30
+          },
+          "fernet_key": {
+            "type": "string",
+            "title": "Fernet Key"
+          },
+          "jwt_secret_key": {
+            "type": "string",
+            "title": "Jwt Secret Key"
+          },
+          "api_base_url": {
+            "type": "string",
+            "title": "Api Base Url",
+            "default": "http://localhost:8000"
+          },
+          "database_url": {
+            "type": "string",
+            "title": "Database Url"
+          },
+          "log_level": {
+            "type": "string",
+            "title": "Log Level",
+            "default": "DEBUG"
+          },
+          "log_secrets": {
+            "type": "boolean",
+            "title": "Log Secrets",
+            "default": false
+          },
+          "run_startup_simulation": {
+            "type": "boolean",
+            "title": "Run Startup Simulation",
+            "default": false
+          },
+          "llm_configs": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/LLMConfig"
+            },
+            "type": "object",
+            "title": "Llm Configs",
+            "default": {
+              "default": {
+                "provider": "google",
+                "model_name": "gemini-1.5-flash-latest",
+                "generation_config": {}
+              },
+              "analysis": {
+                "generation_config": {
+                  "temperature": 0.5
+                },
+                "model_name": "gemini-1.5-flash-latest",
+                "provider": "google"
+              },
+              "gpt-4": {
+                "generation_config": {
+                  "temperature": 0.8
+                },
+                "model_name": "gpt-4",
+                "provider": "openai"
+              }
+            }
+          }
+        },
+        "type": "object",
+        "title": "AppConfig",
+        "description": "Base configuration class."
       },
       "Body_login_for_access_token_auth_token_post": {
         "properties": {
@@ -1152,38 +975,114 @@
         ],
         "title": "Body_login_for_access_token_auth_token_post"
       },
-      "ClickHouseCredentials": {
+      "Body_start_agent_api_v3_apex_chat_start_agent_post": {
         "properties": {
-          "host": {
-            "type": "string",
-            "title": "Host"
+          "request": {
+            "$ref": "#/components/schemas/AnalysisRequest"
           },
-          "port": {
-            "type": "integer",
-            "title": "Port"
-          },
-          "user": {
-            "type": "string",
-            "title": "User"
-          },
-          "password": {
-            "type": "string",
-            "title": "Password"
-          },
-          "database": {
-            "type": "string",
-            "title": "Database"
+          "settings": {
+            "$ref": "#/components/schemas/AppConfig"
           }
         },
         "type": "object",
         "required": [
-          "host",
-          "port",
-          "user",
-          "password",
-          "database"
+          "request",
+          "settings"
         ],
-        "title": "ClickHouseCredentials"
+        "title": "Body_start_agent_api_v3_apex_chat_start_agent_post"
+      },
+      "ClickHouseHTTPSConfig": {
+        "properties": {
+          "host": {
+            "type": "string",
+            "title": "Host",
+            "default": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+          },
+          "port": {
+            "type": "integer",
+            "title": "Port",
+            "default": 8443
+          },
+          "user": {
+            "type": "string",
+            "title": "User",
+            "default": "default"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password",
+            "default": ""
+          },
+          "database": {
+            "type": "string",
+            "title": "Database",
+            "default": "default"
+          }
+        },
+        "type": "object",
+        "title": "ClickHouseHTTPSConfig"
+      },
+      "ClickHouseHTTPSDevConfig": {
+        "properties": {
+          "host": {
+            "type": "string",
+            "title": "Host",
+            "default": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+          },
+          "port": {
+            "type": "integer",
+            "title": "Port",
+            "default": 8443
+          },
+          "user": {
+            "type": "string",
+            "title": "User",
+            "default": "development_user"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password",
+            "default": ""
+          },
+          "database": {
+            "type": "string",
+            "title": "Database",
+            "default": "development"
+          }
+        },
+        "type": "object",
+        "title": "ClickHouseHTTPSDevConfig"
+      },
+      "ClickHouseNativeConfig": {
+        "properties": {
+          "host": {
+            "type": "string",
+            "title": "Host",
+            "default": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+          },
+          "port": {
+            "type": "integer",
+            "title": "Port",
+            "default": 9440
+          },
+          "user": {
+            "type": "string",
+            "title": "User",
+            "default": "default"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password",
+            "default": ""
+          },
+          "database": {
+            "type": "string",
+            "title": "Database",
+            "default": "default"
+          }
+        },
+        "type": "object",
+        "title": "ClickHouseNativeConfig"
       },
       "ContentCorpusGenParams": {
         "properties": {
@@ -1237,6 +1136,12 @@
             "title": "Max Cores",
             "description": "Max CPU cores to use.",
             "default": 4
+          },
+          "clickhouse_table": {
+            "type": "string",
+            "title": "Clickhouse Table",
+            "description": "The name of the ClickHouse table to store the corpus in.",
+            "default": "content_corpus"
           }
         },
         "type": "object",
@@ -1319,25 +1224,24 @@
         ],
         "title": "DataIngestionParams"
       },
-      "DemoAgentParams": {
+      "GoogleCloudConfig": {
         "properties": {
-          "query": {
+          "project_id": {
             "type": "string",
-            "title": "Query",
-            "description": "The user's query for the demo agent."
+            "title": "Project Id",
+            "default": "cryptic-net-466001-n0"
           },
-          "debug_mode": {
-            "type": "boolean",
-            "title": "Debug Mode",
-            "description": "Enable debug mode for the agent.",
-            "default": false
+          "client_id": {
+            "type": "string",
+            "title": "Client Id"
+          },
+          "client_secret": {
+            "type": "string",
+            "title": "Client Secret"
           }
         },
         "type": "object",
-        "required": [
-          "query"
-        ],
-        "title": "DemoAgentParams"
+        "title": "GoogleCloudConfig"
       },
       "HTTPValidationError": {
         "properties": {
@@ -1351,6 +1255,66 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "LLMConfig": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "title": "Provider",
+            "description": "The LLM provider (e.g., 'google', 'openai')."
+          },
+          "model_name": {
+            "type": "string",
+            "title": "Model Name",
+            "description": "The name of the model."
+          },
+          "api_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Api Key",
+            "description": "The API key for the LLM provider."
+          },
+          "generation_config": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Generation Config",
+            "description": "A dictionary of generation parameters, e.g., temperature, max_tokens.",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "provider",
+          "model_name"
+        ],
+        "title": "LLMConfig"
+      },
+      "LangfuseConfig": {
+        "properties": {
+          "secret_key": {
+            "type": "string",
+            "title": "Secret Key",
+            "default": ""
+          },
+          "public_key": {
+            "type": "string",
+            "title": "Public Key",
+            "default": ""
+          },
+          "host": {
+            "type": "string",
+            "title": "Host",
+            "default": "https://cloud.langfuse.com/"
+          }
+        },
+        "type": "object",
+        "title": "LangfuseConfig"
       },
       "LogGenParams": {
         "properties": {
@@ -1507,11 +1471,41 @@
             "description": "Number of traces to generate.",
             "default": 10000
           },
-          "output_file": {
+          "num_users": {
+            "type": "integer",
+            "maximum": 10000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Num Users",
+            "description": "Number of unique users to simulate.",
+            "default": 100
+          },
+          "error_rate": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Error Rate",
+            "description": "The fraction of traces that should be errors.",
+            "default": 0.05
+          },
+          "event_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Event Types",
+            "description": "A list of event types to simulate."
+          },
+          "source_table": {
             "type": "string",
-            "title": "Output File",
-            "description": "The name of the output file.",
-            "default": "generated_logs_v2.json"
+            "title": "Source Table",
+            "description": "The name of the source ClickHouse table for the content corpus.",
+            "default": "content_corpus"
+          },
+          "destination_table": {
+            "type": "string",
+            "title": "Destination Table",
+            "description": "The name of the destination ClickHouse table for the generated data.",
+            "default": "synthetic_data"
           }
         },
         "type": "object",
@@ -1601,6 +1595,53 @@
         ],
         "title": "UserPublic"
       },
+      "UserPublicWithPicture": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "picture": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Picture"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "id",
+          "created_at"
+        ],
+        "title": "UserPublicWithPicture"
+      },
       "UserUpdate": {
         "properties": {
           "email": {
@@ -1636,38 +1677,6 @@
           "email"
         ],
         "title": "UserUpdate"
-      },
-      "V3RunRequest": {
-        "properties": {
-          "prompt": {
-            "type": "string",
-            "title": "Prompt"
-          },
-          "metadata": {
-            "additionalProperties": true,
-            "type": "object",
-            "title": "Metadata"
-          }
-        },
-        "type": "object",
-        "required": [
-          "prompt",
-          "metadata"
-        ],
-        "title": "V3RunRequest"
-      },
-      "V3ValidationRequest": {
-        "properties": {
-          "log_set_id": {
-            "type": "string",
-            "title": "Log Set Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "log_set_id"
-        ],
-        "title": "V3ValidationRequest"
       },
       "ValidationError": {
         "properties": {
@@ -1709,7 +1718,7 @@
         "flows": {
           "password": {
             "scopes": {},
-            "tokenUrl": "/token"
+            "tokenUrl": "/auth/token"
           }
         }
       }
