@@ -56,6 +56,6 @@ async def test_run(mock_request, mock_db_session, mock_llm_connector):
     # Then
     assert agent.status == "complete"
     assert final_state is not None
-    assert len(final_state.messages) == 2
+    assert len(final_state.messages) == 3
     assert final_state.messages[0]["content"] == "Scenario identified: test_scenario"
     assert final_state.messages[1]["content"] == "tool_result"
