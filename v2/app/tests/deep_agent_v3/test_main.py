@@ -47,12 +47,13 @@ async def test_run(mock_request, mock_llm_manager, mock_db_session):
             "propose_solution": mock_tool,
             "generate_report": mock_tool,
         }
-        mock_scenario_finder_instance = mock_scenario_finder.return_value
-        mock_scenario_finder_instance.find_scenario.return_value = {
-            "name": "test_scenario",
+        mock_scenario_finder.return_value.find_scenario.return_value = {
+            "scenario": {
+                "name": "test_scenario",
+                "steps": ["analyze_request", "propose_solution", "generate_report"],
+            },
             "confidence": 0.9,
             "justification": "test_justification",
-            "steps": ["analyze_request", "propose_solution", "generate_report"],
         }
 
         agent = DeepAgentV3(
