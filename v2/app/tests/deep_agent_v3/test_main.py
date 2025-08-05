@@ -27,9 +27,12 @@ def mock_request():
         query="test_query",
     )
 
+import uuid
+
 @pytest.mark.asyncio
 async def test_run(mock_request, mock_db_session, mock_llm_connector):
     # Given
+    run_id = str(uuid.uuid4())
     with patch('app.services.deep_agent_v3.main.ToolBuilder.build_all') as mock_build_all, \
          patch('app.services.deep_agent_v3.main.ScenarioFinder') as mock_scenario_finder, \
          patch.object(DeepAgentV3, '_init_langfuse', return_value=None):
@@ -49,7 +52,7 @@ async def test_run(mock_request, mock_db_session, mock_llm_connector):
         }
 
         agent = DeepAgentV3(
-            run_id="test_run_id",
+            run_id=run_id,
             request=mock_request,
             db_session=mock_db_session,
             llm_connector=mock_llm_connector,
@@ -57,8 +60,7 @@ async def test_run(mock_request, mock_db_session, mock_llm_connector):
         agent.agent_core.decide_next_step = MagicMock(return_value={"tool_name": "test_tool", "tool_input": {}})
 
     # When
-    with patch('app.services.deep_agent_v3.main.DeepAgentV3._generate_and_save_run_report', new_callable=AsyncMock):
-        final_state = await agent.run()
+    final_state = await agent.run()
 
     # Then
     assert agent.status == "complete"

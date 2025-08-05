@@ -63,7 +63,7 @@ async def test_query_raw_logs_success(mock_db_session, mock_request):
     """Tests successful fetching and parsing of raw logs."""
     state = AgentState()
     log_fetcher = MagicMock()
-    log_fetcher.fetch_logs.return_value = []
+    log_fetcher.fetch_logs.return_value = ([], [])
     request = {"time_range": {"start_time": "2025-08-01T00:00:00Z", "end_time": "2025-08-01T01:00:00Z"}}
 
     result = await fetch_raw_logs(state, log_fetcher, request)

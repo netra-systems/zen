@@ -15,3 +15,4 @@ class AgentState(BaseModel):
     final_report: Optional[str] = None
     tool_result: Optional[Dict[str, Any]] = None
     span_map: Optional[Dict[str, UnifiedLogEntry]] = None
+    trace_ids: Optional[List[str]] = None
