@@ -20,8 +20,8 @@ class PolicySimulator(BaseTool):
         Simulate the outcome of the following policy:
 
         Policy:
-        - Pattern Name: {policy.pattern_name}
-        - Optimal Supply Option: {policy.optimal_supply_option_name}
+        - Pattern Name: {policy["pattern_name"]}
+        - Optimal Supply Option: {policy["optimal_supply_option_name"]}
 
         Based on this information, predict the following:
         - utility_score (0.0 to 1.0)

@@ -78,7 +78,7 @@ async def test_enrich_and_cluster_logs_success(sample_log_entries, mock_llm_conn
     log_pattern_identifier = MagicMock()
     log_pattern_identifier.identify_patterns = AsyncMock(return_value=([], []))
     result = await enrich_and_cluster(state, log_pattern_identifier)
-    assert result == "No patterns identified."
+    assert result == "Successfully discovered 0 patterns."
 
 @pytest.mark.asyncio
 async def test_propose_optimal_policies_success(mock_db_session, mock_llm_connector):
