@@ -35,7 +35,7 @@ def get_secret_client() -> secretmanager.SecretManagerServiceClient:
         print(f"Error initializing Secret Manager client: {e}")
         return None
 
-def fetch_secrets(client: secretmanager.SecretManagerServiceClient, secret_references: List[SecretReference]) -> Dict[str, str]:
+def fetch_secrets(client: secretmanager.SecretManagerServiceClient, secret_references: List[SecretReference], log_secrets: bool = False) -> Dict[str, str]:
     """Fetches multiple secrets from Google Cloud Secret Manager."""
     secrets = {}
     if not client:
@@ -46,9 +46,11 @@ def fetch_secrets(client: secretmanager.SecretManagerServiceClient, secret_refer
             name = f"projects/{ref.project_id}/secrets/{ref.name}/versions/{ref.version}"
             response = client.access_secret_version(name=name)
             secrets[ref.name] = response.payload.data.decode("UTF-8")
-            print(secrets[ref.name])
+            if log_secrets:
+                print(f"Fetched secret: {ref.name}")
         except Exception as e:
-            print(f"Error fetching secret {ref.name}: {e}")
+            if log_secrets:
+                print(f"Error fetching secret {ref.name}: {e}")
             secrets[ref.name] = None
     return secrets
 
@@ -110,15 +112,18 @@ class AppConfig(BaseModel):
     api_base_url: str = "http://localhost:8000"
     database_url: str = None
     log_level: str = "DEBUG"
+    log_secrets: bool = False
+    run_startup_simulation: bool = False
 
     def load_secrets(self):
         if self.google_cloud.project_id and self.app_env != "testing":
-            print("Loading secrets from Google Cloud Secret Manager...")
+            if self.log_secrets:
+                print("Loading secrets from Google Cloud Secret Manager...")
             client = get_secret_client()
             if not client:
                 return
 
-            fetched_secrets = fetch_secrets(client, SECRET_CONFIG)
+            fetched_secrets = fetch_secrets(client, SECRET_CONFIG, self.log_secrets)
 
             for secret_ref in SECRET_CONFIG:
                 fetched_value = fetched_secrets.get(secret_ref.name)
@@ -129,10 +134,11 @@ class AppConfig(BaseModel):
                     
                     if target:
                         setattr(target, secret_ref.target_field, fetched_value)
-                else:
+                elif self.log_secrets:
                     print(f"Secret '{secret_ref.name}' not found or failed to fetch.")
             
-            print("Secrets loaded.")
+            if self.log_secrets:
+                print("Secrets loaded.")
 
 class DevelopmentConfig(AppConfig):
     """Development-specific settings can override defaults."""
@@ -165,4 +171,5 @@ def get_settings() -> AppConfig:
 settings = get_settings()
 # The following line is for debugging and will print the loaded settings.
 # In a real application, you would just export 'settings'.
-print(settings.model_dump_json(indent=2))
+if settings.log_secrets:
+    print(settings.model_dump_json(indent=2))
