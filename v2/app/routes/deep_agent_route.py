@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import Dict, Any
 import uuid
 
-from app.services.apex_optimizer_agent.main import DeepAgentV3
+from app.services.apex_optimizer_agent.main import NetraOptimizerAgent
 from app.db.models_clickhouse import AnalysisRequest
 from app.dependencies import get_llm_manager, get_db_session
 from app.llm.llm_manager import LLMManager
@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 
-AGENT_INSTANCES: Dict[str, DeepAgentV3] = {}
+AGENT_INSTANCES: Dict[str, NetraOptimizerAgent] = {}
 
 class StartRequest(BaseModel):
     user_id: str
@@ -21,7 +21,7 @@ LLMManagerDep = Depends(get_llm_manager)
 DBSessionDep = Depends(get_db_session)
 
 async def run_agent_in_background(run_id: str, request: AnalysisRequest, db_session: AsyncSession, llm_manager: LLMManager):
-    agent = DeepAgentV3(run_id, request, db_session, llm_manager)
+    agent = NetraOptimizerAgent(run_id, request, db_session, llm_manager)
     AGENT_INSTANCES[run_id] = agent
     await agent.start_agent()
 

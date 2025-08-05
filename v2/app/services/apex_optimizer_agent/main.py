@@ -15,7 +15,7 @@ from app.services.apex_optimizer_agent.tool_builder import ToolBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
-class DeepAgentV3:
+class NetraOptimizerAgent:
     """
     A stateful, agentic system for conducting deep analysis of LLM usage.
     This engine is designed for interactive control, monitoring, and extensibility.
@@ -32,7 +32,7 @@ class DeepAgentV3:
         self.triage = triage or Triage(self.llm_manager)
         self.triage_result: Dict[str, Any] | None = None
         self.status = "starting"
-        app_logger.info(f"DeepAgentV3 initialized for run_id: {self.run_id}")
+        app_logger.info(f"NetraOptimizerAgent initialized for run_id: {self.run_id}")
 
     def _init_langfuse(self):
         """Initializes the Langfuse client if configured."""

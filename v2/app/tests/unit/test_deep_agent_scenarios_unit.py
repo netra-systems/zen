@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
-from app.services.apex_optimizer_agent.main import DeepAgentV3
+from app.services.apex_optimizer_agent.main import NetraOptimizerAgent
 from app.db.models_clickhouse import AnalysisRequest
 
 @pytest.fixture

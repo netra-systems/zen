@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
 from datetime import datetime
 
-from app.services.apex_optimizer_agent.main import DeepAgentV3
+from app.services.apex_optimizer_agent.main import NetraOptimizerAgent
 from app.services.apex_optimizer_agent.steps.fetch_raw_logs import fetch_raw_logs
 from app.services.apex_optimizer_agent.steps.enrich_and_cluster import enrich_and_cluster
 from app.services.apex_optimizer_agent.steps.propose_optimal_policies import propose_optimal_policies

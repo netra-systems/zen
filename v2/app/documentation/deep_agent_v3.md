@@ -1,11 +1,11 @@
 
-# DeepAgentV3 Documentation
+# NetraOptimizerAgent Documentation
 
 ## 1. High-Level Overview
 
-DeepAgentV3 is a stateful, step-by-step agent designed for in-depth analysis of LLM usage. Its primary goal is to provide a flexible and extensible framework for identifying optimization opportunities, simulating their impact, and generating actionable reports. The system is built to be interactive, allowing for human-in-the-loop control and monitoring.
+NetraOptimizerAgent is a stateful, step-by-step agent designed for in-depth analysis of LLM usage. Its primary goal is to provide a flexible and extensible framework for identifying optimization opportunities, simulating their impact, and generating actionable reports. The system is built to be interactive, allowing for human-in-the-loop control and monitoring.
 
-The key objectives of DeepAgentV3 are:
+The key objectives of NetraOptimizerAgent are:
 
 *   **Cost Reduction:** Analyze LLM usage to identify and propose cost-saving measures.
 *   **Performance Optimization:** Identify and address latency bottlenecks and other performance issues.
@@ -14,9 +14,9 @@ The key objectives of DeepAgentV3 are:
 
 ## 2. System Architecture
 
-DeepAgentV3 follows a pipeline-based architecture, where a series of steps are executed in a predefined order to complete an analysis. The main components of the system are:
+NetraOptimizerAgent follows a pipeline-based architecture, where a series of steps are executed in a predefined order to complete an analysis. The main components of the system are:
 
-*   **DeepAgentV3 (main.py):** The main class that orchestrates the entire analysis process. It initializes the agent, manages its state, and executes the pipeline.
+*   **NetraOptimizerAgent (main.py):** The main class that orchestrates the entire analysis process. It initializes the agent, manages its state, and executes the pipeline.
 *   **Pipeline (pipeline.py):**  A generic pipeline that takes a list of steps and executes them sequentially. It handles retries and error handling.
 *   **State (state.py):** A Pydantic model that represents the agent's state. It stores all the data generated during the analysis, such as logs, patterns, policies, and reports.
 *   **ScenarioFinder (scenario_finder.py):**  Determines the appropriate analysis scenario based on the user's request. Scenarios are predefined sequences of steps designed to address specific optimization goals.
@@ -47,9 +47,9 @@ The following diagram illustrates the high-level data flow:
 
 ## 3. Component Deep Dive
 
-### 3.1. DeepAgentV3 (main.py)
+### 3.1. NetraOptimizerAgent (main.py)
 
-The `DeepAgentV3` class is the entry point for running an analysis. It is responsible for:
+The `NetraOptimizerAgent` class is the entry point for running an analysis. It is responsible for:
 
 *   **Initialization:**  Initializes the agent's state, Langfuse for tracing, the tools, and the pipeline.
 *   **Execution:**  Provides methods for running the entire analysis (`run_full_analysis`) or executing the next step (`run_next_step`).
@@ -106,7 +106,7 @@ The steps use a collection of tools to perform their tasks. The tools are locate
 
 ## 4. Codebase Maturity
 
-The DeepAgentV3 codebase is a mix of mature and developing components.
+The NetraOptimizerAgent codebase is a mix of mature and developing components.
 
 ### 4.1. Mature Components
 
@@ -126,7 +126,7 @@ The following components are still under development and may be subject to chang
 
 ## 5. Onboarding Guide
 
-This guide provides a step-by-step process for new engineers to get started with the DeepAgentV3 codebase.
+This guide provides a step-by-step process for new engineers to get started with the NetraOptimizerAgent codebase.
 
 ### 5.1. Prerequisites
 

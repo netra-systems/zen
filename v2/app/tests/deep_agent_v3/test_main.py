@@ -6,7 +6,7 @@ import pytest
 
 from app.db.models_clickhouse import AnalysisRequest
 from app.llm.llm_manager import LLMManager
-from app.services.apex_optimizer_agent.main import DeepAgentV3
+from app.services.apex_optimizer_agent.main import NetraOptimizerAgent
 from app.services.apex_optimizer_agent.triage import Triage
 from app.config import AppConfig, LLMConfig, LangfuseConfig
 
@@ -46,13 +46,13 @@ async def test_start_agent(mock_request, mock_llm_manager, mock_db_session):
     }
 
     with patch("app.services.apex_optimizer_agent.main.ToolBuilder.build_all") as mock_build_all, patch.object(
-        DeepAgentV3, "_init_langfuse", return_value=None
+        NetraOptimizerAgent, "_init_langfuse", return_value=None
     ):
         mock_tool = MagicMock()
         mock_tool.run = AsyncMock(return_value="tool_result")
         mock_build_all.return_value = ({"cost_analyzer": mock_tool}, {"cost_optimization": {"cost_analyzer": mock_tool}})
 
-        agent = DeepAgentV3(
+        agent = NetraOptimizerAgent(
             run_id=run_id,
             request=mock_request,
             db_session=mock_db_session,
@@ -65,7 +65,7 @@ async def test_start_agent(mock_request, mock_llm_manager, mock_db_session):
 
     # When
     with patch(
-        "app.services.apex_optimizer_agent.main.DeepAgentV3._generate_and_save_run_report",
+        "app.services.apex_optimizer_agent.main.NetraOptimizerAgent._generate_and_save_run_report",
         new_callable=AsyncMock,
     ):
         final_state = await agent.start_agent()
@@ -98,7 +98,7 @@ def test_apex_optimizer_agent_initialization_with_settings(mock_settings):
         mock_db_session = MagicMock()
         mock_llm_manager = LLMManager(settings=mock_settings)
 
-        agent = DeepAgentV3(
+        agent = NetraOptimizerAgent(
             run_id="test_run",
             request=MagicMock(),
             db_session=mock_db_session,

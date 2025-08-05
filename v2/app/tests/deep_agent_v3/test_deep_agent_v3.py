@@ -6,7 +6,7 @@ from sqlmodel import Session
 
 from app.main import app
 from app.db.models_clickhouse import AnalysisRequest
-from app.services.apex_optimizer_agent.main import DeepAgentV3
+from app.services.apex_optimizer_agent.main import NetraOptimizerAgent
 
 
 
@@ -26,7 +26,7 @@ def mock_llm_manager():
 
 @pytest.fixture
 def mock_apex_optimizer_agent():
-    with patch('app.routes.deep_agent.DeepAgentV3', autospec=True) as mock_agent:
+    with patch('app.routes.deep_agent.NetraOptimizerAgent', autospec=True) as mock_agent:
         mock_instance = mock_agent.return_value
         mock_instance.start_agent = AsyncMock()
         yield mock_agent
