@@ -8,6 +8,7 @@ from cryptography.fernet import Fernet
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from sqlmodel import Session, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..db import models_postgres
 from ..db import models_clickhouse
@@ -42,9 +43,10 @@ class SecurityService:
     def decrypt(self, encrypted_value: bytes) -> str:
         return self.fernet.decrypt(encrypted_value).decode('utf-8')
 
-    def save_user_credentials(self, user_id: int, credentials: models_clickhouse.ClickHouseCredentials, db_session: Session):
+    async def save_user_credentials(self, user_id: int, credentials: models_clickhouse.ClickHouseCredentials, db_session: AsyncSession):
         existing_secrets_query = select(models_postgres.Secret).where(models_postgres.Secret.user_id == user_id)
-        existing_secrets_list = db_session.exec(existing_secrets_query).all()
+        existing_secrets_list = await db_session.exec(existing_secrets_query)
+        existing_secrets_list = existing_secrets_list.all()
         existing_secrets_map = {secret.key: secret for secret in existing_secrets_list}
 
         creds_dict = credentials.model_dump()
@@ -61,9 +63,9 @@ class SecurityService:
                 new_secret = models_postgres.Secret(user_id=user_id, key=key, encrypted_value=encrypted_value)
                 db_session.add(new_secret)
         
-        db_session.commit()
+        await db_session.commit()
 
-    async def get_user_credentials(self, user_id: int, db_session: Session) -> Optional[models_clickhouse.ClickHouseCredentials]:
+    async def get_user_credentials(self, user_id: int, db_session: AsyncSession) -> Optional[models_clickhouse.ClickHouseCredentials]:
         result = await db_session.execute(select(models_postgres.Secret).where(models_postgres.Secret.user_id == user_id))
         secrets = result.scalars().all()
         if not secrets:
@@ -92,5 +94,3 @@ try:
 except (ImportError, ValueError) as e:
     logging.error(f"Failed to initialize SecurityService: {e}")
     security_service = None
-
-
