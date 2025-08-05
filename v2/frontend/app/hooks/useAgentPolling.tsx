@@ -13,11 +13,12 @@ export const useAgentPolling = (token: string | null) => {
         setMessages(prev => [...prev, { role, content }]);
     };
 
-    const pollStatus = useCallback(async () => {
+    """    const pollStatus = useCallback(async () => {
         if (!pollingRunIdRef.current) {
-            setIsPolling(false);
             return;
         }
+
+        setError(null);
 
         try {
             const data: AgentRun = await apiService.getAgentStatus(pollingRunIdRef.current, token);
@@ -58,7 +59,8 @@ export const useAgentPolling = (token: string | null) => {
     const startPolling = (runId: string) => {
         pollingRunIdRef.current = runId;
         setIsPolling(true);
-    };
+        setIsLoading(true);
+    };""
 
     return { isPolling, isLoading, error, messages, addMessage, startPolling, setIsLoading, setError };
 };
