@@ -1,4 +1,3 @@
-
 import logging
 import sys
 import json
@@ -30,7 +29,18 @@ class Formatter:
 def create_logger():
     logger.remove()
     log_format = Formatter()
-    logger.add(sys.stdout, format=log_format.format)
+    
+    # Filter out verbose debug messages
+    def is_not_verbose(record):
+        verbose_patterns = [
+            "loaded lazy attr",
+            "registered 'bcrypt' handler",
+            "Using orjson library for writing JSON byte strings",
+            "Looking up time zone info from registry"
+        ]
+        return not any(pattern in record["message"] for pattern in verbose_patterns)
+
+    logger.add(sys.stdout, format=log_format.format, filter=is_not_verbose)
     return logger
 
 # Create a logger instance to be used across the application
@@ -47,7 +57,7 @@ class InterceptHandler(logging.Handler):
 
         # Find caller from where originated the logged message
         frame, depth = logging.currentframe(), 2
-        while frame.f_code.co_filename == logging.__file__:
+        while frame and frame.f_code.co_filename == logging.__file__:
             frame = frame.f_back
             depth += 1
 
@@ -56,3 +66,12 @@ class InterceptHandler(logging.Handler):
 logging.basicConfig(handlers=[InterceptHandler()], level=0)
 logging.getLogger("uvicorn.access").handlers = [InterceptHandler()]
 logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+
+
+def setup_logging(config_path='logging_config.json'):
+    with open(config_path, 'rt') as f:
+        config = json.load(f)
+    logging.config.dictConfig(config)
+
+def get_logger(name):
+    return logging.getLogger(name)
