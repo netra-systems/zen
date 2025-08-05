@@ -21,6 +21,8 @@ SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="clickhouse-default-password", target_model="clickhouse_https", target_field="password"),
     SecretReference(name="clickhouse-development-password", target_model="clickhouse_https_dev", target_field="password"),
     #SecretReference(name="database-url", target_field="database_url"),
+    SecretReference(name="clickhouse-development-password", target_model="clickhouse_https_dev", target_field="password"),
+    #SecretReference(name="database-url", target_field="database_url"),
     SecretReference(name="jwt-secret-key", target_field="jwt_secret_key"),
     SecretReference(name="fernet-key", target_field="fernet_key")
 ]
@@ -75,12 +77,14 @@ class ClickHouseHTTPSConfig(BaseModel):
     password: str = ""
     database: str = "default"
 
+
 class ClickHouseHTTPSDevConfig(BaseModel):
     host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
     port: int = 8443
     user: str = "development_user"
     password: str = ""
     database: str = "development"
+
 
 class LangfuseConfig(BaseModel):
     secret_key: str = ""
