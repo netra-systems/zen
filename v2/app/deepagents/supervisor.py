@@ -6,11 +6,12 @@ from langgraph.prebuilt import tools_condition
 
 from .state import DeepAgentState
 from .tools import update_todo
-from .model import get_default_model
+from app.llm.llm_manager import LLMManager
 
 
-def create_supervisor_graph(llm):
+def create_supervisor_graph(llm_manager: LLMManager, llm_name: str = "default"):
     builder = StateGraph(DeepAgentState)
+    llm = llm_manager.get_llm(llm_name)
 
     # Define the two nodes we will cycle between
     builder.add_node("supervisor", llm)

@@ -1,4 +1,5 @@
 
+from typing import Any, Dict
 from app.llm.llm_manager import LLMManager
 from app.services.deep_agent_v3.tools.log_fetcher import LogFetcher
 from app.services.deep_agent_v3.tools.log_pattern_identifier import LogPatternIdentifier

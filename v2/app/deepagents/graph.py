@@ -3,7 +3,7 @@ from langchain_core.language_models import LanguageModelLike
 from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_core.tools import BaseTool
 from langgraph.graph import END, StateGraph
-from .model import get_default_model
+from app.llm.llm_manager import LLMManager
 from .state import DeepAgentState
 from .sub_agent import _create_task_tool
 from .supervisor import create_supervisor_graph
@@ -23,9 +23,10 @@ class SubAgent(TypedDict):
     tools: Optional[list] = None
 
 class Team:
-    def __init__(self, agents: List[SubAgent], supervisor_llm: Optional[LanguageModelLike] = None):
+    def __init__(self, agents: List[SubAgent], llm_manager: LLMManager, supervisor_llm_name: str = "default"):
         self.agents = agents
-        self.supervisor_llm = supervisor_llm or get_default_model()
+        self.llm_manager = llm_manager
+        self.supervisor_llm = self.llm_manager.get_llm(supervisor_llm_name)
 
     def create_graph(self):
         # Create the supervisor graph
@@ -64,7 +65,8 @@ class Team:
 def create_deep_agent(
     tools: Sequence[Union[BaseTool, Callable, dict[str, Any]]],
     instructions: str,
-    model: Optional[Union[str, LanguageModelLike]] = None,
+    llm_manager: LLMManager,
+    model_name: str = "default",
     subagents: list[SubAgent] = None,
     state_schema: Optional[DeepAgentState] = None,
 ):
@@ -94,8 +96,7 @@ Do not batch up multiple tasks before marking them as completed.
 - When doing web search, prefer to use the `task` tool in order to reduce context usage."""
     prompt = instructions + base_prompt
     built_in_tools = [write_todos, update_todo, write_file, read_file, ls, edit_file]
-    if model is None:
-        model = get_default_model()
+    model = llm_manager.get_llm(model_name)
     state_schema = state_schema or DeepAgentState
     task_tool = _create_task_tool(
         list(tools) + built_in_tools,

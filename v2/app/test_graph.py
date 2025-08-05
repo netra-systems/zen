@@ -4,6 +4,7 @@ from langchain_core.messages import HumanMessage, AIMessage, ToolCall
 from langchain_core.runnables import RunnableLambda
 from .deepagents.graph import create_deep_agent
 from .deepagents.tools import update_todo
+from .llm.llm_manager import LLMManager, LLMConfig
 
 @pytest.mark.asyncio
 async def test_agent_completes_todos():
@@ -36,9 +37,13 @@ async def test_agent_completes_todos():
     # Wrap the llm mock in a RunnableLambda
     model = RunnableLambda(llm)
 
+    # Create a mock LLMManager
+    llm_manager = LLMManager({"default": LLMConfig(provider="google", model_name="gemini-1.5-flash-latest")})
+    llm_manager._llm_cache["default"] = model
+
     # Define a simple agent with a todo list
     agent = create_deep_agent(
-        model=model,
+        llm_manager=llm_manager,
         tools=[update_todo],
         instructions="Complete the following tasks:",
     )

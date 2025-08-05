@@ -6,7 +6,7 @@ from app.services.deep_agent_v3.main import DeepAgentV3
 from app.db.models_postgres import DeepAgentRun
 
 @pytest.mark.asyncio
-async def test_logging_and_reporting(mock_db_session, mock_llm_connector, mock_request):
+async def test_logging_and_reporting(mock_db_session, mock_llm_manager, mock_request):
     """Tests that the agent correctly logs step execution and generates a run report."""
     # Arrange
     with patch('app.services.deep_agent_v3.main.ToolBuilder.build_all') as mock_build_all, \
@@ -27,7 +27,7 @@ async def test_logging_and_reporting(mock_db_session, mock_llm_connector, mock_r
             "justification": "test_justification"
         }
 
-        agent = DeepAgentV3(run_id="test_run_id", request=mock_request, db_session=mock_db_session, llm_connector=mock_llm_connector)
+        agent = DeepAgentV3(run_id="test_run_id", request=mock_request, db_session=mock_db_session, llm_manager=mock_llm_manager)
         agent.agent_core.decide_next_step = MagicMock(return_value={"tool_name": "test_tool", "tool_input": {}})
 
         # Act

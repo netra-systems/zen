@@ -1,4 +1,4 @@
-import json
+from app.llm.llm_manager import LLMManager
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 import uuid
@@ -11,14 +11,8 @@ def mock_db_session():
     return MagicMock()
 
 @pytest.fixture
-def mock_llm_connector():
-    mock = MagicMock()
-    mock.get_completion.return_value = json.dumps({
-        "scenario_name": "test_scenario",
-        "confidence": 0.9,
-        "justification": "test_justification"
-    })
-    return mock
+def mock_llm_manager():
+    return MagicMock(spec=LLMManager)
 
 @pytest.fixture
 def mock_request():
@@ -29,7 +23,7 @@ def mock_request():
     )
 
 @pytest.mark.asyncio
-async def test_run(mock_request, mock_db_session, mock_llm_connector):
+async def test_run(mock_request, mock_db_session, mock_llm_manager):
     # Given
     run_id = str(uuid.uuid4())
     with patch('app.services.deep_agent_v3.main.ToolBuilder.build_all') as mock_build_all, \
@@ -56,7 +50,7 @@ async def test_run(mock_request, mock_db_session, mock_llm_connector):
             run_id=run_id,
             request=mock_request,
             db_session=mock_db_session,
-            llm_connector=mock_llm_connector,
+            llm_manager=mock_llm_manager,
         )
         agent.agent_core.decide_next_step = MagicMock(return_value={"tool_name": "test_tool", "tool_input": {}})
 

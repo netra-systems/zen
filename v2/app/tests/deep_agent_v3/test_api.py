@@ -17,11 +17,11 @@ def mock_db_session():
         yield mock_session
 
 @pytest.fixture
-def mock_llm_connector():
-    with patch('app.dependencies.get_llm_connector') as mock_get_llm:
-        mock_llm = MagicMock()
-        mock_get_llm.return_value = mock_llm
-        yield mock_llm
+def mock_llm_manager():
+    with patch('app.dependencies.get_llm_manager') as mock_get_llm_manager:
+        mock_llm_manager_instance = MagicMock()
+        mock_get_llm_manager.return_value = mock_llm_manager_instance
+        yield mock_llm_manager_instance
 
 @pytest.fixture
 def mock_deep_agent_v3():
@@ -30,7 +30,7 @@ def mock_deep_agent_v3():
         mock_instance.run = AsyncMock()
         yield mock_agent
 
-def test_create_agent_run_success(mock_db_session, mock_llm_connector, mock_deep_agent_v3):
+def test_create_agent_run_success(mock_db_session, mock_llm_manager, mock_deep_agent_v3):
     # Given
     analysis_request = {
         "user_id": "test_user",
@@ -46,7 +46,7 @@ def test_create_agent_run_success(mock_db_session, mock_llm_connector, mock_deep
     assert response.json() == {"run_id": "test_run_id", "message": "Agent run created and started in the background."}
     mock_deep_agent_v3.assert_called_once()
 
-def test_create_agent_run_no_workloads(mock_db_session, mock_llm_connector):
+def test_create_agent_run_no_workloads(mock_db_session, mock_llm_manager):
     # Given
     analysis_request = {
         "user_id": "test_user",

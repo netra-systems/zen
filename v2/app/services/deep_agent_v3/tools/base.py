@@ -1,5 +1,6 @@
-from app.llm.llm_manager import LLMManager
+from pydantic import BaseModel, Field
 from typing import Optional
+from app.llm.llm_manager import LLMManager
 
 class ToolMetadata(BaseModel):
     name: str = Field(..., description="The unique name of the tool.")
