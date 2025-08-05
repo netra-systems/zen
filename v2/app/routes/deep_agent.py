@@ -46,54 +46,9 @@ async def create_agent_run(request: AnalysisRequest, background_tasks: Backgroun
         AGENT_INSTANCES[run_id] = agent
 
         # Run the full analysis in the background to not block the API
-        background_tasks.add_task(agent.run_full_analysis)
+        background_tasks.add_task(agent.run)
 
         return {"run_id": run_id, "message": "Agent run created and started in the background."}
-
-@router.get("/agent/{run_id}/step")
-async def get_agent_step(run_id: str) -> Dict[str, Any]:
-    """
-    Retrieves the current state and step of an active agent run.
-    """
-    agent = AGENT_INSTANCES.get(run_id)
-    if not agent:
-        raise HTTPException(status_code=404, detail="Agent run not found.")
-
-    if agent.is_complete():
-        return {
-            "run_id": run_id,
-            "status": "complete",
-            "current_step": len(agent.pipeline.steps),
-            "total_steps": len(agent.pipeline.steps),
-            "final_report": agent.state.final_report
-        }
-
-    return {
-        "run_id": run_id,
-        "status": agent.state.status,
-        "current_step": agent.pipeline.current_step_index,
-        "total_steps": len(agent.pipeline.steps),
-        "last_step_result": agent.state.messages[-1] if agent.state.messages else None
-    }
-
-@router.post("/agent/{run_id}/next")
-async def trigger_agent_next_step(run_id: str, request: ConfirmationRequest) -> Dict[str, Any]:
-    """
-    Triggers the agent to execute the next step in its analysis pipeline.
-    
-    NOTE: This endpoint is designed for a manual, step-by-step progression.
-    The create endpoint already runs the full analysis in the background.
-    This can be used for debugging or a more controlled execution flow.
-    """
-    agent = AGENT_INSTANCES.get(run_id)
-    if not agent:
-        raise HTTPException(status_code=404, detail="Agent run not found.")
-
-    if agent.is_complete():
-        return {"status": "complete", "message": "Analysis is already complete."}
-
-    result = await agent.run_next_step(request.confirmation)
-    return result
 
 @router.get("/agent/{run_id}/history")
 async def get_agent_history(run_id: str) -> Dict[str, Any]:

@@ -27,7 +27,7 @@ def mock_llm_connector():
 def mock_deep_agent_v3():
     with patch('app.routes.deep_agent.DeepAgentV3', autospec=True) as mock_agent:
         mock_instance = mock_agent.return_value
-        mock_instance.run_full_analysis = AsyncMock()
+        mock_instance.run = AsyncMock()
         yield mock_agent
 
 def test_create_agent_run_success(mock_db_session, mock_llm_connector, mock_deep_agent_v3):
@@ -60,14 +60,3 @@ def test_create_agent_run_no_workloads(mock_db_session, mock_llm_connector):
     # Then
     assert response.status_code == 400
     assert response.json() == {"detail": "No workloads provided in the request."}
-
-def test_get_agent_step_not_found():
-    # Given
-    run_id = "non_existent_run"
-
-    # When
-    response = client.get(f"/api/v3/agent/{run_id}/step")
-
-    # Then
-    assert response.status_code == 404
-    assert response.json() == {"detail": "Agent run not found."}
