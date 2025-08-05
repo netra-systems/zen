@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 from app.services.deep_agent_v3.steps.enrich_and_cluster import enrich_and_cluster
 from app.services.deep_agent_v3.state import AgentState
 from app.db.models_clickhouse import UnifiedLogEntry, Request, Response, Performance, FinOps, TraceContext
@@ -25,7 +25,7 @@ async def test_enrich_and_cluster_success():
         )
     ]
     log_pattern_identifier = MagicMock()
-    log_pattern_identifier.identify_patterns = AsyncMock(return_value=(["pattern1", "pattern2"], ["desc1", "desc2"]))
+    log_pattern_identifier.identify_patterns.return_value = (["pattern1", "pattern2"], ["desc1", "desc2"])
 
     # Act
     result = await enrich_and_cluster(state, log_pattern_identifier)
@@ -42,7 +42,7 @@ async def test_enrich_and_cluster_no_logs():
     state = MagicMock(spec=AgentState)
     state.raw_logs = []
     log_pattern_identifier = MagicMock()
-    log_pattern_identifier.identify_patterns = AsyncMock(return_value=([], []))
+    log_pattern_identifier.identify_patterns.return_value = ([], [])
 
     # Act
     result = await enrich_and_cluster(state, log_pattern_identifier)

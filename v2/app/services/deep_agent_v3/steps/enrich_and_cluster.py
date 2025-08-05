@@ -35,7 +35,7 @@ async def enrich_and_cluster(
     if not enriched_spans_data:
         return "No enriched spans to cluster."
 
-    patterns, descriptions = await log_pattern_identifier.identify_patterns(enriched_spans_data)
+    patterns, descriptions = log_pattern_identifier.identify_patterns(enriched_spans_data)
 
     state.discovered_patterns = patterns
     state.pattern_descriptions = descriptions
