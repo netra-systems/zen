@@ -4,6 +4,7 @@ from app.db.session import get_db_session
 from app.llm.llm_manager import LLMManager
 from app.services.apex_optimizer_agent.supervisor import NetraOptimizerAgentSupervisor
 from app.db.models_clickhouse import AnalysisRequest
+from sse_starlette.sse import EventSourceResponse
 
 router = APIRouter()
 
@@ -36,3 +37,23 @@ async def start_agent(
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{req_id}/events")
+async def stream_events(req_id: str, request: Request):
+    """
+    Streams events for a given request ID.
+
+    Args:
+        req_id (str): The request ID.
+        request (Request): The request object.
+
+    Returns:
+        EventSourceResponse: The server-sent events.
+    """
+    # Placeholder for event streaming logic
+    async def event_generator():
+        # In a real implementation, you would fetch events for req_id
+        # from a message queue or a database.
+        yield {"data": f"Streaming events for {req_id}"}
+
+    return EventSourceResponse(event_generator())
