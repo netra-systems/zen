@@ -84,8 +84,8 @@ class SupplyOption(Base):
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
-class DeepAgentRun(Base):
-    __tablename__ = "deep_agent_runs"
+class ApexOptimizerAgentRun(Base):
+    __tablename__ = "apex_optimizer_agent_runs"
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     run_id = Column(String, index=True, nullable=False)
     step_name = Column(String, nullable=False)
@@ -94,8 +94,8 @@ class DeepAgentRun(Base):
     run_log = Column(String, nullable=True)
     timestamp = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
 
-class DeepAgentRunReport(Base):
-    __tablename__ = "deep_agent_run_reports"
+class ApexOptimizerAgentRunReport(Base):
+    __tablename__ = "apex_optimizer_agent_run_reports"
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     run_id = Column(String, index=True, unique=True, nullable=False)
     report = Column(String, nullable=False)

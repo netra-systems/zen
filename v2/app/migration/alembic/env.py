@@ -23,7 +23,8 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from db.base import Base
-from db.models_postgres import User, Secret, Supply, Analysis, AnalysisResult, SupplyOption, DeepAgentRun
+
+from db.models_postgres import *
 from config import settings
 target_metadata = Base.metadata
 
