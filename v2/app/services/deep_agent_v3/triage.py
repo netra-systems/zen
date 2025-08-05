@@ -11,13 +11,13 @@ class Triage:
         Analyzes the user's prompt to determine the best course of action.
         """
         system_prompt = f"""
-You are an expert at triaging requests for a system that analyzes and optimizes LLM usage.
-Your task is to analyze the user's request and provide a structured response in JSON format with the following keys:
-1.  "triage_category": A high-level category for the request (e.g., "cost_optimization", "performance_tuning", "security_audit").
-2.  "confidence": A float between 0.0 and 1.0, representing your confidence in the categorization.
-3.  "justification": A brief explanation for your choice.
-4.  "suggested_next_steps": A list of recommended actions or tools to address the user's request.
-"""
+            You are an expert at triaging requests for a system that analyzes and optimizes LLM usage.
+            Your task is to analyze the user's request and provide a structured response in JSON format with the following keys:
+            1.  "triage_category": A high-level category for the request (e.g., "cost_optimization", "performance_tuning", "security_audit").
+            2.  "confidence": A float between 0.0 and 1.0, representing your confidence in the categorization.
+            3.  "justification": A brief explanation for your choice.
+            4.  "suggested_next_steps": A list of recommended actions or tools to address the user's request.
+        """
         try:
             llm = self.llm_manager.get_llm("default")
             response = await llm.ainvoke(prompt, system_prompt=system_prompt)

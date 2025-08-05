@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.routes import auth, supply, v3, generation, google_auth, deep_agent
-from app.db.postgres import Database
+from app.db.postgres import async_session_factory
 from app.db.clickhouse import ClickHouseClient
 from app.db.models_clickhouse import SUPPLY_TABLE_SCHEMA, LOGS_TABLE_SCHEMA
 from app.config import settings
@@ -70,6 +70,9 @@ async def lifespan(app: FastAPI):
         # Re-raise the exception to prevent the application from starting in a bad state
         raise
     
+    # Initialize Postgres
+    app.state.db_session_factory = async_session_factory
+
     yield
     
     # Shutdown
@@ -77,9 +80,6 @@ async def lifespan(app: FastAPI):
     if hasattr(app.state, 'clickhouse_client') and await app.state.clickhouse_client.is_connected():
         await app.state.clickhouse_client.disconnect()
         logger.info("ClickHouse disconnected.")
-    if hasattr(app.state, 'db'):
-        await Database.close()
-        logger.info("Postgres connection closed.")
 
 
 from fastapi.middleware.cors import CORSMiddleware

@@ -83,7 +83,6 @@ class DeepAgentV3:
             self.state.messages.append({"role": "tool", "name": tool_name, "content": json.dumps(result)})
             await self._record_step_history(tool_name, tool_input, self.state.model_dump(), {"status": "success", "result": result})
 
-            self.status = "complete"
             self.state.current_step = "complete"
             app_logger.info(f"Agent run completed for run_id: {self.run_id}")
             await self._generate_and_save_run_report()

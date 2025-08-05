@@ -14,6 +14,7 @@ router = APIRouter()
 AGENT_INSTANCES: Dict[str, DeepAgentV3] = {}
 
 class StartRequest(BaseModel):
+    user_id: str
     query: str
 
 LLMManagerDep = Depends(get_llm_manager)
@@ -30,7 +31,7 @@ async def start_agent_run(request: StartRequest, background_tasks: BackgroundTas
     Starts a new Deep Agent run in the background.
     """
     run_id = str(uuid.uuid4())
-    analysis_request = AnalysisRequest(query=request.query, workloads=[{"run_id": run_id}])
+    analysis_request = AnalysisRequest(user_id=request.user_id, query=request.query, workloads=[{"run_id": run_id}])
     
     background_tasks.add_task(run_agent_in_background, run_id, analysis_request, db_session, llm_manager)
 
