@@ -1,13 +1,18 @@
 
-from app.services.deep_agent_v3.state import AgentState
-from app.services.deep_agent_v3.tools.log_fetcher import LogFetcher
+import json
+from typing import Any
 
-async def fetch_raw_logs(state: AgentState, tool: LogFetcher, request: dict) -> str:
-    """Fetches raw logs from the specified data source."""
-    workload = request.workloads[0]  # Assuming single workload
-    state.raw_logs = await tool.execute(
-        source_table=workload["data_source"]["source_table"],
-        start_time=workload["time_range"]["start_time"],
-        end_time=workload["time_range"]["end_time"],
+from app.services.deep_agent_v3.core import query_raw_logs
+from app.services.deep_agent_v3.state import AgentState
+from app.services.deep_agent_v3.models import DataSource, TimeRange
+
+async def fetch_raw_logs(state: AgentState, db_session: Any) -> str:
+    """Fetches raw log data from the user's ClickHouse database."""
+    state.raw_logs = await query_raw_logs(
+        db_session=db_session,
+        source_table=state.request.data_source.source_table,
+        start_time=state.request.time_range.start_time,
+        end_time=state.request.time_range.end_time,
+        filters=state.request.data_source.filters,
     )
-    return f"Fetched {len(state.raw_logs)} raw logs."
+    return f"Fetched {len(state.raw_logs)} log entries."

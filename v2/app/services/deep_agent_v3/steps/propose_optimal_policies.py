@@ -1,8 +1,18 @@
+from typing import Any
 
+from app.services.deep_agent_v3.core import propose_optimal_policies
 from app.services.deep_agent_v3.state import AgentState
-from app.services.deep_agent_v3.tools.policy_proposer import PolicyProposer
 
-async def propose_optimal_policies(state: AgentState, tool: PolicyProposer) -> str:
-    """Proposes optimal policies based on the identified patterns."""
-    state.policies = await tool.execute(state.patterns, state.span_map)
-    return f"Proposed {len(state.policies)} policies."
+async def propose_optimal_policies(state: AgentState, db_session: Any, llm_connector: Any) -> str:
+    """Simulates outcomes and proposes optimal routing policies."""
+    if not state.patterns:
+        raise ValueError("Cannot propose policies without discovered patterns.")
+
+    span_map = {span.trace_context.span_id: span for span in state.raw_logs}
+    state.policies = await propose_optimal_policies(
+        db_session=db_session,
+        patterns=state.patterns,
+        span_map=span_map,
+        llm_connector=llm_connector,
+    )
+    return f"Generated {len(state.policies)} optimal policies."
