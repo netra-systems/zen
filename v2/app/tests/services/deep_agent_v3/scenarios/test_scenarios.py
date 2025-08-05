@@ -1,3 +1,4 @@
+from unittest.mock import MagicMock
 from app.llm.llm_manager import LLMManager
 from app.services.deep_agent_v3.scenario_finder import ScenarioFinder
 from app.db.models_clickhouse import AnalysisRequest

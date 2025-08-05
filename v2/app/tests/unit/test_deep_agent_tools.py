@@ -1,4 +1,5 @@
 import pytest
+from app.llm.llm_manager import LLMManager
 from unittest.mock import MagicMock, AsyncMock, patch
 from app.services.deep_agent_v3.tools.log_analyzer import LogAnalyzer
 from app.services.deep_agent_v3.tools.policy_simulator import PolicySimulator
@@ -6,12 +7,12 @@ from app.services.deep_agent_v3.tools.supply_catalog_search import SupplyCatalog
 from app.schema import PredictedOutcome
 
 @pytest.fixture
-def mock_llm_connector():
-    """Provides a mock LLM connector."""
-    connector = MagicMock()
-    connector.generate_text_async = AsyncMock(return_value='{"key": "value"}')
-    connector.get_completion = AsyncMock(return_value='{"utility_score": 0.9, "predicted_cost_usd": 0.1, "predicted_latency_ms": 100, "predicted_quality_score": 0.9, "explanation": "test", "confidence": 0.9}')
-    return connector
+def mock_llm_manager():
+    """Provides a mock LLM manager."""
+    llm_manager = MagicMock(spec=LLMManager)
+    llm_manager.get_llm.return_value.ainvoke.return_value.content = '{"key": "value"}'
+    llm_manager.get_llm.return_value.ainvoke.return_value.content = '{"utility_score": 0.9, "predicted_cost_usd": 0.1, "predicted_latency_ms": 100, "predicted_quality_score": 0.9, "explanation": "test", "confidence": 0.9}'
+    return llm_manager
 
 @pytest.fixture
 def mock_db_session():
@@ -22,19 +23,19 @@ def mock_db_session():
 
 class TestLogAnalyzer:
     @pytest.mark.asyncio
-    async def test_analyze_logs(self, mock_llm_connector):
-        tool = LogAnalyzer(llm_connector=mock_llm_connector)
+    async def test_analyze_logs(self, mock_llm_manager):
+        tool = LogAnalyzer(llm_manager=mock_llm_manager)
         logs = ["log1", "log2", "log3"]
         result = await tool.analyze_logs(logs)
         assert result == {"key": "value"}
-        mock_llm_connector.generate_text_async.assert_called_once()
+        mock_llm_manager.get_llm.return_value.ainvoke.assert_called_once()
 
 class TestPolicySimulator:
     @pytest.mark.asyncio
-    async def test_simulate_policy(self, mock_llm_connector):
-        tool = PolicySimulator(llm_connector=mock_llm_connector)
+    async def test_simulate_policy(self, mock_llm_manager):
+        tool = PolicySimulator(llm_manager=mock_llm_manager)
         policy = {"pattern_name": "test", "optimal_supply_option_name": "test"}
-        mock_llm_connector.get_completion.return_value = PredictedOutcome(
+        mock_llm_manager.get_llm.return_value.ainvoke.return_value.content = PredictedOutcome(
             supply_option_name="test_supply_option",
             utility_score=0.9,
             predicted_cost_usd=0.1,
@@ -45,7 +46,7 @@ class TestPolicySimulator:
         ).model_dump_json()
         result = await tool.simulate(policy)
         assert result.utility_score == 0.9
-        mock_llm_connector.get_completion.assert_called_once()
+        mock_llm_manager.get_llm.return_value.ainvoke.assert_called_once()
 
 class TestSupplyCatalogSearch:
     @pytest.mark.asyncio
