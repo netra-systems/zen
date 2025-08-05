@@ -1,8 +1,19 @@
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from app.services.deep_agent_v3.main import DeepAgentV3
 from app.db.models_clickhouse import AnalysisRequest
 from app.services.deep_agent_v3.state import AgentState
+
+class IsCompleteSideEffect:
+    def __init__(self):
+        self.called = False
+
+    def __call__(self):
+        if not self.called:
+            self.called = True
+            return False
+        return True
 
 @pytest.mark.asyncio
 async def test_end_to_end_cost_reduction_quality_preservation():
@@ -18,7 +29,7 @@ async def test_end_to_end_cost_reduction_quality_preservation():
 
     # Mock the pipeline and tools
     pipeline = MagicMock()
-    pipeline.is_complete.side_effect = [False, True, True]
+    pipeline.is_complete.side_effect = IsCompleteSideEffect()
     pipeline.run_next_step = AsyncMock(return_value={"status": "success", "completed_step": "generate_final_report"})
 
     tools = {
@@ -58,7 +69,7 @@ async def test_end_to_end_latency_reduction_cost_constraint():
 
     # Mock the pipeline and tools
     pipeline = MagicMock()
-    pipeline.is_complete.side_effect = [False, True, True]
+    pipeline.is_complete.side_effect = IsCompleteSideEffect()
     pipeline.run_next_step = AsyncMock(return_value={"status": "success", "completed_step": "generate_final_report"})
 
     tools = {
@@ -98,7 +109,7 @@ async def test_end_to_end_usage_increase_impact_analysis():
 
     # Mock the pipeline and tools
     pipeline = MagicMock()
-    pipeline.is_complete.side_effect = [False, True, True]
+    pipeline.is_complete.side_effect = IsCompleteSideEffect()
     pipeline.run_next_step = AsyncMock(return_value={"status": "success", "completed_step": "generate_final_report"})
 
     tools = {
@@ -138,7 +149,7 @@ async def test_end_to_end_function_optimization():
 
     # Mock the pipeline and tools
     pipeline = MagicMock()
-    pipeline.is_complete.side_effect = [False, True, True]
+    pipeline.is_complete.side_effect = IsCompleteSideEffect()
     pipeline.run_next_step = AsyncMock(return_value={"status": "success", "completed_step": "generate_final_report"})
 
     tools = {
@@ -178,7 +189,7 @@ async def test_end_to_end_model_effectiveness_analysis():
 
     # Mock the pipeline and tools
     pipeline = MagicMock()
-    pipeline.is_complete.side_effect = [False, True, True]
+    pipeline.is_complete.side_effect = IsCompleteSideEffect()
     pipeline.run_next_step = AsyncMock(return_value={"status": "success", "completed_step": "generate_final_report"})
 
     tools = {
@@ -218,7 +229,7 @@ async def test_end_to_end_kv_caching_audit():
 
     # Mock the pipeline and tools
     pipeline = MagicMock()
-    pipeline.is_complete.side_effect = [False, True, True]
+    pipeline.is_complete.side_effect = IsCompleteSideEffect()
     pipeline.run_next_step = AsyncMock(return_value={"status": "success", "completed_step": "generate_final_report"})
 
     tools = {
@@ -258,7 +269,7 @@ async def test_end_to_end_multi_objective_optimization():
 
     # Mock the pipeline and tools
     pipeline = MagicMock()
-    pipeline.is_complete.side_effect = [False, True, True]
+    pipeline.is_complete.side_effect = IsCompleteSideEffect()
     pipeline.run_next_step = AsyncMock(return_value={"status": "success", "completed_step": "generate_final_report"})
 
     tools = {
