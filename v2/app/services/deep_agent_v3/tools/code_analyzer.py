@@ -1,31 +1,20 @@
-
 from typing import Any, Dict
-from app.services.deep_agent_v3.utils.llm_provider import LLMProvider
+from app.services.deep_agent_v3.state import AgentState
 
 class CodeAnalyzer:
-    def __init__(self, llm_connector: Any):
-        self.llm = LLMProvider(llm_connector)
+    def __init__(self, code_analyzer: any):
+        self.code_analyzer = code_analyzer
 
-    async def analyze_function(self, file_path: str, function_name: str) -> Dict[str, Any]:
+    async def run(self, state: AgentState, request: Dict[str, Any]) -> str:
         """
-        Analyzes a specific function within a file and suggests improvements.
+        Analyzes the code of a specific function.
         """
-        try:
-            with open(file_path, 'r') as f:
-                content = f.read()
-        except FileNotFoundError:
-            return {"error": f"File not found: {file_path}"}
+        file_path = request.get("file_path")
+        function_name = request.get("function_name")
 
-        prompt = f"""
-        Analyze the function `{function_name}` in the following code and suggest improvements.
-        Focus on performance, readability, and best practices.
-        Provide a summary of the function's purpose and a list of suggested improvements.
+        if not file_path or not function_name:
+            return "Error: file_path and function_name are required."
 
-        Code:
-        ```python
-        {content}
-        ```
-        """
-
-        response = await self.llm.generate_text(prompt)
-        return {"analysis": response}
+        analysis = await self.code_analyzer.analyze_function(file_path, function_name)
+        state.tool_result = analysis
+        return f"Function {function_name} in {file_path} analyzed."

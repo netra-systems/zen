@@ -7,12 +7,17 @@ from app.db import models_postgres
 from app import schema
 from app.services.security_service import oauth2_scheme
 from app.llm.llm_manager import LLMManager
+from sqlalchemy.ext.asyncio import AsyncSession
 
 DbDep = Annotated[Session, Depends(get_async_db)]
 TokenDep = Annotated[str, Depends(oauth2_scheme)]
 
 def get_llm_manager(request: Request) -> LLMManager:
     return request.app.state.llm_manager
+
+async def get_db_session(request: Request) -> AsyncSession:
+    async with request.app.state.db_session_factory() as session:
+        yield session
 
 def get_current_user(
     token: TokenDep, db: DbDep, request: Request

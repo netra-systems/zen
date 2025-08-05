@@ -11,7 +11,7 @@ from app.services.deep_agent_v3.state import AgentState
 from app.llm.llm_manager import LLMManager
 from app.logging_config_custom.logger import app_logger
 from app.services.deep_agent_v3.core import AgentCore
-from app.services.deep_agent_v3.scenario_finder import ScenarioFinder
+from app.services.deep_agent_v3.triage import Triage
 from app.services.deep_agent_v3.tool_builder import ToolBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
@@ -22,28 +22,39 @@ class DeepAgentV3:
     This engine is designed for interactive control, monitoring, and extensibility.
     """
 
-    def __init__(self, run_id: str, request: AnalysisRequest, db_session: AsyncSession, llm_manager: LLMManager, scenario_finder: ScenarioFinder = None):
+    def __init__(self, run_id: str, request: AnalysisRequest, db_session: AsyncSession, llm_manager: LLMManager, triage: Triage = None):
         self.run_id = run_id
         self.request = request
         self.db_session = db_session
         self.llm_manager = llm_manager
         self.state = AgentState(messages=[], current_step=None)
         self.langfuse = self._init_langfuse()
-        self.tools = self._init_tools()
-        self.agent_core = AgentCore(self.llm_manager, list(self.tools.values()))
-        self.scenario_finder = scenario_finder or ScenarioFinder(self.llm_manager)
+        self.all_tools, self.super_tools = self._init_tools()
+        self.agent_core = AgentCore(self.llm_manager, list(self.all_tools.values()))
+        self.triage = triage or Triage(self.llm_manager)
         self.triage_result: Dict[str, Any] | None = None
         self.status = "starting"
         app_logger.info(f"DeepAgentV3 initialized for run_id: {self.run_id}")
 
     def _init_langfuse(self):
+        """Initializes the Langfuse client if configured."""
+        if settings.langfuse and settings.langfuse.public_key and settings.langfuse.secret_key:
+            try:
+                return Langfuse(
+                    public_key=settings.langfuse.public_key,
+                    secret_key=settings.langfuse.secret_key,
+                    host=settings.langfuse.host,
+                )
+            except Exception as e:
+                app_logger.error(f"Failed to initialize Langfuse: {e}")
+                return None
         return None
 
-    def _init_tools(self) -> Dict[str, Any]:
+    def _init_tools(self) -> (Dict[str, Any], Dict[str, Any]):
         return ToolBuilder.build_all(self.db_session, self.llm_manager)
 
     @observe()
-    async def run(self):
+    async def start_agent(self):
         """Executes the agentic workflow."""
         app_logger.info(f"Starting agent run for run_id: {self.run_id}")
         self.status = "in_progress"
@@ -51,14 +62,22 @@ class DeepAgentV3:
         try:
             # 1. Triage
             self.state.current_step = "triage"
-            self.triage_result = await self.scenario_finder.find_scenario(self.request.query)
+            self.triage_result = await self.triage.triage_request(self.request.query)
+            
+            triage_category = self.triage_result.get("triage_category")
+            if triage_category in self.super_tools:
+                self.agent_core.tools = self.super_tools[triage_category]
+            else:
+                self.agent_core.tools = self.all_tools
 
-            next_step = self.agent_core.decide_next_step(self.state, [tool_name])
+            # Continue with the agentic workflow using the selected tools
+            next_step = self.agent_core.decide_next_step(self.state, list(self.agent_core.tools.keys()))
+            tool_name = next_step["tool_name"]
             tool_input = next_step["tool_input"]
             
             app_logger.info(f"Executing tool: {tool_name} for run_id: {self.run_id}")
             
-            tool_function = self.tools[tool_name]
+            tool_function = self.agent_core.tools[tool_name]
             result = await tool_function.run(state=self.state, **tool_input)
 
             self.state.messages.append({"role": "tool", "name": tool_name, "content": json.dumps(result)})
@@ -111,9 +130,14 @@ class DeepAgentV3:
         
         if self.triage_result:
             report += "## Triage\n\n"
-            report += f"**Scenario:** {self.triage_result['scenario']['name']}\n"
-            report += f"**Confidence:** {self.triage_result['confidence']}\n"
-            report += f"**Justification:** {self.triage_result['justification']}\n\n"
+            report += f"**Category:** {self.triage_result.get('triage_category')}\n"
+            report += f"**Confidence:** {self.triage_result.get('confidence')}\n"
+            report += f"**Justification:** {self.triage_result.get('justification')}\n"
+            report += f"**Suggested Next Steps:**\n"
+            for step in self.triage_result.get('suggested_next_steps', []):
+                report += f"- {step}\n"
+            report += "\n"
+
 
         report += "## Steps\n\n"
 

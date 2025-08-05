@@ -1,41 +1,20 @@
-import json
-from typing import Any, Dict
-from app.schema import DiscoveredPattern, PredictedOutcome, LearnedPolicy
-from app.db.models_postgres import SupplyOption
-from app.config import settings
-from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
+from typing import Any
+from app.services.deep_agent_v3.state import AgentState
 
-class PolicySimulator(BaseTool):
-    metadata = ToolMetadata(
-        name="policy_simulator",
-        description="Simulates the outcome of a single policy.",
-        version="1.0.0",
-        status="in_review"
-    )
+class PolicySimulator:
+    def __init__(self, policy_simulator: any):
+        self.policy_simulator = policy_simulator
 
-    async def run(self, policy: LearnedPolicy) -> PredictedOutcome:
+    async def run(self, state: AgentState) -> str:
         """Simulates the outcome of a single policy."""
-        prompt = f"""
-        Simulate the outcome of the following policy:
+        if not state.learned_policies:
+            return "No policies to simulate."
 
-        Policy:
-        - Pattern Name: {policy.pattern_name}
-        - Optimal Supply Option: {policy.optimal_supply_option_name}
+        # For now, we only simulate the first policy
+        # This can be extended to simulate multiple policies in the future
+        policy = state.learned_policies[0]
+        predicted_outcome = await self.policy_simulator.simulate(policy)
 
-        Based on this information, predict the following:
-        - utility_score (0.0 to 1.0)
-        - predicted_cost_usd (float)
-        - predicted_latency_ms (int)
-        - predicted_quality_score (0.0 to 1.0)
-        - explanation (string)
-        - confidence (0.0 to 1.0)
+        state.predicted_outcomes = [predicted_outcome]
 
-        Return the result as a JSON object.
-        """
-        llm = self.get_llm()
-        response = await llm.ainvoke(prompt)
-        try:
-            return PredictedOutcome.model_validate_json(response.content)
-        except Exception as e:
-            # Handle parsing errors
-            return None
+        return "Successfully simulated policy"

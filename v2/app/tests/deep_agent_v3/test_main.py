@@ -7,7 +7,7 @@ import pytest
 from app.db.models_clickhouse import AnalysisRequest
 from app.llm.llm_manager import LLMManager
 from app.services.deep_agent_v3.main import DeepAgentV3
-from app.services.deep_agent_v3.scenario_finder import ScenarioFinder
+from app.services.deep_agent_v3.triage import Triage
 from app.config import AppConfig, LLMConfig, LangfuseConfig
 
 
@@ -34,17 +34,15 @@ def mock_request():
 
 
 @pytest.mark.asyncio
-async def test_run(mock_request, mock_llm_manager, mock_db_session):
+async def test_start_agent(mock_request, mock_llm_manager, mock_db_session):
     # Given
     run_id = str(uuid.uuid4())
-    mock_scenario_finder = MagicMock(spec=ScenarioFinder)
-    mock_scenario_finder.find_scenario.return_value = {
-        "scenario": {
-            "name": "test_scenario",
-            "steps": ["analyze_request", "propose_solution", "generate_report"],
-        },
+    mock_triage = MagicMock(spec=Triage)
+    mock_triage.triage_request.return_value = {
+        "triage_category": "cost_optimization",
         "confidence": 0.9,
         "justification": "test_justification",
+        "suggested_next_steps": ["cost_analyzer"],
     }
 
     with patch("app.services.deep_agent_v3.main.ToolBuilder.build_all") as mock_build_all, patch.object(
@@ -52,21 +50,17 @@ async def test_run(mock_request, mock_llm_manager, mock_db_session):
     ):
         mock_tool = MagicMock()
         mock_tool.run = AsyncMock(return_value="tool_result")
-        mock_build_all.return_value = {
-            "analyze_request": mock_tool,
-            "propose_solution": mock_tool,
-            "generate_report": mock_tool,
-        }
+        mock_build_all.return_value = ({"cost_analyzer": mock_tool}, {"cost_optimization": {"cost_analyzer": mock_tool}})
 
         agent = DeepAgentV3(
             run_id=run_id,
             request=mock_request,
             db_session=mock_db_session,
             llm_manager=mock_llm_manager,
-            scenario_finder=mock_scenario_finder,
+            triage=mock_triage,
         )
         agent.agent_core.decide_next_step = MagicMock(
-            return_value={"tool_name": "test_tool", "tool_input": {}}
+            return_value={"tool_name": "cost_analyzer", "tool_input": {}}
         )
 
     # When
@@ -74,16 +68,13 @@ async def test_run(mock_request, mock_llm_manager, mock_db_session):
         "app.services.deep_agent_v3.main.DeepAgentV3._generate_and_save_run_report",
         new_callable=AsyncMock,
     ):
-        final_state = await agent.run()
+        final_state = await agent.start_agent()
 
     # Then
     assert agent.status == "complete"
     assert final_state is not None
-    assert len(final_state.messages) == 4
-    assert final_state.messages[0]["content"] == "Scenario identified: test_scenario"
-    assert final_state.messages[1]["content"] == '"tool_result"'
-    assert final_state.messages[2]["content"] == '"tool_result"'
-    assert final_state.messages[3]["content"] == '"tool_result"'
+    assert len(final_state.messages) == 1
+    assert final_state.messages[0]["name"] == "cost_analyzer"
 
 @pytest.fixture
 def mock_settings():
