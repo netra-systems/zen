@@ -60,7 +60,7 @@ async def test_run(mock_request, mock_llm_manager):
         agent = DeepAgentV3(
             run_id=run_id,
             request=mock_request,
-            db_session=mock_db_session,
+            db_session=mock_db_session(),
             llm_manager=mock_llm_manager,
         )
         agent.agent_core.decide_next_step = MagicMock(
