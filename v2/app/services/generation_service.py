@@ -260,7 +260,7 @@ def run_log_generation_job(job_id: str, params: dict):
 
     except Exception as e:
         logging.exception("Error during log generation job")
-        update_job_status(job_id, "failed", progress={'error': str(e)})
+        update_job_status(job_id, "failed", error=str(e))
 
 
 def run_data_ingestion_job(job_id: str, params: dict):

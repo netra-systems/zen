@@ -2,10 +2,15 @@ from typing import Any, Dict, List
 from app.db.session import get_db_session
 from app.db.models_postgres import Supply
 from sqlmodel import select
+from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
-class SupplyCatalogSearch:
-    def __init__(self, db_session: Any):
-        self.db_session = db_session
+class SupplyCatalogSearch(BaseTool):
+    metadata = ToolMetadata(
+        name="SupplyCatalogSearch",
+        description="Searches the supply catalog for available models and resources.",
+        version="1.0.0",
+        status="production"
+    )
 
     async def search(self, query: str) -> List[Supply]:
         """
