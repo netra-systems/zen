@@ -8,12 +8,10 @@ from datetime import datetime
 from app.services.deep_agent_v3.main import (
     DeepAgentV3,
     AgentState,)
-from app.services.deep_agent_v3.core import (
-    query_raw_logs,
-    enrich_and_cluster_logs,
-    propose_optimal_policies,
-)
-from app.services.deep_agent_v3.core import simulate_policy_outcome
+from app.services.deep_agent_v3.steps.fetch_raw_logs import fetch_raw_logs
+from app.services.deep_agent_v3.steps.enrich_and_cluster import enrich_and_cluster
+from app.services.deep_agent_v3.steps.propose_optimal_policies import propose_optimal_policies
+from app.services.deep_agent_v3.steps.simulate_policy import simulate_policy_outcome
 from app.db.models_clickhouse import UnifiedLogEntry, AnalysisRequest
 from app.db.models_postgres import SupplyOption
 from app.schema import DiscoveredPattern, LearnedPolicy, PredictedOutcome
@@ -70,7 +68,7 @@ def sample_log_entries():
 @pytest.mark.asyncio
 async def test_query_raw_logs_success(mock_db_session):
     """Tests successful fetching and parsing of raw logs."""
-    with patch('app.services.deep_agent_v3.core.get_clickhouse_client') as mock_get_client:
+    with patch('app.services.deep_agent_v3.steps.fetch_raw_logs.get_clickhouse_client') as mock_get_client:
         mock_client = MagicMock()
         mock_client.execute.return_value = (
             [('val1', 123)], # Data rows
@@ -82,7 +80,7 @@ async def test_query_raw_logs_success(mock_db_session):
         with patch('app.services.deep_agent_v3.core.security_service') as mock_security:
             mock_security.get_user_credentials.return_value = {"host": "localhost"}
             
-            logs = await query_raw_logs(
+            logs = await fetch_raw_logs(
                 db_session=mock_db_session,
                 source_table="db.table",
                 start_time=datetime(2023, 1, 1),
