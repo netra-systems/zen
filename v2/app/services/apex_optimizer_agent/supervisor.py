@@ -14,10 +14,15 @@ class NetraOptimizerAgentSupervisor:
         self.db_session = db_session
         self.llm_manager = llm_manager
 
-    def _get_agent_definition(self, llm_manager: LLMManager) -> SubAgent:
+        all_tools, _ = ToolBuilder.build_all(self.db_session, self.llm_manager)
+        agent_def = self._get_agent_definition(self.llm_manager, list(all_tools.values()))
+        tool_dispatcher = ToolDispatcher(tools=list(all_tools.values()))
+
+        team = SingleAgentTeam(agent=agent_def, llm_manager=self.llm_manager, tool_dispatcher=tool_dispatcher)
+        self.graph = team.create_graph()
+
+    def _get_agent_definition(self, llm_manager: LLMManager, tools: list) -> SubAgent:
         """Returns the definition of the Netra Optimizer Agent."""
-        all_tools, _ = ToolBuilder.build_all(self.db_session, llm_manager)
-        
         return SubAgent(
             name="netra_optimizer_agent",
             description="An agent for optimizing LLM usage.",
@@ -26,16 +31,10 @@ class NetraOptimizerAgentSupervisor:
                 "and provide a set of recommendations for improving their LLM usage. Start by creating a todo list of the steps you will take to address the user's request. "
                 "When you have completed all the steps in your todo list and have a final answer, output the final answer followed by the word FINISH."
             ),
-            tools=list(all_tools.values())
+            tools=tools
         )
 
     async def start_agent(self, request: AnalysisRequest) -> Dict[str, Any]:
-        agent_def = self._get_agent_definition(self.llm_manager)
-        all_tools, _ = ToolBuilder.build_all(self.db_session, self.llm_manager)
-        tool_dispatcher = ToolDispatcher(tools=list(all_tools.values()))
-
-        team = SingleAgentTeam(agent=agent_def, llm_manager=self.llm_manager, tool_dispatcher=tool_dispatcher)
-        self.graph = team.create_graph()
         initial_state = {
             "messages": [HumanMessage(content=request.request.query)],
             "workloads": request.request.workloads,
@@ -47,3 +46,8 @@ class NetraOptimizerAgentSupervisor:
         
         # Immediately return a response to the user
         return {"status": "agent_started", "request_id": request.request.id}
+
+    async def poll_agent(self, request_id: str) -> Dict[str, Any]:
+        # This method would need to be implemented to poll the state of a running agent.
+        # For now, it's a placeholder.
+        return {"status": "polling not implemented"}
