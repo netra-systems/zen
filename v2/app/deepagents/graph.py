@@ -8,7 +8,7 @@ from langchain_core.messages import (
     HumanMessage,
     ToolMessage,
 )
-from langchain_core.tools import BaseTool
+from langchain_core.tools import BaseTool, tool
 from langgraph.graph import END, StateGraph
 
 from app.llm.llm_manager import LLMManager
@@ -101,6 +101,7 @@ Do not batch up multiple tasks before marking them as completed.
     prompt = instructions + base_prompt
     built_in_tools = [write_todos, update_todo, write_file, read_file, ls, edit_file]
     all_tools = [t if isinstance(t, BaseTool) else tool(t) for t in built_in_tools + list(tools)]
+    model = llm_manager.get_llm(model_name)
     model_with_tools = model.bind_tools(all_tools)
 
     state_schema = state_schema or DeepAgentState
