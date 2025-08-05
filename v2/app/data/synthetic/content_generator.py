@@ -28,7 +28,7 @@ from rich.console import Console
 from rich.progress import Progress
 from dotenv import load_dotenv
 
-from ...config import settings
+from app.llm.llm_manager import LLMManager, LLMConfig
 
 load_dotenv()
 
@@ -129,9 +129,13 @@ def generate_for_type(task_args, model, generation_config):
 
 # --- 4. Orchestration ---
 def main(args):
-    if not genai or not GEMINI_API_KEY:
-        console.print("[bold red]Cannot proceed: Gemini API is not configured.[/bold red]")
-        sys.exit(1)
+    llm_manager = LLMManager({
+        "default": LLMConfig(
+            provider="google",
+            model_name="gemini-1.5-flash-latest",
+        )
+    })
+    llm = llm_manager.get_llm("default")
 
     console.print("[bold cyan]Starting AI-Powered Content Corpus Generation (Structured)...[/bold cyan]")
     start_time = time.time()

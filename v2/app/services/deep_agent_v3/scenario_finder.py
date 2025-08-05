@@ -1,10 +1,10 @@
-import json
+from app.llm.llm_manager import LLMManager
 from typing import Dict, Any, List
 from app.services.deep_agent_v3.scenarios import SCENARIOS
 
 class ScenarioFinder:
-    def __init__(self, llm_connector: Any):
-        self.llm_connector = llm_connector
+    def __init__(self, llm_manager: LLMManager):
+        self.llm_manager = llm_manager
 
     def _get_scenario_descriptions(self) -> str:
         """Formats scenario descriptions for the language model."""
@@ -32,12 +32,10 @@ Available Scenarios:
 {scenario_descriptions}
 """
         try:
-            response_text = self.llm_connector.get_completion(
-                prompt=prompt,
-                system_prompt=system_prompt
-            )
+            llm = self.llm_manager.get_llm("default")
+            response = llm.invoke(prompt, system_prompt=system_prompt)
             
-            response_data = json.loads(response_text)
+            response_data = json.loads(response.content)
             scenario_name = response_data.get("scenario_name")
             
             if scenario_name in SCENARIOS:

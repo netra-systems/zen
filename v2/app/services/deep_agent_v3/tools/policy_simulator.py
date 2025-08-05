@@ -33,9 +33,10 @@ class PolicySimulator(BaseTool):
 
         Return the result as a JSON object.
         """
-        response = await self.llm_connector.get_completion(prompt)
+        llm = self.get_llm()
+        response = await llm.ainvoke(prompt)
         try:
-            return PredictedOutcome.model_validate_json(response)
+            return PredictedOutcome.model_validate_json(response.content)
         except Exception as e:
             # Handle parsing errors
             return None

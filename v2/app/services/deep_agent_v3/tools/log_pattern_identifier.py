@@ -8,6 +8,7 @@ from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
 class LogPatternIdentifier(BaseTool):
     name = "log_pattern_identifier"
+    llm_name = "analysis"
     metadata = ToolMetadata(
         name="LogPatternIdentifier",
         description="Identifies patterns in the enriched logs.",
@@ -39,7 +40,8 @@ class LogPatternIdentifier(BaseTool):
 
         # Generate descriptions
         descriptions = {}
-        if self.llm_connector:
+        llm = self.get_llm()
+        if llm:
             features_json = json.dumps({f"pattern_{i}": features for i, features in enumerate(centroids)}, indent=2)
             prompt = f"""
             Analyze the following LLM usage pattern features. For each pattern, generate a concise, 2-4 word name and a one-sentence description.
@@ -49,8 +51,8 @@ class LogPatternIdentifier(BaseTool):
             **Output Format (JSON ONLY):**
             Respond with a single JSON object where keys are the pattern identifiers (e.g., "pattern_0"). Each value should be an object containing "name" and "description".
             """
-            response = await self.llm_connector.generate_text_async(prompt, settings.google_model.analysis_model, settings.google_model.analysis_model_fallback)
-            descriptions = json.loads(response) if response else {}
+            response = await llm.ainvoke(prompt)
+            descriptions = json.loads(response.content) if response.content else {}
 
         patterns = []
         pattern_descriptions = []

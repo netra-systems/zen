@@ -2,7 +2,7 @@ import os
 from pydantic import BaseModel
 from google.cloud import secretmanager
 from typing import List, Dict, Optional
-from app.llm.llm_manager import LLMConfig
+from app.llm.schemas import LLMConfig
 
 class SecretReference(BaseModel):
     name: str
