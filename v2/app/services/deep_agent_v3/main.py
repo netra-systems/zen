@@ -1,4 +1,3 @@
-
 import io
 from typing import Any, Dict
 from langfuse import Langfuse, observe
@@ -57,7 +56,7 @@ class DeepAgentV3:
         ])
 
     @observe()
-    async def run_full_analysis(self):
+    async def run_full_analysis(self) -> AgentState:
         """Executes the entire analysis pipeline from start to finish."""
         app_logger.info(f"Starting full analysis for run_id: {self.run_id}")
         while not self.pipeline.is_complete():
@@ -65,17 +64,14 @@ class DeepAgentV3:
             if result["status"] == "failed":
                 self.status = "failed"
                 app_logger.error(f"Full analysis failed for run_id: {self.run_id} at step: {result.get('step')}")
-                return result
+                return self.state
         
         self.status = "complete"
         app_logger.info(f"Full analysis completed for run_id: {self.run_id}")
         if self.langfuse:
             self.langfuse.flush()
         
-        if self.pipeline.is_complete():
-            return self.state.final_report
-        else:
-            return None
+        return self.state
 
     @observe()
     async def run_next_step(self, confirmation: bool = True):
