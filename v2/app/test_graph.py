@@ -94,7 +94,72 @@ async def test_agent_completes_todos():
     assert all(todo["status"] == "completed" for todo in final_state["todos"])
 
 @pytest.mark.asyncio
-async def test_agent_creates_and_completes_todos():
+async def test_agent_calls_tools_in_sequence():
+    # Mock the language model
+    llm_side_effect = [
+        AIMessage(
+            content="",
+            tool_calls=[
+                ToolCall(
+                    name="write_todos",
+                    args={"todos": [{"id": "1", "content": "First task", "status": "pending"}]},
+                    id="1",
+                )
+            ],
+        ),
+        AIMessage(
+            content="",
+            tool_calls=[
+                ToolCall(
+                    name="update_todo",
+                    args={"todo_id": "1", "status": "in_progress"},
+                    id="2",
+                )
+            ],
+        ),
+        AIMessage(
+            content="",
+            tool_calls=[
+                ToolCall(
+                    name="update_todo",
+                    args={"todo_id": "1", "status": "completed"},
+                    id="3",
+                )
+            ],
+        ),
+        AIMessage(content="All tasks completed!"),
+    ]
+
+    mock_model = MockChatModel(side_effect=llm_side_effect)
+
+    # Create a mock LLMManager
+    llm_manager = LLMManager({"default": LLMConfig(provider="google", model_name="gemini-1.5-flash-latest")})
+    llm_manager._llm_cache["default"] = mock_model
+
+    # Define a simple agent with a todo list
+    agent = create_deep_agent(
+        llm_manager=llm_manager,
+        tools=[write_todos, update_todo],
+        instructions="Create a task, mark it as in progress, and then complete it.",
+    )
+
+    # Initial state
+    initial_state = {
+        "messages": [HumanMessage(content="Create a task, mark it as in progress, and then complete it.")],
+        "todos": [],
+        "next": "supervisor",
+    }
+
+    # Run the agent
+    final_state = await agent.ainvoke(initial_state)
+
+    # Assert that the todo went through the correct states
+    assert len(final_state["todos"]) == 1
+    assert final_state["todos"][0]["status"] == "completed"
+    assert mock_model.call_count == 4
+
+@pytest.mark.asyncio
+async def test_agent_actually_calls_tools():
     # Mock the language model
     llm_side_effect = [
         AIMessage(
@@ -112,8 +177,28 @@ async def test_agent_creates_and_completes_todos():
             tool_calls=[
                 ToolCall(
                     name="update_todo",
-                    args={"todo_id": "1", "status": "completed"},
+                    args={"todo_id": "1", "status": "in_progress"},
                     id="2",
+                )
+            ],
+        ),
+        AIMessage(
+            content="",
+            tool_calls=[
+                ToolCall(
+                    name="read_file",
+                    args={"file_path": "test.txt"},
+                    id="3",
+                )
+            ],
+        ),
+        AIMessage(
+            content="",
+            tool_calls=[
+                ToolCall(
+                    name="update_todo",
+                    args={"todo_id": "1", "status": "completed"},
+                    id="4",
                 )
             ],
         ),
@@ -129,19 +214,22 @@ async def test_agent_creates_and_completes_todos():
     # Define a simple agent with a todo list
     agent = create_deep_agent(
         llm_manager=llm_manager,
-        tools=[write_todos, update_todo],
-        instructions="Create and complete a task.",
+        tools=[write_todos, update_todo, read_file],
+        instructions="Create a task, read a file, and then complete the task.",
     )
 
-    # Initial state without a todo list
+    # Initial state
     initial_state = {
-        "messages": [HumanMessage(content="Create and complete a task.")],
+        "messages": [HumanMessage(content="Create a task, read a file, and then complete the task.")],
         "todos": [],
+        "files": {"test.txt": "This is a test file."},
         "next": "supervisor",
     }
 
     # Run the agent
     final_state = await agent.ainvoke(initial_state)
 
-    # Assert that all todos are completed
-    assert all(todo["status"] == "completed" for todo in final_state["todos"])
+    # Assert that the todo went through the correct states
+    assert len(final_state["todos"]) == 1
+    assert final_state["todos"][0]["status"] == "completed"
+    assert mock_model.call_count == 5
