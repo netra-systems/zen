@@ -32,12 +32,12 @@ def mock_request():
 
 
 @pytest.mark.asyncio
-async def test_run(mock_request, mock_llm_manager):
+async def test_run(mock_request, mock_llm_manager, mock_db_session):
     # Given
     run_id = str(uuid.uuid4())
     with patch("app.services.deep_agent_v3.main.ToolBuilder.build_all") as mock_build_all, patch(
-        "app.services.deep_agent_v3.main.ScenarioFinder"
-    ) as mock_scenario_finder, patch.object(
+        "app.services.deep_agent_v3.main.ScenarioFinder.find_scenario", new_callable=AsyncMock
+    ) as mock_find_scenario, patch.object(
         DeepAgentV3, "_init_langfuse", return_value=None
     ):
         mock_tool = MagicMock()
@@ -47,20 +47,19 @@ async def test_run(mock_request, mock_llm_manager):
             "propose_solution": mock_tool,
             "generate_report": mock_tool,
         }
-        mock_scenario_finder_instance = mock_scenario_finder.return_value
-        mock_scenario_finder_instance.find_scenario = AsyncMock(return_value = {
+        mock_find_scenario.return_value = {
             "scenario": {
                 "name": "test_scenario",
                 "steps": ["analyze_request", "propose_solution", "generate_report"],
             },
             "confidence": 0.9,
             "justification": "test_justification",
-        })
+        }
 
         agent = DeepAgentV3(
             run_id=run_id,
             request=mock_request,
-            db_session=mock_db_session(),
+            db_session=mock_db_session,
             llm_manager=mock_llm_manager,
         )
         agent.agent_core.decide_next_step = MagicMock(
