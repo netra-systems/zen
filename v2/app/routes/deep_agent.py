@@ -10,8 +10,6 @@ from app.llm.llm_manager import LLMManager
 
 router = APIRouter()
 
-# A simple in-memory store for active agent instances
-# In a production environment, this would be replaced with a more robust solution like Redis
 AGENT_INSTANCES: Dict[str, DeepAgentV3] = {}
 
 class ConfirmationRequest(BaseModel):
@@ -23,6 +21,12 @@ from app.services.deep_agent_v3.dev_utils import get_or_create_dev_user
 
 LLMManagerDep = Depends(get_llm_manager)
 
+async def run_agent_in_background(run_id: str, request: AnalysisRequest, llm_manager: LLMManager):
+    async with get_db_session() as db_session:
+        agent = DeepAgentV3(run_id=run_id, request=request, db_session=db_session, llm_manager=llm_manager)
+        AGENT_INSTANCES[run_id] = agent
+        await agent.run()
+
 @router.post("/agent/create", status_code=202)
 async def create_agent_run(request: AnalysisRequest, background_tasks: BackgroundTasks, llm_manager: LLMManager = LLMManagerDep) -> Dict[str, str]:
     """
@@ -31,27 +35,13 @@ async def create_agent_run(request: AnalysisRequest, background_tasks: Backgroun
     if not request.workloads:
         raise HTTPException(status_code=400, detail="No workloads provided in the request.")
 
-    async with get_db_session() as db_session:
-        user_id = request.user_id
-        if settings.app_env == "development" and not user_id:
-            dev_user = await get_or_create_dev_user(db_session)
-            user_id = dev_user.id
+    run_id = request.workloads[0].get('run_id')
+    if not run_id:
+        raise HTTPException(status_code=400, detail="run_id not found in workload.")
 
-        # Pre-flight check for credentials
-        if settings.app_env != "development" and not await security_service.get_user_credentials(user_id, db_session):
-            raise HTTPException(status_code=400, detail="User credentials are not configured. Please set them up before running an analysis.")
+    background_tasks.add_task(run_agent_in_background, run_id, request, llm_manager)
 
-        # Assuming a single workload for now, as per the new structure
-        run_id = request.workloads[0].get('run_id')
-        if not run_id:
-            raise HTTPException(status_code=400, detail="run_id not found in workload.")
-        agent = DeepAgentV3(run_id=run_id, request=request, db_session=db_session, llm_manager=llm_manager)
-        AGENT_INSTANCES[run_id] = agent
-
-        # Run the full analysis in the background to not block the API
-        background_tasks.add_task(agent.run)
-
-        return {"run_id": run_id, "message": "Agent run created and started in the background."}
+    return {"run_id": run_id, "message": "Agent run created and started in the background."}
 
 @router.get("/agent/{run_id}/history")
 async def get_agent_history(run_id: str) -> Dict[str, Any]:

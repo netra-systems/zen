@@ -10,7 +10,7 @@ from sqlalchemy import (
     ARRAY,
 )
 from sqlalchemy.orm import relationship
-from .base import Base  # Corrected: Import Base from the new central location.
+from .base import Base
 import uuid
 from datetime import datetime, timezone
 
@@ -92,5 +92,11 @@ class DeepAgentRun(Base):
     step_input = Column(JSON, nullable=True)
     step_output = Column(JSON, nullable=True)
     run_log = Column(String, nullable=True)
-    run_report = Column(String, nullable=True)
+    timestamp = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
+
+class DeepAgentRunReport(Base):
+    __tablename__ = "deep_agent_run_reports"
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id = Column(String, index=True, unique=True, nullable=False)
+    report = Column(String, nullable=False)
     timestamp = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))

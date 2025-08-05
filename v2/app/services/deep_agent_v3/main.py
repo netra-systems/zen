@@ -6,14 +6,15 @@ from datetime import datetime, timezone
 
 from app.config import settings
 from app.db.models_clickhouse import AnalysisRequest
-from app.db.models_postgres import DeepAgentRun
+from app.db.models_postgres import DeepAgentRun, DeepAgentRunReport
 from app.services.deep_agent_v3.state import AgentState
 from app.llm.llm_manager import LLMManager
 from app.logging_config_custom.logger import app_logger
 from app.services.deep_agent_v3.core import AgentCore
 from app.services.deep_agent_v3.scenario_finder import ScenarioFinder
 from app.services.deep_agent_v3.tool_builder import ToolBuilder
-from app.db.session import get_db_session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
 
 class DeepAgentV3:
     """
@@ -21,7 +22,7 @@ class DeepAgentV3:
     This engine is designed for interactive control, monitoring, and extensibility.
     """
 
-    def __init__(self, run_id: str, request: AnalysisRequest, db_session: Any, llm_manager: LLMManager):
+    def __init__(self, run_id: str, request: AnalysisRequest, db_session: AsyncSession, llm_manager: LLMManager):
         self.run_id = run_id
         self.request = request
         self.db_session = db_session
@@ -35,14 +36,6 @@ class DeepAgentV3:
         app_logger.info(f"DeepAgentV3 initialized for run_id: {self.run_id}")
 
     def _init_langfuse(self):
-        if settings.langfuse.secret_key and settings.langfuse.public_key and settings.langfuse.host:
-            return Langfuse(
-                secret_key=settings.langfuse.secret_key,
-                public_key=settings.langfuse.public_key,
-                host=settings.langfuse.host
-            )
-        
-        self.llm_manager = LLMManager()
         return None
 
     def _init_tools(self) -> Dict[str, Any]:
@@ -66,7 +59,6 @@ class DeepAgentV3:
                             f"Justification='{self.triage_result['justification']}'")
             self.state.messages.append({"role": "assistant", "content": f"Scenario identified: {scenario['name']}"})
 
-
             # 2. Execute based on scenario
             steps = scenario["steps"]
 
@@ -85,14 +77,11 @@ class DeepAgentV3:
                 
                 app_logger.info(f"Executing tool: {tool_name} for run_id: {self.run_id}")
                 
-                # Execute the tool
                 tool_function = self.tools[tool_name]
-                # This is a simplified execution. A real implementation would handle async and tool arguments better.
-                result = tool_function.run(state=self.state, **tool_input) 
+                result = await tool_function.run(state=self.state, **tool_input)
 
                 self.state.messages.append({"role": "tool", "name": tool_name, "content": result})
                 await self._record_step_history(tool_name, tool_input, self.state.model_dump(), {"status": "success", "result": result})
-
 
             self.status = "complete"
             self.state.current_step = "complete"
@@ -102,14 +91,13 @@ class DeepAgentV3:
         except Exception as e:
             self.status = "failed"
             self.state.current_step = "failed"
-            app_logger.error(f"An unexpected error occurred during agent run for run_id: {self.run_id}. Error: {e}")
+            app_logger.error(f"An unexpected error occurred during agent run for run_id: {self.run_id}. Error: {e}", exc_info=True)
             await self._generate_and_save_run_report()
         finally:
             if self.langfuse:
                 self.langfuse.flush()
         
         return self.state
-
 
     async def _record_step_history(self, step_name: str, input_data: dict, output_data: dict, result: dict):
         if not step_name:
@@ -124,21 +112,19 @@ class DeepAgentV3:
         }
         app_logger.info(json.dumps(log_message))
 
-        async with get_db_session() as db_session:
-            new_run = DeepAgentRun(
-                run_id=self.run_id,
-                step_name=step_name,
-                step_input=input_data,
-                step_output=output_data,
-                run_log=json.dumps(log_message),
-                timestamp=datetime.now(timezone.utc)
-            )
-            db_session.add(new_run)
+        new_run = DeepAgentRun(
+            run_id=self.run_id,
+            step_name=step_name,
+            step_input=input_data,
+            step_output=output_data,
+            run_log=json.dumps(log_message),
+            timestamp=datetime.now(timezone.utc)
+        )
+        self.db_session.add(new_run)
+        await self.db_session.commit()
 
     async def _generate_and_save_run_report(self):
         """Generates a markdown report of the entire run and saves it to the database."""
-        from sqlmodel import select
-
         report = f"# Deep Agent Run Report: {self.run_id}\n\n"
         report += f"**Status:** {self.status}\n\n"
         
@@ -150,24 +136,27 @@ class DeepAgentV3:
 
         report += "## Steps\n\n"
 
-        async with get_db_session() as db_session:
-            runs_result = await db_session.execute(select(DeepAgentRun).where(DeepAgentRun.run_id == self.run_id))
-            runs = runs_result.scalars().all()
-            for run in runs:
-                report += f"### {run.step_name}\n\n"
-                report += f"**Status:** {json.loads(run.run_log).get('status')}\n\n"
-                result = json.loads(run.run_log).get('result')
-                if isinstance(result, (dict, list)):
-                    report += f"**Result:**\n```json\n{json.dumps(result, indent=2)}\n```\n\n"
-                else:
-                    report += f"**Result:**\n{result}\n\n"
-                if json.loads(run.run_log).get('error'):
-                    report += f"**Error:**\n```\n{json.loads(run.run_log).get('error')}\n```\n\n"
+        runs_result = await self.db_session.execute(select(DeepAgentRun).where(DeepAgentRun.run_id == self.run_id))
+        runs = runs_result.scalars().all()
+        for run in runs:
+            report += f"### {run.step_name}\n\n"
+            run_log = json.loads(run.run_log)
+            report += f"**Status:** {run_log.get('status')}\n\n"
+            result = run_log.get('result')
+            if isinstance(result, (dict, list)):
+                report += f"**Result:**\n```json\n{json.dumps(result, indent=2)}\n```\n\n"
+            else:
+                report += f"**Result:**\n{result}\n\n"
+            if run_log.get('error'):
+                report += f"**Error:**\n```\n{run_log.get('error')}\n```\n\n"
 
-            final_run_result = await db_session.execute(select(DeepAgentRun).where(DeepAgentRun.run_id == self.run_id).order_by(DeepAgentRun.timestamp.desc()))
-            final_run = final_run_result.scalar_one_or_none()
-            if final_run:
-                final_run.run_report = report
+        new_report = DeepAgentRunReport(
+            run_id=self.run_id,
+            report=report,
+            timestamp=datetime.now(timezone.utc)
+        )
+        self.db_session.add(new_report)
+        await self.db_session.commit()
 
     def is_complete(self) -> bool:
         """Checks if the analysis has completed."""
