@@ -20,7 +20,8 @@ def test_pipeline_creation_for_scenario(mock_llm_connector, mock_db_session):
     run_id = "test-pipeline-creation"
     request = AnalysisRequest(
         user_id="test_user",
-        workloads=[{"run_id": run_id, "query": "reduce costs but keep quality"}]
+        workloads=[{"run_id": run_id, "query": "reduce costs but keep quality"}],
+        query="reduce costs but keep quality"
     )
 
     agent = DeepAgentV3(
