@@ -1,10 +1,24 @@
 import pytest
 import asyncio
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 from langchain_core.messages import HumanMessage, AIMessage, ToolCall
-from langchain_core.runnables import RunnableLambda
+from langchain_core.runnables import Runnable
 from app.deepagents.graph import create_deep_agent
 from app.deepagents.tools import update_todo
+
+class MockRunnable(Runnable):
+    def __init__(self, llm):
+        self.llm = llm
+
+    async def ainvoke(self, *args, **kwargs):
+        return await self.llm(*args, **kwargs)
+
+    def invoke(self, *args, **kwargs):
+        # Not used in this test, but required by the abstract class
+        pass
+
+    def bind_tools(self, *args, **kwargs):
+        return self
 
 @pytest.mark.asyncio
 async def test_agent_completes_todos():
@@ -34,13 +48,8 @@ async def test_agent_completes_todos():
         AIMessage(content="All tasks completed!"),
     ]
 
-    # Wrap the llm mock in a regular function that awaits the coroutine
-    async def llm_wrapper(input):
-        return await llm(input)
-
-    # Wrap the llm mock in a RunnableLambda
-    model = RunnableLambda(llm_wrapper)
-    model.bind_tools = llm.bind_tools
+    # Wrap the llm mock in a custom Runnable
+    model = MockRunnable(llm)
 
     # Define a simple agent with a todo list
     agent = create_deep_agent(
