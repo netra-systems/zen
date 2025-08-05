@@ -61,16 +61,16 @@ async def get_agent_step(run_id: str) -> Dict[str, Any]:
         return {
             "run_id": run_id,
             "status": "complete",
-            "current_step": len(agent.steps),
-            "total_steps": len(agent.steps),
-            "final_report": agent.state.final_report
+            "current_step": len(agent.state['steps']),
+            "total_steps": len(agent.state['steps']),
+            "final_report": agent.state['final_report']
         }
 
     return {
         "run_id": run_id,
-        "status": agent.status,
-        "current_step": agent.current_step_index,
-        "total_steps": len(agent.steps),
+        "status": agent.state['status'],
+        "current_step": agent.state['current_step_index'],
+        "total_steps": len(agent.state['steps']),
         "last_step_result": agent.state.get('messages', [])[-1] if agent.state.get('messages') else None
     }
 
