@@ -1,12 +1,14 @@
-
+import asyncio
 import inspect
 from typing import List, Callable, Any, Dict
 from app.services.deep_agent_v3.state import AgentState
 
 class Pipeline:
-    def __init__(self, steps: List[Callable]):
+    def __init__(self, steps: List[Callable], max_retries: int = 3, retry_delay: int = 5):
         self.steps = steps
         self.current_step_index = 0
+        self.max_retries = max_retries
+        self.retry_delay = retry_delay
 
     def is_complete(self) -> bool:
         return self.current_step_index >= len(self.steps)
@@ -18,14 +20,18 @@ class Pipeline:
         step_func = self.steps[self.current_step_index]
         step_name = step_func.__name__
 
-        try:
-            kwargs = self._prepare_step_kwargs(step_func, state, tools, request)
-            result_message = await step_func(**kwargs)
+        for attempt in range(self.max_retries):
+            try:
+                kwargs = self._prepare_step_kwargs(step_func, state, tools, request)
+                result_message = await step_func(**kwargs)
 
-            self.current_step_index += 1
-            return {"status": "success", "completed_step": step_name, "result": result_message}
-        except Exception as e:
-            return {"status": "failed", "step": step_name, "error": str(e)}
+                self.current_step_index += 1
+                return {"status": "success", "completed_step": step_name, "result": result_message}
+            except Exception as e:
+                if attempt < self.max_retries - 1:
+                    await asyncio.sleep(self.retry_delay)
+                else:
+                    return {"status": "failed", "step": step_name, "error": str(e)}
 
     def _prepare_step_kwargs(
         self,
