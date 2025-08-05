@@ -9,5 +9,5 @@ async def run_analysis(run_id: str, request: AnalysisRequest, db_session: Any, l
     This function is designed to be called from an async context, like a FastAPI endpoint.
     """
     agent = DeepAgentV3(run_id, request, db_session, llm_connector)
-    await agent.run_full_analysis()
+    await agent.run()
     return agent.state
