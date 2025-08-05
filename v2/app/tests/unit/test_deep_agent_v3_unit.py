@@ -94,8 +94,8 @@ async def test_propose_optimal_policies_success(mock_db_session, mock_llm_connec
     request = MagicMock()
 
     with patch('app.services.deep_agent_v3.steps.propose_optimal_policies.PolicySimulator.run', new_callable=AsyncMock) as mock_simulate:
-            mock_simulate.return_value = {"supply_option_id": "test-option", "utility_score": 0.9, "predicted_cost_usd": 0.1, "predicted_latency_ms": 100, "predicted_quality_score": 0.9, "explanation": "test", "confidence": 0.9}
-            
-            result = await propose_optimal_policies(state, tools, request)
-            assert result["status"] == "success"
-            assert len(state.policies) > 0
+        mock_simulate.return_value = {"supply_option_id": "test-option", "utility_score": 0.9, "predicted_cost_usd": 0.1, "predicted_latency_ms": 100, "predicted_quality_score": 0.9, "explanation": "test", "confidence": 0.9}
+        
+        result = await propose_optimal_policies(state, tools, request)
+        assert result["status"] == "success"
+        assert len(state.policies) > 0

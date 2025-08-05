@@ -53,8 +53,7 @@ class DeepAgentV3:
         try:
             # 1. Triage
             scenario_finder = ScenarioFinder(self.llm_connector)
-            prompt = self.request.workloads[0].get("query", "")
-            self.triage_result = scenario_finder.find_scenario(prompt)
+            self.triage_result = scenario_finder.find_scenario(self.request.query)
             scenario = self.triage_result["scenario"]
             app_logger.info(f"Scenario selected for run_id {self.run_id}: "
                             f"Name='{scenario['name']}', "
