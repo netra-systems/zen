@@ -22,7 +22,7 @@ class DeepAgentV3:
     This engine is designed for interactive control, monitoring, and extensibility.
     """
 
-    def __init__(self, run_id: str, request: AnalysisRequest, db_session: AsyncSession, llm_manager: LLMManager):
+    def __init__(self, run_id: str, request: AnalysisRequest, db_session: AsyncSession, llm_manager: LLMManager, scenario_finder: ScenarioFinder = None):
         self.run_id = run_id
         self.request = request
         self.db_session = db_session
@@ -31,6 +31,7 @@ class DeepAgentV3:
         self.langfuse = self._init_langfuse()
         self.tools = self._init_tools()
         self.agent_core = AgentCore(self.llm_manager, list(self.tools.values()))
+        self.scenario_finder = scenario_finder or ScenarioFinder(self.llm_manager)
         self.triage_result: Dict[str, Any] | None = None
         self.status = "starting"
         app_logger.info(f"DeepAgentV3 initialized for run_id: {self.run_id}")
@@ -50,8 +51,7 @@ class DeepAgentV3:
         try:
             # 1. Triage
             self.state.current_step = "triage"
-            scenario_finder = ScenarioFinder(self.llm_manager)
-            self.triage_result = await scenario_finder.find_scenario(self.request.query)
+            self.triage_result = await self.scenario_finder.find_scenario(self.request.query)
             scenario = self.triage_result["scenario"]
             app_logger.info(f"Scenario selected for run_id {self.run_id}: "
                             f"Name='{scenario['name']}', "
