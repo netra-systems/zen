@@ -1,10 +1,14 @@
 from langchain_core.tools import tool
-from typing import Any
-import pandas as pd
-from sklearn.cluster import KMeans
+from typing import Any, List
+from pydantic import BaseModel, Field
+
+class RawLog(BaseModel):
+    response: Any = Field(..., description="The response from the LLM.")
+    performance: Any = Field(..., description="The performance metrics for the LLM call.")
+    trace_context: Any = Field(..., description="The trace context for the LLM call.")
 
 @tool
-async def log_enricher_and_clusterer(raw_logs: list, log_pattern_identifier: any) -> str:
+async def log_enricher_and_clusterer(raw_logs: List[RawLog], log_pattern_identifier: any) -> str:
     """Enriches logs and applies KMeans clustering."""
     if not raw_logs:
         return "No logs to enrich and cluster."
@@ -29,7 +33,7 @@ async def log_enricher_and_clusterer(raw_logs: list, log_pattern_identifier: any
             "inter_token_latency_ms": inter_token_latency
         }
 
-    enriched_spans_data = [{'span_id': s.trace_context.span_id, **s.enriched_metrics} for s in raw_logs if s.enriched_metrics]
+    enriched_spans_data = [{'span_id': s.trace_context.span_id, **s.enriched_metrics} for s in raw_logs if hasattr(s, 'enriched_metrics')]
     if not enriched_spans_data:
         return "No enriched spans to cluster."
 

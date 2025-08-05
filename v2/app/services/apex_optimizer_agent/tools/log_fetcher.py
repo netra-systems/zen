@@ -1,16 +1,21 @@
 from langchain_core.tools import tool
 from typing import Any, Dict, List
+from pydantic import BaseModel, Field
+
+class Workload(BaseModel):
+    time_range: Dict[str, Any] = Field(..., description="The time range for the workload.")
+    data_source: Dict[str, Any] = Field(..., description="The data source for the workload.")
 
 @tool
-async def log_fetcher(workloads: List[Dict[str, Any]], log_fetcher: any) -> str:
+async def log_fetcher(workloads: List[Workload], log_fetcher: any) -> str:
     """
     Fetches raw logs from the database for each workload.
     """
     all_logs = []
     all_trace_ids = []
     for workload in workloads:
-        time_range = workload.get("time_range")
-        data_source = workload.get("data_source")
+        time_range = workload.time_range
+        data_source = workload.data_source
         if not time_range or not data_source:
             return "Error: time_range and data_source are required for each workload."
         

@@ -1,7 +1,13 @@
 from langchain_core.tools import tool
+from typing import List
+from pydantic import BaseModel, Field
+
+class LearnedPolicy(BaseModel):
+    pattern_name: str = Field(..., description="The name of the pattern.")
+    optimal_supply_option_name: str = Field(..., description="The name of the optimal supply option.")
 
 @tool
-async def performance_gains_simulator(learned_policies: list, policy_simulator: any) -> str:
+async def performance_gains_simulator(learned_policies: List[LearnedPolicy], policy_simulator: any) -> str:
     """Simulates the performance gains of an optimized function."""
     total_predicted_latency = 0
     for policy in learned_policies:
