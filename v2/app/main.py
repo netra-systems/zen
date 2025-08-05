@@ -1,5 +1,7 @@
 # v2/app/main.py
 import logging
+logging.getLogger("faker").setLevel(logging.WARNING)
+
 import sys
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, HTTPException
