@@ -13,6 +13,10 @@ class BaseTool(ABC):
     metadata: ToolMetadata
     llm_name: Optional[str] = None
 
+    @property
+    def name(self) -> str:
+        return self.metadata.name
+
     def __init__(self, llm_manager: Optional[LLMManager] = None, db_session=None):
         self.llm_manager = llm_manager
         self.db_session = db_session
