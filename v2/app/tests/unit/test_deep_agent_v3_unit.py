@@ -11,7 +11,7 @@ from app.services.deep_agent_v3.main import (
 from app.services.deep_agent_v3.steps.fetch_raw_logs import fetch_raw_logs
 from app.services.deep_agent_v3.steps.enrich_and_cluster import enrich_and_cluster
 from app.services.deep_agent_v3.steps.propose_optimal_policies import propose_optimal_policies
-from app.services.deep_agent_v3.steps.simulate_policy import simulate_policy_outcome
+from app.services.deep_agent_v3.steps.simulate_policy import simulate_policy
 from app.db.models_clickhouse import UnifiedLogEntry, AnalysisRequest
 from app.db.models_postgres import SupplyOption
 from app.schema import DiscoveredPattern, LearnedPolicy, PredictedOutcome
@@ -97,7 +97,7 @@ async def test_enrich_and_cluster_logs_success(sample_log_entries, mock_llm_conn
         "pattern_0": {"name": "Test Pattern", "description": "A test pattern."}
     }
     '''
-    patterns = await enrich_and_cluster_logs(
+    patterns = await enrich_and_cluster(
         spans=sample_log_entries,
         n_patterns=1,
         llm_connector=mock_llm_connector,
@@ -115,7 +115,7 @@ async def test_propose_optimal_policies_success(mock_db_session, mock_llm_connec
     with patch('app.services.deep_agent_v3.core.get_supply_catalog', new_callable=AsyncMock) as mock_get_catalog:
         mock_get_catalog.return_value = [SupplyOption(name="test-option")]
         
-        with patch('app.services.deep_agent_v3.core.simulate_policy_outcome', new_callable=AsyncMock) as mock_simulate:
+        with patch('app.services.deep_agent_v3.core.simulate_policy', new_callable=AsyncMock) as mock_simulate:
             mock_simulate.return_value = PredictedOutcome(supply_option_name="test-option", utility_score=0.9, predicted_cost_usd=0.1, predicted_latency_ms=100, predicted_quality_score=0.9, explanation="test", confidence=0.9)
             
             policies = await propose_optimal_policies(
