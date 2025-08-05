@@ -1,37 +1,50 @@
-from langgraph.graph import StateGraph, END
-from app.services.deepagents.state import AgentState
-from app.services.deepagents.sub_agent import SubAgent
+from typing import Any, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
+
+from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.runnables import Runnable
+from langgraph.graph import END, StateGraph
+from langgraph.prebuilt import ToolExecutor, ToolNode
+
 from app.llm.llm_manager import LLMManager
-from app.services.deepagents.tool_dispatcher import ToolDispatcher
+
+from .state import DeepAgentState
+from .sub_agent import SubAgent
+from .tool_dispatcher import ToolDispatcher
+
 
 class SingleAgentTeam:
-    def __init__(self, agent: SubAgent, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
+    def __init__(
+        self, agent: SubAgent, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher
+    ):
         self.agent = agent
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
 
+    def _get_agent_runnable(self) -> Runnable:
+        llm = self.llm_manager.get_llm(self.agent.name)
+        return self.agent.get_runnable(llm)
+
     def create_graph(self):
-        workflow = StateGraph(AgentState)
-        
-        workflow.add_node("agent", self.agent.as_runnable(self.llm_manager))
-        workflow.add_node("tool_dispatcher", self.tool_dispatcher.as_runnable())
+        tool_executor = ToolExecutor(self.tool_dispatcher.tools)
 
-        workflow.add_edge("agent", "tool_dispatcher")
+        graph = StateGraph(DeepAgentState)
+        graph.add_node("agent", self._get_agent_runnable())
+        graph.add_node("call_tool", ToolNode(tool_executor))
 
-        workflow.add_conditional_edges(
-            "tool_dispatcher",
-            self.route_to_agent,
-            {
-                "continue": "agent",
-                "end": END
-            }
-        )
-        
-        workflow.set_entry_point("agent")
-        return workflow.compile()
+        graph.add_edge("agent", "call_tool")
 
-    def route_to_agent(self, state: AgentState):
-        if state.get("todo_list") and len(state["todo_list"]) > 0:
-            return "continue"
-        else:
-            return "end"
+        graph.set_entry_point("agent")
+
+        def _route_tools(state: DeepAgentState) -> str:
+            if isinstance(state["messages"][-1], HumanMessage):
+                return END
+            tool_calls = state["messages"][-1].tool_calls
+            if not tool_calls:
+                raise ValueError("No tool calls found in the last message.")
+            if tool_calls[0]["name"] == "finish":
+                return END
+            return "call_tool"
+
+        graph.add_conditional_edges("call_tool", _route_tools)
+
+        return graph.compile()
