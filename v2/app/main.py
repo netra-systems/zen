@@ -53,11 +53,11 @@ async def lifespan(app: FastAPI):
     )
     logger.info(f"Connecting to ClickHouse at {settings.clickhouse_https.host}:{settings.clickhouse_https.port}")
     try:
-        ch_client.connect()
+        await ch_client.connect()
         logger.info("ClickHouse connected.")
         # Create tables if they don't exist
-        ch_client.command(SUPPLY_TABLE_SCHEMA)
-        ch_client.command(LOGS_TABLE_SCHEMA)
+        await ch_client.command(SUPPLY_TABLE_SCHEMA)
+        await ch_client.command(LOGS_TABLE_SCHEMA)
         app.state.clickhouse_client = ch_client
 
         # Add the ClickHouse handler to the root logger for the application
@@ -74,11 +74,11 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     logger.info("Application shutdown...")
-    if hasattr(app.state, 'clickhouse_client') and app.state.clickhouse_client.is_connected():
-        app.state.clickhouse_client.disconnect()
+    if hasattr(app.state, 'clickhouse_client') and await app.state.clickhouse_client.is_connected():
+        await app.state.clickhouse_client.disconnect()
         logger.info("ClickHouse disconnected.")
     if hasattr(app.state, 'db'):
-        Database.close()
+        await Database.close()
         logger.info("Postgres connection closed.")
 
 
