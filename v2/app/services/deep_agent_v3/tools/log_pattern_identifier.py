@@ -1,14 +1,18 @@
-
 import pandas as pd
 from sklearn.cluster import KMeans
 import json
 from typing import List, Any
 from app.schema import DiscoveredPattern
 from app.config import settings
+from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
-class LogPatternIdentifier:
-    def __init__(self, llm_connector: Any):
-        self.llm_connector = llm_connector
+class LogPatternIdentifier(BaseTool):
+    metadata = ToolMetadata(
+        name="LogPatternIdentifier",
+        description="Identifies patterns in the enriched logs.",
+        version="1.0.0",
+        status="production"
+    )
 
     async def identify_patterns(
         self, enriched_spans: List[dict], n_patterns: int = 5

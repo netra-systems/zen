@@ -4,11 +4,15 @@ from app.db.models_postgres import SupplyOption
 from app.schema import LearnedPolicy, PredictedOutcome, DiscoveredPattern
 from app.db.models_clickhouse import UnifiedLogEntry
 from sqlalchemy.future import select
+from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
-class PolicyProposer:
-    def __init__(self, db_session: Any, llm_connector: Any):
-        self.db_session = db_session
-        self.llm_connector = llm_connector
+class PolicyProposer(BaseTool):
+    metadata = ToolMetadata(
+        name="PolicyProposer",
+        description="Finds the best routing policies through simulation.",
+        version="1.0.0",
+        status="production"
+    )
 
     async def propose_policies(
         self, patterns: List[DiscoveredPattern], span_map: Dict[str, UnifiedLogEntry]

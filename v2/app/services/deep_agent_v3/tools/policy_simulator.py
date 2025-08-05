@@ -1,13 +1,17 @@
-
 import json
 from typing import Any, Dict
 from app.schema import DiscoveredPattern, PredictedOutcome, LearnedPolicy
 from app.db.models_postgres import SupplyOption
 from app.config import settings
+from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
-class PolicySimulator:
-    def __init__(self, llm_connector: Any):
-        self.llm_connector = llm_connector
+class PolicySimulator(BaseTool):
+    metadata = ToolMetadata(
+        name="PolicySimulator",
+        description="Simulates the outcome of a single policy.",
+        version="1.0.0",
+        status="production"
+    )
 
     async def simulate(self, policy: LearnedPolicy) -> PredictedOutcome:
         """Simulates the outcome of a single policy."""
