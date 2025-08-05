@@ -1,22 +1,23 @@
-from app.llm.llm_manager import LLMManager
-import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
+import json
 import uuid
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from app.services.deep_agent_v3.main import DeepAgentV3
+import pytest
+
 from app.db.models_clickhouse import AnalysisRequest
-
+from app.llm.llm_manager import LLMManager
+from app.services.deep_agent_v3.main import DeepAgentV3
 
 
 @pytest.fixture
 def mock_db_session():
     return MagicMock()
 
+
 @pytest.fixture
 def mock_llm_manager():
     return MagicMock(spec=LLMManager)
 
-import json
 
 @pytest.fixture
 def mock_request():
@@ -26,14 +27,16 @@ def mock_request():
         query=json.dumps({"query": "test_query"}),
     )
 
+
 @pytest.mark.asyncio
-async def test_run(mock_request, db_session, mock_llm_manager):
+async def test_run(mock_request, mock_llm_manager):
     # Given
     run_id = str(uuid.uuid4())
-    with patch('app.services.deep_agent_v3.main.ToolBuilder.build_all') as mock_build_all, \
-         patch('app.services.deep_agent_v3.main.ScenarioFinder') as mock_scenario_finder, \
-         patch.object(DeepAgentV3, '_init_langfuse', return_value=None):
-
+    with patch("app.services.deep_agent_v3.main.ToolBuilder.build_all") as mock_build_all, patch(
+        "app.services.deep_agent_v3.main.ScenarioFinder"
+    ) as mock_scenario_finder, patch.object(
+        DeepAgentV3, "_init_langfuse", return_value=None
+    ):
         mock_tool = MagicMock()
         mock_tool.run = MagicMock(return_value="tool_result")
         mock_build_all.return_value = {
@@ -45,10 +48,10 @@ async def test_run(mock_request, db_session, mock_llm_manager):
         mock_scenario_finder_instance.find_scenario.return_value = {
             "scenario": {
                 "name": "test_scenario",
-                "steps": ["analyze_request", "propose_solution", "generate_report"]
+                "steps": ["analyze_request", "propose_solution", "generate_report"],
             },
             "confidence": 0.9,
-            "justification": "test_justification"
+            "justification": "test_justification",
         }
 
         agent = DeepAgentV3(
@@ -57,18 +60,22 @@ async def test_run(mock_request, db_session, mock_llm_manager):
             db_session=mock_db_session,
             llm_manager=mock_llm_manager,
         )
-        agent.agent_core.decide_next_step = MagicMock(return_value={"tool_name": "test_tool", "tool_input": {}})
+        agent.agent_core.decide_next_step = MagicMock(
+            return_value={"tool_name": "test_tool", "tool_input": {}}
+        )
 
     # When
-    with patch('app.services.deep_agent_v3.main.DeepAgentV3._generate_and_save_run_report', new_callable=AsyncMock):
+    with patch(
+        "app.services.deep_agent_v3.main.DeepAgentV3._generate_and_save_run_report",
+        new_callable=AsyncMock,
+    ):
         final_state = await agent.run()
 
     # Then
     assert agent.status == "complete"
     assert final_state is not None
     assert len(final_state.messages) == 4
-    assert final_state.messages[0]['content'] == "Scenario identified: test_scenario"
-    assert final_state.messages[1]['content'] == 'tool_result'
-    assert final_state.messages[2]['content'] == 'tool_result'
-    assert final_state.messages[3]['content'] == 'tool_result'
-
+    assert final_state.messages[0]["content"] == "Scenario identified: test_scenario"
+    assert final_state.messages[1]["content"] == "tool_result"
+    assert final_state.messages[2]["content"] == "tool_result"
+    assert final_state.messages[3]["content"] == "tool_result"
