@@ -42,7 +42,7 @@ class NetraOptimizerAgentSupervisor:
             "completed_steps": []
         }
         # Start the agent asynchronously
-        await self.graph.astart(initial_state, {"recursion_limit": 100})
+        await self.graph.ainvoke(initial_state, {"recursion_limit": 100})
         
         # Immediately return a response to the user
         return {"status": "agent_started", "request_id": request.request.id}

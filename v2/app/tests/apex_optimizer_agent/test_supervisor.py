@@ -11,8 +11,8 @@ async def test_start_agent():
     mock_llm_manager = MagicMock()
     mock_graph = MagicMock()
     
-    # Mock the graph's astart method
-    mock_graph.astart = AsyncMock()
+    # Mock the graph's ainvoke method
+    mock_graph.ainvoke = AsyncMock()
 
     # Mock the SingleAgentTeam and its create_graph method
     with unittest.mock.patch('app.services.apex_optimizer_agent.supervisor.SingleAgentTeam') as mock_team_class:
@@ -43,8 +43,8 @@ async def test_start_agent():
         result = await supervisor.start_agent(analysis_request)
 
         # Assert that the graph was started with the correct initial state
-        mock_graph.astart.assert_awaited_once()
-        call_args, call_kwargs = mock_graph.astart.call_args
+        mock_graph.ainvoke.assert_awaited_once()
+        call_args, call_kwargs = mock_graph.ainvoke.call_args
         assert call_args[0]["messages"][0].content == "test query"
         assert call_args[0]["todo_list"] == ["triage_request"]
 
