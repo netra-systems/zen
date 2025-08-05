@@ -1,3 +1,4 @@
+
 import json
 from typing import Any, Dict
 from app.schema import DiscoveredPattern, PredictedOutcome, LearnedPolicy
@@ -10,13 +11,26 @@ class PolicySimulator:
 
     async def simulate(self, policy: LearnedPolicy) -> PredictedOutcome:
         """Simulates the outcome of a single policy."""
-        # This is a placeholder for the actual simulation logic
-        return PredictedOutcome(
-            supply_option_name=policy.optimal_supply_option_name,
-            utility_score=0.9,
-            predicted_cost_usd=0.01,
-            predicted_latency_ms=100,
-            predicted_quality_score=0.9,
-            explanation="",
-            confidence=0.9
-        )
+        prompt = f"""
+        Simulate the outcome of the following policy:
+
+        Policy:
+        - Pattern Name: {policy.pattern_name}
+        - Optimal Supply Option: {policy.optimal_supply_option_name}
+
+        Based on this information, predict the following:
+        - utility_score (0.0 to 1.0)
+        - predicted_cost_usd (float)
+        - predicted_latency_ms (int)
+        - predicted_quality_score (0.0 to 1.0)
+        - explanation (string)
+        - confidence (0.0 to 1.0)
+
+        Return the result as a JSON object.
+        """
+        response = await self.llm_connector.get_completion(prompt)
+        try:
+            return PredictedOutcome.model_validate_json(response)
+        except Exception as e:
+            # Handle parsing errors
+            return None

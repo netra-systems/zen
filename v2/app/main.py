@@ -1,5 +1,6 @@
 # v2/app/main.py
 import logging
+import sys
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
@@ -10,12 +11,13 @@ from app.db.postgres import Database
 from app.db.clickhouse import ClickHouseClient
 from app.db.models_clickhouse import SUPPLY_TABLE_SCHEMA, LOGS_TABLE_SCHEMA
 from app.config import settings
-from app.logging_config_custom.logger import logger
+from app.logging_config_custom.logger import logger, Formatter
 from app.logging_config_custom.clickhouse_logger import ClickHouseLogHandler
 
 def setup_logging():
     """Initializes the application's logging configuration."""
-    logger.configure(level=settings.log_level)
+    logger.remove()
+    logger.add(sys.stdout, level=settings.log_level, format=Formatter().format)
     logger.info("Logging configured.")
 
 from app.services.key_manager import KeyManager

@@ -1,6 +1,7 @@
 import io
 from typing import Any, Dict
 from langfuse import Langfuse, observe
+import json
 
 from app.db.models_clickhouse import AnalysisRequest
 from app.db.models_postgres import DeepAgentRun
@@ -8,11 +9,8 @@ from app.services.deep_agent_v3.state import AgentState
 from app.config import settings
 from app.logging_config_custom.logger import app_logger
 from app.services.deep_agent_v3.pipeline import Pipeline
-from app.services.deep_agent_v3.steps.fetch_raw_logs import fetch_raw_logs
-from app.services.deep_agent_v3.steps.enrich_and_cluster import enrich_and_cluster
-from app.services.deep_agent_v3.steps.propose_optimal_policies import propose_optimal_policies
-from app.services.deep_agent_v3.steps.simulate_policy import simulate_policy
-from app.services.deep_agent_v3.steps.generate_final_report import generate_final_report
+from app.services.deep_agent_v3.scenario_finder import ScenarioFinder
+from app.services.deep_agent_v3.steps import ALL_STEPS
 from app.services.deep_agent_v3.tool_builder import ToolBuilder
 
 class DeepAgentV3:
@@ -27,7 +25,6 @@ class DeepAgentV3:
         self.db_session = db_session
         self.llm_connector = llm_connector
         self.state = AgentState(messages=[])
-        self.log_stream = io.StringIO()
         self.langfuse = self._init_langfuse()
         self.tools = self._init_tools()
         self.pipeline = self._init_pipeline()
@@ -47,13 +44,11 @@ class DeepAgentV3:
         return ToolBuilder.build_all(self.db_session, self.llm_connector)
 
     def _init_pipeline(self) -> Pipeline:
-        return Pipeline(steps=[
-            fetch_raw_logs,
-            enrich_and_cluster,
-            propose_optimal_policies,
-            simulate_policy,
-            generate_final_report,
-        ])
+        scenario_finder = ScenarioFinder(self.llm_connector)
+        prompt = self.request.workloads[0].get("query", "")
+        scenario = scenario_finder.find_scenario(prompt)
+        step_functions = [ALL_STEPS[step_name] for step_name in scenario["steps"] if step_name in ALL_STEPS]
+        return Pipeline(steps=step_functions)
 
     @observe()
     async def run_full_analysis(self) -> AgentState:
@@ -64,10 +59,12 @@ class DeepAgentV3:
             if result["status"] == "failed":
                 self.status = "failed"
                 app_logger.error(f"Full analysis failed for run_id: {self.run_id} at step: {result.get('step')}")
+                self._generate_and_save_run_report()
                 return self.state
         
         self.status = "complete"
         app_logger.info(f"Full analysis completed for run_id: {self.run_id}")
+        self._generate_and_save_run_report()
         if self.langfuse:
             self.langfuse.flush()
         
@@ -89,7 +86,7 @@ class DeepAgentV3:
         result = await self.pipeline.run_next_step(self.state, self.tools, self.request)
         output_data = self.state.model_dump()
 
-        self._record_step_history(result.get("completed_step"), input_data, output_data)
+        self._record_step_history(result.get("completed_step"), input_data, output_data, result)
 
         if result["status"] == "failed":
             self.status = "failed"
@@ -106,24 +103,47 @@ class DeepAgentV3:
 
         return result
 
-    def _record_step_history(self, step_name: str, input_data: dict, output_data: dict):
+    def _record_step_history(self, step_name: str, input_data: dict, output_data: dict, result: dict):
         if not step_name:
             return
         
-        log_contents = self.log_stream.getvalue()
-        self.log_stream.truncate(0)
-        self.log_stream.seek(0)
+        log_message = {
+            "run_id": self.run_id,
+            "step_name": step_name,
+            "status": result.get("status"),
+            "result": result.get("result"),
+            "error": result.get("error"),
+        }
+        app_logger.info(json.dumps(log_message))
 
         new_run = DeepAgentRun(
             run_id=self.run_id,
             step_name=step_name,
             step_input=input_data,
             step_output=output_data,
-            run_log=log_contents
+            run_log=json.dumps(log_message)
         )
         self.db_session.add(new_run)
         self.db_session.commit()
-        app_logger.info(f"Recorded history for step: {step_name} for run_id: {self.run_id}")
+
+    def _generate_and_save_run_report(self):
+        """Generates a markdown report of the entire run and saves it to the database."""
+        report = f"# Deep Agent Run Report: {self.run_id}\n\n"
+        report += f"**Status:** {self.status}\n\n"
+        report += "## Steps\n\n"
+
+        runs = self.db_session.query(DeepAgentRun).filter_by(run_id=self.run_id).all()
+        for run in runs:
+            report += f"### {run.step_name}\n\n"
+            report += f"**Status:** {json.loads(run.run_log).get('status')}\n\n"
+            report += f"**Result:**\n```json\n{json.dumps(json.loads(run.run_log).get('result'), indent=2)}\n```\n\n"
+            if json.loads(run.run_log).get('error'):
+                report += f"**Error:**\n```\n{json.loads(run.run_log).get('error')}\n```\n\n"
+
+        final_run = self.db_session.query(DeepAgentRun).filter_by(run_id=self.run_id).order_by(DeepAgentRun.timestamp.desc()).first()
+        if final_run:
+            final_run.run_report = report
+            self.db_session.commit()
 
     def is_complete(self) -> bool:
         """Checks if the analysis has completed all steps."""

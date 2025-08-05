@@ -1,4 +1,3 @@
-
 import asyncio
 from typing import List, Dict, Any
 from app.db.models_postgres import SupplyOption
@@ -39,7 +38,7 @@ class PolicyProposer:
             baseline_metrics = {
                 "avg_cost_usd": sum(s.finops['total_cost_usd'] for s in member_spans) / len(member_spans),
                 "avg_latency_ms": sum(s.performance['latency_ms']['total_e2e_ms'] for s in member_spans) / len(member_spans),
-                "avg_quality_score": 0.8 # Placeholder
+                "avg_quality_score": sum(s.quality.score for s in member_spans) / len(member_spans) if all(s.quality for s in member_spans) else 0.8,
             }
 
             pattern_spend = sum(s.finops['total_cost_usd'] for s in member_spans)
@@ -57,16 +56,35 @@ class PolicyProposer:
         return policies, outcomes
 
     async def _simulate_policy_outcome(self, pattern: DiscoveredPattern, supply_option: SupplyOption, user_goal: str, span: UnifiedLogEntry) -> PredictedOutcome:
-        # This is a placeholder for the actual simulation logic
-        return PredictedOutcome(
-            supply_option_name=supply_option.name,
-            utility_score=0.9,
-            predicted_cost_usd=0.01,
-            predicted_latency_ms=100,
-            predicted_quality_score=0.9,
-            explanation="",
-            confidence=0.9
-        )
+        prompt = f"""
+        Simulate the outcome of routing a request with the following characteristics to the given supply option.
+
+        Request Pattern:
+        - Name: {pattern.pattern_name}
+        - Description: {pattern.pattern_description}
+        - User Goal: {user_goal}
+
+        Supply Option:
+        - Name: {supply_option.name}
+        - Provider: {supply_option.provider}
+        - Family: {supply_option.family}
+
+        Based on this information, predict the following:
+        - utility_score (0.0 to 1.0)
+        - predicted_cost_usd (float)
+        - predicted_latency_ms (int)
+        - predicted_quality_score (0.0 to 1.0)
+        - explanation (string)
+        - confidence (0.0 to 1.0)
+
+        Return the result as a JSON object.
+        """
+        response = await self.llm_connector.get_completion(prompt)
+        try:
+            return PredictedOutcome.model_validate_json(response)
+        except Exception as e:
+            # Handle parsing errors
+            return None
 
     async def _get_supply_catalog(self) -> List[SupplyOption]:
         """Retrieves the supply catalog from the database."""
