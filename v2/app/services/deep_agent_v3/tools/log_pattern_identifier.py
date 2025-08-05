@@ -7,16 +7,15 @@ from app.config import settings
 from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
 class LogPatternIdentifier(BaseTool):
-    name = "log_pattern_identifier"
-    llm_name = "analysis"
     metadata = ToolMetadata(
-        name="LogPatternIdentifier",
+        name="log_pattern_identifier",
         description="Identifies patterns in the enriched logs.",
         version="1.0.0",
         status="in_review"
     )
+    llm_name = "analysis"
 
-    async def identify_patterns(
+    async def run(
         self, enriched_spans: List[dict], n_patterns: int = 5
     ) -> (List[DiscoveredPattern], List[str]):
         """Identifies patterns in the enriched logs."""

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Any
+from abc import ABC, abstractmethod
 from app.llm.llm_manager import LLMManager
 
 class ToolMetadata(BaseModel):
@@ -8,7 +9,7 @@ class ToolMetadata(BaseModel):
     version: str = Field("1.0.0", description="The version of the tool.")
     status: str = Field("production", description="The operational status of the tool (e.g., 'production', 'mock', 'disabled').")
 
-class BaseTool:
+class BaseTool(ABC):
     metadata: ToolMetadata
     llm_name: Optional[str] = None
 
@@ -23,3 +24,7 @@ class BaseTool:
 
     def get_metadata(self) -> dict:
         return self.metadata.dict()
+
+    @abstractmethod
+    async def run(self, *args, **kwargs) -> Any:
+        pass

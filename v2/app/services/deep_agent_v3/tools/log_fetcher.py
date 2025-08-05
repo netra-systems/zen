@@ -1,4 +1,3 @@
-
 from typing import Any, List, Dict, Optional
 from datetime import datetime
 import json
@@ -6,25 +5,28 @@ from app.db.models_clickhouse import UnifiedLogEntry
 from app.services.security_service import security_service
 from app.db.clickhouse import get_clickhouse_client
 from app.config import settings
+from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
-class LogFetcher:
-    name = "log_fetcher"
-    def __init__(self, db_session: Any):
-        self.db_session = db_session
+class LogFetcher(BaseTool):
+    metadata = ToolMetadata(
+        name="log_fetcher",
+        description="Fetches raw log data from ClickHouse.",
+        version="1.0.0",
+        status="production"
+    )
 
-    async def fetch_logs(
+    async def run(
         self, source_table: str, start_time: datetime, end_time: datetime, filters: dict = None
     ) -> (List[UnifiedLogEntry], List[str]):
         """Connects to ClickHouse to fetch raw log data."""
-        from app.config import settings
         if settings.app_env == "development":
             from app.services.deep_agent_v3.dev_utils import get_or_create_dev_user
-            dev_user = get_or_create_dev_user(self.db_session)
+            dev_user = await get_or_create_dev_user(self.db_session)
             user_id = dev_user.id
         else:
             user_id = self.db_session.info["user_id"]
 
-        credentials = security_service.get_user_credentials(user_id=user_id, db_session=self.db_session)
+        credentials = await security_service.get_user_credentials(user_id=user_id, db_session=self.db_session)
         if not credentials:
             raise ValueError("ClickHouse credentials not found for user.")
 
@@ -56,7 +58,8 @@ class LogFetcher:
                             pass
                 log_entry = UnifiedLogEntry.model_validate(row_dict)
                 log_entries.append(log_entry)
-                trace_ids.append(log_entry.trace_context.trace_id)
+                if log_entry.trace_context and log_entry.trace_context.trace_id:
+                    trace_ids.append(log_entry.trace_context.trace_id)
             except Exception as e:
                 print(f"Skipping a row due to parsing/validation error: {e}. Row data: {row}")
                 continue
