@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, AsyncMock, patch
 from app.services.deep_agent_v3.tools.log_analyzer import LogAnalyzer
 from app.services.deep_agent_v3.tools.policy_simulator import PolicySimulator
 from app.services.deep_agent_v3.tools.supply_catalog_search import SupplyCatalogSearch
-from app.schema import PredictedOutcome, LearnedPolicy
+from app.schema import PredictedOutcome, LearnedPolicy, BaselineMetrics
 
 @pytest.fixture
 def mock_llm_manager():
@@ -20,14 +20,10 @@ def mock_db_session():
     session.info = {"user_id": "test_user"}
     return session
 
-class MockLogAnalyzer(LogAnalyzer):
-    async def run(self, *args, **kwargs):
-        return await super().run(*args, **kwargs)
-
 class TestLogAnalyzer:
     @pytest.mark.asyncio
     async def test_analyze_logs(self, mock_llm_manager):
-        tool = MockLogAnalyzer(llm_manager=mock_llm_manager)
+        tool = LogAnalyzer(llm_manager=mock_llm_manager)
         logs = ["log1", "log2", "log3"]
         result = await tool.run(logs)
         assert result == {"key": "value"}
@@ -37,7 +33,26 @@ class TestPolicySimulator:
     @pytest.mark.asyncio
     async def test_simulate_policy(self, mock_llm_manager):
         tool = PolicySimulator(llm_manager=mock_llm_manager)
-        policy = LearnedPolicy(pattern_name="test", optimal_supply_option_name="test", predicted_outcome=None, alternative_outcomes=[], baseline_metrics=None, pattern_impact_fraction=0.0)
+        policy = LearnedPolicy(
+            pattern_name="test",
+            optimal_supply_option_name="test",
+            predicted_outcome=PredictedOutcome(
+                supply_option_name="test_supply_option",
+                utility_score=0.9,
+                predicted_cost_usd=0.1,
+                predicted_latency_ms=100,
+                predicted_quality_score=0.9,
+                explanation="test",
+                confidence=0.9
+            ),
+            alternative_outcomes=[],
+            baseline_metrics=BaselineMetrics(
+                avg_cost_usd=0.2,
+                avg_latency_ms=200,
+                avg_quality_score=0.8
+            ),
+            pattern_impact_fraction=0.5
+        )
         mock_llm_manager.get_llm.return_value.ainvoke.return_value.content = PredictedOutcome(
             supply_option_name="test_supply_option",
             utility_score=0.9,
@@ -58,7 +73,7 @@ class TestSupplyCatalogSearch:
         query = "test query"
         mock_option = MagicMock()
         mock_option.name = "test query model"
-        with patch('app.services.supply_catalog_service.SupplyCatalogService.get_all_options', new_callable=AsyncMock) as mock_get_all_options:
+        with patch('app.services.supply_catalog_service.SupplyCatalogService.get_all_options') as mock_get_all_options:
             mock_get_all_options.return_value = [mock_option]
             result = await tool.run(query)
             assert len(result) == 1

@@ -30,37 +30,33 @@ class LogFetcher(BaseTool):
         if not credentials:
             raise ValueError("ClickHouse credentials not found for user.")
 
-        client = get_clickhouse_client(credentials)
-        database, table = source_table.split('.', 1)
-        query = f"SELECT * FROM {database}.{table} WHERE timestamp BETWEEN '{start_time}' AND '{end_time}'"
+        async with get_clickhouse_client() as client:
+            database, table = source_table.split('.', 1)
+            query = f"SELECT * FROM {database}.{table} WHERE timestamp BETWEEN '{start_time}' AND '{end_time}'"
 
-        if filters:
-            for key, value in filters.items():
-                query += f" AND {key} = '{value}'"
+            if filters:
+                for key, value in filters.items():
+                    query += f" AND {key} = '{value}'"
 
-        query_result = client.execute(query, with_column_types=True)
-        if not query_result or not query_result[0]:
-            return [], []
+            query_result = await client.execute_query(query)
+            if not query_result:
+                return [], []
 
-        column_names = [col[0] for col in query_result[1]]
-        data_rows = query_result[0]
-
-        log_entries = []
-        trace_ids = []
-        for row in data_rows:
-            try:
-                row_dict = dict(zip(column_names, row))
-                for key, value in row_dict.items():
-                    if isinstance(value, str) and value.startswith('{'):
-                        try:
-                            row_dict[key] = json.loads(value)
-                        except json.JSONDecodeError:
-                            pass
-                log_entry = UnifiedLogEntry.model_validate(row_dict)
-                log_entries.append(log_entry)
-                if log_entry.trace_context and log_entry.trace_context.trace_id:
-                    trace_ids.append(log_entry.trace_context.trace_id)
-            except Exception as e:
-                print(f"Skipping a row due to parsing/validation error: {e}. Row data: {row}")
-                continue
-        return log_entries, trace_ids
+            log_entries = []
+            trace_ids = []
+            for row in query_result:
+                try:
+                    for key, value in row.items():
+                        if isinstance(value, str) and value.startswith('{'):
+                            try:
+                                row[key] = json.loads(value)
+                            except json.JSONDecodeError:
+                                pass
+                    log_entry = UnifiedLogEntry.model_validate(row)
+                    log_entries.append(log_entry)
+                    if log_entry.trace_context and log_entry.trace_context.trace_id:
+                        trace_ids.append(log_entry.trace_context.trace_id)
+                except Exception as e:
+                    print(f"Skipping a row due to parsing/validation error: {e}. Row data: {row}")
+                    continue
+            return log_entries, trace_ids

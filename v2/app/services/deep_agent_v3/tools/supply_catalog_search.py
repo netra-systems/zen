@@ -21,5 +21,5 @@ class SupplyCatalogSearch(BaseTool):
         """
         Searches the supply catalog for available models and resources.
         """
-        all_options = await self.supply_catalog_service.get_all_options(self.db_session)
+        all_options = self.supply_catalog_service.get_all_options(self.db_session)
         return [option for option in all_options if query in option.name]

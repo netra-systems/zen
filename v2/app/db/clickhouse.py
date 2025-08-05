@@ -2,11 +2,10 @@ import clickhouse_connect
 from app.logging_config_custom.logger import app_logger as logger
 from clickhouse_connect.driver.client import Client
 from typing import List, Dict, Any
+from contextlib import asynccontextmanager
 
 from app.logging_config_custom.logger import app_logger
 from ..config import settings
-
-# TBD better difference between "Connect" and "Driver"
 
 class ClickHouseClient:
     """
@@ -21,83 +20,79 @@ class ClickHouseClient:
         self.password = password
         self.client: Client | None = None
 
-    def connect(self):
+    async def connect(self):
         """
         Establishes a connection to the ClickHouse server.
         """
         try:
-            self.client = clickhouse_connect.get_client(
+            self.client = await clickhouse_connect.get_client(
                 host=self.host,
                 port=self.port,
                 database=self.database,
                 username=self.user,
-                password=self.password
+                password=self.password,
+                secure=True
             )
-            self.client.ping()
+            await self.client.ping()
             logger.info(f"Successfully connected to ClickHouse at {self.host}:{self.port}")
         except Exception as e:
             logger.error(f"Failed to connect to ClickHouse: {e}", exc_info=True)
             self.client = None
-            # Raise a specific error to be handled by the application startup logic.
             raise ConnectionError("Could not connect to ClickHouse") from e
 
-    def disconnect(self):
+    async def disconnect(self):
         """Closes the connection to the ClickHouse server."""
         if self.client:
-            self.client.close()
+            await self.client.close()
             self.client = None
             logger.info("ClickHouse connection closed.")
 
-    def is_connected(self) -> bool:
+    async def is_connected(self) -> bool:
         """
         Checks if the client is initialized and can connect to the server.
         """
         if self.client is None:
             return False
         try:
-            # The ping() method returns True on success or raises an exception on failure.
-            return self.client.ping()
+            return await self.client.ping()
         except Exception:
             return False
 
-    def command(self, schema: str):
+    async def command(self, schema: str):
         """Executes a command."""
-        if not self.is_connected():
+        if not await self.is_connected():
             raise ConnectionError("Not connected to ClickHouse.")
         try:
-            self.client.command(schema)
+            await self.client.command(schema)
             logger.info(f"Schema executed successfully.")
         except Exception as e:
             logger.error(f"Could not execute schema '{schema[:50]}...': {e}", exc_info=True)
             raise
 
-    def insert_data(self, table: str, data: List[List[Any]], column_names: List[str]):
+    async def insert_data(self, table: str, data: List[List[Any]], column_names: List[str]):
         """Inserts a list of rows into the specified table."""
-        if not self.is_connected():
+        if not await self.is_connected():
             raise ConnectionError("Not connected to ClickHouse.")
         try:
-            self.client.insert(table, data, column_names=column_names)
+            await self.client.insert(table, data, column_names=column_names)
             logger.info(f"Inserted {len(data)} rows into table '{table}'.")
         except Exception as e:
             logger.error(f"Failed to insert data into table '{table}': {e}", exc_info=True)
             raise
 
-    def execute_query(self, query: str) -> List[Dict[str, Any]]:
+    async def execute_query(self, query: str) -> List[Dict[str, Any]]:
         """Executes a read-only query and returns the result as a list of dicts."""
-        if not self.is_connected():
+        if not await self.is_connected():
             raise ConnectionError("Not connected to ClickHouse.")
         try:
-            result = self.client.query(query)
-            # Return results as a list of dictionaries for easier use.
+            result = await self.client.query(query)
             return [dict(zip(result.column_names, row)) for row in result.result_rows]
         except Exception as e:
             logger.error(f"Failed to execute query '{query}': {e}", exc_info=True)
             raise
 
-from contextlib import contextmanager
-
-@contextmanager
-def get_clickhouse_client():
+@asynccontextmanager
+async def get_clickhouse_client():
     """
     Dependency provider for the ClickHouse client.
     Instantiates the client with settings and attempts to connect.
@@ -115,8 +110,8 @@ def get_clickhouse_client():
         password=config.password,
         database=config.database,
     )
-    client.connect()
+    await client.connect()
     try:
         yield client
     finally:
-        client.disconnect()
+        await client.disconnect()
