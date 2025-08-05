@@ -9,7 +9,7 @@ class SupplyCatalogSearch(BaseTool):
         name="SupplyCatalogSearch",
         description="Searches the supply catalog for available models and resources.",
         version="1.0.0",
-        status="production"
+        status="in_review"
     )
 
     async def search(self, query: str) -> List[Supply]:

@@ -11,7 +11,7 @@ class PolicyProposer(BaseTool):
         name="PolicyProposer",
         description="Finds the best routing policies through simulation.",
         version="1.0.0",
-        status="production"
+        status="in_review"
     )
 
     async def propose_policies(

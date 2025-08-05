@@ -6,7 +6,7 @@ class ToolLatencyOptimizationTool(BaseTool):
         name="ToolLatencyOptimization",
         description="Reduces tool latency.",
         version="1.0.0",
-        status="production"
+        status="in_review"
     )
 
 async def analyze_current_latency(state: Dict[str, Any], **kwargs) -> str:

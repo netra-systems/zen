@@ -6,7 +6,7 @@ class CostEstimator(BaseTool):
         name="CostEstimator",
         description="Estimates the cost of a given prompt using the llm_connector.",
         version="1.0.0",
-        status="production"
+        status="in_review"
     )
 
     async def execute(self, prompt: str, context: Dict[str, Any]) -> Dict[str, Any]:

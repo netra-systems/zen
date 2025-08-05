@@ -6,7 +6,7 @@ class NewModelEffectivenessAnalysisTool(BaseTool):
         name="NewModelEffectivenessAnalysis",
         description="Analyzes the effectiveness of new models.",
         version="1.0.0",
-        status="production"
+        status="in_review"
     )
 
 async def define_evaluation_criteria(state: Dict[str, Any], **kwargs) -> str:

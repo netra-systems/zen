@@ -10,7 +10,7 @@ class PolicySimulator(BaseTool):
         name="PolicySimulator",
         description="Simulates the outcome of a single policy.",
         version="1.0.0",
-        status="production"
+        status="in_review"
     )
 
     async def simulate(self, policy: LearnedPolicy) -> PredictedOutcome:

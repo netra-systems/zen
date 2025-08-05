@@ -6,7 +6,7 @@ class CostSimulationForIncreasedUsageTool(BaseTool):
         name="CostSimulationForIncreasedUsage",
         description="Simulates the cost impact of increased usage.",
         version="1.0.0",
-        status="production"
+        status="in_review"
     )
 
 async def analyze_current_usage(state: Dict[str, Any], **kwargs) -> str:

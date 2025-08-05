@@ -1,5 +1,5 @@
 import io
-from typing import Any, Dict
+from typing import Any, Dict, List
 from langfuse import Langfuse, observe
 import json
 
@@ -8,15 +8,14 @@ from app.db.models_postgres import DeepAgentRun
 from app.services.deep_agent_v3.state import AgentState
 from app.config import settings
 from app.logging_config_custom.logger import app_logger
-from app.services.deep_agent_v3.pipeline import Pipeline
+from app.services.deep_agent_v3.core import AgentCore
 from app.services.deep_agent_v3.scenario_finder import ScenarioFinder
-from app.services.deep_agent_v3.steps import ALL_STEPS
 from app.services.deep_agent_v3.tool_builder import ToolBuilder
 from app.db.session import get_db_session
 
 class DeepAgentV3:
     """
-    A stateful, step-by-step agent for conducting deep analysis of LLM usage.
+    A stateful, agentic system for conducting deep analysis of LLM usage.
     This engine is designed for interactive control, monitoring, and extensibility.
     """
 
@@ -28,8 +27,9 @@ class DeepAgentV3:
         self.state = AgentState(messages=[])
         self.langfuse = self._init_langfuse()
         self.tools = self._init_tools()
-        self.pipeline = self._init_pipeline()
-        self.status = "in_progress"
+        self.agent_core = AgentCore(self.llm_connector, list(self.tools.values()))
+        self.triage_result: Dict[str, Any] | None = None
+        self.status = "starting"
         app_logger.info(f"DeepAgentV3 initialized for run_id: {self.run_id}")
 
     def _init_langfuse(self):
@@ -44,32 +44,56 @@ class DeepAgentV3:
     def _init_tools(self) -> Dict[str, Any]:
         return ToolBuilder.build_all(self.db_session, self.llm_connector)
 
-    def _init_pipeline(self) -> Pipeline:
-        scenario_finder = ScenarioFinder(self.llm_connector)
-        prompt = self.request.workloads[0].get("query", "")
-        scenario = scenario_finder.find_scenario(prompt)
-        step_functions = [ALL_STEPS[step_name] for step_name in scenario["steps"] if step_name in ALL_STEPS]
-        return Pipeline(steps=step_functions)
-
     @observe()
-    async def run_full_analysis(self) -> AgentState:
-        """Executes the entire analysis pipeline from start to finish."""
-        app_logger.info(f"Starting full analysis for run_id: {self.run_id}")
+    async def run(self):
+        """Executes the agentic workflow."""
+        app_logger.info(f"Starting agent run for run_id: {self.run_id}")
+        self.status = "in_progress"
+
         try:
-            while not self.pipeline.is_complete():
-                result = await self.run_next_step()
-                if result["status"] == "failed":
-                    self.status = "failed"
-                    app_logger.error(f"Full analysis failed for run_id: {self.run_id} at step: {result.get('step')}")
-                    await self._generate_and_save_run_report()
-                    return self.state
-            
+            # 1. Triage
+            scenario_finder = ScenarioFinder(self.llm_connector)
+            prompt = self.request.workloads[0].get("query", "")
+            self.triage_result = scenario_finder.find_scenario(prompt)
+            scenario = self.triage_result["scenario"]
+            app_logger.info(f"Scenario selected for run_id {self.run_id}: "
+                            f"Name='{scenario['name']}', "
+                            f"Confidence={self.triage_result['confidence']}, "
+                            f"Justification='{self.triage_result['justification']}'")
+            self.state.messages.append({"role": "assistant", "content": f"Scenario identified: {scenario['name']}"})
+
+
+            # 2. Execute based on scenario
+            available_tools = [step for step in scenario["steps"] if step in self.tools]
+
+            while available_tools:
+                next_step = self.agent_core.decide_next_step(self.state, available_tools)
+                if not next_step:
+                    break
+
+                tool_name = next_step["tool_name"]
+                tool_input = next_step["tool_input"]
+                
+                app_logger.info(f"Executing tool: {tool_name} for run_id: {self.run_id}")
+                
+                # Execute the tool
+                tool_function = self.tools[tool_name]
+                # This is a simplified execution. A real implementation would handle async and tool arguments better.
+                result = tool_function.run(state=self.state, **tool_input) 
+
+                self.state.messages.append({"role": "tool", "name": tool_name, "content": result})
+                await self._record_step_history(tool_name, tool_input, self.state.model_dump(), {"status": "success", "result": result})
+                
+                available_tools.remove(tool_name)
+
+
             self.status = "complete"
-            app_logger.info(f"Full analysis completed for run_id: {self.run_id}")
+            app_logger.info(f"Agent run completed for run_id: {self.run_id}")
             await self._generate_and_save_run_report()
+
         except Exception as e:
             self.status = "failed"
-            app_logger.error(f"An unexpected error occurred during full analysis for run_id: {self.run_id}. Error: {e}")
+            app_logger.error(f"An unexpected error occurred during agent run for run_id: {self.run_id}. Error: {e}")
             await self._generate_and_save_run_report()
         finally:
             if self.langfuse:
@@ -77,38 +101,6 @@ class DeepAgentV3:
         
         return self.state
 
-    @observe()
-    async def run_next_step(self, confirmation: bool = True):
-        """Executes the next step in the analysis pipeline."""
-        if self.pipeline.is_complete():
-            return {"status": "complete", "message": "Analysis is already complete."}
-
-        if self.status == "awaiting_confirmation" and not confirmation:
-            return {"status": "awaiting_confirmation", "message": "Awaiting user confirmation to proceed."}
-
-        step_name = self.pipeline.get_current_step_name()
-        app_logger.info(f"Running step: {step_name} for run_id: {self.run_id}")
-
-        input_data = self.state.model_dump()
-        result = await self.pipeline.run_next_step(self.state, self.tools, self.request)
-        output_data = self.state.model_dump()
-
-        await self._record_step_history(result.get("completed_step"), input_data, output_data, result)
-
-        if result["status"] == "failed":
-            self.status = "failed"
-            app_logger.error(f"Step {step_name} failed for run_id: {self.run_id}. Error: {result.get('error')}")
-        elif self.pipeline.is_complete():
-            self.status = "complete"
-            app_logger.info(f"Pipeline completed for run_id: {self.run_id}")
-        else:
-            self.status = "awaiting_confirmation"
-            app_logger.info(f"Step {step_name} completed for run_id: {self.run_id}. Awaiting confirmation.")
-        
-        if self.langfuse:
-            self.langfuse.flush()
-
-        return result
 
     async def _record_step_history(self, step_name: str, input_data: dict, output_data: dict, result: dict):
         if not step_name:
@@ -139,6 +131,13 @@ class DeepAgentV3:
 
         report = f"# Deep Agent Run Report: {self.run_id}\n\n"
         report += f"**Status:** {self.status}\n\n"
+        
+        if self.triage_result:
+            report += "## Triage\n\n"
+            report += f"**Scenario:** {self.triage_result['scenario']['name']}\n"
+            report += f"**Confidence:** {self.triage_result['confidence']}\n"
+            report += f"**Justification:** {self.triage_result['justification']}\n\n"
+
         report += "## Steps\n\n"
 
         async with get_db_session() as db_session:
@@ -161,5 +160,5 @@ class DeepAgentV3:
                 final_run.run_report = report
 
     def is_complete(self) -> bool:
-        """Checks if the analysis has completed all steps."""
+        """Checks if the analysis has completed."""
         return self.status == "complete" or self.status == "failed"

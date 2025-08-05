@@ -6,7 +6,7 @@ class CostReductionQualityPreservationTool(BaseTool):
         name="CostReductionQualityPreservation",
         description="Reduces costs while preserving quality.",
         version="1.0.0",
-        status="production"
+        status="in_review"
     )
 
 async def analyze_current_costs(state: Dict[str, Any], **kwargs) -> str:

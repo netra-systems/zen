@@ -6,7 +6,7 @@ class MultiObjectiveOptimizationTool(BaseTool):
         name="MultiObjectiveOptimization",
         description="Performs multi-objective optimization.",
         version="1.0.0",
-        status="production"
+        status="in_review"
     )
 
 async def define_optimization_goals(state: Dict[str, Any], **kwargs) -> str:

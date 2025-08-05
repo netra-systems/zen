@@ -11,7 +11,7 @@ class LogPatternIdentifier(BaseTool):
         name="LogPatternIdentifier",
         description="Identifies patterns in the enriched logs.",
         version="1.0.0",
-        status="production"
+        status="in_review"
     )
 
     async def identify_patterns(
