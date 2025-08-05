@@ -1,13 +1,12 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/button';
-import { Input } from '@/components/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/card';
-import { Progress } from '@/components/progress';
-import { Switch } from '@/components/switch';
-import { Label } from '@/components/label';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAgentPolling } from '../hooks/useAgentPolling';
+import { useAuth } from '@clerk/nextjs';
+import { apiService } from '../api';
 
 const exampleQueries = [
   "Analyze the current state of the S&P 500 and provide a summary of its recent performance.",
@@ -19,56 +18,21 @@ const exampleQueries = [
   "What are the most promising emerging markets for investment right now?"
 ];
 
-export default function DeepAgent() {
-  const [runId, setRunId] = useState<string | null>(null);
+export default function ApexOptimizerAgent() {
+  const { getToken } = useAuth();
   const [prompt, setPrompt] = useState<string>(exampleQueries[Math.floor(Math.random() * exampleQueries.length)]);
-  const [status, setStatus] = useState<string | null>(null);
-  const [step, setStep] = useState<number>(0);
-  const [totalSteps, setTotalSteps] = useState<number>(0);
-  const [lastStepResult, setLastStepResult] = useState<any | null>(null);
-  const [completedSteps, setCompletedSteps] = useState<any[]>([]);
-  const [finalReport, setFinalReport] = useState<string | null>(null);
-  const [isAutoProgress, setIsAutoProgress] = useState<boolean>(false);
+  const { messages, addMessage, startPolling, isLoading, error } = useAgentPolling(getToken());
 
-
-  const handleNextStep = async () => {
-    if (!runId) return;
-    const response = await fetch(`/api/v3/agent/${runId}/next`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ confirmation: true }),
-    });
-    const data = await response.json();
-    setLastStepResult(data.result);
-    if (data.completed_step) {
-      setCompletedSteps(prev => [...prev, { step: data.completed_step, result: data.result }]);
-    }
+  const startAnalysis = async () => {
+    addMessage('user', prompt);
+    const body = { prompt };
+    const runId = await apiService.startAgent(await getToken(), body);
+    startPolling(runId.run_id);
   };
 
   const handleClear = () => {
     setPrompt('');
   };
-
-  useEffect(() => {
-    if (runId) {
-      const interval = setInterval(async () => {
-        const response = await fetch(`/api/v3/agent/${runId}/status`);
-        const data = await response.json();
-        setStatus(data.status);
-        setStep(data.current_step);
-        setTotalSteps(data.total_steps);
-        setLastStepResult(data.last_step_result);
-
-        if (data.status === 'complete') {
-          setFinalReport(data.final_report);
-          clearInterval(interval);
-        } else if (isAutoProgress && data.status === 'awaiting_confirmation') {
-          handleNextStep();
-        }
-      }, 2000);
-      return () => clearInterval(interval);
-    }
-  }, [runId, isAutoProgress]);
 
   return (
     <Card>
@@ -83,49 +47,23 @@ export default function DeepAgent() {
             onChange={(e) => setPrompt(e.target.value)}
             className="flex-grow"
           />
-          <Button onClick={startAnalysis}>Start Analysis</Button>
+          <Button onClick={startAnalysis} disabled={isLoading}>Start Analysis</Button>
           <Button onClick={handleClear} variant="outline">Clear</Button>
         </div>
-        <div className="flex items-center space-x-2">
-          <Switch id="auto-progress" checked={isAutoProgress} onCheckedChange={setIsAutoProgress} />
-          <Label htmlFor="auto-progress">Auto-progress</Label>
-        </div>
-        {runId && (
-          <div>
-            <p>Run ID: {runId}</p>
-            <p>Status: {status}</p>
-            <Progress value={(step / totalSteps) * 100} />
-            <p>
-              Step {step} of {totalSteps}
-            </p>
-            {status === 'awaiting_confirmation' && !isAutoProgress && (
-              <Button onClick={handleNextStep} className="mt-2">Confirm & Continue</Button>
-            )}
+        {error && (
+          <div className="text-red-500">
+            <p>Error: {error.message}</p>
           </div>
         )}
-        {completedSteps.length > 0 && (
-          <div>
-            <h2 className="text-lg font-semibold mt-4">Analysis History</h2>
-            <div className="space-y-4 mt-2">
-              {completedSteps.map((item, index) => (
-                <Card key={index}>
-                  <CardHeader>
-                    <CardTitle>Step {index + 1}: {item.step}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <pre className="bg-gray-100 p-2 rounded-md">{JSON.stringify(item.result, null, 2)}</pre>
-                  </CardContent>
-                </Card>
-              ))}
+        <div className="space-y-4 mt-2">
+          {messages.map((msg, index) => (
+            <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`p-2 rounded-md ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
+                {msg.content}
+              </div>
             </div>
-          </div>
-        )}
-        {finalReport && (
-          <div>
-            <h2 className="text-lg font-semibold mt-4">Final Report</h2>
-            <pre className="bg-gray-100 p-4 rounded-md">{finalReport}</pre>
-          </div>
-        )}
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

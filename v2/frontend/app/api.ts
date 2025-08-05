@@ -6,9 +6,14 @@ export interface AgentRun {
     status: 'in_progress' | 'awaiting_confirmation' | 'complete' | 'failed';
     current_step: number;
     total_steps: number;
-    last_step_result?: any;
+    last_step_result?: Record<string, unknown>;
     final_report?: string;
-    error?: any;
+    error?: Record<string, unknown>;
+}
+
+export interface AgentEvent {
+    event: string;
+    data: Record<string, unknown>;
 }
 
 // --- API Service ---
@@ -43,7 +48,11 @@ export const apiService = {
         return this.post(`${config.api.baseUrl}/apex/chat/start_agent`, body, token);
     },
 
-    async getAgentStatus(runId: string, token: string | null) {
+    async getAgentStatus(runId: string, token: string | null): Promise<AgentRun> {
         return this.get(`${config.api.baseUrl}/agent/${runId}/status`, token);
+    },
+
+    async getAgentEvents(runId: string, token: string | null): Promise<AgentEvent[]> {
+        return this.get(`${config.api.baseUrl}/agent/${runId}/events`, token);
     }
 };

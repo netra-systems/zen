@@ -1,15 +1,20 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { apiService, AgentRun } from '../api';
+import { apiService, AgentRun, AgentEvent } from '../api';
 import React from 'react';
+
+interface Message {
+    role: 'user' | 'agent';
+    content: React.ReactNode;
+}
 
 export const useAgentPolling = (token: string | null) => {
     const [isPolling, setIsPolling] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<any | null>(null);
-    const [messages, setMessages] = useState<any[]>([]);
+    const [error, setError] = useState<Error | null>(null);
+    const [messages, setMessages] = useState<Message[]>([]);
     const pollingRunIdRef = useRef<string | null>(null);
 
-    const addMessage = (role: 'user' | 'agent', content: any) => {
+    const addMessage = (role: 'user' | 'agent', content: React.ReactNode) => {
         setMessages(prev => [...prev, { role, content }]);
     };
 
@@ -32,14 +37,14 @@ export const useAgentPolling = (token: string | null) => {
                 if (data.status === 'complete') {
                     addMessage('agent', data.final_report || 'Analysis complete.');
                 } else {
-                    setError(data.error || 'Unknown error');
+                    setError(new Error(data.error?.toString() || 'Unknown error'));
                     addMessage('agent', `Analysis failed.`);
                 }
                 setIsLoading(false);
             }
         } catch (err) {
             console.error("Polling failed:", err);
-            setError(err);
+            setError(err as Error);
             addMessage('agent', `Error polling for status.`);
             setIsPolling(false);
             pollingRunIdRef.current = null;
@@ -47,13 +52,35 @@ export const useAgentPolling = (token: string | null) => {
         }
     }, [token]);
 
+    const pollEvents = useCallback(async () => {
+        if (!pollingRunIdRef.current) {
+            return;
+        }
+
+        try {
+            const events: AgentEvent[] = await apiService.getAgentEvents(pollingRunIdRef.current, token);
+            if (events && events.length > 0) {
+                events.forEach(event => {
+                    addMessage('agent', <pre>{JSON.stringify(event, null, 2)}</pre>);
+                });
+            }
+        } catch (err) {
+            console.error("Event polling failed:", err);
+        }
+    }, [token]);
+
     useEffect(() => {
         if (!isPolling) {
             return;
         }
-        const intervalId = setInterval(pollStatus, 3000);
-        return () => clearInterval(intervalId);
-    }, [isPolling, pollStatus]);
+        const statusIntervalId = setInterval(pollStatus, 3000);
+        const eventsIntervalId = setInterval(pollEvents, 3000);
+
+        return () => {
+            clearInterval(statusIntervalId);
+            clearInterval(eventsIntervalId);
+        };
+    }, [isPolling, pollStatus, pollEvents]);
 
     const startPolling = (runId: string) => {
         pollingRunIdRef.current = runId;
