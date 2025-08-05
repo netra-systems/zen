@@ -1,3 +1,5 @@
+
+import inspect
 from typing import List, Callable, Any, Dict
 from app.services.deep_agent_v3.state import AgentState
 
@@ -17,20 +19,33 @@ class Pipeline:
         step_name = step_func.__name__
 
         try:
-            # This is a simplified version of the tool injection. A more robust solution
-            # would inspect the function signature and provide the required tools.
-            if step_name == "fetch_raw_logs":
-                result_message = await step_func(state, tools["log_fetcher"], request)
-            elif step_name == "enrich_and_cluster":
-                result_message = await step_func(state, tools["log_pattern_identifier"])
-            elif step_name == "propose_optimal_policies":
-                result_message = await step_func(state, tools["policy_proposer"])
-            elif step_name == "dispatch_tool":
-                result_message = await step_func(state, tools["cost_estimator"]) # This is a placeholder, will be updated later
-            else:
-                result_message = await step_func(state)
+            kwargs = self._prepare_step_kwargs(step_func, state, tools, request)
+            result_message = await step_func(**kwargs)
 
             self.current_step_index += 1
             return {"status": "success", "completed_step": step_name, "result": result_message}
         except Exception as e:
             return {"status": "failed", "step": step_name, "error": str(e)}
+
+    def _prepare_step_kwargs(
+        self,
+        step_func: Callable,
+        state: AgentState,
+        tools: Dict[str, Any],
+        request: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        kwargs = {}
+        sig = inspect.signature(step_func)
+        for param in sig.parameters.values():
+            if param.name == "state":
+                kwargs["state"] = state
+            elif param.name == "request":
+                kwargs["request"] = request
+            elif param.name in tools:
+                kwargs[param.name] = tools[param.name]
+        return kwargs
+
+    def get_current_step_name(self) -> str:
+        if self.is_complete():
+            return "Pipeline Complete"
+        return self.steps[self.current_step_index].__name__

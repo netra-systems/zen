@@ -1,6 +1,5 @@
-import json
 import io
-from typing import Any
+from typing import Any, Dict
 from langfuse import Langfuse, observe
 
 from app.db.models_clickhouse import AnalysisRequest
@@ -8,18 +7,13 @@ from app.db.models_postgres import DeepAgentRun
 from app.services.deep_agent_v3.state import AgentState
 from app.config import settings
 from app.logging_config_custom.logger import app_logger
-from app.services.deep_agent_v3.tools.log_fetcher import LogFetcher
-from app.services.deep_agent_v3.tools.log_pattern_identifier import LogPatternIdentifier
-from app.services.deep_agent_v3.tools.policy_proposer import PolicyProposer
-from app.services.deep_agent_v3.tools.policy_simulator import PolicySimulator
-from app.services.deep_agent_v3.tools.supply_catalog_search import SupplyCatalogSearch
-from app.services.deep_agent_v3.tools.cost_estimator import CostEstimator
-from app.services.deep_agent_v3.tools.performance_predictor import PerformancePredictor
 from app.services.deep_agent_v3.pipeline import Pipeline
 from app.services.deep_agent_v3.steps.fetch_raw_logs import fetch_raw_logs
 from app.services.deep_agent_v3.steps.enrich_and_cluster import enrich_and_cluster
 from app.services.deep_agent_v3.steps.propose_optimal_policies import propose_optimal_policies
+from app.services.deep_agent_v3.steps.simulate_policy import simulate_policy
 from app.services.deep_agent_v3.steps.generate_final_report import generate_final_report
+from app.services.deep_agent_v3.tool_builder import ToolBuilder
 
 class DeepAgentV3:
     """
@@ -34,32 +28,32 @@ class DeepAgentV3:
         self.llm_connector = llm_connector
         self.state = AgentState(messages=[])
         self.log_stream = io.StringIO()
-        self.langfuse = None
+        self.langfuse = self._init_langfuse()
+        self.tools = self._init_tools()
+        self.pipeline = self._init_pipeline()
+        self.status = "in_progress"
+        app_logger.info(f"DeepAgentV3 initialized for run_id: {self.run_id}")
+
+    def _init_langfuse(self):
         if settings.langfuse.secret_key and settings.langfuse.public_key and settings.langfuse.host:
-            self.langfuse = Langfuse(
+            return Langfuse(
                 secret_key=settings.langfuse.secret_key,
                 public_key=settings.langfuse.public_key,
                 host=settings.langfuse.host
             )
+        return None
 
-        self.tools = {
-            "log_fetcher": LogFetcher(self.db_session),
-            "log_pattern_identifier": LogPatternIdentifier(self.llm_connector),
-            "policy_proposer": PolicyProposer(self.db_session, self.llm_connector),
-            "policy_simulator": PolicySimulator(self.llm_connector),
-            "supply_catalog_search": SupplyCatalogSearch(self.db_session),
-            "cost_estimator": CostEstimator(self.llm_connector),
-            "performance_predictor": PerformancePredictor(self.llm_connector),
-        }
+    def _init_tools(self) -> Dict[str, Any]:
+        return ToolBuilder.build_all(self.db_session, self.llm_connector)
 
-        self.pipeline = Pipeline(steps=[
+    def _init_pipeline(self) -> Pipeline:
+        return Pipeline(steps=[
             fetch_raw_logs,
             enrich_and_cluster,
             propose_optimal_policies,
+            simulate_policy,
             generate_final_report,
         ])
-        self.status = "in_progress"
-        app_logger.info(f"DeepAgentV3 initialized for run_id: {self.run_id}")
 
     @observe()
     async def run_full_analysis(self):
@@ -87,7 +81,7 @@ class DeepAgentV3:
         if self.status == "awaiting_confirmation" and not confirmation:
             return {"status": "awaiting_confirmation", "message": "Awaiting user confirmation to proceed."}
 
-        step_name = self.pipeline.steps[self.pipeline.current_step_index].__name__
+        step_name = self.pipeline.get_current_step_name()
         app_logger.info(f"Running step: {step_name} for run_id: {self.run_id}")
 
         input_data = self.state.model_dump()
