@@ -46,8 +46,3 @@ class NetraOptimizerAgentSupervisor:
         
         # Immediately return a response to the user
         return {"status": "agent_started", "request_id": request.request.id}
-
-    async def poll_agent(self, request_id: str) -> Dict[str, Any]:
-        # This method would need to be implemented to poll the state of a running agent.
-        # For now, it's a placeholder.
-        return {"status": "polling not implemented"}
