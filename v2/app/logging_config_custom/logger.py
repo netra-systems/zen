@@ -36,8 +36,11 @@ def create_logger():
             "loaded lazy attr",
             "registered 'bcrypt' handler",
             "Using orjson library for writing JSON byte strings",
-            "Looking up time zone info from registry"
+            "Looking up time zone info from registry",
         ]
+        # Filter out sqlalchemy info messages
+        if record["name"] == "sqlalchemy.engine" and record["level"].name == "INFO":
+            return False
         return not any(pattern in record["message"] for pattern in verbose_patterns)
 
     logger.add(sys.stdout, format=log_format.format, filter=is_not_verbose)
@@ -65,7 +68,7 @@ class InterceptHandler(logging.Handler):
 
 logging.basicConfig(handlers=[InterceptHandler()], level=0)
 logging.getLogger("uvicorn.access").handlers = [InterceptHandler()]
-logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+logging.getLogger("sqlalchemy.engine").setLevel(logging.ERROR)
 
 
 def setup_logging(config_path='logging_config.json'):
