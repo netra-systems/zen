@@ -49,6 +49,7 @@ def _create_task_tool(tools, instructions, subagents: list[SubAgent], model, sta
         subagent_type: str,
         state: Annotated[DeepAgentState, InjectedState],
         tool_call_id: Annotated[str, InjectedToolCallId],
+        todo_id: str,
     ):
         if subagent_type not in agents:
             return f"Error: invoked agent of type {subagent_type}, the only allowed types are {[f'`{k}`' for k in agents]}"

@@ -1,8 +1,9 @@
 from langchain_core.tools import tool, InjectedToolCallId
 from langgraph.types import Command
 from langchain_core.messages import ToolMessage
-from typing import Annotated
+from typing import Annotated, Literal
 from langgraph.prebuilt import InjectedState
+import uuid
 
 from ..deepagents.prompts import (
     WRITE_TODOS_DESCRIPTION,
@@ -12,13 +13,47 @@ from ..deepagents.prompts import (
 from ..deepagents.state import Todo, DeepAgentState
 
 
-@tool(description=WRITE_TODOS_DESCRIPTION)
-def write_todos(
-    todos: list[Todo], tool_call_id: Annotated[str, InjectedToolCallId]
+@tool
+def update_todo(
+    todo_id: str,
+    status: Literal["pending", "in_progress", "completed"],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    state: Annotated[DeepAgentState, InjectedState],
 ) -> Command:
+    """Update the status of a todo."""
+    todos = state.get("todos", [])
+    for todo in todos:
+        if todo["id"] == todo_id:
+            todo["status"] = status
+            break
     return Command(
         update={
             "todos": todos,
+            "messages": [
+                ToolMessage(
+                    f"Updated todo {todo_id} to {status}", tool_call_id=tool_call_id
+                )
+            ],
+        }
+    )
+
+
+@tool(description=WRITE_TODOS_DESCRIPTION)
+def write_todos(
+    todos: list[Todo],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    state: Annotated[DeepAgentState, InjectedState],
+) -> Command:
+    # Get the existing todos
+    existing_todos = state.get("todos", [])
+    # Add the new todos, assigning a unique ID to each
+    for todo in todos:
+        if "id" not in todo:
+            todo["id"] = uuid.uuid4().hex
+    all_todos = existing_todos + todos
+    return Command(
+        update={
+            "todos": all_todos,
             "messages": [
                 ToolMessage(f"Updated todo list to {todos}", tool_call_id=tool_call_id)
             ],
