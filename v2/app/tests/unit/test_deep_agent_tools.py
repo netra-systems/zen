@@ -1,4 +1,3 @@
-
 import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
 from app.services.deep_agent_v3.tools.log_analyzer import LogAnalyzer
@@ -9,7 +8,7 @@ from app.services.deep_agent_v3.tools.supply_catalog_search import SupplyCatalog
 def mock_llm_connector():
     """Provides a mock LLM connector."""
     connector = MagicMock()
-    connector.generate_text_async = AsyncMock(return_value='{"key": "value"}')
+    connector.get_completion = AsyncMock(return_value='{"utility_score": 0.9, "predicted_cost_usd": 0.1, "predicted_latency_ms": 100, "predicted_quality_score": 0.9, "explanation": "test", "confidence": 0.9}')
     return connector
 
 @pytest.fixture
@@ -32,19 +31,19 @@ class TestPolicySimulator:
     @pytest.mark.asyncio
     async def test_simulate_policy(self, mock_llm_connector):
         tool = PolicySimulator(llm_connector=mock_llm_connector)
-        policy = {"policy": "test"}
+        policy = {"pattern_name": "test", "optimal_supply_option_name": "test"}
         result = await tool.simulate(policy)
-        assert result == {"key": "value"}
-        mock_llm_connector.generate_text_async.assert_called_once()
+        assert result.utility_score == 0.9
+        mock_llm_connector.get_completion.assert_called_once()
 
 class TestSupplyCatalogSearch:
     @pytest.mark.asyncio
     async def test_search_supply_catalog(self, mock_db_session):
         tool = SupplyCatalogSearch(db_session=mock_db_session)
         query = "test query"
-        with patch('app.services.deep_agent_v3.tools.supply_catalog_search.SupplyCatalogSearch.search') as mock_search:
-            mock_search.return_value = [MagicMock(model_name="test query model")]
-            result = await tool.search_supply_catalog(query)
+        with patch('app.services.supply_catalog_service.SupplyCatalogService.list_all_records') as mock_list_all_records:
+            mock_list_all_records.return_value = [MagicMock(model_name="test query model")]
+            result = await tool.search(query)
             assert len(result) == 1
             assert result[0].model_name == "test query model"
             mock_list_all_records.assert_called_once()
