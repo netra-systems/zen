@@ -2,7 +2,7 @@ import clickhouse_connect
 from clickhouse_connect.driver.client import Client
 from typing import List, Dict, Any
 
-from app.logging_config_custom.logger import logger, Log
+from app.logging_config_custom.logger import app_logger
 from ..config import settings
 
 # TBD better difference between "Connect" and "Driver"

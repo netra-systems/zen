@@ -1,10 +1,11 @@
+
+from typing import Any, List
 from app.db.models_postgres import SupplyOption
-from app.services.supply_catalog_service import SupplyCatalogService
+from app.services.deep_agent_v3.core import get_supply_catalog
 
 class SupplyCatalogSearch:
-    def __init__(self, db_session):
+    def __init__(self, db_session: Any):
         self.db_session = db_session
-        self.catalog_service = SupplyCatalogService()
 
-    async def execute(self, query: str):
-        return self.catalog_service.get_all_options(self.db_session)
+    async def execute(self) -> List[SupplyOption]:
+        return await get_supply_catalog(self.db_session)
