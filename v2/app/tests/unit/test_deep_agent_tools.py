@@ -42,7 +42,7 @@ class TestSupplyCatalogSearch:
     async def test_search_supply_catalog(self, mock_db_session):
         tool = SupplyCatalogSearch(db_session=mock_db_session)
         query = "test query"
-        with patch('app.services.deep_agent_v3.tools.supply_catalog_search.SupplyCatalog.list_all_records') as mock_list_all_records:
+        with patch('app.services.deep_agent_v3.tools.supply_catalog_search.SupplyCatalogSearch.search') as mock_search:
             mock_list_all_records.return_value = [MagicMock(model_name="test query model")]
             result = await tool.search_supply_catalog(query)
             assert len(result) == 1
