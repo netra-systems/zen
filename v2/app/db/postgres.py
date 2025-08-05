@@ -29,7 +29,7 @@ try:
         settings.database_url,
         echo=True,
     )
-    AsyncSessionLocal = sessionmaker(
+    async_session_factory = sessionmaker(
         bind=async_engine, class_=AsyncSession, expire_on_commit=False
     )
     print("PostgreSQL async engine created successfully.")
@@ -37,7 +37,7 @@ except Exception as e:
     logger.error(f"Failed to create PostgreSQL async engine: {e}")
     # Handle the error appropriately, maybe exit or use a fallback
     async_engine = None
-    AsyncSessionLocal = None
+    async_session_factory = None
 
 
 from typing import AsyncGenerator
@@ -46,11 +46,11 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
     """
     Dependency to get an async database session.
     """
-    if AsyncSessionLocal is None:
-        logger.error("AsyncSessionLocal is not initialized.")
+    if async_session_factory is None:
+        logger.error("async_session_factory is not initialized.")
         raise RuntimeError("Database not configured")
 
-    async with AsyncSessionLocal() as session:
+    async with async_session_factory() as session:
         try:
             yield session
             await session.commit()
