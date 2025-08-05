@@ -4,10 +4,12 @@ from app.services.deep_agent_v3.main import DeepAgentV3
 from app.db.models_clickhouse import AnalysisRequest
 from app.db.session import get_db_session
 
+import uuid
+
 @pytest.mark.asyncio
 async def test_end_to_end_scenario():
     # Arrange
-    run_id = "test_run_id"
+    run_id = str(uuid.uuid4())
     request = AnalysisRequest(
         user_id="test_user",
         workloads=[{"query": "test_query"}],
@@ -44,4 +46,5 @@ async def test_end_to_end_scenario():
 
             # Assert
             assert agent.status == "complete"
+
 
