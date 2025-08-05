@@ -18,13 +18,14 @@ class Log(BaseModel):
 class Formatter:
     def __init__(self):
         self.padding = 0
-        self.json_format = '{{"timestamp":"{{time}}", "level":"{{level}}", "message":"{{message}}", "extra":{{extra}}}}'
+        self.log_format = (
+            "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+            "<level>{level: <8}</level> | "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>\n"
+        )
 
     def format(self, record):
-        length = len("{level}".format(**record))
-        self.padding = max(self.padding, length)
-        record["extra"]["padding"] = self.padding
-        return self.json_format + "\n"
+        return self.log_format
 
 def create_logger():
     logger.remove()

@@ -112,6 +112,7 @@ export default function DeepAgentPage() {
                 `${config.api.baseUrl}/agent/create`,
                 {
                     user_id,
+                    query,
                     workloads: [
                         {
                             run_id,

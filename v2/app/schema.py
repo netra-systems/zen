@@ -94,6 +94,7 @@ class AnalysisRun(AnalysisRunBase, table=True):
 
 class AnalysisRunCreate(AnalysisRunBase):
     source_table: str = Field(description="The full name of the source table to analyze, e.g., 'mydatabase.mytable'")
+    query: str = Field(description="The user's query for the analysis.")
 
 class AnalysisRunPublic(AnalysisRunBase):
     id: uuid.UUID

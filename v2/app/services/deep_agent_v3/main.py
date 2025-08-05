@@ -54,19 +54,25 @@ class DeepAgentV3:
     async def run_full_analysis(self) -> AgentState:
         """Executes the entire analysis pipeline from start to finish."""
         app_logger.info(f"Starting full analysis for run_id: {self.run_id}")
-        while not self.pipeline.is_complete():
-            result = await self.run_next_step()
-            if result["status"] == "failed":
-                self.status = "failed"
-                app_logger.error(f"Full analysis failed for run_id: {self.run_id} at step: {result.get('step')}")
-                self._generate_and_save_run_report()
-                return self.state
-        
-        self.status = "complete"
-        app_logger.info(f"Full analysis completed for run_id: {self.run_id}")
-        self._generate_and_save_run_report()
-        if self.langfuse:
-            self.langfuse.flush()
+        try:
+            while not self.pipeline.is_complete():
+                result = await self.run_next_step()
+                if result["status"] == "failed":
+                    self.status = "failed"
+                    app_logger.error(f"Full analysis failed for run_id: {self.run_id} at step: {result.get('step')}")
+                    await self._generate_and_save_run_report()
+                    return self.state
+            
+            self.status = "complete"
+            app_logger.info(f"Full analysis completed for run_id: {self.run_id}")
+            await self._generate_and_save_run_report()
+        except Exception as e:
+            self.status = "failed"
+            app_logger.error(f"An unexpected error occurred during full analysis for run_id: {self.run_id}. Error: {e}")
+            await self._generate_and_save_run_report()
+        finally:
+            if self.langfuse:
+                self.langfuse.flush()
         
         return self.state
 
@@ -86,7 +92,7 @@ class DeepAgentV3:
         result = await self.pipeline.run_next_step(self.state, self.tools, self.request)
         output_data = self.state.model_dump()
 
-        self._record_step_history(result.get("completed_step"), input_data, output_data, result)
+        await self._record_step_history(result.get("completed_step"), input_data, output_data, result)
 
         if result["status"] == "failed":
             self.status = "failed"
@@ -103,7 +109,7 @@ class DeepAgentV3:
 
         return result
 
-    def _record_step_history(self, step_name: str, input_data: dict, output_data: dict, result: dict):
+    async def _record_step_history(self, step_name: str, input_data: dict, output_data: dict, result: dict):
         if not step_name:
             return
         
@@ -116,35 +122,48 @@ class DeepAgentV3:
         }
         app_logger.info(json.dumps(log_message))
 
-        new_run = DeepAgentRun(
-            run_id=self.run_id,
-            step_name=step_name,
-            step_input=input_data,
-            step_output=output_data,
-            run_log=json.dumps(log_message)
-        )
-        self.db_session.add(new_run)
-        self.db_session.commit()
+        try:
+            new_run = DeepAgentRun(
+                run_id=self.run_id,
+                step_name=step_name,
+                step_input=input_data,
+                step_output=output_data,
+                run_log=json.dumps(log_message)
+            )
+            self.db_session.add(new_run)
+            await self.db_session.commit()
+        except Exception as e:
+            await self.db_session.rollback()
+            app_logger.error(f"Failed to record step history for run_id: {self.run_id}. Error: {e}")
 
-    def _generate_and_save_run_report(self):
+    async def _generate_and_save_run_report(self):
         """Generates a markdown report of the entire run and saves it to the database."""
+        from sqlmodel import select
+
         report = f"# Deep Agent Run Report: {self.run_id}\n\n"
         report += f"**Status:** {self.status}\n\n"
         report += "## Steps\n\n"
 
-        runs = self.db_session.query(DeepAgentRun).filter_by(run_id=self.run_id).all()
-        for run in runs:
-            report += f"### {run.step_name}\n\n"
-            report += f"**Status:** {json.loads(run.run_log).get('status')}\n\n"
-            report += f"**Result:**\n```json\n{json.dumps(json.loads(run.run_log).get('result'), indent=2)}\n```\n\n"
-            if json.loads(run.run_log).get('error'):
-                report += f"**Error:**\n```\n{json.loads(run.run_log).get('error')}\n```\n\n"
+        try:
+            runs_result = await self.db_session.execute(select(DeepAgentRun).where(DeepAgentRun.run_id == self.run_id))
+            runs = runs_result.scalars().all()
+            for run in runs:
+                report += f"### {run.step_name}\n\n"
+                report += f"**Status:** {json.loads(run.run_log).get('status')}\n\n"
+                report += f"**Result:**\n```json\n{json.dumps(json.loads(run.run_log).get('result'), indent=2)}
+```\n\n"
+                if json.loads(run.run_log).get('error'):
+                    report += f"**Error:**\n```\n{json.loads(run.run_log).get('error')}\n```\n\n"
 
-        final_run = self.db_session.query(DeepAgentRun).filter_by(run_id=self.run_id).order_by(DeepAgentRun.timestamp.desc()).first()
-        if final_run:
-            final_run.run_report = report
-            self.db_session.commit()
+            final_run_result = await self.db_session.execute(select(DeepAgentRun).where(DeepAgentRun.run_id == self.run_id).order_by(DeepAgentRun.timestamp.desc()))
+            final_run = final_run_result.scalar_one_or_none()
+            if final_run:
+                final_run.run_report = report
+                await self.db_session.commit()
+        except Exception as e:
+            await self.db_session.rollback()
+            app_logger.error(f"Failed to generate and save run report for run_id: {self.run_id}. Error: {e}")
 
     def is_complete(self) -> bool:
         """Checks if the analysis has completed all steps."""
-        return self.pipeline.is_complete()
+        return self.status == "complete" or self.status == "failed"
