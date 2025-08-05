@@ -1,3 +1,4 @@
+import json
 from typing import Dict, Any, List
 from app.services.deep_agent_v3.scenarios import SCENARIOS
 
@@ -14,42 +15,61 @@ class ScenarioFinder:
 
     def find_scenario(self, prompt: str) -> Dict[str, Any]:
         """
-        Selects the best scenario based on the user's prompt using a language model.
+        Selects the best scenario based on the user's prompt using a language model,
+        providing a confidence score and justification.
         """
         scenario_descriptions = self._get_scenario_descriptions()
         system_prompt = f"""
-You are a scenario router for a system that analyzes and optimizes LLM usage.
+You are an expert scenario router for a system that analyzes and optimizes LLM usage.
 Your task is to select the most appropriate scenario from the list below based on the user's request.
-Respond with only the name of the best matching scenario (e.g., "cost_reduction_quality_constraint").
+
+You must respond in JSON format with the following three keys:
+1.  "scenario_name": The name of the best matching scenario (e.g., "cost_reduction_quality_constraint").
+2.  "confidence": A float between 0.0 and 1.0, representing your confidence in the selection.
+3.  "justification": A brief explanation for your choice.
 
 Available Scenarios:
 {scenario_descriptions}
 """
         try:
-            response = self.llm_connector.get_completion(
+            response_text = self.llm_connector.get_completion(
                 prompt=prompt,
                 system_prompt=system_prompt
             )
             
-            # Basic validation to ensure the response is a valid scenario key
-            if response in SCENARIOS:
-                return SCENARIOS[response]
+            response_data = json.loads(response_text)
+            scenario_name = response_data.get("scenario_name")
+            
+            if scenario_name in SCENARIOS:
+                return {
+                    "scenario": SCENARIOS[scenario_name],
+                    "confidence": response_data.get("confidence", 0.0),
+                    "justification": response_data.get("justification", "No justification provided.")
+                }
             else:
                 # Fallback for cases where the model's output is not a perfect key match
                 for key in SCENARIOS:
-                    if key in response.lower().replace(" ", "_"):
-                        return SCENARIOS[key]
+                    if key in str(scenario_name).lower().replace(" ", "_"):
+                        return {
+                            "scenario": SCENARIOS[key],
+                            "confidence": response_data.get("confidence", 0.5), # Lower confidence on fallback
+                            "justification": f"Fallback match: {response_data.get('justification', 'No justification provided.')}"
+                        }
 
         except Exception as e:
             print(f"Error during scenario finding: {e}")
             # Fallback to a generic scenario in case of errors
         
         return {
-            "name": "Generic Optimization",
-            "description": "A generic optimization scenario for when a specific one cannot be determined.",
-            "steps": [
-                "analyze_request",
-                "propose_solution",
-                "generate_report"
-            ]
+            "scenario": {
+                "name": "Generic Optimization",
+                "description": "A generic optimization scenario for when a specific one cannot be determined.",
+                "steps": [
+                    "analyze_request",
+                    "propose_solution",
+                    "generate_report"
+                ]
+            },
+            "confidence": 0.1,
+            "justification": "An error occurred during scenario selection, falling back to generic optimization."
         }
