@@ -14,10 +14,12 @@ export const useAgentPolling = (token: string | null) => {
     };
 
     const pollStatus = useCallback(async () => {
-        if (!pollingRunIdRef.current) {
-            setIsPolling(false);
+        if (!pollingRunIdRef.current || isPolling) {
             return;
         }
+
+        setIsPolling(true);
+        setError(null);
 
         try {
             const data: AgentRun = await apiService.getAgentStatus(pollingRunIdRef.current, token);
@@ -27,7 +29,6 @@ export const useAgentPolling = (token: string | null) => {
             }
 
             if (data.status === 'complete' || data.status === 'failed') {
-                setIsPolling(false);
                 pollingRunIdRef.current = null;
                 if (data.status === 'complete') {
                     addMessage('agent', data.final_report || 'Analysis complete.');
@@ -41,11 +42,12 @@ export const useAgentPolling = (token: string | null) => {
             console.error("Polling failed:", err);
             setError(err);
             addMessage('agent', `Error polling for status.`);
-            setIsPolling(false);
             pollingRunIdRef.current = null;
             setIsLoading(false);
+        } finally {
+            setIsPolling(false);
         }
-    }, [token]);
+    }, [token, isPolling]);
 
     useEffect(() => {
         if (!isPolling) {
