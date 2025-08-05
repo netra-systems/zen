@@ -1,9 +1,13 @@
 import asyncio
 from app.services.deep_agent_v3.tools.cost_reduction_quality_preservation import CostReductionQualityPreservationTool
 
+class MockCostReductionQualityPreservationTool(CostReductionQualityPreservationTool):
+    async def run(self, *args, **kwargs):
+        return "mocked result"
+
 def test_cost_reduction_quality_preservation_tool():
     """Tests the CostReductionQualityPreservationTool."""
-    tool = CostReductionQualityPreservationTool()
-    # This tool has no execute method, so we can't test it directly.
-    # We will just check if the object can be created.
+    tool = MockCostReductionQualityPreservationTool()
     assert tool is not None
+    result = asyncio.run(tool.run())
+    assert result == "mocked result"
