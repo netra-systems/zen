@@ -1,5 +1,6 @@
+
 from typing import Any, Callable, List, Optional, Sequence, TypedDict, Union
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, BaseMessage, AIMessage, ToolMessage
 from langchain_core.tools import BaseTool
 from langgraph.graph import END, StateGraph
 from app.llm.llm_manager import LLMManager
@@ -98,21 +99,61 @@ Do not batch up multiple tasks before marking them as completed.
     built_in_tools = [write_todos, update_todo, write_file, read_file, ls, edit_file]
     model = llm_manager.get_llm(model_name)
     state_schema = state_schema or DeepAgentState
-    task_tool = _create_task_tool(
-        list(tools) + built_in_tools,
-        instructions,
-        subagents or [],
-        model,
-        state_schema
-    )
     all_tools = built_in_tools + list(tools)
-    from langgraph.prebuilt import create_react_agent
-    return create_react_agent(
-        model,
-        prompt=prompt,
-        tools=all_tools,
-        state_schema=state_schema,
+    
+    # Create a new graph
+    workflow = StateGraph(state_schema)
+
+    # Add a node for the agent
+    def agent_node(state: DeepAgentState):
+        result = model.invoke(state)
+        return {"messages": [result]}
+    workflow.add_node("agent", agent_node)
+
+    # Add a node for the tools
+    def tool_node(state: DeepAgentState):
+        tool_calls = state["messages"][-1].tool_calls
+        tool_messages = []
+        for tool_call in tool_calls:
+            tool_name = tool_call["name"]
+            tool_args = tool_call["args"]
+            # Find the tool to execute
+            tool_to_execute = next((t for t in all_tools if t.name == tool_name), None)
+            if tool_to_execute:
+                # Inject state and tool_call_id if the tool needs them
+                tool_kwargs = {}
+                if "state" in tool_to_execute.args:
+                    tool_kwargs["state"] = state
+                if "tool_call_id" in tool_to_execute.args:
+                    tool_kwargs["tool_call_id"] = tool_call["id"]
+                
+                result = tool_to_execute.invoke({**tool_args, **tool_kwargs})
+                if isinstance(result, BaseMessage):
+                    tool_messages.append(result)
+                else:
+                    tool_messages.append(ToolMessage(content=str(result), tool_call_id=tool_call["id"]))
+        return {"messages": tool_messages}
+
+    workflow.add_node("tools", tool_node)
+
+    # Define the conditional logic
+    def should_continue(state: DeepAgentState):
+        if not state["messages"] or isinstance(state["messages"][-1], ToolMessage):
+            return "agent"
+        if state["messages"][-1].tool_calls:
+            return "tools"
+        return END
+
+    workflow.add_conditional_edges(
+        "agent",
+        should_continue,
     )
+    workflow.add_edge("tools", "agent")
+
+    # Set the entry point
+    workflow.set_entry_point("agent")
+
+    return workflow.compile()
 
 if __name__ == "__main__":
     from app.config import settings

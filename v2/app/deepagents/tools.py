@@ -17,33 +17,22 @@ from .state import Todo, DeepAgentState
 def update_todo(
     todo_id: str,
     status: Literal["pending", "in_progress", "completed"],
-    tool_call_id: Annotated[str, InjectedToolCallId],
     state: Annotated[DeepAgentState, InjectedState],
-) -> Command:
+) -> dict:
     """Update the status of a todo."""
     todos = state.get("todos", [])
     for todo in todos:
         if todo["id"] == todo_id:
             todo["status"] = status
             break
-    return Command(
-        update={
-            "todos": todos,
-            "messages": [
-                ToolMessage(
-                    f"Updated todo {todo_id} to {status}", tool_call_id=tool_call_id
-                )
-            ],
-        }
-    )
+    return {"todos": todos}
 
 
 @tool(description=WRITE_TODOS_DESCRIPTION)
 def write_todos(
     todos: list[Todo],
-    tool_call_id: Annotated[str, InjectedToolCallId],
     state: Annotated[DeepAgentState, InjectedState],
-) -> Command:
+) -> dict:
     # Get the existing todos
     existing_todos = state.get("todos", [])
     # Add the new todos, assigning a unique ID to each
@@ -51,14 +40,7 @@ def write_todos(
         if "id" not in todo:
             todo["id"] = uuid.uuid4().hex
     all_todos = existing_todos + todos
-    return Command(
-        update={
-            "todos": all_todos,
-            "messages": [
-                ToolMessage(f"Updated todo list to {todos}", tool_call_id=tool_call_id)
-            ],
-        }
-    )
+    return {"todos": all_todos}
 
 def ls(state: Annotated[DeepAgentState, InjectedState]) -> list[str]:
     """List all files"""
@@ -115,19 +97,11 @@ def write_file(
     file_path: str,
     content: str,
     state: Annotated[DeepAgentState, InjectedState],
-    tool_call_id: Annotated[str, InjectedToolCallId],
-) -> Command:
+) -> dict:
     """Write to a file."""
     files = state.get("files", {})
     files[file_path] = content
-    return Command(
-        update={
-            "files": files,
-            "messages": [
-                ToolMessage(f"Updated file {file_path}", tool_call_id=tool_call_id)
-            ],
-        }
-    )
+    return {"files": files}
 
 
 @tool(description=EDIT_DESCRIPTION)
@@ -136,9 +110,8 @@ def edit_file(
     old_string: str,
     new_string: str,
     state: Annotated[DeepAgentState, InjectedState],
-    tool_call_id: Annotated[str, InjectedToolCallId],
     replace_all: bool = False,
-) -> str:
+) -> dict:
     """Write to a file."""
     mock_filesystem = state.get("files", {})
     # Check if file exists in mock filesystem
@@ -173,11 +146,4 @@ def edit_file(
 
     # Update the mock filesystem
     mock_filesystem[file_path] = new_content
-    return Command(
-        update={
-            "files": mock_filesystem,
-            "messages": [
-                ToolMessage(f"Updated file {file_path}", tool_call_id=tool_call_id)
-            ],
-        }
-    )
+    return {"files": mock_filesystem}
