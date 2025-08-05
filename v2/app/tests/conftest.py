@@ -10,7 +10,6 @@ from fastapi.testclient import TestClient
 from app.main import app, lifespan
 from app.config import settings
 from app.db.base import Base
-from app.db.models_postgres import DeepAgentRun
 from app.db.postgres import get_async_db
 from app.llm.llm_manager import LLMManager
 

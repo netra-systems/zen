@@ -1,5 +1,4 @@
 from typing import Any
-from app.services.apex_optimizer_agent.state import AgentState
 import pandas as pd
 from sklearn.cluster import KMeans
 
@@ -7,13 +6,13 @@ class LogEnricherAndClusterer:
     def __init__(self, log_pattern_identifier: any):
         self.log_pattern_identifier = log_pattern_identifier
 
-    async def run(self, state: AgentState) -> str:
+    async def run(self, raw_logs: list) -> str:
         """Enriches logs and applies KMeans clustering."""
-        if not state.raw_logs:
+        if not raw_logs:
             return "No logs to enrich and cluster."
 
         # Enrichment
-        for span in state.raw_logs:
+        for span in raw_logs:
             usage = span.response.usage
             prompt_tokens = usage.get('prompt_tokens', 0)
             completion_tokens = usage.get('completion_tokens', 0)
@@ -32,13 +31,10 @@ class LogEnricherAndClusterer:
                 "inter_token_latency_ms": inter_token_latency
             }
 
-        enriched_spans_data = [{'span_id': s.trace_context.span_id, **s.enriched_metrics} for s in state.raw_logs if s.enriched_metrics]
+        enriched_spans_data = [{'span_id': s.trace_context.span_id, **s.enriched_metrics} for s in raw_logs if s.enriched_metrics]
         if not enriched_spans_data:
             return "No enriched spans to cluster."
 
         patterns, descriptions = await self.log_pattern_identifier.identify_patterns(enriched_spans_data)
-
-        state.discovered_patterns = patterns
-        state.pattern_descriptions = descriptions
 
         return f"Successfully discovered {len(patterns)} patterns."

@@ -31,7 +31,7 @@ export default function DeepAgent() {
   const [isAutoProgress, setIsAutoProgress] = useState<boolean>(false);
 
   const startAnalysis = async () => {
-    const response = await fetch('/api/v3/agent/apex', {
+    const response = await fetch('/api/v3/apex/chat/start_agent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(

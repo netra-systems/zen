@@ -1,11 +1,10 @@
 from typing import Any, Dict
-from app.services.apex_optimizer_agent.state import AgentState
 
 class LogFetcher:
     def __init__(self, log_fetcher: any):
         self.log_fetcher = log_fetcher
 
-    async def run(self, state: AgentState, request: Dict[str, Any]) -> str:
+    async def run(self, request: Dict[str, Any]) -> str:
         """
         Fetches raw logs from the database.
         """
@@ -15,6 +14,4 @@ class LogFetcher:
             return "Error: time_range is required."
 
         logs, trace_ids = self.log_fetcher.fetch_logs(time_range=time_range, source_table=source_table)
-        state.raw_logs = logs
-        state.trace_ids = trace_ids
         return "Raw logs fetched."

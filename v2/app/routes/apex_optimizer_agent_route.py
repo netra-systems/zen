@@ -14,19 +14,20 @@ async def start_agent(
     db: AsyncSession = Depends(get_db_session),
     llm_manager: LLMManager = Depends(LLMManager),
 ):
-    """_summary_
+    """
+    Starts the Netra Optimizer Agent to analyze the user's request.
 
     Args:
-        request (AnalysisRequest): _description_
-        db (AsyncSession, optional): _description_. Defaults to Depends(get_db_session).
-        llm_manager (LLMManager, optional): _description_. Defaults to Depends(LLMManager).
+        request (AnalysisRequest): The user's request to the agent.
+        db (AsyncSession, optional): The database session. Defaults to Depends(get_db_session).
+        llm_manager (LLMManager, optional): The LLM manager. Defaults to Depends(LLMManager).
 
     Raises:
-        HTTPException: _description_
+        HTTPException: If there is an error running the agent.
 
     Returns:
-        _type_: _description_
-    """    
+        dict: The result of the agent's analysis.
+    """
     try:
         supervisor = NetraOptimizerAgentSupervisor(db, llm_manager)
         result = await supervisor.start_agent(request)

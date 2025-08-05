@@ -109,7 +109,7 @@ export default function DeepAgentPage() {
 
         try {
             const newRun = await apiService.post(
-                `${config.api.baseUrl}/agent/create`,
+                `${config.api.baseUrl}/apex/chat/start_agent`,
                 {
                     user_id,
                     query,
@@ -122,8 +122,7 @@ export default function DeepAgentPage() {
                         }
                     ],
                     debug_mode: false,
-                    constraints: null,
-                    negotiated_discount_percent: 0
+                    constraints: null
                 },
                 token
             );
