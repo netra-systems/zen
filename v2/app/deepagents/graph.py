@@ -1,3 +1,4 @@
+
 import inspect
 from typing import Any, Callable, List, Optional, Sequence, TypedDict, Union
 
@@ -125,7 +126,7 @@ Do not batch up multiple tasks before marking them as completed.
                 
                 sig = inspect.signature(getattr(tool_to_execute, "func", tool_to_execute))
                 if "state" in sig.parameters:
-                    tool_input["state"] = state
+                    tool_input["state"] = DeepAgentState(**state)
 
                 result = tool_to_execute.invoke(tool_input)
 
