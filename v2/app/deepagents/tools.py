@@ -5,12 +5,12 @@ from typing import Annotated, Literal
 from langgraph.prebuilt import InjectedState
 import uuid
 
-from deepagents.prompts import (
+from .prompts import (
     WRITE_TODOS_DESCRIPTION,
     EDIT_DESCRIPTION,
     TOOL_DESCRIPTION,
 )
-from deepagents.state import Todo, DeepAgentState
+from .state import Todo, DeepAgentState
 
 
 @tool
@@ -59,7 +59,6 @@ def write_todos(
             ],
         }
     )
-
 
 def ls(state: Annotated[DeepAgentState, InjectedState]) -> list[str]:
     """List all files"""
