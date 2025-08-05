@@ -1,15 +1,19 @@
-
 import json
+
 from app.services.deep_agent_v3.state import AgentState
 
-def generate_final_report(state: AgentState) -> str:
-    """Generates the final analysis report."""
-    # This is still a placeholder, but now it's in its own module.
-    # We will implement this fully later.
-    report = {
-        "summary": f"Analysis complete. Found {len(state.patterns)} patterns and {len(state.policies)} policies.",
-        "patterns": [p.model_dump() for p in state.patterns],
-        "policies": [p.model_dump() for p in state.policies],
-    }
-    state.final_report = json.dumps(report, indent=2)
+async def generate_final_report(state: AgentState) -> str:
+    """Generates a human-readable summary of the analysis."""
+    if not state.policies:
+        raise ValueError("Cannot generate a report without policies.")
+        
+    report = "Analysis Complete. Recommended Policies:\n"
+    for policy in state.policies:
+        report += f"- For pattern '{policy.pattern_name}', recommend using '{policy.optimal_supply_option_name}'.\n"
+    
+    if state.tool_result:
+        report += "\nTool Execution Result:\n"
+        report += json.dumps(state.tool_result, indent=2)
+
+    state.final_report = report
     return "Final report generated."
