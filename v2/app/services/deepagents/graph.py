@@ -4,6 +4,14 @@ from app.services.deepagents.sub_agent import SubAgent
 from app.llm.llm_manager import LLMManager
 from app.services.deepagents.tool_dispatcher import ToolDispatcher
 from app.logging_config_custom.logger import app_logger
+import json
+from langchain_core.messages import BaseMessage
+
+class MessageEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, BaseMessage):
+            return o.dict()
+        return super().default(o)
 
 class SingleAgentTeam:
     def __init__(self, agent: SubAgent, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
@@ -32,7 +40,7 @@ class SingleAgentTeam:
         return workflow.compile()
 
     def route_to_agent(self, state: AgentState):
-        app_logger.info(f"Routing agent with state: {state}")
+        app_logger.info(f"Routing agent with state: {json.dumps(state, indent=2, cls=MessageEncoder)}")
         messages = state.get("messages", [])
         if messages:
             last_message = messages[-1]

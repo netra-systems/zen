@@ -4,8 +4,11 @@ import asyncio
 from unittest.mock import MagicMock
 from app.services.apex_optimizer_agent.supervisor import NetraOptimizerAgentSupervisor
 from app.db.models_clickhouse import AnalysisRequest, RequestModel, Settings
-from langchain_core.messages import AIMessage
 from langchain_community.chat_models.fake import FakeListChatModel
+
+class FakeLLMWithTools(FakeListChatModel):
+    def bind_tools(self, tools, **kwargs):
+        return self
 
 @pytest.mark.asyncio
 async def test_start_agent_manually():
@@ -15,7 +18,7 @@ async def test_start_agent_manually():
     # Mock dependencies
     db_session = MagicMock()
     llm_manager = MagicMock()
-    llm_manager.get_llm.return_value = FakeListChatModel(responses=[AIMessage(content="Hello, world!")])
+    llm_manager.get_llm.return_value = FakeLLMWithTools(responses=["Hello, world!"])
 
     # Create a mock request
     mock_request_model = RequestModel(

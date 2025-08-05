@@ -16,6 +16,7 @@ from app.config import settings
 from app.logging_config_custom.logger import logger, Formatter
 from app.logging_config_custom.clickhouse_logger import ClickHouseLogHandler
 from app.llm.llm_manager import LLMManager
+from app.services.apex_optimizer_agent.supervisor import NetraOptimizerAgentSupervisor
 
 def setup_logging():
     """Initializes the application's logging configuration."""
@@ -72,6 +73,9 @@ async def lifespan(app: FastAPI):
     
     # Initialize Postgres
     app.state.db_session_factory = async_session_factory
+
+    # Initialize the agent supervisor
+    app.state.agent_supervisor = NetraOptimizerAgentSupervisor(app.state.db_session_factory, app.state.llm_manager)
 
     yield
     

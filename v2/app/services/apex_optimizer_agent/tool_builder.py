@@ -22,6 +22,7 @@ from app.services.apex_optimizer_agent.tools.rate_limit_impact_simulator import 
 from app.services.apex_optimizer_agent.tools.performance_gains_simulator import performance_gains_simulator
 from app.services.apex_optimizer_agent.tools.policy_simulator import policy_simulator
 from app.services.apex_optimizer_agent.tools.finish import finish
+from app.services.deepagents.tools.update_state import update_state
 
 class ToolBuilder:
     @staticmethod
@@ -49,6 +50,7 @@ class ToolBuilder:
             "performance_gains_simulator": performance_gains_simulator,
             "policy_simulator": policy_simulator,
             "finish": finish,
+            "update_state": update_state,
         }
         
         return all_tools, {}
