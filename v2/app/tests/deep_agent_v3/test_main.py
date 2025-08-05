@@ -6,6 +6,8 @@ import uuid
 from app.services.deep_agent_v3.main import DeepAgentV3
 from app.db.models_clickhouse import AnalysisRequest
 
+
+
 @pytest.fixture
 def mock_db_session():
     return MagicMock()
@@ -14,16 +16,18 @@ def mock_db_session():
 def mock_llm_manager():
     return MagicMock(spec=LLMManager)
 
+import json
+
 @pytest.fixture
 def mock_request():
     return AnalysisRequest(
         user_id="test_user",
         workloads=[{"run_id": "test_run_id", "query": "test_query"}],
-        query="test_query",
+        query=json.dumps({"query": "test_query"}),
     )
 
 @pytest.mark.asyncio
-async def test_run(mock_request, mock_db_session, mock_llm_manager):
+async def test_run(mock_request, db_session, mock_llm_manager):
     # Given
     run_id = str(uuid.uuid4())
     with patch('app.services.deep_agent_v3.main.ToolBuilder.build_all') as mock_build_all, \
@@ -37,7 +41,9 @@ async def test_run(mock_request, mock_db_session, mock_llm_manager):
             "propose_solution": mock_tool,
             "generate_report": mock_tool,
         }
-        mock_scenario_finder.return_value.find_scenario.return_value = {
+        mock_scenario_finder_instance = mock_scenario_finder.return_value
+                mock_scenario_finder_instance = mock_scenario_finder.return_value
+        mock_scenario_finder_instance.find_scenario.return_value = {
             "scenario": {
                 "name": "test_scenario",
                 "steps": ["analyze_request", "propose_solution", "generate_report"]

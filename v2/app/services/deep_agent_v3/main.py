@@ -41,6 +41,8 @@ class DeepAgentV3:
                 public_key=settings.langfuse.public_key,
                 host=settings.langfuse.host
             )
+        
+        self.llm_manager = LLMManager()
         return None
 
     def _init_tools(self) -> Dict[str, Any]:

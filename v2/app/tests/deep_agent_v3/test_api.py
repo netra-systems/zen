@@ -18,10 +18,9 @@ def mock_db_session():
 
 @pytest.fixture
 def mock_llm_manager():
-    with patch('app.dependencies.get_llm_manager') as mock_get_llm_manager:
-        mock_llm_manager_instance = MagicMock()
-        mock_get_llm_manager.return_value = mock_llm_manager_instance
-        yield mock_llm_manager_instance
+    mock_llm_manager_instance = MagicMock()
+    app.state.llm_manager = mock_llm_manager_instance
+    yield mock_llm_manager_instance
 
 @pytest.fixture
 def mock_deep_agent_v3():

@@ -2,12 +2,16 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from app.services.deep_agent_v3.main import DeepAgentV3
 from app.db.models_clickhouse import AnalysisRequest
+
+
 from app.db.session import get_db_session
 
 import uuid
 
+from app.db.session import get_db_session
+
 @pytest.mark.asyncio
-async def test_end_to_end_scenario():
+async def test_end_to_end_scenario(db_session):
     # Arrange
     run_id = str(uuid.uuid4())
     request = AnalysisRequest(
