@@ -55,3 +55,4 @@ class InterceptHandler(logging.Handler):
 
 logging.basicConfig(handlers=[InterceptHandler()], level=0)
 logging.getLogger("uvicorn.access").handlers = [InterceptHandler()]
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
