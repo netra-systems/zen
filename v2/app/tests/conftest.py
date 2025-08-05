@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import pytest
 from typing import AsyncGenerator, Generator
 
@@ -10,6 +11,9 @@ from app.main import app
 from app.config import settings
 from app.db.base import Base
 from app.db.postgres import get_async_db
+
+# Set the log level for sqlalchemy.engine to WARNING
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def event_loop(request) -> Generator:
