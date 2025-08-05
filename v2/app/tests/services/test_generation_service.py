@@ -28,7 +28,7 @@ async def test_run_content_generation_job_success(mock_genai, mock_pool, mock_cp
     ]
 
     # Set the required environment variable
-    os.environ['GEMINI_API_KEY'] = 'test_key'
+    settings.llm_configs["default"].api_key = "test_key"
 
     # Define the job parameters
     job_id = 'test_content_job'
@@ -41,8 +41,7 @@ async def test_run_content_generation_job_success(mock_genai, mock_pool, mock_cp
     }
 
     # Run the job
-    with patch.object(settings.google_model, 'corpus_generation_model', 'gemini-1.5-flash'):
-        run_content_generation_job(job_id, params)
+    run_content_generation_job(job_id, params)
 
     # Assert that the job was completed successfully
     assert GENERATION_JOBS[job_id]['status'] == 'completed'
@@ -53,6 +52,7 @@ async def test_run_content_generation_job_success(mock_genai, mock_pool, mock_cp
 async def test_run_content_generation_job_no_api_key(mock_getenv):
     # Mock the environment variable to simulate the API key not being set
     mock_getenv.return_value = None
+    settings.llm_configs["default"].api_key = None
 
     # Define the job parameters
     job_id = 'test_content_job_no_key'

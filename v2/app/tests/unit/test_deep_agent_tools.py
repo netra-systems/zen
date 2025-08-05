@@ -10,8 +10,7 @@ from app.schema import PredictedOutcome
 def mock_llm_manager():
     """Provides a mock LLM manager."""
     llm_manager = MagicMock(spec=LLMManager)
-    llm_manager.get_llm.return_value.ainvoke.return_value.content = '{"key": "value"}'
-    llm_manager.get_llm.return_value.ainvoke.return_value.content = '{"utility_score": 0.9, "predicted_cost_usd": 0.1, "predicted_latency_ms": 100, "predicted_quality_score": 0.9, "explanation": "test", "confidence": 0.9}'
+    llm_manager.get_llm.return_value.ainvoke = AsyncMock(return_value=MagicMock(content='{"key": "value"}'))
     return llm_manager
 
 @pytest.fixture

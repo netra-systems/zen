@@ -4,6 +4,11 @@ import json
 
 from app.services.deep_agent_v3.main import DeepAgentV3
 from app.db.models_postgres import DeepAgentRun
+from app.llm.llm_manager import LLMManager
+
+@pytest.fixture
+def mock_llm_manager():
+    return MagicMock(spec=LLMManager)
 
 @pytest.mark.asyncio
 async def test_logging_and_reporting(mock_db_session, mock_llm_manager, mock_request):
