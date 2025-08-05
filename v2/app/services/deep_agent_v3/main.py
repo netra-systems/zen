@@ -52,36 +52,17 @@ class DeepAgentV3:
             # 1. Triage
             self.state.current_step = "triage"
             self.triage_result = await self.scenario_finder.find_scenario(self.request.query)
-            scenario = self.triage_result["scenario"]
-            app_logger.info(f"Scenario selected for run_id {self.run_id}: "
-                            f"Name='{scenario['name']}', "
-                            f"Confidence={self.triage_result['confidence']}, "
-                            f"Justification='{self.triage_result['justification']}'")
-            self.state.messages.append({"role": "assistant", "content": f"Scenario identified: {scenario['name']}"})
 
-            # 2. Execute based on scenario
-            steps = scenario["steps"]
+            next_step = self.agent_core.decide_next_step(self.state, [tool_name])
+            tool_input = next_step["tool_input"]
+            
+            app_logger.info(f"Executing tool: {tool_name} for run_id: {self.run_id}")
+            
+            tool_function = self.tools[tool_name]
+            result = await tool_function.run(state=self.state, **tool_input)
 
-            for step in steps:
-                self.state.current_step = step
-                tool_name = step
-                if tool_name not in self.tools:
-                    app_logger.warning(f"Tool '{tool_name}' not found in available tools. Skipping step.")
-                    continue
-
-                next_step = self.agent_core.decide_next_step(self.state, [tool_name])
-                if not next_step:
-                    break
-
-                tool_input = next_step["tool_input"]
-                
-                app_logger.info(f"Executing tool: {tool_name} for run_id: {self.run_id}")
-                
-                tool_function = self.tools[tool_name]
-                result = await tool_function.run(state=self.state, **tool_input)
-
-                self.state.messages.append({"role": "tool", "name": tool_name, "content": json.dumps(result)})
-                await self._record_step_history(tool_name, tool_input, self.state.model_dump(), {"status": "success", "result": result})
+            self.state.messages.append({"role": "tool", "name": tool_name, "content": json.dumps(result)})
+            await self._record_step_history(tool_name, tool_input, self.state.model_dump(), {"status": "success", "result": result})
 
             self.status = "complete"
             self.state.current_step = "complete"
