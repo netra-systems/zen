@@ -13,13 +13,6 @@ class NetraOptimizerAgentSupervisor:
         self.db_session = db_session
         self.llm_manager = llm_manager
 
-        agent_def = self._get_agent_definition(llm_manager)
-        all_tools, _ = ToolBuilder.build_all(self.db_session, llm_manager)
-        tool_dispatcher = ToolDispatcher(tools=list(all_tools.values()))
-
-        team = SingleAgentTeam(agent=agent_def, llm_manager=llm_manager, tool_dispatcher=tool_dispatcher)
-        self.graph = team.create_graph()
-
     def _get_agent_definition(self, llm_manager: LLMManager) -> SubAgent:
         """Returns the definition of the Netra Optimizer Agent."""
         all_tools, _ = ToolBuilder.build_all(self.db_session, llm_manager)
@@ -34,9 +27,16 @@ class NetraOptimizerAgentSupervisor:
             tools=list(all_tools.values())
         )
 
-    async def start_agent(self, request: AnalysisRequest) -> Dict[str, Any]:
+    async def start_agent(self, request: RequestModel) -> Dict[str, Any]:
+        agent_def = self._get_agent_definition(self.llm_manager)
+        all_tools, _ = ToolBuilder.build_all(self.db_session, self.llm_manager)
+        tool_dispatcher = ToolDispatcher(tools=list(all_tools.values()))
+
+        team = SingleAgentTeam(agent=agent_def, llm_manager=self.llm_manager, tool_dispatcher=tool_dispatcher)
+        self.graph = team.create_graph()
         initial_state = {
             "messages": [HumanMessage(content=request.query)],
+            "workloads": request.workloads,
             "todo_list": ["triage_request"],
             "completed_steps": []
         }

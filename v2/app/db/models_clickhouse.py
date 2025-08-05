@@ -166,9 +166,31 @@ class CostComparison(SQLModel, table=False):
 
 from pydantic import BaseModel, Field
 
-class AnalysisRequest(BaseModel):
+class Settings(BaseModel):
+    debug_mode: bool
+
+class DataSource(BaseModel):
+    source_table: str
+
+class TimeRange(BaseModel):
+    start_time: str
+    end_time: str
+
+class Workload(BaseModel):
+    run_id: str
+    query: str
+    data_source: DataSource
+    time_range: TimeRange
+
+class RequestModel(BaseModel):
     user_id: str
     query: str
+    workloads: List[Workload]
+    constraints: Optional[Any] = None
+
+class AnalysisRequest(BaseModel):
+    settings: Settings
+    request: RequestModel
 
 class AnalysisResult(SQLModel, table=False):
     run_id: str

@@ -1,5 +1,4 @@
-
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db_session
 from app.llm.llm_manager import LLMManager
@@ -8,19 +7,22 @@ from app.db.models_clickhouse import AnalysisRequest
 
 router = APIRouter()
 
+def get_llm_manager_from_state(request: Request) -> LLMManager:
+    return request.app.state.llm_manager
+
 @router.post("/start_agent")
 async def start_agent(
-    request: AnalysisRequest,
+    analysis_request: AnalysisRequest,
     db: AsyncSession = Depends(get_db_session),
-    llm_manager: LLMManager = Depends(LLMManager),
+    llm_manager: LLMManager = Depends(get_llm_manager_from_state),
 ):
     """
     Starts the Netra Optimizer Agent to analyze the user's request.
 
     Args:
-        request (AnalysisRequest): The user's request to the agent.
+        analysis_request (AnalysisRequest): The user's request to the agent.
         db (AsyncSession, optional): The database session. Defaults to Depends(get_db_session).
-        llm_manager (LLMManager, optional): The LLM manager. Defaults to Depends(LLMManager).
+        llm_manager (LLMManager, optional): The LLM manager. Defaults to Depends(get_llm_manager_from_state).
 
     Raises:
         HTTPException: If there is an error running the agent.
@@ -30,7 +32,7 @@ async def start_agent(
     """
     try:
         supervisor = NetraOptimizerAgentSupervisor(db, llm_manager)
-        result = await supervisor.start_agent(request)
+        result = await supervisor.start_agent(analysis_request.request)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
