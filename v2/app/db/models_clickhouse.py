@@ -1,4 +1,4 @@
-# /v2/app/db/models_clickhouse.py
+
 import uuid
 import time
 from typing import Dict, Any, List, Optional, Literal
@@ -95,10 +95,18 @@ class TraceContext(SQLModel):
     span_id: str = Field(default_factory=lambda: f"span_{uuid.uuid4().hex[:8]}")
     parent_span_id: Optional[str] = None
 
-class RequestData(SQLModel):
-    model: ModelIdentifier
+class Request(SQLModel):
+    model: str
     prompt_text: str
-    user_goal: Literal["cost", "latency", "quality"] = "quality"
+
+class Response(SQLModel):
+    usage: Dict[str, int]
+
+class Performance(SQLModel):
+    latency_ms: Dict[str, int]
+
+class FinOps(SQLModel):
+    total_cost_usd: float
 
 class EnrichedMetrics(SQLModel):
     prefill_ratio: float
@@ -111,10 +119,10 @@ class UnifiedLogEntry(SQLModel, table=False):
     # but is not managed as a table by SQLAlchemy/SQLModel.
     event_metadata: EventMetadata = Field(default_factory=EventMetadata)
     trace_context: TraceContext
-    request: RequestData
-    performance: Dict[str, Any]
-    finops: Dict[str, Any]
-    response: Dict[str, Any]
+    request: Request
+    performance: Performance
+    finops: FinOps
+    response: Response
     workloadName: str = "Unknown"
     enriched_metrics: Optional[EnrichedMetrics] = None
     embedding: Optional[List[float]] = None
@@ -158,6 +166,7 @@ class CostComparison(SQLModel, table=False):
 class AnalysisRequest(SQLModel, table=False):
     user_id: str
     workloads: List[Dict]
+    query: str
     debug_mode: bool = False
     constraints: Optional[Dict[str, bool]] = None
     negotiated_discount_percent: float = Field(0.0, ge=0, le=100)
