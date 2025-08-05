@@ -1,4 +1,3 @@
-
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from app.services.deep_agent_v3.steps.propose_optimal_policies import propose_optimal_policies
@@ -9,7 +8,7 @@ from app.schema import DiscoveredPattern
 async def test_propose_optimal_policies_success():
     # Arrange
     state = MagicMock(spec=AgentState)
-    state.discovered_patterns=[
+    state.patterns=[
         DiscoveredPattern(pattern_name="pattern1", pattern_description="desc1", centroid_features={}, member_span_ids=[], member_count=0),
         DiscoveredPattern(pattern_name="pattern2", pattern_description="desc2", centroid_features={}, member_span_ids=[], member_count=0)
     ]
@@ -24,13 +23,13 @@ async def test_propose_optimal_policies_success():
     assert result == "Successfully proposed 2 optimal policies."
     assert len(state.learned_policies) == 2
     assert len(state.predicted_outcomes) == 2
-    policy_proposer.propose_policies.assert_called_once_with(state.discovered_patterns, {})
+    policy_proposer.propose_policies.assert_called_once_with(state.patterns, {})
 
 @pytest.mark.asyncio
 async def test_propose_optimal_policies_no_patterns():
     # Arrange
     state = MagicMock(spec=AgentState)
-    state.discovered_patterns = []
+    state.patterns = []
     policy_proposer = MagicMock()
     policy_proposer.propose_policies = AsyncMock(return_value=([], []))
 

@@ -27,8 +27,10 @@ async def test_run(mock_request, mock_db_session, mock_llm_connector):
          patch('app.services.deep_agent_v3.main.ScenarioFinder') as mock_scenario_finder, \
          patch.object(DeepAgentV3, '_init_langfuse', return_value=None):
 
+        mock_tool = MagicMock()
+        mock_tool.run = MagicMock(return_value="tool_result")
         mock_build_all.return_value = {
-            "test_tool": MagicMock(run=MagicMock(return_value="tool_result"))
+            "test_tool": mock_tool
         }
         mock_scenario_finder.return_value.find_scenario.return_value = {
             "scenario": {

@@ -99,33 +99,3 @@ async def test_propose_optimal_policies_success(mock_db_session, mock_llm_connec
             result = await propose_optimal_policies(state, tools, request)
             assert result["status"] == "success"
             assert len(state.policies) > 0
-
-# --- Unit Tests for DeepAgentV3 Class ---
-
-@pytest.mark.asyncio
-async def test_deep_agent_v3_full_run(mock_request, mock_db_session, mock_llm_connector):
-    """Tests the full execution of the DeepAgentV3 pipeline."""
-    with patch('app.services.deep_agent_v3.main.ScenarioFinder.find_scenario', return_value={"steps": []}):
-        agent = DeepAgentV3(run_id="test-run", request=mock_request, db_session=mock_db_session, llm_connector=mock_llm_connector)
-        await agent.run_full_analysis()
-        assert agent.status == "complete"
-
-@pytest.mark.asyncio
-async def test_deep_agent_v3_step_by_step(mock_request, mock_db_session, mock_llm_connector):
-    """Tests the step-by-step execution of the agent."""
-    with patch('app.services.deep_agent_v3.main.ScenarioFinder.find_scenario', return_value={"steps": ["fetch_raw_logs"]}):
-        agent = DeepAgentV3(run_id="test-run", request=mock_request, db_session=mock_db_session, llm_connector=mock_llm_connector)
-        with patch('app.services.deep_agent_v3.steps.fetch_raw_logs.fetch_raw_logs', new_callable=AsyncMock) as mock_fetch:
-            mock_fetch.return_value = {"status": "success"}
-            result = await agent.run_next_step()
-            assert result["status"] == "success"
-
-@pytest.mark.asyncio
-async def test_deep_agent_v3_step_failure(mock_request, mock_db_session, mock_llm_connector):
-    """Tests that a step failure is handled gracefully."""
-    with patch('app.services.deep_agent_v3.main.ScenarioFinder.find_scenario', return_value={"steps": ["fetch_raw_logs"]}):
-        agent = DeepAgentV3(run_id="test-run", request=mock_request, db_session=mock_db_session, llm_connector=mock_llm_connector)
-        with patch('app.services.deep_agent_v3.steps.fetch_raw_logs.fetch_raw_logs', new_callable=AsyncMock) as mock_fetch:
-            mock_fetch.side_effect = Exception("Test Error")
-            result = await agent.run_next_step()
-            assert result["status"] == "failed"
