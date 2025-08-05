@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from app.services.deep_agent_v3.steps.dispatch_tool import dispatch_tool
-from app.services.deep_agent_v3.state import AgentState
+from app.services.apex_optimizer_agent.steps.dispatch_tool import dispatch_tool
+from app.services.apex_optimizer_agent.state import AgentState
 from app.db.models_clickhouse import AnalysisRequest
 from app.config import settings
 

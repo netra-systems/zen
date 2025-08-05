@@ -1,5 +1,5 @@
 import asyncio
-from app.services.deep_agent_v3.tools.cost_reduction_quality_preservation import CostReductionQualityPreservationTool
+from app.services.apex_optimizer_agent.tools.cost_reduction_quality_preservation import CostReductionQualityPreservationTool
 
 class MockCostReductionQualityPreservationTool(CostReductionQualityPreservationTool):
     async def run(self, *args, **kwargs):

@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import Dict, Any
 import uuid
 
-from app.services.deep_agent_v3.main import DeepAgentV3
+from app.services.apex_optimizer_agent.main import DeepAgentV3
 from app.db.models_clickhouse import AnalysisRequest
 from app.dependencies import get_llm_manager, get_db_session
 from app.llm.llm_manager import LLMManager

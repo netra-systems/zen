@@ -1,0 +1,17 @@
+from app.services.apex_optimizer_agent.state import AgentState
+
+class LatencyAnalyzer:
+    def __init__(self, performance_predictor: any):
+        self.performance_predictor = performance_predictor
+
+    async def run(self, state: AgentState) -> str:
+        """Analyzes the current latency of the system."""
+        total_latency = 0
+        for log in state.logs:
+            latency_result = await self.performance_predictor.execute(log.request.prompt_text, log.model_dump())
+            total_latency += latency_result["predicted_latency_ms"]
+        
+        average_latency = total_latency / len(state.logs) if state.logs else 0
+        
+        state.messages.append({"message": f"Average predicted latency: {average_latency:.2f}ms"})
+        return f"Analyzed current latency. Average predicted latency: {average_latency:.2f}ms"

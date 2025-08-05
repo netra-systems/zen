@@ -1,9 +1,9 @@
 import pytest
 from app.llm.llm_manager import LLMManager
 from unittest.mock import MagicMock, AsyncMock, patch
-from app.services.deep_agent_v3.tools.log_analyzer import LogAnalyzer
-from app.services.deep_agent_v3.tools.policy_simulator import PolicySimulator
-from app.services.deep_agent_v3.tools.supply_catalog_search import SupplyCatalogSearch
+from app.services.apex_optimizer_agent.tools.log_analyzer import LogAnalyzer
+from app.services.apex_optimizer_agent.tools.policy_simulator import PolicySimulator
+from app.services.apex_optimizer_agent.tools.supply_catalog_search import SupplyCatalogSearch
 from app.schema import PredictedOutcome, LearnedPolicy, BaselineMetrics
 
 @pytest.fixture

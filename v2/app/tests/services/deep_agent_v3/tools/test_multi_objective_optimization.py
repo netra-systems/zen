@@ -1,5 +1,5 @@
 import asyncio
-from app.services.deep_agent_v3.tools.multi_objective_optimization import MultiObjectiveOptimizationTool
+from app.services.apex_optimizer_agent.tools.multi_objective_optimization import MultiObjectiveOptimizationTool
 
 class MockMultiObjectiveOptimizationTool(MultiObjectiveOptimizationTool):
     async def run(self, *args, **kwargs):

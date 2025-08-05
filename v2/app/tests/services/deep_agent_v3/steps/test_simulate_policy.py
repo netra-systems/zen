@@ -1,8 +1,8 @@
 
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from app.services.deep_agent_v3.steps.simulate_policy import simulate_policy
-from app.services.deep_agent_v3.state import AgentState
+from app.services.apex_optimizer_agent.steps.simulate_policy import simulate_policy
+from app.services.apex_optimizer_agent.state import AgentState
 from app.schema import LearnedPolicy, PredictedOutcome, BaselineMetrics
 
 @pytest.mark.asyncio

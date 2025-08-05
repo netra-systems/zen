@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from app.services.deep_agent_v3.steps.propose_optimal_policies import propose_optimal_policies
-from app.services.deep_agent_v3.state import AgentState
+from app.services.apex_optimizer_agent.steps.propose_optimal_policies import propose_optimal_policies
+from app.services.apex_optimizer_agent.state import AgentState
 from app.schema import DiscoveredPattern
 
 @pytest.mark.asyncio

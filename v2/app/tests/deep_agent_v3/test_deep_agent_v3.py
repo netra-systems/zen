@@ -6,7 +6,7 @@ from sqlmodel import Session
 
 from app.main import app
 from app.db.models_clickhouse import AnalysisRequest
-from app.services.deep_agent_v3.main import DeepAgentV3
+from app.services.apex_optimizer_agent.main import DeepAgentV3
 
 
 
@@ -25,13 +25,13 @@ def mock_llm_manager():
         yield mock_llm_manager_instance
 
 @pytest.fixture
-def mock_deep_agent_v3():
+def mock_apex_optimizer_agent():
     with patch('app.routes.deep_agent.DeepAgentV3', autospec=True) as mock_agent:
         mock_instance = mock_agent.return_value
         mock_instance.start_agent = AsyncMock()
         yield mock_agent
 
-def test_cost_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_deep_agent_v3):
+def test_cost_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
     # Given
     request_data = {
         "user_id": "test_user",
@@ -43,11 +43,11 @@ def test_cost_optimization_scenario(client: TestClient, mock_db_session, mock_ll
 
     # Then
     assert response.status_code == 202
-    mock_deep_agent_v3.assert_called_once()
-    agent_instance = mock_deep_agent_v3.return_value
+    mock_apex_optimizer_agent.assert_called_once()
+    agent_instance = mock_apex_optimizer_agent.return_value
     agent_instance.start_agent.assert_awaited_once()
 
-def test_latency_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_deep_agent_v3):
+def test_latency_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
     # Given
     request_data = {
         "user_id": "test_user",
@@ -59,11 +59,11 @@ def test_latency_optimization_scenario(client: TestClient, mock_db_session, mock
 
     # Then
     assert response.status_code == 202
-    mock_deep_agent_v3.assert_called_once()
-    agent_instance = mock_deep_agent_v3.return_value
+    mock_apex_optimizer_agent.assert_called_once()
+    agent_instance = mock_apex_optimizer_agent.return_value
     agent_instance.start_agent.assert_awaited_once()
 
-def test_scalability_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_deep_agent_v3):
+def test_scalability_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
     # Given
     request_data = {
         "user_id": "test_user",
@@ -75,11 +75,11 @@ def test_scalability_scenario(client: TestClient, mock_db_session, mock_llm_mana
 
     # Then
     assert response.status_code == 202
-    mock_deep_agent_v3.assert_called_once()
-    agent_instance = mock_deep_agent_v3.return_value
+    mock_apex_optimizer_agent.assert_called_once()
+    agent_instance = mock_apex_optimizer_agent.return_value
     agent_instance.start_agent.assert_awaited_once()
 
-def test_code_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_deep_agent_v3):
+def test_code_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
     # Given
     request_data = {
         "user_id": "test_user",
@@ -91,11 +91,11 @@ def test_code_optimization_scenario(client: TestClient, mock_db_session, mock_ll
 
     # Then
     assert response.status_code == 202
-    mock_deep_agent_v3.assert_called_once()
-    agent_instance = mock_deep_agent_v3.return_value
+    mock_apex_optimizer_agent.assert_called_once()
+    agent_instance = mock_apex_optimizer_agent.return_value
     agent_instance.start_agent.assert_awaited_once()
 
-def test_model_evaluation_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_deep_agent_v3):
+def test_model_evaluation_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
     # Given
     request_data = {
         "user_id": "test_user",
@@ -107,11 +107,11 @@ def test_model_evaluation_scenario(client: TestClient, mock_db_session, mock_llm
 
     # Then
     assert response.status_code == 202
-    mock_deep_agent_v3.assert_called_once()
-    agent_instance = mock_deep_agent_v3.return_value
+    mock_apex_optimizer_agent.assert_called_once()
+    agent_instance = mock_apex_optimizer_agent.return_value
     agent_instance.start_agent.assert_awaited_once()
 
-def test_system_audit_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_deep_agent_v3):
+def test_system_audit_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
     # Given
     request_data = {
         "user_id": "test_user",
@@ -123,11 +123,11 @@ def test_system_audit_scenario(client: TestClient, mock_db_session, mock_llm_man
 
     # Then
     assert response.status_code == 202
-    mock_deep_agent_v3.assert_called_once()
-    agent_instance = mock_deep_agent_v3.return_value
+    mock_apex_optimizer_agent.assert_called_once()
+    agent_instance = mock_apex_optimizer_agent.return_value
     agent_instance.start_agent.assert_awaited_once()
 
-def test_multi_objective_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_deep_agent_v3):
+def test_multi_objective_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
     # Given
     request_data = {
         "user_id": "test_user",
@@ -139,6 +139,6 @@ def test_multi_objective_optimization_scenario(client: TestClient, mock_db_sessi
 
     # Then
     assert response.status_code == 202
-    mock_deep_agent_v3.assert_called_once()
-    agent_instance = mock_deep_agent_v3.return_value
+    mock_apex_optimizer_agent.assert_called_once()
+    agent_instance = mock_apex_optimizer_agent.return_value
     agent_instance.start_agent.assert_awaited_once()

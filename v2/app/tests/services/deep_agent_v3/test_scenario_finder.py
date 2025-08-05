@@ -3,7 +3,7 @@ import json
 from app.llm.llm_manager import LLMManager
 from unittest.mock import AsyncMock, MagicMock
 
-from app.services.deep_agent_v3.scenario_finder import ScenarioFinder
+from app.services.apex_optimizer_agent.scenario_finder import ScenarioFinder
 from app.db.models_clickhouse import AnalysisRequest
 
 @pytest.fixture

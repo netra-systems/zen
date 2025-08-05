@@ -1,8 +1,8 @@
 import pytest
 from app.llm.llm_manager import LLMManager
 from unittest.mock import MagicMock, AsyncMock
-from app.services.deep_agent_v3.tools.cost_estimator import CostEstimator
-from app.services.deep_agent_v3.tools.performance_predictor import PerformancePredictor
+from app.services.apex_optimizer_agent.tools.cost_estimator import CostEstimator
+from app.services.apex_optimizer_agent.tools.performance_predictor import PerformancePredictor
 
 @pytest.mark.asyncio
 async def test_cost_estimator():

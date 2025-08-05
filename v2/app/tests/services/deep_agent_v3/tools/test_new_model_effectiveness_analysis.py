@@ -1,5 +1,5 @@
 import asyncio
-from app.services.deep_agent_v3.tools.new_model_effectiveness_analysis import NewModelEffectivenessAnalysisTool
+from app.services.apex_optimizer_agent.tools.new_model_effectiveness_analysis import NewModelEffectivenessAnalysisTool
 
 class MockNewModelEffectivenessAnalysisTool(NewModelEffectivenessAnalysisTool):
     async def run(self, *args, **kwargs):

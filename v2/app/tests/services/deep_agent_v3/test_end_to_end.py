@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from app.services.deep_agent_v3.main import DeepAgentV3
+from app.services.apex_optimizer_agent.main import DeepAgentV3
 from app.db.models_clickhouse import AnalysisRequest
 
 
@@ -22,10 +22,10 @@ async def test_end_to_end_scenario(db_session):
     llm_connector = MagicMock()
 
     # Create the agent
-    with patch('app.services.deep_agent_v3.main.ToolBuilder.build_all') as mock_build_all, \
-         patch('app.services.deep_agent_v3.main.ScenarioFinder.find_scenario', new_callable=AsyncMock) as mock_find_scenario, \
+    with patch('app.services.apex_optimizer_agent.main.ToolBuilder.build_all') as mock_build_all, \
+         patch('app.services.apex_optimizer_agent.main.ScenarioFinder.find_scenario', new_callable=AsyncMock) as mock_find_scenario, \
          patch.object(DeepAgentV3, '_init_langfuse', return_value=None), \
-         patch('app.services.deep_agent_v3.main.DeepAgentV3._generate_and_save_run_report', new_callable=AsyncMock):
+         patch('app.services.apex_optimizer_agent.main.DeepAgentV3._generate_and_save_run_report', new_callable=AsyncMock):
 
         mock_tool = MagicMock()
         mock_tool.run = AsyncMock(return_value="tool_result")
@@ -43,7 +43,7 @@ async def test_end_to_end_scenario(db_session):
 
         async with get_db_session() as db_session:
             agent = DeepAgentV3(run_id, request, db_session, llm_connector)
-            agent.agent_core.decide_next_step = MagicMock(return_value={"tool_name": "test_tool", "tool_input": {}})
+            agent.UPDATE_THIS_NAME.decide_next_step = MagicMock(return_value={"tool_name": "test_tool", "tool_input": {}})
 
             # Act
             result_state = await agent.run()

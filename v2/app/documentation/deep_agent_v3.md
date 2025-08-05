@@ -162,7 +162,7 @@ This guide provides a step-by-step process for new engineers to get started with
 The agent can be run from the command line using the following command:
 
 ```
-python -m app.services.deep_agent_v3.runner
+python -m app.services.apex_optimizer_agent.runner
 ```
 
 This will start the agent and run the default analysis scenario.

@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
-from app.services.deep_agent_v3.steps.fetch_raw_logs import fetch_raw_logs
-from app.services.deep_agent_v3.state import AgentState
+from app.services.apex_optimizer_agent.steps.fetch_raw_logs import fetch_raw_logs
+from app.services.apex_optimizer_agent.state import AgentState
 
 @pytest.mark.asyncio
 async def test_fetch_raw_logs_success():

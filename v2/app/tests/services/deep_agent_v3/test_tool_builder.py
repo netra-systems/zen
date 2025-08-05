@@ -1,12 +1,12 @@
 
-from app.services.deep_agent_v3.tool_builder import ToolBuilder
-from app.services.deep_agent_v3.tools.log_fetcher import LogFetcher
-from app.services.deep_agent_v3.tools.log_pattern_identifier import LogPatternIdentifier
-from app.services.deep_agent_v3.tools.policy_proposer import PolicyProposer
-from app.services.deep_agent_v3.tools.policy_simulator import PolicySimulator
-from app.services.deep_agent_v3.tools.supply_catalog_search import SupplyCatalogSearch
-from app.services.deep_agent_v3.tools.cost_estimator import CostEstimator
-from app.services.deep_agent_v3.tools.performance_predictor import PerformancePredictor
+from app.services.apex_optimizer_agent.tool_builder import ToolBuilder
+from app.services.apex_optimizer_agent.tools.log_fetcher import LogFetcher
+from app.services.apex_optimizer_agent.tools.log_pattern_identifier import LogPatternIdentifier
+from app.services.apex_optimizer_agent.tools.policy_proposer import PolicyProposer
+from app.services.apex_optimizer_agent.tools.policy_simulator import PolicySimulator
+from app.services.apex_optimizer_agent.tools.supply_catalog_search import SupplyCatalogSearch
+from app.services.apex_optimizer_agent.tools.cost_estimator import CostEstimator
+from app.services.apex_optimizer_agent.tools.performance_predictor import PerformancePredictor
 
 def test_tool_builder_builds_all_tools(mock_db_session, mock_llm_connector):
     """Tests that the ToolBuilder correctly builds all the tools."""

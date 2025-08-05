@@ -1,5 +1,5 @@
 import asyncio
-from app.services.deep_agent_v3.tools.tool_latency_optimization import ToolLatencyOptimizationTool
+from app.services.apex_optimizer_agent.tools.tool_latency_optimization import ToolLatencyOptimizationTool
 
 class MockToolLatencyOptimizationTool(ToolLatencyOptimizationTool):
     async def run(self, *args, **kwargs):

@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
 import json
 
-from app.services.deep_agent_v3.main import DeepAgentV3
+from app.services.apex_optimizer_agent.main import DeepAgentV3
 from app.db.models_postgres import DeepAgentRun
 from app.llm.llm_manager import LLMManager
 
@@ -14,8 +14,8 @@ def mock_llm_manager():
 async def test_logging_and_reporting(mock_db_session, mock_llm_manager, mock_request):
     """Tests that the agent correctly logs step execution and generates a run report."""
     # Arrange
-    with patch('app.services.deep_agent_v3.main.ToolBuilder.build_all') as mock_build_all, \
-         patch('app.services.deep_agent_v3.main.ScenarioFinder.find_scenario', new_callable=AsyncMock) as mock_find_scenario, \
+    with patch('app.services.apex_optimizer_agent.main.ToolBuilder.build_all') as mock_build_all, \
+         patch('app.services.apex_optimizer_agent.main.ScenarioFinder.find_scenario', new_callable=AsyncMock) as mock_find_scenario, \
          patch.object(DeepAgentV3, '_init_langfuse', return_value=None):
 
         mock_tool = MagicMock()
@@ -33,11 +33,11 @@ async def test_logging_and_reporting(mock_db_session, mock_llm_manager, mock_req
         }
 
         agent = DeepAgentV3(run_id="test_run_id", request=mock_request, db_session=mock_db_session, llm_manager=mock_llm_manager)
-        agent.agent_core.decide_next_step = MagicMock(return_value={"tool_name": "test_tool", "tool_input": {}})
+        agent.UPDATE_THIS_NAME.decide_next_step = MagicMock(return_value={"tool_name": "test_tool", "tool_input": {}})
 
         # Act
         with patch('app.logging_config_custom.logger.app_logger.info') as mock_logger, \
-             patch('app.services.deep_agent_v3.main.DeepAgentV3._generate_and_save_run_report', new_callable=AsyncMock):
+             patch('app.services.apex_optimizer_agent.main.DeepAgentV3._generate_and_save_run_report', new_callable=AsyncMock):
             await agent.run()
 
         # Assert

@@ -2,14 +2,14 @@ import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
 from datetime import datetime
 
-from app.services.deep_agent_v3.main import DeepAgentV3
-from app.services.deep_agent_v3.steps.fetch_raw_logs import fetch_raw_logs
-from app.services.deep_agent_v3.steps.enrich_and_cluster import enrich_and_cluster
-from app.services.deep_agent_v3.steps.propose_optimal_policies import propose_optimal_policies
+from app.services.apex_optimizer_agent.main import DeepAgentV3
+from app.services.apex_optimizer_agent.steps.fetch_raw_logs import fetch_raw_logs
+from app.services.apex_optimizer_agent.steps.enrich_and_cluster import enrich_and_cluster
+from app.services.apex_optimizer_agent.steps.propose_optimal_policies import propose_optimal_policies
 from app.db.models_clickhouse import UnifiedLogEntry, AnalysisRequest, Request, Response, Performance, FinOps, TraceContext
 from app.db.models_postgres import SupplyOption
 from app.schema import DiscoveredPattern, LearnedPolicy, PredictedOutcome
-from app.services.deep_agent_v3.state import AgentState
+from app.services.apex_optimizer_agent.state import AgentState
 
 # --- Fixtures ---
 

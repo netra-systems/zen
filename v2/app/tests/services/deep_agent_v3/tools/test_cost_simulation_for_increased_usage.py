@@ -1,5 +1,5 @@
 import asyncio
-from app.services.deep_agent_v3.tools.cost_simulation_for_increased_usage import CostSimulationForIncreasedUsageTool
+from app.services.apex_optimizer_agent.tools.cost_simulation_for_increased_usage import CostSimulationForIncreasedUsageTool
 
 class MockCostSimulationForIncreasedUsageTool(CostSimulationForIncreasedUsageTool):
     async def run(self, *args, **kwargs):

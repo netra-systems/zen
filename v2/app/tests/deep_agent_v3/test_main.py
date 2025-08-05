@@ -6,8 +6,8 @@ import pytest
 
 from app.db.models_clickhouse import AnalysisRequest
 from app.llm.llm_manager import LLMManager
-from app.services.deep_agent_v3.main import DeepAgentV3
-from app.services.deep_agent_v3.triage import Triage
+from app.services.apex_optimizer_agent.main import DeepAgentV3
+from app.services.apex_optimizer_agent.triage import Triage
 from app.config import AppConfig, LLMConfig, LangfuseConfig
 
 
@@ -45,7 +45,7 @@ async def test_start_agent(mock_request, mock_llm_manager, mock_db_session):
         "suggested_next_steps": ["cost_analyzer"],
     }
 
-    with patch("app.services.deep_agent_v3.main.ToolBuilder.build_all") as mock_build_all, patch.object(
+    with patch("app.services.apex_optimizer_agent.main.ToolBuilder.build_all") as mock_build_all, patch.object(
         DeepAgentV3, "_init_langfuse", return_value=None
     ):
         mock_tool = MagicMock()
@@ -59,13 +59,13 @@ async def test_start_agent(mock_request, mock_llm_manager, mock_db_session):
             llm_manager=mock_llm_manager,
             triage=mock_triage,
         )
-        agent.agent_core.decide_next_step = MagicMock(
+        agent.UPDATE_THIS_NAME.decide_next_step = MagicMock(
             return_value={"tool_name": "cost_analyzer", "tool_input": {}}
         )
 
     # When
     with patch(
-        "app.services.deep_agent_v3.main.DeepAgentV3._generate_and_save_run_report",
+        "app.services.apex_optimizer_agent.main.DeepAgentV3._generate_and_save_run_report",
         new_callable=AsyncMock,
     ):
         final_state = await agent.start_agent()
@@ -93,8 +93,8 @@ def mock_settings():
         )
     )
 
-def test_deep_agent_v3_initialization_with_settings(mock_settings):
-    with patch("app.services.deep_agent_v3.main.settings", mock_settings):
+def test_apex_optimizer_agent_initialization_with_settings(mock_settings):
+    with patch("app.services.apex_optimizer_agent.main.settings", mock_settings):
         mock_db_session = MagicMock()
         mock_llm_manager = LLMManager(settings=mock_settings)
 
