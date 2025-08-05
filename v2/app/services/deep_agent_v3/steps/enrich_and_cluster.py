@@ -1,6 +1,7 @@
-
 from typing import Any
 from app.services.deep_agent_v3.state import AgentState
+import pandas as pd
+from sklearn.cluster import KMeans
 
 async def enrich_and_cluster(
     state: AgentState,
@@ -12,12 +13,12 @@ async def enrich_and_cluster(
 
     # Enrichment
     for span in state.raw_logs:
-        usage = span.response.get('usage', {})
+        usage = span.response.usage
         prompt_tokens = usage.get('prompt_tokens', 0)
         completion_tokens = usage.get('completion_tokens', 0)
         total_tokens = prompt_tokens + completion_tokens
-        latency_ms = span.performance['latency_ms']['total_e2e_ms']
-        ttft_ms = span.performance['latency_ms']['time_to_first_token_ms']
+        latency_ms = span.performance.latency_ms['total_e2e_ms']
+        ttft_ms = span.performance.latency_ms['time_to_first_token_ms']
         
         inter_token_latency = None
         if completion_tokens > 1 and latency_ms > ttft_ms:
