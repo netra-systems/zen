@@ -31,10 +31,12 @@ export default function DeepAgent() {
   const [isAutoProgress, setIsAutoProgress] = useState<boolean>(false);
 
   const startAnalysis = async () => {
-    const response = await fetch('/api/v3/agent/create', {
+    const response = await fetch('/api/v3/agent/apex', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: prompt, run_id: `run-${Date.now()}` }),
+      body: JSON.stringify(
+        { query: prompt, 
+          run_id: `run-${Date.now()}` }),
     });
     const data = await response.json();
     setRunId(data.run_id);
