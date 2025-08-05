@@ -19,7 +19,7 @@ async def test_logging_and_reporting(mock_db_session, mock_llm_manager, mock_req
          patch.object(DeepAgentV3, '_init_langfuse', return_value=None):
 
         mock_tool = MagicMock()
-        mock_tool.run = MagicMock(return_value="tool_result")
+        mock_tool.run = AsyncMock(return_value="tool_result")
         mock_build_all.return_value = {
             "test_tool": mock_tool
         }
