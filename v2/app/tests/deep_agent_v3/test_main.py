@@ -39,12 +39,14 @@ async def test_run(mock_request, mock_db_session, mock_llm_connector):
         mock_tool = MagicMock()
         mock_tool.run = MagicMock(return_value="tool_result")
         mock_build_all.return_value = {
-            "test_tool": mock_tool
+            "analyze_request": mock_tool,
+            "propose_solution": mock_tool,
+            "generate_report": mock_tool,
         }
         mock_scenario_finder.return_value.find_scenario.return_value = {
             "scenario": {
                 "name": "test_scenario",
-                "steps": ["test_tool"]
+                "steps": ["analyze_request", "propose_solution", "generate_report"]
             },
             "confidence": 0.9,
             "justification": "test_justification"
@@ -65,7 +67,9 @@ async def test_run(mock_request, mock_db_session, mock_llm_connector):
     # Then
     assert agent.status == "complete"
     assert final_state is not None
-    assert len(final_state.messages) == 2
+    assert len(final_state.messages) == 4
     assert final_state.messages[0]['content'] == "Scenario identified: test_scenario"
     assert final_state.messages[1]['content'] == 'tool_result'
+    assert final_state.messages[2]['content'] == 'tool_result'
+    assert final_state.messages[3]['content'] == 'tool_result'
 

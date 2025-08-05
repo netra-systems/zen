@@ -5,12 +5,12 @@ from typing import Annotated, Literal
 from langgraph.prebuilt import InjectedState
 import uuid
 
-from ..deepagents.prompts import (
+from deepagents.prompts import (
     WRITE_TODOS_DESCRIPTION,
     EDIT_DESCRIPTION,
     TOOL_DESCRIPTION,
 )
-from ..deepagents.state import Todo, DeepAgentState
+from deepagents.state import Todo, DeepAgentState
 
 
 @tool

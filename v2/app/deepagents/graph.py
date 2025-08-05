@@ -1,6 +1,13 @@
-from ..deepagents.sub_agent import _create_task_tool, SubAgent
-from ..deepagents.model import get_default_model
-from ..deepagents.tools import (
+from typing import Any, Callable, List, Optional, Sequence, TypedDict, Union
+from langchain_core.language_models import LanguageModelLike
+from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.tools import BaseTool
+from langgraph.graph import END, StateGraph
+from .model import get_default_model
+from .state import DeepAgentState
+from .sub_agent import _create_task_tool
+from .supervisor import create_supervisor_graph
+from .tools import (
     write_todos,
     write_file,
     read_file,
@@ -8,17 +15,60 @@ from ..deepagents.tools import (
     edit_file,
     update_todo,
 )
-from ..deepagents.state import DeepAgentState
-from typing import Sequence, Union, Callable, Any, TypeVar, Type, Optional
-from langchain_core.tools import BaseTool
-from langchain_core.language_models import LanguageModelLike
 
-from langgraph.prebuilt import create_react_agent
+class SubAgent(TypedDict):
+    name: str
+    description: str
+    prompt: str
+    tools: Optional[list] = None
 
-StateSchema = TypeVar("StateSchema", bound=DeepAgentState)
-StateSchemaType = Type[StateSchema]
+class Team:
+    def __init__(self, agents: List[SubAgent], supervisor_llm: Optional[LanguageModelLike] = None):
+        self.agents = agents
+        self.supervisor_llm = supervisor_llm or get_default_model()
 
-base_prompt = """You have access to a number of standard tools to help you manage and plan your work.
+    def create_graph(self):
+        # Create the supervisor graph
+        supervisor_graph = create_supervisor_graph(self.supervisor_llm)
+
+        # Create the agent graphs
+        agent_graphs = {}
+        for agent in self.agents:
+            agent_graphs[agent["name"]] = create_deep_agent(
+                tools=agent.get("tools", []),
+                instructions=agent["prompt"],
+                model=self.supervisor_llm,
+            )
+
+        # Define the main graph
+        workflow = StateGraph(DeepAgentState)
+        workflow.add_node("supervisor", supervisor_graph)
+
+        for agent_name, agent_graph in agent_graphs.items():
+            workflow.add_node(agent_name, agent_graph)
+
+        # Add edges
+        for agent_name in agent_graphs:
+            workflow.add_edge(agent_name, "supervisor")
+
+        # The conditional edge will decide which agent to call
+        workflow.add_conditional_edges(
+            "supervisor",
+            lambda x: x["next"],
+            {**{agent: agent for agent in agent_graphs}, **{"FINISH": END}},
+        )
+
+        workflow.set_entry_point("supervisor")
+        return workflow.compile()
+
+def create_deep_agent(
+    tools: Sequence[Union[BaseTool, Callable, dict[str, Any]]],
+    instructions: str,
+    model: Optional[Union[str, LanguageModelLike]] = None,
+    subagents: list[SubAgent] = None,
+    state_schema: Optional[DeepAgentState] = None,
+):
+    base_prompt = """You have access to a number of standard tools to help you manage and plan your work.
 
 ## Todos
 
@@ -42,33 +92,6 @@ Do not batch up multiple tasks before marking them as completed.
 ## `task`
 
 - When doing web search, prefer to use the `task` tool in order to reduce context usage."""
-
-
-def create_deep_agent(
-    tools: Sequence[Union[BaseTool, Callable, dict[str, Any]]],
-    instructions: str,
-    model: Optional[Union[str, LanguageModelLike]] = None,
-    subagents: list[SubAgent] = None,
-    state_schema: Optional[StateSchemaType] = None,
-):
-    """Create a deep agent.
-
-    This agent will by default have access to a tool to write todos (write_todos),
-    and then four file editing tools: write_file, ls, read_file, edit_file.
-
-    Args:
-        tools: The additional tools the agent should have access to.
-        instructions: The additional instructions the agent should have. Will go in
-            the system prompt.
-        model: The model to use.
-        subagents: The subagents to use. Each subagent should be a dictionary with the
-            following keys:
-                - `name`
-                - `description` (used by the main agent to decide whether to call the sub agent)
-                - `prompt` (used as the system prompt in the subagent)
-                - (optional) `tools`
-        state_schema: The schema of the deep agent. Should subclass from DeepAgentState
-    """
     prompt = instructions + base_prompt
     built_in_tools = [write_todos, update_todo, write_file, read_file, ls, edit_file]
     if model is None:
@@ -81,10 +104,42 @@ def create_deep_agent(
         model,
         state_schema
     )
-    all_tools = built_in_tools + list(tools) + [task_tool]
+    all_tools = built_in_tools + list(tools)
+    from langgraph.prebuilt import create_react_agent
     return create_react_agent(
         model,
         prompt=prompt,
         tools=all_tools,
         state_schema=state_schema,
     )
+
+if __name__ == "__main__":
+    # Define your agents
+    agents = [
+        SubAgent(
+            name="researcher",
+            description="This agent is responsible for conducting research and gathering information.",
+            prompt="You are a research agent. Your goal is to find and synthesize information on a given topic.",
+            tools=[]
+        ),
+        SubAgent(
+            name="writer",
+            description="This agent is responsible for writing content based on the research provided.",
+            prompt="You are a writer. Your goal is to create a well-written piece of content based on the provided information.",
+            tools=[]
+        ),
+    ]
+
+    # Create the team
+    team = Team(agents)
+
+    # Create the graph
+    graph = team.create_graph()
+
+    # Run the graph
+    initial_state = {
+        "messages": [HumanMessage(content="Write a blog post about the latest advancements in AI.")]
+    }
+
+    for event in graph.stream(initial_state, {"recursion_limit": 100}):
+        print(event)
