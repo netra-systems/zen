@@ -1,4 +1,3 @@
-
 from typing import List, Callable, Any, Dict
 from app.services.deep_agent_v3.state import AgentState
 
@@ -26,6 +25,8 @@ class Pipeline:
                 result_message = await step_func(state, tools["log_pattern_identifier"])
             elif step_name == "propose_optimal_policies":
                 result_message = await step_func(state, tools["policy_proposer"])
+            elif step_name == "dispatch_tool":
+                result_message = await step_func(state, tools["cost_estimator"]) # This is a placeholder, will be updated later
             else:
                 result_message = await step_func(state)
 
