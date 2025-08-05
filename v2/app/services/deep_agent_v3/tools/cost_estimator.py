@@ -1,9 +1,13 @@
-
 from typing import Any, Dict
+from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
-class CostEstimator:
-    def __init__(self, llm_connector: any):
-        self.llm_connector = llm_connector
+class CostEstimator(BaseTool):
+    metadata = ToolMetadata(
+        name="CostEstimator",
+        description="Estimates the cost of a given prompt using the llm_connector.",
+        version="1.0.0",
+        status="production"
+    )
 
     async def execute(self, prompt: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Estimates the cost of a given prompt using the llm_connector."""
