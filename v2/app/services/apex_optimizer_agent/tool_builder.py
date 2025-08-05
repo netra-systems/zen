@@ -5,7 +5,7 @@ from app.services.apex_optimizer_agent.tools.latency_analyzer import LatencyAnal
 from app.services.apex_optimizer_agent.tools.code_analyzer import CodeAnalyzer
 from app.services.apex_optimizer_agent.tools.function_performance_analyzer import FunctionPerformanceAnalyzer
 from app.services.apex_optimizer_agent.tools.evaluation_criteria_definer import EvaluationCriteriaDefiner
-from app.services.apex_optimizer_agent.tools.tool_dispatcher import ToolDispatcher
+from app.services.apex_optimizer_agent.tool_dispatcher import ToolDispatcher
 from app.services.apex_optimizer_agent.tools.log_enricher_and_clusterer import LogEnricherAndClusterer
 from app.services.apex_optimizer_agent.tools.log_fetcher import LogFetcher
 from app.services.apex_optimizer_agent.tools.kv_cache_finder import KVCacheFinder
@@ -80,7 +80,7 @@ class ToolBuilder:
             **simulation_tools,
             "kv_cache_finder": KVCacheFinder(llm_manager),
             "final_report_generator": FinalReportGenerator(),
-            "tool_dispatcher": ToolDispatcher(llm_manager, None), # Settings will be passed in the agent
+            
             "evaluation_criteria_definer": EvaluationCriteriaDefiner(),
             "optimization_proposer": OptimizationProposer(llm_manager),
         }

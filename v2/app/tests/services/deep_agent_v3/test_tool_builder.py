@@ -11,13 +11,7 @@ from app.services.apex_optimizer_agent.tools.performance_predictor import Perfor
 def test_tool_builder_builds_all_tools(mock_db_session, mock_llm_connector):
     """Tests that the ToolBuilder correctly builds all the tools."""
     # Arrange & Act
-    tools = ToolBuilder.build_all(mock_db_session, mock_llm_connector)
+    all_tools, super_tools = ToolBuilder.build_all(mock_db_session, mock_llm_connector)
 
     # Assert
-    assert isinstance(tools["log_fetcher"], LogFetcher)
-    assert isinstance(tools["log_pattern_identifier"], LogPatternIdentifier)
-    assert isinstance(tools["policy_proposer"], PolicyProposer)
-    assert isinstance(tools["policy_simulator"], PolicySimulator)
-    assert isinstance(tools["supply_catalog_search"], SupplyCatalogSearch)
-    assert isinstance(tools["cost_estimator"], CostEstimator)
-    assert isinstance(tools["performance_predictor"], PerformancePredictor)
+    

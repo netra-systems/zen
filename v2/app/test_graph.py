@@ -2,8 +2,8 @@ from typing import Any, List
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from langchain_core.messages import HumanMessage, AIMessage, ToolCall, BaseMessage
-from .deepagents.graph import create_deep_agent
-from .deepagents.tools import update_todo, write_todos
+from app.services.deepagents.graph import create_deep_agent
+from app.services.deepagents.tools import update_todo, write_todos
 from langchain_core.tools import tool
 
 @tool

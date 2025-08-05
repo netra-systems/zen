@@ -4,7 +4,8 @@ from unittest.mock import MagicMock, AsyncMock, patch
 from app.services.apex_optimizer_agent.tools.log_analyzer import LogAnalyzer
 from app.services.apex_optimizer_agent.tools.policy_simulator import PolicySimulator
 from app.services.apex_optimizer_agent.tools.supply_catalog_search import SupplyCatalogSearch
-from app.schema import PredictedOutcome, LearnedPolicy, BaselineMetrics
+from app.services.apex_optimizer_agent.state import AgentState
+from app.schema import LearnedPolicy, PredictedOutcome, BaselineMetrics
 
 @pytest.fixture
 def mock_llm_manager():
@@ -32,7 +33,8 @@ class TestLogAnalyzer:
 class TestPolicySimulator:
     @pytest.mark.asyncio
     async def test_simulate_policy(self, mock_llm_manager):
-        tool = PolicySimulator(llm_manager=mock_llm_manager)
+        mock_policy_simulator = MagicMock()
+        tool = PolicySimulator(policy_simulator=mock_policy_simulator)
         policy = LearnedPolicy(
             pattern_name="test",
             optimal_supply_option_name="test",
@@ -53,16 +55,8 @@ class TestPolicySimulator:
             ),
             pattern_impact_fraction=0.5
         )
-        mock_llm_manager.get_llm.return_value.ainvoke.return_value.content = PredictedOutcome(
-            supply_option_name="test_supply_option",
-            utility_score=0.9,
-            predicted_cost_usd=0.1,
-            predicted_latency_ms=100,
-            predicted_quality_score=0.9,
-            explanation="test",
-            confidence=0.9
-        ).model_dump_json()
-        result = await tool.run(policy)
+        state = AgentState(learned_policies=[policy], messages=[])
+        result = await tool.run(state)
         assert result.utility_score == 0.9
         mock_llm_manager.get_llm.return_value.ainvoke.assert_called_once()
 

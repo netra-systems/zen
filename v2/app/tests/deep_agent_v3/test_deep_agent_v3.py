@@ -1,4 +1,3 @@
-
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 from fastapi.testclient import TestClient
@@ -6,7 +5,7 @@ from sqlmodel import Session
 
 from app.main import app
 from app.db.models_clickhouse import AnalysisRequest
-from app.services.apex_optimizer_agent.main import NetraOptimizerAgent
+from app.services.apex_optimizer_agent.agent import NetraOptimizerAgent
 
 
 
@@ -26,12 +25,12 @@ def mock_llm_manager():
 
 @pytest.fixture
 def mock_apex_optimizer_agent():
-    with patch('app.routes.deep_agent.NetraOptimizerAgent', autospec=True) as mock_agent:
+    with patch('app.services.apex_optimizer_agent.agent.NetraOptimizerAgent', autospec=True) as mock_agent:
         mock_instance = mock_agent.return_value
         mock_instance.start_agent = AsyncMock()
         yield mock_agent
 
-def test_cost_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
+async def test_cost_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
     # Given
     request_data = {
         "user_id": "test_user",
@@ -39,7 +38,9 @@ def test_cost_optimization_scenario(client: TestClient, mock_db_session, mock_ll
     }
 
     # When
-    response = client.post("/api/v3/agent/start", json=request_data)
+    request_data["workloads"] = []
+    analysis_request = AnalysisRequest(**request_data)
+    response = client.post("/apex/start_agent", json=analysis_request.model_dump())
 
     # Then
     assert response.status_code == 202
@@ -47,7 +48,7 @@ def test_cost_optimization_scenario(client: TestClient, mock_db_session, mock_ll
     agent_instance = mock_apex_optimizer_agent.return_value
     agent_instance.start_agent.assert_awaited_once()
 
-def test_latency_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
+async def test_latency_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
     # Given
     request_data = {
         "user_id": "test_user",
@@ -55,7 +56,9 @@ def test_latency_optimization_scenario(client: TestClient, mock_db_session, mock
     }
 
     # When
-    response = client.post("/api/v3/agent/start", json=request_data)
+    request_data["workloads"] = []
+    analysis_request = AnalysisRequest(**request_data)
+    response = client.post("/apex/start_agent", json=analysis_request.model_dump())
 
     # Then
     assert response.status_code == 202
@@ -63,7 +66,7 @@ def test_latency_optimization_scenario(client: TestClient, mock_db_session, mock
     agent_instance = mock_apex_optimizer_agent.return_value
     agent_instance.start_agent.assert_awaited_once()
 
-def test_scalability_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
+async def test_scalability_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
     # Given
     request_data = {
         "user_id": "test_user",
@@ -71,7 +74,9 @@ def test_scalability_scenario(client: TestClient, mock_db_session, mock_llm_mana
     }
 
     # When
-    response = client.post("/api/v3/agent/start", json=request_data)
+    request_data["workloads"] = []
+    analysis_request = AnalysisRequest(**request_data)
+    response = client.post("/apex/start_agent", json=analysis_request.model_dump())
 
     # Then
     assert response.status_code == 202
@@ -79,7 +84,7 @@ def test_scalability_scenario(client: TestClient, mock_db_session, mock_llm_mana
     agent_instance = mock_apex_optimizer_agent.return_value
     agent_instance.start_agent.assert_awaited_once()
 
-def test_code_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
+async def test_code_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
     # Given
     request_data = {
         "user_id": "test_user",
@@ -87,7 +92,9 @@ def test_code_optimization_scenario(client: TestClient, mock_db_session, mock_ll
     }
 
     # When
-    response = client.post("/api/v3/agent/start", json=request_data)
+    request_data["workloads"] = []
+    analysis_request = AnalysisRequest(**request_data)
+    response = client.post("/apex/start_agent", json=analysis_request.model_dump())
 
     # Then
     assert response.status_code == 202
@@ -95,7 +102,7 @@ def test_code_optimization_scenario(client: TestClient, mock_db_session, mock_ll
     agent_instance = mock_apex_optimizer_agent.return_value
     agent_instance.start_agent.assert_awaited_once()
 
-def test_model_evaluation_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
+async def test_model_evaluation_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
     # Given
     request_data = {
         "user_id": "test_user",
@@ -103,7 +110,9 @@ def test_model_evaluation_scenario(client: TestClient, mock_db_session, mock_llm
     }
 
     # When
-    response = client.post("/api/v3/agent/start", json=request_data)
+    request_data["workloads"] = []
+    analysis_request = AnalysisRequest(**request_data)
+    response = client.post("/apex/start_agent", json=analysis_request.model_dump())
 
     # Then
     assert response.status_code == 202
@@ -111,7 +120,7 @@ def test_model_evaluation_scenario(client: TestClient, mock_db_session, mock_llm
     agent_instance = mock_apex_optimizer_agent.return_value
     agent_instance.start_agent.assert_awaited_once()
 
-def test_system_audit_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
+async def test_system_audit_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
     # Given
     request_data = {
         "user_id": "test_user",
@@ -119,7 +128,9 @@ def test_system_audit_scenario(client: TestClient, mock_db_session, mock_llm_man
     }
 
     # When
-    response = client.post("/api/v3/agent/start", json=request_data)
+    request_data["workloads"] = []
+    analysis_request = AnalysisRequest(**request_data)
+    response = client.post("/apex/start_agent", json=analysis_request.model_dump())
 
     # Then
     assert response.status_code == 202
@@ -127,7 +138,7 @@ def test_system_audit_scenario(client: TestClient, mock_db_session, mock_llm_man
     agent_instance = mock_apex_optimizer_agent.return_value
     agent_instance.start_agent.assert_awaited_once()
 
-def test_multi_objective_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
+async def test_multi_objective_optimization_scenario(client: TestClient, mock_db_session, mock_llm_manager, mock_apex_optimizer_agent):
     # Given
     request_data = {
         "user_id": "test_user",
@@ -135,7 +146,9 @@ def test_multi_objective_optimization_scenario(client: TestClient, mock_db_sessi
     }
 
     # When
-    response = client.post("/api/v3/agent/start", json=request_data)
+    request_data["workloads"] = []
+    analysis_request = AnalysisRequest(**request_data)
+    response = client.post("/apex/start_agent", json=analysis_request.model_dump())
 
     # Then
     assert response.status_code == 202
