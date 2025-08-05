@@ -57,18 +57,22 @@ export default function ApexOptimizerAgentPage() {
 
         try {
             const newRun = await apiService.startAgent(token, {
-                user_id,
-                query,
-                workloads: [
-                    {
-                        run_id,
-                        query,
-                        data_source: { source_table: 'synthetic_data' },
-                        time_range: { start_time: '2025-01-01T00:00:00Z', end_time: '2025-12-31T23:59:59Z' }
-                    }
-                ],
-                debug_mode: false,
-                constraints: null
+                settings: {
+                    user_id,
+                    debug_mode: false,
+                },
+                request: {
+                    query,
+                    workloads: [
+                        {
+                            run_id,
+                            query,
+                            data_source: { source_table: 'synthetic_data' },
+                            time_range: { start_time: '2025-01-01T00:00:00Z', end_time: '2025-12-31T23:59:59Z' }
+                        }
+                    ],
+                    constraints: null
+                }
             });
 
             if (newRun && newRun.run_id) {

@@ -1,20 +1,18 @@
+from langchain_core.tools import tool
 
-class FunctionPerformanceAnalyzer:
-    def __init__(self, performance_predictor: any):
-        self.performance_predictor = performance_predictor
-
-    async def run(self, logs: list, function_name: str) -> str:
-        """Analyzes the performance of a specific function."""
-        total_latency = 0
-        function_logs = [log for log in logs if function_name in log.request.prompt_text]
-        
-        if not function_logs:
-            return f"No logs found for function: {function_name}"
-        
-        for log in function_logs:
-            latency_result = await self.performance_predictor.execute(log.request.prompt_text, log.model_dump())
-            total_latency += latency_result["predicted_latency_ms"]
-        
-        average_latency = total_latency / len(function_logs)
-        
-        return f"Analyzed function performance for {function_name}. Average predicted latency: {average_latency:.2f}ms"
+@tool
+async def function_performance_analyzer(logs: list, function_name: str, performance_predictor: any) -> str:
+    """Analyzes the performance of a specific function."""
+    total_latency = 0
+    function_logs = [log for log in logs if function_name in log.request.prompt_text]
+    
+    if not function_logs:
+        return f"No logs found for function: {function_name}"
+    
+    for log in function_logs:
+        latency_result = await performance_predictor.execute(log.request.prompt_text, log.model_dump())
+        total_latency += latency_result["predicted_latency_ms"]
+    
+    average_latency = total_latency / len(function_logs)
+    
+    return f"Analyzed function performance for {function_name}. Average predicted latency: {average_latency:.2f}ms"

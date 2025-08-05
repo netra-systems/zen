@@ -1,15 +1,13 @@
+from langchain_core.tools import tool
 
-class OptimizedImplementationProposer:
-    def __init__(self, llm_connector: any):
-        self.llm_connector = llm_connector
-
-    async def run(self, function_name: str) -> str:
-        """Proposes an optimized implementation for a function."""
-        prompt = f"""
-        Given the function '{function_name}', propose an optimized implementation.
-        Provide the optimized code and an explanation of the changes.
-        """
-        
-        response = await self.llm_connector.get_completion(prompt)
-        
-        return f"Proposed optimized implementation for {function_name}."
+@tool
+async def optimized_implementation_proposer(function_name: str, llm_connector: any) -> str:
+    """Proposes an optimized implementation for a function."""
+    prompt = f"""
+    Given the function '{function_name}', propose an optimized implementation.
+    Provide the optimized code and an explanation of the changes.
+    """
+    
+    response = await llm_connector.get_completion(prompt)
+    
+    return f"Proposed optimized implementation for {function_name}."

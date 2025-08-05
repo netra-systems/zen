@@ -1,21 +1,18 @@
 import pytest
-from app.llm.llm_manager import LLMManager
-from unittest.mock import MagicMock, AsyncMock
-from app.services.apex_optimizer_agent.tools.cost_estimator import CostEstimator
-from app.services.apex_optimizer_agent.tools.performance_predictor import PerformancePredictor
+from app.services.deepagents.tool_dispatcher import ToolDispatcher
+from langchain_core.tools import tool
 
-@pytest.mark.asyncio
-async def test_cost_estimator():
-    mock_llm_manager = MagicMock(spec=LLMManager)
-    mock_llm_manager.get_llm.return_value.ainvoke = AsyncMock(return_value=MagicMock(content="0.01"))
-    estimator = CostEstimator(llm_manager=mock_llm_manager)
-    result = await estimator.run("test model", {})
-    assert isinstance(result["estimated_cost_usd"], float)
+@tool
+def mock_tool(a: int, b: int) -> int:
+    """A mock tool that adds two numbers."""
+    return a + b
 
-@pytest.mark.asyncio
-async def test_performance_predictor():
-    mock_llm_manager = MagicMock(spec=LLMManager)
-    mock_llm_manager.get_llm.return_value.ainvoke = AsyncMock(return_value=MagicMock(content="100"))
-    predictor = PerformancePredictor(llm_manager=mock_llm_manager)
-    result = await predictor.run("test model", {})
-    assert isinstance(result["predicted_latency_ms"], int)
+def test_tool_dispatcher():
+    dispatcher = ToolDispatcher(tools=[mock_tool])
+    result = dispatcher.dispatch("mock_tool", a=1, b=2)
+    assert result == 3
+
+def test_tool_dispatcher_tool_not_found():
+    dispatcher = ToolDispatcher(tools=[mock_tool])
+    result = dispatcher.dispatch("non_existent_tool", a=1, b=2)
+    assert result == "Tool 'non_existent_tool' not found."

@@ -1,4 +1,3 @@
-
 import pytest
 import unittest
 from unittest.mock import MagicMock, AsyncMock
@@ -13,15 +12,13 @@ async def test_start_agent():
     mock_graph = MagicMock()
     
     # Mock the graph's astream method to be an async generator
-    mock_graph.astream = AsyncMock()
-
     async def async_gen(*args, **kwargs):
         yield {"final_answer": "The agent has finished."}
 
-    mock_graph.astream.return_value = async_gen()()
+    mock_graph.astream.return_value = async_gen()
 
-    # Mock the Team and its create_graph method
-    with unittest.mock.patch('app.services.apex_optimizer_agent.supervisor.Team') as mock_team_class:
+    # Mock the SingleAgentTeam and its create_graph method
+    with unittest.mock.patch('app.services.apex_optimizer_agent.supervisor.SingleAgentTeam') as mock_team_class:
         mock_team_instance = mock_team_class.return_value
         mock_team_instance.create_graph.return_value = mock_graph
 
@@ -38,6 +35,7 @@ async def test_start_agent():
         mock_graph.astream.assert_called_once()
         call_args, call_kwargs = mock_graph.astream.call_args
         assert call_args[0]["messages"][0].content == "test query"
+        assert call_args[0]["todo_list"] == ["triage_request"]
 
         # Assert that the result is the final event from the stream
         assert result == {"final_answer": "The agent has finished."}

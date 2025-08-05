@@ -35,7 +35,7 @@ def update_job_status(job_id: str, status: str, **kwargs):
     job['last_updated'] = time.time()
     job.update(kwargs)
 
-def get_corpus_from_clickhouse(table_name: str) -> dict:
+async def get_corpus_from_clickhouse(table_name: str) -> dict:
     """Fetches the content corpus from a specified ClickHouse table."""
     db = None
     try:
@@ -46,10 +46,10 @@ def get_corpus_from_clickhouse(table_name: str) -> dict:
             password=settings.clickhouse_https.password,
             database=settings.clickhouse_https.database
         )
-        db.connect()
+        await db.connect()
         
         query = f"SELECT workload_type, prompt, response FROM {table_name}"
-        results = db.execute_query(query)
+        results = await db.execute_query(query)
         
         corpus = defaultdict(list)
         for row in results:
@@ -62,10 +62,10 @@ def get_corpus_from_clickhouse(table_name: str) -> dict:
         logging.exception(f"Failed to load corpus from ClickHouse table {table_name}")
         raise
     finally:
-        if db and db.is_connected():
-            db.disconnect()
+        if db and await db.is_connected():
+            await db.disconnect()
 
-def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str = None):
+async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str = None):
     """Saves the generated content corpus to a specified ClickHouse table."""
     if job_id:
         output_dir = os.path.join("app", "data", "generated", "content_corpuses", job_id)
@@ -83,10 +83,10 @@ def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str = None)
             password=settings.clickhouse_https.password,
             database=settings.clickhouse_https.database
         )
-        db.connect()
+        await db.connect()
         
         table_schema = get_content_corpus_schema(table_name)
-        db.command(table_schema)
+        await db.command(table_schema)
         
         records = []
         for w_type, samples in corpus.items():
@@ -112,19 +112,19 @@ def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str = None)
             logging.info(f"No valid records to insert into ClickHouse table: {table_name}")
             return
 
-        db.insert_data(table_name, [list(record.model_dump().values()) for record in records], list(ContentCorpus.model_fields.keys()))
+        await db.insert_data(table_name, [list(record.model_dump().values()) for record in records], list(ContentCorpus.model_fields.keys()))
         logging.info(f"Successfully saved {len(records)} records to ClickHouse table: {table_name}")
 
     except Exception as e:
         logging.exception(f"Failed to save corpus to ClickHouse table {table_name}")
         raise
     finally:
-        if db and db.is_connected():
-            db.disconnect()
+        if db and await db.is_connected():
+            await db.disconnect()
 
 
 # --- Content Generation Service ---
-def run_content_generation_job(job_id: str, params: dict):
+async def run_content_generation_job(job_id: str, params: dict):
     """The core worker process for generating a content corpus."""
     try:
         import google.generativeai as genai
@@ -165,7 +165,7 @@ def run_content_generation_job(job_id: str, params: dict):
 
     clickhouse_table = params.get('clickhouse_table', 'content_corpus')
     try:
-        save_corpus_to_clickhouse(corpus, clickhouse_table, job_id=job_id)
+        await save_corpus_to_clickhouse(corpus, clickhouse_table, job_id=job_id)
         summary = {
             "message": f"Corpus generated and saved to {clickhouse_table}",
             "counts": {w_type: len(samples) for w_type, samples in corpus.items()}
@@ -218,7 +218,7 @@ def generate_data_chunk_for_service(args):
     df['total_cost'] = df['prompt_cost'] + df['completion_cost']
     return df
 
-def run_log_generation_job(job_id: str, params: dict):
+async def run_log_generation_job(job_id: str, params: dict):
     """The core worker process for generating a synthetic log set."""
     update_job_status(job_id, "running", progress={'completed_logs': 0, 'total_logs': params['num_logs']})
     
@@ -270,12 +270,12 @@ def run_log_generation_job(job_id: str, params: dict):
         update_job_status(job_id, "failed", error=str(e))
 
 
-def run_data_ingestion_job(job_id: str, params: dict):
+async def run_data_ingestion_job(job_id: str, params: dict):
     """The core worker process for ingesting data into ClickHouse."""
     update_job_status(job_id, "running")
     
     try:
-        summary = ingest_data_from_file(params['data_path'])
+        summary = await ingest_data_from_file(params['data_path'])
         GENERATION_JOBS[job_id].update({
             "status": "completed",
             "finished_at": time.time(),
@@ -288,7 +288,7 @@ def run_data_ingestion_job(job_id: str, params: dict):
 
 from app.data.synthetic.synthetic_data_v2 import main as synthetic_data_main
 
-def run_synthetic_data_generation_job(job_id: str, params: dict):
+async def run_synthetic_data_generation_job(job_id: str, params: dict):
     """Generates and ingests synthetic logs in batches from a ClickHouse corpus."""
     batch_size = params.get('batch_size', 1000)
     total_logs_to_gen = params.get('num_traces', 10000)
@@ -302,14 +302,14 @@ def run_synthetic_data_generation_job(job_id: str, params: dict):
         user=settings.clickhouse_https.user, password=settings.clickhouse_https.password,
         database=settings.clickhouse_https.database
     )
-    client.connect()
+    await client.connect()
     
     try:
         # Create the destination table
         table_schema = get_llm_events_table_schema(destination_table)
-        client.command(table_schema)
+        await client.command(table_schema)
 
-        content_corpus = get_corpus_from_clickhouse(source_table)
+        content_corpus = await get_corpus_from_clickhouse(source_table)
         
         class Args:
             def __init__(self, num_traces, config, max_cores, corpus):
@@ -327,13 +327,13 @@ def run_synthetic_data_generation_job(job_id: str, params: dict):
         for i, log_record in enumerate(generated_logs):
             log_batch.append(log_record)
             if len(log_batch) >= batch_size:
-                ingested_count = ingest_records(client, log_batch, destination_table)
+                ingested_count = await ingest_records(client, log_batch, destination_table)
                 records_ingested += ingested_count
                 log_batch.clear()
                 update_job_status(job_id, "running", progress=i + 1, records_ingested=records_ingested)
 
         if log_batch:
-            ingested_count = ingest_records(client, log_batch, destination_table)
+            ingested_count = await ingest_records(client, log_batch, destination_table)
             records_ingested += ingested_count
 
         summary = {"message": f"Synthetic data generated and saved to {destination_table}", "records_ingested": records_ingested}
@@ -343,7 +343,7 @@ def run_synthetic_data_generation_job(job_id: str, params: dict):
         logging.exception("Error during synthetic data generation job")
         update_job_status(job_id, "failed", error=str(e))
     finally:
-        client.disconnect()
+        await client.disconnect()
 
 def get_config():
     """Loads the application configuration from config.yaml."""

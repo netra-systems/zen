@@ -41,7 +41,7 @@ async def test_run_content_generation_job_success(mock_genai, mock_pool, mock_cp
     }
 
     # Run the job
-    run_content_generation_job(job_id, params)
+    await run_content_generation_job(job_id, params)
 
     # Assert that the job was completed successfully
     assert GENERATION_JOBS[job_id]['status'] == 'completed'
@@ -59,7 +59,7 @@ async def test_run_content_generation_job_no_api_key(mock_getenv):
     params = {}
 
     # Run the job
-    run_content_generation_job(job_id, params)
+    await run_content_generation_job(job_id, params)
 
     # Assert that the job failed
     assert GENERATION_JOBS[job_id]['status'] == 'failed'
@@ -108,7 +108,7 @@ async def test_run_log_generation_job_success(mock_exists, mock_get_config, mock
 
     # Run the job
     with patch('app.services.generation_service.os.makedirs') as mock_makedirs:
-        run_log_generation_job(job_id, params)
+        await run_log_generation_job(job_id, params)
 
     # Assert that the job was completed successfully
     assert GENERATION_JOBS[job_id]['status'] == 'completed'
@@ -128,7 +128,7 @@ async def test_run_log_generation_job_no_corpus(mock_exists):
     }
 
     # Run the job
-    run_log_generation_job(job_id, params)
+    await run_log_generation_job(job_id, params)
 
     # Assert that the job failed
     assert GENERATION_JOBS[job_id]['status'] == 'failed'
