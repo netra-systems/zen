@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { Copy, Check } from 'lucide-react';
 
 interface ErrorDisplayProps {
-  error: any;
+  error: Error | string | null | undefined;
 }
 
 export const ErrorDisplay = ({ error }: ErrorDisplayProps) => {

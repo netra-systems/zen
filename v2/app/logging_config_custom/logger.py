@@ -1,6 +1,7 @@
 import logging
 import sys
 import json
+import os
 from loguru import logger
 from pydantic import BaseModel
 from typing import Optional
@@ -20,7 +21,7 @@ class Formatter:
         self.log_format = (
             "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
             "<level>{level: <8}</level> | "
-            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>\n"
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>\n{exception}"
         )
 
     def format(self, record):
@@ -28,6 +29,7 @@ class Formatter:
 
 def create_logger():
     logger.remove()
+    log_level = os.environ.get("LOG_LEVEL", "INFO")
     log_format = Formatter()
     
     # Filter out verbose debug messages
@@ -43,7 +45,7 @@ def create_logger():
             return False
         return not any(pattern in record["message"] for pattern in verbose_patterns)
 
-    logger.add(sys.stdout, format=log_format.format, filter=is_not_verbose)
+    logger.add(sys.stdout, level=log_level, format=log_format.format, filter=is_not_verbose)
     return logger
 
 # Create a logger instance to be used across the application

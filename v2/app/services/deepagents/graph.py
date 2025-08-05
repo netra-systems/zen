@@ -3,6 +3,7 @@ from app.services.deepagents.state import AgentState
 from app.services.deepagents.sub_agent import SubAgent
 from app.llm.llm_manager import LLMManager
 from app.services.deepagents.tool_dispatcher import ToolDispatcher
+from app.logging_config_custom.logger import app_logger
 
 class SingleAgentTeam:
     def __init__(self, agent: SubAgent, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
@@ -31,13 +32,17 @@ class SingleAgentTeam:
         return workflow.compile()
 
     def route_to_agent(self, state: AgentState):
+        app_logger.info(f"Routing agent with state: {state}")
         messages = state.get("messages", [])
         if messages:
             last_message = messages[-1]
             if "FINISH" in last_message.content:
+                app_logger.info("FINISH detected, ending execution.")
                 return "end"
 
         if state.get("todo_list") and len(state["todo_list"]) > 0:
+            app_logger.info("TODO list is not empty, continuing execution.")
             return "continue"
         else:
+            app_logger.info("TODO list is empty, ending execution.")
             return "end"
