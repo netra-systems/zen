@@ -1,4 +1,5 @@
 import clickhouse_connect
+from app.logging_config_custom.logger import app_logger as logger
 from clickhouse_connect.driver.client import Client
 from typing import List, Dict, Any
 
