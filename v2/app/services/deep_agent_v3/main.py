@@ -25,7 +25,7 @@ class DeepAgentV3:
         self.request = request
         self.db_session = db_session
         self.llm_connector = llm_connector
-        self.state = AgentState(messages=[])
+        self.state = AgentState(messages=[], current_step=None)
         self.langfuse = self._init_langfuse()
         self.tools = self._init_tools()
         self.agent_core = AgentCore(self.llm_connector, list(self.tools.values()))
@@ -53,6 +53,7 @@ class DeepAgentV3:
 
         try:
             # 1. Triage
+            self.state.current_step = "triage"
             scenario_finder = ScenarioFinder(self.llm_connector)
             self.triage_result = scenario_finder.find_scenario(self.request.query)
             scenario = self.triage_result["scenario"]
@@ -67,6 +68,7 @@ class DeepAgentV3:
             steps = scenario["steps"]
 
             for step in steps:
+                self.state.current_step = step
                 tool_name = step
                 if tool_name not in self.tools:
                     app_logger.warning(f"Tool '{tool_name}' not found in available tools. Skipping step.")
@@ -90,11 +92,13 @@ class DeepAgentV3:
 
 
             self.status = "complete"
+            self.state.current_step = "complete"
             app_logger.info(f"Agent run completed for run_id: {self.run_id}")
             await self._generate_and_save_run_report()
 
         except Exception as e:
             self.status = "failed"
+            self.state.current_step = "failed"
             app_logger.error(f"An unexpected error occurred during agent run for run_id: {self.run_id}. Error: {e}")
             await self._generate_and_save_run_report()
         finally:

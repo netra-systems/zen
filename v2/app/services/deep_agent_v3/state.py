@@ -16,3 +16,4 @@ class AgentState(BaseModel):
     tool_result: Optional[Dict[str, Any]] = None
     span_map: Optional[Dict[str, UnifiedLogEntry]] = None
     trace_ids: Optional[List[str]] = None
+    current_step: Optional[str] = None

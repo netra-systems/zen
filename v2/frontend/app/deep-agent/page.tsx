@@ -163,7 +163,7 @@ export default function DeepAgentPage() {
             return;
         }
         try {
-            const data: AgentRun = await apiService.get(`${config.api.baseUrl}/agent/${pollingRunIdRef.current}/step`, token);
+            const data: AgentRun = await apiService.get(`${config.api.baseUrl}/agent/${pollingRunIdRef.current}/status`, token);
 
             if (data.last_step_result) {
                 addMessage('agent', <pre>{JSON.stringify(data.last_step_result, null, 2)}</pre>);

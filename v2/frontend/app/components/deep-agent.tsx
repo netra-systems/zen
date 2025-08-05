@@ -62,7 +62,7 @@ export default function DeepAgent() {
   useEffect(() => {
     if (runId) {
       const interval = setInterval(async () => {
-        const response = await fetch(`/api/v3/agent/${runId}/step`);
+        const response = await fetch(`/api/v3/agent/${runId}/status`);
         const data = await response.json();
         setStatus(data.status);
         setStep(data.current_step);

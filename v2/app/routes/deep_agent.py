@@ -67,3 +67,18 @@ async def get_agent_history(run_id: str) -> Dict[str, Any]:
         "is_complete": agent.is_complete(),
         "history": agent.state
     }
+
+@router.get("/agent/{run_id}/status")
+async def get_agent_status(run_id: str) -> Dict[str, Any]:
+    """
+    Retrieves the current status of an agent run.
+    """
+    agent = AGENT_INSTANCES.get(run_id)
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent run not found.")
+
+    return {
+        "run_id": run_id,
+        "is_complete": agent.is_complete(),
+        "current_step": agent.state.get('current_step') 
+    }

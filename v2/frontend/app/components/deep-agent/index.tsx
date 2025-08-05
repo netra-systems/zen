@@ -58,7 +58,7 @@ function DeepAgentRunner({ dataSourceTable }: { dataSourceTable: string }) {
 
     const interval = setInterval(async () => {
       try {
-        const response = await fetch(`/api/v3/agent/${runId}/step`);
+        const response = await fetch(`/api/v3/agent/${runId}/status`);
         if (!response.ok) throw new Error("Failed to fetch agent status.");
         const data: AgentStep = await response.json();
         setAgentState(data);
