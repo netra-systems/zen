@@ -4,6 +4,12 @@ from unittest.mock import AsyncMock, MagicMock
 from langchain_core.messages import HumanMessage, AIMessage, ToolCall, BaseMessage
 from .deepagents.graph import create_deep_agent
 from .deepagents.tools import update_todo, write_todos
+from langchain_core.tools import tool
+
+@tool
+def read_file(file_path: str):
+    """Reads the contents of a file."""
+    return "File content"
 from .llm.llm_manager import LLMManager, LLMConfig
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.outputs import ChatGeneration, ChatResult
