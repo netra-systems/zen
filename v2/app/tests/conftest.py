@@ -38,13 +38,12 @@ async def db_session(db_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, Non
     Provides a transactional session for each test function.
     It starts a transaction and rolls it back after the test, ensuring isolation.
     """
-    async with db_engine.connect() as connection:
-        async with connection.begin() as transaction:
-            Session = sessionmaker(bind=connection, class_=AsyncSession, expire_on_commit=False)
-            session = Session()
+    async_session_factory = sessionmaker(
+        bind=db_engine, class_=AsyncSession, expire_on_commit=False
+    )
+    async with async_session_factory() as session:
+        async with session.begin():
             yield session
-            # The transaction is rolled back automatically by the context manager
-            # ensuring a clean state for the next test.
 
 @pytest.fixture(scope="function")
 def client(db_session: AsyncSession) -> Generator[TestClient, None, None]:

@@ -9,6 +9,7 @@ from app.services.deep_agent_v3.steps.propose_optimal_policies import propose_op
 from app.db.models_clickhouse import UnifiedLogEntry, AnalysisRequest, Request, Response, Performance, FinOps, TraceContext
 from app.db.models_postgres import SupplyOption
 from app.schema import DiscoveredPattern, LearnedPolicy, PredictedOutcome
+from app.services.deep_agent_v3.state import AgentState
 
 # --- Fixtures ---
 
