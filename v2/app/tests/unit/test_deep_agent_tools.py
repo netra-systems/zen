@@ -41,9 +41,9 @@ class TestSupplyCatalogSearch:
     async def test_search_supply_catalog(self, mock_db_session):
         tool = SupplyCatalogSearch(db_session=mock_db_session)
         query = "test query"
-        with patch('app.services.supply_catalog_service.SupplyCatalogService.list_all_records') as mock_list_all_records:
-            mock_list_all_records.return_value = [MagicMock(model_name="test query model")]
+        with patch('app.services.supply_catalog_service.SupplyCatalogService.get_all_options') as mock_get_all_options:
+            mock_get_all_options.return_value = [MagicMock(model_name="test query model")]
             result = await tool.search(query)
             assert len(result) == 1
             assert result[0].model_name == "test query model"
-            mock_list_all_records.assert_called_once()
+            mock_get_all_options.assert_called_once()
