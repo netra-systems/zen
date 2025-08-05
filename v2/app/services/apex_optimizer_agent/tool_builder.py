@@ -21,6 +21,7 @@ from app.services.apex_optimizer_agent.tools.quality_impact_simulator import qua
 from app.services.apex_optimizer_agent.tools.rate_limit_impact_simulator import rate_limit_impact_simulator
 from app.services.apex_optimizer_agent.tools.performance_gains_simulator import performance_gains_simulator
 from app.services.apex_optimizer_agent.tools.policy_simulator import policy_simulator
+from app.services.apex_optimizer_agent.tools.finish import finish
 
 class ToolBuilder:
     @staticmethod
@@ -47,6 +48,7 @@ class ToolBuilder:
             "rate_limit_impact_simulator": rate_limit_impact_simulator,
             "performance_gains_simulator": performance_gains_simulator,
             "policy_simulator": policy_simulator,
+            "finish": finish,
         }
         
         return all_tools, {}
