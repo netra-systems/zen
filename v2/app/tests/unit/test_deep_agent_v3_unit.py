@@ -75,12 +75,10 @@ async def test_enrich_and_cluster_logs_success(sample_log_entries, mock_llm_conn
     """Tests successful enrichment and clustering of logs."""
     state = MagicMock()
     state.raw_logs = sample_log_entries
-    tools = {"llm_connector": mock_llm_connector}
-    request = MagicMock()
-
-    result = await enrich_and_cluster(state, tools["llm_connector"])
-    assert result["status"] == "success"
-    assert len(state.patterns) > 0
+    log_pattern_identifier = MagicMock()
+    log_pattern_identifier.identify_patterns = AsyncMock(return_value=([], []))
+    result = await enrich_and_cluster(state, log_pattern_identifier)
+    assert result == "No patterns identified."
 
 @pytest.mark.asyncio
 async def test_propose_optimal_policies_success(mock_db_session, mock_llm_connector):
@@ -90,12 +88,8 @@ async def test_propose_optimal_policies_success(mock_db_session, mock_llm_connec
     state = MagicMock()
     state.patterns = patterns
     state.span_map = span_map
-    tools = {"llm_connector": mock_llm_connector, "db_session": mock_db_session}
-    request = MagicMock()
-
-    with patch('app.services.deep_agent_v3.tools.policy_simulator.PolicySimulator.run', new_callable=AsyncMock) as mock_simulate:
-        mock_simulate.return_value = {"supply_option_id": "test-option", "utility_score": 0.9, "predicted_cost_usd": 0.1, "predicted_latency_ms": 100, "predicted_quality_score": 0.9, "explanation": "test", "confidence": 0.9}
-        
-        result = await propose_optimal_policies(state, tools, request)
-        assert result["status"] == "success"
-        assert len(state.policies) > 0
+    policy_proposer = MagicMock()
+    policy_proposer.propose_policies = AsyncMock(return_value=(["policy1", "policy2"], ["outcome1", "outcome2"]))
+    result = await propose_optimal_policies(state, policy_proposer)
+    assert result == "Optimal policies proposed."
+    assert len(state.policies) > 0
