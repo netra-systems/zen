@@ -7,7 +7,6 @@ from typing import Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 
-from ..v3_simulation import initialize_system, run_single_workload
 from ..services.generation_service import GENERATION_JOBS
 
 class V3RunRequest(BaseModel):
@@ -18,9 +17,6 @@ class V3ValidationRequest(BaseModel):
     log_set_id: str
 
 router = APIRouter()
-
-# Initialize the system once at startup
-system = initialize_system()
 
 @router.post("/run", status_code=200)
 def run_v3_simulation(request: V3RunRequest):
