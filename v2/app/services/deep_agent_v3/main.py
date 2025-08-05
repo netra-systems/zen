@@ -147,8 +147,11 @@ class DeepAgentV3:
             for run in runs:
                 report += f"### {run.step_name}\n\n"
                 report += f"**Status:** {json.loads(run.run_log).get('status')}\n\n"
-                report += f"**Result:**\n```json\n{json.dumps(json.loads(run.run_log).get('result'), indent=2)}
-```\n\n"
+                result = json.loads(run.run_log).get('result')
+                if isinstance(result, (dict, list)):
+                    report += f"**Result:**\n```json\n{json.dumps(result, indent=2)}\n```\n\n"
+                else:
+                    report += f"**Result:**\n{result}\n\n"
                 if json.loads(run.run_log).get('error'):
                     report += f"**Error:**\n```\n{json.loads(run.run_log).get('error')}\n```\n\n"
 
