@@ -75,9 +75,9 @@ export default function ApexOptimizerAgentPage() {
                 }
             });
 
-            if (newRun && newRun.run_id) {
-                startPolling(newRun.run_id);
-                addMessage('agent', `Starting analysis with Run ID: ${newRun.run_id}`);
+            if (newRun && newRun.request_id) {
+                startPolling(newRun.request_id);
+                addMessage('agent', `Starting analysis with Run ID: ${newRun.request_id}`);
             } else {
                 const err = new Error("Failed to start analysis: No run ID returned.");
                 setError(err);
