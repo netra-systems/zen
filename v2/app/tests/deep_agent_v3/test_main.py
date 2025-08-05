@@ -1,6 +1,7 @@
 import json
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
+import uuid
 
 from app.services.deep_agent_v3.main import DeepAgentV3
 from app.db.models_clickhouse import AnalysisRequest
@@ -26,8 +27,6 @@ def mock_request():
         workloads=[{"run_id": "test_run_id", "query": "test_query"}],
         query="test_query",
     )
-
-import uuid
 
 @pytest.mark.asyncio
 async def test_run(mock_request, mock_db_session, mock_llm_connector):
@@ -60,7 +59,8 @@ async def test_run(mock_request, mock_db_session, mock_llm_connector):
         agent.agent_core.decide_next_step = MagicMock(return_value={"tool_name": "test_tool", "tool_input": {}})
 
     # When
-    final_state = await agent.run()
+    with patch('app.services.deep_agent_v3.main.DeepAgentV3._generate_and_save_run_report', new_callable=AsyncMock):
+        final_state = await agent.run()
 
     # Then
     assert agent.status == "complete"
@@ -68,3 +68,4 @@ async def test_run(mock_request, mock_db_session, mock_llm_connector):
     assert len(final_state.messages) == 2
     assert final_state.messages[0]['content'] == "Scenario identified: test_scenario"
     assert final_state.messages[1]['content'] == 'tool_result'
+
