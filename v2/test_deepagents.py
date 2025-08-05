@@ -2,23 +2,14 @@ import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
 from langchain_core.messages import HumanMessage, AIMessage, ToolCall
-from langchain_core.runnables import Runnable
-from app.deepagents.graph import create_deep_agent
-from app.deepagents.tools import update_todo
+from app.services.deepagents.graph import SingleAgentTeam
+from app.services.deepagents.sub_agent import SubAgent
+from app.services.deepagents.tool_dispatcher import ToolDispatcher
+from app.llm.llm_manager import LLMManager
 
-class MockRunnable(Runnable):
-    def __init__(self, llm):
-        self.llm = llm
-
-    async def ainvoke(self, *args, **kwargs):
-        return await self.llm(*args, **kwargs)
-
-    def invoke(self, *args, **kwargs):
-        # Not used in this test, but required by the abstract class
-        pass
-
-    def bind_tools(self, *args, **kwargs):
-        return self
+# Mock the update_todo tool
+async def update_todo(todo_id: str, status: str):
+    return f"Todo {todo_id} has been updated to {status}"
 
 @pytest.mark.asyncio
 async def test_agent_completes_todos():
@@ -48,27 +39,36 @@ async def test_agent_completes_todos():
         AIMessage(content="All tasks completed!"),
     ]
 
-    # Wrap the llm mock in a custom Runnable
-    model = MockRunnable(llm)
+    # Mock the LLMManager
+    llm_manager = MagicMock(spec=LLMManager)
+    llm_manager.get_llm.return_value = llm
 
     # Define a simple agent with a todo list
-    agent = create_deep_agent(
-        model=model,
-        tools=[update_todo],
-        instructions="Complete the following tasks:",
+    agent_def = SubAgent(
+        name="test_agent",
+        description="A test agent",
+        prompt="Complete the following tasks:",
+        tools=[update_todo]
     )
+
+    # Create a ToolDispatcher
+    tool_dispatcher = ToolDispatcher(tools=[update_todo])
+
+    # Create a SingleAgentTeam
+    team = SingleAgentTeam(agent=agent_def, llm_manager=llm_manager, tool_dispatcher=tool_dispatcher)
+    graph = team.create_graph()
 
     # Initial state with a todo list
     initial_state = {
         "messages": [HumanMessage(content="Write a short summary of the book 'The Hobbit'.")],
-        "todos": [
-            {"id": "1", "content": "Read the book", "status": "pending"},
-            {"id": "2", "content": "Write the summary", "status": "pending"},
-        ],
+        "todo_list": ["Read the book", "Write the summary"],
+        "completed_steps": []
     }
 
     # Run the agent
-    final_state = await agent.ainvoke(initial_state)
+    final_state = None
+    async for event in graph.astream(initial_state, {"recursion_limit": 100}):
+        final_state = event
 
     # Assert that all todos are completed
-    assert all(todo["status"] == "completed" for todo in final_state["todos"])
+    assert len(final_state["todo_list"]) == 0

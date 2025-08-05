@@ -14,7 +14,7 @@ class SecretReference(BaseModel):
 
 # https://console.cloud.google.com/security/secret-manager?inv=1&invt=Ab4muw&project=cryptic-net-466001-n0
 SECRET_CONFIG: List[SecretReference] = [
-    SecretReference(name="gemini-api-key", target_model="llm_configs.google.api_key", target_field="api_key"),
+    SecretReference(name="gemini-api-key", target_model="llm_configs.default", target_field="api_key"),
     SecretReference(name="google-client-id", target_model="google_cloud", target_field="client_id"),
     SecretReference(name="google-client-secret", target_model="google_cloud", target_field="client_secret"),
     SecretReference(name="langfuse-secret-key", target_model="langfuse", target_field="secret_key"),
@@ -125,37 +125,52 @@ class AppConfig(BaseModel):
     }
 
     def load_secrets(self):
-        if self.google_cloud.project_id and self.app_env != "testing":
-            if self.log_secrets:
-                print("Loading secrets from Google Cloud Secret Manager...")
-            client = get_secret_client()
-            if not client:
-                return
+        if not (self.google_cloud.project_id and self.app_env != "testing"):
+            return
 
-            fetched_secrets = fetch_secrets(client, SECRET_CONFIG, self.log_secrets)
+        if self.log_secrets:
+            print("Loading secrets from Google Cloud Secret Manager...")
+        
+        client = get_secret_client()
+        if not client:
+            return
 
-            for secret_ref in SECRET_CONFIG:
-                fetched_value = fetched_secrets.get(secret_ref.name)
-                if fetched_value:
-                    if secret_ref.target_model:
-                        if "llm_configs" in secret_ref.target_model:
-                            parts = secret_ref.target_model.split('.')
-                            # llm_configs.google.api_key -> llm_configs["google"].api_key
-                            config_name = parts[1]
-                            field_name = parts[2]
-                            if config_name in self.llm_configs:
-                                setattr(self.llm_configs[config_name], field_name, fetched_value)
-                        else:
-                            target = getattr(self, secret_ref.target_model, None)
-                            if target:
-                                setattr(target, secret_ref.target_field, fetched_value)
-                    elif secret_ref.target_field:
-                         setattr(self, secret_ref.target_field, fetched_value)
-                elif self.log_secrets:
+        fetched_secrets = fetch_secrets(client, SECRET_CONFIG, self.log_secrets)
+
+        for secret_ref in SECRET_CONFIG:
+            fetched_value = fetched_secrets.get(secret_ref.name)
+            if not fetched_value:
+                if self.log_secrets:
                     print(f"Secret '{secret_ref.name}' not found or failed to fetch.")
-            
-            if self.log_secrets:
-                print("Secrets loaded.")
+                continue
+
+            try:
+                target_obj = self
+                if secret_ref.target_model:
+                    path_parts = secret_ref.target_model.split('.')
+                    for part in path_parts:
+                        if isinstance(target_obj, dict):
+                            target_obj = target_obj.get(part)
+                        else:
+                            target_obj = getattr(target_obj, part, None)
+
+                        if target_obj is None:
+                            if self.log_secrets:
+                                print(f"Could not resolve path '{secret_ref.target_model}' for secret '{secret_ref.name}'.")
+                            break 
+                
+                if target_obj is not None:
+                    setattr(target_obj, secret_ref.target_field, fetched_value)
+                elif not secret_ref.target_model:
+                    setattr(self, secret_ref.target_field, fetched_value)
+
+
+            except Exception as e:
+                if self.log_secrets:
+                    print(f"Error processing secret '{secret_ref.name}': {e}")
+
+        if self.log_secrets:
+            print("Secrets loaded.")
 
 class DevelopmentConfig(AppConfig):
     """Development-specific settings can override defaults."""

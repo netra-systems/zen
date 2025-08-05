@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 from langchain_core.messages import HumanMessage
-from app.db.models_clickhouse import AnalysisRequest
+from app.db.models_clickhouse import RequestModel
 from app.llm.llm_manager import LLMManager
 from app.services.deepagents.graph import SingleAgentTeam
 from app.services.deepagents.sub_agent import SubAgent
