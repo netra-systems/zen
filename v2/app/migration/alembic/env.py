@@ -1,3 +1,6 @@
+import sys
+sys.path.append('C:/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1/v2/app')
+
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
