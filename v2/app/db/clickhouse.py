@@ -25,7 +25,6 @@ class ClickHouseClient:
         Establishes a connection to the ClickHouse server.
         """
         try:
-            try:
             self.client = clickhouse_connect.get_client(
                 host=self.host,
                 port=self.port,
