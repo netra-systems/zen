@@ -26,32 +26,6 @@ function DeepAgentRunner({ dataSourceTable }: { dataSourceTable: string }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const startAgentRun = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch("/api/v3/agent/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          run_id: `run-${Date.now()}`,
-          query: prompt,
-          data_source: { source_table: dataSourceTable },
-          time_range: {
-            start_time: new Date(Date.now() - 86400000).toISOString(),
-            end_time: new Date().toISOString(),
-          },
-        }),
-      });
-      if (!response.ok) throw new Error("Failed to start agent run.");
-      const data = await response.json();
-      setRunId(data.run_id);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   useEffect(() => {
     if (!runId || (agentState && agentState.status === "complete")) return;
