@@ -31,6 +31,12 @@ class SingleAgentTeam:
         return workflow.compile()
 
     def route_to_agent(self, state: AgentState):
+        messages = state.get("messages", [])
+        if messages:
+            last_message = messages[-1]
+            if "FINISH" in last_message.content:
+                return "end"
+
         if state.get("todo_list") and len(state["todo_list"]) > 0:
             return "continue"
         else:

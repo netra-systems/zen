@@ -183,6 +183,7 @@ class Workload(BaseModel):
     time_range: TimeRange
 
 class RequestModel(BaseModel):
+    id: str = Field(default_factory=lambda: f"req_{uuid.uuid4().hex[:8]}")
     user_id: str
     query: str
     workloads: List[Workload]

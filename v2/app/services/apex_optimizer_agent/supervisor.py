@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 from langchain_core.messages import HumanMessage
-from app.db.models_clickhouse import RequestModel
+from app.db.models_clickhouse import AnalysisRequest
 from app.llm.llm_manager import LLMManager
 from app.services.deepagents.graph import SingleAgentTeam
 from app.services.deepagents.sub_agent import SubAgent
@@ -22,12 +22,13 @@ class NetraOptimizerAgentSupervisor:
             description="An agent for optimizing LLM usage.",
             prompt=(
                 "You are an expert in optimizing LLM usage. Your goal is to analyze the user's request "
-                "and provide a set of recommendations for improving their LLM usage. Start by creating a todo list of the steps you will take to address the user's request."
+                "and provide a set of recommendations for improving their LLM usage. Start by creating a todo list of the steps you will take to address the user's request. "
+                "When you have completed all the steps in your todo list and have a final answer, output the final answer followed by the word FINISH."
             ),
             tools=list(all_tools.values())
         )
 
-    async def start_agent(self, request: RequestModel) -> Dict[str, Any]:
+    async def start_agent(self, request: AnalysisRequest) -> Dict[str, Any]:
         agent_def = self._get_agent_definition(self.llm_manager)
         all_tools, _ = ToolBuilder.build_all(self.db_session, self.llm_manager)
         tool_dispatcher = ToolDispatcher(tools=list(all_tools.values()))
@@ -40,9 +41,8 @@ class NetraOptimizerAgentSupervisor:
             "todo_list": ["triage_request"],
             "completed_steps": []
         }
-        # The last message in the stream is the final state
-        final_state = None
-        async for event in self.graph.astream(initial_state, {"recursion_limit": 100}):
-            final_state = event
+        # Start the agent asynchronously
+        await self.graph.astart(initial_state, {"recursion_limit": 100})
         
-        return final_state
+        # Immediately return a response to the user
+        return {"status": "agent_started", "request_id": request.id}

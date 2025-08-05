@@ -2,7 +2,7 @@ import pytest
 import unittest
 from unittest.mock import MagicMock, AsyncMock
 from app.services.apex_optimizer_agent.supervisor import NetraOptimizerAgentSupervisor
-from app.db.models_clickhouse import AnalysisRequest
+from app.db.models_clickhouse import AnalysisRequest, RequestModel, Settings, Workload, DataSource, TimeRange
 
 @pytest.mark.asyncio
 async def test_start_agent():
@@ -11,11 +11,8 @@ async def test_start_agent():
     mock_llm_manager = MagicMock()
     mock_graph = MagicMock()
     
-    # Mock the graph's astream method to be an async generator
-    async def async_gen(*args, **kwargs):
-        yield {"final_answer": "The agent has finished."}
-
-    mock_graph.astream.return_value = async_gen()
+    # Mock the graph's astart method
+    mock_graph.astart = AsyncMock()
 
     # Mock the SingleAgentTeam and its create_graph method
     with unittest.mock.patch('app.services.apex_optimizer_agent.supervisor.SingleAgentTeam') as mock_team_class:
@@ -26,16 +23,30 @@ async def test_start_agent():
         supervisor = NetraOptimizerAgentSupervisor(mock_db_session, mock_llm_manager)
 
         # Create a mock request
-        request = AnalysisRequest(query="test query", user_id="test_user")
+        settings = Settings(debug_mode=False)
+        workload = Workload(
+            run_id="test_run",
+            query="test workload query",
+            data_source=DataSource(source_table="test_table"),
+            time_range=TimeRange(start_time="2024-01-01T00:00:00Z", end_time="2024-01-02T00:00:00Z")
+        )
+        request = RequestModel(
+            user_id="test_user",
+            query="test query",
+            workloads=[workload]
+        )
+        analysis_request = AnalysisRequest(settings=settings, request=request)
+        
+
 
         # Call the method to be tested
-        result = await supervisor.start_agent(request)
+        result = await supervisor.start_agent(analysis_request)
 
-        # Assert that the graph was streamed with the correct initial state
-        mock_graph.astream.assert_called_once()
-        call_args, call_kwargs = mock_graph.astream.call_args
+        # Assert that the graph was started with the correct initial state
+        mock_graph.astart.assert_awaited_once()
+        call_args, call_kwargs = mock_graph.astart.call_args
         assert call_args[0]["messages"][0].content == "test query"
         assert call_args[0]["todo_list"] == ["triage_request"]
 
-        # Assert that the result is the final event from the stream
-        assert result == {"final_answer": "The agent has finished."}
+        # Assert that the result is the initial response
+        assert result == {"status": "agent_started", "request_id": analysis_request.request.id}

@@ -32,7 +32,7 @@ async def start_agent(
     """
     try:
         supervisor = NetraOptimizerAgentSupervisor(db, llm_manager)
-        result = await supervisor.start_agent(analysis_request.request)
+        result = await supervisor.start_agent(analysis_request)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
