@@ -25,15 +25,16 @@ class ClickHouseClient:
         Establishes a connection to the ClickHouse server.
         """
         try:
-            self.client = await clickhouse_connect.get_client(
+            try:
+            self.client = clickhouse_connect.get_client(
                 host=self.host,
                 port=self.port,
                 database=self.database,
                 username=self.user,
                 password=self.password,
-                secure=True
+                driver='httpx'
             )
-            await self.client.ping()
+            self.client.ping()
             logger.info(f"Successfully connected to ClickHouse at {self.host}:{self.port}")
         except Exception as e:
             logger.error(f"Failed to connect to ClickHouse: {e}", exc_info=True)
@@ -43,7 +44,7 @@ class ClickHouseClient:
     async def disconnect(self):
         """Closes the connection to the ClickHouse server."""
         if self.client:
-            await self.client.close()
+            self.client.close()
             self.client = None
             logger.info("ClickHouse connection closed.")
 
@@ -54,7 +55,7 @@ class ClickHouseClient:
         if self.client is None:
             return False
         try:
-            return await self.client.ping()
+            return self.client.ping()
         except Exception:
             return False
 
@@ -63,7 +64,7 @@ class ClickHouseClient:
         if not await self.is_connected():
             raise ConnectionError("Not connected to ClickHouse.")
         try:
-            await self.client.command(schema)
+            self.client.command(schema)
             logger.info(f"Schema executed successfully.")
         except Exception as e:
             logger.error(f"Could not execute schema '{schema[:50]}...': {e}", exc_info=True)
@@ -74,7 +75,7 @@ class ClickHouseClient:
         if not await self.is_connected():
             raise ConnectionError("Not connected to ClickHouse.")
         try:
-            await self.client.insert(table, data, column_names=column_names)
+            self.client.insert(table, data, column_names=column_names)
             logger.info(f"Inserted {len(data)} rows into table '{table}'.")
         except Exception as e:
             logger.error(f"Failed to insert data into table '{table}': {e}", exc_info=True)
@@ -85,7 +86,7 @@ class ClickHouseClient:
         if not await self.is_connected():
             raise ConnectionError("Not connected to ClickHouse.")
         try:
-            result = await self.client.query(query)
+            result = self.client.query(query)
             return [dict(zip(result.column_names, row)) for row in result.result_rows]
         except Exception as e:
             logger.error(f"Failed to execute query '{query}': {e}", exc_info=True)

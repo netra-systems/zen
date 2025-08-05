@@ -1,4 +1,3 @@
-
 from typing import Any, List
 import pytest
 from unittest.mock import AsyncMock, MagicMock
@@ -85,7 +84,7 @@ async def test_agent_completes_todos():
             {"id": "1", "content": "Read the book", "status": "pending"},
             {"id": "2", "content": "Write the summary", "status": "pending"},
         ],
-        "next": "",
+        "next": "supervisor",
     }
 
     # Run the agent
@@ -137,7 +136,8 @@ async def test_agent_creates_and_completes_todos():
     # Initial state without a todo list
     initial_state = {
         "messages": [HumanMessage(content="Create and complete a task.")],
-        "next": "",
+        "todos": [],
+        "next": "supervisor",
     }
 
     # Run the agent

@@ -5,6 +5,7 @@ from typing import AsyncGenerator, Generator
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncEngine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import text
 from fastapi.testclient import TestClient
 
 from app.main import app, lifespan
@@ -50,6 +51,8 @@ async def db_session(db_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, Non
     async with async_session_factory() as session:
         async with session.begin():
             yield session
+        await session.execute(text(f"TRUNCATE TABLE {DeepAgentRun.__tablename__} RESTART IDENTITY"))
+        await session.commit()
 
 @pytest.fixture(scope="function")
 async def client(db_session: AsyncSession) -> Generator[TestClient, None, None]:

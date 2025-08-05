@@ -80,7 +80,7 @@ class DeepAgentV3:
                 tool_function = self.tools[tool_name]
                 result = await tool_function.run(state=self.state, **tool_input)
 
-                self.state.messages.append({"role": "tool", "name": tool_name, "content": result})
+                self.state.messages.append({"role": "tool", "name": tool_name, "content": json.dumps(result)})
                 await self._record_step_history(tool_name, tool_input, self.state.model_dump(), {"status": "success", "result": result})
 
             self.status = "complete"
