@@ -34,7 +34,9 @@ class LLMManager:
 
             genai.configure(api_key=config.api_key)
             llm = ChatGoogleGenerativeAI(
-                model=config.model_name, **final_generation_config
+                model=config.model_name,
+                api_key=config.api_key,
+                **final_generation_config
             )
         elif config.provider == "openai":
             llm = ChatOpenAI(
