@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import Optional, List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 # schema.py is for API schema
@@ -49,7 +49,7 @@ class SupplyOptionBase(BaseModel):
     family: str
     name: str = Field(..., description="The unique name/identifier for the model, e.g., 'gpt-4-turbo'")
     hosting_type: str = "api_provider"
-    cost_per_million_tokens_usd: Dict[str, float] = Field(..., example={"prompt": 5.00, "completion": 15.00})
+    cost_per_million_tokens_usd: Dict[str, float] = Field(..., json_schema_extra={"example": {"prompt": 5.00, "completion": 15.00}})
     quality_score: float = Field(..., ge=0, le=1, description="A normalized quality score between 0 and 1.")
 
 class SupplyOptionCreate(SupplyOptionBase):
@@ -88,7 +88,7 @@ class AnalysisRun(AnalysisRunBase, table=True):
     execution_log: Optional[str] = None
     result_summary: Optional[Dict[str, Any]] = Field(None, sa_column=Column(JSON))
     result_details: Optional[Dict[str, Any]] = Field(None, sa_column=Column(JSON))
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
     completed_at: Optional[datetime] = None
     pass
 
