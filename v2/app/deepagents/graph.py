@@ -100,8 +100,7 @@ Do not batch up multiple tasks before marking them as completed.
 """
     prompt = instructions + base_prompt
     built_in_tools = [write_todos, update_todo, write_file, read_file, ls, edit_file]
-    model = llm_manager.get_llm(model_name)
-    all_tools = built_in_tools + list(tools)
+    all_tools = [t if isinstance(t, BaseTool) else tool(t) for t in built_in_tools + list(tools)]
     model_with_tools = model.bind_tools(all_tools)
 
     state_schema = state_schema or DeepAgentState
@@ -118,8 +117,9 @@ Do not batch up multiple tasks before marking them as completed.
         tool_messages = []
         state_updates = {}
         for tool_call in tool_calls:
+            tool_name = tool_call["name"]
             tool_to_execute = next(
-                (t for t in all_tools if t.name == tool_call["name"]), None
+                (t for t in all_tools if getattr(t, "name", None) == tool_name), None
             )
             if tool_to_execute:
                 tool_input = tool_call["args"].copy()
