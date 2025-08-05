@@ -1,4 +1,5 @@
 import pytest
+import asyncio
 from unittest.mock import AsyncMock
 from langchain_core.messages import HumanMessage, AIMessage, ToolCall
 from langchain_core.runnables import RunnableLambda
@@ -33,8 +34,13 @@ async def test_agent_completes_todos():
         AIMessage(content="All tasks completed!"),
     ]
 
+    # Wrap the llm mock in a regular function that awaits the coroutine
+    async def llm_wrapper(input):
+        return await llm(input)
+
     # Wrap the llm mock in a RunnableLambda
-    model = RunnableLambda(llm)
+    model = RunnableLambda(llm_wrapper)
+    model.bind_tools = llm.bind_tools
 
     # Define a simple agent with a todo list
     agent = create_deep_agent(
