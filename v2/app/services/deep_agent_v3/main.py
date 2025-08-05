@@ -4,6 +4,7 @@ from langfuse import Langfuse, observe
 import json
 from datetime import datetime, timezone
 
+from app.config import settings
 from app.db.models_clickhouse import AnalysisRequest
 from app.db.models_postgres import DeepAgentRun
 from app.services.deep_agent_v3.state import AgentState
