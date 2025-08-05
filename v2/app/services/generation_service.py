@@ -128,10 +128,10 @@ def run_content_generation_job(job_id: str, params: dict):
     """The core worker process for generating a content corpus."""
     try:
         import google.generativeai as genai
-        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-        if not GEMINI_API_KEY:
+        gemini_api_key = settings.llm_configs['default'].api_key
+        if not gemini_api_key:
             raise ValueError("GEMINI_API_KEY not set")
-        genai.configure(api_key=GEMINI_API_KEY)
+        genai.configure(api_key=gemini_api_key)
     except (ImportError, ValueError) as e:
         update_job_status(job_id, "failed", error=str(e))
         return
@@ -144,7 +144,7 @@ def run_content_generation_job(job_id: str, params: dict):
         top_p=params.get('top_p'),
         top_k=params.get('top_k')
     )
-    model = genai.GenerativeModel(settings.google_model.corpus_generation_model)
+    model = genai.GenerativeModel(settings.llm_configs['default'].model_name)
 
     workload_types = list(META_PROMPTS.keys())
     num_processes = min(cpu_count(), params.get('max_cores', 4))

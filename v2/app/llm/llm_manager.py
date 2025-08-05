@@ -1,41 +1,53 @@
-
 from typing import Any, Dict, Optional
 from app.llm.schemas import LLMConfig
-from app.config import settings
+from app.config import AppConfig
 import google.generativeai as genai
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 
-
-
 class LLMManager:
-    def __init__(self, llm_configs: Dict[str, LLMConfig]):
-        self.llm_configs = llm_configs
+    def __init__(self, settings: AppConfig):
+        self.settings = settings
         self._llm_cache: Dict[str, Any] = {}
 
-    def get_llm(self, name: str) -> Any:
-        if name in self._llm_cache:
-            return self._llm_cache[name]
+    def get_llm(self, name: str, generation_config: Optional[Dict[str, Any]] = None) -> Any:
+        cache_key = name
+        if generation_config:
+            # Create a unique cache key for this combination of name and generation_config
+            cache_key += str(sorted(generation_config.items()))
 
-        config = self.llm_configs.get(name)
+        if cache_key in self._llm_cache:
+            return self._llm_cache[cache_key]
+
+        config = self.settings.llm_configs.get(name)
         if not config:
             raise ValueError(f"LLM configuration for '{name}' not found.")
 
+        # Merge the default generation config with the override
+        final_generation_config = config.generation_config.copy()
+        if generation_config:
+            final_generation_config.update(generation_config)
+
         if config.provider == "google":
-            genai.configure(api_key=config.api_key or settings.google_model.gemini_api_key)
-            llm = ChatGoogleGenerativeAI(model=config.model_name, temperature=config.temperature, max_tokens=config.max_tokens)
+            # It's assumed the google api key is set in the "google" config
+            google_api_key = self.settings.llm_configs.get("google").api_key
+            api_key = config.api_key or google_api_key
+            
+            if not api_key:
+                 raise ValueError("Gemini API key not found in config.")
+
+            genai.configure(api_key=api_key)
+            llm = ChatGoogleGenerativeAI(
+                model=config.model_name, **final_generation_config
+            )
         elif config.provider == "openai":
-            llm = ChatOpenAI(model_name=config.model_name, api_key=config.api_key, temperature=config.temperature, max_tokens=config.max_tokens)
+            llm = ChatOpenAI(
+                model_name=config.model_name,
+                api_key=config.api_key,
+                **final_generation_config,
+            )
         else:
             raise ValueError(f"Unsupported LLM provider: {config.provider}")
 
-        self._llm_cache[name] = llm
+        self._llm_cache[cache_key] = llm
         return llm
-
-# To be initialized in main.py
-llm_manager: Optional[LLMManager] = None
-
-def get_llm_manager() -> LLMManager:
-    if not llm_manager:
-        raise RuntimeError("LLMManager has not been initialized.")
-    return llm_manager

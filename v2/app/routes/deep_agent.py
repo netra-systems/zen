@@ -5,7 +5,8 @@ from typing import Dict, Any
 from app.services.deep_agent_v3.main import DeepAgentV3
 from app.db.models_clickhouse import AnalysisRequest
 from app.db.session import get_db_session
-from app.dependencies import LLMManagerDep
+from app.dependencies import get_llm_manager
+from app.llm.llm_manager import LLMManager
 
 router = APIRouter()
 
@@ -20,8 +21,10 @@ from app.services.security_service import security_service
 from app.config import settings
 from app.services.deep_agent_v3.dev_utils import get_or_create_dev_user
 
+LLMManagerDep = Depends(get_llm_manager)
+
 @router.post("/agent/create", status_code=202)
-async def create_agent_run(request: AnalysisRequest, background_tasks: BackgroundTasks, llm_manager: LLMManagerDep) -> Dict[str, str]:
+async def create_agent_run(request: AnalysisRequest, background_tasks: BackgroundTasks, llm_manager: LLMManager = LLMManagerDep) -> Dict[str, str]:
     """
     Creates and starts a new Deep Agent analysis run in the background.
     """
@@ -71,7 +74,7 @@ async def get_agent_history(run_id: str) -> Dict[str, Any]:
 @router.get("/agent/{run_id}/status")
 async def get_agent_status(run_id: str) -> Dict[str, Any]:
     """
-    Retrieves the current status of an agent run.
+    Retrieivs the current status of an agent run.
     """
     agent = AGENT_INSTANCES.get(run_id)
     if not agent:

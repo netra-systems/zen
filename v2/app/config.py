@@ -1,3 +1,4 @@
+
 import os
 from pydantic import BaseModel
 from google.cloud import secretmanager
@@ -13,7 +14,7 @@ class SecretReference(BaseModel):
 
 # https://console.cloud.google.com/security/secret-manager?inv=1&invt=Ab4muw&project=cryptic-net-466001-n0
 SECRET_CONFIG: List[SecretReference] = [
-    SecretReference(name="gemini-api-key", target_model="google_model", target_field="gemini_api_key"),
+    SecretReference(name="gemini-api-key", target_model="llm_configs.google.api_key", target_field="api_key"),
     SecretReference(name="google-client-id", target_model="google_cloud", target_field="client_id"),
     SecretReference(name="google-client-secret", target_model="google_cloud", target_field="client_secret"),
     SecretReference(name="langfuse-secret-key", target_model="langfuse", target_field="secret_key"),
@@ -21,9 +22,6 @@ SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="clickhouse-default-password", target_model="clickhouse_native", target_field="password"),
     SecretReference(name="clickhouse-default-password", target_model="clickhouse_https", target_field="password"),
     SecretReference(name="clickhouse-development-password", target_model="clickhouse_https_dev", target_field="password"),
-    #SecretReference(name="database-url", target_field="database_url"),
-    SecretReference(name="clickhouse-development-password", target_model="clickhouse_https_dev", target_field="password"),
-    #SecretReference(name="database-url", target_field="database_url"),
     SecretReference(name="jwt-secret-key", target_field="jwt_secret_key"),
     SecretReference(name="fernet-key", target_field="fernet_key")
 ]
@@ -60,12 +58,6 @@ class GoogleCloudConfig(BaseModel):
     client_id: str = None
     client_secret: str = None
 
-class GoogleModelConfig(GoogleCloudConfig):
-    gemini_api_key: str = None
-    corpus_generation_model: str = "gemini-2.5-flash-lite"
-    analysis_model: str = "gemini-2.5-flash-lite"
-    analysis_model_fallback: str = "gemini-2.5-flash-lite"
-
 class ClickHouseNativeConfig(BaseModel):
     host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
     port: int = 9440
@@ -99,7 +91,6 @@ class AppConfig(BaseModel):
 
     app_env: str = "development"
     google_cloud: GoogleCloudConfig = GoogleCloudConfig()
-    google_model: GoogleModelConfig = GoogleModelConfig()
     clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
     clickhouse_https: ClickHouseHTTPSConfig = ClickHouseHTTPSConfig()
     clickhouse_https_dev: ClickHouseHTTPSDevConfig = ClickHouseHTTPSDevConfig()
@@ -123,13 +114,13 @@ class AppConfig(BaseModel):
         ),
         "analysis": LLMConfig(
             provider="google",
-            model_name="gemini-2.5-flash-lite",
-            temperature=0.5,
+            model_name="gemini-1.5-flash-latest",
+            generation_config={"temperature": 0.5},
         ),
         "gpt-4": LLMConfig(
             provider="openai",
             model_name="gpt-4",
-            temperature=0.8,
+            generation_config={"temperature": 0.8},
         ),
     }
 
@@ -146,12 +137,20 @@ class AppConfig(BaseModel):
             for secret_ref in SECRET_CONFIG:
                 fetched_value = fetched_secrets.get(secret_ref.name)
                 if fetched_value:
-                    target = self
                     if secret_ref.target_model:
-                        target = getattr(self, secret_ref.target_model, None)
-                    
-                    if target:
-                        setattr(target, secret_ref.target_field, fetched_value)
+                        if "llm_configs" in secret_ref.target_model:
+                            parts = secret_ref.target_model.split('.')
+                            # llm_configs.google.api_key -> llm_configs["google"].api_key
+                            config_name = parts[1]
+                            field_name = parts[2]
+                            if config_name in self.llm_configs:
+                                setattr(self.llm_configs[config_name], field_name, fetched_value)
+                        else:
+                            target = getattr(self, secret_ref.target_model, None)
+                            if target:
+                                setattr(target, secret_ref.target_field, fetched_value)
+                    elif secret_ref.target_field:
+                         setattr(self, secret_ref.target_field, fetched_value)
                 elif self.log_secrets:
                     print(f"Secret '{secret_ref.name}' not found or failed to fetch.")
             

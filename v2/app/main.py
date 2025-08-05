@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
     app.state.security_service = SecurityService(key_manager)
 
     # Initialize LLMManager
-    app.state.llm_manager = LLMManager(settings.llm_configs)
+    app.state.llm_manager = LLMManager(settings)
 
     # Initialize and connect to ClickHouse
     ch_client = ClickHouseClient(
@@ -120,3 +120,8 @@ app.include_router(deep_agent.router, prefix="/api/v3", tags=["deep_agent"])
 def read_root():
     logger.info("Root endpoint was hit.")
     return {"message": "Welcome to Netra API v2"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

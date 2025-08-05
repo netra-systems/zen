@@ -9,12 +9,14 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 from sqlmodel import Session, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.security import OAuth2PasswordBearer
 
 from ..db import models_postgres
 from ..db import models_clickhouse
 from .key_manager import KeyManager
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)

@@ -1,6 +1,5 @@
 from typing import Any, Callable, List, Optional, Sequence, TypedDict, Union
-from langchain_core.language_models import LanguageModelLike
-from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.messages import HumanMessage
 from langchain_core.tools import BaseTool
 from langgraph.graph import END, StateGraph
 from app.llm.llm_manager import LLMManager
@@ -15,6 +14,7 @@ from .tools import (
     edit_file,
     update_todo,
 )
+from langchain_core.runnables import RunnableLambda
 
 class SubAgent(TypedDict):
     name: str
@@ -26,11 +26,11 @@ class Team:
     def __init__(self, agents: List[SubAgent], llm_manager: LLMManager, supervisor_llm_name: str = "default"):
         self.agents = agents
         self.llm_manager = llm_manager
-        self.supervisor_llm = self.llm_manager.get_llm(supervisor_llm_name)
+        self.supervisor_llm_name = supervisor_llm_name
 
     def create_graph(self):
         # Create the supervisor graph
-        supervisor_graph = create_supervisor_graph(self.supervisor_llm)
+        supervisor_graph = create_supervisor_graph(self.llm_manager, self.supervisor_llm_name)
 
         # Create the agent graphs
         agent_graphs = {}
@@ -38,7 +38,7 @@ class Team:
             agent_graphs[agent["name"]] = create_deep_agent(
                 tools=agent.get("tools", []),
                 instructions=agent["prompt"],
-                model=self.supervisor_llm,
+                llm_manager=self.llm_manager,
             )
 
         # Define the main graph
@@ -115,6 +115,7 @@ Do not batch up multiple tasks before marking them as completed.
     )
 
 if __name__ == "__main__":
+    from app.config import settings
     # Define your agents
     agents = [
         SubAgent(
@@ -132,7 +133,8 @@ if __name__ == "__main__":
     ]
 
     # Create the team
-    team = Team(agents)
+    llm_manager = LLMManager(settings)
+    team = Team(agents, llm_manager)
 
     # Create the graph
     graph = team.create_graph()

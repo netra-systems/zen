@@ -1,4 +1,5 @@
 from app.llm.llm_manager import LLMManager
+import json
 from typing import Dict, Any, List
 from app.services.deep_agent_v3.scenarios import SCENARIOS
 

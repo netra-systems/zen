@@ -2,10 +2,8 @@ from typing import Literal
 
 
 from langgraph.graph import END, StateGraph
-from langgraph.prebuilt import tools_condition
 
 from .state import DeepAgentState
-from .tools import update_todo
 from app.llm.llm_manager import LLMManager
 
 
@@ -48,8 +46,9 @@ def create_supervisor_graph(llm_manager: LLMManager, llm_name: str = "default"):
 
 # Example usage
 if __name__ == "__main__":
-    llm = get_default_model()
-    graph = create_supervisor_graph(llm)
+    from app.config import settings
+    llm_manager = LLMManager(settings)
+    graph = create_supervisor_graph(llm_manager)
     # You can now run the graph with some initial state
     # initial_state = DeepAgentState(messages=[("user", "your request here")])
     # for event in graph.stream(initial_state):

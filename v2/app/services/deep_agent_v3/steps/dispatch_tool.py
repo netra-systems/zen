@@ -1,9 +1,9 @@
 import json
 from typing import Any
 from app.services.deep_agent_v3.state import AgentState
-from app.config import settings
+from app.config import AppConfig
 
-async def dispatch_tool(state: AgentState, llm_connector: Any) -> str:
+async def dispatch_tool(state: AgentState, llm_connector: Any, settings: AppConfig) -> str:
     """Uses an LLM to decide which tool to use based on the user's request."""
     if not state.request.query:
         return "No query found in the request."
@@ -19,7 +19,7 @@ async def dispatch_tool(state: AgentState, llm_connector: Any) -> str:
     }}
     """
 
-    response_text = await llm_connector.generate_text_async(prompt, settings.google_model.analysis_model, settings.google_model.analysis_model_fallback)
+    response_text = await llm_connector.generate_text_async(prompt, settings.llm_configs['analysis'].model_name, settings.llm_configs['analysis'].model_name)
     tool_data = json.loads(response_text)
 
     state.current_tool_name = tool_data.get("tool_name")
