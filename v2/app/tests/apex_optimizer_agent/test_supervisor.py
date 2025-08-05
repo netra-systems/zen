@@ -15,7 +15,7 @@ async def test_start_agent():
     mock_graph.ainvoke = AsyncMock()
 
     # Mock the SingleAgentTeam and its create_graph method
-    with unittest.mock.patch('app.services.apex_optimizer_agent.supervisor.SingleAgentTeam') as mock_team_class:
+    with unittest.mock.patch('app.services.apex_optimizer_agent.supervisor.SingleAgentTeam') as mock_team_class,         unittest.mock.patch('asyncio.create_task') as mock_create_task:
         mock_team_instance = mock_team_class.return_value
         mock_team_instance.create_graph.return_value = mock_graph
 
@@ -42,8 +42,11 @@ async def test_start_agent():
         # Call the method to be tested
         result = await supervisor.start_agent(analysis_request)
 
+        # Assert that asyncio.create_task was called
+        mock_create_task.assert_called_once()
+
         # Assert that the graph was started with the correct initial state
-        mock_graph.ainvoke.assert_awaited_once()
+        mock_graph.ainvoke.assert_called_once()
         call_args, call_kwargs = mock_graph.ainvoke.call_args
         assert call_args[0]["messages"][0].content == "test query"
         assert call_args[0]["todo_list"] == ["triage_request"]

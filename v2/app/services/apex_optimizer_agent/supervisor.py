@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, Dict, List
 from langchain_core.messages import HumanMessage
 from app.db.models_clickhouse import AnalysisRequest
@@ -42,7 +43,7 @@ class NetraOptimizerAgentSupervisor:
             "completed_steps": []
         }
         # Start the agent asynchronously
-        await self.graph.ainvoke(initial_state, {"recursion_limit": 100})
+        asyncio.create_task(self.graph.ainvoke(initial_state, {"recursion_limit": 100}))
         
         # Immediately return a response to the user
         return {"status": "agent_started", "request_id": request.request.id}
