@@ -7,6 +7,7 @@ import pytest
 from app.db.models_clickhouse import AnalysisRequest
 from app.llm.llm_manager import LLMManager
 from app.services.deep_agent_v3.main import DeepAgentV3
+from app.services.deep_agent_v3.scenario_finder import ScenarioFinder
 
 
 @pytest.fixture
@@ -35,9 +36,17 @@ def mock_request():
 async def test_run(mock_request, mock_llm_manager, mock_db_session):
     # Given
     run_id = str(uuid.uuid4())
-    with patch("app.services.deep_agent_v3.main.ToolBuilder.build_all") as mock_build_all, patch(
-        "app.services.deep_agent_v3.main.ScenarioFinder"
-    ) as mock_scenario_finder, patch.object(
+    mock_scenario_finder = MagicMock(spec=ScenarioFinder)
+    mock_scenario_finder.find_scenario.return_value = {
+        "scenario": {
+            "name": "test_scenario",
+            "steps": ["analyze_request", "propose_solution", "generate_report"],
+        },
+        "confidence": 0.9,
+        "justification": "test_justification",
+    }
+
+    with patch("app.services.deep_agent_v3.main.ToolBuilder.build_all") as mock_build_all, patch.object(
         DeepAgentV3, "_init_langfuse", return_value=None
     ):
         mock_tool = MagicMock()
@@ -47,20 +56,13 @@ async def test_run(mock_request, mock_llm_manager, mock_db_session):
             "propose_solution": mock_tool,
             "generate_report": mock_tool,
         }
-        mock_scenario_finder.return_value.find_scenario.return_value = {
-            "scenario": {
-                "name": "test_scenario",
-                "steps": ["analyze_request", "propose_solution", "generate_report"],
-            },
-            "confidence": 0.9,
-            "justification": "test_justification",
-        }
 
         agent = DeepAgentV3(
             run_id=run_id,
             request=mock_request,
             db_session=mock_db_session,
             llm_manager=mock_llm_manager,
+            scenario_finder=mock_scenario_finder,
         )
         agent.agent_core.decide_next_step = MagicMock(
             return_value={"tool_name": "test_tool", "tool_input": {}}
