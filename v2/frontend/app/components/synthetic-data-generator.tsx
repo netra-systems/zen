@@ -54,7 +54,7 @@ export default function SyntheticDataGenerator({ onGenerationComplete }) {
         body: JSON.stringify(generationParams),
       });
       if (!response.ok) throw new Error("Failed to generate synthetic data.");
-      const data = await response.json();
+      await response.json();
       onGenerationComplete(generationParams.destination_table);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred.");

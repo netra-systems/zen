@@ -40,7 +40,7 @@ export default function ApexOptimizerAgentPage() {
         fetchExamples();
     }, [token]);
 
-    const startAgent = async (query: string) => {
+    const startAgent = useCallback(async (query: string) => {
         setIsLoading(true);
         setError(null);
 
@@ -48,7 +48,7 @@ export default function ApexOptimizerAgentPage() {
         const user_id = getUserId();
 
         if (!user_id) {
-            const err = { detail: "User not found. Please log in again." };
+            const err = new Error("User not found. Please log in again.");
             setError(err);
             addMessage('agent', "User not found. Please log in again.");
             setIsLoading(false);
@@ -79,23 +79,23 @@ export default function ApexOptimizerAgentPage() {
                 startPolling(newRun.run_id);
                 addMessage('agent', `Starting analysis with Run ID: ${newRun.run_id}`);
             } else {
-                const err = { detail: "Failed to start analysis: No run ID returned." };
+                const err = new Error("Failed to start analysis: No run ID returned.");
                 setError(err);
                 addMessage('agent', "Failed to start analysis: No run ID returned.");
                 setIsLoading(false);
             }
         } catch (err) {
             console.error("Error starting analysis:", err);
-            setError(err);
+            setError(err as Error);
             addMessage('agent', `Error starting analysis.`);
             setIsLoading(false);
         }
-    };
+    }, [addMessage, setError, setIsLoading, startPolling, token]);
 
     const handleSendMessage = useCallback(async (query: string) => {
         addMessage('user', query);
         await startAgent(query);
-    }, [token]);
+    }, [addMessage, startAgent]);
 
     useEffect(() => {
         if (autoLoadExample && exampleQueries.length > 0 && !hasLoadedExample) {
