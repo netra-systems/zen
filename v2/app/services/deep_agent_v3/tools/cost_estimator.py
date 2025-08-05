@@ -10,7 +10,7 @@ class CostEstimator(BaseTool):
         status="in_review"
     )
 
-    async def execute(self, prompt: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def run(self, prompt: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Estimates the cost of a given prompt using the llm_connector."""
         estimation_prompt = f"""
         Given the following prompt, estimate the cost in USD to run it.

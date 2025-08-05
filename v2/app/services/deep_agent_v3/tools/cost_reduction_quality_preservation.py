@@ -9,18 +9,25 @@ class CostReductionQualityPreservationTool(BaseTool):
         status="in_review"
     )
 
-async def analyze_current_costs(state: Dict[str, Any], **kwargs) -> str:
-    # Implementation for analyzing current costs
-    return "Analyzed current costs."
+    async def run(self, state: Dict[str, Any], **kwargs) -> str:
+        await self.analyze_current_costs(state, **kwargs)
+        await self.identify_cost_drivers(state, **kwargs)
+        await self.propose_cost_optimizations(state, **kwargs)
+        await self.simulate_quality_impact(state, **kwargs)
+        return "Cost reduction quality preservation complete."
 
-async def identify_cost_drivers(state: Dict[str, Any], **kwargs) -> str:
-    # Implementation for identifying cost drivers
-    return "Identified cost drivers."
+    async def analyze_current_costs(self, state: Dict[str, Any], **kwargs) -> str:
+        # Implementation for analyzing current costs
+        return "Analyzed current costs."
 
-async def propose_cost_optimizations(state: Dict[str, Any], **kwargs) -> str:
-    # Implementation for proposing cost optimizations
-    return "Proposed cost optimizations."
+    async def identify_cost_drivers(self, state: Dict[str, Any], **kwargs) -> str:
+        # Implementation for identifying cost drivers
+        return "Identified cost drivers."
 
-async def simulate_quality_impact(state: Dict[str, Any], **kwargs) -> str:
-    # Implementation for simulating quality impact
-    return "Simulated quality impact."
+    async def propose_cost_optimizations(self, state: Dict[str, Any], **kwargs) -> str:
+        # Implementation for proposing cost optimizations
+        return "Proposed cost optimizations."
+
+    async def simulate_quality_impact(self, state: Dict[str, Any], **kwargs) -> str:
+        # Implementation for simulating quality impact
+        return "Simulated quality impact."

@@ -10,7 +10,7 @@ class PerformancePredictor(BaseTool):
         status="in_review"
     )
 
-    async def execute(self, prompt: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def run(self, prompt: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Predicts the performance of a given prompt using the llm_connector."""
         prediction_prompt = f"""
         Given the following prompt, predict the latency in milliseconds.

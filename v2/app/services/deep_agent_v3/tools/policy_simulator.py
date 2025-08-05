@@ -6,22 +6,21 @@ from app.config import settings
 from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
 class PolicySimulator(BaseTool):
-    name = "policy_simulator"
     metadata = ToolMetadata(
-        name="PolicySimulator",
+        name="policy_simulator",
         description="Simulates the outcome of a single policy.",
         version="1.0.0",
         status="in_review"
     )
 
-    async def simulate(self, policy: LearnedPolicy) -> PredictedOutcome:
+    async def run(self, policy: LearnedPolicy) -> PredictedOutcome:
         """Simulates the outcome of a single policy."""
         prompt = f"""
         Simulate the outcome of the following policy:
 
         Policy:
-        - Pattern Name: {policy["pattern_name"]}
-        - Optimal Supply Option: {policy["optimal_supply_option_name"]}
+        - Pattern Name: {policy.pattern_name}
+        - Optimal Supply Option: {policy.optimal_supply_option_name}
 
         Based on this information, predict the following:
         - utility_score (0.0 to 1.0)

@@ -7,15 +7,14 @@ from sqlalchemy.future import select
 from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
 
 class PolicyProposer(BaseTool):
-    name = "policy_proposer"
     metadata = ToolMetadata(
-        name="PolicyProposer",
+        name="policy_proposer",
         description="Finds the best routing policies through simulation.",
         version="1.0.0",
         status="in_review"
     )
 
-    async def propose_policies(
+    async def run(
         self, patterns: List[DiscoveredPattern], span_map: Dict[str, UnifiedLogEntry]
     ) -> (List[LearnedPolicy], List[PredictedOutcome]):
         """Finds the best routing policies through simulation."""
@@ -41,13 +40,13 @@ class PolicyProposer(BaseTool):
             outcomes.extend(sorted_outcomes)
 
             baseline_metrics = {
-                "avg_cost_usd": sum(s.finops['total_cost_usd'] for s in member_spans) / len(member_spans),
-                "avg_latency_ms": sum(s.performance['latency_ms']['total_e2e_ms'] for s in member_spans) / len(member_spans),
+                "avg_cost_usd": sum(s.finops.total_cost_usd for s in member_spans) / len(member_spans),
+                "avg_latency_ms": sum(s.performance.latency_ms.total_e2e_ms for s in member_spans) / len(member_spans),
                 "avg_quality_score": sum(s.quality.score for s in member_spans) / len(member_spans) if all(s.quality for s in member_spans) else 0.8,
             }
 
-            pattern_spend = sum(s.finops['total_cost_usd'] for s in member_spans)
-            all_spans_spend = sum(s.finops['total_cost_usd'] for s in span_map.values())
+            pattern_spend = sum(s.finops.total_cost_usd for s in member_spans)
+            all_spans_spend = sum(s.finops.total_cost_usd for s in span_map.values())
             pattern_impact_fraction = (pattern_spend / all_spans_spend) if all_spans_spend > 0 else 0
 
             policies.append(LearnedPolicy(
@@ -94,4 +93,5 @@ class PolicyProposer(BaseTool):
 
     async def _get_supply_catalog(self) -> List[SupplyOption]:
         """Retrieves the supply catalog from the database."""
-        return self.db_session.exec(select(SupplyOption)).all()
+        result = await self.db_session.execute(select(SupplyOption))
+        return result.scalars().all()
