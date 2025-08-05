@@ -28,7 +28,7 @@ async def test_end_to_end_scenario(db_session):
          patch('app.services.deep_agent_v3.main.DeepAgentV3._generate_and_save_run_report', new_callable=AsyncMock):
 
         mock_tool = MagicMock()
-        mock_tool.run = MagicMock(return_value="tool_result")
+        mock_tool.run = AsyncMock(return_value="tool_result")
         mock_build_all.return_value = {
             "test_tool": mock_tool
         }
