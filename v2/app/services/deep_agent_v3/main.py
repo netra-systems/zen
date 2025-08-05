@@ -2,6 +2,7 @@ import io
 from typing import Any, Dict, List
 from langfuse import Langfuse, observe
 import json
+from datetime import datetime, timezone
 
 from app.db.models_clickhouse import AnalysisRequest
 from app.db.models_postgres import DeepAgentRun
@@ -122,7 +123,8 @@ class DeepAgentV3:
                 step_name=step_name,
                 step_input=input_data,
                 step_output=output_data,
-                run_log=json.dumps(log_message)
+                run_log=json.dumps(log_message),
+                timestamp=datetime.now(timezone.utc)
             )
             db_session.add(new_run)
 

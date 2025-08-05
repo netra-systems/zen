@@ -93,4 +93,4 @@ class DeepAgentRun(Base):
     step_output = Column(JSON, nullable=True)
     run_log = Column(String, nullable=True)
     run_report = Column(String, nullable=True)
-    timestamp = Column(DateTime, default=datetime.now(timezone.utc))
+    timestamp = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))

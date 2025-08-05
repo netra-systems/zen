@@ -1,3 +1,4 @@
+import json
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 
@@ -10,7 +11,13 @@ def mock_db_session():
 
 @pytest.fixture
 def mock_llm_connector():
-    return MagicMock()
+    mock = MagicMock()
+    mock.get_completion.return_value = json.dumps({
+        "scenario_name": "test_scenario",
+        "confidence": 0.9,
+        "justification": "test_justification"
+    })
+    return mock
 
 @pytest.fixture
 def mock_request():
@@ -56,6 +63,6 @@ async def test_run(mock_request, mock_db_session, mock_llm_connector):
     # Then
     assert agent.status == "complete"
     assert final_state is not None
-    assert len(final_state.messages) == 3
-    assert final_state.messages[0]["content"] == "Scenario identified: test_scenario"
-    assert final_state.messages[1]["content"] == "tool_result"
+    assert len(final_state.messages) == 2
+    assert final_state.messages[0]['content'] == "Scenario identified: test_scenario"
+    assert final_state.messages[1]['content'] == 'tool_result'

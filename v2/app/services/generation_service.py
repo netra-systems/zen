@@ -65,8 +65,15 @@ def get_corpus_from_clickhouse(table_name: str) -> dict:
         if db and db.is_connected():
             db.disconnect()
 
-def save_corpus_to_clickhouse(corpus: dict, table_name: str):
+def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str = None):
     """Saves the generated content corpus to a specified ClickHouse table."""
+    if job_id:
+        output_dir = os.path.join("app", "data", "generated", "content_corpuses", job_id)
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, "content_corpus.json")
+        with open(output_path, 'w') as f:
+            json.dump(corpus, f, indent=2)
+
     db = None
     try:
         db = ClickHouseClient(
@@ -137,7 +144,7 @@ def run_content_generation_job(job_id: str, params: dict):
         top_p=params.get('top_p'),
         top_k=params.get('top_k')
     )
-    model = genai.GenerativeModel(settings.corpus_generation_model)
+    model = genai.GenerativeModel(settings.google_model.corpus_generation_model)
 
     workload_types = list(META_PROMPTS.keys())
     num_processes = min(cpu_count(), params.get('max_cores', 4))
@@ -158,12 +165,12 @@ def run_content_generation_job(job_id: str, params: dict):
 
     clickhouse_table = params.get('clickhouse_table', 'content_corpus')
     try:
-        save_corpus_to_clickhouse(corpus, clickhouse_table)
+        save_corpus_to_clickhouse(corpus, clickhouse_table, job_id=job_id)
         summary = {
             "message": f"Corpus generated and saved to {clickhouse_table}",
             "counts": {w_type: len(samples) for w_type, samples in corpus.items()}
         }
-        update_job_status(job_id, "completed", summary=summary)
+        update_job_status(job_id, "completed", summary=summary, result_path=os.path.join("app", "data", "generated", "content_corpuses", job_id, "content_corpus.json"))
     except Exception as e:
         update_job_status(job_id, "failed", error=f"Failed to save to ClickHouse: {e}")
 

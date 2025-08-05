@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, AsyncMock
 from app.services.deep_agent_v3.steps.enrich_and_cluster import enrich_and_cluster
 from app.services.deep_agent_v3.state import AgentState
 from app.db.models_clickhouse import UnifiedLogEntry, Request, Response, Performance, FinOps, TraceContext

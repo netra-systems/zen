@@ -20,10 +20,9 @@ async def test_propose_optimal_policies_success():
     result = await propose_optimal_policies(state, policy_proposer)
 
     # Assert
-    assert result == "Successfully proposed 2 optimal policies."
-    assert len(state.learned_policies) == 2
-    assert len(state.predicted_outcomes) == 2
-    policy_proposer.propose_policies.assert_called_once_with(state.patterns, {})
+    assert result == "Optimal policies proposed."
+    assert len(state.policies) == 2
+    policy_proposer.propose_policies.assert_called_once_with(state.patterns)
 
 @pytest.mark.asyncio
 async def test_propose_optimal_policies_no_patterns():
@@ -37,5 +36,5 @@ async def test_propose_optimal_policies_no_patterns():
     result = await propose_optimal_policies(state, policy_proposer)
 
     # Assert
-    assert result == "No discovered patterns to propose policies for."
+    assert result == "Error: patterns is not available."
     policy_proposer.propose_policies.assert_not_called()

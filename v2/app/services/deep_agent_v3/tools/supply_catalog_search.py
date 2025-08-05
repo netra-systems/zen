@@ -3,6 +3,7 @@ from app.db.session import get_db_session
 from app.db.models_postgres import Supply
 from sqlmodel import select
 from app.services.deep_agent_v3.tools.base import BaseTool, ToolMetadata
+from app.services.supply_catalog_service import SupplyCatalogService
 
 class SupplyCatalogSearch(BaseTool):
     name = "supply_catalog_search"
@@ -13,10 +14,13 @@ class SupplyCatalogSearch(BaseTool):
         status="in_review"
     )
 
+    def __init__(self, db_session):
+        self.db_session = db_session
+        self.supply_catalog_service = SupplyCatalogService()
+
     async def search(self, query: str) -> List[Supply]:
         """
         Searches the supply catalog for available models and resources.
         """
-        async with get_db_session() as session:
-            result = await session.execute(select(Supply).where(Supply.name.like(f"%{query}%")))
-            return result.scalars().all()
+        all_options = self.supply_catalog_service.get_all_options(self.db_session)
+        return [option for option in all_options if query in option.name]

@@ -7,6 +7,8 @@ from app.services.deep_agent_v3.state import AgentState
 async def test_fetch_raw_logs_success():
     # Arrange
     state = MagicMock(spec=AgentState)
+    state.raw_logs = []
+    state.trace_ids = []
     log_fetcher = MagicMock()
     log_fetcher.fetch_logs.return_value = (["log1", "log2"], ["trace1", "trace2"])
     request = {
@@ -36,6 +38,8 @@ async def test_fetch_raw_logs_success():
 async def test_fetch_raw_logs_no_logs():
     # Arrange
     state = MagicMock(spec=AgentState)
+    state.raw_logs = []
+    state.trace_ids = []
     log_fetcher = MagicMock()
     log_fetcher.fetch_logs.return_value = ([], [])
     request = {

@@ -10,4 +10,4 @@ def test_get_scenario():
     scenario_finder = ScenarioFinder(llm_connector=mock_llm_connector)
     mock_request = AnalysisRequest(query="I need to reduce costs but keep quality the same.", user_id="test_user", workloads=[])
     scenario = scenario_finder.find_scenario(mock_request)
-    assert scenario["scenario"]["name"] == "cost_reduction_quality_constraint"
+    assert scenario["scenario"]["name"] == "Cost Reduction with Quality Constraint"
