@@ -15,7 +15,7 @@ async def test_logging_and_reporting(mock_db_session, mock_llm_manager, mock_req
     """Tests that the agent correctly logs step execution and generates a run report."""
     # Arrange
     with patch('app.services.deep_agent_v3.main.ToolBuilder.build_all') as mock_build_all, \
-         patch('app.services.deep_agent_v3.main.ScenarioFinder.find_scenario') as mock_find_scenario, \
+         patch('app.services.deep_agent_v3.main.ScenarioFinder.find_scenario', new_callable=AsyncMock) as mock_find_scenario, \
          patch.object(DeepAgentV3, '_init_langfuse', return_value=None):
 
         mock_tool = MagicMock()

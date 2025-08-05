@@ -23,7 +23,7 @@ async def test_end_to_end_scenario(db_session):
 
     # Create the agent
     with patch('app.services.deep_agent_v3.main.ToolBuilder.build_all') as mock_build_all, \
-         patch('app.services.deep_agent_v3.main.ScenarioFinder.find_scenario') as mock_find_scenario, \
+         patch('app.services.deep_agent_v3.main.ScenarioFinder.find_scenario', new_callable=AsyncMock) as mock_find_scenario, \
          patch.object(DeepAgentV3, '_init_langfuse', return_value=None), \
          patch('app.services.deep_agent_v3.main.DeepAgentV3._generate_and_save_run_report', new_callable=AsyncMock):
 

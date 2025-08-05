@@ -20,14 +20,15 @@ def create_supervisor_graph(llm_manager: LLMManager, llm_name: str = "default"):
 
     # A conditional edge will decide to go to one of the agents, or to finish
     def supervisor_condition(state: DeepAgentState) -> Literal["agent", "__end__"]:
-        # If we have a plan, then we are done with planning
-        if state.get("todos") and all(
-            todo["status"] == "completed" for todo in state["todos"]
-        ):
-            return END
-        else:
-            # Otherwise, we need to replan
+        todos = state.get("todos")
+        if not todos or any(todo["status"] == "pending" for todo in todos):
             return "agent"
+        if any(todo["status"] == "in_progress" for todo in todos):
+            return "agent"
+        if all(todo["status"] == "completed" for todo in todos):
+            return END
+        return "agent"
+
 
     builder.add_conditional_edges(
         "supervisor",

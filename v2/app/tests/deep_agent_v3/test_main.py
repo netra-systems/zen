@@ -45,14 +45,14 @@ async def test_run(mock_request, mock_llm_manager):
             "generate_report": mock_tool,
         }
         mock_scenario_finder_instance = mock_scenario_finder.return_value
-        mock_scenario_finder_instance.find_scenario.return_value = {
+        mock_scenario_finder_instance.find_scenario = AsyncMock(return_value = {
             "scenario": {
                 "name": "test_scenario",
                 "steps": ["analyze_request", "propose_solution", "generate_report"],
             },
             "confidence": 0.9,
             "justification": "test_justification",
-        }
+        })
 
         agent = DeepAgentV3(
             run_id=run_id,

@@ -130,10 +130,9 @@ class DeepAgentV3:
         
         if self.triage_result:
             report += "## Triage\n\n"
-            triage_result = await self.triage_result
-            report += f"**Scenario:** {triage_result['scenario']['name']}\n"
-            report += f"**Confidence:** {triage_result['confidence']}\n"
-            report += f"**Justification:** {triage_result['justification']}\n\n"
+            report += f"**Scenario:** {self.triage_result['scenario']['name']}\n"
+            report += f"**Confidence:** {self.triage_result['confidence']}\n"
+            report += f"**Justification:** {self.triage_result['justification']}\n\n"
 
         report += "## Steps\n\n"
 
