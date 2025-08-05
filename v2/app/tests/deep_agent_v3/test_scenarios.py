@@ -1,7 +1,7 @@
-
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
+from app.db.models_clickhouse import AnalysisRequest
 
 client = TestClient(app)
 
@@ -16,14 +16,12 @@ client = TestClient(app)
 ])
 def test_deep_agent_v3_scenario(scenario_prompt: str, scenario_name: str):
     run_id = f"test-run-{hash(scenario_prompt)}"
-    agent_request = {
-            "user_id": "test_user",
-            "workloads": [{
-                "run_id": run_id,
-                "query": scenario_prompt
-            }]
-        }
-    response = client.post("/api/v3/agent/create", json=agent_request)
+    agent_request = AnalysisRequest(
+        user_id="test_user",
+        workloads=[{"run_id": run_id, "query": scenario_prompt}],
+        query=scenario_prompt
+    )
+    response = client.post("/api/v3/agent/create", json=agent_request.model_dump())
     assert response.status_code == 202
 
     import time

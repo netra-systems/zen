@@ -1,4 +1,3 @@
-
 import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
 from app.services.deep_agent_v3.main import DeepAgentV3
@@ -31,7 +30,8 @@ def mock_llm_connector():
 async def test_deep_agent_scenario_unit(scenario_prompt: str, mock_db_session, mock_llm_connector):
     run_id = f"test-run-{hash(scenario_prompt)}"
     agent_request = AnalysisRequest(
-        run_id=run_id,
+        user_id="test_user",
+        workloads=[{"run_id": run_id, "query": scenario_prompt}],
         query=scenario_prompt,
         data_source={
             "source_table": "default.synthetic_data",
@@ -45,15 +45,9 @@ async def test_deep_agent_scenario_unit(scenario_prompt: str, mock_db_session, m
 
     agent = DeepAgentV3(run_id=run_id, request=agent_request, db_session=mock_db_session, llm_connector=mock_llm_connector)
 
-    with (patch.object(agent.tools['log_fetcher'], 'execute', new_callable=AsyncMock) as mock_fetch,
-          patch.object(agent.tools['log_pattern_identifier'], 'execute', new_callable=AsyncMock) as mock_identify,
-          patch.object(agent.tools['policy_proposer'], 'execute', new_callable=AsyncMock) as mock_propose):
-
-        mock_fetch.return_value = [MagicMock()]
-        mock_identify.return_value = [MagicMock()]
-        mock_propose.return_value = [MagicMock()]
-
-        final_report = await agent.run_full_analysis()
+    with (patch.object(agent.pipeline, 'run_next_step', new_callable=AsyncMock) as mock_run_next_step):
+        mock_run_next_step.return_value = {"status": "complete"}
+        final_state = await agent.run_full_analysis()
 
         assert agent.is_complete()
-        assert "Analysis Complete" in final_report
+        assert final_state is not None

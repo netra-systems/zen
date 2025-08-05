@@ -53,7 +53,8 @@ async def test_run_full_analysis(mock_request, mock_db_session, mock_llm_connect
         agent.pipeline = mock_pipeline_for_full_analysis
 
     # When
-    final_state = await agent.run_full_analysis()
+    with patch('app.services.deep_agent_v3.main.DeepAgentV3._generate_and_save_run_report', new_callable=AsyncMock):
+        final_state = await agent.run_full_analysis()
 
     # Then
     assert agent.status == "complete"

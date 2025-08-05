@@ -1,4 +1,3 @@
-
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from app.services.deep_agent_v3.main import DeepAgentV3
@@ -11,7 +10,7 @@ async def test_end_to_end_cost_reduction_quality_preservation():
     run_id = "test_run_id"
     request = AnalysisRequest(
         user_id="test_user",
-        workloads=[],
+        workloads=[{"query": "I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms."}],
         query="I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms."
     )
     db_session = MagicMock()
@@ -25,9 +24,9 @@ async def test_end_to_end_cost_reduction_quality_preservation():
     agent.pipeline.steps[1] = AsyncMock(return_value="Successfully enriched and clustered logs") # enrich_and_cluster
     agent.pipeline.steps[2] = AsyncMock(return_value="Successfully proposed optimal policies") # propose_optimal_policies
     agent.pipeline.steps[3] = AsyncMock(return_value="Successfully simulated policy") # simulate_policy
-    async def mock_generate_final_report(state):
+    async def mock_generate_final_report(state, tools, request):
         state.final_report = "This is the final report."
-        return "Final report generated."
+        return {"status": "success"}
     agent.pipeline.steps[4] = AsyncMock(side_effect=mock_generate_final_report) # generate_final_report
 
     # Act
@@ -42,7 +41,7 @@ async def test_end_to_end_latency_reduction_cost_constraint():
     run_id = "test_run_id"
     request = AnalysisRequest(
         user_id="test_user",
-        workloads=[],
+        workloads=[{"query": "My tools are too slow. I need to reduce the latency by 3x, but I can't spend more money."}],
         query="My tools are too slow. I need to reduce the latency by 3x, but I can't spend more money."
     )
     db_session = MagicMock()
@@ -56,9 +55,9 @@ async def test_end_to_end_latency_reduction_cost_constraint():
     agent.pipeline.steps[1] = AsyncMock(return_value="Successfully enriched and clustered logs") # enrich_and_cluster
     agent.pipeline.steps[2] = AsyncMock(return_value="Successfully proposed optimal policies") # propose_optimal_policies
     agent.pipeline.steps[3] = AsyncMock(return_value="Successfully simulated policy") # simulate_policy
-    async def mock_generate_final_report(state):
+    async def mock_generate_final_report(state, tools, request):
         state.final_report = "This is the final report."
-        return "Final report generated."
+        return {"status": "success"}
     agent.pipeline.steps[4] = AsyncMock(side_effect=mock_generate_final_report) # generate_final_report
 
     # Act
@@ -73,7 +72,7 @@ async def test_end_to_end_usage_increase_impact_analysis():
     run_id = "test_run_id"
     request = AnalysisRequest(
         user_id="test_user",
-        workloads=[],
+        workloads=[{"query": "I'm expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?"}],
         query="I'm expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?"
     )
     db_session = MagicMock()
@@ -87,9 +86,9 @@ async def test_end_to_end_usage_increase_impact_analysis():
     agent.pipeline.steps[1] = AsyncMock(return_value="Successfully enriched and clustered logs") # enrich_and_cluster
     agent.pipeline.steps[2] = AsyncMock(return_value="Successfully proposed optimal policies") # propose_optimal_policies
     agent.pipeline.steps[3] = AsyncMock(return_value="Successfully simulated policy") # simulate_policy
-    async def mock_generate_final_report(state):
+    async def mock_generate_final_report(state, tools, request):
         state.final_report = "This is the final report."
-        return "Final report generated."
+        return {"status": "success"}
     agent.pipeline.steps[4] = AsyncMock(side_effect=mock_generate_final_report) # generate_final_report
 
     # Act
@@ -104,7 +103,7 @@ async def test_end_to_end_function_optimization():
     run_id = "test_run_id"
     request = AnalysisRequest(
         user_id="test_user",
-        workloads=[],
+        workloads=[{"query": "I need to optimize the 'user_authentication' function. What advanced methods can I use?"}],
         query="I need to optimize the 'user_authentication' function. What advanced methods can I use?"
     )
     db_session = MagicMock()
@@ -118,9 +117,9 @@ async def test_end_to_end_function_optimization():
     agent.pipeline.steps[1] = AsyncMock(return_value="Successfully enriched and clustered logs") # enrich_and_cluster
     agent.pipeline.steps[2] = AsyncMock(return_value="Successfully proposed optimal policies") # propose_optimal_policies
     agent.pipeline.steps[3] = AsyncMock(return_value="Successfully simulated policy") # simulate_policy
-    async def mock_generate_final_report(state):
+    async def mock_generate_final_report(state, tools, request):
         state.final_report = "This is the final report."
-        return "Final report generated."
+        return {"status": "success"}
     agent.pipeline.steps[4] = AsyncMock(side_effect=mock_generate_final_report) # generate_final_report
 
     # Act
@@ -135,7 +134,7 @@ async def test_end_to_end_model_effectiveness_analysis():
     run_id = "test_run_id"
     request = AnalysisRequest(
         user_id="test_user",
-        workloads=[],
+        workloads=[{"query": "I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?"}],
         query="I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?"
     )
     db_session = MagicMock()
@@ -149,9 +148,9 @@ async def test_end_to_end_model_effectiveness_analysis():
     agent.pipeline.steps[1] = AsyncMock(return_value="Successfully enriched and clustered logs") # enrich_and_cluster
     agent.pipeline.steps[2] = AsyncMock(return_value="Successfully proposed optimal policies") # propose_optimal_policies
     agent.pipeline.steps[3] = AsyncMock(return_value="Successfully simulated policy") # simulate_policy
-    async def mock_generate_final_report(state):
+    async def mock_generate_final_report(state, tools, request):
         state.final_report = "This is the final report."
-        return "Final report generated."
+        return {"status": "success"}
     agent.pipeline.steps[4] = AsyncMock(side_effect=mock_generate_final_report) # generate_final_report
 
     # Act
@@ -166,7 +165,7 @@ async def test_end_to_end_kv_caching_audit():
     run_id = "test_run_id"
     request = AnalysisRequest(
         user_id="test_user",
-        workloads=[],
+        workloads=[{"query": "I want to audit all uses of KV caching in my system to find optimization opportunities."}],
         query="I want to audit all uses of KV caching in my system to find optimization opportunities."
     )
     db_session = MagicMock()
@@ -180,9 +179,9 @@ async def test_end_to_end_kv_caching_audit():
     agent.pipeline.steps[1] = AsyncMock(return_value="Successfully enriched and clustered logs") # enrich_and_cluster
     agent.pipeline.steps[2] = AsyncMock(return_value="Successfully proposed optimal policies") # propose_optimal_policies
     agent.pipeline.steps[3] = AsyncMock(return_value="Successfully simulated policy") # simulate_policy
-    async def mock_generate_final_report(state):
+    async def mock_generate_final_report(state, tools, request):
         state.final_report = "This is the final report."
-        return "Final report generated."
+        return {"status": "success"}
     agent.pipeline.steps[4] = AsyncMock(side_effect=mock_generate_final_report) # generate_final_report
 
     # Act
@@ -197,7 +196,7 @@ async def test_end_to_end_multi_objective_optimization():
     run_id = "test_run_id"
     request = AnalysisRequest(
         user_id="test_user",
-        workloads=[],
+        workloads=[{"query": "I need to reduce costs by 20% and improve latency by 2x. I'm also expecting a 30% increase in usage. What should I do?"}],
         query="I need to reduce costs by 20% and improve latency by 2x. I'm also expecting a 30% increase in usage. What should I do?"
     )
     db_session = MagicMock()
@@ -211,9 +210,9 @@ async def test_end_to_end_multi_objective_optimization():
     agent.pipeline.steps[1] = AsyncMock(return_value="Successfully enriched and clustered logs") # enrich_and_cluster
     agent.pipeline.steps[2] = AsyncMock(return_value="Successfully proposed optimal policies") # propose_optimal_policies
     agent.pipeline.steps[3] = AsyncMock(return_value="Successfully simulated policy") # simulate_policy
-    async def mock_generate_final_report(state):
+    async def mock_generate_final_report(state, tools, request):
         state.final_report = "This is the final report."
-        return "Final report generated."
+        return {"status": "success"}
     agent.pipeline.steps[4] = AsyncMock(side_effect=mock_generate_final_report) # generate_final_report
 
     # Act

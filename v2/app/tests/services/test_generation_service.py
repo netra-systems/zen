@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch, mock_open
 import os
 import json
 from app.services.generation_service import run_content_generation_job, run_log_generation_job, GENERATION_JOBS
+from app.config import settings
 
 # Mark all tests in this file as asynchronous
 pytestmark = pytest.mark.asyncio
@@ -40,7 +41,8 @@ async def test_run_content_generation_job_success(mock_genai, mock_pool, mock_cp
     }
 
     # Run the job
-    run_content_generation_job(job_id, params)
+    with patch.object(settings, 'corpus_generation_model', 'gemini-1.5-flash'):
+        run_content_generation_job(job_id, params)
 
     # Assert that the job was completed successfully
     assert GENERATION_JOBS[job_id]['status'] == 'completed'
@@ -61,7 +63,7 @@ async def test_run_content_generation_job_no_api_key(mock_getenv):
 
     # Assert that the job failed
     assert GENERATION_JOBS[job_id]['status'] == 'failed'
-    assert GENERATION_JOBS[job_id]['progress']['error'] == 'GEMINI_API_KEY not set'
+    assert GENERATION_JOBS[job_id]['error'] == 'GEMINI_API_KEY not set'
 
 @patch('app.services.generation_service.cpu_count')
 @patch('app.services.generation_service.Pool')
@@ -105,7 +107,8 @@ async def test_run_log_generation_job_success(mock_exists, mock_get_config, mock
     }
 
     # Run the job
-    run_log_generation_job(job_id, params)
+    with patch('app.services.generation_service.os.makedirs') as mock_makedirs:
+        run_log_generation_job(job_id, params)
 
     # Assert that the job was completed successfully
     assert GENERATION_JOBS[job_id]['status'] == 'completed'
@@ -129,4 +132,4 @@ async def test_run_log_generation_job_no_corpus(mock_exists):
 
     # Assert that the job failed
     assert GENERATION_JOBS[job_id]['status'] == 'failed'
-    assert 'Content corpus' in GENERATION_JOBS[job_id]['progress']['error']
+    assert 'Content corpus' in GENERATION_JOBS[job_id]['error']
