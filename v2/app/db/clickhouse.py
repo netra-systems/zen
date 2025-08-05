@@ -103,12 +103,17 @@ def get_clickhouse_client():
     Instantiates the client with settings and attempts to connect.
     This function will be called by FastAPI for routes that need a ClickHouse connection.
     """
+    if settings.app_env == "development":
+        config = settings.clickhouse_https_dev
+    else:
+        config = settings.clickhouse_https
+
     client = ClickHouseClient(
-        host=settings.clickhouse_https.host,
-        port=settings.clickhouse_https.port,
-        user=settings.clickhouse_https.user,
-        password=settings.clickhouse_https.password,
-        database=settings.clickhouse_https.database,
+        host=config.host,
+        port=config.port,
+        user=config.user,
+        password=config.password,
+        database=config.database,
     )
     client.connect()
     try:

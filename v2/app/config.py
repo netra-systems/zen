@@ -74,6 +74,13 @@ class ClickHouseHTTPSConfig(BaseModel):
     password: str = ""
     database: str = "default"
 
+class ClickHouseHTTPSDevConfig(BaseModel):
+    host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+    port: int = 8443
+    user: str = "development_user"
+    password: str = "00000000000aaAAAaaaaaa*****"
+    database: str = "development"
+
 class LangfuseConfig(BaseModel):
     secret_key: str = ""
     public_key: str = ""
@@ -87,6 +94,7 @@ class AppConfig(BaseModel):
     google_model: GoogleModelConfig = GoogleModelConfig()
     clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
     clickhouse_https: ClickHouseHTTPSConfig = ClickHouseHTTPSConfig()
+    clickhouse_https_dev: ClickHouseHTTPSDevConfig = ClickHouseHTTPSDevConfig()
     langfuse: LangfuseConfig = LangfuseConfig()
 
     secret_key: str = "default_secret_key"
