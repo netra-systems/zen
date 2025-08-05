@@ -64,14 +64,18 @@ class DeepAgentV3:
 
 
             # 2. Execute based on scenario
-            available_tools = [step for step in scenario["steps"] if step in self.tools]
+            steps = scenario["steps"]
 
-            while available_tools:
-                next_step = self.agent_core.decide_next_step(self.state, available_tools)
+            for step in steps:
+                tool_name = step
+                if tool_name not in self.tools:
+                    app_logger.warning(f"Tool '{tool_name}' not found in available tools. Skipping step.")
+                    continue
+
+                next_step = self.agent_core.decide_next_step(self.state, [tool_name])
                 if not next_step:
                     break
 
-                tool_name = next_step["tool_name"]
                 tool_input = next_step["tool_input"]
                 
                 app_logger.info(f"Executing tool: {tool_name} for run_id: {self.run_id}")
@@ -83,8 +87,6 @@ class DeepAgentV3:
 
                 self.state.messages.append({"role": "tool", "name": tool_name, "content": result})
                 await self._record_step_history(tool_name, tool_input, self.state.model_dump(), {"status": "success", "result": result})
-                
-                available_tools.remove(tool_name)
 
 
             self.status = "complete"
