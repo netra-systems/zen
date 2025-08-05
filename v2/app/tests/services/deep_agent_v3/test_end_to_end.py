@@ -1,4 +1,3 @@
-
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from app.services.deep_agent_v3.main import DeepAgentV3
@@ -27,33 +26,22 @@ async def test_end_to_end_cost_reduction_quality_preservation():
     db_session = MagicMock()
     llm_connector = MagicMock()
 
-    # Mock the pipeline and tools
-    pipeline = MagicMock()
-    pipeline.is_complete.side_effect = IsCompleteSideEffect()
-    pipeline.run_next_step = AsyncMock(return_value={"status": "success", "completed_step": "generate_final_report"})
-
-    tools = {
-        "log_fetcher": MagicMock(),
-        "log_pattern_identifier": MagicMock(),
-        "policy_proposer": MagicMock(),
-        "policy_simulator": MagicMock(),
-        "supply_catalog_search": MagicMock(),
-        "cost_estimator": MagicMock(),
-        "performance_predictor": MagicMock(),
-    }
-
     # Create the agent
     agent = DeepAgentV3(run_id, request, db_session, llm_connector)
-    agent.pipeline = pipeline
-    agent.tools = tools
-    agent.state = AgentState(messages=[])
+    
+    async def mock_run_next_step(state, tools, request):
+        state.final_report = "This is the final report."
+        return {"status": "success", "completed_step": "generate_final_report"}
+
+    agent.pipeline.run_next_step = AsyncMock(side_effect=mock_run_next_step)
+    agent.pipeline.is_complete = MagicMock(side_effect=IsCompleteSideEffect())
 
     # Act
     result = await agent.run_full_analysis()
 
     # Assert
     assert result is not None
-    pipeline.run_next_step.assert_called_once()
+    agent.pipeline.run_next_step.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_end_to_end_latency_reduction_cost_constraint():
@@ -67,33 +55,22 @@ async def test_end_to_end_latency_reduction_cost_constraint():
     db_session = MagicMock()
     llm_connector = MagicMock()
 
-    # Mock the pipeline and tools
-    pipeline = MagicMock()
-    pipeline.is_complete.side_effect = IsCompleteSideEffect()
-    pipeline.run_next_step = AsyncMock(return_value={"status": "success", "completed_step": "generate_final_report"})
-
-    tools = {
-        "log_fetcher": MagicMock(),
-        "log_pattern_identifier": MagicMock(),
-        "policy_proposer": MagicMock(),
-        "policy_simulator": MagicMock(),
-        "supply_catalog_search": MagicMock(),
-        "cost_estimator": MagicMock(),
-        "performance_predictor": MagicMock(),
-    }
-
     # Create the agent
     agent = DeepAgentV3(run_id, request, db_session, llm_connector)
-    agent.pipeline = pipeline
-    agent.tools = tools
-    agent.state = AgentState(messages=[])
+    
+    async def mock_run_next_step(state, tools, request):
+        state.final_report = "This is the final report."
+        return {"status": "success", "completed_step": "generate_final_report"}
+
+    agent.pipeline.run_next_step = AsyncMock(side_effect=mock_run_next_step)
+    agent.pipeline.is_complete = MagicMock(side_effect=IsCompleteSideEffect())
 
     # Act
     result = await agent.run_full_analysis()
 
     # Assert
     assert result is not None
-    pipeline.run_next_step.assert_called_once()
+    agent.pipeline.run_next_step.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_end_to_end_usage_increase_impact_analysis():
@@ -107,33 +84,22 @@ async def test_end_to_end_usage_increase_impact_analysis():
     db_session = MagicMock()
     llm_connector = MagicMock()
 
-    # Mock the pipeline and tools
-    pipeline = MagicMock()
-    pipeline.is_complete.side_effect = IsCompleteSideEffect()
-    pipeline.run_next_step = AsyncMock(return_value={"status": "success", "completed_step": "generate_final_report"})
-
-    tools = {
-        "log_fetcher": MagicMock(),
-        "log_pattern_identifier": MagicMock(),
-        "policy_proposer": MagicMock(),
-        "policy_simulator": MagicMock(),
-        "supply_catalog_search": MagicMock(),
-        "cost_estimator": MagicMock(),
-        "performance_predictor": MagicMock(),
-    }
-
     # Create the agent
     agent = DeepAgentV3(run_id, request, db_session, llm_connector)
-    agent.pipeline = pipeline
-    agent.tools = tools
-    agent.state = AgentState(messages=[])
+    
+    async def mock_run_next_step(state, tools, request):
+        state.final_report = "This is the final report."
+        return {"status": "success", "completed_step": "generate_final_report"}
+
+    agent.pipeline.run_next_step = AsyncMock(side_effect=mock_run_next_step)
+    agent.pipeline.is_complete = MagicMock(side_effect=IsCompleteSideEffect())
 
     # Act
     result = await agent.run_full_analysis()
 
     # Assert
     assert result is not None
-    pipeline.run_next_step.assert_called_once()
+    agent.pipeline.run_next_step.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_end_to_end_function_optimization():
@@ -147,33 +113,22 @@ async def test_end_to_end_function_optimization():
     db_session = MagicMock()
     llm_connector = MagicMock()
 
-    # Mock the pipeline and tools
-    pipeline = MagicMock()
-    pipeline.is_complete.side_effect = IsCompleteSideEffect()
-    pipeline.run_next_step = AsyncMock(return_value={"status": "success", "completed_step": "generate_final_report"})
-
-    tools = {
-        "log_fetcher": MagicMock(),
-        "log_pattern_identifier": MagicMock(),
-        "policy_proposer": MagicMock(),
-        "policy_simulator": MagicMock(),
-        "supply_catalog_search": MagicMock(),
-        "cost_estimator": MagicMock(),
-        "performance_predictor": MagicMock(),
-    }
-
     # Create the agent
     agent = DeepAgentV3(run_id, request, db_session, llm_connector)
-    agent.pipeline = pipeline
-    agent.tools = tools
-    agent.state = AgentState(messages=[])
+    
+    async def mock_run_next_step(state, tools, request):
+        state.final_report = "This is the final report."
+        return {"status": "success", "completed_step": "generate_final_report"}
+
+    agent.pipeline.run_next_step = AsyncMock(side_effect=mock_run_next_step)
+    agent.pipeline.is_complete = MagicMock(side_effect=IsCompleteSideEffect())
 
     # Act
     result = await agent.run_full_analysis()
 
     # Assert
     assert result is not None
-    pipeline.run_next_step.assert_called_once()
+    agent.pipeline.run_next_step.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_end_to_end_model_effectiveness_analysis():
@@ -187,33 +142,22 @@ async def test_end_to_end_model_effectiveness_analysis():
     db_session = MagicMock()
     llm_connector = MagicMock()
 
-    # Mock the pipeline and tools
-    pipeline = MagicMock()
-    pipeline.is_complete.side_effect = IsCompleteSideEffect()
-    pipeline.run_next_step = AsyncMock(return_value={"status": "success", "completed_step": "generate_final_report"})
-
-    tools = {
-        "log_fetcher": MagicMock(),
-        "log_pattern_identifier": MagicMock(),
-        "policy_proposer": MagicMock(),
-        "policy_simulator": MagicMock(),
-        "supply_catalog_search": MagicMock(),
-        "cost_estimator": MagicMock(),
-        "performance_predictor": MagicMock(),
-    }
-
     # Create the agent
     agent = DeepAgentV3(run_id, request, db_session, llm_connector)
-    agent.pipeline = pipeline
-    agent.tools = tools
-    agent.state = AgentState(messages=[])
+    
+    async def mock_run_next_step(state, tools, request):
+        state.final_report = "This is the final report."
+        return {"status": "success", "completed_step": "generate_final_report"}
+
+    agent.pipeline.run_next_step = AsyncMock(side_effect=mock_run_next_step)
+    agent.pipeline.is_complete = MagicMock(side_effect=IsCompleteSideEffect())
 
     # Act
     result = await agent.run_full_analysis()
 
     # Assert
     assert result is not None
-    pipeline.run_next_step.assert_called_once()
+    agent.pipeline.run_next_step.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_end_to_end_kv_caching_audit():
@@ -227,33 +171,22 @@ async def test_end_to_end_kv_caching_audit():
     db_session = MagicMock()
     llm_connector = MagicMock()
 
-    # Mock the pipeline and tools
-    pipeline = MagicMock()
-    pipeline.is_complete.side_effect = IsCompleteSideEffect()
-    pipeline.run_next_step = AsyncMock(return_value={"status": "success", "completed_step": "generate_final_report"})
-
-    tools = {
-        "log_fetcher": MagicMock(),
-        "log_pattern_identifier": MagicMock(),
-        "policy_proposer": MagicMock(),
-        "policy_simulator": MagicMock(),
-        "supply_catalog_search": MagicMock(),
-        "cost_estimator": MagicMock(),
-        "performance_predictor": MagicMock(),
-    }
-
     # Create the agent
     agent = DeepAgentV3(run_id, request, db_session, llm_connector)
-    agent.pipeline = pipeline
-    agent.tools = tools
-    agent.state = AgentState(messages=[])
+    
+    async def mock_run_next_step(state, tools, request):
+        state.final_report = "This is the final report."
+        return {"status": "success", "completed_step": "generate_final_report"}
+
+    agent.pipeline.run_next_step = AsyncMock(side_effect=mock_run_next_step)
+    agent.pipeline.is_complete = MagicMock(side_effect=IsCompleteSideEffect())
 
     # Act
     result = await agent.run_full_analysis()
 
     # Assert
     assert result is not None
-    pipeline.run_next_step.assert_called_once()
+    agent.pipeline.run_next_step.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_end_to_end_multi_objective_optimization():
@@ -267,30 +200,19 @@ async def test_end_to_end_multi_objective_optimization():
     db_session = MagicMock()
     llm_connector = MagicMock()
 
-    # Mock the pipeline and tools
-    pipeline = MagicMock()
-    pipeline.is_complete.side_effect = IsCompleteSideEffect()
-    pipeline.run_next_step = AsyncMock(return_value={"status": "success", "completed_step": "generate_final_report"})
-
-    tools = {
-        "log_fetcher": MagicMock(),
-        "log_pattern_identifier": MagicMock(),
-        "policy_proposer": MagicMock(),
-        "policy_simulator": MagicMock(),
-        "supply_catalog_search": MagicMock(),
-        "cost_estimator": MagicMock(),
-        "performance_predictor": MagicMock(),
-    }
-
     # Create the agent
     agent = DeepAgentV3(run_id, request, db_session, llm_connector)
-    agent.pipeline = pipeline
-    agent.tools = tools
-    agent.state = AgentState(messages=[])
+    
+    async def mock_run_next_step(state, tools, request):
+        state.final_report = "This is the final report."
+        return {"status": "success", "completed_step": "generate_final_report"}
+
+    agent.pipeline.run_next_step = AsyncMock(side_effect=mock_run_next_step)
+    agent.pipeline.is_complete = MagicMock(side_effect=IsCompleteSideEffect())
 
     # Act
     result = await agent.run_full_analysis()
 
     # Assert
     assert result is not None
-    pipeline.run_next_step.assert_called_once()
+    agent.pipeline.run_next_step.assert_called_once()
