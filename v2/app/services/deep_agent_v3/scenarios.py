@@ -1,6 +1,7 @@
 
 from typing import Dict, Any
 
+# TBD move to tests
 COST_REDUCTION_QUALITY_CONSTRAINT: Dict[str, Any] = {
     "name": "Cost Reduction with Quality Constraint",
     "description": "Reduces costs while maintaining a certain level of quality.",

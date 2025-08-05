@@ -30,7 +30,6 @@ async def run_agent_in_background(run_id: str, request: AnalysisRequest, llm_man
     async for event in supervisor_graph.astream(initial_state):
         AGENT_INSTANCES[run_id]["state"] = event
         
-    AGENT_INSTANCES[run_id]["status"] = "completed"
 
 @router.post("/agent/create", status_code=202)
 async def create_agent_run(request: AnalysisRequest, background_tasks: BackgroundTasks, llm_manager: LLMManager = LLMManagerDep) -> Dict[str, str]:
