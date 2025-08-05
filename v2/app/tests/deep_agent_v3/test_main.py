@@ -11,7 +11,10 @@ from app.services.deep_agent_v3.main import DeepAgentV3
 
 @pytest.fixture
 def mock_db_session():
-    return MagicMock()
+    session = MagicMock()
+    session.add = MagicMock()
+    session.commit = AsyncMock()
+    return session
 
 
 @pytest.fixture
