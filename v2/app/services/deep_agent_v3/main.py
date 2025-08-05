@@ -1,3 +1,4 @@
+
 import io
 from typing import Any, Dict
 from langfuse import Langfuse, observe
@@ -70,7 +71,11 @@ class DeepAgentV3:
         app_logger.info(f"Full analysis completed for run_id: {self.run_id}")
         if self.langfuse:
             self.langfuse.flush()
-        return self.state.final_report
+        
+        if self.pipeline.is_complete():
+            return self.state.final_report
+        else:
+            return None
 
     @observe()
     async def run_next_step(self, confirmation: bool = True):
