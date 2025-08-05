@@ -51,7 +51,7 @@ class DeepAgentV3:
             # 1. Triage
             self.state.current_step = "triage"
             scenario_finder = ScenarioFinder(self.llm_manager)
-            self.triage_result = scenario_finder.find_scenario(self.request.query)
+            self.triage_result = await scenario_finder.find_scenario(self.request.query)
             scenario = self.triage_result["scenario"]
             app_logger.info(f"Scenario selected for run_id {self.run_id}: "
                             f"Name='{scenario['name']}', "
@@ -130,9 +130,10 @@ class DeepAgentV3:
         
         if self.triage_result:
             report += "## Triage\n\n"
-            report += f"**Scenario:** {self.triage_result['scenario']['name']}\n"
-            report += f"**Confidence:** {self.triage_result['confidence']}\n"
-            report += f"**Justification:** {self.triage_result['justification']}\n\n"
+            triage_result = await self.triage_result
+            report += f"**Scenario:** {triage_result['scenario']['name']}\n"
+            report += f"**Confidence:** {triage_result['confidence']}\n"
+            report += f"**Justification:** {triage_result['justification']}\n\n"
 
         report += "## Steps\n\n"
 
