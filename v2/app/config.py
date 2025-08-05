@@ -137,6 +137,8 @@ class TestingConfig(AppConfig):
 def get_settings() -> AppConfig:
     """Returns the appropriate configuration class based on the APP_ENV."""
     app_env = os.environ.get("APP_ENV", "development").lower()
+    if os.environ.get("TESTING"):
+        app_env = "testing"
     print(f"|| Loading configuration for: {app_env} ||")
     config_map = {
         "production": ProductionConfig,
