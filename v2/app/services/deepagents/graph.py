@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
 from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_core.runnables import Runnable
 from langgraph.graph import END, StateGraph
-from langgraph.prebuilt import ToolNode
+from langgraph.prebuilt import ToolExecutor, ToolNode
 
 from app.llm.llm_manager import LLMManager
 
@@ -25,9 +25,11 @@ class SingleAgentTeam:
         return self.agent.get_runnable(llm)
 
     def create_graph(self):
+        tool_executor = ToolExecutor(self.tool_dispatcher.tools)
+
         graph = StateGraph(DeepAgentState)
         graph.add_node("agent", self._get_agent_runnable())
-        graph.add_node("call_tool", ToolNode(self.tool_dispatcher.tools))
+        graph.add_node("call_tool", ToolNode(tool_executor))
 
         graph.add_edge("agent", "call_tool")
 
