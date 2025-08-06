@@ -21,7 +21,7 @@ class CostEstimator(BaseTool):
         Return only the estimated cost as a float.
         """
         
-        llm = self.get_llm()
+        llm = context.llm_manager.get_llm(self.llm_name or "default")
         response = await llm.ainvoke(estimation_prompt)
         
         try:

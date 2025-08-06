@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, Any
 from abc import ABC, abstractmethod
-from app.llm.llm_manager import LLMManager
 from app.services.context import ToolContext
 
 class ToolMetadata(BaseModel):
@@ -13,14 +12,6 @@ class ToolMetadata(BaseModel):
 class BaseTool(ABC):
     metadata: ToolMetadata
     llm_name: Optional[str] = None
-
-    def __init__(self, context: ToolContext):
-        self.context = context
-
-    def get_llm(self):
-        if not self.context.llm_manager:
-            return None
-        return self.context.llm_manager.get_llm(self.llm_name or "default")
 
     def get_metadata(self) -> dict:
         return self.metadata.dict()
