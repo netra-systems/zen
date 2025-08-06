@@ -43,7 +43,7 @@ META_PROMPTS = {
 
 # --- 3. Generation Logic ---
 
-def generate_content_sample(workload_type: str, llm, generation_params: dict) -> dict:
+def generate_content_sample(workload_type: str, model, generation_config) -> dict:
     """Generates a single, schema-guaranteed sample for a given workload type using the LLM."""
     instruction, schema = META_PROMPTS[workload_type]
     
@@ -55,7 +55,7 @@ def generate_content_sample(workload_type: str, llm, generation_params: dict) ->
     
     try:
         # Use the schema as a "tool" to enforce structured output
-        response = llm.client.generate_content(prompt, generation_config=generation_params, tools=[schema])
+        response = model.generate_content(prompt, generation_config=generation_config, tools=[schema])
         
         # Extract the structured data from the tool call
         tool_call = response.candidates[0].content.parts[0].function_call

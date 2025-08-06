@@ -97,7 +97,7 @@ class LangfuseConfig(BaseModel):
 class AppConfig(BaseModel):
     """Base configuration class."""
 
-    app_env: str = "development"
+    environment: str = "development"
     google_cloud: GoogleCloudConfig = GoogleCloudConfig()
     clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
     clickhouse_https: ClickHouseHTTPSConfig = ClickHouseHTTPSConfig()
@@ -134,7 +134,7 @@ class AppConfig(BaseModel):
     }
 
     def load_secrets(self):
-        if not (self.google_cloud.project_id and self.app_env != "testing"):
+        if not (self.google_cloud.project_id and self.environment != "testing"):
             return
 
         if self.log_secrets:
@@ -194,21 +194,21 @@ class ProductionConfig(AppConfig):
 
 class TestingConfig(AppConfig):
     """Testing-specific settings."""
-    app_env: str = "testing"
+    environment: str = "testing"
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"
 
 def get_settings() -> AppConfig:
-    """Returns the appropriate configuration class based on the APP_ENV."""
-    app_env = os.environ.get("APP_ENV", "development").lower()
+    """Returns the appropriate configuration class based on the environment."""
+    environment = os.environ.get("environment", "development").lower()
     if os.environ.get("TESTING"):
-        app_env = "testing"
-    print(f"|| Loading configuration for: {app_env} ||")
+        environment = "testing"
+    print(f"|| Loading configuration for: {environment} ||")
     config_map = {
         "production": ProductionConfig,
         "testing": TestingConfig,
         "development": DevelopmentConfig
     }
-    config = config_map.get(app_env, DevelopmentConfig)()
+    config = config_map.get(environment, DevelopmentConfig)()
     config.load_secrets()
     return config
 

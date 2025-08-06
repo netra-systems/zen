@@ -15,7 +15,7 @@ from app.main import app
 @pytest.fixture(scope="module", autouse=True)
 def mock_settings():
     with patch.dict('os.environ', {
-        'APP_ENV': 'testing',
+        'environment': 'testing',
         'SECRET_KEY': 'a_very_secret_key_that_is_32_bytes',
         'POSTGRES_USER': 'testuser',
         'POSTGRES_PASSWORD': 'testpassword',

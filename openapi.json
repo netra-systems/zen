@@ -787,7 +787,7 @@
       },
       "AppConfig": {
         "properties": {
-          "app_env": {
+          "environment": {
             "type": "string",
             "title": "App Env",
             "default": "development"

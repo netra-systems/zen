@@ -11,7 +11,7 @@ async def get_clickhouse_client():
     """
     client = None
     try:
-        if settings.app_env == "development":
+        if settings.environment == "development":
             config = settings.clickhouse_https_dev
         else:
             config = settings.clickhouse_https

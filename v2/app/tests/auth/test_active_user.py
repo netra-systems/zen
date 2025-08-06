@@ -11,7 +11,7 @@ from app.config import settings
 @pytest.mark.asyncio
 async def test_active_user_success(mocker):
     # Arrange
-    settings.app_env = "production"
+    settings.environment = "production"
     email = "test@example.com"
     session = AsyncMock()
     security_service = AsyncMock()
@@ -34,7 +34,7 @@ async def test_active_user_success(mocker):
 @pytest.mark.asyncio
 async def test_active_user_invalid_token(mocker):
     # Arrange
-    settings.app_env = "production"
+    settings.environment = "production"
     db_session_factory = mocker.AsyncMock()
     security_service = AsyncMock()
     security_service.get_user_email_from_token.return_value = None
@@ -52,7 +52,7 @@ async def test_active_user_invalid_token(mocker):
 @pytest.mark.asyncio
 async def test_active_user_no_user(mocker):
     # Arrange
-    settings.app_env = "production"
+    settings.environment = "production"
     email = "test@example.com"
     session = AsyncMock()
     security_service = AsyncMock()

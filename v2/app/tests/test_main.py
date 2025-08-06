@@ -8,7 +8,7 @@ from cryptography.fernet import Fernet
 @pytest.fixture(scope="module", autouse=True)
 def mock_settings():
     with patch.dict('os.environ', {
-        'APP_ENV': 'testing',
+        'environment': 'testing',
         'SECRET_KEY': 'test_secret',
         'POSTGRES_USER': 'testuser',
         'POSTGRES_PASSWORD': 'testpassword',

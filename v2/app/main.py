@@ -115,7 +115,7 @@ app.include_router(agent.router, prefix="/agent", tags=["agent"])
 app.include_router(references.router, prefix="/api/v3", tags=["references"])
 app.include_router(health.router, prefix="/health", tags=["health"])
 
-if settings.app_env == "development":
+if settings.environment == "development":
     from app.routes import dev_websocket
     app.include_router(dev_websocket.router, prefix="/ws/dev", tags=["dev_websocket"])
 

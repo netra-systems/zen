@@ -15,7 +15,7 @@ class ActiveUser:
         self.security_service = security_service
 
     async def __call__(self, request: Request) -> models_postgres.User:
-        if settings.app_env == "development":
+        if settings.environment == "development":
             return models_postgres.User(email=settings.dev_user_email, hashed_password="dev")
 
         token = request.headers.get("Authorization")

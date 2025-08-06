@@ -240,7 +240,7 @@ def main(args):
 
     # Get ClickHouse config for worker processes
     from app.config import settings
-    if settings.app_env == "development":
+    if settings.environment == "development":
         clickhouse_config = settings.clickhouse_https_dev.dict()
     else:
         clickhouse_config = settings.clickhouse_https.dict()

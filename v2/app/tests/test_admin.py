@@ -46,7 +46,7 @@ def regular_user_client():
 def test_get_app_settings_as_superuser(superuser_client):
     response = superuser_client.get("/api/v3/settings")
     assert response.status_code == 200
-    assert response.json()["app_env"] == "development"
+    assert response.json()["environment"] == "development"
 
 def test_get_app_settings_as_regular_user(regular_user_client):
     response = regular_user_client.get("/api/v3/settings")
