@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { apiService, AgentRun, AgentEvent } from '../api';
+import { apiService } from '../api';
 import React from 'react';
 
 interface Message {
@@ -7,20 +7,24 @@ interface Message {
     content: React.ReactNode;
 }
 
+const MAX_RETRIES = 5;
+const INITIAL_RETRY_DELAY = 1000; // 1 second
+
 export const useAgentStreaming = (token: string | null) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [artifacts, setArtifacts] = useState<any[]>([]);
     const ws = useRef<WebSocket | null>(null);
+    const retryCount = useRef(0);
 
     const addMessage = (role: 'user' | 'agent', content: React.ReactNode) => {
         setMessages(prev => [...prev, { role, content }]);
     };
 
-    const connect = (clientId: string) => {
-        if (ws.current) {
-            ws.current.close();
+    const connect = useCallback((clientId: string) => {
+        if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+            return;
         }
 
         const wsUrl = `ws://localhost:8000/ws/${clientId}`;
@@ -29,6 +33,7 @@ export const useAgentStreaming = (token: string | null) => {
         ws.current.onopen = () => {
             console.log('WebSocket connected');
             setIsLoading(true);
+            retryCount.current = 0; // Reset retry count on successful connection
         };
 
         ws.current.onmessage = (event) => {
@@ -41,8 +46,8 @@ export const useAgentStreaming = (token: string | null) => {
             }
         };
 
-        ws.current.onerror = (error) => {
-            console.error('WebSocket error:', error);
+        ws.current.onerror = (event) => {
+            console.error('WebSocket error:', event);
             setError(new Error('WebSocket connection failed.'));
             setIsLoading(false);
         };
@@ -50,12 +55,25 @@ export const useAgentStreaming = (token: string | null) => {
         ws.current.onclose = () => {
             console.log('WebSocket disconnected');
             setIsLoading(false);
-        };
-    };
 
-    const startAgent = async (query: string) => {
+            if (retryCount.current < MAX_RETRIES) {
+                const delay = INITIAL_RETRY_DELAY * Math.pow(2, retryCount.current);
+                console.log(`Attempting to reconnect in ${delay / 1000} seconds...`);
+                setTimeout(() => {
+                    retryCount.current++;
+                    connect(clientId);
+                }, delay);
+            } else {
+                setError(new Error('Could not reconnect to the WebSocket after multiple attempts.'));
+            }
+        };
+    }, []);
+
+    const startAgent = useCallback(async (query: string) => {
         setIsLoading(true);
         setError(null);
+        setArtifacts([]);
+        setMessages([]);
 
         const clientId = `client-${Date.now()}`;
         connect(clientId);
@@ -94,7 +112,15 @@ export const useAgentStreaming = (token: string | null) => {
             addMessage('agent', `Error starting analysis.`);
             setIsLoading(false);
         }
-    };
+    }, [token, connect]);
+
+    useEffect(() => {
+        return () => {
+            if (ws.current) {
+                ws.current.close();
+            }
+        };
+    }, []);
 
     return { isLoading, error, messages, artifacts, addMessage, startAgent, setIsLoading, setError };
 };
