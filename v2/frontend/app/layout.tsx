@@ -1,21 +1,59 @@
 'use client';
 
-import { useState } from 'react';
-import type { Metadata } from 'next';
+import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
+import useAppStore from '@/store';
+import { getToken } from '@/lib/user';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
+  const { user, fetchUser, isLoading } = useAppStore();
+
+  useEffect(() => {
+    const token = getToken();
+    if (token && !user) {
+      fetchUser(token);
+    } else if (!token && pathname !== '/login') {
+      router.push('/login');
+    }
+  }, [user, fetchUser, router, pathname]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
+  if (isLoading && !user) {
+    return (
+      <html lang="en" suppressHydrationWarning>
+        <body className={cn('min-h-screen bg-background font-sans antialiased', inter.className)}>
+          <div>Loading...</div>
+        </body>
+      </html>
+    );
+  }
+
+  if (!user && pathname !== '/login') {
+    return null; 
+  }
+
+  if (pathname === '/login') {
+    return (
+      <html lang="en" suppressHydrationWarning>
+        <body className={cn('min-h-screen bg-background font-sans antialiased', inter.className)}>
+          {children}
+        </body>
+      </html>
+    );
+  }
 
   return (
     <html lang="en" suppressHydrationWarning>
