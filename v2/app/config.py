@@ -189,6 +189,7 @@ class DevelopmentConfig(AppConfig):
 
 class ProductionConfig(AppConfig):
     """Production-specific settings."""
+    environment: str = "production"
     debug: bool = False
     log_level: str = "INFO"
 
