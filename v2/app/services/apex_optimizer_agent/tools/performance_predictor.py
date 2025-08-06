@@ -12,7 +12,7 @@ class PerformancePredictor(BaseTool):
         status="in_review"
     )
 
-    async def run(self, prompt: str, context: ToolContext) -> Dict[str, Any]:
+    async def run(self, context: ToolContext, prompt: str) -> Dict[str, Any]:
         """Predicts the performance of a given prompt using the llm_connector."""
         prediction_prompt = f"""
         Given the following prompt, predict the latency in milliseconds.
@@ -22,7 +22,7 @@ class PerformancePredictor(BaseTool):
         Return only the predicted latency as an integer.
         """
         
-        llm = self.get_llm()
+        llm = context.llm_manager.get_llm(self.llm_name or "default")
         response = await llm.ainvoke(prediction_prompt)
         
         try:

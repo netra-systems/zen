@@ -9,8 +9,10 @@ from app.services.apex_optimizer_agent.tool_builder import ToolBuilder
 from app.services.deepagents.tool_dispatcher import ToolDispatcher
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.apex_optimizer_agent.models import ToolInvocation, ToolStatus
+from app.services.supply_catalog_service import SupplyCatalogService
+from app.services.deepagents.state import DeepAgentState
 
-from app.services.apex_optimizer_agent.tools.context import ToolContext
+from app.services.context import ToolContext
 
 class NetraOptimizerAgentSupervisor:
     def __init__(self, db_session: AsyncSession, llm_manager: LLMManager):
@@ -18,7 +20,9 @@ class NetraOptimizerAgentSupervisor:
         self.llm_manager = llm_manager
         self.agent_states: Dict[str, Dict[str, Any]] = {}
 
-        context = ToolContext(logs=[], db_session=self.db_session, llm_manager=self.llm_manager, cost_estimator=None)
+        state = DeepAgentState()
+        supply_catalog = SupplyCatalogService()
+        context = ToolContext(logs=[], db_session=self.db_session, llm_manager=self.llm_manager, cost_estimator=None, state=state, supply_catalog=supply_catalog)
         all_tools, _ = ToolBuilder.build_all(context)
         agent_def = self._get_agent_definition(self.llm_manager, list(all_tools.values()))
         tool_dispatcher = ToolDispatcher(tools=list(all_tools.values()))

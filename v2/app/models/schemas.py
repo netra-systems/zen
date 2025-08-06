@@ -215,3 +215,6 @@ class CanaryHealthCheckResult(BaseModel):
     current_value: float
     threshold: float
     message: str
+
+class Log(BaseModel):
+    request: dict = Field(..., description="The request data for the log.")

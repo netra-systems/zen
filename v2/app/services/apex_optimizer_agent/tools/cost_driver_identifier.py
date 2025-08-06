@@ -1,10 +1,6 @@
 from langchain_core.tools import tool
 from typing import List, Any
-from pydantic import BaseModel, Field
 from app.services.context import ToolContext
-
-class Log(BaseModel):
-    request: dict = Field(..., description="The request data for the log.")
 
 @tool
 async def cost_driver_identifier(context: ToolContext) -> str:

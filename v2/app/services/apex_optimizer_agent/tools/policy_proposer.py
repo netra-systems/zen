@@ -17,12 +17,12 @@ class PolicyProposer(BaseTool):
     )
 
     async def run(
-        self, patterns: List[DiscoveredPattern], span_map: Dict[str, UnifiedLogEntry], context: ToolContext
+        self, context: ToolContext, patterns: List[DiscoveredPattern], span_map: Dict[str, UnifiedLogEntry]
     ) -> Tuple[List[LearnedPolicy], List[PredictedOutcome]]:
         """Finds the best routing policies through simulation."""
         policies = []
         outcomes = []
-        all_options = await self._get_supply_catalog()
+        all_options = await self._get_supply_catalog(context)
 
         for pattern in patterns:
             member_spans = [span_map[sid] for sid in pattern.member_span_ids if sid in span_map]
@@ -32,7 +32,7 @@ class PolicyProposer(BaseTool):
             representative_span = member_spans[0]
             user_goal = representative_span.request.user_goal
 
-            sim_tasks = [self._simulate_policy_outcome(pattern, supply, user_goal, representative_span) for supply in all_options]
+            sim_tasks = [self._simulate_policy_outcome(context, pattern, supply, user_goal, representative_span) for supply in all_options]
             policy_outcomes = [o for o in await asyncio.gather(*sim_tasks) if o]
 
             if not policy_outcomes:
@@ -44,7 +44,7 @@ class PolicyProposer(BaseTool):
             baseline_metrics = {
                 "avg_cost_usd": sum(s.finops.total_cost_usd for s in member_spans) / len(member_spans),
                 "avg_latency_ms": sum(s.performance.latency_ms.total_e2e_ms for s in member_spans) / len(member_spans),
-                "avg_quality_score": sum(s.quality.score for s in member_spans) / len(member_spans) if all(s.quality for s in member_spans) else 0.8,
+                "avg_quality_score": sum(s.quality.score for s in member_spans) if all(s.quality for s in member_spans) else 0.8,
             }
 
             pattern_spend = sum(s.finops.total_cost_usd for s in member_spans)
@@ -61,7 +61,7 @@ class PolicyProposer(BaseTool):
             ))
         return policies, outcomes
 
-    async def _simulate_policy_outcome(self, pattern: DiscoveredPattern, supply_option: SupplyOption, user_goal: str, span: UnifiedLogEntry) -> PredictedOutcome:
+    async def _simulate_policy_outcome(self, context: ToolContext, pattern: DiscoveredPattern, supply_option: SupplyOption, user_goal: str, span: UnifiedLogEntry) -> PredictedOutcome:
         prompt = f"""
         Simulate the outcome of routing a request with the following characteristics to the given supply option.
 
@@ -85,7 +85,7 @@ class PolicyProposer(BaseTool):
 
         Return the result as a JSON object.
         """
-        llm = self.get_llm()
+        llm = context.llm_manager.get_llm(self.llm_name or "default")
         response = await llm.ainvoke(prompt)
         try:
             return PredictedOutcome.model_validate_json(response.content)
@@ -93,7 +93,7 @@ class PolicyProposer(BaseTool):
             # Handle parsing errors
             return None
 
-    async def _get_supply_catalog(self) -> List[SupplyOption]:
+    async def _get_supply_catalog(self, context: ToolContext) -> List[SupplyOption]:
         """Retrieves the supply catalog from the database."""
-        result = await self.db_session.execute(select(SupplyOption))
+        result = await context.db_session.execute(select(SupplyOption))
         return result.scalars().all()

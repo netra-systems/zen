@@ -1,13 +1,9 @@
 from langchain_core.tools import tool
 from typing import List, Any
-from pydantic import BaseModel, Field
 from app.services.context import ToolContext
 
-class Log(BaseModel):
-    request: dict = Field(..., description="The request data for the log.")
-
 @tool
-async def function_performance_analyzer(context: ToolContext, function_name: str) -> str:
+async def function_performance_analyzer(context: ToolContext) -> str:
     """Analyzes the performance of a specific function."""
     total_latency = 0
     function_logs = [log for log in context.logs if function_name in log.request.prompt_text]

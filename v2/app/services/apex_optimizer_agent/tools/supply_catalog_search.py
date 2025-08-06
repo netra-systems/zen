@@ -15,13 +15,9 @@ class SupplyCatalogSearch(BaseTool):
         status="in_review"
     )
 
-    def __init__(self, context: ToolContext):
-        super().__init__(context=context)
-        self.supply_catalog_service = SupplyCatalogService()
-
-    async def run(self, query: str) -> List[SupplyOption]:
+    async def run(self, context: ToolContext, query: str) -> List[SupplyOption]:
         """
         Searches the supply catalog for available models and resources.
         """
-        all_options = self.supply_catalog_service.get_all_options(self.db_session)
+        all_options = context.supply_catalog.get_all_options(context.db_session)
         return [option for option in all_options if query in option.name]
