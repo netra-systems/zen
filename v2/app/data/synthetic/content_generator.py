@@ -14,22 +14,7 @@ from dotenv import load_dotenv
 
 from app.llm.llm_manager import LLMManager, LLMConfig
 
-
 console = Console()
-
-# --- Gemini Integration ---
-try:
-    import google.generativeai as genai
-    from google.generativeai.types import GenerationConfig
-    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-    if GEMINI_API_KEY:
-        genai.configure(api_key=GEMINI_API_KEY)
-    else:
-        console.print("[red]GEMINI_API_KEY environment variable not set.[/red]")
-        genai = None
-except ImportError:
-    console.print("[red]google.generativeai not installed. Please run `pip install google-generativeai`[/red]")
-    genai = None
 
 # --- 1. Structured Output Schemas (Pydantic) ---
 
@@ -58,11 +43,8 @@ META_PROMPTS = {
 
 # --- 3. Generation Logic ---
 
-def generate_content_sample(workload_type: str, model, generation_config) -> dict:
+def generate_content_sample(workload_type: str, llm, generation_params: dict) -> dict:
     """Generates a single, schema-guaranteed sample for a given workload type using the LLM."""
-    if not genai:
-        return None
-
     instruction, schema = META_PROMPTS[workload_type]
     
     prompt = f"""
@@ -73,7 +55,7 @@ def generate_content_sample(workload_type: str, model, generation_config) -> dic
     
     try:
         # Use the schema as a "tool" to enforce structured output
-        response = model.generate_content(prompt, generation_config=generation_config, tools=[schema])
+        response = llm.client.generate_content(prompt, generation_config=generation_params, tools=[schema])
         
         # Extract the structured data from the tool call
         tool_call = response.candidates[0].content.parts[0].function_call
@@ -84,7 +66,6 @@ def generate_content_sample(workload_type: str, model, generation_config) -> dic
             return None
 
         if workload_type == 'multi_turn_tool_use':
-            # Convert the list of dicts back to a list of tuples for the corpus
             convo_tuples = [(turn['user_prompt'], turn.get('assistant_response', '')) for turn in args.get('conversation', [])]
             if not convo_tuples:
                 return None
@@ -96,16 +77,14 @@ def generate_content_sample(workload_type: str, model, generation_config) -> dic
             return {"type": workload_type, "data": (user_prompt, args.get('assistant_response', '')) }
             
     except (ValueError, IndexError, AttributeError, KeyError) as e:
-        # This might happen if the model fails to call the tool correctly, though it's less likely with this method.
-        # console.print(f"[yellow]Warning: Failed to generate content for '{workload_type}': {e}[/yellow]")
         return None
 
-def generate_for_type(task_args, model, generation_config):
+def generate_for_type(task_args, llm, generation_params):
     """Worker function to generate multiple samples for a single workload type."""
     workload_type, num_samples = task_args
     samples = []
     for _ in range(num_samples):
-        sample = generate_content_sample(workload_type, model, generation_config)
+        sample = generate_content_sample(workload_type, llm, generation_params)
         if sample:
             samples.append(sample)
     return [s for s in samples if s]
@@ -129,9 +108,6 @@ def main(args):
         "top_k": args.top_k
     }
 
-    model = genai.GenerativeModel(settings.corpus_generation_model)
-    generation_config = GenerationConfig(**generation_params)
-
     console.print(f"Generation Config: [yellow]temp={args.temperature}, top_p={args.top_p}, top_k={args.top_k}[/yellow]")
 
     workload_types = list(META_PROMPTS.keys())
@@ -142,7 +118,7 @@ def main(args):
 
     corpus = {key: [] for key in workload_types}
 
-    worker_func = partial(generate_for_type, model=model, generation_config=generation_config)
+    worker_func = partial(generate_for_type, llm=llm, generation_params=generation_params)
     tasks_for_pool = [(w_type, num_samples_per_type) for w_type in workload_types]
 
     with Pool(processes=num_processes) as pool:
