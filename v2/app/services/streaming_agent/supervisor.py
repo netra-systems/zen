@@ -47,9 +47,8 @@ class StreamingAgentSupervisor:
             tools=tools
         )
 
-    async def start_agent(self, request: AnalysisRequest, client_id: str) -> Dict[str, Any]:
+    async def start_agent(self, request: AnalysisRequest, run_id: str) -> Dict[str, Any]:
         self._initialize_graph()
-        run_id = request.request.id
         initial_state = {
             "messages": [HumanMessage(content=request.request.query)],
             "workloads": request.request.workloads,
@@ -61,17 +60,21 @@ class StreamingAgentSupervisor:
         self.agent_states[run_id] = initial_state
 
         # Start the agent asynchronously
-        asyncio.create_task(self.run_agent(run_id, client_id))
+        asyncio.create_task(self.run_agent(run_id))
         
         # Immediately return a response to the user
         return {"status": "agent_started", "run_id": run_id}
 
-    async def run_agent(self, run_id: str, client_id: str):
+    async def run_agent(self, run_id: str):
         state = self.agent_states[run_id]
         async for event in self.graph.astream_events(state, {"recursion_limit": 20}):
             state["events"].append(event)
             # Send updates over WebSocket
-            await self.websocket_manager.broadcast(f"Client #{client_id} | RUN #{run_id} | event: {event}")
+            await self.websocket_manager.send_to_run(f"RUN #{run_id} | event: {event}", run_id)
 
         state["status"] = "complete"
-        await self.websocket_manager.broadcast(f"Client #{client_id} | RUN #{run_id} | status: complete")
+        await self.websocket_manager.send_to_run(f"RUN #{run_id} | status: complete", run_id)
+
+
+    async def get_agent_state(self, run_id: str) -> Dict[str, Any]:
+        return self.agent_states.get(run_id, {"status": "not_found"})

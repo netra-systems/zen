@@ -1,34 +1,18 @@
 import json
 from fastapi import APIRouter, Depends, WebSocket, Request, HTTPException
 from app.services.agent_service import AgentService
-from app.services.streaming_agent.supervisor import StreamingAgentSupervisor
-from app.db.models_clickhouse import AnalysisRequest
-from app.auth_dependencies import ActiveUserDep, ActiveUserWsDep
+from app.auth_dependencies import ActiveUserWsDep
+from app.websocket import manager
 
 router = APIRouter()
 
 def get_agent_service(request: Request) -> AgentService:
     return request.app.state.agent_service
 
-@router.post("/start_agent/{client_id}")
-async def start_agent(
-    analysis_request: AnalysisRequest,
-    client_id: str,
-    current_user: ActiveUserDep,
-    agent_service: AgentService = Depends(get_agent_service),
-):
-    """
-    Starts the agent.
-    """
-    try:
-        return await agent_service.start_agent(analysis_request, client_id)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 @router.websocket("/{run_id}")
 async def websocket_endpoint(websocket: WebSocket, run_id: str, current_user: ActiveUserWsDep):
     agent_service: AgentService = websocket.app.state.agent_service
-    await websocket.accept()
+    await manager.connect(websocket, run_id)
     try:
         # Handshake
         handshake_message = await websocket.receive_text()
@@ -46,3 +30,5 @@ async def websocket_endpoint(websocket: WebSocket, run_id: str, current_user: Ac
 
     except Exception as e:
         await websocket.close(code=1011, reason=str(e))
+    finally:
+        manager.disconnect(run_id)

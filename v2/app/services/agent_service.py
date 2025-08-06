@@ -7,20 +7,22 @@ class AgentService:
     def __init__(self, supervisor: StreamingAgentSupervisor):
         self.supervisor = supervisor
 
-    async def start_agent(self, analysis_request: AnalysisRequest, client_id: str):
+    async def start_agent(self, analysis_request: AnalysisRequest, run_id: str):
         """
         Starts the agent and returns the result.
         """
-        return await self.supervisor.start_agent(analysis_request, client_id)
+        return await self.supervisor.start_agent(analysis_request, run_id)
 
     async def handle_websocket_message(self, run_id: str, data: str):
         """
         Handles a message from the WebSocket.
         """
         message_data = json.loads(data)
-        # This is where you would handle the message and interact with the agent
-        # For now, we'll just print the message
-        print(f"Received message for run_id: {run_id}: {message_data}")
+        if message_data.get("action") == "start_agent":
+            analysis_request = AnalysisRequest(**message_data.get("payload"))
+            await self.start_agent(analysis_request, run_id)
+        else:
+            print(f"Received unhandled message for run_id: {run_id}: {message_data}")
 
     async def handle_websocket(self, websocket: WebSocket, run_id: str):
         """

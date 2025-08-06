@@ -6,12 +6,15 @@ export function useAgent() {
   const { addMessage, processStream, setShowThinking, ...rest } = useAgentStreaming();
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const runIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const connect = async () => {
       const token = await getToken();
       if (token) {
-        const ws = new WebSocket(`ws://localhost:8000/agent/run_id?token=${token}`);
+        const runId = `run_${Date.now()}`;
+        runIdRef.current = runId;
+        const ws = new WebSocket(`ws://localhost:8000/agent/${runId}?token=${token}`);
         ws.onopen = () => {
           console.log('WebSocket connected');
           setIsConnected(true);
@@ -50,7 +53,14 @@ export function useAgent() {
     if (socket && isConnected) {
       setShowThinking(true);
       try {
-        socket.send(JSON.stringify({ input: message }));
+        const analysisRequest = {
+          request: {
+            id: runIdRef.current,
+            query: message,
+            workloads: [],
+          },
+        };
+        socket.send(JSON.stringify({ action: 'start_agent', payload: analysisRequest }));
       } catch (error) {
         console.error('Error sending message:', error);
       } finally {

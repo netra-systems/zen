@@ -1,36 +1,36 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
-from typing import List
+from typing import Dict
 from app.auth_dependencies import ActiveUserWsDep
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: Dict[str, WebSocket] = {}
 
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket, run_id: str):
         await websocket.accept()
-        self.active_connections.append(websocket)
+        self.active_connections[run_id] = websocket
 
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
+    def disconnect(self, run_id: str):
+        if run_id in self.active_connections:
+            del self.active_connections[run_id]
 
-    async def send_personal_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
+    async def send_to_run(self, message: str, run_id: str):
+        if run_id in self.active_connections:
+            await self.active_connections[run_id].send_text(message)
 
     async def broadcast(self, message: str):
-        for connection in self.active_connections:
+        for connection in self.active_connections.values():
             await connection.send_text(message)
 
 manager = ConnectionManager()
 router = APIRouter()
 
-@router.websocket("/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: str, user: ActiveUserWsDep):
-    await manager.connect(websocket)
+@router.websocket("/{run_id}")
+async def websocket_endpoint(websocket: WebSocket, run_id: str, user: ActiveUserWsDep):
+    await manager.connect(websocket, run_id)
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.send_personal_message(f"You wrote: {data}", websocket)
-            await manager.broadcast(f"Client #{client_id} says: {data}")
+            await manager.send_to_run(f"Echo: {data}", run_id)
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
-        await manager.broadcast(f"Client #{client_id} left the chat")
+        manager.disconnect(run_id)
