@@ -23,7 +23,7 @@ class AgentService:
         message_data = json.loads(data)
         if message_data.get("action") == "start_agent":
             analysis_request = AnalysisRequest(**message_data.get("payload"))
-            await self.start_agent(analysis_request, run_id)
+            asyncio.create_task(self.start_agent(analysis_request, run_id))
         else:
             print(f"Received unhandled message for run_id: {run_id}: {message_data}")
 

@@ -1,77 +1,19 @@
-import os
 import json
-import time
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 class JobStore:
-    def __init__(self, store_dir: str = "app/data/generated/jobs"):
-        self.store_dir = store_dir
-        os.makedirs(self.store_dir, exist_ok=True)
+    def __init__(self):
+        self._jobs: Dict[str, Dict[str, Any]] = {}
 
-    def _get_job_path(self, job_id: str) -> str:
-        return os.path.join(self.store_dir, f"{job_id}.json")
+    async def set(self, job_id: str, data: Dict[str, Any]):
+        self._jobs[job_id] = data
 
-    def get(self, job_id: str) -> Optional[Dict[str, Any]]:
-        job_path = self._get_job_path(job_id)
-        if not os.path.exists(job_path):
-            return None
-        try:
-            with open(job_path, 'r') as f:
-                return json.load(f)
-        except (IOError, json.JSONDecodeError):
-            return None
+    async def get(self, job_id: str) -> Dict[str, Any]:
+        return self._jobs.get(job_id)
 
-    def update(self, job_id: str, status: str, **kwargs):
-        job_path = self._get_job_path(job_id)
-        try:
-            with open(job_path, 'r+') as f:
-                if os.name == 'nt':
-                    import msvcrt
-                    msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
-                else:
-                    import fcntl
-                    fcntl.flock(f, fcntl.LOCK_EX)
+    async def update(self, job_id: str, status: str, **kwargs):
+        if job_id in self._jobs:
+            self._jobs[job_id]["status"] = status
+            self._jobs[job_id].update(kwargs)
 
-                job_data = json.load(f) or {}
-                
-                job_data['job_id'] = job_id
-                job_data['status'] = status
-                job_data['last_updated'] = time.time()
-                job_data.update(kwargs)
-
-                f.seek(0)
-                json.dump(job_data, f, indent=4)
-                f.truncate()
-
-                if os.name == 'nt':
-                    msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
-                else:
-                    fcntl.flock(f, fcntl.LOCK_UN)
-        except (IOError, json.JSONDecodeError):
-            # Handle exceptions
-            pass
-
-    def set(self, job_id: str, job_data: Dict[str, Any]):
-        job_data['last_updated'] = time.time()
-        job_path = self._get_job_path(job_id)
-        try:
-            with open(job_path, 'w') as f:
-                if os.name == 'nt':
-                    import msvcrt
-                    msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
-                else:
-                    import fcntl
-                    fcntl.flock(f, fcntl.LOCK_EX)
-
-                json.dump(job_data, f, indent=4)
-
-                if os.name == 'nt':
-                    msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
-                else:
-                    fcntl.flock(f, fcntl.LOCK_UN)
-        except IOError:
-            # Handle exceptions
-            pass
-
-# Singleton instance
 job_store = JobStore()

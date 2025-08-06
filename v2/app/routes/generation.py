@@ -39,18 +39,18 @@ class ContentGenParams(BaseModel):
 
 
 @router.post("/content", status_code=status.HTTP_202_ACCEPTED, response_model=Dict[str, str])
-def create_content_corpus(params: ContentGenParams, background_tasks: BackgroundTasks):
+async def create_content_corpus(params: ContentGenParams, background_tasks: BackgroundTasks):
     """Starts a background job to generate a new content corpus."""
     job_id = str(uuid.uuid4())
-    job_store.set(job_id, {"status": "pending", "type": "content", "params": params.dict()})
+    await job_store.set(job_id, {"status": "pending", "type": "content", "params": params.dict()})
     background_tasks.add_task(run_content_generation_job, job_id, params.dict())
     return {"job_id": job_id, "message": "Content generation job started."}
 
 @router.post("/logs", status_code=status.HTTP_202_ACCEPTED, response_model=Dict[str, str])
-def create_synthetic_logs(params: LogGenParams, background_tasks: BackgroundTasks):
+async def create_synthetic_logs(params: LogGenParams, background_tasks: BackgroundTasks):
     """Starts a background job to generate a new set of synthetic logs."""
     job_id = str(uuid.uuid4())
-    job_store.set(job_id, {"status": "pending", "type": "logs", "params": params.dict()})
+    await job_store.set(job_id, {"status": "pending", "type": "logs", "params": params.dict()})
     background_tasks.add_task(run_log_generation_job, job_id, params.dict())
     return {"job_id": job_id, "message": "Synthetic log generation job started."}
 
@@ -72,35 +72,35 @@ class ContentCorpusGenParams(BaseModel):
 
 
 @router.post("/content_corpus", status_code=status.HTTP_202_ACCEPTED, response_model=Dict[str, str])
-def create_content_corpus(params: ContentCorpusGenParams, background_tasks: BackgroundTasks):
+async def create_content_corpus(params: ContentCorpusGenParams, background_tasks: BackgroundTasks):
     """Starts a background job to generate a new content corpus and store it in ClickHouse."""
     job_id = str(uuid.uuid4())
-    job_store.set(job_id, {"status": "pending", "type": "content_corpus_generation", "params": params.dict()})
+    await job_store.set(job_id, {"status": "pending", "type": "content_corpus_generation", "params": params.dict()})
     background_tasks.add_task(run_content_generation_job, job_id, params.dict())
     return {"job_id": job_id, "message": "Content corpus generation job started."}
 
 
 @router.post("/ingest_data", status_code=status.HTTP_202_ACCEPTED, response_model=Dict[str, str])
-def ingest_data(params: DataIngestionParams, background_tasks: BackgroundTasks):
+async def ingest_data(params: DataIngestionParams, background_tasks: BackgroundTasks):
     """Starts a background job to ingest data into ClickHouse."""
     job_id = str(uuid.uuid4())
-    job_store.set(job_id, {"status": "pending", "type": "data_ingestion", "params": params.dict()})
+    await job_store.set(job_id, {"status": "pending", "type": "data_ingestion", "params": params.dict()})
     background_tasks.add_task(run_data_ingestion_job, job_id, params.dict())
     return {"job_id": job_id, "message": "Data ingestion job started."}
 
 
 @router.post("/synthetic_data", status_code=status.HTTP_202_ACCEPTED, response_model=Dict[str, str])
-def create_synthetic_data(params: SyntheticDataGenParams, background_tasks: BackgroundTasks):
+async def create_synthetic_data(params: SyntheticDataGenParams, background_tasks: BackgroundTasks):
     """Starts a background job to generate new synthetic data."""
     job_id = str(uuid.uuid4())
-    job_store.set(job_id, {"status": "pending", "type": "synthetic_data", "params": params.dict()})
+    await job_store.set(job_id, {"status": "pending", "type": "synthetic_data", "params": params.dict()})
     background_tasks.add_task(run_synthetic_data_generation_job, job_id, params.dict())
     return {"job_id": job_id, "message": "Synthetic data generation job started."}
 
 @router.get("/jobs/{job_id}")
-def get_job_status(job_id: str):
+async def get_job_status(job_id: str):
     """Retrieves the status of a generation job."""
-    job = job_store.get(job_id)
+    job = await job_store.get(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found.")
     return job
@@ -144,12 +144,19 @@ async def list_clickhouse_tables() -> List[str]:
     logger.info("Attempting to list ClickHouse tables.")
     try:
         async with get_clickhouse_client() as client:
+            if client is None:
+                logger.error("Failed to get ClickHouse client.")
+                raise HTTPException(status_code=500, detail="Failed to get ClickHouse client.")
             logger.info("Successfully acquired ClickHouse client.")
-            result = await client.execute_query("SHOW TABLES")
+            result = await client.execute("SHOW TABLES")
             logger.info(f"Successfully executed 'SHOW TABLES' query. Result: {result}")
-            table_names = [row['name'] for row in result]
-            logger.info(f"Returning table names: {table_names}")
-            return table_names
+            if result:
+                table_names = [row[0] for row in result]
+                logger.info(f"Returning table names: {table_names}")
+                return table_names
+            else:
+                logger.info("No tables found in ClickHouse.")
+                return []
     except Exception as e:
         logger.error(f"Failed to fetch tables from ClickHouse: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to fetch tables from ClickHouse: {e}")

@@ -1,7 +1,8 @@
 import useAppStore from '@/store';
 
 export const getUserId = () => {
-    let userId = useAppStore.getState().user?.id;
+    const user = useAppStore.getState().user;
+    let userId = user ? user.id : null;
 
     if (!userId && process.env.NODE_ENV === 'development') {
         userId = 'dev-user'; // Dummy user ID for development

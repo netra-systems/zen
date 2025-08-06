@@ -1,8 +1,10 @@
+
 import { useAgentStreaming } from './useAgentStreaming';
-import { getToken } from '../lib/user';
+import { getToken, getUserId } from '../lib/user';
 import { useEffect, useRef, useState } from 'react';
 
 export function useAgent() {
+
   const { addMessage, processStream, setShowThinking, ...rest } = useAgentStreaming();
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -24,8 +26,10 @@ export function useAgent() {
           const message = JSON.parse(event.data);
           if (message.type === 'handshake' && message.message === 'Hello from server') {
             console.log('Handshake successful');
+          } else if (message.type === 'log') {
+            processStream(message.payload);
           } else {
-            processStream(event.data);
+            console.log('Received unhandled message:', message);
           }
         };
         ws.onclose = () => {
