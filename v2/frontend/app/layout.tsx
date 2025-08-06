@@ -22,8 +22,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     const token = getToken();
     if (token && !user) {
       fetchUser(token);
-    } else if (!token && pathname !== '/login') {
-      router.push('/login');
     }
   }, [user, fetchUser, router, pathname]);
 
