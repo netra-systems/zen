@@ -46,7 +46,6 @@ async def get_corpus_from_clickhouse(table_name: str) -> dict:
             password=settings.clickhouse_https.password,
             database=settings.clickhouse_https.database
         )
-        await db.connect()
         
         query = f"SELECT workload_type, prompt, response FROM {table_name}"
         results = await db.execute_query(query)
@@ -62,8 +61,7 @@ async def get_corpus_from_clickhouse(table_name: str) -> dict:
         logging.exception(f"Failed to load corpus from ClickHouse table {table_name}")
         raise
     finally:
-        if db and await db.is_connected():
-            await db.disconnect()
+        pass
 
 async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str = None):
     """Saves the generated content corpus to a specified ClickHouse table."""
@@ -83,7 +81,6 @@ async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str =
             password=settings.clickhouse_https.password,
             database=settings.clickhouse_https.database
         )
-        await db.connect()
         
         table_schema = get_content_corpus_schema(table_name)
         await db.command(table_schema)
@@ -119,8 +116,7 @@ async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str =
         logging.exception(f"Failed to save corpus to ClickHouse table {table_name}")
         raise
     finally:
-        if db and await db.is_connected():
-            await db.disconnect()
+        pass
 
 
 # --- Content Generation Service ---
@@ -302,7 +298,6 @@ async def run_synthetic_data_generation_job(job_id: str, params: dict):
         user=settings.clickhouse_https.user, password=settings.clickhouse_https.password,
         database=settings.clickhouse_https.database
     )
-    await client.connect()
     
     try:
         # Create the destination table
@@ -343,7 +338,7 @@ async def run_synthetic_data_generation_job(job_id: str, params: dict):
         logging.exception("Error during synthetic data generation job")
         update_job_status(job_id, "failed", error=str(e))
     finally:
-        await client.disconnect()
+        pass
 
 def get_config():
     """Loads the application configuration from config.yaml."""
