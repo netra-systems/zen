@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 from ..services.generation_service import run_content_generation_job, run_log_generation_job, run_synthetic_data_generation_job, run_data_ingestion_job
 from ..services.job_store import job_store
 from ..db.clickhouse import get_clickhouse_client
+from app.logging_config import central_logger
 
 router = APIRouter()
 
@@ -56,8 +57,6 @@ def create_synthetic_logs(params: LogGenParams, background_tasks: BackgroundTask
 class DataIngestionParams(BaseModel):
     data_path: str = Field(..., description="The path to the data file to ingest.")
     table_name: str = Field(..., description="The name of the table to ingest the data into.")
-
-
 
 
 
@@ -141,9 +140,16 @@ def list_log_sets() -> List[Dict]:
 @router.get("/clickhouse_tables")
 async def list_clickhouse_tables() -> List[str]:
     """Lists all tables in the ClickHouse database."""
+    logger = central_logger.get_logger(__name__)
+    logger.info("Attempting to list ClickHouse tables.")
     try:
         async with get_clickhouse_client() as client:
+            logger.info("Successfully acquired ClickHouse client.")
             result = await client.execute_query("SHOW TABLES")
-            return [row['name'] for row in result]
+            logger.info(f"Successfully executed 'SHOW TABLES' query. Result: {result}")
+            table_names = [row['name'] for row in result]
+            logger.info(f"Returning table names: {table_names}")
+            return table_names
     except Exception as e:
+        logger.error(f"Failed to fetch tables from ClickHouse: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to fetch tables from ClickHouse: {e}")

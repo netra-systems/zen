@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, AsyncMock
 from app.main import app
 
 client = TestClient(app)
@@ -10,7 +10,7 @@ client = TestClient(app)
 async def test_list_clickhouse_tables_success(mock_get_clickhouse_client):
     """Test that the /clickhouse_tables endpoint returns a list of tables."""
     mock_client = MagicMock()
-    mock_client.execute_query.return_value = [{'name': 'table1'}, {'name': 'table2'}]
+    mock_client.execute_query = AsyncMock(return_value=[{'name': 'table1'}, {'name': 'table2'}])
 
     mock_async_context_manager = MagicMock()
     mock_async_context_manager.__aenter__.return_value = mock_client
