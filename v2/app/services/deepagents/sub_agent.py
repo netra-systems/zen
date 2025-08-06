@@ -1,5 +1,4 @@
 from typing import List
-from functools import wraps
 from langchain_core.tools import BaseTool
 from app.llm.llm_manager import LLMManager
 from app.services.deepagents.prompts import get_agent_prompt
@@ -22,7 +21,6 @@ class SubAgent:
         self.tools = tools
 
     def as_runnable(self, llm_manager: LLMManager):
-        @wraps(self.as_runnable)
         async def agent_node(state: DeepAgentState):
             central_logger.log(LogEntry(event="agent_node_execution", data={"agent_name": self.name, "state": state}))
             prompt = get_agent_prompt(self.prompt)
