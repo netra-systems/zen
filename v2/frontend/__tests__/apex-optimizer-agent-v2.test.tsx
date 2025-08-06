@@ -1,4 +1,3 @@
-
 import { render, screen, fireEvent } from '@testing-library/react';
 import ApexOptimizerAgentV2 from '../app/components/apex-optimizer-agent-v2';
 import { useAgent } from '../app/hooks/useAgent';
@@ -46,5 +45,39 @@ describe('ApexOptimizerAgentV2', () => {
 
     render(<ApexOptimizerAgentV2 />);
     expect(screen.getByText('Test message')).toBeInTheDocument();
+  });
+
+  it('should call startAgent when an example query is clicked', () => {
+    render(<ApexOptimizerAgentV2 />);
+    const exampleButton = screen.getByText('Example Query 1');
+
+    fireEvent.click(exampleButton);
+
+    expect(mockStartAgent).toHaveBeenCalledWith('Example Query 1');
+  });
+
+  it('should populate the input field when an example query is clicked', () => {
+    render(<ApexOptimizerAgentV2 />);
+    const exampleButton = screen.getByText('Example Query 1');
+
+    fireEvent.click(exampleButton);
+
+    const input = screen.getByRole('textbox');
+    expect(input.value).toBe('Example Query 1');
+  });
+
+  it('should still send a message after an example is clicked', () => {
+    render(<ApexOptimizerAgentV2 />);
+    const exampleButton = screen.getByText('Example Query 1');
+
+    fireEvent.click(exampleButton);
+
+    const input = screen.getByRole('textbox');
+    const sendButton = screen.getByRole('button', { name: /send/i });
+
+    fireEvent.change(input, { target: { value: 'Another message' } });
+    fireEvent.click(sendButton);
+
+    expect(mockStartAgent).toHaveBeenCalledWith('Another message');
   });
 });

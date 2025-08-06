@@ -90,14 +90,16 @@ def _flatten_json_first_level(nested_json, sep='_'):
     return items
 
 
-def run_ingestion():
+import asyncio
+
+async def run_ingestion():
     JSON_FILE_PATH = "generated_logs.json"
 
     print("Starting data ingestion process from local file...")
 
-    with get_clickhouse_client() as client:
+    async with get_clickhouse_client() as client:
         
-        client.command(LLM_EVENTS_TABLE_SCHEMA)
+        await client.command(LLM_EVENTS_TABLE_SCHEMA)
         start_time = time.time()
         
         with open(JSON_FILE_PATH, 'r') as f:
@@ -111,7 +113,7 @@ def run_ingestion():
 
         ordered_columns, data_for_insert = prepare_data_for_insert(flattened_records)
 
-        client.insert_data('JSON_HYBRID_EVENTS4',
+        await client.insert_data('JSON_HYBRID_EVENTS4',
             data_for_insert,
             column_names=ordered_columns)
         total_inserted = len(flattened_records)
@@ -125,5 +127,5 @@ def run_ingestion():
 
 if __name__ == "__main__":
 
-    run_ingestion()
+    asyncio.run(run_ingestion())
 

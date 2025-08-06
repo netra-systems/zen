@@ -39,18 +39,20 @@ fake = Faker()
 
 from app.config import settings
 
-def load_content_corpus_from_clickhouse() -> dict:
+import asyncio
+
+async def load_content_corpus_from_clickhouse() -> dict:
     """Loads the content corpus from the ClickHouse database via HTTPS,
     with a fallback to the default corpus if the connection fails.
     """
     try:
-        with get_clickhouse_client() as client:
-            if not client.is_connected():
+        async with get_clickhouse_client() as client:
+            if not client.ping():
                 console.print("[yellow]Warning: ClickHouse connection failed. Falling back to default corpus.[/yellow]")
                 return DEFAULT_CONTENT_CORPUS
             
             query = f"SELECT workload_type, prompt, response FROM {CONTENT_CORPUS_TABLE_NAME}"
-            query_result = client.execute_query(query)
+            query_result = await client.execute_query(query)
 
             corpus = {}
             for row in query_result:
@@ -317,7 +319,7 @@ def generate_multi_turn_tool_trace(config, content_corpus) -> list:
     return trace_logs
 
 # --- 4. ORCHESTRATION ---
-def main(args):
+async def main(args):
     """Main function to generate synthetic logs. Can be called from other modules."""
     console.print("[bold cyan]Starting High-Performance Synthetic Log Generation (v2)...[/bold cyan]")
     start_time = time.time()
@@ -333,7 +335,7 @@ def main(args):
         content_corpus = args.corpus
         console.print("[green]Using content corpus provided in arguments.[/green]")
     else:
-        content_corpus = load_content_corpus_from_clickhouse()
+        content_corpus = await load_content_corpus_from_clickhouse()
 
     total_traces = args.num_traces
 
@@ -404,4 +406,4 @@ if __name__ == "__main__":
     else:
         args = parser.parse_args()
 
-    main(args)
+    asyncio.run(main(args))

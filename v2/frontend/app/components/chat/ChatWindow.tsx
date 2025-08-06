@@ -28,6 +28,7 @@ export function ChatWindow({ messages, onSendMessage, isLoading, initialQuery, m
 
     const handleExampleClick = (query: string) => {
         setInput(query);
+        onSendMessage(query);
     };
 
     return (

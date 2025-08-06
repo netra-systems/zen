@@ -9,7 +9,9 @@ from app.data.synthetic.synthetic_data_v1 import SyntheticDataV1
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def run_real_time_ingestion():
+import asyncio
+
+async def run_real_time_ingestion():
     """
     A standalone script to continuously generate synthetic customer data and ingest it
     into a ClickHouse database to simulate a real-time data feed.
@@ -20,8 +22,8 @@ def run_real_time_ingestion():
     logger.info("Starting real-time data ingestion process...")
 
     try:
-        with get_clickhouse_client() as client:
-            client.command(LLM_EVENTS_TABLE_SCHEMA)
+        async with get_clickhouse_client() as client:
+            await client.command(LLM_EVENTS_TABLE_SCHEMA)
             logger.info("Ensured 'LLM_EVENTS' table exists.")
 
             synthetic_data_generator = SyntheticDataV1()
@@ -35,23 +37,23 @@ def run_real_time_ingestion():
                     
                     if not records:
                         logger.warning("No records generated, sleeping for a while.")
-                        time.sleep(DELAY_SECONDS)
+                        await asyncio.sleep(DELAY_SECONDS)
                         continue
 
-                    client.insert_data('LLM_EVENTS', records)
+                    await client.insert_data('LLM_EVENTS', records)
                     
                     batch_end_time = time.time()
                     logger.info(f"  -> Inserted batch in {batch_end_time - batch_start_time:.2f} seconds.")
                     
-                    time.sleep(DELAY_SECONDS)
+                    await asyncio.sleep(DELAY_SECONDS)
 
                 except Exception as e:
                     logger.error(f"An error occurred during the ingestion loop: {e}")
-                    time.sleep(DELAY_SECONDS * 2) # Wait longer after an error
+                    await asyncio.sleep(DELAY_SECONDS * 2) # Wait longer after an error
 
     except Exception as e:
         logger.critical(f"A critical error occurred: {e}")
         logger.critical("Please check your .env configuration and ensure the ClickHouse Docker container is running.")
 
 if __name__ == "__main__":
-    run_real_time_ingestion()
+    asyncio.run(run_real_time_ingestion())
