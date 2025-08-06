@@ -4,3 +4,4 @@ v2/app/.dev_env
 v2/test.db
 *.db
 *.db
+v2/app/.coverage

@@ -15,7 +15,7 @@ async def test_active_user_success(mocker):
     email = "test@example.com"
     session = AsyncMock()
     security_service = AsyncMock()
-    security_service.get_user.return_value = User(email=email)
+    security_service.get_user = AsyncMock(return_value=User(email=email))
     db_session_factory = mocker.MagicMock()
     db_session_factory.return_value.__aenter__.return_value = session
     security_service.get_user_email_from_token.return_value = email
@@ -56,7 +56,7 @@ async def test_active_user_no_user(mocker):
     email = "test@example.com"
     session = AsyncMock()
     security_service = AsyncMock()
-    security_service.get_user.return_value = None
+    security_service.get_user = AsyncMock(return_value=None)
     db_session_factory = mocker.MagicMock()
     db_session_factory.return_value.__aenter__.return_value = session
     security_service.get_user_email_from_token.return_value = email

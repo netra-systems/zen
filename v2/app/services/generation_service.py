@@ -21,19 +21,13 @@ from ..db.clickhouse_base import ClickHouseDatabase
 from ..db.models_clickhouse import ContentCorpus, get_content_corpus_schema, get_llm_events_table_schema
 from ..data.ingestion import ingest_records
 from ..data.content_corpus import DEFAULT_CONTENT_CORPUS
+from .job_store import job_store
 
 # --- Job Management ---
-GENERATION_JOBS = {}
 
 def update_job_status(job_id: str, status: str, **kwargs):
     """Updates the status and other attributes of a generation job."""
-    if job_id not in GENERATION_JOBS:
-        GENERATION_JOBS[job_id] = {}
-    
-    job = GENERATION_JOBS[job_id]
-    job['status'] = status
-    job['last_updated'] = time.time()
-    job.update(kwargs)
+    job_store.update(job_id, status, **kwargs)
 
 async def get_corpus_from_clickhouse(table_name: str) -> dict:
     """Fetches the content corpus from a specified ClickHouse table."""
@@ -256,12 +250,11 @@ async def run_log_generation_job(job_id: str, params: dict):
         with open(output_path, 'w') as f:
             json.dump(all_logs, f, indent=2)
 
-        GENERATION_JOBS[job_id].update({
-            "status": "completed",
-            "finished_at": time.time(),
-            "result_path": output_path,
-            "summary": {"logs_generated": len(all_logs)}
-        })
+        job_store.update(job_id, "completed", 
+            finished_at=time.time(),
+            result_path=output_path,
+            summary={"logs_generated": len(all_logs)}
+        )
 
     except Exception as e:
         logging.exception("Error during log generation job")
@@ -274,11 +267,10 @@ async def run_data_ingestion_job(job_id: str, params: dict):
     
     try:
         summary = await ingest_data_from_file(params['data_path'])
-        GENERATION_JOBS[job_id].update({
-            "status": "completed",
-            "finished_at": time.time(),
-            "summary": summary
-        })
+        job_store.update(job_id, "completed", 
+            finished_at=time.time(),
+            summary=summary
+        )
 
     except Exception as e:
         logging.exception("Error during data ingestion job")
@@ -342,7 +334,6 @@ async def run_synthetic_data_generation_job(job_id: str, params: dict):
     finally:
         if 'client' in locals() and client:
             client.disconnect()
-    
 
 def get_config():
     """Loads the application configuration from config.yaml."""

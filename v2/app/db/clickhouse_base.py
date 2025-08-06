@@ -51,7 +51,7 @@ class ClickHouseDatabase:
         
         def _query():
             result = self.client.query(query, parameters=parameters, settings=settings)
-            return list(result.named_results)
+            return list(result.named_results())
 
         return await asyncio.to_thread(_query)
 

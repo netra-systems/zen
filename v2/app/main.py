@@ -64,6 +64,20 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(lifespan=lifespan)
 
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger = central_logger.get_logger("api")
+    start_time = time.time()
+    
+    response = await call_next(request)
+    
+    process_time = (time.time() - start_time) * 1000
+    formatted_process_time = f'{process_time:.2f}ms'
+    
+    logger.info(f"Request: {request.method} {request.url.path} | Status: {response.status_code} | Duration: {formatted_process_time}")
+    
+    return response
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -124,3 +138,6 @@ if "pytest" in sys.modules:
     llm_manager = LLMManager(settings)
     app.state.agent_supervisor = NetraOptimizerAgentSupervisor(async_session_factory, llm_manager)
     app.state.streaming_agent_supervisor = StreamingAgentSupervisor(async_session_factory, llm_manager, websocket_manager)
+
+    from app.routes import dev_websocket
+    app.include_router(dev_websocket.router, prefix="/ws/dev", tags=["dev_websocket"])

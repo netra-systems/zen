@@ -46,7 +46,7 @@ def _flatten_json_first_level(nested_json, sep='_'):
             items[k] = v
     return items
 
-def ingest_records(client: ClickHouseDatabase, records: list[dict], table_name: str) -> int:
+async def ingest_records(client: ClickHouseDatabase, records: list[dict], table_name: str) -> int:
     """
     Ingests a list of in-memory records into a specified ClickHouse table using an active client.
     """
@@ -63,6 +63,6 @@ def ingest_records(client: ClickHouseDatabase, records: list[dict], table_name: 
         logging.warning("Data preparation resulted in no records to insert for this batch.")
         return 0
 
-    client.insert_data(table_name, data_for_insert, column_names=ordered_columns)
+    await client.insert_data(table_name, data_for_insert, column_names=ordered_columns)
     logging.info(f"Successfully inserted batch of {len(flattened_records)} records.")
     return len(flattened_records)
