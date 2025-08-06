@@ -1,6 +1,8 @@
 from typing import Dict, Any
 from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
 
+from app.services.apex_optimizer_agent.tools.context import ToolContext
+
 class CostReductionQualityPreservationTool(BaseTool):
     metadata = ToolMetadata(
         name="CostReductionQualityPreservation",
@@ -9,7 +11,7 @@ class CostReductionQualityPreservationTool(BaseTool):
         status="in_review"
     )
 
-    async def run(self, state: Dict[str, Any], **kwargs) -> str:
+    async def run(self, state: Dict[str, Any], context: ToolContext, **kwargs) -> str:
         await self.analyze_current_costs(state, **kwargs)
         await self.identify_cost_drivers(state, **kwargs)
         await self.propose_cost_optimizations(state, **kwargs)

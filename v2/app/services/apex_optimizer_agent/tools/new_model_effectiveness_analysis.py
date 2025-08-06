@@ -1,6 +1,8 @@
 from typing import Dict, Any
 from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
 
+from app.services.apex_optimizer_agent.tools.context import ToolContext
+
 class NewModelEffectivenessAnalysisTool(BaseTool):
     metadata = ToolMetadata(
         name="NewModelEffectivenessAnalysis",
@@ -9,7 +11,7 @@ class NewModelEffectivenessAnalysisTool(BaseTool):
         status="in_review"
     )
 
-    async def run(self, state: Dict[str, Any], **kwargs) -> str:
+    async def run(self, state: Dict[str, Any], context: ToolContext, **kwargs) -> str:
         await self.define_evaluation_criteria(state, **kwargs)
         await self.run_benchmarks(state, **kwargs)
         await self.compare_performance(state, **kwargs)

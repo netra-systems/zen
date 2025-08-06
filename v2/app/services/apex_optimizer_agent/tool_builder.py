@@ -25,9 +25,11 @@ from app.services.apex_optimizer_agent.tools.finish import finish
 from app.services.deepagents.tools import update_state
 from functools import partial
 
+from app.services.apex_optimizer_agent.tools.context import ToolContext
+
 class ToolBuilder:
     @staticmethod
-    def build_all(db_session: Any, llm_manager: LLMManager) -> Dict[str, Any]:
+    def build_all(context: ToolContext) -> Dict[str, Any]:
         all_tools = {
             "cost_analyzer": cost_analyzer,
             "latency_analyzer": latency_analyzer,

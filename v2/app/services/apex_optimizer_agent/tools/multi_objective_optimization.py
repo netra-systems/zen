@@ -1,6 +1,8 @@
 from typing import Dict, Any
 from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
 
+from app.services.apex_optimizer_agent.tools.context import ToolContext
+
 class MultiObjectiveOptimizationTool(BaseTool):
     metadata = ToolMetadata(
         name="MultiObjectiveOptimization",
@@ -9,7 +11,7 @@ class MultiObjectiveOptimizationTool(BaseTool):
         status="in_review"
     )
 
-    async def run(self, state: Dict[str, Any], **kwargs) -> str:
+    async def run(self, state: Dict[str, Any], context: ToolContext, **kwargs) -> str:
         await self.define_optimization_goals(state, **kwargs)
         await self.analyze_trade_offs(state, **kwargs)
         await self.propose_balanced_optimizations(state, **kwargs)

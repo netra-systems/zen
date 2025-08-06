@@ -6,6 +6,8 @@ from app.db.models_clickhouse import UnifiedLogEntry
 from sqlalchemy.future import select
 from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
 
+from app.services.apex_optimizer_agent.tools.context import ToolContext
+
 class PolicyProposer(BaseTool):
     metadata = ToolMetadata(
         name="policy_proposer",
@@ -15,7 +17,7 @@ class PolicyProposer(BaseTool):
     )
 
     async def run(
-        self, patterns: List[DiscoveredPattern], span_map: Dict[str, UnifiedLogEntry]
+        self, patterns: List[DiscoveredPattern], span_map: Dict[str, UnifiedLogEntry], context: ToolContext
     ) -> Tuple[List[LearnedPolicy], List[PredictedOutcome]]:
         """Finds the best routing policies through simulation."""
         policies = []

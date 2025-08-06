@@ -1,6 +1,8 @@
 from typing import Dict, Any
 from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
 
+from app.services.apex_optimizer_agent.tools.context import ToolContext
+
 class KVCacheOptimizationAuditTool(BaseTool):
     metadata = ToolMetadata(
         name="KVCacheOptimizationAudit",
@@ -9,7 +11,7 @@ class KVCacheOptimizationAuditTool(BaseTool):
         status="in_review"
     )
 
-    async def run(self, state: Dict[str, Any], **kwargs) -> str:
+    async def run(self, state: Dict[str, Any], context: ToolContext, **kwargs) -> str:
         await self.identify_kv_caches(state, **kwargs)
         await self.analyze_cache_hit_rates(state, **kwargs)
         await self.identify_inefficient_usage(state, **kwargs)

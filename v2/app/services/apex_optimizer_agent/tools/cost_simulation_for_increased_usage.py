@@ -1,6 +1,8 @@
 from typing import Dict, Any
 from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
 
+from app.services.apex_optimizer_agent.tools.context import ToolContext
+
 class CostSimulationForIncreasedUsageTool(BaseTool):
     metadata = ToolMetadata(
         name="CostSimulationForIncreasedUsage",
@@ -9,7 +11,7 @@ class CostSimulationForIncreasedUsageTool(BaseTool):
         status="in_review"
     )
 
-    async def run(self, state: Dict[str, Any], **kwargs) -> str:
+    async def run(self, state: Dict[str, Any], context: ToolContext, **kwargs) -> str:
         await self.analyze_current_usage(state, **kwargs)
         await self.model_future_usage(state, **kwargs)
         await self.simulate_cost_impact_for_usage(state, **kwargs)

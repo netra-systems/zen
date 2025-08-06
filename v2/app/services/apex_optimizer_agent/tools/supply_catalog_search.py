@@ -5,6 +5,8 @@ from sqlmodel import select
 from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
 from app.services.supply_catalog_service import SupplyCatalogService
 
+from app.services.apex_optimizer_agent.tools.context import ToolContext
+
 class SupplyCatalogSearch(BaseTool):
     metadata = ToolMetadata(
         name="supply_catalog_search",
@@ -13,8 +15,8 @@ class SupplyCatalogSearch(BaseTool):
         status="in_review"
     )
 
-    def __init__(self, db_session):
-        super().__init__(db_session=db_session)
+    def __init__(self, context: ToolContext):
+        super().__init__(context=context)
         self.supply_catalog_service = SupplyCatalogService()
 
     async def run(self, query: str) -> List[SupplyOption]:

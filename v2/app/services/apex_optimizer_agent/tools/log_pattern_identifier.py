@@ -6,6 +6,8 @@ from app.schema import DiscoveredPattern
 from app.config import settings
 from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
 
+from app.services.apex_optimizer_agent.tools.context import ToolContext
+
 class LogPatternIdentifier(BaseTool):
     metadata = ToolMetadata(
         name="log_pattern_identifier",
@@ -16,7 +18,7 @@ class LogPatternIdentifier(BaseTool):
     llm_name = "analysis"
 
     async def run(
-        self, enriched_spans: List[dict], n_patterns: int = 5
+        self, enriched_spans: List[dict], context: ToolContext, n_patterns: int = 5
     ) -> Tuple[List[DiscoveredPattern], List[str]]:
         """Identifies patterns in the enriched logs."""
         if not enriched_spans:
