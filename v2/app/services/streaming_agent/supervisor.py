@@ -9,6 +9,9 @@ from app.services.apex_optimizer_agent.tool_builder import ToolBuilder
 from app.services.deepagents.tool_dispatcher import ToolDispatcher
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.websocket import ConnectionManager
+from app.services.supply_catalog_service import SupplyCatalogService
+from app.services.deepagents.state import DeepAgentState
+from app.services.context import ToolContext
 
 class StreamingAgentSupervisor:
     def __init__(self, db_session: AsyncSession, llm_manager: LLMManager, websocket_manager: ConnectionManager):
@@ -17,7 +20,10 @@ class StreamingAgentSupervisor:
         self.agent_states: Dict[str, Dict[str, Any]] = {}
         self.websocket_manager = websocket_manager
 
-        all_tools, _ = ToolBuilder.build_all(self.db_session, self.llm_manager)
+        state = DeepAgentState()
+        supply_catalog = SupplyCatalogService()
+        context = ToolContext(logs=[], db_session=self.db_session, llm_manager=self.llm_manager, cost_estimator=None, state=state, supply_catalog=supply_catalog)
+        all_tools, _ = ToolBuilder.build_all(context)
         agent_def = self._get_agent_definition(self.llm_manager, list(all_tools.values()))
         tool_dispatcher = ToolDispatcher(tools=list(all_tools.values()))
 
