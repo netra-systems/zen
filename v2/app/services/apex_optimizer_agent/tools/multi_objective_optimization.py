@@ -1,7 +1,6 @@
 from typing import Dict, Any
 from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
-
-from app.services.apex_optimizer_agent.tools.context import ToolContext
+from app.services.context import ToolContext
 
 class MultiObjectiveOptimizationTool(BaseTool):
     metadata = ToolMetadata(
@@ -11,25 +10,25 @@ class MultiObjectiveOptimizationTool(BaseTool):
         status="in_review"
     )
 
-    async def run(self, state: Dict[str, Any], context: ToolContext, **kwargs) -> str:
-        await self.define_optimization_goals(state, **kwargs)
-        await self.analyze_trade_offs(state, **kwargs)
-        await self.propose_balanced_optimizations(state, **kwargs)
-        await self.simulate_multi_objective_impact(state, **kwargs)
+    async def run(self, context: ToolContext, **kwargs) -> str:
+        await self.define_optimization_goals(context, **kwargs)
+        await self.analyze_trade_offs(context, **kwargs)
+        await self.propose_balanced_optimizations(context, **kwargs)
+        await self.simulate_multi_objective_impact(context, **kwargs)
         return "Multi-objective optimization complete."
 
-    async def define_optimization_goals(self, state: Dict[str, Any], **kwargs) -> str:
+    async def define_optimization_goals(self, context: ToolContext, **kwargs) -> str:
         # Implementation for defining optimization goals
         return "Defined optimization goals."
 
-    async def analyze_trade_offs(self, state: Dict[str, Any], **kwargs) -> str:
+    async def analyze_trade_offs(self, context: ToolContext, **kwargs) -> str:
         # Implementation for analyzing trade-offs
         return "Analyzed trade-offs."
 
-    async def propose_balanced_optimizations(self, state: Dict[str, Any], **kwargs) -> str:
+    async def propose_balanced_optimizations(self, context: ToolContext, **kwargs) -> str:
         # Implementation for proposing balanced optimizations
         return "Proposed balanced optimizations."
 
-    async def simulate_multi_objective_impact(self, state: Dict[str, Any], **kwargs) -> str:
+    async def simulate_multi_objective_impact(self, context: ToolContext, **kwargs) -> str:
         # Implementation for simulating multi-objective impact
         return "Simulated multi-objective impact."

@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field, validator
 import json
 from app.services.apex_optimizer_agent.models import ToolInvocation, ToolStatus
 import asyncio
+from app.services.context import ToolContext
 
 class Workload(BaseModel):
     time_range: Union[Dict[str, Any], str] = Field(..., description="The time range for the workload.")
@@ -25,7 +26,7 @@ class Workload(BaseModel):
         return v
 
 @tool
-async def log_fetcher(workloads: List[Workload], db_session: any, llm_manager: any) -> ToolInvocation:
+async def log_fetcher(context: ToolContext, workloads: List[Workload]) -> ToolInvocation:
     """
     Fetches raw logs from the database for each workload.
     """
@@ -44,7 +45,7 @@ async def log_fetcher(workloads: List[Workload], db_session: any, llm_manager: a
                 results.append(ToolInvocation(tool_name="log_fetcher", status=ToolStatus.ERROR, message="Error: source_table is required in the data_source for each workload.", payload={}))
                 continue
 
-            logs, trace_ids = await asyncio.wait_for(db_session.fetch_logs(time_range=time_range, source_table=source_table), timeout=workload.timeout)
+            logs, trace_ids = await asyncio.wait_for(context.db_session.fetch_logs(time_range=time_range, source_table=source_table), timeout=workload.timeout)
             results.append(ToolInvocation(tool_name="log_fetcher", status=ToolStatus.SUCCESS, message=f"Fetched {len(logs)} logs.", payload={"logs": logs, "trace_ids": trace_ids}))
             
         except asyncio.TimeoutError:

@@ -5,8 +5,7 @@ from typing import List, Any, Tuple
 from app.schema import DiscoveredPattern
 from app.config import settings
 from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
-
-from app.services.apex_optimizer_agent.tools.context import ToolContext
+from app.services.context import ToolContext
 
 class LogPatternIdentifier(BaseTool):
     metadata = ToolMetadata(
@@ -18,7 +17,7 @@ class LogPatternIdentifier(BaseTool):
     llm_name = "analysis"
 
     async def run(
-        self, enriched_spans: List[dict], context: ToolContext, n_patterns: int = 5
+        self, context: ToolContext, enriched_spans: List[dict], n_patterns: int = 5
     ) -> Tuple[List[DiscoveredPattern], List[str]]:
         """Identifies patterns in the enriched logs."""
         if not enriched_spans:
