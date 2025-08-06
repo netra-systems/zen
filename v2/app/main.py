@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconn
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.routes import auth, supply, generation, google_auth, apex_optimizer_agent_route, websocket, streaming_agent_route, admin, references, agent
+from app.routes import auth, supply, generation, google_auth, apex_optimizer_agent_route, websocket, streaming_agent_route, admin, references, agent, health
 from app.db.postgres import async_session_factory
 from app.config import settings
 from app.logging_config import central_logger
@@ -90,6 +90,7 @@ app.include_router(websocket.router, prefix="/ws", tags=["websockets"])
 app.include_router(admin.router, prefix="/api/v3", tags=["admin"])
 app.include_router(agent.router, prefix="/agent", tags=["agent"])
 app.include_router(references.router, prefix="/api/v3", tags=["references"])
+app.include_router(health.router, prefix="/health", tags=["health"])
 
 if settings.app_env == "development":
     from app.routes import dev_websocket

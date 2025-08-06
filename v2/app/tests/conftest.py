@@ -1,74 +1,42 @@
-import asyncio
-import logging
+
 import pytest
-from typing import AsyncGenerator, Generator
-
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncEngine
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from fastapi.testclient import TestClient
-
 from app.main import app
-from app.config import settings
+from app.db.postgres import get_async_db as get_db
 from app.db.base import Base
-from app.db.postgres import get_async_db
-from app.llm.llm_manager import LLMManager
-from app.services.apex_optimizer_agent.supervisor import NetraOptimizerAgentSupervisor
-from app.routes.apex_optimizer_agent_route import get_agent_supervisor
 
-# Set the log level for sqlalchemy.engine to WARNING
-logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+DATABASE_URL = "sqlite+aiosqlite:///./test.db"
 
-@pytest.fixture(scope="session")
-def event_loop(request) -> Generator:
-    """Create an instance of the default event loop for each test session."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
+engine = create_async_engine(DATABASE_URL, echo=True)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
 
-@pytest.fixture(scope="session")
-async def db_engine() -> AsyncGenerator[AsyncEngine, None]:
-    """
-    Creates a test database engine that is reused across the test session.
-    Creates all tables before running tests, and drops them after.
-    """
-    engine = create_async_engine(settings.database_url)
+@pytest.fixture(scope="function")
+async def db_engine():
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
     yield engine
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
-    await engine.dispose()
 
 @pytest.fixture(scope="function")
-async def db_session(db_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
-    """
-    Provides a transactional session for each test function.
-    It starts a transaction and rolls it back after the test, ensuring isolation.
-    """
-    async_session_factory = sessionmaker(
-        bind=db_engine, class_=AsyncSession, expire_on_commit=False
-    )
-    async with async_session_factory() as session:
-        async with session.begin():
-            yield session
+async def db_session(db_engine):
+    connection = await db_engine.connect()
+    trans = await connection.begin()
+    Session = sessionmaker(bind=connection, class_=AsyncSession)
+    session = Session()
+    yield session
+    await session.close()
+    await trans.rollback()
+    await connection.close()
 
 @pytest.fixture(scope="function")
-def client(db_session: AsyncSession) -> Generator[TestClient, None, None]:
-    """
-    Provides a FastAPI TestClient with the database dependency overridden
-    to use the test database session.
-    """
-    async def _override_get_db():
+async def client(db_session: AsyncSession):
+    def override_get_db():
         yield db_session
 
-    llm_manager = LLMManager(settings)
-    agent_supervisor = NetraOptimizerAgentSupervisor(db_session, llm_manager)
-
-    app.dependency_overrides[get_async_db] = _override_get_db
-    app.state.agent_supervisor = agent_supervisor
-    
-    with TestClient(app) as c:
+    app.dependency_overrides[get_db] = override_get_db
+    async with AsyncClient(app=app, base_url="http://test") as c:
         yield c
-
-    del app.dependency_overrides[get_async_db]
+    app.dependency_overrides.pop(get_db, None)
