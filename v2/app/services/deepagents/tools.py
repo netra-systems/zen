@@ -1,7 +1,7 @@
 from langchain_core.tools import tool, InjectedToolCallId
 from langgraph.types import Command
 from langchain_core.messages import ToolMessage
-from typing import Annotated, Literal
+from typing import Annotated, Literal, List
 from langgraph.prebuilt import InjectedState
 import uuid
 
@@ -14,7 +14,7 @@ from .state import DeepAgentState, Todo
 
 
 @tool
-def update_state(state: dict, completed_step: str, new_todo: list = None) -> dict:
+def update_state(state: dict, completed_step: str, new_todo: List[str] = None) -> dict:
     """Updates the state of the agent.
 
     Args:
@@ -107,7 +107,7 @@ def read_file(
 
         # Line numbers start at 1, so add 1 to the index
         line_number = i + 1
-        result_lines.append(f"{line_number:6d}	{line_content}")
+        result_lines.append(f"{line_number:6d}\t{line_content}")
 
     return "\n".join(result_lines)
 
@@ -166,3 +166,12 @@ def edit_file(
     # Update the mock filesystem
     mock_filesystem[file_path] = new_content
     return {"files": mock_filesystem}
+
+def get_tools():
+    return [
+        update_state,
+        update_todo,
+        write_todos,
+        read_file,
+        edit_file,
+    ]

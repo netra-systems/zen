@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.routes import auth, supply, generation, google_auth, apex_optimizer_agent_route
+from app.routes import auth, supply, generation, google_auth, apex_optimizer_agent_route, websocket
 from app.db.postgres import async_session_factory
 from app.db.clickhouse import ClickHouseClient
 from app.db.models_clickhouse import SUPPLY_TABLE_SCHEMA, LOGS_TABLE_SCHEMA
@@ -116,6 +116,7 @@ app.include_router(supply.router, prefix="/api/v3/supply", tags=["supply"])
 app.include_router(generation.router, prefix="/api/v3/generation", tags=["generation"])
 app.include_router(google_auth.router, tags=["google_auth"])
 app.include_router(apex_optimizer_agent_route.router, prefix="/api/v3/apex/chat", tags=["apex/chat"])
+app.include_router(websocket.router, prefix="/ws", tags=["websockets"])
 
 
 
@@ -128,3 +129,11 @@ def read_root():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+if "pytest" in sys.modules:
+    from app.db.postgres import async_session_factory
+    from app.llm.llm_manager import LLMManager
+    from app.services.apex_optimizer_agent.supervisor import NetraOptimizerAgentSupervisor
+
+    llm_manager = LLMManager(settings)
+    app.state.agent_supervisor = NetraOptimizerAgentSupervisor(async_session_factory, llm_manager)

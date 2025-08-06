@@ -7,23 +7,25 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncEngin
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 
-from app.main import app, lifespan
+from app.main import app
 from app.config import settings
 from app.db.base import Base
 from app.db.postgres import get_async_db
 from app.llm.llm_manager import LLMManager
+from app.services.apex_optimizer_agent.supervisor import NetraOptimizerAgentSupervisor
+from app.routes.apex_optimizer_agent_route import get_agent_supervisor
 
 # Set the log level for sqlalchemy.engine to WARNING
 logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def event_loop(request) -> Generator:
     """Create an instance of the default event loop for each test session."""
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 async def db_engine() -> AsyncGenerator[AsyncEngine, None]:
     """
     Creates a test database engine that is reused across the test session.
@@ -52,7 +54,7 @@ async def db_session(db_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, Non
             yield session
 
 @pytest.fixture(scope="function")
-async def client(db_session: AsyncSession) -> Generator[TestClient, None, None]:
+def client(db_session: AsyncSession) -> Generator[TestClient, None, None]:
     """
     Provides a FastAPI TestClient with the database dependency overridden
     to use the test database session.
@@ -60,7 +62,13 @@ async def client(db_session: AsyncSession) -> Generator[TestClient, None, None]:
     async def _override_get_db():
         yield db_session
 
+    llm_manager = LLMManager(settings)
+    agent_supervisor = NetraOptimizerAgentSupervisor(db_session, llm_manager)
+
     app.dependency_overrides[get_async_db] = _override_get_db
-    async with lifespan(app):
-        yield TestClient(app)
+    app.state.agent_supervisor = agent_supervisor
+    
+    with TestClient(app) as c:
+        yield c
+
     del app.dependency_overrides[get_async_db]

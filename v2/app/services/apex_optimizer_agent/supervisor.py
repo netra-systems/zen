@@ -37,7 +37,7 @@ class NetraOptimizerAgentSupervisor:
         )
 
     async def start_agent(self, request: AnalysisRequest) -> Dict[str, Any]:
-        request_id = request.request.id
+        run_id = request.request.id
         initial_state = {
             "messages": [HumanMessage(content=request.request.query)],
             "workloads": request.request.workloads,
@@ -46,16 +46,16 @@ class NetraOptimizerAgentSupervisor:
             "status": "in_progress",
             "events": []
         }
-        self.agent_states[request_id] = initial_state
+        self.agent_states[run_id] = initial_state
 
         # Start the agent asynchronously
-        asyncio.create_task(self.run_agent(request_id))
+        await self.run_agent(run_id)
         
         # Immediately return a response to the user
-        return {"status": "agent_started", "request_id": request_id}
+        return {"status": "agent_started", "run_id": run_id}
 
-    async def run_agent(self, request_id: str):
-        state = self.agent_states[request_id]
+    async def run_agent(self, run_id: str):
+        state = self.agent_states[run_id]
         async for event in self.graph.astream_events(state, {"recursion_limit": 20}):
             state["events"].append(event)
             # Update status based on event type if needed
