@@ -11,10 +11,10 @@ def mock_tool(a: int, b: int) -> int:
 async def test_tool_dispatcher():
     dispatcher = ToolDispatcher(tools=[mock_tool])
     result = await dispatcher.dispatch("mock_tool", a=1, b=2)
-    assert result == 3
+    assert result.payload == 3
 
 @pytest.mark.asyncio
 async def test_tool_dispatcher_tool_not_found():
     dispatcher = ToolDispatcher(tools=[mock_tool])
     result = await dispatcher.dispatch("non_existent_tool", a=1, b=2)
-    assert result == "Tool 'non_existent_tool' not found."
+    assert result.message == "Tool 'non_existent_tool' not found."
