@@ -1,4 +1,4 @@
-import { Home, Settings, LucideProps, Database, FileText, BrainCircuit, UploadCloud, Package, Code } from 'lucide-react';
+import { Home, Settings, LucideProps, Database, FileText, BrainCircuit, UploadCloud, Package, Code, Google } from 'lucide-react';
 
 export const Icons = {
   logo: (props: LucideProps) => (
@@ -25,4 +25,5 @@ export const Icons = {
   ingestion: UploadCloud,
   supplyCatalog: Package,
   dev: Code,
+  google: Google
 };
