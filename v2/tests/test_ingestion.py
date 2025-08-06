@@ -47,12 +47,21 @@ async def test_populate_with_default_data(mock_clickhouse_client):
     """Test that the database is populated with the default data."""
     all_records = []
     for workload_type, content_list in DEFAULT_CONTENT_CORPUS.items():
-        for prompt, response in content_list:
-            all_records.append({
-                "workload_type": workload_type,
-                "prompt": prompt,
-                "response": response,
-            })
+        if workload_type == "multi_turn_tool_use":
+            for conversation in content_list:
+                for prompt, response in conversation:
+                    all_records.append({
+                        "workload_type": workload_type,
+                        "prompt": prompt,
+                        "response": response,
+                    })
+        else:
+            for prompt, response in content_list:
+                all_records.append({
+                    "workload_type": workload_type,
+                    "prompt": prompt,
+                    "response": response,
+                })
 
     await ingest_records(mock_clickhouse_client, all_records, CONTENT_CORPUS_TABLE_NAME)
 

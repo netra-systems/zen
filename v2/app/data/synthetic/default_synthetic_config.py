@@ -1,68 +1,29 @@
-DEFAULT_CONFIG = """
-# Configuration for the Synthetic Log Generator
-# This file controls the behavior of the data generation process.
-
-# --- General Settings ---
+DEFAULT_CONFIG = '''
 generation_settings:
-  # Default number of traces to generate if not specified via command line.
-  num_traces: 5
-  # The distribution of different trace types to generate. Values should sum to 1.0.
+  # The distribution of trace types to generate.
+  # These values should sum to 1.0.
   trace_distribution:
-    simple_chat: 0.3
+    simple_chat: 0.4
     rag_pipeline: 0.3
     tool_use: 0.2
-    failed_request: 0.1
-    multi_turn_tool_use: 0.1
+    failed_request: 0.05
+    multi_turn_tool_use: 0.05
 
-# --- Realism Engine Settings ---
-# These settings control the data generated for various fields.
 realism:
-  # List of possible applications and services to simulate.
+  # A pool of realistic application and service names.
   applications:
     - app_name: "customer-support-chatbot"
-      services: ["intent-classifier", "chat-responder", "history-summarizer"]
-    - app_name: "marketing-copy-generator"
-      services: ["headline-generator", "body-text-creator", "seo-analyzer"]
+      services: ["chat-responder", "intent-classifier", "history-summarizer"]
     - app_name: "internal-doc-search"
       services: ["query-parser", "retrieval-engine", "answer-generator"]
-  
-  # List of possible model providers and their models.
-  # Pricing is in USD per 1 Million tokens (prompt, completion).
+    - app_name: "marketing-copy-generator"
+      services: ["headline-generator", "seo-analyzer", "copy-writer"]
+
+  # A pool of realistic model configurations.
+  # Pricing is in USD per 1M tokens (prompt, completion).
   models:
-    - provider: "openai"
-      family: "gpt-4"
-      name: "gpt-4o"
-      version_id: "gpt-4o-2024-08-06"
-      pricing: [5.00, 15.00]
-    - provider: "anthropic"
-      family: "claude-3"
-      name: "claude-3-opus"
-      version_id: "claude-3-opus-20240229"
-      pricing: [15.00, 75.00]
-    - provider: "google"
-      family: "gemini-2.0"
-      name: "gemini-2.0-flash"
-      version_id: null
-      pricing: [0.35, 0.70]
-    - provider: "vllm"
-      family: "llama-3.1"
-      name: "llama-3.1-70b-instruct"
-      version_id: null
-      pricing: [0.50, 0.50] # Example self-hosted cost
-
-# --- Customer Overrides ---
-# Use this section to force specific values for any field in the log schema.
-# This is powerful for tailoring the data to a specific customer's environment.
-# The keys should match the structure of the UnifiedLogEntry schema.
-# Example:
-# overrides:
-#   identity_context:
-#     organization_id: "acme-corp-xyz"
-#   application_context:
-#     environment: "production"
-#   finops:
-#     attribution:
-#       cost_center_id: "R&D-AI-Division"
-
-overrides: {}
-"""
+    - { provider: "openai", name: "gpt-4o", pricing: [5.00, 15.00] }
+    - { provider: "anthropic", name: "claude-3-opus", pricing: [15.00, 75.00] }
+    - { provider: "google", name: "gemini-2.0-flash", pricing: [0.35, 0.70] }
+    - { provider: "vllm", name: "llama-3.1-70b-instruct", pricing: [0.50, 0.50] }
+'''

@@ -4,7 +4,7 @@ import logging
 from app.config import settings
 from app.db.clickhouse import get_clickhouse_client
 from app.db.models_clickhouse import LLM_EVENTS_TABLE_SCHEMA
-from app.data.synthetic.synthetic_data_v1 import SyntheticDataV1
+from app.data.synthetic.synthetic_data_v2 import SyntheticDataV2
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ async def run_real_time_ingestion():
             await client.command(LLM_EVENTS_TABLE_SCHEMA)
             logger.info("Ensured 'LLM_EVENTS' table exists.")
 
-            synthetic_data_generator = SyntheticDataV1()
+            synthetic_data_generator = SyntheticDataV2()
 
             while True:
                 try:
