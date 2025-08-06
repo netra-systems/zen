@@ -8,7 +8,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { GenericInput } from '@/components/GenericInput';
 import useAppStore from '../store';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/Card.tsx';
 import Spinner from '@/components/Spinner';
 
 // --- Type Definitions for API data ---

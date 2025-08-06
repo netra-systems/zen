@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 from fastapi.testclient import TestClient
 from app.main import app
 from app.services.agent_service import AgentService
-from app.auth_dependencies import get_current_active_user
+from app.auth_dependencies import ActiveUserDep
 from app.db.models_postgres import User
 
 @pytest.fixture
@@ -20,7 +20,7 @@ async def test_start_agent(client, agent_service_mock):
     agent_service_mock.start_agent = AsyncMock(return_value={"run_id": "test_run"})
     app.state.agent_service = agent_service_mock
 
-    app.dependency_overrides[get_current_active_user] = lambda: User(email=settings.dev_user_email, hashed_password="test")
+    app.dependency_overrides[ActiveUserDep] = lambda: User(email="dev@example.com", hashed_password="test")
     response = client.post("/agent/start_agent/client123", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "test message", "workloads": []}})
 
     assert response.status_code == 200
@@ -32,7 +32,7 @@ async def test_start_agent_with_different_messages(client, agent_service_mock):
     agent_service_mock.start_agent = AsyncMock(return_value={"run_id": "test_run"})
     app.state.agent_service = agent_service_mock
 
-    app.dependency_overrides[get_current_active_user] = lambda: User(email=settings.dev_user_email, hashed_password="test")
+    app.dependency_overrides[ActiveUserDep] = lambda: User(email="dev@example.com", hashed_password="test")
     # First message
     response1 = client.post("/agent/start_agent/client123", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "first message", "workloads": []}})
     assert response1.status_code == 200
@@ -50,7 +50,7 @@ async def test_start_agent_with_empty_message(client, agent_service_mock):
     agent_service_mock.start_agent = AsyncMock(return_value={"run_id": "test_run"})
     app.state.agent_service = agent_service_mock
 
-    app.dependency_overrides[get_current_active_user] = lambda: User(email=settings.dev_user_email, hashed_password="test")
+    app.dependency_overrides[ActiveUserDep] = lambda: User(email="dev@example.com", hashed_password="test")
     response = client.post("/agent/start_agent/client123", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "", "workloads": []}})
 
     assert response.status_code == 200
@@ -62,7 +62,7 @@ async def test_start_agent_service_failure(client, agent_service_mock):
     agent_service_mock.start_agent.side_effect = Exception("Agent service failed")
     app.state.agent_service = agent_service_mock
 
-    app.dependency_overrides[get_current_active_user] = lambda: User(email=settings.dev_user_email, hashed_password="test")
+    app.dependency_overrides[ActiveUserDep] = lambda: User(email="dev@example.com", hashed_password="test")
     response = client.post("/agent/start_agent/client123", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "test message", "workloads": []}})
 
     assert response.status_code == 500

@@ -15,6 +15,7 @@ from app.logging_config import central_logger
 from app.llm.llm_manager import LLMManager
 from app.services.apex_optimizer_agent.supervisor import NetraOptimizerAgentSupervisor
 from app.services.streaming_agent.supervisor import StreamingAgentSupervisor
+from app.services.agent_service import AgentService
 from app.services.key_manager import KeyManager
 from app.services.security_service import SecurityService
 from app.websocket import manager as websocket_manager
