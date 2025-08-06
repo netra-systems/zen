@@ -104,8 +104,7 @@ export default function GenerationPage() {
         return () => clearInterval(intervalId);
     }, [isPolling, pollStatus]);
 
-    const handleStartGeneration = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const handleStartGeneration = async (data: Record<string, any>) => {
         setIsLoading(true);
         setError(null);
         setJob(null);
@@ -114,13 +113,12 @@ export default function GenerationPage() {
         }
         pollingJobIdRef.current = null;
 
-        const formData = new FormData(event.currentTarget);
-        const num_traces = parseInt(formData.get('num_traces') as string, 10);
-        const num_users = parseInt(formData.get('num_users') as string, 10);
-        const error_rate = parseFloat(formData.get('error_rate') as string);
-        const event_types = (formData.get('event_types') as string).split(',').map(s => s.trim());
-        const source_table = formData.get('source_table') as string;
-        const destination_table = formData.get('destination_table') as string;
+        const num_traces = parseInt(data.num_traces as string, 10);
+        const num_users = parseInt(data.num_users as string, 10);
+        const error_rate = parseFloat(data.error_rate as string);
+        const event_types = (data.event_types as string).split(',').map(s => s.trim());
+        const source_table = data.source_table as string;
+        const destination_table = data.destination_table as string;
 
         try {
             const newJob = await apiService.post(`${config.api.baseUrl}/generation/synthetic_data`, { num_traces, num_users, error_rate, event_types, source_table, destination_table }, token);

@@ -1,14 +1,14 @@
 import pytest
 import os
+import datetime
+import uuid
 from fastapi.testclient import TestClient
 from unittest.mock import patch, AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 from cryptography.fernet import Fernet
-import datetime
-import uuid
 
 from app.db.models_postgres import User
-from app.dependencies import ActiveUserDep
+from app.dependencies import get_current_user
 from app.main import app
 
 # Mock all settings using environment variables
@@ -16,7 +16,7 @@ from app.main import app
 def mock_settings():
     with patch.dict('os.environ', {
         'APP_ENV': 'testing',
-        'SECRET_KEY': 'a_very_secret_key' * 2, # Must be 32 bytes
+        'SECRET_KEY': 'a_very_secret_key_that_is_32_bytes',
         'POSTGRES_USER': 'testuser',
         'POSTGRES_PASSWORD': 'testpassword',
         'POSTGRES_DB': 'testdb',
@@ -47,7 +47,6 @@ def mock_db_session_module():
 def client(mock_db_session_module):
     mock_key_manager = MagicMock()
     mock_key_manager.fernet_key = Fernet.generate_key()
-    # Provide a valid secret key for JWT
     mock_key_manager.jwt_secret_key = os.environ['SECRET_KEY']
 
     with patch('app.main.KeyManager.load_from_settings', return_value=mock_key_manager), \
@@ -181,11 +180,12 @@ def authenticated_client(client):
         full_name="Test User",
         hashed_password="test_password", 
         is_active=True, 
-        created_at=datetime.datetime.now(datetime.timezone.utc)
+        created_at=datetime.datetime.now(datetime.timezone.utc),
+        picture="http://example.com/pic.jpg"
     )
-    app.dependency_overrides[ActiveUserDep] = lambda: mock_user
+    app.dependency_overrides[get_current_user] = lambda: mock_user
     yield client
-    del app.dependency_overrides[ActiveUserDep]
+    del app.dependency_overrides[get_current_user]
 
 def test_read_users_me(authenticated_client):
     response = authenticated_client.get("/auth/users/me")
@@ -193,9 +193,17 @@ def test_read_users_me(authenticated_client):
     json_response = response.json()
     assert json_response["email"] == "test@example.com"
     assert json_response["full_name"] == "Test User"
+    assert json_response["picture"] == "http://example.com/pic.jpg"
 
 def test_update_user_me(authenticated_client, mock_db_session_module):
     update_data = {"full_name": "Updated Test User"}
+    
+    async def refresh_side_effect(user_obj):
+        for key, value in update_data.items():
+            setattr(user_obj, key, value)
+
+    mock_db_session_module.refresh.side_effect = refresh_side_effect
+
     response = authenticated_client.put("/auth/users/me", json=update_data)
     assert response.status_code == 200
     json_response = response.json()
