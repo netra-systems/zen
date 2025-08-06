@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,23 +24,44 @@ const workloadPatterns = [
 export default function SyntheticDataGenerator({ onGenerationComplete }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tables, setTables] = useState<string[]>([]);
   const [generationParams, setGenerationParams] = useState({
     num_traces: 100,
     num_users: 10,
     error_rate: 0.1,
     workload_pattern: "default",
     event_types: "search,login",
-    source_table: "default.content_corpus",
+    source_table: "",
     destination_table: `default.synthetic_data_${Date.now()}`,
   });
+
+  useEffect(() => {
+    const fetchTables = async () => {
+      try {
+        const response = await fetch("/api/v3/generation/clickhouse_tables");
+        if (!response.ok) throw new Error("Failed to fetch tables.");
+        const data = await response.json();
+        setTables(data);
+        const latestCorpusTable = localStorage.getItem("latest_corpus_table");
+        if (latestCorpusTable && data.includes(latestCorpusTable)) {
+          setGenerationParams((prev) => ({ ...prev, source_table: latestCorpusTable }));
+        } else if (data.length > 0) {
+          setGenerationParams((prev) => ({ ...prev, source_table: data[0] }));
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An unknown error occurred.");
+      }
+    };
+    fetchTables();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setGenerationParams((prev) => ({ ...prev, [name]: parseFloat(value) }));
   };
 
-  const handleSelectChange = (value) => {
-    setGenerationParams((prev) => ({ ...prev, workload_pattern: value }));
+  const handleSelectChange = (name: string, value: string) => {
+    setGenerationParams((prev) => ({ ...prev, [name]: value }));
   };
 
   const generateData = async () => {
@@ -104,7 +124,7 @@ export default function SyntheticDataGenerator({ onGenerationComplete }) {
           <div className="space-y-2">
             <Label htmlFor="workload_pattern">Workload Pattern</Label>
             <Select
-              onValueChange={handleSelectChange}
+              onValueChange={(value) => handleSelectChange("workload_pattern", value)}
               defaultValue={generationParams.workload_pattern}
             >
               <SelectTrigger id="workload_pattern">
@@ -131,13 +151,21 @@ export default function SyntheticDataGenerator({ onGenerationComplete }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="source_table">Source Table</Label>
-            <Input
-              id="source_table"
-              name="source_table"
-              type="text"
+            <Select
+              onValueChange={(value) => handleSelectChange("source_table", value)}
               value={generationParams.source_table}
-              onChange={handleInputChange}
-            />
+            >
+              <SelectTrigger id="source_table">
+                <SelectValue placeholder="Select a table" />
+              </SelectTrigger>
+              <SelectContent>
+                {tables.map((table) => (
+                  <SelectItem key={table} value={table}>
+                    {table}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <Button onClick={generateData} disabled={isLoading} className="w-full">

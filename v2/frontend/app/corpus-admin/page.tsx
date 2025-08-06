@@ -72,7 +72,8 @@ export default function AdminPage() {
         try {
             const data: Job = await apiService.get(`${config.api.baseUrl}/generation/jobs/${pollingJobIdRef.current}`, token);
             setJob(data);
-            if (data.status !== 'running' && data.status !== 'pending') {
+            if (data.status === 'completed') {
+                localStorage.setItem('latest_corpus_table', job.params.clickhouse_table);
                 setIsPolling(false);
                 pollingJobIdRef.current = null;
             }
@@ -129,7 +130,7 @@ export default function AdminPage() {
                         title="Generate Content Corpus"
                         description="Generate a new content corpus and store it in ClickHouse."
                         inputFields={[
-                            { id: 'samples_per_type', name: 'samples_per_type', label: 'Samples Per Type', type: 'number', required: true, defaultValue: 10 },
+                            { id: 'samples_per_type', name: 'samples_per_type', label: 'Samples Per Type', type: 'number', required: true, defaultValue: 3 },
                             { id: 'temperature', name: 'temperature', label: 'Temperature', type: 'number', required: true, defaultValue: 0.7 },
                             { id: 'max_cores', name: 'max_cores', label: 'Max Cores', type: 'number', required: true, defaultValue: 4 },
                             { id: 'clickhouse_table', name: 'clickhouse_table', label: 'ClickHouse Table', type: 'text', required: true, defaultValue: 'content_corpus' },

@@ -22,18 +22,32 @@ class JobStore:
             return None
 
     def update(self, job_id: str, status: str, **kwargs):
-        job_data = self.get(job_id) or {}
-        
-        job_data['job_id'] = job_id
-        job_data['status'] = status
-        job_data['last_updated'] = time.time()
-        job_data.update(kwargs)
-
         job_path = self._get_job_path(job_id)
         try:
-            with open(job_path, 'w') as f:
+            with open(job_path, 'r+') as f:
+                if os.name == 'nt':
+                    import msvcrt
+                    msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
+                else:
+                    import fcntl
+                    fcntl.flock(f, fcntl.LOCK_EX)
+
+                job_data = json.load(f) or {}
+                
+                job_data['job_id'] = job_id
+                job_data['status'] = status
+                job_data['last_updated'] = time.time()
+                job_data.update(kwargs)
+
+                f.seek(0)
                 json.dump(job_data, f, indent=4)
-        except IOError:
+                f.truncate()
+
+                if os.name == 'nt':
+                    msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+                else:
+                    fcntl.flock(f, fcntl.LOCK_UN)
+        except (IOError, json.JSONDecodeError):
             # Handle exceptions
             pass
 
@@ -42,7 +56,19 @@ class JobStore:
         job_path = self._get_job_path(job_id)
         try:
             with open(job_path, 'w') as f:
+                if os.name == 'nt':
+                    import msvcrt
+                    msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
+                else:
+                    import fcntl
+                    fcntl.flock(f, fcntl.LOCK_EX)
+
                 json.dump(job_data, f, indent=4)
+
+                if os.name == 'nt':
+                    msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+                else:
+                    fcntl.flock(f, fcntl.LOCK_UN)
         except IOError:
             # Handle exceptions
             pass
