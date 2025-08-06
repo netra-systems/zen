@@ -29,11 +29,18 @@ def update_state(
     Returns:
         The updated state.
     """
+    if state is None:
+        state = {"completed_steps": [], "todo_list": []}
+    if "completed_steps" not in state:
+        state["completed_steps"] = []
+    if "todo_list" not in state:
+        state["todo_list"] = []
     state["completed_steps"].append(completed_step)
     if new_todo:
         state["todo_list"] = new_todo
     else:
-        state["todo_list"].remove(completed_step)
+        if completed_step in state["todo_list"]:
+            state["todo_list"].remove(completed_step)
     return state
 
 @tool
