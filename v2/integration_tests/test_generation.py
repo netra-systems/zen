@@ -6,7 +6,7 @@ from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 from app.main import app
 from app.services.generation_service import GENERATION_JOBS
-from app.db.clickhouse import get_clickhouse_client, ClickHouseClient
+from app.db.clickhouse import get_clickhouse_client
 from app.db.models_clickhouse import get_content_corpus_schema, ContentCorpus
 
 @pytest.fixture(scope="module")
@@ -62,7 +62,7 @@ def test_content_generation_with_custom_table(mock_run_job, test_client):
         time.sleep(0.1)
 
 @patch('app.services.generation_service.run_synthetic_data_generation_job')
-def test_synthetic_data_generation_with_table_selection(mock_run_job, test_client, clickhouse_client: ClickHouseClient):
+def test_synthetic_data_generation_with_table_selection(mock_run_job, test_client, clickhouse_client):
     # Arrange
     source_table = f"test_source_corpus_{uuid.uuid4().hex}"
     destination_table = f"test_destination_data_{uuid.uuid4().hex}"

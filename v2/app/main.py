@@ -10,8 +10,6 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.routes import auth, supply, generation, google_auth, apex_optimizer_agent_route, websocket
 from app.db.postgres import async_session_factory
-from app.db.clickhouse import ClickHouseClient
-from app.db.models_clickhouse import SUPPLY_TABLE_SCHEMA, LOGS_TABLE_SCHEMA
 from app.config import settings
 from app.logging_config import central_logger
 from app.llm.llm_manager import LLMManager
@@ -49,9 +47,6 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     logger.info("Application shutdown...")
-    if hasattr(app.state, 'clickhouse_client') and app.state.clickhouse_client.client.is_active():
-        # The connection is managed by the ClickHouseDatabase object, no need to disconnect manually
-        logger.info("ClickHouse connection will be closed automatically.")
 
 
 
