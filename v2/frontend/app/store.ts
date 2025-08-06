@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { apiService } from './api';
 import { config } from './config';
-import { useEffect, useState } from 'react';
+
 
 interface User {
     id: number;

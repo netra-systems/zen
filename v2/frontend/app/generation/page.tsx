@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, FormEvent, useRef } from 'react';
-import { Zap, HelpCircle } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 
 import { config } from '../config';
 import { Sidebar } from '@/components/Sidebar';
@@ -71,7 +71,7 @@ export default function GenerationPage() {
             try {
                 const data = await apiService.get(`${config.api.baseUrl}/generation/clickhouse_tables`, token);
                 setTables(data);
-            } catch (err) {
+            } catch (error: unknown) {
                 setError('Could not fetch ClickHouse tables.');
             }
         };

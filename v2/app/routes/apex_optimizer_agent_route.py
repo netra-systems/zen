@@ -43,13 +43,18 @@ async def get_agent_status(run_id: str, supervisor: NetraOptimizerAgentSuperviso
     if not state:
         raise HTTPException(status_code=404, detail="Agent run not found")
     
-    return {
+    response = {
         "run_id": run_id,
         "status": state.get("status", "unknown"),
         "current_step": len(state.get("completed_steps", [])),
         "total_steps": len(state.get("todo_list", [])) + len(state.get("completed_steps", [])),
         "last_step_result": state.get("events", [{}])[-1]
     }
+
+    if response["status"] == "failed":
+        response["error_message"] = state.get("error_message")
+
+    return response
 
 @router.get("/{run_id}/events")
 async def get_agent_events(run_id: str, supervisor: NetraOptimizerAgentSupervisor = Depends(get_agent_supervisor)):

@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconn
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.routes import auth, supply, generation, google_auth, apex_optimizer_agent_route, websocket, streaming_agent_route
+from app.routes import auth, supply, generation, google_auth, apex_optimizer_agent_route, websocket, streaming_agent_route, admin
 from app.db.postgres import async_session_factory
 from app.config import settings
 from app.logging_config import central_logger
@@ -85,6 +85,7 @@ app.include_router(google_auth.router, tags=["google_auth"])
 app.include_router(apex_optimizer_agent_route.router, prefix="/api/v3/apex/chat", tags=["apex/chat"])
 app.include_router(streaming_agent_route.router, prefix="/api/v3/streaming_agent", tags=["streaming_agent"])
 app.include_router(websocket.router, prefix="/ws", tags=["websockets"])
+app.include_router(admin.router, prefix="/api/v3/admin", tags=["admin"])
 
 # Add a new websocket route for development that bypasses authentication
 from app.auth_dependencies import ActiveUserWsDep

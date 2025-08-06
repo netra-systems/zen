@@ -3,7 +3,7 @@
 import React from 'react';
 import { Button } from "./ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
-import { Zap, Settings, RefreshCw, BarChart2, HelpCircle } from 'lucide-react';
+import { Zap, Settings, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export const ControlPanel = () => {

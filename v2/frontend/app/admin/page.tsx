@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, FormEvent, useRef } from 'react';
-import { Zap, HelpCircle } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card';
 
 import { config } from '@/config';

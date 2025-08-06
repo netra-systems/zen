@@ -1,6 +1,5 @@
-
 import os
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from google.cloud import secretmanager
 from typing import List, Dict, Optional
 from app.llm.schemas import LLMConfig
@@ -12,7 +11,6 @@ class SecretReference(BaseModel):
     project_id: str = "304612253870"
     version: str = "latest"
 
-# https://console.cloud.google.com/security/secret-manager?inv=1&invt=Ab4muw&project=cryptic-net-466001-n0
 SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="gemini-api-key", target_model="llm_configs.default", target_field="api_key"),
     SecretReference(name="google-client-id", target_model="google_cloud", target_field="client_id"),
@@ -79,11 +77,16 @@ class ClickHouseHTTPSDevConfig(BaseModel):
     user: str = "development_user"
     password: str = ""
     database: str = "development"
+    superuser: bool = True
 
 
 class ClickHouseLoggingConfig(BaseModel):
     enabled: bool = True
-    table: str = "logs"
+    default_table: str = "logs"
+    default_time_period_days: int = 7
+    available_tables: List[str] = Field(default_factory=lambda: ["logs"])
+    default_tables: Dict[str, str] = Field(default_factory=lambda: {})
+    available_time_periods: List[int] = Field(default_factory=lambda: [1, 7, 30, 90])
 
 
 class LangfuseConfig(BaseModel):
@@ -207,7 +210,6 @@ def get_settings() -> AppConfig:
     return config
 
 settings = get_settings()
-# The following line is for debugging and will print the loaded settings.
-# In a real application, you would just export 'settings'.
+
 if settings.log_secrets:
     print(settings.model_dump_json(indent=2))

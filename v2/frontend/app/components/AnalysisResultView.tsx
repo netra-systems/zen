@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
 import { HelpCircle } from 'lucide-react';
 
 export const AnalysisResultView = () => (

@@ -5,7 +5,7 @@ from app.llm.llm_manager import LLMManager
 from app.services.deepagents.tool_dispatcher import ToolDispatcher
 from app.logging_config import central_logger, LogEntry
 import json
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import BaseMessage, ToolMessage
 
 class MessageEncoder(json.JSONEncoder):
     def default(self, o):
@@ -44,6 +44,9 @@ class SingleAgentTeam:
         messages = state.get("messages", [])
         if messages:
             last_message = messages[-1]
+            if isinstance(last_message, ToolMessage) and last_message.is_error:
+                central_logger.log(LogEntry(event="route_to_agent_error", data={"state": state}))
+                return "end"
             if "FINISH" in last_message.content:
                 central_logger.log(LogEntry(event="route_to_agent_finish", data={"state": state}))
                 return "end"
