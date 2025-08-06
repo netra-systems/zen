@@ -148,7 +148,7 @@ async def list_clickhouse_tables() -> List[str]:
                 logger.error("Failed to get ClickHouse client.")
                 raise HTTPException(status_code=500, detail="Failed to get ClickHouse client.")
             logger.info("Successfully acquired ClickHouse client.")
-            result = await client.execute("SHOW TABLES")
+            result = await client.execute_query("SHOW TABLES")
             logger.info(f"Successfully executed 'SHOW TABLES' query. Result: {result}")
             if result:
                 table_names = [row[0] for row in result]
