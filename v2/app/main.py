@@ -4,7 +4,7 @@ logging.getLogger("faker").setLevel(logging.WARNING)
 
 import sys
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
