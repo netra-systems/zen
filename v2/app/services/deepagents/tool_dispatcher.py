@@ -1,24 +1,24 @@
 from typing import List
 from langchain_core.tools import BaseTool
 from langchain_core.messages import ToolMessage
-from app.logging_config_custom.logger import app_logger
+from app.logging_config import central_logger, LogEntry
 
 class ToolDispatcher:
     def __init__(self, tools: List[BaseTool]):
         self.tools = {tool.name: tool for tool in tools}
 
     def dispatch(self, tool_name: str, **kwargs):
-        app_logger.info(f"Dispatching tool '{tool_name}' with args: {kwargs}")
+        central_logger.log(LogEntry(event="dispatch_tool", data={"tool_name": tool_name, "kwargs": kwargs}))
         if tool_name in self.tools:
             try:
                 result = self.tools[tool_name].run(tool_input=kwargs)
-                app_logger.info(f"Tool '{tool_name}' executed successfully with result: {result}")
+                central_logger.log(LogEntry(event="tool_executed", data={"tool_name": tool_name, "result": result}))
                 return result
             except Exception as e:
-                app_logger.error(f"Error executing tool '{tool_name}': {e}")
+                central_logger.log(LogEntry(event="tool_error", data={"tool_name": tool_name, "error": str(e)}))
                 return f"Error executing tool '{tool_name}': {e}"
         else:
-            app_logger.warning(f"Tool '{tool_name}' not found.")
+            central_logger.log(LogEntry(event="tool_not_found", data={"tool_name": tool_name}))
             return f"Tool '{tool_name}' not found."
 
     def as_runnable(self):

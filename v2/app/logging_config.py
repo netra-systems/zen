@@ -6,10 +6,12 @@ from loguru import logger
 from pydantic import BaseModel, Field
 from typing import Optional, Any, Dict
 from logging import Handler
+import asyncio
 
 # ClickHouse
 from app.db.clickhouse_base import ClickHouseDatabase
 from app.config import settings
+from app.websocket import manager
 
 class LogEntry(BaseModel):
     """Pydantic model for a single log entry."""
@@ -46,14 +48,10 @@ class FrontendStreamHandler(Handler):
     """A logging handler that streams logs to the frontend."""
     
     def emit(self, record):
-        # This is a placeholder for the actual implementation
-        # that will send logs to the frontend, e.g., via WebSockets.
         try:
             log_entry = self.format(record)
             if isinstance(log_entry, LogEntry):
-                # In a real application, this would publish the message to a queue
-                # or directly to a WebSocket manager.
-                print(f"FRONTEND_LOG: {log_entry.json()}")
+                asyncio.create_task(manager.broadcast(log_entry.json()))
         except Exception as e:
             print(f"Failed to stream log to frontend: {e}", file=sys.stderr)
 
@@ -90,24 +88,25 @@ class CentralLogger:
     def _initialize_services(self):
         """Initializes external logging services like Langfuse and ClickHouse."""
         # ClickHouse
-        try:
-            self.clickhouse_db = ClickHouseDatabase(
-                host=settings.clickhouse_https_dev.host,
-                port=settings.clickhouse_https_dev.port,
-                user=settings.clickhouse_https_dev.user,
-                password=settings.clickhouse_https_dev.password,
-                database=settings.clickhouse_https_dev.database,
-                secure=True
-            )
-            # Verify connection
-            self.clickhouse_db.client.ping()
-            self.logger.info("ClickHouse connection verified.")
-            # Add ClickHouse handler
-            ch_handler = ClickHouseHandler(self.clickhouse_db, table_name="logs")
-            self.logger.add(ch_handler, level="INFO", format=lambda record: record)
-        except Exception as e:
-            self.logger.error(f"Failed to initialize ClickHouse: {e}")
-            self.clickhouse_db = None
+        if settings.clickhouse_logging.enabled:
+            try:
+                self.clickhouse_db = ClickHouseDatabase(
+                    host=settings.clickhouse_https_dev.host,
+                    port=settings.clickhouse_https_dev.port,
+                    user=settings.clickhouse_https_dev.user,
+                    password=settings.clickhouse_https_dev.password,
+                    database=settings.clickhouse_https_dev.database,
+                    secure=True
+                )
+                # Verify connection
+                self.clickhouse_db.client.ping()
+                self.logger.info("ClickHouse connection verified.")
+                # Add ClickHouse handler
+                ch_handler = ClickHouseHandler(self.clickhouse_db, table_name=settings.clickhouse_logging.table)
+                self.logger.add(ch_handler, level="INFO", format=lambda record: record)
+            except Exception as e:
+                self.logger.error(f"Failed to initialize ClickHouse: {e}")
+                self.clickhouse_db = None
         
         # Add Frontend Stream Handler
         frontend_handler = FrontendStreamHandler()
@@ -143,19 +142,3 @@ central_logger = CentralLogger()
 
 def get_central_logger() -> CentralLogger:
     return central_logger
-
-# Example Usage:
-if __name__ == "__main__":
-    # This demonstrates how to use the central logger from anywhere in the application.
-    
-    # Get the logger instance
-    log_manager = get_central_logger()
-
-    # Log a simple event
-    log_manager.log(LogEntry(
-        event="application_startup",
-        data={"message": "Application is starting up."},
-        user_id="system"
-    ))
-
-    log_manager.logger.info("This is a standard info message through Loguru.")
