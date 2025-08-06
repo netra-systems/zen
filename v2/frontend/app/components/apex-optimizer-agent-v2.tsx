@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ChatWindow } from './chat/ChatWindow';
 import { useAgentStreaming } from '../hooks/useAgentStreaming';
+import { getToken } from '../lib/user';
 
 const exampleQueries = [
   "Analyze the current state of the S&P 500 and provide a summary of its recent performance.",
@@ -15,7 +16,7 @@ const exampleQueries = [
 ];
 
 export default function ApexOptimizerAgentV2() {
-  const { isLoading, error, messages, startAgent } = useAgentStreaming();
+  const { isLoading, error, messages, startAgent } = useAgentStreaming(async () => getToken());
 
   const handleSendMessage = async (message: string) => {
     await startAgent(message);
