@@ -1,7 +1,7 @@
 import json
 import time
 import logging
-from app.db.clickhouse import ClickHouseClient
+from app.db.clickhouse_base import ClickHouseDatabase
 
 def prepare_data_for_insert(flattened_records: list[dict]) -> tuple[list[str], list[list]]:
     """
@@ -46,7 +46,7 @@ def _flatten_json_first_level(nested_json, sep='_'):
             items[k] = v
     return items
 
-def ingest_records(client: ClickHouseClient, records: list[dict], table_name: str) -> int:
+def ingest_records(client: ClickHouseDatabase, records: list[dict], table_name: str) -> int:
     """
     Ingests a list of in-memory records into a specified ClickHouse table using an active client.
     """
