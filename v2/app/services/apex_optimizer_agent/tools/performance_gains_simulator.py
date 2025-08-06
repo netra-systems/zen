@@ -7,7 +7,7 @@ class LearnedPolicy(BaseModel):
     optimal_supply_option_name: str = Field(..., description="The name of the optimal supply option.")
 
 @tool
-async def performance_gains_simulator(learned_policies: List[LearnedPolicy], policy_simulator: any) -> str:
+async def performance_gains_simulator(learned_policies: List[LearnedPolicy], db_session: Any, llm_manager: Any, policy_simulator: any) -> str:
     """Simulates the performance gains of an optimized function."""
     total_predicted_latency = 0
     for policy in learned_policies:

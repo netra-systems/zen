@@ -1,7 +1,7 @@
 from langchain_core.tools import tool
 
 @tool
-async def optimized_implementation_proposer(function_name: str, llm_connector: any) -> str:
+async def optimized_implementation_proposer(function_name: str, db_session: Any, llm_manager: Any, llm_connector: any) -> str:
     """Proposes an optimized implementation for a function."""
     prompt = f"""
     Given the function '{function_name}', propose an optimized implementation.

@@ -2,7 +2,7 @@ from langchain_core.tools import tool
 from typing import Any, Dict
 
 @tool
-async def code_analyzer(request: Dict[str, Any], code_analyzer: any) -> str:
+async def code_analyzer(request: Dict[str, Any], db_session: Any, llm_manager: Any, code_analyzer: any) -> str:
     """
     Analyzes the code of a specific function.
     """

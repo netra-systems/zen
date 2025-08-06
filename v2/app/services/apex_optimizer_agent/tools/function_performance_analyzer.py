@@ -6,7 +6,7 @@ class Log(BaseModel):
     request: dict = Field(..., description="The request data for the log.")
 
 @tool
-async def function_performance_analyzer(logs: List[Log], function_name: str, performance_predictor: any) -> str:
+async def function_performance_analyzer(logs: List[Log], function_name: str, db_session: Any, llm_manager: Any, performance_predictor: any) -> str:
     """Analyzes the performance of a specific function."""
     total_latency = 0
     function_logs = [log for log in logs if function_name in log.request.prompt_text]

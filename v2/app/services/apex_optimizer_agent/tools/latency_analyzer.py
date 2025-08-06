@@ -6,7 +6,7 @@ class Log(BaseModel):
     request: dict = Field(..., description="The request data for the log.")
 
 @tool
-async def latency_analyzer(logs: List[Log], performance_predictor: any) -> str:
+async def latency_analyzer(logs: List[Log], db_session: Any, llm_manager: Any, performance_predictor: any) -> str:
     """Analyzes the current latency of the system."""
     total_latency = 0
     for log in logs:

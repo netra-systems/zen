@@ -7,7 +7,7 @@ class Pattern(BaseModel):
     description: str = Field(..., description="A description of the pattern.")
 
 @tool
-async def optimal_policy_proposer(patterns: List[Pattern], policy_proposer: any) -> str:
+async def optimal_policy_proposer(patterns: List[Pattern], db_session: Any, llm_manager: Any, policy_proposer: any) -> str:
     """
     Proposes optimal policies based on the clustered logs.
     """

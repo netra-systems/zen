@@ -7,7 +7,7 @@ class LearnedPolicy(BaseModel):
     optimal_supply_option_name: str = Field(..., description="The name of the optimal supply option.")
 
 @tool
-async def quality_impact_simulator(learned_policies: List[LearnedPolicy], policy_simulator: any) -> str:
+async def quality_impact_simulator(learned_policies: List[LearnedPolicy], db_session: Any, llm_manager: Any, policy_simulator: any) -> str:
     """Simulates the impact of optimizations on quality."""
     total_predicted_quality = 0
     for policy in learned_policies:

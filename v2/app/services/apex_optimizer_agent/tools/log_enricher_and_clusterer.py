@@ -8,7 +8,7 @@ class RawLog(BaseModel):
     trace_context: Any = Field(..., description="The trace context for the LLM call.")
 
 @tool
-async def log_enricher_and_clusterer(raw_logs: List[RawLog], log_pattern_identifier: any) -> str:
+async def log_enricher_and_clusterer(raw_logs: List[RawLog], db_session: Any, llm_manager: Any, log_pattern_identifier: any) -> str:
     """Enriches logs and applies KMeans clustering."""
     if not raw_logs:
         return "No logs to enrich and cluster."

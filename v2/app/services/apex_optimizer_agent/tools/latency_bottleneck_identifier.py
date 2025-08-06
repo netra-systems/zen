@@ -6,7 +6,7 @@ class Log(BaseModel):
     request: dict = Field(..., description="The request data for the log.")
 
 @tool
-async def latency_bottleneck_identifier(logs: List[Log], performance_predictor: any) -> str:
+async def latency_bottleneck_identifier(logs: List[Log], db_session: Any, llm_manager: Any, performance_predictor: any) -> str:
     """Identifies the main latency bottlenecks in the system."""
     latency_bottlenecks = {}
     for log in logs:

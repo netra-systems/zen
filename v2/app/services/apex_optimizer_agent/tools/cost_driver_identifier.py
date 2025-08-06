@@ -6,7 +6,7 @@ class Log(BaseModel):
     request: dict = Field(..., description="The request data for the log.")
 
 @tool
-async def cost_driver_identifier(logs: List[Log], cost_estimator: any) -> str:
+async def cost_driver_identifier(logs: List[Log], db_session: Any, llm_manager: Any, cost_estimator: any) -> str:
     """Identifies the main drivers of cost in the system."""
     cost_drivers = {}
     for log in logs:

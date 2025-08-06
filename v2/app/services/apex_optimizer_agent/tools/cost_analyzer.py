@@ -6,7 +6,7 @@ class Log(BaseModel):
     request: dict = Field(..., description="The request data for the log.")
 
 @tool
-async def cost_analyzer(logs: List[Log], cost_estimator: any) -> str:
+async def cost_analyzer(logs: List[Log], db_session: any, llm_manager: any, cost_estimator: any) -> str:
     """Analyzes the current costs of the system."""
     total_cost = 0
     for log in logs:

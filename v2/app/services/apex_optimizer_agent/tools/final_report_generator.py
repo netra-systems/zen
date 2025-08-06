@@ -11,7 +11,7 @@ class PredictedOutcome(BaseModel):
     explanation: str = Field(..., description="The explanation of the outcome.")
 
 @tool
-async def final_report_generator(learned_policies: List[LearnedPolicy], predicted_outcomes: List[PredictedOutcome]) -> str:
+async def final_report_generator(learned_policies: List[LearnedPolicy], predicted_outcomes: List[PredictedOutcome], db_session: Any, llm_manager: Any) -> str:
     """Generates a human-readable summary of the analysis."""
     if not learned_policies:
         raise ValueError("Cannot generate a report without learned policies.")
