@@ -3,9 +3,11 @@ from langchain_core.tools import BaseTool
 from app.llm.llm_manager import LLMManager
 from app.services.deepagents.prompts import get_agent_prompt
 from app.services.deepagents.state import DeepAgentState
-from app.logging_config_custom.logger import app_logger
+from app.logging_config import central_logger
 import json
 from langchain_core.messages import BaseMessage
+
+app_logger = central_logger.get_logger(__name__)
 
 class MessageEncoder(json.JSONEncoder):
     def default(self, o):

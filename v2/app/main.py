@@ -13,17 +13,9 @@ from app.db.postgres import async_session_factory
 from app.db.clickhouse import ClickHouseClient
 from app.db.models_clickhouse import SUPPLY_TABLE_SCHEMA, LOGS_TABLE_SCHEMA
 from app.config import settings
-from app.logging_config_custom.logger import logger, Formatter
-from app.logging_config_custom.clickhouse_logger import ClickHouseLogHandler
+from app.logging_config import central_logger
 from app.llm.llm_manager import LLMManager
 from app.services.apex_optimizer_agent.supervisor import NetraOptimizerAgentSupervisor
-
-def setup_logging():
-    """Initializes the application's logging configuration."""
-    logger.remove()
-    logger.add(sys.stdout, level=settings.log_level, format=Formatter().format)
-    logger.info("Logging configured.")
-
 from app.services.key_manager import KeyManager
 from app.services.security_service import SecurityService
 
@@ -34,7 +26,7 @@ async def lifespan(app: FastAPI):
     Manages the application's startup and shutdown events.
     """
     # Startup
-    setup_logging()
+    logger = central_logger.get_logger(__name__)
     logger.info("Application startup...")
 
     key_manager = KeyManager.load_from_settings(settings)
@@ -44,33 +36,9 @@ async def lifespan(app: FastAPI):
     # Initialize LLMManager
     app.state.llm_manager = LLMManager(settings)
 
-    # Initialize and connect to ClickHouse
-    ch_client = ClickHouseClient(
-        host=settings.clickhouse_https.host,
-        port=settings.clickhouse_https.port,
-        database=settings.clickhouse_https.database,
-        user=settings.clickhouse_https.user,
-        password=settings.clickhouse_https.password
-    )
-    logger.info(f"Connecting to ClickHouse at {settings.clickhouse_https.host}:{settings.clickhouse_https.port}")
-    try:
-        await ch_client.connect()
-        logger.info("ClickHouse connected.")
-        # Create tables if they don't exist
-        await ch_client.command(SUPPLY_TABLE_SCHEMA)
-        await ch_client.command(LOGS_TABLE_SCHEMA)
-        app.state.clickhouse_client = ch_client
+    # The ClickHouse client is now managed by the central_logger
+    app.state.clickhouse_client = central_logger.clickhouse_db
 
-        # Add the ClickHouse handler to the root logger for the application
-        ch_handler = ClickHouseLogHandler(client=ch_client)
-        logging.getLogger("netra-core").addHandler(ch_handler)
-        logger.info("ClickHouse logging handler initialized.")
-
-    except Exception as e:
-        logger.error(f"Failed to connect or setup ClickHouse: {e}", exc_info=True)
-        # Re-raise the exception to prevent the application from starting in a bad state
-        raise
-    
     # Initialize Postgres
     app.state.db_session_factory = async_session_factory
 
@@ -81,9 +49,10 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     logger.info("Application shutdown...")
-    if hasattr(app.state, 'clickhouse_client') and await app.state.clickhouse_client.is_connected():
-        await app.state.clickhouse_client.disconnect()
-        logger.info("ClickHouse disconnected.")
+    if hasattr(app.state, 'clickhouse_client') and app.state.clickhouse_client.client.is_active():
+        # The connection is managed by the ClickHouseDatabase object, no need to disconnect manually
+        logger.info("ClickHouse connection will be closed automatically.")
+
 
 
 from fastapi.middleware.cors import CORSMiddleware

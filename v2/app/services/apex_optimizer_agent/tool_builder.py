@@ -26,7 +26,7 @@ from app.services.deepagents.tools import update_state
 
 class ToolBuilder:
     @staticmethod
-    def build_all(db_session: any, llm_manager: LLMManager) -> Dict[str, Any]:
+    def build_all(db_session: Any, llm_manager: LLMManager) -> Dict[str, Any]:
         all_tools = {
             "cost_analyzer": cost_analyzer,
             "latency_analyzer": latency_analyzer,
