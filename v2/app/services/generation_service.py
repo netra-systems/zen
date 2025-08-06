@@ -121,6 +121,16 @@ async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str =
 # --- Content Generation Service ---
 from .generation_worker import init_worker, generate_content_for_worker
 
+# A sentinel value to signal the end of the generator
+_sentinel = object()
+
+def _next_item(it):
+    """A helper function to safely get the next item from a generator."""
+    try:
+        return next(it)
+    except StopIteration:
+        return _sentinel
+
 def run_generation_in_pool(tasks, num_processes):
     with Pool(processes=num_processes, initializer=init_worker) as pool:
         for result in pool.imap_unordered(generate_content_for_worker, tasks):
@@ -160,12 +170,19 @@ async def run_content_generation_job(job_id: str, params: dict):
 
     try:
         loop = asyncio.get_event_loop()
-        async for result in loop.run_in_executor(None, run_generation_in_pool, tasks, num_processes):
+        blocking_generator = run_generation_in_pool(tasks, num_processes)
+        
+        while True:
+            result = await loop.run_in_executor(None, _next_item, blocking_generator)
+            if result is _sentinel:
+                break
+
             if result and result.get('type') in corpus:
                 corpus[result['type']].append(result['data'])
             
             completed_tasks += 1
             await update_job_status(job_id, "running", progress=completed_tasks)
+
     except Exception as e:
         logging.exception("An error occurred during content generation.")
         await update_job_status(job_id, "failed", error=f"A worker process failed: {e}")
