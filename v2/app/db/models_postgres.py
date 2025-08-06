@@ -101,3 +101,15 @@ class ApexOptimizerAgentRunReport(Base):
     run_id = Column(String, index=True, unique=True, nullable=False)
     report = Column(String, nullable=False)
     timestamp = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
+
+class Reference(Base):
+    __tablename__ = "references"
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = Column(String, index=True, nullable=False)  # backend literal name
+    friendly_name = Column(String, nullable=False)  # user-facing name
+    description = Column(String, nullable=True)
+    type = Column(String, nullable=False)  # e.g., 'source', 'time_period'
+    value = Column(String, nullable=False)
+    version = Column(String, nullable=False, default="1.0")
+    created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))

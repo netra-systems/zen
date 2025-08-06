@@ -31,7 +31,7 @@ export function ChatInput() {
     };
 
     const handleReferenceClick = (reference: any) => {
-        setInputValue(inputValue.slice(0, -1) + ` @${reference.name} `);
+        setInputValue(inputValue.slice(0, -1) + ` @${reference.friendly_name} `);
         setSelectedReferences([...selectedReferences, reference]);
         setShowReferences(false);
     };
@@ -79,11 +79,12 @@ export function ChatInput() {
                 <ul className="absolute bottom-full left-0 w-full bg-white border rounded shadow-lg">
                     {references.map((ref) => (
                         <li
-                            key={ref.name}
+                            key={ref.id}
                             className="p-2 cursor-pointer hover:bg-gray-200"
                             onClick={() => handleReferenceClick(ref)}
                         >
-                            {ref.name}
+                            <strong>{ref.friendly_name}</strong> ({ref.type})
+                            <p>{ref.description}</p>
                         </li>
                     ))}
                 </ul>

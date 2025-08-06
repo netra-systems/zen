@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconn
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.routes import auth, supply, generation, google_auth, apex_optimizer_agent_route, websocket, streaming_agent_route, admin, references
+from app.routes import auth, supply, generation, google_auth, apex_optimizer_agent_route, websocket, streaming_agent_route, admin, references, agent
 from app.db.postgres import async_session_factory
 from app.config import settings
 from app.logging_config import central_logger
@@ -45,6 +45,7 @@ async def lifespan(app: FastAPI):
     # Initialize the agent supervisor
     app.state.agent_supervisor = NetraOptimizerAgentSupervisor(app.state.db_session_factory, app.state.llm_manager)
     app.state.streaming_agent_supervisor = StreamingAgentSupervisor(app.state.db_session_factory, app.state.llm_manager, websocket_manager)
+    app.state.agent_service = AgentService(app.state.streaming_agent_supervisor)
 
     yield
     
@@ -86,6 +87,7 @@ app.include_router(apex_optimizer_agent_route.router, prefix="/api/v3/apex/chat"
 app.include_router(streaming_agent_route.router, prefix="/api/v3/streaming_agent", tags=["streaming_agent"])
 app.include_router(websocket.router, prefix="/ws", tags=["websockets"])
 app.include_router(admin.router, prefix="/api/v3", tags=["admin"])
+app.include_router(agent.router, prefix="/agent", tags=["agent"])
 app.include_router(references.router, prefix="/api/v3", tags=["references"])
 
 # Add a new websocket route for development that bypasses authentication
