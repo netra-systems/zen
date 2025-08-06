@@ -1,21 +1,22 @@
 from langchain_core.tools import tool
 from typing import List, Any
 from pydantic import BaseModel, Field
+from app.services.context import ToolContext
 
 class Log(BaseModel):
     request: dict = Field(..., description="The request data for the log.")
 
 @tool
-async def function_performance_analyzer(logs: List[Log], function_name: str, db_session: Any, llm_manager: Any, performance_predictor: any) -> str:
+async def function_performance_analyzer(context: ToolContext, function_name: str) -> str:
     """Analyzes the performance of a specific function."""
     total_latency = 0
-    function_logs = [log for log in logs if function_name in log.request.prompt_text]
+    function_logs = [log for log in context.logs if function_name in log.request.prompt_text]
     
     if not function_logs:
         return f"No logs found for function: {function_name}"
     
     for log in function_logs:
-        latency_result = await performance_predictor.execute(log.request.prompt_text, log.model_dump())
+        latency_result = await context.performance_predictor.execute(log.request.prompt_text, log.model_dump())
         total_latency += latency_result["predicted_latency_ms"]
     
     average_latency = total_latency / len(function_logs)

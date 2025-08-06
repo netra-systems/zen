@@ -1,6 +1,7 @@
 from langchain_core.tools import tool
 from typing import List, Any
 from pydantic import BaseModel, Field
+from app.services.context import ToolContext
 
 class LearnedPolicy(BaseModel):
     pattern_name: str = Field(..., description="The name of the pattern.")
@@ -11,7 +12,7 @@ class PredictedOutcome(BaseModel):
     explanation: str = Field(..., description="The explanation of the outcome.")
 
 @tool
-async def final_report_generator(learned_policies: List[LearnedPolicy], predicted_outcomes: List[PredictedOutcome], db_session: Any, llm_manager: Any) -> str:
+async def final_report_generator(context: ToolContext, learned_policies: List[LearnedPolicy], predicted_outcomes: List[PredictedOutcome]) -> str:
     """Generates a human-readable summary of the analysis."""
     if not learned_policies:
         raise ValueError("Cannot generate a report without learned policies.")
