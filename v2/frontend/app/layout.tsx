@@ -31,15 +31,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  if (isLoading && !user) {
-    return (
-      <html lang="en" suppressHydrationWarning>
-        <body className={cn('min-h-screen bg-background font-sans antialiased', inter.className)}>
-          <div>Loading...</div>
-        </body>
-      </html>
-    );
-  }
 
   if (!user && pathname !== '/login' && process.env.NODE_ENV !== 'development') {
     router.push('/login');
