@@ -2,7 +2,7 @@ from typing import List
 from langchain_core.tools import BaseTool
 from langchain_core.messages import ToolMessage
 from app.logging_config import central_logger, LogEntry
-from app.services.apex_optimizer_agent.models import ToolResult, ToolStatus
+from app.services.apex_optimizer_agent.models import ToolResult, ToolStatus, ToolInput
 import asyncio
 
 class ToolDispatcher:
@@ -11,27 +11,28 @@ class ToolDispatcher:
 
     async def dispatch(self, tool_name: str, **kwargs):
         central_logger.log(LogEntry(event="dispatch_tool", data={"tool_name": tool_name, "kwargs": kwargs}))
+        tool_input = ToolInput(tool_name=tool_name, kwargs=kwargs)
         if tool_name in self.tools:
             try:
                 # Check if the tool is async
                 if asyncio.iscoroutinefunction(self.tools[tool_name].ainvoke):
-                    result = await self.tools[tool_name].ainvoke(tool_input=kwargs)
+                    result = await self.tools[tool_name].ainvoke(kwargs)
                 else:
-                    result = self.tools[tool_name].invoke(tool_input=kwargs)
+                    result = self.tools[tool_name].invoke(kwargs)
                 
                 if isinstance(result, ToolResult):
                     central_logger.log(LogEntry(event="tool_executed", data={"tool_name": tool_name, "result_status": result.status, "result_message": result.message}))
                     return result
                 else:
                     central_logger.log(LogEntry(event="tool_executed", data={"tool_name": tool_name, "result": result}))
-                    return ToolResult(status=ToolStatus.SUCCESS, message="Tool executed successfully.", payload=result)
+                    return ToolResult(tool_input=tool_input, status=ToolStatus.SUCCESS, message="Tool executed successfully.", payload=result)
 
             except Exception as e:
                 central_logger.log(LogEntry(event="tool_error", data={"tool_name": tool_name, "error": str(e)}))
-                return ToolResult(status=ToolStatus.ERROR, message=f"Error executing tool '{tool_name}': {e}")
+                return ToolResult(tool_input=tool_input, status=ToolStatus.ERROR, message=f"Error executing tool '{tool_name}': {e}")
         else:
             central_logger.log(LogEntry(event="tool_not_found", data={"tool_name": tool_name}))
-            return ToolResult(status=ToolStatus.ERROR, message=f"Tool '{tool_name}' not found.")
+            return ToolResult(tool_input=tool_input, status=ToolStatus.ERROR, message=f"Tool '{tool_name}' not found.")
 
     def as_runnable(self):
         async def dispatch_node(state):

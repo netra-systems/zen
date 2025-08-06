@@ -1,31 +1,43 @@
 import pytest
-from functools import partial
+from unittest.mock import MagicMock, AsyncMock
 from app.services.apex_optimizer_agent.tool_builder import ToolBuilder
-from app.llm.llm_manager import LLMManager
-from unittest.mock import MagicMock
+from app.services.deepagents.tool_dispatcher import ToolDispatcher
 from app.services.context import ToolContext
-from app.services.deepagents.state import DeepAgentState
-from app.services.supply_catalog_service import SupplyCatalogService
+from langchain_core.tools import StructuredTool
 
-@pytest.fixture
-def mock_tool_context():
-    return ToolContext(
-        db_session=MagicMock(),
-        llm_manager=MagicMock(spec=LLMManager),
-        cost_estimator=MagicMock(),
-        state=MagicMock(spec=DeepAgentState),
-        supply_catalog=MagicMock(spec=SupplyCatalogService),
-        logs=[]
-    )
+@pytest.mark.asyncio
+async def test_tool_builder_and_dispatcher():
+    # Create a mock context
+    mock_context = MagicMock(spec=ToolContext)
+    mock_context.db_session = AsyncMock()
+    mock_context.llm_manager = MagicMock()
+    mock_context.cost_estimator = MagicMock()
+    mock_context.state = MagicMock()
+    mock_context.supply_catalog = MagicMock()
 
-def test_all_tools_have_name_and_dunder_name_attributes(mock_tool_context):
-    all_tools, _ = ToolBuilder.build_all(mock_tool_context)
-    for name, tool in all_tools.items():
-        assert hasattr(tool, 'name'), f"Tool {name} is missing name attribute"
-        assert hasattr(tool, '__name__'), f"Tool {name} is missing __name__ attribute"
+    # Build the tools
+    bound_tools, _ = ToolBuilder.build_all(mock_context)
 
-def test_tool_name_attributes_match_key(mock_tool_context):
-    all_tools, _ = ToolBuilder.build_all(mock_tool_context)
-    for name, tool in all_tools.items():
-        assert tool.name == name, f"Tool {name} has mismatched name: {tool.name}"
-        assert tool.__name__ == name, f"Tool {name} has mismatched __name__: {tool.__name__}"
+    # Check that all tools are StructuredTool instances
+    for tool_name, tool in bound_tools.items():
+        assert isinstance(tool, StructuredTool), f"Tool {tool_name} is not a StructuredTool"
+
+    # Create a ToolDispatcher with the built tools
+    tool_dispatcher = ToolDispatcher(tools=list(bound_tools.values()))
+
+    # Get the cost_analyzer tool
+    cost_analyzer_tool = bound_tools.get("cost_analyzer")
+    assert cost_analyzer_tool is not None, "cost_analyzer tool not found"
+
+    # Mock the tool's coroutine
+    cost_analyzer_tool.coroutine = AsyncMock(return_value="Success")
+
+    # Dispatch the tool
+    result = await tool_dispatcher.dispatch("cost_analyzer")
+
+    # Assert the result
+    assert result.status == "SUCCESS"
+    assert result.payload == "Success"
+
+    # Verify that the coroutine was called
+    cost_analyzer_tool.coroutine.assert_called_once()

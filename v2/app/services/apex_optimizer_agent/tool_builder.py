@@ -1,5 +1,8 @@
+import inspect
 from typing import Any, Dict
-from functools import partial
+from langchain_core.tools import StructuredTool
+from pydantic import create_model, BaseModel
+import asyncio
 
 from app.services.context import ToolContext
 from app.services.apex_optimizer_agent.tools.cost_analyzer import cost_analyzer
@@ -24,6 +27,13 @@ from app.services.apex_optimizer_agent.tools.rate_limit_impact_simulator import 
 from app.services.apex_optimizer_agent.tools.performance_gains_simulator import performance_gains_simulator
 from app.services.apex_optimizer_agent.tools.policy_simulator import policy_simulator
 from app.services.apex_optimizer_agent.tools.finish import finish
+
+def create_async_tool_wrapper(tool_func, context):
+    async def wrapper(**kwargs):
+        # LangChain automatically adds this, so we filter it out
+        kwargs.pop('callbacks', None)
+        return await tool_func(context, **kwargs)
+    return wrapper
 
 class ToolBuilder:
     @staticmethod
@@ -55,8 +65,29 @@ class ToolBuilder:
         
         bound_tools = {}
         for name, tool_func in all_tools.items():
-            bound_tools[name] = partial(tool_func, context)
-            setattr(bound_tools[name], 'name', name)
-            setattr(bound_tools[name], '__name__', name)
+            sig = inspect.signature(tool_func)
+            params = [p for p in sig.parameters.values() if p.name not in ['context', 'callbacks']]
+            
+            fields = {}
+            for p in params:
+                if p.default is inspect.Parameter.empty:
+                    fields[p.name] = (p.annotation, ...)
+                else:
+                    fields[p.name] = (p.annotation, p.default)
+            
+            args_schema = create_model(
+                f"{name}_args", 
+                **fields,
+                __base__=BaseModel
+            )
 
+            tool = StructuredTool(
+                name=name,
+                description=tool_func.__doc__,
+                args_schema=args_schema,
+                coroutine=create_async_tool_wrapper(tool_func, context),
+                func=None
+            )
+            bound_tools[name] = tool
+            
         return bound_tools, {}

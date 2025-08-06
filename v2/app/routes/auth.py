@@ -38,13 +38,14 @@ from ..services.security_service import get_password_hash, verify_password
         }
     }
 })
-def login_for_access_token(request: Request, form_data: OAuthFormDep, db: DbDep):
+async def login_for_access_token(request: Request, form_data: OAuthFormDep, db: DbDep):
     """
     Provides a JWT access token for a valid user.
     """
     security_service = request.app.state.security_service
     statement = select(models_postgres.User).where(models_postgres.User.email == form_data.username)
-    user = db.execute(statement).scalar_one_or_none()
+    result = await db.execute(statement)
+    user = result.scalar_one_or_none()
 
     if not user or not verify_password(form_data.password, user.hashed_password):
         logger.warning(f"Failed login attempt for email: {form_data.username}")
@@ -67,13 +68,14 @@ def login_for_access_token(request: Request, form_data: OAuthFormDep, db: DbDep)
 
 
 @router.post("/users", response_model=schema.UserPublic, status_code=status.HTTP_201_CREATED)
-def create_user(request: Request, user: schema.UserCreate, db: DbDep):
+async def create_user(request: Request, user: schema.UserCreate, db: DbDep):
     """
     Creates a new user in the database.
     """
     security_service = request.app.state.security_service
     statement = select(models_postgres.User).where(models_postgres.User.email == user.email)
-    db_user = db.execute(statement).scalar_one_or_none()
+    result = await db.execute(statement)
+    db_user = result.scalar_one_or_none()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
@@ -83,8 +85,8 @@ def create_user(request: Request, user: schema.UserCreate, db: DbDep):
     user_to_add = models_postgres.User(**user_data, hashed_password=hashed_password)
     
     db.add(user_to_add)
-    db.commit()
-    db.refresh(user_to_add)
+    await db.commit()
+    await db.refresh(user_to_add)
     logger.info(f"New user created: {user.email}")
     return user_to_add
 
@@ -98,7 +100,7 @@ async def read_users_me(current_user: ActiveUserDep):
 
 
 @router.put("/users/me", response_model=schema.UserPublic)
-def update_user_me(
+async def update_user_me(
     user_update: schema.UserUpdate,
     current_user: ActiveUserDep,
     db: DbDep,
@@ -114,18 +116,18 @@ def update_user_me(
         setattr(current_user, key, value)
 
     db.add(current_user)
-    db.commit()
-    db.refresh(current_user)
+    await db.commit()
+    await db.refresh(current_user)
     logger.info(f"User '{current_user.email}' updated successfully.")
     return current_user
 
 
 @router.delete("/users/me", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user_me(current_user: ActiveUserDep, db: DbDep):
+async def delete_user_me(current_user: ActiveUserDep, db: DbDep):
     """
     Deletes the current user's account.
     """
-    db.delete(current_user)
-    db.commit()
+    await db.delete(current_user)
+    await db.commit()
     logger.info(f"User '{current_user.email}' deleted successfully.")
     return None

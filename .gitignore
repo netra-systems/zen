@@ -2,3 +2,4 @@
 *.env
 v2/app/.dev_env
 v2/test.db
+*.db
