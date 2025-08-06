@@ -8,6 +8,7 @@ export const config = {
         wsBaseUrl: WS_BASE_URL,
         endpoints: {
             login: `${API_BASE_URL}/auth/token`,
+            devLogin: `${API_BASE_URL}/auth/dev-login`,
             currentUser: `${API_BASE_URL}/auth/users/me`,
             runs: `${API_BASE_URL}/runs`,
         },
