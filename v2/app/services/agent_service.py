@@ -11,10 +11,9 @@ class AgentService:
 
     async def start_agent(self, analysis_request: AnalysisRequest, run_id: str):
         """
-        Starts the agent and streams the logs back to the websocket.
+        Starts the agent. The supervisor will stream logs back to the websocket.
         """
-        async for log in self.supervisor.start_agent(analysis_request, run_id):
-            await manager.broadcast(run_id, json.dumps(log))
+        await self.supervisor.start_agent(analysis_request, run_id)
 
     async def handle_websocket_message(self, run_id: str, data: str):
         """
