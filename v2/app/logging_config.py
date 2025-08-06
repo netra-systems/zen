@@ -6,13 +6,12 @@ import json
 import warnings
 from loguru import logger
 from pydantic import BaseModel, Field
-from pydantic.warnings import PydanticUserWarning
 from typing import Optional, Any, Dict
 from logging import Handler
 import asyncio
 
 # Suppress the specific Pydantic UserWarning
-warnings.filterwarnings("ignore", category=PydanticUserWarning, message=".*is not a Python type.*")
+warnings.filterwarnings("ignore", category=UserWarning, message=".*is not a Python type.*")
 
 # ClickHouse
 from app.db.clickhouse_base import ClickHouseDatabase
