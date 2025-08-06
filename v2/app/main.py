@@ -8,14 +8,16 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.routes import auth, supply, generation, google_auth, apex_optimizer_agent_route, websocket
+from app.routes import auth, supply, generation, google_auth, apex_optimizer_agent_route, websocket, streaming_agent_route
 from app.db.postgres import async_session_factory
 from app.config import settings
 from app.logging_config import central_logger
 from app.llm.llm_manager import LLMManager
 from app.services.apex_optimizer_agent.supervisor import NetraOptimizerAgentSupervisor
+from app.services.streaming_agent.supervisor import StreamingAgentSupervisor
 from app.services.key_manager import KeyManager
 from app.services.security_service import SecurityService
+from app.websocket import manager as websocket_manager
 
 
 @asynccontextmanager
@@ -42,6 +44,7 @@ async def lifespan(app: FastAPI):
 
     # Initialize the agent supervisor
     app.state.agent_supervisor = NetraOptimizerAgentSupervisor(app.state.db_session_factory, app.state.llm_manager)
+    app.state.streaming_agent_supervisor = StreamingAgentSupervisor(app.state.db_session_factory, app.state.llm_manager, websocket_manager)
 
     yield
     
@@ -80,6 +83,7 @@ app.include_router(supply.router, prefix="/api/v3/supply", tags=["supply"])
 app.include_router(generation.router, prefix="/api/v3/generation", tags=["generation"])
 app.include_router(google_auth.router, tags=["google_auth"])
 app.include_router(apex_optimizer_agent_route.router, prefix="/api/v3/apex/chat", tags=["apex/chat"])
+app.include_router(streaming_agent_route.router, prefix="/api/v3/streaming_agent", tags=["streaming_agent"])
 app.include_router(websocket.router, prefix="/ws", tags=["websockets"])
 
 
@@ -98,6 +102,9 @@ if "pytest" in sys.modules:
     from app.db.postgres import async_session_factory
     from app.llm.llm_manager import LLMManager
     from app.services.apex_optimizer_agent.supervisor import NetraOptimizerAgentSupervisor
+    from app.services.streaming_agent.supervisor import StreamingAgentSupervisor
+    from app.websocket import manager as websocket_manager
 
     llm_manager = LLMManager(settings)
     app.state.agent_supervisor = NetraOptimizerAgentSupervisor(async_session_factory, llm_manager)
+    app.state.streaming_agent_supervisor = StreamingAgentSupervisor(async_session_factory, llm_manager, websocket_manager)

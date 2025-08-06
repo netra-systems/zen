@@ -66,12 +66,34 @@ class CentralLogger:
         self.logger.remove()
         log_level = settings.log_level.upper()
 
+        # This filter will be used by the console logger to handle structured logs
+        # It serializes the 'log_entry' and puts it in 'pretty_data'
+        # then it removes the original 'log_entry' to prevent recursion errors
+        def console_structured_log_filter(record):
+            if "log_entry" in record["extra"]:
+                try:
+                    # Use .dict() for pydantic models and json.dumps with default=str
+                    # to handle any non-serializable objects within the data.
+                    pretty_data = json.dumps(record["extra"]["log_entry"].dict(), indent=2, default=str)
+                    record["extra"]["pretty_data"] = f"\n{pretty_data}"
+                except Exception as e:
+                    record["extra"]["pretty_data"] = f"\nCould not serialize log_entry: {e}"
+                # IMPORTANT: remove the original object that causes the recursion
+                del record["extra"]["log_entry"]
+            else:
+                record["extra"]["pretty_data"] = ""
+            return True
+
+        # The format now safely includes the pretty-printed data
+        console_format = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}{extra[pretty_data]}</level>"
+
         # Basic console logger for development and debugging
         self.logger.add(
             sys.stdout,
             level=log_level,
-            format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
-            colorize=True
+            format=console_format,
+            colorize=True,
+            filter=console_structured_log_filter
         )
 
         # Intercept standard logging

@@ -48,6 +48,10 @@ export const apiService = {
         return this.post(`${config.api.baseUrl}/apex/chat/start_agent`, body, token);
     },
 
+    async startStreamingAgent(token: string | null, body: Record<string, unknown>, clientId: string) {
+        return this.post(`${config.api.baseUrl}/streaming_agent/start_agent/${clientId}`, body, token);
+    },
+
     async getAgentStatus(runId: string, token: string | null): Promise<AgentRun> {
         return this.get(`${config.api.baseUrl}/agent/${runId}/status`, token);
     },

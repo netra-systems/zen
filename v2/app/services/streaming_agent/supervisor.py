@@ -1,0 +1,67 @@
+import asyncio
+from typing import Any, Dict, List
+from langchain_core.messages import HumanMessage
+from app.db.models_clickhouse import AnalysisRequest
+from app.llm.llm_manager import LLMManager
+from app.services.deepagents.graph import SingleAgentTeam
+from app.services.deepagents.sub_agent import SubAgent
+from app.services.apex_optimizer_agent.tool_builder import ToolBuilder
+from app.services.deepagents.tool_dispatcher import ToolDispatcher
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.websocket import ConnectionManager
+
+class StreamingAgentSupervisor:
+    def __init__(self, db_session: AsyncSession, llm_manager: LLMManager, websocket_manager: ConnectionManager):
+        self.db_session = db_session
+        self.llm_manager = llm_manager
+        self.agent_states: Dict[str, Dict[str, Any]] = {}
+        self.websocket_manager = websocket_manager
+
+        all_tools, _ = ToolBuilder.build_all(self.db_session, self.llm_manager)
+        agent_def = self._get_agent_definition(self.llm_manager, list(all_tools.values()))
+        tool_dispatcher = ToolDispatcher(tools=list(all_tools.values()))
+
+        team = SingleAgentTeam(agent=agent_def, llm_manager=self.llm_manager, tool_dispatcher=tool_dispatcher)
+        self.graph = team.create_graph()
+
+    def _get_agent_definition(self, llm_manager: LLMManager, tools: list) -> SubAgent:
+        """Returns the definition of the Netra Optimizer Agent."""
+        return SubAgent(
+            name="streaming_agent",
+            description="An agent that streams updates over WebSockets.",
+            prompt=(
+                "You are an expert in providing real-time updates. Your goal is to process the user's request "
+                "and stream updates as they happen. Start by creating a todo list of the steps you will take to address the user's request. "
+                "After each step, you must call the `update_state` tool to update the todo list and completed steps. "
+                "When you have completed all the steps in your todo list and have a final answer, output the final answer followed by the word FINISH."
+            ),
+            tools=tools
+        )
+
+    async def start_agent(self, request: AnalysisRequest, client_id: str) -> Dict[str, Any]:
+        run_id = request.request.id
+        initial_state = {
+            "messages": [HumanMessage(content=request.request.query)],
+            "workloads": request.request.workloads,
+            "todo_list": ["triage_request"],
+            "completed_steps": [],
+            "status": "in_progress",
+            "events": []
+        }
+        self.agent_states[run_id] = initial_state
+
+        # Start the agent asynchronously
+        asyncio.create_task(self.run_agent(run_id, client_id))
+        
+        # Immediately return a response to the user
+        return {"status": "agent_started", "run_id": run_id}
+
+    async def run_agent(self, run_id: str, client_id: str):
+        state = self.agent_states[run_id]
+        async for event in self.graph.astream_events(state, {"recursion_limit": 20}):
+            state["events"].append(event)
+            # Send updates over WebSocket
+            await self.websocket_manager.broadcast(f"Client #{client_id} | RUN #{run_id} | event: {event}")
+
+        state["status"] = "complete"
+        await self.websocket_manager.broadcast(f"Client #{client_id} | RUN #{run_id} | status: complete")
