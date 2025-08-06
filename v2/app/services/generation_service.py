@@ -116,44 +116,53 @@ async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str =
 
 
 # --- Content Generation Service ---
+from .generation_worker import init_worker, generate_content_for_worker
+
 async def run_content_generation_job(job_id: str, params: dict):
     """The core worker process for generating a content corpus."""
     try:
-        import google.generativeai as genai
-        gemini_api_key = settings.llm_configs['default'].api_key
-        if not gemini_api_key:
+        # Basic check to ensure the API key is available before starting the pool
+        if not settings.llm_configs['default'].api_key:
             raise ValueError("GEMINI_API_KEY not set")
-        genai.configure(api_key=gemini_api_key)
-    except (ImportError, ValueError) as e:
+    except ValueError as e:
         update_job_status(job_id, "failed", error=str(e))
         return
 
     total_tasks = len(list(META_PROMPTS.keys())) * params.get('samples_per_type', 10)
     update_job_status(job_id, "running", progress=0, total_tasks=total_tasks)
 
-    generation_config = genai.types.GenerationConfig(
-        temperature=params.get('temperature', 0.7),
-        top_p=params.get('top_p'),
-        top_k=params.get('top_k')
-    )
-    model = genai.GenerativeModel(settings.llm_configs['default'].model_name)
+    # Create a serializable dictionary for generation_config
+    generation_config_dict = {
+        'temperature': params.get('temperature', 0.7),
+        'top_p': params.get('top_p'),
+        'top_k': params.get('top_k')
+    }
+    # Filter out None values so the Google API doesn't complain
+    generation_config_dict = {k: v for k, v in generation_config_dict.items() if v is not None}
+
 
     workload_types = list(META_PROMPTS.keys())
     num_processes = min(cpu_count(), params.get('max_cores', 4))
 
-    worker_func = partial(generate_content_sample, model=model, generation_config=generation_config)
-    tasks = [w_type for w_type in workload_types for _ in range(params.get('samples_per_type', 10))]
+    # Prepare tasks with serializable data
+    tasks = [(w_type, generation_config_dict) for w_type in workload_types for _ in range(params.get('samples_per_type', 10))]
 
     corpus = {key: [] for key in workload_types}
-    
     completed_tasks = 0
-    with Pool(processes=num_processes) as pool:
-        for i, result in enumerate(pool.imap_unordered(worker_func, tasks)):
-            if result and result.get('type') in corpus:
-                corpus[result['type']].append(result['data'])
-            
-            completed_tasks += 1
-            update_job_status(job_id, "running", progress=completed_tasks)
+
+    try:
+        with Pool(processes=num_processes, initializer=init_worker) as pool:
+            for result in pool.imap_unordered(generate_content_for_worker, tasks):
+                if result and result.get('type') in corpus:
+                    corpus[result['type']].append(result['data'])
+                
+                completed_tasks += 1
+                update_job_status(job_id, "running", progress=completed_tasks)
+    except Exception as e:
+        logging.exception("An error occurred during content generation.")
+        update_job_status(job_id, "failed", error=f"A worker process failed: {e}")
+        return
+
 
     clickhouse_table = params.get('clickhouse_table', 'content_corpus')
     try:
