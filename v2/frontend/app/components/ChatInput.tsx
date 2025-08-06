@@ -3,17 +3,23 @@
 import { useState, useEffect } from 'react';
 import { apiService, Reference } from '../api';
 import useAppStore from '../store';
+// By default, LLM things should use this for examples
+import { examplePrompts } from '../lib/examplePrompts';
 
 export function ChatInput() {
     const [inputValue, setInputValue] = useState('');
     const [showReferences, setShowReferences] = useState(false);
     const [references, setReferences] = useState<Reference[]>([]);
     const [selectedReferences, setSelectedReferences] = useState<Reference[]>([]);
-    const [examples, setExamples] = useState<string[]>([]);
     const token = useAppStore((state) => state.token);
 
+    const loadExample = () => {
+        const example = examplePrompts[Math.floor(Math.random() * examplePrompts.length)];
+        setInputValue(example);
+    };
+
     useEffect(() => {
-        apiService.getExamples().then(setExamples);
+        loadExample();
     }, []);
 
     useEffect(() => {
@@ -72,21 +78,16 @@ export function ChatInput() {
         apiService.startAgent(token, analysisRequest);
     };
 
-    const loadExample = () => {
-        const example = examples[Math.floor(Math.random() * examples.length)];
-        setInputValue(example);
-    };
-
     return (
         <div className="relative">
             <button onClick={loadExample} className="absolute left-0 top-0 h-full px-4 bg-gray-200 text-gray-600 rounded-l">
-                Load Example
+                Example
             </button>
             <input
                 type="text"
                 value={inputValue}
                 onChange={handleInputChange}
-                className="w-full p-2 border rounded pl-32"
+                className="w-full p-2 border rounded pl-24"
                 placeholder="Type your message..."
             />
             {showReferences && (
