@@ -9,6 +9,10 @@ class KeyManager(BaseModel):
     jwt_secret_key: str = Field(..., min_length=32)
     fernet_key: bytes = Field(...)
 
+    @staticmethod
+    def generate_key():
+        return Fernet.generate_key()
+
     @classmethod
     def load_from_settings(cls, settings: AppConfig):
         jwt_secret_key = settings.jwt_secret_key

@@ -1,4 +1,4 @@
-import { Home, Settings, LucideProps } from 'lucide-react';
+import { Home, Settings, LucideProps, Database, FileText, BrainCircuit, UploadCloud, Package, Code } from 'lucide-react';
 
 export const Icons = {
   logo: (props: LucideProps) => (
@@ -19,4 +19,10 @@ export const Icons = {
   ),
   home: Home,
   settings: Settings,
+  syntheticData: Database,
+  corpusAdmin: FileText,
+  apexOptimizer: BrainCircuit,
+  ingestion: UploadCloud,
+  supplyCatalog: Package,
+  dev: Code,
 };
