@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAgentPolling } from '../hooks/useAgentPolling';
-import { useAuth } from '@clerk/nextjs';
 import { apiService } from '../api';
 
 const exampleQueries = [
@@ -19,14 +18,13 @@ const exampleQueries = [
 ];
 
 export default function ApexOptimizerAgent() {
-  const { getToken } = useAuth();
   const [prompt, setPrompt] = useState<string>(exampleQueries[Math.floor(Math.random() * exampleQueries.length)]);
-  const { messages, addMessage, startPolling, isLoading, error } = useAgentPolling(getToken());
+  const { messages, addMessage, startPolling, isLoading, error } = useAgentPolling();
 
   const startAnalysis = async () => {
     addMessage('user', prompt);
     const body = { prompt };
-    const runId = await apiService.startAgent(await getToken(), body);
+    const runId = await apiService.startAgent(body);
     startPolling(runId.run_id);
   };
 

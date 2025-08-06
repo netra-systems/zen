@@ -1,8 +1,6 @@
-
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@clerk/nextjs';
 import { ChatWindow } from './chat/ChatWindow';
 import { useAgentStreaming } from '../hooks/useAgentStreaming';
 
@@ -17,8 +15,7 @@ const exampleQueries = [
 ];
 
 export default function ApexOptimizerAgentV2() {
-  const { getToken } = useAuth();
-  const { isLoading, error, messages, startAgent } = useAgentStreaming(getToken);
+  const { isLoading, error, messages, startAgent } = useAgentStreaming();
 
   const handleSendMessage = async (message: string) => {
     await startAgent(message);

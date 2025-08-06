@@ -103,7 +103,7 @@ export const MessageArtifact = ({ data }: MessageArtifactProps) => {
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <Button variant="outline" size="sm" onClick={copyToClipboard} title="Copy to clipboard">
-                        {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Clipboard classNameh-4 w-4" />}
+                        {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Clipboard className="h-4 w-4" />}
                     </Button>
                     <Button variant="ghost" size="icon" onClick={toggleExpand} className="h-8 w-8">
                         {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
