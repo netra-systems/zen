@@ -3,11 +3,16 @@ import logging
 import sys
 import os
 import json
+import warnings
 from loguru import logger
 from pydantic import BaseModel, Field
+from pydantic.warnings import PydanticUserWarning
 from typing import Optional, Any, Dict
 from logging import Handler
 import asyncio
+
+# Suppress the specific Pydantic UserWarning
+warnings.filterwarnings("ignore", category=PydanticUserWarning, message=".*is not a Python type.*")
 
 # ClickHouse
 from app.db.clickhouse_base import ClickHouseDatabase
@@ -30,6 +35,8 @@ class ClickHouseSink:
         self.table_name = table_name
 
     def write(self, message):
+        if not message:
+            return
         try:
             log_entry = LogEntry.parse_raw(message)
             self.db.insert_log(log_entry, self.table_name)
@@ -39,6 +46,8 @@ class ClickHouseSink:
 class FrontendStreamSink:
     """A Loguru sink that streams logs to the frontend."""
     def write(self, message):
+        if not message:
+            return
         try:
             log_entry = LogEntry.parse_raw(message)
             asyncio.create_task(manager.broadcast(log_entry.json()))
