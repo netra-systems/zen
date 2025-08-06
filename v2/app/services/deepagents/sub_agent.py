@@ -3,11 +3,9 @@ from langchain_core.tools import BaseTool
 from app.llm.llm_manager import LLMManager
 from app.services.deepagents.prompts import get_agent_prompt
 from app.services.deepagents.state import DeepAgentState
-from app.logging_config import central_logger
+from app.logging_config import central_logger, LogEntry
 import json
 from langchain_core.messages import BaseMessage
-
-app_logger = central_logger.get_logger(__name__)
 
 class MessageEncoder(json.JSONEncoder):
     def default(self, o):
@@ -24,12 +22,12 @@ class SubAgent:
 
     def as_runnable(self, llm_manager: LLMManager):
         def agent_node(state: DeepAgentState):
-            app_logger.info(f"Executing agent '{self.name}' with state: {json.dumps(state, indent=2, cls=MessageEncoder)}")
+            central_logger.log(LogEntry(event="agent_node_execution", data={"agent_name": self.name, "state": state}))
             prompt = get_agent_prompt(self.prompt)
             llm = llm_manager.get_llm("default").bind_tools(self.tools)
             chain = prompt | llm
             response = chain.invoke(state)
-            app_logger.info(f"Agent '{self.name}' produced response: {json.dumps(response.dict(), indent=2, cls=MessageEncoder)}")
+            central_logger.log(LogEntry(event="agent_node_response", data={"agent_name": self.name, "response": response.dict()}))
 
             # Update the todo_list in the state
             if hasattr(response, 'tool_calls') and response.tool_calls:
