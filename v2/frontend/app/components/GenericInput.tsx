@@ -1,8 +1,8 @@
-
 import React, { FormEvent } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface InputField {
     id: string;
@@ -13,6 +13,7 @@ interface InputField {
     defaultValue?: string | number;
     value?: string | number;
     onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    options?: string[];
 }
 
 interface GenericInputProps {
@@ -37,16 +38,29 @@ export function GenericInput({ title, description, inputFields, onSubmit, isLoad
                     {inputFields.map((field) => (
                         <div key={field.id} className="space-y-2">
                             <label htmlFor={field.id} className="text-sm font-medium">{field.label}</label>
-                            <Input
-                                id={field.id}
-                                name={field.name}
-                                type={field.type}
-                                required={field.required}
-                                defaultValue={field.defaultValue}
-                                value={field.value}
-                                onChange={field.onChange}
-                                className="w-full"
-                            />
+                            {field.type === 'select' ? (
+                                <Select name={field.name} required={field.required} defaultValue={field.defaultValue as string}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder={`Select a ${field.label.toLowerCase()}`} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {field.options?.map((option) => (
+                                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            ) : (
+                                <Input
+                                    id={field.id}
+                                    name={field.name}
+                                    type={field.type}
+                                    required={field.required}
+                                    defaultValue={field.defaultValue}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    className="w-full"
+                                />
+                            )}
                         </div>
                     ))}
                     <div className="flex justify-end gap-2 pt-4">

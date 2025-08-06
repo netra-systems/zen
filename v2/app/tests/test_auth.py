@@ -3,15 +3,19 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch, AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 from cryptography.fernet import Fernet
+import datetime
+import uuid
 
 from app.db.models_postgres import User
+from app.dependencies import ActiveUserDep
+from app.main import app
 
 # Mock all settings using environment variables
 @pytest.fixture(scope="module", autouse=True)
 def mock_settings():
     with patch.dict('os.environ', {
         'APP_ENV': 'testing',
-        'SECRET_KEY': 'test_secret',
+        'SECRET_KEY': 'a_very_secret_key' * 2, # Must be 32 bytes
         'POSTGRES_USER': 'testuser',
         'POSTGRES_PASSWORD': 'testpassword',
         'POSTGRES_DB': 'testdb',
@@ -42,6 +46,8 @@ def mock_db_session_module():
 def client(mock_db_session_module):
     mock_key_manager = MagicMock()
     mock_key_manager.fernet_key = Fernet.generate_key()
+    # Provide a valid secret key for JWT
+    mock_key_manager.jwt_secret_key = os.environ['SECRET_KEY']
 
     with patch('app.main.KeyManager.load_from_settings', return_value=mock_key_manager), \
          patch('app.main.LLMManager', autospec=True), \
@@ -50,7 +56,6 @@ def client(mock_db_session_module):
          patch('app.main.StreamingAgentSupervisor', autospec=True), \
          patch('app.main.AgentService', autospec=True):
 
-        from app.main import app
         from app.db.postgres import get_async_db
 
         async def override_get_db():
@@ -74,7 +79,6 @@ def reset_db_mock(mock_db_session_module):
 # --- Test Cases for /token endpoint ---
 
 def test_login_for_access_token_success(client, mock_db_session_module):
-    """Tests successful login and token generation."""
     hashed_password = b'$2b$12$EixZAe3.L2sE5.DV4.fL6u6K0DP.YVjYmJzT8S.C/c8Q9g5u3v5yO' # "password"
     mock_user = User(email="test@example.com", hashed_password=hashed_password, is_active=True)
     
@@ -92,7 +96,6 @@ def test_login_for_access_token_success(client, mock_db_session_module):
         mock_verify_password.assert_called_once_with("password", mock_user.hashed_password)
 
 def test_login_for_access_token_incorrect_password(client, mock_db_session_module):
-    """Tests login with an incorrect password."""
     mock_user = User(email="test@example.com", hashed_password="wrong_hash", is_active=True)
     
     mock_result = MagicMock()
@@ -106,7 +109,6 @@ def test_login_for_access_token_incorrect_password(client, mock_db_session_modul
         assert response.json() == {"detail": "Incorrect email or password"}
 
 def test_login_for_access_token_user_not_found(client, mock_db_session_module):
-    """Tests login for a user that does not exist."""
     mock_result = MagicMock()
     mock_result.scalar_one_or_none.return_value = None
     mock_db_session_module.execute.return_value = mock_result
@@ -117,7 +119,6 @@ def test_login_for_access_token_user_not_found(client, mock_db_session_module):
     assert response.json() == {"detail": "Incorrect email or password"}
 
 def test_login_for_access_token_inactive_user(client, mock_db_session_module):
-    """Tests login for an inactive user."""
     mock_user = User(email="inactive@example.com", hashed_password="some_hash", is_active=False)
     
     mock_result = MagicMock()
@@ -133,11 +134,15 @@ def test_login_for_access_token_inactive_user(client, mock_db_session_module):
 # --- Test Cases for /users endpoint ---
 
 def test_create_user_success(client, mock_db_session_module):
-    """Tests successful user creation."""
-    # Mock that the user does not exist
     mock_result_existing = MagicMock()
     mock_result_existing.scalar_one_or_none.return_value = None
     mock_db_session_module.execute.return_value = mock_result_existing
+
+    async def refresh_side_effect(user_obj):
+        user_obj.id = str(uuid.uuid4())
+        user_obj.created_at = datetime.datetime.now(datetime.timezone.utc)
+
+    mock_db_session_module.refresh.side_effect = refresh_side_effect
 
     with patch('app.routes.auth.get_password_hash', return_value="hashed_password") as mock_get_hash:
         user_data = {"email": "newuser@example.com", "password": "newpassword", "full_name": "New User"}
@@ -154,8 +159,6 @@ def test_create_user_success(client, mock_db_session_module):
         mock_db_session_module.refresh.assert_awaited_once()
 
 def test_create_user_email_already_registered(client, mock_db_session_module):
-    """Tests creating a user with an email that is already registered."""
-    # Mock that the user *does* exist
     mock_existing_user = User(email="existing@example.com", hashed_password="some_hash", is_active=True)
     mock_result_existing = MagicMock()
     mock_result_existing.scalar_one_or_none.return_value = mock_existing_user
@@ -166,3 +169,42 @@ def test_create_user_email_already_registered(client, mock_db_session_module):
 
     assert response.status_code == 400
     assert response.json() == {"detail": "Email already registered"}
+
+# --- Test Cases for /users/me endpoint ---
+
+@pytest.fixture
+def authenticated_client(client):
+    mock_user = User(
+        id=str(uuid.uuid4()),
+        email="test@example.com", 
+        full_name="Test User",
+        hashed_password="test_password", 
+        is_active=True, 
+        created_at=datetime.datetime.now(datetime.timezone.utc)
+    )
+    app.dependency_overrides[ActiveUserDep] = lambda: mock_user
+    yield client
+    del app.dependency_overrides[ActiveUserDep]
+
+def test_read_users_me(authenticated_client):
+    response = authenticated_client.get("/auth/users/me")
+    assert response.status_code == 200
+    json_response = response.json()
+    assert json_response["email"] == "test@example.com"
+    assert json_response["full_name"] == "Test User"
+
+def test_update_user_me(authenticated_client, mock_db_session_module):
+    update_data = {"full_name": "Updated Test User"}
+    response = authenticated_client.put("/auth/users/me", json=update_data)
+    assert response.status_code == 200
+    json_response = response.json()
+    assert json_response["full_name"] == "Updated Test User"
+    mock_db_session_module.add.assert_called_once()
+    mock_db_session_module.commit.assert_awaited_once()
+    mock_db_session_module.refresh.assert_awaited_once()
+
+def test_delete_user_me(authenticated_client, mock_db_session_module):
+    response = authenticated_client.delete("/auth/users/me")
+    assert response.status_code == 204
+    mock_db_session_module.delete.assert_called_once()
+    mock_db_session_module.commit.assert_awaited_once()

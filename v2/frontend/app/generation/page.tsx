@@ -5,6 +5,7 @@ import { HelpCircle } from 'lucide-react';
 
 import { config } from '../config';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { GenericInput } from '@/components/GenericInput';
 import Spinner from '@/components/Spinner';
 import useAppStore from '@/store';
 
