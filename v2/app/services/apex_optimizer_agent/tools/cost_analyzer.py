@@ -1,8 +1,6 @@
-from langchain_core.tools import tool
 from typing import List, Any
 from app.services.context import ToolContext
 
-@tool
 async def cost_analyzer(context: ToolContext) -> str:
     """Analyzes the current costs of the system."""
     total_cost = 0

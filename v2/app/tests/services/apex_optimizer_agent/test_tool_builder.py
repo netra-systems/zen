@@ -34,7 +34,7 @@ async def test_tool_builder_and_dispatcher():
     cost_analyzer_tool._arun = AsyncMock(return_value="Success")
 
     # Dispatch the tool
-    result = await tool_dispatcher.dispatch("cost_analyzer", tool_input={})
+    result = await tool_dispatcher.dispatch("cost_analyzer", **{})
 
     # Assert the result
     assert result.status == ToolStatus.SUCCESS
