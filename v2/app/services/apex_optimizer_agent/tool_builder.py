@@ -79,11 +79,10 @@ class ToolBuilder:
                 else:
                     fields[p.name] = (p.annotation, p.default)
             
-            args_schema = create_model(
-                f"{name}_args", 
-                **fields,
-                __base__=BaseModel
-            )
+            if has_args:
+                args_schema = create_model(f"{name}_args", **fields, __base__=BaseModel)
+            else:
+                args_schema = BaseModel
 
             tool = StructuredTool(
                 name=name,

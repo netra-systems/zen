@@ -1,4 +1,5 @@
 import logging
+import time
 
 logging.getLogger("faker").setLevel(logging.WARNING)
 
@@ -27,6 +28,7 @@ async def lifespan(app: FastAPI):
     Manages the application's startup and shutdown events.
     """
     # Startup
+    start_time = time.time()
     logger = central_logger.get_logger(__name__)
     logger.info("Application startup...")
 
@@ -47,6 +49,9 @@ async def lifespan(app: FastAPI):
     app.state.agent_supervisor = NetraOptimizerAgentSupervisor(app.state.db_session_factory, app.state.llm_manager)
     app.state.streaming_agent_supervisor = StreamingAgentSupervisor(app.state.db_session_factory, app.state.llm_manager, websocket_manager)
     app.state.agent_service = AgentService(app.state.streaming_agent_supervisor)
+    
+    elapsed_time = time.time() - start_time
+    logger.info(f"System Ready (Took {elapsed_time:.2f}s).")
 
     yield
     

@@ -14,7 +14,7 @@ export default function CallbackClient() {
     if (token) {
       localStorage.setItem('authToken', token);
       fetchUser(token).then(() => {
-        router.push('/');
+        router.push('/dashboard');
       });
     } else {
       router.push('/login');
