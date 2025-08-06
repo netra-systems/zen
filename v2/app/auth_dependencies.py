@@ -7,6 +7,9 @@ async def get_current_user_ws(
     websocket: WebSocket,
     token: str = Query(None),
 ) -> models_postgres.User:
+    print(f"DEBUG: app_env = {settings.app_env}")
+    print(f"DEBUG: token = {token}")
+
     if settings.app_env == "development":
         return models_postgres.User(email="dev@example.com", hashed_password="dev")
 
@@ -16,6 +19,7 @@ async def get_current_user_ws(
 
     security_service = websocket.app.state.security_service
     email = security_service.get_user_email_from_token(token)
+    print(f"DEBUG: email from token = {email}")
     if email is None:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return

@@ -39,11 +39,23 @@ class SecurityService:
         encoded_jwt = jwt.encode(to_encode, self.key_manager.jwt_secret_key, algorithm="HS256")
         return encoded_jwt
 
+    def get_user_email_from_token(self, token: str) -> Optional[str]:
+        try:
+            payload = jwt.decode(token, self.key_manager.jwt_secret_key, algorithms=["HS256"])
+            email: str = payload.get("sub")
+            return email
+        except JWTError:
+            return None
+
     def encrypt(self, value: str) -> bytes:
         return self.fernet.encrypt(value.encode('utf-8'))
 
     def decrypt(self, encrypted_value: bytes) -> str:
         return self.fernet.decrypt(encrypted_value).decode('utf-8')
+
+    async def get_user(self, db_session: AsyncSession, email: str) -> Optional[models_postgres.User]:
+        result = await db_session.execute(select(models_postgres.User).where(models_postgres.User.email == email))
+        return result.scalars().first()
 
     async def save_user_credentials(self, user_id: int, credentials: models_clickhouse.ClickHouseCredentials, db_session: AsyncSession):
         existing_secrets_query = select(models_postgres.Secret).where(models_postgres.Secret.user_id == user_id)
