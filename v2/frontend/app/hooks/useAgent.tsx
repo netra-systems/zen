@@ -53,9 +53,18 @@ export function useAgent() {
     if (socket && isConnected) {
       setShowThinking(true);
       try {
+        const userId = getUserId();
+        if (!userId) {
+          console.error('User ID not found');
+          return;
+        }
         const analysisRequest = {
+          settings: {
+            debug_mode: false,
+          },
           request: {
             id: runIdRef.current,
+            user_id: userId,
             query: message,
             workloads: [],
           },

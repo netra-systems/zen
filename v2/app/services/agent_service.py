@@ -1,7 +1,9 @@
 import json
-from fastapi import WebSocket
+import asyncio
+from fastapi import WebSocket, WebSocketDisconnect
 from app.services.streaming_agent.supervisor import StreamingAgentSupervisor
 from app.db.models_clickhouse import AnalysisRequest
+from app.websocket import manager
 
 class AgentService:
     def __init__(self, supervisor: StreamingAgentSupervisor):
@@ -9,9 +11,10 @@ class AgentService:
 
     async def start_agent(self, analysis_request: AnalysisRequest, run_id: str):
         """
-        Starts the agent and returns the result.
+        Starts the agent and streams the logs back to the websocket.
         """
-        return await self.supervisor.start_agent(analysis_request, run_id)
+        async for log in self.supervisor.start_agent(analysis_request, run_id):
+            await manager.broadcast(run_id, json.dumps(log))
 
     async def handle_websocket_message(self, run_id: str, data: str):
         """

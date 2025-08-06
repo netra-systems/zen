@@ -1,4 +1,5 @@
 import asyncio
+import json
 from typing import Any, Dict, List
 from langchain_core.messages import HumanMessage
 from app.db.models_clickhouse import AnalysisRequest
@@ -70,7 +71,7 @@ class StreamingAgentSupervisor:
         async for event in self.graph.astream_events(state, {"recursion_limit": 20}):
             state["events"].append(event)
             # Send updates over WebSocket
-            await self.websocket_manager.send_to_run(f"RUN #{run_id} | event: {event}", run_id)
+            await self.websocket_manager.send_to_run(json.dumps({"event": event["event"], "data": event["data"]}), run_id)
 
         state["status"] = "complete"
         await self.websocket_manager.send_to_run(f"RUN #{run_id} | status: complete", run_id)
