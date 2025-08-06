@@ -2,7 +2,7 @@ from typing import List
 from langchain_core.tools import BaseTool
 from app.llm.llm_manager import LLMManager
 from app.services.deepagents.prompts import get_agent_prompt
-from app.services.deepagents.state import AgentState
+from app.services.deepagents.state import DeepAgentState
 from app.logging_config_custom.logger import app_logger
 
 class SubAgent:
@@ -13,7 +13,7 @@ class SubAgent:
         self.tools = tools
 
     def as_runnable(self, llm_manager: LLMManager):
-        def agent_node(state: AgentState):
+        def agent_node(state: DeepAgentState):
             app_logger.info(f"Executing agent '{self.name}' with state: {state}")
             prompt = get_agent_prompt(self.prompt)
             llm = llm_manager.get_llm("default").bind_tools(self.tools)

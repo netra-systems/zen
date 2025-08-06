@@ -10,7 +10,7 @@ from .prompts import (
     EDIT_DESCRIPTION,
     TOOL_DESCRIPTION,
 )
-from .state import Todo, DeepAgentState
+from .state import DeepAgentState, Todo
 
 
 @tool
@@ -107,7 +107,7 @@ def read_file(
 
         # Line numbers start at 1, so add 1 to the index
         line_number = i + 1
-        result_lines.append(f"{line_number:6d}\t{line_content}")
+        result_lines.append(f"{line_number:6d}	{line_content}")
 
     return "\n".join(result_lines)
 

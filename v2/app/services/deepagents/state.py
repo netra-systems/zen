@@ -2,8 +2,13 @@ from typing import TypedDict, Annotated, List, Union
 from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
 
-class AgentState(TypedDict):
+class Todo(TypedDict):
+    id: str
+    task: str
+    status: str
+    items: List[str]
+
+class DeepAgentState(TypedDict):
     messages: Annotated[List[BaseMessage], add_messages]
-    next: Union[str, None]
-    todo_list: List[str]
-    completed_steps: List[str]
+    todos: List[Todo]
+    files: dict

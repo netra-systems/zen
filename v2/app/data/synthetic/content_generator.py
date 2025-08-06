@@ -132,7 +132,7 @@ def main(args):
     llm_manager = LLMManager({
         "default": LLMConfig(
             provider="google",
-            model_name="gemini-1.5-flash-latest",
+            model_name="gemini-2.5-flash-lite",
         )
     })
     llm = llm_manager.get_llm("default")

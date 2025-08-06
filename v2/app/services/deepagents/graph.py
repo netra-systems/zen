@@ -1,5 +1,5 @@
 from langgraph.graph import StateGraph, END
-from app.services.deepagents.state import AgentState
+from app.services.deepagents.state import DeepAgentState
 from app.services.deepagents.sub_agent import SubAgent
 from app.llm.llm_manager import LLMManager
 from app.services.deepagents.tool_dispatcher import ToolDispatcher
@@ -20,7 +20,7 @@ class SingleAgentTeam:
         self.tool_dispatcher = tool_dispatcher
 
     def create_graph(self):
-        workflow = StateGraph(AgentState)
+        workflow = StateGraph(DeepAgentState)
         
         workflow.add_node("agent", self.agent.as_runnable(self.llm_manager))
         workflow.add_node("tool_dispatcher", self.tool_dispatcher.as_runnable())
@@ -39,7 +39,7 @@ class SingleAgentTeam:
         workflow.set_entry_point("agent")
         return workflow.compile()
 
-    def route_to_agent(self, state: AgentState):
+    def route_to_agent(self, state: DeepAgentState):
         app_logger.info(f"Routing agent with state: {json.dumps(state, indent=2, cls=MessageEncoder)}")
         messages = state.get("messages", [])
         if messages:

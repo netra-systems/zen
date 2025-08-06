@@ -110,11 +110,11 @@ class AppConfig(BaseModel):
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(
             provider="google",
-            model_name="gemini-1.5-flash-latest",
+            model_name="gemini-2.5-pro",
         ),
         "analysis": LLMConfig(
             provider="google",
-            model_name="gemini-1.5-flash-latest",
+            model_name="gemini-2.5-pro",
             generation_config={"temperature": 0.5},
         ),
         "gpt-4": LLMConfig(
