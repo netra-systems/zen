@@ -67,6 +67,34 @@ async def login_for_access_token(request: Request, form_data: OAuthFormDep, db: 
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+@router.post("/dev-login", response_model=schema.Token, include_in_schema=False)
+async def dev_login(request: Request, db: DbDep):
+    """
+    Provides a JWT access token for a default user in development environments.
+    """
+    if settings.environment != "development":
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+
+    security_service = request.app.state.security_service
+    statement = select(models_postgres.User)
+    result = await db.execute(statement)
+    user = result.scalars().first()
+
+    if not user:
+        logger.error("No users found in the database for dev login.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No users found in the database. Please create a user first.",
+        )
+
+    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+    access_token = security_service.create_access_token(
+        data={"sub": user.email}, expires_delta=access_token_expires
+    )
+    logger.info(f"Dev login successful for user: {user.email}")
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
 @router.post("/users", response_model=schema.UserPublic, status_code=status.HTTP_201_CREATED)
 async def create_user(request: Request, user: schema.UserCreate, db: DbDep):
     """
@@ -79,7 +107,7 @@ async def create_user(request: Request, user: schema.UserCreate, db: DbDep):
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    hashed_password = get_password_hash(user.password)
+    hashed_password = get_password_hash(user..password)
     user_data = user.model_dump()
     user_data.pop("password", None)
     user_to_add = models_postgres.User(**user_data, hashed_password=hashed_password)
