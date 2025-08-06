@@ -1,6 +1,10 @@
 from langchain_core.tools import tool
 
 @tool
+from langchain_core.tools import tool
+from typing import Any
+
+@tool
 async def optimized_implementation_proposer(function_name: str, db_session: Any, llm_manager: Any, llm_connector: any) -> str:
     """Proposes an optimized implementation for a function."""
     prompt = f"""

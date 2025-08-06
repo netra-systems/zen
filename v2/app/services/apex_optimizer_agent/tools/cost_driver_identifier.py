@@ -1,16 +1,17 @@
 from langchain_core.tools import tool
 from typing import List, Any
 from pydantic import BaseModel, Field
+from app.services.context import ToolContext
 
 class Log(BaseModel):
     request: dict = Field(..., description="The request data for the log.")
 
 @tool
-async def cost_driver_identifier(logs: List[Log], db_session: Any, llm_manager: Any, cost_estimator: any) -> str:
+async def cost_driver_identifier(context: ToolContext) -> str:
     """Identifies the main drivers of cost in the system."""
     cost_drivers = {}
-    for log in logs:
-        cost_result = await cost_estimator.execute(log.request.prompt_text, log.model_dump())
+    for log in context.logs:
+        cost_result = await context.cost_estimator.execute(log.request.prompt_text, log.model_dump())
         prompt_category = log.request.prompt_text.split(" ")[0] # Simple categorization by first word
         if prompt_category not in cost_drivers:
             cost_drivers[prompt_category] = 0

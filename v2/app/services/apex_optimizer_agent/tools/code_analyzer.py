@@ -1,8 +1,9 @@
 from langchain_core.tools import tool
 from typing import Any, Dict
+from app.services.context import ToolContext
 
 @tool
-async def code_analyzer(request: Dict[str, Any], db_session: Any, llm_manager: Any, code_analyzer: any) -> str:
+async def code_analyzer(context: ToolContext, request: Dict[str, Any]) -> str:
     """
     Analyzes the code of a specific function.
     """
@@ -12,5 +13,5 @@ async def code_analyzer(request: Dict[str, Any], db_session: Any, llm_manager: A
     if not file_path or not function_name:
         return "Error: file_path and function_name are required."
 
-    analysis = await code_analyzer.analyze_function(file_path, function_name)
+    analysis = await context.code_analyzer.analyze_function(file_path, function_name)
     return f"Function {function_name} in {file_path} analyzed."

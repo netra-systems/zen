@@ -1,6 +1,10 @@
 from langchain_core.tools import tool
 
 @tool
+from langchain_core.tools import tool
+from typing import Any
+
+@tool
 async def optimization_method_researcher(function_name: str, db_session: Any, llm_manager: Any, llm_connector: any) -> str:
     """Researches advanced optimization methods for a function."""
     prompt = f'''

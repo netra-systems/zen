@@ -1,5 +1,6 @@
 from typing import Any, Dict
 from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
+from app.services.context import ToolContext
 
 class CostEstimator(BaseTool):
     name = "cost_estimator"
@@ -10,18 +11,7 @@ class CostEstimator(BaseTool):
         status="in_review"
     )
 
-    from app.services.apex_optimizer_agent.tools.context import ToolContext
-
-class CostEstimator(BaseTool):
-    name = "cost_estimator"
-    metadata = ToolMetadata(
-        name="CostEstimator",
-        description="Estimates the cost of a given prompt using the llm_connector.",
-        version="1.0.0",
-        status="in_review"
-    )
-
-    async def run(self, prompt: str, context: ToolContext) -> Dict[str, Any]:
+    async def run(self, context: ToolContext, prompt: str) -> Dict[str, Any]:
         """Estimates the cost of a given prompt using the llm_connector."""
         estimation_prompt = f"""
         Given the following prompt, estimate the cost in USD to run it.

@@ -1,5 +1,7 @@
 from typing import Any, Dict
-from app.llm.llm_manager import LLMManager
+from functools import partial
+
+from app.services.context import ToolContext
 from app.services.apex_optimizer_agent.tools.cost_analyzer import cost_analyzer
 from app.services.apex_optimizer_agent.tools.latency_analyzer import latency_analyzer
 from app.services.apex_optimizer_agent.tools.code_analyzer import code_analyzer
@@ -22,10 +24,6 @@ from app.services.apex_optimizer_agent.tools.rate_limit_impact_simulator import 
 from app.services.apex_optimizer_agent.tools.performance_gains_simulator import performance_gains_simulator
 from app.services.apex_optimizer_agent.tools.policy_simulator import policy_simulator
 from app.services.apex_optimizer_agent.tools.finish import finish
-from app.services.deepagents.tools import update_state
-from functools import partial
-
-from app.services.apex_optimizer_agent.tools.context import ToolContext
 
 class ToolBuilder:
     @staticmethod
@@ -53,11 +51,12 @@ class ToolBuilder:
             "performance_gains_simulator": performance_gains_simulator,
             "policy_simulator": policy_simulator,
             "finish": finish,
-            "update_state": update_state,
         }
         
-        for name, tool in all_tools.items():
-            setattr(tool, 'name', name)
-            setattr(tool, '__name__', name)
+        bound_tools = {}
+        for name, tool_func in all_tools.items():
+            bound_tools[name] = partial(tool_func, context)
+            setattr(bound_tools[name], 'name', name)
+            setattr(bound_tools[name], '__name__', name)
 
-        return all_tools, {}
+        return bound_tools, {}
