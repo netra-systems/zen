@@ -91,8 +91,7 @@ export default function AdminPage() {
         return () => clearInterval(intervalId);
     }, [isPolling, pollStatus]);
 
-    const handleStartGeneration = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const handleStartGeneration = async (data: Record<string, any>) => {
         setIsLoading(true);
         setError(null);
         setJob(null);
@@ -101,12 +100,7 @@ export default function AdminPage() {
         }
         pollingJobIdRef.current = null;
 
-
-        const formData = new FormData(event.currentTarget);
-        const samples_per_type = parseInt(formData.get('samples_per_type') as string, 10);
-        const temperature = parseFloat(formData.get('temperature') as string);
-        const max_cores = parseInt(formData.get('max_cores') as string, 10);
-        const clickhouse_table = formData.get('clickhouse_table') as string;
+        const { samples_per_type, temperature, max_cores, clickhouse_table } = data;
 
         try {
             const newJob = await apiService.post(`${config.api.baseUrl}/generation/content_corpus`, { samples_per_type, temperature, max_cores, clickhouse_table }, token);
