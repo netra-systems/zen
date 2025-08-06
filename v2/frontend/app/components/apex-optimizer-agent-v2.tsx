@@ -16,7 +16,10 @@ export default function ApexOptimizerAgentV2() {
     await startAgent(message);
   };
 
+  const chatContainerClasses = messages.length === 0 ? "flex items-center justify-center h-full" : "h-full";
+
   return (
+    <div className={chatContainerClasses}>
       <ChatWindow
         messages={messages}
         onSendMessage={handleSendMessage}
@@ -26,5 +29,6 @@ export default function ApexOptimizerAgentV2() {
         messageFilters={messageFilters}
         setMessageFilters={setMessageFilters}
       />
+    </div>
   );
 }
