@@ -54,4 +54,8 @@ class ToolBuilder:
             "update_state": update_state,
         }
         
+        for name, tool in all_tools.items():
+            if isinstance(tool, partial):
+                setattr(tool, 'name', name)
+
         return all_tools, {}

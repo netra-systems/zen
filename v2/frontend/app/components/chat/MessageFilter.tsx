@@ -6,9 +6,11 @@ import { MessageFilter } from '@/app/hooks/useAgentStreaming';
 interface MessageFilterProps {
     messageFilters: Set<MessageFilter>;
     setMessageFilters: React.Dispatch<React.SetStateAction<Set<MessageFilter>>>;
+    showThinking: boolean;
+    setShowThinking: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function MessageFilterControl({ messageFilters, setMessageFilters }: MessageFilterProps) {
+export function MessageFilterControl({ messageFilters, setMessageFilters, showThinking, setShowThinking }: MessageFilterProps) {
     const handleFilterChange = (filter: MessageFilter, checked: boolean) => {
         const newFilters = new Set(messageFilters);
         if (checked) {
@@ -24,18 +26,18 @@ export function MessageFilterControl({ messageFilters, setMessageFilters }: Mess
             <div className="flex items-center space-x-2">
                 <Switch
                     id="thinking-filter"
-                    checked={messageFilters.has('thinking')}
-                    onCheckedChange={(checked) => handleFilterChange('thinking', checked)}
+                    checked={showThinking}
+                    onCheckedChange={setShowThinking}
                 />
-                <Label htmlFor="thinking-filter">Hide Thinking</Label>
+                <Label htmlFor="thinking-filter">Show Thinking</Label>
             </div>
             <div className="flex items-center space-x-2">
                 <Switch
                     id="event-filter"
-                    checked={messageFilters.has('event')}
-                    onCheckedChange={(checked) => handleFilterChange('event', checked)}
+                    checked={!messageFilters.has('event')}
+                    onCheckedChange={(checked) => handleFilterChange('event', !checked)}
                 />
-                <Label htmlFor="event-filter">Hide Events</Label>
+                <Label htmlFor="event-filter">Show Events</Label>
             </div>
         </div>
     );

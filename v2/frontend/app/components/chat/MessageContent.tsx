@@ -1,6 +1,5 @@
 import React from 'react';
 import { Message } from '@/app/types/chat';
-import { ArtifactCard } from './ArtifactCard';
 
 export interface MessageContentProps {
     message: Message;
@@ -19,7 +18,7 @@ export function MessageContent({ message }: MessageContentProps) {
             );
         case 'event':
         case 'artifact':
-            return <ArtifactCard message={message} />;
+            return <p>{message.name}</p>;
         default:
             const exhaustiveCheck: never = message;
             return null;

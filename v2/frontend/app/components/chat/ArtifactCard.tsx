@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { JsonTreeView } from './JsonTreeView';
 import { Message } from '@/app/types/chat';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export interface ArtifactCardProps {
     message: Message;
@@ -11,13 +12,20 @@ export interface ArtifactCardProps {
 function renderFriendlyArtifactData(data: any) {
     if (!data) return <p>No data available</p>;
 
+    const renderValue = (value: any) => {
+        if (typeof value === 'object' && value !== null) {
+            return <JsonTreeView data={value} />;
+        }
+        return String(value);
+    }
+
     // Example of rendering specific data points in a user-friendly way
     return (
         <div className="space-y-2">
             {Object.entries(data).map(([key, value]) => (
                 <div key={key} className="flex justify-between">
                     <span className="font-semibold">{key}:</span>
-                    <span>{String(value)}</span>
+                    <span>{renderValue(value)}</span>
                 </div>
             ))}
         </div>
@@ -45,7 +53,14 @@ export function ArtifactCard({ message }: ArtifactCardProps) {
                 {showJson ? (
                     <JsonTreeView data={data} />
                 ) : (
-                    renderFriendlyArtifactData(data)
+                    <Accordion type="single" collapsible className="w-full">
+                        <AccordionItem value="item-1">
+                            <AccordionTrigger>View Details</AccordionTrigger>
+                            <AccordionContent>
+                                {renderFriendlyArtifactData(data)}
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
                 )}
             </CardContent>
         </Card>
