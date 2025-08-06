@@ -27,7 +27,7 @@ export const useAgentStreaming = (token: string | null) => {
             return;
         }
 
-        const wsUrl = `ws://localhost:8000/ws/${clientId}`;
+        const wsUrl = `ws://localhost:8000/ws/${clientId}${token ? `?token=${token}` : ''}`;
         ws.current = new WebSocket(wsUrl);
 
         ws.current.onopen = () => {

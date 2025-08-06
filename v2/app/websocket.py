@@ -1,5 +1,6 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from typing import List
+from app.auth_dependencies import ActiveUserWsDep
 
 class ConnectionManager:
     def __init__(self):
@@ -23,7 +24,7 @@ manager = ConnectionManager()
 router = APIRouter()
 
 @router.websocket("/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: str):
+async def websocket_endpoint(websocket: WebSocket, client_id: str, user: ActiveUserWsDep):
     await manager.connect(websocket)
     try:
         while True:
