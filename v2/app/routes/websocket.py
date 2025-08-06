@@ -10,8 +10,10 @@ import json
 
 router = APIRouter()
 
-@router.websocket("/ws/{run_id}")
-async def websocket_endpoint(websocket: WebSocket, run_id: str):
+from app.auth_dependencies import ActiveUserWsDep
+
+@router.websocket("/{run_id}")
+async def websocket_endpoint(websocket: WebSocket, run_id: str, current_user: ActiveUserWsDep):
     await websocket.accept()
     try:
         while True:

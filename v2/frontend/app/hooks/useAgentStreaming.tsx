@@ -27,7 +27,9 @@ export const useAgentStreaming = (token: string | null) => {
             return;
         }
 
-        const wsUrl = `ws://localhost:8000/ws/${clientId}${token ? `?token=${token}` : ''}`;
+        // TODO dev work with empty token 
+        // real adds ${token ? `?token=${token}` : ''}` ????
+        const wsUrl = `ws://localhost:8000/ws/dev/${clientId}`;
         ws.current = new WebSocket(wsUrl);
 
         ws.current.onopen = () => {

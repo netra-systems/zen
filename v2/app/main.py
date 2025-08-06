@@ -87,9 +87,11 @@ app.include_router(streaming_agent_route.router, prefix="/api/v3/streaming_agent
 app.include_router(websocket.router, prefix="/ws", tags=["websockets"])
 
 # Add a new websocket route for development that bypasses authentication
+from app.auth_dependencies import ActiveUserWsDep
 if settings.app_env == "development":
     @app.websocket("/ws/dev/{client_id}")
-    async def dev_websocket_endpoint(websocket: WebSocket, client_id: str):
+    async def dev_websocket_endpoint(websocket: WebSocket, client_id: str, current_user: ActiveUserWsDep):
+        print(f"DEBUG: Dev WebSocket endpoint hit for client_id: {client_id}")
         await websocket_manager.connect(websocket)
         try:
             while True:

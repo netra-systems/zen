@@ -7,10 +7,10 @@ async def get_current_user_ws(
     websocket: WebSocket,
     token: str = Query(None),
 ) -> models_postgres.User:
-    print(f"DEBUG: app_env = {settings.app_env}")
-    print(f"DEBUG: token = {token}")
+    print(f"DEBUG: get_current_user_ws called. app_env = {settings.app_env}, token = {token}")
 
     if settings.app_env == "development":
+        print("DEBUG: APP_ENV is development. Bypassing authentication.")
         return models_postgres.User(email="dev@example.com", hashed_password="dev")
 
     if token is None:
