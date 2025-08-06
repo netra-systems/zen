@@ -1,16 +1,17 @@
 from langchain_core.tools import tool
 from typing import List, Any
 from pydantic import BaseModel, Field
+from app.services.context import ToolContext
 
 class Log(BaseModel):
     request: dict = Field(..., description="The request data for the log.")
 
 @tool
-async def latency_bottleneck_identifier(logs: List[Log], db_session: Any, llm_manager: Any, performance_predictor: any) -> str:
+async def latency_bottleneck_identifier(context: ToolContext) -> str:
     """Identifies the main latency bottlenecks in the system."""
     latency_bottlenecks = {}
-    for log in logs:
-        latency_result = await performance_predictor.execute(log.request.prompt_text, log.model_dump())
+    for log in context.logs:
+        latency_result = await context.performance_predictor.execute(log.request.prompt_text, log.model_dump())
         prompt_category = log.request.prompt_text.split(" ")[0] # Simple categorization by first word
         if prompt_category not in latency_bottlenecks:
             latency_bottlenecks[prompt_category] = []
