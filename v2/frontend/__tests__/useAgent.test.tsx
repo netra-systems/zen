@@ -1,57 +1,64 @@
-
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useAgent } from '../app/hooks/useAgent';
-import fetchMock from 'jest-fetch-mock';
+import { Server } from 'ws';
 
-fetchMock.enableMocks();
+const mockServer = new Server({ port: 8080 });
 
-describe('useAgent', () => {
-  beforeEach(() => {
-    fetchMock.resetMocks();
+describe('useAgent with WebSocket', () => {
+  let server: Server;
+
+  beforeAll(() => {
+    server = new Server({ port: 8000 });
   });
 
-  it('should send a message and receive a response', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useAgent());
-    const message = 'Test message';
+  afterAll(() => {
+    server.close();
+  });
 
-    fetchMock.mockResponseOnce(JSON.stringify({ message: 'Test response' }));
+  it('should connect to WebSocket and perform handshake', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useAgent());
 
     await act(async () => {
-      result.current.startAgent(message);
       await waitForNextUpdate();
     });
 
-    expect(result.current.messages).toHaveLength(2);
-    expect(result.current.messages[0].content).toBe(message);
-    expect(result.current.messages[0].sender).toBe('user');
-    expect(result.current.messages[1].content).toBe('Test response');
-    expect(result.current.messages[1].sender).toBe('agent');
+    expect(result.current.isConnected).toBe(true);
   });
 
-  it('should add user message to messages list immediately', async () => {
-    const { result } = renderHook(() => useAgent());
+  it('should send a message and receive a response via WebSocket', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useAgent());
     const message = 'Test message';
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
 
     act(() => {
       result.current.startAgent(message);
     });
 
+    // Assert that the user message is added immediately
     expect(result.current.messages).toHaveLength(1);
     expect(result.current.messages[0].content).toBe(message);
     expect(result.current.messages[0].sender).toBe('user');
-  });
 
-  it('should handle errors gracefully', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useAgent());
-    const message = 'Test message';
-
-    fetchMock.mockRejectOnce(new Error('API Error'));
+    // Mock the server response
+    server.on('connection', (ws) => {
+      ws.on('message', (message) => {
+        const data = JSON.parse(message.toString());
+        if (data.input === 'Test message') {
+          ws.send(JSON.stringify({ message: 'Test response' }));
+        }
+      });
+    });
 
     await act(async () => {
-      result.current.startAgent(message);
       await waitForNextUpdate();
     });
 
-    expect(result.current.messages).toHaveLength(1);
+    // Assert that the agent response is received
+    expect(result.current.messages).toHaveLength(2);
+    expect(result.current.messages[1].content).toBe('Test response');
+    expect(result.current.messages[1].sender).toBe('agent');
   });
 });

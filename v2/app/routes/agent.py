@@ -1,5 +1,5 @@
-
-from fastapi import APIRouter, Depends, WebSocket, Request
+import json
+from fastapi import APIRouter, Depends, WebSocket, Request, HTTPException
 from app.services.agent_service import AgentService
 from app.services.streaming_agent.supervisor import StreamingAgentSupervisor
 from app.db.models_clickhouse import AnalysisRequest
@@ -28,7 +28,21 @@ async def start_agent(
 @router.websocket("/{run_id}")
 async def websocket_endpoint(websocket: WebSocket, run_id: str, current_user: ActiveUserWsDep):
     agent_service: AgentService = websocket.app.state.agent_service
-    """
-    Handles the WebSocket connection for the agent.
-    """
-    await agent_service.handle_websocket(websocket, run_id)
+    await websocket.accept()
+    try:
+        # Handshake
+        handshake_message = await websocket.receive_text()
+        handshake_data = json.loads(handshake_message)
+        if handshake_data.get("type") == "handshake" and handshake_data.get("message") == "Hello from client":
+            await websocket.send_text(json.dumps({"type": "handshake", "message": "Hello from server"}))
+        else:
+            await websocket.close(code=1008, reason="Invalid handshake")
+            return
+
+        # Handle incoming messages
+        while True:
+            data = await websocket.receive_text()
+            await agent_service.handle_websocket_message(run_id, data)
+
+    except Exception as e:
+        await websocket.close(code=1011, reason=str(e))

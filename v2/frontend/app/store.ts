@@ -23,6 +23,7 @@ interface AppState {
     setToken: (token: string | null) => void;
     setIsLoading: (isLoading: boolean) => void;
     addMessage: (message: Message) => void;
+    devLogin: () => Promise<void>;
 }
 
 const useAppStore = create<AppState>((set, get) => ({
@@ -73,6 +74,17 @@ const useAppStore = create<AppState>((set, get) => ({
         set({ user: null, token: null });
         if (typeof window !== 'undefined') {
             localStorage.removeItem('authToken');
+        }
+    },
+    devLogin: async () => {
+        try {
+            const response = await apiService.post(config.api.endpoints.devLogin, {});
+            const { access_token } = response;
+            localStorage.setItem('authToken', access_token);
+            set({ token: access_token });
+            await get().fetchUser(access_token);
+        } catch (error) {
+            console.error('Failed to login as dev user', error);
         }
     },
 }));

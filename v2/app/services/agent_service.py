@@ -1,4 +1,4 @@
-
+import json
 from fastapi import WebSocket
 from app.services.streaming_agent.supervisor import StreamingAgentSupervisor
 from app.db.models_clickhouse import AnalysisRequest
@@ -12,6 +12,15 @@ class AgentService:
         Starts the agent and returns the result.
         """
         return await self.supervisor.start_agent(analysis_request, client_id)
+
+    async def handle_websocket_message(self, run_id: str, data: str):
+        """
+        Handles a message from the WebSocket.
+        """
+        message_data = json.loads(data)
+        # This is where you would handle the message and interact with the agent
+        # For now, we'll just print the message
+        print(f"Received message for run_id: {run_id}: {message_data}")
 
     async def handle_websocket(self, websocket: WebSocket, run_id: str):
         """

@@ -16,14 +16,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
-  const { user, fetchUser, isLoading } = useAppStore();
+  const { user, fetchUser, devLogin, isLoading } = useAppStore();
 
   useEffect(() => {
     const token = getToken();
     if (token && !user) {
       fetchUser(token);
+    } else if (!token && !user && process.env.NODE_ENV === 'development') {
+      devLogin();
     }
-  }, [user, fetchUser, router, pathname]);
+  }, [user, fetchUser, devLogin, router, pathname]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -39,8 +41,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     );
   }
 
-  if (!user && pathname !== '/login') {
-    return null; 
+  if (!user && pathname !== '/login' && process.env.NODE_ENV !== 'development') {
+    router.push('/login');
+    return null;
   }
 
   if (pathname === '/login') {
