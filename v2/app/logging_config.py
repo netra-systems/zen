@@ -7,12 +7,8 @@ from pydantic import BaseModel, Field
 from typing import Optional, Any, Dict
 from logging import Handler
 
-# Langfuse
-from langfuse import Langfuse
-from langfuse.model import CreateTrace, CreateSpan, UpdateSpan, CreateGeneration, UpdateGeneration
-
 # ClickHouse
-from app.db.clickhouse import ClickHouseDatabase
+from app.db.clickhouse_base import ClickHouseDatabase
 from app.config import settings
 
 class LogEntry(BaseModel):
@@ -69,7 +65,6 @@ class FrontendStreamHandler(Handler):
 class CentralLogger:
     def __init__(self):
         self.logger = logger
-        self.langfuse = None
         self.clickhouse_db = None
 
         self._configure_loguru()
@@ -94,15 +89,6 @@ class CentralLogger:
 
     def _initialize_services(self):
         """Initializes external logging services like Langfuse and ClickHouse."""
-        # Langfuse
-        if settings.langfuse.secret_key and settings.langfuse.public_key:
-            self.langfuse = Langfuse(
-                secret_key=settings.langfuse.secret_key,
-                public_key=settings.langfuse.public_key,
-                host=settings.langfuse.host
-            )
-            self.logger.info("Langfuse initialized.")
-
         # ClickHouse
         try:
             self.clickhouse_db = ClickHouseDatabase(
@@ -133,20 +119,6 @@ class CentralLogger:
     def log(self, entry: LogEntry):
         """Logs a structured LogEntry to all configured destinations."""
         self.logger.bind(log_entry=entry).info(entry.event)
-
-        # Langfuse logging
-        if self.langfuse:
-            try:
-                if entry.trace_id:
-                    # This is a simplified example. You would create traces, spans, etc.
-                    # based on the specific event and data in the LogEntry.
-                    self.langfuse.span(CreateSpan(
-                        trace_id=entry.trace_id,
-                        name=entry.event,
-                        input=entry.data,
-                    ))
-            except Exception as e:
-                self.logger.error(f"Failed to log to Langfuse: {e}")
 
     def get_logger(self, name: Optional[str] = None):
         """Returns a Loguru logger instance, optionally named."""
@@ -182,29 +154,11 @@ if __name__ == "__main__":
     # Get the logger instance
     log_manager = get_central_logger()
 
-    # Create a trace for a request or a job
-    trace = log_manager.langfuse.trace(CreateTrace(name="example-trace"))
-
     # Log a simple event
     log_manager.log(LogEntry(
-        trace_id=trace.id,
         event="application_startup",
         data={"message": "Application is starting up."},
         user_id="system"
-    ))
-
-    # Log a more complex event, like an agent step
-    log_manager.log(LogEntry(
-        trace_id=trace.id,
-        span_id=trace.span().id, # Assuming a span is created for the step
-        event="agent_step_completed",
-        data={
-            "agent_name": "TestAgent",
-            "step_name": "initial_analysis",
-            "result": "success",
-            "output": {"key": "value"}
-        },
-        user_id="user123"
     ))
 
     log_manager.logger.info("This is a standard info message through Loguru.")
