@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, FormEvent, useRef } from 'react';
 import { HelpCircle } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/Card.tsx';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
 import { config } from '@/config';
 import { Sidebar } from '@/components/Sidebar';
