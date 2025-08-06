@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconn
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.routes import auth, supply, generation, google_auth, apex_optimizer_agent_route, websocket, streaming_agent_route, admin
+from app.routes import auth, supply, generation, google_auth, apex_optimizer_agent_route, websocket, streaming_agent_route, admin, references
 from app.db.postgres import async_session_factory
 from app.config import settings
 from app.logging_config import central_logger

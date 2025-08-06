@@ -2,11 +2,13 @@ import { render, screen, act } from '@testing-library/react';
 import { useAgent } from '../useAgent';
 import { getToken } from '../../lib/user';
 import { FC, useEffect } from 'react';
-import 'jest-fetch-mock';
 
 jest.mock('../../lib/user', () => ({
   getToken: jest.fn(),
 }));
+
+const mockFetch = jest.fn();
+global.fetch = mockFetch;
 
 const TestComponent: FC<{ message: string }> = ({ message }) => {
   const { startAgent, messages, showThinking } = useAgent();
@@ -32,7 +34,7 @@ const TestComponent: FC<{ message: string }> = ({ message }) => {
 describe('useAgent', () => {
   beforeEach(() => {
     (getToken as jest.Mock).mockResolvedValue('test-token');
-    fetch.resetMocks();
+    mockFetch.mockClear();
   });
 
   it('should start the agent, show thinking indicator, and process the response', async () => {
@@ -46,7 +48,7 @@ describe('useAgent', () => {
         controller.close();
       },
     });
-    fetch.mockResponseOnce(mockStream as any);
+    mockFetch.mockResolvedValue({ body: mockStream });
 
     render(<TestComponent message="Test message" />);
 
@@ -67,7 +69,7 @@ describe('useAgent', () => {
   });
 
   it('should handle errors when calling the agent', async () => {
-    fetch.mockReject(new Error('API Error'));
+    mockFetch.mockRejectedValue(new Error('API Error'));
 
     render(<TestComponent message="Test message" />);
 
@@ -85,6 +87,6 @@ describe('useAgent', () => {
 
     render(<TestComponent message="Test message" />);
 
-    expect(fetch).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 });

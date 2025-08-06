@@ -50,7 +50,6 @@
     "eslint-config-next": "15.4.4",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
-    "jest-fetch-mock": "^3.0.3",
     "msw": "^2.10.4",
     "start-server-and-test": "^2.0.13",
     "tailwindcss": "^4",
