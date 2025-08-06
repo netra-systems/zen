@@ -8,7 +8,8 @@ from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status, Depends
 from pydantic import BaseModel, Field
 
-from ..services.generation_service import run_content_generation_job, run_log_generation_job, run_synthetic_data_generation_job, run_data_ingestion_job, GENERATION_JOBS
+from ..services.generation_service import run_content_generation_job, run_log_generation_job, run_synthetic_data_generation_job, run_data_ingestion_job
+from ..services.job_store import job_store
 
 router = APIRouter()
 
@@ -39,7 +40,7 @@ class ContentGenParams(BaseModel):
 def create_content_corpus(params: ContentGenParams, background_tasks: BackgroundTasks):
     """Starts a background job to generate a new content corpus."""
     job_id = str(uuid.uuid4())
-    GENERATION_JOBS[job_id] = {"status": "pending", "type": "content", "params": params.dict()}
+    job_store.set(job_id, {"status": "pending", "type": "content", "params": params.dict()})
     background_tasks.add_task(run_content_generation_job, job_id, params.dict())
     return {"job_id": job_id, "message": "Content generation job started."}
 
@@ -47,7 +48,7 @@ def create_content_corpus(params: ContentGenParams, background_tasks: Background
 def create_synthetic_logs(params: LogGenParams, background_tasks: BackgroundTasks):
     """Starts a background job to generate a new set of synthetic logs."""
     job_id = str(uuid.uuid4())
-    GENERATION_JOBS[job_id] = {"status": "pending", "type": "logs", "params": params.dict()}
+    job_store.set(job_id, {"status": "pending", "type": "logs", "params": params.dict()})
     background_tasks.add_task(run_log_generation_job, job_id, params.dict())
     return {"job_id": job_id, "message": "Synthetic log generation job started."}
 
@@ -74,7 +75,7 @@ class ContentCorpusGenParams(BaseModel):
 def create_content_corpus(params: ContentCorpusGenParams, background_tasks: BackgroundTasks):
     """Starts a background job to generate a new content corpus and store it in ClickHouse."""
     job_id = str(uuid.uuid4())
-    GENERATION_JOBS[job_id] = {"status": "pending", "type": "content_corpus_generation", "params": params.dict()}
+    job_store.set(job_id, {"status": "pending", "type": "content_corpus_generation", "params": params.dict()})
     background_tasks.add_task(run_content_generation_job, job_id, params.dict())
     return {"job_id": job_id, "message": "Content corpus generation job started."}
 
@@ -83,7 +84,7 @@ def create_content_corpus(params: ContentCorpusGenParams, background_tasks: Back
 def ingest_data(params: DataIngestionParams, background_tasks: BackgroundTasks):
     """Starts a background job to ingest data into ClickHouse."""
     job_id = str(uuid.uuid4())
-    GENERATION_JOBS[job_id] = {"status": "pending", "type": "data_ingestion", "params": params.dict()}
+    job_store.set(job_id, {"status": "pending", "type": "data_ingestion", "params": params.dict()})
     background_tasks.add_task(run_data_ingestion_job, job_id, params.dict())
     return {"job_id": job_id, "message": "Data ingestion job started."}
 
@@ -92,14 +93,14 @@ def ingest_data(params: DataIngestionParams, background_tasks: BackgroundTasks):
 def create_synthetic_data(params: SyntheticDataGenParams, background_tasks: BackgroundTasks):
     """Starts a background job to generate new synthetic data."""
     job_id = str(uuid.uuid4())
-    GENERATION_JOBS[job_id] = {"status": "pending", "type": "synthetic_data", "params": params.dict()}
+    job_store.set(job_id, {"status": "pending", "type": "synthetic_data", "params": params.dict()})
     background_tasks.add_task(run_synthetic_data_generation_job, job_id, params.dict())
     return {"job_id": job_id, "message": "Synthetic data generation job started."}
 
 @router.get("/jobs/{job_id}")
 def get_job_status(job_id: str):
     """Retrieves the status of a generation job."""
-    job = GENERATION_JOBS.get(job_id)
+    job = job_store.get(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found.")
     return job
