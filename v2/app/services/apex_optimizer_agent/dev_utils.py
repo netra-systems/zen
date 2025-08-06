@@ -2,7 +2,9 @@ from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models_postgres import User
 
-DEV_USER_EMAIL = "dev@example.com"
+from app.config import settings
+
+DEV_USER_EMAIL = settings.dev_user_email
 
 async def get_or_create_dev_user(db_session: AsyncSession) -> User:
     """Get or create a dummy user for development purposes."""

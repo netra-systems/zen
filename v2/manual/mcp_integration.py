@@ -99,7 +99,7 @@ if __name__ == "__main__":
     logger.info(f"Applied recommendations result: {applied_recommendations}")
 
     # Demonstrate finding model calls
-    model_calls = mcp_integration.find_model_calls(directory="/app")
+    model_calls = mcp_integration.find_model_calls(directory=".")
     logger.info(f"Model calls result: {model_calls}")
 
     # Demonstrate refactoring for middleware

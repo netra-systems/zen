@@ -114,7 +114,7 @@ class AppConfig(BaseModel):
     database_url: str = None
     log_level: str = "DEBUG"
     log_secrets: bool = False
-    run_startup_simulation: bool = False
+    frontend_url: str = "http://localhost:3000"
 
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(
@@ -184,6 +184,7 @@ class AppConfig(BaseModel):
 class DevelopmentConfig(AppConfig):
     """Development-specific settings can override defaults."""
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra"
+    dev_user_email: str = "dev@example.com"
 
 class ProductionConfig(AppConfig):
     """Production-specific settings."""

@@ -1,3 +1,4 @@
+"use client";
 
 import { useState, useEffect } from 'react';
 import { startAgent, connectToWebSocket } from '../services/agentService';
@@ -51,4 +52,3 @@ export default function ApexOptimizerAgentPage() {
         </div>
     );
 }
-

@@ -18,7 +18,7 @@ def test_client():
 @pytest.fixture
 def auth_token(test_client):
     # Create a test user
-    test_client.post("/auth/users", json={"email": "test@example.com", "password": "testpassword"})
+    test_client.post("/auth/users", json={"email": settings.dev_user_email, "password": "testpassword"})
     # Login and get token
     response = test_client.post("/auth/token", data={"username": "test@example.com", "password": "testpassword"})
     return response.json()["access_token"]

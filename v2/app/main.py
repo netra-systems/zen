@@ -90,21 +90,9 @@ app.include_router(admin.router, prefix="/api/v3", tags=["admin"])
 app.include_router(agent.router, prefix="/agent", tags=["agent"])
 app.include_router(references.router, prefix="/api/v3", tags=["references"])
 
-# Add a new websocket route for development that bypasses authentication
-from app.auth_dependencies import ActiveUserWsDep
 if settings.app_env == "development":
-    @app.websocket("/ws/dev/{client_id}")
-    async def dev_websocket_endpoint(websocket: WebSocket, client_id: str, current_user: ActiveUserWsDep):
-        print(f"DEBUG: Dev WebSocket endpoint hit for client_id: {client_id}")
-        await websocket_manager.connect(websocket)
-        try:
-            while True:
-                data = await websocket.receive_text()
-                await websocket_manager.send_personal_message(f"You wrote: {data}", websocket)
-                await websocket_manager.broadcast(f"Client #{client_id} says: {data}")
-        except WebSocketDisconnect:
-            websocket_manager.disconnect(websocket)
-            await websocket_manager.broadcast(f"Client #{client_id} left the chat")
+    from app.routes import dev_websocket
+    app.include_router(dev_websocket.router, prefix="/ws/dev", tags=["dev_websocket"])
 
 
 

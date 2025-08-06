@@ -11,7 +11,7 @@ async def get_current_user_ws(
 
     if settings.app_env == "development":
         print("DEBUG: APP_ENV is development. Bypassing authentication.")
-        return models_postgres.User(email="dev@example.com", hashed_password="dev")
+        return models_postgres.User(email=settings.dev_user_email, hashed_password="dev")
 
     if token is None:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
@@ -33,7 +33,7 @@ async def get_current_user_ws(
 
 async def get_current_active_user(request: Request) -> models_postgres.User:
     if settings.app_env == "development":
-        return models_postgres.User(email="dev@example.com", hashed_password="dev")
+        return models_postgres.User(email=settings.dev_user_email, hashed_password="dev")
 
     token = request.headers.get("Authorization")
     if token is None:

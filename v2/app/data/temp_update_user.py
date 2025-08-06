@@ -15,7 +15,7 @@ async def update_development_user():
         async with session.begin():
             result = await session.execute(
                 update(User)
-                .where(User.email == "development_user@netra.ai")
+                .where(User.email == settings.dev_user_email)
                 .values(is_superuser=True)
             )
             if result.rowcount > 0:
