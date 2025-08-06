@@ -55,7 +55,7 @@ class ToolBuilder:
         }
         
         for name, tool in all_tools.items():
-            if isinstance(tool, partial):
-                setattr(tool, 'name', name)
+            setattr(tool, 'name', name)
+            setattr(tool, '__name__', name)
 
         return all_tools, {}
