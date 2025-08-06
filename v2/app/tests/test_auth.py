@@ -1,4 +1,5 @@
 import pytest
+import os
 from fastapi.testclient import TestClient
 from unittest.mock import patch, AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession

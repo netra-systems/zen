@@ -1,4 +1,5 @@
-import React, { FormEvent } from 'react';
+
+import React, { FormEvent, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -11,22 +12,41 @@ interface InputField {
     type: string;
     required?: boolean;
     defaultValue?: string | number;
-    value?: string | number;
-    onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     options?: string[];
+    step?: number;
 }
 
 interface GenericInputProps {
     title: string;
     description: string;
     inputFields: InputField[];
-    onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+    onSubmit: (data: Record<string, any>) => void;
     isLoading: boolean;
     submitButtonText: string;
     onClear?: () => void;
 }
 
 export function GenericInput({ title, description, inputFields, onSubmit, isLoading, submitButtonText, onClear }: GenericInputProps) {
+    const [formState, setFormState] = useState<Record<string, any>>(() => {
+        const initialState: Record<string, any> = {};
+        inputFields.forEach(field => {
+            initialState[field.name] = field.defaultValue ?? '';
+        });
+        return initialState;
+    });
+
+    const handleChange = (name: string, value: any) => {
+        setFormState(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        onSubmit(formState);
+    };
+
     return (
         <Card>
             <CardHeader>
@@ -34,12 +54,17 @@ export function GenericInput({ title, description, inputFields, onSubmit, isLoad
                 <CardDescription>{description}</CardDescription>
             </CardHeader>
             <CardContent>
-                <form onSubmit={onSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {inputFields.map((field) => (
                         <div key={field.id} className="space-y-2">
                             <label htmlFor={field.id} className="text-sm font-medium">{field.label}</label>
                             {field.type === 'select' ? (
-                                <Select name={field.name} required={field.required} defaultValue={field.defaultValue as string}>
+                                <Select
+                                    name={field.name}
+                                    required={field.required}
+                                    defaultValue={field.defaultValue as string}
+                                    onValueChange={(value) => handleChange(field.name, value)}
+                                >
                                     <SelectTrigger>
                                         <SelectValue placeholder={`Select a ${field.label.toLowerCase()}`} />
                                     </SelectTrigger>
@@ -55,10 +80,10 @@ export function GenericInput({ title, description, inputFields, onSubmit, isLoad
                                     name={field.name}
                                     type={field.type}
                                     required={field.required}
-                                    defaultValue={field.defaultValue}
-                                    value={field.value}
-                                    onChange={field.onChange}
+                                    value={formState[field.name]}
+                                    onChange={(e) => handleChange(field.name, e.target.value)}
                                     className="w-full"
+                                    step={field.step}
                                 />
                             )}
                         </div>
