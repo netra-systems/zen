@@ -1,6 +1,7 @@
+import asyncio
 import clickhouse_connect
 from clickhouse_connect.driver.client import Client
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Iterable
 
 class ClickHouseDatabase:
     """
@@ -38,3 +39,28 @@ class ClickHouseDatabase:
             return True
         except Exception as e:
             return False
+
+    async def command(self, cmd: str, parameters: Dict[str, Any] | None = None, settings: Dict[str, Any] | None = None):
+        if not self.client:
+            raise ConnectionError("Not connected to ClickHouse.")
+        return await asyncio.to_thread(self.client.command, cmd, parameters=parameters, settings=settings)
+
+    async def execute_query(self, query: str, parameters: Dict[str, Any] | None = None, settings: Dict[str, Any] | None = None) -> List[Dict[str, Any]]:
+        if not self.client:
+            raise ConnectionError("Not connected to ClickHouse.")
+        
+        def _query():
+            result = self.client.query(query, parameters=parameters, settings=settings)
+            return list(result.named_results)
+
+        return await asyncio.to_thread(_query)
+
+    async def insert_data(self, table: str, data: List[List[Any]], column_names: Iterable[str] = '*'):
+        if not self.client:
+            raise ConnectionError("Not connected to ClickHouse.")
+        return await asyncio.to_thread(self.client.insert, table, data, column_names=column_names)
+
+    def disconnect(self):
+        if self.client:
+            self.client.close()
+            self.client = None

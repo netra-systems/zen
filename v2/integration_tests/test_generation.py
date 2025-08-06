@@ -1,13 +1,15 @@
-
 import pytest
+import asyncio
 import time
 import uuid
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, AsyncMock
+
 from fastapi.testclient import TestClient
 from app.main import app
-from app.services.generation_service import GENERATION_JOBS
+from app.services.generation_service import GENERATION_JOBS, get_corpus_from_clickhouse, save_corpus_to_clickhouse
 from app.db.clickhouse import get_clickhouse_client
-from app.db.models_clickhouse import get_content_corpus_schema, ContentCorpus
+from app.db.models_clickhouse import get_content_corpus_schema, ContentCorpus, get_llm_events_table_schema
+from app.db.clickhouse_base import ClickHouseDatabase
 
 @pytest.fixture(scope="module")
 def test_client():
@@ -15,16 +17,23 @@ def test_client():
         yield c
 
 @pytest.fixture(scope="module")
-def clickhouse_client():
-    with get_clickhouse_client() as client:
+def event_loop():
+    loop = asyncio.get_event_loop()
+    yield loop
+    loop.close()
+
+@pytest.fixture(scope="function")
+async def clickhouse_client():
+    async with get_clickhouse_client() as client:
         yield client
 
-@patch('app.services.generation_service.run_content_generation_job')
-def test_content_generation_with_custom_table(mock_run_job, test_client):
+@pytest.mark.asyncio
+@patch('app.services.generation_service.run_content_generation_job', new_callable=AsyncMock)
+async def test_content_generation_with_custom_table(mock_run_job, test_client):
     # Arrange
-    custom_table_name = "my_custom_corpus_table"
+    custom_table_name = f"test_content_corpus_{uuid.uuid4().hex}"
 
-    def side_effect(job_id, params):
+    async def side_effect(job_id, params):
         GENERATION_JOBS[job_id] = {
             "status": "completed",
             "summary": {
@@ -50,19 +59,21 @@ def test_content_generation_with_custom_table(mock_run_job, test_client):
     job_id = response.json()["job_id"]
 
     # Poll for job completion
-    while True:
+    for _ in range(10): # Poll for a maximum of 1 second
         status_response = test_client.get(f"/api/v3/generation/jobs/{job_id}")
         assert status_response.status_code == 200
         job_status = status_response.json()
         if job_status["status"] == "completed":
             assert f"Corpus generated and saved to {custom_table_name}" in job_status["summary"]["message"]
-            break
+            return
         elif job_status["status"] == "failed":
             pytest.fail("Content generation job failed")
-        time.sleep(0.1)
+        await asyncio.sleep(0.1)
+    pytest.fail("Job did not complete in time")
 
-@patch('app.services.generation_service.run_synthetic_data_generation_job')
-def test_synthetic_data_generation_with_table_selection(mock_run_job, test_client, clickhouse_client):
+@pytest.mark.asyncio
+@patch('app.services.generation_service.run_synthetic_data_generation_job', new_callable=AsyncMock)
+async def test_synthetic_data_generation_with_table_selection(mock_run_job, test_client, clickhouse_client: ClickHouseDatabase):
     # Arrange
     source_table = f"test_source_corpus_{uuid.uuid4().hex}"
     destination_table = f"test_destination_data_{uuid.uuid4().hex}"
@@ -70,7 +81,7 @@ def test_synthetic_data_generation_with_table_selection(mock_run_job, test_clien
     # Create and populate a temporary source table
     try:
         schema = get_content_corpus_schema(source_table)
-        clickhouse_client.command(schema)
+        await clickhouse_client.command(schema)
         
         sample_corpus = [
             ContentCorpus(workload_type="test", prompt="p1", response="r1", record_id=str(uuid.uuid4())),
@@ -78,9 +89,9 @@ def test_synthetic_data_generation_with_table_selection(mock_run_job, test_clien
         ]
         records = [list(item.model_dump().values()) for item in sample_corpus]
         column_names = list(ContentCorpus.model_fields.keys())
-        clickhouse_client.insert_data(source_table, records, column_names)
+        await clickhouse_client.insert_data(source_table, records, column_names)
 
-        def side_effect(job_id, params):
+        async def side_effect(job_id, params):
             GENERATION_JOBS[job_id] = {
                 "status": "completed",
                 "summary": {
@@ -105,18 +116,99 @@ def test_synthetic_data_generation_with_table_selection(mock_run_job, test_clien
         job_id = response.json()["job_id"]
 
         # Poll for job completion
-        while True:
+        for _ in range(10):
             status_response = test_client.get(f"/api/v3/generation/jobs/{job_id}")
             assert status_response.status_code == 200
             job_status = status_response.json()
             if job_status["status"] == "completed":
                 assert f"Synthetic data generated and saved to {destination_table}" in job_status["summary"]["message"]
+                # Verify destination table was created
+                result = await clickhouse_client.command(f"EXISTS TABLE {destination_table}")
+                assert result == 1
                 break
             elif job_status["status"] == "failed":
                 pytest.fail(f"Synthetic data generation job failed: {job_status.get('error')}")
-            time.sleep(0.1)
+            await asyncio.sleep(0.1)
+        else:
+            pytest.fail("Job did not complete in time")
 
     finally:
         # Clean up the temporary tables
-        clickhouse_client.command(f"DROP TABLE IF EXISTS {source_table}")
-        clickhouse_client.command(f"DROP TABLE IF EXISTS {destination_table}")
+        await clickhouse_client.command(f"DROP TABLE IF EXISTS {source_table}")
+        await clickhouse_client.command(f"DROP TABLE IF EXISTS {destination_table}")
+
+@pytest.mark.asyncio
+async def test_save_and_get_corpus(clickhouse_client: ClickHouseDatabase):
+    """Test saving a corpus to ClickHouse and retrieving it."""
+    table_name = f"test_corpus_{uuid.uuid4().hex}"
+    test_corpus = {
+        "test_workload": [("prompt1", "response1"), ("prompt2", "response2")]
+    }
+
+    try:
+        # Save the corpus
+        await save_corpus_to_clickhouse(test_corpus, table_name)
+
+        # Retrieve the corpus
+        retrieved_corpus = await get_corpus_from_clickhouse(table_name)
+
+        # Assertions
+        assert "test_workload" in retrieved_corpus
+        assert len(retrieved_corpus["test_workload"]) == 2
+        assert tuple(retrieved_corpus["test_workload"][0]) == ("prompt1", "response1")
+
+    finally:
+        # Clean up the temporary table
+        await clickhouse_client.command(f"DROP TABLE IF EXISTS {table_name}")
+
+@pytest.mark.asyncio
+async def test_run_synthetic_data_generation_job_e2e(clickhouse_client: ClickHouseDatabase):
+    """An end-to-end test for the synthetic data generation job."""
+    source_table = f"test_source_corpus_e2e_{uuid.uuid4().hex}"
+    destination_table = f"test_dest_data_e2e_{uuid.uuid4().hex}"
+    job_id = str(uuid.uuid4())
+
+    # 1. Setup: Create and populate a source corpus table
+    try:
+        schema = get_content_corpus_schema(source_table)
+        await clickhouse_client.command(schema)
+        sample_corpus = {
+            "greeting": [("hello", "world"), ("hey", "there")]
+        }
+        await save_corpus_to_clickhouse(sample_corpus, source_table)
+
+        # 2. Execute: Run the actual job function
+        params = {
+            "num_traces": 5,
+            "source_table": source_table,
+            "destination_table": destination_table,
+            "batch_size": 2
+        }
+        
+        # Mock the parts that are external or too slow for a unit test
+        with patch('app.services.generation_service.synthetic_data_main') as mock_synth_main, \
+             patch('app.services.generation_service.ingest_records', new_callable=AsyncMock) as mock_ingest:
+            
+            # Mock the synthetic data generator to return predictable data
+            mock_synth_main.return_value = [{"id": i} for i in range(5)]
+            # Mock the ingestion to simulate success
+            mock_ingest.return_value = 2 # Batch size
+
+            await run_synthetic_data_generation_job(job_id, params)
+
+        # 3. Assert: Check the job status and outcomes
+        job_status = GENERATION_JOBS.get(job_id)
+        assert job_status is not None
+        assert job_status["status"] == "completed"
+        assert job_status["summary"]["records_ingested"] == 6 # 2 + 2 + 2 (last batch is 1, but ingest returns 2)
+
+        # Verify that the destination table was created by the job
+        table_exists = await clickhouse_client.command(f"EXISTS TABLE {destination_table}")
+        assert table_exists == 1
+
+    finally:
+        # 4. Teardown: Clean up tables
+        await clickhouse_client.command(f"DROP TABLE IF EXISTS {source_table}")
+        await clickhouse_client.command(f"DROP TABLE IF EXISTS {destination_table}")
+        if job_id in GENERATION_JOBS:
+            del GENERATION_JOBS[job_id]

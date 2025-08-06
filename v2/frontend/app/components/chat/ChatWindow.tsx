@@ -6,7 +6,7 @@ import { Send } from 'lucide-react';
 import { MessageOrchestrator } from './MessageOrchestrator';
 import { MessageFilterControl } from './MessageFilter';
 
-export function ChatWindow({ messages, onSendMessage, isLoading, initialQuery, messageFilters, setMessageFilters }) {
+export function ChatWindow({ messages, onSendMessage, isLoading, initialQuery, messageFilters, setMessageFilters, exampleQueries = [] }) {
     const [input, setInput] = useState(initialQuery || '');
     const scrollRef = useRef<HTMLDivElement>(null);
 

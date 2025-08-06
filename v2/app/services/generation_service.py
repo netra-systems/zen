@@ -61,7 +61,8 @@ async def get_corpus_from_clickhouse(table_name: str) -> dict:
         logging.exception(f"Failed to load corpus from ClickHouse table {table_name}")
         raise
     finally:
-        pass
+        if 'db' in locals() and db:
+            db.disconnect()
 
 async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str = None):
     """Saves the generated content corpus to a specified ClickHouse table."""
@@ -116,7 +117,8 @@ async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str =
         logging.exception(f"Failed to save corpus to ClickHouse table {table_name}")
         raise
     finally:
-        pass
+        if 'db' in locals() and db:
+            db.disconnect()
 
 
 # --- Content Generation Service ---
@@ -338,7 +340,9 @@ async def run_synthetic_data_generation_job(job_id: str, params: dict):
         logging.exception("Error during synthetic data generation job")
         update_job_status(job_id, "failed", error=str(e))
     finally:
-        pass
+        if 'client' in locals() and client:
+            client.disconnect()
+    
 
 def get_config():
     """Loads the application configuration from config.yaml."""

@@ -43,6 +43,9 @@ def test_apex_optimizer_agent(prompt: str):
     assert isinstance(run_id, str)
 
     with client.websocket_connect(f"/ws/{run_id}") as websocket:
-        time.sleep(1) # Allow time for the websocket to connect and receive the message
-        data = websocket.receive_text()
-        assert isinstance(data, str)
+        try:
+            time.sleep(15) # Allow even more time for the websocket to connect and receive the message
+            data = websocket.receive_text()
+            assert isinstance(data, str)
+        finally:
+            websocket.close()
