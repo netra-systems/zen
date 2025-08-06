@@ -1,6 +1,7 @@
 from langchain_core.tools import tool
 from typing import Any, List
 from pydantic import BaseModel, Field
+from app.services.context import ToolContext
 
 class RawLog(BaseModel):
     response: Any = Field(..., description="The response from the LLM.")
@@ -8,7 +9,7 @@ class RawLog(BaseModel):
     trace_context: Any = Field(..., description="The trace context for the LLM call.")
 
 @tool
-async def log_enricher_and_clusterer(raw_logs: List[RawLog], db_session: Any, llm_manager: Any, log_pattern_identifier: any) -> str:
+async def log_enricher_and_clusterer(context: ToolContext, raw_logs: List[RawLog]) -> str:
     """Enriches logs and applies KMeans clustering."""
     if not raw_logs:
         return "No logs to enrich and cluster."
@@ -37,6 +38,6 @@ async def log_enricher_and_clusterer(raw_logs: List[RawLog], db_session: Any, ll
     if not enriched_spans_data:
         return "No enriched spans to cluster."
 
-    patterns, descriptions = await log_pattern_identifier.identify_patterns(enriched_spans_data)
+    patterns, descriptions = await context.log_pattern_identifier.identify_patterns(enriched_spans_data)
 
     return f"Successfully discovered {len(patterns)} patterns."
