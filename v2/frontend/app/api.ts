@@ -16,6 +16,16 @@ export interface AgentEvent {
     data: Record<string, unknown>;
 }
 
+export interface Reference {
+    id: string;
+    name: string;
+    friendly_name: string;
+    description: string | null;
+    type: string;
+    value: string;
+    version: string;
+}
+
 // --- API Service ---
 export const apiService = {
     async get(endpoint: string, token: string | null) {
@@ -60,7 +70,7 @@ export const apiService = {
         return this.get(`${config.api.baseUrl}/agent/${runId}/events`, token);
     },
 
-    async getReferences(token: string | null): Promise<any> {
+    async getReferences(token: string | null): Promise<{ references: Reference[] }> {
         return this.get(`${config.api.baseUrl}/references`, token);
     }
 };

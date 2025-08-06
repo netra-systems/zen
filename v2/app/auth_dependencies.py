@@ -31,24 +31,7 @@ async def get_current_user_ws(
             return
         return user
 
-async def get_current_active_user(request: Request) -> models_postgres.User:
-    if settings.app_env == "development":
-        return models_postgres.User(email=settings.dev_user_email, hashed_password="dev")
-
-    token = request.headers.get("Authorization")
-    if token is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-
-    security_service = request.app.state.security_service
-    email = security_service.get_user_email_from_token(token)
-    if email is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-
-    async with request.app.state.db_session_factory() as session:
-        user = await security_service.get_user(session, email)
-        if user is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-        return user
+from app.auth.active_user import get_active_user_dependency
 
 ActiveUserWsDep = Annotated[models_postgres.User, Depends(get_current_user_ws)]
-ActiveUserDep = Annotated[models_postgres.User, Depends(get_current_active_user)]
+ActiveUserDep = Annotated[models_postgres.User, Depends(get_active_user_dependency)]

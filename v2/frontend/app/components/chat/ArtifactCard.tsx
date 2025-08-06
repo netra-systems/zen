@@ -10,10 +10,10 @@ export interface ArtifactCardProps {
     message: Message;
 }
 
-function renderFriendlyArtifactData(data: any) {
+function renderFriendlyArtifactData(data: unknown) {
     if (!data) return <p>No data available</p>;
 
-    const renderValue = (value: any) => {
+    const renderValue = (value: unknown) => {
         if (typeof value === 'object' && value !== null) {
             return <JsonTreeView data={value} />;
         }

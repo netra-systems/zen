@@ -20,7 +20,6 @@ export function MessageContent({ message }: MessageContentProps) {
         case 'artifact':
             return <p>{message.name}</p>;
         default:
-            const exhaustiveCheck: never = message;
             return null;
     }
 }

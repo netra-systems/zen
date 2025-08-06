@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface JsonTreeViewProps {
-    data: any;
+    data: unknown;
 }
 
 const JsonTreeView: React.FC<JsonTreeViewProps> = ({ data }) => {

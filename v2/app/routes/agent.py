@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, WebSocket, Request
 from app.services.agent_service import AgentService
 from app.services.streaming_agent.supervisor import StreamingAgentSupervisor
 from app.db.models_clickhouse import AnalysisRequest
-from app.auth_dependencies import ActiveUserDep, ActiveUserWsDep, get_current_user_ws
+from app.auth_dependencies import ActiveUserDep, ActiveUserWsDep
 
 router = APIRouter()
 

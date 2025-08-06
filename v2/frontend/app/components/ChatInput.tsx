@@ -1,15 +1,14 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
-import { apiService } from '../api';
+import { apiService, Reference } from '../api';
 import useAppStore from '../store';
 
 export function ChatInput() {
     const [inputValue, setInputValue] = useState('');
     const [showReferences, setShowReferences] = useState(false);
-    const [references, setReferences] = useState<any[]>([]);
-    const [selectedReferences, setSelectedReferences] = useState<any[]>([]);
+    const [references, setReferences] = useState<Reference[]>([]);
+    const [selectedReferences, setSelectedReferences] = useState<Reference[]>([]);
     const token = useAppStore((state) => state.token);
 
     useEffect(() => {
@@ -30,7 +29,7 @@ export function ChatInput() {
         }
     };
 
-    const handleReferenceClick = (reference: any) => {
+    const handleReferenceClick = (reference: Reference) => {
         setInputValue(inputValue.slice(0, -1) + ` @${reference.friendly_name} `);
         setSelectedReferences([...selectedReferences, reference]);
         setShowReferences(false);

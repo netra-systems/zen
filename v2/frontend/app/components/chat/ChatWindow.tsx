@@ -5,10 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import { MessageOrchestrator } from './MessageOrchestrator';
 import { MessageFilterControl } from './MessageFilter';
-import { useAgentStreaming } from '@/hooks/useAgentStreaming';
-import { Message } from '@/types/chat';
 
-export function ChatWindow({ messages, onSendMessage, isLoading, exampleQueries, initialQuery, messageFilters, setMessageFilters }) {
+export function ChatWindow({ messages, onSendMessage, isLoading, initialQuery, messageFilters, setMessageFilters }) {
     const [input, setInput] = useState(initialQuery || '');
     const scrollRef = useRef<HTMLDivElement>(null);
 

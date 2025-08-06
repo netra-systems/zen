@@ -6,7 +6,7 @@ export type MessageFilter = 'event';
 function isJson(str: string) {
     try {
         JSON.parse(str);
-    } catch (e) {
+    } catch {
         return false;
     }
     return true;

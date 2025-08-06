@@ -12,6 +12,10 @@
     "cy:run": "npm run dev & wait-on http://localhost:3000 && cypress run"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.4",
+    "@langchain/community": "^0.3.49",
+    "@langchain/core": "^0.3.66",
+    "@langchain/openai": "^0.6.3",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.14",
@@ -21,8 +25,10 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.5",
     "@radix-ui/react-tabs": "^1.1.12",
+    "ai": "^5.0.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "langchain": "^0.3.30",
     "lucide-react": "^0.525.0",
     "next": "15.4.4",
     "next-themes": "^0.4.6",

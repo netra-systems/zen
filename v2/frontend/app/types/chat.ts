@@ -19,13 +19,13 @@ export interface ThinkingMessage extends BaseMessage {
 export interface EventMessage extends BaseMessage {
     type: 'event';
     name: string;
-    data: any;
+    data: Record<string, unknown>;
 }
 
 export interface ArtifactMessage extends BaseMessage {
     type: 'artifact';
     name: 'on_chain_start' | 'on_chain_end' | 'on_tool_start' | 'on_tool_end' | 'on_llm_start' | 'on_llm_end' | 'on_chat_model_start' | 'on_agent_action' | 'on_agent_finish';
-    data: any;
+    data: Record<string, unknown>;
 }
 
 export type Message = TextMessage | ThinkingMessage | EventMessage | ArtifactMessage;
