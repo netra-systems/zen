@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { apiService } from '../api';
-import React from 'react';
+import { getUserId } from '../lib/user';
 
 interface Message {
     role: 'user' | 'agent';
@@ -108,9 +108,11 @@ export const useAgentStreaming = (getToken: () => Promise<string | null>) => {
 
         try {
             const token = await getToken();
-            if (!token) throw new Error("Authentication token not available.");
+            if (!token && process.env.NODE_ENV !== 'development') {
+                throw new Error("Authentication token not available.");
+            }
 
-            await apiService.startStreamingAgent(token, {
+            await apiService.startStreamingAgent(token ?? '', {
                 settings: { debug_mode: false },
                 request: {
                     user_id: 'user-123',
