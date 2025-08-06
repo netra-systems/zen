@@ -13,12 +13,14 @@ cur = conn.cursor()
 cur.execute("SELECT 1 FROM pg_database WHERE datname = 'netra'")
 exists = cur.fetchone()
 
-if not exists:
-    # Create the database
-    cur.execute("CREATE DATABASE netra")
-    print("Database 'netra' created successfully.")
-else:
-    print("Database 'netra' already exists.")
+if exists:
+    # Drop the database
+    cur.execute("DROP DATABASE netra")
+    print("Database 'netra' dropped successfully.")
+
+# Create the database
+cur.execute("CREATE DATABASE netra")
+print("Database 'netra' created successfully.")
 
 # Close the cursor and connection
 cur.close()

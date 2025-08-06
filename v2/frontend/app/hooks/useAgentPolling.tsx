@@ -17,35 +17,31 @@ export const useAgentPolling = (token: string | null) => {
         setMessages(prev => [...prev, { role, content }]);
     };
 
-    const startPolling = (runId: string) => {
-        if (ws.current) {
-            ws.current.close();
-        }
-
-        const wsUrl = `ws://localhost:8000/ws/${runId}`;
+    useEffect(() => {
+        const wsUrl = `ws://localhost:8000/ws/dev/test-client`;
         ws.current = new WebSocket(wsUrl);
 
         ws.current.onopen = () => {
-            console.log('WebSocket connected');
-            setIsLoading(true);
+            console.log('WebSocket connected for testing');
+            ws.current?.send('test message');
         };
 
         ws.current.onmessage = (event) => {
-            const message = JSON.parse(event.data);
-            addMessage('agent', <pre>{JSON.stringify(message, null, 2)}</pre>);
+            console.log('WebSocket test message received:', event.data);
         };
 
         ws.current.onerror = (error) => {
-            console.error('WebSocket error:', error);
-            setError(new Error('WebSocket connection failed.'));
-            setIsLoading(false);
+            console.error('WebSocket test error:', error);
         };
 
         ws.current.onclose = () => {
-            console.log('WebSocket disconnected');
-            setIsLoading(false);
+            console.log('WebSocket test connection closed');
         };
-    };
+
+        return () => {
+            ws.current?.close();
+        };
+    }, []);
 
     return { isLoading, error, messages, addMessage, startPolling, setIsLoading, setError };
 };

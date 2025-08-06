@@ -86,6 +86,20 @@ app.include_router(apex_optimizer_agent_route.router, prefix="/api/v3/apex/chat"
 app.include_router(streaming_agent_route.router, prefix="/api/v3/streaming_agent", tags=["streaming_agent"])
 app.include_router(websocket.router, prefix="/ws", tags=["websockets"])
 
+# Add a new websocket route for development that bypasses authentication
+if settings.app_env == "development":
+    @app.websocket("/ws/dev/{client_id}")
+    async def dev_websocket_endpoint(websocket: WebSocket, client_id: str):
+        await websocket_manager.connect(websocket)
+        try:
+            while True:
+                data = await websocket.receive_text()
+                await websocket_manager.send_personal_message(f"You wrote: {data}", websocket)
+                await websocket_manager.broadcast(f"Client #{client_id} says: {data}")
+        except WebSocketDisconnect:
+            websocket_manager.disconnect(websocket)
+            await websocket_manager.broadcast(f"Client #{client_id} left the chat")
+
 
 
 @app.get("/")
