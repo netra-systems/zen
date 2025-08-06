@@ -1,4 +1,3 @@
-
 import logging
 import sys
 import os
@@ -117,7 +116,7 @@ class CentralLogger:
                 self.clickhouse_db.client.ping()
                 self.logger.info("ClickHouse connection verified.")
                 # Add ClickHouse sink
-                ch_sink = ClickHouseSink(self.clickhouse_db, table_name=settings.clickhouse_logging.table)
+                ch_sink = ClickHouseSink(self.clickhouse_db, table_name=settings.clickhouse_logging.default_table)
                 self.logger.add(ch_sink, level="INFO", format=self._format_log_entry)
             except Exception as e:
                 self.logger.error(f"Failed to initialize ClickHouse: {e}")

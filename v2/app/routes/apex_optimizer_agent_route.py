@@ -10,8 +10,8 @@ router = APIRouter()
 def get_llm_manager_from_state(request: Request) -> LLMManager:
     return request.app.state.llm_manager
 
-def get_agent_supervisor(request: Request) -> NetraOptimizerAgentSupervisor:
-    return request.app.state.agent_supervisor
+def get_agent_supervisor(request: Request, db_session: AsyncSession = Depends(get_db_session), llm_manager: LLMManager = Depends(get_llm_manager_from_state)) -> NetraOptimizerAgentSupervisor:
+    return NetraOptimizerAgentSupervisor(db_session, llm_manager)
 
 @router.post("/start_agent")
 async def start_agent(

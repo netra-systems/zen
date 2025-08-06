@@ -23,32 +23,33 @@ from app.services.apex_optimizer_agent.tools.performance_gains_simulator import 
 from app.services.apex_optimizer_agent.tools.policy_simulator import policy_simulator
 from app.services.apex_optimizer_agent.tools.finish import finish
 from app.services.deepagents.tools import update_state
+from functools import partial
 
 class ToolBuilder:
     @staticmethod
     def build_all(db_session: Any, llm_manager: LLMManager) -> Dict[str, Any]:
         all_tools = {
-            "cost_analyzer": cost_analyzer,
-            "latency_analyzer": latency_analyzer,
-            "code_analyzer": code_analyzer,
-            "function_performance_analyzer": function_performance_analyzer,
-            "evaluation_criteria_definer": evaluation_criteria_definer,
-            "log_enricher_and_clusterer": log_enricher_and_clusterer,
-            "log_fetcher": log_fetcher,
-            "kv_cache_finder": kv_cache_finder,
-            "final_report_generator": final_report_generator,
-            "cost_driver_identifier": cost_driver_identifier,
-            "latency_bottleneck_identifier": latency_bottleneck_identifier,
-            "future_usage_modeler": future_usage_modeler,
-            "optimal_policy_proposer": optimal_policy_proposer,
-            "optimization_proposer": optimization_proposer,
-            "optimized_implementation_proposer": optimized_implementation_proposer,
-            "optimization_method_researcher": optimization_method_researcher,
-            "cost_impact_simulator": cost_impact_simulator,
-            "quality_impact_simulator": quality_impact_simulator,
-            "rate_limit_impact_simulator": rate_limit_impact_simulator,
-            "performance_gains_simulator": performance_gains_simulator,
-            "policy_simulator": policy_simulator,
+            "cost_analyzer": partial(cost_analyzer, db_session=db_session, llm_manager=llm_manager),
+            "latency_analyzer": partial(latency_analyzer, db_session=db_session, llm_manager=llm_manager),
+            "code_analyzer": partial(code_analyzer, db_session=db_session, llm_manager=llm_manager),
+            "function_performance_analyzer": partial(function_performance_analyzer, db_session=db_session, llm_manager=llm_manager),
+            "evaluation_criteria_definer": partial(evaluation_criteria_definer, db_session=db_session, llm_manager=llm_manager),
+            "log_enricher_and_clusterer": partial(log_enricher_and_clusterer, db_session=db_session, llm_manager=llm_manager),
+            "log_fetcher": partial(log_fetcher, db_session=db_session, llm_manager=llm_manager),
+            "kv_cache_finder": partial(kv_cache_finder, db_session=db_session, llm_manager=llm_manager),
+            "final_report_generator": partial(final_report_generator, db_session=db_session, llm_manager=llm_manager),
+            "cost_driver_identifier": partial(cost_driver_identifier, db_session=db_session, llm_manager=llm_manager),
+            "latency_bottleneck_identifier": partial(latency_bottleneck_identifier, db_session=db_session, llm_manager=llm_manager),
+            "future_usage_modeler": partial(future_usage_modeler, db_session=db_session, llm_manager=llm_manager),
+            "optimal_policy_proposer": partial(optimal_policy_proposer, db_session=db_session, llm_manager=llm_manager),
+            "optimization_proposer": partial(optimization_proposer, db_session=db_session, llm_manager=llm_manager),
+            "optimized_implementation_proposer": partial(optimized_implementation_proposer, db_session=db_session, llm_manager=llm_manager),
+            "optimization_method_researcher": partial(optimization_method_researcher, db_session=db_session, llm_manager=llm_manager),
+            "cost_impact_simulator": partial(cost_impact_simulator, db_session=db_session, llm_manager=llm_manager),
+            "quality_impact_simulator": partial(quality_impact_simulator, db_session=db_session, llm_manager=llm_manager),
+            "rate_limit_impact_simulator": partial(rate_limit_impact_simulator, db_session=db_session, llm_manager=llm_manager),
+            "performance_gains_simulator": partial(performance_gains_simulator, db_session=db_session, llm_manager=llm_manager),
+            "policy_simulator": partial(policy_simulator, db_session=db_session, llm_manager=llm_manager),
             "finish": finish,
             "update_state": update_state,
         }
