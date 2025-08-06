@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 from ..services.generation_service import run_content_generation_job, run_log_generation_job, run_synthetic_data_generation_job, run_data_ingestion_job
 from ..services.job_store import job_store
+from ..db.clickhouse import get_clickhouse_client
 
 router = APIRouter()
 

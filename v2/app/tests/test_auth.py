@@ -184,11 +184,12 @@ def authenticated_client(client):
         picture="http://example.com/pic.jpg"
     )
     app.dependency_overrides[get_current_user] = lambda: mock_user
-    yield client
+    yield client, mock_user
     del app.dependency_overrides[get_current_user]
 
 def test_read_users_me(authenticated_client):
-    response = authenticated_client.get("/auth/users/me")
+    client, _ = authenticated_client
+    response = client.get("/auth/users/me")
     assert response.status_code == 200
     json_response = response.json()
     assert json_response["email"] == "test@example.com"
@@ -196,15 +197,16 @@ def test_read_users_me(authenticated_client):
     assert json_response["picture"] == "http://example.com/pic.jpg"
 
 def test_update_user_me(authenticated_client, mock_db_session_module):
-    update_data = {"full_name": "Updated Test User"}
+    client, mock_user = authenticated_client
+    update_data = {"email": mock_user.email, "full_name": "Updated Test User"}
     
     async def refresh_side_effect(user_obj):
-        for key, value in update_data.items():
-            setattr(user_obj, key, value)
+        # When refresh is called, update the mock_user object to simulate the DB update
+        mock_user.full_name = update_data["full_name"]
 
     mock_db_session_module.refresh.side_effect = refresh_side_effect
 
-    response = authenticated_client.put("/auth/users/me", json=update_data)
+    response = client.put("/auth/users/me", json=update_data)
     assert response.status_code == 200
     json_response = response.json()
     assert json_response["full_name"] == "Updated Test User"
@@ -213,7 +215,8 @@ def test_update_user_me(authenticated_client, mock_db_session_module):
     mock_db_session_module.refresh.assert_awaited_once()
 
 def test_delete_user_me(authenticated_client, mock_db_session_module):
-    response = authenticated_client.delete("/auth/users/me")
+    client, _ = authenticated_client
+    response = client.delete("/auth/users/me")
     assert response.status_code == 204
     mock_db_session_module.delete.assert_called_once()
     mock_db_session_module.commit.assert_awaited_once()

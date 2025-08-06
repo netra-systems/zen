@@ -83,14 +83,19 @@ class CentralLogger:
                 record["extra"]["pretty_data"] = ""
             return True
 
-        # The format now safely includes the pretty-printed data
-        console_format = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}{extra[pretty_data]}</level>"
+        def formatter(record):
+            if record["level"].name == "ERROR":
+                # Red for errors, including traceback
+                return "<red>{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}{extra[pretty_data]}\n{exception}</red>"
+            
+            # Default format for other levels
+            return "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}{extra[pretty_data]}</level>"
 
         # Basic console logger for development and debugging
         self.logger.add(
             sys.stdout,
             level=log_level,
-            format=console_format,
+            format=formatter,
             colorize=True,
             filter=console_structured_log_filter
         )
@@ -131,9 +136,9 @@ class CentralLogger:
             return record["extra"]["log_entry"].json()
         return ""
 
-    def log(self, entry: LogEntry):
+    def log(self, entry: LogEntry, level: str = "INFO"):
         """Logs a structured LogEntry to all configured destinations."""
-        self.logger.bind(log_entry=entry).info(entry.event)
+        self.logger.bind(log_entry=entry).log(level, entry.event)
 
     def get_logger(self, name: Optional[str] = None):
         """Returns a Loguru logger instance, optionally named."""

@@ -5,7 +5,7 @@ export function useAgent() {
   const { addMessage, processStream, setShowThinking, ...rest } = useAgentStreaming();
 
   const startAgent = async (message: string) => {
-    addMessage(message);
+    addMessage(message, 'user');
     const token = await getToken();
     if (token) {
       setShowThinking(true);
@@ -16,7 +16,9 @@ export function useAgent() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify({ message }),
+          body: JSON.stringify({
+            input: message,
+          }),
         });
 
         if (!response.body) {

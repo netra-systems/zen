@@ -127,6 +127,14 @@ def read_root():
     logger.info("Root endpoint was hit.")
     return {"message": "Welcome to Netra API v2"}
 
+@app.get("/test-error")
+def test_error():
+    logger = central_logger.get_logger(__name__)
+    try:
+        raise HTTPException(status_code=500, detail="This is a test error.")
+    except HTTPException as e:
+        logger.error(f"An HTTP exception occurred: {e.detail}", exc_info=True)
+        raise e
 
 if __name__ == "__main__":
     import uvicorn

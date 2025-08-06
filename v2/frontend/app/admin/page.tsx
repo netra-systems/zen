@@ -4,9 +4,7 @@ import React, { useState, useEffect, useCallback, FormEvent, useRef } from 'reac
 import { HelpCircle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
-import { config } from '@/config';
-import { Sidebar } from '@/components/Sidebar';
-import { Header } from '@/components/Header';
+
 import { GenericInput } from '@/components/GenericInput';
 import useAppStore from '@/store';
 import Spinner from '@/components/Spinner';
@@ -128,35 +126,29 @@ export default function AdminPage() {
     };
 
     return (
-        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-        <Sidebar />
-        <div className="flex flex-col">
-          <Header />
-          <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-                    {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative mb-6" role="alert">{error}</div>}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-1">
-                            <GenericInput
-                                title="Generate Content Corpus"
-                                description="Generate a new content corpus and store it in ClickHouse."
-                                inputFields={[
-                                    { id: 'samples_per_type', name: 'samples_per_type', label: 'Samples Per Type', type: 'number', required: true, defaultValue: 10 },
-                                    { id: 'temperature', name: 'temperature', label: 'Temperature', type: 'number', required: true, defaultValue: 0.7 },
-                                    { id: 'max_cores', name: 'max_cores', label: 'Max Cores', type: 'number', required: true, defaultValue: 4 },
-                                    { id: 'clickhouse_table', name: 'clickhouse_table', label: 'ClickHouse Table', type: 'text', required: true, defaultValue: 'content_corpus' },
-                                ]}
-                                onSubmit={handleStartGeneration}
-                                isLoading={isLoading || isPolling}
-                                submitButtonText={isPolling ? 'Generation in Progress...' : 'Start Generation'}
-                            />
-                        </div>
-                        <div className="lg:col-span-2">
-                            <JobStatusView job={job} />
-                        </div>
-                    </div>
-                </main>
+        <>
+            {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative mb-6" role="alert">{error}</div>}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-1">
+                    <GenericInput
+                        title="Generate Content Corpus"
+                        description="Generate a new content corpus and store it in ClickHouse."
+                        inputFields={[
+                            { id: 'samples_per_type', name: 'samples_per_type', label: 'Samples Per Type', type: 'number', required: true, defaultValue: 10 },
+                            { id: 'temperature', name: 'temperature', label: 'Temperature', type: 'number', required: true, defaultValue: 0.7 },
+                            { id: 'max_cores', name: 'max_cores', label: 'Max Cores', type: 'number', required: true, defaultValue: 4 },
+                            { id: 'clickhouse_table', name: 'clickhouse_table', label: 'ClickHouse Table', type: 'text', required: true, defaultValue: 'content_corpus' },
+                        ]}
+                        onSubmit={handleStartGeneration}
+                        isLoading={isLoading || isPolling}
+                        submitButtonText={isPolling ? 'Generation in Progress...' : 'Start Generation'}
+                    />
+                </div>
+                <div className="lg:col-span-2">
+                    <JobStatusView job={job} />
+                </div>
             </div>
-        </div>
+        </>
     );
 }
 
