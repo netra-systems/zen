@@ -66,12 +66,22 @@ class StreamingAgentSupervisor:
         # Immediately return a response to the user
         return {"status": "agent_started", "run_id": run_id}
 
+    def _serialize_event_data(self, data: Any) -> Any:
+        if isinstance(data, dict):
+            return {key: self._serialize_event_data(value) for key, value in data.items()}
+        if isinstance(data, list):
+            return [self._serialize_event_data(item) for item in data]
+        if isinstance(data, HumanMessage):
+            return {"type": "human", "content": data.content}
+        return data
+
     async def run_agent(self, run_id: str):
         state = self.agent_states[run_id]
         async for event in self.graph.astream_events(state, {"recursion_limit": 20}):
             state["events"].append(event)
             # Send updates over WebSocket
-            await self.websocket_manager.send_to_run(json.dumps({"event": event["event"], "data": event["data"]}), run_id)
+            serializable_data = self._serialize_event_data(event["data"])
+            await self.websocket_manager.send_to_run(json.dumps({"event": event["event"], "data": serializable_data}), run_id)
 
         state["status"] = "complete"
         await self.websocket_manager.send_to_run(f"RUN #{run_id} | status: complete", run_id)
