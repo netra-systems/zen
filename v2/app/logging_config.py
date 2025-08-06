@@ -2,6 +2,7 @@
 import logging
 import sys
 import os
+import json
 from loguru import logger
 from pydantic import BaseModel, Field
 from typing import Optional, Any, Dict
@@ -22,43 +23,27 @@ class LogEntry(BaseModel):
     source: str = "backend"
     user_id: Optional[str] = None
 
-class ClickHouseHandler(Handler):
-    """A logging handler that writes logs to ClickHouse."""
-
-    def __init__(self, clickhouse_db: ClickHouseDatabase, table_name: str = "logs"):
-        super().__init__()
-        self.db = clickhouse_db
+class ClickHouseSink:
+    """A Loguru sink that writes logs to ClickHouse."""
+    def __init__(self, db: ClickHouseDatabase, table_name: str):
+        self.db = db
         self.table_name = table_name
 
-    def emit(self, record):
+    def write(self, message):
         try:
-            log_entry = self.format(record)
-            if isinstance(log_entry, LogEntry):
-                self.db.insert_log(log_entry)
+            log_entry = LogEntry.parse_raw(message)
+            self.db.insert_log(log_entry, self.table_name)
         except Exception as e:
-            # Handle exceptions during logging, e.g., DB connection errors
             print(f"Failed to log to ClickHouse: {e}", file=sys.stderr)
 
-    def format(self, record) -> Optional[LogEntry]:
-        if hasattr(record, 'extra') and 'log_entry' in record.extra:
-            return record.extra['log_entry']
-        return None
-
-class FrontendStreamHandler(Handler):
-    """A logging handler that streams logs to the frontend."""
-    
-    def emit(self, record):
+class FrontendStreamSink:
+    """A Loguru sink that streams logs to the frontend."""
+    def write(self, message):
         try:
-            log_entry = self.format(record)
-            if isinstance(log_entry, LogEntry):
-                asyncio.create_task(manager.broadcast(log_entry.json()))
+            log_entry = LogEntry.parse_raw(message)
+            asyncio.create_task(manager.broadcast(log_entry.json()))
         except Exception as e:
             print(f"Failed to stream log to frontend: {e}", file=sys.stderr)
-
-    def format(self, record) -> Optional[LogEntry]:
-        if hasattr(record, 'extra') and 'log_entry' in record.extra:
-            return record.extra['log_entry']
-        return None
 
 class CentralLogger:
     def __init__(self):
@@ -101,16 +86,21 @@ class CentralLogger:
                 # Verify connection
                 self.clickhouse_db.client.ping()
                 self.logger.info("ClickHouse connection verified.")
-                # Add ClickHouse handler
-                ch_handler = ClickHouseHandler(self.clickhouse_db, table_name=settings.clickhouse_logging.table)
-                self.logger.add(ch_handler, level="INFO", format=lambda record: record)
+                # Add ClickHouse sink
+                ch_sink = ClickHouseSink(self.clickhouse_db, table_name=settings.clickhouse_logging.table)
+                self.logger.add(ch_sink, level="INFO", format=self._format_log_entry)
             except Exception as e:
                 self.logger.error(f"Failed to initialize ClickHouse: {e}")
                 self.clickhouse_db = None
         
-        # Add Frontend Stream Handler
-        frontend_handler = FrontendStreamHandler()
-        self.logger.add(frontend_handler, level="INFO", format=lambda record: record)
+        # Add Frontend Stream Sink
+        frontend_sink = FrontendStreamSink()
+        self.logger.add(frontend_sink, level="INFO", format=self._format_log_entry)
+
+    def _format_log_entry(self, record) -> str:
+        if "log_entry" in record["extra"]:
+            return record["extra"]["log_entry"].json()
+        return ""
 
     def log(self, entry: LogEntry):
         """Logs a structured LogEntry to all configured destinations."""
