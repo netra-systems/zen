@@ -107,7 +107,7 @@ async def create_user(request: Request, user: schema.UserCreate, db: DbDep):
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    hashed_password = get_password_hash(user..password)
+    hashed_password = get_password_hash(user.password)
     user_data = user.model_dump()
     user_data.pop("password", None)
     user_to_add = models_postgres.User(**user_data, hashed_password=hashed_password)
