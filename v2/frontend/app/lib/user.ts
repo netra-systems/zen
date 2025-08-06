@@ -1,4 +1,4 @@
-import useAppStore from '../store';
+import useAppStore from '@/store';
 
 export const getUserId = () => {
     let userId = useAppStore.getState().user?.id;

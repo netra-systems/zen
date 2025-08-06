@@ -1,7 +1,8 @@
 import pytest
 import time
 from unittest.mock import MagicMock, AsyncMock, patch
-from app.services.generation_service import update_job_status, GENERATION_JOBS, get_corpus_from_clickhouse, save_corpus_to_clickhouse
+from app.services.generation_service import update_job_status, get_corpus_from_clickhouse, save_corpus_to_clickhouse
+from app.services.job_store import job_store
 
 @pytest.mark.asyncio
 async def test_update_job_status():
@@ -14,10 +15,10 @@ async def test_update_job_status():
     update_job_status(job_id, status, **kwargs)
 
     # Assert
-    assert job_id in GENERATION_JOBS
-    assert GENERATION_JOBS[job_id]['status'] == status
-    assert GENERATION_JOBS[job_id]['progress'] == 50
-    assert 'last_updated' in GENERATION_JOBS[job_id]
+    assert job_id in job_store.jobs
+    assert job_store.jobs[job_id]['status'] == status
+    assert job_store.jobs[job_id]['progress'] == 50
+    assert 'last_updated' in job_store.jobs[job_id]
 
 @pytest.mark.asyncio
 async def test_get_corpus_from_clickhouse():

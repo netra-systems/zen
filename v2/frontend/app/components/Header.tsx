@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
 import React from 'react';
 import Link from 'next/link';
-import useAppStore from '../store';
+import useAppStore from '@/store';
 import { Button } from './ui/button';
 import {
   DropdownMenu,
@@ -13,46 +13,18 @@ import {
   DropdownMenuTrigger,
 } from './dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from './avatar';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from './sheet';
 import { Icons } from './Icons';
 
-export const Header = () => {
+export const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
   const { logout } = useAppStore();
   const user = useAppStore((state) => state.user);
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="shrink-0 md:hidden">
-            <Icons.logo className="h-5 w-5" />
-            <span className="sr-only">Toggle navigation menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="flex flex-col">
-          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-          <nav className="grid gap-2 text-lg font-medium">
-            <Link href="#" className="flex items-center gap-2 text-lg font-semibold">
-              <Icons.logo className="h-6 w-6" />
-              <span className="sr-only">Netra</span>
-            </Link>
-            <Link
-              href="#"
-              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-            >
-              <Icons.home className="h-5 w-5" />
-              Dashboard
-            </Link>
-            <Link
-              href="#"
-              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-            >
-              <Icons.settings className="h-5 w-5" />
-              Settings
-            </Link>
-          </nav>
-        </SheetContent>
-      </Sheet>
+      <Button variant="outline" size="icon" className="shrink-0 md:hidden" onClick={toggleSidebar}>
+        <Icons.logo className="h-5 w-5" />
+        <span className="sr-only">Toggle navigation menu</span>
+      </Button>
       <div className="w-full flex-1">
         {/* Add search bar here if needed */}
       </div>

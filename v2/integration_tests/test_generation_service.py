@@ -6,7 +6,8 @@ from unittest.mock import patch, MagicMock, AsyncMock
 
 from fastapi.testclient import TestClient
 from app.main import app
-from app.services.generation_service import GENERATION_JOBS, get_corpus_from_clickhouse, save_corpus_to_clickhouse, run_synthetic_data_generation_job
+from app.services.job_store import job_store
+from app.services.generation_service import get_corpus_from_clickhouse, save_corpus_to_clickhouse, run_synthetic_data_generation_job
 from app.db.clickhouse import get_clickhouse_client
 from app.db.models_clickhouse import get_content_corpus_schema, ContentCorpus, get_llm_events_table_schema
 from app.db.clickhouse_base import ClickHouseDatabase
@@ -34,12 +35,7 @@ async def test_content_generation_with_custom_table(mock_run_job, test_client):
     custom_table_name = f"test_content_corpus_{uuid.uuid4().hex}"
 
     async def side_effect(job_id, params):
-        GENERATION_JOBS[job_id] = {
-            "status": "completed",
-            "summary": {
-                "message": f"Corpus generated and saved to {params['clickhouse_table']}"
-            }
-        }
+        job_store.update(job_id, "completed", summary={"message": f"Corpus generated and saved to {params['clickhouse_table']}"})
 
     mock_run_job.side_effect = side_effect
     
@@ -80,12 +76,7 @@ async def test_synthetic_data_generation_with_table_selection(mock_run_job, test
 
     async def side_effect(job_id, params):
         # This is now the mock, so we update the job status here
-        GENERATION_JOBS[job_id] = {
-            "status": "completed",
-            "summary": {
-                "message": f"Synthetic data generated and saved to {params['destination_table']}"
-            }
-        }
+        job_store.update(job_id, "completed", summary={"message": f"Synthetic data generated and saved to {params['destination_table']}"})
 
     mock_run_job.side_effect = side_effect
 
@@ -179,12 +170,12 @@ async def test_run_synthetic_data_generation_job_e2e(MockClickHouseDatabase, moc
     await run_synthetic_data_generation_job(job_id, params)
 
     # Assert
-    job_status = GENERATION_JOBS.get(job_id)
+    job_status = job_store.get(job_id)
     assert job_status is not None
     assert job_status["status"] == "completed"
     assert job_status["summary"]["records_ingested"] == 5
     mock_db_instance.command.assert_called_once_with(get_llm_events_table_schema(destination_table))
     assert mock_ingest.call_count == 3
 
-    if job_id in GENERATION_JOBS:
-        del GENERATION_JOBS[job_id]
+    if job_id in job_store.jobs:
+        del job_store.jobs[job_id]

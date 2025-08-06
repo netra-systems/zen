@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { apiService, Reference } from '../api';
-import useAppStore from '../store';
+import useAppStore from '@/store';
 // By default, LLM things should use this for examples
 import { examplePrompts } from '../lib/examplePrompts';
 
@@ -12,6 +12,7 @@ export function ChatInput() {
     const [references, setReferences] = useState<Reference[]>([]);
     const [selectedReferences, setSelectedReferences] = useState<Reference[]>([]);
     const token = useAppStore((state) => state.token);
+    const addMessage = useAppStore((state) => state.addMessage);
 
     const loadExample = () => {
         const example = examplePrompts[Math.floor(Math.random() * examplePrompts.length)];
@@ -74,8 +75,9 @@ export function ChatInput() {
                 ],
             },
         };
-
+        addMessage({ role: 'user', content: inputValue });
         apiService.startAgent(token, analysisRequest);
+        setInputValue('');
     };
 
     return (

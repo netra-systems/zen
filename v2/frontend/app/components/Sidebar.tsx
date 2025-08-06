@@ -28,13 +28,10 @@ export function Sidebar() {
               <Icons.syntheticData className="h-4 w-4" />
               Synthetic Data
             </Link>
-            <Link
-              href="/admin"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
+            <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-not-allowed">
               <Icons.corpusAdmin className="h-4 w-4" />
               Corpus Admin
-            </Link>
+            </div>
             <Link
               href="/apex-optimizer-agent-v2"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
@@ -42,27 +39,18 @@ export function Sidebar() {
               <Icons.apexOptimizer className="h-4 w-4" />
               Apex Optimizer
             </Link>
-            <Link
-              href="/ingestion"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
+            <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-not-allowed">
               <Icons.ingestion className="h-4 w-4" />
               Ingestion
-            </Link>
-            <Link
-              href="/supply-catalog"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
+            </div>
+            <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-not-allowed">
               <Icons.supplyCatalog className="h-4 w-4" />
               Supply Catalog
-            </Link>
-            <Link
-              href="/settings"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
+            </div>
+            <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-not-allowed">
               <Icons.settings className="h-4 w-4" />
               Settings
-            </Link>
+            </div>
           </nav>
         </div>
       </div>

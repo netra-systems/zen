@@ -1,4 +1,5 @@
 import { config } from './config';
+import useAppStore from '@/store';
 
 // --- Type Definitions for API data ---
 export interface AgentRun {
@@ -55,7 +56,35 @@ export const apiService = {
     },
 
     async startAgent(token: string | null, body: Record<string, unknown>) {
-        return this.post(`${config.api.baseUrl}/apex/chat/start_agent`, body, token);
+        const addMessage = useAppStore.getState().addMessage;
+        addMessage({ role: 'user', content: JSON.stringify(body) });
+
+        const response = await fetch(`${config.api.baseUrl}/apex/chat/start_agent`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!response.body) {
+            return;
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let assistantMessage = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+                break;
+            }
+            const chunk = decoder.decode(value, { stream: true });
+            assistantMessage += chunk;
+            addMessage({ role: 'assistant', content: assistantMessage });
+        }
     },
 
     async startStreamingAgent(token: string, body: Record<string, unknown>, clientId: string) {

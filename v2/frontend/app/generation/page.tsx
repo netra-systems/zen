@@ -4,12 +4,9 @@ import React, { useState, useEffect, useCallback, FormEvent, useRef } from 'reac
 import { HelpCircle } from 'lucide-react';
 
 import { config } from '../config';
-import { Sidebar } from '@/components/Sidebar';
-import { Header } from '@/components/Header';
-import { GenericInput } from '@/components/GenericInput';
-import useAppStore from '../store';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import Spinner from '@/components/Spinner';
+import useAppStore from '@/store';
 
 // --- Type Definitions for API data ---
 interface Job {
@@ -142,37 +139,31 @@ export default function GenerationPage() {
     };
 
     return (
-        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-            <Sidebar />
-            <div className="flex flex-col">
-                <Header />
-                <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-                    {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative mb-6" role="alert">{error}</div>}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-1">
-                            <GenericInput
-                                title="Create & Ingest Synthetic Data"
-                                description="Create and ingest synthetic data from a source table into a destination table."
-                                inputFields={[
-                                    { id: 'num_traces', name: 'num_traces', label: 'Number of Traces', type: 'number', required: true, defaultValue: 10000 },
-                                    { id: 'num_users', name: 'num_users', label: 'Number of Users', type: 'number', required: true, defaultValue: 100 },
-                                    { id: 'error_rate', name: 'error_rate', label: 'Error Rate', type: 'number', required: true, defaultValue: 0.1, step: 0.01 },
-                                    { id: 'event_types', name: 'event_types', label: 'Event Types (comma-separated)', type: 'text', required: true, defaultValue: 'search,login,checkout' },
-                                    { id: 'source_table', name: 'source_table', label: 'Source Table', type: 'select', required: true, options: tables, defaultValue: 'content_corpus' },
-                                    { id: 'destination_table', name: 'destination_table', label: 'Destination Table', type: 'text', required: true, defaultValue: 'synthetic_data' },
-                                ]}
-                                onSubmit={handleStartGeneration}
-                                isLoading={isLoading || isPolling}
-                                submitButtonText={isPolling ? 'Generation in Progress...' : 'Start Generation'}
-                            />
-                        </div>
-                        <div className="lg:col-span-2">
-                            <JobStatusView job={job} />
-                        </div>
-                    </div>
-                </main>
+        <>
+            {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative mb-6" role="alert">{error}</div>}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-1">
+                    <GenericInput
+                        title="Create & Ingest Synthetic Data"
+                        description="Create and ingest synthetic data from a source table into a destination table."
+                        inputFields={[
+                            { id: 'num_traces', name: 'num_traces', label: 'Number of Traces', type: 'number', required: true, defaultValue: 10000 },
+                            { id: 'num_users', name: 'num_users', label: 'Number of Users', type: 'number', required: true, defaultValue: 100 },
+                            { id: 'error_rate', name: 'error_rate', label: 'Error Rate', type: 'number', required: true, defaultValue: 0.1, step: 0.01 },
+                            { id: 'event_types', name: 'event_types', label: 'Event Types (comma-separated)', type: 'text', required: true, defaultValue: 'search,login,checkout' },
+                            { id: 'source_table', name: 'source_table', label: 'Source Table', type: 'select', required: true, options: tables, defaultValue: 'content_corpus' },
+                            { id: 'destination_table', name: 'destination_table', label: 'Destination Table', type: 'text', required: true, defaultValue: 'synthetic_data' },
+                        ]}
+                        onSubmit={handleStartGeneration}
+                        isLoading={isLoading || isPolling}
+                        submitButtonText={isPolling ? 'Generation in Progress...' : 'Start Generation'}
+                    />
+                </div>
+                <div className="lg:col-span-2">
+                    <JobStatusView job={job} />
+                </div>
             </div>
-        </div>
+        </>
     );
 }
 

@@ -7,11 +7,12 @@ import useAppStore from '@/store';
 export default function CallbackClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { fetchUser } = useAppStore();
+  const { setToken, fetchUser } = useAppStore();
 
   useEffect(() => {
     const token = searchParams.get('token');
     if (token) {
+      setToken(token);
       localStorage.setItem('authToken', token);
       fetchUser(token).then(() => {
         router.push('/dashboard');
@@ -19,7 +20,7 @@ export default function CallbackClient() {
     } else {
       router.push('/login');
     }
-  }, [router, searchParams, fetchUser]);
+  }, [router, searchParams, setToken, fetchUser]);
 
   return <div>Loading...</div>;
 }

@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import patch, MagicMock, call
 from fastapi.testclient import TestClient
 from app.main import app
-from app.services.generation_service import GENERATION_JOBS
+from app.services.job_store import job_store
 from app.db.models_clickhouse import get_llm_events_table_schema
 
 @pytest.fixture(scope="module")
@@ -42,6 +42,6 @@ def test_batch_ingestion_process(mock_generate_data, mock_clickhouse_client, tes
     mock_db_instance.disconnect.assert_called_once()
 
     # Verify job status updates
-    final_job_status = GENERATION_JOBS.get(job_id, {})
+    final_job_status = job_store.get(job_id, {})
     assert final_job_status.get("status") == "completed"
     assert final_job_status.get("records_ingested") == 5
