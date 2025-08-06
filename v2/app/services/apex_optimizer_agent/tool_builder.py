@@ -28,11 +28,14 @@ from app.services.apex_optimizer_agent.tools.performance_gains_simulator import 
 from app.services.apex_optimizer_agent.tools.policy_simulator import policy_simulator
 from app.services.apex_optimizer_agent.tools.finish import finish
 
-def create_async_tool_wrapper(tool_func, context):
+def create_async_tool_wrapper(tool_func, context, has_args):
     async def wrapper(**kwargs):
         # LangChain automatically adds this, so we filter it out
         kwargs.pop('callbacks', None)
-        return await tool_func(context, **kwargs)
+        if has_args:
+            return await tool_func(context, **kwargs)
+        else:
+            return await tool_func(context)
     return wrapper
 
 class ToolBuilder:
@@ -67,6 +70,7 @@ class ToolBuilder:
         for name, tool_func in all_tools.items():
             sig = inspect.signature(tool_func)
             params = [p for p in sig.parameters.values() if p.name not in ['context', 'callbacks']]
+            has_args = len(params) > 0
             
             fields = {}
             for p in params:
@@ -85,7 +89,7 @@ class ToolBuilder:
                 name=name,
                 description=tool_func.__doc__,
                 args_schema=args_schema,
-                coroutine=create_async_tool_wrapper(tool_func, context),
+                coroutine=create_async_tool_wrapper(tool_func, context, has_args),
                 func=None
             )
             bound_tools[name] = tool

@@ -14,11 +14,12 @@ class ToolDispatcher:
         tool_input = ToolInput(tool_name=tool_name, kwargs=kwargs)
         if tool_name in self.tools:
             try:
+                tool = self.tools[tool_name]
                 # Check if the tool is async
-                if asyncio.iscoroutinefunction(self.tools[tool_name].ainvoke):
-                    result = await self.tools[tool_name].ainvoke(kwargs)
+                if asyncio.iscoroutinefunction(tool.coroutine):
+                    result = await tool.ainvoke(kwargs)
                 else:
-                    result = self.tools[tool_name].invoke(kwargs)
+                    result = tool.invoke(kwargs)
                 
                 if isinstance(result, ToolResult):
                     central_logger.log(LogEntry(event="tool_executed", data={"tool_name": tool_name, "result_status": result.status, "result_message": result.message}))
