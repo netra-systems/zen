@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.cluster import KMeans
 import json
-from typing import List, Any
+from typing import List, Any, Tuple
 from app.schema import DiscoveredPattern
 from app.config import settings
 from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
@@ -17,7 +17,7 @@ class LogPatternIdentifier(BaseTool):
 
     async def run(
         self, enriched_spans: List[dict], n_patterns: int = 5
-    ) -> (List[DiscoveredPattern], List[str]):
+    ) -> Tuple[List[DiscoveredPattern], List[str]]:
         """Identifies patterns in the enriched logs."""
         if not enriched_spans:
             return [], []

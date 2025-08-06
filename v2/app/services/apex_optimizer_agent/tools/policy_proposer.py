@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from app.db.models_postgres import SupplyOption
 from app.schema import LearnedPolicy, PredictedOutcome, DiscoveredPattern
 from app.db.models_clickhouse import UnifiedLogEntry
@@ -16,7 +16,7 @@ class PolicyProposer(BaseTool):
 
     async def run(
         self, patterns: List[DiscoveredPattern], span_map: Dict[str, UnifiedLogEntry]
-    ) -> (List[LearnedPolicy], List[PredictedOutcome]):
+    ) -> Tuple[List[LearnedPolicy], List[PredictedOutcome]]:
         """Finds the best routing policies through simulation."""
         policies = []
         outcomes = []
