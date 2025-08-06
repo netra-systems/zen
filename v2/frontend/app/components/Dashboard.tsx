@@ -4,13 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { ChatInput } from './ChatInput';
 import { ChatHistory } from './ChatHistory';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { useAuth } from '../hooks/useAuth';
 import { Message } from '../types';
 
 const WS_URL = 'ws://localhost:8000/ws/123';
 
 export const Dashboard = () => {
-  const { user } = useAuth();
   const { messages: wsMessages, isConnected, sendMessage } = useWebSocket(WS_URL);
   const [messages, setMessages] = useState<Message[]>([]);
 
@@ -24,10 +22,6 @@ export const Dashboard = () => {
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     sendMessage(message);
   };
-
-  if (!user) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="flex flex-col h-full items-center justify-center">
