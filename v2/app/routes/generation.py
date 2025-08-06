@@ -9,7 +9,6 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, status, Depends
 from pydantic import BaseModel, Field
 
 from ..services.generation_service import run_content_generation_job, run_log_generation_job, run_synthetic_data_generation_job, run_data_ingestion_job, GENERATION_JOBS
-from ..db.clickhouse import get_clickhouse_client, ClickHouseClient
 
 router = APIRouter()
 

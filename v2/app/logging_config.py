@@ -100,14 +100,11 @@ class CentralLogger:
                 secure=True
             )
             # Verify connection
-            if self.clickhouse_db.client.is_active():
-                self.logger.info("ClickHouse connection verified.")
-                # Add ClickHouse handler
-                ch_handler = ClickHouseHandler(self.clickhouse_db, table_name="logs")
-                self.logger.add(ch_handler, level="INFO", format=lambda record: record)
-            else:
-                self.logger.warning("ClickHouse connection is not active.")
-                self.clickhouse_db = None
+            self.clickhouse_db.client.ping()
+            self.logger.info("ClickHouse connection verified.")
+            # Add ClickHouse handler
+            ch_handler = ClickHouseHandler(self.clickhouse_db, table_name="logs")
+            self.logger.add(ch_handler, level="INFO", format=lambda record: record)
         except Exception as e:
             self.logger.error(f"Failed to initialize ClickHouse: {e}")
             self.clickhouse_db = None
