@@ -1,19 +1,3 @@
-# AI-Powered Content Corpus Generator (V2 with Structured Generation)
-#
-# This script uses a powerful Large Language Model (Gemini) to generate a rich corpus
-# of realistic prompts and responses. It leverages structured generation by providing
-# Pydantic models as a schema, ensuring the LLM's output is always in the correct format.
-#
-# SETUP:
-# 1. Install necessary libraries:
-#    pip install google-generativeai rich pydantic
-#
-# 2. Set your Gemini API Key:
-#    export GEMINI_API_KEY="YOUR_API_KEY"
-#
-# USAGE:
-#    python -m app.data.synthetic.content_generator --samples-per-type 10 --output-file content_corpus.json
-
 import os
 import json
 import time
@@ -30,7 +14,6 @@ from dotenv import load_dotenv
 
 from app.llm.llm_manager import LLMManager, LLMConfig
 
-load_dotenv()
 
 console = Console()
 

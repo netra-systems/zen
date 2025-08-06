@@ -2,23 +2,24 @@
 #
 # This script uses a powerful Large Language Model (Gemini) to generate a rich corpus
 # of realistic prompts and responses. It leverages structured generation by providing
-# Pydantic models as a schema, ensuring the LLM's output is always in the correct format.
+# Pydantic models as a scope, ensuring the LLM's output is always in the correct format.
 #
 # SETUP:
 # 1. Install necessary libraries:
-#    pip install google-generativeai rich pydantic
+#    pip install google-generativeai rich pydantic clickhouse-connect
 #
 # 2. Set your Gemini API Key:
 #    export GEMINI_API_KEY="YOUR_API_KEY"
 #
 # USAGE:
-#    python -m app.data.synthetic.content_generator --samples-per-type 10 --output-file content_corpus.json
+#    python -m app.data.synthetic.content_generator --samples-per-type 10
 
 import os
 import json
 import time
 import argparse
 import sys
+import uuid
 from multiprocessing import Pool, cpu_count
 from functools import partial
 from typing import List, Tuple
@@ -29,6 +30,9 @@ from rich.progress import Progress
 from dotenv import load_dotenv
 
 from app.llm.llm_manager import LLMManager, LLMConfig
+from app.db.clickhouse import get_clickhouse_client
+from app.db.models_clickhouse import ContentCorpus, get_content_corpus_schema, CONTENT_CORPUS_TABLE_NAME
+from app.data.content_corpus import DEFAULT_CONTENT_CORPUS
 
 load_dotenv()
 
@@ -73,7 +77,7 @@ META_PROMPTS = {
     "multi_turn_tool_use": ("Generate a realistic, 3-5 turn conversation where an assistant uses tools to help a user plan a trip.", MultiTurnConversation)
 }
 
-# --- 3. Generation Logic ---
+# --- 3. Generation and Ingestion Logic ---
 
 def generate_content_sample(workload_type: str, model, generation_config) -> dict:
     """Generates a single, schema-guaranteed sample for a given workload type using the LLM."""
@@ -89,23 +93,21 @@ def generate_content_sample(workload_type: str, model, generation_config) -> dic
     """
     
     try:
-        # Use the schema as a "tool" to enforce structured output
         response = model.generate_content(prompt, generation_config=generation_config, tools=[schema])
         
-        # Extract the structured data from the tool call
         tool_call = response.candidates[0].content.parts[0].function_call
         args = tool_call.args
 
         if not args:
-            # console.print(f"[yellow]Warning: Model returned empty arguments for '{workload_type}'.[/yellow]")
             return None
 
         if workload_type == 'multi_turn_tool_use':
-            # Convert the list of dicts back to a list of tuples for the corpus
             convo_tuples = [(turn['user_prompt'], turn.get('assistant_response', '')) for turn in args.get('conversation', [])]
             if not convo_tuples:
                 return None
-            return {"type": workload_type, "data": convo_tuples}
+            # For multi-turn, we'll serialize the conversation into a single prompt/response pair for simplicity
+            # This could be handled differently depending on the desired table structure
+            return {"type": workload_type, "data": (json.dumps(convo_tuples), "Conversation")}
         else:
             user_prompt = args.get('user_prompt')
             if not user_prompt:
@@ -113,19 +115,97 @@ def generate_content_sample(workload_type: str, model, generation_config) -> dic
             return {"type": workload_type, "data": (user_prompt, args.get('assistant_response', '')) }
             
     except (ValueError, IndexError, AttributeError, KeyError) as e:
-        # This might happen if the model fails to call the tool correctly, though it's less likely with this method.
-        # console.print(f"[yellow]Warning: Failed to generate content for '{workload_type}': {e}[/yellow]")
         return None
 
-def generate_for_type(task_args, model, generation_config):
-    """Worker function to generate multiple samples for a single workload type."""
+def insert_into_clickhouse(client, table_name: str, data: List[ContentCorpus]):
+    """Inserts a list of ContentCorpus objects into the specified ClickHouse table."""
+    if not data:
+        return
+    try:
+        client.insert(table_name, [d.dict() for d in data])
+    except Exception as e:
+        console.print(f"[red]Error inserting data into ClickHouse: {e}[/red]")
+
+def generate_and_ingest_for_type(task_args, model, generation_config, clickhouse_config):
+    """Worker function to generate and ingest multiple samples for a single workload type."""
     workload_type, num_samples = task_args
-    samples = []
-    for _ in range(num_samples):
-        sample = generate_content_sample(workload_type, model, generation_config)
-        if sample:
-            samples.append(sample)
-    return [s for s in samples if s]
+    samples_to_insert = []
+    
+    # Each process needs its own ClickHouse client
+    with get_clickhouse_client() as client:
+        for _ in range(num_samples):
+            sample = generate_content_sample(workload_type, model, generation_config)
+            if sample:
+                prompt, response = sample['data']
+                corpus_item = ContentCorpus(
+                    record_id=uuid.uuid4(),
+                    workload_type=sample['type'],
+                    prompt=prompt,
+                    response=response
+                )
+                samples_to_insert.append(corpus_item)
+        
+        if samples_to_insert:
+            insert_into_clickhouse(client, CONTENT_CORPUS_TABLE_NAME, samples_to_insert)
+            
+    return len(samples_to_insert)
+
+async def get_all_existing_content_corpuses():
+    """
+    Retrieves all content corpuses from ClickHouse.
+    If the query fails or returns no results, it populates the DB with the default corpus.
+    """
+    corpuses = {}
+    try:
+        async with get_clickhouse_client() as client:
+            if not await client.table_exists(CONTENT_CORPUS_TABLE_NAME):
+                console.print(f"[yellow]Table '{CONTENT_CORPUS_TABLE_NAME}' not found. Populating with default data.[/yellow]")
+                await populate_with_default_data(client)
+
+            result = await client.query(f"SELECT workload_type, prompt, response FROM {CONTENT_CORPUS_TABLE_NAME}")
+            
+            if not result.result_rows:
+                console.print("[yellow]No content found in ClickHouse. Populating with default data.[/yellow]")
+                await populate_with_default_data(client)
+                result = await client.query(f"SELECT workload_type, prompt, response FROM {CONTENT_CORPUS_TABLE_NAME}")
+
+            for row in result.result_rows:
+                workload_type, prompt, response = row
+                if workload_type not in corpuses:
+                    corpuses[workload_type] = []
+                corpuses[workload_type].append((prompt, response))
+
+    except Exception as e:
+        console.print(f"[red]Failed to fetch content from ClickHouse: {e}. Returning default corpus.[/red]")
+        return DEFAULT_CONTENT_CORPUS
+        
+    return corpuses
+
+async def populate_with_default_data(client):
+    """Populates the ClickHouse database with the default content corpus."""
+    await client.command(get_content_corpus_schema(CONTENT_CORPUS_TABLE_NAME))
+    
+    records_to_insert = []
+    for workload_type, items in DEFAULT_CONTENT_CORPUS.items():
+        for item in items:
+            # Handle both single-turn (tuple) and multi-turn (list of tuples)
+            if isinstance(item, list):
+                prompt = json.dumps(item)
+                response = "Conversation"
+            else:
+                prompt, response = item
+                
+            records_to_insert.append(ContentCorpus(
+                record_id=uuid.uuid4(),
+                workload_type=workload_type,
+                prompt=prompt,
+                response=response
+            ).dict())
+
+    if records_to_insert:
+        await client.insert(CONTENT_CORPUS_TABLE_NAME, records_to_insert)
+    console.print(f"Successfully inserted {len(records_to_insert)} default records into '{CONTENT_CORPUS_TABLE_NAME}'.")
+
 
 # --- 4. Orchestration ---
 def main(args):
@@ -135,7 +215,8 @@ def main(args):
             model_name="gemini-2.5-flash-lite",
         )
     })
-    llm = llm_manager.get_llm("default")
+    # This script doesn't use the LLM manager, but it's here for consistency
+    # llm = llm_manager.get_llm("default")
 
     console.print("[bold cyan]Starting AI-Powered Content Corpus Generation (Structured)...[/bold cyan]")
     start_time = time.time()
@@ -157,45 +238,44 @@ def main(args):
 
     console.print(f"Using [yellow]{num_processes}[/yellow] cores to generate [yellow]{num_samples_per_type * len(workload_types)}[/yellow] total samples.")
 
-    corpus = {key: [] for key in workload_types}
+    # Get ClickHouse config for worker processes
+    from app.config import settings
+    if settings.app_env == "development":
+        clickhouse_config = settings.clickhouse_https_dev.dict()
+    else:
+        clickhouse_config = settings.clickhouse_https.dict()
 
-    worker_func = partial(generate_for_type, model=model, generation_config=generation_config)
+
+    worker_func = partial(generate_and_ingest_for_type, model=model, generation_config=generation_config, clickhouse_config=clickhouse_config)
     tasks_for_pool = [(w_type, num_samples_per_type) for w_type in workload_types]
 
+    total_generated = 0
     with Pool(processes=num_processes) as pool:
         with Progress() as progress:
-            task = progress.add_task("[green]Generating content...", total=len(tasks_for_pool))
-            for result in pool.imap_unordered(worker_func, tasks_for_pool):
-                if result:
-                    for item in result:
-                        if item and item.get('type') in corpus:
-                            corpus[item['type']].append(item['data'])
+            task = progress.add_task("[green]Generating and ingesting content...", total=len(tasks_for_pool))
+            for num_generated in pool.imap_unordered(worker_func, tasks_for_pool):
+                total_generated += num_generated
                 progress.update(task, advance=1)
-
-    # Save to file
-    with open(args.output_file, 'w') as f:
-        json.dump(corpus, f, indent=2)
 
     end_time = time.time()
     duration = end_time - start_time
 
-    console.print(f"\n[bold green]Successfully generated content corpus![/bold green]")
-    for w_type, samples in corpus.items():
-        console.print(f"  - [cyan]{w_type}[/cyan]: {len(samples)} samples")
-    console.print(f"Output saved to [cyan]{args.output_file}[/cyan]")
+    console.print(f"\n[bold green]Successfully generated and ingested content![/bold green]")
+    console.print(f"  - Total Samples: {total_generated}")
+    console.print(f"  - Table: [cyan]{CONTENT_CORPUS_TABLE_NAME}[/cyan]")
     console.print(f"Total time: [yellow]{duration:.2f}s[/yellow]")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="AI-Powered Content Corpus Generator (Structured)")
     parser.add_argument("--samples-per-type", type=int, default=10, help="Number of samples to generate for each workload type.")
-    parser.add_argument("--output-file", default="content_corpus.json", help="Path to the output JSON file.")
     parser.add_argument("--max-cores", type=int, default=cpu_count(), help="Maximum number of CPU cores to use.")
     parser.add_argument("--temperature", type=float, default=0.8, help="Controls the randomness of the output.")
     parser.add_argument("--top-p", type=float, default=None, help="Nucleus sampling probability.")
     parser.add_argument("--top-k", type=int, default=None, help="Top-k sampling control.")
 
     if len(sys.argv) == 1:
-        args = parser.parse_args(['--samples-per-type', '10'])
+        # Default run for convenience
+        args = parser.parse_args(['--samples-per-type', '2'])
     else:
         args = parser.parse_args()
 
