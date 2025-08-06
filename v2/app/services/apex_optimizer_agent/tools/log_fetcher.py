@@ -1,10 +1,28 @@
 from langchain_core.tools import tool
-from typing import Any, Dict, List
-from pydantic import BaseModel, Field
+from typing import Any, Dict, List, Union
+from pydantic import BaseModel, Field, validator
+import json
 
 class Workload(BaseModel):
-    time_range: Dict[str, Any] = Field(..., description="The time range for the workload.")
-    data_source: Dict[str, Any] = Field(..., description="The data source for the workload.")
+    time_range: Union[Dict[str, Any], str] = Field(..., description="The time range for the workload.")
+    data_source: Union[Dict[str, Any], str] = Field(..., description="The data source for the workload.")
+
+    @validator('time_range', 'data_source', pre=True)
+    def parse_str_to_dict(cls, v):
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                # Handle simple strings that are not JSON by wrapping them in a dict.
+                # This is a simplistic approach. You may need to adjust this based on expected string formats.
+                # For example, if the string is 'last_30_days', you might want to convert it to {'type': 'relative', 'value': 'last_30_days'}
+                if 'days' in v:
+                    return {'type': 'relative', 'value': v}
+                elif v == 'production':
+                    return {'source_table': 'production_logs'}
+                else:
+                    raise ValueError("Cannot parse string to dictionary")
+        return v
 
 @tool
 async def log_fetcher(workloads: List[Workload], log_fetcher: any) -> str:
