@@ -14,13 +14,17 @@ from .state import DeepAgentState, Todo
 
 
 @tool
-def update_state(state: dict, completed_step: str, new_todo: List[str] = None) -> dict:
+def update_state(
+    completed_step: str,
+    new_todo: List[str] = None,
+    state: Annotated[DeepAgentState, InjectedState] = None,
+) -> dict:
     """Updates the state of the agent.
 
     Args:
-        state: The current state of the agent.
         completed_step: The step that has been completed.
         new_todo: A new todo list to replace the old one.
+        state: The current state of the agent.
 
     Returns:
         The updated state.
