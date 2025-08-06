@@ -1,16 +1,15 @@
-"use client";
+'use client';
 
 import React from 'react';
-import { ControlPanel } from './ControlPanel';
-import { AnalysisResultView } from './AnalysisResultView';
+import { ChatInput } from './ChatInput';
 
 export const Dashboard = () => (
-  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <div className="lg:col-span-1">
-      <ControlPanel />
+  <div className="flex flex-col h-full">
+    <div className="flex-grow p-4">
+      {/* This is where the chat messages will go */}
     </div>
-    <div className="lg:col-span-2">
-      <AnalysisResultView />
+    <div className="p-4">
+      <ChatInput />
     </div>
   </div>
 );

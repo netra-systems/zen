@@ -58,5 +58,9 @@ export const apiService = {
 
     async getAgentEvents(runId: string, token: string | null): Promise<AgentEvent[]> {
         return this.get(`${config.api.baseUrl}/agent/${runId}/events`, token);
+    },
+
+    async getReferences(token: string | null): Promise<any> {
+        return this.get(`${config.api.baseUrl}/references`, token);
     }
 };

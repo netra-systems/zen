@@ -32,6 +32,7 @@ async def start_agent(
         dict: The result of the agent's analysis.
     """
     try:
+        print(analysis_request)
         result = await supervisor.start_agent(analysis_request)
         return result
     except Exception as e:

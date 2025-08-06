@@ -86,6 +86,7 @@ app.include_router(apex_optimizer_agent_route.router, prefix="/api/v3/apex/chat"
 app.include_router(streaming_agent_route.router, prefix="/api/v3/streaming_agent", tags=["streaming_agent"])
 app.include_router(websocket.router, prefix="/ws", tags=["websockets"])
 app.include_router(admin.router, prefix="/api/v3", tags=["admin"])
+app.include_router(references.router, prefix="/api/v3", tags=["references"])
 
 # Add a new websocket route for development that bypasses authentication
 from app.auth_dependencies import ActiveUserWsDep

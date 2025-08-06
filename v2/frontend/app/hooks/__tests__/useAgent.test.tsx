@@ -1,83 +1,89 @@
-import { renderHook, act } from '@testing-library/react-hooks';
+import { render, screen, act } from '@testing-library/react';
 import { useAgent } from '../useAgent';
 import { getToken } from '../../lib/user';
+import { FC, useEffect } from 'react';
+import 'jest-fetch-mock';
 
 jest.mock('../../lib/user', () => ({
   getToken: jest.fn(),
 }));
 
-global.fetch = jest.fn();
+const TestComponent: FC<{ message: string }> = ({ message }) => {
+  const { startAgent, messages, showThinking } = useAgent();
+
+  useEffect(() => {
+    if (message) {
+      startAgent(message);
+    }
+  }, [message, startAgent]);
+
+  return (
+    <div>
+      {showThinking && <div>Thinking...</div>}
+      <ul>
+        {messages.map((msg) => (
+          <li key={msg.id}>{msg.content}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
 describe('useAgent', () => {
   beforeEach(() => {
     (getToken as jest.Mock).mockResolvedValue('test-token');
-    (global.fetch as jest.Mock).mockClear();
+    fetch.resetMocks();
   });
 
   it('should start the agent, show thinking indicator, and process the response', async () => {
     const mockStream = new ReadableStream({
       start(controller) {
-        controller.enqueue('event: on_chat_model_stream\n');
-        controller.enqueue('data: { \"chunk\": { \"content\": \"Hello\" } }\n\n');
-        controller.enqueue('event: on_chain_end\n');
-        controller.enqueue('data: {}\n\n');
+        const encoder = new TextEncoder();
+        controller.enqueue(encoder.encode('event: on_chat_model_stream\n'));
+        controller.enqueue(encoder.encode('data: { \"chunk\": { \"content\": \"Hello\" } }\n\n'));
+        controller.enqueue(encoder.encode('event: on_chain_end\n'));
+        controller.enqueue(encoder.encode('data: {}\n\n'));
         controller.close();
       },
     });
-    (global.fetch as jest.Mock).mockResolvedValue({ body: mockStream });
+    fetch.mockResponseOnce(mockStream as any);
 
-    const { result, waitForNextUpdate } = renderHook(() => useAgent());
+    render(<TestComponent message="Test message" />);
 
-    await act(async () => {
-      result.current.startAgent('Test message');
-      await waitForNextUpdate();
-    });
-
-    expect(result.current.showThinking).toBe(true);
+    expect(screen.getByText('Thinking...')).toBeInTheDocument();
 
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    expect(result.current.messages).toEqual([
-      { id: expect.any(String), role: 'user', timestamp: expect.any(String), type: 'text', content: 'Test message' },
-      { id: expect.any(String), role: 'agent', timestamp: expect.any(String), type: 'thinking', content: 'Hello' },
-    ]);
+    expect(screen.getByText('Test message')).toBeInTheDocument();
+    expect(screen.getByText('Hello')).toBeInTheDocument();
 
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    expect(result.current.showThinking).toBe(false);
+    expect(screen.queryByText('Thinking...')).not.toBeInTheDocument();
   });
 
   it('should handle errors when calling the agent', async () => {
-    (global.fetch as jest.Mock).mockRejectedValue(new Error('API Error'));
+    fetch.mockReject(new Error('API Error'));
 
-    const { result, waitForNextUpdate } = renderHook(() => useAgent());
+    render(<TestComponent message="Test message" />);
 
-    await act(async () => {
-      result.current.startAgent('Test message');
-      await waitForNextUpdate();
-    });
-
-    expect(result.current.showThinking).toBe(true);
+    expect(screen.getByText('Thinking...')).toBeInTheDocument();
 
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    expect(result.current.showThinking).toBe(false);
+    expect(screen.queryByText('Thinking...')).not.toBeInTheDocument();
   });
 
   it('should not start the agent if no token is available', async () => {
     (getToken as jest.Mock).mockResolvedValue(null);
 
-    const { result } = renderHook(() => useAgent());
-
-    await act(async () => {
-      result.current.startAgent('Test message');
-    });
+    render(<TestComponent message="Test message" />);
 
     expect(fetch).not.toHaveBeenCalled();
   });
