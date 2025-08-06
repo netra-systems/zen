@@ -183,11 +183,13 @@ class AppConfig(BaseModel):
 
 class DevelopmentConfig(AppConfig):
     """Development-specific settings can override defaults."""
+    debug: bool = True
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra"
     dev_user_email: str = "dev@example.com"
 
 class ProductionConfig(AppConfig):
     """Production-specific settings."""
+    debug: bool = False
     log_level: str = "INFO"
 
 class TestingConfig(AppConfig):

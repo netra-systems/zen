@@ -40,18 +40,25 @@ export const apiService = {
         }
         return response.json();
     },
-    async post(endpoint: string, body: Record<string, unknown>, token: string | null) {
+
+    async post(endpoint: string, body: Record<string, unknown>, token?: string | null) {
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(endpoint, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            headers,
             body: JSON.stringify(body),
         });
+
         if (!response.ok) {
             throw await response.json().catch(() => new Error('An unknown error occurred.'));
         }
+
         return response.json();
     },
 

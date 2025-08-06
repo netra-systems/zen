@@ -1,12 +1,13 @@
-
 'use client';
 
-import useAppStore from '@/store';
 import { ChatMessage } from './ChatMessage';
+import { Message } from '../types';
 
-export function ChatHistory() {
-  const messages = useAppStore((state) => state.messages);
+interface ChatHistoryProps {
+  messages: Message[];
+}
 
+export function ChatHistory({ messages }: ChatHistoryProps) {
   return (
     <div className="w-full max-w-2xl flex-grow overflow-y-auto">
       {messages.map((msg, index) => (

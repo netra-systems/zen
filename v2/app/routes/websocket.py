@@ -16,11 +16,17 @@ from app.auth_dependencies import ActiveUserWsDep
 @router.websocket("/{run_id}")
 async def websocket_endpoint(websocket: WebSocket, run_id: str, current_user: ActiveUserWsDep):
     await websocket.accept()
+    handshake_completed = False
     try:
         while True:
-            # This is a placeholder for the actual logic to get the agent's status and logs
-            # In a real implementation, you would have a way to access the agent's state and logs using the run_id
-            await websocket.send_text(f"Message for run_id: {run_id}")
-            await asyncio.sleep(1)
+            data = await websocket.receive_text()
+            if not handshake_completed:
+                if data == "handshake":
+                    await websocket.send_text("handshake_ack")
+                    handshake_completed = True
+                else:
+                    await websocket.close(code=1008)
+            else:
+                await websocket.send_text(f"Echo: {data}")
     except WebSocketDisconnect:
         print(f"WebSocket disconnected for run_id: {run_id}")
