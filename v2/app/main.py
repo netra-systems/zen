@@ -105,6 +105,7 @@ if settings.app_env == "development":
 
 @app.get("/")
 def read_root():
+    logger = central_logger.get_logger(__name__)
     logger.info("Root endpoint was hit.")
     return {"message": "Welcome to Netra API v2"}
 

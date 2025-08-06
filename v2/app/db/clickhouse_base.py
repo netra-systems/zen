@@ -30,11 +30,11 @@ class ClickHouseDatabase:
             self.client = None
             raise ConnectionError(f"Could not connect to ClickHouse: {e}") from e
 
-    def insert_log(self, log_entry, table_name: str):
+    def ping(self):
         if not self.client:
             raise ConnectionError("Not connected to ClickHouse.")
         try:
-            self.client.insert(table_name, [log_entry.model_dump_json()])
+            self.client.ping()
+            return True
         except Exception as e:
-            # In a real application, you would have a more robust error handling mechanism
-            print(f"Failed to insert log into ClickHouse: {e}")
+            return False

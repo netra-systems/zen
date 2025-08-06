@@ -58,6 +58,7 @@ const useAppStore = create<AppState>((set, get) => ({
             localStorage.setItem('authToken', access_token);
             set({ token: access_token });
             await get().fetchUser(access_token);
+            window.location.href = '/';
         } catch (error: unknown) {
             console.error(error);
             set({ authError: error instanceof Error ? error.message : 'An unexpected error occurred during login.', isLoading: false });

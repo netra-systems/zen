@@ -1,21 +1,36 @@
+
 import pytest
 from httpx import AsyncClient
-
-# Mark the test as asynchronous
-@pytest.mark.asyncio
-async def test_health_live(client: AsyncClient):
-    """
-    Tests the /health/live endpoint to ensure it returns a 200 OK response.
-    """
-    response = await client.get("/health/live")
-    assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+from fastapi.testclient import TestClient
+from app.main import app
 
 @pytest.mark.asyncio
-async def test_health_ready(client: AsyncClient):
+async def test_live_endpoint():
     """
-    Tests the /health/ready endpoint to ensure it returns a 200 OK response.
+    Tests the /live endpoint.
     """
-    response = await client.get("/health/ready")
-    assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    with TestClient(app) as client:
+        response = client.get("/health/live")
+        assert response.status_code == 200
+        assert response.json() == {"status": "ok"}
+
+@pytest.mark.asyncio
+async def test_ready_endpoint_success():
+    """
+    Tests the /ready endpoint when all services are healthy.
+    """
+    with TestClient(app) as client:
+        response = client.get("/health/ready")
+        assert response.status_code == 200
+        assert response.json() == {"status": "ok"}
+
+@pytest.mark.asyncio
+async def test_ready_endpoint_failure(mocker):
+    """
+    Tests the /ready endpoint when a service is unhealthy.
+    """
+    mocker.patch("app.db.clickhouse_base.ClickHouseDatabase.ping", return_value=False)
+    with TestClient(app) as client:
+        response = client.get("/health/ready")
+        assert response.status_code == 503
+        assert response.json() == {"detail": "Service Unavailable"}
