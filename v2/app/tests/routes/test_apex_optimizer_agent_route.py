@@ -1,7 +1,14 @@
 import pytest
+import time
 from fastapi.testclient import TestClient
 from app.main import app
 from app.db.models_clickhouse import AnalysisRequest, Settings, RequestModel, Workload, DataSource, TimeRange
+from app.llm.llm_manager import LLMManager
+from app.config import settings
+
+# Initialize the LLMManager and add it to the app state for testing
+llm_manager = LLMManager(settings)
+app.state.llm_manager = llm_manager
 
 client = TestClient(app)
 
@@ -36,5 +43,6 @@ def test_apex_optimizer_agent(prompt: str):
     assert isinstance(run_id, str)
 
     with client.websocket_connect(f"/ws/{run_id}") as websocket:
+        time.sleep(1) # Allow time for the websocket to connect and receive the message
         data = websocket.receive_text()
         assert isinstance(data, str)

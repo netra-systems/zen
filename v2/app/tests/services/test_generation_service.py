@@ -1,135 +1,69 @@
 import pytest
-import pandas as pd
-from unittest.mock import MagicMock, patch, mock_open
+import time
+from unittest.mock import MagicMock, AsyncMock, patch
+from app.services.generation_service import update_job_status, GENERATION_JOBS, get_corpus_from_clickhouse, save_corpus_to_clickhouse
 
-import os
-import json
-from app.services.generation_service import run_content_generation_job, run_log_generation_job, GENERATION_JOBS
-from app.config import settings
+@pytest.mark.asyncio
+async def test_update_job_status():
+    # Arrange
+    job_id = "test_job"
+    status = "running"
+    kwargs = {"progress": 50}
 
-# Mark all tests in this file as asynchronous
-pytestmark = pytest.mark.asyncio
+    # Act
+    update_job_status(job_id, status, **kwargs)
 
-@pytest.fixture(autouse=True)
-def clear_generation_jobs():
-    """Fixture to automatically clear the GENERATION_JOBS dictionary before each test."""
-    GENERATION_JOBS.clear()
-    yield
+    # Assert
+    assert job_id in GENERATION_JOBS
+    assert GENERATION_JOBS[job_id]['status'] == status
+    assert GENERATION_JOBS[job_id]['progress'] == 50
+    assert 'last_updated' in GENERATION_JOBS[job_id]
 
-@patch('app.services.generation_service.cpu_count')
-@patch('app.services.generation_service.Pool')
-@patch('app.data.synthetic.content_generator.genai')
-async def test_run_content_generation_job_success(mock_genai, mock_pool, mock_cpu_count):
-    # Mock the necessary dependencies
-    mock_cpu_count.return_value = 4
-    mock_genai.GenerativeModel.return_value = MagicMock()
-    mock_pool.return_value.__enter__.return_value.imap_unordered.return_value = [
-        {'type': 'simple_chat', 'data': ('What is AI?', 'AI is...')}
-    ]
+@pytest.mark.asyncio
+async def test_get_corpus_from_clickhouse():
+    # Arrange
+    table_name = "test_corpus"
+    mock_db_instance = MagicMock()
+    mock_db_instance.connect = AsyncMock()
+    mock_db_instance.execute_query = AsyncMock(return_value=[
+        {'workload_type': 'test_type', 'prompt': 'p1', 'response': 'r1'},
+        {'workload_type': 'test_type', 'prompt': 'p2', 'response': 'r2'}
+    ])
+    mock_db_instance.is_connected = AsyncMock(return_value=True)
+    mock_db_instance.disconnect = AsyncMock()
 
-    # Set the required environment variable
-    settings.llm_configs["default"].api_key = "test_key"
+    with patch('app.services.generation_service.ClickHouseDatabase') as mock_db_class:
+        mock_db_class.return_value = mock_db_instance
 
-    # Define the job parameters
-    job_id = 'test_content_job'
-    params = {
-        'samples_per_type': 1,
-        'temperature': 0.7,
-        'top_p': 0.9,
-        'top_k': 40,
-        'max_cores': 2
-    }
+        # Act
+        corpus = await get_corpus_from_clickhouse(table_name)
 
-    # Run the job
-    await run_content_generation_job(job_id, params)
+        # Assert
+        assert "test_type" in corpus
+        assert len(corpus["test_type"]) == 2
+        assert corpus["test_type"][0] == ('p1', 'r1')
+        mock_db_instance.execute_query.assert_called_once_with(f"SELECT workload_type, prompt, response FROM {table_name}")
+        mock_db_instance.disconnect.assert_called_once()
 
-    # Assert that the job was completed successfully
-    assert GENERATION_JOBS[job_id]['status'] == 'completed'
-    assert 'result_path' in GENERATION_JOBS[job_id]
-    assert 'summary' in GENERATION_JOBS[job_id]
+@pytest.mark.asyncio
+async def test_save_corpus_to_clickhouse():
+    # Arrange
+    table_name = "test_corpus"
+    corpus = {"test_type": [("p1", "r1"), ("p2", "r2")]}
+    mock_db_instance = MagicMock()
+    mock_db_instance.connect = AsyncMock()
+    mock_db_instance.command = AsyncMock()
+    mock_db_instance.insert_data = AsyncMock()
+    mock_db_instance.is_connected = AsyncMock(return_value=True)
+    mock_db_instance.disconnect = AsyncMock()
 
-@patch('app.services.generation_service.os.getenv')
-async def test_run_content_generation_job_no_api_key(mock_getenv):
-    # Mock the environment variable to simulate the API key not being set
-    mock_getenv.return_value = None
-    settings.llm_configs["default"].api_key = None
+    with patch('app.services.generation_service.ClickHouseDatabase') as mock_db_class:
+        mock_db_class.return_value = mock_db_instance
 
-    # Define the job parameters
-    job_id = 'test_content_job_no_key'
-    params = {}
+        # Act
+        await save_corpus_to_clickhouse(corpus, table_name)
 
-    # Run the job
-    await run_content_generation_job(job_id, params)
-
-    # Assert that the job failed
-    assert GENERATION_JOBS[job_id]['status'] == 'failed'
-    assert GENERATION_JOBS[job_id]['error'] == 'GEMINI_API_KEY not set'
-
-@patch('app.services.generation_service.cpu_count')
-@patch('app.services.generation_service.Pool')
-@patch('app.services.generation_service.open', new_callable=mock_open, read_data='{}')
-@patch('app.services.generation_service.get_config')
-@patch('app.services.generation_service.os.path.exists')
-async def test_run_log_generation_job_success(mock_exists, mock_get_config, mock_file, mock_pool, mock_cpu_count):
-    # Mock the necessary dependencies
-    mock_cpu_count.return_value = 4
-    mock_exists.return_value = True
-    mock_pool.return_value.__enter__.return_value.imap_unordered.return_value = [
-        pd.DataFrame({
-            'trace_id': ['test_trace'],
-            'span_id': ['test_span'],
-            'app_name': ['test_app'],
-            'service_name': ['test_service'],
-            'model_provider': ['test_provider'],
-            'model_name': ['test_model'],
-            'model_pricing': [[0.0, 0.0]],
-            'user_prompt': ['test_prompt'],
-            'assistant_response': ['test_response'],
-            'prompt_tokens': [1],
-            'completion_tokens': [1],
-            'total_tokens': [2],
-            'prompt_cost': [0.0],
-            'completion_cost': [0.0],
-            'total_cost': [0.0],
-            'total_e2e_ms': [1],
-            'ttft_ms': [1],
-            'user_id': ['test_user'],
-            'organization_id': ['test_org']
-        })
-    ]
-
-    # Define the job parameters
-    job_id = 'test_log_job'
-    params = {
-        'num_logs': 10,
-        'max_cores': 2,
-        'corpus_id': 'test_corpus'
-    }
-
-    # Run the job
-    with patch('app.services.generation_service.os.makedirs') as mock_makedirs:
-        await run_log_generation_job(job_id, params)
-
-    # Assert that the job was completed successfully
-    assert GENERATION_JOBS[job_id]['status'] == 'completed'
-    assert 'result_path' in GENERATION_JOBS[job_id]
-    assert 'summary' in GENERATION_JOBS[job_id]
-
-@patch('app.services.generation_service.os.path.exists')
-async def test_run_log_generation_job_no_corpus(mock_exists):
-    # Mock the os.path.exists to simulate the corpus not being found
-    mock_exists.return_value = False
-
-    # Define the job parameters
-    job_id = 'test_log_job_no_corpus'
-    params = {
-        'corpus_id': 'non_existent_corpus',
-        'num_logs': 10
-    }
-
-    # Run the job
-    await run_log_generation_job(job_id, params)
-
-    # Assert that the job failed
-    assert GENERATION_JOBS[job_id]['status'] == 'failed'
-    assert 'Content corpus' in GENERATION_JOBS[job_id]['error']
+        # Assert
+        mock_db_instance.command.assert_called_once()
+        mock_db_instance.insert_data.assert_called_once()
+        mock_db_instance.disconnect.assert_called_once()

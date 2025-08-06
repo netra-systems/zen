@@ -19,16 +19,19 @@ class StreamingAgentSupervisor:
         self.llm_manager = llm_manager
         self.agent_states: Dict[str, Dict[str, Any]] = {}
         self.websocket_manager = websocket_manager
+        self.graph = None
 
-        state = DeepAgentState()
-        supply_catalog = SupplyCatalogService()
-        context = ToolContext(logs=[], db_session=self.db_session, llm_manager=self.llm_manager, cost_estimator=None, state=state, supply_catalog=supply_catalog)
-        all_tools, _ = ToolBuilder.build_all(context)
-        agent_def = self._get_agent_definition(self.llm_manager, list(all_tools.values()))
-        tool_dispatcher = ToolDispatcher(tools=list(all_tools.values()))
+    def _initialize_graph(self):
+        if self.graph is None:
+            state = DeepAgentState()
+            supply_catalog = SupplyCatalogService()
+            context = ToolContext(logs=[], db_session=self.db_session, llm_manager=self.llm_manager, cost_estimator=None, state=state, supply_catalog=supply_catalog)
+            all_tools, _ = ToolBuilder.build_all(context)
+            agent_def = self._get_agent_definition(self.llm_manager, list(all_tools.values()))
+            tool_dispatcher = ToolDispatcher(tools=list(all_tools.values()))
 
-        team = SingleAgentTeam(agent=agent_def, llm_manager=self.llm_manager, tool_dispatcher=tool_dispatcher)
-        self.graph = team.create_graph()
+            team = SingleAgentTeam(agent=agent_def, llm_manager=self.llm_manager, tool_dispatcher=tool_dispatcher)
+            self.graph = team.create_graph()
 
     def _get_agent_definition(self, llm_manager: LLMManager, tools: list) -> SubAgent:
         """Returns the definition of the Netra Optimizer Agent."""
@@ -45,6 +48,7 @@ class StreamingAgentSupervisor:
         )
 
     async def start_agent(self, request: AnalysisRequest, client_id: str) -> Dict[str, Any]:
+        self._initialize_graph()
         run_id = request.request.id
         initial_state = {
             "messages": [HumanMessage(content=request.request.query)],

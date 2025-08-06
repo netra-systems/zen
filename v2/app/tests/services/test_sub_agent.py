@@ -1,3 +1,4 @@
+import asyncio
 import pytest
 from unittest.mock import MagicMock, AsyncMock
 from app.services.deepagents.sub_agent import SubAgent

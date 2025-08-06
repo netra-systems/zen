@@ -32,7 +32,7 @@ class LLMManager:
             if not config.api_key:
                 raise ValueError(f"{config.api_key} Gemini API key not found in config.")
 
-            genai.configure(api_key=config.api_key)
+            # Defer genai.configure until a Google model is actually used
             llm = ChatGoogleGenerativeAI(
                 model=config.model_name,
                 api_key=config.api_key,

@@ -1,7 +1,7 @@
 from typing import Dict, Any
 from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
 
-from app.services.apex_optimizer_agent.tools.context import ToolContext
+from app.services.context import ToolContext
 
 class ToolLatencyOptimizationTool(BaseTool):
     metadata = ToolMetadata(

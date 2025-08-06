@@ -7,12 +7,14 @@ def mock_tool(a: int, b: int) -> int:
     """A mock tool that adds two numbers."""
     return a + b
 
-def test_tool_dispatcher():
+@pytest.mark.asyncio
+async def test_tool_dispatcher():
     dispatcher = ToolDispatcher(tools=[mock_tool])
-    result = dispatcher.dispatch("mock_tool", a=1, b=2)
+    result = await dispatcher.dispatch("mock_tool", a=1, b=2)
     assert result == 3
 
-def test_tool_dispatcher_tool_not_found():
+@pytest.mark.asyncio
+async def test_tool_dispatcher_tool_not_found():
     dispatcher = ToolDispatcher(tools=[mock_tool])
-    result = dispatcher.dispatch("non_existent_tool", a=1, b=2)
+    result = await dispatcher.dispatch("non_existent_tool", a=1, b=2)
     assert result == "Tool 'non_existent_tool' not found."
