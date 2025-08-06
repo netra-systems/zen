@@ -1,4 +1,4 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
@@ -35,6 +35,16 @@ const ExampleQueries = ({ queries, onQueryClick }: { queries: string[], onQueryC
 
 export function ChatWindow({ messages, onSendMessage, isLoading, exampleQueries = [] }: ChatWindowProps) {
     const [input, setInput] = useState('');
+    const [isAgentThinking, setIsAgentThinking] = useState(false);
+
+    useEffect(() => {
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage?.role === 'agent' && lastMessage.isThinking) {
+            setIsAgentThinking(true);
+        } else {
+            setIsAgentThinking(false);
+        }
+    }, [messages]);
 
     const handleSendMessage = (e: FormEvent) => {
         e.preventDefault();
@@ -60,10 +70,10 @@ export function ChatWindow({ messages, onSendMessage, isLoading, exampleQueries 
                     <Input
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder="Type your message..."
-                        disabled={isLoading}
+                        placeholder={isAgentThinking ? "Agent is thinking..." : "Type your message..."}
+                        disabled={isLoading || isAgentThinking}
                     />
-                    <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
+                    <Button type="submit" size="icon" disabled={isLoading || isAgentThinking || !input.trim()}>
                         <Send className="h-4 w-4" />
                     </Button>
                 </form>

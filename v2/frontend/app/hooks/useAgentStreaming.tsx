@@ -5,6 +5,7 @@ import React from 'react';
 interface Message {
     role: 'user' | 'agent';
     content: React.ReactNode;
+    isThinking?: boolean;
 }
 
 const MAX_RETRIES = 5;
@@ -18,33 +19,35 @@ export const useAgentStreaming = (token: string | null) => {
     const ws = useRef<WebSocket | null>(null);
     const retryCount = useRef(0);
 
-    const addMessage = (role: 'user' | 'agent', content: React.ReactNode) => {
-        setMessages(prev => [...prev, { role, content }]);
-    };
+    const addMessage = useCallback((message: Message) => {
+        setMessages(prev => [...prev, message]);
+    }, []);
 
     const connect = useCallback((clientId: string) => {
         if (ws.current && ws.current.readyState === WebSocket.OPEN) {
             return;
         }
 
-        // TODO dev work with empty token 
-        // real adds ${token ? `?token=${token}` : ''}` ????
         const wsUrl = `ws://localhost:8000/ws/dev/${clientId}`;
         ws.current = new WebSocket(wsUrl);
 
         ws.current.onopen = () => {
             console.log('WebSocket connected');
             setIsLoading(true);
-            retryCount.current = 0; // Reset retry count on successful connection
+            retryCount.current = 0; 
         };
 
         ws.current.onmessage = (event) => {
             const message = event.data;
             try {
                 const parsedMessage = JSON.parse(message);
-                setArtifacts(prev => [...prev, parsedMessage]);
+                if (parsedMessage.event && parsedMessage.data) {
+                    addMessage({ role: 'agent', content: parsedMessage, isThinking: true });
+                } else {
+                    setArtifacts(prev => [...prev, parsedMessage]);
+                }
             } catch (error) {
-                addMessage('agent', message);
+                addMessage({ role: 'agent', content: message });
             }
         };
 
@@ -69,7 +72,7 @@ export const useAgentStreaming = (token: string | null) => {
                 setError(new Error('Could not reconnect to the WebSocket after multiple attempts.'));
             }
         };
-    }, []);
+    }, [addMessage]);
 
     const startAgent = useCallback(async (query: string) => {
         setIsLoading(true);
@@ -101,20 +104,20 @@ export const useAgentStreaming = (token: string | null) => {
             }, clientId);
 
             if (newRun && newRun.run_id) {
-                addMessage('agent', `Starting analysis with Run ID: ${newRun.run_id}`);
+                addMessage({ role: 'agent', content: `Starting analysis with Run ID: ${newRun.run_id}` });
             } else {
                 const err = new Error("Failed to start analysis: No run ID returned.");
                 setError(err);
-                addMessage('agent', "Failed to start analysis: No run ID returned.");
+                addMessage({ role: 'agent', content: "Failed to start analysis: No run ID returned." });
                 setIsLoading(false);
             }
         } catch (err) {
             console.error("Error starting analysis:", err);
             setError(err as Error);
-            addMessage('agent', `Error starting analysis.`);
+            addMessage({ role: 'agent', content: `Error starting analysis.` });
             setIsLoading(false);
         }
-    }, [token, connect]);
+    }, [token, connect, addMessage]);
 
     useEffect(() => {
         return () => {

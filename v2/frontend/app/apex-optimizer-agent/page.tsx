@@ -9,9 +9,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { ChatWindow } from '@/components/chat/ChatWindow';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
 import { apiService } from '../api';
-import { useAgentStreaming } from '../hooks/useAgentStreaming.tsx';
+import { useAgentStreaming } from '../hooks/useAgentStreaming';
 import { getUserId } from '../lib/user';
 import useAppStore from '../store';
+import { MessageArtifact } from '@/components/chat/MessageArtifact';
 
 export default function ApexOptimizerAgentPage() {
     const { token } = useAppStore();
@@ -31,9 +32,23 @@ export default function ApexOptimizerAgentPage() {
     }, [token]);
 
     const handleSendMessage = useCallback(async (query: string) => {
-        addMessage('user', query);
+        addMessage({ role: 'user', content: query });
         await startAgent(query);
     }, [addMessage, startAgent]);
+
+    const renderArtifacts = () => {
+        if (artifacts.length === 0) {
+            return (
+                <div className="flex flex-col items-center justify-center text-center h-full">
+                    <HelpCircle className="w-16 h-16 text-gray-300" />
+                </div>
+            );
+        }
+
+        return artifacts.map((artifact, index) => (
+            <MessageArtifact key={index} data={artifact} />
+        ));
+    };
 
     return (
         <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -58,13 +73,7 @@ export default function ApexOptimizerAgentPage() {
                                     <CardDescription>Generated artifacts will appear here.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="flex-1 overflow-auto">
-                                    {artifacts.length === 0 ? (
-                                        <div className="flex flex-col items-center justify-center text-center h-full">
-                                            <HelpCircle className="w-16 h-16 text-gray-300" />
-                                        </div>
-                                    ) : (
-                                        <pre>{JSON.stringify(artifacts, null, 2)}</pre>
-                                    )}
+                                    {renderArtifacts()}
                                 </CardContent>
                             </Card>
                         </div>
