@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Message } from './types/chat';
+import { Message } from '../types/chat';
 
 export type MessageFilter = 'event';
 
@@ -78,6 +78,38 @@ export function useAgentStreaming(initialMessages: Message[] = [], initialFilter
         }
     }, []);
 
+    const startAgent = async (message: string, token: string) => {
+        setShowThinking(true);
+        try {
+            const response = await fetch('/api/agent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ message }),
+            });
+
+            if (!response.body) {
+                throw new Error('No response body');
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    break;
+                }
+                processStream(decoder.decode(value));
+            }
+        } catch (error) {
+            console.error('Error calling agent:', error);
+        } finally {
+            setShowThinking(false);
+        }
+    };
+
     const filteredMessages = messages.filter(m => !messageFilters.has(m.type as MessageFilter));
 
     return {
@@ -97,5 +129,6 @@ export function useAgentStreaming(initialMessages: Message[] = [], initialFilter
         showThinking,
         setShowThinking,
         processStream,
+        startAgent,
     };
 }
