@@ -9,7 +9,12 @@ export function ChatInput() {
     const [showReferences, setShowReferences] = useState(false);
     const [references, setReferences] = useState<Reference[]>([]);
     const [selectedReferences, setSelectedReferences] = useState<Reference[]>([]);
+    const [examples, setExamples] = useState<string[]>([]);
     const token = useAppStore((state) => state.token);
+
+    useEffect(() => {
+        apiService.getExamples().then(setExamples);
+    }, []);
 
     useEffect(() => {
         if (showReferences) {
@@ -36,6 +41,8 @@ export function ChatInput() {
     };
 
     const handleSubmit = () => {
+        if (!inputValue.trim()) return;
+
         const source = selectedReferences.find((ref) => ref.type === 'source')?.value || 'synthetic_data';
         const timePeriod = selectedReferences.find((ref) => ref.type === 'time_period')?.value || 'last_7_days';
 
@@ -65,13 +72,21 @@ export function ChatInput() {
         apiService.startAgent(token, analysisRequest);
     };
 
+    const loadExample = () => {
+        const example = examples[Math.floor(Math.random() * examples.length)];
+        setInputValue(example);
+    };
+
     return (
         <div className="relative">
+            <button onClick={loadExample} className="absolute left-0 top-0 h-full px-4 bg-gray-200 text-gray-600 rounded-l">
+                Load Example
+            </button>
             <input
                 type="text"
                 value={inputValue}
                 onChange={handleInputChange}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded pl-32"
                 placeholder="Type your message..."
             />
             {showReferences && (
@@ -88,7 +103,11 @@ export function ChatInput() {
                     ))}
                 </ul>
             )}
-            <button onClick={handleSubmit} className="absolute right-0 top-0 h-full px-4 bg-blue-500 text-white rounded-r">
+            <button
+                onClick={handleSubmit}
+                className="absolute right-0 top-0 h-full px-4 bg-blue-500 text-white rounded-r disabled:bg-gray-400"
+                disabled={!inputValue.trim()}
+            >
                 Submit
             </button>
         </div>

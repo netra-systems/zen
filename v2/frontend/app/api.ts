@@ -72,5 +72,9 @@ export const apiService = {
 
     async getReferences(token: string | null): Promise<{ references: Reference[] }> {
         return this.get(`${config.api.baseUrl}/references`, token);
+    },
+
+    async getExamples(): Promise<string[]> {
+        return this.get(`${config.api.baseUrl}/examples`, null);
     }
 };
