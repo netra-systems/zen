@@ -81,6 +81,11 @@ class ClickHouseHTTPSDevConfig(BaseModel):
     database: str = "development"
 
 
+class ClickHouseLoggingConfig(BaseModel):
+    enabled: bool = True
+    table: str = "logs"
+
+
 class LangfuseConfig(BaseModel):
     secret_key: str = ""
     public_key: str = ""
@@ -94,6 +99,7 @@ class AppConfig(BaseModel):
     clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
     clickhouse_https: ClickHouseHTTPSConfig = ClickHouseHTTPSConfig()
     clickhouse_https_dev: ClickHouseHTTPSDevConfig = ClickHouseHTTPSDevConfig()
+    clickhouse_logging: ClickHouseLoggingConfig = ClickHouseLoggingConfig()
     langfuse: LangfuseConfig = LangfuseConfig()
 
     secret_key: str = "default_secret_key"
