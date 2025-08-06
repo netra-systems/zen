@@ -5,10 +5,10 @@ from app.services.context import ToolContext
 
 class LogAnalyzer(BaseTool):
     async def run(self, context: ToolContext) -> Any:
-        return await self.analyze_logs(context.logs)
+        return await self.analyze_logs(context)
 
-    async def analyze_logs(self, logs: Any) -> Any:
-        prompt = f'Analyze the following logs and return a summary in JSON format: {logs}'
-        llm = self.get_llm()
+    async def analyze_logs(self, context: ToolContext) -> Any:
+        prompt = f'Analyze the following logs and return a summary in JSON format: {context.logs}'
+        llm = context.llm_manager.get_llm(self.llm_name or "default")
         response = await llm.ainvoke(prompt)
         return json.loads(response.content)

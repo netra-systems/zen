@@ -40,7 +40,7 @@ class LogPatternIdentifier(BaseTool):
 
         # Generate descriptions
         descriptions = {}
-        llm = self.get_llm()
+        llm = context.llm_manager.get_llm(self.llm_name or "default")
         if llm:
             features_json = json.dumps({f"pattern_{i}": features for i, features in enumerate(centroids)}, indent=2)
             prompt = f"""
