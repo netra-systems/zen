@@ -29,15 +29,25 @@ async def test_tool_builder_and_dispatcher():
     cost_analyzer_tool = bound_tools.get("cost_analyzer")
     assert cost_analyzer_tool is not None, "cost_analyzer tool not found"
 
-    # Mock the tool's ainvoke method
-    cost_analyzer_tool.ainvoke = AsyncMock(return_value="Success")
+    # Mock the tool's coroutine
+    cost_analyzer_tool.coroutine = AsyncMock(return_value="Success")
 
     # Dispatch the tool
     result = await tool_dispatcher.dispatch("cost_analyzer")
 
     # Assert the result
+    # Mock the tool's _arun method
+    cost_analyzer_tool._arun = AsyncMock(return_value="Success")
+
+    # Dispatch the tool
+    result = await tool_dispatcher.dispatch("cost_analyzer", tool_input={})
+
+    # Assert the result
     assert result.status == "SUCCESS"
     assert result.payload == "Success"
 
-    # Verify that the ainvoke method was called
-    cost_analyzer_tool.ainvoke.assert_called_once()
+    # Verify that the _arun method was called
+    cost_analyzer_tool._arun.assert_called_once()
+
+    # Verify that the coroutine was called
+    cost_analyzer_tool.coroutine.assert_called_once()

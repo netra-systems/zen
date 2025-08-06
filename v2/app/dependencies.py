@@ -20,7 +20,7 @@ async def get_db_session(request: Request) -> AsyncSession:
     async with request.app.state.db_session_factory() as session:
         yield session
 
-def get_current_user(
+async def get_current_user(
     token: TokenDep, db: DbDep, request: Request
 ) -> models_postgres.User:
     security_service = request.app.state.security_service
@@ -31,7 +31,7 @@ def get_current_user(
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    user = security_service.get_user(db, email)
+    user = await security_service.get_user(db, email)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
