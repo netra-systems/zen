@@ -1,11 +1,24 @@
 'use client';
 
-import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import useAppStore from '@/store';
 import config from '@/config';
 
-const AuthContext = createContext<any>(null);
+interface User {
+  email: string;
+  // Add other user properties here
+}
+
+interface AuthContextType {
+  user: User | null;
+  login: () => void;
+  logout: () => Promise<void>;
+  handleAuthCallback: () => Promise<void>;
+  fetchUser: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -40,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     if (user) return;
     try {
       const response = await fetch(`${config.apiBaseUrl}/api/v3/auth/get_user`);
@@ -53,14 +66,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Failed to fetch user:', error);
     }
-  };
+  }, [user, setUser]);
 
   useEffect(() => {
     const publicPaths = ['/login', '/auth/error', '/auth/callback'];
     if (!user && !publicPaths.includes(pathname)) {
       fetchUser();
     }
-  }, [user, pathname]);
+  }, [user, pathname, fetchUser]);
 
   const value = {
     user,

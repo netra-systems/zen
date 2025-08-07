@@ -14,6 +14,17 @@ from .base import Base
 import uuid
 from datetime import datetime, timezone
 
+class User(Base):
+    __tablename__ = "users"
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    email = Column(String, unique=True, index=True, nullable=False)
+    full_name = Column(String, index=True)
+    picture = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+    is_active = Column(Boolean(), default=True)
+    is_superuser = Column(Boolean(), default=False)
+    secrets = relationship("Secret", back_populates="user", cascade="all, delete-orphan")
 
 class Secret(Base):
     __tablename__ = "secrets"

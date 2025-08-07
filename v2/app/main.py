@@ -154,7 +154,7 @@ if "pytest" in sys.modules:
     llm_manager = LLMManager(settings)
     app.state.agent_supervisor = OverallSupervisor(async_session_factory, llm_manager, websocket_manager)
 
-    from app.db.testing import TestSessionLocal, engine
+    from app.db.testing import override_get_db, engine
     from app.db.base import Base
 
     @asynccontextmanager
@@ -165,13 +165,6 @@ if "pytest" in sys.modules:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
 
-    def get_test_db():
-        try:
-            db = TestSessionLocal()
-            yield db
-        finally:
-            db.close()
-
     from app.dependencies import get_db_session
-    app.dependency_overrides[get_db_session] = get_test_db
+    app.dependency_overrides[get_db_session] = override_get_db
     app.router.lifespan_context = test_lifespan

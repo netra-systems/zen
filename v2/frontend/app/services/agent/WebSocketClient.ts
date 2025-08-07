@@ -1,6 +1,7 @@
 import config from '@/config';
 
 import { WebSocketStatus } from '@/types';
+export { WebSocketStatus };
 
 export class WebSocketClient {
     private ws: WebSocket | null = null;

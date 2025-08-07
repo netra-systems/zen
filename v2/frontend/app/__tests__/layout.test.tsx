@@ -12,7 +12,11 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/',
 }));
 
-jest.mock('@/providers/auth');
+import { useAuth } from '@/providers/auth';
+
+jest.mock('@/providers/auth', () => ({
+  useAuth: jest.fn()
+}));
 
 jest.mock('@/store', () => jest.fn());
 

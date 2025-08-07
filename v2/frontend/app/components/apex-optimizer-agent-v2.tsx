@@ -1,80 +1,22 @@
 'use client';
 
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useState } from 'react';
+import { MessageFactory } from '../services/agent/MessageFactory';
 import { useAgentContext } from '../providers/AgentProvider';
 import { MessageOrchestrator } from './chat/MessageOrchestrator';
 
-function ApexOptimizerAgentV2() {
-  const [input, setInput] = useState('');
-  const { startAgent, messages, showThinking, error } = useAgentContext();
-  const [showExamples, setShowExamples] = useState(true);
+const examplePrompts = [
+  'Analyze the latency of the `get_user_data` tool and suggest optimizations.',
+    'Find the most expensive tool in my project and explain why it is so costly.',
+  'Simulate the cost impact of a 50% increase in traffic to the `process_payment` tool.',
+  'Generate a report on the quality of the `generate_report` tool.',
+];
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value);
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (input.trim()) {
-      startAgent(input);
-      setInput('');
-      setShowExamples(false);
-    }
-  };
-
-  const handleExampleClick = (prompt: string) => {
-    setInput(prompt);
-    setShowExamples(false);
-  };
-
-  return (
-    <Card className="w-full max-w-4xl mx-auto my-8" role="article">
-      <CardHeader>
-        <CardTitle>Apex Deep Research Agent</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col h-[600px] border rounded-lg">
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message, index) => (
-              <div key={message.id || index}>
-                <MessageOrchestrator message={message} />
-              </div>
-            ))}
-            {showThinking && <MessageOrchestrator key="thinking" message={MessageFactory.createThinkingMessage()} />}
-          </div>
-          <div className="p-4 border-t">
-            {showExamples && (
-              <Card className="mb-4">
-                <CardHeader>
-                  <CardTitle>Example Prompts</CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
-                  {examplePrompts.map((prompt, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      onClick={() => handleExampleClick(prompt)}
-                      className="h-auto text-left whitespace-normal min-h-[4rem]"
-                    >
-                      {truncatePrompt(prompt, 7)}
-                    </Button>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-            <form onSubmit={handleSubmit} className="flex items-center gap-2" role="form">
-              <Input
-                value={input}
-                onChange={handleInputChange}
-                placeholder="Ask the agent to optimize a tool..."
-                className="flex-1"
-              />
-              <Button type="submit">Send</Button>
-            </form>
-            {error && <p className="text-red-500 mt-2">{error.message}</p>}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+function truncatePrompt(prompt: string, words: number) {
+  return prompt.split(' ').slice(0, words).join(' ') + '...';
 }
+
+function ApexOptimizerAgentV2() {
