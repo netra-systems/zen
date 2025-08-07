@@ -94,25 +94,80 @@ export interface UpdateStateData {
   data: StateUpdate;
 }
 
-export interface Message {
+// Base interface for all message types
+export interface BaseMessage {
   id: string;
   role: MessageRole;
-  type: 'text' | 'thinking' | 'error' | 'tool_start' | 'tool_end' | 'state_update' | 'tool_code' | 'user' | 'assistant' | 'event';
+  rawServerEvent?: ServerEvent;
+}
+
+export interface UserMessage extends BaseMessage {
+  type: 'user';
   content: string;
+}
+
+export interface EventMessage extends BaseMessage {
+  type: 'event';
+  content: string;
+  eventName: string;
+}
+
+export interface TextMessage extends BaseMessage {
+  type: 'text';
+  content: string;
+  usageMetadata?: UsageMetadata;
+  responseMetadata?: ResponseMetadata;
+}
+
+export interface ToolStartMessage extends BaseMessage {
+  type: 'tool_start';
+  content: string;
+  tool: string;
+  toolInput: any;
+  usageMetadata?: UsageMetadata;
+  responseMetadata?: ResponseMetadata;
+}
+
+export interface ToolEndMessage extends BaseMessage {
+  type: 'tool_end';
+  content: string;
+  tool: string;
+  toolInput: any;
+  toolOutput: any;
+  usageMetadata?: UsageMetadata;
+  responseMetadata?: ResponseMetadata;
+}
+
+export interface ErrorMessage extends BaseMessage {
+  type: 'error';
+  content: string;
+  isError: true;
   tool?: string;
   toolInput?: any;
   toolOutput?: any;
-  isError?: boolean;
-  state?: StateUpdate;
-
-  // To store all data from the server event
-  rawServerEvent?: ServerEvent;
-
-  // For easier access to common data points
-  usageMetadata?: UsageMetadata;
-  responseMetadata?: ResponseMetadata;
-  toolCalls?: ToolCall[];
 }
+
+export interface ThinkingMessage extends BaseMessage {
+    type: 'thinking';
+    content: string;
+}
+
+export interface StateUpdateMessage extends BaseMessage {
+    type: 'state_update';
+    content: string;
+    state: StateUpdate;
+}
+
+export type Message =
+  | UserMessage
+  | EventMessage
+  | TextMessage
+  | ToolStartMessage
+  | ToolEndMessage
+  | ErrorMessage
+  | ThinkingMessage
+  | StateUpdateMessage;
+
 
 export interface MessageFilter {
   [key: string]: boolean;

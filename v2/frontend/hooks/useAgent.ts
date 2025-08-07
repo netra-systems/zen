@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
     Message,
-    AIMessageChunk,
     ServerEvent,
     AgentStartedData,
     ChainStartData,
@@ -10,7 +9,15 @@ import {
     RunCompleteData,
     ToolEndData,
     ToolErrorData,
-    UpdateStateData
+    UpdateStateData,
+    UserMessage,
+    EventMessage,
+    TextMessage,
+    ToolStartMessage,
+    ToolEndMessage,
+    ErrorMessage,
+    ThinkingMessage,
+    StateUpdateMessage,
 } from '@/app/types/chat';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -39,7 +46,6 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
 
                 setMessages((prevMessages) => {
                     let updatedMessages = [...prevMessages];
-                    const lastMessage = updatedMessages[updatedMessages.length - 1];
 
                     switch (parsedData.event) {
                         case 'agent_started':
@@ -49,30 +55,31 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
                                 role: 'assistant',
                                 type: 'event',
                                 content: `Agent started (Run ID: ${agentStartedData.run_id})`,
+                                eventName: parsedData.event,
                                 rawServerEvent: parsedData,
-                            });
+                            } as EventMessage);
                             break;
 
                         case 'on_chain_start':
-                            const chainStartData = parsedData.data as ChainStartData;
                             updatedMessages.push({
-                                id: Math.random().toString(),
+                                id: parsedData.run_id || Math.random().toString(),
                                 role: 'assistant',
                                 type: 'event',
                                 content: 'Chain started',
+                                eventName: parsedData.event,
                                 rawServerEvent: parsedData,
-                            });
+                            } as EventMessage);
                             break;
 
                         case 'on_chat_model_start':
-                            const chatModelStartData = parsedData.data as ChatModelStartData;
                             updatedMessages.push({
-                                id: Math.random().toString(),
+                                id: parsedData.run_id || Math.random().toString(),
                                 role: 'assistant',
                                 type: 'event',
                                 content: 'Chat model started',
+                                eventName: parsedData.event,
                                 rawServerEvent: parsedData,
-                            });
+                            } as EventMessage);
                             break;
 
                         case 'on_chat_model_stream':
@@ -84,7 +91,7 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
                                     const existingMessageIndex = updatedMessages.findIndex(msg => msg.id === toolCallChunk.id);
 
                                     if (existingMessageIndex !== -1) {
-                                        const existingMessage = updatedMessages[existingMessageIndex];
+                                        const existingMessage = updatedMessages[existingMessageIndex] as ToolStartMessage;
                                         let currentArgs = existingMessage.toolInput || '';
                                         if (typeof currentArgs !== 'string') {
                                             currentArgs = JSON.stringify(currentArgs);
@@ -96,7 +103,7 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
                                             rawServerEvent: parsedData,
                                             usageMetadata: chunk.usage_metadata,
                                             responseMetadata: chunk.response_metadata,
-                                        };
+                                        } as ToolStartMessage;
                                     } else {
                                         updatedMessages.push({
                                             id: toolCallChunk.id,
@@ -108,28 +115,25 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
                                             rawServerEvent: parsedData,
                                             usageMetadata: chunk.usage_metadata,
                                             responseMetadata: chunk.response_metadata,
-                                        });
+                                        } as ToolStartMessage);
                                     }
                                 }
                             } else if (chunk.content) {
-                                if (lastMessage && lastMessage.role === 'assistant' && lastMessage.type === 'text') {
-                                    updatedMessages[updatedMessages.length - 1] = {
-                                        ...lastMessage,
-                                        content: lastMessage.content + chunk.content,
-                                        rawServerEvent: parsedData,
-                                        usageMetadata: chunk.usage_metadata,
-                                        responseMetadata: chunk.response_metadata,
-                                    };
+                                const lastMessage = updatedMessages[updatedMessages.length - 1];
+                                if (lastMessage && lastMessage.type === 'text') {
+                                    (lastMessage as TextMessage).content += chunk.content;
+                                    (lastMessage as TextMessage).usageMetadata = chunk.usage_metadata;
+                                    (lastMessage as TextMessage).responseMetadata = chunk.response_metadata;
                                 } else {
                                     updatedMessages.push({
-                                        id: chunk.id || Math.random().toString(),
+                                        id: chunk.id || parsedData.run_id || Math.random().toString(),
                                         role: 'assistant',
                                         type: 'text',
                                         content: chunk.content,
                                         rawServerEvent: parsedData,
                                         usageMetadata: chunk.usage_metadata,
                                         responseMetadata: chunk.response_metadata,
-                                    });
+                                    } as TextMessage);
                                 }
                             }
                             break;
@@ -137,62 +141,72 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
                         case 'run_complete':
                             const runCompleteData = parsedData.data as RunCompleteData;
                             updatedMessages.push({
-                                id: Math.random().toString(),
+                                id: parsedData.run_id || Math.random().toString(),
                                 role: 'assistant',
                                 type: 'event',
                                 content: `Run complete (Status: ${runCompleteData.status})`,
+                                eventName: parsedData.event,
                                 rawServerEvent: parsedData,
-                            });
+                            } as EventMessage);
                             break;
 
                         case 'on_tool_end':
                             const toolEndData = parsedData.data as ToolEndData;
                             const toolCallId = parsedData.run_id;
-                            const msgIndex = updatedMessages.findIndex(msg => msg.id === toolCallId)
+                            const msgIndex = updatedMessages.findIndex(msg => msg.id === toolCallId);
                             if (msgIndex !== -1) {
+                                const startMessage = updatedMessages[msgIndex] as ToolStartMessage;
                                 updatedMessages[msgIndex] = {
-                                    ...updatedMessages[msgIndex],
+                                    ...startMessage,
                                     type: 'tool_end',
                                     toolOutput: toolEndData.output,
+                                    content: `Tool ${startMessage.tool} finished.`,
                                     rawServerEvent: parsedData,
-                                };
+                                } as ToolEndMessage;
                             }
                             break;
 
                         case 'on_tool_error':
                             const toolErrorData = parsedData.data as ToolErrorData;
                             const errorToolCallId = parsedData.run_id;
-                            const errorMsgIndex = updatedMessages.findIndex(msg => msg.id === errorToolCallId)
+                            const errorMsgIndex = updatedMessages.findIndex(msg => msg.id === errorToolCallId);
                             if (errorMsgIndex !== -1) {
+                                const startMessage = updatedMessages[errorMsgIndex] as ToolStartMessage;
                                 updatedMessages[errorMsgIndex] = {
-                                    ...updatedMessages[errorMsgIndex],
+                                    ...startMessage,
                                     type: 'error',
                                     isError: true,
                                     toolOutput: toolErrorData.error,
+                                    content: `Error in tool ${startMessage.tool}`,
                                     rawServerEvent: parsedData,
-                                };
+                                } as ErrorMessage;
                             }
                             break;
 
                         case 'update_state':
                             const updateStateData = parsedData.data as UpdateStateData;
+                            const lastMessage = updatedMessages[updatedMessages.length - 1];
                             if (lastMessage) {
-                                updatedMessages[updatedMessages.length - 1] = {
-                                    ...lastMessage,
+                                updatedMessages.push({
+                                    id: parsedData.run_id || Math.random().toString(),
+                                    role: 'assistant',
+                                    type: 'state_update',
+                                    content: 'State updated',
                                     state: updateStateData.data,
                                     rawServerEvent: parsedData,
-                                };
+                                } as StateUpdateMessage);
                             }
                             break;
 
                         default:
                             updatedMessages.push({
-                                id: Math.random().toString(),
+                                id: parsedData.run_id || Math.random().toString(),
                                 role: 'assistant',
                                 type: 'event',
                                 content: `Unknown event: ${parsedData.event}`,
+                                eventName: parsedData.event,
                                 rawServerEvent: parsedData,
-                            });
+                            } as EventMessage);
                             break;
                     }
                     return updatedMessages;
@@ -205,9 +219,10 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
                     {
                         id: Math.random().toString(),
                         role: 'assistant',
-                        type: 'text',
+                        type: 'error',
                         content: `Could not parse message: ${event.data}`,
-                    },
+                        isError: true,
+                    } as ErrorMessage,
                 ]);
             }
         };
@@ -237,10 +252,10 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
 
             if (!messageContent.trim()) return;
 
-            const userMessage: Message = {
+            const userMessage: UserMessage = {
                 id: Math.random().toString(),
                 role: 'user',
-                type: 'text',
+                type: 'user',
                 content: messageContent,
             };
             setMessages((prevMessages) => [...prevMessages, userMessage]);
