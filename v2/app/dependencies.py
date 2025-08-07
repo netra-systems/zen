@@ -4,7 +4,7 @@ from sqlmodel import Session
 
 from app.db.postgres import get_async_db
 from app.db import models_postgres
-from app import schema
+from app import schemas
 from app.services.security_service import oauth2_scheme
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
