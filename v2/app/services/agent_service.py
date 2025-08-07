@@ -13,7 +13,7 @@ class AgentService:
         """
         Starts the agent. The supervisor will stream logs back to the websocket.
         """
-        await self.supervisor.start_agent(analysis_request, run_id)
+        return await self.supervisor.start_agent(analysis_request, run_id)
 
     async def handle_websocket_message(self, run_id: str, data: str):
         """
@@ -30,7 +30,8 @@ class AgentService:
                 settings=Settings(**settings),
                 request=RequestModel(**request_data)
             )
-            asyncio.create_task(self.start_agent(analysis_request, run_id))
+            response = await self.start_agent(analysis_request, run_id)
+            await manager.send_to_run(json.dumps(response), run_id)
         else:
             print(f"Received unhandled message for run_id: {run_id}: {message_data}")
 

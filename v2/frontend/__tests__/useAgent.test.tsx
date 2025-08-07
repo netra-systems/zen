@@ -1,7 +1,8 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { useAgent } from '../app/hooks/useAgent';
 import WS from 'jest-websocket-mock';
 import { getToken, getUserId } from '../app/lib/user';
+import { WebSocketStatus } from '../app/hooks/useWebSocket';
 
 jest.mock('../app/lib/user', () => ({
   getToken: jest.fn(),
@@ -29,9 +30,11 @@ describe('useAgent', () => {
 
     const { result } = renderHook(() => useAgent());
 
-    await waitFor(() => expect(result.current.showThinking).toBe(false));
+    await waitFor(() => expect(result.current.status).toBe(WebSocketStatus.Open));
 
-    result.current.startAgent('Test message');
+    act(() => {
+      result.current.startAgent('Test message');
+    });
 
     await waitFor(() => expect(result.current.showThinking).toBe(true));
 
