@@ -3,7 +3,7 @@ from fastapi import APIRouter, Request, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from app.config import settings
 from app.dependencies import get_db_session, get_security_service
-from app.services.security_service import SecurityService
+from app.auth.services import SecurityService
 from app.db.postgres import AsyncSession
 from app.logging_config import central_logger
 

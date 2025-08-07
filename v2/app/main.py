@@ -22,7 +22,7 @@ from app.llm.llm_manager import LLMManager
 from app.services.deepagents.overall_supervisor import OverallSupervisor
 from app.services.agent_service import AgentService
 from app.services.key_manager import KeyManager
-from app.services.security_service import SecurityService
+from app.auth.services import SecurityService
 from app.websocket import manager as websocket_manager
 
 
@@ -153,3 +153,25 @@ if "pytest" in sys.modules:
 
     llm_manager = LLMManager(settings)
     app.state.agent_supervisor = OverallSupervisor(async_session_factory, llm_manager, websocket_manager)
+
+    from app.db.testing import TestSessionLocal, engine
+    from app.db.base import Base
+
+    @asynccontextmanager
+    async def test_lifespan(app: FastAPI):
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        yield
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+
+    def get_test_db():
+        try:
+            db = TestSessionLocal()
+            yield db
+        finally:
+            db.close()
+
+    from app.dependencies import get_db_session
+    app.dependency_overrides[get_db_session] = get_test_db
+    app.router.lifespan_context = test_lifespan
