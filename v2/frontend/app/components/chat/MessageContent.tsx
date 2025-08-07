@@ -1,4 +1,5 @@
 import React from 'react';
+import Thinking from '@/components/Thinking';
 import { Message } from '@/app/types/chat';
 import JsonTreeView from './JsonTreeView';
 import { TodoListView } from './TodoListView';
@@ -15,7 +16,7 @@ export function MessageContent({ message }: MessageContentProps) {
         case 'thinking':
             return (
                 <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                    <Thinking />
                     <p>{message.content || 'Thinking...'}</p>
                 </div>
             );

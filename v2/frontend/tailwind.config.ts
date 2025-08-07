@@ -48,14 +48,14 @@ const config: Config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       animation: {
-        'pulse-fast': 'pulse 1.4s infinite',
-        'pulse-medium': 'pulse 1.4s infinite 0.2s',
-        'pulse-slow': 'pulse 1.4s infinite 0.4s',
+        'bounce-1': 'bounce 1.4s infinite',
+        'bounce-2': 'bounce 1.4s infinite 0.2s',
+        'bounce-3': 'bounce 1.4s infinite 0.4s',
       },
       keyframes: {
-        pulse: {
-          '0%, 100%': { opacity: 1 },
-          '50%': { opacity: 0.3 },
+        bounce: {
+          '0%, 100%': { transform: 'translateY(-25%)', opacity: 1 },
+          '50%': { transform: 'translateY(0)', opacity: 0.5 },
         },
       },
     },
