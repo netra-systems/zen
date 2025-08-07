@@ -1,51 +1,20 @@
 # /v2/app/services/security_service.py
 import logging
 import os
-from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from cryptography.fernet import Fernet
-from jose import jwt, JWTError
-from passlib.context import CryptContext
 from sqlmodel import Session, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi.security import OAuth2PasswordBearer
 
 from ..db import models_postgres
 from ..db import models_clickhouse
 from .key_manager import KeyManager
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
-
-def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
-
 class SecurityService:
     def __init__(self, key_manager: KeyManager):
         self.key_manager = key_manager
         self.fernet = Fernet(self.key_manager.fernet_key)
-
-    def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None):
-        to_encode = data.copy()
-        if expires_delta:
-            expire = datetime.now(timezone.utc) + expires_delta
-        else:
-            expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-        to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, self.key_manager.jwt_secret_key, algorithm="HS256")
-        return encoded_jwt
-
-    def get_user_email_from_token(self, token: str) -> Optional[str]:
-        try:
-            payload = jwt.decode(token, self.key_manager.jwt_secret_key, algorithms=["HS256"])
-            email: str = payload.get("sub")
-            return email
-        except JWTError:
-            return None
 
     def encrypt(self, value: str) -> bytes:
         return self.fernet.encrypt(value.encode('utf-8'))
