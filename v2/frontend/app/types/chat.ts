@@ -52,7 +52,7 @@ export interface AIMessageChunk {
 export interface Message {
   id: string;
   role: MessageRole;
-  type: 'text' | 'thinking' | 'error' | 'tool_start' | 'tool_end' | 'state_update' | 'tool_code';
+  type: 'text' | 'thinking' | 'error' | 'tool_start' | 'tool_end' | 'state_update' | 'tool_code' | 'user' | 'assistant';
   content: string;
   tool?: string;
   toolInput?: any;
@@ -60,4 +60,8 @@ export interface Message {
   isError?: boolean;
   state?: StateUpdate;
   rawChunk?: AIMessageChunk;
+}
+
+export interface MessageFilter {
+  [key: string]: boolean;
 }

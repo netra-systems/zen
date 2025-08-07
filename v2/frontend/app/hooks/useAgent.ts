@@ -141,27 +141,6 @@ const processStreamEvent = (draft: Message[], event: StreamEvent) => {
                 existingMessage.tool_outputs.push(toolOutput);
             }
             break;
-
-        default:
-            // For unknown events, we can create an artifact message
-            if (existingMessage.type !== 'artifact') {
-                const artifactMessage: ArtifactMessage = {
-                    id: existingMessage.id,
-                    role: 'agent',
-                    timestamp: existingMessage.timestamp,
-                    type: 'artifact',
-                    name: eventName,
-                    data: data,
-                    tool_calls: [],
-                    tool_outputs: [],
-                    state_updates: { todo_list: [], completed_steps: [] },
-                };
-                const index = draft.findIndex((m) => m.id === run_id);
-                if (index !== -1) {
-                    draft[index] = artifactMessage;
-                }
-            }
-            break;
     }
 };
 

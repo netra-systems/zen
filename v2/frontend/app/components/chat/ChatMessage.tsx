@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -12,14 +11,33 @@ export interface ChatMessageProps {
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
-    const isToolMessage = message.type === 'tool_start' || message.type === 'tool_end' || message.type === 'error';
-    const title = isToolMessage ? message.tool : message.role === 'user' ? 'User' : 'Assistant';
+    const getTitle = (message: Message): string => {
+        switch (message.type) {
+            case 'tool_start':
+            case 'tool_end':
+                return message.tool || 'Tool';
+            case 'state_update':
+                return 'State Update';
+            case 'tool_code':
+                return 'Tool Code';
+            case 'error':
+                return 'Error';
+            case 'user':
+                return 'User';
+            case 'assistant':
+                return 'Assistant';
+            default:
+                return 'Message';
+        }
+    };
+
+    const title = getTitle(message);
 
     return (
         <Card className="w-full">
             <CardHeader>
                 <CardTitle className="text-lg">{title}</CardTitle>
-                {isToolMessage && message.content && <p className="text-sm text-gray-500">{message.content}</p>}
+                {message.type === 'tool_start' && message.content && <p className="text-sm text-gray-500">{message.content}</p>}
             </CardHeader>
             <CardContent>
                 <MessageContent message={message} />
