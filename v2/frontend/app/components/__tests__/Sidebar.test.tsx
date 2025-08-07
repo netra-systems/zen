@@ -11,7 +11,9 @@ describe('Sidebar', () => {
     expect(screen.getByText('Netra')).toBeInTheDocument();
 
     // Check for navigation links
-    expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument();
+    const dashboardLink = screen.getByRole('link', { name: /dashboard/i });
+    expect(dashboardLink).toBeInTheDocument();
+    expect(dashboardLink).toHaveAttribute('href', '/');
     expect(screen.getByRole('link', { name: /settings/i })).toBeInTheDocument();
   });
 });
