@@ -11,7 +11,7 @@ from ..db import models_postgres
 from .. import schemas
 from ..dependencies import DbDep
 from ..config import settings
-from ..auth.active_user import CurrentUser
+from ..auth.auth_dependencies import CurrentUser
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

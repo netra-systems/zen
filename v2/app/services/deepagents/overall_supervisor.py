@@ -219,4 +219,22 @@ class OverallSupervisor:
     async def shutdown(self):
         for task in self.tasks.values():
             task.cancel()
-        await asyncio.gather(*self.tasks.values(), return_exceptions=True)
+        
+        # Create a gathering of all tasks
+        tasks = list(self.tasks.values())
+        if not tasks:
+            return
+
+        # Wait for all tasks to complete, with a timeout
+        # The timeout is a safeguard against tasks that might not respect cancellation
+        try:
+            await asyncio.wait(tasks, timeout=5.0)
+        except asyncio.TimeoutError:
+            logger.warning("Timeout expired while waiting for agent tasks to cancel.")
+
+        # Additional check to see which tasks are still running
+        for task in tasks:
+            if not task.done():
+                logger.warning(f"Task {task.get_name()} did not cancel in time.")
+
+        self.tasks.clear()

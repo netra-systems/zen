@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.config import settings, AppConfig
-from app.auth_dependencies import ActiveUserWsDep
+from app.auth.auth_dependencies import ActiveUserWsDep
 from app.db.models_postgres import User
 from typing import List, Dict
 

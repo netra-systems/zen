@@ -117,11 +117,6 @@ app.include_router(references.router, prefix="/api/v3", tags=["references"])
 app.include_router(health.router, prefix="/health", tags=["health"])
 app.include_router(google_oauth.router, prefix="/api/v3/auth", tags=["auth"])
 
-if settings.environment == "development":
-    from app.routes import dev_websocket
-    app.include_router(dev_websocket.router, prefix="/ws/dev", tags=["dev_websocket"])
-
-
 
 @app.get("/")
 def read_root():
@@ -150,6 +145,3 @@ if "pytest" in sys.modules:
 
     llm_manager = LLMManager(settings)
     app.state.agent_supervisor = OverallSupervisor(async_session_factory, llm_manager, websocket_manager)
-
-    from app.routes import dev_websocket
-    app.include_router(dev_websocket.router, prefix="/ws/dev", tags=["dev_websocket"])

@@ -1,7 +1,7 @@
 import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from app.websocket_manager import manager
-from app.auth_dependencies import ActiveUserWsDep
+from app.auth.auth_dependencies import ActiveUserWsDep
 from typing import Dict, Any
 
 router = APIRouter()
