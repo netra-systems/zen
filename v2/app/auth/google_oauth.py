@@ -2,7 +2,7 @@
 from authlib.integrations.starlette_client import OAuth
 from fastapi import Request, Depends
 from app.config import settings
-from app.db.session import get_session
+from app.db.postgres import get_async_db
 from app.services.security_service import SecurityService
 from app.db.models_postgres import User
 from app import schemas
@@ -29,7 +29,7 @@ async def auth(request: Request, security_service: SecurityService = Depends()):
     
     if user_info:
         email = user_info.get('email')
-        async with get_session() as session:
+        async with get_async_db() as session:
             user = await security_service.get_user(session, email)
             if not user:
                 user = User(email=email, name=user_info.get('name'))
