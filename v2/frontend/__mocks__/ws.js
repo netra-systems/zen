@@ -26,23 +26,8 @@ MockWebSocket.CLOSING = 2;
 MockWebSocket.CLOSED = 3;
 MockWebSocket.lastInstance = null;
 
-class MockWebSocketServer extends EventEmitter {
-  constructor(options, callback) {
-    super();
-    if (callback) {
-      callback();
-    }
-  }
-
-  close(callback) {
-    if (callback) {
-      callback();
-    }
-  }
-}
-
 module.exports = {
   WebSocket: MockWebSocket,
-  Server: MockWebSocketServer,
-  WebSocketServer: MockWebSocketServer,
+  Server: EventEmitter,
+  WebSocketServer: EventEmitter,
 };

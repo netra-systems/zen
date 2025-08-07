@@ -1,6 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useAgent } from '../app/hooks/useAgent';
 import { getToken } from '../app/lib/user';
+import WS from 'jest-websocket-mock';
 
 // Mock the user module
 jest.mock('../app/lib/user', () => ({
@@ -9,6 +10,16 @@ jest.mock('../app/lib/user', () => ({
 }));
 
 describe('useAgent', () => {
+  let server: WS;
+
+  beforeEach(async () => {
+    server = new WS('ws://localhost:8000/agent/run_123?token=test-token');
+  });
+
+  afterEach(() => {
+    WS.clean();
+  });
+
   it('should start the agent, show thinking indicator, and process the response', async () => {
     const { result } = renderHook(() => useAgent());
 
@@ -16,21 +27,16 @@ describe('useAgent', () => {
       result.current.startAgent('test message');
     });
 
-    await waitFor(() => expect((global.WebSocket as any).lastInstance).not.toBeNull());
-    const socket = (global.WebSocket as any).lastInstance;
+    await server.connected;
 
     expect(result.current.showThinking).toBe(true);
 
     act(() => {
-      socket.onmessage(
-        new MessageEvent('message', {
-          data: JSON.stringify({
-            event: 'on_chain_start',
-            run_id: result.current.messages[0].id,
-            data: { input: { todo_list: ['step 1'] } },
-          }),
-        }),
-      );
+      server.send(JSON.stringify({
+        event: 'on_chain_start',
+        run_id: result.current.messages[0].id,
+        data: { input: { todo_list: ['step 1'] } },
+      }));
     });
 
     await waitFor(() => {
@@ -39,11 +45,7 @@ describe('useAgent', () => {
     });
 
     act(() => {
-      socket.onmessage(
-        new MessageEvent('message', {
-          data: JSON.stringify({ event: 'run_complete' }),
-        }),
-      );
+      server.send(JSON.stringify({ event: 'run_complete' }));
     });
 
     await waitFor(() => expect(result.current.showThinking).toBe(false));
@@ -56,11 +58,10 @@ describe('useAgent', () => {
       result.current.startAgent('test message');
     });
     
-    await waitFor(() => expect((global.WebSocket as any).lastInstance).not.toBeNull());
-    const socket = (global.WebSocket as any).lastInstance;
+    await server.connected;
 
     act(() => {
-        socket.onerror(new Event('error'));
+        server.error();
     });
 
     await waitFor(() => expect(result.current.error).not.toBeNull());

@@ -35,7 +35,7 @@ class AgentService:
             while True:
                 # This is a placeholder for the actual logic to get the agent's status and logs
                 # In a real implementation, you would have a way to access the agent's state and logs using the run_id
-                await websocket.send_text(f"Message for run_id: {run_id}")
-                await asyncio.sleep(1)
+                await asyncio.sleep(0.1)  # Keep the connection alive
         except WebSocketDisconnect:
+            manager.disconnect(run_id)
             print(f"WebSocket disconnected for run_id: {run_id}")

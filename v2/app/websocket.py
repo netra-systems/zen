@@ -1,7 +1,10 @@
 import asyncio
+import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from typing import Dict, Any
 from app.auth_dependencies import ActiveUserWsDep
+from app.services.agent_service import AgentService
+from app.services.streaming_agent.supervisor import StreamingAgentSupervisor
 
 class ConnectionManager:
     def __init__(self):
@@ -25,6 +28,7 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 router = APIRouter()
+agent_service = AgentService(StreamingAgentSupervisor())
 
 @router.websocket("/{run_id}")
 async def websocket_endpoint(websocket: WebSocket, run_id: str, user: ActiveUserWsDep):
@@ -32,8 +36,8 @@ async def websocket_endpoint(websocket: WebSocket, run_id: str, user: ActiveUser
     try:
         while True:
             try:
-                data = await asyncio.wait_for(websocket.receive_json(), timeout=30)
-                await manager.send_to_run({"echo": data}, run_id)
+                data = await asyncio.wait_for(websocket.receive_json(), timeout=60)
+                await agent_service.handle_websocket_message(run_id, json.dumps(data))
             except asyncio.TimeoutError:
                 # No message received within the timeout period, continue listening
                 continue

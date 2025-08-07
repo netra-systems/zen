@@ -25,8 +25,6 @@ oauth.register(
 
 REDIRECT_URI = f"{settings.frontend_url}/auth/callback"
 
-REDIRECT_URI = f"{settings.frontend_url}/auth/callback"
-
 @router.get("/login/google")
 async def login_via_google(request: Request):
     return await oauth.google.authorize_redirect(request, REDIRECT_URI)
