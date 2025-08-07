@@ -39,14 +39,13 @@ export class WebSocketClient {
         };
         this.ws.onmessage = (event) => {
             try {
-                // The data received over WebSocket should be a string.
-                // We parse it once here. The consumer of `onMessage` will receive an object.
-                const parsedData = JSON.parse(event.data);
                 if (this.onMessage) {
-                    this.onMessage(parsedData);
+                    this.onMessage(event.data);
                 }
             } catch (error) {
-                console.error('Failed to parse WebSocket message:', error, 'Received data:', event.data);
+                console.error(
+                    'Failed to parse WebSocket message:', error, 
+                    'Received data:', event.data);
             }
         };
     }

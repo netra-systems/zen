@@ -32,13 +32,7 @@ class WebSocketService {
 
         this.client.onmessage = (message) => {
             try {
-                // FIX: The actual content is in the 'data' property.
-                // We parse the data here and pass the resulting object to listeners.
-                // message.data is "JSON", e.g. its JSON formatted wrapped in STR
-                if (typeof message.data === 'string') {  // just string wrapper, is JSON
-                    const parsedData = JSON.parse(message.data);
-                    this.messageListeners.forEach(listener => listener(parsedData));
-                }
+                this.messageListeners.forEach(listener => listener(message));
             } catch (error) {
                 console.error("Failed to parse or dispatch WebSocket message:", error);
             }

@@ -95,7 +95,7 @@ class Agent {
     }
 
     private handleMessage(event: MessageEvent): void {
-        const streamEvent: StreamEvent = JSON.parse(event.data);
+        const streamEvent: StreamEvent = event;
         if (streamEvent.event === 'run_complete') {
             this.setState(draft => {
                 draft.isThinking = false;
