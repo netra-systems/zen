@@ -10,7 +10,10 @@ const config: Config = {
   testEnvironment: 'jest-environment-jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
-    '^@/components/(.*)$': '<rootDir>/components/$1',
+    '^@/components/(.*)$': '<rootDir>/app/components/$1',
+    '^@/hooks/(.*)$': '<rootDir>/app/hooks/$1',
+    '^@/lib/(.*)$': '<rootDir>/app/lib/$1',
+    '^@/(.*)$': '<rootDir>/app/$1',
   },
 };
 

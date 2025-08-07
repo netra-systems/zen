@@ -2,7 +2,7 @@
 
 import './globals.css';
 import { AuthProvider } from '@/hooks/useAuth';
-import { AppLayout } from '@/app/components/AppLayout';
+import { AppLayout } from '@/components/AppLayout';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

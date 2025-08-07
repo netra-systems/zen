@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db_session
 from app.llm.llm_manager import LLMManager
 from app.services.deepagents.overall_supervisor import OverallSupervisor
-from app.db.models_clickhouse import AnalysisRequest
+from app.schemas import AnalysisRequest
 from app.connection_manager import manager
 
 router = APIRouter()

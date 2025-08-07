@@ -2,7 +2,7 @@ import pytest
 import asyncio
 from httpx import AsyncClient
 from app.main import app
-from app.db.models_clickhouse import AnalysisRequest, Settings, RequestModel, Workload, DataSource, TimeRange
+from app.schemas import AnalysisRequest, Settings, RequestModel, Workload, DataSource, TimeRange
 from app.llm.llm_manager import LLMManager
 from app.config import settings
 

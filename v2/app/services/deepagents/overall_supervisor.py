@@ -7,7 +7,7 @@ from langchain_core.messages import HumanMessage, AIMessage, ToolMessage, BaseMe
 from langchain_core.prompt_values import ChatPromptValue
 from langgraph.graph import END, StateGraph
 
-from app.db.models_clickhouse import AnalysisRequest
+from app.schemas import AnalysisRequest
 from app.llm.llm_manager import LLMManager
 from app.services.deepagents.sub_agent import SubAgent
 from app.services.apex_optimizer_agent.tool_builder import ToolBuilder

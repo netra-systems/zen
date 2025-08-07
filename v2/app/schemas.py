@@ -121,6 +121,21 @@ class WebSocketMessage(BaseModel):
     data: Any
     run_id: str
 
+class RunCompleteMessage(WebSocketMessage):
+    event: str = "run_complete"
+
+class ErrorData(BaseModel):
+    type: str
+    message: str
+
+class ErrorMessage(WebSocketMessage):
+    event: str = "error"
+    data: ErrorData
+
+class StreamEventMessage(WebSocketMessage):
+    event: str = "stream_event"
+    event_type: str
+
 # --- Supply Schemas ---
 
 class SupplyOptionBase(BaseModel):
