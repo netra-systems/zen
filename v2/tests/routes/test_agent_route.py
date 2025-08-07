@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 from fastapi.testclient import TestClient
 from app.main import app
 from app.services.agent_service import AgentService
-from app.auth_dependencies import ActiveUserDep
+from app.auth.auth_dependencies import ActiveUserDep
 from app.db.models_postgres import User
 
 @pytest.fixture

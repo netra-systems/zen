@@ -6,7 +6,7 @@ import datetime
 
 from app.main import app
 from app.db.models_postgres import User
-from app.auth_dependencies import ActiveUserWsDep
+from app.auth.auth_dependencies import ActiveUserWsDep
 from app.config import settings
 
 @pytest.fixture
