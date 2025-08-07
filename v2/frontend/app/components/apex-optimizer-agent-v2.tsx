@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useAgent } from '../hooks/useAgent';
-import { ChatMessage } from './chat/ChatMessage';
+import { MessageOrchestrator } from './chat/MessageOrchestrator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { examplePrompts } from '../lib/examplePrompts';
+import { ThinkingMessage } from '../types';
 
 const truncatePrompt = (prompt: string, maxLength: number) => {
   const words = prompt.split(' ');
@@ -49,10 +50,10 @@ export default function ApexOptimizerAgentV2() {
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((message, index) => (
               <div key={message.id || index}>
-                <ChatMessage message={message} />
+                <MessageOrchestrator message={message} />
               </div>
             ))}
-            {showThinking && <ChatMessage key="thinking" message={{id: 'thinking', role: 'agent', type: 'thinking', timestamp: new Date().toISOString()}}/>}
+            {showThinking && <MessageOrchestrator key="thinking" message={new ThinkingMessage()} />}
           </div>
           <div className="p-4 border-t">
             {showExamples && (

@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react';
 import { agent } from '../services/agent/Agent';
+import { Message } from '../types';
+
+interface AgentState {
+    messages: Message[];
+    isThinking: boolean;
+    error: Error | null;
+}
 
 export function useAgent() {
-    const [state, setState] = useState({ messages: [], isThinking: false, error: null });
+    const [state, setState] = useState<AgentState>({ messages: [], isThinking: false, error: null });
 
     useEffect(() => {
         agent.initialize();

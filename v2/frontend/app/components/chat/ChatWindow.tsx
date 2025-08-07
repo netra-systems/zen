@@ -5,8 +5,27 @@ import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import { MessageOrchestrator } from './MessageOrchestrator';
 import { MessageFilterControl } from './MessageFilter';
+import { Message, MessageFilter } from '../../types';
 
-export function ChatWindow({ messages, onSendMessage, isLoading, initialQuery, messageFilters, setMessageFilters, exampleQueries = [] }) {
+interface ChatWindowProps {
+    messages: Message[];
+    onSendMessage: (message: string) => void;
+    isLoading: boolean;
+    initialQuery?: string;
+    messageFilters: MessageFilter;
+    setMessageFilters: (filters: MessageFilter) => void;
+    exampleQueries?: string[];
+}
+
+export function ChatWindow({ 
+    messages, 
+    onSendMessage, 
+    isLoading, 
+    initialQuery, 
+    messageFilters, 
+    setMessageFilters, 
+    exampleQueries = [] 
+}: ChatWindowProps) {
     const [input, setInput] = useState(initialQuery || '');
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -43,8 +62,7 @@ export function ChatWindow({ messages, onSendMessage, isLoading, initialQuery, m
             </div>
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.map((message) => (
-                    <MessageOrchestrator key={message.id} message={message} showThinking={isLoading} />
-                    {isAgentThinking && <Thinking />}
+                    <MessageOrchestrator key={message.id} message={message} />
                 ))}
             </div>
             <div className="p-4 border-t bg-background rounded-b-xl">

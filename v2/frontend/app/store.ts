@@ -1,20 +1,18 @@
 import { create } from 'zustand';
 import { apiService } from './api';
 import { config } from './config';
-import { Message, User } from './types';
+import { User } from './types';
 
 interface AppState {
     user: User | null;
     token: string | null;
     isLoading: boolean;
     authError: string | null;
-    messages: Message[];
     fetchUser: (token: string) => Promise<void>;
     login: (formData: FormData) => Promise<void>;
     logout: () => void;
     setToken: (token: string | null) => void;
     setIsLoading: (isLoading: boolean) => void;
-    addMessage: (message: Message) => void;
     devLogin: () => Promise<void>;
 }
 
@@ -23,13 +21,11 @@ const useAppStore = create<AppState>((set, get) => ({
     token: null,
     isLoading: true,
     authError: null,
-    messages: [],
     setToken: (token) => set({ token }),
     setIsLoading: (isLoading) => set({ isLoading }),
-    addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
     fetchUser: async (token) => {
         try {
-            const userData = await apiService.get(config.api.endpoints.currentUser, token);
+            const userData = await apiService.get<User>(config.api.endpoints.currentUser, token);
             set({ user: userData, token, isLoading: false });
         } catch (error) {
             console.error("Failed to fetch user, logging out.", error);
