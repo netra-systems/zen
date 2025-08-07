@@ -1,12 +1,13 @@
-
 from authlib.integrations.starlette_client import OAuth
-from fastapi import Request, Depends
+from fastapi import APIRouter, Request, Depends, HTTPException
+from fastapi.responses import RedirectResponse
 from app.config import settings
 from app.db.postgres import get_async_db
 from app.services.security_service import SecurityService
 from app.db.models_postgres import User
 from app import schemas
 
+router = APIRouter()
 oauth = OAuth()
 
 oauth.register(
@@ -19,10 +20,12 @@ oauth.register(
     }
 )
 
+@router.get('/login')
 async def login(request: Request):
     redirect_uri = request.url_for('auth')
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
+@router.get('/auth')
 async def auth(request: Request, security_service: SecurityService = Depends()):
     token = await oauth.google.authorize_access_token(request)
     user_info = token.get('userinfo')
@@ -37,14 +40,14 @@ async def auth(request: Request, security_service: SecurityService = Depends()):
                 await session.commit()
                 await session.refresh(user)
             
-            access_token = security_service.create_access_token(user.email)
+            request.session['user'] = user_info
             response = RedirectResponse(url="/")
-            response.set_cookie(key="access_token", value=access_token, httponly=True)
             return response
 
     raise HTTPException(status_code=400, detail="Authentication failed")
 
+@router.get('/logout')
 async def logout(request: Request):
+    request.session.pop('user', None)
     response = RedirectResponse(url="/")
-    response.delete_cookie("access_token")
     return response
