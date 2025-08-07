@@ -1,4 +1,3 @@
-
 export interface User {
     id: number;
     full_name?: string;
@@ -259,4 +258,97 @@ export interface AgentRun {
 export interface AgentEvent {
     event: string;
     data: Record<string, unknown>;
+}
+
+
+// --- WebSocket Service Types ---
+
+export enum WebSocketStatus {
+    Connecting,
+    Open,
+    Closing,
+    Closed,
+    Error,
+}
+
+export interface WebSocketMessage {
+    action: string;
+    payload: any;
+}
+
+// --- Constructors for Messages ---
+
+export class UserMessage implements UserMessage {
+    type: 'user' = 'user';
+    id: string;
+    role: MessageRole = 'user';
+    constructor(public content: string) {
+        this.id = `user_${Date.now()}`;
+    }
+}
+
+export class ThinkingMessage implements ThinkingMessage {
+    type: 'thinking' = 'thinking';
+    id: string;
+    role: MessageRole = 'agent';
+    content: string = 'Thinking...';
+    constructor() {
+        this.id = `thinking_${Date.now()}`;
+    }
+}
+
+export class TextMessage implements TextMessage {
+    type: 'text' = 'text';
+    id: string;
+    role: MessageRole = 'agent';
+    constructor(public content: string) {
+        this.id = `text_${Date.now()}`;
+    }
+}
+
+export class ToolStartMessage implements ToolStartMessage {
+    type: 'tool_start' = 'tool_start';
+    id: string;
+    role: MessageRole = 'agent';
+    tool: string = '';
+    toolInput: any = {};
+    constructor(public content: string) {
+        this.id = `tool_start_${Date.now()}`;
+    }
+}
+
+export class ToolEndMessage implements ToolEndMessage {
+    type: 'tool_end' = 'tool_end';
+    id: string;
+    role: MessageRole = 'agent';
+    tool: string;
+    toolInput: any;
+    tool_outputs: any[] = [];
+    constructor(public content: string, tool: string, toolInput: any) {
+        this.id = `tool_end_${Date.now()}`;
+        this.tool = tool;
+        this.toolInput = toolInput;
+    }
+}
+
+export class StateUpdateMessage implements StateUpdateMessage {
+    type: 'state_update' = 'state_update';
+    id: string;
+    role: MessageRole = 'agent';
+    state: StateUpdate = { todo_list: [], completed_steps: [] };
+    constructor(public content: string) {
+        this.id = `state_update_${Date.now()}`;
+    }
+}
+
+export interface ToolOutputMessage {
+    type: 'tool';
+    content: string | { [key: string]: any };
+    tool_call_id: string;
+}
+
+export interface StreamEvent {
+    event: string;
+    data: any;
+    run_id: string;
 }
