@@ -1,30 +1,22 @@
 const EventEmitter = require('events');
 
-let lastInstance = null;
-
 class MockWebSocket extends EventEmitter {
   constructor(url) {
     super();
     this.url = url;
     this.readyState = MockWebSocket.CONNECTING;
-    lastInstance = this;
+    MockWebSocket.lastInstance = this;
     setTimeout(() => {
       this.readyState = MockWebSocket.OPEN;
       this.emit('open');
     }, 0);
   }
 
-  send(data) {
-    // Mock send
-  }
+  send(data) {}
 
   close() {
     this.readyState = MockWebSocket.CLOSED;
     this.emit('close');
-  }
-
-  static get lastInstance() {
-    return lastInstance;
   }
 }
 
@@ -32,6 +24,7 @@ MockWebSocket.CONNECTING = 0;
 MockWebSocket.OPEN = 1;
 MockWebSocket.CLOSING = 2;
 MockWebSocket.CLOSED = 3;
+MockWebSocket.lastInstance = null;
 
 class MockWebSocketServer extends EventEmitter {
   constructor(options, callback) {
@@ -50,6 +43,6 @@ class MockWebSocketServer extends EventEmitter {
 
 module.exports = {
   WebSocket: MockWebSocket,
-  Server: MockWebSocketServer, // Note: Jest documentation uses Server, not WebSocketServer
+  Server: MockWebSocketServer,
   WebSocketServer: MockWebSocketServer,
 };

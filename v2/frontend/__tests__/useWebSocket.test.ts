@@ -9,14 +9,14 @@ describe('useWebSocket', () => {
     const socket = (WebSocket as any).lastInstance;
 
     act(() => {
-      socket.onmessage(new MessageEvent('message', { data: 'handshake_ack' }));
+      socket.emit('message', { data: 'handshake_ack' });
     });
 
     expect(result.current.isConnected).toBe(true);
 
     const testMessage = { type: 'test', payload: 'hello' };
     act(() => {
-        socket.onmessage(new MessageEvent('message', { data: JSON.stringify(testMessage) }));
+        socket.emit('message', { data: JSON.stringify(testMessage) });
     });
 
     expect(result.current.messages).toEqual([testMessage]);

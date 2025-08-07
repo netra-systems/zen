@@ -9,6 +9,8 @@ export const config = {
         endpoints: {
             login: '/auth/token',
             devLogin: '/auth/dev-login',
+            login: '/auth/token',
+            devLogin: '/auth/dev-login',
             currentUser: '/auth/users/me',
             googleLogin: '/auth/google',
             logout: '/auth/logout',

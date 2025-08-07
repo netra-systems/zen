@@ -67,7 +67,7 @@ async def login_for_access_token(request: Request, form_data: OAuthFormDep, db: 
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/api/v3/auth/dev-login", response_model=schema.Token, include_in_schema=False)
+@router.post("/dev-login", response_model=schema.Token, include_in_schema=False)
 async def dev_login(request: Request, db: DbDep):
     """
     Provides a JWT access token for a default user in development environments.

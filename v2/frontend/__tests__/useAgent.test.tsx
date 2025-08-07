@@ -22,26 +22,22 @@ describe('useAgent', () => {
     const socket = (WebSocket as any).lastInstance;
 
     act(() => {
-      socket.onmessage(
-        new MessageEvent('message', {
-          data: JSON.stringify({
-            event: 'on_chain_start',
-            run_id: 'run_123',
-            data: { input: { todo_list: ['step 1'] } },
-          }),
+      socket.emit('message', {
+        data: JSON.stringify({
+          event: 'on_chain_start',
+          run_id: 'run_123',
+          data: { input: { todo_list: ['step 1'] } },
         }),
-      );
+      });
     });
 
     expect(result.current.messages).toHaveLength(2); // User message + agent thinking message
     expect(result.current.messages[1].state_updates.todo_list).toEqual(['step 1']);
 
     act(() => {
-      socket.onmessage(
-        new MessageEvent('message', {
-          data: JSON.stringify({ event: 'run_complete' }),
-        }),
-      );
+      socket.emit('message', {
+        data: JSON.stringify({ event: 'run_complete' }),
+      });
     });
 
     expect(result.current.showThinking).toBe(false);
@@ -57,7 +53,7 @@ describe('useAgent', () => {
     const socket = (WebSocket as any).lastInstance;
 
     act(() => {
-        socket.onerror(new Event('error'));
+        socket.emit('error', new Event('error'));
     });
 
     expect(result.current.error).not.toBeNull();
