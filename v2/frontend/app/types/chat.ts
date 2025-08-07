@@ -36,6 +36,7 @@ export interface ToolCall {
   args: Record<string, any>;
   id: string;
   type: 'tool_call';
+  is_error?: boolean;
 }
 
 export interface ToolOutput {
@@ -105,7 +106,12 @@ export interface StreamEvent {
   metadata?: Record<string, any>;
 }
 
-export type Message = TextMessage | ThinkingMessage | ArtifactMessage;
+export interface EventMessage extends BaseMessage {
+  type: 'event';
+  event: 'agent_started';
+}
+
+export type Message = TextMessage | ThinkingMessage | ArtifactMessage | EventMessage;
 
 export interface ChatState {
   messages: Message[];

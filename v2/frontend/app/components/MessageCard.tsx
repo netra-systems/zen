@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { JsonView, allExpanded, defaultStyles } from 'react-json-view-lite';
 import 'react-json-view-lite/dist/index.css';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { AlertCircle } from 'lucide-react';
+import { TodoListView } from './chat/TodoListView';
 
 interface MessageCardProps {
   message: Message;
@@ -100,38 +102,24 @@ export function MessageCard({ message, user }: MessageCardProps) {
         </Avatar>
       )}
       <div className={`rounded-lg p-3 max-w-[75%] ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-        <>
+        <div className="flex flex-col">
           {toolName && <p className="font-bold text-sm">Tool: {toolName}</p>}
-          {aiMessage && <p className="text-sm">{aiMessage}</p>}
+          {aiMessage && <p className="text-sm mt-1">{aiMessage}</p>}
           {todoList && (todoList.todo_list.length > 0 || todoList.completed_steps.length > 0) && (
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="item-1">
-                <AccordionTrigger>TODO List</AccordionTrigger>
+                <AccordionTrigger>
+                  <span className="font-medium">TODO List</span>
+                </AccordionTrigger>
                 <AccordionContent>
-                  {todoList.todo_list.length > 0 && (
-                    <ul className="list-disc pl-5">
-                      {todoList.todo_list.map((item, index) => (
-                        <li key={index}>{item}</li>
-                      ))}
-                    </ul>
-                  )}
-                  {todoList.completed_steps.length > 0 && (
-                    <>
-                      <h4 className="font-bold mt-2">Completed Steps</h4>
-                      <ul className="list-disc pl-5">
-                        {todoList.completed_steps.map((item, index) => (
-                          <li key={index} className="line-through">{item}</li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
+                  <TodoListView todoList={todoList} />
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
           )}
           {toolErrors && toolErrors.length > 0 && (
             <div className="mt-2">
-              <p className="font-bold text-red-500">Errors:</p>
+              <p className="font-bold text-red-500 flex items-center"><AlertCircle className="h-4 w-4 mr-1" /> Errors:</p>
               <ul className="list-disc pl-5 text-red-500">
                 {toolErrors.map((error, index) => (
                   <li key={index}>{error.content}</li>
@@ -139,10 +127,10 @@ export function MessageCard({ message, user }: MessageCardProps) {
               </ul>
             </div>
           )}
-        </>
+        </div>
         {message.role === 'agent' && (
-          <div>
-            <button onClick={toggleRaw} className="text-blue-500 hover:underline mt-2">
+          <div className="mt-2">
+            <button onClick={toggleRaw} className="text-blue-500 hover:underline text-xs">
               {showRaw ? 'Hide Raw Message' : 'Show Raw Message'}
             </button>
             {showRaw && (

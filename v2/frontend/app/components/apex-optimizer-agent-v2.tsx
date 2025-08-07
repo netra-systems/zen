@@ -14,6 +14,14 @@ const examplePrompts = [
   "What are the cost drivers for the 'generate_report' tool?",
 ];
 
+const truncatePrompt = (prompt: string, maxLength: number) => {
+  const words = prompt.split(' ');
+  if (words.length > maxLength) {
+    return words.slice(0, maxLength).join(' ') + '...';
+  }
+  return prompt;
+};
+
 export default function ApexOptimizerAgentV2() {
   const [input, setInput] = useState('');
   const { startAgent, messages, showThinking, error } = useAgent();
@@ -64,7 +72,7 @@ export default function ApexOptimizerAgentV2() {
                       onClick={() => handleExampleClick(prompt)}
                       className="text-left h-auto"
                     >
-                      {prompt}
+                      {truncatePrompt(prompt, 7)}
                     </Button>
                   ))}
                 </CardContent>
