@@ -18,6 +18,10 @@ class UserCreate(UserBase):
 class UserUpdate(UserBase):
     password: Optional[str] = None
 
+class User(UserBase):
+    id: str
+    picture: Optional[str] = None
+    created_at: datetime
 
 class UserPublic(UserBase):
     id: str

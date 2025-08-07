@@ -13,7 +13,7 @@ from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconn
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.routes import auth, supply, generation, google_auth, websocket, admin, references, agent_route, health
+from app.routes import auth, supply, generation, websocket, admin, references, agent_route, health
 from app.db.postgres import async_session_factory
 from app.config import settings
 from app.logging_config import central_logger
@@ -106,7 +106,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 app.include_router(auth.router, prefix="/api/v3/auth", tags=["auth"])
 app.include_router(supply.router, prefix="/api/v3/supply", tags=["supply"])
 app.include_router(generation.router, prefix="/api/v3/generation", tags=["generation"])
-app.include_router(google_auth.router, tags=["google_auth"])
+
 app.include_router(agent_route.router, prefix="/api/v3/agent", tags=["agent"])
 app.include_router(websocket.router, prefix="/ws", tags=["websockets"])
 app.include_router(admin.router, prefix="/api/v3", tags=["admin"])

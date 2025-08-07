@@ -1,9 +1,10 @@
-
 from fastapi import Depends, HTTPException, status, Request
 from app.db import models_postgres
 from app.config import settings
 from app.services.security_service import SecurityService
-from sqlalchemy.ext.asyncio import AsyncSession
+from app import schemas
+import uuid
+from datetime import datetime
 
 class ActiveUser:
     def __init__(
@@ -14,11 +15,20 @@ class ActiveUser:
         self.db_session_factory = db_session_factory
         self.security_service = security_service
 
-    async def __call__(self, request: Request) -> models_postgres.User:
+    async def __call__(self, request: Request) -> schemas.User:
         if settings.environment == "development":
-            return models_postgres.User(email=settings.dev_user_email, hashed_password="dev")
+            return schemas.User(
+                id=str(uuid.uuid4()), 
+                email=settings.dev_user_email, 
+                created_at=datetime.utcnow()
+            )
 
-        token = request.headers.get("Authorization")
+        token = request.cookies.get("access_token")
+        if token is None:
+            auth_header = request.headers.get("Authorization")
+            if auth_header and auth_header.startswith("Bearer "):
+                token = auth_header.split(" ")[1]
+
         if token is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
@@ -30,7 +40,7 @@ class ActiveUser:
             user = await self.security_service.get_user(session, email)
             if user is None:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-            return user
+            return schemas.User.model_validate(user)
 
 def get_active_user_dependency(
     db_session_factory: callable = Depends(lambda: lambda: None),

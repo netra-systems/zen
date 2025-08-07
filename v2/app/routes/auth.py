@@ -6,6 +6,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session, select
+from authlib.integrations.starlette_client import OAuth
+from fastapi.responses import RedirectResponse
 
 from ..db import models_postgres
 from .. import schemas
@@ -21,12 +23,22 @@ OAuthFormDep = Annotated[OAuth2PasswordRequestForm, Depends()]
 
 from ..services.security_service import get_password_hash, verify_password
 
+oauth = OAuth()
+oauth.register(
+    name='google',
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_id=settings.google_cloud.client_id,
+    client_secret=settings.google_cloud.client_secret,
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
+)
 
 @router.post("/token", response_model=schemas.Token, openapi_extra={
     "requestBody": {
         "content": {
             "application/x-www-form-urlencoded": {
-                "schemas": {
+                "schema": {
                     "type": "object",
                     "properties": {
                         "username": {"type": "string", "example": "jdoe@example.com"},
@@ -38,7 +50,7 @@ from ..services.security_service import get_password_hash, verify_password
         }
     }
 })
-async def login_for_access_token(request: Request, form_data: OAuthFormDep, db: DbDep):
+async def login_for_access_token(request: Request, response: Response, form_data: OAuthFormDep, db: DbDep):
     """
     Provides a JWT access token for a valid user.
     """
@@ -63,12 +75,13 @@ async def login_for_access_token(request: Request, form_data: OAuthFormDep, db: 
     access_token = security_service.create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
+    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=settings.environment == "production", samesite="lax")
     logger.info(f"User '{user.email}' logged in successfully.")
     return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.post("/dev-login", response_model=schemas.Token, include_in_schema=False)
-async def dev_login(request: Request, db: DbDep):
+async def dev_login(request: Request, response: Response, db: DbDep):
     """
     Provides a JWT access token for a default user in development environments.
     """
@@ -91,11 +104,12 @@ async def dev_login(request: Request, db: DbDep):
     access_token = security_service.create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
+    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=False, samesite="lax")
     logger.info(f"Dev login successful for user: {user.email}")
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/users", response_model=schemas.UserPublic, status_code=status.HTTP_201_CREATED)
+@router.post("/users", response_model=schemas.User, status_code=status.HTTP_201_CREATED)
 async def create_user(request: Request, user: schemas.UserCreate, db: DbDep):
     """
     Creates a new user in the database.
@@ -116,10 +130,10 @@ async def create_user(request: Request, user: schemas.UserCreate, db: DbDep):
     await db.commit()
     await db.refresh(user_to_add)
     logger.info(f"New user created: {user.email}")
-    return user_to_add
+    return schemas.User.model_validate(user_to_add)
 
 
-@router.get("/users/me", response_model=schemas.UserPublicWithPicture)
+@router.get("/users/me", response_model=schemas.User)
 async def read_users_me(current_user: ActiveUserDep):
     """
     Returns the public information for the currently authenticated user.
@@ -127,7 +141,7 @@ async def read_users_me(current_user: ActiveUserDep):
     return current_user
 
 
-@router.put("/users/me", response_model=schemas.UserPublic)
+@router.put("/users/me", response_model=schemas.User)
 async def update_user_me(
     user_update: schemas.UserUpdate,
     current_user: ActiveUserDep,
@@ -147,7 +161,7 @@ async def update_user_me(
     await db.commit()
     await db.refresh(current_user)
     logger.info(f"User '{current_user.email}' updated successfully.")
-    return current_user
+    return schemas.User.model_validate(current_user)
 
 
 @router.delete("/users/me", status_code=status.HTTP_204_NO_CONTENT)
@@ -168,3 +182,45 @@ async def logout(response: Response):
     """
     response.delete_cookie(key="access_token")
     return {"message": "Logout successful"}
+
+@router.get("/login/google")
+async def login_via_google(request: Request):
+    redirect_uri = request.url_for('auth_via_google')
+    return await oauth.google.authorize_redirect(request, redirect_uri)
+
+@router.get("/auth/google")
+async def auth_via_google(request: Request, db: DbDep):
+    token = await oauth.google.authorize_access_token(request)
+    user_info = token.get('userinfo')
+    if not user_info:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Could not fetch user info from Google"
+        )
+
+    result = await db.execute(select(models_postgres.User).where(models_postgres.User.email == user_info['email']))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        user = models_postgres.User(
+            email=user_info['email'],
+            full_name=user_info.get('name'),
+            picture=user_info.get('picture'),
+            is_active=True,
+            hashed_password=""  # No password for OAuth users
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+
+    access_token = request.app.state.security_service.create_access_token(data={"sub": user.email})
+    
+    response = RedirectResponse(url=settings.frontend_url)
+    response.set_cookie(
+        key="access_token", 
+        value=access_token, 
+        httponly=True, 
+        secure=settings.environment == "production", 
+        samesite="lax"
+    )
+    return response
