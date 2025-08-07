@@ -21,7 +21,7 @@ const getToolName = (message: ArtifactMessage): string | null => {
     const toolNames = message.tool_calls.map(tc => tc.name).filter(name => name !== 'update_state');
     if (toolNames.length > 0) return toolNames.join(', ');
   }
-  if (message.name.startsWith('on_tool')) {
+  if (message.name && message.name.startsWith('on_tool')) {
     return message.name;
   }
   return null;
