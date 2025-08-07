@@ -5,179 +5,73 @@ export interface User {
     picture?: string;
 }
 
+// --- Message Types ---
+
 export type MessageRole = 'user' | 'assistant' | 'agent';
 
-export interface StateUpdate {
-  todo_list: string[];
-  completed_steps: string[];
-}
-
-export interface ToolCall {
-  name: string;
-  args: Record<string, any>;
-  id: string;
-  type?: 'tool_call';
-}
-
-export interface ToolCallChunk {
-  name: string;
-  args: string;
-  id: string;
-  index?: number;
-  type?: 'tool_call_chunk';
-}
-
-export interface UsageMetadata {
-  input_tokens: number;
-  output_tokens: number;
-  total_tokens: number;
-  input_token_details?: any;
-  output_token_details?: any;
-}
-
-export interface ResponseMetadata {
-  finish_reason?: string;
-  model_name?: string;
-  safety_ratings?: any[];
-}
-
-export interface AIMessageChunk {
-  content?: string;
-  additional_kwargs?: {
-    function_call?: {
-      name: string;
-      arguments: string;
-    };
-  };
-  response_metadata?: ResponseMetadata;
-  id?: string;
-  tool_calls?: ToolCall[];
-  usage_metadata?: UsageMetadata;
-  tool_call_chunks?: ToolCallChunk[];
-}
-
-// This represents the raw message from the server
-export interface ServerEvent {
-  event: string;
-  data: StreamEventData;
-  run_id?: string;
-}
-
-export interface StateData {
-  todo_list: string[];
-  completed_steps: string[];
-}
-
-export interface StreamEventData {
-  run_id: string;
-  input?: any;
-  chunk?: any;
-  messages?: any[];
-}
-
-
-// Specific data types for each event
-export interface AgentStartedData {
-  status: 'agent_started';
-  run_id: string;
-}
-
-export interface ChainStartData {
-  input: {
-    messages: any[]; // Can be more specific if needed
-  };
-}
-
-export interface ChatModelStartData {
-  input: {
-    messages: any[]; // Can be more specific if needed
-  };
-}
-
-export interface ChatModelStreamData {
-  chunk: AIMessageChunk;
-}
-
-export interface RunCompleteData {
-  status: 'complete';
-}
-
-export interface ToolEndData {
-  output: any;
-}
-
-export interface ToolErrorData {
-  error: any;
-}
-
-export interface UpdateStateData {
-  data: StateUpdate;
-}
-
-// Base interface for all message types
 export interface BaseMessage {
-  id: string;
-  role: MessageRole;
-  rawServerEvent?: ServerEvent;
+    id: string;
+    role: MessageRole;
+    rawServerEvent?: ServerEvent;
 }
 
 export interface UserMessage extends BaseMessage {
-  type: 'user';
-  content: string;
+    type: 'user';
+    content: string;
 }
 
 export interface EventMessage extends BaseMessage {
-  type: 'event';
-  content: string;
-  eventName: string;
+    type: 'event';
+    content: string;
+    eventName: string;
 }
 
 export interface TextMessage extends BaseMessage {
-  type: 'text';
-  content: string;
-  usageMetadata?: UsageMetadata;
-  responseMetadata?: ResponseMetadata;
+    type: 'text';
+    content: string;
+    usageMetadata?: UsageMetadata;
+    responseMetadata?: ResponseMetadata;
 }
 
 export interface ToolStartMessage extends BaseMessage {
-  type: 'tool_start';
-  content: string;
-  tool: string;
-  toolInput: any;
-  usageMetadata?: UsageMetadata;
-  responseMetadata?: ResponseMetadata;
+    type: 'tool_start';
+    content: string;
+    tool: string;
+    toolInput: any;
+    usageMetadata?: UsageMetadata;
+    responseMetadata?: ResponseMetadata;
 }
 
 export interface ToolEndMessage extends BaseMessage {
-  type: 'tool_end';
-  content: string;
-  tool: string;
-  toolInput: any;
-  toolOutput: any;
-  usageMetadata?: UsageMetadata;
-  responseMetadata?: ResponseMetadata;
+    type: 'tool_end';
+    content: string;
+    tool: string;
+    toolInput: any;
+    toolOutput: any;
+    usageMetadata?: UsageMetadata;
+    responseMetadata?: ResponseMetadata;
 }
 
 export interface ToolEndErrorMessage extends BaseMessage {
-  type: 'tool_end';
-  content: string;
-  tool: string;
-  toolInput: any;
-  toolOutput: {
+    type: 'tool_end';
     content: string;
-    is_error: true;
-  };
-  usageMetadata?: UsageMetadata;
-  responseMetadata?: ResponseMetadata;
+    tool: string;
+    toolInput: any;
+    toolOutput: {
+        content: string;
+        is_error: true;
+    };
+    usageMetadata?: UsageMetadata;
+    responseMetadata?: ResponseMetadata;
 }
 
 export interface ErrorMessage extends BaseMessage {
-  type: 'error';
-  content: string;
-  isError: true;
-  tool?: string;
-  toolInput?: any;
-  toolOutput?: any;
+    type: 'error';
+    content: string;
+    isError: true;
+    tool?: string;
+    toolInput?: any;
+    toolOutput?: any;
 }
 
 export interface ThinkingMessage extends BaseMessage {
@@ -192,47 +86,41 @@ export interface StateUpdateMessage extends BaseMessage {
 }
 
 export type Message =
-  | UserMessage
-  | EventMessage
-  | TextMessage
-  | ToolStartMessage
-  | ToolEndMessage
-  | ErrorMessage
-  | ThinkingMessage
-  | StateUpdateMessage;
+    | UserMessage
+    | EventMessage
+    | TextMessage
+    | ToolStartMessage
+    | ToolEndMessage
+    | ErrorMessage
+    | ThinkingMessage
+    | StateUpdateMessage;
 
+
+// --- Agent and Chat State ---
 
 export interface MessageFilter {
-  [key: string]: boolean;
-}
-
-
-export interface Reference {
-  id: string;
-  name: string;
-  friendly_name: string;
-  description: string | null;
-  type: string;
-  value: string;
-  version: string;
+    [key: string]: boolean;
 }
 
 export interface ChatState {
-  messages: Message[];
-  isLoading: boolean;
-  error: Error | null;
-  filter: MessageFilter;
-  isAutoLoad: boolean;
+    messages: Message[];
+    isLoading: boolean;
+    error: Error | null;
+    filter: MessageFilter;
+    isAutoLoad: boolean;
 }
 
 export interface ChatActions {
-  addMessage: (message: Message) => void;
-  setError: (error: Error | null) => void;
-  setFilter: (filter: MessageFilter) => void;
-  toggleAutoLoad: () => void;
+    addMessage: (message: Message) => void;
+    setError: (error: Error | null) => void;
+    setFilter: (filter: MessageFilter) => void;
+    toggleAutoLoad: () => void;
 }
 
 export type ChatStore = ChatState & ChatActions;
+
+
+// --- API and Server Communication ---
 
 export interface AnalysisRequest {
     settings: {
@@ -260,6 +148,85 @@ export interface AgentEvent {
     data: Record<string, unknown>;
 }
 
+export interface StateUpdate {
+    todo_list: string[];
+    completed_steps: string[];
+}
+
+export interface ToolCall {
+    name: string;
+    args: Record<string, any>;
+    id: string;
+    type?: 'tool_call';
+}
+
+export interface ToolCallChunk {
+    name: string;
+    args: string;
+    id: string;
+    index?: number;
+    type?: 'tool_call_chunk';
+}
+
+export interface UsageMetadata {
+    input_tokens: number;
+    output_tokens: number;
+    total_tokens: number;
+    input_token_details?: any;
+    output_token_details?: any;
+}
+
+export interface ResponseMetadata {
+    finish_reason?: string;
+    model_name?: string;
+    safety_ratings?: any[];
+}
+
+export interface AIMessageChunk {
+    content?: string;
+    additional_kwargs?: {
+        function_call?: {
+            name: string;
+            arguments: string;
+        };
+    };
+    response_metadata?: ResponseMetadata;
+    id?: string;
+    tool_calls?: ToolCall[];
+    usage_metadata?: UsageMetadata;
+    tool_call_chunks?: ToolCallChunk[];
+}
+
+export interface ServerEvent {
+    event: string;
+    data: StreamEventData;
+    run_id?: string;
+}
+
+export interface StateData {
+    todo_list: string[];
+    completed_steps: string[];
+}
+
+export interface StreamEventData {
+    run_id: string;
+    input?: any;
+    chunk?: any;
+    messages?: any[];
+}
+
+export interface ToolOutputMessage {
+    type: 'tool';
+    content: string | { [key: string]: any };
+    tool_call_id: string;
+}
+
+export interface StreamEvent {
+    event: string;
+    data: any;
+    run_id: string;
+}
+
 
 // --- WebSocket Service Types ---
 
@@ -276,79 +243,14 @@ export interface WebSocketMessage {
     payload: any;
 }
 
-// --- Constructors for Messages ---
+// --- Reference Picker ---
 
-export class UserMessage implements UserMessage {
-    type: 'user' = 'user';
+export interface Reference {
     id: string;
-    role: MessageRole = 'user';
-    constructor(public content: string) {
-        this.id = `user_${Date.now()}`;
-    }
-}
-
-export class ThinkingMessage implements ThinkingMessage {
-    type: 'thinking' = 'thinking';
-    id: string;
-    role: MessageRole = 'agent';
-    content: string = 'Thinking...';
-    constructor() {
-        this.id = `thinking_${Date.now()}`;
-    }
-}
-
-export class TextMessage implements TextMessage {
-    type: 'text' = 'text';
-    id: string;
-    role: MessageRole = 'agent';
-    constructor(public content: string) {
-        this.id = `text_${Date.now()}`;
-    }
-}
-
-export class ToolStartMessage implements ToolStartMessage {
-    type: 'tool_start' = 'tool_start';
-    id: string;
-    role: MessageRole = 'agent';
-    tool: string = '';
-    toolInput: any = {};
-    constructor(public content: string) {
-        this.id = `tool_start_${Date.now()}`;
-    }
-}
-
-export class ToolEndMessage implements ToolEndMessage {
-    type: 'tool_end' = 'tool_end';
-    id: string;
-    role: MessageRole = 'agent';
-    tool: string;
-    toolInput: any;
-    tool_outputs: any[] = [];
-    constructor(public content: string, tool: string, toolInput: any) {
-        this.id = `tool_end_${Date.now()}`;
-        this.tool = tool;
-        this.toolInput = toolInput;
-    }
-}
-
-export class StateUpdateMessage implements StateUpdateMessage {
-    type: 'state_update' = 'state_update';
-    id: string;
-    role: MessageRole = 'agent';
-    state: StateUpdate = { todo_list: [], completed_steps: [] };
-    constructor(public content: string) {
-        this.id = `state_update_${Date.now()}`;
-    }
-}
-
-export interface ToolOutputMessage {
-    type: 'tool';
-    content: string | { [key: string]: any };
-    tool_call_id: string;
-}
-
-export interface StreamEvent {
-    event: string;
-    data: any;
-    run_id: string;
+    name: string;
+    friendly_name: string;
+    description: string | null;
+    type: string;
+    value: string;
+    version: string;
 }

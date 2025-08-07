@@ -13,7 +13,13 @@ export function useAgent() {
 
     useEffect(() => {
         agent.initialize();
-        const unsubscribe = agent.subscribe(setState);
+        const unsubscribe = agent.subscribe((newState) => {
+            setState({
+                messages: newState.messages,
+                isThinking: newState.isThinking,
+                error: newState.error,
+            });
+        });
         return () => {
             unsubscribe();
         };

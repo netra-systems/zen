@@ -1,6 +1,7 @@
 import { getToken, getUserId } from '../../lib/user';
 import { produce } from 'immer';
 import { WebSocketClient, WebSocketStatus } from './WebSocketClient';
+import { MessageFactory } from './MessageFactory';
 import { 
     Message, 
     StreamEvent, 
@@ -8,12 +9,7 @@ import {
     ToolCall, 
     ToolCallChunk, 
     ToolOutputMessage, 
-    UserMessage, 
-    ThinkingMessage, 
-    ToolStartMessage, 
-    ToolEndMessage, 
-    StateUpdateMessage, 
-    TextMessage, 
+    ToolStartMessage,
     StateData,
     AIMessageChunk
 } from '../../types';
@@ -95,8 +91,8 @@ class Agent {
         }
         
         this.setState(draft => {
-            draft.messages.push(new UserMessage(message));
-            draft.messages.push(new ThinkingMessage()); // Add placeholder for the agent's response
+            draft.messages.push(MessageFactory.createUserMessage(message));
+            draft.messages.push(MessageFactory.createThinkingMessage()); // Add placeholder for the agent's response
             draft.isThinking = true;
             draft.error = null;
             draft.toolArgBuffers = {}; // Clear previous buffers
@@ -250,7 +246,7 @@ class Agent {
         }
 
         // Fallback: create a new message (should be rare).
-        const newMessage = new ThinkingMessage();
+        const newMessage = MessageFactory.createThinkingMessage();
         newMessage.id = run_id;
         draft.messages.push(newMessage);
         return newMessage;
@@ -263,8 +259,7 @@ class Agent {
         // If the current message is a 'thinking' placeholder, morph it into a 'text' message.
         if (message.type === 'thinking') {
             const index = draft.messages.findIndex(m => m.id === message.id);
-            const newMessage = new TextMessage(content);
-            newMessage.id = run_id; // Preserve ID
+            const newMessage = MessageFactory.createTextMessage(content, run_id);
             if (index !== -1) draft.messages[index] = newMessage;
         } else if (message.type === 'text') {
             // Otherwise, just append the content.
@@ -276,9 +271,7 @@ class Agent {
     private processToolStart(draft: AgentState, toolCallId: string, toolName: string): void {
         if (draft.messages.some(m => m.id === toolCallId)) return; // Avoid duplicates
 
-        const toolMessage = new ToolStartMessage(`Calling tool: ${toolName}`);
-        toolMessage.id = toolCallId;
-        toolMessage.tool = toolName;
+        const toolMessage = MessageFactory.createToolStartMessage(`Calling tool: ${toolName}`, toolName, {}, toolCallId);
         draft.messages.push(toolMessage);
     }
     
@@ -308,17 +301,17 @@ class Agent {
 
         if (index !== -1 && startMessage?.type === 'tool_start') {
             // Morph the 'tool_start' message into a 'tool_end' message.
-            const endMessage = new ToolEndMessage(
+            const endMessage = MessageFactory.createToolEndMessage(
                 startMessage.content,
                 startMessage.tool,
-                startMessage.toolInput
+                startMessage.toolInput,
+                {
+                    tool_call_id: output.tool_call_id,
+                    content: typeof output.content === 'string' ? output.content : JSON.stringify(output.content, null, 2),
+                    is_error: false
+                },
+                startMessage.id
             );
-            endMessage.id = startMessage.id; // Preserve ID
-            endMessage.tool_outputs = [{
-                tool_call_id: output.tool_call_id,
-                content: typeof output.content === 'string' ? output.content : JSON.stringify(output.content, null, 2),
-                is_error: false
-            }];
             
             // Replace the start message with the final end message.
             draft.messages[index] = endMessage;
@@ -334,8 +327,10 @@ class Agent {
         // Morph or create a state update message.
         if (message.type !== 'state_update') {
              const index = draft.messages.findIndex(m => m.id === message.id);
-             const newMessage = new StateUpdateMessage('Updating plan...');
-             newMessage.id = run_id;
+             const newMessage = MessageFactory.createStateUpdateMessage('Updating plan...', {
+                todo_list: stateData.todo_list,
+                completed_steps: stateData.completed_steps || [],
+            }, run_id);
              if (index !== -1) draft.messages[index] = newMessage;
              message = newMessage;
         }

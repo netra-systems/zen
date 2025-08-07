@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { examplePrompts } from '../lib/examplePrompts';
-import { ThinkingMessage } from '../types';
+import { MessageFactory } from '../services/agent/MessageFactory';
 
 const truncatePrompt = (prompt: string, maxLength: number) => {
   const words = prompt.split(' ');
@@ -53,7 +53,7 @@ export default function ApexOptimizerAgentV2() {
                 <MessageOrchestrator message={message} />
               </div>
             ))}
-            {showThinking && <MessageOrchestrator key="thinking" message={new ThinkingMessage()} />}
+            {showThinking && <MessageOrchestrator key="thinking" message={MessageFactory.createThinkingMessage()} />}
           </div>
           <div className="p-4 border-t">
             {showExamples && (
