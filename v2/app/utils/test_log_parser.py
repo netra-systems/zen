@@ -5,7 +5,7 @@ from app.utils.log_parser import LogParser
     "tool_string, expected_output",
     [
         (
-            'MyTool(arg1="hello", arg2=123, nested={'key': 'val'})',
+            'MyTool(arg1="hello", arg2=123, nested={"key": "val"})',
             {'name': 'MyTool', 'args': {'arg1': 'hello', 'arg2': 123, 'nested': {'key': 'val'}}},
         ),
         (
