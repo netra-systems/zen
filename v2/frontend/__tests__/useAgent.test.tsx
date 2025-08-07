@@ -1,88 +1,79 @@
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useAgent } from '../app/hooks/useAgent';
-import { Server } from 'ws';
-import { Message, StreamEvent } from '../app/types/chat';
+import { server, mockSocket } from '../mocks/server';
+import { getToken } from '../app/lib/user';
 
-global.WebSocket = require('ws');
+// Mock the user module
+jest.mock('../app/lib/user', () => ({
+  getUserId: jest.fn(() => 'test-user'),
+  getToken: jest.fn(() => Promise.resolve('test-token')),
+}));
 
 describe('useAgent', () => {
-  let server: Server;
+  beforeAll(() => server.listen());
+  afterEach(() => server.resetHandlers());
+  afterAll(() => server.close());
 
-  beforeEach(done => {
-    server = new Server({ port: 8000 }, done);
-  });
+  it('should start the agent, show thinking indicator, and process the response', async () => {
+    const { result } = renderHook(() => useAgent());
 
-  afterEach(done => {
-    server.close(done);
-  });
-
-  it('should connect to the WebSocket server', async () => {
-    const { result, waitFor } = renderHook(() => useAgent());
-    await waitFor(() => expect(result.current.messages).toBeDefined());
-    // No direct way to check isConnected from outside, so we infer it by lack of error
-  });
-
-  it('should handle incoming stream events and update messages', async () => {
-    const { result, waitFor } = renderHook(() => useAgent());
-
-    const streamEvent: StreamEvent = {
-      event: 'on_chain_start',
-      run_id: 'run123',
-      data: {
-        input: {
-          messages: [],
-          workloads: [],
-          todo_list: ['do a thing'],
-          completed_steps: [],
-          status: 'in_progress',
-          events: [],
-        },
-      },
-    };
-
-    act(() => {
-      server.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(streamEvent));
-        }
-      });
-    });
-
-    await waitFor(() => {
-      expect(result.current.messages.length).toBe(1);
-      const message = result.current.messages[0] as any;
-      expect(message.id).toBe('run123');
-      expect(message.state_updates.todo_list).toEqual(['do a thing']);
-    });
-  });
-
-  it('should set showThinking to false on run_complete', async () => {
-    const { result, waitFor } = renderHook(() => useAgent());
-
-    act(() => {
+    await act(async () => {
       result.current.startAgent('test message');
     });
 
-    await waitFor(() => {
-      expect(result.current.showThinking).toBe(true);
-    });
-
-    const streamEvent: StreamEvent = {
-      event: 'run_complete',
-      run_id: 'run123',
-      data: { status: 'complete' },
-    };
+    expect(result.current.showThinking).toBe(true);
 
     act(() => {
-      server.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(streamEvent));
-        }
-      });
+      mockSocket.onmessage!(
+        new MessageEvent('message', {
+          data: JSON.stringify({
+            event: 'on_chain_start',
+            run_id: 'run_123',
+            data: { input: { todo_list: ['step 1'] } },
+          }),
+        }),
+      );
     });
 
-    await waitFor(() => {
-      expect(result.current.showThinking).toBe(false);
+    expect(result.current.messages).toHaveLength(2); // User message + agent thinking message
+    expect(result.current.messages[1].state_updates.todo_list).toEqual(['step 1']);
+
+    act(() => {
+      mockSocket.onmessage!(
+        new MessageEvent('message', {
+          data: JSON.stringify({ event: 'run_complete' }),
+        }),
+      );
     });
+
+    expect(result.current.showThinking).toBe(false);
+  });
+
+  it('should handle errors when calling the agent', async () => {
+    const { result } = renderHook(() => useAgent());
+
+    await act(async () => {
+      result.current.startAgent('test message');
+    });
+
+    act(() => {
+        mockSocket.onerror!(new Event('error'));
+    });
+
+    expect(result.current.error).not.toBeNull();
+    expect(result.current.showThinking).toBe(false);
+  });
+
+  it('should not start the agent if no token is available', async () => {
+    (getToken as jest.Mock).mockResolvedValueOnce(null);
+
+    const { result } = renderHook(() => useAgent());
+
+    await act(async () => {
+      result.current.startAgent('test message');
+    });
+
+    expect(result.current.error).not.toBeNull();
+    expect(result.current.showThinking).toBe(false);
   });
 });
