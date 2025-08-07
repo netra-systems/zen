@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 export const useWebSocket = (url: string) => {
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<object[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const webSocketRef = useRef<WebSocket | null>(null);
 
@@ -20,7 +20,13 @@ export const useWebSocket = (url: string) => {
         setIsConnected(true);
         console.log('WebSocket handshake successful');
       } else {
-        setMessages((prevMessages) => [...prevMessages, message]);
+        try {
+          const parsedMessage = JSON.parse(message);
+          setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+        } catch (error) {
+          console.error('Error parsing WebSocket message JSON:', error);
+          // Handle non-JSON messages if necessary
+        }
       }
     };
 
@@ -38,9 +44,9 @@ export const useWebSocket = (url: string) => {
     };
   }, [url]);
 
-  const sendMessage = (message: string) => {
+  const sendMessage = (message: object) => {
     if (webSocketRef.current && webSocketRef.current.readyState === WebSocket.OPEN) {
-      webSocketRef.current.send(message);
+      webSocketRef.current.send(JSON.stringify(message));
     } else {
       console.error('WebSocket is not connected.');
     }

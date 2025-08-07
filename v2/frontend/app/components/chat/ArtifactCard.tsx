@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { JsonTreeView } from './JsonTreeView';
+import JsonTreeView from './JsonTreeView';
 import { Artifact } from '@/app/types';
 
 interface ArtifactCardProps {

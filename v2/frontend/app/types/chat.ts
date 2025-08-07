@@ -2,7 +2,7 @@ export type MessageRole = 'user' | 'agent';
 
 export interface Artifact {
     type: string;
-    content: string;
+    content: any;
     data: any;
 }
 

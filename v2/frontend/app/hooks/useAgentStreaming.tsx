@@ -18,18 +18,50 @@ export function useAgentStreaming(initialMessages: Message[] = [], initialFilter
     const [showThinking, setShowThinking] = useState(false);
 
     const addMessage = useCallback((content: string, role: 'user' | 'agent' = 'user', event?: string, data?: any) => {
-        const newMessage: Message = {
-            id: `msg-${Date.now()}`,
-            role,
-            timestamp: new Date().toISOString(),
-            type: event === 'on_chain_end' ? 'artifact' : 'text',
-            content,
-            artifact: event === 'on_chain_end' ? {
-                type: 'analysis_result',
+        let newMessage: Message;
+
+        if (event === 'on_chain_end') {
+            let parsedContent: any = content;
+            if (typeof content === 'string') {
+                try {
+                    parsedContent = JSON.parse(content);
+                } catch (e) {
+                    // Not a JSON string, use as is
+                }
+            }
+
+            newMessage = {
+                id: `msg-${Date.now()}`,
+                role: 'agent',
+                timestamp: new Date().toISOString(),
+                type: 'artifact',
+                name: 'on_chain_end',
+                data: data,
+                artifact: {
+                    type: 'analysis_result',
+                    content: parsedContent,
+                    data: data,
+                },
+            };
+        } else if (role === 'user') {
+            newMessage = {
+                id: `msg-${Date.now()}`,
+                role: 'user',
+                timestamp: new Date().toISOString(),
+                type: 'text',
                 content: content,
-                data: data
-            } : undefined
-        };
+            };
+        } else {
+            // Generic agent message for streaming
+            newMessage = {
+                id: `msg-${Date.now()}`,
+                role: 'agent',
+                timestamp: new Date().toISOString(),
+                type: 'text',
+                content: content,
+            };
+        }
+
         setMessages(prev => [...prev, newMessage]);
     }, []);
 

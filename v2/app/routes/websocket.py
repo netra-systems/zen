@@ -2,6 +2,7 @@ import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from app.websocket_manager import manager
 from app.auth_dependencies import ActiveUserWsDep
+from typing import Dict, Any
 
 router = APIRouter()
 
@@ -10,7 +11,11 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str, current_user:
     await manager.connect(websocket, client_id)
     try:
         while True:
-            data = await websocket.receive_text()
+            data = await websocket.receive_json()
             # You can add logic here to handle messages from the client if needed
     except WebSocketDisconnect:
         manager.disconnect(websocket, client_id)
+
+
+async def send_update_to_client(client_id: str, message: Dict[str, Any]):
+    await manager.broadcast_to_client(client_id, message)

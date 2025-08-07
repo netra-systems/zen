@@ -1,28 +1,23 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
+import JsonView from '@uiw/react-json-view';
+import { darkTheme } from '@uiw/react-json-view/dark';
 
 interface JsonTreeViewProps {
-  data: any;
+  data: object;
 }
 
-export const JsonTreeView: React.FC<JsonTreeViewProps> = ({ data }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const toggleOpen = () => {
-    setIsOpen(!isOpen);
-  };
-
+const JsonTreeView: React.FC<JsonTreeViewProps> = ({ data }) => {
   return (
-    <div>
-      <button onClick={toggleOpen} className="text-sm text-gray-500">
-        {isOpen ? 'Hide JSON' : 'Show JSON'}
-      </button>
-      {isOpen && (
-        <pre className="bg-gray-100 p-2 rounded mt-2 text-xs">
-          {JSON.stringify(data, null, 2)}
-        </pre>
-      )}
-    </div>
+    <JsonView
+      value={data}
+      style={darkTheme}
+      displayDataTypes={false}
+      enableClipboard={true}
+      iconStyle="square"
+    />
   );
 };
+
+export default JsonTreeView;
