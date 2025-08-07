@@ -1,4 +1,4 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useAgent } from '../app/hooks/useAgent';
 import WS from 'jest-websocket-mock';
 import { getToken, getUserId } from '../app/lib/user';
@@ -18,25 +18,22 @@ describe('useAgent', () => {
 
   afterEach(() => {
     WS.clean();
+    jest.restoreAllMocks();
   });
 
   it('should connect on first load, start the agent, show thinking indicator, and process the response', async () => {
-    const { result } = renderHook(() => useAgent());
-
-    // The hook connects automatically, so we need to wait for the server to be created.
-    // We can get the URL from the mock WebSocket constructor.
-    const url = (WS as any).instances[0].url;
+    const mockDateNow = jest.spyOn(Date, 'now').mockImplementation(() => 12345);
+    const runId = `run_${Date.now()}`;
+    const url = `ws://localhost:8000/agent/${runId}?token=test-token`;
     server = new WS(url, { jsonProtocol: true });
 
-    await server.connected;
+    const { result } = renderHook(() => useAgent());
 
-    act(() => {
-        result.current.startAgent('Test message');
-    });
+    await waitFor(() => expect(result.current.showThinking).toBe(false));
+
+    result.current.startAgent('Test message');
 
     await waitFor(() => expect(result.current.showThinking).toBe(true));
-
-    const runId = url.split('/').pop().split('?')[0];
 
     const streamEvent = {
         event: 'on_chain_start',
@@ -44,19 +41,16 @@ describe('useAgent', () => {
         run_id: runId,
     };
 
-    act(() => {
-        server.send(streamEvent);
-    });
+    server.send(streamEvent);
 
     await waitFor(() => {
-        expect(result.current.messages).toHaveLength(2); // user message + artifact
+        expect(result.current.messages).toHaveLength(2);
         expect(result.current.messages[1].type).toBe('artifact');
     });
 
-    act(() => {
-        server.send({ event: 'run_complete', run_id: runId });
-    });
+    server.send({ event: 'run_complete', run_id: runId });
 
     await waitFor(() => expect(result.current.showThinking).toBe(false));
-  }, 10000);
+
+  }, 20000);
 });

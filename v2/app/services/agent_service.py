@@ -2,7 +2,7 @@ import json
 import asyncio
 from fastapi import WebSocket, WebSocketDisconnect
 from app.services.streaming_agent.supervisor import StreamingAgentSupervisor
-from app.db.models_clickhouse import AnalysisRequest
+from app.db.models_clickhouse import AnalysisRequest, Settings, RequestModel
 from app.connection_manager import manager
 
 class AgentService:
@@ -21,7 +21,15 @@ class AgentService:
         """
         message_data = json.loads(data)
         if message_data.get("action") == "start_agent":
-            analysis_request = AnalysisRequest(**message_data.get("payload"))
+            payload = message_data.get("payload")
+            # It seems the payload is nested, let's access it correctly
+            settings = payload.get("settings")
+            request_data = payload.get("request")
+            
+            analysis_request = AnalysisRequest(
+                settings=Settings(**settings),
+                request=RequestModel(**request_data)
+            )
             asyncio.create_task(self.start_agent(analysis_request, run_id))
         else:
             print(f"Received unhandled message for run_id: {run_id}: {message_data}")

@@ -95,13 +95,7 @@ export function useAgent() {
         if (status === WebSocketStatus.Closed) {
             connectToSocket();
         }
-
-        return () => {
-            if (status === WebSocketStatus.Open) {
-                disconnect();
-            }
-        };
-    }, [status, connect, disconnect]);
+    }, [status, connect]);
 
     useEffect(() => {
         if (status === WebSocketStatus.Open && lastMessage) {
@@ -159,5 +153,5 @@ export function useAgent() {
         [status, sendMessage],
     );
 
-    return { startAgent, messages, showThinking, error };
+    return { startAgent, messages, showThinking, error, status };
 }
