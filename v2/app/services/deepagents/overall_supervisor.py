@@ -215,3 +215,8 @@ class OverallSupervisor:
 
     async def get_agent_state(self, run_id: str) -> Dict[str, Any]:
         return self.agent_states.get(run_id, {"status": "not_found"})
+
+    async def shutdown(self):
+        for task in self.tasks.values():
+            task.cancel()
+        await asyncio.gather(*self.tasks.values(), return_exceptions=True)

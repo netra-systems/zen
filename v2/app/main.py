@@ -60,6 +60,8 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     logger.info("Application shutdown...")
+    await app.state.agent_supervisor.shutdown()
+    central_logger.shutdown()
 
 
 
