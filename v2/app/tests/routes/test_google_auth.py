@@ -29,7 +29,7 @@ def test_google_auth(mock_get_or_create_user, mock_google_oauth):
             }
         }
     )
-    mock_get_or_create_user.return_value = User(id=uuid.uuid4(), email="test@example.com", full_name="Test User", picture="https://example.com/avatar.png", is_active=True, is_superuser=False)
+    mock_get_or_create_user.return_value = User(id=str(uuid.uuid4()), email="test@example.com", full_name="Test User", picture="https://example.com/avatar.png", is_active=True, is_superuser=False)
 
     # 2. Initialize the security service
     key_manager = KeyManager.load_from_settings(settings)

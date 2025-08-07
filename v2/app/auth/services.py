@@ -8,7 +8,7 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 
 from ..db import models_postgres
-from . import schemas
+from .. import schemas
 from ..services.key_manager import KeyManager
 
 class SecurityService:

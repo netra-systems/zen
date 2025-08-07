@@ -3,7 +3,7 @@ from fastapi import Depends, HTTPException, status, Request
 from sqlmodel import Session
 
 from app.db.postgres import get_async_db
-from app.auth import schemas
+from app import schemas
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings

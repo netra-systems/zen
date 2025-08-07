@@ -1,6 +1,7 @@
 
 import Link from 'next/link';
 import { Icons } from '@/components/Icons';
+import { useAuth } from '@/providers/auth';
 
 import { NavItem } from '../types';
 
@@ -46,20 +47,32 @@ const navItems: NavItem[] = [
 ];
 
 export function NavLinks() {
+  const { user } = useAuth();
+
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-      {navItems.map(({ href, icon, label, disabled }) => (
+      {user ? (
+        navItems.map(({ href, icon, label, disabled }) => (
+          <Link
+            key={label}
+            href={href}
+            className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${
+              disabled ? 'cursor-not-allowed pointer-events-none opacity-50' : ''
+            }`}
+          >
+            {icon}
+            {label}
+          </Link>
+        ))
+      ) : (
         <Link
-          key={label}
-          href={href}
-          className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${
-            disabled ? 'cursor-not-allowed pointer-events-none opacity-50' : ''
-          }`}
+          href="/login"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
         >
-          {icon}
-          {label}
+          <Icons.dev className="h-4 w-4" />
+          Login
         </Link>
-      ))}
+      )}
     </nav>
   );
 }

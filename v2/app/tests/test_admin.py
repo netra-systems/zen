@@ -12,7 +12,7 @@ from app.config import settings
 @pytest.fixture
 def superuser_client():
     mock_user = User(
-        id=uuid.uuid4(),
+        id=str(uuid.uuid4()),
         email="superuser@example.com",
         full_name="Super User",
         is_active=True,
@@ -26,7 +26,7 @@ def superuser_client():
 @pytest.fixture
 def regular_user_client():
     mock_user = User(
-        id=uuid.uuid4(),
+        id=str(uuid.uuid4()),
         email="user@example.com",
         full_name="Regular User",
         is_active=True,

@@ -3,10 +3,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import ApexOptimizerAgentV2 from '@/components/apex-optimizer-agent-v2';
 import { useAgentContext } from '@/providers/AgentProvider';
 
-const useAgentContext = jest.requireMock('@/providers/AgentProvider').useAgentContext;
-
 jest.mock('@/providers/AgentProvider', () => ({
-  useAgentContext: jest.fn()
+  useAgentContext: jest.fn(),
 }));
 
 describe('ApexOptimizerAgentV2', () => {
@@ -14,7 +12,7 @@ describe('ApexOptimizerAgentV2', () => {
 
   beforeEach(() => {
     (useAgentContext as jest.Mock).mockReturnValue({
-      messages: [],
+      messages: [{ type: 'human', content: 'Test message' }],
       showThinking: false,
       startAgent: mockStartAgent,
       error: null,
@@ -39,10 +37,10 @@ describe('ApexOptimizerAgentV2', () => {
 
   it('should call startAgent when an example query is clicked', () => {
     render(<ApexOptimizerAgentV2 />);
-    const exampleButton = screen.getByText(/Overview of the lowest hanging optimization fruit/);
+    const exampleButton = screen.getByText(/Analyze the latency/);
 
     fireEvent.click(exampleButton);
 
-    expect(screen.getByRole('textbox')).toHaveValue("Overview of the lowest hanging optimization fruit that I can implement with config only change");
+    expect(screen.getByRole('textbox')).toHaveValue("Analyze the latency of the `get_user_data` tool and suggest optimizations.");
   });
 });

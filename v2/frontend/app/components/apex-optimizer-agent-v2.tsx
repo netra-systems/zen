@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -19,4 +20,47 @@ function truncatePrompt(prompt: string, words: number) {
   return prompt.split(' ').slice(0, words).join(' ') + '...';
 }
 
-function ApexOptimizerAgentV2() {
+export default function ApexOptimizerAgentV2() {
+  const { messages, showThinking, startAgent, error } = useAgentContext();
+  const [inputValue, setInputValue] = useState('');
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (inputValue.trim()) {
+      startAgent(inputValue);
+      setInputValue('');
+    }
+  };
+
+  const handleExampleQuery = (prompt: string) => {
+    setInputValue(prompt);
+  };
+
+  return (
+    <Card className="w-full h-full flex flex-col" role="article">
+      <CardHeader>
+        <CardTitle>Apex Optimizer Agent</CardTitle>
+      </CardHeader>
+      <CardContent className="flex-grow overflow-y-auto">
+        <MessageOrchestrator messages={messages} showThinking={showThinking} error={error} />
+      </CardContent>
+      <div className="p-4 border-t">
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {examplePrompts.map((prompt) => (
+            <Button key={prompt} variant="outline" onClick={() => handleExampleQuery(prompt)}>
+              {truncatePrompt(prompt, 5)}
+            </Button>
+          ))}
+        </div>
+        <form onSubmit={handleSendMessage} className="flex gap-2" role="form">
+          <Input
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Ask the agent to optimize a tool..."
+          />
+          <Button type="submit">Send</Button>
+        </form>
+      </div>
+    </Card>
+  );
+}

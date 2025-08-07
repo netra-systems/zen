@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 @pytest.fixture
 def authenticated_client():
     mock_user = User(
-        id=uuid.uuid4(),
+        id=str(uuid.uuid4()),
         email="test@example.com",
         full_name="Test User",
         is_active=True,

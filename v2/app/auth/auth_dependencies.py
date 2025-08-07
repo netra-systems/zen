@@ -1,7 +1,7 @@
 from typing import Annotated, Optional
 from fastapi import Depends, HTTPException, status, Request, WebSocket
 from app.config import settings
-from app.auth import schemas
+from app import schemas
 import uuid
 from datetime import datetime
 from app.db.postgres import AsyncSession
