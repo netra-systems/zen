@@ -38,7 +38,7 @@ export interface ToolStartMessage extends BaseMessage {
     type: 'tool_start';
     content: string;
     tool: string;
-    toolInput: any;
+    toolInput: Record<string, unknown>;
     usageMetadata?: UsageMetadata;
     responseMetadata?: ResponseMetadata;
 }
@@ -47,8 +47,8 @@ export interface ToolEndMessage extends BaseMessage {
     type: 'tool_end';
     content: string;
     tool: string;
-    toolInput: any;
-    toolOutput: any;
+    toolInput: Record<string, unknown>;
+    toolOutput: Record<string, unknown>;
     usageMetadata?: UsageMetadata;
     responseMetadata?: ResponseMetadata;
 }
@@ -57,7 +57,7 @@ export interface ToolEndErrorMessage extends BaseMessage {
     type: 'tool_end';
     content: string;
     tool: string;
-    toolInput: any;
+    toolInput: Record<string, unknown>;
     toolOutput: {
         content: string;
         is_error: true;
@@ -71,8 +71,8 @@ export interface ErrorMessage extends BaseMessage {
     content: string;
     isError: true;
     tool?: string;
-    toolInput?: any;
-    toolOutput?: any;
+    toolInput?: Record<string, unknown>;
+    toolOutput?: Record<string, unknown>;
 }
 
 export interface ThinkingMessage extends BaseMessage {
@@ -129,6 +129,18 @@ export interface AgentState {
 
 // --- API and Server Communication ---
 
+export interface Workload {
+    run_id: string;
+    query: string;
+    data_source: {
+        source_table: string;
+    };
+    time_range: {
+        start_time: string;
+        end_time: string;
+    };
+}
+
 export interface AnalysisRequest {
     settings: {
         debug_mode: boolean;
@@ -136,7 +148,7 @@ export interface AnalysisRequest {
     request: {
         user_id: string;
         query: string;
-        workloads: any[];
+        workloads: Workload[];
     };
 }
 
@@ -144,19 +156,7 @@ export interface ChatAnalysisRequest extends AnalysisRequest {
     request: {
         user_id: string;
         query: string;
-        workloads: [
-            {
-                run_id: string;
-                query: string;
-                data_source: {
-                    source_table: string;
-                };
-                time_range: {
-                    start_time: string;
-                    end_time: string;
-                };
-            }
-        ];
+        workloads: Workload[];
     };
 }
 
@@ -199,24 +199,15 @@ export interface UsageMetadata {
     input_tokens: number;
     output_tokens: number;
     total_tokens: number;
-    input_token_details?: any;
-    output_token_details?: any;
 }
 
 export interface ResponseMetadata {
     finish_reason?: string;
     model_name?: string;
-    safety_ratings?: any[];
 }
 
 export interface AIMessageChunk {
     content?: string;
-    additional_kwargs?: {
-        function_call?: {
-            name: string;
-            arguments: string;
-        };
-    };
     response_metadata?: ResponseMetadata;
     id?: string;
     tool_calls?: ToolCall[];
@@ -347,8 +338,8 @@ export interface MessageContentProps {
 }
 
 export interface MessageFilterControlProps {
-    messageFilters: Set<MessageFilter>;
-    setMessageFilters: React.Dispatch<React.SetStateAction<Set<MessageFilter>>>;
+    messageFilters: MessageFilter;
+    setMessageFilters: (filters: MessageFilter) => void;
     showThinking: boolean;
     setShowThinking: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -358,7 +349,7 @@ export interface TodoListViewProps {
 }
 
 export interface JsonTreeViewProps {
-    data: any;
+    data: Record<string, unknown>;
 }
 
 export interface Job {

@@ -35,6 +35,10 @@ export function ChatWindow({
 
     const isAgentThinking = messages.some(m => m.type === 'thinking');
 
+    const handleExampleClick = (query: string) => {
+        setInput(query);
+    };
+
     
 
     return (

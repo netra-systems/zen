@@ -5,16 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { InputField, GenericInputProps } from '@/app/types/index';
 
+type FormState = Record<string, string | number>;
+
 export function GenericInput({ title, description, inputFields, onSubmit, isLoading, submitButtonText, onClear }: GenericInputProps) {
-    const [formState, setFormState] = useState<Record<string, any>>(() => {
-        const initialState: Record<string, any> = {};
+    const [formState, setFormState] = useState<FormState>(() => {
+        const initialState: FormState = {};
         inputFields.forEach(field => {
             initialState[field.name] = field.defaultValue ?? '';
         });
         return initialState;
     });
 
-    const handleChange = (name: string, value: any) => {
+    const handleChange = (name: string, value: string | number) => {
         setFormState(prevState => ({
             ...prevState,
             [name]: value

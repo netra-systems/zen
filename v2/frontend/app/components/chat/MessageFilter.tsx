@@ -10,14 +10,10 @@ interface MessageFilterProps {
     setShowThinking: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function MessageFilterControl({ messageFilters, setMessageFilters, showThinking, setShowThinking }: MessageFilterProps) {
-    const handleFilterChange = (filter: MessageFilter, checked: boolean) => {
-        const newFilters = new Set(messageFilters);
-        if (checked) {
-            newFilters.add(filter);
-        } else {
-            newFilters.delete(filter);
-        }
+export function MessageFilterControl({ messageFilters, setMessageFilters, showThinking, setShowThinking }: MessageFilterControlProps) {
+    const handleFilterChange = (filter: keyof MessageFilter, checked: boolean) => {
+        const newFilters = { ...messageFilters };
+        newFilters[filter] = checked;
         setMessageFilters(newFilters);
     };
 
@@ -34,7 +30,7 @@ export function MessageFilterControl({ messageFilters, setMessageFilters, showTh
             <div className="flex items-center space-x-2">
                 <Switch
                     id="event-filter"
-                    checked={!messageFilters.has('event')}
+                    checked={!messageFilters.event}
                     onCheckedChange={(checked) => handleFilterChange('event', !checked)}
                 />
                 <Label htmlFor="event-filter">Show Events</Label>
