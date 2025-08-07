@@ -3,7 +3,7 @@ from app.db.session import get_db_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.db.models_postgres import Reference
-from app.models.references import ReferenceGetResponse, ReferenceItem, ReferenceCreateRequest, ReferenceUpdateRequest
+from app.schemas import ReferenceGetResponse, ReferenceItem, ReferenceCreateRequest, ReferenceUpdateRequest
 
 router = APIRouter()
 
