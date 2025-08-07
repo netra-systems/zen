@@ -3,49 +3,45 @@ from typing import Optional, List, Dict, Any, Literal
 from datetime import datetime, timezone
 import uuid
 
-# schemas.py is for API schema
-# See db/models_clickhouse.py for ClickHouse schema
-# See db/models_postgres.py for Postgres schema
-
 # --- User Schemas ---
 class UserBase(BaseModel):
-    email: EmailStr
-    full_name: Optional[str] = None
+    email: EmailStr = Field(..., example="user@example.com")
+    full_name: Optional[str] = Field(None, example="John Doe")
 
 class UserCreate(UserBase):
-    password: str
+    """Schema for creating a new user, including password for local authentication."""
+    password: str = Field(..., min_length=8)
 
-class UserUpdate(UserBase):
-    password: Optional[str] = None
+class UserUpdate(BaseModel):
+    """Schema for updating an existing user. All fields are optional."""
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    picture: Optional[str] = None
 
-class User(UserBase):
-    id: str
+class UserInDBBase(UserBase):
+    """Base schema for users as stored in the database."""
+    id: uuid.UUID
     picture: Optional[str] = None
     created_at: datetime
+    is_superuser: bool = False
 
-class UserPublic(UserBase):
-    id: str
-    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
 
-class UserPublicWithPicture(UserPublic):
-    picture: Optional[str] = None
+class User(UserInDBBase):
+    """Default user schema for API responses."""
+    pass
+
+class UserInDB(UserInDBBase):
+    """User schema including the hashed password, for internal use."""
+    hashed_password: Optional[str] = None
 
 # --- Token Schemas ---
 class Token(BaseModel):
     access_token: str
     token_type: str
 
-# --- Secret Schemas ---
-class SecretBase(BaseModel):
-    key: str = Field(description="The name of the secret (e.g., 'CLICKHOUSE_HOST')")
-
-class SecretCreate(SecretBase):
-    value: str
-
-class SecretPublic(SecretBase):
-    id: int
-    user_id: str
-
+class TokenData(BaseModel):
+    email: Optional[EmailStr] = None
 
 # --- SupplyOption Schemas ---
 class SupplyOptionBase(BaseModel):
