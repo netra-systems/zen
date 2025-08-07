@@ -1,0 +1,67 @@
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import { User } from '@/lib/types';
+
+interface AppState {
+  user: User | null;
+  isLoading: boolean;
+  fetchUser: (token: string) => Promise<void>;
+  devLogin: () => Promise<void>;
+  logout: () => void;
+}
+
+const useAppStore = create<AppState>()(
+  devtools((set) => ({
+    user: null,
+    isLoading: true,
+    fetchUser: async (token) => {
+      try {
+        const response = await fetch('http://localhost:8000/api/v3/auth/users/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const user = await response.json();
+          set({ user, isLoading: false });
+        } else {
+          set({ user: null, isLoading: false });
+        }
+      } catch (error) {
+        set({ user: null, isLoading: false });
+      }
+    },
+    devLogin: async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/v3/auth/dev-login', {
+          method: 'POST',
+        });
+        if (response.ok) {
+          const { access_token } = await response.json();
+          document.cookie = `access_token=${access_token}; path=/; samesite=lax;`;
+          const userResponse = await fetch('http://localhost:8000/api/v3/auth/users/me', {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+          });
+          if (userResponse.ok) {
+            const user = await userResponse.json();
+            set({ user, isLoading: false });
+          } else {
+            set({ user: null, isLoading: false });
+          }
+        } else {
+          set({ user: null, isLoading: false });
+        }
+      } catch (error) {
+        set({ user: null, isLoading: false });
+      }
+    },
+    logout: () => {
+      document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      set({ user: null });
+    },
+  }))
+);
+
+export default useAppStore;
