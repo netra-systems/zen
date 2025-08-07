@@ -48,7 +48,7 @@ async def test_start_agent_success(mock_get_agent_service, authenticated_client)
     }
     client_id = "test_client"
 
-    response = authenticated_client.post(f"/api/v3/agent/start_agent/{client_id}", json=analysis_request)
+    response = authenticated_client.post(f"/api/v3/agent/chat/start_agent/{client_id}", json=analysis_request)
 
     assert response.status_code == 200
     mock_agent_service.start_agent.assert_awaited_once()
@@ -76,7 +76,7 @@ async def test_start_agent_failure(mock_get_agent_service, authenticated_client)
     }
     client_id = "test_client"
 
-    response = authenticated_client.post(f"/api/v3/agent/start_agent/{client_id}", json=analysis_request)
+    response = authenticated_client.post(f"/api/v3/agent/chat/start_agent/{client_id}", json=analysis_request)
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Agent start failed"}
@@ -85,6 +85,6 @@ async def test_start_agent_failure(mock_get_agent_service, authenticated_client)
 async def test_websocket_endpoint():
     run_id = "test_run"
     with patch('app.services.agent_service.AgentService.handle_websocket', new_callable=AsyncMock) as mock_handle_websocket:
-        with TestClient(app).websocket_connect(f"/api/v3/agent/{run_id}?token=test_token") as websocket:
+        with TestClient(app).websocket_connect(f"/api/v3/agent/chat/{run_id}?token=test_token") as websocket:
             pass
     mock_handle_websocket.assert_awaited_once()
