@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Literal
 from datetime import datetime, timezone
 import uuid
 
@@ -143,3 +143,25 @@ class CostComparison(BaseModel):
     projected_monthly_spend: float
     projected_monthly_savings: float
     delta_percent: float
+
+# --- WebSocket Schemas ---
+class WebSocketMessage(BaseModel):
+    event: str
+    data: Dict[str, Any]
+    run_id: str
+
+class RunCompleteMessage(WebSocketMessage):
+    event: Literal["run_complete"] = "run_complete"
+    data: Dict[str, Literal["complete"]]
+
+class ErrorData(BaseModel):
+    type: str
+    message: str
+
+class ErrorMessage(WebSocketMessage):
+    event: Literal["error"] = "error"
+    data: ErrorData
+
+class StreamEventMessage(WebSocketMessage):
+    event: str = Field(..., alias='event_type')
+    data: Dict[str, Any]
