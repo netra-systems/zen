@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 
 import { RootLayoutProps, AppWithLayoutProps } from './types';
 
-function AppWithLayout({ children }: AppWithLayoutProps) {
+export function AppWithLayout({ children }: AppWithLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user } = useAuth();
   const pathname = usePathname();

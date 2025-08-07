@@ -10,8 +10,14 @@
 # for demand (WorkloadProfile) and supply (SupplyRecord).
 
 import uuid
-from typing import List, Dict, Any, Optional
+import time
+import enum
+import os
+from typing import List, Dict, Any, Optional, Union, Literal, TypedDict, Annotated
 from pydantic import BaseModel, Field, conint, confloat, ConfigDict
+from langchain_core.messages import BaseMessage
+from langgraph.graph.message import add_messages
+
 
 # --- Constants and Enums ---
 
@@ -184,6 +190,19 @@ class SyntheticDataGenParams(BaseModel):
     event_types: List[str] = Field(default_factory=lambda: ["search", "login", "purchase", "logout"], description="A list of event types to simulate.")
     source_table: str = Field("content_corpus", description="The name of the source ClickHouse table for the content corpus.")
     destination_table: str = Field("synthetic_data", description="The name of the destination ClickHouse table for the generated data.")
+
+class DataIngestionParams(BaseModel):
+    data_path: str = Field(..., description="The path to the data file to ingest.")
+    table_name: str = Field(..., description="The name of the table to ingest the data into.")
+
+class ContentCorpusGenParams(BaseModel):
+    samples_per_type: int = Field(10, gt=0, le=100, description="Number of samples to generate for each workload type.")
+    temperature: float = Field(0.7, ge=0.0, le=2.0, description="Controls randomness. Higher is more creative.")
+    top_p: Optional[float] = Field(None, ge=0.0, le=1.0, description="Nucleus sampling probability.")
+    top_k: Optional[int] = Field(None, ge=0, description="Top-k sampling control.")
+    max_cores: int = Field(4, ge=1, le=os.cpu_count(), description="Max CPU cores to use.")
+    clickhouse_table: str = Field('content_corpus', description="The name of the ClickHouse table to store the corpus in.")
+
 
 # --- WebSocket Schemas ---
 class WebSocketMessage(BaseModel):
@@ -423,3 +442,310 @@ class ReferenceUpdateRequest(BaseModel):
     type: str | None = None
     value: str | None = None
     version: str | None = None
+
+# --- Config Schemas ---
+class SecretReference(BaseModel):
+    name: str
+    target_field: str
+    target_model: Optional[str] = None
+    project_id: str = "304612253870"
+    version: str = "latest"
+
+class GoogleCloudConfig(BaseModel):
+    project_id: str = "cryptic-net-466001-n0"
+    client_id: str = None
+    client_secret: str = None
+
+class ClickHouseNativeConfig(BaseModel):
+    host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+    port: int = 9440
+    user: str = "default"
+    password: str = ""
+    database: str = "default"
+
+class ClickHouseHTTPSConfig(BaseModel):
+    host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+    port: int = 8443
+    user: str = "default"
+    password: str = ""
+    database: str = "default"
+
+
+class ClickHouseHTTPSDevConfig(BaseModel):
+    host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+    port: int = 8443
+    user: str = "development_user"
+    password: str = ""
+    database: str = "development"
+    superuser: bool = True
+
+
+class ClickHouseLoggingConfig(BaseModel):
+    enabled: bool = True
+    default_table: str = "logs"
+    default_time_period_days: int = 7
+    available_tables: List[str] = Field(default_factory=lambda: ["logs"])
+    default_tables: Dict[str, str] = Field(default_factory=lambda: {})
+    available_time_periods: List[int] = Field(default_factory=lambda: [1, 7, 30, 90])
+
+
+class LangfuseConfig(BaseModel):
+    secret_key: str = ""
+    public_key: str = ""
+    host: str = "https://cloud.langfuse.com/"
+
+class LLMConfig(BaseModel):
+    provider: str = Field(..., description="The LLM provider (e.g., 'google', 'openai').")
+    model_name: str = Field(..., description="The name of the model.")
+    api_key: Optional[str] = Field(None, description="The API key for the LLM provider.")
+    generation_config: Dict[str, Any] = Field({}, description="A dictionary of generation parameters, e.g., temperature, max_tokens.")
+
+class AppConfig(BaseModel):
+    """Base configuration class."""
+
+    environment: str = "development"
+    google_cloud: GoogleCloudConfig = GoogleCloudConfig()
+    clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
+    clickhouse_https: ClickHouseHTTPSConfig = ClickHouseHTTPSConfig()
+    clickhouse_https_dev: ClickHouseHTTPSDevConfig = ClickHouseHTTPSDevConfig()
+    clickhouse_logging: ClickHouseLoggingConfig = ClickHouseLoggingConfig()
+    langfuse: LangfuseConfig = LangfuseConfig()
+
+    secret_key: str = "default_secret_key"
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+    fernet_key: str = None
+    jwt_secret_key: str = None
+    api_base_url: str = "http://localhost:8000"
+    database_url: str = None
+    log_level: str = "DEBUG"
+    log_secrets: bool = False
+    frontend_url: str = "http://localhost:3000"
+
+    llm_configs: Dict[str, LLMConfig] = {
+        "default": LLMConfig(
+            provider="google",
+            model_name="gemini-2.5-pro",
+        ),
+        "analysis": LLMConfig(
+            provider="google",
+            model_name="gemini-2.5-pro",
+            generation_config={"temperature": 0.5},
+        ),
+        "gpt-4": LLMConfig(
+            provider="openai",
+            model_name="gpt-4",
+            generation_config={"temperature": 0.8},
+        ),
+    }
+
+class DevelopmentConfig(AppConfig):
+    """Development-specific settings can override defaults."""
+    debug: bool = True
+    database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra"
+    dev_user_email: str = "dev@example.com"
+
+class ProductionConfig(AppConfig):
+    """Production-specific settings."""
+    environment: str = "production"
+    debug: bool = False
+    log_level: str = "INFO"
+
+class TestingConfig(AppConfig):
+    """Testing-specific settings."""
+    environment: str = "testing"
+    database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"
+
+# --- LLM Schemas ---
+class ToolConfig(BaseModel):
+    name: str = Field(..., description="The name of the tool.")
+    llm_config: Optional[LLMConfig] = Field(None, description="LLM configuration for this tool.")
+
+# --- ClickHouse Models ---
+class ContentCorpus(BaseModel, table=False): # Set table=False as we are manually creating it
+    record_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    workload_type: str
+    prompt: str
+    response: str
+    created_at: int = Field(default_factory=lambda: int(time.time()))
+
+class ClickHouseCredentials(BaseModel):
+    host: str
+    port: int
+    user: str
+    password: str
+    database: str
+
+class ModelIdentifier(BaseModel):
+    provider: str
+    family: str
+    name: str
+
+class EventMetadata(BaseModel):
+    log_schema_version: str = "23.4.0"
+    event_id: str = Field(default_factory=lambda: f"evt_{uuid.uuid4().hex[:8]}")
+    timestamp_utc: int = Field(default_factory=lambda: int(time.time()))
+
+class TraceContext(BaseModel):
+    trace_id: str
+    span_id: str = Field(default_factory=lambda: f"span_{uuid.uuid4().hex[:8]}")
+    parent_span_id: Optional[str] = None
+
+class Request(BaseModel):
+    model: str
+    prompt_text: str
+
+class Response(BaseModel):
+    usage: Dict[str, int]
+
+class Performance(BaseModel):
+    latency_ms: Dict[str, int]
+
+class FinOps(BaseModel):
+    total_cost_usd: float
+
+class EnrichedMetrics(BaseModel):
+    prefill_ratio: float
+    generation_ratio: float
+    throughput_tokens_per_sec: float
+    inter_token_latency_ms: Optional[float] = None
+
+class UnifiedLogEntry(BaseModel, table=False):
+    # This model represents the structure of the data in ClickHouse
+    # but is not managed as a table by SQLAlchemy/SQLModel.
+    event_metadata: EventMetadata = Field(default_factory=EventMetadata)
+    trace_context: TraceContext
+    request: Request
+    performance: Performance
+    finops: FinOps
+    response: Response
+    workloadName: str = "Unknown"
+    enriched_metrics: Optional[EnrichedMetrics] = None
+    embedding: Optional[List[float]] = None
+
+class DiscoveredPattern(BaseModel, table=False):
+    pattern_id: str = Field(default_factory=lambda: f"pat_{uuid.uuid4().hex[:8]}")
+    pattern_name: str
+    pattern_description: str
+    centroid_features: Dict[str, float]
+    member_span_ids: List[str]
+    member_count: int
+
+class PredictedOutcome(BaseModel, table=False):
+    supply_option_id: str
+    predicted_cost_usd: float
+    predicted_latency_ms: int
+    predicted_quality_score: float
+    utility_score: float
+    explanation: str
+    confidence: float
+
+class BaselineMetrics(BaseModel, table=False):
+    avg_cost_usd: float
+    avg_latency_ms: int
+    avg_quality_score: float
+
+class LearnedPolicy(BaseModel, table=False):
+    pattern_id: str
+    optimal_supply_option_id: str
+    predicted_outcome: PredictedOutcome
+    alternative_outcomes: List[PredictedOutcome]
+    baseline_metrics: BaselineMetrics
+    pattern_impact_fraction: float
+
+class CostComparison(BaseModel, table=False):
+    prior_monthly_spend: float
+    projected_monthly_spend: float
+    projected_monthly_savings: float
+    delta_percent: float
+
+class AnalysisResult(BaseModel, table=False):
+    run_id: str
+    discovered_patterns: List[DiscoveredPattern]
+    learned_policies: List[LearnedPolicy]
+    supply_catalog: List[Any] # Using 'Any' to avoid circular dependency with postgres models
+    cost_comparison: CostComparison
+    execution_log: List[Dict]
+    debug_mode: bool
+    span_map: Dict[str, UnifiedLogEntry]
+
+# --- Logging Schemas ---
+class LogEntry(BaseModel):
+    """Pydantic model for a single log entry."""
+    trace_id: Optional[str] = None
+    span_id: Optional[str] = None
+    event: str
+    data: Dict[str, Any] = Field(default_factory=dict)
+    source: str = "backend"
+    user_id: Optional[str] = None
+
+# --- Apex Optimizer Agent Schemas ---
+class AdditionalTable(BaseModel):
+    name: str = Field(..., description="The name of the additional table.")
+    context: str = Field(..., description="The context in which this table should be used.")
+    time_period: str = Field(..., description="The default time period for this table.")
+
+class ConfigForm(BaseModel):
+    default_log_table: str = Field(..., description="The default log table to pull from.")
+    default_time_range: str = Field(default="7d", description="The default time period to pull logs from.")
+    additional_tables: Optional[List[AdditionalTable]] = Field(default=None, description="A list of additional default tables.")
+
+class AgentState(BaseModel):
+    messages: List[BaseMessage]
+    next_node: str
+    tool_results: Optional[List[Dict]] = None
+
+class ToolStatus(str, enum.Enum):
+    SUCCESS = "success"
+    ERROR = "error"
+    PARTIAL_SUCCESS = "partial_success"
+    IN_PROGRESS = "in_progress"
+    COMPLETE = "complete"
+
+class ToolInput(BaseModel):
+    tool_name: str
+    args: List[Any] = []
+    kwargs: Dict[str, Any] = {}
+
+class ToolResult(BaseModel):
+    tool_input: ToolInput
+    status: ToolStatus = ToolStatus.IN_PROGRESS
+    message: str = ""
+    payload: Optional[Any] = None
+    start_time: float = Field(default_factory=time.time)
+    end_time: Optional[float] = None
+
+    def complete(self, status: ToolStatus, message: str, payload: Optional[Any] = None):
+        self.status = status
+        self.message = message
+        self.payload = payload
+        self.end_time = time.time()
+
+class ToolInvocation(BaseModel):
+    tool_result: ToolResult
+
+    def __init__(self, tool_name: str, *args, **kwargs):
+        super().__init__(tool_result=ToolResult(tool_input=ToolInput(tool_name=tool_name, args=list(args), kwargs=kwargs)))
+
+    def set_result(self, status: ToolStatus, message: str, payload: Optional[Any] = None):
+        self.tool_result.complete(status, message, payload)
+
+class DataSource(BaseModel):
+    source_table: str
+    filters: Optional[Dict[str, Any]] = None
+
+class TimeRange(BaseModel):
+    start_time: str
+    end_time: str
+
+# --- Deep-Agent Schemas ---
+class Todo(TypedDict):
+    id: str
+    task: str
+    status: str
+    items: List[str]
+
+class DeepAgentState(TypedDict):
+    messages: Annotated[List[BaseMessage], add_messages]
+    todos: List[Todo]
+    files: dict

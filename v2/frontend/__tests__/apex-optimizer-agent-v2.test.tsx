@@ -1,15 +1,15 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import ApexOptimizerAgentV2 from '../app/components/apex-optimizer-agent-v2';
-import { useAgent } from '../app/hooks/useAgent';
+import ApexOptimizerAgentV2 from '@/components/apex-optimizer-agent-v2';
+import { useAgentContext } from '@/app/providers/AgentProvider';
 
-jest.mock('../app/hooks/useAgent');
+jest.mock('@/providers/AgentProvider');
 
 describe('ApexOptimizerAgentV2', () => {
   const mockStartAgent = jest.fn();
 
   beforeEach(() => {
-    (useAgent as jest.Mock).mockReturnValue({
+    (useAgentContext as jest.Mock).mockReturnValue({
       messages: [],
       showThinking: false,
       startAgent: mockStartAgent,

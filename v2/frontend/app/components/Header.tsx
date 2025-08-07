@@ -8,7 +8,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Icons } from './Icons';
 
-export const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
+import { HeaderProps } from '../types';
+
+export const Header = ({ toggleSidebar }: HeaderProps) => {
   const { logout } = useAppStore();
   const user = useAppStore((state) => state.user);
 

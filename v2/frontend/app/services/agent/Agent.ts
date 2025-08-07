@@ -11,20 +11,12 @@ import {
     ToolOutputMessage, 
     ToolStartMessage,
     StateData,
-    StateUpdateMessage
+    StateUpdateMessage,
+    AgentState,
+    AgentListener
 } from '@/app/types/index';
 
 // --- Agent Class ---
-
-type AgentListener = (state: AgentState) => void;
-
-interface AgentState {
-    messages: Message[];
-    isThinking: boolean;
-    error: Error | null;
-    // A map to buffer incomplete tool call arguments as they stream in
-    toolArgBuffers: { [key: string]: string };
-}
 
 class Agent {
     private webSocketClient: WebSocketClient;

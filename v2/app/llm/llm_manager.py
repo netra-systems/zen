@@ -1,6 +1,5 @@
 from typing import Any, Dict, Optional
-from app.llm.schemas import LLMConfig
-from app.config import AppConfig
+from app.schemas import LLMConfig, AppConfig
 import google.generativeai as genai
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI

@@ -1,12 +1,6 @@
 import config from '@/config';
 
-export enum WebSocketStatus {
-    Connecting = 'Connecting',
-    Open = 'Open',
-    Closing = 'Closing',
-    Closed = 'Closed',
-    Error = 'Error',
-}
+import { WebSocketStatus } from '@/types';
 
 export class WebSocketClient {
     private ws: WebSocket | null = null;

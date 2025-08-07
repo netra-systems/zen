@@ -2,7 +2,9 @@
 import Link from 'next/link';
 import { Icons } from '@/components/Icons';
 
-const navItems = [
+import { NavItem } from '../types';
+
+const navItems: NavItem[] = [
   {
     href: '/',
     icon: <Icons.home className="h-4 w-4" />,

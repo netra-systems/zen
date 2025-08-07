@@ -124,7 +124,17 @@ export interface AgentState {
     messages: Message[];
     isThinking: boolean;
     error: Error | null;
+    toolArgBuffers: { [key: string]: string };
 }
+
+export interface UseAgentReturn {
+    startAgent: (message: string) => void;
+    messages: Message[];
+    showThinking: boolean;
+    error: Error | null;
+}
+
+export type AgentListener = (state: AgentState) => void;
 
 
 // --- API and Server Communication ---
@@ -256,11 +266,11 @@ export interface StreamEvent {
 // --- WebSocket Service Types ---
 
 export enum WebSocketStatus {
-    Connecting,
-    Open,
-    Closing,
-    Closed,
-    Error,
+    Connecting = 'Connecting',
+    Open = 'Open',
+    Closing = 'Closing',
+    Closed = 'Closed',
+    Error = 'Error',
 }
 
 export interface WebSocketMessage {
@@ -398,6 +408,13 @@ export interface ControlButton {
     icon: React.ReactNode;
     onClick: () => void;
     variant: 'outline' | 'default' | 'destructive' | 'ghost' | 'link' | 'secondary';
+}
+
+export interface NavItem {
+    href: string;
+    icon: React.ReactNode;
+    label: string;
+    disabled?: boolean;
 }
 
 export interface MessageOrchestratorProps {

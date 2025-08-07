@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import { agent } from '../services/agent/Agent';
-import { AgentState } from '../types';
+import { AgentState, UseAgentReturn } from '../types';
 
-
-
-export function useAgent() {
+export function useAgent(): UseAgentReturn {
     const [state, setState] = useState<AgentState>({ messages: [], isThinking: false, error: null });
 
     useEffect(() => {
