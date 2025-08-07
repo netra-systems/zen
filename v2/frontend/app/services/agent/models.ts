@@ -29,6 +29,12 @@ export class ThinkingMessage extends BaseMessage {
     }
 }
 
+export class TextMessage extends BaseMessage {
+    constructor(content: string) {
+        super('agent', 'text', content);
+    }
+}
+
 export class ToolStartMessage extends BaseMessage {
     tool?: string;
     toolInput?: any;

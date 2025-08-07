@@ -41,15 +41,6 @@ export function MessageContent({ message }: MessageContentProps) {
         case 'state_update':
             return <div>{message.state && <TodoListView todoList={message.state} />}</div>;
         default:
-            return (
-                <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="item-1">
-                        <AccordionTrigger>Raw Message</AccordionTrigger>
-                        <AccordionContent>
-                            <pre>{JSON.stringify(message, null, 2)}</pre>
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
-            );
+            return <pre>{JSON.stringify(message, null, 2)}</pre>;
     }
 }

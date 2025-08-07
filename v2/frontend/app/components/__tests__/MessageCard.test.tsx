@@ -16,7 +16,7 @@ describe('MessageCard', () => {
       content: '',
     };
     render(<MessageCard message={message} user={mockUser} />);
-    expect(screen.getByTestId('thinking-indicator')).toBeInTheDocument();
+    expect(screen.getByText('Thinking...')).toBeInTheDocument();
   });
 
   it('renders a user message', () => {
@@ -37,9 +37,14 @@ describe('MessageCard', () => {
       type: 'tool_start',
       content: '',
       tool: 'test_tool',
+      toolInput: { key: 'value' },
     };
     render(<MessageCard message={message} user={mockUser} />);
-    expect(screen.getByText(/Tool: test_tool/)).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Raw Message'));
+    const accordion = screen.getByRole('region');
+    expect(accordion).toBeInTheDocument();
+    expect(screen.getAllByText(/key/).length).toBe(2);
+    expect(screen.getAllByText(/value/).length).toBe(2);
   });
 
   it('renders a state update message with a todo list', () => {
@@ -54,7 +59,6 @@ describe('MessageCard', () => {
       },
     };
     render(<MessageCard message={message} user={mockUser} />);
-    fireEvent.click(screen.getByText('TODO List'));
     expect(screen.getByText('step 1')).toBeInTheDocument();
     expect(screen.getByText('step 2')).toBeInTheDocument();
   });
@@ -71,7 +75,9 @@ describe('MessageCard', () => {
       },
     };
     render(<MessageCard message={message} user={mockUser} />);
-    expect(screen.getByText('Errors:')).toBeInTheDocument();
-    expect(screen.getByText('Error message')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Raw Message'));
+    const accordion = screen.getByRole('region');
+    expect(accordion).toBeInTheDocument();
+    expect(screen.getAllByText(/Error message/).length).toBe(2);
   });
 });

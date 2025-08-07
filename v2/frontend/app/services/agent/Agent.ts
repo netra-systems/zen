@@ -2,7 +2,7 @@ import { getToken, getUserId } from '../../lib/user';
 import { produce } from 'immer';
 import { WebSocketClient, WebSocketStatus } from './WebSocketClient';
 import { Message, StreamEvent, AnalysisRequest } from './types';
-import { UserMessage, ThinkingMessage, ToolStartMessage, ToolEndMessage, StateUpdateMessage } from './models';
+import { UserMessage, ThinkingMessage, ToolStartMessage, ToolEndMessage, StateUpdateMessage, TextMessage } from './models';
 
 type AgentListener = (state: AgentState) => void;
 
@@ -103,7 +103,7 @@ class Agent {
             return;
         }
         this.setState(draft => {
-            this.processStreamEvent(draft.messages, streamEvent);
+            this.processStreamEvent(draft, streamEvent);
         });
     }
 
@@ -118,21 +118,21 @@ class Agent {
         }
     }
 
-    private processStreamEvent(draft: Message[], event: StreamEvent): void {
+    private processStreamEvent(draft: AgentState, event: StreamEvent): void {
         const { event: eventName, data, run_id } = event;
-        let message = draft.find((m) => m.id === run_id);
+        this.updateMessage(draft, eventName, data, run_id);
+    }
+
+    private updateMessage(draft: AgentState, eventName: string, data: any, run_id: string): void {
+        let message = draft.messages.find((m) => m.id === run_id);
 
         if (!message) {
             const newMessage = new ThinkingMessage();
             newMessage.id = run_id;
-            draft.push(newMessage);
+            draft.messages.push(newMessage);
             message = newMessage;
         }
 
-        this.updateMessage(message, eventName, data);
-    }
-
-    private updateMessage(message: Message, eventName: string, data: any): void {
         if (message.type === 'thinking') {
             message.type = this.getMessageType(eventName);
         }
@@ -142,7 +142,12 @@ class Agent {
                 this.updateStateMessage(message as StateUpdateMessage, data.input);
                 break;
             case 'on_chat_model_stream':
-                this.updateToolCode(message as ToolStartMessage, data.chunk);
+                const chunk = data.chunk;
+                if (chunk?.tool_call_chunks) {
+                    this.updateToolCode(draft.messages, chunk);
+                } else if (chunk?.content) {
+                    this.updateStreamTextMessage(draft.messages, chunk, run_id);
+                }
                 break;
             case 'on_tool_start':
                 this.updateToolStart(message as ToolStartMessage, data);
@@ -189,12 +194,41 @@ class Agent {
         }
     }
 
-    private updateToolCode(message: ToolStartMessage, chunk: any): void {
-        if (chunk?.content) {
-            message.content = (message.content || '') + chunk.content;
+    private updateToolCode(messages: Message[], chunk: any): void {
+        if (chunk.tool_call_chunks && chunk.tool_call_chunks.length > 0) {
+            for (const toolCallChunk of chunk.tool_call_chunks) {
+                const existingMessageIndex = messages.findIndex(msg => msg.id === toolCallChunk.id);
+
+                if (existingMessageIndex !== -1) {
+                    const existingMessage = messages[existingMessageIndex] as ToolStartMessage;
+                    let currentArgs = existingMessage.toolInput || '';
+                    if (typeof currentArgs !== 'string') {
+                        currentArgs = JSON.stringify(currentArgs);
+                    }
+                    const newArgsChunk = toolCallChunk.args || '';
+                    messages[existingMessageIndex] = {
+                        ...existingMessage,
+                        toolInput: currentArgs + newArgsChunk,
+                    } as ToolStartMessage;
+                } else {
+                    const newMessage = new ToolStartMessage(`Starting tool ${toolCallChunk.name}...`);
+                    newMessage.id = toolCallChunk.id;
+                    newMessage.tool = toolCallChunk.name;
+                    newMessage.toolInput = toolCallChunk.args || '';
+                    messages.push(newMessage);
+                }
+            }
         }
-        if (chunk?.tool_calls) {
-            message.tool_calls = [...(message.tool_calls || []), ...chunk.tool_calls];
+    }
+    
+    private updateStreamTextMessage(messages: Message[], chunk: any, run_id: string): void {
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage && lastMessage.type === 'text') {
+            (lastMessage as TextMessage).content += chunk.content;
+        } else {
+            const newMessage = new TextMessage(chunk.content);
+            newMessage.id = run_id;
+            messages.push(newMessage);
         }
     }
 
