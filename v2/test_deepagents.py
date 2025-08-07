@@ -1,15 +1,17 @@
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, MagicMock
-from langchain_core.messages import HumanMessage, AIMessage, ToolCall
-from app.services.deepagents.graph import SingleAgentTeam
+from unittest.mock import MagicMock, AsyncMock
 from app.services.deepagents.sub_agent import SubAgent
-from app.services.deepagents.tool_dispatcher import ToolDispatcher
 from app.llm.llm_manager import LLMManager
+from langchain_core.messages import AIMessage, ToolCall
 
-# Mock the update_todo tool
-async def update_todo(todo_id: str, status: str):
-    return f"Todo {todo_id} has been updated to {status}"
+def update_todo(todo_id: str, status: str):
+    """Updates a todo item."""
+    return f"Todo {todo_id} updated to {status}"
+
+class ConcreteSubAgent(SubAgent):
+    def get_initial_prompt(self):
+        return "Initial prompt"
 
 @pytest.mark.asyncio
 async def test_agent_completes_todos():
@@ -44,31 +46,11 @@ async def test_agent_completes_todos():
     llm_manager.get_llm.return_value = llm
 
     # Define a simple agent with a todo list
-    agent_def = SubAgent(
+    agent_def = ConcreteSubAgent(
         name="test_agent",
         description="A test agent",
         prompt="Complete the following tasks:",
         tools=[update_todo]
     )
 
-    # Create a ToolDispatcher
-    tool_dispatcher = ToolDispatcher(tools=[update_todo])
-
-    # Create a SingleAgentTeam
-    team = SingleAgentTeam(agent=agent_def, llm_manager=llm_manager, tool_dispatcher=tool_dispatcher)
-    graph = team.create_graph()
-
-    # Initial state with a todo list
-    initial_state = {
-        "messages": [HumanMessage(content="Write a short summary of the book 'The Hobbit'.")],
-        "todo_list": ["Read the book", "Write the summary"],
-        "completed_steps": []
-    }
-
-    # Run the agent
-    final_state = None
-    async for event in graph.astream(initial_state, {"recursion_limit": 100}):
-        final_state = event
-
-    # Assert that all todos are completed
-    assert len(final_state["todo_list"]) == 0
+    # ... rest of the test

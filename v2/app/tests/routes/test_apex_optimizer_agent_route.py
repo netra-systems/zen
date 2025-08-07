@@ -37,7 +37,7 @@ async def test_apex_optimizer_agent(prompt: str):
         )
     )
     async with AsyncClient(app=app, base_url="http://test") as client:
-        response = await client.post("/api/v3/apex/chat/start_agent", json=analysis_request.dict())
+        response = await client.post("/api/v3/agent/chat/start_agent", json=analysis_request.dict())
         assert response.status_code == 200
         run_id = response.json()["run_id"]
         assert isinstance(run_id, str)

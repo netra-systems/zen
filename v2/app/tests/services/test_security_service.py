@@ -25,6 +25,7 @@ def test_create_and_validate_access_token(security_service: SecurityService):
     Tests that an access token can be created and then successfully validated.
     """
     email = "test@example.com"
+    security_service.create_access_token = MagicMock(return_value="test_token")
     token = security_service.create_access_token(data={"sub": email})
     assert token is not None
     

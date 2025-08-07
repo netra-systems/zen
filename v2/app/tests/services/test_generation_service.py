@@ -12,13 +12,13 @@ async def test_update_job_status():
     kwargs = {"progress": 50}
 
     # Act
-    update_job_status(job_id, status, **kwargs)
+    await update_job_status(job_id, status, **kwargs)
 
     # Assert
-    assert job_id in job_store.jobs
-    assert job_store.jobs[job_id]['status'] == status
-    assert job_store.jobs[job_id]['progress'] == 50
-    assert 'last_updated' in job_store.jobs[job_id]
+    assert job_id in job_store._jobs
+    assert job_store._jobs[job_id]['status'] == status
+    assert job_store._jobs[job_id]['progress'] == 50
+    assert 'last_updated' in job_store._jobs[job_id]
 
 @pytest.mark.asyncio
 async def test_get_corpus_from_clickhouse():

@@ -7,9 +7,10 @@ from app.main import app
 from app.services.security_service import SecurityService
 from app.services.key_manager import KeyManager
 from app.config import settings
+from app.auth import google_oauth as oauth
 
 
-@patch("app.routes.google_auth.oauth.google")
+@patch("app.auth.google_oauth.google")
 def test_google_auth(mock_google_oauth):
     # 1. Mock the Google OAuth flow
     async def mock_authorize_redirect(request: Request, redirect_uri: str):
@@ -34,7 +35,7 @@ def test_google_auth(mock_google_oauth):
     # 3. Use TestClient as a context manager to persist session
     with TestClient(app) as client:
         # 4. Initiate the Google login
-        response = client.get("/login/google", follow_redirects=False)
+        response = client.get("/api/v3/auth/login/google", follow_redirects=False)
         assert response.status_code == 302
         assert "session" in response.cookies
 

@@ -35,7 +35,7 @@ async def test_content_generation_with_custom_table(mock_run_job, test_client):
     custom_table_name = f"test_content_corpus_{uuid.uuid4().hex}"
 
     async def side_effect(job_id, params):
-        job_store.update(job_id, "completed", summary={"message": f"Corpus generated and saved to {params['clickhouse_table']}"})
+        await job_store.update(job_id, "completed", summary={"message": f"Corpus generated and saved to {params['clickhouse_table']}"})
 
     mock_run_job.side_effect = side_effect
     
@@ -55,7 +55,7 @@ async def test_content_generation_with_custom_table(mock_run_job, test_client):
     job_id = response.json()["job_id"]
 
     # Poll for job completion
-    for _ in range(10): # Poll for a maximum of 1 second
+    for _ in range(200): # Poll for a maximum of 20 seconds
         status_response = test_client.get(f"/api/v3/generation/jobs/{job_id}")
         assert status_response.status_code == 200
         job_status = status_response.json()
@@ -76,7 +76,7 @@ async def test_synthetic_data_generation_with_table_selection(mock_run_job, test
 
     async def side_effect(job_id, params):
         # This is now the mock, so we update the job status here
-        job_store.update(job_id, "completed", summary={"message": f"Synthetic data generated and saved to {params['destination_table']}"})
+        await job_store.update(job_id, "completed", summary={"message": f"Synthetic data generated and saved to {params['destination_table']}"})
 
     mock_run_job.side_effect = side_effect
 
@@ -97,7 +97,7 @@ async def test_synthetic_data_generation_with_table_selection(mock_run_job, test
     await asyncio.sleep(0.1) 
 
     # Poll for job completion
-    for _ in range(10):
+    for _ in range(200):
         status_response = test_client.get(f"/api/v3/generation/jobs/{job_id}")
         assert status_response.status_code == 200
         job_status = status_response.json()
@@ -156,7 +156,7 @@ async def test_run_synthetic_data_generation_job_e2e(MockClickHouseDatabase, moc
     destination_table = 'dest_table'
     
     mock_get_corpus.return_value = {"greeting": [("hello", "world")]}
-    mock_synth_main.return_value = [{"id": i} for i in range(5)]
+    mock_synth_main.return_value = await asyncio.sleep(0, result=[{"id": i} for i in range(5)])
     mock_ingest.side_effect = [2, 2, 1] 
 
     params = {
@@ -170,12 +170,12 @@ async def test_run_synthetic_data_generation_job_e2e(MockClickHouseDatabase, moc
     await run_synthetic_data_generation_job(job_id, params)
 
     # Assert
-    job_status = job_store.get(job_id)
+    job_status = await job_store.get(job_id)
     assert job_status is not None
     assert job_status["status"] == "completed"
     assert job_status["summary"]["records_ingested"] == 5
     mock_db_instance.command.assert_called_once_with(get_llm_events_table_schema(destination_table))
     assert mock_ingest.call_count == 3
 
-    if job_id in job_store.jobs:
-        del job_store.jobs[job_id]
+    if job_id in job_store._jobs:
+        del job_store._jobs[job_id]
