@@ -1,5 +1,10 @@
 import useAppStore from '@/store';
 
+export const useUser = () => {
+    const user = useAppStore((state) => state.user);
+    return { user };
+};
+
 export const getUserId = () => {
     const user = useAppStore.getState().user;
     let userId = user ? user.id : null;
@@ -16,4 +21,16 @@ export const getToken = (): string | null => {
         return localStorage.getItem('authToken');
     }
     return null;
+};
+
+export const setToken = (token: string): void => {
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('authToken', token);
+    }
+};
+
+export const removeToken = (): void => {
+    if (typeof window !== 'undefined') {
+        localStorage.removeItem('authToken');
+    }
 };

@@ -4,12 +4,7 @@ import { config } from './config';
 import { Message } from './types';
 
 
-interface User {
-    id: number;
-    full_name?: string;
-    email: string;
-    picture?: string;
-}
+import { User } from './types';
 
 interface AppState {
     user: User | null;

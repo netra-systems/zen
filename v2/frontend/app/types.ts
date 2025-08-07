@@ -1,3 +1,4 @@
+
 export interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -7,4 +8,11 @@ export interface Message {
 export interface Artifact {
   type: 'table' | 'chart' | 'code';
   data: any;
+}
+
+export interface User {
+    id: number;
+    full_name?: string;
+    email: string;
+    picture?: string;
 }
