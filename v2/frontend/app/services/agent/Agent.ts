@@ -1,17 +1,56 @@
 import { getToken, getUserId } from '../../lib/user';
 import { produce } from 'immer';
 import { WebSocketClient, WebSocketStatus } from './WebSocketClient';
-import { Message, StreamEvent, AnalysisRequest, ToolCallChunk, ToolOutput } from './types'; // Added ToolCallChunk, ToolOutput
+import { Message, StreamEvent, AnalysisRequest, ToolCall, ToolCallChunk, ToolOutputMessage } from './types';
 import { UserMessage, ThinkingMessage, ToolStartMessage, ToolEndMessage, StateUpdateMessage, TextMessage } from './models';
 
-// --- Type Definitions for Clarity ---
+// --- Type Definitions for Clarity (assuming these are in './types.ts') ---
+/*
+// A generic message in the chat UI
+export interface Message {
+    id: string; // Unique ID, often corresponds to a run_id or tool_call_id
+    type: 'user' | 'thinking' | 'text' | 'tool_start' | 'tool_end' | 'state_update' | 'error';
+    content: string;
+}
+
+// The generic structure of a WebSocket event from the backend
+export interface StreamEvent {
+    event: string;      // e.g., 'on_chat_model_stream', 'on_tool_end'
+    data: any;
+    run_id: string;
+}
+
+// Represents the model's decision to call a tool
+export interface ToolCall {
+    id: string;
+    name: string;
+    args: { [key: string]: any };
+}
+
+// Represents a streamed chunk of a tool call's arguments
+export interface ToolCallChunk {
+    id: string;
+    name: string;
+    args: string; // A string chunk of the JSON arguments
+}
+
+// Represents the final output from a tool, wrapped in a message
+export interface ToolOutputMessage {
+    type: 'tool';
+    content: string | { [key: string]: any };
+    tool_call_id: string;
+}
+*/
+
+// --- Agent Class ---
+
 type AgentListener = (state: AgentState) => void;
 
 interface AgentState {
     messages: Message[];
     isThinking: boolean;
     error: Error | null;
-    // A map to buffer incomplete tool call arguments
+    // A map to buffer incomplete tool call arguments as they stream in
     toolArgBuffers: { [key: string]: string };
 }
 
@@ -74,14 +113,14 @@ class Agent {
     public start(message: string): void {
         if (!this.isInitialized) {
              this.setState(draft => {
-                draft.error = new Error('Agent is not connected. Please initialize first.');
+                 draft.error = new Error('Agent is not connected. Please initialize first.');
              });
              return;
         }
         
         this.setState(draft => {
             draft.messages.push(new UserMessage(message));
-            draft.messages.push(new ThinkingMessage()); // Add placeholder
+            draft.messages.push(new ThinkingMessage()); // Add placeholder for the agent's response
             draft.isThinking = true;
             draft.error = null;
             draft.toolArgBuffers = {}; // Clear previous buffers
@@ -123,7 +162,6 @@ class Agent {
         }
         if (status === WebSocketStatus.Closed) {
             this.isInitialized = false;
-            // Optionally, update state to reflect disconnection
             this.setState(draft => {
                 if (draft.isThinking) {
                    draft.isThinking = false;
@@ -151,48 +189,66 @@ class Agent {
     // --- Core Event Processing Logic ---
 
     private processStreamEvent(draft: AgentState, streamEvent: StreamEvent): void {
-        const { event, data, run_id } = JSON.parse(streamEvent);
-        //console.log(event, data, run_id)
-        // Ensure a message exists for the current run to attach data to
-        this.findOrCreateRunMessage(draft, run_id);
+        const { event, data } = JSON.parse(streamEvent as any); // The raw event is a JSON string
+        const run_id = data.run_id; // The run_id is often nested inside the data object
 
         switch (event) {
-            case 'on_chat_model_stream':
-                if (data.chunk?.content) {
-                    this.processTextChunk(draft, run_id, data.chunk.content);
-                }
-                if (data.chunk?.tool_calls) {
-                    // This event signals the *start* of tools, but chunks provide the content
-                }
-                if (data.chunk?.tool_call_chunks) {
-                    data.chunk.tool_call_chunks.forEach((chunk: ToolCallChunk) => {
-                        this.processToolChunk(draft, chunk);
-                    });
-                }
-                break;
-
-            case 'on_tool_end':
-                if (data.output) {
-                    this.processToolOutput(draft, data.output as ToolOutput);
-                }
-                break;
-
-            case 'update_state':
-            case 'on_chain_start': // Grouping similar state updates
-                const stateData = event === 'update_state' ? data : data?.input;
-                if (stateData) {
-                    this.processStateUpdate(draft, run_id, stateData);
+            // --- Agent Lifecycle ---
+            case 'on_chain_start':
+                // This event can contain initial state like a to-do list.
+                if (data?.input?.todo_list) {
+                    this.processStateUpdate(draft, run_id, data.input);
                 }
                 break;
 
             case 'run_complete':
                 draft.isThinking = false;
-                // Clean up any remaining thinking placeholders
-                draft.messages = draft.messages.filter(m => m.type !== 'thinking');
+                // Clean up any "thinking" placeholders that were not used.
+                draft.messages = draft.messages.filter(m => m.type !== 'thinking' || m.content);
+                break;
+
+            // --- Model Streaming ---
+            case 'on_chat_model_stream':
+                const chunk = data.chunk;
+                // 1. Process streamed text content.
+                if (chunk?.content) {
+                    this.processTextChunk(draft, run_id, chunk.content);
+                }
+                // 2. Process the model's decision to call a tool.
+                if (chunk?.tool_calls) {
+                    chunk.tool_calls.forEach((toolCall: ToolCall) => {
+                        this.processToolStart(draft, toolCall.id, toolCall.name);
+                    });
+                }
+                // 3. Process streamed arguments for a tool call.
+                if (chunk?.tool_call_chunks) {
+                    chunk.tool_call_chunks.forEach((toolChunk: ToolCallChunk) => {
+                        this.processToolChunk(draft, toolChunk);
+                    });
+                }
                 break;
             
-            // Gracefully ignore events we don't handle
+            // --- Generic Stream for Tool Outputs & Other Messages ---
+            case 'on_chain_stream':
+                if (data.chunk?.messages) {
+                    data.chunk.messages.forEach((msg: any) => {
+                        if (msg.type === 'tool') {
+                            // This is the crucial event carrying the result of a tool execution.
+                            this.processToolOutput(draft, msg as ToolOutputMessage);
+                        }
+                    });
+                }
+                break;
+
+            // --- Gracefully Ignored Events ---
+            // These events are useful for debugging but do not require a state update in this client design.
+            // The essential data they carry is captured by other events like `on_chat_model_stream`.
+            case 'on_prompt_start':
             case 'on_prompt_end':
+            case 'on_chat_model_start':
+            case 'on_chat_model_end':
+            case 'on_tool_start': // The UI message is created earlier via `on_chat_model_stream`.
+            case 'on_tool_end':   // The result is handled via the `on_chain_stream` 'tool' message.
             case 'on_chain_end':
                 break;
 
@@ -204,87 +260,107 @@ class Agent {
     
     // --- Helper Functions for Processing Stream Data ---
     
-    /** Finds the primary message associated with a run, or the last thinking message. */
+    /** Finds or creates the primary response message associated with a run. */
     private findOrCreateRunMessage(draft: AgentState, run_id: string): Message {
         let message = draft.messages.find(m => m.id === run_id);
         if (message) return message;
         
-        // If no message with run_id, find the last 'thinking' placeholder and assign the id
+        // Find the last 'thinking' placeholder and assign it this run's ID.
         const thinkingMessage = draft.messages.slice().reverse().find(m => m.type === 'thinking');
         if (thinkingMessage) {
             thinkingMessage.id = run_id;
             return thinkingMessage;
         }
 
-        // Fallback: create a new message if none exists (should be rare)
+        // Fallback: create a new message (should be rare).
         const newMessage = new ThinkingMessage();
         newMessage.id = run_id;
         draft.messages.push(newMessage);
         return newMessage;
     }
 
+    /** Appends streamed text to the current agent response message. */
     private processTextChunk(draft: AgentState, run_id: string, content: string): void {
         let message = this.findOrCreateRunMessage(draft, run_id);
 
-        // Morph the 'thinking' message into the first 'text' message
-        if (message.type !== 'text') {
-            Object.assign(message, new TextMessage(content));
-            message.id = run_id; // Ensure ID is preserved
-        } else {
+        // If the current message is a 'thinking' placeholder, morph it into a 'text' message.
+        if (message.type === 'thinking') {
+            const index = draft.messages.findIndex(m => m.id === message.id);
+            const newMessage = new TextMessage(content);
+            newMessage.id = run_id; // Preserve ID
+            if (index !== -1) draft.messages[index] = newMessage;
+        } else if (message.type === 'text') {
+            // Otherwise, just append the content.
             message.content += content;
         }
     }
 
-    private processToolChunk(draft: AgentState, chunk: ToolCallChunk): void {
-        if (!chunk.id) return; // Ignore chunks without an ID
+    /** Creates a new 'tool_start' message when the model decides to use a tool. */
+    private processToolStart(draft: AgentState, toolCallId: string, toolName: string): void {
+        if (draft.messages.some(m => m.id === toolCallId)) return; // Avoid duplicates
 
-        // Buffer the raw argument string
+        const toolMessage = new ToolStartMessage(`Calling tool: ${toolName}`);
+        toolMessage.id = toolCallId;
+        toolMessage.tool = toolName;
+        draft.messages.push(toolMessage);
+    }
+    
+    /** Buffers and parses streamed arguments for a tool call. */
+    private processToolChunk(draft: AgentState, chunk: ToolCallChunk): void {
+        if (!chunk.id) return;
+
         draft.toolArgBuffers[chunk.id] = (draft.toolArgBuffers[chunk.id] || '') + chunk.args;
 
-        // Find or create the message for this tool call
-        let toolMessage = draft.messages.find(m => m.id === chunk.id) as ToolStartMessage;
-        if (!toolMessage) {
-            toolMessage = new ToolStartMessage(`Calling tool: ${chunk.name}`);
-            toolMessage.id = chunk.id;
-            toolMessage.tool = chunk.name;
-            draft.messages.push(toolMessage);
-        }
+        const toolMessage = draft.messages.find(m => m.id === chunk.id) as ToolStartMessage;
+        if (!toolMessage || toolMessage.type !== 'tool_start') return;
         
-        // Attempt to parse the buffered string to create a nicely formatted input for display
+        // Attempt to parse the buffered JSON for pretty-printing.
         try {
             const parsedArgs = JSON.parse(draft.toolArgBuffers[chunk.id]);
             toolMessage.toolInput = JSON.stringify(parsedArgs, null, 2); // Pretty print
         } catch (e) {
-            // If it fails to parse, it's incomplete. Display the raw buffer.
+            // If JSON is incomplete, just show the raw buffer.
             toolMessage.toolInput = draft.toolArgBuffers[chunk.id];
         }
     }
     
-    private processToolOutput(draft: AgentState, output: ToolOutput): void {
-        const toolMessage = draft.messages.find(m => m.id === output.tool_call_id);
-        if (toolMessage && toolMessage.type === 'tool_start') {
-             // Morph the message into a ToolEndMessage
-            Object.assign(toolMessage, new ToolEndMessage(
-                toolMessage.content,
-                (toolMessage as ToolStartMessage).tool,
-                (toolMessage as ToolStartMessage).toolInput
-            ));
-            (toolMessage as ToolEndMessage).tool_outputs = [{
+    /** Processes the final output of a tool and updates the corresponding message. */
+    private processToolOutput(draft: AgentState, output: ToolOutputMessage): void {
+        const index = draft.messages.findIndex(m => m.id === output.tool_call_id);
+        const startMessage = draft.messages[index] as ToolStartMessage;
+
+        if (index !== -1 && startMessage?.type === 'tool_start') {
+            // Morph the 'tool_start' message into a 'tool_end' message.
+            const endMessage = new ToolEndMessage(
+                startMessage.content,
+                startMessage.tool,
+                startMessage.toolInput
+            );
+            endMessage.id = startMessage.id; // Preserve ID
+            endMessage.tool_outputs = [{
                 tool_call_id: output.tool_call_id,
                 content: typeof output.content === 'string' ? output.content : JSON.stringify(output.content, null, 2),
-                is_error: false // Assuming success, can be extended for errors
+                is_error: false
             }];
-            toolMessage.type = 'tool_end'; // Ensure type is correctly set
+            
+            // Replace the start message with the final end message.
+            draft.messages[index] = endMessage;
         }
     }
 
+    /** Updates a message to show a to-do list or other state information. */
     private processStateUpdate(draft: AgentState, run_id: string, stateData: any): void {
         if (!stateData.todo_list) return;
 
         let message = this.findOrCreateRunMessage(draft, run_id);
+        
+        // Morph or create a state update message.
         if (message.type !== 'state_update') {
-             Object.assign(message, new StateUpdateMessage(''));
-             message.id = run_id;
+             const index = draft.messages.findIndex(m => m.id === message.id);
+             const newMessage = new StateUpdateMessage('Updating plan...');
+             newMessage.id = run_id;
+             if (index !== -1) draft.messages[index] = newMessage;
+             message = newMessage;
         }
 
         (message as StateUpdateMessage).state = {

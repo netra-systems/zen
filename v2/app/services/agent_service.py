@@ -36,7 +36,8 @@ class AgentService:
                     request=RequestModel(**request_data)
                 )
                 response = await self.start_agent(analysis_request, run_id)
-                await manager.send_to_run(json.dumps(response), run_id)
+                # careful not double wrap JSON
+                await manager.send_to_run(response)
             else:
                 logger.warning(f"Received unhandled message for run_id: {run_id}: {message_data}")
         except Exception as e:
