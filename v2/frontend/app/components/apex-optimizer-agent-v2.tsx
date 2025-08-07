@@ -7,9 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
+const examplePrompts = [
+  "Analyze the 'fetch_user_data' tool and suggest optimizations.",
+  "How can I improve the performance of the 'process_image' tool?",
+  "Find bottlenecks in the 'run_simulation' tool.",
+  "What are the cost drivers for the 'generate_report' tool?",
+];
+
 export default function ApexOptimizerAgentV2() {
   const [input, setInput] = useState('');
   const { startAgent, messages, showThinking, error } = useAgent();
+  const [showExamples, setShowExamples] = useState(true);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
@@ -20,7 +28,13 @@ export default function ApexOptimizerAgentV2() {
     if (input.trim()) {
       startAgent(input);
       setInput('');
+      setShowExamples(false);
     }
+  };
+
+  const handleExampleClick = (prompt: string) => {
+    setInput(prompt);
+    setShowExamples(false);
   };
 
   return (
@@ -37,6 +51,25 @@ export default function ApexOptimizerAgentV2() {
             {showThinking && <ChatMessage message={{id: 'thinking', role: 'agent', type: 'thinking', timestamp: new Date().toISOString()}}/>}
           </div>
           <div className="p-4 border-t">
+            {showExamples && (
+              <Card className="mb-4">
+                <CardHeader>
+                  <CardTitle>Example Prompts</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-4">
+                  {examplePrompts.map((prompt, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      onClick={() => handleExampleClick(prompt)}
+                      className="text-left h-auto"
+                    >
+                      {prompt}
+                    </Button>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
             <form onSubmit={handleSubmit} className="flex items-center gap-2">
               <Input
                 value={input}

@@ -29,7 +29,7 @@ const processStreamEvent = (draft: Message[], event: StreamEvent) => {
 
   switch (eventName) {
     case 'on_chain_start':
-      if ('input' in data && data.input?.todo_list) {
+      if (data.input?.todo_list) {
         existingMessage.state_updates = {
           todo_list: data.input.todo_list,
           completed_steps: data.input.completed_steps || [],
@@ -38,24 +38,33 @@ const processStreamEvent = (draft: Message[], event: StreamEvent) => {
       break;
 
     case 'on_chat_model_stream':
-      if ('chunk' in data) {
-        if (data.chunk?.content) {
-          existingMessage.content = (existingMessage.content || '') + data.chunk.content;
-        }
-        if (data.chunk?.tool_calls) {
-          existingMessage.tool_calls = [...(existingMessage.tool_calls || []), ...data.chunk.tool_calls];
-        }
+      if (data.chunk?.content) {
+        existingMessage.content = (existingMessage.content || '') + data.chunk.content;
+      }
+      if (data.chunk?.tool_calls) {
+        data.chunk.tool_calls.forEach(toolCall => {
+          if (toolCall.name === 'update_state') {
+            existingMessage.state_updates = toolCall.args as any;
+          } else {
+            const existingCallIndex = existingMessage.tool_calls.findIndex(tc => tc.id === toolCall.id);
+            if (existingCallIndex > -1) {
+              existingMessage.tool_calls[existingCallIndex] = toolCall;
+            } else {
+              existingMessage.tool_calls.push(toolCall);
+            }
+          }
+        });
       }
       break;
 
     case 'on_tool_end':
-      if ('output' in data) {
+      if (data.output) {
         const toolOutput = {
-          tool_call_id: run_id, // This might need adjustment based on actual data
+          tool_call_id: run_id, 
           content: typeof data.output === 'string' ? data.output : JSON.stringify(data.output),
-          is_error: 'is_error' in data ? data.is_error : false,
+          is_error: data.is_error || false,
         };
-        existingMessage.tool_outputs = [...(existingMessage.tool_outputs || []), toolOutput];
+        existingMessage.tool_outputs.push(toolOutput);
       }
       break;
 

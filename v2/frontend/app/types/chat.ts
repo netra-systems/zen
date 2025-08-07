@@ -28,7 +28,8 @@ export type EventName =
   | 'on_tool_end'
   | 'on_agent_action'
   | 'on_agent_finish'
-  | 'run_complete';
+  | 'run_complete'
+  | 'update_state';
 
 export interface ToolCall {
   name: string;
@@ -59,27 +60,27 @@ export interface ArtifactMessage extends BaseMessage {
 }
 
 export interface OnChainStartData {
-  input: {
-    messages: any[];
-    workloads: any[];
-    todo_list: string[];
-    completed_steps: string[];
-    status: string;
-    events: any[];
+  input?: {
+    messages?: any[];
+    workloads?: any[];
+    todo_list?: string[];
+    completed_steps?: string[];
+    status?: string;
+    events?: any[];
   };
 }
 
 export interface OnToolStartData {
-  input: Record<string, any>;
+  input?: Record<string, any>;
 }
 
 export interface OnToolEndData {
-  output: string;
-  is_error: boolean;
+  output?: string;
+  is_error?: boolean;
 }
 
 export interface OnChatModelStreamData {
-  chunk: {
+  chunk?: {
     content?: string;
     tool_calls?: ToolCall[];
   };
@@ -99,6 +100,9 @@ export interface StreamEvent {
     | RunCompleteData
     | Record<string, any>;
   run_id: string;
+  name?: string;
+  tags?: string[];
+  metadata?: Record<string, any>;
 }
 
 export type Message = TextMessage | ThinkingMessage | ArtifactMessage;

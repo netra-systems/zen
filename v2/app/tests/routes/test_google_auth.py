@@ -1,4 +1,5 @@
 from unittest.mock import patch, AsyncMock
+from fastapi import Request
 from fastapi.testclient import TestClient
 from fastapi.responses import RedirectResponse
 
@@ -7,15 +8,15 @@ from app.services.security_service import SecurityService
 from app.services.key_manager import KeyManager
 from app.config import settings
 
-client = TestClient(app)
-
 
 @patch("app.routes.google_auth.oauth.google")
 def test_google_auth(mock_google_oauth):
     # 1. Mock the Google OAuth flow
-    mock_google_oauth.authorize_redirect = AsyncMock(
-        return_value=RedirectResponse(url="https://accounts.google.com/o/oauth2/v2/auth", status_code=302)
-    )
+    async def mock_authorize_redirect(request: Request, redirect_uri: str):
+        request.session['_google_state_'] = 'test-state'
+        return RedirectResponse(url="https://accounts.google.com/o/oauth2/v2/auth", status_code=302)
+
+    mock_google_oauth.authorize_redirect.side_effect = mock_authorize_redirect
     mock_google_oauth.authorize_access_token = AsyncMock(
         return_value={
             "userinfo": {
@@ -35,15 +36,15 @@ def test_google_auth(mock_google_oauth):
         # 4. Initiate the Google login
         response = client.get("/login/google", follow_redirects=False)
         assert response.status_code == 302
-        assert "state" in response.cookies
+        assert "session" in response.cookies
 
         # 5. Simulate the callback from Google
-        response = client.get("/api/v3/auth/google", follow_redirects=False)
+        response = client.get("/api/v3/auth/google?state=test-state&code=test-code", follow_redirects=False)
         assert response.status_code == 307
         redirect_url = response.headers["location"]
         assert redirect_url.startswith(f"{settings.frontend_url}/auth/callback?token=")
 
         # 6. Verify the token in the redirect URL
         token = redirect_url.split("=")[1]
-        payload = app.state.security_service.decode_access_token(token)
-        assert payload["sub"] == "test@example.com"
+        email = app.state.security_service.get_user_email_from_token(token)
+        assert email == "test@example.com"
