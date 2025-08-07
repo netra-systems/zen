@@ -2,15 +2,15 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import ApexOptimizerAgentV2 from '@/components/apex-optimizer-agent-v2';
 import { useAgentContext } from '@/providers/AgentProvider';
-import { UserProvider } from '@/providers/UserProvider';
+import useAuth from '@/auth';
 
 jest.mock('@/providers/AgentProvider', () => ({
   useAgentContext: jest.fn(),
 }));
 
-jest.mock('@/providers/UserProvider', () => ({
-  useUser: () => ({ user: { id: 'test-user' }, isLoading: false }),
-  UserProvider: ({ children }) => <div>{children}</div>,
+jest.mock('@/auth', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 describe('ApexOptimizerAgentV2', () => {
@@ -23,23 +23,20 @@ describe('ApexOptimizerAgentV2', () => {
       startAgent: mockStartAgent,
       error: null,
     });
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { id: 'test-user', name: 'Test User', picture: '' },
+      login: jest.fn(),
+      logout: jest.fn(),
+    });
   });
 
   it('should render the chat window', () => {
-    render(
-      <UserProvider>
-        <ApexOptimizerAgentV2 />
-      </UserProvider>
-    );
+    render(<ApexOptimizerAgentV2 />);
     expect(screen.getByRole('article')).toBeInTheDocument();
   });
 
   it('should call startAgent when a message is sent', () => {
-    render(
-      <UserProvider>
-        <ApexOptimizerAgentV2 />
-      </UserProvider>
-    );
+    render(<ApexOptimizerAgentV2 />);
     const input = screen.getByPlaceholderText('Ask the agent to optimize a tool...');
     const sendButton = screen.getByText('Send');
 
@@ -50,11 +47,7 @@ describe('ApexOptimizerAgentV2', () => {
   });
 
   it('should call startAgent when an example query is clicked', () => {
-    render(
-      <UserProvider>
-        <ApexOptimizerAgentV2 />
-      </UserProvider>
-    );
+    render(<ApexOptimizerAgentV2 />);
     const exampleButton = screen.getByText(/Analyze the latency/);
 
     fireEvent.click(exampleButton);

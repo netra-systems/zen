@@ -1,48 +1,37 @@
 import pytest
-from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from app.main import app
-from app.db.postgres import get_async_db as get_db
 from app.db.base import Base
-from app.config import settings
-from app.services.key_manager import KeyManager
-from app.services.security_service import SecurityService
+from app.main import app
+from fastapi.testclient import TestClient
 
-DATABASE_URL = "sqlite+aiosqlite:///./test.db"
+@pytest.fixture(scope="session")
+def event_loop():
+    import asyncio
+    loop = asyncio.get_event_loop()
+    yield loop
+    loop.close()
 
-engine = create_async_engine(DATABASE_URL, echo=True)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
-
-@pytest.fixture(scope="function")
-async def db_engine():
+@pytest.fixture(scope="session")
+async def test_engine():
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield engine
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+    await engine.dispose()
 
 @pytest.fixture(scope="function")
-async def db_session(db_engine):
-    connection = await db_engine.connect()
-    trans = await connection.begin()
-    Session = sessionmaker(bind=connection, class_=AsyncSession)
-    session = Session()
-    yield session
-    await session.close()
-    await trans.rollback()
-    await connection.close()
+async def db_session(test_engine):
+    async_session = sessionmaker(test_engine, expire_on_commit=False, class_=AsyncSession)
+    async with async_session() as session:
+        yield session
 
 @pytest.fixture(scope="function")
-async def client(db_session: AsyncSession):
+def client(db_session):
     def override_get_db():
         yield db_session
 
-    key_manager = KeyManager.load_from_settings(settings)
-    app.state.key_manager = key_manager
-    app.state.security_service = SecurityService(key_manager)
-
     app.dependency_overrides[get_db] = override_get_db
-    async with AsyncClient(app=app, base_url="http://test") as c:
+    with TestClient(app) as c:
         yield c
-    app.dependency_overrides.pop(get_db, None)
+    del app.dependency_overrides[get_db]

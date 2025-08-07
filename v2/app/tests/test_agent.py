@@ -1,86 +1,91 @@
 import pytest
-from unittest.mock import patch, AsyncMock
-import uuid
-import datetime
-
-from app.main import app
-from app.schemas import User
-from app.dependencies import get_current_user
-from app.services.agent_service import AgentService
+from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi.testclient import TestClient
+from app.main import app
+from app.services.agent_service import AgentService
+from app.auth.auth_dependencies import get_current_user
+from app.schemas import User
+from app.routes.agent_route import get_agent_supervisor
+import uuid
+from fastapi import HTTPException
 
 @pytest.fixture
-def authenticated_client():
-    mock_user = User(
-        id=str(uuid.uuid4()),
-        email="test@example.com",
-        full_name="Test User",
-        is_active=True,
-        is_superuser=False,
-    )
-    app.dependency_overrides[get_current_user] = lambda: mock_user
-    with TestClient(app) as client:
-        yield client
-    del app.dependency_overrides[get_current_user]
+def client():
+    return TestClient(app)
+
+@pytest.fixture
+def agent_service_mock():
+    return MagicMock(spec=AgentService)
 
 @pytest.mark.asyncio
-@patch('app.services.agent_service.AgentService.start_agent')
-async def test_start_agent_success(mock_start_agent, authenticated_client):
-    mock_start_agent.return_value = {"status": "agent_started", "run_id": "test_run"}
-    analysis_request = {
-        "settings": {"debug_mode": True},
-        "request": {
-            "id": "test_req",
-            "user_id": "test_user",
-            "query": "test query",
-            "workloads": [
-                {
-                    "run_id": "test_run",
-                    "query": "test query",
-                    "data_source": {"source_table": "test_table"},
-                    "time_range": {"start_time": "2024-01-01T00:00:00Z", "end_time": "2024-01-02T00:00:00Z"}
-                }
-            ]
-        }
-    }
+async def test_start_agent(client, agent_service_mock):
+    agent_service_mock.start_agent = AsyncMock(return_value={"run_id": "test_run"})
+    app.dependency_overrides[get_agent_supervisor] = lambda: agent_service_mock
 
-    response = authenticated_client.post("/api/v3/agent/chat/start_agent", json=analysis_request)
+    app.dependency_overrides[get_current_user] = lambda: User(id=str(uuid.uuid4()), email="dev@example.com", is_superuser=False)
+    response = client.post("/api/v3/agent/start", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "test message", "workloads": []}})
 
     assert response.status_code == 200
-    assert response.json() == {"status": "agent_started", "run_id": "test_req"}
-    mock_start_agent.assert_awaited_once()
+    assert response.json() == {"run_id": "test_run"}
+    agent_service_mock.start_agent.assert_called_once()
 
 @pytest.mark.asyncio
-@patch('app.services.agent_service.AgentService.start_agent')
-async def test_start_agent_failure(mock_start_agent, authenticated_client):
-    mock_start_agent.side_effect = HTTPException(status_code=500, detail="Agent start failed")
-    analysis_request = {
-        "settings": {"debug_mode": True},
-        "request": {
-            "id": "test_req",
-            "user_id": "test_user",
-            "query": "test query",
-            "workloads": [
-                {
-                    "run_id": "test_run",
-                    "query": "test query",
-                    "data_source": {"source_table": "test_table"},
-                    "time_range": {"start_time": "2024-01-01T00:00:00Z", "end_time": "2024-01-02T00:00:00Z"}
-                }
-            ]
-        }
-    }
+async def test_start_agent_with_different_messages(client, agent_service_mock):
+    agent_service_mock.start_agent = AsyncMock(return_value={"run_id": "test_run"})
+    app.dependency_overrides[get_agent_supervisor] = lambda: agent_service_mock
 
-    response = authenticated_client.post("/api/v3/agent/chat/start_agent", json=analysis_request)
+    app.dependency_overrides[get_current_user] = lambda: User(id=str(uuid.uuid4()), email="dev@example.com", is_superuser=False)
+    # First message
+    response1 = client.post("/api/v3/agent/start", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "first message", "workloads": []}})
+    assert response1.status_code == 200
+    assert response1.json() == {"run_id": "test_run"}
+
+    # Second message
+    response2 = client.post("/api/v3/agent/start", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "second message", "workloads": []}})
+    assert response2.status_code == 200
+    assert response2.json() == {"run_id": "test_run"}
+
+    assert agent_service_mock.start_agent.call_count == 2
+
+@pytest.mark.asyncio
+async def test_start_agent_with_empty_message(client, agent_service_mock):
+    agent_service_mock.start_agent = AsyncMock(return_value={"run_id": "test_run"})
+    app.dependency_overrides[get_agent_supervisor] = lambda: agent_service_mock
+
+    app.dependency_overrides[get_current_user] = lambda: User(id=str(uuid.uuid4()), email="dev@example.com", is_superuser=False)
+    response = client.post("/api/v3/agent/start", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "", "workloads": []}})
+
+    assert response.status_code == 200
+    assert response.json() == {"run_id": "test_run"}
+    agent_service_mock.start_agent.assert_called_once()
+
+@pytest.mark.asyncio
+async def test_start_agent_service_failure(client, agent_service_mock):
+    agent_service_mock.start_agent.side_effect = Exception("Agent service failed")
+    app.dependency_overrides[get_agent_supervisor] = lambda: agent_service_mock
+
+    app.dependency_overrides[get_current_user] = lambda: User(id=str(uuid.uuid4()), email="dev@example.com", is_superuser=False)
+    response = client.post("/api/v3/agent/start", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "test message", "workloads": []}})
 
     assert response.status_code == 500
-    assert response.json() == {"detail": "Agent start failed"}
+    assert response.json() == {"detail": "Agent service failed"}
 
 @pytest.mark.asyncio
-async def test_websocket_endpoint(authenticated_client):
-    run_id = "test_run"
-    with authenticated_client.websocket_connect(f"/ws/{run_id}") as websocket:
-        # The connection should be accepted, but there's no message sent from the server
-        # immediately upon connection in the current implementation.
-        # We can just assert that the connection is accepted.
-        pass
+async def test_websocket_connection(client):
+    with client.websocket_connect("/api/v3/agent/ws/test_run?token=test_token") as websocket:
+        data = websocket.receive_text()
+        assert data == "Message for run_id: test_run"
+
+@pytest.mark.asyncio
+async def test_start_agent_unauthenticated(client):
+    app.dependency_overrides[get_current_user] = lambda: exec('raise HTTPException(status_code=401, detail="Not authenticated")')
+    response = client.post("/api/v3/agent/start", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "test message", "workloads": []}})
+
+    assert response.status_code == 401
+
+@pytest.mark.asyncio
+async def test_start_agent_invalid_request(client):
+    app.dependency_overrides[get_current_user] = lambda: User(id=str(uuid.uuid4()), email="dev@example.com", is_superuser=False)
+    response = client.post("/api/v3/agent/start", json={"invalid": "request"})
+
+    assert response.status_code == 422

@@ -1,5 +1,6 @@
 import pytest
 from app.services.deepagents.overall_supervisor import OverallSupervisor
+from app.config import get_settings
 
 @pytest.mark.asyncio
 async def test_overall_supervisor():
@@ -13,7 +14,8 @@ async def test_overall_supervisor():
     engine = create_async_engine("sqlite+aiosqlite:///:memory:")
     async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
-    llm_manager = LLMManager()
+    settings = get_settings()
+    llm_manager = LLMManager(settings)
     websocket_manager = manager
 
     async with async_session() as session:
