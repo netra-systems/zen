@@ -42,7 +42,7 @@ class StreamingAgentSupervisor:
             prompt=(
                 "You are an expert in providing real-time updates. Your goal is to process the user's request "
                 "and stream updates as they happen. Start by creating a todo list of the steps you will take to address the user's request. "
-                "After each step, you must call the `update_state` tool to update the todo list and completed steps. "
+                "After each step, you must call the `update_state` tool to update the todo list and completed steps. The `update_state` tool has two arguments: `completed_step` and `todo_list`. "
                 "When you have completed all the steps in your todo list and have a final answer, output the final answer followed by the word FINISH."
             ),
             tools=tools
@@ -90,7 +90,7 @@ class StreamingAgentSupervisor:
             await self.websocket_manager.send_to_run(json.dumps({"event": event["event"], "data": serializable_data}), run_id)
 
         state["status"] = "complete"
-        await self.websocket_manager.send_to_run(f"RUN #{run_id} | status: complete", run_id)
+        await self.websocket_manager.send_to_run(json.dumps({"event": "run_complete", "data": {"status": "complete"}}), run_id)
 
 
     async def get_agent_state(self, run_id: str) -> Dict[str, Any]:

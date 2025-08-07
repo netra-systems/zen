@@ -1,17 +1,32 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ChatInput } from './ChatInput';
 import { ChatHistory } from './ChatHistory';
 import { useAgent } from '../hooks/useAgent';
+import { MessageFilter } from './MessageFilter';
+import { Message } from '../types';
 
 export const Dashboard = () => {
   const { messages, startAgent, isConnected } = useAgent();
+  const [filter, setFilter] = useState('all');
+
+  const handleFilterChange = (newFilter: string) => {
+    setFilter(newFilter);
+  };
+
+  const filteredMessages = messages.filter((message: Message) => {
+    if (filter === 'all') {
+      return true;
+    }
+    return message.role === filter;
+  });
 
   return (
     <div className="flex flex-col h-full items-center justify-center">
       <div className="w-full max-w-2xl flex flex-col h-full">
-        <ChatHistory messages={messages} />
+        <MessageFilter onFilterChange={handleFilterChange} />
+        <ChatHistory messages={filteredMessages} />
         <div className="mt-4">
           <ChatInput onSendMessage={startAgent} />
         </div>
@@ -24,3 +39,5 @@ export const Dashboard = () => {
     </div>
   );
 };
+
+export default Dashboard;

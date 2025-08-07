@@ -39,7 +39,7 @@ class NetraOptimizerAgentSupervisor:
             "An agent for optimizing LLM usage. Your goal is to analyze the user's request "
             "and provide a set of recommendations for improving their LLM usage. Start by creating a todo list "
             "of the steps you will take to address the user's request. After each step, you must call the "
-            "`update_state` tool to update the todo list and completed steps. When you have completed all the "
+            "`update_state` tool to update the todo list and completed steps. The `update_state` tool has two arguments: `completed_step` and `todo_list`. When you have completed all the "
             "steps in your todo list and have a final answer, output the final answer followed by the word FINISH."
         )
         return SubAgent(
