@@ -4,12 +4,12 @@ import React from 'react';
 import { Button } from "./ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
 import { Zap, Settings, RefreshCw } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { ControlButton } from '../types';
 
 export const ControlPanel = () => {
   const router = useRouter();
 
-  const buttons = [
+  const buttons: ControlButton[] = [
     
     { 
       text: 'Generate Admin Corpus', 

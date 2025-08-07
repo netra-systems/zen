@@ -1,36 +1,13 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Message } from '@/app/types';
+import { Message, ChatMessageProps } from '@/app/types';
 import { MessageContent } from './MessageContent';
 import { TodoListView } from './TodoListView';
 import JsonTreeView from './JsonTreeView';
-
-export interface ChatMessageProps {
-    message: Message;
-}
+import { getTitle } from '@/app/lib/utils';
 
 export function ChatMessage({ message }: ChatMessageProps) {
-    const getTitle = (message: Message): string => {
-        switch (message.type) {
-            case 'tool_start':
-            case 'tool_end':
-                return message.tool || 'Tool';
-            case 'state_update':
-                return 'State Update';
-            case 'tool_code':
-                return 'Tool Code';
-            case 'error':
-                return 'Error';
-            case 'user':
-                return 'User';
-            case 'assistant':
-                return 'Assistant';
-            default:
-                return 'Message';
-        }
-    };
-
     const title = getTitle(message);
 
     return (

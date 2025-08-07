@@ -120,6 +120,12 @@ export interface ChatActions {
 
 export type ChatStore = ChatState & ChatActions;
 
+export interface AgentState {
+    messages: Message[];
+    isThinking: boolean;
+    error: Error | null;
+}
+
 
 // --- API and Server Communication ---
 
@@ -131,6 +137,26 @@ export interface AnalysisRequest {
         user_id: string;
         query: string;
         workloads: any[];
+    };
+}
+
+export interface ChatAnalysisRequest extends AnalysisRequest {
+    request: {
+        user_id: string;
+        query: string;
+        workloads: [
+            {
+                run_id: string;
+                query: string;
+                data_source: {
+                    source_table: string;
+                };
+                time_range: {
+                    start_time: string;
+                    end_time: string;
+                };
+            }
+        ];
     };
 }
 
@@ -363,4 +389,15 @@ export interface HeaderProps {
 
 export interface RootLayoutProps {
   children: React.ReactNode;
+}
+
+export interface ControlButton {
+    text: string;
+    icon: React.ReactNode;
+    onClick: () => void;
+    variant: 'outline' | 'default' | 'destructive' | 'ghost' | 'link' | 'secondary';
+}
+
+export interface MessageOrchestratorProps {
+    message: Message;
 }

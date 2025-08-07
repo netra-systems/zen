@@ -1,13 +1,9 @@
 import React from 'react';
 import Thinking from '@/components/Thinking';
-import { Message, StateUpdateMessage, ToolEndMessage } from '@/app/types';
+import { Message, StateUpdateMessage, ToolEndMessage, MessageContentProps } from '@/app/types';
 import JsonTreeView from './JsonTreeView';
 // Replaced Heroicons with Lucid React for icons
 import { AlertCircle, CheckCircle2, Cog, ListTodo } from 'lucide-react';
-
-export interface MessageContentProps {
-    message: Message;
-}
 
 /**
  * A component responsible for rendering the specific content of a message

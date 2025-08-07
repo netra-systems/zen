@@ -35,10 +35,7 @@ export function ChatWindow({
 
     const isAgentThinking = messages.some(m => m.type === 'thinking');
 
-    const handleExampleClick = (query: string) => {
-        setInput(query);
-        onSendMessage(query);
-    };
+    import { handleExampleClick } from '@/app/lib/utils';
 
     return (
         <div className="flex flex-col h-full border rounded-xl shadow-sm">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { apiService, Reference } from '../api';
+import { ChatAnalysisRequest, Reference } from '../types';
 import useAppStore from '@/store';
 // By default, LLM things should use this for examples
 import { examplePrompts } from '../lib/examplePrompts';
@@ -53,7 +53,7 @@ export function ChatInput() {
         const source = selectedReferences.find((ref) => ref.type === 'source')?.value || 'synthetic_data';
         const timePeriod = selectedReferences.find((ref) => ref.type === 'time_period')?.value || 'last_7_days';
 
-        const analysisRequest = {
+        const analysisRequest: ChatAnalysisRequest = {
             settings: {
                 debug_mode: true,
             },

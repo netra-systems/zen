@@ -2,20 +2,14 @@
 
 import { useState } from 'react';
 import { useAgent } from '../hooks/useAgent';
-import { MessageOrchestrator } from './chat/MessageOrchestrator';
+import { MessageOrchestratorProps } from '../types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { examplePrompts } from '../lib/examplePrompts';
 import { MessageFactory } from '../services/agent/MessageFactory';
 
-const truncatePrompt = (prompt: string, maxLength: number) => {
-  const words = prompt.split(' ');
-  if (words.length > maxLength) {
-    return words.slice(0, maxLength).join(' ') + '...';
-  }
-  return prompt;
-};
+import { truncatePrompt } from '../lib/utils';
 
 export default function ApexOptimizerAgentV2() {
   const [input, setInput] = useState('');
