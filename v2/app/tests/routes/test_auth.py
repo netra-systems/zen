@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 from app.main import app
 from app.db.models_postgres import User
-from app.services.security_service import get_password_hash, verify_password
+from app.services.security_service import security_service
 
 @pytest.fixture
 def client():

@@ -1,36 +1,33 @@
 import pytest
 from unittest.mock import MagicMock
-from app.services.security_service import SecurityService
-from app.services.key_manager import KeyManager
+from app.services.security_service import SecurityService, KeyManager
+from app.config import AppConfig
+from cryptography.fernet import Fernet
 
 @pytest.fixture
-def key_manager():
-    """
-    Provides a mock KeyManager for testing.
-    """
-    km = MagicMock(spec=KeyManager)
-    km.jwt_secret_key = "test_secret_key"
-    km.fernet_key = KeyManager.generate_key()
-    return km
-
-@pytest.fixture
-def security_service(key_manager: KeyManager):
-    """
-    Provides a SecurityService instance with a mock KeyManager.
-    """
+def security_service():
+    mock_settings = AppConfig(jwt_secret_key="a_super_secret_jwt_key_for_development_that_is_long_enough", fernet_key=Fernet.generate_key())
+    key_manager = KeyManager.load_from_settings(mock_settings)
     return SecurityService(key_manager)
+
+def test_encrypt_and_decrypt(security_service: SecurityService):
+    original_string = "test_string"
+    encrypted = security_service.encrypt(original_string)
+    decrypted = security_service.decrypt(encrypted)
+    assert decrypted == original_string
+
 
 def test_create_and_validate_access_token(security_service: SecurityService):
     """
     Tests that an access token can be created and then successfully validated.
     """
     email = "test@example.com"
-    security_service.create_access_token = MagicMock(return_value="test_token")
     token = security_service.create_access_token(data={"sub": email})
     assert token is not None
-    
+
     decoded_email = security_service.get_user_email_from_token(token)
     assert decoded_email == email
+
 
 def test_invalid_token(security_service: SecurityService):
     """
@@ -38,14 +35,3 @@ def test_invalid_token(security_service: SecurityService):
     """
     decoded_email = security_service.get_user_email_from_token("invalid_token")
     assert decoded_email is None
-
-def test_encrypt_and_decrypt(security_service: SecurityService):
-    """
-    Tests that a value can be encrypted and then successfully decrypted.
-    """
-    original_value = "my_secret_password"
-    encrypted_value = security_service.encrypt(original_value)
-    assert encrypted_value is not None
-    
-    decrypted_value = security_service.decrypt(encrypted_value)
-    assert decrypted_value == original_value

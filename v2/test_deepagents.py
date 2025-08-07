@@ -49,8 +49,8 @@ async def test_agent_completes_todos():
     agent_def = ConcreteSubAgent(
         name="test_agent",
         description="A test agent",
-        prompt="Complete the following tasks:",
-        tools=[update_todo]
+        tools=[update_todo],
+        llm_manager=llm_manager
     )
 
     # ... rest of the test
