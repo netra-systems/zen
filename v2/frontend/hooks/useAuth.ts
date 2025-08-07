@@ -1,29 +1,35 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import useAppStore from '@/store';
-import { getToken } from '@/lib/user';
 
-export function useAuth() {
+export const useAuth = () => {
   const router = useRouter();
-  const pathname = usePathname();
-  const { user, fetchUser, devLogin, isLoading } = useAppStore();
+  const { setUser } = useAppStore();
 
-  useEffect(() => {
-    const token = getToken();
-    if (token && !user) {
-      fetchUser(token);
-    } else if (!token && !user && process.env.NODE_ENV === 'development') {
-      devLogin();
+  const login = () => {
+    window.location.href = 'http://localhost:8000/api/v3/auth/login';
+  };
+
+  const logout = async () => {
+    await fetch('http://localhost:8000/api/v3/auth/logout');
+    setUser(null);
+    router.push('/login');
+  };
+
+  const handleAuthCallback = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/v3/auth/me');
+      if (response.ok) {
+        const user = await response.json();
+        setUser(user);
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.error('Authentication callback failed:', error);
+      return false;
     }
-  }, [user, fetchUser, devLogin]);
+  };
 
-  useEffect(() => {
-    if (!isLoading && !user && pathname !== '/login') {
-      router.push('/login');
-    }
-  }, [user, isLoading, pathname, router]);
-
-  return { user, isLoading };
-}
+  return { login, logout, handleAuthCallback };
+};

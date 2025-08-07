@@ -9,8 +9,9 @@ from fastapi.responses import RedirectResponse
 
 from ..db import models_postgres
 from .. import schemas
-from ..dependencies import DbDep, ActiveUserDep
+from ..dependencies import DbDep
 from ..config import settings
+from ..auth.active_user import CurrentUser
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -28,8 +29,8 @@ oauth.register(
     }
 )
 
-@router.get("/users/me", response_model=schemas.User)
-async def read_users_me(current_user: ActiveUserDep):
+@router.get("/me", response_model=schemas.UserPublicWithPicture)
+async def get_current_user_details(current_user: CurrentUser):
     """
     Returns the public information for the currently authenticated user.
     """
