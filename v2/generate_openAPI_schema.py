@@ -30,9 +30,9 @@ def generate_openapi_schema():
     )
 
     # Determine the output path for the schema file. It should be placed
-    # in the parent directory of the 'app' folder (i.e., in 'v2/').
+    # in the 'frontend/public' directory.
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    output_path = os.path.join(script_dir, "..", "openapi.json")
+    output_path = os.path.join(script_dir, "frontend", "public", "openapi.json")
 
     # Write the generated schema to the file.
     with open(output_path, "w") as f:

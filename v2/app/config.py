@@ -1,7 +1,7 @@
 import os
 from google.cloud import secretmanager
 from typing import List, Dict
-from app.schemas import AppConfig, ProductionConfig, TestingConfig, DevelopmentConfig, SecretReference
+from app.schemas import AppConfig, ProductionConfig, TestingConfig, DevelopmentConfig, SecretReference, OAuthConfig
 
 SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="gemini-api-key", target_model="llm_configs.default", target_field="api_key"),

@@ -50,6 +50,6 @@ class SubAgent(ABC):
         # Update the state
         state["messages"].append(response)
         state["tool_calls"] = response.tool_calls
-        state["current_agent"] = self.sub_agent_type
+        state["current_agent"] = self.name
 
         return state

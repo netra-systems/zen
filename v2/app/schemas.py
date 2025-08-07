@@ -456,6 +456,21 @@ class GoogleCloudConfig(BaseModel):
     client_id: str = None
     client_secret: str = None
 
+class OAuthConfig(BaseModel):
+    web: Dict[str, List[str]] = {
+        "authorized_javascript_origins": [
+            "https://app.netrasystems.ai",
+            "https://127.0.0.1",
+            "http://localhost"
+        ],
+        "authorized_redirect_uris": [
+            "https://app.netrasystems.ai/oauth2callback",
+            "https://127.0.0.1/oauth2callback",
+            "http://localhost:8000/auth/google",
+            "http://localhost:3000/auth/callback"
+        ]
+    }
+
 class ClickHouseNativeConfig(BaseModel):
     host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
     port: int = 9440
