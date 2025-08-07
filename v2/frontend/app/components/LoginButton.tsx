@@ -2,32 +2,20 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useUser }from '../providers/UserProvider';
+import useAuth from '../auth';
 
 export default function LoginButton() {
-  const { user, isLoading } = useUser();
-
-  const handleLogin = () => {
-    window.location.href = 'http://localhost:8000/api/v3/auth/login';
-  };
-
-  const handleLogout = () => {
-    window.location.href = 'http://localhost:8000/api/v3/auth/logout';
-  };
-
-  if (isLoading) {
-    return <Button variant="outline">Loading...</Button>;
-  }
+  const { user, login, logout } = useAuth();
 
   if (user) {
     return (
       <div className="flex items-center gap-4">
-        <img src={user.picture} alt={user.name} className="w-8 h-8 rounded-full" />
-        <span>{user.name}</span>
-        <Button onClick={handleLogout}>Logout</Button>
+        <img src={user.picture} alt={user.full_name} className="w-8 h-8 rounded-full" />
+        <span>{user.full_name}</span>
+        <Button onClick={logout}>Logout</Button>
       </div>
     );
   }
 
-  return <Button onClick={handleLogin}>Login with Google</Button>;
+  return <Button onClick={login}>Login with Google</Button>;
 }

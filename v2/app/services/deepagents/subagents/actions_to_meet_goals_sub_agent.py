@@ -12,7 +12,5 @@ class ActionsToMeetGoalsSubAgent(SubAgent):
 
     def get_initial_prompt(self) -> str:
         return """
-        You are the Actions to Meet Goals Sub-Agent. Your purpose is to translate the optimization strategies from the Core Sub-Agent into concrete, actionable steps. 
-        This may involve generating configuration files, code snippets, or detailed instructions for the user. 
-        Your output should be clear, concise, and easy to implement.
+        You are the Actions to Meet Goals Sub-Agent. Your role is to formulate tangible actions and changes to meet optimization goals.
         """

@@ -49,11 +49,11 @@ class OverallSupervisor:
 
         # Initialize sub-agents
         self.sub_agents = {
-            'triage': TriageSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values())),
-            'data': DataSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values())),
-            'optimizations_core': OptimizationsCoreSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values())),
-            'actions_to_meet_goals': ActionsToMeetGoalsSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values())),
-            'reporting': ReportingSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values()))
+            'TriageSubAgent': TriageSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values())),
+            'DataSubAgent': DataSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values())),
+            'OptimizationsCoreSubAgent': OptimizationsCoreSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values())),
+            'ActionsToMeetGoalsSubAgent': ActionsToMeetGoalsSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values())),
+            'ReportingSubAgent': ReportingSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values()))
         }
 
     def _create_graph(self):
@@ -66,26 +66,26 @@ class OverallSupervisor:
         builder.add_node("tool_dispatcher", self.tool_dispatcher.as_runnable())
 
         # Define the edges
-        builder.set_entry_point("triage")
+        builder.set_entry_point("TriageSubAgent")
 
         builder.add_conditional_edges(
-            "triage",
-            lambda state: "tool_dispatcher" if state.get("tool_calls") else "data"
+            "TriageSubAgent",
+            lambda state: "tool_dispatcher" if state.get("tool_calls") else "DataSubAgent"
         )
         builder.add_conditional_edges(
-            "data",
-            lambda state: "tool_dispatcher" if state.get("tool_calls") else "optimizations_core"
+            "DataSubAgent",
+            lambda state: "tool_dispatcher" if state.get("tool_calls") else "OptimizationsCoreSubAgent"
         )
         builder.add_conditional_edges(
-            "optimizations_core",
-            lambda state: "tool_dispatcher" if state.get("tool_calls") else "actions_to_meet_goals"
+            "OptimizationsCoreSubAgent",
+            lambda state: "tool_dispatcher" if state.get("tool_calls") else "ActionsToMeetGoalsSubAgent"
         )
         builder.add_conditional_edges(
-            "actions_to_meet_goals",
-            lambda state: "tool_dispatcher" if state.get("tool_calls") else "reporting"
+            "ActionsToMeetGoalsSubAgent",
+            lambda state: "tool_dispatcher" if state.get("tool_calls") else "ReportingSubAgent"
         )
         builder.add_conditional_edges(
-            "reporting",
+            "ReportingSubAgent",
             lambda state: "tool_dispatcher" if state.get("tool_calls") else END
         )
 
@@ -99,19 +99,6 @@ class OverallSupervisor:
 
         return builder.compile()
 
-    def _initialize_sub_agents_and_tools(self):
-        state = DeepAgentState()
-        supply_catalog = SupplyCatalogService()
-        context = ToolContext(logs=[], db_session=self.db_session, llm_manager=self.llm_manager, cost_estimator=None, state=state, supply_catalog=supply_catalog)
-        all_tools, _ = ToolBuilder.build_all(context)
-        self.tool_dispatcher = ToolDispatcher(tools=list(all_tools.values()))
-
-        self.sub_agents['triage'] = TriageSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values()))
-        self.sub_agents['data'] = DataSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values()))
-        self.sub_agents['optimizations_core'] = OptimizationsCoreSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values()))
-        self.sub_agents['actions_to_meet_goals'] = ActionsToMeetGoalsSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values()))
-        self.sub_agents['reporting'] = ReportingSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values()))
-
     async def start_agent(self, request: AnalysisRequest, run_id: str, stream_updates: bool = False) -> Dict[str, Any]:
         logger.info(f"start_agent called for run_id: {run_id}")
         try:
@@ -120,7 +107,7 @@ class OverallSupervisor:
                 "workloads": request.request.workloads,
                 "run_id": run_id,
                 "stream_updates": stream_updates,
-                "next_node": "triage"
+                "next_node": "TriageSubAgent"
             }
             self.agent_states[run_id] = initial_state
 

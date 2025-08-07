@@ -12,3 +12,4 @@ class DeepAgentState(TypedDict):
     messages: Annotated[List[BaseMessage], add_messages]
     todos: List[Todo]
     files: dict
+    current_agent: str

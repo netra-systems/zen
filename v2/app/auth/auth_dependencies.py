@@ -23,22 +23,11 @@ async def get_current_user(
     db_session: Annotated[AsyncSession, Depends(get_db_session)],
     security_service: Annotated[SecurityService, Depends(get_security_service)],
 ) -> Optional[schemas.User]:
-    if settings.environment == "development":
-        # In development, allow fallback to a dev user
-        user_info = request.session.get('user')
-        if not user_info:
-            return await get_dev_user()
-        
-        email = user_info.get('email')
-        if not email:
-            return await get_dev_user()
-
-        user = await security_service.get_user(db_session, email)
-        if user is None:
-            return await get_dev_user()
-        return schemas.User.model_validate(user)
-
     user_info = request.session.get('user')
+
+    if settings.environment == "development" and not user_info:
+        return await get_dev_user()
+
     if not user_info:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
@@ -46,11 +35,8 @@ async def get_current_user(
     if not email:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid session data: email missing")
 
-    user = await security_service.get_user(db_session, email)
-    if user is None:
-        request.session.pop('user', None)
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-    
+    user = await security_service.get_or_create_user_from_oauth(db_session, user_info)
+
     return schemas.User.model_validate(user)
 
 async def get_current_user_ws(
