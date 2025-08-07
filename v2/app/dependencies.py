@@ -8,6 +8,7 @@ from app import schemas
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
+from app.services.security_service import SecurityService
 
 DbDep = Annotated[Session, Depends(get_async_db)]
 
@@ -47,3 +48,6 @@ async def get_current_user(
 
 ActiveUserDep = Annotated[models_postgres.User, Depends(get_current_user)]
 LLMManagerDep = Annotated[LLMManager, Depends(get_llm_manager)]
+
+def get_security_service(request: Request) -> SecurityService:
+    return request.app.state.security_service
