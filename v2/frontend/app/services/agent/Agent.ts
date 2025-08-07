@@ -1,45 +1,22 @@
 import { getToken, getUserId } from '../../lib/user';
 import { produce } from 'immer';
 import { WebSocketClient, WebSocketStatus } from './WebSocketClient';
-import { Message, StreamEvent, AnalysisRequest, ToolCall, ToolCallChunk, ToolOutputMessage, UserMessage, ThinkingMessage, ToolStartMessage, ToolEndMessage, StateUpdateMessage, TextMessage, StateData } from '../../types';
-
-// --- Type Definitions for Clarity (assuming these are in './types.ts') ---
-/*
-// A generic message in the chat UI
-export interface Message {
-    id: string; // Unique ID, often corresponds to a run_id or tool_call_id
-    type: 'user' | 'thinking' | 'text' | 'tool_start' | 'tool_end' | 'state_update' | 'error';
-    content: string;
-}
-
-// The generic structure of a WebSocket event from the backend
-export interface StreamEvent {
-    event: string;      // e.g., 'on_chat_model_stream', 'on_tool_end'
-    data: any;
-    run_id: string;
-}
-
-// Represents the model's decision to call a tool
-export interface ToolCall {
-    id: string;
-    name: string;
-    args: { [key: string]: any };
-}
-
-// Represents a streamed chunk of a tool call's arguments
-export interface ToolCallChunk {
-    id: string;
-    name: string;
-    args: string; // A string chunk of the JSON arguments
-}
-
-// Represents the final output from a tool, wrapped in a message
-export interface ToolOutputMessage {
-    type: 'tool';
-    content: string | { [key: string]: any };
-    tool_call_id: string;
-}
-*/
+import { 
+    Message, 
+    StreamEvent, 
+    AnalysisRequest, 
+    ToolCall, 
+    ToolCallChunk, 
+    ToolOutputMessage, 
+    UserMessage, 
+    ThinkingMessage, 
+    ToolStartMessage, 
+    ToolEndMessage, 
+    StateUpdateMessage, 
+    TextMessage, 
+    StateData,
+    AIMessageChunk
+} from '../../types';
 
 // --- Agent Class ---
 
@@ -231,10 +208,10 @@ class Agent {
             // --- Generic Stream for Tool Outputs & Other Messages ---
             case 'on_chain_stream':
                 if (data.chunk?.messages) {
-                    data.chunk.messages.forEach((msg: any) => {
+                    data.chunk.messages.forEach((msg: ToolOutputMessage) => {
                         if (msg.type === 'tool') {
                             // This is the crucial event carrying the result of a tool execution.
-                            this.processToolOutput(draft, msg as ToolOutputMessage);
+                            this.processToolOutput(draft, msg);
                         }
                     });
                 }
