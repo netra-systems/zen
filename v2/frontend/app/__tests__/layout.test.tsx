@@ -11,7 +11,7 @@ jest.mock('@/hooks/useAuth', () => ({
 
 describe('RootLayout', () => {
   it('renders the sidebar and header when authenticated', () => {
-    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
+    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true, isAuthReady: true });
     render(<AppWithLayout><div>Main Content</div></AppWithLayout>);
     expect(screen.getByRole('banner')).toBeInTheDocument();
     expect(screen.getByRole('complementary')).toBeInTheDocument();

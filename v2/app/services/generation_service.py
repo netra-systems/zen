@@ -16,7 +16,7 @@ import pandas as pd
 import numpy as np
 from faker import Faker
 
-from ..config import settings
+from ..schemas import ContentGenParams, LogGenParams, SyntheticDataGenParams
 from ..data.synthetic.content_generator import META_PROMPTS, generate_content_sample
 from ..db.clickhouse_base import ClickHouseDatabase
 from ..db.models_clickhouse import ContentCorpus, get_content_corpus_schema, get_llm_events_table_schema
