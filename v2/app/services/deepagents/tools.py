@@ -7,6 +7,8 @@ from .prompts import (
     WRITE_TODOS_DESCRIPTION,
     EDIT_DESCRIPTION,
     TOOL_DESCRIPTION,
+    CREATE_DESCRIPTION,
+    LS_DESCRIPTION,
 )
 from .state import DeepAgentState, Todo
 from app.services.apex_optimizer_agent.models import ToolResult, ToolStatus
@@ -60,6 +62,7 @@ def write_todos(
     all_todos = existing_todos + todos
     return ToolResult(status=ToolStatus.SUCCESS, message="Todos created successfully.", payload={"todos": all_todos})
 
+@tool(description=LS_DESCRIPTION)
 def ls(state: Annotated[DeepAgentState, InjectedState]) -> ToolResult:
     """List all files"""
     files = list(state.get("files", {}).keys())
@@ -102,7 +105,7 @@ def read_file(
     return ToolResult(status=ToolStatus.SUCCESS, message="File read successfully.", payload="\n".join(result_lines))
 
 
-@tool
+@tool(description=CREATE_DESCRIPTION)
 def create_file(
     file_path: str,
     content: str,
@@ -160,4 +163,5 @@ def get_tools():
         read_file,
         create_file,
         edit_file,
+        ls,
     ]

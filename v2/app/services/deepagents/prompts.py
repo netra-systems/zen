@@ -10,4 +10,6 @@ def get_agent_prompt(system_prompt: str) -> ChatPromptTemplate:
 
 WRITE_TODOS_DESCRIPTION = "A tool to write todos."
 EDIT_DESCRIPTION = "A tool to edit files."
+CREATE_DESCRIPTION = "A tool to create files."
+LS_DESCRIPTION = "A tool to list files."
 TOOL_DESCRIPTION = "A tool to read files."
