@@ -6,8 +6,8 @@ from app.services.deepagents.sub_agent import SubAgent
 class OptimizationsCoreSubAgent(SubAgent):
     def __init__(self, llm_manager: LLMManager, tools: List[BaseTool] = None):
         super().__init__(
-            name="optimizations_core",
-            description="You are the core optimizations agent. Your job is to analyze the data and propose optimizations.",
+            name="OptimizationsCoreSubAgent",
+            description="Performs the core analysis and generates optimization strategies.",
             llm_manager=llm_manager,
             tools=tools,
             sub_agent_type="optimizations_core"

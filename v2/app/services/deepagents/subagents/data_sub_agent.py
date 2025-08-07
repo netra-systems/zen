@@ -6,8 +6,8 @@ from app.services.deepagents.sub_agent import SubAgent
 class DataSubAgent(SubAgent):
     def __init__(self, llm_manager: LLMManager, tools: List[BaseTool] = None):
         super().__init__(
-            name="data",
-            description="You are a data agent. Your job is to gather and enrich the data needed for the analysis.",
+            name="DataSubAgent",
+            description="Manages all data-related tasks, including retrieval and enrichment.",
             llm_manager=llm_manager,
             tools=tools,
             sub_agent_type="data"

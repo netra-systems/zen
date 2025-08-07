@@ -6,8 +6,8 @@ from app.services.deepagents.sub_agent import SubAgent
 class ActionsToMeetGoalsSubAgent(SubAgent):
     def __init__(self, llm_manager: LLMManager, tools: List[BaseTool] = None):
         super().__init__(
-            name="actions_to_meet_goals",
-            description="You are the actions agent. Your job is to formulate a plan of action based on the proposed optimizations.",
+            name="ActionsToMeetGoalsSubAgent",
+            description="Translates strategies into concrete, actionable steps.",
             llm_manager=llm_manager,
             tools=tools,
             sub_agent_type="actions_to_meet_goals"

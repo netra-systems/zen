@@ -6,8 +6,8 @@ from app.services.deepagents.sub_agent import SubAgent
 class TriageSubAgent(SubAgent):
     def __init__(self, llm_manager: LLMManager, tools: List[BaseTool] = None):
         super().__init__(
-            name="triage",
-            description="You are a triage agent. Your job is to analyze the user's request and determine the next steps.",
+            name="TriageSubAgent",
+            description="Analyzes the user's request and determines the appropriate workflow.",
             llm_manager=llm_manager,
             tools=tools,
             sub_agent_type="triage"
