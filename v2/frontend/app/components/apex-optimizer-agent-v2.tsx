@@ -71,8 +71,8 @@ export default function ApexOptimizerAgentV2() {
                       variant="outline"
                       onClick={() => handleExampleClick(prompt)}
                       className="text-left h-auto"
+                      className="text-left whitespace-normal min-h-[4rem]"
                     >
-                      {truncatePrompt(prompt, 7)}
                     </Button>
                   ))}
                 </CardContent>

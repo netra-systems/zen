@@ -34,7 +34,7 @@ describe('Select Component', () => {
     expect(trigger).toBeInTheDocument();
 
     // Open the select dropdown
-    fireEvent.mouseDown(trigger);
+    fireEvent.click(trigger);
 
     // Check if the content is rendered
     const content = await screen.findByRole('listbox');

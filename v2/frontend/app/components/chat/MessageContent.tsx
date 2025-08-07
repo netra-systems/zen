@@ -1,27 +1,16 @@
 import React from 'react';
 import { Message } from '@/app/types/chat';
 import JsonTreeView from './JsonTreeView';
+import { TodoListView } from './TodoListView';
 
 export interface MessageContentProps {
     message: Message;
 }
 
 export function MessageContent({ message }: MessageContentProps) {
-    const renderContent = () => {
-        if (typeof message.content === 'string') {
-            try {
-                const parsedContent = JSON.parse(message.content);
-                return <JsonTreeView data={parsedContent} />;
-            } catch (error) {
-                // Not a JSON string, render as plain text
-            }
-        }
-        return <p>{message.content}</p>;
-    };
-
     switch (message.type) {
         case 'text':
-            return renderContent();
+            return <p>{message.content}</p>;
         case 'thinking':
             return (
                 <div className="flex items-center gap-2">
@@ -29,10 +18,29 @@ export function MessageContent({ message }: MessageContentProps) {
                     <p>{message.content}</p>
                 </div>
             );
-        case 'event':
-            return <JsonTreeView data={message} />;
-        case 'artifact':
-            return <p>{message.name}</p>;
+        case 'error':
+            return (
+                <div>
+                    <p className="text-red-500">{message.content}</p>
+                    {message.toolOutput && <JsonTreeView data={message.toolOutput} />}
+                </div>
+            );
+        case 'tool_start':
+            return (
+                <div>
+                    <p>{message.content}</p>
+                    {message.toolInput && <JsonTreeView data={message.toolInput} />}
+                </div>
+            );
+        case 'tool_end':
+            return (
+                <div>
+                    <p>{message.content}</p>
+                    {message.toolOutput && <JsonTreeView data={message.toolOutput} />}
+                </div>
+            );
+        case 'state_update':
+            return <div>{message.state && <TodoListView todoList={message.state} />}</div>;
         default:
             return null;
     }
