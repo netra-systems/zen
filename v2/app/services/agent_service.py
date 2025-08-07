@@ -3,7 +3,7 @@ import asyncio
 from fastapi import WebSocket, WebSocketDisconnect
 from app.services.streaming_agent.supervisor import StreamingAgentSupervisor
 from app.db.models_clickhouse import AnalysisRequest
-from app.websocket import manager
+from app.connection_manager import manager
 
 class AgentService:
     def __init__(self, supervisor: StreamingAgentSupervisor):

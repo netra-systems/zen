@@ -9,14 +9,14 @@ from app.services.deepagents.sub_agent import SubAgent
 from app.services.apex_optimizer_agent.tool_builder import ToolBuilder
 from app.services.deepagents.tool_dispatcher import ToolDispatcher
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.websocket import ConnectionManager
+from app.connection_manager import manager
 from app.services.supply_catalog_service import SupplyCatalogService
 from app.services.deepagents.state import DeepAgentState
 from app.services.context import ToolContext
 from app.utils.log_parser import LogParser
 
 class StreamingAgentSupervisor:
-    def __init__(self, db_session: AsyncSession, llm_manager: LLMManager, websocket_manager: ConnectionManager):
+    def __init__(self, db_session: AsyncSession, llm_manager: LLMManager, websocket_manager: manager):
         self.db_session = db_session
         self.llm_manager = llm_manager
         self.agent_states: Dict[str, Dict[str, Any]] = {}
