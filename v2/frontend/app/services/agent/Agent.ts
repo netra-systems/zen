@@ -1,0 +1,196 @@
+import { produce } from 'immer';
+import { WebSocketClient, WebSocketStatus } from './WebSocketClient';
+import { Message, StreamEvent, AnalysisRequest } from './types';
+import { UserMessage, ThinkingMessage, ToolStartMessage, ToolEndMessage, StateUpdateMessage } from './models';
+
+type AgentListener = (state: AgentState) => void;
+
+interface AgentState {
+    messages: Message[];
+    isThinking: boolean;
+    error: Error | null;
+}
+
+class Agent {
+    private webSocketClient: WebSocketClient;
+    private listeners: AgentListener[] = [];
+    private state: AgentState = {
+        messages: [],
+        isThinking: false,
+        error: null,
+    };
+    private isInitialized = false;
+
+    constructor() {
+        this.webSocketClient = new WebSocketClient();
+        this.webSocketClient.onMessage = this.handleMessage.bind(this);
+        this.webSocketClient.onStatusChange = this.handleStatusChange.bind(this);
+    }
+
+    public subscribe(listener: AgentListener): () => void {
+        this.listeners.push(listener);
+        listener(this.state);
+        return () => {
+            this.listeners = this.listeners.filter(l => l !== listener);
+        };
+    }
+
+    private notify(): void {
+        this.listeners.forEach(listener => listener(this.state));
+    }
+
+    private setState(updater: (draft: AgentState) => void): void {
+        this.state = produce(this.state, updater);
+        this.notify();
+    }
+
+    public async initialize(): Promise<void> {
+        if (this.isInitialized) return;
+        this.isInitialized = true;
+
+        const token = await getToken();
+        if (!token) {
+            this.setState(draft => {
+                draft.error = new Error('Authentication token not found.');
+            });
+            this.isInitialized = false; // Allow re-initialization
+            return;
+        }
+        const runId = `run_${Date.now()}`;
+        this.webSocketClient.connect(token, runId);
+    }
+
+    public start(message: string): void {
+        this.addUserMessage(message);
+        this.sendStartAgentRequest(message);
+    }
+
+    public stop(): void {
+        this.webSocketClient.disconnect();
+    }
+
+    private addUserMessage(message: string): void {
+        this.setState(draft => {
+            draft.messages.push(new UserMessage(message));
+        });
+    }
+
+    private sendStartAgentRequest(message: string): void {
+        const userId = getUserId();
+        if (!userId) {
+            this.setState(draft => {
+                draft.error = new Error('User ID not found.');
+            });
+            return;
+        }
+        const analysisRequest: AnalysisRequest = {
+            settings: { debug_mode: false },
+            request: { user_id: userId, query: message, workloads: [] },
+        };
+        this.webSocketClient.sendMessage({ action: 'start_agent', payload: analysisRequest });
+        this.setState(draft => {
+            draft.isThinking = true;
+        });
+    }
+
+    private handleMessage(event: MessageEvent): void {
+        const streamEvent: StreamEvent = JSON.parse(event.data);
+        if (streamEvent.event === 'run_complete') {
+            this.setState(draft => {
+                draft.isThinking = false;
+            });
+            return;
+        }
+        this.setState(draft => {
+            this.processStreamEvent(draft.messages, streamEvent);
+        });
+    }
+
+    private handleStatusChange(status: WebSocketStatus): void {
+        if (status === WebSocketStatus.Error) {
+            this.setState(draft => {
+                draft.error = new Error('WebSocket connection error.');
+            });
+        }
+        if (status === WebSocketStatus.Closed) {
+            this.isInitialized = false;
+        }
+    }
+
+    private processStreamEvent(draft: Message[], event: StreamEvent): void {
+        const { event: eventName, data, run_id } = event;
+        let message = draft.find((m) => m.id === run_id);
+
+        if (!message) {
+            const newMessage = new ThinkingMessage();
+            newMessage.id = run_id;
+            draft.push(newMessage);
+            message = newMessage;
+        }
+
+        this.updateMessage(message, eventName, data);
+    }
+
+    private updateMessage(message: Message, eventName: string, data: any): void {
+        if (message.type === 'thinking') {
+            message.type = this.getMessageType(eventName);
+        }
+
+        switch (eventName) {
+            case 'on_chain_start':
+                this.updateStateMessage(message as StateUpdateMessage, data.input);
+                break;
+            case 'on_chat_model_stream':
+                this.updateToolCode(message as ToolStartMessage, data.chunk);
+                break;
+            case 'on_tool_end':
+                this.updateToolEnd(message as ToolEndMessage, data);
+                break;
+            case 'update_state':
+                this.updateStateMessage(message as StateUpdateMessage, data);
+                break;
+        }
+    }
+
+    private getMessageType(eventName: string): Message['type'] {
+        const typeMap: { [key: string]: Message['type'] } = {
+            on_chain_start: 'state_update',
+            on_chain_end: 'tool_end',
+            on_chat_model_stream: 'tool_start',
+            on_tool_end: 'tool_end',
+            on_tool_start: 'tool_start',
+            update_state: 'state_update',
+        };
+        return typeMap[eventName];
+    }
+
+    private updateStateMessage(message: StateUpdateMessage, data: any): void {
+        if (data.todo_list) {
+            message.state = {
+                todo_list: data.todo_list,
+                completed_steps: data.completed_steps || [],
+            };
+        }
+    }
+
+    private updateToolCode(message: ToolStartMessage, chunk: any): void {
+        if (chunk?.content) {
+            message.content = (message.content || '') + chunk.content;
+        }
+        if (chunk?.tool_calls) {
+            message.tool_calls = [...(message.tool_calls || []), ...chunk.tool_calls];
+        }
+    }
+
+    private updateToolEnd(message: ToolEndMessage, data: any): void {
+        if (data.output) {
+            message.tool_outputs = [...(message.tool_outputs || []), {
+                tool_call_id: data.run_id,
+                content: typeof data.output === 'string' ? data.output : JSON.stringify(data.output),
+                is_error: data.is_error || false,
+            }];
+        }
+    }
+}
+
+export const agent = new Agent();

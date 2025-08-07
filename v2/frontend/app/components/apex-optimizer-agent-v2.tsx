@@ -50,7 +50,7 @@ export default function ApexOptimizerAgentV2() {
             {messages.map((message) => (
               <ChatMessage key={message.id} message={message} />
             ))}
-            {showThinking && <ChatMessage message={{id: 'thinking', role: 'agent', type: 'thinking', timestamp: new Date().toISOString()}}/>}
+            {showThinking && <ChatMessage key="thinking" message={{id: 'thinking', role: 'agent', type: 'thinking', timestamp: new Date().toISOString()}}/>}
           </div>
           <div className="p-4 border-t">
             {showExamples && (
@@ -64,8 +64,7 @@ export default function ApexOptimizerAgentV2() {
                       key={index}
                       variant="outline"
                       onClick={() => handleExampleClick(prompt)}
-                      className="text-left h-auto"
-                      className="text-left whitespace-normal min-h-[4rem]"
+                      className="h-auto text-left whitespace-normal min-h-[4rem]"
                     >
                       {truncatePrompt(prompt, 7)}
                     </Button>

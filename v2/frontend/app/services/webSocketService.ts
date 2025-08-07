@@ -36,6 +36,7 @@ class WebSocketService {
                 console.log("WebSocket handshake successful");
                 return;
             }
+            console.log("WebSocket message received:", message);
             this.messageListeners.forEach(listener => listener(message));
         };
 
