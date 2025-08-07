@@ -38,6 +38,14 @@ const processStreamEvent = (draft: Message[], event: StreamEvent) => {
             }
             break;
 
+        case 'on_chain_end':
+            existingMessage.content = undefined;
+            break;
+
+        case 'on_chain_end':
+            existingMessage.content = undefined;
+            break;
+
         case 'on_chat_model_stream':
             if (data.chunk?.content) {
                 existingMessage.content = (existingMessage.content || '') + data.chunk.content;
