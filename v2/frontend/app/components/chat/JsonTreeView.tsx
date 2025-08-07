@@ -1,24 +1,28 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 
 interface JsonTreeViewProps {
-    data: unknown;
+  data: any;
 }
 
-const JsonTreeView: React.FC<JsonTreeViewProps> = ({ data }) => {
-    if (typeof data !== 'object' || data === null) {
-        return <div>{String(data)}</div>;
-    }
+export const JsonTreeView: React.FC<JsonTreeViewProps> = ({ data }) => {
+  const [isOpen, setIsOpen] = useState(false);
 
-    return (
-        <ul className="pl-4">
-            {Object.entries(data).map(([key, value]) => (
-                <li key={key}>
-                    <strong>{key}: </strong>
-                    <JsonTreeView data={value} />
-                </li>
-            ))}
-        </ul>
-    );
+  const toggleOpen = () => {
+    setIsOpen(!isOpen);
+  };
+
+  return (
+    <div>
+      <button onClick={toggleOpen} className="text-sm text-gray-500">
+        {isOpen ? 'Hide JSON' : 'Show JSON'}
+      </button>
+      {isOpen && (
+        <pre className="bg-gray-100 p-2 rounded mt-2 text-xs">
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      )}
+    </div>
+  );
 };
-
-export { JsonTreeView };

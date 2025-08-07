@@ -1,9 +1,16 @@
 export type MessageRole = 'user' | 'agent';
 
+export interface Artifact {
+    type: string;
+    content: string;
+    data: any;
+}
+
 export interface BaseMessage {
     id: string;
     role: MessageRole;
     timestamp: string;
+    artifact?: Artifact;
 }
 
 export interface TextMessage extends BaseMessage {

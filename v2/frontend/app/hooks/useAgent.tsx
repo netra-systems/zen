@@ -24,12 +24,30 @@ export function useAgent() {
         };
         ws.onmessage = (event) => {
           const message = JSON.parse(event.data);
-          if (message.type === 'handshake' && message.message === 'Hello from server') {
-            console.log('Handshake successful');
-          } else if (message.type === 'log') {
-            processStream(message.payload);
-          } else {
-            console.log('Received unhandled message:', message);
+          // Handle different event types from the backend
+          switch (message.event) {
+            case 'on_chain_start':
+            case 'on_prompt_start':
+            case 'on_chat_model_start':
+              // We can handle these events to show some status
+              break;
+            case 'on_chat_model_stream':
+              if (message.data && message.data.messages) {
+                message.data.messages.forEach((msg: any) => {
+                  addMessage(msg.content, 'agent', message.event);
+                });
+              }
+              break;
+            case 'on_chat_model_end':
+            case 'on_chain_end':
+              if (message.data && message.data.output && message.data.output.messages) {
+                message.data.output.messages.forEach((msg: any) => {
+                  addMessage(msg.content, 'agent', message.event, message.data);
+                });
+              }
+              break;
+            default:
+              console.log('Received unhandled message:', message);
           }
         };
         ws.onclose = () => {
@@ -50,7 +68,7 @@ export function useAgent() {
         socket.close();
       }
     };
-  }, []);
+  }, [addMessage]);
 
   const startAgent = async (message: string) => {
     addMessage(message, 'user');

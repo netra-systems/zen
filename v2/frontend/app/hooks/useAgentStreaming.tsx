@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Message } from '../types/chat';
+import { Message, Artifact } from '../types/chat';
 
 export type MessageFilter = 'event';
 
@@ -16,6 +16,22 @@ export function useAgentStreaming(initialMessages: Message[] = [], initialFilter
     const [messages, setMessages] = useState<Message[]>(initialMessages);
     const [messageFilters, setMessageFilters] = useState<Set<MessageFilter>>(initialFilters);
     const [showThinking, setShowThinking] = useState(false);
+
+    const addMessage = useCallback((content: string, role: 'user' | 'agent' = 'user', event?: string, data?: any) => {
+        const newMessage: Message = {
+            id: `msg-${Date.now()}`,
+            role,
+            timestamp: new Date().toISOString(),
+            type: event === 'on_chain_end' ? 'artifact' : 'text',
+            content,
+            artifact: event === 'on_chain_end' ? {
+                type: 'analysis_result',
+                content: content,
+                data: data
+            } : undefined
+        };
+        setMessages(prev => [...prev, newMessage]);
+    }, []);
 
     const processStream = useCallback((chunk: string) => {
         if (isJson(chunk)) {
@@ -67,31 +83,15 @@ export function useAgentStreaming(initialMessages: Message[] = [], initialFilter
                 setMessages(prev => [...prev, newMessage]);
             }
         } else {
-            const newMessage: Message = {
-                id: `msg-${Date.now()}`,
-                role: 'agent',
-                timestamp: new Date().toISOString(),
-                type: 'text',
-                content: chunk,
-            };
-            setMessages(prev => [...prev, newMessage]);
+            addMessage(chunk, 'agent');
         }
-    }, []);
+    }, [addMessage]);
 
     const filteredMessages = messages.filter(m => !messageFilters.has(m.type as MessageFilter));
 
     return {
         messages: filteredMessages,
-        addMessage: (content: string, role: 'user' | 'agent' = 'user') => {
-            const newMessage: Message = {
-                id: `msg-${Date.now()}`,
-                role,
-                timestamp: new Date().toISOString(),
-                type: 'text',
-                content,
-            };
-            setMessages(prev => [...prev, newMessage]);
-        },
+        addMessage,
         messageFilters,
         setMessageFilters,
         showThinking,

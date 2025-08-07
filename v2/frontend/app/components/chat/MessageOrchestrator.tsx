@@ -1,22 +1,18 @@
+'use client';
 
 import React from 'react';
 import { Message } from '@/app/types/chat';
 import { ChatMessage } from './ChatMessage';
 import { ArtifactCard } from './ArtifactCard';
 
-export interface MessageOrchestratorProps {
-    message: Message;
-    showThinking: boolean;
+interface MessageOrchestratorProps {
+  message: Message;
 }
 
-export function MessageOrchestrator({ message, showThinking }: MessageOrchestratorProps) {
-    if (message.type === 'thinking' && !showThinking) {
-        return null;
-    }
+export const MessageOrchestrator: React.FC<MessageOrchestratorProps> = ({ message }) => {
+  if (message.artifact) {
+    return <ArtifactCard artifact={message.artifact} />;
+  }
 
-    if (message.type === 'artifact' || message.type === 'event') {
-        return <ArtifactCard message={message} />;
-    }
-
-    return <ChatMessage message={message} />;
-}
+  return <ChatMessage message={message} />;
+};
