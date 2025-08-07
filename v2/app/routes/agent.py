@@ -14,14 +14,9 @@ async def websocket_endpoint(websocket: WebSocket, run_id: str, current_user: Ac
     agent_service: AgentService = websocket.app.state.agent_service
     await manager.connect(websocket, run_id)
     try:
-        # Handshake
-        handshake_message = await websocket.receive_text()
-        handshake_data = json.loads(handshake_message)
-        if handshake_data.get("type") == "handshake" and handshake_data.get("message") == "Hello from client":
-            await websocket.send_text(json.dumps({"type": "handshake", "message": "Hello from server"}))
-        else:
-            await websocket.close(code=1008, reason="Invalid handshake")
-            return
+        # The first message is the start_agent command
+        initial_message = await websocket.receive_text()
+        await agent_service.handle_websocket_message(run_id, initial_message)
 
         # Handle incoming messages
         while True:

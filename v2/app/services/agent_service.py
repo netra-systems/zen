@@ -1,9 +1,12 @@
 import json
 import asyncio
+import logging
 from fastapi import WebSocket, WebSocketDisconnect
 from app.services.streaming_agent.supervisor import StreamingAgentSupervisor
 from app.db.models_clickhouse import AnalysisRequest, Settings, RequestModel
 from app.connection_manager import manager
+
+logger = logging.getLogger(__name__)
 
 class AgentService:
     def __init__(self, supervisor: StreamingAgentSupervisor):
@@ -19,21 +22,25 @@ class AgentService:
         """
         Handles a message from the WebSocket.
         """
-        message_data = json.loads(data)
-        if message_data.get("action") == "start_agent":
-            payload = message_data.get("payload")
-            # It seems the payload is nested, let's access it correctly
-            settings = payload.get("settings")
-            request_data = payload.get("request")
-            
-            analysis_request = AnalysisRequest(
-                settings=Settings(**settings),
-                request=RequestModel(**request_data)
-            )
-            response = await self.start_agent(analysis_request, run_id)
-            await manager.send_to_run(json.dumps(response), run_id)
-        else:
-            print(f"Received unhandled message for run_id: {run_id}: {message_data}")
+        logger.info(f"handle_websocket_message called for run_id: {run_id} with data: {data}")
+        try:
+            message_data = json.loads(data)
+            if message_data.get("action") == "start_agent":
+                payload = message_data.get("payload")
+                # It seems the payload is nested, let's access it correctly
+                settings = payload.get("settings")
+                request_data = payload.get("request")
+                
+                analysis_request = AnalysisRequest(
+                    settings=Settings(**settings),
+                    request=RequestModel(**request_data)
+                )
+                response = await self.start_agent(analysis_request, run_id)
+                await manager.send_to_run(json.dumps(response), run_id)
+            else:
+                logger.warning(f"Received unhandled message for run_id: {run_id}: {message_data}")
+        except Exception as e:
+            logger.error(f"Error in handle_websocket_message for run_id: {run_id}: {e}", exc_info=True)
 
     async def handle_websocket(self, websocket: WebSocket, run_id: str):
         """
