@@ -1,75 +1,45 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 
-export const useWebSocket = (url: string) => {
-  const [messages, setMessages] = useState<object[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
-  const webSocketRef = useRef<WebSocket | null>(null);
-  const reconnectInterval = useRef<NodeJS.Timeout | null>(null);
+export enum WebSocketStatus {
+  Connecting,
+  Open,
+  Closing,
+  Closed,
+}
 
-  const connect = useCallback(() => {
-    const ws = new WebSocket(url);
-    webSocketRef.current = ws;
+export interface WebSocketHook {
+  sendMessage: (message: object) => void;
+  lastMessage: MessageEvent | null;
+  status: WebSocketStatus;
+}
 
-    ws.onopen = () => {
-      console.log('WebSocket connected');
-      setIsConnected(true);
-      if (reconnectInterval.current) {
-        clearInterval(reconnectInterval.current);
-        reconnectInterval.current = null;
-      }
-      ws.send('handshake');
-    };
+export const useWebSocket = (url: string | null): WebSocketHook => {
+  const [lastMessage, setLastMessage] = useState<MessageEvent | null>(null);
+  const [status, setStatus] = useState<WebSocketStatus>(WebSocketStatus.Closed);
+  const ws = useRef<WebSocket | null>(null);
 
-    ws.onmessage = (event) => {
-      const message = event.data;
-      if (message === 'handshake_ack') {
-        console.log('WebSocket handshake successful');
-      } else {
-        try {
-          const parsedMessage = JSON.parse(message);
-          setMessages((prevMessages) => [...prevMessages, parsedMessage]);
-        } catch (error) {
-          console.error('Error parsing WebSocket message JSON:', error);
-        }
-      }
-    };
-
-    ws.onclose = () => {
-      console.log('WebSocket disconnected');
-      setIsConnected(false);
-      if (!reconnectInterval.current) {
-        reconnectInterval.current = setInterval(() => {
-          console.log('Attempting to reconnect WebSocket...');
-          connect();
-        }, 5000);
-      }
-    };
-
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      ws.close();
-    };
-  }, [url]);
+  const sendMessage = useCallback((message: object) => {
+    if (ws.current?.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify(message));
+    }
+  }, []);
 
   useEffect(() => {
-    connect();
-    return () => {
-      if (webSocketRef.current) {
-        webSocketRef.current.close();
-      }
-      if (reconnectInterval.current) {
-        clearInterval(reconnectInterval.current);
-      }
-    };
-  }, [connect]);
+    if (url) {
+      setStatus(WebSocketStatus.Connecting);
+      ws.current = new WebSocket(url);
 
-  const sendMessage = (message: object) => {
-    if (webSocketRef.current && webSocketRef.current.readyState === WebSocket.OPEN) {
-      webSocketRef.current.send(JSON.stringify(message));
-    } else {
-      console.error('WebSocket is not connected.');
+      ws.current.onopen = () => setStatus(WebSocketStatus.Open);
+      ws.current.onclose = () => setStatus(WebSocketStatus.Closed);
+      ws.current.onmessage = (message) => setLastMessage(message);
+
+      return () => {
+        if (ws.current) {
+          ws.current.close();
+        }
+      };
     }
-  };
+  }, [url]);
 
-  return { messages, isConnected, sendMessage };
+  return { sendMessage, lastMessage, status };
 };

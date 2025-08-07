@@ -1,5 +1,5 @@
 import { getToken, getUserId } from '../lib/user';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Message, StreamEvent, ArtifactMessage } from '../types/chat';
 import { produce } from 'immer';
 
@@ -93,16 +93,73 @@ export function useAgent() {
         );
     };
 
-    const disconnect = useCallback(() => {
+    const connect = useCallback(async () => {
         if (socketRef.current) {
-            socketRef.current.close();
-            socketRef.current = null;
+            return;
         }
+
+        const token = await getToken();
+        if (!token) {
+            setError(new Error('Authentication token not found.'));
+            return;
+        }
+
+        const runId = `run_${Date.now()}`;
+        runIdRef.current = runId;
+
+        const ws = new WebSocket(`ws://localhost:8000/agent/${runId}?token=${token}`);
+        socketRef.current = ws;
+
+        ws.onopen = () => {
+            console.log('WebSocket connected');
+        };
+
+        ws.onmessage = (event) => {
+            const message: StreamEvent = JSON.parse(event.data);
+            console.log('Received message:', message);
+
+            if (message.event === 'run_complete') {
+                setShowThinking(false);
+                return;
+            }
+
+            setMessages((draft) => produce(draft, (d) => processStreamEvent(d, message)));
+        };
+
+        ws.onclose = () => {
+            console.log('WebSocket disconnected');
+            socketRef.current = null;
+            setShowThinking(false);
+        };
+
+        ws.onerror = (event) => {
+            console.error('WebSocket error:', event);
+            setError(new Error('WebSocket connection failed.'));
+            setShowThinking(false);
+        };
     }, []);
+
+    useEffect(() => {
+        connect();
+
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.close();
+                socketRef.current = null;
+            }
+        };
+    }, [connect]);
 
     const startAgent = useCallback(
         async (message: string) => {
-            disconnect(); // Disconnect any existing socket
+            if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
+                await connect();
+            }
+            
+            if (!socketRef.current) {
+                setError(new Error('WebSocket is not connected.'));
+                return;
+            }
 
             const userMessage: Message = {
                 id: `msg_${Date.now()}`,
@@ -111,80 +168,41 @@ export function useAgent() {
                 type: 'text',
                 content: message,
             };
-            setMessages((prev) => [...prev, userMessage]);
+            addMessage(userMessage);
 
             setShowThinking(true);
             setError(null);
+            
+            const thinkingMessage: Message = {
+                id: runIdRef.current!,
+                role: 'agent',
+                timestamp: new Date().toISOString(),
+                type: 'thinking',
+            };
+            addMessage(thinkingMessage);
 
-            const token = await getToken();
-            if (!token) {
-                setError(new Error('Authentication token not found.'));
+            const userId = getUserId();
+            if (!userId) {
+                console.error('User ID not found');
+                setError(new Error('User ID not found.'));
                 setShowThinking(false);
                 return;
             }
 
-            const runId = `run_${Date.now()}`;
-            runIdRef.current = runId;
-
-            const ws = new WebSocket(`ws://localhost:8000/agent/${runId}?token=${token}`);
-            socketRef.current = ws;
-
-            ws.onopen = () => {
-                console.log('WebSocket connected');
-                const thinkingMessage: Message = {
-                    id: runIdRef.current!,
-                    role: 'agent',
-                    timestamp: new Date().toISOString(),
-                    type: 'thinking',
-                };
-                addMessage(thinkingMessage);
-
-                const userId = getUserId();
-                if (!userId) {
-                    console.error('User ID not found');
-                    setError(new Error('User ID not found.'));
-                    setShowThinking(false);
-                    return;
-                }
-
-                const analysisRequest = {
-                    settings: {
-                        debug_mode: false,
-                    },
-                    request: {
-                        id: runIdRef.current,
-                        user_id: userId,
-                        query: message,
-                        workloads: [],
-                    },
-                };
-                ws.send(JSON.stringify({ action: 'start_agent', payload: analysisRequest }));
+            const analysisRequest = {
+                settings: {
+                    debug_mode: false,
+                },
+                request: {
+                    id: runIdRef.current,
+                    user_id: userId,
+                    query: message,
+                    workloads: [],
+                },
             };
-
-            ws.onmessage = (event) => {
-                const message: StreamEvent = JSON.parse(event.data);
-                console.log('Received message:', message);
-
-                if (message.event === 'run_complete') {
-                    setShowThinking(false);
-                    return;
-                }
-
-                setMessages((draft) => produce(draft, (d) => processStreamEvent(d, message)));
-            };
-
-            ws.onclose = () => {
-                console.log('WebSocket disconnected');
-                setShowThinking(false);
-            };
-
-            ws.onerror = (event) => {
-                console.error('WebSocket error:', event);
-                setError(new Error('WebSocket connection failed.'));
-                setShowThinking(false);
-            };
+            socketRef.current.send(JSON.stringify({ action: 'start_agent', payload: analysisRequest }));
         },
-        [disconnect],
+        [connect],
     );
 
     return { startAgent, messages, showThinking, error };
