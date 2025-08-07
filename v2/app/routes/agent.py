@@ -18,10 +18,9 @@ async def websocket_endpoint(websocket: WebSocket, run_id: str, current_user: Ac
         initial_message = await websocket.receive_text()
         await agent_service.handle_websocket_message(run_id, initial_message)
 
-        # Handle incoming messages
+        # Keep the connection alive to allow the agent to send messages
         while True:
-            data = await websocket.receive_text()
-            await agent_service.handle_websocket_message(run_id, data)
+            await websocket.receive_text() # Keep the connection open
 
     except Exception as e:
         await websocket.close(code=1011, reason=str(e))

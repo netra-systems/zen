@@ -54,6 +54,20 @@ export function MessageCard({ message, user }: MessageCardProps) {
 
   const toggleRaw = () => setShowRaw(!showRaw);
 
+  if (message.type === 'event' && message.event === 'agent_started') {
+    return (
+      <div className="flex items-start gap-4" data-testid="agent-started-indicator">
+        <Avatar>
+          <AvatarImage src="/agent-avatar.png" />
+          <AvatarFallback>A</AvatarFallback>
+        </Avatar>
+        <div className="rounded-lg p-3 max-w-[75%] bg-muted">
+          <p className="text-sm">Agent started...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (message.type === 'thinking') {
     return (
       <div className="flex items-start gap-4" data-testid="thinking-indicator">
