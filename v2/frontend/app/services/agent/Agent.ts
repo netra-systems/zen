@@ -12,7 +12,7 @@ import {
     ToolStartMessage,
     StateData,
     AIMessageChunk
-} from '@/app/types';
+} from '@/app/types/index';
 
 // --- Agent Class ---
 

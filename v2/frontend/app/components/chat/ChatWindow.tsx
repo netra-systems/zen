@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import { MessageOrchestrator } from './MessageOrchestrator';
 import { MessageFilterControl } from './MessageFilter';
-import { Message, MessageFilter, ChatWindowProps } from '@/app/types';
+import { Message, MessageFilter, ChatWindowProps } from '@/app/types/index';
 
 export function ChatWindow({ 
     messages, 
@@ -35,7 +35,7 @@ export function ChatWindow({
 
     const isAgentThinking = messages.some(m => m.type === 'thinking');
 
-    import { handleExampleClick } from '@/app/lib/utils';
+    
 
     return (
         <div className="flex flex-col h-full border rounded-xl shadow-sm">

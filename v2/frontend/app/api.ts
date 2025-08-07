@@ -1,5 +1,5 @@
 import { config } from './config';
-import { AgentRun, AgentEvent, Reference, AnalysisRequest } from '@/app/types';
+import { AgentRun, AgentEvent, Reference, AnalysisRequest } from '@/app/types/index';
 
 // --- API Service ---
 export const apiService = {

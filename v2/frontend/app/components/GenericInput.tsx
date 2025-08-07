@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { InputField, GenericInputProps } from '@/app/types';
+import { InputField, GenericInputProps } from '@/app/types/index';
 
 export function GenericInput({ title, description, inputFields, onSubmit, isLoading, submitButtonText, onClear }: GenericInputProps) {
     const [formState, setFormState] = useState<Record<string, any>>(() => {

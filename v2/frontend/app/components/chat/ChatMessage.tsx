@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Message, ChatMessageProps } from '@/app/types';
+import { Message, ChatMessageProps } from '@/app/types/index';
 import { MessageContent } from './MessageContent';
 import { TodoListView } from './TodoListView';
 import JsonTreeView from './JsonTreeView';

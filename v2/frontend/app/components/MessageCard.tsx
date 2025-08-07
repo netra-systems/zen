@@ -7,7 +7,7 @@ import 'react-json-view-lite/dist/index.css';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { MessageContent } from './chat/MessageContent';
 import { TodoListView } from './chat/TodoListView';
-import { Message, MessageCardProps } from '@/app/types';
+import { Message, MessageCardProps } from '@/app/types/index';
 
 export function MessageCard({ message, user }: MessageCardProps) {
   const getToolName = (message: Message) => {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MessageFilterProps } from '@/app/types';
+import { MessageFilterProps } from '@/app/types/index';
 
 export function MessageFilter({ onFilterChange }: MessageFilterProps) {
   const [filter, setFilter] = useState('all');

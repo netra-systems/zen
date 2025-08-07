@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { apiService } from './api';
 import { config } from './config';
-import { User } from '@/app/types';
+import { User } from '@/app/types/index';
 
 interface AppState {
     user: User | null;
