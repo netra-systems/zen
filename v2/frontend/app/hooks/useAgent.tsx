@@ -1,8 +1,68 @@
-
 import { getToken, getUserId } from '../lib/user';
 import { useEffect, useRef, useState } from 'react';
-import { Message, ToolCall, ToolOutput, StateUpdate, EventName } from '../types/chat';
+import { Message, StreamEvent, ArtifactMessage, EventName } from '../types/chat';
 import { produce } from 'immer';
+
+const processStreamEvent = (draft: Message[], event: StreamEvent) => {
+  const { event: eventName, data, run_id } = event;
+
+  let existingMessage = draft.find(m => m.id === run_id) as ArtifactMessage | undefined;
+
+  if (!existingMessage || existingMessage.type !== 'artifact') {
+    const newMessage: ArtifactMessage = {
+      id: run_id || `msg_${Date.now()}`,
+      role: 'agent',
+      timestamp: new Date().toISOString(),
+      type: 'artifact',
+      name: eventName,
+      data: data,
+      tool_calls: [],
+      tool_outputs: [],
+      state_updates: { todo_list: [], completed_steps: [] },
+    };
+    draft.push(newMessage);
+    existingMessage = newMessage;
+  } else {
+    existingMessage.name = eventName;
+    existingMessage.data = data;
+  }
+
+  switch (eventName) {
+    case 'on_chain_start':
+      if ('input' in data && data.input?.todo_list) {
+        existingMessage.state_updates = {
+          todo_list: data.input.todo_list,
+          completed_steps: data.input.completed_steps || [],
+        };
+      }
+      break;
+
+    case 'on_chat_model_stream':
+      if ('chunk' in data) {
+        if (data.chunk?.content) {
+          existingMessage.content = (existingMessage.content || '') + data.chunk.content;
+        }
+        if (data.chunk?.tool_calls) {
+          existingMessage.tool_calls = [...(existingMessage.tool_calls || []), ...data.chunk.tool_calls];
+        }
+      }
+      break;
+
+    case 'on_tool_end':
+      if ('output' in data) {
+        const toolOutput = {
+          tool_call_id: run_id, // This might need adjustment based on actual data
+          content: typeof data.output === 'string' ? data.output : JSON.stringify(data.output),
+          is_error: 'is_error' in data ? data.is_error : false,
+        };
+        existingMessage.tool_outputs = [...(existingMessage.tool_outputs || []), toolOutput];
+      }
+      break;
+
+    default:
+      break;
+  }
+};
 
 export function useAgent() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -13,16 +73,14 @@ export function useAgent() {
   const runIdRef = useRef<string | null>(null);
 
   const addMessage = (message: Message) => {
-    setMessages(
-      produce(draft => {
-        const existingMessageIndex = draft.findIndex(m => m.id === message.id);
-        if (existingMessageIndex !== -1) {
-          draft[existingMessageIndex] = message;
-        } else {
-          draft.push(message);
-        }
-      })
-    );
+    setMessages(produce(draft => {
+      const existingMessageIndex = draft.findIndex(m => m.id === message.id);
+      if (existingMessageIndex !== -1) {
+        draft[existingMessageIndex] = message;
+      } else {
+        draft.push(message);
+      }
+    }));
   };
 
   useEffect(() => {
@@ -32,7 +90,7 @@ export function useAgent() {
         const runId = `run_${Date.now()}`;
         runIdRef.current = runId;
         const ws = new WebSocket(`ws://localhost:8000/agent/${runId}?token=${token}`);
-        
+
         ws.onopen = () => {
           console.log('WebSocket connected');
           setIsConnected(true);
@@ -40,82 +98,15 @@ export function useAgent() {
         };
 
         ws.onmessage = (event) => {
-          const message = JSON.parse(event.data);
+          const message: StreamEvent = JSON.parse(event.data);
           console.log('Received message:', message);
 
-          const { event: eventName, data, run_id } = message;
-
-          if (eventName === 'run_complete') {
+          if (message.event === 'run_complete') {
             setShowThinking(false);
             return;
           }
 
-          setMessages(produce(draft => {
-            let existingMessage = draft.find(m => m.id === run_id) as ArtifactMessage | undefined;
-
-            if (!existingMessage || existingMessage.type !== 'artifact') {
-                const newMessage: Message = {
-                    id: run_id || `msg_${Date.now()}`,
-                    role: 'agent',
-                    timestamp: new Date().toISOString(),
-                    type: 'artifact',
-                    name: eventName as EventName,
-                    data: data,
-                };
-                draft.push(newMessage);
-                existingMessage = newMessage as ArtifactMessage;
-            } else {
-                existingMessage.name = eventName as EventName;
-                existingMessage.data = data;
-            }
-            
-            let content: string | undefined;
-            if (data?.chunk?.agent?.messages?.[0]?.content) {
-              content = data.chunk.agent.messages[0].content;
-            } else if (data?.output?.messages?.[0]?.content) {
-              content = data.output.messages[0].content;
-            } else if (data?.chunk?.messages?.[0]?.content) {
-              content = data.chunk.messages[0].content;
-            } else if (typeof data?.chunk?.content === 'string') {
-              content = data.chunk.content;
-            }
-            if (content) {
-                existingMessage.content = (existingMessage.content || '') + content;
-            }
-  
-            let tool_calls: ToolCall[] | undefined;
-            if (data?.tool_calls) {
-              tool_calls = data.tool_calls;
-            } else if (data?.output?.messages?.[0]?.tool_calls) {
-              tool_calls = data.output.messages[0].tool_calls;
-            } else if (data?.chunk?.tool_calls) {
-              tool_calls = data.chunk.tool_calls;
-            } else if (data?.chunk?.agent?.messages?.[0]?.tool_calls) {
-              tool_calls = data.chunk.agent.messages[0].tool_calls;
-            }
-            if (tool_calls) {
-                existingMessage.tool_calls = [...(existingMessage.tool_calls || []), ...tool_calls];
-            }
-  
-            if (data?.tool_outputs) {
-                existingMessage.tool_outputs = [...(existingMessage.tool_outputs || []), ...data.tool_outputs];
-            }
-  
-            const updateStateCall = tool_calls?.find(tc => tc.name === 'update_state');
-            if (updateStateCall?.args) {
-              const newCompletedStep = updateStateCall.args.completed_step as string;
-              const existingSteps = existingMessage.state_updates?.completed_steps || [];
-              existingMessage.state_updates = {
-                todo_list: updateStateCall.args.todo_list as string[],
-                completed_steps: newCompletedStep ? [...existingSteps, newCompletedStep] : existingSteps,
-              };
-            } else if (data?.input?.todo_list) {
-                existingMessage.state_updates = {
-                    todo_list: data.input.todo_list,
-                    completed_steps: data.input.completed_steps || [],
-                };
-            }
-          }));
+          setMessages(produce(draft => processStreamEvent(draft, message)));
         };
 
         ws.onclose = () => {

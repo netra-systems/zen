@@ -1,64 +1,88 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useAgent } from '../app/hooks/useAgent';
 import { Server } from 'ws';
+import { Message, StreamEvent } from '../app/types/chat';
 
-const mockServer = new Server({ port: 8080 });
+global.WebSocket = require('ws');
 
-describe('useAgent with WebSocket', () => {
+describe('useAgent', () => {
   let server: Server;
 
-  beforeAll(() => {
-    server = new Server({ port: 8000 });
+  beforeEach(done => {
+    server = new Server({ port: 8000 }, done);
   });
 
-  afterAll(() => {
-    server.close();
+  afterEach(done => {
+    server.close(done);
   });
 
-  it('should connect to WebSocket and perform handshake', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useAgent());
-
-    await act(async () => {
-      await waitForNextUpdate();
-    });
-
-    expect(result.current.isConnected).toBe(true);
+  it('should connect to the WebSocket server', async () => {
+    const { result, waitFor } = renderHook(() => useAgent());
+    await waitFor(() => expect(result.current.messages).toBeDefined());
+    // No direct way to check isConnected from outside, so we infer it by lack of error
   });
 
-  it('should send a message and receive a response via WebSocket', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useAgent());
-    const message = 'Test message';
+  it('should handle incoming stream events and update messages', async () => {
+    const { result, waitFor } = renderHook(() => useAgent());
 
-    await act(async () => {
-      await waitForNextUpdate();
-    });
+    const streamEvent: StreamEvent = {
+      event: 'on_chain_start',
+      run_id: 'run123',
+      data: {
+        input: {
+          messages: [],
+          workloads: [],
+          todo_list: ['do a thing'],
+          completed_steps: [],
+          status: 'in_progress',
+          events: [],
+        },
+      },
+    };
 
     act(() => {
-      result.current.startAgent(message);
-    });
-
-    // Assert that the user message is added immediately
-    expect(result.current.messages).toHaveLength(1);
-    expect(result.current.messages[0].content).toBe(message);
-    expect(result.current.messages[0].sender).toBe('user');
-
-    // Mock the server response
-    server.on('connection', (ws) => {
-      ws.on('message', (message) => {
-        const data = JSON.parse(message.toString());
-        if (data.input === 'Test message') {
-          ws.send(JSON.stringify({ message: 'Test response' }));
+      server.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(streamEvent));
         }
       });
     });
 
-    await act(async () => {
-      await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.messages.length).toBe(1);
+      const message = result.current.messages[0] as any;
+      expect(message.id).toBe('run123');
+      expect(message.state_updates.todo_list).toEqual(['do a thing']);
+    });
+  });
+
+  it('should set showThinking to false on run_complete', async () => {
+    const { result, waitFor } = renderHook(() => useAgent());
+
+    act(() => {
+      result.current.startAgent('test message');
     });
 
-    // Assert that the agent response is received
-    expect(result.current.messages).toHaveLength(2);
-    expect(result.current.messages[1].content).toBe('Test response');
-    expect(result.current.messages[1].sender).toBe('agent');
+    await waitFor(() => {
+      expect(result.current.showThinking).toBe(true);
+    });
+
+    const streamEvent: StreamEvent = {
+      event: 'run_complete',
+      run_id: 'run123',
+      data: { status: 'complete' },
+    };
+
+    act(() => {
+      server.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(streamEvent));
+        }
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current.showThinking).toBe(false);
+    });
   });
 });

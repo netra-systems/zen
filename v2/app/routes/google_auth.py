@@ -23,14 +23,17 @@ oauth.register(
     }
 )
 
+REDIRECT_URI = f"{settings.frontend_url}/auth/callback"
+
+REDIRECT_URI = f"{settings.frontend_url}/auth/callback"
+
 @router.get("/login/google")
 async def login_via_google(request: Request):
-    redirect_uri = f"{settings.frontend_url}/auth/callback"
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    return await oauth.google.authorize_redirect(request, REDIRECT_URI)
 
 @router.get("/api/v3/auth/google")
 async def auth_via_google(request: Request, db: DbDep):
-    token = await oauth.google.authorize_access_token(request)
+    token = await oauth.google.authorize_access_token(request, redirect_uri=REDIRECT_URI)
     user_info = token.get('userinfo')
     if not user_info:
         raise HTTPException(

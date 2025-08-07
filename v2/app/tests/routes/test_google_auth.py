@@ -14,7 +14,7 @@ client = TestClient(app)
 def test_google_auth(mock_google_oauth):
     # 1. Mock the Google OAuth flow
     mock_google_oauth.authorize_redirect = AsyncMock(
-        return_value=RedirectResponse(url="https://accounts.google.com/o/oauth2/v2/auth", status_code=200)
+        return_value=RedirectResponse(url="https://accounts.google.com/o/oauth2/v2/auth", status_code=302)
     )
     mock_google_oauth.authorize_access_token = AsyncMock(
         return_value={
@@ -30,12 +30,20 @@ def test_google_auth(mock_google_oauth):
     key_manager = KeyManager.load_from_settings(settings)
     app.state.security_service = SecurityService(key_manager)
 
-    # 3. Initiate the Google login
-    response = client.get("/login/google")
-    assert response.status_code == 200
+    # 3. Use TestClient as a context manager to persist session
+    with TestClient(app) as client:
+        # 4. Initiate the Google login
+        response = client.get("/login/google", allow_redirects=False)
+        assert response.status_code == 302
+        assert "state" in response.cookies
 
-    # 4. Simulate the callback from Google
-    response = client.get("/auth/google")
-    assert response.status_code == 307
-    redirect_url = response.headers["location"]
-    assert redirect_url.startswith("http://localhost:3000/auth/callback?token=")
+        # 5. Simulate the callback from Google
+        response = client.get("/api/v3/auth/google", allow_redirects=False)
+        assert response.status_code == 307
+        redirect_url = response.headers["location"]
+        assert redirect_url.startswith(f"{settings.frontend_url}/auth/callback?token=")
+
+        # 6. Verify the token in the redirect URL
+        token = redirect_url.split("=")[1]
+        payload = app.state.security_service.decode_access_token(token)
+        assert payload["sub"] == "test@example.com"

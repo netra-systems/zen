@@ -1,25 +1,18 @@
 export type MessageRole = 'user' | 'agent';
 
-export interface Artifact {
-    type: string;
-    content: any;
-    data: any;
-}
-
 export interface BaseMessage {
-    id: string;
-    role: MessageRole;
-    timestamp: string;
-    artifact?: Artifact;
+  id: string;
+  role: MessageRole;
+  timestamp: string;
 }
 
 export interface TextMessage extends BaseMessage {
-    type: 'text';
-    content: string;
+  type: 'text';
+  content: string;
 }
 
 export interface ThinkingMessage extends BaseMessage {
-    type: 'thinking';
+  type: 'thinking';
 }
 
 export type EventName =
@@ -37,44 +30,85 @@ export type EventName =
   | 'on_agent_finish'
   | 'run_complete';
 
-export interface EventMessage extends BaseMessage {
-    type: 'event';
-    name: EventName;
-    data: Record<string, unknown>;
-}
-
 export interface ToolCall {
-    name: string;
-    args: Record<string, unknown>;
-    id: string;
-    type: 'tool_call';
+  name: string;
+  args: Record<string, any>;
+  id: string;
+  type: 'tool_call';
 }
 
 export interface ToolOutput {
-    tool_call_id: string;
-    content: string;
-    is_error: boolean;
+  tool_call_id: string;
+  content: string;
+  is_error: boolean;
 }
 
 export interface StateUpdate {
-    todo_list: string[];
-    completed_steps: string[];
+  todo_list: string[];
+  completed_steps: string[];
 }
 
 export interface ArtifactMessage extends BaseMessage {
-    type: 'artifact';
-    name: EventName;
-    data: any;
-    content?: string;
-    tool_calls?: ToolCall[];
-    tool_outputs?: ToolOutput[];
-    state_updates?: StateUpdate;
+  type: 'artifact';
+  name: EventName;
+  data: any;
+  content?: string;
+  tool_calls?: ToolCall[];
+  tool_outputs?: ToolOutput[];
+  state_updates?: StateUpdate;
 }
 
-export type Message = TextMessage | ThinkingMessage | EventMessage | ArtifactMessage;
+export interface OnChainStartData {
+  input: {
+    messages: any[];
+    workloads: any[];
+    todo_list: string[];
+    completed_steps: string[];
+    status: string;
+    events: any[];
+  };
+}
+
+export interface OnToolStartData {
+  input: Record<string, any>;
+}
+
+export interface OnToolEndData {
+  output: string;
+  is_error: boolean;
+}
+
+export interface OnChatModelStreamData {
+  chunk: {
+    content?: string;
+    tool_calls?: ToolCall[];
+  };
+}
+
+export interface RunCompleteData {
+  status: string;
+}
+
+export interface StreamEvent {
+  event: EventName;
+  data:
+    | OnChainStartData
+    | OnToolStartData
+    | OnToolEndData
+    | OnChatModelStreamData
+    | RunCompleteData
+    | Record<string, any>;
+  run_id: string;
+}
+
+export type Message = TextMessage | ThinkingMessage | ArtifactMessage;
 
 export interface ChatState {
-    messages: Message[];
-    isLoading: boolean;
-    error: Error | null;
+  messages: Message[];
+  isLoading: boolean;
+  error: Error | null;
+}
+
+export interface ChatContextType extends ChatState {
+  sendMessage: (message: string) => void;
 }
