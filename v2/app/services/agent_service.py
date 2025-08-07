@@ -18,18 +18,17 @@ class AgentService:
         """
         return await self.supervisor.start_agent(analysis_request, run_id, stream_updates)
 
-    async def handle_websocket_message(self, run_id: str, data: str):
+    async def handle_websocket_message(self, run_id: str, message: schemas.WebSocketMessage):
         """
         Handles a message from the WebSocket.
         """
-        logger.info(f"handle_websocket_message called for run_id: {run_id} with data: {data}")
+        logger.info(f"handle_websocket_message called for run_id: {run_id} with message: {message}")
         try:
-            message = schemas.StartAgentMessage.parse_raw(data)
-
-            if message.action == "start_agent":
+            if message.type == "start_agent":
+                payload = schemas.StartAgentPayload.parse_obj(message.payload)
                 analysis_request = schemas.AnalysisRequest(
-                    settings=message.payload.settings,
-                    request=message.payload.request
+                    settings=payload.settings,
+                    request=payload.request
                 )
                 # When started from a websocket, we always want to stream updates
                 response = await self.start_agent(analysis_request, run_id, stream_updates=True)

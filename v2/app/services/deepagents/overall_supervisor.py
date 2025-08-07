@@ -186,7 +186,8 @@ class OverallSupervisor:
                             event_type=event["event"],
                             data=serializable_data,
                             run_id=run_id
-                        )
+                        ).dict(),
+                        run_id
                     )
 
             state["status"] = "complete"
@@ -195,7 +196,8 @@ class OverallSupervisor:
                     RunCompleteMessage(
                         data={"status": "complete"},
                         run_id=run_id
-                    )
+                    ).dict(),
+                    run_id
                 )
             logger.info(f"Agent run for run_id: {run_id} completed successfully.")
         except Exception as e:
@@ -209,7 +211,7 @@ class OverallSupervisor:
                         ),
                         run_id=run_id
                     )
-                    await self.websocket_manager.send_to_run(error_payload)
+                    await self.websocket_manager.send_to_run(error_payload.dict(), run_id)
                 except Exception as ws_e:
                     logger.error(f"Failed to send error message to client for run_id: {run_id}: {ws_e}")
 

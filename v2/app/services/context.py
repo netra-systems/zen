@@ -1,5 +1,5 @@
 from typing import Any, List, Dict
-from app.models.schemas import Log
+from app.schemas import Log
 from app.services.deepagents.state import DeepAgentState
 from app.services.supply_catalog_service import SupplyCatalogService
 

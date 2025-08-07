@@ -389,6 +389,10 @@ export interface RootLayoutProps {
   children: React.ReactNode;
 }
 
+export interface AppWithLayoutProps {
+  children: React.ReactNode;
+}
+
 export interface ControlButton {
     text: string;
     icon: React.ReactNode;

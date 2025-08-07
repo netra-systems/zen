@@ -35,15 +35,15 @@ async def auth(request: Request, db_session: AsyncSession = Depends(get_db_sessi
         token = await oauth.google.authorize_access_token(request)
     except Exception as e:
         logger.error(f"Error authorizing access token: {e}")
-        raise HTTPException(status_code=400, detail="Authentication failed: could not verify token")
+        return RedirectResponse(url=f"{settings.frontend_url}/auth/error?message=Authentication failed: could not verify token")
 
     user_info = token.get('userinfo')
     if not user_info:
-        raise HTTPException(status_code=400, detail="Authentication failed: no user info")
+        return RedirectResponse(url=f"{settings.frontend_url}/auth/error?message=Authentication failed: no user info")
 
     email = user_info.get('email')
     if not email:
-        raise HTTPException(status_code=400, detail="Authentication failed: no email in user info")
+        return RedirectResponse(url=f"{settings.frontend_url}/auth/error?message=Authentication failed: no email in user info")
 
     user = await security_service.get_or_create_user_from_oauth(db_session, user_info)
 

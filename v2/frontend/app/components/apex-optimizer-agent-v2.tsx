@@ -1,19 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useAgent } from '../hooks/useAgent';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { examplePrompts } from '../lib/examplePrompts';
-import { MessageFactory } from '../services/agent/MessageFactory';
+import { useAgentContext } from '../providers/AgentProvider';
 import { MessageOrchestrator } from './chat/MessageOrchestrator';
 
-import { truncatePrompt } from '../lib/utils';
-
-export default function ApexOptimizerAgentV2() {
+function ApexOptimizerAgentV2() {
   const [input, setInput] = useState('');
-  const { startAgent, messages, showThinking, error } = useAgent();
+  const { startAgent, messages, showThinking, error } = useAgentContext();
   const [showExamples, setShowExamples] = useState(true);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,4 +1,4 @@
-import { config } from '../../config';
+import config from '@/config';
 
 export enum WebSocketStatus {
     Connecting = 'Connecting',
@@ -20,7 +20,7 @@ export class WebSocketClient {
             return;
         }
 
-        this.url = `${config.api.wsBaseUrl}/agent/${runId}?token=${token}`;
+        this.url = `${config.apiBaseUrl.replace(/^http/, 'ws')}/ws/agent/${runId}?token=${token}`;
         this.setStatus(WebSocketStatus.Connecting);
         console.log('WebSocket connecting to:', this.url);
         this.ws = new WebSocket(this.url);

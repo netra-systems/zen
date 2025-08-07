@@ -24,10 +24,9 @@ def authenticated_client():
     del app.dependency_overrides[get_current_user]
 
 @pytest.mark.asyncio
-@patch('app.routes.agent_route.get_agent_supervisor')
-async def test_start_agent_success(mock_get_agent_supervisor, authenticated_client):
-    mock_agent_supervisor = AsyncMock(spec=AgentService)
-    mock_get_agent_supervisor.return_value = mock_agent_supervisor
+@patch('app.services.agent_service.AgentService.start_agent')
+async def test_start_agent_success(mock_start_agent, authenticated_client):
+    mock_start_agent.return_value = {"status": "agent_started", "run_id": "test_run"}
     analysis_request = {
         "settings": {"debug_mode": True},
         "request": {
@@ -45,17 +44,16 @@ async def test_start_agent_success(mock_get_agent_supervisor, authenticated_clie
         }
     }
 
-    response = authenticated_client.post("/api/v3/agent/start_agent", json=analysis_request)
+    response = authenticated_client.post("/api/v3/agent/chat/start_agent", json=analysis_request)
 
     assert response.status_code == 200
-    mock_agent_supervisor.start_agent.assert_awaited_once()
+    assert response.json() == {"status": "agent_started", "run_id": "test_req"}
+    mock_start_agent.assert_awaited_once()
 
 @pytest.mark.asyncio
-@patch('app.routes.agent_route.get_agent_supervisor')
-async def test_start_agent_failure(mock_get_agent_supervisor, authenticated_client):
-    mock_agent_supervisor = AsyncMock(spec=AgentService)
-    mock_agent_supervisor.start_agent.side_effect = Exception("Agent start failed")
-    mock_get_agent_supervisor.return_value = mock_agent_supervisor
+@patch('app.services.agent_service.AgentService.start_agent')
+async def test_start_agent_failure(mock_start_agent, authenticated_client):
+    mock_start_agent.side_effect = HTTPException(status_code=500, detail="Agent start failed")
     analysis_request = {
         "settings": {"debug_mode": True},
         "request": {
@@ -73,15 +71,16 @@ async def test_start_agent_failure(mock_get_agent_supervisor, authenticated_clie
         }
     }
 
-    response = authenticated_client.post("/api/v3/agent/start_agent", json=analysis_request)
+    response = authenticated_client.post("/api/v3/agent/chat/start_agent", json=analysis_request)
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Agent start failed"}
 
 @pytest.mark.asyncio
-async def test_websocket_endpoint():
+async def test_websocket_endpoint(authenticated_client):
     run_id = "test_run"
-    with patch('app.routes.agent.websocket_endpoint', new_callable=AsyncMock) as mock_websocket_endpoint:
-        with TestClient(app).websocket_connect(f"/api/v3/agent/{run_id}") as websocket:
-            pass
-    mock_websocket_endpoint.assert_awaited_once()
+    with authenticated_client.websocket_connect(f"/ws/{run_id}") as websocket:
+        # The connection should be accepted, but there's no message sent from the server
+        # immediately upon connection in the current implementation.
+        # We can just assert that the connection is accepted.
+        pass

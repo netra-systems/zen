@@ -78,12 +78,12 @@ def test_remove_log_table_success(superuser_client):
     assert table_to_remove not in settings.clickhouse_logging.available_tables
 
 def test_remove_log_table_not_found(superuser_client):
-    response = superuser_client.delete("/api/v3/settings/log_tables?log_table=not_a_real_table")
+    response = superuser_client.delete("/api/v3/settings/log_tables", params={"log_table": "not_a_real_table"})
     assert response.status_code == 400
 
 def test_remove_default_log_table(superuser_client):
     default_table = settings.clickhouse_logging.default_table
-    response = superuser_client.delete(f"/api/v3/settings/log_tables?log_table={default_table}")
+    response = superuser_client.delete(f"/api/v3/settings/log_tables", params={"log_table": default_table})
     assert response.status_code == 400
 
 # --- Time Period Management ---
@@ -116,10 +116,10 @@ def test_remove_default_log_table_for_context_success(superuser_client):
     context = "context_to_delete"
     table_name = settings.clickhouse_logging.available_tables[0]
     settings.clickhouse_logging.default_tables[context] = table_name
-    response = superuser_client.delete(f"/api/v3/settings/default_log_table?context={context}&log_table={table_name}")
+    response = superuser_client.delete(f"/api/v3/settings/default_log_table", params={"context": context, "log_table": table_name})
     assert response.status_code == 200
     assert context not in settings.clickhouse_logging.default_tables
 
 def test_remove_default_log_table_for_context_not_found(superuser_client):
-    response = superuser_client.delete("/api/v3/settings/default_log_table?context=non_existent_context&log_table=test")
+    response = superuser_client.delete("/api/v3/settings/default_log_table", params={"context": "non_existent_context", "log_table": "test"})
     assert response.status_code == 400

@@ -16,6 +16,7 @@ import pandas as pd
 import numpy as np
 from faker import Faker
 
+from ..config import settings
 from ..schemas import ContentGenParams, LogGenParams, SyntheticDataGenParams
 from ..data.synthetic.content_generator import META_PROMPTS, generate_content_sample
 from ..db.clickhouse_base import ClickHouseDatabase
@@ -29,7 +30,7 @@ from ..websocket_manager import manager
 
 async def update_job_status(job_id: str, status: str, **kwargs):
     """Updates the status and other attributes of a generation job and sends a WebSocket message."""
-    job_store.update(job_id, status, **kwargs)
+    await job_store.update(job_id, status, **kwargs)
     await manager.broadcast_to_client(job_id, json.dumps({"job_id": job_id, "status": status, **kwargs}))
 
 async def get_corpus_from_clickhouse(table_name: str) -> dict:
@@ -343,7 +344,7 @@ async def run_synthetic_data_generation_job(job_id: str, params: SyntheticDataGe
 
         args = Args(total_logs_to_gen, "config.yaml", cpu_count(), content_corpus)
         
-        generated_logs = synthetic_data_main(args)
+        generated_logs = await synthetic_data_main(args)
         records_ingested = 0
         log_batch = []
 

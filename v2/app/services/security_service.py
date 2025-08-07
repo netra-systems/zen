@@ -32,8 +32,8 @@ class SecurityService:
         except Exception:
             return False
 
-    def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None):
-        to_encode = data.copy()
+    def create_access_token(self, data: schemas.TokenPayload, expires_delta: Optional[timedelta] = None):
+        to_encode = data.model_dump()
         if expires_delta:
             expire = datetime.utcnow() + expires_delta
         else:

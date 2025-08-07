@@ -17,12 +17,14 @@ def test_encrypt_and_decrypt(security_service: SecurityService):
     assert decrypted == original_string
 
 
+from app.schemas import TokenPayload
+
 def test_create_and_validate_access_token(security_service: SecurityService):
     """
     Tests that an access token can be created and then successfully validated.
     """
     email = "test@example.com"
-    token = security_service.create_access_token(data={"sub": email})
+    token = security_service.create_access_token(data=TokenPayload(sub=email))
     assert token is not None
 
     decoded_email = security_service.get_user_email_from_token(token)

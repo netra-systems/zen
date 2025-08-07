@@ -42,7 +42,7 @@ class SubAgent(ABC):
         state["messages"].append(HumanMessage(content=initial_prompt))
         
         # Get the LLM
-        llm = self.llm_manager.get_llm()
+        llm = self.llm_manager.get_llm(self.sub_agent_type)
 
         # Invoke the LLM
         response = await llm.ainvoke(state["messages"])

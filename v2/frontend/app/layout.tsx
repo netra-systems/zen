@@ -2,47 +2,41 @@
 'use client';
 
 import './globals.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { AuthProvider, useAuth } from '@/hooks/useAuth';
+import { AuthProvider, useAuth } from '@/providers/auth';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { cn } from '@/lib/utils';
 
-export function AppWithLayout({ children }: { children: React.ReactNode }) {
+import { RootLayoutProps, AppWithLayoutProps } from './types';
+
+function AppWithLayout({ children }: AppWithLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const { user } = useAuth();
   const pathname = usePathname();
-  const { isAuthenticated, isAuthReady } = useAuth(); // Get isAuthReady
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const isLoginPage = pathname === '/login';
+  const publicPaths = ['/login', '/auth/error', '/auth/callback'];
+  const isPublicPath = publicPaths.includes(pathname);
 
-  // Wait for auth to be ready before rendering auth-dependent UI
-  if (!isAuthReady) {
+  if (!user && !isPublicPath) {
     return null; // Or a loading spinner
-  }
-
-  if (!isAuthenticated && !isLoginPage) {
-    return <>{children}</>;
-  }
-
-  if (isLoginPage) {
-    return <>{children}</>;
   }
 
   return (
     <div
       className={cn(
         'grid min-h-screen w-full',
-        isSidebarOpen && 'md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]'
+        isSidebarOpen && user && !isPublicPath && 'md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]'
       )}
     >
-      {isSidebarOpen && <Sidebar />}
+      {isSidebarOpen && user && !isPublicPath && <Sidebar />}
       <div className="flex flex-col">
-        <Header toggleSidebar={toggleSidebar} />
+        {user && !isPublicPath && <Header toggleSidebar={toggleSidebar} />}
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           {children}
         </main>
@@ -51,9 +45,9 @@ export function AppWithLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning={true}>
       <body>
         <AuthProvider>
           <AppWithLayout>{children}</AppWithLayout>

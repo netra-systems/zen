@@ -67,6 +67,9 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+class TokenPayload(BaseModel):
+    sub: str
+
 # --- Admin Schemas ---
 
 class LogTableSettings(BaseModel):
@@ -181,6 +184,12 @@ class SyntheticDataGenParams(BaseModel):
     event_types: List[str] = Field(default_factory=lambda: ["search", "login", "purchase", "logout"], description="A list of event types to simulate.")
     source_table: str = Field("content_corpus", description="The name of the source ClickHouse table for the content corpus.")
     destination_table: str = Field("synthetic_data", description="The name of the destination ClickHouse table for the generated data.")
+
+# --- WebSocket Schemas ---
+class WebSocketMessage(BaseModel):
+    type: str
+    payload: Dict[str, Any]
+
 
 # --- Section 2: Demand Analyzer Schemas ---
 

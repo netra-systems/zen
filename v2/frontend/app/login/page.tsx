@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/auth';
 
 export default function LoginPage() {
   const { login } = useAuth();

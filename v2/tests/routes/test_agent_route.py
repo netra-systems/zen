@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.services.agent_service import AgentService
 from app.auth.auth_dependencies import ActiveUserDep
-from app.db.models_postgres import User
+from app.schemas import User
 
 @pytest.fixture
 def client():
@@ -18,10 +18,10 @@ def agent_service_mock():
 @pytest.mark.asyncio
 async def test_start_agent(client, agent_service_mock):
     agent_service_mock.start_agent = AsyncMock(return_value={"run_id": "test_run"})
-    app.state.agent_service = agent_service_mock
+    app.dependency_overrides[get_agent_supervisor] = lambda: agent_service_mock
 
     app.dependency_overrides[ActiveUserDep] = lambda: User(email="dev@example.com", hashed_password="test")
-    response = client.post("/api/v3/agent/chat/start_agent/client123", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "test message", "workloads": []}})
+    response = client.post("/api/v3/agent/chat/start_agent", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "test message", "workloads": []}})
 
     assert response.status_code == 200
     assert response.json() == {"run_id": "test_run"}
@@ -30,7 +30,7 @@ async def test_start_agent(client, agent_service_mock):
 @pytest.mark.asyncio
 async def test_start_agent_with_different_messages(client, agent_service_mock):
     agent_service_mock.start_agent = AsyncMock(return_value={"run_id": "test_run"})
-    app.state.agent_service = agent_service_mock
+    app.dependency_overrides[get_agent_supervisor] = lambda: agent_service_mock
 
     app.dependency_overrides[ActiveUserDep] = lambda: User(email="dev@example.com", hashed_password="test")
     # First message
@@ -48,7 +48,7 @@ async def test_start_agent_with_different_messages(client, agent_service_mock):
 @pytest.mark.asyncio
 async def test_start_agent_with_empty_message(client, agent_service_mock):
     agent_service_mock.start_agent = AsyncMock(return_value={"run_id": "test_run"})
-    app.state.agent_service = agent_service_mock
+    app.dependency_overrides[get_agent_supervisor] = lambda: agent_service_mock
 
     app.dependency_overrides[ActiveUserDep] = lambda: User(email="dev@example.com", hashed_password="test")
     response = client.post("/api/v3/agent/chat/start_agent/client123", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "", "workloads": []}})
@@ -60,10 +60,10 @@ async def test_start_agent_with_empty_message(client, agent_service_mock):
 @pytest.mark.asyncio
 async def test_start_agent_service_failure(client, agent_service_mock):
     agent_service_mock.start_agent.side_effect = Exception("Agent service failed")
-    app.state.agent_service = agent_service_mock
+    app.dependency_overrides[get_agent_supervisor] = lambda: agent_service_mock
 
     app.dependency_overrides[ActiveUserDep] = lambda: User(email="dev@example.com", hashed_password="test")
-    response = client.post("/api/v3/agent/chat/start_agent/client123", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "test message", "workloads": []}})
+    response = client.post("/api/v3/agent/chat/start_agent", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "test message", "workloads": []}})
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Agent service failed"}
@@ -77,7 +77,7 @@ async def test_websocket_connection(client):
 @pytest.mark.asyncio
 async def test_start_agent_unauthenticated(client):
     app.dependency_overrides[ActiveUserDep] = lambda: exec('raise HTTPException(status_code=401, detail="Not authenticated")')
-    response = client.post("/api/v3/agent/chat/start_agent/client123", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "test message", "workloads": []}})
+    response = client.post("/api/v3/agent/chat/start_agent", json={"settings": {"debug_mode": True}, "request": {"id": "req_123", "user_id": "user123", "query": "test message", "workloads": []}})
 
     assert response.status_code == 401
 
