@@ -9,5 +9,6 @@ class DataSubAgent(SubAgent):
             name="data",
             description="You are a data agent. Your job is to gather and enrich the data needed for the analysis.",
             llm_manager=llm_manager,
-            tools=tools
+            tools=tools,
+            sub_agent_type="data"
         )

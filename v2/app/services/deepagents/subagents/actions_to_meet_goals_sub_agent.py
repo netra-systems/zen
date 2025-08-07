@@ -9,5 +9,6 @@ class ActionsToMeetGoalsSubAgent(SubAgent):
             name="actions_to_meet_goals",
             description="You are the actions agent. Your job is to formulate a plan of action based on the proposed optimizations.",
             llm_manager=llm_manager,
-            tools=tools
+            tools=tools,
+            sub_agent_type="actions_to_meet_goals"
         )

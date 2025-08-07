@@ -9,5 +9,6 @@ class TriageSubAgent(SubAgent):
             name="triage",
             description="You are a triage agent. Your job is to analyze the user's request and determine the next steps.",
             llm_manager=llm_manager,
-            tools=tools
+            tools=tools,
+            sub_agent_type="triage"
         )

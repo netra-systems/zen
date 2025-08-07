@@ -9,5 +9,6 @@ class OptimizationsCoreSubAgent(SubAgent):
             name="optimizations_core",
             description="You are the core optimizations agent. Your job is to analyze the data and propose optimizations.",
             llm_manager=llm_manager,
-            tools=tools
+            tools=tools,
+            sub_agent_type="optimizations_core"
         )

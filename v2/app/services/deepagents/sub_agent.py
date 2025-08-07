@@ -14,11 +14,12 @@ class MessageEncoder(json.JSONEncoder):
         return super().default(o)
 
 class SubAgent:
-    def __init__(self, name: str, description: str, llm_manager: LLMManager, tools: List[BaseTool] = None):
+    def __init__(self, name: str, description: str, llm_manager: LLMManager, tools: List[BaseTool] = None, sub_agent_type: str = None):
         self.name = name
         self.description = description
         self.llm_manager = llm_manager
         self.tools = tools or []
+        self.sub_agent_type = sub_agent_type
 
     async def run(self, state: DeepAgentState) -> Dict[str, Any]:
         central_logger.log(LogEntry(event="agent_node_execution", data={"agent_name": self.name, "state": state}))
@@ -30,7 +31,8 @@ class SubAgent:
 
         tool_calls = response.tool_calls if hasattr(response, 'tool_calls') else []
 
-        return {"messages": [response], "tool_calls": tool_calls}
+        return {"messages": [response], "tool_calls": tool_calls, "next_node": self.sub_agent_type}
+
 
     def as_runnable(self):
         async def agent_node(state: DeepAgentState):

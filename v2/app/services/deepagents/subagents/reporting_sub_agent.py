@@ -9,5 +9,6 @@ class ReportingSubAgent(SubAgent):
             name="reporting",
             description="You are the reporting agent. Your job is to summarize the results of the analysis and present them to the user.",
             llm_manager=llm_manager,
-            tools=tools
+            tools=tools,
+            sub_agent_type="reporting"
         )
