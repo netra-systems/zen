@@ -78,7 +78,7 @@ describe('MessageCard', () => {
       tool_outputs: [{ tool_call_id: 'tool1', content: 'Error message', is_error: true }],
     };
     render(<MessageCard message={message} user={mockUser} />);
-    fireEvent.click(screen.getByText('Errors'));
+    fireEvent.click(screen.getByText('Errors:').parentElement as HTMLElement);
     expect(screen.getByText('Error message')).toBeInTheDocument();
   });
 });

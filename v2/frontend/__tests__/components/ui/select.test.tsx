@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select';
 
 describe('Select Component', () => {
-  it('should render all parts of the select component', () => {
+  it('should render all parts of the select component', async () => {
     render(
       <Select>
         <SelectTrigger data-testid="select-trigger">
@@ -37,8 +37,8 @@ describe('Select Component', () => {
     fireEvent.mouseDown(trigger);
 
     // Check if the content is rendered
-    const content = screen.getByText('Options');
-    expect(content).toBeInTheDocument();
+    const content = await screen.findByRole('listbox');
+    expect(within(content).getByText('Options')).toBeInTheDocument();
 
     // Check if the items are rendered
     const item1 = screen.getByText('Option 1');

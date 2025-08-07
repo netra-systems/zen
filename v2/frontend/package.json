@@ -41,6 +41,7 @@
     "react-json-view-lite": "^2.4.2",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "websocket": "^1.0.35",
     "zustand": "^5.0.7"
   },
   "devDependencies": {
@@ -54,6 +55,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/websocket": "^1.0.10",
     "broadcast-channel": "^7.1.0",
     "cross-fetch": "^4.1.0",
     "cypress": "^14.5.3",

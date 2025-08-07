@@ -18,11 +18,11 @@ describe('useWebSocket', () => {
 
     await server.connected;
 
+    await waitFor(() => expect(result.current.isConnected).toBe(true));
+
     act(() => {
       server.send('handshake_ack');
     });
-
-    await waitFor(() => expect(result.current.isConnected).toBe(true));
 
     const testMessage = { type: 'test', payload: 'hello' };
     act(() => {
