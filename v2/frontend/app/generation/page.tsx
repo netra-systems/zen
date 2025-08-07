@@ -196,7 +196,7 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
                         {job.last_updated && <p><strong>Last Updated:</strong> {new Date(job.last_updated * 1000).toLocaleString()}</p>}
                     </div>
                     <div className="mt-6">
-                        <Spinner />
+                        <Thinking />
                         {job.progress !== undefined && job.total_tasks !== undefined && (
                             <div className="mt-4">
                                 <div className="flex justify-between mb-1">

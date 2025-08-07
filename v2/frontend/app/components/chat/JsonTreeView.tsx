@@ -1,23 +1,17 @@
-'use client';
 
 import React from 'react';
-import JsonView from '@uiw/react-json-view';
-import { darkTheme } from '@uiw/react-json-view/dark';
+import { JsonView } from 'react-json-view-lite';
 
 interface JsonTreeViewProps {
-  data: object;
+    data: any;
 }
 
 const JsonTreeView: React.FC<JsonTreeViewProps> = ({ data }) => {
-  return (
-    <JsonView
-      value={data}
-      style={darkTheme}
-      displayDataTypes={false}
-      enableClipboard={true}
-      iconStyle="square"
-    />
-  );
+    return (
+        <div className="text-sm">
+            <JsonView data={data} />
+        </div>
+    );
 };
 
 export default JsonTreeView;

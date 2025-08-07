@@ -14,7 +14,7 @@ export interface ToolCall {
 export interface Message {
   id: string;
   role: MessageRole;
-  type: 'text' | 'thinking' | 'error' | 'tool_start' | 'tool_end' | 'state_update';
+  type: 'text' | 'thinking' | 'error' | 'tool_start' | 'tool_end' | 'state_update' | 'tool_code';
   content: string;
   tool?: string;
   toolInput?: any;

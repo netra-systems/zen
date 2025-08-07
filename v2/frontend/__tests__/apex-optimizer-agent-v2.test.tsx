@@ -1,3 +1,4 @@
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import ApexOptimizerAgentV2 from '../app/components/apex-optimizer-agent-v2';
 import { useAgent } from '../app/hooks/useAgent';
@@ -34,10 +35,10 @@ describe('ApexOptimizerAgentV2', () => {
 
   it('should call startAgent when an example query is clicked', () => {
     render(<ApexOptimizerAgentV2 />);
-    const exampleButton = screen.getByText(/Analyze the 'fetch_user_data' tool/);
+    const exampleButton = screen.getByText(/Overview of the lowest hanging optimization fruit/);
 
     fireEvent.click(exampleButton);
 
-    expect(screen.getByRole('textbox')).toHaveValue("Analyze the 'fetch_user_data' tool and suggest optimizations.");
+    expect(screen.getByRole('textbox')).toHaveValue("Overview of the lowest hanging optimization fruit that I can implement with config only change");
   });
 });

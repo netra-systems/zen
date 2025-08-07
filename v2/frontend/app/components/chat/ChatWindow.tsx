@@ -44,6 +44,7 @@ export function ChatWindow({ messages, onSendMessage, isLoading, initialQuery, m
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.map((message) => (
                     <MessageOrchestrator key={message.id} message={message} showThinking={isLoading} />
+                    {isAgentThinking && <Thinking />}
                 ))}
             </div>
             <div className="p-4 border-t bg-background rounded-b-xl">
