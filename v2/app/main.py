@@ -94,8 +94,8 @@ app.add_middleware(
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.secret_key,
-    same_site="none",
-    https_only=False,  # Set to True in production
+    same_site="lax" if settings.environment != "development" else "none",
+    https_only=settings.environment != "development",
 )
 
 @app.exception_handler(HTTPException)

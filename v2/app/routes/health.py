@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.postgres import get_async_db as get_db
 from app.logging_config import central_logger
 import logging
+import asyncio
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -22,11 +23,12 @@ async def ready(db: AsyncSession = Depends(get_db)):
     """
     try:
         # Check Postgres connection
-        await db.execute(text("SELECT 1"))
+        result = await db.execute(text("SELECT 1"))
+        result.scalar_one_or_none()
 
         # Check ClickHouse connection
         clickhouse_client = central_logger.clickhouse_db
-        if not clickhouse_client.ping():
+        if not await asyncio.to_thread(clickhouse_client.ping):
             raise Exception("ClickHouse connection failed")
 
         # If all checks pass, return a success response
