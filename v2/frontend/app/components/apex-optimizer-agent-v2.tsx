@@ -42,7 +42,7 @@ export default function ApexOptimizerAgentV2() {
   return (
     <Card className="w-full max-w-4xl mx-auto my-8" role="article">
       <CardHeader>
-        <CardTitle>Apex Optimizer Agent V2</CardTitle>
+        <CardTitle>Apex Deep Research Agent</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col h-[600px] border rounded-lg">

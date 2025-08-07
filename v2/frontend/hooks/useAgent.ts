@@ -1,47 +1,7 @@
-
 import { useState, useEffect, useCallback } from 'react';
-import { Message, StateUpdate } from '@/app/types/chat';
+import { Message, AIMessageChunk } from '@/app/types/chat';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-function parsePythonRepr(reprString: string): any {
-    if (!reprString || typeof reprString !== 'string') {
-        return {};
-    }
-
-    function jsonSafeParse(str: string) {
-        try {
-            return JSON.parse(str.replace(/'/g, '"').replace(/None/g, 'null').replace(/True/g, 'true').replace(/False/g, 'false'));
-        } catch (e) {
-            console.error("jsonSafeParse failed for string:", str, e);
-            return null;
-        }
-    }
-
-    const result: any = {};
-
-    const contentMatch = reprString.match(/content='((?:\'|[^'])*)'/);
-    if (contentMatch && contentMatch[1]) {
-        result.content = contentMatch[1].replace(/\'/g, "'");
-    }
-
-    const toolCallsMatch = reprString.match(/tool_calls=(\[.*?\])(?=, additional_kwargs=|, response_metadata=|, id=|, usage_metadata=|, tool_call_chunks=|$)/s);
-    if (toolCallsMatch && toolCallsMatch[1]) {
-        result.tool_calls = jsonSafeParse(toolCallsMatch[1]);
-    }
-
-    const toolCallChunksMatch = reprString.match(/tool_call_chunks=(\[.*?\])(?=, additional_kwargs=|, response_metadata=|, id=|, usage_metadata=|$)/s);
-    if (toolCallChunksMatch && toolCallChunksMatch[1]) {
-        result.tool_call_chunks = jsonSafeParse(toolCallChunksMatch[1]);
-    }
-    
-    if (Object.keys(result).length === 0) {
-        return { content: reprString };
-    }
-
-    return result;
-}
-
 
 export function useAgent(userId: string, initialMessages: Message[] = []) {
     const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -66,92 +26,84 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
                 const parsedData = JSON.parse(event.data);
 
                 if (parsedData.event === 'on_chat_model_stream') {
-                    const chunk = typeof parsedData.data.chunk === 'string' 
-                        ? parsePythonRepr(parsedData.data.chunk) 
-                        : parsedData.data.chunk;
+                    const chunk: AIMessageChunk = parsedData.data.chunk;
 
-                    const toolCallChunks = chunk.tool_call_chunks;
+                    setMessages((prevMessages) => {
+                        let updatedMessages = [...prevMessages];
+                        const lastMessage = updatedMessages[updatedMessages.length - 1];
 
-                    if (toolCallChunks && toolCallChunks.length > 0) {
-                        const toolCallChunk = toolCallChunks[0];
-                        if (toolCallChunk.name && toolCallChunk.id) {
-                            setMessages((prevMessages) => {
-                                const existingMessageIndex = prevMessages.findIndex(msg => msg.id === toolCallChunk.id);
+                        // Handle tool call chunks
+                        if (chunk.tool_call_chunks && chunk.tool_call_chunks.length > 0) {
+                            for (const toolCallChunk of chunk.tool_call_chunks) {
+                                const existingMessageIndex = updatedMessages.findIndex(msg => msg.id === toolCallChunk.id);
+
                                 if (existingMessageIndex !== -1) {
-                                    const updatedMessages = [...prevMessages];
+                                    // Update existing tool message
                                     const existingMessage = updatedMessages[existingMessageIndex];
-                                    
                                     let currentArgs = existingMessage.toolInput || '';
                                     if (typeof currentArgs !== 'string') {
                                         currentArgs = JSON.stringify(currentArgs);
                                     }
-                                    
                                     const newArgsChunk = toolCallChunk.args || '';
-                                    const combinedArgs = currentArgs + newArgsChunk;
-
                                     updatedMessages[existingMessageIndex] = {
                                         ...existingMessage,
-                                        toolInput: combinedArgs,
+                                        toolInput: currentArgs + newArgsChunk,
+                                        rawChunk: chunk
                                     };
-                                    return updatedMessages;
                                 } else {
-                                    return [
-                                        ...prevMessages,
-                                        {
-                                            id: toolCallChunk.id,
-                                            role: 'assistant',
-                                            type: 'tool_start',
-                                            content: `Starting tool ${toolCallChunk.name}...`,
-                                            tool: toolCallChunk.name,
-                                            toolInput: toolCallChunk.args || '',
-                                        },
-                                    ];
+                                    // Add new tool message
+                                    updatedMessages.push({
+                                        id: toolCallChunk.id,
+                                        role: 'assistant',
+                                        type: 'tool_start',
+                                        content: `Starting tool ${toolCallChunk.name}...`,
+                                        tool: toolCallChunk.name,
+                                        toolInput: toolCallChunk.args || '',
+                                        rawChunk: chunk
+                                    });
                                 }
-                            });
-                        }
-                    } else if (chunk.content) {
-                        setMessages((prevMessages) => {
-                            const lastMessage = prevMessages[prevMessages.length - 1];
-                            if (lastMessage && lastMessage.role === 'assistant' && lastMessage.type === 'text') {
-                                return [
-                                    ...prevMessages.slice(0, -1),
-                                    { ...lastMessage, content: lastMessage.content + chunk.content },
-                                ];
                             }
-                            return [
-                                ...prevMessages,
-                                {
-                                    id: Math.random().toString(),
+                        } else if (chunk.content) {
+                            // Handle content chunks
+                            if (lastMessage && lastMessage.role === 'assistant' && lastMessage.type === 'text') {
+                                // Append to last text message
+                                updatedMessages[updatedMessages.length - 1] = {
+                                    ...lastMessage,
+                                    content: lastMessage.content + chunk.content,
+                                    rawChunk: chunk
+                                };
+                            } else {
+                                // Add new text message
+                                updatedMessages.push({
+                                    id: chunk.id || Math.random().toString(),
                                     role: 'assistant',
                                     type: 'text',
                                     content: chunk.content,
-                                },
-                            ];
-                        });
-                    }
+                                    rawChunk: chunk
+                                });
+                            }
+                        }
+                        return updatedMessages;
+                    });
                 } else if (parsedData.event === 'on_chat_model_end') {
-                    const output = typeof parsedData.data.output === 'string'
-                        ? parsePythonRepr(parsedData.data.output)
-                        : parsedData.data.output;
-
+                    const output: AIMessageChunk = parsedData.data.output;
                     if (output.content) {
                          setMessages((prevMessages) => {
                             const lastMessage = prevMessages[prevMessages.length - 1];
-                            // If the last message was a tool call, we might need to add a new text message for the final answer.
-                            // Or if the last message was a text message being streamed, update it.
                             if (lastMessage && lastMessage.role === 'assistant' && lastMessage.type === 'text' && !lastMessage.content.endsWith(output.content)) {
                                 return [
                                     ...prevMessages.slice(0, -1),
-                                    { ...lastMessage, content: output.content },
+                                    { ...lastMessage, content: output.content, rawChunk: output },
                                 ];
                             } else if (lastMessage && lastMessage.type !== 'text') {
                                 return [
                                     ...prevMessages,
                                     {
-                                        id: Math.random().toString(),
+                                        id: output.id || Math.random().toString(),
                                         role: 'assistant',
                                         type: 'text',
                                         content: output.content,
+                                        rawChunk: output
                                     },
                                 ];
                             }
@@ -160,29 +112,21 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
                     }
                 } else if (parsedData.event === 'on_tool_end') {
                     setMessages((prevMessages) => {
-                        const toolCallId = parsedData.run_id; // Assuming run_id from on_tool_end corresponds to tool call id
-                        const lastMessage = prevMessages.findLast((msg) => msg.id === toolCallId);
-                        if (lastMessage) {
-                            return prevMessages.map((msg) =>
-                                msg.id === lastMessage.id
-                                    ? { ...msg, type: 'tool_end', toolOutput: parsedData.data.output }
-                                    : msg
-                            );
-                        }
-                        return prevMessages;
+                        const toolCallId = parsedData.run_id;
+                        return prevMessages.map((msg) =>
+                            msg.id === toolCallId
+                                ? { ...msg, type: 'tool_end', toolOutput: parsedData.data.output }
+                                : msg
+                        );
                     });
                 } else if (parsedData.event === 'on_tool_error') {
                     setMessages((prevMessages) => {
                         const toolCallId = parsedData.run_id;
-                        const lastMessage = prevMessages.findLast((msg) => msg.id === toolCallId);
-                        if (lastMessage) {
-                            return prevMessages.map((msg) =>
-                                msg.id === lastMessage.id
-                                    ? { ...msg, type: 'error', isError: true, toolOutput: parsedData.data.error }
-                                    : msg
-                            );
-                        }
-                        return prevMessages;
+                        return prevMessages.map((msg) =>
+                            msg.id === toolCallId
+                                ? { ...msg, type: 'error', isError: true, toolOutput: parsedData.data.error }
+                                : msg
+                        );
                     });
                 } else if (parsedData.event === 'update_state') {
                     setMessages((prevMessages) => {
