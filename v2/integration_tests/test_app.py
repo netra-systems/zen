@@ -14,14 +14,6 @@ async def test_client():
     async with AsyncClient(app=app, base_url="http://test") as c:
         yield c
 
-@pytest.fixture
-async def auth_token(test_client):
-    # Create a test user
-    await test_client.post("/auth/users", json={"email": settings.dev_user_email, "password": "testpassword"})
-    # Login and get token
-    response = await test_client.post("/auth/token", data={"username": "test@example.com", "password": "testpassword"})
-    return response.json()["access_token"]
-
 @pytest.mark.asyncio
 async def test_read_main(test_client):
     response = await test_client.get("/")
@@ -82,9 +74,8 @@ async def test_generation_api(mock_generative_model, test_client):
     # assert result[0][0] > 0
 
 @pytest.mark.asyncio
-async def test_analysis_api(auth_token, test_client):
-    headers = {"Authorization": f"Bearer {auth_token}"}
-    response = await test_client.post("/api/v3/analysis/runs", headers=headers, json={"source_table": "test"})
+async def test_analysis_api(test_client):
+    response = await test_client.post("/api/v3/analysis/runs", json={"source_table": "test"})
     assert response.status_code == 202
 
 def test_multi_objective_controller():

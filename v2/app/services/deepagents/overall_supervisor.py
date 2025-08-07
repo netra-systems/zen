@@ -220,21 +220,14 @@ class OverallSupervisor:
         for task in self.tasks.values():
             task.cancel()
         
-        # Create a gathering of all tasks
         tasks = list(self.tasks.values())
         if not tasks:
             return
 
-        # Wait for all tasks to complete, with a timeout
-        # The timeout is a safeguard against tasks that might not respect cancellation
-        try:
-            await asyncio.wait(tasks, timeout=5.0)
-        except asyncio.TimeoutError:
-            logger.warning("Timeout expired while waiting for agent tasks to cancel.")
-
-        # Additional check to see which tasks are still running
-        for task in tasks:
-            if not task.done():
-                logger.warning(f"Task {task.get_name()} did not cancel in time.")
+        # Use asyncio.gather to wait for all tasks to complete
+        # The return_exceptions=True argument prevents gather from stopping
+        # if one of the tasks raises an exception.
+        await asyncio.gather(*tasks, return_exceptions=True)
 
         self.tasks.clear()
+        logger.info("All agent tasks have been cancelled and gathered.")

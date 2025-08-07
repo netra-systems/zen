@@ -56,12 +56,14 @@ async def lifespan(app: FastAPI):
     elapsed_time = time.time() - start_time
     logger.info(f"System Ready (Took {elapsed_time:.2f}s).")
 
-    yield
-    
-    # Shutdown
-    logger.info("Application shutdown...")
-    await app.state.agent_supervisor.shutdown()
-    central_logger.shutdown()
+    try:
+        yield
+    finally:
+        # Shutdown
+        logger.info("Application shutdown initiated...")
+        await app.state.agent_supervisor.shutdown()
+        central_logger.shutdown()
+        logger.info("Application shutdown complete.")
 
 
 
@@ -135,7 +137,13 @@ def test_error():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(
+        "main:app", 
+        host="0.0.0.0", 
+        port=8000, 
+        reload=True, 
+        lifespan="on"
+    )
 
 if "pytest" in sys.modules:
     from app.db.postgres import async_session_factory
