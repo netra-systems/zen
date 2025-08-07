@@ -33,12 +33,12 @@ def test_google_auth(mock_google_oauth):
     # 3. Use TestClient as a context manager to persist session
     with TestClient(app) as client:
         # 4. Initiate the Google login
-        response = client.get("/login/google", allow_redirects=False)
+        response = client.get("/login/google", follow_redirects=False)
         assert response.status_code == 302
         assert "state" in response.cookies
 
         # 5. Simulate the callback from Google
-        response = client.get("/api/v3/auth/google", allow_redirects=False)
+        response = client.get("/api/v3/auth/google", follow_redirects=False)
         assert response.status_code == 307
         redirect_url = response.headers["location"]
         assert redirect_url.startswith(f"{settings.frontend_url}/auth/callback?token=")
