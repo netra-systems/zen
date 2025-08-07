@@ -11,8 +11,12 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str, current_user:
     await manager.connect(websocket, client_id)
     try:
         while True:
-            data = await websocket.receive_json()
-            # You can add logic here to handle messages from the client if needed
+            try:
+                data = await asyncio.wait_for(websocket.receive_json(), timeout=30)
+                # You can add logic here to handle messages from the client if needed
+            except asyncio.TimeoutError:
+                # No message received within the timeout period, continue listening
+                continue
     except WebSocketDisconnect:
         manager.disconnect(websocket, client_id)
 

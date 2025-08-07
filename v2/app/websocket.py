@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from typing import Dict, Any
 from app.auth_dependencies import ActiveUserWsDep
@@ -30,7 +31,11 @@ async def websocket_endpoint(websocket: WebSocket, run_id: str, user: ActiveUser
     await manager.connect(websocket, run_id)
     try:
         while True:
-            data = await websocket.receive_json()
-            await manager.send_to_run({"echo": data}, run_id)
+            try:
+                data = await asyncio.wait_for(websocket.receive_json(), timeout=30)
+                await manager.send_to_run({"echo": data}, run_id)
+            except asyncio.TimeoutError:
+                # No message received within the timeout period, continue listening
+                continue
     except WebSocketDisconnect:
         manager.disconnect(run_id)
