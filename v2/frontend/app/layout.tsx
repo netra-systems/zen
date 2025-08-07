@@ -12,13 +12,18 @@ import { cn } from '@/lib/utils';
 export function AppWithLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const pathname = usePathname();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAuthReady } = useAuth(); // Get isAuthReady
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
   const isLoginPage = pathname === '/login';
+
+  // Wait for auth to be ready before rendering auth-dependent UI
+  if (!isAuthReady) {
+    return null; // Or a loading spinner
+  }
 
   if (!isAuthenticated && !isLoginPage) {
     return <>{children}</>;
