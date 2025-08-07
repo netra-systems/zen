@@ -109,16 +109,16 @@ class StreamingAgentSupervisor:
                 state["events"].append(event)
                 # Send updates over WebSocket
                 serializable_data = self._serialize_event_data(event["data"])
-                await self.websocket_manager.send_to_run(json.dumps({"event": event["event"], "data": serializable_data}), run_id)
+                await self.websocket_manager.send_to_run(json.dumps({"event": event["event"], "data": serializable_data, "run_id": run_id}), run_id)
 
             state["status"] = "complete"
-            await self.websocket_manager.send_to_run(json.dumps({"event": "run_complete", "data": {"status": "complete"}}), run_id)
+            await self.websocket_manager.send_to_run(json.dumps({"event": "run_complete", "data": {"status": "complete"}, "run_id": run_id}), run_id)
             logger.info(f"Agent run for run_id: {run_id} completed successfully.")
         except Exception as e:
             logger.error(f"Error during agent run for run_id: {run_id}: {e}", exc_info=True)
             # Optionally, send an error message to the client
             try:
-                await self.websocket_manager.send_to_run(json.dumps({"event": "error", "data": {"message": str(e)}}), run_id)
+                await self.websocket_manager.send_to_run(json.dumps({"event": "error", "data": {"message": str(e)}, "run_id": run_id}), run_id)
             except Exception as ws_e:
                 logger.error(f"Failed to send error message to client for run_id: {run_id}: {ws_e}")
 

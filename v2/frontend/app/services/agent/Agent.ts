@@ -1,3 +1,4 @@
+import { getToken, getUserId } from '../../lib/user';
 import { produce } from 'immer';
 import { WebSocketClient, WebSocketStatus } from './WebSocketClient';
 import { Message, StreamEvent, AnalysisRequest } from './types';
@@ -143,7 +144,13 @@ class Agent {
             case 'on_chat_model_stream':
                 this.updateToolCode(message as ToolStartMessage, data.chunk);
                 break;
+            case 'on_tool_start':
+                this.updateToolStart(message as ToolStartMessage, data);
+                break;
             case 'on_tool_end':
+                this.updateToolEnd(message as ToolEndMessage, data);
+                break;
+            case 'on_chain_end':
                 this.updateToolEnd(message as ToolEndMessage, data);
                 break;
             case 'update_state':
@@ -170,6 +177,15 @@ class Agent {
                 todo_list: data.todo_list,
                 completed_steps: data.completed_steps || [],
             };
+        }
+    }
+
+    private updateToolStart(message: ToolStartMessage, data: any): void {
+        if (data.name) {
+            message.tool = data.name;
+        }
+        if (data.input) {
+            message.toolInput = data.input;
         }
     }
 

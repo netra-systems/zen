@@ -1,6 +1,8 @@
-
 export interface Message {
-  r// COMPLETE THIS
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: string;
 }
 
 export interface User {
