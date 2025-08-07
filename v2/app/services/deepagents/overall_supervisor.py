@@ -40,6 +40,22 @@ class OverallSupervisor:
         self._initialize_sub_agents_and_tools()
         self.graph = self._create_graph()
 
+    def _initialize_sub_agents_and_tools(self):
+        state = DeepAgentState()
+        supply_catalog = SupplyCatalogService()
+        context = ToolContext(logs=[], db_session=self.db_session, llm_manager=self.llm_manager, cost_estimator=None, state=state, supply_catalog=supply_catalog)
+        all_tools, _ = ToolBuilder.build_all(context)
+        self.tool_dispatcher = ToolDispatcher(tools=list(all_tools.values()))
+
+        # Initialize sub-agents
+        self.sub_agents = {
+            'triage': TriageSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values())),
+            'data': DataSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values())),
+            'optimizations_core': OptimizationsCoreSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values())),
+            'actions_to_meet_goals': ActionsToMeetGoalsSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values())),
+            'reporting': ReportingSubAgent(llm_manager=self.llm_manager, tools=list(all_tools.values()))
+        }
+
     def _create_graph(self):
         # Build the graph
         builder = StateGraph(DeepAgentState)
