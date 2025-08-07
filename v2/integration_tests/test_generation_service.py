@@ -32,6 +32,7 @@ async def clickhouse_client():
 @patch('app.routes.generation.run_content_generation_job', new_callable=AsyncMock)
 async def test_content_generation_with_custom_table(mock_run_job, test_client):
     # Arrange
+    job_store.set("test", {})
     custom_table_name = f"test_content_corpus_{uuid.uuid4().hex}"
 
     async def side_effect(job_id, params):
@@ -71,6 +72,7 @@ async def test_content_generation_with_custom_table(mock_run_job, test_client):
 @patch('app.routes.generation.run_synthetic_data_generation_job', new_callable=AsyncMock)
 async def test_synthetic_data_generation_with_table_selection(mock_run_job, test_client):
     # Arrange
+    job_store.set("test", {})
     source_table = f"test_source_corpus_{uuid.uuid4().hex}"
     destination_table = f"test_destination_data_{uuid.uuid4().hex}"
 
@@ -147,6 +149,7 @@ async def test_save_and_get_corpus(MockClickHouseDatabase):
 async def test_run_synthetic_data_generation_job_e2e(MockClickHouseDatabase, mock_get_corpus, mock_synth_main, mock_ingest):
     """An end-to-end test for the synthetic data generation job."""
     # Arrange
+    job_store.set("test", {})
     mock_db_instance = MagicMock()
     mock_db_instance.command = AsyncMock()
     MockClickHouseDatabase.return_value = mock_db_instance

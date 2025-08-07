@@ -14,8 +14,8 @@ async def test_start_agent():
     workload = Workload(
         run_id="test_run",
         query="test_query",
-        data_source=DataSource(source_table="test_table"),
-        time_range=TimeRange(start_time="2024-01-01T00:00:00Z", end_time="2024-01-02T00:00:00Z")
+        data_source=DataSource(source_table="test_table").model_dump(),
+        time_range=TimeRange(start_time="2024-01-01T00:00:00Z", end_time="2024-01-02T00:00:00Z").model_dump()
     )
     request_model = RequestModel(
         id="test_req",

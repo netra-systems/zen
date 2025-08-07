@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useAuth } from '@/providers/auth';
+import { useRouter } from 'next/navigation';
 
-export default function AuthCallbackPage() {
-  const { handleAuthCallback } = useAuth();
+export default function AuthCallback() {
+  const router = useRouter();
 
   useEffect(() => {
-    handleAuthCallback();
-  }, [handleAuthCallback]);
+    router.push('/');
+  }, [router]);
 
   return <div>Loading...</div>;
 }

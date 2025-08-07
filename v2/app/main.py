@@ -14,7 +14,6 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.routes import auth, supply, generation, websocket, admin, references, agent_route, health
-from app.auth import google_oauth
 from app.db.postgres import async_session_factory
 from app.config import settings
 from app.logging_config import central_logger
@@ -117,7 +116,7 @@ app.include_router(websocket.router, prefix="/ws", tags=["websockets"])
 app.include_router(admin.router, prefix="/api/v3", tags=["admin"])
 app.include_router(references.router, prefix="/api/v3", tags=["references"])
 app.include_router(health.router, prefix="/health", tags=["health"])
-app.include_router(google_oauth.router, prefix="/api/v3/auth", tags=["auth"])
+
 
 
 @app.get("/")

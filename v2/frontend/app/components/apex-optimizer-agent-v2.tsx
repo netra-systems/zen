@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { MessageFactory } from '../services/agent/MessageFactory';
 import { useAgentContext } from '../providers/AgentProvider';
 import { MessageOrchestrator } from './chat/MessageOrchestrator';
+import LoginButton from './LoginButton';
 
 const examplePrompts = [
   'Analyze the latency of the `get_user_data` tool and suggest optimizations.',
@@ -38,8 +39,9 @@ export default function ApexOptimizerAgentV2() {
 
   return (
     <Card className="w-full h-full flex flex-col" role="article">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Apex Optimizer Agent</CardTitle>
+        <LoginButton />
       </CardHeader>
       <CardContent className="flex-grow overflow-y-auto">
         <MessageOrchestrator messages={messages} showThinking={showThinking} error={error} />

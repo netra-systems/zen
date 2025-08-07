@@ -30,14 +30,14 @@ async def test_apex_optimizer_agent(prompt: str):
                 Workload(
                     run_id="test_run",
                     query=prompt,
-                    data_source=DataSource(source_table="test_table"),
-                    time_range=TimeRange(start_time="2025-01-01T00:00:00Z", end_time="2025-01-02T00:00:00Z")
+                    data_source=DataSource(source_table="test_table").model_dump(),
+                    time_range=TimeRange(start_time="2025-01-01T00:00:00Z", end_time="2025-01-02T00:00:00Z").model_dump()
                 )
             ]
         )
     )
     async with AsyncClient(app=app, base_url="http://test") as client:
-        response = await client.post("/api/v3/agent/chat/start_agent", json=analysis_request.dict())
+        response = await client.post("/api/v3/agent/chat/start_agent", json=analysis_request.model_dump())
         assert response.status_code == 200
         run_id = response.json()["run_id"]
         assert isinstance(run_id, str)

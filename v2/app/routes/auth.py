@@ -81,3 +81,10 @@ async def auth_via_google(request: Request, db: DbDep):
     
     response = RedirectResponse(url=settings.frontend_url)
     return response
+
+@router.get("/user", response_model=schemas.User)
+async def get_user(current_user: CurrentUser):
+    """
+    Returns the current user from the session, if available.
+    """
+    return current_user
