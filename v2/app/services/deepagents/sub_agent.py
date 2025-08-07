@@ -33,7 +33,7 @@ class SubAgent(ABC):
         """
         return self
 
-    def __call__(self, state: DeepAgentState):
+    async def __call__(self, state: DeepAgentState):
         """
         The main entry point for the sub-agent.
         """
@@ -45,7 +45,7 @@ class SubAgent(ABC):
         llm = self.llm_manager.get_llm()
 
         # Invoke the LLM
-        response = llm.invoke(state["messages"])
+        response = await llm.ainvoke(state["messages"])
 
         # Update the state
         state["messages"].append(response)

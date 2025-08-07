@@ -5,7 +5,7 @@ import { ChatInput } from './ChatInput';
 import { ChatHistory } from './ChatHistory';
 import { useAgent } from '../hooks/useAgent';
 import { MessageFilter } from './MessageFilter';
-import { Message } from '../types';
+import { Message } from '@/app/types';
 
 export const Dashboard = () => {
   const { messages, startAgent, isConnected } = useAgent();

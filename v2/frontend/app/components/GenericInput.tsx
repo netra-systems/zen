@@ -1,30 +1,9 @@
-
 import React, { FormEvent, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
-interface InputField {
-    id: string;
-    name: string;
-    label: string;
-    type: string;
-    required?: boolean;
-    defaultValue?: string | number;
-    options?: string[];
-    step?: number;
-}
-
-interface GenericInputProps {
-    title: string;
-    description: string;
-    inputFields: InputField[];
-    onSubmit: (data: Record<string, any>) => void;
-    isLoading: boolean;
-    submitButtonText: string;
-    onClear?: () => void;
-}
+import { InputField, GenericInputProps } from '@/app/types';
 
 export function GenericInput({ title, description, inputFields, onSubmit, isLoading, submitButtonText, onClear }: GenericInputProps) {
     const [formState, setFormState] = useState<Record<string, any>>(() => {

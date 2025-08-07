@@ -34,6 +34,7 @@ class OverallSupervisor:
         self.llm_manager = llm_manager
         self.agent_states: Dict[str, Dict[str, Any]] = {}
         self.websocket_manager = websocket_manager
+        self.tasks: Dict[str, asyncio.Task] = {}
         self.sub_agents: Dict[str, SubAgent] = {}
         self.tool_dispatcher = None
         self._initialize_sub_agents_and_tools()
@@ -50,40 +51,37 @@ class OverallSupervisor:
 
         # Define the edges
         builder.set_entry_point("triage")
-        builder.add_edge("triage", "data")
-        builder.add_edge("data", "optimizations_core")
-        builder.add_edge("optimizations_core", "actions_to_meet_goals")
-        builder.add_edge("actions_to_meet_goals", "reporting")
-        builder.add_edge("reporting", END)
 
-        # Add conditional edges for tool calls
         builder.add_conditional_edges(
             "triage",
-            self._get_next_node,
-            {"tool_dispatcher": "tool_dispatcher", "data": "data"}
+            lambda state: "tool_dispatcher" if state.get("tool_calls") else "data"
         )
         builder.add_conditional_edges(
             "data",
-            self._get_next_node,
-            {"tool_dispatcher": "tool_dispatcher", "optimizations_core": "optimizations_core"}
+            lambda state: "tool_dispatcher" if state.get("tool_calls") else "optimizations_core"
         )
         builder.add_conditional_edges(
             "optimizations_core",
-            self._get_next_node,
-            {"tool_dispatcher": "tool_dispatcher", "actions_to_meet_goals": "actions_to_meet_goals"}
+            lambda state: "tool_dispatcher" if state.get("tool_calls") else "actions_to_meet_goals"
         )
         builder.add_conditional_edges(
             "actions_to_meet_goals",
-            self._get_next_node,
-            {"tool_dispatcher": "tool_dispatcher", "reporting": "reporting"}
+            lambda state: "tool_dispatcher" if state.get("tool_calls") else "reporting"
+        )
+        builder.add_conditional_edges(
+            "reporting",
+            lambda state: "tool_dispatcher" if state.get("tool_calls") else END
         )
 
-        builder.add_edge("tool_dispatcher", "triage") # Or decide dynamically
+        sub_agent_names = list(self.sub_agents.keys())
+        tool_dispatcher_edges = {name: name for name in sub_agent_names}
+        builder.add_conditional_edges(
+            "tool_dispatcher",
+            lambda state: state.get("current_agent"),
+            tool_dispatcher_edges
+        )
 
         return builder.compile()
-
-    def _get_next_node(self, state: DeepAgentState) -> str:
-        return "tool_dispatcher" if state.get("tool_calls") else state.get("next_node")
 
     def _initialize_sub_agents_and_tools(self):
         state = DeepAgentState()
@@ -110,7 +108,8 @@ class OverallSupervisor:
             }
             self.agent_states[run_id] = initial_state
 
-            asyncio.create_task(self.run_agent(run_id))
+            task = asyncio.create_task(self.run_agent(run_id))
+            self.tasks[run_id] = task
             
             return {"status": "agent_started", "run_id": run_id}
         except Exception as e:

@@ -5,17 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import { MessageOrchestrator } from './MessageOrchestrator';
 import { MessageFilterControl } from './MessageFilter';
-import { Message, MessageFilter } from '../../types';
-
-interface ChatWindowProps {
-    messages: Message[];
-    onSendMessage: (message: string) => void;
-    isLoading: boolean;
-    initialQuery?: string;
-    messageFilters: MessageFilter;
-    setMessageFilters: (filters: MessageFilter) => void;
-    exampleQueries?: string[];
-}
+import { Message, MessageFilter, ChatWindowProps } from '@/app/types';
 
 export function ChatWindow({ 
     messages, 

@@ -1,4 +1,4 @@
-import { getToken, getUserId } from '../../lib/user';
+import { getToken, getUserId } from '@/lib/user';
 import { produce } from 'immer';
 import { WebSocketClient, WebSocketStatus } from './WebSocketClient';
 import { MessageFactory } from './MessageFactory';
@@ -12,7 +12,7 @@ import {
     ToolStartMessage,
     StateData,
     AIMessageChunk
-} from '../../types';
+} from '@/app/types';
 
 // --- Agent Class ---
 

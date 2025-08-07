@@ -1,4 +1,3 @@
-
 import {
     UserMessage,
     ThinkingMessage,
@@ -8,7 +7,7 @@ import {
     StateUpdateMessage,
     MessageRole,
     StateUpdate
-} from '../../types';
+} from '@/app/types';
 
 export class MessageFactory {
     static createUserMessage(content: string): UserMessage {
