@@ -3,8 +3,8 @@ import asyncio
 import logging
 from fastapi import WebSocket, WebSocketDisconnect
 from app.services.deepagents.overall_supervisor import OverallSupervisor
-from app.db.models_clickhouse import AnalysisRequest, Settings, RequestModel
-from app.schemas import WebSocketMessage
+from app import schemas
+from app.websocket import manager
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +12,7 @@ class AgentService:
     def __init__(self, supervisor: OverallSupervisor):
         self.supervisor = supervisor
 
-    async def start_agent(self, analysis_request: AnalysisRequest, run_id: str, stream_updates: bool = False):
+    async def start_agent(self, analysis_request: schemas.AnalysisRequest, run_id: str, stream_updates: bool = False):
         """
         Starts the agent. The supervisor will stream logs back to the websocket if requested.
         """
@@ -24,20 +24,17 @@ class AgentService:
         """
         logger.info(f"handle_websocket_message called for run_id: {run_id} with data: {data}")
         try:
-            message_data = json.loads(data)
-            if message_data.get("action") == "start_agent":
-                payload = message_data.get("payload")
-                settings = payload.get("settings")
-                request_data = payload.get("request")
-                
-                analysis_request = AnalysisRequest(
-                    settings=Settings(**settings),
-                    request=RequestModel(**request_data)
+            message = schemas.StartAgentMessage.parse_raw(data)
+
+            if message.action == "start_agent":
+                analysis_request = schemas.AnalysisRequest(
+                    settings=message.payload.settings,
+                    request=message.payload.request
                 )
                 # When started from a websocket, we always want to stream updates
                 response = await self.start_agent(analysis_request, run_id, stream_updates=True)
                 await manager.send_to_run(
-                    WebSocketMessage(
+                    schemas.WebSocketMessage(
                         event="agent_started",
                         data=response,
                         run_id=run_id
@@ -45,7 +42,7 @@ class AgentService:
                 )
 
             else:
-                logger.warning(f"Received unhandled message for run_id: {run_id}: {message_data}")
+                logger.warning(f"Received unhandled message for run_id: {run_id}: {message}")
         except Exception as e:
             logger.error(f"Error in handle_websocket_message for run_id: {run_id}: {e}", exc_info=True)
 

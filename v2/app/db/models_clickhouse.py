@@ -1,4 +1,3 @@
-
 import uuid
 import time
 from typing import Dict, Any, List, Optional, Literal
@@ -163,35 +162,6 @@ class CostComparison(SQLModel, table=False):
     projected_monthly_spend: float
     projected_monthly_savings: float
     delta_percent: float
-
-from pydantic import BaseModel, Field
-
-class Settings(BaseModel):
-    debug_mode: bool
-
-class DataSource(BaseModel):
-    source_table: str
-
-class TimeRange(BaseModel):
-    start_time: str
-    end_time: str
-
-class Workload(BaseModel):
-    run_id: str
-    query: str
-    data_source: DataSource
-    time_range: TimeRange
-
-class RequestModel(BaseModel):
-    id: str = Field(default_factory=lambda: f"req_{uuid.uuid4().hex[:8]}")
-    user_id: str
-    query: str
-    workloads: List[Workload]
-    constraints: Optional[Any] = None
-
-class AnalysisRequest(BaseModel):
-    settings: Settings
-    request: RequestModel
 
 class AnalysisResult(SQLModel, table=False):
     run_id: str

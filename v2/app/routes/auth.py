@@ -53,21 +53,23 @@ async def login_via_google(request: Request):
 @router.get("/auth/google")
 async def auth_via_google(request: Request, db: DbDep):
     token = await oauth.google.authorize_access_token(request)
-    user_info = token.get('userinfo')
-    if not user_info:
+    user_info_data = token.get('userinfo')
+    if not user_info_data:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Could not fetch user info from Google"
         )
 
-    result = await db.execute(select(models_postgres.User).where(models_postgres.User.email == user_info['email']))
+    user_info = schemas.GoogleUser(**user_info_data)
+
+    result = await db.execute(select(models_postgres.User).where(models_postgres.User.email == user_info.email))
     user = result.scalar_one_or_none()
 
     if not user:
         user = models_postgres.User(
-            email=user_info['email'],
-            full_name=user_info.get('name'),
-            picture=user_info.get('picture'),
+            email=user_info.email,
+            full_name=user_info.name,
+            picture=user_info.picture,
             is_active=True,
             hashed_password=""  # No password for OAuth users
         )
@@ -75,7 +77,7 @@ async def auth_via_google(request: Request, db: DbDep):
         await db.commit()
         await db.refresh(user)
 
-    request.session['user'] = user_info
+    request.session['user'] = user_info.dict()
     
     response = RedirectResponse(url=settings.frontend_url)
     return response
