@@ -39,6 +39,11 @@ export function MessageCard({ message, user }: MessageCardProps) {
         <div className="flex flex-col">
           {toolName && <CardHeader><CardTitle>{toolName}</CardTitle></CardHeader>}
           <MessageContent message={message} />
+          {message.type === 'tool_end' && message.toolOutput?.is_error && (
+            <div className="mt-2 text-red-500">
+              <p>Error: {message.toolOutput.content}</p>
+            </div>
+          )}
           {message.type === 'state_update' && (
             <Accordion type="single" collapsible className="w-full mt-2">
               <AccordionItem value="item-1">

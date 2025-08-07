@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { MessageCard } from '../MessageCard';
 import { Message } from '../../../types/chat';
 
@@ -60,16 +60,19 @@ describe('MessageCard', () => {
     };
     render(<MessageCard message={message} user={mockUser} />);
     fireEvent.click(screen.getByText('TODO List'));
-    expect(screen.getByText('step 1')).toBeInTheDocument();
-    expect(screen.getByText('step 2')).toBeInTheDocument();
+    const todoList = screen.getByTestId('todo-list-view');
+    expect(within(todoList).getByText('step 1')).toBeInTheDocument();
+    expect(within(todoList).getByText('step 2')).toBeInTheDocument();
   });
 
   it('renders a tool end message with errors', () => {
-    const message: Message = {
+    const message: ToolEndErrorMessage = {
       id: '5',
       role: 'assistant',
       type: 'tool_end',
       content: '',
+      tool: 'test_tool',
+      toolInput: { key: 'value' },
       toolOutput: {
         content: 'Error message',
         is_error: true,

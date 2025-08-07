@@ -6,7 +6,7 @@ interface TodoListViewProps {
 
 export function TodoListView({ todoList }: TodoListViewProps) {
   return (
-    <div className="mt-2">
+    <div className="mt-2" data-testid="todo-list-view">
       {todoList.todo_list.length > 0 && (
         <>
           <h4 className="font-bold">TODO</h4>
