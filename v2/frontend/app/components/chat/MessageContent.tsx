@@ -35,6 +35,13 @@ export function MessageContent({ message }: MessageContentProps) {
         case 'state_update':
             return null;
         default:
+
+            if (message.type == "user") {
+                return (<div>
+                    {message.content}
+                </div> )
+            }
+
             return <pre>{JSON.stringify(message, null, 2)}</pre>;
     }
 }
