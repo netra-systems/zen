@@ -92,6 +92,13 @@ class StreamingAgentSupervisor:
         if isinstance(data, dict):
             return {key: self._serialize_event_data(value, _depth + 1) for key, value in data.items()}
         if isinstance(data, list):
+            # NEW: Flatten list-of-lists for messages if it occurs.
+            # This is a common structure in LangChain events that clients might not expect.
+            if len(data) == 1 and isinstance(data[0], list):
+                # It's a list containing a single list, e.g., [[msg1, msg2]]. Flatten it.
+                return [self._serialize_event_data(item, _depth + 1) for item in data[0]]
+            
+            # Original recursive call for all other lists
             return [self._serialize_event_data(item, _depth + 1) for item in data]
 
         # Handle all BaseMessage subclasses (HumanMessage, AIMessage, ToolMessage, etc.)
