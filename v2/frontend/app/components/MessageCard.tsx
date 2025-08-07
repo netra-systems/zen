@@ -56,7 +56,7 @@ export function MessageCard({ message, user }: MessageCardProps) {
 
   if (message.type === 'thinking') {
     return (
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-4" data-testid="thinking-indicator">
         <Avatar>
           <AvatarImage src="/agent-avatar.png" />
           <AvatarFallback>A</AvatarFallback>

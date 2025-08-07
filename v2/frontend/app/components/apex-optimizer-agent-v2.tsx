@@ -38,7 +38,7 @@ export default function ApexOptimizerAgentV2() {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto my-8">
+    <Card className="w-full max-w-4xl mx-auto my-8" role="article">
       <CardHeader>
         <CardTitle>Apex Optimizer Agent V2</CardTitle>
       </CardHeader>
@@ -70,7 +70,7 @@ export default function ApexOptimizerAgentV2() {
                 </CardContent>
               </Card>
             )}
-            <form onSubmit={handleSubmit} className="flex items-center gap-2">
+            <form onSubmit={handleSubmit} className="flex items-center gap-2" role="form">
               <Input
                 value={input}
                 onChange={handleInputChange}

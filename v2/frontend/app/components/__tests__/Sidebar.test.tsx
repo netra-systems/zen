@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Sidebar } from '../Sidebar';
@@ -14,6 +13,8 @@ describe('Sidebar', () => {
     const dashboardLink = screen.getByRole('link', { name: /dashboard/i });
     expect(dashboardLink).toBeInTheDocument();
     expect(dashboardLink).toHaveAttribute('href', '/');
-    expect(screen.getByRole('link', { name: /settings/i })).toBeInTheDocument();
+    
+    // Check for the disabled Settings link
+    expect(screen.getByText(/Settings/i)).toHaveClass('cursor-not-allowed');
   });
 });

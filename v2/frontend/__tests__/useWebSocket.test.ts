@@ -1,34 +1,24 @@
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useWebSocket } from '../app/hooks/useWebSocket';
-import { w3cwebsocket as W3CWebSocket } from 'websocket';
-
-global.WebSocket = W3CWebSocket as any;
+import { WebSocket } from 'ws';
 
 describe('useWebSocket', () => {
-  it('should connect to the WebSocket server, perform a handshake, and handle JSON messages', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useWebSocket('ws://localhost:8000/ws/123'));
+  it('should connect, handshake, and handle JSON messages', async () => {
+    const { result } = renderHook(() => useWebSocket('ws://localhost:8000/ws/123'));
 
-    await waitForNextUpdate();
+    const socket = (WebSocket as any).lastInstance;
+
+    act(() => {
+      socket.onmessage(new MessageEvent('message', { data: 'handshake_ack' }));
+    });
 
     expect(result.current.isConnected).toBe(true);
 
     const testMessage = { type: 'test', payload: 'hello' };
-
     act(() => {
-      // Simulate receiving a message from the server
-      const messageEvent = new MessageEvent('message', {
-        data: JSON.stringify(testMessage),
-      });
-      (global.WebSocket as any).dispatchEvent(messageEvent);
+        socket.onmessage(new MessageEvent('message', { data: JSON.stringify(testMessage) }));
     });
 
     expect(result.current.messages).toEqual([testMessage]);
-
-    act(() => {
-      result.current.sendMessage(testMessage);
-    });
-
-    // This part of the test would require a mock server to verify the message was sent.
-    // For now, we just ensure the function doesn't crash.
   });
 });

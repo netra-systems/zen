@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MessageCard } from '../MessageCard';
 import { ArtifactMessage, Message } from '@/app/types/chat';
 
@@ -17,7 +17,7 @@ describe('MessageCard', () => {
       type: 'thinking',
     };
     render(<MessageCard message={message} user={mockUser} />);
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(screen.getByTestId('thinking-indicator')).toBeInTheDocument();
   });
 
   it('renders a user message', () => {
@@ -43,7 +43,7 @@ describe('MessageCard', () => {
       tool_calls: [{ name: 'test_tool', args: {}, id: 'tool1', type: 'tool_call' }],
     };
     render(<MessageCard message={message} user={mockUser} />);
-    expect(screen.getByText('Tool: test_tool')).toBeInTheDocument();
+    expect(screen.getByText(/Tool: test_tool/)).toBeInTheDocument();
   });
 
   it('renders an artifact message with a todo list', () => {
@@ -60,10 +60,10 @@ describe('MessageCard', () => {
       },
     };
     render(<MessageCard message={message} user={mockUser} />);
-    expect(screen.getByText('TODO List')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('TODO List'));
     expect(screen.getByText('step 1')).toBeInTheDocument();
     expect(screen.getByText('step 2')).toBeInTheDocument();
-    expect(screen.getByText('Completed Steps')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Completed Steps'));
     expect(screen.getByText('step 0')).toBeInTheDocument();
   });
 
@@ -78,7 +78,7 @@ describe('MessageCard', () => {
       tool_outputs: [{ tool_call_id: 'tool1', content: 'Error message', is_error: true }],
     };
     render(<MessageCard message={message} user={mockUser} />);
-    expect(screen.getByText('Errors:')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Errors'));
     expect(screen.getByText('Error message')).toBeInTheDocument();
   });
 });

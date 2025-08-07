@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useAgent } from '../app/hooks/useAgent';
-import { server, mockSocket } from '../mocks/server';
 import { getToken } from '../app/lib/user';
+import { WebSocket } from 'ws';
 
 // Mock the user module
 jest.mock('../app/lib/user', () => ({
@@ -10,10 +10,6 @@ jest.mock('../app/lib/user', () => ({
 }));
 
 describe('useAgent', () => {
-  beforeAll(() => server.listen());
-  afterEach(() => server.resetHandlers());
-  afterAll(() => server.close());
-
   it('should start the agent, show thinking indicator, and process the response', async () => {
     const { result } = renderHook(() => useAgent());
 
@@ -23,8 +19,10 @@ describe('useAgent', () => {
 
     expect(result.current.showThinking).toBe(true);
 
+    const socket = (WebSocket as any).lastInstance;
+
     act(() => {
-      mockSocket.onmessage!(
+      socket.onmessage(
         new MessageEvent('message', {
           data: JSON.stringify({
             event: 'on_chain_start',
@@ -39,7 +37,7 @@ describe('useAgent', () => {
     expect(result.current.messages[1].state_updates.todo_list).toEqual(['step 1']);
 
     act(() => {
-      mockSocket.onmessage!(
+      socket.onmessage(
         new MessageEvent('message', {
           data: JSON.stringify({ event: 'run_complete' }),
         }),
@@ -56,8 +54,10 @@ describe('useAgent', () => {
       result.current.startAgent('test message');
     });
 
+    const socket = (WebSocket as any).lastInstance;
+
     act(() => {
-        mockSocket.onerror!(new Event('error'));
+        socket.onerror(new Event('error'));
     });
 
     expect(result.current.error).not.toBeNull();
