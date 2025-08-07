@@ -1,6 +1,6 @@
 import pytest
-import time
-from fastapi.testclient import TestClient
+import asyncio
+from httpx import AsyncClient
 from app.main import app
 from app.db.models_clickhouse import AnalysisRequest, Settings, RequestModel, Workload, DataSource, TimeRange
 from app.llm.llm_manager import LLMManager
@@ -10,8 +10,7 @@ from app.config import settings
 llm_manager = LLMManager(settings)
 app.state.llm_manager = llm_manager
 
-client = TestClient(app)
-
+@pytest.mark.asyncio
 @pytest.mark.parametrize("prompt", [
     "I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.",
     "My tools are too slow. I need to reduce the latency by 3x, but I can't spend more money.",
@@ -21,7 +20,7 @@ client = TestClient(app)
     "I want to audit all uses of KV caching in my system to find optimization opportunities.",
     "I need to reduce costs by 20% and improve latency by 2x. I'm also expecting a 30% increase in usage. What should I do?"
 ])
-def test_apex_optimizer_agent(prompt: str):
+async def test_apex_optimizer_agent(prompt: str):
     analysis_request = AnalysisRequest(
         settings=Settings(debug_mode=True),
         request=RequestModel(
@@ -37,15 +36,15 @@ def test_apex_optimizer_agent(prompt: str):
             ]
         )
     )
-    response = client.post("/api/v3/apex/chat/start_agent", json=analysis_request.dict())
-    assert response.status_code == 200
-    run_id = response.json()["run_id"]
-    assert isinstance(run_id, str)
+    async with AsyncClient(app=app, base_url="http://test") as client:
+        response = await client.post("/api/v3/apex/chat/start_agent", json=analysis_request.dict())
+        assert response.status_code == 200
+        run_id = response.json()["run_id"]
+        assert isinstance(run_id, str)
 
-    with client.websocket_connect(f"/ws/{run_id}") as websocket:
         try:
-            time.sleep(35) # Allow even more time for the websocket to connect and receive the message
-            data = websocket.receive_text()
-            assert isinstance(data, str)
-        finally:
-            websocket.close()
+            async with client.websocket_connect(f"/ws/{run_id}") as websocket:
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=45)
+                assert isinstance(data, str)
+        except asyncio.TimeoutError:
+            pytest.fail("WebSocket message not received within 45 seconds.")
