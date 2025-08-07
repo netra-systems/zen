@@ -59,6 +59,7 @@ describe('MessageCard', () => {
       },
     };
     render(<MessageCard message={message} user={mockUser} />);
+    fireEvent.click(screen.getByText('TODO List'));
     expect(screen.getByText('step 1')).toBeInTheDocument();
     expect(screen.getByText('step 2')).toBeInTheDocument();
   });

@@ -32,12 +32,13 @@ class WebSocketService {
         };
 
         this.client.onmessage = (message) => {
-            if (message.data === "handshake_ack") {
-                console.log("WebSocket handshake successful");
-                return;
+            try {
+                this.messageListeners.forEach(listener => listener(message));
+            } catch (error) {
+                console.error("Failed to send Listener WebSocket message:", error);
+                // Optionally, notify listeners about the raw message or error
+                // this.messageListeners.forEach(listener => listener(message.data));
             }
-            console.log("WebSocket message received:", message);
-            this.messageListeners.forEach(listener => listener(message));
         };
 
         this.client.onclose = () => {

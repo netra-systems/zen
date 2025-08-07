@@ -11,7 +11,7 @@ export enum WebSocketStatus {
 export class WebSocketClient {
     private ws: WebSocket | null = null;
     private url: string = '';
-    public onMessage: ((message: MessageEvent) => void) | null = null;
+    public onMessage: ((message: any) => void) | null = null;
     public onStatusChange: ((status: WebSocketStatus) => void) | null = null;
 
     public connect(token: string, runId: string): void {
@@ -38,8 +38,14 @@ export class WebSocketClient {
             this.setStatus(WebSocketStatus.Error);
         };
         this.ws.onmessage = (message) => {
-            if (this.onMessage) {
-                this.onMessage(message);
+            try {
+                console.log(message.data)
+                const parsedData = JSON.parse(message.data);
+                if (this.onMessage) {
+                    this.onMessage(parsedData);
+                }
+            } catch (error) {
+                console.error('Failed to parse WebSocket message:', error);
             }
         };
     }

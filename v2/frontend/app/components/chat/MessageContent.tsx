@@ -2,8 +2,6 @@ import React from 'react';
 import Thinking from '@/components/Thinking';
 import { Message } from '@/app/types/chat';
 import JsonTreeView from './JsonTreeView';
-import { TodoListView } from './TodoListView';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export interface MessageContentProps {
     message: Message;
@@ -21,11 +19,7 @@ export function MessageContent({ message }: MessageContentProps) {
                 </div>
             );
         case 'error':
-            return (
-                <div>
-                    <p className="text-red-500">{message.content}</p>
-                </div>
-            );
+            return null;
         case 'tool_start':
             return (
                 <div>
@@ -39,7 +33,7 @@ export function MessageContent({ message }: MessageContentProps) {
                 </div>
             );
         case 'state_update':
-            return <div>{message.state && <TodoListView todoList={message.state} />}</div>;
+            return null;
         default:
             return <pre>{JSON.stringify(message, null, 2)}</pre>;
     }

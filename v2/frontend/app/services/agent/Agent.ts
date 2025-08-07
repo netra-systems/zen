@@ -1,8 +1,8 @@
 import { getToken, getUserId } from '../../lib/user';
 import { produce } from 'immer';
 import { WebSocketClient, WebSocketStatus } from './WebSocketClient';
-import { Message, StreamEvent, AnalysisRequest } from './types';
-import { UserMessage, ThinkingMessage, ToolStartMessage, ToolEndMessage, StateUpdateMessage, TextMessage } from './models';
+import { Message, StreamEvent, AnalysisRequest, TextMessage } from './types';
+import { UserMessage, ThinkingMessage, ToolStartMessage, ToolEndMessage, StateUpdateMessage } from './models';
 
 type AgentListener = (state: AgentState) => void;
 
@@ -134,7 +134,11 @@ class Agent {
         }
 
         if (message.type === 'thinking') {
-            message.type = this.getMessageType(eventName);
+            if (eventName === 'on_chat_model_stream' && data.chunk?.content) {
+                message.type = 'text';
+            } else {
+                message.type = this.getMessageType(eventName);
+            }
         }
 
         switch (eventName) {
@@ -146,7 +150,7 @@ class Agent {
                 if (chunk?.tool_call_chunks) {
                     this.updateToolCode(draft.messages, chunk);
                 } else if (chunk?.content) {
-                    this.updateStreamTextMessage(draft.messages, chunk, run_id);
+                    message.content = (message.content || '') + chunk.content;
                 }
                 break;
             case 'on_tool_start':
@@ -218,17 +222,6 @@ class Agent {
                     messages.push(newMessage);
                 }
             }
-        }
-    }
-    
-    private updateStreamTextMessage(messages: Message[], chunk: any, run_id: string): void {
-        const lastMessage = messages[messages.length - 1];
-        if (lastMessage && lastMessage.type === 'text') {
-            (lastMessage as TextMessage).content += chunk.content;
-        } else {
-            const newMessage = new TextMessage(chunk.content);
-            newMessage.id = run_id;
-            messages.push(newMessage);
         }
     }
 
