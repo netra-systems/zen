@@ -7,30 +7,20 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
-import { useAuth } from '@/hooks/useAuth';
+import { AuthProvider, useAuth } from '@/hooks/useAuth';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+function AppLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const pathname = usePathname();
-  const { user, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  if (isLoading) {
-    return (
-      <html lang="en" suppressHydrationWarning>
-        <body className={cn('min-h-screen bg-background font-sans antialiased', inter.className)}>
-          <div>Loading...</div>
-        </body>
-      </html>
-    );
-  }
-
-  if (!user && pathname !== '/login') {
+  if (!isAuthenticated && pathname !== '/login') {
     return (
       <html lang="en" suppressHydrationWarning>
         <body className={cn('min-h-screen bg-background font-sans antialiased', inter.className)}>
@@ -64,5 +54,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
       </body>
     </html>
+  );
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthProvider>
+      <AppLayout>{children}</AppLayout>
+    </AuthProvider>
   );
 }

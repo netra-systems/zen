@@ -3,10 +3,12 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import useAppStore from '@/store';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function AuthCallbackPage() {
   const router = useRouter();
   const { fetchUser } = useAppStore();
+  const { login } = useAuth();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -18,9 +20,9 @@ export default function AuthCallbackPage() {
         router.push('/');
       });
     } else {
-      router.push('/login');
+      login();
     }
-  }, [fetchUser, router]);
+  }, [fetchUser, router, login]);
 
   return <div>Loading...</div>;
 }
