@@ -152,7 +152,7 @@ class Agent {
 
     private processStreamEvent(draft: AgentState, streamEvent: StreamEvent): void {
         const { event, data, run_id } = JSON.parse(streamEvent);
-        console.log(event, data, run_id)
+        //console.log(event, data, run_id)
         // Ensure a message exists for the current run to attach data to
         this.findOrCreateRunMessage(draft, run_id);
 
