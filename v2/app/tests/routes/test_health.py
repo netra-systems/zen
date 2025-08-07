@@ -1,4 +1,3 @@
-
 import pytest
 from httpx import AsyncClient
 from fastapi.testclient import TestClient
@@ -15,10 +14,11 @@ async def test_live_endpoint():
         assert response.json() == {"status": "ok"}
 
 @pytest.mark.asyncio
-async def test_ready_endpoint_success():
+async def test_ready_endpoint_success(mocker):
     """
     Tests the /ready endpoint when all services are healthy.
     """
+    mocker.patch("app.db.clickhouse_base.ClickHouseDatabase.ping", return_value=True)
     with TestClient(app) as client:
         response = client.get("/health/ready")
         assert response.status_code == 200
