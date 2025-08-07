@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Message, AIMessageChunk } from '@/app/types/chat';
 
@@ -32,13 +33,11 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
                         let updatedMessages = [...prevMessages];
                         const lastMessage = updatedMessages[updatedMessages.length - 1];
 
-                        // Handle tool call chunks
                         if (chunk.tool_call_chunks && chunk.tool_call_chunks.length > 0) {
                             for (const toolCallChunk of chunk.tool_call_chunks) {
                                 const existingMessageIndex = updatedMessages.findIndex(msg => msg.id === toolCallChunk.id);
 
                                 if (existingMessageIndex !== -1) {
-                                    // Update existing tool message
                                     const existingMessage = updatedMessages[existingMessageIndex];
                                     let currentArgs = existingMessage.toolInput || '';
                                     if (typeof currentArgs !== 'string') {
@@ -51,7 +50,6 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
                                         rawChunk: chunk
                                     };
                                 } else {
-                                    // Add new tool message
                                     updatedMessages.push({
                                         id: toolCallChunk.id,
                                         role: 'assistant',
@@ -64,16 +62,13 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
                                 }
                             }
                         } else if (chunk.content) {
-                            // Handle content chunks
                             if (lastMessage && lastMessage.role === 'assistant' && lastMessage.type === 'text') {
-                                // Append to last text message
                                 updatedMessages[updatedMessages.length - 1] = {
                                     ...lastMessage,
                                     content: lastMessage.content + chunk.content,
                                     rawChunk: chunk
                                 };
                             } else {
-                                // Add new text message
                                 updatedMessages.push({
                                     id: chunk.id || Math.random().toString(),
                                     role: 'assistant',
@@ -87,6 +82,7 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
                     });
                 } else if (parsedData.event === 'on_chat_model_end') {
                     const output: AIMessageChunk = parsedData.data.output;
+
                     if (output.content) {
                          setMessages((prevMessages) => {
                             const lastMessage = prevMessages[prevMessages.length - 1];
@@ -121,7 +117,7 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
                     });
                 } else if (parsedData.event === 'on_tool_error') {
                     setMessages((prevMessages) => {
-                        const toolCallId = parsedData.run_id;
+                        const toolCallId = parsed.run_id;
                         return prevMessages.map((msg) =>
                             msg.id === toolCallId
                                 ? { ...msg, type: 'error', isError: true, toolOutput: parsedData.data.error }

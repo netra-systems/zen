@@ -46,31 +46,43 @@ const parseChunkData = (chunkStr: string): any => {
 const processStreamEvent = (draft: Message[], event: StreamEvent) => {
     const { event: eventName, data, run_id } = event;
 
-    let existingMessage = draft.find((m) => m.id === run_id) as ArtifactMessage | undefined;
+    let existingMessage = draft.find((m) => m.id === run_id) as Message | undefined;
 
-    if (!existingMessage || existingMessage.type !== 'artifact') {
-        const newMessage: ArtifactMessage = {
+    if (!existingMessage) {
+        const newMessage: Message = {
             id: run_id || `msg_${Date.now()}`,
             role: 'agent',
             timestamp: new Date().toISOString(),
-            type: 'artifact',
-            name: eventName,
-            data: data,
-            tool_calls: [],
-            tool_outputs: [],
-            state_updates: { todo_list: [], completed_steps: [] },
+            type: 'thinking',
+            content: '',
         };
         draft.push(newMessage);
         existingMessage = newMessage;
-    } else {
-        existingMessage.name = eventName;
-        existingMessage.data = data;
+    }
+
+    const getMessageType = (eventName: string): Message['type'] => {
+        switch (eventName) {
+            case 'on_chain_start':
+                return 'state_update';
+            case 'on_chain_end':
+                return 'tool_end';
+            case 'on_chat_model_stream':
+                return 'tool_code';
+            case 'on_tool_end':
+                return 'tool_end';
+            default:
+                return 'artifact';
+        }
+    };
+
+    if (existingMessage.type === 'thinking') {
+        existingMessage.type = getMessageType(eventName);
     }
 
     switch (eventName) {
         case 'on_chain_start':
             if (data.input?.todo_list) {
-                existingMessage.state_updates = {
+                existingMessage.state = {
                     todo_list: data.input.todo_list,
                     completed_steps: data.input.completed_steps || [],
                 };
@@ -78,7 +90,7 @@ const processStreamEvent = (draft: Message[], event: StreamEvent) => {
             break;
 
         case 'on_chain_end':
-            existingMessage.content = undefined;
+            existingMessage.content = '';
             break;
 
         case 'on_chat_model_stream':
@@ -90,14 +102,22 @@ const processStreamEvent = (draft: Message[], event: StreamEvent) => {
                 existingMessage.content = (existingMessage.content || '') + chunk.content;
             }
             if (chunk?.tool_calls) {
+                // @ts-ignore
+                if (!existingMessage.tool_calls) {
+                    // @ts-ignore
+                    existingMessage.tool_calls = [];
+                }
                 chunk.tool_calls.forEach((toolCall) => {
                     if (toolCall.name === 'update_state') {
-                        existingMessage.state_updates = toolCall.args as any;
+                        existingMessage.state = toolCall.args as any;
                     } else {
+                        // @ts-ignore
                         const existingCallIndex = existingMessage.tool_calls.findIndex((tc) => tc.id === toolCall.id);
                         if (existingCallIndex > -1) {
+                            // @ts-ignore
                             existingMessage.tool_calls[existingCallIndex] = toolCall;
                         } else {
+                            // @ts-ignore
                             existingMessage.tool_calls.push(toolCall);
                         }
                     }
@@ -107,16 +127,40 @@ const processStreamEvent = (draft: Message[], event: StreamEvent) => {
 
         case 'on_tool_end':
             if (data.output) {
+                // @ts-ignore
+                if (!existingMessage.tool_outputs) {
+                    // @ts-ignore
+                    existingMessage.tool_outputs = [];
+                }
                 const toolOutput = {
                     tool_call_id: run_id,
                     content: typeof data.output === 'string' ? data.output : JSON.stringify(data.output),
                     is_error: data.is_error || false,
                 };
+                // @ts-ignore
                 existingMessage.tool_outputs.push(toolOutput);
             }
             break;
 
         default:
+            // For unknown events, we can create an artifact message
+            if (existingMessage.type !== 'artifact') {
+                const artifactMessage: ArtifactMessage = {
+                    id: existingMessage.id,
+                    role: 'agent',
+                    timestamp: existingMessage.timestamp,
+                    type: 'artifact',
+                    name: eventName,
+                    data: data,
+                    tool_calls: [],
+                    tool_outputs: [],
+                    state_updates: { todo_list: [], completed_steps: [] },
+                };
+                const index = draft.findIndex((m) => m.id === run_id);
+                if (index !== -1) {
+                    draft[index] = artifactMessage;
+                }
+            }
             break;
     }
 };
