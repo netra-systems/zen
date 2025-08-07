@@ -562,7 +562,7 @@ class ToolConfig(BaseModel):
     llm_config: Optional[LLMConfig] = Field(None, description="LLM configuration for this tool.")
 
 # --- ClickHouse Models ---
-class ContentCorpus(BaseModel, table=False): # Set table=False as we are manually creating it
+class ContentCorpus(BaseModel): # Set table=False as we are manually creating it
     record_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     workload_type: str
     prompt: str
@@ -610,7 +610,7 @@ class EnrichedMetrics(BaseModel):
     throughput_tokens_per_sec: float
     inter_token_latency_ms: Optional[float] = None
 
-class UnifiedLogEntry(BaseModel, table=False):
+class UnifiedLogEntry(BaseModel):
     # This model represents the structure of the data in ClickHouse
     # but is not managed as a table by SQLAlchemy/SQLModel.
     event_metadata: EventMetadata = Field(default_factory=EventMetadata)
@@ -623,7 +623,7 @@ class UnifiedLogEntry(BaseModel, table=False):
     enriched_metrics: Optional[EnrichedMetrics] = None
     embedding: Optional[List[float]] = None
 
-class DiscoveredPattern(BaseModel, table=False):
+class DiscoveredPattern(BaseModel):
     pattern_id: str = Field(default_factory=lambda: f"pat_{uuid.uuid4().hex[:8]}")
     pattern_name: str
     pattern_description: str
@@ -631,7 +631,7 @@ class DiscoveredPattern(BaseModel, table=False):
     member_span_ids: List[str]
     member_count: int
 
-class PredictedOutcome(BaseModel, table=False):
+class PredictedOutcome(BaseModel):
     supply_option_id: str
     predicted_cost_usd: float
     predicted_latency_ms: int
@@ -640,12 +640,12 @@ class PredictedOutcome(BaseModel, table=False):
     explanation: str
     confidence: float
 
-class BaselineMetrics(BaseModel, table=False):
+class BaselineMetrics(BaseModel):
     avg_cost_usd: float
     avg_latency_ms: int
     avg_quality_score: float
 
-class LearnedPolicy(BaseModel, table=False):
+class LearnedPolicy(BaseModel):
     pattern_id: str
     optimal_supply_option_id: str
     predicted_outcome: PredictedOutcome
@@ -653,13 +653,13 @@ class LearnedPolicy(BaseModel, table=False):
     baseline_metrics: BaselineMetrics
     pattern_impact_fraction: float
 
-class CostComparison(BaseModel, table=False):
+class CostComparison(BaseModel):
     prior_monthly_spend: float
     projected_monthly_spend: float
     projected_monthly_savings: float
     delta_percent: float
 
-class AnalysisResult(BaseModel, table=False):
+class AnalysisResult(BaseModel):
     run_id: str
     discovered_patterns: List[DiscoveredPattern]
     learned_policies: List[LearnedPolicy]

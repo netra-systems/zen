@@ -43,6 +43,34 @@ def fetch_secrets(client: secretmanager.SecretManagerServiceClient, secret_refer
             secrets[ref.name] = None
     return secrets
 
+def load_secrets(config: AppConfig):
+    """Fetches secrets from Secret Manager and populates the config object."""
+    client = get_secret_client()
+    if not client:
+        print("Could not create Secret Manager client. Skipping secret loading.")
+        return
+
+    fetched_secrets = fetch_secrets(client, SECRET_CONFIG, config.log_secrets)
+
+    for ref in SECRET_CONFIG:
+        secret_value = fetched_secrets.get(ref.name)
+        if secret_value is None:
+            continue
+
+        target_obj = config
+        if ref.target_model:
+            if '.' in ref.target_model:
+                parts = ref.target_model.split('.', 1)
+                dict_name = parts[0]
+                key_name = parts[1]
+                target_dict = getattr(config, dict_name)
+                target_obj = target_dict.get(key_name)
+            else:
+                target_obj = getattr(config, ref.target_model)
+
+        if target_obj:
+            setattr(target_obj, ref.target_field, secret_value)
+
 def get_settings() -> AppConfig:
     """Returns the appropriate configuration class based on the environment."""
     environment = os.environ.get("environment", "development").lower()
@@ -55,7 +83,7 @@ def get_settings() -> AppConfig:
         "development": DevelopmentConfig
     }
     config = config_map.get(environment, DevelopmentConfig)()
-    config.load_secrets()
+    load_secrets(config)
     return config
 
 settings = get_settings()
