@@ -1,4 +1,3 @@
-
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 class WebSocketService {
@@ -33,11 +32,15 @@ class WebSocketService {
 
         this.client.onmessage = (message) => {
             try {
-                this.messageListeners.forEach(listener => listener(message));
+                // FIX: The actual content is in the 'data' property.
+                // We parse the data here and pass the resulting object to listeners.
+                // message.data is "JSON", e.g. its JSON formatted wrapped in STR
+                if (typeof message.data === 'string') {  // just string wrapper, is JSON
+                    const parsedData = JSON.parse(message.data);
+                    this.messageListeners.forEach(listener => listener(parsedData));
+                }
             } catch (error) {
-                console.error("Failed to send Listener WebSocket message:", error);
-                // Optionally, notify listeners about the raw message or error
-                // this.messageListeners.forEach(listener => listener(message.data));
+                console.error("Failed to parse or dispatch WebSocket message:", error);
             }
         };
 

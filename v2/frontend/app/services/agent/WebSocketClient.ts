@@ -37,15 +37,16 @@ export class WebSocketClient {
             console.error('WebSocket error:', event);
             this.setStatus(WebSocketStatus.Error);
         };
-        this.ws.onmessage = (message) => {
+        this.ws.onmessage = (event) => {
             try {
-                console.log(message.data)
-                const parsedData = JSON.parse(message.data);
+                // The data received over WebSocket should be a string.
+                // We parse it once here. The consumer of `onMessage` will receive an object.
+                const parsedData = JSON.parse(event.data);
                 if (this.onMessage) {
                     this.onMessage(parsedData);
                 }
             } catch (error) {
-                console.error('Failed to parse WebSocket message:', error);
+                console.error('Failed to parse WebSocket message:', error, 'Received data:', event.data);
             }
         };
     }
@@ -71,3 +72,4 @@ export class WebSocketClient {
         }
     }
 }
+
