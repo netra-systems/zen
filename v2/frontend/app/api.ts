@@ -30,11 +30,12 @@ export interface Reference {
 // --- API Service ---
 export const apiService = {
     async get(endpoint: string, token: string | null) {
-        const response = await fetch(endpoint, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        const url = endpoint.startsWith('http') ? endpoint : `${config.api.baseUrl}${endpoint}`;
+        const headers: Record<string, string> = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        const response = await fetch(url, { headers });
         if (!response.ok) {
             throw await response.json().catch(() => new Error('An unknown error occurred.'));
         }
@@ -42,6 +43,7 @@ export const apiService = {
     },
 
     async post(endpoint: string, body: Record<string, unknown>, token?: string | null) {
+        const url = endpoint.startsWith('http') ? endpoint : `${config.api.baseUrl}${endpoint}`;
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
         };
@@ -49,7 +51,7 @@ export const apiService = {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(endpoint, {
+        const response = await fetch(url, {
             method: 'POST',
             headers,
             body: JSON.stringify(body),
@@ -59,19 +61,28 @@ export const apiService = {
             throw await response.json().catch(() => new Error('An unknown error occurred.'));
         }
 
-        return response.json();
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.indexOf('application/json') !== -1) {
+            return response.json();
+        } else {
+            return;
+        }
     },
 
     async startAgent(token: string | null, body: Record<string, unknown>) {
         const addMessage = useAppStore.getState().addMessage;
         addMessage({ role: 'user', content: JSON.stringify(body) });
 
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(`${config.api.baseUrl}/apex/chat/start_agent`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            },
+            headers,
             body: JSON.stringify(body),
         });
 
@@ -95,22 +106,22 @@ export const apiService = {
     },
 
     async startStreamingAgent(token: string, body: Record<string, unknown>, clientId: string) {
-        return this.post(`${config.api.baseUrl}/streaming_agent/start_agent/${clientId}`, body, token);
+        return this.post(`/streaming_agent/start_agent/${clientId}`, body, token);
     },
 
     async getAgentStatus(runId: string, token: string | null): Promise<AgentRun> {
-        return this.get(`${config.api.baseUrl}/agent/${runId}/status`, token);
+        return this.get(`/agent/${runId}/status`, token);
     },
 
     async getAgentEvents(runId: string, token: string | null): Promise<AgentEvent[]> {
-        return this.get(`${config.api.baseUrl}/agent/${runId}/events`, token);
+        return this.get(`/agent/${runId}/events`, token);
     },
 
     async getReferences(token: string | null): Promise<{ references: Reference[] }> {
-        return this.get(`${config.api.baseUrl}/references`, token);
+        return this.get(`/references`, token);
     },
 
     async getExamples(): Promise<string[]> {
-        return this.get(`${config.api.baseUrl}/examples`, null);
+        return this.get(`/examples`, null);
     }
 };

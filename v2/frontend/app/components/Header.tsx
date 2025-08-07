@@ -4,15 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import useAppStore from '@/store';
 import { Button } from './ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from './dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from './avatar';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Icons } from './Icons';
 
 export const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {

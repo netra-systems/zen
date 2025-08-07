@@ -7,10 +7,12 @@ export const config = {
         baseUrl: `${API_BASE_URL}/api/v3`,
         wsBaseUrl: WS_BASE_URL,
         endpoints: {
-            login: `${API_BASE_URL}/auth/token`,
-            devLogin: `${API_BASE_URL}/auth/dev-login`,
-            currentUser: `${API_BASE_URL}/auth/users/me`,
-            runs: `${API_BASE_URL}/runs`,
+            login: '/auth/token',
+            devLogin: '/auth/dev-login',
+            currentUser: '/auth/users/me',
+            googleLogin: '/auth/google',
+            logout: '/auth/logout',
+            runs: '/runs'
         },
     },
 };

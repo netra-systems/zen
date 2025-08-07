@@ -13,7 +13,7 @@ import { config } from '@/config';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, authError } = useAppStore();
+  const { login, authError, isLoading } = useAppStore();
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -22,11 +22,15 @@ export default function LoginPage() {
     formData.append('username', email);
     formData.append('password', password);
     await login(formData);
-    router.push('/');
+    if (!authError) {
+      router.push('/');
+    }
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${config.api.baseUrl}${config.api.endpoints.googleLogin}`;
+    const googleLoginUrl = `${config.api.baseUrl}${config.api.endpoints.googleLogin}`;
+    console.log('Redirecting to Google Login:', googleLoginUrl);
+    window.location.href = googleLoginUrl;
   };
 
   return (

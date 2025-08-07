@@ -3,7 +3,7 @@ import logging
 from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session, select
 
@@ -159,3 +159,12 @@ async def delete_user_me(current_user: ActiveUserDep, db: DbDep):
     await db.commit()
     logger.info(f"User '{current_user.email}' deleted successfully.")
     return None
+
+
+@router.post("/logout")
+async def logout(response: Response):
+    """
+    Logs out the user by clearing the authentication cookie.
+    """
+    response.delete_cookie(key="access_token")
+    return {"message": "Logout successful"}

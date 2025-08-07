@@ -48,9 +48,9 @@ const useAppStore = create<AppState>((set, get) => ({
         }
     },
     login: async (formData) => {
-        set({ authError: null });
+        set({ authError: null, isLoading: true });
         try {
-            const response = await fetch(config.api.endpoints.login, {
+            const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.login}`, {
                 method: 'POST',
                 body: formData,
             });
@@ -61,26 +61,40 @@ const useAppStore = create<AppState>((set, get) => ({
             }
 
             const { access_token } = await response.json();
-            localStorage.setItem('authToken', access_token);
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('authToken', access_token);
+            }
             set({ token: access_token });
             await get().fetchUser(access_token);
-            window.location.href = '/';
         } catch (error: unknown) {
             console.error(error);
-            set({ authError: error instanceof Error ? error.message : 'An unexpected error occurred during login.', isLoading: false });
+            set({ authError: error instanceof Error ? error.message : 'An unexpected error occurred during login.' });
+        } finally {
+            set({ isLoading: false });
         }
     },
-    logout: () => {
+    logout: async () => {
+        const token = get().token;
+        if (token) {
+            try {
+                await apiService.post(config.api.endpoints.logout, {}, token);
+            } catch (error) {
+                console.error("Failed to logout from server", error);
+            }
+        }
         set({ user: null, token: null });
         if (typeof window !== 'undefined') {
             localStorage.removeItem('authToken');
+            window.location.href = '/login';
         }
     },
     devLogin: async () => {
         try {
             const response = await apiService.post(config.api.endpoints.devLogin, {});
             const { access_token } = response;
-            localStorage.setItem('authToken', access_token);
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('authToken', access_token);
+            }
             set({ token: access_token });
             await get().fetchUser(access_token);
         } catch (error) {
