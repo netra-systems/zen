@@ -66,14 +66,20 @@ class StreamingAgentSupervisor:
         # Immediately return a response to the user
         return {"status": "agent_started", "run_id": run_id}
 
-    def _serialize_event_data(self, data: Any) -> Any:
+    def _serialize_event_data(self, data: Any, _depth: int = 0) -> Any:
+        if _depth > 15:
+            return "Max serialization depth exceeded"
         if isinstance(data, dict):
-            return {key: self._serialize_event_data(value) for key, value in data.items()}
+            return {key: self._serialize_event_data(value, _depth + 1) for key, value in data.items()}
         if isinstance(data, list):
-            return [self._serialize_event_data(item) for item in data]
+            return [self._serialize_event_data(item, _depth + 1) for item in data]
         if isinstance(data, HumanMessage):
             return {"type": "human", "content": data.content}
-        return data
+        
+        if isinstance(data, (str, int, float, bool)) or data is None:
+            return data
+        
+        return str(data)
 
     async def run_agent(self, run_id: str):
         state = self.agent_states[run_id]
