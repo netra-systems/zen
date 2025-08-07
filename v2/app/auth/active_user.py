@@ -23,17 +23,12 @@ class ActiveUser:
                 created_at=datetime.utcnow()
             )
 
-        token = request.cookies.get("access_token")
-        if token is None:
-            auth_header = request.headers.get("Authorization")
-            if auth_header and auth_header.startswith("Bearer "):
-                token = auth_header.split(" ")[1]
-
-        if token is None:
+        user_info = request.session.get('user')
+        if not user_info:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
-        email = self.security_service.get_user_email_from_token(token)
-        if email is None:
+        email = user_info.get('email')
+        if not email:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
         async with self.db_session_factory() as session:
