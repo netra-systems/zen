@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAgent } from '../hooks/useAgent';
-import { ChatMessage } from '../components/chat/ChatMessage';
+import { ChatMessage } from './chat/ChatMessage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

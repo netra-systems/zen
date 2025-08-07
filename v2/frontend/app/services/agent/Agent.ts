@@ -1,8 +1,7 @@
 import { getToken, getUserId } from '../../lib/user';
 import { produce } from 'immer';
 import { WebSocketClient, WebSocketStatus } from './WebSocketClient';
-import { Message, StreamEvent, AnalysisRequest, ToolCall, ToolCallChunk, ToolOutputMessage } from './types';
-import { UserMessage, ThinkingMessage, ToolStartMessage, ToolEndMessage, StateUpdateMessage, TextMessage } from './models';
+import { Message, StreamEvent, AnalysisRequest, ToolCall, ToolCallChunk, ToolOutputMessage, UserMessage, ThinkingMessage, ToolStartMessage, ToolEndMessage, StateUpdateMessage, TextMessage, StateData } from '../../types';
 
 // --- Type Definitions for Clarity (assuming these are in './types.ts') ---
 /*

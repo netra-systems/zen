@@ -1,31 +1,6 @@
 import { config } from './config';
 import useAppStore from '@/store';
-
-// --- Type Definitions for API data ---
-export interface AgentRun {
-    run_id: string;
-    status: 'in_progress' | 'awaiting_confirmation' | 'complete' | 'failed';
-    current_step: number;
-    total_steps: number;
-    last_step_result?: Record<string, unknown>;
-    final_report?: string;
-    error?: Record<string, unknown>;
-}
-
-export interface AgentEvent {
-    event: string;
-    data: Record<string, unknown>;
-}
-
-export interface Reference {
-    id: string;
-    name: string;
-    friendly_name: string;
-    description: string | null;
-    type: string;
-    value: string;
-    version: string;
-}
+import { AgentRun, AgentEvent, Reference } from './types';
 
 // --- API Service ---
 export const apiService = {
@@ -42,7 +17,7 @@ export const apiService = {
         return response.json();
     },
 
-    async post(endpoint: string, body: Record<string, unknown>, token?: string | null) {
+    async post<T>(endpoint: string, body: T, token?: string | null) {
         const url = endpoint.startsWith('http') ? endpoint : `${config.api.baseUrl}${endpoint}`;
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
@@ -69,7 +44,7 @@ export const apiService = {
         }
     },
 
-    async startAgent(token: string | null, body: Record<string, unknown>) {
+    async startAgent(token: string | null, body: AnalysisRequest) {
         const addMessage = useAppStore.getState().addMessage;
         addMessage({ role: 'user', content: JSON.stringify(body) });
 
@@ -105,7 +80,7 @@ export const apiService = {
         }
     },
 
-    async startStreamingAgent(token: string, body: Record<string, unknown>, clientId: string) {
+    async startStreamingAgent(token: string, body: AnalysisRequest, clientId: string) {
         return this.post(`/start_agent_streaming/${clientId}`, body, token);
     },
 

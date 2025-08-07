@@ -1,10 +1,7 @@
 import { create } from 'zustand';
 import { apiService } from './api';
 import { config } from './config';
-import { Message } from './types';
-
-
-import { User } from './types';
+import { Message, User } from './types';
 
 interface AppState {
     user: User | null;

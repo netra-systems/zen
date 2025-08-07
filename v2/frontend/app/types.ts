@@ -1,3 +1,4 @@
+
 export interface User {
     id: number;
     full_name?: string;
@@ -5,7 +6,7 @@ export interface User {
     picture?: string;
 }
 
-export type MessageRole = 'user' | 'assistant';
+export type MessageRole = 'user' | 'assistant' | 'agent';
 
 export interface StateUpdate {
   todo_list: string[];
@@ -223,4 +224,39 @@ export interface ChatState {
   error: Error | null;
   filter: MessageFilter;
   isAutoLoad: boolean;
+}
+
+export interface ChatActions {
+  addMessage: (message: Message) => void;
+  setError: (error: Error | null) => void;
+  setFilter: (filter: MessageFilter) => void;
+  toggleAutoLoad: () => void;
+}
+
+export type ChatStore = ChatState & ChatActions;
+
+export interface AnalysisRequest {
+    settings: {
+        debug_mode: boolean;
+    };
+    request: {
+        user_id: string;
+        query: string;
+        workloads: any[];
+    };
+}
+
+export interface AgentRun {
+    run_id: string;
+    status: 'in_progress' | 'awaiting_confirmation' | 'complete' | 'failed';
+    current_step: number;
+    total_steps: number;
+    last_step_result?: Record<string, unknown>;
+    final_report?: string;
+    error?: Record<string, unknown>;
+}
+
+export interface AgentEvent {
+    event: string;
+    data: Record<string, unknown>;
 }
