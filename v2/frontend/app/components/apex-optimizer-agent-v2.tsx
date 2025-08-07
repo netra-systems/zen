@@ -6,13 +6,7 @@ import { ChatMessage } from '../components/chat/ChatMessage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-const examplePrompts = [
-  "Analyze the 'fetch_user_data' tool and suggest optimizations.",
-  "How can I improve the performance of the 'process_image' tool?",
-  "Find bottlenecks in the 'run_simulation' tool.",
-  "What are the cost drivers for the 'generate_report' tool?",
-];
+import { examplePrompts } from '../lib/examplePrompts';
 
 const truncatePrompt = (prompt: string, maxLength: number) => {
   const words = prompt.split(' ');
@@ -73,6 +67,7 @@ export default function ApexOptimizerAgentV2() {
                       className="text-left h-auto"
                       className="text-left whitespace-normal min-h-[4rem]"
                     >
+                      {truncatePrompt(prompt, 7)}
                     </Button>
                   ))}
                 </CardContent>
