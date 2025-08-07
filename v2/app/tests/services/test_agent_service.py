@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, AsyncMock
 from app.services.agent_service import AgentService
-from app.db.models_clickhouse import AnalysisRequest, Settings, RequestModel, Workload, DataSource, TimeRange
+from app.schemas import AnalysisRequest, Settings, RequestModel, Workload, DataSource, TimeRange
 
 @pytest.mark.asyncio
 async def test_start_agent():

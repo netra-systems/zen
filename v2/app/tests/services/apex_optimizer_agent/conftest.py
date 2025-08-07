@@ -11,7 +11,7 @@ def mock_llm_connector():
     """Provides a mock LLM connector."""
     return MagicMock()
 
-from app.db.models_clickhouse import AnalysisRequest
+from app.schemas import AnalysisRequest
 
 @pytest.fixture
 def mock_request():
