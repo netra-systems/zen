@@ -11,7 +11,7 @@ export enum WebSocketStatus {
 export class WebSocketClient {
     private ws: WebSocket | null = null;
     private url: string = '';
-    public onMessage: ((message: any) => void) | null = null;
+    public onMessage: ((message: string) => void) | null = null;
     public onStatusChange: ((status: WebSocketStatus) => void) | null = null;
 
     public connect(token: string, runId: string): void {

@@ -44,9 +44,8 @@ async def test_start_agent_success(mock_get_agent_supervisor, authenticated_clie
             ]
         }
     }
-    client_id = "test_client"
 
-    response = authenticated_client.post(f"/api/v3/agent/start_agent_streaming/{client_id}", json=analysis_request)
+    response = authenticated_client.post("/api/v3/agent/start_agent", json=analysis_request)
 
     assert response.status_code == 200
     mock_agent_supervisor.start_agent.assert_awaited_once()
@@ -73,9 +72,8 @@ async def test_start_agent_failure(mock_get_agent_supervisor, authenticated_clie
             ]
         }
     }
-    client_id = "test_client"
 
-    response = authenticated_client.post(f"/api/v3/agent/start_agent_streaming/{client_id}", json=analysis_request)
+    response = authenticated_client.post("/api/v3/agent/start_agent", json=analysis_request)
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Agent start failed"}

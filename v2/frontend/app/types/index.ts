@@ -182,7 +182,7 @@ export interface StateUpdate {
 
 export interface ToolCall {
     name: string;
-    args: Record<string, any>;
+    args: Record<string, unknown>;
     id: string;
     type?: 'tool_call';
 }
@@ -235,14 +235,14 @@ export interface StateData {
 
 export interface StreamEventData {
     run_id: string;
-    input?: any;
-    chunk?: any;
-    messages?: any[];
+    input?: Record<string, unknown>;
+    chunk?: Record<string, unknown>;
+    messages?: Record<string, unknown>[];
 }
 
 export interface ToolOutputMessage {
     type: 'tool';
-    content: string | { [key: string]: any };
+    content: string | { [key: string]: unknown };
     tool_call_id: string;
 }
 

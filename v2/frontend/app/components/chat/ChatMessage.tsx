@@ -1,11 +1,11 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Message, ChatMessageProps } from '@/app/types/index';
+import { ChatMessageProps } from '@/app/types/index';
 import { MessageContent } from './MessageContent';
 import { TodoListView } from './TodoListView';
 import JsonTreeView from './JsonTreeView';
-import { getTitle } from '@/app/lib/utils';
+import { getTitle } from '@/lib/utils';
 
 export function ChatMessage({ message }: ChatMessageProps) {
     const title = getTitle(message);

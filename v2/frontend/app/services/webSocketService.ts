@@ -3,7 +3,7 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 class WebSocketService {
     private client: W3CWebSocket | null = null;
     private static instance: WebSocketService;
-    private messageListeners: ((message: any) => void)[] = [];
+    private messageListeners: ((message: MessageEvent) => void)[] = [];
     private connectionListeners: ((isConnected: boolean) => void)[] = [];
     private isConnected: boolean = false;
 
@@ -49,11 +49,11 @@ class WebSocketService {
         };
     }
 
-    public addMessageListener(listener: (message: any) => void): void {
+    public addMessageListener(listener: (message: MessageEvent) => void): void {
         this.messageListeners.push(listener);
     }
 
-    public removeMessageListener(listener: (message: any) => void): void {
+    public removeMessageListener(listener: (message: MessageEvent) => void): void {
         this.messageListeners = this.messageListeners.filter(l => l !== listener);
     }
 

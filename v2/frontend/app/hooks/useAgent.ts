@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { agent } from '../services/agent/Agent';
-import { AgentState, Message } from '../types';
+import { AgentState } from '../types';
 
 
 

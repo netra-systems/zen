@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, FormEvent, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { HelpCircle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-
-
 import { config } from '../config';
 import { GenericInput } from '@/components/GenericInput';
 import useAppStore from '@/store';
-import Spinner from '@/components/Spinner';
+import Thinking from '@/components/Thinking';
 
 // --- Type Definitions for API data ---
 interface Job {
@@ -62,7 +60,7 @@ export default function AdminPage() {
     const [isPolling, setIsPolling] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const pollingJobIdRef = useRef<string | null>(null);
+    const pollingJobIdRef = React.useRef<string | null>(null);
 
     const pollStatus = useCallback(async () => {
         if (!pollingJobIdRef.current) {
@@ -72,8 +70,10 @@ export default function AdminPage() {
         try {
             const data: Job = await apiService.get(`${config.api.baseUrl}/generation/jobs/${pollingJobIdRef.current}`, token);
             setJob(data);
-            if (data.status === 'completed') {
-                localStorage.setItem('latest_corpus_table', job.params.clickhouse_table);
+            if (data.status === 'completed' || data.status === 'failed') {
+                if (data.status === 'completed' && data.params.clickhouse_table) {
+                    localStorage.setItem('latest_corpus_table', data.params.clickhouse_table as string);
+                }
                 setIsPolling(false);
                 pollingJobIdRef.current = null;
             }
@@ -83,7 +83,7 @@ export default function AdminPage() {
             setIsPolling(false);
             pollingJobIdRef.current = null;
         }
-    }, [token, setIsPolling, setJob, setError]);
+    }, [token]);
 
     useEffect(() => {
         if (!isPolling) {
@@ -93,7 +93,7 @@ export default function AdminPage() {
         return () => clearInterval(intervalId);
     }, [isPolling, pollStatus]);
 
-    const handleStartGeneration = async (data: Record<string, any>) => {
+    const handleStartGeneration = async (data: Record<string, string | number>) => {
         setIsLoading(true);
         setError(null);
         setJob(null);
@@ -131,7 +131,7 @@ export default function AdminPage() {
                         description="Generate a new content corpus and store it in ClickHouse."
                         inputFields={[
                             { id: 'samples_per_type', name: 'samples_per_type', label: 'Samples Per Type', type: 'number', required: true, defaultValue: 3 },
-                            { id: 'temperature', name: 'temperature', label: 'Temperature', type: 'number', required: true, defaultValue: 0.7 },
+                            { id: 'temperature', name: 'temperature', label: 'Temperature', type: 'number', required: true, defaultValue: 0.7, step: 0.1 },
                             { id: 'max_cores', name: 'max_cores', label: 'Max Cores', type: 'number', required: true, defaultValue: 4 },
                             { id: 'clickhouse_table', name: 'clickhouse_table', label: 'ClickHouse Table', type: 'text', required: true, defaultValue: 'content_corpus' },
                         ]}
@@ -163,7 +163,7 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
         );
     }
 
-    const progressPercentage = job.total_tasks ? (job.progress / job.total_tasks) * 100 : 0;
+    const progressPercentage = job.total_tasks && job.progress ? (job.progress / job.total_tasks) * 100 : 0;
 
     if (job.status === 'pending' || job.status === 'running') {
         return (

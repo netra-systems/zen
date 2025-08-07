@@ -11,7 +11,7 @@ import {
     ToolOutputMessage, 
     ToolStartMessage,
     StateData,
-    AIMessageChunk
+    StateUpdateMessage
 } from '@/app/types/index';
 
 // --- Agent Class ---
@@ -235,7 +235,7 @@ class Agent {
     
     /** Finds or creates the primary response message associated with a run. */
     private findOrCreateRunMessage(draft: AgentState, run_id: string): Message {
-        let message = draft.messages.find(m => m.id === run_id);
+        const message = draft.messages.find(m => m.id === run_id);
         if (message) return message;
         
         // Find the last 'thinking' placeholder and assign it this run's ID.
@@ -254,7 +254,7 @@ class Agent {
 
     /** Appends streamed text to the current agent response message. */
     private processTextChunk(draft: AgentState, run_id: string, content: string): void {
-        let message = this.findOrCreateRunMessage(draft, run_id);
+        const message = this.findOrCreateRunMessage(draft, run_id);
 
         // If the current message is a 'thinking' placeholder, morph it into a 'text' message.
         if (message.type === 'thinking') {
@@ -288,7 +288,7 @@ class Agent {
         try {
             const parsedArgs = JSON.parse(draft.toolArgBuffers[chunk.id]);
             toolMessage.toolInput = JSON.stringify(parsedArgs, null, 2); // Pretty print
-        } catch (e) {
+        } catch (err) {
             // If JSON is incomplete, just show the raw buffer.
             toolMessage.toolInput = draft.toolArgBuffers[chunk.id];
         }

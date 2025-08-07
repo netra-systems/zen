@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { useAgent } from '../hooks/useAgent';
-import { MessageOrchestratorProps } from '../types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { examplePrompts } from '../lib/examplePrompts';
 import { MessageFactory } from '../services/agent/MessageFactory';
+import { MessageOrchestrator } from './chat/MessageOrchestrator';
 
 import { truncatePrompt } from '../lib/utils';
 

@@ -37,7 +37,7 @@ export class MessageFactory {
         };
     }
 
-    static createToolStartMessage(content: string, tool: string, toolInput: any, id?: string): ToolStartMessage {
+    static createToolStartMessage(content: string, tool: string, toolInput: Record<string, unknown>, id?: string): ToolStartMessage {
         return {
             type: 'tool_start',
             id: id || `tool_start_${Date.now()}`,
@@ -48,7 +48,7 @@ export class MessageFactory {
         };
     }
 
-    static createToolEndMessage(content: string, tool: string, toolInput: any, toolOutput: any, id?: string): ToolEndMessage {
+    static createToolEndMessage(content: string, tool: string, toolInput: Record<string, unknown>, toolOutput: Record<string, unknown>, id?: string): ToolEndMessage {
         return {
             type: 'tool_end',
             id: id || `tool_end_${Date.now()}`,

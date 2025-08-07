@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import { MessageOrchestrator } from './MessageOrchestrator';
 import { MessageFilterControl } from './MessageFilter';
-import { Message, MessageFilter, ChatWindowProps } from '@/app/types/index';
+import { ChatWindowProps } from '@/app/types/index';
 
 export function ChatWindow({ 
     messages, 

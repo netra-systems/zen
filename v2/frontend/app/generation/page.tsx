@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, FormEvent, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { HelpCircle } from 'lucide-react';
 
 import { config } from '../config';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { GenericInput } from '@/components/GenericInput';
-import Spinner from '@/components/Spinner';
+import Thinking from '@/components/Thinking';
 import useAppStore from '@/store';
 
 // --- Type Definitions for API data ---
@@ -62,7 +62,7 @@ export default function GenerationPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [tables, setTables] = useState<string[]>([]);
-    const pollingJobIdRef = useRef<string | null>(null);
+    const pollingJobIdRef = React.useRef<string | null>(null);
 
     useEffect(() => {
         const fetchTables = async () => {
@@ -94,7 +94,7 @@ export default function GenerationPage() {
             setIsPolling(false);
             pollingJobIdRef.current = null;
         }
-    }, [token, setIsPolling, setJob, setError]);
+    }, [token]);
 
     useEffect(() => {
         if (!isPolling) {
@@ -104,7 +104,7 @@ export default function GenerationPage() {
         return () => clearInterval(intervalId);
     }, [isPolling, pollStatus]);
 
-    const handleStartGeneration = async (data: Record<string, any>) => {
+    const handleStartGeneration = async (data: Record<string, string | number>) => {
         setIsLoading(true);
         setError(null);
         setJob(null);
@@ -181,7 +181,7 @@ const JobStatusView = ({ job }: { job: Job | null }) => {
         );
     }
 
-    const progressPercentage = job.total_tasks ? (job.progress / job.total_tasks) * 100 : 0;
+    const progressPercentage = job.total_tasks && job.progress ? (job.progress / job.total_tasks) * 100 : 0;
 
     if (job.status === 'pending' || job.status === 'running') {
         return (

@@ -6,7 +6,7 @@ import useAppStore from '@/store';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: any;
+  user: Record<string, unknown> | null;
   login: () => void;
   logout: () => void;
 }

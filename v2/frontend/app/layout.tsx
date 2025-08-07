@@ -1,15 +1,57 @@
+
 'use client';
 
 import './globals.css';
-import { AuthProvider } from '@/hooks/useAuth';
-import { AppLayout } from '@/components/AppLayout';
+import { useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { AuthProvider, useAuth } from '@/hooks/useAuth';
+import { Sidebar } from '@/components/Sidebar';
+import { Header } from '@/components/Header';
+import { cn } from '@/lib/utils';
+
+export function AppWithLayout({ children }: { children: React.ReactNode }) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const pathname = usePathname();
+  const { isAuthenticated } = useAuth();
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const isLoginPage = pathname === '/login';
+
+  if (!isAuthenticated && !isLoginPage) {
+    return <>{children}</>;
+  }
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
+
+  return (
+    <div
+      className={cn(
+        'grid min-h-screen w-full',
+        isSidebarOpen && 'md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]'
+      )}
+    >
+      {isSidebarOpen && <Sidebar />}
+      <div className="flex flex-col">
+        <Header toggleSidebar={toggleSidebar} />
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
         <AuthProvider>
-          <AppLayout>{children}</AppLayout>
+          <AppWithLayout>{children}</AppWithLayout>
         </AuthProvider>
       </body>
     </html>
