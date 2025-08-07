@@ -215,9 +215,16 @@ export interface AIMessageChunk {
     tool_call_chunks?: ToolCallChunk[];
 }
 
+export interface StreamData {
+    run_id: string;
+    input?: Record<string, unknown>;
+    chunk?: Record<string, unknown>;
+    messages?: Record<string, unknown>[];
+}
+
 export interface ServerEvent {
     event: string;
-    data: StreamEventData;
+    data: StreamData;
     run_id?: string;
 }
 
@@ -241,7 +248,7 @@ export interface ToolOutputMessage {
 
 export interface StreamEvent {
     event: string;
-    data: any;
+    data: StreamData;
     run_id: string;
 }
 
@@ -258,7 +265,7 @@ export enum WebSocketStatus {
 
 export interface WebSocketMessage {
     action: string;
-    payload: any;
+    payload: AnalysisRequest;
 }
 
 // --- Reference Picker ---
