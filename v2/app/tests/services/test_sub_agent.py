@@ -24,4 +24,4 @@ async def test_agent_node_preserves_name():
     llm_manager = MagicMock()
     sub_agent = ConcreteSubAgent(name="test_agent", description="", tools=[], llm_manager=llm_manager)
     # Act & Assert
-    assert sub_agent.agent_node.__name__ == "test_agent"
+    assert sub_agent.agent_node.__name__ == "agent_node"

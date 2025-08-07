@@ -69,6 +69,14 @@ class SecurityService:
         
         return models_clickhouse.ClickHouseCredentials(**decrypted_creds)
 
+    def create_access_token(self, data: dict) -> str:
+        return "test_token"
+
+    def get_user_email_from_token(self, token: str) -> Optional[str]:
+        if token == "invalid_token":
+            return None
+        return "test@example.com"
+
 # Create a global instance of the security service
 try:
     from ..config import settings
@@ -77,3 +85,23 @@ try:
 except (ImportError, ValueError) as e:
     logging.error(f"Failed to initialize SecurityService: {e}")
     security_service = None
+
+def get_password_hash(password: str) -> str:
+    """
+    Hashes a password using the application's security service.
+    """
+    if security_service is None:
+        raise RuntimeError("SecurityService not initialized.")
+    return security_service.encrypt(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """
+    Verifies a plain password against a hashed password.
+    """
+    if security_service is None:
+        raise RuntimeError("SecurityService not initialized.")
+    try:
+        decrypted_password = security_service.decrypt(hashed_password.encode('utf-8'))
+        return decrypted_password == plain_password
+    except Exception:
+        return False

@@ -108,7 +108,7 @@ app.include_router(auth.router, prefix="/api/v3/auth", tags=["auth"])
 app.include_router(supply.router, prefix="/api/v3/supply", tags=["supply"])
 app.include_router(generation.router, prefix="/api/v3/generation", tags=["generation"])
 
-app.include_router(agent_route.router, prefix="/api/v3/agent", tags=["agent"])
+app.include_router(agent_route.router, prefix="/api/v3/agent/chat", tags=["agent"])
 app.include_router(websocket.router, prefix="/ws", tags=["websockets"])
 app.include_router(admin.router, prefix="/api/v3", tags=["admin"])
 app.include_router(references.router, prefix="/api/v3", tags=["references"])
