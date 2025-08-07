@@ -8,9 +8,12 @@ from app.services.security_service import SecurityService
 from app.services.key_manager import KeyManager
 from app.config import settings
 from app.auth import google_oauth
+from app.schemas import User
+import uuid
 
 @patch("app.auth.google_oauth.oauth.google")
-def test_google_auth(mock_google_oauth):
+@patch("app.services.security_service.SecurityService.get_or_create_user_from_oauth", new_callable=AsyncMock)
+def test_google_auth(mock_get_or_create_user, mock_google_oauth):
     # 1. Mock the Google OAuth flow
     async def mock_authorize_redirect(request: Request, redirect_uri: str):
         request.session['_google_state_'] = 'test-state'
@@ -26,6 +29,7 @@ def test_google_auth(mock_google_oauth):
             }
         }
     )
+    mock_get_or_create_user.return_value = User(id=uuid.uuid4(), email="test@example.com", full_name="Test User", picture="https://example.com/avatar.png", is_active=True, is_superuser=False)
 
     # 2. Initialize the security service
     key_manager = KeyManager.load_from_settings(settings)
@@ -34,11 +38,11 @@ def test_google_auth(mock_google_oauth):
     # 3. Use TestClient as a context manager to persist session
     with TestClient(app) as client:
         # 4. Initiate the Google login
-        response = client.get("/api/v3/auth/login", follow_redirects=False)
+        response = client.get("/api/v3/auth/login/google", follow_redirects=False)
         assert response.status_code == 302
 
         # 5. Simulate the callback from Google
-        response = client.get("/api/v3/auth/auth?state=test-state&code=test-code", follow_redirects=False)
+        response = client.get("/api/v3/auth/google?state=test-state&code=test-code", follow_redirects=False)
         assert response.status_code == 307
         redirect_url = response.headers["location"]
         assert redirect_url == settings.frontend_url

@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 from fastapi.testclient import TestClient
 from app.main import app
-from app.db.models_postgres import User
+from app.schemas import User
 from app.services.key_manager import KeyManager
 from app.config import settings
 from cryptography.fernet import Fernet

@@ -6,8 +6,12 @@ import { AppLayout } from '@/components/AppLayout';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-      <AppLayout>{children}</AppLayout>
-    </AuthProvider>
+    <html lang="en">
+      <body>
+        <AuthProvider>
+          <AppLayout>{children}</AppLayout>
+        </AuthProvider>
+      </body>
+    </html>
   );
 }

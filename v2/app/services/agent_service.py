@@ -4,7 +4,7 @@ import logging
 from fastapi import WebSocket, WebSocketDisconnect
 from app.services.deepagents.overall_supervisor import OverallSupervisor
 from app import schemas
-from app.websocket import manager
+from app.connection_manager import manager
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class AgentService:
                         event="agent_started",
                         data=response,
                         run_id=run_id
-                    )
+                    ).dict()
                 )
 
             else:

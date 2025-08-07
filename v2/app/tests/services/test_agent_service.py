@@ -26,8 +26,8 @@ async def test_start_agent():
     analysis_request = AnalysisRequest(settings=settings, request=request_model)
 
     # Act
-    result = await agent_service.start_agent(analysis_request, "test_client")
+    result = await agent_service.start_agent(analysis_request, "test_client", False)
 
     # Assert
     assert result == {"status": "started"}
-    mock_supervisor.start_agent.assert_called_once_with(analysis_request, "test_client")
+    mock_supervisor.start_agent.assert_called_once_with(analysis_request, "test_client", False)
