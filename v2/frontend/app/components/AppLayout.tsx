@@ -5,8 +5,8 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Inter } from 'next/font/google';
 import { cn } from '@/lib/utils';
-import { Sidebar } from '@/app/components/Sidebar';
-import { Header } from '@/app/components/Header';
+import { Sidebar } from './Sidebar';
+import { Header } from './Header';
 import { useAuth } from '@/hooks/useAuth';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -53,7 +53,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         >
           {isSidebarOpen && <Sidebar />}
           <div className="flex flex-col">
-            <Header toggleSidebar={toggleSidebar} />
+            <header>
+              <Header toggleSidebar={toggleSidebar} />
+            </header>
             <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
               {children}
             </main>

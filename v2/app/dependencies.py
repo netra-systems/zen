@@ -3,7 +3,6 @@ from fastapi import Depends, HTTPException, status, Request
 from sqlmodel import Session
 
 from app.db.postgres import get_async_db
-from app.db import models_postgres
 from app import schemas
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,7 +20,7 @@ async def get_db_session(request: Request) -> AsyncSession:
 
 async def get_current_user(
     db: DbDep, request: Request
-) -> models_postgres.User:
+) -> schemas.User:
     user_info = request.session.get('user')
     if not user_info:
         raise HTTPException(
@@ -46,7 +45,7 @@ async def get_current_user(
         )
     return user
 
-ActiveUserDep = Annotated[models_postgres.User, Depends(get_current_user)]
+ActiveUserDep = Annotated[schemas.User, Depends(get_current_user)]
 LLMManagerDep = Annotated[LLMManager, Depends(get_llm_manager)]
 
 def get_security_service(request: Request) -> SecurityService:

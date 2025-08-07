@@ -38,19 +38,30 @@ class GoogleUser(BaseModel):
     name: Optional[str] = None
     picture: Optional[str] = None
 
-class User(BaseModel):
-    """
-    Represents a user in the system.
-    """
-    id: uuid.UUID
+class UserBase(BaseModel):
     email: str
+    is_active: bool = True
+    is_superuser: bool = False
     full_name: Optional[str] = None
     picture: Optional[str] = None
-    is_active: bool
-    is_superuser: bool
+
+class UserCreate(UserBase):
+    password: str
+
+class UserUpdate(UserBase):
+    pass
+
+class UserInDBBase(UserBase):
+    id: uuid.UUID
 
     class Config:
         orm_mode = True
+
+class User(UserInDBBase):
+    pass
+
+class UserInDB(UserInDBBase):
+    hashed_password: str
 
 class Token(BaseModel):
     access_token: str
@@ -109,6 +120,31 @@ class WebSocketMessage(BaseModel):
     event: str
     data: Any
     run_id: str
+
+# --- Supply Schemas ---
+
+class SupplyOptionBase(BaseModel):
+    provider: str
+    family: str
+    name: str
+    hosting_type: str
+    cost_per_million_tokens_usd: Dict[str, float]
+    quality_score: float
+
+class SupplyOptionCreate(SupplyOptionBase):
+    pass
+
+class SupplyOptionUpdate(SupplyOptionBase):
+    pass
+
+class SupplyOptionInDBBase(SupplyOptionBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class SupplyOption(SupplyOptionInDBBase):
+    pass
 
 # --- Section 2: Demand Analyzer Schemas ---
 
