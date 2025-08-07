@@ -34,10 +34,11 @@ export const useWebSocket = (url: string) => {
       }
     };
 
-    ws.onclose = () => {
-      console.log('WebSocket disconnected');
+    ws.onclose = (event) => {
+      console.log('WebSocket disconnected', event.code, event.reason);
       setIsConnected(false);
-      if (!reconnectInterval.current) {
+      // Don't reconnect on normal close
+      if (event.code !== 1000 && !reconnectInterval.current) {
         reconnectInterval.current = setInterval(() => {
           console.log('Attempting to reconnect WebSocket...');
           connect();
