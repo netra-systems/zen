@@ -22,11 +22,11 @@ OAuthFormDep = Annotated[OAuth2PasswordRequestForm, Depends()]
 from ..services.security_service import get_password_hash, verify_password
 
 
-@router.post("/token", response_model=schema.Token, openapi_extra={
+@router.post("/token", response_model=schemas.Token, openapi_extra={
     "requestBody": {
         "content": {
             "application/x-www-form-urlencoded": {
-                "schema": {
+                "schemas": {
                     "type": "object",
                     "properties": {
                         "username": {"type": "string", "example": "jdoe@example.com"},
@@ -67,7 +67,7 @@ async def login_for_access_token(request: Request, form_data: OAuthFormDep, db: 
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/dev-login", response_model=schema.Token, include_in_schema=False)
+@router.post("/dev-login", response_model=schemas.Token, include_in_schema=False)
 async def dev_login(request: Request, db: DbDep):
     """
     Provides a JWT access token for a default user in development environments.
@@ -95,8 +95,8 @@ async def dev_login(request: Request, db: DbDep):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/users", response_model=schema.UserPublic, status_code=status.HTTP_201_CREATED)
-async def create_user(request: Request, user: schema.UserCreate, db: DbDep):
+@router.post("/users", response_model=schemas.UserPublic, status_code=status.HTTP_201_CREATED)
+async def create_user(request: Request, user: schemas.UserCreate, db: DbDep):
     """
     Creates a new user in the database.
     """
@@ -119,7 +119,7 @@ async def create_user(request: Request, user: schema.UserCreate, db: DbDep):
     return user_to_add
 
 
-@router.get("/users/me", response_model=schema.UserPublicWithPicture)
+@router.get("/users/me", response_model=schemas.UserPublicWithPicture)
 async def read_users_me(current_user: ActiveUserDep):
     """
     Returns the public information for the currently authenticated user.
@@ -127,9 +127,9 @@ async def read_users_me(current_user: ActiveUserDep):
     return current_user
 
 
-@router.put("/users/me", response_model=schema.UserPublic)
+@router.put("/users/me", response_model=schemas.UserPublic)
 async def update_user_me(
-    user_update: schema.UserUpdate,
+    user_update: schemas.UserUpdate,
     current_user: ActiveUserDep,
     db: DbDep,
 ):

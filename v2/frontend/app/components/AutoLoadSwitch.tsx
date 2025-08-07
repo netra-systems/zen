@@ -3,11 +3,7 @@
 import React from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-
-interface AutoLoadSwitchProps {
-  isAutoLoad: boolean;
-  onAutoLoadChange: (value: boolean) => void;
-}
+import { AutoLoadSwitchProps } from '@/app/types';
 
 export function AutoLoadSwitch({ isAutoLoad, onAutoLoadChange }: AutoLoadSwitchProps) {
   return (

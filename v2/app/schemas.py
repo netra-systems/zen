@@ -3,7 +3,7 @@ from typing import Optional, List, Dict, Any, Literal
 from datetime import datetime, timezone
 import uuid
 
-# schema.py is for API schema
+# schemas.py is for API schema
 # See db/models_clickhouse.py for ClickHouse schema
 # See db/models_postgres.py for Postgres schema
 

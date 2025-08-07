@@ -11,9 +11,9 @@ from .. import schemas
 router = APIRouter()
 catalog_service = SupplyCatalogService()
 
-@router.post("/supply-catalog/", response_model=schema.SupplyOption, status_code=status.HTTP_201_CREATED)
+@router.post("/supply-catalog/", response_model=schemas.SupplyOption, status_code=status.HTTP_201_CREATED)
 def create_supply_option(
-    option_create: schema.SupplyOptionCreate,
+    option_create: schemas.SupplyOptionCreate,
     db: DbDep,
 ):
     """
@@ -22,7 +22,7 @@ def create_supply_option(
     return catalog_service.create_option(db_session=db, option_data=option_create)
 
 
-@router.get("/supply-catalog/", response_model=List[schema.SupplyOption])
+@router.get("/supply-catalog/", response_model=List[schemas.SupplyOption])
 def read_supply_catalog(
     db: DbDep
 ):
@@ -33,7 +33,7 @@ def read_supply_catalog(
 
 
 
-@router.get("/supply-catalog/{option_id}", response_model=schema.SupplyOption)
+@router.get("/supply-catalog/{option_id}", response_model=schemas.SupplyOption)
 def read_supply_option(option_id: int, db: DbDep):
     """
     Retrieves a single supply option by its ID.

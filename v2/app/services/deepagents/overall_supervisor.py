@@ -34,23 +34,18 @@ class OverallSupervisor:
         self.llm_manager = llm_manager
         self.agent_states: Dict[str, Dict[str, Any]] = {}
         self.websocket_manager = websocket_manager
-        self.graph = self._create_graph()
-        self.sub_agents = {}
+        self.sub_agents: Dict[str, SubAgent] = {}
         self.tool_dispatcher = None
+        self._initialize_sub_agents_and_tools()
+        self.graph = self._create_graph()
 
     def _create_graph(self):
-        # Initialize sub-agents and tools
-        self._initialize_sub_agents_and_tools()
-
         # Build the graph
         builder = StateGraph(DeepAgentState)
 
         # Add nodes for each sub-agent
-        builder.add_node("triage", self.sub_agents['triage'].as_runnable())
-        builder.add_node("data", self.sub_agents['data'].as_runnable())
-        builder.add_node("optimizations_core", self.sub_agents['optimizations_core'].as_runnable())
-        builder.add_node("actions_to_meet_goals", self.sub_agents['actions_to_meet_goals'].as_runnable())
-        builder.add_node("reporting", self.sub_agents['reporting'].as_runnable())
+        for name, agent in self.sub_agents.items():
+            builder.add_node(name, agent.as_runnable())
         builder.add_node("tool_dispatcher", self.tool_dispatcher.as_runnable())
 
         # Define the edges
@@ -83,6 +78,8 @@ class OverallSupervisor:
             {"tool_dispatcher": "tool_dispatcher", "reporting": "reporting"}
         )
 
+        builder.add_edge("tool_dispatcher", "triage") # Or decide dynamically
+
         return builder.compile()
 
     def _get_next_node(self, state: DeepAgentState) -> str:
@@ -108,7 +105,8 @@ class OverallSupervisor:
                 "messages": [HumanMessage(content=request.request.query)],
                 "workloads": request.request.workloads,
                 "run_id": run_id,
-                "stream_updates": stream_updates
+                "stream_updates": stream_updates,
+                "next_node": "triage"
             }
             self.agent_states[run_id] = initial_state
 

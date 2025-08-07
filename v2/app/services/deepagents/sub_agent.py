@@ -1,40 +1,55 @@
-from typing import List, Dict, Any
+from abc import ABC, abstractmethod
+from typing import List
 from langchain_core.tools import BaseTool
 from app.llm.llm_manager import LLMManager
-from app.services.deepagents.prompts import get_agent_prompt
 from app.services.deepagents.state import DeepAgentState
-from app.logging_config import central_logger, LogEntry
-import json
-from langchain_core.messages import BaseMessage, AIMessage
+from langchain_core.messages import HumanMessage
 
-class MessageEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, BaseMessage):
-            return o.dict()
-        return super().default(o)
-
-class SubAgent:
-    def __init__(self, name: str, description: str, llm_manager: LLMManager, tools: List[BaseTool] = None, sub_agent_type: str = None):
+class SubAgent(ABC):
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        llm_manager: LLMManager,
+        tools: List[BaseTool] = None,
+        sub_agent_type: str = "base"
+    ):
         self.name = name
         self.description = description
         self.llm_manager = llm_manager
         self.tools = tools or []
         self.sub_agent_type = sub_agent_type
 
-    async def run(self, state: DeepAgentState) -> Dict[str, Any]:
-        central_logger.log(LogEntry(event="agent_node_execution", data={"agent_name": self.name, "state": state}))
-        prompt = get_agent_prompt(self.description)
-        llm = self.llm_manager.get_llm("default").bind_tools(self.tools)
-        chain = prompt | llm
-        response = await chain.ainvoke(state)
-        central_logger.log(LogEntry(event="agent_node_response", data={"agent_name": self.name, "response": response.dict()}))
-
-        tool_calls = response.tool_calls if hasattr(response, 'tool_calls') else []
-
-        return {"messages": [response], "tool_calls": tool_calls, "next_node": self.sub_agent_type}
-
+    @abstractmethod
+    def get_initial_prompt(self) -> str:
+        """
+        Returns the initial prompt for the sub-agent.
+        """
+        pass
 
     def as_runnable(self):
-        async def agent_node(state: DeepAgentState):
-            return await self.run(state)
-        return agent_node
+        """
+        Returns a runnable that can be used in the graph.
+        """
+        return self
+
+    def __call__(self, state: DeepAgentState):
+        """
+        The main entry point for the sub-agent.
+        """
+        # Add the initial prompt to the messages
+        initial_prompt = self.get_initial_prompt()
+        state["messages"].append(HumanMessage(content=initial_prompt))
+        
+        # Get the LLM
+        llm = self.llm_manager.get_llm()
+
+        # Invoke the LLM
+        response = llm.invoke(state["messages"])
+
+        # Update the state
+        state["messages"].append(response)
+        state["tool_calls"] = response.tool_calls
+        state["current_agent"] = self.sub_agent_type
+
+        return state

@@ -1,11 +1,7 @@
 'use client';
 
 import { MessageCard } from './MessageCard';
-import { Message } from '../types';
-
-interface ChatHistoryProps {
-  messages: Message[];
-}
+import { ChatHistoryProps } from '@/app/types';
 
 export function ChatHistory({ messages }: ChatHistoryProps) {
   return (

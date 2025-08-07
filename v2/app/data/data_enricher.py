@@ -56,7 +56,7 @@ class DataEnricher:
 
         create_schema_query = self._get_enriched_table_schema(dest_db, enriched_table_name)
         self.client.execute(create_schema_query)
-        logging.info(f"Created new empty table `{enriched_table_name}` with target schema.")
+        logging.info(f"Created new empty table `{enriched_table_name}` with target schemas.")
 
         # This core transformation logic assumes a flat source table and builds the
         # nested JSON structures required by the analysis engine's UnifiedLogEntry model.

@@ -4,7 +4,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from ..db import models_postgres
-from ..schema import SupplyOptionCreate, SupplyOptionUpdate
+from ..schemas import SupplyOptionCreate, SupplyOptionUpdate
 
 logger = logging.getLogger(__name__)
 

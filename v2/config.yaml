@@ -51,9 +51,9 @@ realism:
       pricing: [0.50, 0.50] # Example self-hosted cost
 
 # --- Customer Overrides ---
-# Use this section to force specific values for any field in the log schema.
+# Use this section to force specific values for any field in the log schemas.
 # This is powerful for tailoring the data to a specific customer's environment.
-# The keys should match the structure of the UnifiedLogEntry schema.
+# The keys should match the structure of the UnifiedLogEntry schemas.
 # Example:
 # overrides:
 #   identity_context:

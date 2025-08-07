@@ -1,6 +1,5 @@
 'use client';
 
-import { Message } from '../types/chat';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { JsonView, allExpanded, defaultStyles } from 'react-json-view-lite';
@@ -8,14 +7,7 @@ import 'react-json-view-lite/dist/index.css';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { MessageContent } from './chat/MessageContent';
 import { TodoListView } from './chat/TodoListView';
-
-interface MessageCardProps {
-  message: Message;
-  user: {
-    name: string;
-    picture: string;
-  } | undefined
-}
+import { Message, MessageCardProps } from '@/app/types';
 
 export function MessageCard({ message, user }: MessageCardProps) {
   const getToolName = (message: Message) => {
