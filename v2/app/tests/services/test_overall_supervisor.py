@@ -2,7 +2,7 @@ import pytest
 import asyncio
 from unittest.mock import MagicMock, AsyncMock
 from app.services.deepagents.overall_supervisor import OverallSupervisor
-from app.db.models_clickhouse import AnalysisRequest, RequestModel, Settings
+from app.schemas import AnalysisRequest, RequestModel, Settings
 from langchain_community.chat_models.fake import FakeListChatModel
 
 class FakeLLMWithTools(FakeListChatModel):
