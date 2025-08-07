@@ -82,7 +82,7 @@ class ToolBuilder:
             if has_args:
                 args_schema = create_model(f"{name}_args", **fields, __base__=BaseModel)
             else:
-                args_schema = BaseModel
+                args_schema = create_model(f"{name}_args", __base__=BaseModel)
 
             tool = StructuredTool(
                 name=name,

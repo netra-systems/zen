@@ -13,6 +13,15 @@ class ToolDispatcher:
         central_logger.log(LogEntry(event="dispatch_tool", data={"tool_name": tool_name, "kwargs": kwargs}))
         tool_input = ToolInput(tool_name=tool_name, kwargs=kwargs)
         if tool_name in self.tools:
+            tool = self.tools[tool_name]
+            # Validate kwargs against the tool's args_schema
+            if tool.args_schema:
+                try:
+                    tool.args_schema.model_validate(kwargs)
+                except Exception as e:
+                    error_message = f"Invalid arguments for tool '{tool_name}': {e}"
+                    central_logger.log(LogEntry(event="tool_error", data={"tool_name": tool_name, "error": error_message}))
+                    return ToolResult(tool_input=tool_input, status=ToolStatus.ERROR, message=error_message)
             try:
                 tool = self.tools[tool_name]
                 # Check if the tool is async

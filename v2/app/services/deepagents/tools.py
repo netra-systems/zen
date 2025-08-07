@@ -14,7 +14,7 @@ from app.services.apex_optimizer_agent.models import ToolResult, ToolStatus
 @tool
 def update_state(
     completed_step: str,
-    new_todo: List[str] = None,
+    todo_list: List[str] = None,
     state: Annotated[DeepAgentState, InjectedState] = None,
 ) -> ToolResult:
     """Updates the state of the agent."""
@@ -25,8 +25,8 @@ def update_state(
     if "todo_list" not in state:
         state["todo_list"] = []
     state["completed_steps"].append(completed_step)
-    if new_todo:
-        state["todo_list"] = new_todo
+    if todo_list:
+        state["todo_list"] = todo_list
     else:
         if completed_step in state["todo_list"]:
             state["todo_list"].remove(completed_step)

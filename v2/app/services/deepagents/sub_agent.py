@@ -33,7 +33,7 @@ class SubAgent:
             if hasattr(response, 'tool_calls') and response.tool_calls:
                 for tool_call in response.tool_calls:
                     if tool_call['name'] == 'update_state':
-                        state['todo_list'] = tool_call['args']['new_todo']
+                        state['todo_list'] = tool_call['args']['todo_list']
 
             return {"messages": [response]}
         return agent_node
