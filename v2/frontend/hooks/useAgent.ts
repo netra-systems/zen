@@ -1,24 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-    Message,
-    ServerEvent,
-    AgentStartedData,
-    ChainStartData,
-    ChatModelStartData,
-    ChatModelStreamData,
-    RunCompleteData,
-    ToolEndData,
-    ToolErrorData,
-    UpdateStateData,
-    UserMessage,
-    EventMessage,
-    TextMessage,
-    ToolStartMessage,
-    ToolEndMessage,
-    ErrorMessage,
-    ThinkingMessage,
-    StateUpdateMessage,
-} from '@/app/types/chat';
+import { Message, UserMessage, EventMessage, TextMessage, ToolStartMessage, ToolEndMessage, ErrorMessage, StateUpdateMessage, ServerEvent, AgentStartedData, ChatModelStreamData, RunCompleteData, ToolEndData, ToolErrorData, UpdateStateData } from '../types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 

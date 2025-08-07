@@ -1,4 +1,4 @@
-import { StateUpdate } from '../../types/chat';
+import { StateUpdate } from '@/app/types';
 
 interface TodoListViewProps {
   todoList: StateUpdate;

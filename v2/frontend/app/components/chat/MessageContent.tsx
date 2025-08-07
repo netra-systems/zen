@@ -1,6 +1,6 @@
 import React from 'react';
 import Thinking from '@/components/Thinking';
-import { Message, StateUpdateMessage, ToolEndMessage } from '@/app/types/chat';
+import { Message, StateUpdateMessage, ToolEndMessage } from '@/app/types';
 import JsonTreeView from './JsonTreeView';
 // Replaced Heroicons with Lucid React for icons
 import { AlertCircle, CheckCircle2, Cog, ListTodo } from 'lucide-react';
