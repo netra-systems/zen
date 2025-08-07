@@ -6,6 +6,7 @@ import useAppStore from '@/store';
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  isAuthReady: boolean; // Add this line
   user: Record<string, unknown> | null;
   login: () => void;
   logout: () => void;
@@ -15,7 +16,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { token, user, setToken, fetchUser, clearAuth } = useAppStore();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!token);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthReady, setIsAuthReady] = useState<boolean>(false); // Add this line
 
   useEffect(() => {
     const storedToken = localStorage.getItem('authToken');
@@ -24,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       fetchUser(storedToken);
     }
     setIsAuthenticated(!!storedToken);
+    setIsAuthReady(true); // Set auth as ready
   }, [token, setToken, fetchUser]);
 
   const login = () => {
@@ -37,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, isAuthReady, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
