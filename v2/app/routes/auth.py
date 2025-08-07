@@ -29,7 +29,7 @@ oauth.register(
     }
 )
 
-@router.get("/me", response_model=schemas.UserPublicWithPicture)
+@router.get("/me", response_model=schemas.User)
 async def get_current_user_details(current_user: CurrentUser):
     """
     Returns the public information for the currently authenticated user.

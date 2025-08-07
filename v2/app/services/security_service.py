@@ -1,14 +1,12 @@
 # /v2/app/services/security_service.py
 import logging
-import os
 from typing import Optional
-
 from cryptography.fernet import Fernet
-from sqlmodel import Session, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 from ..db import models_postgres
-from ..db import models_clickhouse
+from .. import schemas
 from .key_manager import KeyManager
 
 class SecurityService:
@@ -16,92 +14,46 @@ class SecurityService:
         self.key_manager = key_manager
         self.fernet = Fernet(self.key_manager.fernet_key)
 
-    def encrypt(self, value: str) -> bytes:
-        return self.fernet.encrypt(value.encode('utf-8'))
+    def get_password_hash(self, password: str) -> str:
+        return self.fernet.encrypt(password.encode()).decode()
 
-    def decrypt(self, encrypted_value: bytes) -> str:
-        return self.fernet.decrypt(encrypted_value).decode('utf-8')
-
-    async def get_user(self, db_session: AsyncSession, email: str) -> Optional[models_postgres.User]:
-        result = await db_session.execute(select(models_postgres.User).where(models_postgres.User.email == email))
-        return result.scalars().first()
-
-    async def save_user_credentials(self, user_id: int, credentials: models_clickhouse.ClickHouseCredentials, db_session: AsyncSession):
-        existing_secrets_query = select(models_postgres.Secret).where(models_postgres.Secret.user_id == user_id)
-        existing_secrets_list = await db_session.exec(existing_secrets_query)
-        existing_secrets_list = existing_secrets_list.all()
-        existing_secrets_map = {secret.key: secret for secret in existing_secrets_list}
-
-        creds_dict = credentials.model_dump()
-        for key, value in creds_dict.items():
-            if value is None:
-                continue
-            encrypted_value = self.encrypt(str(value))
-
-            if key in existing_secrets_map:
-                if existing_secrets_map[key].encrypted_value != encrypted_value:
-                    existing_secrets_map[key].encrypted_value = encrypted_value
-                    db_session.add(existing_secrets_map[key])
-            else:
-                new_secret = models_postgres.Secret(user_id=user_id, key=key, encrypted_value=encrypted_value)
-                db_session.add(new_secret)
-        
-        await db_session.commit()
-
-    async def get_user_credentials(self, user_id: int, db_session: AsyncSession) -> Optional[models_clickhouse.ClickHouseCredentials]:
-        result = await db_session.execute(select(models_postgres.Secret).where(models_postgres.Secret.user_id == user_id))
-        secrets = result.scalars().all()
-        if not secrets:
-            return None
-            
-        decrypted_creds = {}
+    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         try:
-            for secret in secrets:
-                decrypted_creds[secret.key] = self.decrypt(secret.encrypted_value)
-        except Exception as e:
-            logging.error(f"Failed to decrypt credentials for user_id {user_id}: {e}")
-            return None
-        
-        required_keys = models_clickhouse.ClickHouseCredentials.model_fields.keys()
-        if not all(key in decrypted_creds for key in required_keys):
-            logging.warning(f"Incomplete credentials found for user_id {user_id}. Missing keys: {required_keys - decrypted_creds.keys()}")
-            # Still return the model, it will raise a validation error on use, which is informative.
-        
-        return models_clickhouse.ClickHouseCredentials(**decrypted_creds)
+            decrypted_password = self.fernet.decrypt(hashed_password.encode()).decode()
+            return plain_password == decrypted_password
+        except Exception:
+            return False
 
-    def create_access_token(self, data: dict) -> str:
-        return "test_token"
+    async def get_user(self, db_session: AsyncSession, email: str) -> Optional[schemas.UserInDB]:
+        result = await db_session.execute(select(models_postgres.User).where(models_postgres.User.email == email))
+        user_in_db = result.scalars().first()
+        if user_in_db:
+            return schemas.UserInDB.model_validate(user_in_db)
+        return None
 
-    def get_user_email_from_token(self, token: str) -> Optional[str]:
-        if token == "invalid_token":
-            return None
-        return "test@example.com"
+    async def create_user(self, db_session: AsyncSession, user_create: schemas.UserCreate) -> schemas.User:
+        hashed_password = self.get_password_hash(user_create.password)
+        db_user = models_postgres.User(
+            **user_create.model_dump(exclude={"password"}),
+            hashed_password=hashed_password
+        )
+        db_session.add(db_user)
+        await db_session.commit()
+        await db_session.refresh(db_user)
+        return schemas.User.model_validate(db_user)
 
-# Create a global instance of the security service
-try:
-    from ..config import settings
-    key_manager = KeyManager.load_from_settings(settings)
-    security_service = SecurityService(key_manager)
-except (ImportError, ValueError) as e:
-    logging.error(f"Failed to initialize SecurityService: {e}")
-    security_service = None
+    async def get_or_create_user_from_oauth(self, db_session: AsyncSession, user_info: dict) -> schemas.User:
+        user = await self.get_user(db_session, user_info["email"])
+        if user:
+            return user
 
-def get_password_hash(password: str) -> str:
-    """
-    Hashes a password using the application's security service.
-    """
-    if security_service is None:
-        raise RuntimeError("SecurityService not initialized.")
-    return security_service.encrypt(password)
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """
-    Verifies a plain password against a hashed password.
-    """
-    if security_service is None:
-        raise RuntimeError("SecurityService not initialized.")
-    try:
-        decrypted_password = security_service.decrypt(hashed_password.encode('utf-8'))
-        return decrypted_password == plain_password
-    except Exception:
-        return False
+        # Create a new user if one doesn't exist
+        db_user = models_postgres.User(
+            email=user_info["email"],
+            full_name=user_info.get("name"),
+            picture=user_info.get("picture"),
+        )
+        db_session.add(db_user)
+        await db_session.commit()
+        await db_session.refresh(db_user)
+        return schemas.User.model_validate(db_user)

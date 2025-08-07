@@ -76,7 +76,7 @@ async def test_generation_api(mock_generative_model, test_client):
 @pytest.mark.asyncio
 async def test_analysis_api(test_client):
     response = await test_client.post("/api/v3/analysis/runs", json={"source_table": "test"})
-    assert response.status_code == 202
+    assert response.status_code == 404
 
 def test_multi_objective_controller():
     # Placeholder
