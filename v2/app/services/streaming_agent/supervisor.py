@@ -4,7 +4,7 @@ import logging
 from typing import Any, Dict, List
 
 # 1. IMPORT THE NECESSARY MESSAGE TYPES
-from langchain_core.messages import HumanMessage, AIMessage, ToolMessage, BaseMessage
+from langchain_core.messages import HumanMessage, AIMessage, ToolMessage, BaseMessage, AIMessageChunk
 from app.db.models_clickhouse import AnalysisRequest
 from app.llm.llm_manager import LLMManager
 from app.services.deepagents.graph import SingleAgentTeam
@@ -63,8 +63,8 @@ class StreamingAgentSupervisor:
                 "workloads": request.request.workloads,
                 "todo_list": ["triage_request"],
                 "completed_steps": [],
-                "status": "in_progress",
-                "events": []
+                "status": "in_progress"
+                # Removed "events": [] to prevent circular references later
             }
             self.agent_states[run_id] = initial_state
 
@@ -79,11 +79,10 @@ class StreamingAgentSupervisor:
             logger.error(f"Error in start_agent for run_id: {run_id}: {e}", exc_info=True)
             return {"status": "error", "run_id": run_id, "message": str(e)}
 
-    # 2. REWRITE THE SERIALIZATION FUNCTION
     def _serialize_event_data(self, data: Any, _depth: int = 0) -> Any:
         """
         Recursively converts complex data objects into a JSON-serializable format.
-        This function now correctly handles all LangChain message types.
+        This function now correctly handles all LangChain message types and structures.
         """
         if _depth > 15:
             return "Max serialization depth exceeded"
@@ -92,28 +91,23 @@ class StreamingAgentSupervisor:
         if isinstance(data, dict):
             return {key: self._serialize_event_data(value, _depth + 1) for key, value in data.items()}
         if isinstance(data, list):
-            # NEW: Flatten list-of-lists for messages if it occurs.
-            # This is a common structure in LangChain events that clients might not expect.
+            # Flatten list-of-lists for messages if it occurs.
             if len(data) == 1 and isinstance(data[0], list):
-                # It's a list containing a single list, e.g., [[msg1, msg2]]. Flatten it.
                 return [self._serialize_event_data(item, _depth + 1) for item in data[0]]
-            
-            # Original recursive call for all other lists
             return [self._serialize_event_data(item, _depth + 1) for item in data]
 
         # Handle all BaseMessage subclasses (HumanMessage, AIMessage, ToolMessage, etc.)
-        if isinstance(data, BaseMessage):
-            # Start with a base representation for any message type
+        if isinstance(data, (BaseMessage, AIMessageChunk)):
             serialized_message = {"type": data.type, "content": str(data.content)}
             
-            # Add specific attributes for AIMessage if they exist
-            if isinstance(data, AIMessage):
+            # Add specific attributes for AIMessage and AIMessageChunk if they exist
+            if isinstance(data, (AIMessage, AIMessageChunk)):
                 if hasattr(data, 'tool_calls') and data.tool_calls:
-                    serialized_message["tool_calls"] = data.tool_calls
+                    serialized_message["tool_calls"] = self._serialize_event_data(data.tool_calls, _depth + 1)
                 if hasattr(data, 'additional_kwargs') and data.additional_kwargs:
-                    serialized_message["additional_kwargs"] = data.additional_kwargs
+                    serialized_message["additional_kwargs"] = self._serialize_event_data(data.additional_kwargs, _depth + 1)
                 if hasattr(data, 'response_metadata') and data.response_metadata:
-                    serialized_message["response_metadata"] = data.response_metadata
+                    serialized_message["response_metadata"] = self._serialize_event_data(data.response_metadata, _depth + 1)
                 if hasattr(data, 'id') and data.id:
                     serialized_message["id"] = data.id
 
@@ -128,15 +122,16 @@ class StreamingAgentSupervisor:
             return data
 
         # A safer fallback for any other unhandled type.
-        # This ensures the output is always a valid JSON structure.
-        return {"type": "unknown", "content": str(data)}
+        return {"type": "unknown", "content": f"Unserializable object of type: {type(data).__name__}"}
 
     async def run_agent(self, run_id: str):
         logger.info(f"Starting agent run for run_id: {run_id}")
         try:
             state = self.agent_states[run_id]
             async for event in self.graph.astream_events(state, {"recursion_limit": 20}):
-                state["events"].append(event)
+                # NOTE: The line `state["events"].append(event)` was removed
+                # as it was causing the circular reference and serialization errors.
+                
                 # Send updates over WebSocket
                 serializable_data = self._serialize_event_data(event["data"])
                 await self.websocket_manager.send_to_run(json.dumps({"event": event["event"], "data": serializable_data, "run_id": run_id}), run_id)
@@ -146,7 +141,6 @@ class StreamingAgentSupervisor:
             logger.info(f"Agent run for run_id: {run_id} completed successfully.")
         except Exception as e:
             logger.error(f"Error during agent run for run_id: {run_id}: {e}", exc_info=True)
-            # 3. FIX THE EXCEPTION HANDLER TO SEND STRUCTURED JSON
             try:
                 # Create a structured error object instead of using str(e) directly
                 error_payload = {
