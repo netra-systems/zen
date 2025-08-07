@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.cluster import KMeans
 import json
 from typing import List, Any, Tuple
-from app.schema import DiscoveredPattern
+from app.schemas import DiscoveredPattern
 from app.config import settings
 from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
 from app.services.context import ToolContext

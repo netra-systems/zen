@@ -6,7 +6,7 @@ from authlib.integrations.starlette_client import OAuth
 from sqlmodel import Session, select
 
 from ..db import models_postgres
-from .. import schema
+from .. import schemas
 from ..dependencies import DbDep
 from ..config import settings
 

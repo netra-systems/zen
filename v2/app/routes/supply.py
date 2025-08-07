@@ -6,7 +6,7 @@ from sqlmodel import Session
 from ..db import models_postgres
 from ..dependencies import DbDep
 from ..services.supply_catalog_service import SupplyCatalogService
-from .. import schema
+from .. import schemas
 
 router = APIRouter()
 catalog_service = SupplyCatalogService()

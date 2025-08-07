@@ -8,7 +8,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session, select
 
 from ..db import models_postgres
-from .. import schema
+from .. import schemas
 from ..dependencies import DbDep, ActiveUserDep
 from ..config import settings
 
