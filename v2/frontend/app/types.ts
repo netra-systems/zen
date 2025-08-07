@@ -59,9 +59,22 @@ export interface AIMessageChunk {
 // This represents the raw message from the server
 export interface ServerEvent {
   event: string;
-  data: any;
+  data: StreamEventData;
   run_id?: string;
 }
+
+export interface StateData {
+  todo_list: string[];
+  completed_steps: string[];
+}
+
+export interface StreamEventData {
+  run_id: string;
+  input?: any;
+  chunk?: any;
+  messages?: any[];
+}
+
 
 // Specific data types for each event
 export interface AgentStartedData {
@@ -145,6 +158,19 @@ export interface ToolEndMessage extends BaseMessage {
   responseMetadata?: ResponseMetadata;
 }
 
+export interface ToolEndErrorMessage extends BaseMessage {
+  type: 'tool_end';
+  content: string;
+  tool: string;
+  toolInput: any;
+  toolOutput: {
+    content: string;
+    is_error: true;
+  };
+  usageMetadata?: UsageMetadata;
+  responseMetadata?: ResponseMetadata;
+}
+
 export interface ErrorMessage extends BaseMessage {
   type: 'error';
   content: string;
@@ -180,6 +206,16 @@ export interface MessageFilter {
   [key: string]: boolean;
 }
 
+
+export interface Reference {
+  id: string;
+  name: string;
+  friendly_name: string;
+  description: string | null;
+  type: string;
+  value: string;
+  version: string;
+}
 
 export interface ChatState {
   messages: Message[];

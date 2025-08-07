@@ -1,15 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 
-interface Reference {
-  id: string;
-  name: string;
-  friendly_name: string;
-  description: string | null;
-  type: string;
-  value: string;
-  version: string;
-}
+import { Reference } from '@/app/types';
 
 interface ReferencePickerProps {
   onSelect: (reference: Reference) => void;

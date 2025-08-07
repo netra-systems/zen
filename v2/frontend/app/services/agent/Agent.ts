@@ -171,11 +171,12 @@ class Agent {
         }
     }
     
-    private handleMessage(eventData: StreamEvent): void {
+    private handleMessage(eventData: string): void {
         try {
-            console.log("Received Event: ", eventData); // For debugging
+            const event: StreamEvent = JSON.parse(eventData);
+            console.log("Received Event: ", event); // For debugging
             this.setState(draft => {
-                this.processStreamEvent(draft, eventData);
+                this.processStreamEvent(draft, event);
             });
         } catch (error) {
             console.error("Failed to handle WebSocket message:", { eventData, error });
@@ -189,7 +190,7 @@ class Agent {
     // --- Core Event Processing Logic ---
 
     private processStreamEvent(draft: AgentState, streamEvent: StreamEvent): void {
-        const { event, data } = JSON.parse(streamEvent as any); // The raw event is a JSON string
+        const { event, data } = streamEvent;
         const run_id = data.run_id; // The run_id is often nested inside the data object
 
         switch (event) {
@@ -349,7 +350,7 @@ class Agent {
     }
 
     /** Updates a message to show a to-do list or other state information. */
-    private processStateUpdate(draft: AgentState, run_id: string, stateData: any): void {
+    private processStateUpdate(draft: AgentState, run_id: string, stateData: StateData): void {
         if (!stateData.todo_list) return;
 
         let message = this.findOrCreateRunMessage(draft, run_id);
