@@ -13,6 +13,7 @@ from app.websocket import ConnectionManager
 from app.services.supply_catalog_service import SupplyCatalogService
 from app.services.deepagents.state import DeepAgentState
 from app.services.context import ToolContext
+from app.utils.log_parser import LogParser
 
 class StreamingAgentSupervisor:
     def __init__(self, db_session: AsyncSession, llm_manager: LLMManager, websocket_manager: ConnectionManager):
@@ -75,11 +76,20 @@ class StreamingAgentSupervisor:
             return [self._serialize_event_data(item, _depth + 1) for item in data]
         if isinstance(data, HumanMessage):
             return {"type": "human", "content": data.content}
-        
+
         if isinstance(data, (str, int, float, bool)) or data is None:
             return data
-        
-        return str(data)
+
+        stringified_data = str(data)
+        # Attempt to parse the stringified data
+        parsed_data = LogParser.parse_log_message(stringified_data)
+
+        # If parsing as a tool call is successful, return the structured data
+        if parsed_data and parsed_data.get("type") == "tool_call":
+            return parsed_data
+
+        # Otherwise, return the original stringified data
+        return stringified_data
 
     async def run_agent(self, run_id: str):
         state = self.agent_states[run_id]
