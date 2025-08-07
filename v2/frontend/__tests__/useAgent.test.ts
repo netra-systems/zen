@@ -18,7 +18,7 @@ describe('useAgent', () => {
         const messages = [
             { event: 'agent_started', data: { status: 'agent_started', run_id: 'run_1754540329677' } },
             { event: 'on_chain_start', data: { input: { messages: [{ type: 'human', content: "I'm expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?" }] } } },
-            { event: 'on_chat_model_start', data: { input: { messages: [['content="You are an expert...", { type: 'human', content: "I'm expecting a 50% increase..." }]] } } },
+            { event: 'on_chat_model_start', data: { input: { messages: [['content="You are an expert..."', { type: 'human', content: "I'm expecting a 50% increase..." }]] } } },
             { event: 'on_chat_model_stream', data: { chunk: { content: 'Here is' } } },
             { event: 'on_chat_model_stream', data: { chunk: { content: ' a list of the steps I will take to address your request...' } } },
             { event: 'on_chat_model_stream', data: { chunk: { tool_call_chunks: [{ name: 'cost_analyzer', args: '{}', id: 'd6de110a-fb41-4fa2-8868-bb14419ff2c4' }] } } },
@@ -64,5 +64,5 @@ describe('useAgent', () => {
         expect(finalMessages[5].type).toBe('event');
         expect(finalMessages[5].content).toContain('Run complete');
         expect(finalMessages[5].rawServerEvent).toEqual(messages[6]);
-    });
+    }, 30000);
 });

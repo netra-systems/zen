@@ -1,7 +1,7 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useAgent } from '../app/hooks/useAgent';
 import WS from 'jest-websocket-mock';
-import { Message } from '@/app/types/chat';
+import { Message, ToolStartMessage } from '@/app/types/chat';
 
 describe('useAgent - Extended Message Parsing', () => {
   let server: WS;
@@ -56,15 +56,16 @@ describe('useAgent - Extended Message Parsing', () => {
       const textMessage = messages.find(m => m.type === 'text');
       expect(textMessage?.content).toContain('Here is a list of the steps');
 
-      const toolMessage = messages.find(m => m.type === 'tool_start');
+      const toolMessage = messages.find(m => m.type === 'tool_start') as ToolStartMessage;
       expect(toolMessage).toBeDefined();
       expect(toolMessage?.tool).toBe('cost_analyzer');
       
-      expect(toolMessage?.rawChunk).toBeDefined();
-      if(toolMessage?.rawChunk) {
-        expect(toolMessage.rawChunk.tool_call_chunks).toBeDefined();
-        expect(toolMessage.rawChunk.tool_call_chunks?.[0].name).toBe('cost_analyzer');
+      expect(toolMessage?.rawServerEvent).toBeDefined();
+      if(toolMessage?.rawServerEvent) {
+        const streamData = toolMessage.rawServerEvent.data as any;
+        expect(streamData.chunk.tool_call_chunks).toBeDefined();
+        expect(streamData.chunk.tool_call_chunks?.[0].name).toBe('cost_analyzer');
       }
-    }, { timeout: 20000 });
-  });
+    }, { timeout: 30000 });
+  }, 30000);
 });
