@@ -106,7 +106,7 @@ export const apiService = {
     },
 
     async startStreamingAgent(token: string, body: Record<string, unknown>, clientId: string) {
-        return this.post(`/streaming_agent/start_agent/${clientId}`, body, token);
+        return this.post(`/start_agent_streaming/${clientId}`, body, token);
     },
 
     async getAgentStatus(runId: string, token: string | null): Promise<AgentRun> {
