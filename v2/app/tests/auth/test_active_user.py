@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from fastapi import HTTPException, Request
-from app.auth.active_user import ActiveUser
+from app.auth.active_user import CurrentUser
 from app.db.models_postgres import User
 from app.config import settings
 import uuid
@@ -23,7 +23,7 @@ async def test_active_user_success(mocker):
     request = mocker.Mock()
     request.headers = {"Authorization": "Bearer test_token"}
 
-    active_user = ActiveUser(db_session_factory, security_service)
+    active_user = CurrentUser(db_session_factory, security_service)
 
     # Act
     user = await active_user(request)
