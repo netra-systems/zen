@@ -70,6 +70,10 @@ const processStreamEvent = (draft: Message[], event: StreamEvent) => {
                 return 'tool_code';
             case 'on_tool_end':
                 return 'tool_end';
+            case 'on_tool_start':
+                return 'tool_start';
+            case 'update_state':
+                return 'state_update';
             default:
                 return 'artifact';
         }
@@ -102,6 +106,7 @@ const processStreamEvent = (draft: Message[], event: StreamEvent) => {
                 existingMessage.content = (existingMessage.content || '') + chunk.content;
             }
             if (chunk?.tool_calls) {
+                existingMessage.type = 'tool_start';
                 // @ts-ignore
                 if (!existingMessage.tool_calls) {
                     // @ts-ignore
@@ -111,6 +116,7 @@ const processStreamEvent = (draft: Message[], event: StreamEvent) => {
                     if (toolCall.name === 'update_state') {
                         existingMessage.state = toolCall.args as any;
                     } else {
+                        existingMessage.tool = toolCall.name;
                         // @ts-ignore
                         const existingCallIndex = existingMessage.tool_calls.findIndex((tc) => tc.id === toolCall.id);
                         if (existingCallIndex > -1) {
@@ -123,6 +129,11 @@ const processStreamEvent = (draft: Message[], event: StreamEvent) => {
                     }
                 });
             }
+            break;
+
+        case 'on_tool_start':
+            existingMessage.tool = data.name;
+            existingMessage.toolInput = data.input;
             break;
 
         case 'on_tool_end':
@@ -139,6 +150,14 @@ const processStreamEvent = (draft: Message[], event: StreamEvent) => {
                 };
                 // @ts-ignore
                 existingMessage.tool_outputs.push(toolOutput);
+            }
+            break;
+        case 'update_state':
+            if (data.todo_list) {
+                existingMessage.state = {
+                    todo_list: data.todo_list,
+                    completed_steps: data.completed_steps || [],
+                };
             }
             break;
     }
