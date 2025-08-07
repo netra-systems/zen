@@ -316,7 +316,7 @@ export interface GenericInputProps {
     title: string;
     description: string;
     inputFields: InputField[];
-    onSubmit: (data: Record<string, any>) => void;
+    onSubmit: (data: Record<string, string | number>) => void;
     isLoading: boolean;
     submitButtonText: string;
     onClear?: () => void;
