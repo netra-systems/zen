@@ -4,6 +4,45 @@ import { Message, StreamEvent, ArtifactMessage } from '../types/chat';
 import { produce } from 'immer';
 import { useWebSocket, WebSocketStatus } from './useWebSocket';
 
+const parseChunkData = (chunkStr: string): any => {
+    if (typeof chunkStr !== 'string' || !chunkStr.trim()) {
+        return chunkStr;
+    }
+
+    const result: { [key: string]: any } = {};
+    // This regex splits the string by spaces that are followed by a key-like identifier and an equals sign.
+    // This is to avoid splitting inside nested structures like dictionaries or lists.
+    const parts = chunkStr.trim().split(/\s+(?=(?:[a-zA-Z_][a-zA-Z0-9_]*=))/);
+
+    for (const part of parts) {
+        const firstEqualIndex = part.indexOf('=');
+        if (firstEqualIndex === -1) continue;
+
+        const key = part.substring(0, firstEqualIndex);
+        let valueStr = part.substring(firstEqualIndex + 1);
+
+        try {
+            // This is a workaround to parse Python-like string literals into JSON.
+            // It's inherently fragile and might not cover all edge cases.
+            // A proper fix would be for the backend to send valid JSON.
+            const jsonStr = valueStr
+                .replace(/None/g, 'null')
+                .replace(/True/g, 'true')
+                .replace(/False/g, 'false')
+                .replace(/\\'/g, "'") // Unescape single quotes
+                .replace(/\\"/g, '"') // Unescape double quotes
+                .replace(/'/g, '"'); // Replace single quotes with double quotes for JSON
+
+            result[key] = JSON.parse(jsonStr);
+        } catch (e) {
+            console.error('Failed to parse chunk value:', valueStr, e);
+            // Fallback for simple strings or parsing errors
+            result[key] = valueStr;
+        }
+    }
+    return result;
+};
+
 const processStreamEvent = (draft: Message[], event: StreamEvent) => {
     const { event: eventName, data, run_id } = event;
 
@@ -42,16 +81,16 @@ const processStreamEvent = (draft: Message[], event: StreamEvent) => {
             existingMessage.content = undefined;
             break;
 
-        case 'on_chain_end':
-            existingMessage.content = undefined;
-            break;
-
         case 'on_chat_model_stream':
-            if (data.chunk?.content) {
-                existingMessage.content = (existingMessage.content || '') + data.chunk.content;
+            const chunk = typeof data.chunk === 'string'
+                ? parseChunkData(data.chunk)
+                : data.chunk;
+
+            if (chunk?.content) {
+                existingMessage.content = (existingMessage.content || '') + chunk.content;
             }
-            if (data.chunk?.tool_calls) {
-                data.chunk.tool_calls.forEach((toolCall) => {
+            if (chunk?.tool_calls) {
+                chunk.tool_calls.forEach((toolCall) => {
                     if (toolCall.name === 'update_state') {
                         existingMessage.state_updates = toolCall.args as any;
                     } else {
