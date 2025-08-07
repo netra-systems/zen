@@ -47,8 +47,10 @@ export default function ApexOptimizerAgentV2() {
       <CardContent>
         <div className="flex flex-col h-[600px] border rounded-lg">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
+            {messages.map((message, index) => (
+              <div key={message.id || index}>
+                <ChatMessage message={message} />
+              </div>
             ))}
             {showThinking && <ChatMessage key="thinking" message={{id: 'thinking', role: 'agent', type: 'thinking', timestamp: new Date().toISOString()}}/>}
           </div>
