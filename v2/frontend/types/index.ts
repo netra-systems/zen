@@ -7,6 +7,28 @@ export interface Corpus {
   updated_at: string;
 }
 
+export interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  picture: string;
+}
+
+export interface AuthEndpoints {
+  login: string;
+  logout: string;
+  token: string;
+  user: string;
+}
+
+export interface AuthConfigResponse {
+  google_client_id: string;
+  endpoints: AuthEndpoints;
+  development_mode: boolean;
+  user: User | null;
+}
+
+
 // --- WebSocket Service Types ---
 
 export enum WebSocketStatus {

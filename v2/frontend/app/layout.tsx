@@ -1,10 +1,10 @@
 'use client';
 
 import './globals.css';
-import { AuthProvider } from '@/hooks/useAuth';
-import { WebSocketProvider } from '@/providers/WebSocketProvider';
-import { AppWithLayout } from '@/components/AppWithLayout';
-import { RootLayoutProps } from '@/types';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { WebSocketProvider } from '@/app/providers/WebSocketProvider';
+import { AppWithLayout } from '@/app/components/AppWithLayout';
+import { RootLayoutProps } from '@/types/index';
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (

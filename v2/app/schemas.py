@@ -525,19 +525,20 @@ class DevUser(BaseModel):
     picture: Optional[str] = None
     is_dev: bool = True
 
+
 class AuthEndpoints(BaseModel):
-    login_url: str
-    logout_url: str
-    auth_callback_url: str
-    user_info_url: str
-    token_url: str
-    
+    login: str
+    logout: str
+    token: str
+    user: str
+
+
 class AuthConfigResponse(BaseModel):
-    development_mode: bool
-    dev_user: Optional[DevUser] = None
-    endpoints: AuthEndpoints
     google_client_id: str
-    google_redirect_uri: str
+    endpoints: AuthEndpoints
+    development_mode: bool
+    user: Optional[User] = None
+
 
 class ClickHouseNativeConfig(BaseModel):
     host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"

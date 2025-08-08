@@ -3,13 +3,28 @@
 import React from 'react';
 import { ApexOptimizerAgentV2 } from './components/apex-optimizer-agent-v2';
 import { AgentProvider } from './providers/AgentProvider';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ApexOptimizerAgentPage() {
+    const { user, login, logout, loading } = useAuth();
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
     return (
         <div className="h-full">
-            <AgentProvider>
-                <ApexOptimizerAgentV2 />
-            </AgentProvider>
+            {user ? (
+                <div>
+                    <p>Welcome, {user.email}</p>
+                    <button onClick={logout}>Logout</button>
+                    <AgentProvider>
+                        <ApexOptimizerAgentV2 />
+                    </AgentProvider>
+                </div>
+            ) : (
+                <button onClick={login}>Login with Google</button>
+            )}
         </div>
     );
 }
