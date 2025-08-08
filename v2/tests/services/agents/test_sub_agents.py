@@ -1,10 +1,10 @@
 import pytest
 from unittest.mock import MagicMock, AsyncMock
-from app.services.deepagents.subagents.triage_sub_agent import TriageSubAgent
-from app.services.deepagents.subagents.data_sub_agent import DataSubAgent
-from app.services.deepagents.subagents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-from app.services.deepagents.subagents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-from app.services.deepagents.subagents.reporting_sub_agent import ReportingSubAgent
+from app.services.agents.triage_sub_agent import TriageSubAgent
+from app.services.agents.data_sub_agent import DataSubAgent
+from app.services.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+from app.services.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+from app.services.agents.reporting_sub_agent import ReportingSubAgent
 from app.schemas import AnalysisRequest, RequestModel, Settings
 from app.llm.llm_manager import LLMManager
 
@@ -29,7 +29,7 @@ def analysis_request():
 @pytest.mark.asyncio
 async def test_triage_sub_agent(mock_llm_manager, analysis_request):
     mock_llm_manager.arun.return_value = MagicMock(content="DataSubAgent")
-    agent = TriageSubAgent(mock_llm_manager, [])
+    agent = TriageSubAgent()
     state = {
         "analysis_request": analysis_request,
         "messages": [],
@@ -38,13 +38,13 @@ async def test_triage_sub_agent(mock_llm_manager, analysis_request):
         "current_agent": "TriageSubAgent",
         "tool_calls": None,
     }
-    result = await agent.ainvoke(state)
+    result = await agent.run(state, "test_run", False)
     assert result["current_agent"] == "DataSubAgent"
 
 @pytest.mark.asyncio
 async def test_data_sub_agent(mock_llm_manager, analysis_request):
     mock_llm_manager.arun.return_value = MagicMock(content="Data gathered.")
-    agent = DataSubAgent(mock_llm_manager, [])
+    agent = DataSubAgent()
     state = {
         "analysis_request": analysis_request,
         "messages": [],
@@ -53,14 +53,14 @@ async def test_data_sub_agent(mock_llm_manager, analysis_request):
         "current_agent": "DataSubAgent",
         "tool_calls": None,
     }
-    result = await agent.ainvoke(state)
+    result = await agent.run(state, "test_run", False)
     assert result["current_agent"] == "OptimizationsCoreSubAgent"
     assert "Data gathered." in result["messages"][-1].content
 
 @pytest.mark.asyncio
 async def test_optimizations_core_sub_agent(mock_llm_manager, analysis_request):
     mock_llm_manager.arun.return_value = MagicMock(content="Optimization strategies formulated.")
-    agent = OptimizationsCoreSubAgent(mock_llm_manager, [])
+    agent = OptimizationsCoreSubAgent()
     state = {
         "analysis_request": analysis_request,
         "messages": [],
@@ -69,14 +69,14 @@ async def test_optimizations_core_sub_agent(mock_llm_manager, analysis_request):
         "current_agent": "OptimizationsCoreSubAgent",
         "tool_calls": None,
     }
-    result = await agent.ainvoke(state)
+    result = await agent.run(state, "test_run", False)
     assert result["current_agent"] == "ActionsToMeetGoalsSubAgent"
     assert "Optimization strategies formulated." in result["messages"][-1].content
 
 @pytest.mark.asyncio
 async def test_actions_to_meet_goals_sub_agent(mock_llm_manager, analysis_request):
     mock_llm_manager.arun.return_value = MagicMock(content="Actions formulated.")
-    agent = ActionsToMeetGoalsSubAgent(mock_llm_manager, [])
+    agent = ActionsToMeetGoalsSubAgent()
     state = {
         "analysis_request": analysis_request,
         "messages": [],
@@ -85,14 +85,14 @@ async def test_actions_to_meet_goals_sub_agent(mock_llm_manager, analysis_reques
         "current_agent": "ActionsToMeetGoalsSubAgent",
         "tool_calls": None,
     }
-    result = await agent.ainvoke(state)
+    result = await agent.run(state, "test_run", False)
     assert result["current_agent"] == "ReportingSubAgent"
     assert "Actions formulated." in result["messages"][-1].content
 
 @pytest.mark.asyncio
 async def test_reporting_sub_agent(mock_llm_manager, analysis_request):
     mock_llm_manager.arun.return_value = MagicMock(content="Report generated.")
-    agent = ReportingSubAgent(mock_llm_manager, [])
+    agent = ReportingSubAgent()
     state = {
         "analysis_request": analysis_request,
         "messages": [],
@@ -101,6 +101,6 @@ async def test_reporting_sub_agent(mock_llm_manager, analysis_request):
         "current_agent": "ReportingSubAgent",
         "tool_calls": None,
     }
-    result = await agent.ainvoke(state)
+    result = await agent.run(state, "test_run", False)
     assert result["current_agent"] == "__end__"
     assert "Report generated." in result["messages"][-1].content
