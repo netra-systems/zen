@@ -1,4 +1,3 @@
-
 # OAuth Implementation and Bug Fix Plan
 
 This plan outlines the steps to implement a production-ready OAuth solution and fix the existing authentication bugs.
