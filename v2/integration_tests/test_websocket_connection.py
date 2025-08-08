@@ -15,7 +15,7 @@ app.dependency_overrides[ActiveUserWsDep] = override_active_user_ws_dep
 
 
 def test_websocket_connection(client):
-    with client.websocket_connect("/ws/test_run_ws") as websocket:
+    with client.websocket_connect("/ws/ws") as websocket:
         websocket.send_text("ping")
         data = websocket.receive_text()
         assert data == "pong"

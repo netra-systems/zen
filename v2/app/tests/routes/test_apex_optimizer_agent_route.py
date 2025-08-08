@@ -37,17 +37,7 @@ async def test_apex_optimizer_agent(prompt: str):
         )
     )
     async with AsyncClient(app=app, base_url="http://test") as client:
-        response = await client.post("/api/v3/agent/chat/start_agent", json=analysis_request.model_dump())
+        response = await client.post("/api/v3/agent/chat/start", json=analysis_request.model_dump())
         assert response.status_code == 200
         run_id = response.json()["run_id"]
         assert isinstance(run_id, str)
-
-        try:
-            # Mock the websocket connection
-            async def mock_receive_text():
-                return "mocked_data"
-            
-            data = await asyncio.wait_for(mock_receive_text(), timeout=1)
-            assert isinstance(data, str)
-        except asyncio.TimeoutError:
-            pytest.fail("WebSocket message not received within 1 second.")

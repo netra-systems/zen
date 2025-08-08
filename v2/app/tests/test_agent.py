@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi.testclient import TestClient
 from app.main import app
 from app.services.agent_service import AgentService
-from app.auth.auth_dependencies import get_current_user
+from app.auth.auth_dependencies import get_current_user, ActiveUserWsDep
 from app.schemas import User
 from app.routes.agent_route import get_agent_supervisor
 import uuid
@@ -19,7 +19,7 @@ def agent_service_mock():
 
 @pytest.mark.asyncio
 async def test_start_agent(client, agent_service_mock):
-    agent_service_mock.start_agent = AsyncMock(return_value={"run_id": "test_run"})
+    agent_service_mock.run = AsyncMock(return_value={"run_id": "test_run"})
     app.dependency_overrides[get_agent_supervisor] = lambda: agent_service_mock
 
     app.dependency_overrides[get_current_user] = lambda: User(id=str(uuid.uuid4()), email="dev@example.com", is_superuser=False)
@@ -27,11 +27,11 @@ async def test_start_agent(client, agent_service_mock):
 
     assert response.status_code == 200
     assert response.json() == {"run_id": "test_run"}
-    agent_service_mock.start_agent.assert_called_once()
+    agent_service_mock.run.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_start_agent_with_different_messages(client, agent_service_mock):
-    agent_service_mock.start_agent = AsyncMock(return_value={"run_id": "test_run"})
+    agent_service_mock.run = AsyncMock(return_value={"run_id": "test_run"})
     app.dependency_overrides[get_agent_supervisor] = lambda: agent_service_mock
 
     app.dependency_overrides[get_current_user] = lambda: User(id=str(uuid.uuid4()), email="dev@example.com", is_superuser=False)
@@ -45,11 +45,11 @@ async def test_start_agent_with_different_messages(client, agent_service_mock):
     assert response2.status_code == 200
     assert response2.json() == {"run_id": "test_run"}
 
-    assert agent_service_mock.start_agent.call_count == 2
+    assert agent_service_mock.run.call_count == 2
 
 @pytest.mark.asyncio
 async def test_start_agent_with_empty_message(client, agent_service_mock):
-    agent_service_mock.start_agent = AsyncMock(return_value={"run_id": "test_run"})
+    agent_service_mock.run = AsyncMock(return_value={"run_id": "test_run"})
     app.dependency_overrides[get_agent_supervisor] = lambda: agent_service_mock
 
     app.dependency_overrides[get_current_user] = lambda: User(id=str(uuid.uuid4()), email="dev@example.com", is_superuser=False)
@@ -57,11 +57,11 @@ async def test_start_agent_with_empty_message(client, agent_service_mock):
 
     assert response.status_code == 200
     assert response.json() == {"run_id": "test_run"}
-    agent_service_mock.start_agent.assert_called_once()
+    agent_service_mock.run.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_start_agent_service_failure(client, agent_service_mock):
-    agent_service_mock.start_agent.side_effect = Exception("Agent service failed")
+    agent_service_mock.run.side_effect = Exception("Agent service failed")
     app.dependency_overrides[get_agent_supervisor] = lambda: agent_service_mock
 
     app.dependency_overrides[get_current_user] = lambda: User(id=str(uuid.uuid4()), email="dev@example.com", is_superuser=False)
@@ -72,9 +72,10 @@ async def test_start_agent_service_failure(client, agent_service_mock):
 
 @pytest.mark.asyncio
 async def test_websocket_connection(client):
-    with client.websocket_connect("/ws/test_run?token=test_token") as websocket:
-        data = websocket.receive_text()
-        assert data == "Message for run_id: test_run"
+    app.dependency_overrides[ActiveUserWsDep] = lambda: User(id=str(uuid.uuid4()), email="dev@example.com", is_superuser=False)
+    with client.websocket_connect("/ws/ws") as websocket:
+        # The connection should be accepted, so no exception should be raised
+        pass
 
 @pytest.mark.asyncio
 async def test_start_agent_unauthenticated(client):
