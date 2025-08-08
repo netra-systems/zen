@@ -184,7 +184,7 @@ if "pytest" in sys.modules:
     tool_dispatcher = ToolDispatcher(tool_registry.get_tools([]))
     app.state.agent_supervisor = Supervisor(async_session_factory, llm_manager, websocket_manager, tool_dispatcher)
 
-    from app.db.testing import override_get_.db, engine
+    from app.db.testing import override_get_db, engine
     from app.db.base import Base
 
     @asynccontextmanager
