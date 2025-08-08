@@ -11,6 +11,8 @@ export interface AuthConfigResponse {
   user?: User | null;
   authorized_javascript_origins: string[];
   authorized_redirect_uris: string[];
+  google_login_url?: string;
+  logout_url?: string;
 }
 
 export interface AuthEndpoints {
@@ -198,7 +200,7 @@ export interface User {
   email: string;
   is_active?: boolean;
   is_superuser?: boolean;
-  full_name?: string | null;
+  full_.name?: string | null;
   picture?: string | null;
   id: string;
 }
