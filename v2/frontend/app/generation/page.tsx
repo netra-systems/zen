@@ -67,7 +67,7 @@ export default function GenerationPage() {
     useEffect(() => {
         const fetchTables = async () => {
             try {
-                const data = await apiService.get(`${config.api.baseUrl}/generation/clickhouse_tables`, token);
+                const data = await apiService.get(`/api/v3/generation/clickhouse_tables`, token);
                 setTables(data);
             } catch (error: unknown) {
                 setError('Could not fetch ClickHouse tables.');
@@ -79,7 +79,7 @@ export default function GenerationPage() {
     useEffect(() => {
         const fetchCorpora = async () => {
             try {
-                const data = await apiService.get(`${config.api.baseUrl}/api/v3/corpus`, token);
+                const data = await apiService.get(`/api/v3/corpus`, token);
                 setCorpora(data);
             } catch (error: unknown) {
                 setError('Could not fetch corpora.');

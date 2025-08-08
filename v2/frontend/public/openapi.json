@@ -6,7 +6,7 @@
     "version": "2.0.0"
   },
   "paths": {
-    "/api/v3/auth/me": {
+    "/auth/me": {
       "get": {
         "tags": [
           "auth"
@@ -28,7 +28,7 @@
         }
       }
     },
-    "/api/v3/auth/logout": {
+    "/auth/logout": {
       "post": {
         "tags": [
           "auth"
@@ -48,7 +48,7 @@
         }
       }
     },
-    "/api/v3/auth/login/google": {
+    "/auth/login/google": {
       "get": {
         "tags": [
           "auth"
@@ -67,7 +67,7 @@
         }
       }
     },
-    "/api/v3/auth/google": {
+    "/auth/google": {
       "get": {
         "tags": [
           "auth"
@@ -86,7 +86,7 @@
         }
       }
     },
-    "/api/v3/auth/user": {
+    "/auth/user": {
       "get": {
         "tags": [
           "auth"
@@ -108,7 +108,7 @@
         }
       }
     },
-    "/api/v3/supply/supply-catalog/": {
+    "/supply/supply-catalog/": {
       "get": {
         "tags": [
           "supply"
@@ -174,7 +174,7 @@
         }
       }
     },
-    "/api/v3/supply/supply-catalog/{option_id}": {
+    "/supply/supply-catalog/{option_id}": {
       "get": {
         "tags": [
           "supply"
@@ -217,7 +217,7 @@
         }
       }
     },
-    "/api/v3/generation/content": {
+    "/generation/content": {
       "get": {
         "tags": [
           "generation"
@@ -288,7 +288,7 @@
         }
       }
     },
-    "/api/v3/generation/logs": {
+    "/generation/logs": {
       "get": {
         "tags": [
           "generation"
@@ -359,7 +359,7 @@
         }
       }
     },
-    "/api/v3/generation/content_corpus": {
+    "/generation/content_corpus": {
       "post": {
         "tags": [
           "generation"
@@ -405,7 +405,7 @@
         }
       }
     },
-    "/api/v3/generation/ingest_data": {
+    "/generation/ingest_data": {
       "post": {
         "tags": [
           "generation"
@@ -451,7 +451,7 @@
         }
       }
     },
-    "/api/v3/generation/synthetic_data": {
+    "/generation/synthetic_data": {
       "post": {
         "tags": [
           "generation"
@@ -497,7 +497,7 @@
         }
       }
     },
-    "/api/v3/generation/jobs/{job_id}": {
+    "/generation/jobs/{job_id}": {
       "get": {
         "tags": [
           "generation"
@@ -538,7 +538,7 @@
         }
       }
     },
-    "/api/v3/generation/clickhouse_tables": {
+    "/generation/clickhouse_tables": {
       "get": {
         "tags": [
           "generation"
@@ -564,7 +564,7 @@
         }
       }
     },
-    "/api/v3/agent/chat/start_agent": {
+    "/agent/chat/start_agent": {
       "post": {
         "tags": [
           "agent"
@@ -604,7 +604,7 @@
         }
       }
     },
-    "/api/v3/agent/chat/start_agent_streaming/{client_id}": {
+    "/agent/chat/start_agent_streaming/{client_id}": {
       "post": {
         "tags": [
           "agent"
@@ -655,7 +655,7 @@
         }
       }
     },
-    "/api/v3/agent/chat/{run_id}/status": {
+    "/agent/chat/{run_id}/status": {
       "get": {
         "tags": [
           "agent"
@@ -695,7 +695,7 @@
         }
       }
     },
-    "/api/v3/settings": {
+    "/settings": {
       "get": {
         "tags": [
           "admin"
@@ -745,7 +745,7 @@
         }
       }
     },
-    "/api/v3/settings/log_table": {
+    "/settings/log_table": {
       "post": {
         "tags": [
           "admin"
@@ -803,7 +803,7 @@
         }
       }
     },
-    "/api/v3/settings/log_tables": {
+    "/settings/log_tables": {
       "post": {
         "tags": [
           "admin"
@@ -917,7 +917,7 @@
         }
       }
     },
-    "/api/v3/settings/time_period": {
+    "/settings/time_period": {
       "post": {
         "tags": [
           "admin"
@@ -975,7 +975,7 @@
         }
       }
     },
-    "/api/v3/settings/default_log_table": {
+    "/settings/default_log_table": {
       "post": {
         "tags": [
           "admin"
@@ -1089,7 +1089,7 @@
         }
       }
     },
-    "/api/v3/references": {
+    "/references": {
       "get": {
         "tags": [
           "references"
@@ -1151,7 +1151,7 @@
         }
       }
     },
-    "/api/v3/references/{reference_id}": {
+    "/references/{reference_id}": {
       "get": {
         "tags": [
           "references"

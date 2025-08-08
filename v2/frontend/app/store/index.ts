@@ -24,7 +24,7 @@ const useAppStore = create<AppState>()(
     clearAuth: () => set({ user: null, token: null }),
     fetchUser: async (token) => {
       try {
-        const response = await fetch('http://localhost:8000/api/v3/auth/users/me', {
+        const response = await fetch('/api/v3/auth/users/me', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -41,13 +41,13 @@ const useAppStore = create<AppState>()(
     },
     devLogin: async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/v3/auth/dev-login', {
+        const response = await fetch('/api/v3/auth/dev-login', {
           method: 'POST',
         });
         if (response.ok) {
           const { access_token } = await response.json();
           document.cookie = `access_token=${access_token}; path=/; samesite=lax;`;
-          const userResponse = await fetch('http://localhost:8000/api/v3/auth/users/me', {
+          const userResponse = await fetch('/api/v3/auth/users/me', {
             headers: {
               Authorization: `Bearer ${access_token}`,
             },

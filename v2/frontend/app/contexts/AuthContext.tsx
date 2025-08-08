@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, ReactNode, useState, useCallback 
 import useAppStore from '@/store';
 import { User } from '@/types';
 import { Button } from '@/components/ui/button';
+import { getAuthConfig } from '@/services/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -18,8 +19,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchEndpoints = useCallback(async () => {
     try {
-      const response = await fetch('/api/v3/auth/endpoints');
-      const data = await response.json();
+      const data = await getAuthConfig();
       setAuthEndpoints(data);
       if (data.user) {
         const token = document.cookie.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1];
