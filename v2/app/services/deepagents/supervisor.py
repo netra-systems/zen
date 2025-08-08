@@ -35,11 +35,11 @@ class Supervisor:
         reporting_agent = ReportingSubAgent(self.llm_manager, self.tool_registry.get_tools(["reporting"]))
         
         return {
-            "TriageSubAgent": triage_agent,
-            "DataSubAgent": data_agent,
-            "OptimizationsCoreSubAgent": optimizations_core_agent,
-            "ActionsToMeetGoalsSubAgent": actions_to_meet_goals_agent,
-            "ReportingSubAgent": reporting_agent,
+            triage_agent.name: triage_agent,
+            data_agent.name: data_agent,
+            optimizations_core_agent.name: optimizations_core_agent,
+            actions_to_meet_goals_agent.name: actions_to_meet_goals_agent,
+            reporting_agent.name: reporting_agent,
         }
 
     def _define_graph(self):
@@ -56,37 +56,22 @@ class Supervisor:
         workflow.add_conditional_edges(
             "TriageSubAgent",
             self.route,
-            {
-                "DataSubAgent": "DataSubAgent",
-                "OptimizationsCoreSubAgent": "OptimizationsCoreSubAgent",
-                "ActionsToMeetGoalsSubAgent": "ActionsToMeetGoalsSubAgent",
-                "ReportingSubAgent": "ReportingSubAgent",
-                "__end__": END,
-            },
+            {agent: agent for agent in self.sub_agents.keys()} | {"__end__": END}
         )
         workflow.add_conditional_edges(
             "DataSubAgent",
             self.route,
-            {
-                "OptimizationsCoreSubAgent": "OptimizationsCoreSubAgent",
-                "__end__": END,
-            },
+            {agent: agent for agent in self.sub_agents.keys()} | {"__end__": END}
         )
         workflow.add_conditional_edges(
             "OptimizationsCoreSubAgent",
             self.route,
-            {
-                "ActionsToMeetGoalsSubAgent": "ActionsToMeetGoalsSubAgent",
-                "__end__": END,
-            },
+            {agent: agent for agent in self.sub_agents.keys()} | {"__end__": END}
         )
         workflow.add_conditional_edges(
             "ActionsToMeetGoalsSubAgent",
             self.route,
-            {
-                "ReportingSubAgent": "ReportingSubAgent",
-                "__end__": END,
-            },
+            {agent: agent for agent in self.sub_agents.keys()} | {"__end__": END}
         )
         workflow.add_edge("ReportingSubAgent", END)
         
@@ -106,30 +91,22 @@ class Supervisor:
             return "tool_node"
 
         last_message = state["messages"][-1]
-        if "tool_calls" in last_message.additional_kwargs:
+        if hasattr(last_message, 'tool_calls') and last_message.tool_calls:
             return "tool_node"
 
         # Check the content of the last message for routing instructions
-        content = last_message.content.lower()
-        routing_config = {
-            "TriageSubAgent": "DataSubAgent",
-            "DataSubAgent": "OptimizationsCoreSubAgent",
-            "OptimizationsCoreSubAgent": "ActionsToMeetGoalsSubAgent",
-            "ActionsToMeetGoalsSubAgent": "ReportingSubAgent",
-            "ReportingSubAgent": "__end__",
-        }
+        if last_message.content:
+            for agent_name in self.sub_agents.keys():
+                if agent_name in last_message.content:
+                    return agent_name
 
-        current_agent = state.get("current_agent")
-        if current_agent in routing_config:
-            return routing_config[current_agent]
-        else:
-            return "__end__"
+        return "__end__"
 
     async def start_agent(self, analysis_request: AnalysisRequest, run_id: str, stream_updates: bool = False):
         """Starts the agent with the given analysis request."""
         logger.info(f"Starting agent for run_id: {run_id})")
         initial_state = DeepAgentState(
-            messages=[],
+            messages=[HumanMessage(content=analysis_request.request.data['message'])],
             run_id=run_id,
             stream_updates=stream_updates,
             analysis_request=analysis_request,

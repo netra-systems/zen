@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List
-from app.llm.llm_manager import LLMManager
 from langchain_core.tools import BaseTool
+from app.llm.llm_manager import LLMManager
+from app.services.deepagents.state import DeepAgentState
 
 class BaseSubAgent(ABC):
     def __init__(self, llm_manager: LLMManager, tools: List[BaseTool]):
@@ -21,6 +22,6 @@ class BaseSubAgent(ABC):
         pass
 
     @abstractmethod
-    async def ainvoke(self, state):
+    async def ainvoke(self, state: DeepAgentState) -> DeepAgentState:
         """Invokes the agent with the given state."""
         pass

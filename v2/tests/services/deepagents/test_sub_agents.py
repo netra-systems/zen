@@ -1,0 +1,106 @@
+import pytest
+from unittest.mock import MagicMock, AsyncMock
+from app.services.deepagents.subagents.triage_sub_agent import TriageSubAgent
+from app.services.deepagents.subagents.data_sub_agent import DataSubAgent
+from app.services.deepagents.subagents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+from app.services.deepagents.subagents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+from app.services.deepagents.subagents.reporting_sub_agent import ReportingSubAgent
+from app.schemas import AnalysisRequest, RequestModel, Settings
+from app.llm.llm_manager import LLMManager
+
+@pytest.fixture
+def mock_llm_manager():
+    mock = MagicMock(spec=LLMManager)
+    mock.arun = AsyncMock()
+    return mock
+
+@pytest.fixture
+def analysis_request():
+    return AnalysisRequest(
+        settings=Settings(debug_mode=True),
+        request=RequestModel(
+            id="test_run",
+            user_id="test_user",
+            query="Test message",
+            workloads=[]
+        )
+    )
+
+@pytest.mark.asyncio
+async def test_triage_sub_agent(mock_llm_manager, analysis_request):
+    mock_llm_manager.arun.return_value = MagicMock(content="DataSubAgent")
+    agent = TriageSubAgent(mock_llm_manager, [])
+    state = {
+        "analysis_request": analysis_request,
+        "messages": [],
+        "run_id": "test_run",
+        "stream_updates": False,
+        "current_agent": "TriageSubAgent",
+        "tool_calls": None,
+    }
+    result = await agent.ainvoke(state)
+    assert result["current_agent"] == "DataSubAgent"
+
+@pytest.mark.asyncio
+async def test_data_sub_agent(mock_llm_manager, analysis_request):
+    mock_llm_manager.arun.return_value = MagicMock(content="Data gathered.")
+    agent = DataSubAgent(mock_llm_manager, [])
+    state = {
+        "analysis_request": analysis_request,
+        "messages": [],
+        "run_id": "test_run",
+        "stream_updates": False,
+        "current_agent": "DataSubAgent",
+        "tool_calls": None,
+    }
+    result = await agent.ainvoke(state)
+    assert result["current_agent"] == "OptimizationsCoreSubAgent"
+    assert "Data gathered." in result["messages"][-1].content
+
+@pytest.mark.asyncio
+async def test_optimizations_core_sub_agent(mock_llm_manager, analysis_request):
+    mock_llm_manager.arun.return_value = MagicMock(content="Optimization strategies formulated.")
+    agent = OptimizationsCoreSubAgent(mock_llm_manager, [])
+    state = {
+        "analysis_request": analysis_request,
+        "messages": [],
+        "run_id": "test_run",
+        "stream_updates": False,
+        "current_agent": "OptimizationsCoreSubAgent",
+        "tool_calls": None,
+    }
+    result = await agent.ainvoke(state)
+    assert result["current_agent"] == "ActionsToMeetGoalsSubAgent"
+    assert "Optimization strategies formulated." in result["messages"][-1].content
+
+@pytest.mark.asyncio
+async def test_actions_to_meet_goals_sub_agent(mock_llm_manager, analysis_request):
+    mock_llm_manager.arun.return_value = MagicMock(content="Actions formulated.")
+    agent = ActionsToMeetGoalsSubAgent(mock_llm_manager, [])
+    state = {
+        "analysis_request": analysis_request,
+        "messages": [],
+        "run_id": "test_run",
+        "stream_updates": False,
+        "current_agent": "ActionsToMeetGoalsSubAgent",
+        "tool_calls": None,
+    }
+    result = await agent.ainvoke(state)
+    assert result["current_agent"] == "ReportingSubAgent"
+    assert "Actions formulated." in result["messages"][-1].content
+
+@pytest.mark.asyncio
+async def test_reporting_sub_agent(mock_llm_manager, analysis_request):
+    mock_llm_manager.arun.return_value = MagicMock(content="Report generated.")
+    agent = ReportingSubAgent(mock_llm_manager, [])
+    state = {
+        "analysis_request": analysis_request,
+        "messages": [],
+        "run_id": "test_run",
+        "stream_updates": False,
+        "current_agent": "ReportingSubAgent",
+        "tool_calls": None,
+    }
+    result = await agent.ainvoke(state)
+    assert result["current_agent"] == "__end__"
+    assert "Report generated." in result["messages"][-1].content
