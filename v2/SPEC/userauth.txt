@@ -1,8 +1,6 @@
-SPEC:netra_user_auth: Netra netra_user_auth:
+SPEC:netra_user_auth: start: Netra netra_user_auth:
 
 netra_user_auth:1:0:0: PRIMARY GOAL: User Login, Logout, and OAuth. (Production and Dev).
-
-
 netra_user_auth:1:0:1: The UI/UX base layout and header are persistent in all auth states.
 netra_user_auth:1:0:2: Only use official google OAuth libraries or similar. Make existing stuff work without major changes
 netra_user_auth:1:0:3: Validate that OAuth Login, OAuth Logout, 
@@ -27,3 +25,5 @@ netra_user_auth:1:0:7: Schema: {
 netra_user_auth:1:0:8: The login button for OAuth on the front end looks good and is large.
 netra_user_auth:1:0:9: The backend provides discovery of OAUTH endpoints to frontend, e.g. the complete path including base url etc. a dict with login, logout, auth, etc. This can lean on existing OpenAPI / Fast API spec if possible.
 netra_user_auth:1:0:10: Keep the development env. When front and backend in development mode: On Pageload: Automatically authentics as Dev user without using Google OAuth.
+
+netra_user_auth:ENDS
