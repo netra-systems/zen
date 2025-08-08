@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { ApexOptimizerAgentV2 } from '@/components/apex-optimizer-agent-v2';
-import { useAgentContext } from '@/app/providers/AgentProvider';
-import useAppStore from '@/app/store';
+import { useAgentContext } from '@/providers/AgentProvider';
+import useAppStore from '@/store';
 
-jest.mock('../app/providers/AgentProvider', () => ({
+jest.mock('../providers/AgentProvider', () => ({
   useAgentContext: jest.fn(),
 }));
 

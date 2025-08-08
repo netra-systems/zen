@@ -21,13 +21,13 @@
     "paths": {
       "@/*": ["./*"],
       "@/components/*": ["./app/components/*"],
-      "@/contexts/*": ["./contexts/*"],
-      "@/hooks/*": ["./hooks/*"],
-      "@/lib/*": ["./lib/*"],
+      "@/contexts/*": ["./app/contexts/*"],
+      "@/hooks/*": ["./app/hooks/*"],
+      "@/lib/*": ["./app/lib/*"],
       "@/mocks/*": ["./mocks/*"],
-      "@/providers/*": ["./app/providers/*"],
+      "@/providers/*": ["./providers/*"],
       "@/services/*": ["./app/services/*"],
-      "@/store/*": ["./store/*"],
+      "@/store/*": ["./app/store/*"],
       "@/types/*": ["./app/types/*"]
     }
   },
