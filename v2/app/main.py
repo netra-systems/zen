@@ -15,7 +15,8 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.routes import auth, supply, generation, websocket, admin, references, agent_route, health, corpus
+from app.routes import auth, supply, generation, admin, references, agent_route, health, corpus
+from app.websockets import websockets_router
 from app.db.postgres import async_session_factory
 from app.config import settings
 from app.logging_config import central_logger
@@ -24,8 +25,8 @@ from app.agents.supervisor import Supervisor
 from app.services.agent_service import AgentService
 from app.services.key_manager import KeyManager
 from app.auth.services import SecurityService
-from app.websocket_manager import manager as websocket_manager
 from app.background import BackgroundTaskManager
+from app.websockets import manager as websocket_manager
 
 
 @asynccontextmanager
@@ -118,7 +119,7 @@ app.include_router(supply.router, prefix="/api/v3/supply", tags=["supply"])
 app.include_router(generation.router, prefix="/api/v3/generation", tags=["generation"])
 
 app.include_router(agent_route.router, prefix="/api/v3/agent/chat", tags=["agent"])
-app.include_router(websocket.router, prefix="/ws", tags=["websockets"])
+app.include_router(websockets_router, prefix="/ws", tags=["websockets"])
 app.include_router(admin.router, prefix="/api/v3", tags=["admin"])
 app.include_router(references.router, prefix="/api/v3", tags=["references"])
 app.include_router(health.router, prefix="/health", tags=["health"])
@@ -156,7 +157,7 @@ if "pytest" in sys.modules:
     from app.db.postgres import async_session_factory
     from app.llm.llm_manager import LLMManager
     from app.agents.supervisor import Supervisor
-    from app.websocket_manager import manager as websocket_manager
+    
 
     llm_manager = LLMManager(settings)
     app.state.llm_manager = llm_manager
