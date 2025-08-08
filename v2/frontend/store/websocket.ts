@@ -1,7 +1,7 @@
 
 import { create } from 'zustand';
 import { WebSocketStatus } from '@/types';
-import webSocketService from '@/app/services/websocket';
+import webSocketService from '@/services/websocket';
 
 interface WebSocketState {
   status: WebSocketStatus;
