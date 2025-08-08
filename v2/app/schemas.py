@@ -513,7 +513,6 @@ class OAuthConfig(BaseModel):
         ],
         "authorized_redirect_uris": [
             "https://app.netrasystems.ai/oauth2callback",
-            "https://127.0.0.1/oauth2callback",
             "http://localhost:8000/auth/google",
             "http://localhost:3000/auth/callback"
         ]

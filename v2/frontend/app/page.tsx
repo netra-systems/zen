@@ -16,7 +16,7 @@ export default function ApexOptimizerAgentPage() {
         <div className="h-full">
             {user ? (
                 <div>
-                    <p>Welcome, {user.email}</p>
+                    <p>Welcome, {user.full_name || user.email}</p>
                     <button onClick={logout}>Logout</button>
                     <AgentProvider>
                         <ApexOptimizerAgentV2 />
