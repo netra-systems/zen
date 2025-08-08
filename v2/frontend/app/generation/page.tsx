@@ -150,7 +150,7 @@ export default function GenerationPage() {
                             { id: 'num_users', name: 'num_users', label: 'Number of Users', type: 'number', required: true, defaultValue: 100 },
                             { id: 'error_rate', name: 'error_rate', label: 'Error Rate', type: 'number', required: true, defaultValue: 0.1, step: 0.01 },
                             { id: 'event_types', name: 'event_types', label: 'Event Types (comma-separated)', type: 'text', required: true, defaultValue: 'search,login,checkout' },
-                            { id: 'source_table', name: 'source_table', label: 'Source Table', type: 'select', required: true, options: tables, defaultValue: 'content_corpus' },
+                            { id: 'corpus_id', name: 'corpus_id', label: 'Corpus', type: 'select', required: true, options: corpora.map(c => c.name), defaultValue: corpora[0]?.name },
                             { id: 'destination_table', name: 'destination_table', label: 'Destination Table', type: 'text', required: true, defaultValue: 'synthetic_data' },
                         ]}
                         onSubmit={handleStartGeneration}
