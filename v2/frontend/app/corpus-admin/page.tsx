@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { HelpCircle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { config } from '../config';
+import config from '@/types';
 import { GenericInput } from '@/components/GenericInput';
 import useAppStore from '@/store';
 import Thinking from '@/components/Thinking';
