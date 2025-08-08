@@ -1,0 +1,27 @@
+SPEC: OAuth & User Login Logout
+
+1:0:0: PRIMARY GOAL: User Login, Logout, and OAuth. (Production and Dev).
+
+1:0:1: Keep the development env. When front and backend in development mode: On Pageload: Automatically authentics as Dev user without using Google OAuth.
+1:0:2: Only use official google OAuth libraries or similar. Make existing stuff work without major changes
+1:0:3: Validate that OAuth Login, OAuth Logout, and development user context all works. Production ready.
+1:0:4: In development context: Defaults to auto login. OAuth user login supercedes dev login.
+1:0:5: Handle context of frontend and backend env hot reloading. 
+1:0:6: KEEP EXISTING STUFF. Keep existing stuff as much as possible. The point is to have the core wiring work. Focus on adding mixing things and break fix. Use Schemas.py and app/types/index.ts whenever possible for any static values, paths, config values, etc. etc.
+1:0:7: Schema: MUST add this to Schema.py and USE AN EXACT URL from the list on front and back end. EXACTLY as is : authorized_javascript_origins & authorized_redirect_uris: {
+  "web": {
+    "authorized_javascript_origins": [
+      "https://app.netrasystems.ai",
+      "https://127.0.0.1",
+      "http://localhost"
+    ],
+    "authorized_redirect_uris": [
+      "https://app.netrasystems.ai/oauth2callback",
+      "http://localhost:3000/auth/callback"
+    ]
+  }
+}
+1:0:8: The login button for OAuth on the front end looks good and is large.
+1:0:9: The backend MUST provide discovery of OAUTH endpoints to frontend, e.g. the complete path including base url etc. a dict with login, logout, auth, etc. etc. etc. This can lean on existing OpenAPI / Fast API spec if possible.
+
+Remember: 0:7.  Remember: 0:1 to 0:7 to 1 including all sub items 1:0:0 through 1:0:8.
