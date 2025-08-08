@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Icons } from '@/components/Icons';
 import { useAuth } from '../hooks/useAuth';
 
-import { NavItem } from '../types';
+import { NavItem } from '@/types';
 
 const navItems: NavItem[] = [
   {
