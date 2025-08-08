@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import { MessageOrchestrator } from './MessageOrchestrator';
 import { MessageFilterControl } from './MessageFilter';
-import { ChatWindowProps } from '@/app/types/index';
+import { ChatWindowProps, Reference } from '@/app/types/index';
 
 export function ChatWindow({ 
     messages, 
@@ -17,6 +17,7 @@ export function ChatWindow({
     exampleQueries = [] 
 }: ChatWindowProps) {
     const [input, setInput] = useState(initialQuery || '');
+    const [references, setReferences] = useState<Reference[]>([]);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -28,8 +29,9 @@ export function ChatWindow({
     const handleSendMessage = (e: FormEvent) => {
         e.preventDefault();
         if (input.trim()) {
-            onSendMessage(input.trim());
+            onSendMessage(input.trim(), references);
             setInput('');
+            setReferences([]);
         }
     };
 
@@ -38,8 +40,6 @@ export function ChatWindow({
     const handleExampleClick = (query: string) => {
         setInput(query);
     };
-
-    
 
     return (
         <div className="flex flex-col h-full border rounded-xl shadow-sm">

@@ -1,3 +1,4 @@
+
 import {
     UserMessage,
     ThinkingMessage,
@@ -5,17 +6,22 @@ import {
     ToolStartMessage,
     ToolEndMessage,
     StateUpdateMessage,
+    AgentMessage,
     MessageRole,
-    StateUpdate
+    StateUpdate,
+    Tool,
+    Todo,
+    Reference
 } from '@/app/types/index';
 
 export class MessageFactory {
-    static createUserMessage(content: string): UserMessage {
+    static createUserMessage(content: string, references?: Reference[]): UserMessage {
         return {
             type: 'user',
             id: `user_${Date.now()}`,
             role: 'user' as MessageRole,
             content: content,
+            references: references
         };
     }
 
@@ -67,6 +73,19 @@ export class MessageFactory {
             role: 'agent' as MessageRole,
             content: content,
             state: state,
+        };
+    }
+
+    static createAgentMessage(subAgentName: string, tools: Tool[], todos: Todo[], toolErrors: string[], content?: string): AgentMessage {
+        return {
+            type: 'agent',
+            id: `agent_${Date.now()}`,
+            role: 'agent' as MessageRole,
+            subAgentName: subAgentName,
+            tools: tools,
+            todos: todos,
+            toolErrors: toolErrors,
+            content: content,
         };
     }
 }

@@ -10,39 +10,44 @@ The Supervisor uses a dynamic routing mechanism to determine the next Sub-Agent 
 
 ## BaseSubAgent
 
-The `BaseSubAgent` class is the base class for all sub-agents. It defines the common interface for all sub-agents, including the `ainvoke` method.
+The `BaseSubAgent` class is the base class for all sub-agents. It defines the common interface for all sub-agents, including the `run` method.
 
 ## Sub-Agents
 
-- **TriageSubAgent**: This Sub-Agent is responsible for triaging the user's request and determining the next step.
-- **DataSubAgent**: This Sub-Agent is responsible for gathering and enriching data for the optimization process.
-- **OptimizationsCoreSubAgent**: This Sub-Agent is responsible for analyzing data and formulating optimization strategies.
-- **ActionsToMeetGoalsSubAgent**: This Sub-Agent is responsible for formulating tangible actions and changes to meet optimization goals.
-- **ReportingSubAgent**: This Sub-Agent is responsible for summarizing the overall results and reporting them to the user.
+- **TriageSubAgent**: This Sub-Agent is responsible for triaging the user's request and determining the primary category of the request (e.g., Data Analysis, Code Optimization, General Inquiry).
+- **DataSubAgent**: This Sub-Agent is responsible for gathering and enriching data based on the triage result. For example, if the request is for data analysis, this agent will fetch and process the relevant data.
+- **OptimizationsCoreSubAgent**: This Sub-Agent is responsible for analyzing the data from the `DataSubAgent` and formulating optimization strategies.
+- **ActionsToMeetGoalsSubAgent**: This Sub-Agent is responsible for taking the optimization strategies and creating a concrete plan of action.
+- **ReportingSubAgent**: This Sub-Agent is responsible for summarizing the overall results and generating a final report for the user.
 
 ## Workflow
 
 The Supervisor orchestrates the SubAgent workflow in a predefined sequence:
 
-1.  **TriageSubAgent**: The workflow begins with the `TriageSubAgent`, which analyzes the initial user request.
-2.  **DataSubAgent**: The `DataSubAgent` is activated to gather and process the necessary data.
-3.  **OptimizationsCoreSubAgent**: The `OptimizationsCoreSubAgent` analyzes the data and formulates optimization strategies.
-4.  **ActionsToMeetGoalsSubAgent**: The `ActionsToMeetGoalsSubAgent` translates the optimization strategies into actionable steps.
-5.  **ReportingSubAgent**: Finally, the `ReportingSubAgent` summarizes the results and presents them to the user.
-
-The Supervisor can also dynamically route to a specific SubAgent if the user's query contains the name of that agent.
+1.  **Supervisor**: The user's request is first received by the `Supervisor`.
+2.  **TriageSubAgent**: The `Supervisor` passes the request to the `TriageSubAgent`, which analyzes the initial user request and categorizes it.
+3.  **DataSubAgent**: The output of the `TriageSubAgent` is passed to the `DataSubAgent`, which gathers and processes the necessary data.
+4.  **OptimizationsCoreSubAgent**: The `OptimizationsCoreSubAgent` receives the processed data and formulates optimization strategies.
+5.  **ActionsToMeetGoalsSubAgent**: The `ActionsToMeetGoalsSubAgent` takes the optimization strategies and translates them into a concrete action plan.
+6.  **ReportingSubAgent**: Finally, the `ReportingSubAgent` takes the action plan and generates a comprehensive report for the user.
+7.  **Supervisor**: The `Supervisor` returns the final report to the user.
 
 ```mermaid
 graph TD
     A[User Request] --> B(Supervisor)
     B --> C{TriageSubAgent}
-    C --> D{DataSubAgent}
-    D --> E{OptimizationsCoreSubAgent}
-    E --> F{ActionsToMeetGoalsSubAgent}
-    F --> G{ReportingSubAgent}
-    G --> H[User Response]
+    C --> B
+    B --> D{DataSubAgent}
+    D --> B
+    B --> E{OptimizationsCoreSubAgent}
+    E --> B
+    B --> F{ActionsToMeetGoalsSubAgent}
+    F --> B
+    B --> G{ReportingSubAgent}
+    G --> B
+    B --> H[User Response]
 ```
 
 ## WebSocket Communication
 
-The application uses WebSockets to provide real-time updates to the client. The `ConnectionManager` class is responsible for managing the WebSocket connections, and the `Supervisor` uses it to send updates to the client as the agent progresses through the workflow. At each step, the `Supervisor` sends a message to the client with the current agent's name and the messages that have been processed so far.
+The application uses WebSockets to provide real-time updates to the client. The `ConnectionManager` class is responsible for managing the WebSocket connections, and the `Supervisor` uses it to send updates to the client as the agent progresses through the workflow. At each step, the `Supervisor` sends a message to the client with the current agent's name and the data that has been processed so far.

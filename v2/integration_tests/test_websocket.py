@@ -1,49 +1,58 @@
 import pytest
-import asyncio
 import json
 from fastapi.testclient import TestClient
 from app.main import app
-from app.schemas import AnalysisRequest, RequestModel, Settings, User
-from app.auth.auth_dependencies import ActiveUserWsDep
-from app.services.deepagents.supervisor import Supervisor
-from app.websocket import get_agent_supervisor
-from unittest.mock import MagicMock, AsyncMock
-from app.connection_manager import ConnectionManager
+from app.schemas import AnalysisRequest, Settings, RequestModel, Workload, DataSource, TimeRange
+from app.config import settings
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def client():
-    return TestClient(app)
+    with TestClient(app) as c:
+        yield c
 
-def override_active_user_ws_dep():
-    return User(id="test_user", email="test@example.com")
-
-
-async def override_get_agent_supervisor():
-    mock_supervisor = MagicMock(spec=Supervisor)
-    mock_supervisor.start_agent = AsyncMock()
-    mock_supervisor.manager = MagicMock(spec=ConnectionManager)
-    mock_supervisor.manager.send_to_run = AsyncMock()
-    return mock_supervisor
-
-app.dependency_overrides[ActiveUserWsDep] = override_active_user_ws_dep
-app.dependency_overrides[get_agent_supervisor] = override_get_agent_supervisor
-
-@pytest.mark.asyncio
-async def test_websocket_e2e(client):
+def test_websocket_connection(client):
+    # Authenticate and get the session cookie
+    response = client.get("/api/v3/auth/google", allow_redirects=False)
+    assert response.status_code == 307
+    redirect_url = response.headers["location"]
+    
+    # In a real test environment, you would mock the Google OAuth2 flow.
+    # For this test, we'll simulate the callback with a development user.
+    state = redirect_url.split("state=")[1].split("&")[0]
+    callback_url = f"/auth/callback?state={state}&code=test_code"
+    response = client.get(callback_url, allow_redirects=False)
+    assert response.status_code == 307
+    
     run_id = "test_run_ws"
-    analysis_request = AnalysisRequest(
-        settings=Settings(debug_mode=True),
-        request=RequestModel(
-            id=run_id,
-            user_id="test_user",
-            query="Analyze my data and generate a report.",
-            workloads=[]
-        )
-    )
-
     with client.websocket_connect(f"/ws/{run_id}") as websocket:
+        # Send a sample analysis request
+        settings = Settings(debug_mode=True)
+        request_model = RequestModel(
+            user_id="test_user",
+            query="Analyze my data and suggest optimizations.",
+            workloads=[
+                Workload(
+                    run_id=run_id,
+                    query="Test workload query",
+                    data_source=DataSource(source_table="test_table"),
+                    time_range=TimeRange(start_time="2025-01-01T00:00:00Z", end_time="2025-01-02T00:00:00Z")
+                )
+            ]
+        )
+        analysis_request = AnalysisRequest(settings=settings, request=request_model)
         websocket.send_text(analysis_request.json())
-        await asyncio.sleep(1) # Give time for the message to be processed
 
-    # In a real test, you would assert that the supervisor.start_agent was called
-    # and that the messages were sent to the websocket.
+        # Check for the agent started message
+        data = websocket.receive_json()
+        assert data["event"] == "agent_started"
+        assert data["run_id"] == run_id
+
+        # Check for the agent step started messages
+        for i in range(5):
+            data = websocket.receive_json()
+            assert data["event"] == "agent_step_started"
+            assert data["run_id"] == run_id
+
+            data = websocket.receive_json()
+            assert data["event"] == "agent_step_finished"
+            assert data["run_id"] == run_id

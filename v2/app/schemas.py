@@ -14,10 +14,10 @@ import time
 import enum
 import os
 from typing import List, Dict, Any, Optional, Union, Literal, TypedDict, Annotated
-from pydantic import BaseModel, Field, conint, confloat, ConfigDict
+from pydantic import BaseModel, Field, conint, confloat, ConfigDict, EmailStr
 from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
-
+from datetime import datetime
 
 # --- Constants and Enums ---
 
@@ -45,7 +45,7 @@ class GoogleUser(BaseModel):
     picture: Optional[str] = None
 
 class UserBase(BaseModel):
-    email: str
+    email: EmailStr
     is_active: bool = True
     is_superuser: bool = False
     full_name: Optional[str] = None
@@ -95,6 +95,7 @@ class Settings(BaseModel):
 
 class DataSource(BaseModel):
     source_table: str
+    filters: Optional[Dict[str, Any]] = None
 
 class TimeRange(BaseModel):
     start_time: str
@@ -792,14 +793,6 @@ class ToolInvocation(BaseModel):
     def set_result(self, status: ToolStatus, message: str, payload: Optional[Any] = None):
         self.tool_result.complete(status, message, payload)
 
-class DataSource(BaseModel):
-    source_table: str
-    filters: Optional[Dict[str, Any]] = None
-
-class TimeRange(BaseModel):
-    start_time: str
-    end_time: str
-
 # --- Deep-Agent Schemas ---
 class Todo(TypedDict):
     id: str
@@ -811,27 +804,3 @@ class DeepAgentState(TypedDict):
     messages: Annotated[List[BaseMessage], add_messages]
     todos: List[Todo]
     files: dict
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
-import uuid
-from datetime import datetime
-
-class UserBase(BaseModel):
-    email: EmailStr
-    is_active: bool = True
-    is_superuser: bool = False
-    full_name: Optional[str] = None
-    picture: Optional[str] = None
-
-class UserCreate(UserBase):
-    password: str
-
-class User(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    email: EmailStr
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    full_name: Optional[str] = None
-    picture: Optional[str] = None
-
-    class Config:
-        from_attributes = True

@@ -1,4 +1,3 @@
-
 export interface User {
     id: number;
     full_name?: string;
@@ -19,6 +18,7 @@ export interface BaseMessage {
 export interface UserMessage extends BaseMessage {
     type: 'user';
     content: string;
+    references?: Reference[];
 }
 
 export interface EventMessage extends BaseMessage {
@@ -32,6 +32,27 @@ export interface TextMessage extends BaseMessage {
     content: string;
     usageMetadata?: UsageMetadata;
     responseMetadata?: ResponseMetadata;
+}
+
+export interface Tool {
+    name: string;
+    input: Record<string, unknown>;
+    output?: Record<string, unknown>;
+    error?: string;
+}
+
+export interface Todo {
+    description: string;
+    state: 'pending' | 'in_progress' | 'completed' | 'error';
+}
+
+export interface AgentMessage extends BaseMessage {
+    type: 'agent';
+    subAgentName: string;
+    content?: string;
+    tools: Tool[];
+    todos: Todo[];
+    toolErrors: string[];
 }
 
 export interface ToolStartMessage extends BaseMessage {
@@ -94,7 +115,8 @@ export type Message =
     | ToolEndMessage
     | ErrorMessage
     | ThinkingMessage
-    | StateUpdateMessage;
+    | StateUpdateMessage
+    | AgentMessage;
 
 
 // --- Agent and Chat State ---
@@ -128,7 +150,8 @@ export interface AgentState {
 }
 
 export interface UseAgentReturn {
-    startAgent: (message: string) => void;
+    startAgent: (message: string, references?: Reference[]) => void;
+    stopAgent: () => void;
     messages: Message[];
     showThinking: boolean;
     error: Error | null;
@@ -159,6 +182,7 @@ export interface AnalysisRequest {
         user_id: string;
         query: string;
         workloads: Workload[];
+        references: Reference[];
     };
 }
 
@@ -338,7 +362,7 @@ export interface ErrorDisplayProps {
 
 export interface ChatWindowProps {
     messages: Message[];
-    onSendMessage: (message: string) => void;
+    onSendMessage: (message: string, references?: Reference[]) => void;
     isLoading: boolean;
     initialQuery?: string;
     messageFilters: MessageFilter;
@@ -418,5 +442,5 @@ export interface NavItem {
 }
 
 export interface MessageOrchestratorProps {
-    message: Message;
+    messages: Message[];
 }

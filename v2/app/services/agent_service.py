@@ -14,11 +14,11 @@ class AgentService:
     def __init__(self, supervisor: Supervisor):
         self.supervisor = supervisor
 
-    async def start_agent(self, analysis_request: schemas.AnalysisRequest, run_id: str, stream_updates: bool = False):
+    async def run(self, analysis_request: schemas.AnalysisRequest, run_id: str, stream_updates: bool = False):
         """
         Starts the agent. The supervisor will stream logs back to the websocket if requested.
         """
-        return await self.supervisor.start_agent(analysis_request, run_id, stream_updates)
+        return await self.supervisor.run(analysis_request, run_id, stream_updates)
 
     async def handle_websocket_message(self, run_id: str, message: str):
         """
@@ -35,7 +35,7 @@ class AgentService:
                     request=payload.get("request")
                 )
                 # When started from a websocket, we always want to stream updates
-                response = await self.start_agent(analysis_request, run_id, stream_updates=True)
+                response = await self.run(analysis_request, run_id, stream_updates=True)
                 await manager.send_to_run(
                     {
                         "run_id": run_id,

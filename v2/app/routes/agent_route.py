@@ -15,8 +15,8 @@ def get_agent_supervisor(request: Request, db_session: AsyncSession = Depends(ge
     # This is a simplified way to get the supervisor. In a real app, you might have a more robust way to manage this.
     return Supervisor(db_session, llm_manager, manager)
 
-@router.post("/start_agent")
-async def start_agent(
+@router.post("/run_agent")
+async def run_agent(
     analysis_request: AnalysisRequest,
     supervisor: Supervisor = Depends(get_agent_supervisor),
 ):
@@ -24,7 +24,7 @@ async def start_agent(
     Starts the agent to analyze the user's request.
     """
     try:
-        result = await supervisor.start_agent(
+        result = await supervisor.run(
             analysis_request, 
             analysis_request.request.id, 
             stream_updates=True)

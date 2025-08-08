@@ -128,7 +128,7 @@ app.include_router(health.router, prefix="/health", tags=["health"])
 def read_root():
     logger = central_logger.get_logger(__name__)
     logger.info("Root endpoint was hit.")
-    return {"message": "Welcome to Netra API v2"}
+    return {"message": "Welcome to Netra API"}
 
 @app.get("/test-error")
 def test_error():
