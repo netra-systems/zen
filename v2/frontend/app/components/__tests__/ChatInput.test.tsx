@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ChatInput } from '@/app/components/ChatInput';
+import { ChatInput } from '@/components/ChatInput';
 import { examplePrompts } from '@/lib/examplePrompts';
 
 // Mock the apiService

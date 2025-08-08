@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { AgentMessageCard } from '@/app/components/chat/AgentMessageCard';
+import { AgentMessageCard } from '@/components/chat/AgentMessageCard';
 import { AgentMessage } from '@/types';
 
 describe('AgentMessageCard', () => {

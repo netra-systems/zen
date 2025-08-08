@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { UserMessageCard } from '@/app/components/chat/UserMessageCard';
+import { UserMessageCard } from '@/components/chat/UserMessageCard';
 import { UserMessage } from '@/types';
 
 describe('UserMessageCard', () => {

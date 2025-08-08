@@ -5,8 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { JsonView, allExpanded, defaultStyles } from 'react-json-view-lite';
 import 'react-json-view-lite/dist/index.css';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { MessageContent } from '@/app/components/chat/MessageContent';
-import { TodoListView } from '@/app/components/chat/TodoListView';
+import { MessageContent } from '@/components/chat/MessageContent';
+import { TodoListView } from '@/components/chat/TodoListView';
 import { Message, MessageCardProps } from '@/types/index';
 
 export function MessageCard({ message, user }: MessageCardProps) {

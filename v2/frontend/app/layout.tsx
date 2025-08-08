@@ -3,7 +3,7 @@
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 
-import { AppWithLayout } from '@/app/components/AppWithLayout';
+import { AppWithLayout } from '@/components/AppWithLayout';
 import { RootLayoutProps } from '@/types';
 
 export default function RootLayout({ children }: RootLayoutProps) {

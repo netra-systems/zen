@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import { MessageCard } from '@/app/components/MessageCard';
+import { MessageCard } from '@/components/MessageCard';
 import { Message } from '@/types/chat';
 
 const mockUser = {
