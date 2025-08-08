@@ -4,10 +4,10 @@ from app.services.agent_service import AgentService
 from app.schemas import AnalysisRequest, Settings, RequestModel, Workload, DataSource, TimeRange
 
 @pytest.mark.asyncio
-async def test_start_agent():
+async def test_run_agent():
     # Arrange
     mock_supervisor = MagicMock()
-    mock_supervisor.start_agent = AsyncMock(return_value={"status": "started"})
+    mock_supervisor.run = AsyncMock(return_value={"status": "started"})
     agent_service = AgentService(mock_supervisor)
     
     settings = Settings(debug_mode=True)
@@ -26,8 +26,8 @@ async def test_start_agent():
     analysis_request = AnalysisRequest(settings=settings, request=request_model)
 
     # Act
-    result = await agent_service.start_agent(analysis_request, "test_client", False)
+    result = await agent_service.run(analysis_request, "test_client", False)
 
     # Assert
     assert result == {"status": "started"}
-    mock_supervisor.start_agent.assert_called_once_with(analysis_request, "test_client", False)
+    mock_supervisor.run.assert_called_once_with(analysis_request.model_dump(), "test_client", False)

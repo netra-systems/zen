@@ -19,7 +19,7 @@ async def test_read_main():
     async with AsyncClient(app=app, base_url="http://test") as ac:
         response = await ac.get("/")
         assert response.status_code == 200
-        assert response.json() == {"message": "Welcome to Netra API v2"}
+        assert response.json() == {"message": "Welcome to Netra API"}
 
 def test_analysis_runner():
     # Placeholder
