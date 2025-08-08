@@ -23,7 +23,7 @@ class WebSocketService {
             return;
         }
 
-        const url = `${config.api.wsBaseUrl}/ws/ws?token=${token}`;
+        const url = `${config.api.wsBaseUrl}/ws?token=${token}`;
         this.setStatus(WebSocketStatus.Connecting);
         console.log('WebSocket connecting to:', url);
         this.ws = new WebSocket(url);
