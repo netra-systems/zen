@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { AgentState, AgentListener, Message, Reference, ToolCallChunk, ToolCall } from '@/types';
-import { webSocketManager } from '@/services/websocket';
+import webSocketManager from '@/services/websocket';
 
 class Agent {
     private state: AgentState = {
@@ -15,7 +15,7 @@ class Agent {
     initialize() {
         if (this.isInitialized) return;
 
-        webSocketManager.addMessageListener(this.handleWebSocketMessage);
+        webSocketManager.onMessage(this.handleWebSocketMessage);
         this.isInitialized = true;
     }
 
@@ -50,19 +50,18 @@ class Agent {
             enable_update_step_results: true,
         };
 
-        webSocketManager.sendMessage("stream", streamInput);
+        webSocketManager.sendMessage(streamInput as any);
     }
 
     stop() {
         if (this.state.isThinking) {
-            webSocketManager.sendMessage("stream_kill", {});
+            webSocketManager.sendMessage({} as any);
             this.setState(prev => ({ ...prev, isThinking: false }));
         }
     }
 
-    private handleWebSocketMessage = (event: MessageEvent) => {
+    private handleWebSocketMessage = (serverEvent: any) => {
         try {
-            const serverEvent = JSON.parse(event.data);
             const { event: eventName, data, run_id } = serverEvent;
 
             this.setState(prev => {
@@ -105,7 +104,7 @@ class Agent {
                             if (toolIndex !== -1) {
                                 lastMessage.tools[toolIndex].input += code_chunk;
                             } else {
-                                lastMessage.tools.push({ name: tool_name, input: code_chunk });
+                                lastMessage.tools.push({ name: tool_name, input: code_chunk, output: null });
                             }
                         }
                         break;
@@ -120,6 +119,7 @@ class Agent {
                                         id: chunk.id,
                                         name: chunk.name,
                                         input: chunk.args,
+                                        output: null
                                     });
                                     toolArgBuffers[chunk.id] = chunk.args || "";
                                 } else {
@@ -144,6 +144,7 @@ class Agent {
                                         id: toolCall.id,
                                         name: toolCall.name,
                                         input: toolCall.args,
+                                        output: null
                                     });
                                 } else {
                                     lastMessage.tools[toolIndex].input = toolCall.args;
