@@ -9,18 +9,7 @@ Instructions:
 0:1:0:5: Reflect on work in progress if relevant.
 0:1:0:6: ACTION only the defined ACTION: spec. this is the {spec_name}
 
-0:1:1: Project Conventions:
-0:1:1:0: Types: 
-0:1:1:0:0: frontend: types/index.ts. 
-0:1:1:0:1: backend: schemas.py. 
-0:1:1:0:2: ALWAYS use existing or add new types using (“0:1:1:0:0:”, “0:1:1:0:1”).
-0:1:1:1: Use single sources of truth. Every unique concept is only defined once and then references the rest of the places. E.g. for each frontend concept, e.g. Context, Hooks, Store, etc. etc. MUST be only ONE
-0:1:1:3: Frontend: Imports: Use tsconfig.json, named exports (export const ...)
-All import paths must be absolute using the @/ alias from tsconfig.
-All imports use { item } over defaults.
-0:1:1:4: Always use classes (interfaces). All functions must be inside of classes.
-0:1:1:5: Always import at class level.
-0:1:1:6: Frontend: Always prefer typescript classes over react concepts. The core logic is always in typescript, react is just the view related concepts when it make sense.
+0:1:1: Conventions: Follow all conventions in SPEC/conventions.txt
 
 0:1:1:4: Connection between services look at shared/schema.json for alignment.
 0:1:1:5: Use lowercase for settings in python. e.g. settings.var_name
