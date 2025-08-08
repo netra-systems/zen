@@ -1,43 +1,31 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { WebSocketStatus } from '@/app/types';
-import WebSocketService from '@/app/services/websocket';
+import webSocketService from '@/app/services/websocketService';
 
-const useWebSocket = (url: string) => {
+const useWebSocket = () => {
     const [status, setStatus] = useState<WebSocketStatus>(WebSocketStatus.Closed);
     const [lastJsonMessage, setLastJsonMessage] = useState<any | null>(null);
-    const webSocketService = useRef<WebSocketService | null>(null);
 
-    const handleMessage = useCallback((event: MessageEvent) => {
-        try {
-            const message = JSON.parse(event.data);
-            setLastJsonMessage(message);
-        } catch (error) {
-            console.error('Failed to parse WebSocket message:', error);
-        }
+    const handleMessage = useCallback((message: any) => {
+        setLastJsonMessage(message);
     }, []);
 
     useEffect(() => {
-        webSocketService.current = new WebSocketService(url);
+        webSocketService.onStatusChange(setStatus);
+        webSocketService.onMessage(handleMessage);
 
-        webSocketService.current.onStatusChange(setStatus);
-        webSocketService.current.onMessage(handleMessage);
-
-        webSocketService.current.connect();
+        // The connection should be initiated elsewhere, for example, in a context or on app load.
 
         return () => {
-            if (webSocketService.current) {
-                webSocketService.current.disconnect();
-            }
+            // Disconnecting here might not be desirable for a persistent connection.
         };
-    }, [url, handleMessage]);
+    }, [handleMessage]);
 
     const sendMessage = (message: any) => {
-        if (webSocketService.current) {
-            webSocketService.current.sendMessage(message);
-        }
+        webSocketService.sendMessage(message);
     };
 
-    return { status, lastJsonMessage, sendMessage };
+    return { status, lastJsonMessage, sendMessage, connect: webSocketService.connect.bind(webSocketService) };
 };
 
 export default useWebSocket;
