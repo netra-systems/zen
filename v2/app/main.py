@@ -114,7 +114,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     )
 
 
-from app.routes import auth, supply, generation, admin, references, health, corpus
+from app.routes import auth, supply, generation, admin, references, health, corpus, synthetic_data
 
 app.include_router(auth.router, prefix="/api/v3/auth", tags=["auth"])
 app.include_router(supply.router, prefix="/api/v3/supply", tags=["supply"])
@@ -126,6 +126,7 @@ app.include_router(admin.router, prefix="/api/v3", tags=["admin"])
 app.include_router(references.router, prefix="/api/v3", tags=["references"])
 app.include_router(health.router, prefix="/health", tags=["health"])
 app.include_router(corpus.router, prefix="/api/v3/corpus", tags=["corpus"])
+app.include_router(synthetic_data.router, prefix="/api/v3", tags=["synthetic_data"])
 
 
 

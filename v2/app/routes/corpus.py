@@ -1,13 +1,18 @@
 from typing import List
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
 from sqlalchemy.orm import Session
 from .. import schemas
-from ..services import corpus_service
+from ..services import corpus_service, clickhouse_service
 from ..dependencies import get_db_session
 from ..auth.auth_dependencies import get_current_user
 from ..db.models_postgres import User
 
 router = APIRouter()
+
+@router.get("/tables", response_model=List[str])
+async def list_corpus_tables(current_user: User = Depends(get_current_user)):
+    return await clickhouse_service.list_corpus_tables()
 
 @router.post("/", response_model=schemas.Corpus)
 def create_corpus(

@@ -116,6 +116,7 @@ class Corpus(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, index=True, nullable=False, unique=True)
     description = Column(String, nullable=True)
+    table_name = Column(String, nullable=True)
     status = Column(String, default="pending")  # e.g., pending, running, completed, failed
     created_by_id = Column(String, ForeignKey("users.id"))
     created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
