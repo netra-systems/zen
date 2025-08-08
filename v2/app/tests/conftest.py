@@ -4,6 +4,8 @@ from sqlalchemy.orm import sessionmaker
 from app.db.base import Base
 from app.main import app
 from fastapi.testclient import TestClient
+from app.db.session import get_db_session
+from app.config import settings
 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -14,10 +16,12 @@ def event_loop():
 
 @pytest.fixture(scope="session")
 async def test_engine():
-    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    engine = create_async_engine(settings.database_url, echo=True)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield engine
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
     await engine.dispose()
 
 @pytest.fixture(scope="function")
@@ -31,7 +35,7 @@ def client(db_session):
     def override_get_db():
         yield db_session
 
-    app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as c:
+    app.dependency_overrides[get_db_session] = override_get_db
+    with TestClient(app, lifespan="on") as c:
         yield c
-    del app.dependency_overrides[get_db]
+    del app.dependency_overrides[get_db_session]
