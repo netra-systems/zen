@@ -225,6 +225,19 @@ export interface WebSocketError {
   message: string;
 }
 
+export interface MessageToUser {
+  content: string;
+  sender: "user" | "agent";
+  metadata?: { [k: string]: any } | null;
+}
+
+export interface SubAgentStatus {
+  name: string;
+  tools: string[];
+  state: string;
+}
+
+
 export interface WebSocketMessage {
   type:
     | "analysis_request"

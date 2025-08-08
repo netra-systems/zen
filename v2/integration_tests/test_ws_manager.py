@@ -62,12 +62,16 @@ async def test_listen_for_broadcast_messages(mock_redis_manager):
     await manager.connect(ws1, user1)
     await manager.connect(ws2, user2)
 
-    mock_redis_manager.pubsub.return_value.get_message.return_value = {
-        'channel': b'broadcast',
-        'data': b'{"type": "broadcast", "payload": "test"}'
-    }
+    mock_redis_manager.pubsub.return_value.get_message.side_effect = [
+        {
+            'channel': b'broadcast',
+            'data': b'{"type": "broadcast", "payload": "test"}'
+        },
+        Exception("Stop loop")
+    ]
 
-    await manager.listen_for_messages()
+    with pytest.raises(Exception, match="Stop loop"):
+        await manager.listen_for_messages()
 
     ws1.send_text.assert_called_with('{"type": "broadcast", "payload": "test"}')
     ws2.send_text.assert_called_with('{"type": "broadcast", "payload": "test"}')

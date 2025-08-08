@@ -1,37 +1,40 @@
-import { useContext, useEffect } from 'react';
-import { WebSocketContext } from '../contexts/WebSocketContext';
-import { useChatStore } from '../store';
-import { WebSocketMessage } from '@/types/chat';
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
 
 export const useWebSocket = () => {
-  const webSocketContext = useContext(WebSocketContext);
-  const { addMessage, setSubAgentName, setSubAgentStatus, setProcessing } = useChatStore();
+  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [lastMessage, setLastMessage] = useState<MessageEvent | null>(null);
+  const [isConnecting, setIsConnecting] = useState(true);
 
   useEffect(() => {
-    if (webSocketContext?.lastMessage) {
-      const message: WebSocketMessage = JSON.parse(webSocketContext.lastMessage.data);
+    const ws = new WebSocket('ws://localhost:8000/ws');
 
-      if (message.type === 'message') {
-        addMessage(message.payload);
-      } else if (message.type === 'sub_agent_update') {
-        setSubAgentName(message.payload.sub_agent_name);
-        if (message.payload.state.lifecycle) {
-          setSubAgentStatus(message.payload.state.lifecycle);
-          if (['completed', 'failed', 'shutdown'].includes(message.payload.state.lifecycle)) {
-            setProcessing(false);
-          }
-        }
-      } else if (message.type === 'agent_started') {
-        setProcessing(true);
-      } else if (message.type === 'broadcast') {
-        console.log('Broadcast message received:', message.payload);
-      }
+    ws.onopen = () => {
+      console.log('WebSocket connected');
+      setSocket(ws);
+      setIsConnecting(false);
+    };
+
+    ws.onmessage = (event) => {
+      setLastMessage(event);
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket disconnected');
+      setSocket(null);
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, []);
+
+  const sendMessage = (message: string) => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(message);
     }
-  }, [webSocketContext?.lastMessage, addMessage, setSubAgentName, setSubAgentStatus, setProcessing]);
+  };
 
-  if (!webSocketContext) {
-    throw new Error("useWebSocket must be used within a WebSocketProvider");
-  }
-
-  return { ...webSocketContext };
+  return { sendMessage, lastMessage, isConnecting };
 };

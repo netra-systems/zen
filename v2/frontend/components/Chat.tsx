@@ -1,98 +1,91 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useAuth } from '@/hooks/useAuth';
+import React, { useState, useEffect, useRef } from 'react';
+import { useChatStore } from '@/store';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { MessageCard } from '@/components/MessageCard';
-import { Message } from '@/types/chat';
-import { WEBSOCKET_URL } from '@/config';
+import { Message } from './Message';
+import { SubAgentStatus } from './SubAgentStatus';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
-export function Chat() {
-  const [message, setMessage] = useState('');
-  const { user } = useAuth();
-  const socketUrl = useMemo(() => {
-    if (user?.id) {
-      return WEBSOCKET_URL.replace('{user_id}', user.id);
-    }
-    return null;
-  }, [user]);
+export const Chat = () => {
+  const {
+    messages,
+    subAgentName,
+    subAgentStatus,
+    isProcessing,
+    addMessage,
+    setSubAgentName,
+    setSubAgentStatus,
+    setProcessing,
+  } = useChatStore();
+  const { sendMessage, lastMessage } = useWebSocket();
+  const [input, setInput] = useState('');
+  const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
-  const { lastMessage, readyState, sendMessage, subAgentName, subAgentStatus } = useWebSocket(socketUrl, {
-    shouldReconnect: (closeEvent) => true,
-  });
-  const [messageHistory, setMessageHistory] = useState<Message[]>([]);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     if (lastMessage !== null) {
-      const parsedMessage = JSON.parse(lastMessage.data);
-      setMessageHistory((prev) => [...prev, parsedMessage]);
+      const data = JSON.parse(lastMessage.data);
+      if (data.type === 'message_to_user') {
+        addMessage(data.payload);
+      } else if (data.type === 'sub_agent_status') {
+        setSubAgentName(data.payload.name);
+        setSubAgentStatus(data.payload.state);
+      }
     }
-  }, [lastMessage]);
+  }, [lastMessage, addMessage, setSubAgentName, setSubAgentStatus]);
 
-  useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
-    }
-  }, [messageHistory]);
-
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      const wsMessage: Message = {
-        id: new Date().toISOString(),
-        type: 'user',
-        user_id: user?.id || 'anonymous',
-        message: message,
-        timestamp: new Date().toISOString(),
-        full_name: user?.full_name || 'Anonymous',
-        picture: user?.picture || undefined,
-      };
-      sendMessage(JSON.stringify(wsMessage));
-      setMessage('');
+  const handleSend = () => {
+    if (input.trim()) {
+      const userMessage = { content: input, sender: 'user' };
+      addMessage(userMessage);
+      sendMessage(JSON.stringify({ type: 'user_message', payload: userMessage }));
+      setInput('');
+      setProcessing(true);
     }
   };
 
   const handleStop = () => {
-    const wsMessage = {
-      type: 'stop',
-    };
-    sendMessage(JSON.stringify(wsMessage));
+    sendMessage(JSON.stringify({ type: 'stop_agent' }));
+    setProcessing(false);
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)]">
-      <div className="flex items-center justify-between p-4 border-b">
-        <div>
-          <h2 className="text-lg font-semibold">{subAgentName}</h2>
-          <p className="text-sm text-muted-foreground">{subAgentStatus}</p>
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex flex-col gap-4">
+          {messages.map((msg, i) => (
+            <Message key={i} message={msg} />
+          ))}
+          <div ref={messagesEndRef} />
         </div>
-        <Button onClick={handleStop} variant="destructive">Stop</Button>
-      </div>
-      <div className="flex-1 p-4">
-        <ScrollArea className="h-full" ref={scrollAreaRef}>
-          <div className="space-y-4">
-            {messageHistory.map((msg) => (
-              <MessageCard key={msg.id} message={msg} />
-            ))}
-          </div>
-        </ScrollArea>
       </div>
       <div className="p-4 border-t">
-        <div className="flex items-center gap-4">
+        <SubAgentStatus name={subAgentName} status={subAgentStatus} />
+        <div className="flex gap-2 mt-2">
           <Input
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            placeholder="Type your message..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+            placeholder="Type a message..."
+            disabled={isProcessing}
           />
-          <Button onClick={handleSendMessage} disabled={readyState !== 'OPEN'}>
+          <Button onClick={handleSend} disabled={isProcessing}>
             Send
+          </Button>
+          <Button onClick={handleStop} disabled={!isProcessing} variant="destructive">
+            Stop
           </Button>
         </div>
       </div>
     </div>
   );
-}
+};
