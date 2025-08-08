@@ -10,7 +10,7 @@ The Supervisor uses a dynamic routing mechanism to determine the next Sub-Agent 
 
 ## BaseSubAgent
 
-The `BaseSubAgent` class is the base class for all sub-agents. It defines the common interface for all sub-agents, including the `run` method.
+The `BaseSubAgent` class is the base class for all sub-agents. It defines the common interface for all sub-agents, including the `run` method. Each sub-agent also has a lifecycle state, which is managed by the `SubAgentLifecycle` enum.
 
 ## Sub-Agents
 
@@ -26,11 +26,15 @@ The Supervisor orchestrates the SubAgent workflow in a predefined sequence:
 
 1.  **Supervisor**: The user's request is first received by the `Supervisor`.
 2.  **TriageSubAgent**: The `Supervisor` passes the request to the `TriageSubAgent`, which analyzes the initial user request and categorizes it.
-3.  **DataSubAgent**: The output of the `TriageSubAgent` is passed to the `DataSubAgent`, which gathers and processes the necessary data.
-4.  **OptimizationsCoreSubAgent**: The `OptimizationsCoreSubAgent` receives the processed data and formulates optimization strategies.
-5.  **ActionsToMeetGoalsSubAgent**: The `ActionsToMeetGoalsSubAgent` takes the optimization strategies and translates them into a concrete action plan.
-6.  **ReportingSubAgent**: Finally, the `ReportingSubAgent` takes the action plan and generates a comprehensive report for the user.
-7.  **Supervisor**: The `Supervisor` returns the final report to the user.
+3.  **Supervisor**: The `Supervisor` receives the output from the `TriageSubAgent` and passes it to the next agent.
+4.  **DataSubAgent**: The output of the `TriageSubAgent` is passed to the `DataSubAgent`, which gathers and processes the necessary data.
+5.  **Supervisor**: The `Supervisor` receives the output from the `DataSubAgent` and passes it to the next agent.
+6.  **OptimizationsCoreSubAgent**: The `OptimizationsCoreSubAgent` receives the processed data and formulates optimization strategies.
+7.  **Supervisor**: The `Supervisor` receives the output from the `OptimizationsCoreSubAgent` and passes it to the next agent.
+8.  **ActionsToMeetGoalsSubAgent**: The `ActionsToMeetGoalsSubAgent` takes the optimization strategies and translates them into a concrete action plan.
+9.  **Supervisor**: The `Supervisor` receives the output from the `ActionsToMeetGoalsSubAgent` and passes it to the next agent.
+10. **ReportingSubAgent**: Finally, the `ReportingSubAgent` takes the action plan and generates a comprehensive report for the user.
+11. **Supervisor**: The `Supervisor` returns the final report to the user.
 
 ```mermaid
 graph TD
