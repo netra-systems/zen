@@ -43,5 +43,7 @@ async def websocket_endpoint(websocket: WebSocket, user: ActiveUserWsDep, superv
                 continue
     except WebSocketDisconnect:
         logger.info(f"WebSocket disconnected for user {user.id}")
+    except Exception as e:
+        logger.error(f"WebSocket connection failed for user {user.id}: {e}", exc_info=True)
     finally:
         manager.disconnect(websocket, user.id)
