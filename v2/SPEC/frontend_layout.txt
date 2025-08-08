@@ -1,0 +1,17 @@
+SPEC:netra_frontend_layout: Overall Frontend layout
+
+netra_frontend_layout:1:0:0: PRIMARY GOAL: Core: 
+Core background shell for frontend layout has react and next js required elements and concepts,
+sidebar, header, and main panel background. Keep and use existing items
+netra_frontend_layout:1:0:1: Core frontend layout is always visible and is persistent.
+netra_frontend_layout:1:0:1:0: Sidebar maintains its collapsible function.
+netra_frontend_layout:1:0:2: Prevent regression, including tests that test the existence of items of these existing components.
+
+netra_frontend_layout:1:0:3: Core is persistent for authenticated users AND unauthenticated users on the homepage.
+netra_frontend_layout:1:0:4: Core (sidebar and header) should indeed be visible at all times, with the content inside them
+  adapting to the user's authentication status (e.g., showing a "Login" button when logged out).
+netra_frontend_layout:1:0:5: The homepage loads and is visible by default
+
+netra_frontend_layout:1:0:6: Sidebar links are different for authenticated and unauthenticated users
+
+netra_frontend_layout:END
