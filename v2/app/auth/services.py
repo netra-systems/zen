@@ -1,38 +1,36 @@
+
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.models.user import User
 from sqlalchemy.future import select
-from app.db.models_postgres import User as UserModel
-from app.auth import schemas as auth_schemas
-from app.services.key_manager import KeyManager
+import uuid
 
 class SecurityService:
-    def __init__(self, key_manager: KeyManager):
-        self.key_manager = key_manager
-
-    async def get_user(self, db_session: AsyncSession, email: str) -> UserModel | None:
-        result = await db_session.execute(select(UserModel).filter(UserModel.email == email))
+    async def get_user_by_id(self, db_session: AsyncSession, user_id: uuid.UUID) -> User | None:
+        """
+        Retrieves a user by their ID.
+        """
+        result = await db_session.execute(select(User).filter(User.id == user_id))
         return result.scalars().first()
 
-    async def get_or_create_user_from_oauth(
-        self, db_session: AsyncSession, user_info: dict
-    ) -> UserModel:
-        user = await self.get_user(db_session, user_info["email"])
-        if user:
-            # Update user info if it has changed
-            user.full_name = user_info.get("name", user.full_name)
-            user.picture = user_info.get("picture", user.picture)
+    async def get_or_create_user_from_oauth(self, db_session: AsyncSession, user_info: dict) -> User:
+        """
+        Retrieves a user by email from OAuth info, or creates a new user if they don't exist.
+        """
+        email = user_info.get("email")
+        if not email:
+            raise ValueError("Email not found in user info")
+
+        result = await db_session.execute(select(User).filter(User.email == email))
+        user = result.scalars().first()
+
+        if not user:
+            user = User(
+                email=email,
+                full_name=user_info.get("name"),
+                picture=user_info.get("picture"),
+            )
+            db_session.add(user)
             await db_session.commit()
             await db_session.refresh(user)
-            return user
-
-        user_data = auth_schemas.User(
-            id=user_info.get("sub"),
-            email=user_info["email"],
-            full_name=user_info.get("name"),
-            picture=user_info.get("picture"),
-        )
         
-        user = UserModel(**user_data.model_dump())
-        db_session.add(user)
-        await db_session.commit()
-        await db_session.refresh(user)
         return user

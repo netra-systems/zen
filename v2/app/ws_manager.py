@@ -41,6 +41,10 @@ class WebSocketManager:
             for connection in connections:
                 await connection.send_json(message.dict())
 
+    async def broadcast_to_user(self, user_id: str, message: WebSocketMessage):
+        if self.redis:
+            await self.redis.publish(f"ws:{user_id}", message.json())
+
     async def send_error(self, user_id: str, error_message: str):
         error = WebSocketMessage(type="error", payload={"message": error_message})
         await self.send_personal_message(error, user_id)

@@ -4,7 +4,7 @@
 import { createContext, useContext, useEffect, ReactNode, useState, useCallback } from 'react';
 import { User, AuthConfigResponse } from '@/types';
 import { Button } from '@/components/ui/button';
-import { getAuthConfig, handleLogin as authLogin, handleLogout as authLogout } from '@/services/auth';
+import { authService } from '@/services/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -23,14 +23,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchAuthConfig = useCallback(async () => {
     try {
-      const data = await getAuthConfig();
+      const data = await authService.getAuthConfig();
       setAuthConfig(data);
       if (data.user) {
         setUser(data.user);
       } else if (data.development_mode) {
         // In development mode, if there's no user, we can try to log in automatically.
         // The backend will create a dev user if one doesn't exist.
-        authLogin(data);
+        authService.handleLogin(data);
       }
     } catch (error) { 
       console.error("Failed to fetch auth config:", error);
@@ -45,13 +45,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = () => {
     if (authConfig) {
-      authLogin(authConfig);
+      authService.handleLogin(authConfig);
     }
   };
 
   const logout = () => {
     if (authConfig) {
-      authLogout(authConfig);
+      authService.handleLogout(authConfig);
     }
   };
 

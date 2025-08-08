@@ -1,51 +1,24 @@
+# User Authentication Plan
 
-# Plan: User Authentication (OAuth & Dev Mode)
+This document outlines the plan to implement user authentication (login, logout, OAuth) based on the `userauth.txt` spec.
 
-This plan outlines the steps to implement user authentication using Google OAuth for production and a development mode with an auto-login feature, as specified in `userauth.txt`.
+## Backend
 
-## 1. Backend (FastAPI)
+- **`app/auth/services.py`**: Created a `SecurityService` class with methods to get a user by ID and to get or create a user from OAuth information. This service is used by the auth routes.
+- **`app/routes/auth.py`**: This file was already implemented with endpoints for `/login/google`, `/callback/google`, `/logout`, `/dev-login`, and `/user`.
+- **`app/models/user.py`**: The `User` model was already defined.
+- **`app/schemas.py`**: User-related schemas were already defined.
+- **`app/config.py`**: Configuration for OAuth and the development user was already in place.
 
-### Create Auth Routes (`app/routes/auth.py`)
+## Frontend
 
-- **Create a new file `app/routes/auth.py`** to house all authentication-related endpoints.
-- **Login (`/api/auth/login/google`):** Create a route that initiates the Google OAuth flow using the `oauth.google.authorize_redirect` method.
-- **Callback (`/api/auth/callback/google`):** This route will be the redirect URI for Google. It will handle the OAuth callback, fetch the user information, create or update the user in the database, and set the user's information in the session.
-- **Logout (`/api/auth/logout`):** Create a route that clears the user's session.
-- **Auth Config (`/api/auth/config`):** Create an endpoint that returns the `AuthConfigResponse` schema, providing the frontend with the Google Client ID, auth endpoints, and development mode status.
+- **`frontend/services/auth.ts`**: Created functions to fetch the auth configuration from the backend and to handle login and logout redirects.
+- **`frontend/contexts/AuthContext.tsx`**: The `AuthContext` was already implemented to manage the user's authentication state.
+- **`frontend/components/auth/LoginButton.tsx`**: Created a new `LoginButton` component to provide a consistent login/logout UI.
+- **`frontend/components/Header.tsx`**: Replaced the existing login/logout UI with the new `LoginButton` component to centralize the logic and match the spec.
+- **`frontend/app/auth/callback/page.tsx`**: This page was already implemented to handle the redirect from the backend after a successful OAuth login.
 
-### Update `app/main.py`
+## Next Steps
 
-- Include the new `auth_router` in the main FastAPI app.
-
-### Configuration (`.env` and `config.py`)
-
-- The user will provide the `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to be added to the `.env` file.
-- Ensure `config.py` loads these variables and the `AUTHORIZED_REDIRECT_URIS` correctly.
-
-## 2. Frontend (Next.js/React)
-
-### Refine `AuthContext.tsx`
-
-- Update the `login` function to redirect to the new `/api/auth/login/google` endpoint.
-- Implement the `logout` function to call the `/api/auth/logout` endpoint and clear the user from the state.
-- Ensure the `fetchEndpoints` function correctly fetches the configuration from `/api/auth/config`.
-
-### Update Login UI
-
-- The main login button will be in the `AuthProvider`, which will be displayed when the user is not authenticated. It will be large and styled appropriately.
-- The dedicated `/login` page will also use this button.
-
-### Create a Header Component
-
-- Create a new header component that will be displayed on all pages.
-- The header will display the user's name and a "Logout" button when the user is authenticated.
-
-### Update `layout.tsx`
-
-- Add the new header component to the main layout file so it's persistent across all pages.
-
-## 3. Testing
-
-- **Backend:** Add integration tests for the new authentication endpoints.
-- **Frontend:** Add tests for the `AuthContext` and the login/logout functionality.
-- **Manual:** Thoroughly test the entire login/logout flow in both development and production (or simulated production) environments.
+- The implementation is now complete based on the provided files and the `userauth.txt` spec.
+- The next step would be to run the application and test the authentication flow thoroughly.

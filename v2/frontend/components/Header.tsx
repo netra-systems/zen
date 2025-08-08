@@ -7,6 +7,7 @@ import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Icons } from './Icons';
+import { LoginButton } from './auth/LoginButton';
 
 import { HeaderProps } from '../types';
 
@@ -22,54 +23,7 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
       <div className="w-full flex-1">
         {/* Add search bar here if needed */}
       </div>
-      {user ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="secondary" size="icon" className="rounded-full">
-              <Avatar className="h-8 w-8">
-                {user.picture ? (
-                  <>
-                    <AvatarImage
-                      src={user.picture}
-                      alt={user.full_name || 'User'}
-                      onError={(e) => {
-                        console.error('Error loading profile image:', e);
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                      }}
-                    />
-                    <AvatarFallback>
-                      {user.full_name && user.full_name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
-                    </AvatarFallback>
-                  </>
-                ) : (
-                  <AvatarFallback>
-                    {user.full_name && user.full_name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')}
-                  </AvatarFallback>
-                )}
-              </Avatar>
-              <span className="sr-only">Toggle user menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>{user.full_name}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : (
-        <Button asChild variant="outline">
-          <Link href="/login">Login</Link>
-        </Button>
-      )}
+      <LoginButton />
     </header>
   );
 };

@@ -134,15 +134,19 @@ class WebSocketError(BaseModel):
     message: str
 
 
-class MessageToUser(BaseModel):
-    content: str
-    sender: Literal["user", "agent"]
-    metadata: Optional[Dict[str, Any]] = None
-
 class SubAgentStatus(BaseModel):
-    name: str
+    agent_name: str
     tools: List[str]
-    state: str
+    status: str
+
+
+class MessageToUser(BaseModel):
+    sender: str  # e.g., "user", "agent"
+    content: str
+    references: Optional[List[str]] = None
+    raw_json: Optional[Dict] = None
+    error: Optional[str] = None
+
 
 
 
@@ -192,8 +196,8 @@ class StopAgent(BaseModel):
 
 
 class WebSocketMessage(BaseModel):
-    type: Literal["analysis_request", "error", "stream_event", "run_complete", "sub_agent_update", "agent_started", "agent_completed", "agent_error", "user_message", "agent_message", "tool_started", "tool_completed", "stop_agent", "message"]
-    payload: Union[AnalysisRequest, WebSocketError, "StreamEvent", "RunComplete", "SubAgentUpdate", "AgentStarted", "AgentCompleted", "AgentErrorMessage", "UserMessage", "AgentMessage", "ToolStarted", "ToolCompleted", "StopAgent", Message]
+    type: Literal["analysis_request", "error", "stream_event", "run_complete", "sub_agent_update", "agent_started", "agent_completed", "agent_error", "user_message", "agent_message", "tool_started", "tool_completed", "stop_agent", "message", "sub_agent_status"]
+    payload: Union[AnalysisRequest, WebSocketError, "StreamEvent", "RunComplete", "SubAgentUpdate", "AgentStarted", "AgentCompleted", "AgentErrorMessage", "UserMessage", "AgentMessage", "ToolStarted", "ToolCompleted", "StopAgent", Message, SubAgentStatus]
 
 class StreamEvent(BaseModel):
     event_type: str

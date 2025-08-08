@@ -34,14 +34,23 @@ class Supervisor(BaseSubAgent):
         logger.info(f"Supervisor starting for run_id: {run_id}")
         self.set_state(SubAgentLifecycle.RUNNING)
         self.run_states[run_id] = {"status": "running", "current_step": 0, "total_steps": len(self.sub_agents)}
-        
+
         if stream_updates:
             await self.websocket_manager.send_to_client(
                 run_id,
                 WebSocketMessage(type="agent_started", payload=AgentStarted(run_id=run_id))
             )
 
-        current_data = {"request": input_data}
+        accumulated_results = {"request": input_data}
+
+        sub_agent_io_keys = {
+            "TriageSubAgent": ("triage_result", "request"),
+            "DataSubAgent": ("data_result", "triage_result"),
+            "OptimizationsCoreSubAgent": ("optimizations_result", "data_result"),
+            "ActionsToMeetGoalsSubAgent": ("action_plan_result", "optimizations_result"),
+            "ReportingSubAgent": ("report_result", "action_plan_result"),
+        }
+
         for i, agent in enumerate(self.sub_agents):
             self.run_states[run_id]["current_step"] = i + 1
             
@@ -63,7 +72,15 @@ class Supervisor(BaseSubAgent):
                     )
                 )
             
-            current_data = await agent.run(current_data, run_id, stream_updates)
+            output_key, input_key = sub_agent_io_keys[agent.name]
+            
+            if agent.name == "TriageSubAgent":
+                input_for_agent = accumulated_results
+            else:
+                input_for_agent = {input_key: accumulated_results[input_key]}
+
+            result = await agent.run(input_for_agent, run_id, stream_updates)
+            accumulated_results.update(result)
 
             agent.set_state(SubAgentLifecycle.COMPLETED)
             if stream_updates:
@@ -88,7 +105,7 @@ class Supervisor(BaseSubAgent):
                         type="sub_agent_completed",
                         payload={
                             "sub_agent_name": agent.name,
-                            "result": current_data
+                            "result": accumulated_results
                         }
                     )
                 )
@@ -98,10 +115,10 @@ class Supervisor(BaseSubAgent):
         if stream_updates:
             await self.websocket_manager.send_to_client(
                 run_id,
-                WebSocketMessage(type="agent_completed", payload=AgentCompleted(run_id=run_id, result=current_data))
+                WebSocketMessage(type="agent_completed", payload=AgentCompleted(run_id=run_id, result=accumulated_results))
             )
         logger.info(f"Supervisor finished for run_id: {run_id}")
-        return current_data
+        return accumulated_results
 
     async def get_agent_state(self, run_id: str) -> Dict[str, Any]:
         return self.run_states.get(run_id, {"status": "not_found"})

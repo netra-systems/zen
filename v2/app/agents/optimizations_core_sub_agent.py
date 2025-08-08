@@ -32,5 +32,4 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
 
         logger.info(f"OptimizationsCoreSubAgent finished for run_id: {run_id}")
 
-        input_data["optimizations_result"] = optimizations_result
-        return input_data
+        return {"optimizations_result": optimizations_result}

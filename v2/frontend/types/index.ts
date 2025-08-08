@@ -225,16 +225,18 @@ export interface WebSocketError {
   message: string;
 }
 
-export interface MessageToUser {
-  content: string;
-  sender: "user" | "agent";
-  metadata?: { [k: string]: any } | null;
+export interface SubAgentStatus {
+  agent_name: string;
+  tools: string[];
+  status: string;
 }
 
-export interface SubAgentStatus {
-  name: string;
-  tools: string[];
-  state: string;
+export interface MessageToUser {
+  sender: string;
+  content: string;
+  references?: string[] | null;
+  raw_json?: { [k: string]: any } | null;
+  error?: string | null;
 }
 
 
@@ -253,7 +255,8 @@ export interface WebSocketMessage {
     | "tool_started"
     | "tool_completed"
     | "stop_agent"
-    | "pong";
+    | "pong"
+    | "sub_agent_status";
   payload:
     | AnalysisRequest
     | WebSocketError
@@ -268,6 +271,8 @@ export interface WebSocketMessage {
     | ToolStarted
     | ToolCompleted
     | StopAgent
+    | SubAgentStatus
+    | MessageToUser
     | null;
 }
 

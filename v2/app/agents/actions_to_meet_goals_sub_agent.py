@@ -32,5 +32,4 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
 
         logger.info(f"ActionsToMeetGoalsSubAgent finished for run_id: {run_id}")
 
-        input_data["action_plan_result"] = action_plan_result
-        return input_data
+        return {"action_plan_result": action_plan_result}

@@ -32,5 +32,4 @@ class DataSubAgent(BaseSubAgent):
 
         logger.info(f"DataSubAgent finished for run_id: {run_id}")
 
-        input_data["data_result"] = data_result
-        return input_data
+        return {"data_result": data_result}

@@ -32,5 +32,4 @@ class TriageSubAgent(BaseSubAgent):
 
         logger.info(f"TriageSubAgent finished for run_id: {run_id}")
 
-        input_data["triage_result"] = triage_result
-        return input_data
+        return {"triage_result": triage_result}
