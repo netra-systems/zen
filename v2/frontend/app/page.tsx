@@ -3,7 +3,7 @@
 import React from 'react';
 import { ApexOptimizerAgentV2 } from './components/apex-optimizer-agent-v2';
 import { AgentProvider } from './providers/AgentProvider';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function ApexOptimizerAgentPage() {
     const { user, login, logout, loading } = useAuth();
