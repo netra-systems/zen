@@ -1,10 +1,10 @@
+from abc import ABC, abstractmethod
+from typing import List
+from app.llm.llm_manager import LLMManager
+from langchain_core.tools import BaseTool
 
-from app.services.deepagents.subagents.base import BaseSubAgent
-
-class SubAgent(BaseSubAgent):
+class BaseSubAgent(ABC):
     def __init__(self, llm_manager: LLMManager, tools: List[BaseTool]):
-        self.llm_manager = llm_manager
-        self.tools = tools
         self.llm_manager = llm_manager
         self.tools = tools
 
