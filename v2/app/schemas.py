@@ -134,6 +134,18 @@ class WebSocketError(BaseModel):
     message: str
 
 
+class MessageToUser(BaseModel):
+    content: str
+    sender: Literal["user", "agent"]
+    metadata: Optional[Dict[str, Any]] = None
+
+class SubAgentStatus(BaseModel):
+    name: str
+    tools: List[str]
+    state: str
+
+
+
 class MessageType(str, enum.Enum):
     USER = "user"
     AGENT = "agent"

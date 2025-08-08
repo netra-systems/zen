@@ -16,7 +16,9 @@ def mock_redis_manager():
 async def test_connect(mock_redis_manager):
     manager = WebSocketManager(mock_redis_manager)
     websocket = AsyncMock()
-    await manager.connect(websocket, "user1")
+    user = MagicMock()
+    user.id = "user1"
+    await manager.connect(websocket, user)
     assert "user1" in manager.connections
     assert websocket in manager.connections["user1"]
     mock_redis_manager.pubsub.return_value.subscribe.assert_called_with("user:user1")
@@ -25,7 +27,9 @@ async def test_connect(mock_redis_manager):
 async def test_disconnect(mock_redis_manager):
     manager = WebSocketManager(mock_redis_manager)
     websocket = AsyncMock()
-    await manager.connect(websocket, "user1")
+    user = MagicMock()
+    user.id = "user1"
+    await manager.connect(websocket, user)
     manager.disconnect("user1", websocket)
     assert "user1" not in manager.connections
     mock_redis_manager.pubsub.return_value.unsubscribe.assert_called_with("user:user1")
@@ -45,3 +49,25 @@ async def test_broadcast(mock_redis_manager):
     message.model_dump_json.return_value = '{"type": "test", "payload": {}}'
     await manager.broadcast(message)
     mock_redis_manager.publish.assert_called_with("broadcast", '{"type": "test", "payload": {}}')
+
+@pytest.mark.asyncio
+async def test_listen_for_broadcast_messages(mock_redis_manager):
+    manager = WebSocketManager(mock_redis_manager)
+    ws1 = AsyncMock()
+    ws2 = AsyncMock()
+    user1 = MagicMock()
+    user1.id = "user1"
+    user2 = MagicMock()
+    user2.id = "user2"
+    await manager.connect(ws1, user1)
+    await manager.connect(ws2, user2)
+
+    mock_redis_manager.pubsub.return_value.get_message.return_value = {
+        'channel': b'broadcast',
+        'data': b'{"type": "broadcast", "payload": "test"}'
+    }
+
+    await manager.listen_for_messages()
+
+    ws1.send_text.assert_called_with('{"type": "broadcast", "payload": "test"}')
+    ws2.send_text.assert_called_with('{"type": "broadcast", "payload": "test"}')
