@@ -505,18 +505,17 @@ class OAuthConfig(BaseModel):
     auth_uri: str = "https://accounts.google.com/o/oauth2/v2/auth"
     userinfo_endpoint: str = "https://www.googleapis.com/oauth2/v3/userinfo"
     scopes: List[str] = ["openid", "email", "profile"]
-    web: Dict[str, List[str]] = {
-        "authorized_javascript_origins": [
-            "https://app.netrasystems.ai",
-            "https://127.0.0.1",
-            "http://localhost"
-        ],
-        "authorized_redirect_uris": [
-            "https://app.netrasystems.ai/oauth2callback",
-            "http://localhost:8000/auth/google",
-            "http://localhost:3000/auth/callback"
-        ]
-    }
+    authorized_javascript_origins: List[str] = [
+      "https://app.netrasystems.ai",
+      "https://127.0.0.1",
+      "http://localhost"
+    ]
+    authorized_redirect_uris: List[str] = [
+      "https://app.netrasystems.ai/oauth2callback",
+      "http://localhost:8000/auth/google",
+      "http://localhost:3000/auth/callback"
+    ]
+
 
 class DevUser(BaseModel):
     email: str = "dev@example.com"

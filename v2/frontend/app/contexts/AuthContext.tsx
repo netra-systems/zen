@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useEffect, ReactNode, useState, useCallback } from 'react';
 import useAppStore from '@/store';
 import { User } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -13,30 +13,47 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { user, devLogin, logout, isLoading, setUser } = useAppStore();
+  const { user, setUser, isLoading, setLoading } = useAppStore();
+  const [authEndpoints, setAuthEndpoints] = useState<any>(null);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await fetch('/api/v3/auth/user');
-        if (response.ok) {
-          const user = await response.json();
-          setUser(user);
-        } else if (process.env.NODE_ENV === 'development') {
-          devLogin();
-        }
-      } catch (error) {
-        console.error('Failed to fetch user', error);
-        if (process.env.NODE_ENV === 'development') {
-          devLogin();
+  const fetchEndpoints = useCallback(async () => {
+    try {
+      const response = await fetch('/api/v3/auth/endpoints');
+      const data = await response.json();
+      setAuthEndpoints(data);
+      if (data.user) {
+        setUser(data.user);
+      } else if (data.development_mode) {
+        // In dev mode, we might auto-login the dev user
+        const devLoginResponse = await fetch(data.endpoints.dev_login, { method: 'POST' });
+        if (devLoginResponse.ok) {
+          const devUser = await devLoginResponse.json();
+          setUser(devUser);
         }
       }
-    };
-    fetchUser();
-  }, [devLogin, setUser]);
+    } catch (error) {
+      console.error("Failed to fetch auth endpoints:", error);
+    }
+  }, [setUser]);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchEndpoints().finally(() => setLoading(false));
+  }, [fetchEndpoints, setLoading]);
 
   const login = () => {
-    window.location.href = '/api/v3/auth/login';
+    if (authEndpoints?.endpoints?.login) {
+      window.location.href = authEndpoints.endpoints.login;
+    }
+  };
+
+  const logout = async () => {
+    if (authEndpoints?.endpoints?.logout) {
+      await fetch(authEndpoints.endpoints.logout);
+      setUser(null);
+      // After logout, we might want to re-fetch endpoints to see if we should dev-login
+      fetchEndpoints();
+    }
   };
 
   return (
