@@ -1,16 +1,16 @@
 import logging
 from typing import Any, Dict, List
-from app.services.agents.base import BaseSubAgent
+from app.agents.base import BaseSubAgent
 from app.schemas import AnalysisRequest, SubAgentLifecycle
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Import all the sub-agents
-from app.services.agents.triage_sub_agent import TriageSubAgent
-from app.services.agents.data_sub_agent import DataSubAgent
-from app.services.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-from app.services.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-from app.services.agents.reporting_sub_agent import ReportingSubAgent
+from app.agents.triage_sub_agent import TriageSubAgent
+from app.agents.data_sub_agent import DataSubAgent
+from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+from app.agents.reporting_sub_agent import ReportingSubAgent
 
 logger = logging.getLogger(__name__)
 

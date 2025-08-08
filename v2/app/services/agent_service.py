@@ -2,7 +2,7 @@ import json
 import asyncio
 import logging
 from fastapi import WebSocket, WebSocketDisconnect, Depends
-from app.services.agents.supervisor import Supervisor
+from app.agents.supervisor import Supervisor
 from app import schemas
 from app.websocket_manager import manager
 from app.llm.llm_manager import LLMManager
@@ -50,6 +50,6 @@ class AgentService:
             logger.error(f"Error in handle_websocket_message for run_id: {run_id}: {e}", exc_info=True)
 
 def get_agent_service(db_session = Depends(get_db_session), llm_manager: LLMManager = Depends(LLMManager)) -> AgentService:
-    from app.services.agents.supervisor import Supervisor
+    from app.agents.supervisor import Supervisor
     supervisor = Supervisor(db_session, llm_manager, manager)
     return AgentService(supervisor)

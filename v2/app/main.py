@@ -14,12 +14,12 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.routes import auth, supply, generation, websocket, admin, references, agent_route, health
+from app.routes import auth, supply, generation, websocket, admin, references, agent_route, health, corpus
 from app.db.postgres import async_session_factory
 from app.config import settings
 from app.logging_config import central_logger
 from app.llm.llm_manager import LLMManager
-from app.services.agents.supervisor import Supervisor
+from app.agents.supervisor import Supervisor
 from app.services.agent_service import AgentService
 from app.services.key_manager import KeyManager
 from app.auth.services import SecurityService
@@ -121,6 +121,7 @@ app.include_router(websocket.router, prefix="/ws", tags=["websockets"])
 app.include_router(admin.router, prefix="/api/v3", tags=["admin"])
 app.include_router(references.router, prefix="/api/v3", tags=["references"])
 app.include_router(health.router, prefix="/health", tags=["health"])
+app.include_router(corpus.router, prefix="/api/v3/corpus", tags=["corpus"])
 app.include_router(corpus.router, prefix="/api/v3/corpus", tags=["corpus"])
 
 

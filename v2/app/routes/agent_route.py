@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
-from app.services.agents.supervisor import Supervisor
+from app.agents.supervisor import Supervisor
 from app.schemas import AnalysisRequest
 
 router = APIRouter()

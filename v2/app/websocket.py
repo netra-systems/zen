@@ -3,7 +3,7 @@ import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Request
 from app.auth.auth_dependencies import ActiveUserWsDep
 from app.websocket_manager import manager
-from app.services.agents.supervisor import Supervisor
+from app.agents.supervisor import Supervisor
 from app.schemas import WebSocketMessage, AnalysisRequest
 from app.logging_config import central_logger
 
