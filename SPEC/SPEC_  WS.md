@@ -1,10 +1,10 @@
 SPEC:  WS Websockets
 
 1:0: Primary Spec: WS Websockets Specification.
-1:1:0: Goal: WS working frontend  and backend.
-
-
-1:0:1: Frontend: CRITICAL: For each frontend concept, e.g. Context, Hooks, Store, etc. etc. MUST be only ONE single WS class or concept. ONE CENTRAL PLACE (for each) that all other components use and call etc. CRITICAL.
+1:1:0: Goal: WS working as a complete end to end system.
+1:1:1: CRITICAL: The Coherence of the system working in harmony front and backend together.
+1:1:1:0: Cohernece: Coherence with User Auth using WS
+1:1:1:1: Coherence: Agent communications using WS
 
 Careful:
 1:0:1:0: Careful: Lanchain stream to JSON parsing
@@ -23,10 +23,7 @@ Websockets works with regular JSON etc. when the user sends chat messages or fre
 1:0:2: Backend:
 1:0:2:0: WS Startup profile: When application starts up or reloads, WS are available.
 1:0:2:1: If the front end sends a socket but the backend rejects, it must be logged clearly. 
-1:0:2:2: Backend sends responses using a single source of truth to manage WS. 
-1:0:2:3: Backend: Always uses Schemas.py interfaces. 
+1:0:2:2: Backend sends responses using a single source of truth to manage WS.
 1:0:2:4: Backend: Always complete JSON objects.
-1:0:2:5: Backend: User Auth works with WS context
-1:0:2:6: Backend: Dev Auth Auto login works with all relevant context
 
 Remember: 0:7.  Remember: 0:1 to 0:7 to 1 including all sub items 1:0:0 through 1:2: etc.
