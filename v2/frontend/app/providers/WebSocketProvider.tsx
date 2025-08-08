@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
-import useWebSocket from '@/app/hooks/useWebSocket';
-import { useAuth } from '@/app/hooks/useAuth';
-import { WebSocketStatus } from '@/app/types';
+import useWebSocket from '@/hooks/useWebSocket';
+import { useAuth } from '@/hooks/useAuth';
+import { WebSocketStatus } from '@/types';
 
 interface WebSocketContextType {
   status: WebSocketStatus;
@@ -36,6 +36,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
   return (
     <WebSocketContext.Provider value={{ status, lastJsonMessage, sendMessage }}>
       {children}
-    </WebSocketContext.Provider>
+    </WebSocket-Context.Provider>
   );
 };

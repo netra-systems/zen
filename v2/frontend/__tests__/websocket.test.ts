@@ -1,5 +1,5 @@
-import webSocketService from '@/app/services/websocket';
-import { WebSocketStatus } from '@/app/types';
+import webSocketService from '@/services/websocket';
+import { WebSocketStatus } from '@/types';
 import WS from 'jest-websocket-mock';
 
 const token = 'test-token';
