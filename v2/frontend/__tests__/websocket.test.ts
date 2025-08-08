@@ -1,14 +1,14 @@
+
+import { renderHook, act } from '@testing-library/react';
+import { useWebSocket } from '@/app/services/websocket';
 import { WebSocketStatus } from '@/types';
 import WS from 'jest-websocket-mock';
 
-describe('WebSocketService', () => {
+describe('useWebSocket', () => {
   let server: WS;
-  let webSocketService: any; // instance of WebSocketService
   const token = 'test-token';
 
   beforeEach(() => {
-    jest.resetModules(); // This is the key
-    webSocketService = require('@/services/websocket').default;
     server = new WS('ws://localhost:8000/ws?token=test-token');
   });
 
@@ -17,53 +17,58 @@ describe('WebSocketService', () => {
   });
 
   it('should connect to the server', async () => {
-    let status: WebSocketStatus | null = null;
-    webSocketService.onStatusChange((newStatus: WebSocketStatus) => {
-      status = newStatus;
+    const { result } = renderHook(() => useWebSocket());
+
+    act(() => {
+      result.current.connect(token);
     });
-    webSocketService.connect(token);
+
     await server.connected;
-    expect(status).toBe(WebSocketStatus.Open);
+
+    expect(result.current.status).toBe(WebSocketStatus.Open);
   });
 
   it('should send and receive messages', async () => {
-    webSocketService.connect(token);
-    await server.connected;
+    const { result } = renderHook(() => useWebSocket());
 
-    let receivedMessage: any = null;
-    webSocketService.onMessage((message: any) => {
-      receivedMessage = message;
+    act(() => {
+      result.current.connect(token);
     });
 
+    await server.connected;
+
     const message = { type: 'test', payload: 'hello' };
-    // The webSocketService is now connected, so readyState should be OPEN
-    webSocketService.sendMessage(message);
+    act(() => {
+      result.current.sendMessage(message);
+    });
 
     await expect(server).toReceiveMessage(JSON.stringify(message));
 
     const response = { type: 'response', payload: 'world' };
-    server.send(JSON.stringify(response));
+    act(() => {
+      server.send(JSON.stringify(response));
+    });
 
-    // Wait for the message to be processed
-    await new Promise(resolve => process.nextTick(resolve));
-
-    expect(receivedMessage).toEqual(response);
+    expect(result.current.lastJsonMessage).toEqual(response);
   });
 
   it('should change status on disconnect', async () => {
-    let status: WebSocketStatus | null = null;
-    webSocketService.onStatusChange((newStatus: WebSocketStatus) => {
-      status = newStatus;
+    const { result } = renderHook(() => useWebSocket());
+
+    act(() => {
+      result.current.connect(token);
     });
 
-    webSocketService.connect(token);
     await server.connected;
-    // At this point, status should be Open
-    expect(status).toBe(WebSocketStatus.Open);
 
-    webSocketService.disconnect();
+    expect(result.current.status).toBe(WebSocketStatus.Open);
+
+    act(() => {
+      result.current.disconnect();
+    });
+
     await server.closed;
 
-    expect(status).toBe(WebSocketStatus.Closed);
+    expect(result.current.status).toBe(WebSocketStatus.Closed);
   });
 });

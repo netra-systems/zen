@@ -1,9 +1,9 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { ChatAnalysisRequest, Reference } from '../types';
-import useAppStore from '@/store';
-// By default, LLM things should use this for examples
+import { useWebSocket } from '@/app/services/websocket';
 import { examplePrompts } from '../lib/examplePrompts';
 
 export function ChatInput() {
@@ -11,8 +11,7 @@ export function ChatInput() {
     const [showReferences, setShowReferences] = useState(false);
     const [references, setReferences] = useState<Reference[]>([]);
     const [selectedReferences, setSelectedReferences] = useState<Reference[]>([]);
-    const token = useAppStore.getState().token;
-    const addMessage = useAppStore.getState().addMessage;
+    const { sendMessage } = useWebSocket();
 
     const loadExample = () => {
         const example = examplePrompts[Math.floor(Math.random() * examplePrompts.length)];
@@ -22,14 +21,6 @@ export function ChatInput() {
     useEffect(() => {
         loadExample();
     }, []);
-
-    useEffect(() => {
-        if (showReferences) {
-            apiService.getReferences(token).then((data) => {
-                setReferences(data.references);
-            });
-        }
-    }, [showReferences, token]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -75,8 +66,7 @@ export function ChatInput() {
                 ],
             },
         };
-        addMessage({ role: 'user', content: inputValue });
-        apiService.startAgent(token, analysisRequest);
+        sendMessage({ type: 'analysis_request', payload: analysisRequest });
         setInputValue('');
     };
 
