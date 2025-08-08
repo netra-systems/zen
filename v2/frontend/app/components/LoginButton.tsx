@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import useAuth from '../auth';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function LoginButton() {
   const { user, login, logout } = useAuth();
