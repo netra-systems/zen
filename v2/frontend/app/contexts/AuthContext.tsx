@@ -12,10 +12,7 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const user = useAppStore((state) => state.user);
-  const devLogin = useAppStore((state) => state.devLogin);
-  const logout = useAppStore((state) => state.logout);
-  const isLoading = useAppStore((state) => state.isLoading);
+  const { user, devLogin, logout, isLoading } = useAppStore();
 
   const login = () => {
     devLogin();
