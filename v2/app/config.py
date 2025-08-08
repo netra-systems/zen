@@ -2,6 +2,7 @@ import os
 from google.cloud import secretmanager
 from typing import List, Dict
 from app.schemas import AppConfig, ProductionConfig, TestingConfig, DevelopmentConfig, SecretReference, OAuthConfig
+from tenacity import retry, stop_after_attempt, wait_fixed, RetryError
 
 SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="gemini-api-key", target_model="llm_configs.default", target_field="api_key"),
@@ -23,13 +24,16 @@ SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="google-client-secret", target_model="oauth_config", target_field="client_secret"),
 ]
 
+from tenacity import retry, stop_after_attempt, wait_fixed, RetryError
+
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
 def get_secret_client() -> secretmanager.SecretManagerServiceClient:
-    """Initializes and returns a Secret Manager service client."""
+    """Initializes and returns a Secret Manager service client with retry logic."""
     try:
         return secretmanager.SecretManagerServiceClient()
     except Exception as e:
-        print(f"Error initializing Secret Manager client: {e}")
-        return None
+        print(f"Attempt to initialize Secret Manager client failed: {e}")
+        raise ConnectionError(f"Failed to connect to Secret Manager: {e}")
 
 def fetch_secrets(client: secretmanager.SecretManagerServiceClient, secret_references: List[SecretReference], log_secrets: bool = False) -> Dict[str, str]:
     """Fetches multiple secrets from Google Cloud Secret Manager."""
@@ -91,7 +95,11 @@ def get_settings() -> AppConfig:
     }
     config = config_map.get(environment, DevelopmentConfig)()
     
-    load_secrets(config)
+    try:
+        load_secrets(config)
+    except ConnectionError as e:
+        raise RuntimeError(f"Application startup failed: Could not load secrets. {e}")
+
     return config
 
 settings = get_settings()

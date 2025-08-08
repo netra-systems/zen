@@ -5,6 +5,8 @@ from app.db.postgres import get_async_db
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.services import SecurityService, security_service
+from app.agents.supervisor import Supervisor
+from app.agents.tool_dispatcher import ToolDispatcher
 
 DbDep = Annotated[AsyncSession, Depends(get_async_db)]
 
@@ -19,3 +21,6 @@ def get_security_service() -> SecurityService:
     return security_service
 
 LLMManagerDep = Annotated[LLMManager, Depends(get_llm_manager)]
+
+def get_agent_supervisor(request: Request) -> Supervisor:
+    return request.app.state.agent_supervisor

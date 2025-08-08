@@ -33,3 +33,4 @@ langfuse
 google-cloud-secret-manager
 langchain-google-genai 
 pydantic-to-typescript
+tenacity
