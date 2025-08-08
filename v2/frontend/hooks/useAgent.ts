@@ -13,14 +13,8 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
     useEffect(() => {
         if (!userId) return;
 
-        const wsUrl = `${API_URL.replace('http', 'ws')}/ws/${userId}`;
-        const newWs = new WebSocket(wsUrl);
-
-        newWs.onopen = () => {
-            console.log('WebSocket connection established');
-        };
-
-        newWs.onmessage = (event) => {
+ 
+       onmessage = (event) => {
             console.log('Received message:', event.data);
             try {
                 const parsedData: ServerEvent = JSON.parse(event.data);
@@ -208,20 +202,7 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
             }
         };
 
-        newWs.onclose = () => {
-            console.log('WebSocket connection closed');
-        };
 
-        newWs.onerror = (err) => {
-            console.error('WebSocket error:', err);
-            setError(new Error('WebSocket connection error'));
-        };
-
-        setWs(newWs);
-
-        return () => {
-            newWs.close();
-        };
     }, [userId]);
 
     const sendMessage = useCallback(
