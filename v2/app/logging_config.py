@@ -94,7 +94,6 @@ class CentralLogger:
         logging.getLogger("uvicorn.access").handlers = [InterceptHandler()]
 
     def _initialize_services(self):
-        from app.websockets import WebSocketSink
         """Initializes external logging services like Langfuse and ClickHouse."""
         # ClickHouse
         if settings.clickhouse_logging.enabled:
@@ -116,10 +115,6 @@ class CentralLogger:
             except Exception as e:
                 self.logger.error(f"Failed to initialize ClickHouse: {e}")
                 self.clickhouse_db = None
-        
-        # Add Frontend Stream Sink
-        frontend_sink = WebSocketSink()
-        self.logger.add(frontend_sink, level="INFO", format=self._format_log_entry)
 
     def _format_log_entry(self, record) -> str:
         if "log_entry" in record["extra"]:
