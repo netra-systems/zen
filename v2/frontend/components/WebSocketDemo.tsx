@@ -8,12 +8,12 @@ export const WebSocketDemo: React.FC = () => {
 
   const handleSendMessage = () => {
     const requestModel: RequestModel = {
-      id: `req_${Math.random().toString(36).substr(2, 9)`,
+      id: 'req_' + Math.random().toString(36).substr(2, 9),
       user_id: 'dev-user',
       query: query,
       workloads: [
         {
-          run_id: `run_${Math.random().toString(36).substr(2, 9)`,
+          run_id: 'run_' + Math.random().toString(36).substr(2, 9),
           query: 'workload query',
           data_source: {
             source_table: 'my_table',
@@ -41,7 +41,7 @@ export const WebSocketDemo: React.FC = () => {
       <h2>WebSocket Demo</h2>
       <p>Status: {status}</p>
       <div>
-        <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} />
+        <input type="text" value={query} onChange={(e) => setQuery(e.targe.value)} />
         <button onClick={handleSendMessage} disabled={status !== 'OPEN'}>
           Send Analysis Request
         </button>

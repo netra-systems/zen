@@ -27,7 +27,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     const newWs = new WebSocket(`ws://localhost:8000/ws?token=${token}`);
 
     newWs.onopen = () => {
-      console.log('WebSocket connected');
     };
 
     newWs.onmessage = (event) => {
@@ -37,7 +36,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     };
 
     newWs.onclose = () => {
-      console.log('WebSocket disconnected');
     };
 
     setWs(newWs);

@@ -62,3 +62,16 @@ export interface TimeRange {
 export interface Settings {
   debug_mode: boolean;
 }
+
+export enum MessageType {
+  USER = 'user',
+  SYSTEM = 'system',
+}
+
+export interface Message {
+  id: string;
+  created_at: Date;
+  content: string;
+  type: MessageType;
+  displayed_to_user: boolean;
+}

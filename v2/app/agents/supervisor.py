@@ -82,6 +82,16 @@ class Supervisor(BaseSubAgent):
                         )
                     )
                 )
+                await self.websocket_manager.send_to_client(
+                    run_id,
+                    WebSocketMessage(
+                        type="sub_agent_completed",
+                        payload={
+                            "sub_agent_name": agent.name,
+                            "result": current_data
+                        }
+                    )
+                )
 
         self.run_states[run_id]["status"] = "finished"
         self.set_state(SubAgentLifecycle.COMPLETED)
