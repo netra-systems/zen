@@ -2,8 +2,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.db.models_postgres import User as UserModel
 from app.auth import schemas as auth_schemas
+from app.services.key_manager import KeyManager
 
 class SecurityService:
+    def __init__(self, key_manager: KeyManager):
+        self.key_manager = key_manager
+
     async def get_user(self, db_session: AsyncSession, email: str) -> UserModel | None:
         result = await db_session.execute(select(UserModel).filter(UserModel.email == email))
         return result.scalars().first()
@@ -32,6 +36,3 @@ class SecurityService:
         await db_session.commit()
         await db_session.refresh(user)
         return user
-
-
-security_service = SecurityService()
