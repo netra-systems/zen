@@ -1,7 +1,7 @@
 import { getEndpoint, getApiUrl } from "./api";
 
 class ApiClient {
-  async request(endpointName: string, method: string, options: any) {
+  async request(endpointName: string, method: string, options: RequestInit) {
     const endpoint = await getEndpoint(endpointName, method);
     if (!endpoint) {
       throw new Error(`Endpoint ${endpointName} not found`);
@@ -20,7 +20,7 @@ class ApiClient {
     return this.request(endpointName, "get", { headers });
   }
 
-  async post(endpointName: string, body: any, token: string | null) {
+  async post(endpointName: string, body: unknown, token: string | null) {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
