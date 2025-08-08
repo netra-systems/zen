@@ -134,11 +134,11 @@ app.include_router(generation.router, prefix="/api/generation", tags=["generatio
 
 
 app.include_router(websockets_router, prefix="/ws", tags=["websockets"])
-app.include_router(admin.router, prefix="/api/", tags=["admin"])
-app.include_router(references.router, prefix="/api/", tags=["references"])
+app.include_router(admin.router, prefix="/api", tags=["admin"])
+app.include_router(references.router, prefix="/api", tags=["references"])
 app.include_router(health.router, prefix="/health", tags=["health"])
 app.include_router(corpus.router, prefix="/api/corpus", tags=["corpus"])
-app.include_router(synthetic_data.router, prefix="/api/", tags=["synthetic_data"])
+app.include_router(synthetic_data.router, prefix="/synthetic_data", tags=["synthetic_data"])
 
 
 
