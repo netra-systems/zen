@@ -1,6 +1,7 @@
 
 Instructions: 
 0:1: Triage:
+0:1:0:1: The name of the company is Netra.
 0:1:0:1: Read: As BACKGROUND CONTEXT ONLY: other files in Spec/*
 0:1:0:2: Read: As BACKGROUND CONTEXT ONLY: “/plans/{*}-plan.md” documents. 
 0:1:0:3: CRITICAL: Consider coherence with all BACKGROUND CONTEXT including existing specs and plans.
@@ -30,7 +31,8 @@ Instructions:
 0:6:3:  Validate and protect against repetition, especially in newly introduced code. 
 0:6:4: Use as strong type checking and types as possible. 
 0:6:5: Validate up to five (5) steps in any direction in the system, especially with data marshalling and unmarshalling. E.g. double check concepts are only being cast as types an appropriate amount of times. 
-0:7: SUPER CRITICAL: Code must be globally coherent and well integrated with the global application context.
+0:7: SUPER CRITICAL: Code must be coherent and well integrated with the entire Netra system application context.
+0:7:0: Limit coherence reflection to be at most 30 most relevant categories and 100 items total.
 0:7:1: Scope: Keep scope of “{spec_name}:1:0” changes in mind. Focus on making changes strictly relevant to the scope described in “1:0” as the primary goal and limit side effects and focus on related changes to the scope of “1:0” only.
 0:7:2: Every added line, function, file, class, etc: Use 0:1:1: Project Conventions.
 0:7:3: Once completed “{spec_name}:1:0”: 
