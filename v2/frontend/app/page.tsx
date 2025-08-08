@@ -1,30 +1,30 @@
-'use client';
 
 import React from 'react';
-import { ApexOptimizerAgentV2 } from './components/apex-optimizer-agent-v2';
-import { AgentProvider } from './providers/AgentProvider';
-import { useAuth } from '@/hooks/useAuth';
+import { useWebSocket } from '@/contexts/WebSocketProvider';
+import { useAuth } from '@/contexts/AuthContext';
 
-export default function ApexOptimizerAgentPage() {
-    const { user, login, logout, loading } = useAuth();
+const HomePage: React.FC = () => {
+  const { sendMessage } = useWebSocket();
+  const { user, login, logout } = useAuth();
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+  const handleSendMessage = () => {
+    sendMessage({ text: 'Hello from the client!' });
+  };
 
-    return (
-        <div className="h-full">
-            {user ? (
-                <div>
-                    <p>Welcome, {user.full_name || user.email}</p>
-                    <button onClick={logout}>Logout</button>
-                    <AgentProvider>
-                        <ApexOptimizerAgentV2 />
-                    </AgentProvider>
-                </div>
-            ) : (
-                <button onClick={login}>Login with Google</button>
-            )}
+  return (
+    <div>
+      <h1>Welcome to the WebSocket Example</h1>
+      {user ? (
+        <div>
+          <p>Welcome, {user.email}</p>
+          <button onClick={logout}>Logout</button>
+          <button onClick={handleSendMessage}>Send Message</button>
         </div>
-    );
-}
+      ) : (
+        <button onClick={login}>Login as Dev</button>
+      )}
+    </div>
+  );
+};
+
+export default HomePage;

@@ -16,3 +16,14 @@ export const logout = async (): Promise<void> => {
     throw new Error('Failed to logout');
   }
 };
+
+
+export const getGoogleLoginUrl = async (): Promise<string> => {
+  const response = await fetch('/api/v3/auth/login');
+  if (!response.ok) {
+    throw new Error('Failed to get Google login URL');
+  }
+  const data = await response.json();
+  return data.url;
+};
+

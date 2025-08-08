@@ -11,7 +11,7 @@ from app.auth.services import SecurityService
 async def get_dev_user() -> schemas.User:
     """Provides a default user for development environments."""
     return schemas.User(
-        id=str(uuid.uuid4()),
+        id=uuid.uuid4(),
         email=settings.dev_user_email,
         created_at=datetime.utcnow(),
         full_name="Dev User",
@@ -29,7 +29,7 @@ async def get_current_user(
         return await get_dev_user()
 
     if not user_info:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+        return None
 
     email = user_info.get('email')
     if not email:

@@ -3,7 +3,7 @@ from app.config import settings
 
 oauth = OAuth()
 
-google_redirect_uri = f'{settings.api_base_url}/api/v3/auth/callback'
+google_redirect_uri = settings.oauth_config.authorized_redirect_uris[-1]
 
 oauth.register(
     name='google',
@@ -11,7 +11,7 @@ oauth.register(
     client_secret=settings.oauth_config.client_secret,
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={
-        'scope': 'openid email profile',
+        'scope': ' '.join(settings.oauth_config.scopes),
         'redirect_uri': google_redirect_uri
     }
 )

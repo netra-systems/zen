@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, ReactNode, useState, useCallback 
 import useAppStore from '@/store';
 import { User } from '@/types';
 import { Button } from '@/components/ui/button';
+import { devLogin } from '@/services/authService';
 
 interface AuthContextType {
   user: User | null;
@@ -25,11 +26,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(data.user);
       } else if (data.development_mode) {
         // In dev mode, we might auto-login the dev user
-        const devLoginResponse = await fetch(data.endpoints.dev_login, { method: 'POST' });
-        if (devLoginResponse.ok) {
-          const devUser = await devLoginResponse.json();
-          setUser(devUser);
-        }
+        const devUser = await devLogin();
+        setUser(devUser);
       }
     } catch (error) {
       console.error("Failed to fetch auth endpoints:", error);
