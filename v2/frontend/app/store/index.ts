@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { User } from '@/types';
-import { useWebSocket } from '@/app/services/websocket';
+import { useWebSocket } from '@/app/hooks/useWebSocket';
 
 interface AppState {
   user: User | null;

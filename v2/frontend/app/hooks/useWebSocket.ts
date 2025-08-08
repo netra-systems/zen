@@ -1,30 +1,23 @@
 import { useContext, useEffect } from 'react';
 import { WebSocketContext } from '../providers/WebSocketProvider';
 import { useChatStore } from '../store';
-import { WebSocketMessage } from '../types';
 
 export const useWebSocket = () => {
   const webSocketContext = useContext(WebSocketContext);
   const { addMessage, setSubAgentName, setSubAgentStatus } = useChatStore();
 
   useEffect(() => {
-    const handleMessage = (message: WebSocketMessage) => {
-      addMessage(message);
+    if (webSocketContext?.lastMessage) {
+      addMessage(webSocketContext.lastMessage);
 
-      if (message.type === 'sub_agent_update') {
-        setSubAgentName(message.payload.sub_agent_name);
-        if (message.payload.state.lifecycle) {
-          setSubAgentStatus(message.payload.state.lifecycle);
+      if (webSocketContext.lastMessage.type === 'sub_agent_update') {
+        setSubAgentName(webSocketContext.lastMessage.payload.sub_agent_name);
+        if (webSocketContext.lastMessage.payload.state.lifecycle) {
+          setSubAgentStatus(webSocketContext.lastMessage.payload.state.lifecycle);
         }
       }
-    };
-
-    webSocketContext?.registerMessageHandler(handleMessage);
-
-    return () => {
-      webSocketContext?.unregisterMessageHandler(handleMessage);
-    };
-  }, [webSocketContext, addMessage, setSubAgentName, setSubAgentStatus]);
+    }
+  }, [webSocketContext?.lastMessage, addMessage, setSubAgentName, setSubAgentStatus]);
 
   return webSocketContext;
 };

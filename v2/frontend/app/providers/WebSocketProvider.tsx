@@ -1,5 +1,3 @@
-'use client';
-
 import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import { WebSocketMessage } from '../types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,6 +6,7 @@ interface WebSocketContextType {
   sendMessage: (type: string, payload: any) => void;
   registerMessageHandler: (handler: (message: WebSocketMessage) => void) => void;
   unregisterMessageHandler: (handler: (message: WebSocketMessage) => void) => void;
+  lastMessage: WebSocketMessage | null;
 }
 
 export const WebSocketContext = createContext<WebSocketContextType | null>(null);
@@ -19,6 +18,7 @@ interface WebSocketProviderProps {
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [messageHandlers, setMessageHandlers] = useState<((message: WebSocketMessage) => void)[]>([]);
+  const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
   const { user, token } = useAuth();
 
   useEffect(() => {
@@ -32,6 +32,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 
     newWs.onmessage = (event) => {
       const message = JSON.parse(event.data);
+      setLastMessage(message);
       messageHandlers.forEach(handler => handler(message));
     };
 
@@ -61,7 +62,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
   };
 
   return (
-    <WebSocketContext.Provider value={{ sendMessage, registerMessageHandler, unregisterMessageHandler }}>
+    <WebSocketContext.Provider value={{ sendMessage, registerMessageHandler, unregisterMessageHandler, lastMessage }}>
       {children}
     </WebSocketContext.Provider>
   );

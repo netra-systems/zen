@@ -1,4 +1,4 @@
-import { useWebSocket } from './websocket';
+import { useWebSocket } from '../hooks/useWebSocket';
 
 export const useDevWebSocket = (onMessage: (message: any) => void) => {
     const { lastJsonMessage } = useWebSocket();

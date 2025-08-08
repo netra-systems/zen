@@ -5,3 +5,4 @@ v2/test.db
 *.db
 *.db
 v2/app/.coverage
+/v2/.venv

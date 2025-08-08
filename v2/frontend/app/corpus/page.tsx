@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { Corpus } from '../../types';
-import { useWebSocket } from '@/app/services/websocket';
+import { useWebSocket } from '@/app/hooks/useWebSocket';
 
 export default function CorpusAdminPage() {
     const [corpora, setCorpora] = useState<Corpus[]>([]);
     const [newCorpusName, setNewCorpusName] = useState('');
     const [newCorpusDescription, setNewCorpusDescription] = useState('');
-    const { lastJsonMessage } = useWebSocket();
+    const { lastMessage } = useWebSocket();
 
     useEffect(() => {
         fetch('/api/v3/corpus')
@@ -17,8 +17,8 @@ export default function CorpusAdminPage() {
     }, []);
 
     useEffect(() => {
-        if (lastJsonMessage) {
-            const message = lastJsonMessage.data;
+        if (lastMessage) {
+            const message = lastMessage.data;
             const match = message.match(/Corpus (.*) progress: (.*)/);
             if (match) {
                 const corpusId = match[1];
@@ -39,7 +39,7 @@ export default function CorpusAdminPage() {
                 );
             }
         }
-    }, [lastJsonMessage]);
+    }, [lastMessage]);
 
     const handleCreateCorpus = () => {
         fetch('/api/v3/corpus', {
