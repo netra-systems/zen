@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { usePathname } from 'next/navigation';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { cn } from '@/lib/utils';
@@ -9,18 +8,10 @@ import { AppWithLayoutProps } from '@/types';
 
 export function AppWithLayout({ children }: AppWithLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const pathname = usePathname();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-
-  const publicPaths = ['/login', '/auth/error', '/auth/callback'];
-  const isPublicPath = publicPaths.includes(pathname);
-
-  if (isPublicPath) {
-    return <>{children}</>;
-  }
 
   return (
     <div
