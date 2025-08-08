@@ -34,7 +34,7 @@ This document outlines the plan to implement the SubAgent specification.
     *   The frontend will use these updates to provide a real-time view of the agent's progress to the user.
 
 2.  **Testing:**
-    *   Create a new test file `app/tests/test_agent_flow.py` to test the end-to-end flow of the agent system.
+    *   Create a new test file `integration_tests/test_agent_flow.py` to test the end-to-end flow of the agent system.
     *   The test will simulate a user request and verify that the agents run in the correct order and that the final result is correct.
     *   The test will also verify that the WebSocket updates are sent correctly.
 
