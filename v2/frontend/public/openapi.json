@@ -1451,7 +1451,7 @@
           "frontend_url": {
             "type": "string",
             "title": "Frontend Url",
-            "default": "http://localhost:3000"
+            "default": "/"
           },
           "llm_configs": {
             "additionalProperties": {
