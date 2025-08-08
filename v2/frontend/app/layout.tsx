@@ -2,8 +2,8 @@
 
 import './globals.css';
 import { AuthProvider } from '@/hooks/useAuth';
-import { WebSocketProvider } from '@/app/providers/WebSocketProvider';
-import { AppWithLayout } from '@/app/components/AppWithLayout';
+import { WebSocketProvider } from '@/providers/WebSocketProvider';
+import { AppWithLayout } from '@/components/AppWithLayout';
 import { RootLayoutProps } from '@/types';
 
 export default function RootLayout({ children }: RootLayoutProps) {

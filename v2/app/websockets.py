@@ -1,7 +1,7 @@
 import asyncio
 import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Request
-from app.auth.auth_dependencies import ActiveUserWsDep, get_current_active_user_ws
+from app.auth.auth_dependencies import ActiveUserWsDep
 from app.agents.supervisor import Supervisor
 from app.schemas import WebSocketMessage, RequestModel
 from app.ws_manager import manager
