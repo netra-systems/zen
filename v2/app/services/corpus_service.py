@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy.orm import Session
 from ..db import models_postgres as models
 from .. import schemas
-from ..websockets import manager
+from ..ws_manager import manager
 from ..db.clickhouse import get_clickhouse_client
 from ..db.models_clickhouse import get_content_corpus_schema
 
