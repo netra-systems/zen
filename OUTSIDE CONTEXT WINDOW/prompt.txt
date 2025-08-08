@@ -1,2 +1,1 @@
-read: instructions.txt
-do: ws.txt
+read instructions.txt review chat_ui_ux.txt 
