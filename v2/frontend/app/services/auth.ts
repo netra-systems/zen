@@ -17,3 +17,28 @@ export async function getUser(): Promise<User | null> {
   }
   return response.json();
 }
+
+export const fetchUser = async (): Promise<User | null> => {
+  try {
+    const response = await fetch(`${API_URL}/api/auth/user`);
+    if (response.ok) {
+      const data = await response.json();
+      return data.user;
+    }
+  } catch (error) {
+    console.error("Error fetching user:", error);
+  }
+  return null;
+};
+
+export const handleLogin = (authConfig: AuthConfigResponse | null) => {
+  if (authConfig?.google_login_url) {
+    window.location.href = authConfig.google_login_url;
+  }
+};
+
+export const handleLogout = (authConfig: AuthConfigResponse | null) => {
+  if (authConfig?.logout_url) {
+    window.location.href = authConfig.logout_url;
+  }
+};

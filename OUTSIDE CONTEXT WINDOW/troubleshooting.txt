@@ -13,3 +13,7 @@ e.g. some specific similar thing in the data
 7: check if plan generated actually matches intention of spec
 8: frame things in positive - LLMs have trouble with negation
 9: Add something like "{spec_name}:ENDS"  at the end of the spec. Generally good to "wrap" context when possible.
+
+10: LLM s are good at "local" changes and struggle with "global" changes
+11: Try to align to the LLMs preference / "standard/averages" whenever reasonable
+this avoids having to "fight" the default without need

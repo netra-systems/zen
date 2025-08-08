@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, ReactNode, useState, useCallback } from 'react';
 import { User, AuthConfigResponse } from '@/types';
 import { Button } from '@/components/ui/button';
-import { getAuthConfig, login as authLogin, logout as authLogout } from '@/services/auth';
+import { getAuthConfig, handleLogin as authLogin, handleLogout as authLogout } from '@/services/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -58,15 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchUser]);
 
   const login = () => {
-    if (authConfig) {
-      authLogin(authConfig);
-    }
+    authLogin(authConfig);
   };
 
   const logout = () => {
-    if (authConfig) {
-      authLogout(authConfig);
-    }
+    authLogout(authConfig);
   };
 
   return (
