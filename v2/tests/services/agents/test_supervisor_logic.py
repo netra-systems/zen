@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, AsyncMock
-from app.services.agents.supervisor import Supervisor
+from app.agents.supervisor import Supervisor
 from app.schemas import AnalysisRequest, RequestModel, Settings
 from app.llm.llm_manager import LLMManager
 from app.websocket_manager import WebSocketManager

@@ -1,7 +1,8 @@
+
 import logging
 from typing import Any, Dict, List
 from app.agents.base import BaseSubAgent
-from app.schemas import AnalysisRequest, SubAgentLifecycle
+from app.schemas import SubAgentLifecycle
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -42,7 +43,7 @@ class Supervisor(BaseSubAgent):
                 }
             )
 
-        current_data = input_data
+        current_data = {"request": input_data}
         for i, agent in enumerate(self.sub_agents):
             self.run_states[run_id]["current_step"] = i + 1
             if stream_updates:

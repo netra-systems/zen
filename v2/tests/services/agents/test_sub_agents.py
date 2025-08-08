@@ -1,10 +1,10 @@
 import pytest
 from unittest.mock import MagicMock, AsyncMock
-from app.services.agents.triage_sub_agent import TriageSubAgent
-from app.services.agents.data_sub_agent import DataSubAgent
-from app.services.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-from app.services.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-from app.services.agents.reporting_sub_agent import ReportingSubAgent
+from app.agents.triage_sub_agent import TriageSubAgent
+from app.agents.data_sub_agent import DataSubAgent
+from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+from app.agents.reporting_sub_agent import ReportingSubAgent
 from app.schemas import AnalysisRequest, RequestModel, Settings
 from app.llm.llm_manager import LLMManager
 
