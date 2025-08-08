@@ -7,7 +7,7 @@ class WebSocketService {
     private ws: WebSocket | null = null;
     private status: WebSocketStatus = WebSocketStatus.Closed;
     private onStatusChangeCallbacks: ((status: WebSocketStatus) => void)[] = [];
-    private onMessageCallbacks: ((message: any) => void)[] = [];
+    private onMessageCallbacks: ((message: unknown) => void)[] = [];
 
     private constructor() {}
 
@@ -73,7 +73,7 @@ class WebSocketService {
         this.onStatusChangeCallbacks.push(callback);
     }
 
-    public onMessage(callback: (message: any) => void): void {
+    public onMessage(callback: (message: unknown) => void): void {
         this.onMessageCallbacks.push(callback);
     }
 

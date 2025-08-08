@@ -1,18 +1,9 @@
 
-import { openApi } from "openapi-zod-client";
-import { z } from "zod";
 
-const document = openApi.document({
-  openapi: "3.0.0",
-  info: {
-    title: "My API",
-    version: "1.0.0",
-  },
-  paths: {},
-});
+
 
 class ApiSpecService {
-  private spec: any = null;
+  private spec: unknown = null;
 
   async getSpec() {
     if (this.spec) {

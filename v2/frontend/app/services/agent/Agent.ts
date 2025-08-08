@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { AgentState, AgentListener, Reference, ToolCallChunk, ToolCall } from '@/types';
-import webSocketManager from '@/services/websocket';
+import webSocketManager from '@/services/websocketService';
 
 class Agent {
     private state: AgentState = {
@@ -60,7 +60,7 @@ class Agent {
         }
     }
 
-    private handleWebSocketMessage = (serverEvent: { event: string; data: any; run_id: string }) => {
+    private handleWebSocketMessage = (serverEvent: { event: string; data: unknown; run_id: string }) => {
         try {
             const { event: eventName, data, run_id } = serverEvent;
 
