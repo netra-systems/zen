@@ -1,6 +1,10 @@
 
 import json
-from pydantic import BaseModel
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).parent.parent))
+
 from app import schemas
 
 
@@ -11,7 +15,7 @@ def main():
     ]
     for model in models:
         with open(f"shared/{model.__name__}.json", "w") as f:
-            f.write(model.model_json_schema())
+            f.write(json.dumps(model.model_json_schema(), indent=2))
 
 
 if __name__ == "__main__":

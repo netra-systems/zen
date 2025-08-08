@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "email": {
+      "format": "email",
+      "title": "Email",
+      "type": "string"
+    },
+    "is_active": {
+      "default": true,
+      "title": "Is Active",
+      "type": "boolean"
+    },
+    "is_superuser": {
+      "default": false,
+      "title": "Is Superuser",
+      "type": "boolean"
+    },
+    "full_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Full Name"
+    },
+    "picture": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Picture"
+    },
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "email",
+    "id"
+  ],
+  "title": "User",
+  "type": "object"
+}
