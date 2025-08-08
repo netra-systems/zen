@@ -1,5 +1,6 @@
 import { WebSocketStatus } from '@/types';
-import config from '@/types';
+
+const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:8000';
 
 class WebSocketService {
     private static instance: WebSocketService;
@@ -23,7 +24,7 @@ class WebSocketService {
             return;
         }
 
-        const url = `${config.api.wsBaseUrl}/ws?token=${token}`;
+        const url = `${WEBSOCKET_URL}/ws?token=${token}`;
         this.setStatus(WebSocketStatus.Connecting);
         console.log('WebSocket connecting to:', url);
         this.ws = new WebSocket(url);

@@ -1,6 +1,6 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { AgentState, UseAgentReturn, Reference } from '@/types';
+import { agent } from '@/services/agent/Agent';
 
 export function useAgent(): UseAgentReturn {
     const [state, setState] = useState<AgentState>({ messages: [], isThinking: false, error: null, toolArgBuffers: {} });
