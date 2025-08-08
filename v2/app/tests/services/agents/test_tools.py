@@ -1,5 +1,5 @@
 import pytest
-from app.services.deepagents.tool_dispatcher import ToolDispatcher
+from app.services.agents.tool_dispatcher import ToolDispatcher
 from langchain_core.tools import tool
 
 @tool
@@ -17,4 +17,4 @@ async def test_tool_dispatcher():
 async def test_tool_dispatcher_tool_not_found():
     dispatcher = ToolDispatcher(tools=[mock_tool])
     result = await dispatcher.dispatch("non_existent_tool", a=1, b=2)
-    assert result.message == "Tool 'non_existent_tool' not found."
+    assert "Tool 'non_existent_tool' not found" in result.payload
