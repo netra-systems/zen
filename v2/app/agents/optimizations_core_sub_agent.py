@@ -17,7 +17,6 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
 
     async def run(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
         logger.info(f"OptimizationsCoreSubAgent starting for run_id: {run_id}")
-        self.set_state(SubAgentLifecycle.RUNNING)
 
         prompt = optimizations_core_prompt_template.format(data=input_data["data_result"])
 
@@ -32,7 +31,6 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
             }
 
         logger.info(f"OptimizationsCoreSubAgent finished for run_id: {run_id}")
-        self.set_state(SubAgentLifecycle.COMPLETED)
 
         input_data["optimizations_result"] = optimizations_result
         return input_data

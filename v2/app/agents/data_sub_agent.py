@@ -17,7 +17,6 @@ class DataSubAgent(BaseSubAgent):
 
     async def run(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
         logger.info(f"DataSubAgent starting for run_id: {run_id}")
-        self.set_state(SubAgentLifecycle.RUNNING)
 
         prompt = data_prompt_template.format(triage_result=input_data["triage_result"])
 
@@ -32,7 +31,6 @@ class DataSubAgent(BaseSubAgent):
             }
 
         logger.info(f"DataSubAgent finished for run_id: {run_id}")
-        self.set_state(SubAgentLifecycle.COMPLETED)
 
         input_data["data_result"] = data_result
         return input_data

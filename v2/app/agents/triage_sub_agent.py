@@ -17,7 +17,6 @@ class TriageSubAgent(BaseSubAgent):
 
     async def run(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
         logger.info(f"TriageSubAgent starting for run_id: {run_id}")
-        self.set_state(SubAgentLifecycle.RUNNING)
 
         prompt = triage_prompt_template.format(user_request=input_data["request"]["query"])
 
@@ -32,7 +31,6 @@ class TriageSubAgent(BaseSubAgent):
             }
 
         logger.info(f"TriageSubAgent finished for run_id: {run_id}")
-        self.set_state(SubAgentLifecycle.COMPLETED)
 
         input_data["triage_result"] = triage_result
         return input_data

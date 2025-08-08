@@ -44,6 +44,8 @@ class Supervisor(BaseSubAgent):
         current_data = {"request": input_data}
         for i, agent in enumerate(self.sub_agents):
             self.run_states[run_id]["current_step"] = i + 1
+            
+            agent.set_state(SubAgentLifecycle.RUNNING)
             if stream_updates:
                 await self.websocket_manager.send_to_client(
                     run_id,
@@ -58,8 +60,8 @@ class Supervisor(BaseSubAgent):
             
             current_data = await agent.run(current_data, run_id, stream_updates)
 
+            agent.set_state(SubAgentLifecycle.COMPLETED)
             if stream_updates:
-                agent.set_state(SubAgentLifecycle.COMPLETED)
                 await self.websocket_manager.send_to_client(
                     run_id,
                     WebSocketMessage(

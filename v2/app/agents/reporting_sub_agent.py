@@ -17,7 +17,6 @@ class ReportingSubAgent(BaseSubAgent):
 
     async def run(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
         logger.info(f"ReportingSubAgent starting for run_id: {run_id}")
-        self.set_state(SubAgentLifecycle.RUNNING)
 
         prompt = reporting_prompt_template.format(action_plan=input_data["action_plan_result"])
 
@@ -32,7 +31,6 @@ class ReportingSubAgent(BaseSubAgent):
             }
 
         logger.info(f"ReportingSubAgent finished for run_id: {run_id}")
-        self.set_state(SubAgentLifecycle.COMPLETED)
 
         input_data["report_result"] = report_result
         return input_data
