@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import { WebSocketMessage } from '../types';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface WebSocketContextType {
   sendMessage: (type: string, payload: any) => void;

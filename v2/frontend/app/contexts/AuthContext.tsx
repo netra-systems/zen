@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, ReactNode, useState, useCallback 
 import useAppStore from '@/store';
 import { User } from '@/types';
 import { Button } from '@/components/ui/button';
-import { devLogin } from '@/services/authService';
 
 interface AuthContextType {
   user: User | null;
@@ -14,7 +13,7 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { user, setUser, isLoading, setLoading } = useAppStore();
+  const { user, isLoading, devLogin, logout, fetchUser } = useAppStore();
   const [authEndpoints, setAuthEndpoints] = useState<any>(null);
 
   const fetchEndpoints = useCallback(async () => {
@@ -23,34 +22,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
       setAuthEndpoints(data);
       if (data.user) {
-        setUser(data.user);
+        const token = document.cookie.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1];
+        if (token) {
+          fetchUser(token);
+        }
       } else if (data.development_mode) {
-        // In dev mode, we might auto-login the dev user
-        const devUser = await devLogin();
-        setUser(devUser);
+        devLogin();
       }
     } catch (error) {
       console.error("Failed to fetch auth endpoints:", error);
     }
-  }, [setUser]);
+  }, [devLogin, fetchUser]);
 
   useEffect(() => {
-    setLoading(true);
-    fetchEndpoints().finally(() => setLoading(false));
-  }, [fetchEndpoints, setLoading]);
+    fetchEndpoints();
+  }, [fetchEndpoints]);
 
   const login = () => {
     if (authEndpoints?.endpoints?.login) {
       window.location.href = authEndpoints.endpoints.login;
-    }
-  };
-
-  const logout = async () => {
-    if (authEndpoints?.endpoints?.logout) {
-      await fetch(authEndpoints.endpoints.logout);
-      setUser(null);
-      // After logout, we might want to re-fetch endpoints to see if we should dev-login
-      fetchEndpoints();
     }
   };
 
@@ -68,3 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     </AuthContext.Provider>
   );
 }
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

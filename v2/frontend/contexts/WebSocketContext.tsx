@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { webSocketService, WebSocketStatus } from '../services/webSocketService';
-import { Message, MessageType } from '@/types';
+import { Message, MessageType } from '../types';
 
 interface WebSocketContextType {
   status: WebSocketStatus;
