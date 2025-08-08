@@ -27,6 +27,7 @@ from app.services.key_manager import KeyManager
 from app.auth.services import SecurityService
 from app.background import BackgroundTaskManager
 from app.websockets import manager as websocket_manager
+from app.redis_manager import redis_manager
 
 
 @asynccontextmanager
@@ -38,6 +39,9 @@ async def lifespan(app: FastAPI):
     start_time = time.time()
     logger = central_logger.get_logger(__name__)
     logger.info("Application startup...")
+
+    await redis_manager.connect()
+    app.state.redis_manager = redis_manager
 
     app.state.background_task_manager = BackgroundTaskManager()
 
@@ -55,7 +59,7 @@ async def lifespan(app: FastAPI):
     app.state.db_session_factory = async_session_factory
 
     # Initialize the agent supervisor
-    app.state.agent_supervisor = Supervisor(app.state.db_session_factory, app.state.llm_manager, websocket_manager)
+        app.state.agent_supervisor = Supervisor(app.state.db_session_factory, app.state.llm_manager, websocket_manager, app.state.tool_dispatcher)
     app.state.agent_service = AgentService(app.state.agent_supervisor)
     
     elapsed_time = time.time() - start_time
@@ -68,6 +72,8 @@ async def lifespan(app: FastAPI):
         logger.info("Application shutdown initiated...")
         await app.state.background_task_manager.shutdown()
         await app.state.agent_supervisor.shutdown()
+        await websocket_manager.shutdown()
+        await redis_manager.disconnect()
         central_logger.shutdown()
         logger.info("Application shutdown complete.")
 
