@@ -1,6 +1,8 @@
+import { useWebSocket } from './websocket';
 
-import webSocketService from './websocket';
-
-export const connectToDevWebSocket = (onMessage: (message: string) => void) => {
-    webSocketService.onMessage(onMessage);
+export const useDevWebSocket = (onMessage: (message: any) => void) => {
+    const { lastJsonMessage } = useWebSocket();
+    if (lastJsonMessage) {
+        onMessage(lastJsonMessage);
+    }
 };

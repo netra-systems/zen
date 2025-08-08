@@ -1,22 +1,31 @@
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ChatInput } from '@/components/ChatInput';
+import { ChatInput } from '@/app/components/ChatInput';
 import { examplePrompts } from '@/lib/examplePrompts';
 
 // Mock the apiService
-jest.mock('../../api', () => ({
+jest.mock('@/app/services/api', () => ({
   apiService: {
     getReferences: jest.fn().mockResolvedValue({ references: [] }),
     startAgent: jest.fn(),
   },
 }));
 
-// Mock the store
-jest.mock('../../store', () => ({
-    __esModule: true,
-    default: jest.fn(() => ({
-        token: 'test-token',
-    })),
+// Mock the AuthContext
+jest.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => ({
+    user: { id: 'test-user', email: 'test@example.com' },
+    login: jest.fn(),
+    logout: jest.fn(),
+  }),
+}));
+
+// Mock the WebSocket hook
+jest.mock('@/app/hooks/useWebSocket', () => ({
+  useWebSocket: () => ({
+    sendMessage: jest.fn(),
+  }),
 }));
 
 describe('ChatInput', () => {

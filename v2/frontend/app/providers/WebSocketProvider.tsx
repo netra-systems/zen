@@ -1,86 +1,40 @@
-
-"use client";
-
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { WebSocketStatus } from '@/types';
-
-const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:8000';
+import React, { createContext, useContext, useEffect, ReactNode } from 'react';
+import { useWebSocket } from '@/app/services/websocket';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface WebSocketContextType {
-  ws: WebSocket | null;
-  status: WebSocketStatus;
-  lastJsonMessage: any;
-  sendMessage: (message: any) => void;
-  connect: (token: string) => void;
-  disconnect: () => void;
+  sendMessage: (payload: any) => void;
 }
 
-const WebSocketContext = createContext<WebSocketContextType | null>(null);
+const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
 
-export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [ws, setWs] = useState<WebSocket | null>(null);
-  const [status, setStatus] = useState<WebSocketStatus>(WebSocketStatus.Closed);
-  const [lastJsonMessage, setLastJsonMessage] = useState<any>(null);
+export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  const { connect, disconnect, sendMessage } = useWebSocket();
 
-  const connect = useCallback((token: string) => {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      console.log('WebSocket already connected.');
-      return;
+  useEffect(() => {
+    if (user?.token) {
+      connect(user.token);
     }
 
-    const url = `${WEBSOCKET_URL}/ws?token=${token}`;
-    setStatus(WebSocketStatus.Connecting);
-    console.log('WebSocket connecting to:', url);
-
-    const newWs = new WebSocket(url);
-
-    newWs.onopen = () => {
-      console.log('WebSocket connection established.');
-      setWs(newWs);
-      setStatus(WebSocketStatus.Open);
-    };
-
-    newWs.onclose = () => {
-      console.log('WebSocket connection closed.');
-      setStatus(WebSocketStatus.Closed);
-      setWs(null);
-    };
-
-    newWs.onerror = (event) => {
-      console.error('WebSocket error:', event);
-      setStatus(WebSocketStatus.Error);
-    };
-
-    newWs.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data);
-        setLastJsonMessage(message);
-      } catch (error) {
-        console.error('Failed to parse WebSocket message:', error, 'Received data:', event.data);
+    return () => {
+      if (user) {
+        disconnect();
       }
     };
-  }, [ws]);
-
-  const disconnect = useCallback(() => {
-    if (ws) {
-      console.log('Disconnecting WebSocket.');
-      ws.close();
-    }
-  }, [ws]);
-
-  const sendMessage = useCallback((message: any) => {
-    if (ws?.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify(message));
-    } else {
-      console.error('WebSocket is not open. Cannot send message.');
-    }
-  }, [ws]);
+  }, [user, connect, disconnect]);
 
   return (
-    <WebSocketContext.Provider value={{ ws, status, lastJsonMessage, sendMessage, connect, disconnect }}>
+    <WebSocketContext.Provider value={{ sendMessage }}>
       {children}
     </WebSocketContext.Provider>
   );
 };
 
-export { useWebSocket } from '@/app/hooks/useWebSocket';
+export const useWebSocketContext = (): WebSocketContextType => {
+  const context = useContext(WebSocketContext);
+  if (!context) {
+    throw new Error('useWebSocketContext must be used within a WebSocketProvider');
+  }
+  return context;
+};

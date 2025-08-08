@@ -1,9 +1,5 @@
-export interface User {
-    id: string;
-    full_name?: string;
-    email: string;
-    picture?: string;
-}
+
+export * from '../../shared/types';
 
 // --- Message Types ---
 
@@ -310,11 +306,6 @@ export enum WebSocketStatus {
     Closing = 'Closing',
     Closed = 'Closed',
     Error = 'Error',
-}
-
-export interface WebSocketMessage {
-    type: string;
-    payload: Record<string, unknown>;
 }
 
 // --- Reference Picker ---

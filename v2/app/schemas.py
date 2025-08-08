@@ -1,3 +1,4 @@
+
 # netra_apex/models/schemas.py
 #
 # Copyright (C) 2025, netra apex Inc.
@@ -136,7 +137,7 @@ class StartAgentMessage(BaseModel):
 class WebSocketMessage(BaseModel):
     event: str
     data: Any
-    run_id: str
+    run_id: Optional[str] = None
 
 class RunCompleteMessage(WebSocketMessage):
     event: str = "run_complete"

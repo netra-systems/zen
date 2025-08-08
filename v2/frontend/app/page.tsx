@@ -1,10 +1,9 @@
-
 import React from 'react';
-import { useWebSocket } from '@/contexts/WebSocketProvider';
+import { useWebSocketContext } from '@/app/providers/WebSocketProvider';
 import { useAuth } from '@/contexts/AuthContext';
 
 const HomePage: React.FC = () => {
-  const { sendMessage } = useWebSocket();
+  const { sendMessage } = useWebSocketContext();
   const { user, login, logout } = useAuth();
 
   const handleSendMessage = () => {

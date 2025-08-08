@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { User } from '@/types';
-import { useWebSocketStore } from './websocket';
+import { useWebSocket } from '@/app/services/websocket';
 
 interface AppState {
   user: User | null;
@@ -72,7 +72,7 @@ const useAppStore = create<AppState>()(
     initializeWebSocket: () => {
       const token = document.cookie.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1];
       if (token) {
-        const { connect } = useWebSocketStore.getState();
+        const { connect } = useWebSocket.getState();
         connect(token);
       }
     },
