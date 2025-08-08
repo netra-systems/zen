@@ -6,6 +6,9 @@ import { useWebSocketStore } from './websocket';
 interface AppState {
   user: User | null;
   isLoading: boolean;
+  token: string | null;
+  setToken: (token: string) => void;
+  clearAuth: () => void;
   fetchUser: (token: string) => Promise<void>;
   devLogin: () => Promise<void>;
   logout: () => void;
@@ -16,6 +19,9 @@ const useAppStore = create<AppState>()(
   devtools((set) => ({
     user: null,
     isLoading: true,
+    token: null,
+    setToken: (token) => set({ token }),
+    clearAuth: () => set({ user: null, token: null }),
     fetchUser: async (token) => {
       try {
         const response = await fetch('http://localhost:8000/api/v3/auth/users/me', {
