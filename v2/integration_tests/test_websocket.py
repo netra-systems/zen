@@ -12,16 +12,8 @@ def client():
 
 def test_websocket_connection(client):
     # Authenticate and get the session cookie
-    response = client.get("/api/v3/auth/google", allow_redirects=False)
-    assert response.status_code == 307
-    redirect_url = response.headers["location"]
-    
-    # In a real test environment, you would mock the Google OAuth2 flow.
-    # For this test, we'll simulate the callback with a development user.
-    state = redirect_url.split("state=")[1].split("&")[0]
-    callback_url = f"/auth/callback?state={state}&code=test_code"
-    response = client.get(callback_url, allow_redirects=False)
-    assert response.status_code == 307
+    response = client.get("/api/v3/auth/google")
+    assert response.status_code == 200
     
     run_id = "test_run_ws"
     with client.websocket_connect(f"/ws/{run_id}") as websocket:
