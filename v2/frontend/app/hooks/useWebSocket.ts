@@ -1,29 +1,28 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+
+import { useState, useEffect, useCallback } from 'react';
 import { WebSocketStatus } from '@/app/types';
-import webSocketService from '@/app/services/websocketService';
+import webSocketService from '@/app/services/websocket';
 
 const useWebSocket = () => {
     const [status, setStatus] = useState<WebSocketStatus>(WebSocketStatus.Closed);
-    const [lastJsonMessage, setLastJsonMessage] = useState<any | null>(null);
-
-    const handleMessage = useCallback((message: any) => {
-        setLastJsonMessage(message);
-    }, []);
+    const [lastJsonMessage, setLastJsonMessage] = useState<any>(null);
 
     useEffect(() => {
+        const handleMessage = (message: any) => {
+            setLastJsonMessage(message);
+        };
+
         webSocketService.onStatusChange(setStatus);
         webSocketService.onMessage(handleMessage);
 
-        // The connection should be initiated elsewhere, for example, in a context or on app load.
-
         return () => {
-            // Disconnecting here might not be desirable for a persistent connection.
+            // Cleanup if necessary
         };
-    }, [handleMessage]);
+    }, []);
 
-    const sendMessage = (message: any) => {
+    const sendMessage = useCallback((message: object) => {
         webSocketService.sendMessage(message);
-    };
+    }, []);
 
     return { status, lastJsonMessage, sendMessage, connect: webSocketService.connect.bind(webSocketService) };
 };

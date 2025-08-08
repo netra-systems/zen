@@ -1,4 +1,3 @@
-
 import { WebSocketStatus } from '@/app/types';
 import config from '@/config';
 
@@ -18,13 +17,13 @@ class WebSocketService {
         return WebSocketService.instance;
     }
 
-    public connect(token: string, runId: string): void {
+    public connect(token: string): void {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             console.log('WebSocket already connected.');
             return;
         }
 
-        const url = `${config.apiBaseUrl.replace(/^http/, 'ws')}/ws/agent/${runId}?token=${token}`;
+        const url = `${config.api.wsBaseUrl}/ws/ws?token=${token}`;
         this.setStatus(WebSocketStatus.Connecting);
         console.log('WebSocket connecting to:', url);
         this.ws = new WebSocket(url);

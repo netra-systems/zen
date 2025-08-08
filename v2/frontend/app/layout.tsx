@@ -2,7 +2,7 @@
 
 import './globals.css';
 import { AuthProvider } from '@/hooks/useAuth';
-import { WebSocketProvider } from '@/app/services/agent/WebSocketProvider';
+import { WebSocketProvider } from '@/app/providers/WebSocketProvider';
 import { AppWithLayout } from '@/app/components/AppWithLayout';
 import { RootLayoutProps } from '@/types';
 
