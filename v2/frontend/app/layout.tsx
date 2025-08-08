@@ -4,7 +4,7 @@ import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 import { AppWithLayout } from '@/app/components/AppWithLayout';
-import { RootLayoutProps } from '@/types/index';
+import { RootLayoutProps } from '@/types';
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
