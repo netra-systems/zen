@@ -1,18 +1,21 @@
-import { useAuth } from '@/contexts/AuthContext';
+
+'use client';
+
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 
-const LoginButton = () => {
-  const { login, logout, user } = useAuth();
+export default function LoginButton() {
+  const { user, login, logout } = useAuth();
 
-  return (
-    <div>
-      {user ? (
-        <Button onClick={logout} size="lg">Logout</Button>
-      ) : (
-        <Button onClick={login} size="lg">Login with Google</Button>
-      )}
-    </div>
-  );
-};
+  if (user) {
+    return (
+      <div className="flex items-center gap-4">
+        <img src={user.picture} alt={user.full_name} className="w-8 h-8 rounded-full" />
+        <span>{user.full_name}</span>
+        <Button onClick={logout}>Logout</Button>
+      </div>
+    );
+  }
 
-export default LoginButton;
+  return <Button onClick={login}>Login with Google</Button>;
+}
