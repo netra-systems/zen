@@ -24,5 +24,7 @@ WS:1:0:2:0: WS Startup profile: When application starts up or reloads, WS are av
 WS:1:0:2:1: If the front end sends a socket but the backend rejects, it must be logged clearly. 
 WS:1:0:2:2: Backend sends responses using a single source of truth to manage WS.
 WS:1:0:2:4: Backend: Always complete JSON objects.
+WS:1:0:2:5: The backend provides discovery of WS config to frontend.
+WS:1:0:2:5:1: The frontend discovers WS config at earilest reasonable application state.
 
 WS:ENDS
