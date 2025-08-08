@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect } from 'react';
 import { useAgent } from '../hooks/useAgent';
-import { useWebSocketContext } from './WebSocketProvider';
+import { useWebSocketStore } from '@/store/websocket';
 import { UseAgentReturn, WebSocketStatus } from '../types';
 
 interface AgentContextValue extends UseAgentReturn {
@@ -14,7 +14,7 @@ const AgentContext = createContext<AgentContextValue | undefined>(undefined);
 
 export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
     const agent = useAgent();
-    const { status: wsStatus, lastJsonMessage, sendMessage: sendWsMessage } = useWebSocketContext();
+    const { status: wsStatus, lastJsonMessage, sendMessage: sendWsMessage } = useWebSocketStore();
 
     useEffect(() => {
         if (lastJsonMessage) {

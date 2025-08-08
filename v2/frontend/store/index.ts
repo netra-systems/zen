@@ -64,8 +64,11 @@ const useAppStore = create<AppState>()(
       set({ user: null });
     },
     initializeWebSocket: () => {
-      const { connect } = useWebSocketStore.getState();
-      connect();
+      const token = document.cookie.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1];
+      if (token) {
+        const { connect } = useWebSocketStore.getState();
+        connect(token);
+      }
     },
   }))
 );
