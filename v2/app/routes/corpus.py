@@ -1,6 +1,6 @@
 
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
 from sqlalchemy.orm import Session
 from .. import schemas
 from ..services import corpus_service
@@ -13,13 +13,13 @@ router = APIRouter()
 @router.post("/", response_model=schemas.Corpus)
 def create_corpus(
     corpus: schemas.CorpusCreate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    background_tasks: BackgroundTasks = None
 ):
-    # In a real application, you would add this to a background task queue
-    # background_tasks.add_task(some_long_running_task, args)
-    return corpus_service.create_corpus(db=db, corpus=corpus, user_id=current_user.id)
+    db_corpus = corpus_service.create_corpus(db=db, corpus=corpus, user_id=current_user.id)
+    request.app.state.background_task_manager.add_task(corpus_service.generate_corpus_task(db_corpus.id, db))
+    return db_corpus
 
 @router.get("/", response_model=List[schemas.Corpus])
 def read_corpora(

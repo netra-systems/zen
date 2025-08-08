@@ -1,8 +1,10 @@
 
+import asyncio
 from sqlalchemy.orm import Session
 from ..db import models_postgres as models
 from .. import schemas
 from fastapi import HTTPException
+from ..websocket_manager import manager
 
 def get_corpus(db: Session, corpus_id: str):
     return db.query(models.Corpus).filter(models.Corpus.id == corpus_id).first()
@@ -15,6 +17,17 @@ def create_corpus(db: Session, corpus: schemas.CorpusCreate, user_id: str):
     db.add(db_corpus)
     db.commit()
     db.refresh(db_corpus)
-    # Here you would trigger a background task
-    # For now, we'll just return the created object
     return db_corpus
+
+async def generate_corpus_task(corpus_id: str, db: Session):
+    # Simulate a long-running task
+    for i in range(10):
+        await asyncio.sleep(1)
+        progress = (i + 1) * 10
+        db.query(models.Corpus).filter(models.Corpus.id == corpus_id).update({"status": f"running: {progress}%"})
+        db.commit()
+        await manager.broadcast(f"Corpus {corpus_id} progress: {progress}%")
+    
+    db.query(models.Corpus).filter(models.Corpus.id == corpus_id).update({"status": "completed"})
+    db.commit()
+    await manager.broadcast(f"Corpus {corpus_id} completed")
