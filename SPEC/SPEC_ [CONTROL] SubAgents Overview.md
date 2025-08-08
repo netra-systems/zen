@@ -1,4 +1,4 @@
-SPEC: [CONTROL] SubAgents Overview
+SPEC: SubAgents Overview
 
 1:0:0: Spec: PRIMARY GOAL: Dedicated SubAgent Specification: 
 
@@ -18,14 +18,12 @@ SPEC: [CONTROL] SubAgents Overview
 
 1:0:2: General:
 
-1:0:2:0: Triple check all existing tools and functions are KEPT. This is only about ADDING and organizing subagent concepts. SubAgents may share many tools if needed.  Modular concepts. Expect other subagents to be in the future.
+1:0:2:0: Validate all existing tools and functions are KEPT. This is only about ADDING and organizing subagent concepts. SubAgents may share many tools if needed.  Modular concepts. Expect other subagents to be in the future.
 
 1:0:2:1: Test the default flow: Input from user: SupervisorAgent: TriageSubAgent: SupervisorAgent: DataSubAgent: SupervisorAgent: OptimizationsCoreSubAgent: SupervisorAgent: ActionsToMeetGoalsSubAgent: SupervisorAgent: ReportingAgent: SupervisorAgent: Output back to user
 
-1:0:2:2: WS connection validate WS is working correctly end to end. From user example message through WS back and forth through final message.
-
-1:0:2:3: Update documentation in docs/subagents.md on 1:0:0-1:011 and related concepts.
+1:0:2:2: WS Integrations: Validate all Agent WS and communication end to end.
 1:0:2:4: Check Lifecycle and shut down concepts
-1:0:2:5: Every SubAgent have all required fields to operate completed. E.g. its prompt definition etc. all completely filled out. 
+1:0:2:5: Every SubAgent has all required fields to operate completed. E.g. its prompt definition etc. all completely filled out. 
 
 Remember: 0:7.  Remember: 0:1 to 0:7 to 1 including all sub items 1:0:0 through 1:0:2.
