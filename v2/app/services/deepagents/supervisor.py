@@ -9,6 +9,7 @@ from app.services.deepagents.subagents.optimizations_core_sub_agent import Optim
 from app.services.deepagents.subagents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from app.services.deepagents.subagents.reporting_sub_agent import ReportingSubAgent
 from langgraph.graph import StateGraph, END
+from langchain_core.messages import HumanMessage
 from app.schemas import AnalysisRequest
 from app.connection_manager import ConnectionManager
 from app.services.deepagents.tool_dispatcher import ToolDispatcher
@@ -106,7 +107,7 @@ class Supervisor:
         """Starts the agent with the given analysis request."""
         logger.info(f"Starting agent for run_id: {run_id})")
         initial_state = DeepAgentState(
-            messages=[HumanMessage(content=analysis_request.request.data['message'])],
+            messages=[HumanMessage(content=analysis_request.request.query)],
             run_id=run_id,
             stream_updates=stream_updates,
             analysis_request=analysis_request,

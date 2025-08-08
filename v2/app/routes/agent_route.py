@@ -32,20 +32,7 @@ async def start_agent(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/start_agent_streaming/{client_id}")
-async def start_agent_streaming(
-    analysis_request: AnalysisRequest,
-    client_id: str,
-    supervisor: Supervisor = Depends(get_agent_supervisor),
-):
-    """
-    Starts the agent and streams updates to the client.
-    """
-    try:
-        result = await supervisor.start_agent(analysis_request, client_id, stream_updates=True)
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/{run_id}/status")
 async def get_agent_status(run_id: str, supervisor: Supervisor = Depends(get_agent_supervisor)):

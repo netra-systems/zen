@@ -3,12 +3,22 @@ import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Request
 from app.auth.auth_dependencies import ActiveUserWsDep
 from app.connection_manager import manager
-from app.services.agent_service import AgentService, get_agent_service
+from app.services.deepagents.supervisor import Supervisor
+from app.schemas import AnalysisRequest
+from app.llm.llm_manager import LLMManager
+from app.db.session import get_db_session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 
+def get_llm_manager_from_state(request: Request) -> LLMManager:
+    return request.app.state.llm_manager
+
+def get_agent_supervisor(request: Request, db_session: AsyncSession = Depends(get_db_session), llm_manager: LLMManager = Depends(get_llm_manager_from_state)) -> Supervisor:
+    return Supervisor(db_session, llm_manager, manager)
+
 @router.websocket("/{run_id}")
-async def websocket_endpoint(websocket: WebSocket, run_id: str, user: ActiveUserWsDep, agent_service: AgentService = Depends(get_agent_service)):
+async def websocket_endpoint(websocket: WebSocket, run_id: str, user: ActiveUserWsDep, supervisor: Supervisor = Depends(get_agent_supervisor)):
     await manager.connect(websocket, run_id)
     try:
         while True:
@@ -17,7 +27,13 @@ async def websocket_endpoint(websocket: WebSocket, run_id: str, user: ActiveUser
                 if data == 'ping':
                     await websocket.send_text('pong')
                     continue
-                await agent_service.handle_websocket_message(run_id, data)
+                
+                try:
+                    analysis_request = AnalysisRequest.parse_raw(data)
+                    await supervisor.start_agent(analysis_request, run_id, stream_updates=True)
+                except Exception as e:
+                    await websocket.send_text(f"Error parsing message: {e}")
+
             except asyncio.TimeoutError:
                 # No message received within the timeout period, continue listening
                 continue
