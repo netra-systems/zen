@@ -25,3 +25,7 @@ If it's not defined in a spec, or loaded externally, assume it can be deleted at
 
 15: Use concepts like service discovery so that the LLM can do something locally correct that
 ends up globaly correct still. esentially "clean contracts".
+
+16: prompt "continue" when needed
+17: watch context window. Usually "good" prompts and context will use less of it
+e.g. leaning into tool use over global context pollution

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import useAppStore from '@/store';
+import { useAppStore } from '@/store';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';

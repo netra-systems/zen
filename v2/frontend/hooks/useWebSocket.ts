@@ -23,6 +23,8 @@ export const useWebSocket = () => {
         }
       } else if (message.type === 'agent_started') {
         setProcessing(true);
+      } else if (message.type === 'broadcast') {
+        console.log('Broadcast message received:', message.payload);
       }
     }
   }, [webSocketContext?.lastMessage, addMessage, setSubAgentName, setSubAgentStatus, setProcessing]);

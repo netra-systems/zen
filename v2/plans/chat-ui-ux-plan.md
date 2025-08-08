@@ -1,75 +1,56 @@
 # Chat UI/UX Implementation Plan
 
-This document outlines the plan to implement the features and improvements for the chat interface as specified in `chat_ui_ux.txt`.
+This document outlines the plan to implement the chat UI/UX, as specified in `chat_ui_ux.txt`.
 
-## 1. Project Setup & Analysis
+## 1. Backend Changes
 
-*   **Analyze Existing Code:** Review the existing chat components, state management, and type definitions to ensure the new implementation is consistent with the current architecture.
-*   **Key Files for Review:**
-    *   `frontend/app/chat/page.tsx`: Main entry point for the chat page.
-    *   `frontend/components/Chat.tsx`: Core chat component.
-    *   `frontend/store/index.ts`: Zustand store for chat state.
-    *   `frontend/types/chat.ts` & `frontend/types/index.ts`: Type definitions.
-    *   `frontend/hooks/useWebSocket.ts`: WebSocket handling logic.
-    *   `app/schemas.py`: Backend Pydantic schemas for data consistency.
+### 1.1. `schemas.py`
+- **`MessageToUser`:** Create a new Pydantic schema `MessageToUser` which will define the structure of messages sent to the user. This will include fields for the message content, the sender (user or agent), and any relevant metadata. This will address `chat_ui_ux:1:0:6`.
+- **`SubAgentStatus`:** Create a new Pydantic schema `SubAgentStatus` to represent the status of a sub-agent. This will include the agent's name, the tools it's currently using, and its current state. This will address `chat_ui_ux:1:0:1:0`.
 
-## 2. Type Definition (`frontend/types/chat.ts`)
+### 1.2. WebSocket Broadcasting
+- **`ws_manager.py`:** The `ws_manager` will be updated to broadcast `SubAgentStatus` updates to the frontend. This will allow the UI to display the current status of each sub-agent in real-time.
+- **Agent Integration:** The `Supervisor` agent will be responsible for sending `MessageToUser` and `SubAgentStatus` updates through the `ws_manager`.
 
-*   **Refine Message Types:** Create a more detailed `Message` type in `frontend/types/chat.ts` that aligns with the `schemas.py` `Message` model. This will include fields like `id`, `created_at`, `content`, `type`, `sub_agent_name`, `tool_info`, `raw_data`, and `displayed_to_user`.
-*   **Displayable Messages:** Introduce a mechanism or a specific type to filter which messages are displayed to the user by default, based on the `displayed_to_user` flag from the backend.
+## 2. Frontend Implementation
 
-## 3. State Management (`frontend/store/index.ts`)
+### 2.1. `types/index.ts`
+- **`MessageToUser`:** Create a new TypeScript type `MessageToUser` that mirrors the Pydantic schema on the backend.
+- **`SubAgentStatus`:** Create a new TypeScript type `SubAgentStatus` that mirrors the Pydantic schema on the backend.
 
-*   **Update Chat Store:** Enhance the `useChatStore` to manage the new, more detailed message objects.
-*   **Add State for Stop Button:** Include a state to handle the "Stop" button's status (e.g., `isProcessing`, `canStop`).
+### 2.2. `services/websocket.ts`
+- The websocket service will be updated to handle incoming `MessageToUser` and `SubAgentStatus` messages.
+- It will provide a way for components to subscribe to these messages.
 
-## 4. Component Implementation
+### 2.3. Chat UI Components
 
-*   **`chat/Header.tsx`:**
-    *   Display the `subAgentName` from the `useChatStore`.
-    *   Display the `subAgentStatus` (lifecycle state) from the `useChatStore`.
-    *   Add an indicator for tool usage when available in the message stream.
-*   **`chat/Message.tsx`:**
-    *   Update the component to render the new `Message` type.
-    *   Display user messages with their text and any associated references.
-    *   Render different message types (user, agent, tool, error) with distinct styling.
-    *   Implement collapsible sections using a UI component like `Collapsible` for displaying complex data (e.g., `tool_info`, `raw_data`).
-*   **`chat/JsonViewer.tsx`:**
-    *   Create a new component that renders a JSON object in an expandable tree view.
-    *   Integrate this component into `Message.tsx` under a "Raw" expandable section.
-*   **`chat/StopButton.tsx`:**
-    *   Create a button that, when clicked, sends a `stop_agent` WebSocket message.
-    *   The button should be enabled only when a process is running.
-*   **`chat/MessageList.tsx`:**
-    *   Update to filter messages based on the `displayed_to_user` flag.
-*   **`chat/page.tsx`:**
-    *   Integrate all the new and updated components to form the complete chat UI.
+- **`components/Chat.tsx`:** This will be the main chat component. It will:
+    - Display the conversation history, including messages from the user and the agent.
+    - Display the current status of the sub-agents.
+    - Provide an input field for the user to send messages.
+    - Include a "Stop" button to send a "stop" message to the backend. (`chat_ui_ux:1:0:10`)
 
-## 5. WebSocket Integration (`frontend/hooks/useWebSocket.ts`)
+- **`components/Message.tsx`:** This component will render a single message in the conversation. It will:
+    - Differentiate between user messages and agent messages.
+    - Display user messages with the user's text and any references. (`chat_ui_ux:1:0:7`)
+    - Display agent messages, with a collapsible "Raw" view to show the full JSON object. (`chat_ui_ux:1:0:9`)
 
-*   **Update Message Handling:** Modify the `useWebSocket` hook to handle the new `WebSocketMessage` structure from `schemas.py`.
-*   **Stop Message:** Implement the logic to send the `stop_agent` message when the stop button is clicked.
+- **`components/SubAgentStatus.tsx`:** This component will display the status of a single sub-agent. It will:
+    - Display the agent's name as the primary header. (`chat_ui_ux:1:0:1`)
+    - Display the tools the agent is currently using. (`chat_ui_ux:1:0:1:0`)
+    - Be updated in real-time as the agent's status changes.
 
-## 6. UI/UX Enhancements
+### 2.4. State Management (`store/chat.ts`)
+- A new Zustand store will be created to manage the state of the chat.
+- It will store the conversation history, the status of the sub-agents, and any errors.
 
-*   **"Alive" Feel:** Add subtle animations and transitions to the chat interface to make it feel more dynamic. This includes loading indicators when the agent is processing and smooth scrolling for new messages.
-*   **Error Display:** Ensure that error messages from the backend are clearly displayed to the user in a distinct format.
+## 3. Testing
 
-## 7. Testing
+- **Backend:**
+    - Unit tests for the new Pydantic schemas.
+    - Integration tests to verify that the `Supervisor` agent sends the correct messages through the `ws_manager`.
+- **Frontend:**
+    - Unit tests for the new React components.
+    - End-to-end tests to verify the entire chat UI, including sending and receiving messages, displaying sub-agent status, and the "Stop" button.
 
-*   **Unit Tests:**
-    *   Write tests for the new components (`JsonViewer`, `StopButton`).
-    *   Update tests for existing components (`Header`, `Message`, `MessageList`) to reflect the new props and functionality.
-    *   Test the updated `useChatStore` logic.
-*   **E2E Tests (Cypress):**
-    *   Create a new test suite in `cypress/e2e/chat.cy.ts`.
-    *   Simulate a full chat conversation, including sending messages, receiving various types of responses, and interacting with collapsible sections.
-    *   Test the functionality of the "Stop" button.
-
-## 8. Documentation
-
-*   Create a `docs/chat_ui_ux-doc.md` file to document the new chat components, their props, and the overall architecture of the chat feature.
-
-## 9. Schema Alignment
-
-*   After implementation, review `shared/schemas.json` and update it if any new shared concepts were introduced that need to be aligned between the frontend and backend.
+This plan addresses all the requirements in `chat_ui_ux.txt` and integrates with the existing architecture.

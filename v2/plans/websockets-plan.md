@@ -1,53 +1,77 @@
-# Websockets Implementation Plan
+# WebSockets Plan
 
-This plan outlines the steps to implement a robust and scalable websocket system for Netra, following the specifications in `ws.txt`.
+## 1. Introduction
 
-## 1. Backend Implementation
+This document outlines the plan for implementing real-time communication between the frontend and backend of the Netra application using WebSockets. The primary goal is to create a robust, scalable, and maintainable WebSocket architecture that supports the application's chat functionality and other real-time features.
 
-### 1.1. WebSocket Manager
-- Create a `ws_manager.py` to handle all websocket connections. This will be a singleton class to ensure a single source of truth for all connections.
-- The manager will handle incoming connections, disconnections, and message broadcasting.
-- It will also handle authentication of connections, ensuring that only authenticated users can connect.
+## 2. Backend Architecture
 
-### 1.2. WebSocket Routes
-- Create a new route in `app/routes/ws.py` to handle websocket connections.
-- This route will be responsible for upgrading the HTTP connection to a websocket connection and passing it to the `ws_manager`.
+The backend WebSocket architecture is built around a central `WebSocketManager` that handles connection management, message broadcasting, and authentication. Redis pub/sub is used to facilitate communication between different instances of the application.
 
-### 1.3. Configuration
-- The backend will provide a configuration endpoint for the frontend to discover the websocket URL. This will be done in `app/config.py`.
+### 2.1. WebSocketManager
 
-### 1.4. JSON Handling
-- All messages sent and received will be in JSON format.
-- Pydantic models will be used to validate the structure of the messages.
+The `WebSocketManager` is a singleton class responsible for:
 
-## 2. Frontend Implementation
+*   **Connection Management:** Tracking all active WebSocket connections and associating them with authenticated users.
+*   **Message Broadcasting:** Sending messages to specific clients or broadcasting messages to all connected clients.
+*   **Authentication:** Ensuring that only authenticated users can establish a WebSocket connection.
 
-### 2.1. WebSocket Service
-- Create a `services/websocket.ts` to handle the websocket connection.
-- This service will be responsible for establishing the connection, sending and receiving messages, and handling connection errors.
-- The service will use the configuration from the backend to discover the websocket URL.
+### 2.2. Redis Pub/Sub
 
-### 2.2. State Management
-- The websocket connection will be managed in the application state.
-- The connection will be established on application load and will be persistent.
-- The connection will be resilient to component re-renders and lifecycle changes.
+Redis pub/sub is used to enable communication between multiple instances of the backend application. When a message needs to be sent to a client, it's published to a Redis channel. All application instances are subscribed to the relevant channels, and the instance that's managing the connection to the target client will send the message.
 
-### 2.3. Message Handling
-- All messages will be handled through the websocket service.
-- The messages will be typed using the types defined in `types/index.ts`.
+### 2.3. Authentication
 
-## 3. Testing
+WebSocket connections are authenticated using the same JWT-based authentication mechanism as the rest of the API. The frontend sends the user's access token as a query parameter when establishing the WebSocket connection. The backend validates the token and, if it's valid, establishes the connection.
 
-### 3.1. Backend
-- Unit tests will be written for the `ws_manager` and the websocket routes.
-- Integration tests will be written to test the end-to-end functionality of the websocket system.
+### 2.4. /ws Endpoint
 
-### 3.2. Frontend
-- Unit tests will be written for the websocket service.
-- End-to-end tests will be written to test the websocket functionality in the browser.
+The `/ws` endpoint is the entry point for all WebSocket connections. It's responsible for:
 
-## 4. Coherence and Integration
+*   Authenticating the user.
+*   Upgrading the HTTP connection to a WebSocket connection.
+*   Passing the WebSocket connection to the `WebSocketManager`.
 
-- The websocket implementation will be coherent with the existing user authentication system.
-- The agent communications will be integrated with the websocket system.
-- The `shared/schema.json` will be updated to reflect the new websocket message types.
+## 3. Frontend Architecture
+
+The frontend WebSocket architecture is built using the `react-use-websocket` library, which provides a robust and easy-to-use hook for managing WebSocket connections.
+
+### 3.1. WebSocketProvider
+
+The `WebSocketProvider` is a React context provider that wraps the entire application. It's responsible for:
+
+*   Establishing and maintaining the WebSocket connection.
+*   Providing the WebSocket connection state and methods to its children.
+*   Automatically reconnecting if the connection is lost.
+
+### 3.2. useWebSocket Hook
+
+The `useWebSocket` hook is a custom hook that provides a simple way for components to interact with the WebSocket connection. It's responsible for:
+
+*   Sending and receiving messages.
+*   Handling different message types.
+*   Updating the application's state based on incoming messages.
+
+### 3.3. State Management
+
+The `useChatStore` (a Zustand store) is used to manage the state of the chat application. The `useWebSocket` hook updates the store with new messages and other real-time data received from the backend.
+
+## 4. Message Schema
+
+All messages sent between the frontend and backend are in JSON format and follow the `WebSocketMessage` schema defined in `app/schemas.py` and `frontend/types/index.ts`.
+
+## 5. End-to-End Flow
+
+1.  The frontend establishes a WebSocket connection to the `/ws` endpoint, sending the user's access token as a query parameter.
+2.  The backend authenticates the user and, if successful, establishes the connection.
+3.  The `WebSocketManager` adds the connection to its list of active connections.
+4.  When the user sends a message, the frontend sends a `WebSocketMessage` to the backend.
+5.  The backend processes the message and, if necessary, sends a response to the frontend.
+6.  The frontend receives the message and updates the UI accordingly.
+
+## 6. Testing
+
+The WebSocket implementation will be thoroughly tested with a combination of unit tests and integration tests.
+
+*   **Unit Tests:** Unit tests will be written for the `WebSocketManager` on the backend and the `useWebSocket` hook on the frontend.
+*   **Integration Tests:** Integration tests will be written to verify the end-to-end communication between the frontend and backend.
