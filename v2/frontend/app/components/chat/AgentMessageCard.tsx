@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -28,17 +27,25 @@ const TodoList: React.FC<{ todos: Todo[] }> = ({ todos }) => (
 );
 
 export const AgentMessageCard: React.FC<AgentMessageCardProps> = ({ message }) => {
+    const toolsInUse = message.tools.filter(tool => !tool.output);
+    const completedTools = message.tools.filter(tool => tool.output);
+
     return (
         <Card className="w-full">
             <CardHeader>
                 <CardTitle className="text-lg">{message.subAgentName}</CardTitle>
+                {toolsInUse.length > 0 && (
+                    <div className="text-sm text-muted-foreground">
+                        <strong>Tools in use:</strong> {toolsInUse.map(tool => tool.name).join(', ')}
+                    </div>
+                )}
             </CardHeader>
             <CardContent>
                 {message.content && <p className="text-muted-foreground">{message.content}</p>}
-                {message.tools.length > 0 &&
+                {completedTools.length > 0 &&
                     <div className="mt-4">
                         <h4 className="font-semibold">Tools Used:</h4>
-                        {message.tools.map((tool, index) => (
+                        {completedTools.map((tool, index) => (
                             <ToolDisplay key={index} tool={tool} />
                         ))}
                     </div>
