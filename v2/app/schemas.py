@@ -1,4 +1,3 @@
-
 # netra_apex/models/schemas.py
 #
 # Copyright (C) 2025, netra apex Inc.
@@ -122,10 +121,6 @@ class RequestModel(BaseModel):
     workloads: List[Workload]
     constraints: Optional[Any] = None
 
-class AnalysisRequest(BaseModel):
-    settings: Settings
-    request: RequestModel
-
 class StartAgentPayload(BaseModel):
     settings: Settings
     request: RequestModel
@@ -134,10 +129,18 @@ class StartAgentMessage(BaseModel):
     action: str
     payload: StartAgentPayload
 
+# --- WebSocket Schemas ---
+class WebSocketError(BaseModel):
+    type: str = "error"
+    message: str
+
+class AnalysisRequest(BaseModel):
+    type: str = "analysis_request"
+    payload: RequestModel
+
 class WebSocketMessage(BaseModel):
-    event: str
-    data: Any
-    run_id: Optional[str] = None
+    type: str
+    payload: Union[AnalysisRequest, WebSocketError, Dict[str, Any]]
 
 class RunCompleteMessage(WebSocketMessage):
     event: str = "run_complete"
@@ -211,22 +214,6 @@ class ContentCorpusGenParams(BaseModel):
     top_k: Optional[int] = Field(None, ge=0, description="Top-k sampling control.")
     max_cores: int = Field(4, ge=1, le=os.cpu_count(), description="Max CPU cores to use.")
     clickhouse_table: str = Field('content_corpus', description="The name of the ClickHouse table to store the corpus in.")
-
-
-class LogEntry(BaseModel):
-    """Pydantic model for a single log entry."""
-    trace_id: Optional[str] = None
-    span_id: Optional[str] = None
-    event: str
-    data: Dict[str, Any] = Field(default_factory=dict)
-    source: str = "backend"
-    user_id: Optional[str] = None
-
-# --- WebSocket Schemas ---
-class WebSocketMessage(BaseModel):
-    type: str
-    payload: Dict[str, Any]
-
 
 # --- Section 2: Demand Analyzer Schemas ---
 
@@ -506,16 +493,15 @@ class OAuthConfig(BaseModel):
     auth_uri: str = "https://accounts.google.com/o/oauth2/v2/auth"
     userinfo_endpoint: str = "https://www.googleapis.com/oauth2/v3/userinfo"
     scopes: List[str] = ["openid", "email", "profile"]
-    authorized_javascript_origins: List[str] = Field(default_factory=lambda: [
-        "https://app.netrasystems.ai",
-        "https://127.0.0.1",
-        "http://localhost"
-    ])
-    authorized_redirect_uris: List[str] = Field(default_factory=lambda: [
-        "https://app.netrasystems.ai/oauth2callback",
-        "http://localhost:3000/auth/callback"
-    ])
-
+    authorized_javascript_origins: List[str] = [
+      "https://app.netrasystems.ai",
+      "https://127.0.0.1",
+      "http://localhost"
+    ]
+    authorized_redirect_uris: List[str] = [
+      "https://app.netrasystems.ai/oauth2callback",
+      "http://localhost:3000/auth/callback"
+    ]
 
 class DevUser(BaseModel):
     email: str = "dev@example.com"
@@ -523,6 +509,8 @@ class DevUser(BaseModel):
     picture: Optional[str] = None
     is_dev: bool = True
 
+class DevLoginRequest(BaseModel):
+    email: str
 
 class AuthEndpoints(BaseModel):
     login: str
@@ -531,13 +519,13 @@ class AuthEndpoints(BaseModel):
     user: str
     dev_login: str
 
-
 class AuthConfigResponse(BaseModel):
     google_client_id: str
     endpoints: AuthEndpoints
     development_mode: bool
     user: Optional[User] = None
-
+    authorized_javascript_origins: List[str]
+    authorized_redirect_uris: List[str]
 
 class ClickHouseNativeConfig(BaseModel):
     host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"

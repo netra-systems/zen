@@ -1,40 +1,21 @@
-import React, { createContext, useContext, useEffect, ReactNode } from 'react';
-import { useWebSocket } from '@/app/services/websocket';
-import { useAuth } from '@/contexts/AuthContext';
 
-interface WebSocketContextType {
-  sendMessage: (payload: any) => void;
-}
+'use client';
 
-const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
+import React, a s React from 'react';
+import webSocketService from '@/app/services/websocket';
 
-export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
-  const { connect, disconnect, sendMessage } = useWebSocket();
+export const WebSocketContext = React.createContext(webSocketService);
 
-  useEffect(() => {
-    if (user?.token) {
-      connect(user.token);
-    }
-
-    return () => {
-      if (user) {
-        disconnect();
-      }
-    };
-  }, [user, connect, disconnect]);
+export const WebSocketProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+  React.useEffect(() => {
+    // This is where you would get the WebSocket URL from your config
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws/ws';
+    webSocketService.connect(wsUrl);
+  }, []);
 
   return (
-    <WebSocketContext.Provider value={{ sendMessage }}>
+    <WebSocketContext.Provider value={webSocketService}>
       {children}
     </WebSocketContext.Provider>
   );
-};
-
-export const useWebSocketContext = (): WebSocketContextType => {
-  const context = useContext(WebSocketContext);
-  if (!context) {
-    throw new Error('useWebSocketContext must be used within a WebSocketProvider');
-  }
-  return context;
 };

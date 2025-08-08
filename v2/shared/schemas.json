@@ -1,0 +1,919 @@
+{
+  "User": {
+    "properties": {
+      "email": {
+        "format": "email",
+        "title": "Email",
+        "type": "string"
+      },
+      "is_active": {
+        "default": true,
+        "title": "Is Active",
+        "type": "boolean"
+      },
+      "is_superuser": {
+        "default": false,
+        "title": "Is Superuser",
+        "type": "boolean"
+      },
+      "full_name": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Full Name"
+      },
+      "picture": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Picture"
+      },
+      "id": {
+        "format": "uuid",
+        "title": "Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "email",
+      "id"
+    ],
+    "title": "User",
+    "type": "object"
+  },
+  "WebSocketMessage": {
+    "$defs": {
+      "AnalysisRequest": {
+        "properties": {
+          "type": {
+            "default": "analysis_request",
+            "title": "Type",
+            "type": "string"
+          },
+          "payload": {
+            "$ref": "#/$defs/RequestModel"
+          }
+        },
+        "required": [
+          "payload"
+        ],
+        "title": "AnalysisRequest",
+        "type": "object"
+      },
+      "DataSource": {
+        "properties": {
+          "source_table": {
+            "title": "Source Table",
+            "type": "string"
+          },
+          "filters": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Filters"
+          }
+        },
+        "required": [
+          "source_table"
+        ],
+        "title": "DataSource",
+        "type": "object"
+      },
+      "RequestModel": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "workloads": {
+            "items": {
+              "$ref": "#/$defs/Workload"
+            },
+            "title": "Workloads",
+            "type": "array"
+          },
+          "constraints": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Constraints"
+          }
+        },
+        "required": [
+          "user_id",
+          "query",
+          "workloads"
+        ],
+        "title": "RequestModel",
+        "type": "object"
+      },
+      "TimeRange": {
+        "properties": {
+          "start_time": {
+            "title": "Start Time",
+            "type": "string"
+          },
+          "end_time": {
+            "title": "End Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start_time",
+          "end_time"
+        ],
+        "title": "TimeRange",
+        "type": "object"
+      },
+      "WebSocketError": {
+        "properties": {
+          "type": {
+            "default": "error",
+            "title": "Type",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "WebSocketError",
+        "type": "object"
+      },
+      "Workload": {
+        "properties": {
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "data_source": {
+            "$ref": "#/$defs/DataSource"
+          },
+          "time_range": {
+            "$ref": "#/$defs/TimeRange"
+          }
+        },
+        "required": [
+          "run_id",
+          "query",
+          "data_source",
+          "time_range"
+        ],
+        "title": "Workload",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "type": {
+        "title": "Type",
+        "type": "string"
+      },
+      "payload": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/AnalysisRequest"
+          },
+          {
+            "$ref": "#/$defs/WebSocketError"
+          },
+          {
+            "additionalProperties": true,
+            "type": "object"
+          }
+        ],
+        "title": "Payload"
+      }
+    },
+    "required": [
+      "type",
+      "payload"
+    ],
+    "title": "WebSocketMessage",
+    "type": "object"
+  },
+  "AnalysisRequest": {
+    "$defs": {
+      "DataSource": {
+        "properties": {
+          "source_table": {
+            "title": "Source Table",
+            "type": "string"
+          },
+          "filters": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Filters"
+          }
+        },
+        "required": [
+          "source_table"
+        ],
+        "title": "DataSource",
+        "type": "object"
+      },
+      "RequestModel": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "workloads": {
+            "items": {
+              "$ref": "#/$defs/Workload"
+            },
+            "title": "Workloads",
+            "type": "array"
+          },
+          "constraints": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Constraints"
+          }
+        },
+        "required": [
+          "user_id",
+          "query",
+          "workloads"
+        ],
+        "title": "RequestModel",
+        "type": "object"
+      },
+      "TimeRange": {
+        "properties": {
+          "start_time": {
+            "title": "Start Time",
+            "type": "string"
+          },
+          "end_time": {
+            "title": "End Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start_time",
+          "end_time"
+        ],
+        "title": "TimeRange",
+        "type": "object"
+      },
+      "Workload": {
+        "properties": {
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "data_source": {
+            "$ref": "#/$defs/DataSource"
+          },
+          "time_range": {
+            "$ref": "#/$defs/TimeRange"
+          }
+        },
+        "required": [
+          "run_id",
+          "query",
+          "data_source",
+          "time_range"
+        ],
+        "title": "Workload",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "type": {
+        "default": "analysis_request",
+        "title": "Type",
+        "type": "string"
+      },
+      "payload": {
+        "$ref": "#/$defs/RequestModel"
+      }
+    },
+    "required": [
+      "payload"
+    ],
+    "title": "AnalysisRequest",
+    "type": "object"
+  },
+  "WebSocketError": {
+    "properties": {
+      "type": {
+        "default": "error",
+        "title": "Type",
+        "type": "string"
+      },
+      "message": {
+        "title": "Message",
+        "type": "string"
+      }
+    },
+    "required": [
+      "message"
+    ],
+    "title": "WebSocketError",
+    "type": "object"
+  },
+  "RequestModel": {
+    "$defs": {
+      "DataSource": {
+        "properties": {
+          "source_table": {
+            "title": "Source Table",
+            "type": "string"
+          },
+          "filters": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Filters"
+          }
+        },
+        "required": [
+          "source_table"
+        ],
+        "title": "DataSource",
+        "type": "object"
+      },
+      "TimeRange": {
+        "properties": {
+          "start_time": {
+            "title": "Start Time",
+            "type": "string"
+          },
+          "end_time": {
+            "title": "End Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start_time",
+          "end_time"
+        ],
+        "title": "TimeRange",
+        "type": "object"
+      },
+      "Workload": {
+        "properties": {
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "data_source": {
+            "$ref": "#/$defs/DataSource"
+          },
+          "time_range": {
+            "$ref": "#/$defs/TimeRange"
+          }
+        },
+        "required": [
+          "run_id",
+          "query",
+          "data_source",
+          "time_range"
+        ],
+        "title": "Workload",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "id": {
+        "title": "Id",
+        "type": "string"
+      },
+      "user_id": {
+        "title": "User Id",
+        "type": "string"
+      },
+      "query": {
+        "title": "Query",
+        "type": "string"
+      },
+      "workloads": {
+        "items": {
+          "$ref": "#/$defs/Workload"
+        },
+        "title": "Workloads",
+        "type": "array"
+      },
+      "constraints": {
+        "anyOf": [
+          {},
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Constraints"
+      }
+    },
+    "required": [
+      "user_id",
+      "query",
+      "workloads"
+    ],
+    "title": "RequestModel",
+    "type": "object"
+  },
+  "StartAgentMessage": {
+    "$defs": {
+      "DataSource": {
+        "properties": {
+          "source_table": {
+            "title": "Source Table",
+            "type": "string"
+          },
+          "filters": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Filters"
+          }
+        },
+        "required": [
+          "source_table"
+        ],
+        "title": "DataSource",
+        "type": "object"
+      },
+      "RequestModel": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "workloads": {
+            "items": {
+              "$ref": "#/$defs/Workload"
+            },
+            "title": "Workloads",
+            "type": "array"
+          },
+          "constraints": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Constraints"
+          }
+        },
+        "required": [
+          "user_id",
+          "query",
+          "workloads"
+        ],
+        "title": "RequestModel",
+        "type": "object"
+      },
+      "Settings": {
+        "properties": {
+          "debug_mode": {
+            "title": "Debug Mode",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "debug_mode"
+        ],
+        "title": "Settings",
+        "type": "object"
+      },
+      "StartAgentPayload": {
+        "properties": {
+          "settings": {
+            "$ref": "#/$defs/Settings"
+          },
+          "request": {
+            "$ref": "#/$defs/RequestModel"
+          }
+        },
+        "required": [
+          "settings",
+          "request"
+        ],
+        "title": "StartAgentPayload",
+        "type": "object"
+      },
+      "TimeRange": {
+        "properties": {
+          "start_time": {
+            "title": "Start Time",
+            "type": "string"
+          },
+          "end_time": {
+            "title": "End Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start_time",
+          "end_time"
+        ],
+        "title": "TimeRange",
+        "type": "object"
+      },
+      "Workload": {
+        "properties": {
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "data_source": {
+            "$ref": "#/$defs/DataSource"
+          },
+          "time_range": {
+            "$ref": "#/$defs/TimeRange"
+          }
+        },
+        "required": [
+          "run_id",
+          "query",
+          "data_source",
+          "time_range"
+        ],
+        "title": "Workload",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "action": {
+        "title": "Action",
+        "type": "string"
+      },
+      "payload": {
+        "$ref": "#/$defs/StartAgentPayload"
+      }
+    },
+    "required": [
+      "action",
+      "payload"
+    ],
+    "title": "StartAgentMessage",
+    "type": "object"
+  },
+  "StartAgentPayload": {
+    "$defs": {
+      "DataSource": {
+        "properties": {
+          "source_table": {
+            "title": "Source Table",
+            "type": "string"
+          },
+          "filters": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Filters"
+          }
+        },
+        "required": [
+          "source_table"
+        ],
+        "title": "DataSource",
+        "type": "object"
+      },
+      "RequestModel": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "workloads": {
+            "items": {
+              "$ref": "#/$defs/Workload"
+            },
+            "title": "Workloads",
+            "type": "array"
+          },
+          "constraints": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Constraints"
+          }
+        },
+        "required": [
+          "user_id",
+          "query",
+          "workloads"
+        ],
+        "title": "RequestModel",
+        "type": "object"
+      },
+      "Settings": {
+        "properties": {
+          "debug_mode": {
+            "title": "Debug Mode",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "debug_mode"
+        ],
+        "title": "Settings",
+        "type": "object"
+      },
+      "TimeRange": {
+        "properties": {
+          "start_time": {
+            "title": "Start Time",
+            "type": "string"
+          },
+          "end_time": {
+            "title": "End Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start_time",
+          "end_time"
+        ],
+        "title": "TimeRange",
+        "type": "object"
+      },
+      "Workload": {
+        "properties": {
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "data_source": {
+            "$ref": "#/$defs/DataSource"
+          },
+          "time_range": {
+            "$ref": "#/$defs/TimeRange"
+          }
+        },
+        "required": [
+          "run_id",
+          "query",
+          "data_source",
+          "time_range"
+        ],
+        "title": "Workload",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "settings": {
+        "$ref": "#/$defs/Settings"
+      },
+      "request": {
+        "$ref": "#/$defs/RequestModel"
+      }
+    },
+    "required": [
+      "settings",
+      "request"
+    ],
+    "title": "StartAgentPayload",
+    "type": "object"
+  },
+  "Workload": {
+    "$defs": {
+      "DataSource": {
+        "properties": {
+          "source_table": {
+            "title": "Source Table",
+            "type": "string"
+          },
+          "filters": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Filters"
+          }
+        },
+        "required": [
+          "source_table"
+        ],
+        "title": "DataSource",
+        "type": "object"
+      },
+      "TimeRange": {
+        "properties": {
+          "start_time": {
+            "title": "Start Time",
+            "type": "string"
+          },
+          "end_time": {
+            "title": "End Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start_time",
+          "end_time"
+        ],
+        "title": "TimeRange",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      },
+      "query": {
+        "title": "Query",
+        "type": "string"
+      },
+      "data_source": {
+        "$ref": "#/$defs/DataSource"
+      },
+      "time_range": {
+        "$ref": "#/$defs/TimeRange"
+      }
+    },
+    "required": [
+      "run_id",
+      "query",
+      "data_source",
+      "time_range"
+    ],
+    "title": "Workload",
+    "type": "object"
+  },
+  "DataSource": {
+    "properties": {
+      "source_table": {
+        "title": "Source Table",
+        "type": "string"
+      },
+      "filters": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Filters"
+      }
+    },
+    "required": [
+      "source_table"
+    ],
+    "title": "DataSource",
+    "type": "object"
+  },
+  "TimeRange": {
+    "properties": {
+      "start_time": {
+        "title": "Start Time",
+        "type": "string"
+      },
+      "end_time": {
+        "title": "End Time",
+        "type": "string"
+      }
+    },
+    "required": [
+      "start_time",
+      "end_time"
+    ],
+    "title": "TimeRange",
+    "type": "object"
+  },
+  "Settings": {
+    "properties": {
+      "debug_mode": {
+        "title": "Debug Mode",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "debug_mode"
+    ],
+    "title": "Settings",
+    "type": "object"
+  }
+}

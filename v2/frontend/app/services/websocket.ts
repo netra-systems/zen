@@ -1,75 +1,60 @@
+import { WebSocketMessage } from '@/app/types';
 
-import { create } from 'zustand';
-import { WebSocketStatus } from '@/types';
+class WebSocketService {
+  private static instance: WebSocketService;
+  private socket: WebSocket | null = null;
+  private messageListeners: Array<(message: WebSocketMessage) => void> = [];
 
-const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:8000';
+  private constructor() {}
 
-interface WebSocketState {
-  ws: WebSocket | null;
-  status: WebSocketStatus;
-  lastJsonMessage: any;
-  connect: (token: string) => void;
-  disconnect: () => void;
-  sendMessage: (message: object) => void;
-}
+  public static getInstance(): WebSocketService {
+    if (!WebSocketService.instance) {
+      WebSocketService.instance = new WebSocketService();
+    }
+    return WebSocketService.instance;
+  }
 
-const useWebSocketStore = create<WebSocketState>((set, get) => ({
-  ws: null,
-  status: WebSocketStatus.Closed,
-  lastJsonMessage: null,
-  connect: (token) => {
-    const { ws } = get();
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      console.log('WebSocket already connected.');
+  public connect(url: string) {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       return;
     }
 
-    const url = `${WEBSOCKET_URL}/ws?token=${token}`;
-    set({ status: WebSocketStatus.Connecting });
-    console.log('WebSocket connecting to:', url);
-    const newWs = new WebSocket(url);
+    this.socket = new WebSocket(url);
 
-    newWs.onopen = () => {
-      console.log('WebSocket connection established.');
-      set({ status: WebSocketStatus.Open });
+    this.socket.onopen = () => {
+      console.log('WebSocket connected');
     };
 
-    newWs.onclose = () => {
-      console.log('WebSocket connection closed.');
-      set({ status: WebSocketStatus.Closed, ws: null });
+    this.socket.onmessage = (event) => {
+      const message = JSON.parse(event.data) as WebSocketMessage;
+      this.messageListeners.forEach(listener => listener(message));
     };
 
-    newWs.onerror = (event) => {
-      console.error('WebSocket error:', event);
-      set({ status: WebSocketStatus.Error });
+    this.socket.onclose = () => {
+      console.log('WebSocket disconnected');
+      this.socket = null;
     };
 
-    newWs.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data);
-        set({ lastJsonMessage: message });
-      } catch (error) {
-        console.error('Failed to parse WebSocket message:', error, 'Received data:', event.data);
-      }
+    this.socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
     };
+  }
 
-    set({ ws: newWs });
-  },
-  disconnect: () => {
-    const { ws } = get();
-    if (ws) {
-      console.log('Disconnecting WebSocket.');
-      ws.close();
-    }
-  },
-  sendMessage: (message) => {
-    const { ws } = get();
-    if (ws?.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify(message));
+  public sendMessage(message: WebSocketMessage) {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify(message));
     } else {
-      console.error('WebSocket is not open. Cannot send message.');
+      console.error('WebSocket is not connected.');
     }
-  },
-}));
+  }
 
-export const useWebSocket = useWebSocketStore;
+  public addMessageListener(listener: (message: WebSocketMessage) => void) {
+    this.messageListeners.push(listener);
+  }
+
+  public removeMessageListener(listener: (message: WebSocketMessage) => void) {
+    this.messageListeners = this.messageListeners.filter(l => l !== listener);
+  }
+}
+
+export default WebSocketService.getInstance();
