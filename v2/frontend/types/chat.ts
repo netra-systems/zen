@@ -1,20 +1,13 @@
 
-export interface UserMessage {
-  type: 'user';
-  text: string;
-}
-
-export interface AgentMessage {
-  type: 'agent';
-  text: string;
-}
-
-export interface SystemMessage {
-  type: 'system';
-  text: string;
-}
-
-export type Message = UserMessage | AgentMessage | SystemMessage;
+export type Message = {
+  id: string;
+  type: 'user' | 'agent' | 'system';
+  full_name: string;
+  picture?: string;
+  message: string;
+  payload?: any;
+  timestamp: string;
+};
 
 export enum SubAgentLifecycle {
   PENDING = "pending",

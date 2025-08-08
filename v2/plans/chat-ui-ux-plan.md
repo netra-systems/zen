@@ -1,61 +1,35 @@
 # Chat UI/UX Implementation Plan
 
-This document outlines the plan to implement the chat UI/UX, following the specifications in `chat_ui_ux.txt`.
+This document outlines the plan to implement the new UI/UX features for the chat interface, as described in `SPEC/chat_ui_ux.txt`.
 
-## Phase 1: Backend - Message Schema and API
+## 1. Refactor `Chat.tsx`
 
-1.  **Define `Message` Schema:**
-    *   In `app/schemas.py`, define a new Pydantic schema for `Message`. This will include fields like `content`, `type` (e.g., 'user', 'agent', 'system', 'error'), `sub_agent_name`, `tool_info`, and a field for expandable JSON data.
-    *   Ensure there's a clear distinction between messages that should be displayed to the user by default and those that are for debugging or raw view.
+*   **Create a new `Message` component:** This component will be responsible for rendering individual messages, including user messages, agent messages, and system messages. This will make the `Chat.tsx` component cleaner and easier to manage.
+*   **Collapsible Raw JSON:** The `Message` component will handle the display of the message content, sender information (avatar, name), and timestamp. It will also include a collapsible section to display raw JSON data for agent messages, as requested in `chat_ui_ux:1:0:9`.
 
-2.  **Update WebSocket Manager:**
-    *   In `app/ws_manager.py`, modify the `WebSocketManager` to handle the new `Message` schema.
-    *   Ensure that messages are properly serialized to JSON before being sent over the websocket.
+## 2. Update `types/chat.ts`
 
-## Phase 2: Frontend - Component-Based UI
+*   **Extend `WebSocketMessage`:** Add new fields to the `WebSocketMessage` interface to support the new UI features, such as `sub_agent_name` and `sub_agent_state`.
+*   **Create `Message` Type:** Create a new `Message` type that can be used to represent all types of messages in the chat, including user, agent, and system messages.
 
-1.  **`Message` Component:**
-    *   Create a new component `frontend/app/components/Message.tsx`.
-    *   This component will be responsible for rendering a single message.
-    *   It will conditionally render different styles based on the message `type`.
-    *   It will display the `sub_agent_name` as the primary header.
-    *   It will display `tool_info` and other secondary information.
-    *   It will include a collapsible section for displaying raw JSON data in a tree view.
+## 3. Enhance `useWebSocket.ts`
 
-2.  **`ChatHistory` Component:**
-    *   Create a new component `frontend/app/components/ChatHistory.tsx`.
-    *   This component will be responsible for rendering a list of messages.
-    *   It will fetch the message history from the `WebSocketContext`.
+*   **Handle New Message Types:** Update the `useWebSocket` hook to handle the new `WebSocketMessage` types and update the chat state accordingly.
+*   **Parse Agent Information:** Add logic to parse the `sub_agent_name` and `sub_agent_state` from the WebSocket messages and store them in the chat state.
 
-3.  **`Chat` Component:**
-    *   Update the existing `frontend/app/components/Chat.tsx` to incorporate the new `ChatHistory` and `Message` components.
-    *   Add a "Stop" button that sends a "stop_processing" message to the backend via the websocket.
+## 4. Implement Header and Status Display
 
-## Phase 3: Frontend - State Management and WebSocket Integration
+*   **Create `Header` Component:** Create a new `Header` component to display the `sub_agent_name` as the primary header and the `sub_agent_state` as the secondary status, as requested in `chat_ui_ux:1:0:1` and `chat_ui_ux:1:0:1:0`.
 
-1.  **`WebSocketContext`:**
-    *   Update `frontend/app/contexts/WebSocketContext.tsx` to manage the state of the chat.
-    *   It will store the list of messages.
-    *   It will handle incoming messages from the websocket and update the message list.
-    *   It will provide a function for sending messages to the websocket.
+## 5. Add "Stop" Button
 
-2.  **Types:**
-    *   Update `frontend/app/types/index.ts` with the new `Message` type, ensuring it's consistent with the backend schema.
+*   **Implement "Stop" Functionality:** Add a "Stop" button to the UI that sends a "stop" message to the WebSocket server to terminate the current agent process, as requested in `chat_ui_ux:1:0:10`.
 
-## Phase 4: Styling and UX
+## 6. Improve UI/UX
 
-1.  **"Alive" UI:**
-    *   Use subtle animations and transitions to make the UI feel more responsive and "alive".
-    *   For example, new messages can fade in, and the "thinking" indicator can have a subtle animation.
+*   **Subtle Animations:** Use subtle animations and transitions to make the UI feel more "alive," as requested in `chat_ui_ux:1:0:8`.
+*   **Error Handling:** Add error handling and display error messages to the user in a clear and concise way, as requested in `chat_ui_ux:1:0:4`.
 
-2.  **Collapsible Sections:**
-    *   Implement the collapsible sections for raw JSON data using a library like `react-json-view`.
+## 7. Add Tests
 
-## Phase 5: Testing
-
-1.  **Backend Tests:**
-    *   Write unit tests for the new `Message` schema and any new logic in the `WebSocketManager`.
-
-2.  **Frontend Tests:**
-    *   Write unit tests for the new `Message` and `ChatHistory` components.
-    *   Write end-to-end tests to verify the entire chat UI, including sending and receiving messages, stopping processing, and displaying raw JSON data.
+*   **Component and Feature Tests:** Create new tests for the new components and features to ensure they work as expected and to prevent regressions, as requested in `chat_ui_ux:1:0:12`.

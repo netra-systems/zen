@@ -22,3 +22,6 @@ this avoids having to "fight" the default without need
 e.g. instead of using app/services it makes a new services folder
 14: Important: Code Churn is EXPECTED in gen AI dev:
 If it's not defined in a spec, or loaded externally, assume it can be deleted at any point in time!!!!
+
+15: Use concepts like service discovery so that the LLM can do something locally correct that
+ends up globaly correct still. esentially "clean contracts".

@@ -1,19 +1,17 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
-import useWebSocket, { ReadyState } from 'react-use-websocket';
-import { WebSocketMessage } from '@/types';
-
+import { useWebSocket } from '@/hooks/useWebSocket';
+import { MessageCard } from '@/components/MessageCard';
+import { Message } from '@/types/chat';
 import { WEBSOCKET_URL } from '@/config';
 
 export function Chat() {
   const [message, setMessage] = useState('');
-  const [messageHistory, setMessageHistory] = useState<WebSocketMessage[]>([]);
   const { user } = useAuth();
   const socketUrl = useMemo(() => {
     if (user?.id) {
@@ -22,9 +20,10 @@ export function Chat() {
     return null;
   }, [user]);
 
-  const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl, {
+  const { lastMessage, readyState, sendMessage, subAgentName, subAgentStatus } = useWebSocket(socketUrl, {
     shouldReconnect: (closeEvent) => true,
   });
+  const [messageHistory, setMessageHistory] = useState<Message[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,7 +41,9 @@ export function Chat() {
 
   const handleSendMessage = () => {
     if (message.trim()) {
-      const wsMessage: WebSocketMessage = {
+      const wsMessage: Message = {
+        id: new Date().toISOString(),
+        type: 'user',
         user_id: user?.id || 'anonymous',
         message: message,
         timestamp: new Date().toISOString(),
@@ -54,38 +55,27 @@ export function Chat() {
     }
   };
 
-  const connectionStatus = {
-    [ReadyState.CONNECTING]: 'Connecting',
-    [ReadyState.OPEN]: 'Open',
-    [ReadyState.CLOSING]: 'Closing',
-    [ReadyState.CLOSED]: 'Closed',
-    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
-  }[readyState];
+  const handleStop = () => {
+    const wsMessage = {
+      type: 'stop',
+    };
+    sendMessage(JSON.stringify(wsMessage));
+  };
 
   return (
     <div className="flex flex-col h-[calc(100vh-120px)]">
+      <div className="flex items-center justify-between p-4 border-b">
+        <div>
+          <h2 className="text-lg font-semibold">{subAgentName}</h2>
+          <p className="text-sm text-muted-foreground">{subAgentStatus}</p>
+        </div>
+        <Button onClick={handleStop} variant="destructive">Stop</Button>
+      </div>
       <div className="flex-1 p-4">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
           <div className="space-y-4">
-            {messageHistory.map((msg, idx) => (
-              <div key={idx} className="flex items-start gap-4">
-                <Avatar className="h-8 w-8">
-                  {msg.picture ? (
-                    <AvatarImage src={msg.picture} alt={msg.full_name} />
-                  ) : (
-                    <AvatarFallback>
-                      {msg.full_name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                <div className="flex-1">
-                  <p className="font-semibold">{msg.full_name}</p>
-                  <p className="text-sm text-muted-foreground">{msg.message}</p>
-                </div>
-              </div>
+            {messageHistory.map((msg) => (
+              <MessageCard key={msg.id} message={msg} />
             ))}
           </div>
         </ScrollArea>
@@ -98,11 +88,10 @@ export function Chat() {
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder="Type your message..."
           />
-          <Button onClick={handleSendMessage} disabled={readyState !== ReadyState.OPEN}>
+          <Button onClick={handleSendMessage} disabled={readyState !== 'OPEN'}>
             Send
           </Button>
         </div>
-        <p className="text-xs text-center text-muted-foreground mt-2">Connection Status: {connectionStatus}</p>
       </div>
     </div>
   );

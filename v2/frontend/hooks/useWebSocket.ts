@@ -1,23 +1,28 @@
 import { useContext, useEffect } from 'react';
-import { WebSocketContext } from '../providers/WebSocketProvider';
+import { WebSocketContext } from '../contexts/WebSocketContext';
 import { useChatStore } from '../store';
 
 export const useWebSocket = () => {
   const webSocketContext = useContext(WebSocketContext);
-  const { addMessage, setSubAgentName, setSubAgentStatus } = useChatStore();
+  const { addMessage, setSubAgentName, setSubAgentStatus, subAgentName, subAgentStatus } = useChatStore();
 
   useEffect(() => {
     if (webSocketContext?.lastMessage) {
-      addMessage(webSocketContext.lastMessage);
+      const message = JSON.parse(webSocketContext.lastMessage.data);
+      addMessage(message);
 
-      if (webSocketContext.lastMessage.type === 'sub_agent_update') {
-        setSubAgentName(webSocketContext.lastMessage.payload.sub_agent_name);
-        if (webSocketContext.lastMessage.payload.state.lifecycle) {
-          setSubAgentStatus(webSocketContext.lastMessage.payload.state.lifecycle);
+      if (message.type === 'sub_agent_update') {
+        setSubAgentName(message.payload.sub_agent_name);
+        if (message.payload.state.lifecycle) {
+          setSubAgentStatus(message.payload.state.lifecycle);
         }
       }
     }
   }, [webSocketContext?.lastMessage, addMessage, setSubAgentName, setSubAgentStatus]);
 
-  return webSocketContext;
+  if (!webSocketContext) {
+    throw new Error("useWebSocket must be used within a WebSocketProvider");
+  }
+
+  return { ...webSocketContext, subAgentName, subAgentStatus };
 };
