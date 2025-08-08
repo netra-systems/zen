@@ -32,5 +32,4 @@ class ReportingSubAgent(BaseSubAgent):
 
         logger.info(f"ReportingSubAgent finished for run_id: {run_id}")
 
-        input_data["report_result"] = report_result
-        return input_data
+        return {"report_result": report_result}
