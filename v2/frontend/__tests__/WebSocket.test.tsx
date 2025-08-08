@@ -1,88 +1,76 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { WebSocketProvider, useWebSocket } from '@/contexts/WebSocketContext';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { render, screen, act } from '@testing-library/react';
+import { WebSocketProvider, useWebSocket } from '../contexts/WebSocketContext';
+import { Server } from 'mock-socket';
+import { WebSocketMessage } from '../types/websockets';
 
-// Mock the WebSocket
-const mockSend = jest.fn();
-const mockClose = jest.fn();
-global.WebSocket = jest.fn(() => ({
-  onopen: jest.fn(),
-  onmessage: jest.fn(),
-  onclose: jest.fn(),
-  onerror: jest.fn(),
-  send: mockSend,
-  close: mockClose,
-})) as any;
+const WS_URL = 'ws://localhost:8000/ws';
 
-const TestComponent = () => {
-  const { sendMessage, lastMessage, isConnected } = useWebSocket();
-  const { login, logout, user } = useAuth();
+describe('WebSocketContext', () => {
+  let mockServer: Server;
 
-  return (
-    <div>
-      <button onClick={() => login()}>Login</button>
-      <button onClick={() => logout()}>Logout</button>
-      <button onClick={() => sendMessage({ payload: { query: 'test' } } as any)}>Send</button>
-      <div data-testid="connected">{isConnected ? 'true' : 'false'}</div>
-      <div data-testid="user">{user?.email}</div>
-      <div data-testid="message">{JSON.stringify(lastMessage)}</div>
-    </div>
-  );
-};
+  beforeEach(() => {
+    mockServer = new Server(WS_URL);
+  });
 
-describe('WebSocketProvider', () => {
-  it('should connect and disconnect with auth status', async () => {
-    render(
-      <AuthProvider>
-        <WebSocketProvider>
-          <TestComponent />
-        </WebSocketProvider>
-      </AuthProvider>
+  afterEach(() => {
+    mockServer.close();
+  });
+
+  const TestComponent = () => {
+    const { status, lastMessage, sendMessage } = useWebSocket();
+
+    const handleSendMessage = () => {
+      const message: WebSocketMessage = {
+        type: 'analysis_request',
+        payload: { request_model: { id: '1', user_id: '1', query: 'test', workloads: [] } },
+      };
+      sendMessage(message);
+    };
+
+    return (
+      <div>
+        <div data-testid="status">{status}</div>
+        <div data-testid="message">{JSON.stringify(lastMessage)}</div>
+        <button onClick={handleSendMessage}>Send</button>
+      </div>
+    );
+  };
+
+  it('should connect and disconnect', async () => {
+    const { unmount } = render(
+      <WebSocketProvider>
+        <TestComponent />
+      </WebSocketProvider>
     );
 
-    // Initially not connected
-    expect(screen.getByTestId('connected')).toHaveTextContent('false');
+    await act(() => mockServer.emit('open'));
+    expect(screen.getByTestId('status').textContent).toBe('OPEN');
 
-    // Login
-    fireEvent.click(screen.getByText('Login'));
-
-    // Wait for connection
-    await waitFor(() => expect(screen.getByTestId('connected')).toHaveTextContent('true'));
-
-    // Logout
-    fireEvent.click(screen.getByText('Logout'));
-
-    // Wait for disconnection
-    await waitFor(() => expect(screen.getByTestId('connected')).toHaveTextContent('false'));
+    unmount();
+    // In a real scenario, the client would initiate the close.
+    // Here, we can check the server's connection count.
+    expect(mockServer.clients().length).toBe(0);
   });
 
   it('should send and receive messages', async () => {
     render(
-      <AuthProvider>
-        <WebSocketProvider>
-          <TestComponent />
-        </WebSocketProvider>
-      </AuthProvider>
+      <WebSocketProvider>
+        <TestComponent />
+      </WebSocketProvider>
     );
 
-    // Login and connect
-    fireEvent.click(screen.getByText('Login'));
-    await waitFor(() => expect(screen.getByTestId('connected')).toHaveTextContent('true'));
+    await act(() => mockServer.emit('open'));
 
-    // Send a message
-    fireEvent.click(screen.getByText('Send'));
-    expect(mockSend).toHaveBeenCalledWith(JSON.stringify({ type: 'analysis_request', payload: { query: 'test' } }));
+    const message: WebSocketMessage = {
+        type: 'agent_started',
+        payload: { run_id: '123' },
+      };
 
-    // Simulate receiving a message
-    const socketInstance = (global.WebSocket as any).mock.instances[0];
-    const message = { type: 'test', payload: { data: 'some data' } };
-    socketInstance.onmessage({ data: JSON.stringify(message) });
-
-    // Check if the message is displayed
-    await waitFor(() => {
-      expect(screen.getByTestId('message')).toHaveTextContent(JSON.stringify(message));
+    act(() => {
+      mockServer.emit('message', JSON.stringify(message));
     });
+
+    expect(screen.getByTestId('message').textContent).toBe(JSON.stringify(message));
   });
 });

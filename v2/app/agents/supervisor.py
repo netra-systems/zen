@@ -2,7 +2,7 @@
 import logging
 from typing import Any, Dict, List
 from app.agents.base import BaseSubAgent
-from app.schemas import SubAgentLifecycle
+from app.schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, SubAgentUpdate, AgentCompleted
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -35,46 +35,48 @@ class Supervisor(BaseSubAgent):
         self.run_states[run_id] = {"status": "running", "current_step": 0, "total_steps": len(self.sub_agents)}
         
         if stream_updates:
-            await self.websocket_manager.broadcast_to_client(
+            await self.websocket_manager.send_to_client(
                 run_id,
-                {
-                    "event": "agent_started",
-                    "data": self.run_states[run_id]
-                }
+                WebSocketMessage(type="agent_started", payload=AgentStarted(run_id=run_id))
             )
 
         current_data = {"request": input_data}
         for i, agent in enumerate(self.sub_agents):
             self.run_states[run_id]["current_step"] = i + 1
             if stream_updates:
-                await self.websocket_manager.broadcast_to_client(
+                await self.websocket_manager.send_to_client(
                     run_id,
-                    {
-                        "event": "agent_step_started",
-                        "data": {
-                            "step": i + 1,
-                            "agent": agent.__class__.__name__
-                        }
-                    }
+                    WebSocketMessage(
+                        type="sub_agent_update",
+                        payload=SubAgentUpdate(
+                            sub_agent_name=agent.__class__.__name__,
+                            state=agent.get_state()
+                        )
+                    )
                 )
             
             current_data = await agent.run(current_data, run_id, stream_updates)
 
             if stream_updates:
-                await self.websocket_manager.broadcast_to_client(
+                agent.set_state(SubAgentLifecycle.COMPLETED)
+                await self.websocket_manager.send_to_client(
                     run_id,
-                    {
-                        "event": "agent_step_finished",
-                        "data": {
-                            "step": i + 1,
-                            "agent": agent.__class__.__name__,
-                            "result": current_data
-                        }
-                    }
+                    WebSocketMessage(
+                        type="sub_agent_update",
+                        payload=SubAgentUpdate(
+                            sub_agent_name=agent.__class__.__name__,
+                            state=agent.get_state()
+                        )
+                    )
                 )
 
         self.run_states[run_id]["status"] = "finished"
         self.set_state(SubAgentLifecycle.COMPLETED)
+        if stream_updates:
+            await self.websocket_manager.send_to_client(
+                run_id,
+                WebSocketMessage(type="agent_completed", payload=AgentCompleted(run_id=run_id, result=current_data))
+            )
         logger.info(f"Supervisor finished for run_id: {run_id}")
         return current_data
 
