@@ -1,6 +1,6 @@
 import { WebSocketMessage } from '../types/websockets';
 
-const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:8000/ws';
+import { WEBSOCKET_URL } from '@/config';
 
 export type WebSocketStatus = 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
 

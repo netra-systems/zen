@@ -6,7 +6,7 @@ import { Server, WebSocket } from 'mock-socket';
 import { useChatStore } from '@/app/store';
 import { useAuth } from '@/app/contexts/AuthContext';
 
-const WS_URL = 'ws://localhost:8000/ws';
+import { WEBSOCKET_URL } from '@/config';
 
 jest.mock('@/app/store', () => ({
   useChatStore: jest.fn(),

@@ -9,11 +9,13 @@ import { useAuth } from '@/hooks/useAuth';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { WebSocketMessage } from '@/types';
 
+import { WEBSOCKET_URL } from '@/config';
+
 export function Chat() {
   const [message, setMessage] = useState('');
   const [messageHistory, setMessageHistory] = useState<WebSocketMessage[]>([]);
   const { user } = useAuth();
-  const { sendMessage, lastMessage, readyState } = useWebSocket('ws://localhost:8000/ws', {
+  const { sendMessage, lastMessage, readyState } = useWebSocket(WEBSOCKET_URL, {
     shouldReconnect: (closeEvent) => true,
   });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
