@@ -41,6 +41,12 @@ export function ChatWindow({
         setInput(query);
     };
 
+    const filteredMessages = messages.filter(message => {
+        if (message.type === 'thinking' && !messageFilters.showThinking) return false;
+        // Add other filter conditions here based on message.type and messageFilters
+        return true;
+    });
+
     return (
         <div className="flex flex-col h-full border rounded-xl shadow-sm">
             <div className="p-4 border-b bg-background rounded-t-xl">
@@ -52,7 +58,7 @@ export function ChatWindow({
                 />
             </div>
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map((message) => (
+                {filteredMessages.map((message) => (
                     <MessageOrchestrator key={message.id} message={message} />
                 ))}
             </div>

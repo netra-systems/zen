@@ -1,3 +1,4 @@
+
 export const examplePrompts: string[] = [
   "Overview of the lowest hanging optimization fruit that I can implement with config only change",
   "I need to reduce costs but keep quality the same. I can accept up to a 35% increase in latency.",

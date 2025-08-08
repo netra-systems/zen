@@ -19,7 +19,7 @@ from app.db.postgres import async_session_factory
 from app.config import settings
 from app.logging_config import central_logger
 from app.llm.llm_manager import LLMManager
-from app.services.deepagents.supervisor import Supervisor
+from app.services.agents.supervisor import Supervisor
 from app.services.agent_service import AgentService
 from app.services.key_manager import KeyManager
 from app.auth.services import SecurityService
@@ -153,7 +153,7 @@ if __name__ == "__main__":
 if "pytest" in sys.modules:
     from app.db.postgres import async_session_factory
     from app.llm.llm_manager import LLMManager
-    from app.services.deepagents.supervisor import Supervisor
+    from app.services.agents.supervisor import Supervisor
     from app.websocket import manager as websocket_manager
 
     llm_manager = LLMManager(settings)

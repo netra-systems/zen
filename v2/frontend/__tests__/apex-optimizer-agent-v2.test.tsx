@@ -1,16 +1,15 @@
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import ApexOptimizerAgentV2 from '@/components/apex-optimizer-agent-v2';
-import { useAgentContext } from '@/providers/AgentProvider';
-import useAuth from '@/auth';
+import { render, screen, fireEvent, act } from '@testing-library/react';
+import { ApexOptimizerAgentV2 } from '../app/components/apex-optimizer-agent-v2';
+import { useAgentContext } from '../app/providers/AgentProvider';
+import { useAuth } from '../app/hooks/useAuth';
 
-jest.mock('@/providers/AgentProvider', () => ({
+jest.mock('../app/providers/AgentProvider', () => ({
   useAgentContext: jest.fn(),
 }));
 
-jest.mock('@/auth', () => ({
-  __esModule: true,
-  default: jest.fn(),
+jest.mock('../app/hooks/useAuth', () => ({
+  useAuth: jest.fn(),
 }));
 
 describe('ApexOptimizerAgentV2', () => {
@@ -18,7 +17,7 @@ describe('ApexOptimizerAgentV2', () => {
 
   beforeEach(() => {
     (useAgentContext as jest.Mock).mockReturnValue({
-      messages: [{ type: 'human', content: 'Test message' }],
+      messages: [{ type: 'user', content: 'Test message', id: '1' }],
       showThinking: false,
       startAgent: mockStartAgent,
       error: null,
@@ -30,28 +29,40 @@ describe('ApexOptimizerAgentV2', () => {
     });
   });
 
-  it('should render the chat window', () => {
-    render(<ApexOptimizerAgentV2 />);
+  it('should render the chat window', async () => {
+    await act(async () => {
+      render(<ApexOptimizerAgentV2 />);
+    });
     expect(screen.getByRole('article')).toBeInTheDocument();
   });
 
-  it('should call startAgent when a message is sent', () => {
-    render(<ApexOptimizerAgentV2 />);
-    const input = screen.getByPlaceholderText('Ask the agent to optimize a tool...');
-    const sendButton = screen.getByText('Send');
+  it('should call startAgent when a message is sent', async () => {
+    await act(async () => {
+      render(<ApexOptimizerAgentV2 />);
+    });
+    const input = screen.getByPlaceholderText('Type your message...');
+    const form = input.closest('form');
 
-    fireEvent.change(input, { target: { value: 'Test message' } });
-    fireEvent.submit(screen.getByRole('form'));
+    await act(async () => {
+        if(form){
+            fireEvent.change(input, { target: { value: 'Test message' } });
+            fireEvent.submit(form);
+        }
+    });
 
-    expect(mockStartAgent).toHaveBeenCalledWith('Test message');
+    expect(mockStartAgent).toHaveBeenCalledWith('Test message', []);
   });
 
-  it('should call startAgent when an example query is clicked', () => {
-    render(<ApexOptimizerAgentV2 />);
-    const exampleButton = screen.getByText(/Analyze the latency/);
+  it('should call startAgent when an example query is clicked', async () => {
+    await act(async () => {
+      render(<ApexOptimizerAgentV2 />);
+    });
+    const exampleButton = screen.getByText(/Overview of the lowest hanging optimization fruit/);
 
-    fireEvent.click(exampleButton);
+    await act(async () => {
+      fireEvent.click(exampleButton);
+    });
 
-    expect(screen.getByRole('textbox')).toHaveValue("Analyze the latency of the `get_user_data` tool and suggest optimizations.");
+    expect(screen.getByPlaceholderText('Type your message...')).toHaveValue("Overview of the lowest hanging optimization fruit that I can implement with config only change");
   });
 });

@@ -12,7 +12,7 @@ def client():
 
 def test_websocket_connection(client):
     # Authenticate and get the session cookie
-    response = client.get("/api/v3/auth/google")
+    response = client.get("/api/v3/auth/login")
     assert response.status_code == 200
     
     run_id = "test_run_ws"

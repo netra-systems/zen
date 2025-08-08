@@ -2,7 +2,7 @@ import json
 import asyncio
 import logging
 from fastapi import WebSocket, WebSocketDisconnect, Depends
-from app.services.deepagents.supervisor import Supervisor
+from app.services.agents.supervisor import Supervisor
 from app import schemas
 from app.connection_manager import manager
 from app.llm.llm_manager import LLMManager
@@ -18,7 +18,7 @@ class AgentService:
         """
         Starts the agent. The supervisor will stream logs back to the websocket if requested.
         """
-        return await self.supervisor.run(analysis_request, run_id, stream_updates)
+        return await self.supervisor.run(analysis_request.model_dump(), run_id, stream_updates)
 
     async def handle_websocket_message(self, run_id: str, message: str):
         """
@@ -36,9 +36,9 @@ class AgentService:
                 )
                 # When started from a websocket, we always want to stream updates
                 response = await self.run(analysis_request, run_id, stream_updates=True)
-                await manager.send_to_run(
+                await manager.broadcast_to_client(
+                    run_id,
                     {
-                        "run_id": run_id,
                         "event": "agent_finished",
                         "data": response
                     }
@@ -50,5 +50,6 @@ class AgentService:
             logger.error(f"Error in handle_websocket_message for run_id: {run_id}: {e}", exc_info=True)
 
 def get_agent_service(db_session = Depends(get_db_session), llm_manager: LLMManager = Depends(LLMManager)) -> AgentService:
+    from app.services.agents.supervisor import Supervisor
     supervisor = Supervisor(db_session, llm_manager, manager)
     return AgentService(supervisor)

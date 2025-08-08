@@ -1,3 +1,4 @@
+
 export interface User {
     id: number;
     full_name?: string;
@@ -251,8 +252,9 @@ export interface AIMessageChunk {
 
 export interface StreamData {
     run_id: string;
+    name: string;
     input?: Record<string, unknown>;
-    chunk?: Record<string, unknown>;
+    chunk?: AIMessageChunk;
     messages?: Record<string, unknown>[];
 }
 
@@ -443,4 +445,44 @@ export interface NavItem {
 
 export interface MessageOrchestratorProps {
     messages: Message[];
+}
+
+export interface MessageOrchestratorProps {
+    message: Message;
+}
+
+export interface AgentMessageCardProps {
+    message: AgentMessage;
+}
+
+export interface UserMessageCardProps {
+    message: UserMessage;
+}
+
+export interface ThinkingProps {
+    message: ThinkingMessage;
+}
+
+export interface ErrorCardProps {
+    message: ErrorMessage;
+}
+
+export interface EventCardProps {
+    message: EventMessage;
+}
+
+export interface TextCardProps {
+    message: TextMessage;
+}
+
+export interface ToolStartCardProps {
+    message: ToolStartMessage;
+}
+
+export interface ToolEndCardProps {
+    message: ToolEndMessage;
+}
+
+export interface StateUpdateCardProps {
+    message: StateUpdateMessage;
 }

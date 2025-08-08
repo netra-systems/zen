@@ -1,24 +1,16 @@
-
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext } from 'react';
 import { useAgent } from '../hooks/useAgent';
-import { Message } from '../types/types';
+import { UseAgentReturn } from '../types';
 
-interface AgentContextType {
-    startAgent: (input: string) => void;
-    messages: Message[];
-    showThinking: boolean;
-    error: Error | null;
-}
-
-const AgentContext = createContext<AgentContextType | undefined>(undefined);
+const AgentContext = createContext<UseAgentReturn | undefined>(undefined);
 
 export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
-    const { startAgent, messages, showThinking, error } = useAgent();
+    const agent = useAgent();
 
     return (
-        <AgentContext.Provider value={{ startAgent, messages, showThinking, error }}>
+        <AgentContext.Provider value={agent}>
             {children}
         </AgentContext.Provider>
     );

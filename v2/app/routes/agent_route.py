@@ -1,19 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.session import get_db_session
-from app.llm.llm_manager import LLMManager
-from app.services.deepagents.supervisor import Supervisor
+from app.services.agents.supervisor import Supervisor
 from app.schemas import AnalysisRequest
-from app.connection_manager import manager
 
 router = APIRouter()
 
-def get_llm_manager_from_state(request: Request) -> LLMManager:
-    return request.app.state.llm_manager
-
-def get_agent_supervisor(request: Request, db_session: AsyncSession = Depends(get_db_session), llm_manager: LLMManager = Depends(get_llm_manager_from_state)) -> Supervisor:
-    # This is a simplified way to get the supervisor. In a real app, you might have a more robust way to manage this.
-    return Supervisor(db_session, llm_manager, manager)
+def get_agent_supervisor(request: Request) -> Supervisor:
+    return request.app.state.agent_supervisor
 
 @router.post("/run_agent")
 async def run_agent(
@@ -25,7 +17,7 @@ async def run_agent(
     """
     try:
         result = await supervisor.run(
-            analysis_request, 
+            analysis_request.model_dump(), 
             analysis_request.request.id, 
             stream_updates=True)
         return result

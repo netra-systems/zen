@@ -1,13 +1,15 @@
-from app.services.deepagents.base import BaseAgent
+from app.services.agents.base import BaseSubAgent
 from app.schemas import AnalysisRequest
 from typing import Any, Dict
 import logging
 
 logger = logging.getLogger(__name__)
 
-class TriageSubAgent(BaseAgent):
-    async def run(self, analysis_request: AnalysisRequest, run_id: str, stream_updates: bool) -> Dict[str, Any]:
+class TriageSubAgent(BaseSubAgent):
+    async def run(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
         logger.info(f"TriageSubAgent starting for run_id: {run_id}")
+
+        analysis_request = AnalysisRequest.parse_obj(input_data)
 
         prompt = f"""
         Analyze the following user request and categorize it.

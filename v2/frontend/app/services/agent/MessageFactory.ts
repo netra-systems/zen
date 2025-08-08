@@ -7,6 +7,8 @@ import {
     ToolEndMessage,
     StateUpdateMessage,
     AgentMessage,
+    ErrorMessage,
+    EventMessage,
     MessageRole,
     StateUpdate,
     Tool,
@@ -43,35 +45,35 @@ export class MessageFactory {
         };
     }
 
-    static createToolStartMessage(content: string, tool: string, toolInput: Record<string, unknown>, id?: string): ToolStartMessage {
+    static createToolStartMessage(tool: string, toolInput: Record<string, unknown>): ToolStartMessage {
         return {
             type: 'tool_start',
-            id: id || `tool_start_${Date.now()}`,
+            id: `tool_start_${Date.now()}`,
             role: 'agent' as MessageRole,
-            content: content,
+            content: `Starting tool: ${tool}`,
             tool: tool,
             toolInput: toolInput,
         };
     }
 
-    static createToolEndMessage(content: string, tool: string, toolInput: Record<string, unknown>, toolOutput: Record<string, unknown>, id?: string): ToolEndMessage {
+    static createToolEndMessage(tool: string, toolInput: Record<string, unknown>, toolOutput: Record<string, unknown>): ToolEndMessage {
         return {
             type: 'tool_end',
-            id: id || `tool_end_${Date.now()}`,
+            id: `tool_end_${Date.now()}`,
             role: 'agent' as MessageRole,
-            content: content,
+            content: `Tool finished: ${tool}`,
             tool: tool,
             toolInput: toolInput,
             toolOutput: toolOutput,
         };
     }
 
-    static createStateUpdateMessage(content: string, state: StateUpdate, id?: string): StateUpdateMessage {
+    static createStateUpdateMessage(state: StateUpdate): StateUpdateMessage {
         return {
             type: 'state_update',
-            id: id || `state_update_${Date.now()}`,
+            id: `state_update_${Date.now()}`,
             role: 'agent' as MessageRole,
-            content: content,
+            content: 'Updating state...',
             state: state,
         };
     }
@@ -86,6 +88,26 @@ export class MessageFactory {
             todos: todos,
             toolErrors: toolErrors,
             content: content,
+        };
+    }
+
+    static createErrorMessage(content: string): ErrorMessage {
+        return {
+            type: 'error',
+            id: `error_${Date.now()}`,
+            role: 'agent' as MessageRole,
+            content: content,
+            isError: true,
+        };
+    }
+
+    static createEventMessage(eventName: string): EventMessage {
+        return {
+            type: 'event',
+            id: `event_${Date.now()}`,
+            role: 'agent' as MessageRole,
+            content: `Event: ${eventName}`,
+            eventName: eventName,
         };
     }
 }

@@ -1,7 +1,7 @@
 import pytest
 import asyncio
 from unittest.mock import MagicMock, AsyncMock
-from app.services.deepagents.supervisor import Supervisor as OverallSupervisor
+from app.services.agents.supervisor import Supervisor as OverallSupervisor
 from app.schemas import AnalysisRequest, RequestModel, Settings
 from langchain_community.chat_models.fake import FakeListChatModel
 
@@ -16,7 +16,7 @@ async def test_overall_supervisor_workflow():
     llm_manager = MagicMock()
     llm_manager.get_llm.return_value = FakeLLMWithTools(responses=["Hello, world!"])
     websocket_manager = MagicMock()
-    websocket_manager.send_to_run = AsyncMock()
+    websocket_manager.broadcast_to_client = AsyncMock()
 
     # Create a mock request
     mock_request_model = RequestModel(
@@ -37,8 +37,8 @@ async def test_overall_supervisor_workflow():
     supervisor = OverallSupervisor(db_session, llm_manager, websocket_manager)
 
     # Start the agent
-    supervisor.start_agent = AsyncMock(return_value={"status": "completed"})
-    response = await supervisor.start_agent(mock_analysis_request, "test_run_id", True)
+    supervisor.run = AsyncMock(return_value={"status": "completed"})
+    response = await supervisor.run(mock_analysis_request.model_dump(), "test_run_id", True)
 
     # Assert that the agent started successfully
     assert response["status"] == "completed"

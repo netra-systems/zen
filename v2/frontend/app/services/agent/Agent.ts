@@ -164,46 +164,45 @@ class Agent {
     private processStreamEvent(draft: AgentState, streamEvent: StreamEvent): void {
         const { event, data } = streamEvent;
 
+        if (draft.messages.some(m => m.type === 'thinking')) {
+            draft.messages = draft.messages.filter(m => m.type !== 'thinking');
+        }
+
         switch (event) {
             case 'on_agent_start':
-                const agentMessage = MessageFactory.createAgentMessage(data.name, [], [], []);
-                draft.messages.push(agentMessage);
+                draft.messages.push(MessageFactory.createAgentMessage(data.name, [], [], []));
                 break;
 
             case 'on_chain_start':
                 if (data?.input?.todo_list) {
-                    this.processStateUpdate(draft, data.run_id, data.input);
+                    this.updateTodoList(draft, data.input as StateData);
                 }
+                break;
+
+            case 'on_tool_start':
+                this.startTool(draft, data.name, data.input as Record<string, unknown>);
+                break;
+
+            case 'on_tool_end':
+                this.endTool(draft, data.name, data.output as Record<string, unknown>);
+                break;
+
+            case 'on_error':
+                this.handleError(draft, data.error as string);
                 break;
 
             case 'run_complete':
                 draft.isThinking = false;
-                draft.messages = draft.messages.filter(m => m.type !== 'thinking');
                 break;
 
             case 'on_chat_model_stream':
                 const chunk = data.chunk;
                 if (chunk?.content) {
-                    this.processTextChunk(draft, data.run_id, chunk.content);
-                }
-                if (chunk?.tool_calls) {
-                    chunk.tool_calls.forEach((toolCall: ToolCall) => {
-                        this.processToolStart(draft, toolCall.id, toolCall.name);
-                    });
+                    this.updateAgentContent(draft, chunk.content);
                 }
                 if (chunk?.tool_call_chunks) {
                     chunk.tool_call_chunks.forEach((toolChunk: ToolCallChunk) => {
-                        this.processToolChunk(draft, toolChunk);
-                    });
-                }
-                break;
-            
-            case 'on_chain_stream':
-                if (data.chunk?.messages) {
-                    data.chunk.messages.forEach((msg: ToolOutputMessage) => {
-                        if (msg.type === 'tool') {
-                            this.processToolOutput(draft, msg);
-                        }
+                        this.updateToolInput(draft, toolChunk);
                     });
                 }
                 break;
@@ -213,55 +212,61 @@ class Agent {
         }
     }
     
-    private findOrCreateAgentMessage(draft: AgentState): AgentMessage {
-        let agentMessage = draft.messages.find(m => m.type === 'agent') as AgentMessage;
+    private findOrCreateAgentMessage(draft: AgentState, subAgentName?: string): AgentMessage {
+        let agentMessage = draft.messages.slice().reverse().find(m => m.type === 'agent') as AgentMessage | undefined;
+        
         if (!agentMessage) {
-            agentMessage = MessageFactory.createAgentMessage("Agent", [], [], []);
+            agentMessage = MessageFactory.createAgentMessage(subAgentName || "Agent", [], [], []);
             draft.messages.push(agentMessage);
         }
         return agentMessage;
     }
 
-    private processTextChunk(draft: AgentState, run_id: string, content: string): void {
+    private updateAgentContent(draft: AgentState, content: string): void {
         const agentMessage = this.findOrCreateAgentMessage(draft);
         agentMessage.content = (agentMessage.content || '') + content;
     }
 
-    private processToolStart(draft: AgentState, toolCallId: string, toolName: string): void {
+    private startTool(draft: AgentState, toolName: string, toolInput: Record<string, unknown>): void {
         const agentMessage = this.findOrCreateAgentMessage(draft);
-        agentMessage.tools.push({ name: toolName, input: {} });
+        agentMessage.tools.push({ name: toolName, input: toolInput });
     }
     
-    private processToolChunk(draft: AgentState, chunk: ToolCallChunk): void {
+    private endTool(draft: AgentState, toolName: string, toolOutput: Record<string, unknown>): void {
+        const agentMessage = this.findOrCreateAgentMessage(draft);
+        const tool = agentMessage.tools.find(t => t.name === toolName && !t.output);
+        if (tool) {
+            tool.output = toolOutput;
+        }
+    }
+
+    private updateToolInput(draft: AgentState, chunk: ToolCallChunk): void {
         if (!chunk.id) return;
 
         draft.toolArgBuffers[chunk.id] = (draft.toolArgBuffers[chunk.id] || '') + chunk.args;
 
         const agentMessage = this.findOrCreateAgentMessage(draft);
-        const tool = agentMessage.tools.find(t => t.name === chunk.name);
+        const tool = agentMessage.tools.find(t => t.name === chunk.name && !t.output);
         if (tool) {
             try {
                 const parsedArgs = JSON.parse(draft.toolArgBuffers[chunk.id]);
                 tool.input = parsedArgs;
             } catch (err) {
-                tool.input = { raw: draft.toolArgBuffers[chunk.id] };
+                // Incomplete JSON, wait for more chunks
             }
         }
     }
-    
-    private processToolOutput(draft: AgentState, output: ToolOutputMessage): void {
-        const agentMessage = this.findOrCreateAgentMessage(draft);
-        const tool = agentMessage.tools.find(t => t.name === output.tool_call_id);
-        if (tool) {
-            tool.output = typeof output.content === 'string' ? { content: output.content } : output.content;
-        }
-    }
 
-    private processStateUpdate(draft: AgentState, run_id: string, stateData: StateData): void {
+    private updateTodoList(draft: AgentState, stateData: StateData): void {
         const agentMessage = this.findOrCreateAgentMessage(draft);
         if (stateData.todo_list) {
             agentMessage.todos = stateData.todo_list.map(item => ({ description: item, state: 'pending' }));
         }
+    }
+
+    private handleError(draft: AgentState, error: string): void {
+        const agentMessage = this.findOrCreateAgentMessage(draft);
+        agentMessage.toolErrors.push(error);
     }
 }
 

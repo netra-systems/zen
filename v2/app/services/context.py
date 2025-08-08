@@ -1,6 +1,6 @@
 from typing import Any, List, Dict
 from app.schemas import Log
-from app.services.deepagents.state import DeepAgentState
+from app.services.agents.state import DeepAgentState
 from app.services.supply_catalog_service import SupplyCatalogService
 
 class ToolContext:

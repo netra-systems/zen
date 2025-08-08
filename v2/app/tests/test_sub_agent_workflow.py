@@ -1,4 +1,3 @@
-
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
@@ -25,14 +24,50 @@ async def test_sub_agent_workflow():
         )
     )
     
-    response = client.post("/api/v3/agent/chat/start_agent", json=analysis_request.model_dump())
-    
-    assert response.status_code == 200
-    
-    response_json = response.json()
-    agent_names = list(response_json.keys())
-    last_agent_name = agent_names[-1]
-    last_agent_state = response_json[last_agent_name]
+    with client.websocket_connect("/ws/test_run") as websocket:
+        websocket.send_json({"type": "start_agent", "payload": analysis_request.model_dump()})
+        response = websocket.receive_json()
+        assert response["event"] == "agent_started"
 
-    assert last_agent_state["run_id"] == "test_run"
-    assert last_agent_state["current_agent"] == "ReportingSubAgent"
+        response = websocket.receive_json()
+        assert response["event"] == "agent_step_started"
+        assert response["data"]["agent"] == "TriageSubAgent"
+
+        response = websocket.receive_json()
+        assert response["event"] == "agent_step_finished"
+        assert response["data"]["agent"] == "TriageSubAgent"
+
+        response = websocket.receive_json()
+        assert response["event"] == "agent_step_started"
+        assert response["data"]["agent"] == "DataSubAgent"
+
+        response = websocket.receive_json()
+        assert response["event"] == "agent_step_finished"
+        assert response["data"]["agent"] == "DataSubAgent"
+
+        response = websocket.receive_json()
+        assert response["event"] == "agent_step_started"
+        assert response["data"]["agent"] == "OptimizationsCoreSubAgent"
+
+        response = websocket.receive_json()
+        assert response["event"] == "agent_step_finished"
+        assert response["data"]["agent"] == "OptimizationsCoreSubAgent"
+
+        response = websocket.receive_json()
+        assert response["event"] == "agent_step_started"
+        assert response["data"]["agent"] == "ActionsToMeetGoalsSubAgent"
+
+        response = websocket.receive_json()
+        assert response["event"] == "agent_step_finished"
+        assert response["data"]["agent"] == "ActionsToMeetGoalsSubAgent"
+
+        response = websocket.receive_json()
+        assert response["event"] == "agent_step_started"
+        assert response["data"]["agent"] == "ReportingSubAgent"
+
+        response = websocket.receive_json()
+        assert response["event"] == "agent_step_finished"
+        assert response["data"]["agent"] == "ReportingSubAgent"
+
+        response = websocket.receive_json()
+        assert response["event"] == "agent_finished"

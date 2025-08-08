@@ -1,16 +1,15 @@
-from app.services.deepagents.base import BaseAgent
-from app.schemas import AnalysisRequest
+from app.services.agents.base import BaseSubAgent
 from typing import Any, Dict
 import logging
 
 logger = logging.getLogger(__name__)
 
-class OptimizationsCoreSubAgent(BaseAgent):
-    async def run(self, previous_agent_output: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
+class OptimizationsCoreSubAgent(BaseSubAgent):
+    async def run(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
         logger.info(f"OptimizationsCoreSubAgent starting for run_id: {run_id}")
 
-        processed_data = previous_agent_output.get("processed_data", {})
-        original_request = previous_agent_output.get("original_request", "")
+        processed_data = input_data.get("processed_data", {})
+        original_request = input_data.get("original_request", "")
 
         # Simulate suggesting optimizations based on the processed data
         if processed_data:

@@ -1,14 +1,11 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { MessageFilter } from '@/app/hooks/useAgentStreaming';
-
-
+import { MessageFilterControlProps, MessageFilter } from '@/app/types/index';
 
 export function MessageFilterControl({ messageFilters, setMessageFilters, showThinking, setShowThinking }: MessageFilterControlProps) {
     const handleFilterChange = (filter: keyof MessageFilter, checked: boolean) => {
-        const newFilters = { ...messageFilters };
-        newFilters[filter] = checked;
+        const newFilters = { ...messageFilters, [filter]: checked };
         setMessageFilters(newFilters);
     };
 
@@ -25,11 +22,12 @@ export function MessageFilterControl({ messageFilters, setMessageFilters, showTh
             <div className="flex items-center space-x-2">
                 <Switch
                     id="event-filter"
-                    checked={!messageFilters.event}
-                    onCheckedChange={(checked) => handleFilterChange('event', !checked)}
+                    checked={messageFilters.event}
+                    onCheckedChange={(checked) => handleFilterChange('event', checked)}
                 />
                 <Label htmlFor="event-filter">Show Events</Label>
             </div>
+            {/* Add more switches for other message types as needed */}
         </div>
     );
 }
