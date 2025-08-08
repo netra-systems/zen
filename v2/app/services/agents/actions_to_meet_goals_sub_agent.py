@@ -58,7 +58,6 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
         logger.info(f"ActionsToMeetGoalsSubAgent finished for run_id: {run_id}")
         self.set_state(SubAgentLifecycle.COMPLETED)
 
-        return {
-            "action_plan": action_plan,
-            "original_request": original_request
-        }
+        input_data["action_plan"] = action_plan
+        input_data["current_agent"] = "ReportingSubAgent"
+        return input_data

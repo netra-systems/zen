@@ -28,7 +28,7 @@ def analysis_request():
 
 @pytest.mark.asyncio
 async def test_triage_sub_agent(mock_llm_manager, analysis_request):
-    mock_llm_manager.arun.return_value = MagicMock(content="DataSubAgent")
+    mock_llm_manager.arun.return_value = '{"category": "Data Analysis", "justification": "The user wants to analyze data."}'
     agent = TriageSubAgent(mock_llm_manager)
     state = {
         "analysis_request": analysis_request,
@@ -40,10 +40,10 @@ async def test_triage_sub_agent(mock_llm_manager, analysis_request):
     }
     result = await agent.run(state, "test_run", False)
     assert result["current_agent"] == "DataSubAgent"
+    assert result["triage_result"]["category"] == "Data Analysis"
 
 @pytest.mark.asyncio
 async def test_data_sub_agent(mock_llm_manager, analysis_request):
-    mock_llm_manager.arun.return_value = MagicMock(content="Data gathered.")
     agent = DataSubAgent(mock_llm_manager)
     state = {
         "analysis_request": analysis_request,
@@ -52,14 +52,14 @@ async def test_data_sub_agent(mock_llm_manager, analysis_request):
         "stream_updates": False,
         "current_agent": "DataSubAgent",
         "tool_calls": None,
+        "triage_result": {"category": "Data Analysis"}
     }
     result = await agent.run(state, "test_run", False)
     assert result["current_agent"] == "OptimizationsCoreSubAgent"
-    assert "Data gathered." in result["messages"][-1].content
+    assert "processed_data" in result
 
 @pytest.mark.asyncio
 async def test_optimizations_core_sub_agent(mock_llm_manager, analysis_request):
-    mock_llm_manager.arun.return_value = MagicMock(content="Optimization strategies formulated.")
     agent = OptimizationsCoreSubAgent(mock_llm_manager)
     state = {
         "analysis_request": analysis_request,
@@ -68,14 +68,14 @@ async def test_optimizations_core_sub_agent(mock_llm_manager, analysis_request):
         "stream_updates": False,
         "current_agent": "OptimizationsCoreSubAgent",
         "tool_calls": None,
+        "processed_data": {"summary": "some data"}
     }
     result = await agent.run(state, "test_run", False)
     assert result["current_agent"] == "ActionsToMeetGoalsSubAgent"
-    assert "Optimization strategies formulated." in result["messages"][-1].content
+    assert "optimizations" in result
 
 @pytest.mark.asyncio
 async def test_actions_to_meet_goals_sub_agent(mock_llm_manager, analysis_request):
-    mock_llm_manager.arun.return_value = MagicMock(content="Actions formulated.")
     agent = ActionsToMeetGoalsSubAgent(mock_llm_manager)
     state = {
         "analysis_request": analysis_request,
@@ -84,14 +84,14 @@ async def test_actions_to_meet_goals_sub_agent(mock_llm_manager, analysis_reques
         "stream_updates": False,
         "current_agent": "ActionsToMeetGoalsSubAgent",
         "tool_calls": None,
+        "optimizations": ["some optimization"]
     }
     result = await agent.run(state, "test_run", False)
     assert result["current_agent"] == "ReportingSubAgent"
-    assert "Actions formulated." in result["messages"][-1].content
+    assert "action_plan" in result
 
 @pytest.mark.asyncio
 async def test_reporting_sub_agent(mock_llm_manager, analysis_request):
-    mock_llm_manager.arun.return_value = MagicMock(content="Report generated.")
     agent = ReportingSubAgent(mock_llm_manager)
     state = {
         "analysis_request": analysis_request,
@@ -100,7 +100,8 @@ async def test_reporting_sub_agent(mock_llm_manager, analysis_request):
         "stream_updates": False,
         "current_agent": "ReportingSubAgent",
         "tool_calls": None,
+        "action_plan": {"title": "some plan"}
     }
     result = await agent.run(state, "test_run", False)
     assert result["current_agent"] == "__end__"
-    assert "Report generated." in result["messages"][-1].content
+    assert "report" in result

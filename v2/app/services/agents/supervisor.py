@@ -4,7 +4,6 @@ from app.services.agents.base import BaseSubAgent
 from app.schemas import AnalysisRequest, SubAgentLifecycle
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.connection_manager import manager
 
 # Import all the sub-agents
 from app.services.agents.triage_sub_agent import TriageSubAgent
@@ -35,7 +34,7 @@ class Supervisor(BaseSubAgent):
         self.run_states[run_id] = {"status": "running", "current_step": 0, "total_steps": len(self.sub_agents)}
         
         if stream_updates:
-            await manager.broadcast_to_client(
+            await self.websocket_manager.broadcast_to_client(
                 run_id,
                 {
                     "event": "agent_started",
@@ -47,7 +46,7 @@ class Supervisor(BaseSubAgent):
         for i, agent in enumerate(self.sub_agents):
             self.run_states[run_id]["current_step"] = i + 1
             if stream_updates:
-                await manager.broadcast_to_client(
+                await self.websocket_manager.broadcast_to_client(
                     run_id,
                     {
                         "event": "agent_step_started",
@@ -61,7 +60,7 @@ class Supervisor(BaseSubAgent):
             current_data = await agent.run(current_data, run_id, stream_updates)
 
             if stream_updates:
-                await manager.broadcast_to_client(
+                await self.websocket_manager.broadcast_to_client(
                     run_id,
                     {
                         "event": "agent_step_finished",

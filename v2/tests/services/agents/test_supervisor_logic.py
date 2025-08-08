@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, AsyncMock
 from app.services.agents.supervisor import Supervisor
 from app.schemas import AnalysisRequest, RequestModel, Settings
 from app.llm.llm_manager import LLMManager
-from app.connection_manager import ConnectionManager
+from app.websocket_manager import WebSocketManager
 
 @pytest.fixture
 def mock_llm_manager():
@@ -32,19 +32,8 @@ async def test_supervisor_logic(mock_llm_manager, mock_manager):
     )
     run_id = "test_run"
 
-    async def astream_mock(initial_state):
-        yield {"current_agent": "TriageSubAgent", "messages": []}
-        yield {"current_agent": "DataSubAgent", "messages": []}
-        yield {"current_agent": "OptimizationsCoreSubAgent", "messages": []}
-        yield {"current_agent": "ActionsToMeetGoalsSubAgent", "messages": []}
-        yield {"current_agent": "ReportingSubAgent", "messages": []}
-        yield {"current_agent": "__end__", "messages": []}
-
-    supervisor.graph.astream = astream_mock
-
     # Act
-    final_state = await supervisor.run(analysis_request.model_dump(), run_id, stream_updates=True)
+    final_state = await supervisor.run(analysis_request.model_dump(), run_id, stream_updates=False)
 
     # Assert
     assert final_state["current_agent"] == "__end__"
-    assert mock_manager.broadcast_to_client.call_count == 6

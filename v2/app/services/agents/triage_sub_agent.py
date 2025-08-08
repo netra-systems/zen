@@ -28,7 +28,7 @@ class TriageSubAgent(BaseSubAgent):
         logger.info(f"TriageSubAgent starting for run_id: {run_id}")
         self.set_state(SubAgentLifecycle.RUNNING)
 
-        analysis_request = AnalysisRequest.parse_obj(input_data)
+        analysis_request = AnalysisRequest.parse_obj(input_data["analysis_request"])
         
         prompt = self.prompt_template.format(query=analysis_request.request.query)
 
@@ -46,7 +46,6 @@ class TriageSubAgent(BaseSubAgent):
         logger.info(f"TriageSubAgent finished for run_id: {run_id}")
         self.set_state(SubAgentLifecycle.COMPLETED)
 
-        return {
-            "triage_result": triage_result,
-            "original_request": analysis_request.request.query
-        }
+        input_data["triage_result"] = triage_result
+        input_data["current_agent"] = "DataSubAgent"
+        return input_data

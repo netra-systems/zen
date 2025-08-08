@@ -43,7 +43,6 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
         logger.info(f"OptimizationsCoreSubAgent finished for run_id: {run_id}")
         self.set_state(SubAgentLifecycle.COMPLETED)
 
-        return {
-            "optimizations": optimizations,
-            "original_request": original_request
-        }
+        input_data["optimizations"] = optimizations
+        input_data["current_agent"] = "ActionsToMeetGoalsSubAgent"
+        return input_data

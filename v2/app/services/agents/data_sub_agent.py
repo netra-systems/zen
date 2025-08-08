@@ -48,7 +48,6 @@ class DataSubAgent(BaseSubAgent):
         logger.info(f"DataSubAgent finished for run_id: {run_id}")
         self.set_state(SubAgentLifecycle.COMPLETED)
 
-        return {
-            "processed_data": processed_data,
-            "original_request": original_request
-        }
+        input_data["processed_data"] = processed_data
+        input_data["current_agent"] = "OptimizationsCoreSubAgent"
+        return input_data

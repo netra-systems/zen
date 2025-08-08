@@ -54,4 +54,6 @@ class ReportingSubAgent(BaseSubAgent):
         logger.info(f"ReportingSubAgent finished for run_id: {run_id}")
         self.set_state(SubAgentLifecycle.COMPLETED)
 
-        return {"report": report}
+        input_data["report"] = report
+        input_data["current_agent"] = "__end__"
+        return input_data
