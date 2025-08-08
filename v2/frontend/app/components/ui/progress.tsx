@@ -18,7 +18,7 @@ function Progress({
         className
       )}
       value={value}
-      aria-valuenow={value}
+      aria-valuenow={value || 0}
       aria-valuemin={0}
       aria-valuemax={100}
       {...props}
