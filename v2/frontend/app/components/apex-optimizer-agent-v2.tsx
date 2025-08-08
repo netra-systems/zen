@@ -1,13 +1,14 @@
+
 'use client';
 
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/app/components/ui/card';
 import { useState } from 'react';
-import { useAgentContext } from '@/providers/AgentProvider';
+import { useAgentContext } from '@/app/providers/AgentProvider';
 import { ChatWindow } from './chat/ChatWindow';
 import LoginButton from './LoginButton';
-import { examplePrompts } from '@/lib/examplePrompts';
-import { MessageFilter, WebSocketMessage, AnalysisRequest } from '@/types';
-import useAppStore from '@/store';
+import { examplePrompts } from '@/app/lib/examplePrompts';
+import { MessageFilter, WebSocketMessage, AnalysisRequest } from '@/app/types';
+import { useAuth } from '@/app/hooks/useAuth';
 
 export function ApexOptimizerAgentV2() {
   const { messages, showThinking, error, sendWsMessage } = useAgentContext();
@@ -15,7 +16,7 @@ export function ApexOptimizerAgentV2() {
     event: false, 
     thinking: true 
   });
-  const { user } = useAppStore();
+  const { user } = useAuth();
 
   const handleSendMessage = (message: string) => {
     if (!user) {

@@ -1,16 +1,14 @@
-
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { ApexOptimizerAgentV2 } from '@/app/components/apex-optimizer-agent-v2';
 import { useAgentContext } from '@/app/providers/AgentProvider';
-import useAppStore from '@/app/store';
+import { useAuth } from '@/app/hooks/useAuth';
 
 jest.mock('@/app/providers/AgentProvider', () => ({
   useAgentContext: jest.fn(),
 }));
 
-jest.mock('@/app/store', () => ({
-  __esModule: true,
-  default: jest.fn(),
+jest.mock('@/app/hooks/useAuth', () => ({
+  useAuth: jest.fn(),
 }));
 
 describe('ApexOptimizerAgentV2', () => {
@@ -23,8 +21,11 @@ describe('ApexOptimizerAgentV2', () => {
       sendWsMessage: mockSendWsMessage,
       error: null,
     });
-    (useAppStore as jest.Mock).mockReturnValue({
+    (useAuth as jest.Mock).mockReturnValue({
       user: { id: 'test-user', name: 'Test User', picture: 'https://example.com/avatar.png' },
+      login: jest.fn(),
+      logout: jest.fn(),
+      loading: false,
     });
   });
 

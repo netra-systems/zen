@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { Corpus } from '../../types';
-import { useWebSocketStore } from '@/store/websocket';
+import { useWebSocket } from '@/app/services/websocket';
 
 export default function CorpusAdminPage() {
     const [corpora, setCorpora] = useState<Corpus[]>([]);
     const [newCorpusName, setNewCorpusName] = useState('');
     const [newCorpusDescription, setNewCorpusDescription] = useState('');
-    const { lastJsonMessage } = useWebSocketStore();
+    const { lastJsonMessage } = useWebSocket();
 
     useEffect(() => {
         fetch('/api/v3/corpus')
