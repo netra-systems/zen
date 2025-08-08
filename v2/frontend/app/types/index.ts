@@ -1,6 +1,5 @@
-
 export interface User {
-    id: number;
+    id: string;
     full_name?: string;
     email: string;
     picture?: string;
@@ -162,6 +161,20 @@ export type AgentListener = (state: AgentState) => void;
 
 
 // --- API and Server Communication ---
+
+export interface AuthEndpoints {
+    login: string;
+    logout: string;
+    token: string;
+    user: string;
+}
+
+export interface AuthConfigResponse {
+    google_client_id: string;
+    endpoints: AuthEndpoints;
+    development_mode: boolean;
+    user: User | null;
+}
 
 export interface Workload {
     run_id: string;
@@ -447,10 +460,6 @@ export interface MessageOrchestratorProps {
     messages: Message[];
 }
 
-export interface MessageOrchestratorProps {
-    message: Message;
-}
-
 export interface AgentMessageCardProps {
     message: AgentMessage;
 }
@@ -486,3 +495,12 @@ export interface ToolEndCardProps {
 export interface StateUpdateCardProps {
     message: StateUpdateMessage;
 }
+
+export interface Corpus {
+    id: string;
+    name: string;
+    description: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+  }
