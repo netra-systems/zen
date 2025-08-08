@@ -187,3 +187,10 @@ class Supervisor:
             "description": agent.description,
             "tools": [tool.name for tool in agent.tools]
         }
+
+    async def shutdown(self):
+        """Shuts down the agent supervisor."""
+        logger.info("Shutting down agent supervisor...")
+        # In a real application, you would add shutdown logic here
+        # For now, we'll just log a message
+        logger.info("Agent supervisor shut down.")

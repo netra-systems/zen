@@ -17,7 +17,5 @@ class ToolRegistry:
         tools = []
         for name in tool_names:
             if name in self._tool_configs:
-                # In a real application, you would initialize the tools here
-                # For now, we'll just return an empty list
-                pass
+                tools.extend(self._tool_configs[name])
         return tools

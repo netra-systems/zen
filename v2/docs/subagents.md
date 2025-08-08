@@ -8,6 +8,10 @@ The Sub-Agent architecture is a modular and scalable way to organize the differe
 
 The Supervisor uses a dynamic routing mechanism to determine the next Sub-Agent to activate. This allows for a flexible and intelligent workflow that can adapt to the user's request.
 
+## BaseSubAgent
+
+The `BaseSubAgent` class is the base class for all sub-agents. It defines the common interface for all sub-agents, including the `ainvoke` method.
+
 ## Sub-Agents
 
 - **TriageSubAgent**: This Sub-Agent is responsible for triaging the user's request and determining the next step.
@@ -32,16 +36,11 @@ The Supervisor can also dynamically route to a specific SubAgent if the user's q
 graph TD
     A[User Request] --> B(Supervisor)
     B --> C{TriageSubAgent}
-    C --> B
-    B --> D{DataSubAgent}
-    D --> B
-    B --> E{OptimizationsCoreSubAgent}
-    E --> B
-    B --> F{ActionsToMeetGoalsSubAgent}
-    F --> B
-    B --> G{ReportingSubAgent}
-    G --> B
-    B --> H[User Response]
+    C --> D{DataSubAgent}
+    D --> E{OptimizationsCoreSubAgent}
+    E --> F{ActionsToMeetGoalsSubAgent}
+    F --> G{ReportingSubAgent}
+    G --> H[User Response]
 ```
 
 ## WebSocket Communication
