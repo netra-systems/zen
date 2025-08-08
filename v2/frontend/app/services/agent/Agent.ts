@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import { AgentState, AgentListener, Reference, ToolCallChunk, ToolCall } from '@/types';
-import webSocketManager from '@/services/websocket';
+import { AgentState, AgentListener, Reference, ToolCallChunk, ToolCall, ServerEvent } from '@/types';
+import { useWebSocket } from '@/services/websocket';
 
 class Agent {
     private state: AgentState = {
@@ -11,12 +11,24 @@ class Agent {
     };
     private listeners: AgentListener[] = [];
     private isInitialized = false;
+    private unsubscribeFromWebSocket: (() => void) | null = null;
 
     initialize() {
         if (this.isInitialized) return;
 
-        webSocketManager.onMessage(this.handleWebSocketMessage);
+        this.unsubscribeFromWebSocket = useWebSocket.subscribe(
+            (state, prevState) => {
+                if (state.lastJsonMessage && state.lastJsonMessage !== prevState.lastJsonMessage) {
+                    this.handleWebSocketMessage(state.lastJsonMessage);
+                }
+            }
+        );
         this.isInitialized = true;
+    }
+
+    cleanup() {
+        this.unsubscribeFromWebSocket?.();
+        this.isInitialized = false;
     }
 
     subscribe(listener: AgentListener) {
@@ -50,12 +62,12 @@ class Agent {
             enable_update_step_results: true,
         };
 
-        webSocketManager.sendMessage(streamInput);
+        useWebSocket.getState().sendMessage(streamInput);
     }
 
     stop() {
         if (this.state.isThinking) {
-            webSocketManager.sendMessage({ type: 'stop' });
+            useWebSocket.getState().sendMessage({ type: 'stop' });
             this.setState(prev => ({ ...prev, isThinking: false }));
         }
     }
