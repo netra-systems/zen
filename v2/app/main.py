@@ -133,7 +133,7 @@ app.include_router(supply.router, prefix="/api/supply", tags=["supply"])
 app.include_router(generation.router, prefix="/api/generation", tags=["generation"])
 
 
-app.include_router(websockets_router, prefix="/ws", tags=["websockets"])
+app.include_router(websockets_router, tags=["websockets"])
 app.include_router(admin.router, prefix="/api", tags=["admin"])
 app.include_router(references.router, prefix="/api", tags=["references"])
 app.include_router(health.router, prefix="/health", tags=["health"])
