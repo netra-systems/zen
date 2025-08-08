@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useAppStore } from '@/store';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -11,8 +11,7 @@ import { Icons } from './Icons';
 import { HeaderProps } from '../types';
 
 export const Header = ({ toggleSidebar }: HeaderProps) => {
-  const logout = useAppStore((state) => state.logout);
-  const user = useAppStore((state) => state.user);
+  const { user, logout } = useAuth();
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">

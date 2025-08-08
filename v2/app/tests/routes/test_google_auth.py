@@ -7,7 +7,7 @@ from app.main import app
 from app.services.security_service import SecurityService
 from app.services.key_manager import KeyManager
 from app.config import settings
-from app.auth.auth_service import google_oauth
+from app.auth.oauth import oauth as google_oauth
 from app.schemas import User
 import uuid
 

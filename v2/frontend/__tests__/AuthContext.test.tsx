@@ -1,5 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { AuthProvider, useAuth } from '../contexts/AuthContext';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import * as auth from '@/services/auth';
 import { mockAuthConfig, mockUser } from '@/mocks/auth';
 
@@ -20,11 +20,13 @@ describe('AuthProvider', () => {
 
   it('should show loading state initially, then login button', async () => {
     mockGetAuthConfig.mockResolvedValue(mockAuthConfig);
-    render(
-      <AuthProvider>
-        <TestComponent />
-      </AuthProvider>
-    );
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>
+      );
+    });
     expect(screen.getByText('Loading...')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
@@ -33,11 +35,13 @@ describe('AuthProvider', () => {
 
   it('should show user info when authenticated', async () => {
     mockGetAuthConfig.mockResolvedValue({ ...mockAuthConfig, user: mockUser });
-    render(
-      <AuthProvider>
-        <TestComponent />
-      </AuthProvider>
-    );
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>
+      );
+    });
     await waitFor(() => {
       expect(screen.getByText(`Welcome, ${mockUser.full_name}`)).toBeInTheDocument();
       expect(screen.getByTestId('test-component-user-id')).toHaveTextContent(mockUser.id);
@@ -48,14 +52,18 @@ describe('AuthProvider', () => {
     mockGetAuthConfig.mockResolvedValue(mockAuthConfig);
     const mockLogin = jest.spyOn(auth, 'handleLogin').mockImplementation(() => {});
 
-    render(
-      <AuthProvider>
-        <TestComponent />
-      </AuthProvider>
-    );
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>
+      );
+    });
 
     const loginButton = await screen.findByText('Login with Google');
-    loginButton.click();
+    await act(async () => {
+      loginButton.click();
+    });
 
     expect(mockLogin).toHaveBeenCalledWith(mockAuthConfig);
   });
@@ -65,14 +73,18 @@ describe('AuthProvider', () => {
     mockGetAuthConfig.mockResolvedValue(authConfigWithUser);
     const mockLogout = jest.spyOn(auth, 'handleLogout').mockImplementation(() => {});
 
-    render(
-      <AuthProvider>
-        <TestComponent />
-      </AuthProvider>
-    );
+    await act(async () => {
+      render(
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>
+      );
+    });
 
     const logoutButton = await screen.findByText('Logout');
-    logoutButton.click();
+    await act(async () => {
+      logoutButton.click();
+    });
 
     expect(mockLogout).toHaveBeenCalledWith(authConfigWithUser);
   });

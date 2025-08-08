@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, AsyncMock
 from app.services.apex_optimizer_agent.tool_builder import ToolBuilder
-from app.services.agents.tool_dispatcher import ToolDispatcher
+from app.services.apex_optimizer_agent.tools.tool_dispatcher import ToolDispatcher
 from app.services.context import ToolContext
 from langchain_core.tools import StructuredTool
 from app.services.apex_optimizer_agent.models import ToolStatus

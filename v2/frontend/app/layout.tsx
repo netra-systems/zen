@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { AppWithLayout } from '@/components/AppWithLayout';
 import { Providers } from '@/components/Providers';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { WebSocketProvider } from '@/contexts/WebSocketContext';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -12,15 +13,24 @@ export const metadata: Metadata = {
   description: 'Autonomous AI agents for business process optimization',
 };
 
+const App = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+  return (
+    <WebSocketProvider userId={user?.id || ''}>
+      <AppWithLayout>{children}</AppWithLayout>
+    </WebSocketProvider>
+  );
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <AuthProvider>
-          <Providers>
-            <AppWithLayout>{children}</AppWithLayout>
-          </Providers>
-        </AuthProvider>
+        <Providers>
+          <AuthProvider>
+            <App>{children}</App>
+          </AuthProvider>
+        </Providers>
       </body>
     </html>
   );

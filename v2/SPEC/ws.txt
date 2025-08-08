@@ -13,7 +13,8 @@ WS:1:0:1:0: Careful: Lanchain stream to JSON parsing
 WS:1:0:1:1: Careful: WS use JSON not string
 WS:1:0:1:2: Careful: Protect against multiple functions or processing double or triple wrapping JSON badly
 
-WS:1:0:1: WebSocket connection is established statefully on application state load (BEFORE the first message is sent.) It is an ERROR if WS can’t be established.
+WS:1:0:1:0 WebSocket connection is established statefully on application state load (BEFORE the first message is sent.) It is an ERROR if WS can’t be established.
+WS:1:0:1:1: Authorization considerations. think carefully dev auth, regular user auth, etc. all well typed.
 WS:1:0:2:2: WebSocket connection is persistent.
 WS:1:0:2:3: Important: WebSocket connection resilient to component re-renders and lifecycle changes.
 Websockets works with regular JSON etc. when the user sends chat messages or free text or clicking examples etc.

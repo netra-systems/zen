@@ -1,6 +1,6 @@
 import json
 from typing import Any
-from app.services.apex_optimizer_agent.state import AgentState
+from app.services.apex_optimizer_agent.models import AgentState
 from app.config import AppConfig
 
 class ToolDispatcher:

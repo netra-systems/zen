@@ -252,7 +252,8 @@ export interface WebSocketMessage {
     | "agent_message"
     | "tool_started"
     | "tool_completed"
-    | "stop_agent";
+    | "stop_agent"
+    | "pong";
   payload:
     | AnalysisRequest
     | WebSocketError
@@ -266,7 +267,8 @@ export interface WebSocketMessage {
     | AgentMessage
     | ToolStarted
     | ToolCompleted
-    | StopAgent;
+    | StopAgent
+    | null;
 }
 
 export interface Workload {

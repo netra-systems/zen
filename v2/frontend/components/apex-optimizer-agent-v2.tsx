@@ -2,12 +2,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { useState } from 'react';
-import { useAgentContext } from '../providers/AgentProvider';
+import { useAgentContext } from '@/contexts/AgentContext';
 import { ChatWindow } from '../chat/ChatWindow';
 import LoginButton from './LoginButton';
 import { examplePrompts } from '../lib/examplePrompts';
 import { MessageFilter, WebSocketMessage, AnalysisRequest } from '@/app/types';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function ApexOptimizerAgentV2() {
   const { messages, showThinking, error, sendWsMessage } = useAgentContext();

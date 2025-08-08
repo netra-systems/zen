@@ -41,7 +41,7 @@ async def get_current_user(
 import logging
 
 async def get_current_user_ws(
-    websocket: WebSocket,
+    user_id: str,
     db_session: Annotated[AsyncSession, Depends(get_db_session)],
     security_service: Annotated[SecurityService, Depends(get_security_service)],
 ) -> auth_schemas.User:
@@ -50,28 +50,14 @@ async def get_current_user_ws(
     and development environments.
     """
     logger = logging.getLogger(__name__)
-    user_json = websocket.session.get('user')
 
-    if settings.environment == "development" and not user_json:
-        logger.info("Development mode: No user info in session, providing dev user.")
+    if settings.environment == "development":
+        logger.info("Development mode: Providing dev user.")
         return await get_dev_user()
 
-    if not user_json:
-        logger.warning(f"WebSocket authentication failed: No user info in session. Closing connection.")
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Not authenticated")
-        raise ConnectionAbortedError("Authentication failed")
-
-    user_info = json.loads(user_json)
-    email = user_info.get('email')
-    if not email:
-        logger.warning(f"WebSocket authentication failed: Invalid session data: email missing. Closing connection.")
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Invalid session data")
-        raise ConnectionAbortedError("Authentication failed")
-
-    user = await security_service.get_user(db_session, email)
+    user = await security_service.get_user_by_id(db_session, user_id)
     if user is None:
-        logger.warning(f"WebSocket authentication failed: User {email} not found. Closing connection.")
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="User not found")
+        logger.warning(f"WebSocket authentication failed: User {user_id} not found. Closing connection.")
         raise ConnectionAbortedError("User not found")
 
     return auth_schemas.User.model_validate(user)
