@@ -1,76 +1,58 @@
 'use client';
 
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { JsonView, allExpanded, defaultStyles } from 'react-json-view-lite';
-import 'react-json-view-lite/dist/index.css';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { MessageContent } from './chat/MessageContent';
-import { TodoListView } from './chat/TodoListView';
-import { Message, MessageCardProps } from '@/app/types/index';
+import { ChatMessage } from '@/types';
 
-export function MessageCard({ message, user }: MessageCardProps) {
-  const getToolName = (message: Message) => {
-    if ('tool' in message) {
-      return message.tool;
-    }
-    return null;
-  };
+export function MessageCard({ message, user }: { message: ChatMessage, user: any }) {
+    const { data } = message;
 
-  const toolName = getToolName(message);
-
-  return (
-    <Card className={`flex items-start gap-4 p-4 ${message.role === 'user' ? 'justify-end' : ''}`}>
-      {message.role === 'assistant' && (
-        <Avatar>
-          <AvatarImage src="/agent-avatar.png" />
-          <AvatarFallback>A</AvatarFallback>
-        </Avatar>
-      )}
-      <div className={`rounded-lg p-3 max-w-[75%] ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-        <div className="flex flex-col">
-          {toolName && <CardHeader><CardTitle>{toolName}</CardTitle></CardHeader>}
-          <MessageContent message={message} />
-          {message.type === 'tool_end' && message.toolOutput?.is_error && (
-            <div className="mt-2 text-red-500">
-              <p>Error: {message.toolOutput.content}</p>
+    return (
+        <Card className="flex items-start gap-4 p-4">
+            <Avatar>
+                <AvatarImage src={data.sub_agent_name ? "/agent-avatar.png" : user?.picture} />
+                <AvatarFallback>{data.sub_agent_name ? 'A' : user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <div className="rounded-lg p-3 max-w-[75%] bg-muted">
+                <div className="flex flex-col">
+                    {data.sub_agent_name && (
+                        <CardHeader>
+                            <CardTitle>{data.sub_agent_name}</CardTitle>
+                        </CardHeader>
+                    )}
+                    <CardContent>
+                        {data.tools_used && (
+                            <div className="text-xs text-gray-500">
+                                Tools: {data.tools_used.join(', ')}
+                            </div>
+                        )}
+                        {data.ai_message && <p>{data.ai_message}</p>}
+                        {data.user_message && <p>{data.user_message}</p>}
+                        {data.tool_todo_list && (
+                            <Accordion type="single" collapsible className="w-full mt-2">
+                                <AccordionItem value="item-1">
+                                    <AccordionTrigger className="text-xs text-gray-500">TODO List</AccordionTrigger>
+                                    <AccordionContent>
+                                        <ul>
+                                            {data.tool_todo_list.map((todo: any, index: number) => (
+                                                <li key={index}>{todo.task}</li>
+                                            ))}
+                                        </ul>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                        )}
+                        {data.tool_errors && (
+                            <div className="mt-2 text-red-500">
+                                {data.tool_errors.map((error, index) => (
+                                    <p key={index}>Error in {error.tool_name}: {error.error_message}</p>
+                                ))}
+                            </div>
+                        )}
+                    </CardContent>
+                </div>
             </div>
-          )}
-          {message.type === 'state_update' && (
-            <Accordion type="single" collapsible className="w-full mt-2">
-              <AccordionItem value="item-1">
-                <AccordionTrigger className="text-xs text-gray-500">TODO List</AccordionTrigger>
-                <AccordionContent>
-                  <TodoListView todoList={message.state} />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          )}
-          {message.type === 'error' && (
-            <div className="mt-2 text-red-500">
-              <p>Error: {message.content}</p>
-            </div>
-          )}
-        </div>
-        {message.role === 'assistant' && (
-          <Accordion type="single" collapsible className="w-full mt-2">
-            <AccordionItem value="item-1">
-              <AccordionTrigger className="text-xs text-gray-500">Raw Message</AccordionTrigger>
-              <AccordionContent>
-                <JsonView data={message} shouldExpandNode={allExpanded} style={defaultStyles} />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        )}
-      </div>
-      {message.role === 'user' && user && (
-        <Avatar>
-          <AvatarImage src={user.picture} />
-          <AvatarFallback>
-            {user.name?.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-      )}
-    </Card>
-  );
+        </Card>
+    );
 }

@@ -1,87 +1,64 @@
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MessageCard } from '../MessageCard';
-import { Message } from '../../../types/chat';
+import { ChatMessage } from '@/types';
 
 const mockUser = {
-  name: 'Test User',
-  picture: 'https://example.com/avatar.png',
+    name: 'Test User',
+    picture: 'https://example.com/avatar.png',
 };
 
 describe('MessageCard', () => {
-  it('renders a thinking message', () => {
-    const message: Message = {
-      id: '1',
-      role: 'assistant',
-      type: 'thinking',
-      content: '',
-    };
-    render(<MessageCard message={message} user={mockUser} />);
-    expect(screen.getByText('Thinking...')).toBeInTheDocument();
-  });
+    it('renders a message from a sub-agent', () => {
+        const message: ChatMessage = {
+            event: 'chat_message',
+            run_id: '1',
+            data: {
+                sub_agent_name: 'Test Agent',
+                ai_message: 'This is a test message from the agent.',
+                tools_used: ['Tool A', 'Tool B'],
+            },
+        };
+        render(<MessageCard message={message} user={mockUser} />);
+        expect(screen.getByText('Test Agent')).toBeInTheDocument();
+        expect(screen.getByText('This is a test message from the agent.')).toBeInTheDocument();
+        expect(screen.getByText('Tools: Tool A, Tool B')).toBeInTheDocument();
+    });
 
-  it('renders a user message', () => {
-    const message: Message = {
-      id: '2',
-      role: 'user',
-      type: 'text',
-      content: 'Hello, world!',
-    };
-    render(<MessageCard message={message} user={mockUser} />);
-    expect(screen.getByText('Hello, world!')).toBeInTheDocument();
-  });
+    it('renders a user message', () => {
+        const message: ChatMessage = {
+            event: 'chat_message',
+            run_id: '2',
+            data: {
+                user_message: 'Hello, world!',
+            },
+        };
+        render(<MessageCard message={message} user={mockUser} />);
+        expect(screen.getByText('Hello, world!')).toBeInTheDocument();
+    });
 
-  it('renders a tool start message', () => {
-    const message: Message = {
-      id: '3',
-      role: 'assistant',
-      type: 'tool_start',
-      content: '',
-      tool: 'test_tool',
-      toolInput: { key: 'value' },
-    };
-    render(<MessageCard message={message} user={mockUser} />);
-    fireEvent.click(screen.getByText('Raw Message'));
-    const accordion = screen.getByRole('region');
-    expect(accordion).toBeInTheDocument();
-    expect(screen.getAllByText(/key/).length).toBe(2);
-    expect(screen.getAllByText(/value/).length).toBe(2);
-  });
+    it('renders a message with a todo list', () => {
+        const message: ChatMessage = {
+            event: 'chat_message',
+            run_id: '3',
+            data: {
+                sub_agent_name: 'Test Agent',
+                tool_todo_list: [{ task: 'Step 1' }, { task: 'Step 2' }],
+            },
+        };
+        render(<MessageCard message={message} user={mockUser} />);
+        expect(screen.getByText('TODO List')).toBeInTheDocument();
+    });
 
-  it('renders a state update message with a todo list', () => {
-    const message: Message = {
-      id: '4',
-      role: 'assistant',
-      type: 'state_update',
-      content: '',
-      state: {
-        todo_list: ['step 1', 'step 2'],
-        completed_steps: ['step 0'],
-      },
-    };
-    render(<MessageCard message={message} user={mockUser} />);
-    fireEvent.click(screen.getByText('TODO List'));
-    const todoList = screen.getByTestId('todo-list-view');
-    expect(within(todoList).getByText('step 1')).toBeInTheDocument();
-    expect(within(todoList).getByText('step 2')).toBeInTheDocument();
-  });
-
-  it('renders a tool end message with errors', () => {
-    const message: ToolEndErrorMessage = {
-      id: '5',
-      role: 'assistant',
-      type: 'tool_end',
-      content: '',
-      tool: 'test_tool',
-      toolInput: { key: 'value' },
-      toolOutput: {
-        content: 'Error message',
-        is_error: true,
-      },
-    };
-    render(<MessageCard message={message} user={mockUser} />);
-    fireEvent.click(screen.getByText('Raw Message'));
-    const accordion = screen.getByRole('region');
-    expect(accordion).toBeInTheDocument();
-    expect(screen.getAllByText(/Error message/).length).toBe(2);
-  });
+    it('renders a message with tool errors', () => {
+        const message: ChatMessage = {
+            event: 'chat_message',
+            run_id: '4',
+            data: {
+                sub_agent_name: 'Test Agent',
+                tool_errors: [{ tool_name: 'Tool A', error_message: 'Something went wrong.' }],
+            },
+        };
+        render(<MessageCard message={message} user={mockUser} />);
+        expect(screen.getByText('Error in Tool A: Something went wrong.')).toBeInTheDocument();
+    });
 });

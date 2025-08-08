@@ -4,7 +4,7 @@ from app.db.session import get_db_session
 from app.llm.llm_manager import LLMManager
 from app.services.deepagents.supervisor import Supervisor
 from app.schemas import AnalysisRequest
-from app.connection_manager import manager
+from app.ws_manager import manager
 
 router = APIRouter()
 

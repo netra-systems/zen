@@ -1,6 +1,6 @@
 import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
-from app.websocket_manager import manager
+from app.ws_manager import manager
 from app.auth.auth_dependencies import ActiveUserWsDep
 from typing import Dict, Any
 
@@ -18,8 +18,4 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str, current_user:
                 # No message received within the timeout period, continue listening
                 continue
     except WebSocketDisconnect:
-        manager.disconnect(websocket, client_id)
-
-
-async def send_update_to_client(client_id: str, message: Dict[str, Any]):
-    await manager.broadcast_to_client(client_id, message)
+        manager.disconnect(client_id)

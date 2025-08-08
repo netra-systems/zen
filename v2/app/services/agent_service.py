@@ -4,7 +4,7 @@ import logging
 from fastapi import WebSocket, WebSocketDisconnect, Depends
 from app.services.deepagents.supervisor import Supervisor
 from app import schemas
-from app.connection_manager import manager
+from app.ws_manager import manager
 from app.llm.llm_manager import LLMManager
 from app.db.session import get_db_session
 

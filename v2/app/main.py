@@ -23,7 +23,7 @@ from app.services.deepagents.supervisor import Supervisor
 from app.services.agent_service import AgentService
 from app.services.key_manager import KeyManager
 from app.auth.services import SecurityService
-from app.websocket import manager as websocket_manager
+from app.ws_manager import manager
 from app.background import BackgroundTaskManager
 
 
@@ -53,7 +53,7 @@ async def lifespan(app: FastAPI):
     app.state.db_session_factory = async_session_factory
 
     # Initialize the agent supervisor
-    app.state.agent_supervisor = Supervisor(app.state.db_session_factory, app.state.llm_manager, websocket_manager)
+    app.state.agent_supervisor = Supervisor(app.state.db_session_factory, app.state.llm_manager, manager)
     app.state.agent_service = AgentService(app.state.agent_supervisor)
     
     elapsed_time = time.time() - start_time
@@ -154,11 +154,11 @@ if "pytest" in sys.modules:
     from app.db.postgres import async_session_factory
     from app.llm.llm_manager import LLMManager
     from app.services.deepagents.supervisor import Supervisor
-    from app.websocket import manager as websocket_manager
+    from app.ws_manager import manager
 
     llm_manager = LLMManager(settings)
     app.state.llm_manager = llm_manager
-    app.state.agent_supervisor = Supervisor(async_session_factory, llm_manager, websocket_manager)
+    app.state.agent_supervisor = Supervisor(async_session_factory, llm_manager, manager)
 
     from app.db.testing import override_get_db, engine
     from app.db.base import Base
