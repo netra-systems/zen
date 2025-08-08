@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, AsyncMock
 from app.services.agents.supervisor import Supervisor
 from app.schemas import AnalysisRequest, RequestModel, Settings
 from app.llm.llm_manager import LLMManager
-from app.connection_manager import WebSocketManager
+from app.connection_manager import ConnectionManager
 
 @pytest.fixture
 def mock_llm_manager():

@@ -29,7 +29,7 @@ def analysis_request():
 @pytest.mark.asyncio
 async def test_triage_sub_agent(mock_llm_manager, analysis_request):
     mock_llm_manager.arun.return_value = MagicMock(content="DataSubAgent")
-    agent = TriageSubAgent()
+    agent = TriageSubAgent(mock_llm_manager)
     state = {
         "analysis_request": analysis_request,
         "messages": [],
@@ -44,7 +44,7 @@ async def test_triage_sub_agent(mock_llm_manager, analysis_request):
 @pytest.mark.asyncio
 async def test_data_sub_agent(mock_llm_manager, analysis_request):
     mock_llm_manager.arun.return_value = MagicMock(content="Data gathered.")
-    agent = DataSubAgent()
+    agent = DataSubAgent(mock_llm_manager)
     state = {
         "analysis_request": analysis_request,
         "messages": [],

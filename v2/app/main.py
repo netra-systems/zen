@@ -171,8 +171,7 @@ if "pytest" in sys.modules:
         try:
             yield
         finally:
-            async with engine.begin() as conn:
-                await conn.run_sync(Base.metadata.drop_all)
+            pass
 
     from app.dependencies import get_db_session
     app.dependency_overrides[get_db_session] = override_get_db
