@@ -60,7 +60,7 @@ class Agent {
         }
     }
 
-    private handleWebSocketMessage = (serverEvent: { event: string; data: unknown; run_id: string }) => {
+    private handleWebSocketMessage = (serverEvent: ServerEvent) => {
         try {
             const { event: eventName, data, run_id } = serverEvent;
 
