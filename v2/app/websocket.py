@@ -1,10 +1,11 @@
+
 import asyncio
 import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Request
 from app.auth.auth_dependencies import ActiveUserWsDep
 from app.websocket_manager import manager
 from app.agents.supervisor import Supervisor
-from app.schemas import WebSocketMessage, AnalysisRequest
+from app.schemas import WebSocketMessage, RequestModel
 from app.logging_config import central_logger
 
 router = APIRouter()
@@ -27,9 +28,8 @@ async def websocket_endpoint(websocket: WebSocket, user: ActiveUserWsDep, superv
                 try:
                     message = WebSocketMessage.parse_raw(data)
                     if message.type == "analysis_request":
-                        analysis_request = AnalysisRequest.parse_obj(message.payload)
-                        # TODO: The run_id needs to be handled properly.
-                        await supervisor.run(analysis_request.model_dump(), "some_run_id", stream_updates=True)
+                        request_model = RequestModel.parse_obj(message.payload)
+                        await supervisor.run(request_model.model_dump(), request_model.id, stream_updates=True)
                     else:
                         logger.warning(f"Received unknown message type: {message.type}")
 

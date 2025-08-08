@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from app.agents.supervisor import Supervisor
-from app.schemas import AnalysisRequest
+from app.schemas import RequestModel
 
 router = APIRouter()
 
@@ -9,7 +9,7 @@ def get_agent_supervisor(request: Request) -> Supervisor:
 
 @router.post("/run_agent")
 async def run_agent(
-    analysis_request: AnalysisRequest,
+    request_model: RequestModel,
     supervisor: Supervisor = Depends(get_agent_supervisor),
 ):
     """
@@ -17,8 +17,8 @@ async def run_agent(
     """
     try:
         result = await supervisor.run(
-            analysis_request.model_dump(), 
-            analysis_request.request.id, 
+            request_model.model_dump(), 
+            request_model.id, 
             stream_updates=True)
         return result
     except Exception as e:
