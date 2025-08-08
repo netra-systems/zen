@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { User } from '@/lib/types';
+import { useWebSocketStore } from './websocket';
 
 interface AppState {
   user: User | null;
@@ -8,6 +9,7 @@ interface AppState {
   fetchUser: (token: string) => Promise<void>;
   devLogin: () => Promise<void>;
   logout: () => void;
+  initializeWebSocket: () => void;
 }
 
 const useAppStore = create<AppState>()(
@@ -60,6 +62,10 @@ const useAppStore = create<AppState>()(
     logout: () => {
       document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       set({ user: null });
+    },
+    initializeWebSocket: () => {
+      const { connect } = useWebSocketStore.getState();
+      connect();
     },
   }))
 );
