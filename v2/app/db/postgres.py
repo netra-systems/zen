@@ -1,10 +1,13 @@
 from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from ..config import settings
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
+
+Base = declarative_base()
 
 class Database:
     def __init__(self, db_url: str):

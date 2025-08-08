@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { AppWithLayout } from '@/components/AppWithLayout';
 import { Providers } from '@/components/Providers';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { ChatProvider } from '@/contexts/ChatContext';
 import { WebSocketProvider } from '@/contexts/WebSocketContext';
 import './globals.css';
 
@@ -28,7 +29,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={inter.className}>
         <Providers>
           <AuthProvider>
-            <App>{children}</App>
+            <ChatProvider>
+              <App>{children}</App>
+            </ChatProvider>
           </AuthProvider>
         </Providers>
       </body>

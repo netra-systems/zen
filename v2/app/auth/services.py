@@ -3,8 +3,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
 from sqlalchemy.future import select
 import uuid
+from app.services.key_manager import KeyManager
 
 class SecurityService:
+    def __init__(self, key_manager: KeyManager):
+        self.key_manager = key_manager
     async def get_user_by_id(self, db_session: AsyncSession, user_id: uuid.UUID) -> User | None:
         """
         Retrieves a user by their ID.

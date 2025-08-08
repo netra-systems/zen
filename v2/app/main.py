@@ -126,9 +126,9 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 
 from app.routes import supply, generation, admin, references, health, corpus, synthetic_data
-from app.routes.auth import auth_router
+from app.routes.auth import auth as auth_router
 
-app.include_router(auth_router, tags=["auth"])
+app.include_router(auth_router.router, prefix="/api/auth", tags=["auth"])
 app.include_router(supply.router, prefix="/api/supply", tags=["supply"])
 app.include_router(generation.router, prefix="/api/generation", tags=["generation"])
 
@@ -184,7 +184,7 @@ if "pytest" in sys.modules:
     tool_dispatcher = ToolDispatcher(tool_registry.get_tools([]))
     app.state.agent_supervisor = Supervisor(async_session_factory, llm_manager, websocket_manager, tool_dispatcher)
 
-    from app.db.testing import override_get_db, engine
+    from app.db.testing import override_get_.db, engine
     from app.db.base import Base
 
     @asynccontextmanager
