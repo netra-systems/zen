@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ChatInput } from '../ChatInput';
-import { examplePrompts } from '../../lib/examplePrompts';
+import { ChatInput } from '@/app/components/ChatInput';
+import { examplePrompts } from '@/lib/examplePrompts';
 
 // Mock the apiService
 jest.mock('../../api', () => ({

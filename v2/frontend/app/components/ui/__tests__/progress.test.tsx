@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { Progress } from '../progress';
+import { Progress } from '@/app/components/ui/progress';
 
 describe('Progress', () => {
   it('renders a progress bar', () => {

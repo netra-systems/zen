@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { AgentState, AgentListener, Reference, ToolCallChunk, ToolCall } from '@/types';
-import webSocketManager from '@/services/websocketService';
+import webSocketManager from '@/services/websocket';
 
 class Agent {
     private state: AgentState = {

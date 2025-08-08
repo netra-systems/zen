@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { Input } from '../input';
+import { Input } from '@/app/components/ui/input';
 
 describe('Input', () => {
   it('renders an input', () => {

@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { Header } from '../Header';
+import { Header } from '@/app/components/Header';
 
 describe('Header', () => {
   it('renders the login button when no user is logged in', () => {

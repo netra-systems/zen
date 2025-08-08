@@ -8,7 +8,7 @@ describe('WebSocketService', () => {
 
   beforeEach(() => {
     jest.resetModules(); // This is the key
-    webSocketService = require('@/services/websocketService').default;
+    webSocketService = require('@/services/websocket').default;
     server = new WS('ws://localhost:8000/ws?token=test-token');
   });
 
