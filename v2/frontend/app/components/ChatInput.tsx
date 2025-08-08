@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { ChatAnalysisRequest, Reference } from '../types';
-import { useWebSocket } from '@/app/services/websocket';
+import { useWebSocket } from '@/app/hooks/useWebSocket';
 import { examplePrompts } from '../lib/examplePrompts';
 
 export function ChatInput() {

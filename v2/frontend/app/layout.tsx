@@ -1,6 +1,7 @@
 'use client';
 
 import './globals.css';
+import { WebSocketProvider } from '@/app/providers/WebSocketProvider';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 import { AppWithLayout } from '@/components/AppWithLayout';
@@ -11,7 +12,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html lang="en" suppressHydrationWarning={true}>
       <body>
         <AuthProvider>
-          <AppWithLayout>{children}</AppWithLayout>
+          <WebSocketProvider>
+            <AppWithLayout>{children}</AppWithLayout>
+          </WebSocketProvider>
         </AuthProvider>
       </body>
     </html>

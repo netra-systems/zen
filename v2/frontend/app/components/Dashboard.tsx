@@ -5,7 +5,7 @@ import { ChatInput } from './ChatInput';
 import { ChatHistory } from './ChatHistory';
 import { useAgentContext } from '../providers/AgentProvider';
 import { MessageFilter } from './MessageFilter';
-import { Message, WebSocketStatus } from '@/types/index';
+import { Message } from '@/types/index';
 
 export const Dashboard = () => {
   const { messages, startAgent, wsStatus } = useAgentContext();

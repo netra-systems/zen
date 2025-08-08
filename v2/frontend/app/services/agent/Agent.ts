@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
 import { AgentState, AgentListener, Reference, ToolCallChunk, ToolCall, ServerEvent } from '@/types';
-import { useWebSocket } from '@/services/websocket';
 
 class Agent {
     private state: AgentState = {
@@ -10,26 +9,6 @@ class Agent {
         toolArgBuffers: {},
     };
     private listeners: AgentListener[] = [];
-    private isInitialized = false;
-    private unsubscribeFromWebSocket: (() => void) | null = null;
-
-    initialize() {
-        if (this.isInitialized) return;
-
-        this.unsubscribeFromWebSocket = useWebSocket.subscribe(
-            (state, prevState) => {
-                if (state.lastJsonMessage && state.lastJsonMessage !== prevState.lastJsonMessage) {
-                    this.handleWebSocketMessage(state.lastJsonMessage);
-                }
-            }
-        );
-        this.isInitialized = true;
-    }
-
-    cleanup() {
-        this.unsubscribeFromWebSocket?.();
-        this.isInitialized = false;
-    }
 
     subscribe(listener: AgentListener) {
         this.listeners.push(listener);
@@ -48,7 +27,7 @@ class Agent {
         this.notifyState();
     }
 
-    start(message: string, references?: Reference[]) {
+    start(message: string, sendMessage: (message: any) => void, references?: Reference[]) {
         this.setState(prev => ({
             ...prev,
             isThinking: true,
@@ -62,17 +41,17 @@ class Agent {
             enable_update_step_results: true,
         };
 
-        useWebSocket.getState().sendMessage(streamInput);
+        sendMessage(streamInput);
     }
 
-    stop() {
+    stop(sendMessage: (message: any) => void) {
         if (this.state.isThinking) {
-            useWebSocket.getState().sendMessage({ type: 'stop' });
+            sendMessage({ type: 'stop' });
             this.setState(prev => ({ ...prev, isThinking: false }));
         }
     }
 
-    private handleWebSocketMessage = (serverEvent: ServerEvent) => {
+    handleWebSocketMessage = (serverEvent: ServerEvent) => {
         try {
             const { event: eventName, data, run_id } = serverEvent;
 
