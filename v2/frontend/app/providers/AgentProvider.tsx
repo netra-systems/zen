@@ -16,12 +16,7 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
     const agent = useAgent();
     const { status: wsStatus, lastJsonMessage, sendMessage: sendWsMessage } = useWebSocket();
 
-    useEffect(() => {
-        if (lastJsonMessage) {
-            console.log('Received WebSocket message:', lastJsonMessage);
-            // Here you would add logic to handle the message and update the agent state
-        }
-    }, [lastJsonMessage]);
+    
 
     const contextValue = {
         ...agent,
