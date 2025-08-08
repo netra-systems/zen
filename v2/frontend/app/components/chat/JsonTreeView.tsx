@@ -2,7 +2,7 @@
 import React from 'react';
 import { JsonView } from 'react-json-view-lite';
 
-import { JsonTreeViewProps } from '@/app/types/index';
+import { JsonTreeViewProps } from '@/types/index';
 
 const JsonTreeView: React.FC<JsonTreeViewProps> = ({ data }) => {
     return (

@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { UserMessageCard } from '../UserMessageCard';
-import { UserMessage } from '@/app/types';
+import { UserMessage } from '@/types';
 
 describe('UserMessageCard', () => {
   const mockMessage: UserMessage = {

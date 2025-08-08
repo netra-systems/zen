@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { WebSocketStatus } from '@/app/types';
+import { WebSocketStatus } from '@/types';
 import webSocketService from '@/services/websocket';
 
 const useWebSocket = () => {

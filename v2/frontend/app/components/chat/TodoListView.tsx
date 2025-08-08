@@ -1,4 +1,4 @@
-import { StateUpdate } from '@/app/types/index';
+import { StateUpdate } from '@/types/index';
 
 interface TodoListViewProps {
   todoList: StateUpdate;

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Message, MessageOrchestratorProps } from '@/app/types/index';
+import { Message, MessageOrchestratorProps } from '@/types/index';
 import { UserMessageCard } from './UserMessageCard';
 import { AgentMessageCard } from './AgentMessageCard';
 

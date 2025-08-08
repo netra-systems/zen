@@ -1,7 +1,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { MessageFilterControlProps, MessageFilter } from '@/app/types/index';
+import { MessageFilterControlProps, MessageFilter } from '@/types/index';
 
 export function MessageFilterControl({ messageFilters, setMessageFilters, showThinking, setShowThinking }: MessageFilterControlProps) {
     const handleFilterChange = (filter: keyof MessageFilter, checked: boolean) => {

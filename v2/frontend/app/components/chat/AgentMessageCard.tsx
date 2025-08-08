@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { AgentMessage, Tool, Todo } from '@/app/types/index';
+import { AgentMessage, Tool, Todo } from '@/types/index';
 import JsonTreeView from './JsonTreeView';
 
 interface AgentMessageCardProps {

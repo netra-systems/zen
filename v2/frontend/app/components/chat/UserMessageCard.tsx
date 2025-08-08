@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { UserMessage, Reference } from '@/app/types/index';
+import { UserMessage, Reference } from '@/types/index';
 
 interface UserMessageCardProps {
     message: UserMessage;

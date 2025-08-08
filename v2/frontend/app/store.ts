@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { User } from '@/app/types/index';
+import { User } from '@/types/index';
 
 interface AppState {
     user: User | null;
