@@ -1,9 +1,9 @@
 'use client';
 
 import { createContext, useContext, useEffect, ReactNode, useState, useCallback } from 'react';
-import { User } from '@/types';
+import { User, AuthConfigResponse } from '@/types';
 import { Button } from '@/components/ui/button';
-import { getAuthConfig } from '@/services/auth';
+import { getAuthConfig, login as authLogin, logout as authLogout } from '@/services/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -21,24 +21,30 @@ const Header = ({ user, logout }: { user: User, logout: () => void }) => (
   </header>
 );
 
+const LoginButton = ({ onLogin }: { onLogin: () => void }) => (
+  <div className="flex items-center justify-center h-screen">
+    <div className="text-center">
+      <h1 className="text-3xl font-bold mb-8">Welcome to Netra</h1>
+      <Button size="lg" onClick={onLogin}>
+        Login with Google
+      </Button>
+    </div>
+  </div>
+);
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [authEndpoints, setAuthEndpoints] = useState<any>(null);
+  const [authConfig, setAuthConfig] = useState<AuthConfigResponse | null>(null);
 
   const fetchUser = useCallback(async () => {
     try {
       const data = await getAuthConfig();
-      setAuthEndpoints(data);
+      setAuthConfig(data);
       if (data.user) {
         setUser(data.user);
       } else if (data.development_mode) {
-        // In dev mode, the backend automatically logs in the user.
-        // We just need to fetch the user info.
-        const devUserData = await getAuthConfig();
-        if (devUserData.user) {
-          setUser(devUserData.user);
-        }
+        authLogin(data);
       }
     } catch (error) {
       console.error("Failed to fetch auth config:", error);
@@ -52,14 +58,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchUser]);
 
   const login = () => {
-    if (authEndpoints?.endpoints?.login) {
-      window.location.href = authEndpoints.endpoints.login;
+    if (authConfig) {
+      authLogin(authConfig);
     }
   };
 
   const logout = () => {
-    if (authEndpoints?.endpoints?.logout) {
-      window.location.href = authEndpoints.endpoints.logout;
+    if (authConfig) {
+      authLogout(authConfig);
     }
   };
 
@@ -73,14 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           {children}
         </>
       ) : (
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold mb-8">Welcome to Netra</h1>
-            <Button size="lg" onClick={login}>
-              Login with Google
-            </Button>
-          </div>
-        </div>
+        <LoginButton onLogin={login} />
       )}
     </AuthContext.Provider>
   );

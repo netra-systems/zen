@@ -12,15 +12,16 @@ from app.auth.services import SecurityService
 auth_router = APIRouter()
 
 @auth_router.get("/api/auth/config", response_model=AuthConfigResponse)
-async def get_auth_config(user: User = Depends(get_current_user)):
+async def get_auth_config(request: Request, user: User = Depends(get_current_user)):
+    base_url = str(request.base_url)
     return AuthConfigResponse(
         google_client_id=settings.oauth_config.client_id,
         endpoints=AuthEndpoints(
-            login="/api/auth/login/google",
-            logout="/api/auth/logout",
-            token="/api/auth/token",  # Placeholder
-            user="/api/auth/user",  # Placeholder
-            dev_login="/api/auth/dev-login" #Placeholder
+            login=f"{base_url}api/auth/login/google",
+            logout=f"{base_url}api/auth/logout",
+            token=f"{base_url}api/auth/token",
+            user=f"{base_url}api/auth/user",
+            dev_login=f"{base_url}api/auth/dev-login"
         ),
         development_mode=settings.environment == "development",
         user=user,
@@ -53,3 +54,28 @@ async def callback_google(
 async def logout(request: Request):
     request.session.clear()
     return RedirectResponse(url="/login")
+
+
+@auth_router.get("/api/auth/dev-login")
+async def dev_login(
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+    security_service: SecurityService = Depends(get_security_service),
+):
+    if settings.environment != "development":
+        return RedirectResponse(url="/login?error=not_in_development")
+
+    user_info = {
+        "email": "dev@example.com",
+        "given_name": "Dev",
+        "family_name": "User",
+        "picture": "https://example.com/avatar.png",
+    }
+    user = await security_service.get_or_create_user_from_oauth(db_session, user_info)
+    request.session['user'] = user.model_dump_json()
+
+    return RedirectResponse(url="/")
+
+@auth_router.get("/api/auth/user", response_model=User)
+async def get_user(user: User = Depends(get_current_user)):
+    return user

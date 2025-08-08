@@ -172,10 +172,14 @@ if "pytest" in sys.modules:
     from app.db.postgres import async_session_factory
     from app.llm.llm_manager import LLMManager
     from app.agents.supervisor import Supervisor
-    
+    from app.services.key_manager import KeyManager
+    from app.auth.services import SecurityService
 
     llm_manager = LLMManager(settings)
     app.state.llm_manager = llm_manager
+    key_manager = KeyManager.load_from_settings(settings)
+    app.state.key_manager = key_manager
+    app.state.security_service = SecurityService(key_manager)
     tool_registry = ToolRegistry(async_session_factory)
     tool_dispatcher = ToolDispatcher(tool_registry.get_tools([]))
     app.state.agent_supervisor = Supervisor(async_session_factory, llm_manager, websocket_manager, tool_dispatcher)
@@ -186,7 +190,6 @@ if "pytest" in sys.modules:
     @asynccontextmanager
     async def test_lifespan(app: FastAPI):
         async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
         try:
             yield

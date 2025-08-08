@@ -12,3 +12,4 @@ autocomplete on all training data not get sucked into specific training dataset
 e.g. some specific similar thing in the data
 7: check if plan generated actually matches intention of spec
 8: frame things in positive - LLMs have trouble with negation
+9: Add something like "{spec_name}:ENDS"  at the end of the spec. Generally good to "wrap" context when possible.
