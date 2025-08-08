@@ -19,7 +19,6 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"],
       "@/components/*": ["./app/components/*"],
       "@/contexts/*": ["./app/contexts/*"],
       "@/hooks/*": ["./app/hooks/*"],
