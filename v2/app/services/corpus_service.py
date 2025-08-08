@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from ..db import models_postgres as models
 from .. import schemas
 from fastapi import HTTPException
-from ..websocket_manager import manager
+from ..websockets import manager
 
 def get_corpus(db: Session, corpus_id: str):
     return db.query(models.Corpus).filter(models.Corpus.id == corpus_id).first()
