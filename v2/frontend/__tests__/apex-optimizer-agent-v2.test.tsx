@@ -1,13 +1,14 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import { ApexOptimizerAgentV2 } from '@/components/apex-optimizer-agent-v2';
-import { useAgentContext } from '@/providers/AgentProvider';
-import useAppStore from '@/store';
 
-jest.mock('../providers/AgentProvider', () => ({
+import { render, screen, fireEvent, act } from '@testing-library/react';
+import { ApexOptimizerAgentV2 } from '@/app/components/apex-optimizer-agent-v2';
+import { useAgentContext } from '@/app/providers/AgentProvider';
+import useAppStore from '@/app/store';
+
+jest.mock('@/app/providers/AgentProvider', () => ({
   useAgentContext: jest.fn(),
 }));
 
-jest.mock('../app/store', () => ({
+jest.mock('@/app/store', () => ({
   __esModule: true,
   default: jest.fn(),
 }));
