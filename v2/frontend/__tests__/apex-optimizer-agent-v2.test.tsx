@@ -1,13 +1,13 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { ApexOptimizerAgentV2 } from '@/app/components/apex-optimizer-agent-v2';
+import { ApexOptimizerAgentV2 } from '../components/apex-optimizer-agent-v2';
 import { useAgentContext } from '@/app/providers/AgentProvider';
 import { useAuth } from '@/app/hooks/useAuth';
 
-jest.mock('@/app/providers/AgentProvider', () => ({
+jest.mock('../providers/AgentProvider', () => ({
   useAgentContext: jest.fn(),
 }));
 
-jest.mock('@/app/hooks/useAuth', () => ({
+jest.mock('../hooks/useAuth', () => ({
   useAuth: jest.fn(),
 }));
 

@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { AuthProvider, useAuth } from '@/app/contexts/AuthContext';
+import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import * as auth from '@/services/auth';
 import { mockAuthConfig, mockUser } from '@/mocks/auth';
 

@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useAgent } from '@/app/hooks/useAgent';
+import { useAgent } from '../hooks/useAgent';
 import { useChatStore } from '@/store';
 
 jest.mock('@/store', () => ({
@@ -8,7 +8,7 @@ jest.mock('@/store', () => ({
 
 const mockSendMessage = jest.fn();
 
-jest.mock('@/app/hooks/useWebSocket', () => ({
+jest.mock('../hooks/useWebSocket', () => ({
   useWebSocket: () => ({
     sendMessage: mockSendMessage,
   }),

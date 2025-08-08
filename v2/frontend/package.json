@@ -16,6 +16,7 @@
     "@langchain/community": "^0.3.49",
     "@langchain/core": "^0.3.66",
     "@langchain/openai": "^0.6.3",
+    "@microlink/react-json-view": "^1.27.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-collapsible": "^1.1.11",

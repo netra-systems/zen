@@ -1,14 +1,13 @@
-
 'use client';
 
-import { Card, CardHeader, CardTitle, CardContent } from '@/app/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { useState } from 'react';
-import { useAgentContext } from '@/app/providers/AgentProvider';
-import { ChatWindow } from './chat/ChatWindow';
+import { useAgentContext } from '../providers/AgentProvider';
+import { ChatWindow } from '../chat/ChatWindow';
 import LoginButton from './LoginButton';
-import { examplePrompts } from '@/app/lib/examplePrompts';
+import { examplePrompts } from '../lib/examplePrompts';
 import { MessageFilter, WebSocketMessage, AnalysisRequest } from '@/app/types';
-import { useAuth } from '@/app/hooks/useAuth';
+import { useAuth } from '../hooks/useAuth';
 
 export function ApexOptimizerAgentV2() {
   const { messages, showThinking, error, sendWsMessage } = useAgentContext();
@@ -58,6 +57,7 @@ export function ApexOptimizerAgentV2() {
           messageFilters={messageFilters}
           setMessageFilters={setMessageFilters}
           exampleQueries={examplePrompts}
+          sendWsMessage={sendWsMessage}
         />
         {error && <div className="text-red-500 p-4">{error.message}</div>}
       </CardContent>

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import Thinking from '../app/components/Thinking';
+import { Thinking } from '../components/Thinking';
 
 describe('Thinking component', () => {
   it('renders three dots', () => {

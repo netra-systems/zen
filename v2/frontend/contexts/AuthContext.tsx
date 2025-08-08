@@ -14,24 +14,6 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const Header = ({ user, logout }: { user: User, logout: () => void }) => (
-  <header className="flex justify-between items-center p-4 bg-gray-100 border-b">
-    <div>Welcome, {user.full_name || user.email}</div>
-    <Button onClick={logout}>Logout</Button>
-  </header>
-);
-
-const LoginButton = ({ onLogin }: { onLogin: () => void }) => (
-  <div className="flex items-center justify-center h-screen">
-    <div className="text-center">
-      <h1 className="text-3xl font-bold mb-8">Welcome to Netra</h1>
-      <Button size="lg" onClick={onLogin}>
-        Login with Google
-      </Button>
-    </div>
-  </div>
-);
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else if (data.development_mode) {
         authLogin(data);
       }
-    } catch (error) {
+    } catch (error) { 
       console.error("Failed to fetch auth config:", error);
     } finally {
       setLoading(false);
@@ -67,16 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={{ user, login, logout, loading }}>
-      {loading ? (
-        <div className="flex items-center justify-center h-screen">Loading...</div>
-      ) : user ? (
-        <>
-          <Header user={user} logout={logout} />
-          {children}
-        </>
-      ) : (
-        <LoginButton onLogin={login} />
-      )}
+      {children}
     </AuthContext.Provider>
   );
 }

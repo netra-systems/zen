@@ -43,6 +43,8 @@ All import paths must be absolute using the @/ alias from tsconfig.
 0:7:3:1: Update shared/schema.json for alignment.
 0:7:3:2: Limit scope creep. Focus on what's actually needed to get to the next step in the system only. Use existing dependencies as much as possible.
 0:7:3:3: For areas with mature code limit total changes at any single time.
+0:7:3:4: Keep the overall project structure as is.
+0:7:3:5: Keep names the same unless expressly refactoring
 
 Remember: 0:7.  Remember: 0:1 to 0:7 including all sub items. Limit to 20 subitems.
 Remember: {spec_name}:1:0:* through {spec_name}:1:*:* Limit to 20 subitems.
