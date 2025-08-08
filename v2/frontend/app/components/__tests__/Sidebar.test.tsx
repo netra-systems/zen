@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Sidebar } from '../Sidebar';
-import { useAuth } from '@/providers/auth';
+import { useAuth } from '@/hooks/useAuth';
 
 jest.mock('@/providers/auth');
 

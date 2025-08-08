@@ -13,6 +13,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   login: () => void;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
@@ -23,7 +24,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { setUser, user } = useAppStore();
+  const { setUser, user, setToken, token } = useAppStore();
   const [authConfig, setAuthConfig] = useState(null);
 
   useEffect(() => {
@@ -34,13 +35,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAuthConfig(data);
         if (data.development_mode) {
           setUser(data.dev_user);
+          setToken(data.dev_token);
         }
       } catch (error) {
         console.error('Failed to fetch auth config:', error);
       }
     };
     fetchAuthConfig();
-  }, [setUser]);
+  }, [setUser, setToken]);
 
   const login = () => {
     if (authConfig) {
@@ -52,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (authConfig) {
       await fetch(authConfig.endpoints.logout_url);
       setUser(null);
+      setToken(null);
       router.push('/login');
     }
   };
@@ -80,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = {
     user,
+    token,
     login,
     logout,
     fetchUser,

@@ -1,51 +1,19 @@
 'use client';
 
 import './globals.css';
-import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
-import { AuthProvider, useAuth } from '@/providers/auth';
-import { Sidebar } from '@/components/Sidebar';
-import { Header } from '@/components/Header';
-import { cn } from '@/lib/utils';
-
-import { RootLayoutProps, AppWithLayoutProps } from './types';
-
-export function AppWithLayout({ children }: AppWithLayoutProps) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { user } = useAuth();
-  const pathname = usePathname();
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const publicPaths = ['/login', '/auth/error', '/auth/callback'];
-  const isPublicPath = publicPaths.includes(pathname);
-
-  return (
-    <div
-      className={cn(
-        'grid min-h-screen w-full',
-        isSidebarOpen && 'md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]'
-      )}
-    >
-      {isSidebarOpen && <Sidebar />}
-      <div className="flex flex-col">
-        <Header toggleSidebar={toggleSidebar} />
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          {children}
-        </main>
-      </div>
-    </div>
-  );
-}
+import { AuthProvider } from '@/hooks/useAuth';
+import { WebSocketProvider } from '@/app/services/agent/WebSocketProvider';
+import { AppWithLayout } from '@/app/components/AppWithLayout';
+import { RootLayoutProps } from '@/types';
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body>
         <AuthProvider>
-          <AppWithLayout>{children}</AppWithLayout>
+          <WebSocketProvider>
+            <AppWithLayout>{children}</AppWithLayout>
+          </WebSocketProvider>
         </AuthProvider>
       </body>
     </html>
