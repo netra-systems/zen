@@ -24,7 +24,7 @@ from ..db.models_clickhouse import ContentCorpus, get_content_corpus_schema, get
 from ..data.ingestion import ingest_records
 from ..data.content_corpus import DEFAULT_CONTENT_CORPUS
 from .job_store import job_store
-from ..websocket_manager import manager
+from ..websockets import manager
 
 # --- Job Management ---
 
