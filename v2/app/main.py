@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
 
-from app.routes.ws_manager import router as websockets_router
+from app.routes.websockets import router as websockets_router
 from app.db.postgres import async_session_factory
 from app.config import settings
 from app.logging_config import central_logger
