@@ -101,7 +101,7 @@ async def test_reporting_sub_agent(mock_llm_manager, analysis_request):
         "stream_updates": False,
         "current_agent": "ReportingSubAgent",
         "tool_calls": None,
-        "action_plan": {"title": "some plan"}
+        "action_plan_result": {"title": "some plan"}
     }
     result = await agent.run(state, "test_run", False)
     assert result["current_agent"] == "__end__"

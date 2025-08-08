@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
 from sqlalchemy.orm import Session
 from .. import schemas
 from ..services import corpus_service
-from ..dependencies import get_db
+from ..dependencies import get_db_session_session
 from ..auth.auth_dependencies import get_current_user
 from ..db.models_postgres import User
 
@@ -14,7 +14,7 @@ router = APIRouter()
 def create_corpus(
     corpus: schemas.CorpusCreate,
     request: Request,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     db_corpus = corpus_service.create_corpus(db=db, corpus=corpus, user_id=current_user.id)
@@ -25,7 +25,7 @@ def create_corpus(
 def read_corpora(
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ):
     corpora = corpus_service.get_corpora(db, skip=skip, limit=limit)
@@ -34,7 +34,7 @@ def read_corpora(
 @router.get("/{corpus_id}", response_model=schemas.Corpus)
 def read_corpus(
     corpus_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ):
     db_corpus = corpus_service.get_corpus(db, corpus_id=corpus_id)
