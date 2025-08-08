@@ -1,12 +1,7 @@
+import { Message as BackendMessage } from './index';
 
-export type Message = {
-  id: string;
-  type: 'user' | 'agent' | 'system';
-  full_name: string;
-  picture?: string;
-  message: string;
-  payload?: any;
-  timestamp: string;
+export type Message = Omit<BackendMessage, 'content'> & {
+  content: string;
 };
 
 export enum SubAgentLifecycle {
@@ -51,6 +46,6 @@ export interface ToolResult {
 }
 
 export interface WebSocketMessage {
-  type: "analysis_request" | "error" | "stream_event" | "run_complete" | "sub_agent_update" | "agent_started" | "agent_completed" | "agent_error";
+  type: "analysis_request" | "error" | "stream_event" | "run_complete" | "sub_agent_update" | "agent_started" | "agent_completed" | "agent_error" | "message";
   payload: any;
 }

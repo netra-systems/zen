@@ -1,17 +1,20 @@
-"use client";
-
 import React from 'react';
-import { Button } from '../components/ui/button';
-import { useAgent } from '../hooks/useAgent';
+import { Button } from '@/components/ui/button';
+import { useChatStore } from '@/store';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
-const StopButton: React.FC = () => {
-  const { stopAgent } = useAgent();
+export const StopButton: React.FC = () => {
+  const { isProcessing, setProcessing } = useChatStore();
+  const { sendMessage } = useWebSocket();
+
+  const handleClick = () => {
+    sendMessage(JSON.stringify({ type: 'stop_agent', payload: {} }));
+    setProcessing(false);
+  };
 
   return (
-    <Button onClick={stopAgent} variant="destructive">
-      Stop
+    <Button onClick={handleClick} disabled={!isProcessing} variant="destructive">
+      Stop Processing
     </Button>
   );
 };
-
-export default StopButton;
