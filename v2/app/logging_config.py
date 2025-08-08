@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore", category=UserWarning, message=".*is not a Pyth
 # ClickHouse
 from app.db.clickhouse_base import ClickHouseDatabase
 from app.config import settings
-from app.websockets import manager as websocket_manager
+from app.websockets import WebSocketSink
 
 class LogEntry(BaseModel):
     """Pydantic model for a single log entry."""
@@ -40,18 +40,6 @@ class ClickHouseSink:
             self.db.insert_log(log_entry, self.table_name)
         except Exception as e:
             print(f"Failed to log to ClickHouse: {e}", file=sys.stderr)
-
-class WebSocketSink:
-    """A Loguru sink that streams logs to the frontend."""
-    def write(self, message):
-        if not message:
-            return
-        try:
-            log_entry = LogEntry.parse_raw(message)
-            if log_entry.user_id:
-                asyncio.create_task(websocket_manager.broadcast_to_client(log_entry.user_id, log_entry.dict()))
-        except Exception as e:
-            print(f"Failed to stream log to frontend: {e}", file=sys.stderr)
 
 class CentralLogger:
     def __init__(self):
