@@ -15,4 +15,10 @@ netra_frontend_layout:1:0:5: The homepage loads and is visible by default
 netra_frontend_layout:1:0:6: Sidebar links are different for authenticated and unauthenticated users
 netra_frontend_layout:1:0:7: The project uses next.js  When needed use the next.js required "app" folder structure. 
 In every other case use the top level folders.
+e.g. "app" should only look like this at most::start example: 'use client'; 
+import { Generation } from '@/components/Generation';
+export default function GenerationPage() {
+  return <Generation />;
+}  :end example:
+
 netra_frontend_layout:END

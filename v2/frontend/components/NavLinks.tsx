@@ -22,7 +22,7 @@ const navItems: NavItem[] = [
     label: 'Corpus Admin',
   },
   {
-    href: '/',
+    href: '/chat',
     icon: <Icons.apexOptimizer className="h-4 w-4" />,
     label: 'Chat',
   },
