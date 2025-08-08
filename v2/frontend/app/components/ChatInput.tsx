@@ -11,8 +11,8 @@ export function ChatInput() {
     const [showReferences, setShowReferences] = useState(false);
     const [references, setReferences] = useState<Reference[]>([]);
     const [selectedReferences, setSelectedReferences] = useState<Reference[]>([]);
-    const token = useAppStore((state) => state.token);
-    const addMessage = useAppStore((state) => state.addMessage);
+    const token = useAppStore.getState().token;
+    const addMessage = useAppStore.getState().addMessage;
 
     const loadExample = () => {
         const example = examplePrompts[Math.floor(Math.random() * examplePrompts.length)];
