@@ -1,9 +1,10 @@
+
 import asyncio
 import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Request
 from app.auth.auth_dependencies import ActiveUserWsDep, get_current_active_user_ws
 from app.agents.supervisor import Supervisor
-from app.schemas import WebSocketMessage, RequestModel
+from app.schemas import WebSocketMessage, RequestModel, LogEntry
 from app.logging_config import central_logger
 from typing import List, Dict, Any
 
@@ -29,6 +30,18 @@ class WebSocketManager:
                 await connection.send_json(message)
 
 manager = WebSocketManager()
+
+class WebSocketSink:
+    """A Loguru sink that streams logs to the frontend."""
+    def write(self, message):
+        if not message:
+            return
+        try:
+            log_entry = LogEntry.parse_raw(message)
+            if log_entry.user_id:
+                asyncio.create_task(manager.broadcast_to_client(log_entry.user_id, log_entry.dict()))
+        except Exception as e:
+            print(f"Failed to stream log to frontend: {e}", file=sys.stderr)
 
 websockets_router = APIRouter()
 
