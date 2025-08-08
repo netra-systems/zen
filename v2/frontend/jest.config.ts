@@ -12,6 +12,11 @@ const config: Config = {
   moduleNameMapper: {
     '^@/components/(.*)$': '<rootDir>/app/components/$1',
     '^@/lib/(.*)$': '<rootDir>/app/lib/$1',
+    '^@/hooks/(.*)$': '<rootDir>/app/hooks/$1',
+    '^@/providers/(.*)$': '<rootDir>/app/providers/$1',
+    '^@/services/(.*)$': '<rootDir>/app/services/$1',
+    '^@/store/(.*)$': '<rootDir>/app/store/$1',
+    '^@/types/(.*)$': '<rootDir>/types/$1',
     '^@/(.*)$': '<rootDir>/app/$1',
   },
 };

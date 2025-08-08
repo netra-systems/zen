@@ -2,6 +2,16 @@ import webSocketService from '@/services/websocket';
 import { WebSocketStatus } from '@/types';
 import WS from 'jest-websocket-mock';
 
+jest.mock('@/types', () => ({
+  ...jest.requireActual('@/types'),
+  __esModule: true,
+  default: {
+    api: {
+      wsBaseUrl: 'ws://localhost:8000/ws',
+    },
+  },
+}));
+
 const token = 'test-token';
 const server = new WS('ws://localhost:8000/ws/ws?token=test-token');
 
