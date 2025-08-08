@@ -11,7 +11,7 @@ import { Icons } from './Icons';
 import { HeaderProps } from '../types';
 
 export const Header = ({ toggleSidebar }: HeaderProps) => {
-  const { logout } = useAppStore();
+  const logout = useAppStore((state) => state.logout);
   const user = useAppStore((state) => state.user);
 
   return (
