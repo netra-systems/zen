@@ -1,8 +1,8 @@
 import { renderHook, act } from '@testing-library/react';
 import { useAgent } from '@/app/hooks/useAgent';
-import { useChatStore } from '@/app/store';
+import { useChatStore } from '@/store';
 
-jest.mock('@/app/store', () => ({
+jest.mock('@/store', () => ({
   useChatStore: jest.fn(),
 }));
 

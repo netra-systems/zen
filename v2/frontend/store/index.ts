@@ -1,20 +1,20 @@
 import { create } from 'zustand';
-import { User } from '@/types';
+import { Message } from '@/types/chat';
 
-interface AppState {
-  isSidebarCollapsed: boolean;
-  toggleSidebar: () => void;
-  user: User | null;
-  logout: () => void;
-  login: (user: User) => void;
+interface ChatState {
+  messages: Message[];
+  subAgentName: string;
+  subAgentStatus: string;
+  addMessage: (message: Message) => void;
+  setSubAgentName: (name: string) => void;
+  setSubAgentStatus: (status: string) => void;
 }
 
-const useAppStore = create<AppState>((set) => ({
-  isSidebarCollapsed: false,
-  toggleSidebar: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
-  user: null,
-  logout: () => set({ user: null }),
-  login: (user) => set({ user }),
+export const useChatStore = create<ChatState>((set) => ({
+  messages: [],
+  subAgentName: 'Idle',
+  subAgentStatus: 'Not started',
+  addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
+  setSubAgentName: (name) => set({ subAgentName: name }),
+  setSubAgentStatus: (status) => set({ subAgentStatus: status }),
 }));
-
-export default useAppStore;

@@ -3,12 +3,12 @@ import { render, screen, act } from '@testing-library/react';
 import { WebSocketProvider } from '@/app/providers/WebSocketProvider';
 import { useWebSocket } from '@/app/hooks/useWebSocket';
 import { Server, WebSocket } from 'mock-socket';
-import { useChatStore } from '@/app/store';
+import { useChatStore } from '@/store';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 import { WEBSOCKET_URL } from '@/config';
 
-jest.mock('@/app/store', () => ({
+jest.mock('@/store', () => ({
   useChatStore: jest.fn(),
 }));
 
