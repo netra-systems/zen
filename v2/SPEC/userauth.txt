@@ -2,13 +2,14 @@ SPEC:userauth:
 
 userauth:1:0:0: PRIMARY GOAL: User Login, Logout, and OAuth. (Production and Dev).
 
-userauth:1:0:1: Keep the development env. When front and backend in development mode: On Pageload: Automatically authentics as Dev user without using Google OAuth.
+
+userauth:1:0:1: The UI/UX base layout and header are persistent in all auth states.
 userauth:1:0:2: Only use official google OAuth libraries or similar. Make existing stuff work without major changes
 userauth:1:0:3: Validate that OAuth Login, OAuth Logout, and development user context all works. Production ready.
 userauth:1:0:4: In development context: Defaults to auto login. OAuth user login supercedes dev login.
 userauth:1:0:5: Handle context of frontend and backend env hot reloading. 
 userauth:1:0:6: KEEP EXISTING STUFF. Keep existing stuff as much as possible. The point is to have the core wiring work. Focus on adding mixing things and break fix. Use Schemas.py and app/types/index.ts whenever possible for any static values, paths, config values, etc. etc.
-userauth:1:0:7: Schema: MUST add this to Schema.py and USE AN EXACT URL from the list on front and back end. EXACTLY as is : authorized_javascript_origins & authorized_redirect_uris: {
+userauth:1:0:7: Schema: {
   "web": {
     "authorized_javascript_origins": [
       "https://app.netrasystems.ai",
@@ -22,4 +23,5 @@ userauth:1:0:7: Schema: MUST add this to Schema.py and USE AN EXACT URL from the
   }
 }
 userauth:1:0:8: The login button for OAuth on the front end looks good and is large.
-userauth:1:0:9: The backend MUST provide discovery of OAUTH endpoints to frontend, e.g. the complete path including base url etc. a dict with login, logout, auth, etc. etc. etc. This can lean on existing OpenAPI / Fast API spec if possible.
+userauth:1:0:9: The backend provides discovery of OAUTH endpoints to frontend, e.g. the complete path including base url etc. a dict with login, logout, auth, etc. etc. etc. This can lean on existing OpenAPI / Fast API spec if possible.
+userauth:1:0:10: Keep the development env. When front and backend in development mode: On Pageload: Automatically authentics as Dev user without using Google OAuth.
