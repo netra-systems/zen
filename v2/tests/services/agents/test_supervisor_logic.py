@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, AsyncMock
 from app.agents.supervisor import Supervisor
 from app.schemas import RequestModel, Settings
 from app.llm.llm_manager import LLMManager
-from app.websocket_manager import WebSocketManager
+from app.websockets import WebSocketManager
 
 @pytest.fixture
 def mock_llm_manager():
