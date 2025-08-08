@@ -36,6 +36,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
   return (
     <WebSocketContext.Provider value={{ status, lastJsonMessage, sendMessage }}>
       {children}
-    </WebSocket-Context.Provider>
+    </WebSocketContext.Provider>
   );
 };
