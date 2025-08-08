@@ -3,7 +3,7 @@ Instructions:
 0:1: Triage:
 0:1:0:1: Read: As BACKGROUND CONTEXT ONLY: other files in Spec/*
 0:1:0:2: Read: As BACKGROUND CONTEXT ONLY: “/plans/{*}-plan.md” documents. 
-0:1:0:3: CRITICAL: Consider coherence with all existing specs and plans.
+0:1:0:3: CRITICAL: Consider coherence with all BACKGROUND CONTEXT including existing specs and plans.
 0:1:0:4: Read and be prepared to discuss all existing relevant code and system concepts. 
 0:1:0:5: Reflect on work in progress if relevant.
 

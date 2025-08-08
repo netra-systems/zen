@@ -1,4 +1,4 @@
-SPEC:  WS Websockets
+SPEC:WS: WS Websockets
 
 WS:1:0: Primary Spec: WS Websockets Specification.
 WS:1:1:0: Goal: WS working as a complete end to end system.
@@ -25,4 +25,4 @@ WS:1:0:2:1: If the front end sends a socket but the backend rejects, it must be 
 WS:1:0:2:2: Backend sends responses using a single source of truth to manage WS.
 WS:1:0:2:4: Backend: Always complete JSON objects.
 
-WS:Remember: 0:7.  Remember: 0:1 to 0:7 to 1 including all sub items 1:0:0 through 1:2: etc.
+WS:Remember: 0:7.  Remember: 0:1 to 0:7. Remember WS:1:0:0 through WS:1:2: etc.
