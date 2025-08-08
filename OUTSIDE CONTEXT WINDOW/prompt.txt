@@ -1,2 +1,2 @@
-Read: instructions.txt
-ACTION: ws.txt
+read: instructions.txt
+do: ws.txt

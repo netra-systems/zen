@@ -12,7 +12,7 @@ class WebSocketService {
   public onStatusChange: ((status: WebSocketStatus) => void) | null = null;
   public onMessage: ((message: WebSocketMessage) => void) | null = null;
 
-  public connect(userId: string) {
+  public connect() {
     if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
       return;
     }
@@ -20,8 +20,7 @@ class WebSocketService {
     this.status = 'CONNECTING';
     this.onStatusChange?.(this.status);
 
-    const url = WEBSOCKET_URL.replace('{user_id}', userId);
-    this.ws = new WebSocket(url);
+    this.ws = new WebSocket(WEBSOCKET_URL);
 
     this.ws.onopen = () => {
       this.status = 'OPEN';

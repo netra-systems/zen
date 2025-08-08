@@ -13,25 +13,30 @@ router = APIRouter()
 
 logger = logging.getLogger(__name__)
 
-async def handle_analysis_request(user_id: str, message: WebSocketMessage, supervisor: Supervisor):
+async def handle_analysis_request(user: User, message: WebSocketMessage, supervisor: Supervisor):
     try:
         analysis_request = AnalysisRequest(**message.payload)
-        await supervisor.start_agent(user_id, analysis_request)
+        await supervisor.start_agent(str(user.id), analysis_request)
     except Exception as e:
         logger.error(f"Error handling analysis request for user {user_id}: {e}", exc_info=True)
         await manager.send_error(user_id, f"Failed to start analysis: {e}")
 
-async def handle_unknown_message(user_id: str, message: WebSocketMessage):
-    logger.warning(f"Unknown message type for user {user_id}: {message.type}")
-    await manager.send_error(user_id, f"Unknown message type: {message.type}")
+async def handle_unknown_message(user: User, message: WebSocketMessage):
+    logger.warning(f"Unknown message type for user {user.id}: {message.type}")
+    await manager.send_error(str(user.id), f"Unknown message type: {message.type}")
 
-@router.websocket("/ws/v1/{user_id}")
+@router.websocket("/ws/v1")
 async def websocket_endpoint(
     websocket: WebSocket, 
-    user_id: str,
+    user: User = Depends(get_current_user_ws),
     supervisor: Supervisor = Depends(get_agent_supervisor)
 ):
-    await manager.connect(websocket, user_id)
+    if user is None:
+        await websocket.close(code=4001)
+        return
+
+    await manager.connect(websocket, user)
+    user_id = str(user.id)
     logger.info(f"WebSocket connected for user {user_id}")
 
     try:
@@ -45,9 +50,9 @@ async def websocket_endpoint(
                 message = WebSocketMessage.parse_obj(data)
                 
                 if message.type == "analysis_request":
-                    await handle_analysis_request(user_id, message, supervisor)
+                    await handle_analysis_request(user, message, supervisor)
                 else:
-                    await handle_unknown_message(user_id, message)
+                    await handle_unknown_message(user, message)
 
             except asyncio.TimeoutError:
                 await websocket.send_text('pong') # Keep alive
@@ -62,5 +67,5 @@ async def websocket_endpoint(
                 await manager.send_error(user_id, "An unexpected error occurred.")
                 break
     finally:
-        manager.disconnect(user_id, websocket)
-        logger.info(f"WebSocket connection closed for user {user_id}")
+        manager.disconnect(user, websocket)
+        logger.info(f"WebSocket connection closed for user {user.id}")
