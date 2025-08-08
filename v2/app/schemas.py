@@ -136,9 +136,26 @@ class WebSocketError(BaseModel):
 class AnalysisRequest(BaseModel):
     request_model: RequestModel
 
+class UserMessage(BaseModel):
+    text: str
+    references: List[str] = []
+
+class AgentMessage(BaseModel):
+    text: str
+
+class ToolStarted(BaseModel):
+    tool_name: str
+
+class ToolCompleted(BaseModel):
+    tool_name: str
+    result: Any
+
+class StopAgent(BaseModel):
+    run_id: str
+
 class WebSocketMessage(BaseModel):
-    type: Literal["analysis_request", "error", "stream_event", "run_complete", "sub_agent_update", "agent_started", "agent_completed", "agent_error"]
-    payload: Union[AnalysisRequest, WebSocketError, "StreamEvent", "RunComplete", "SubAgentUpdate", "AgentStarted", "AgentCompleted", "AgentErrorMessage"]
+    type: Literal["analysis_request", "error", "stream_event", "run_complete", "sub_agent_update", "agent_started", "agent_completed", "agent_error", "user_message", "agent_message", "tool_started", "tool_completed", "stop_agent"]
+    payload: Union[AnalysisRequest, WebSocketError, "StreamEvent", "RunComplete", "SubAgentUpdate", "AgentStarted", "AgentCompleted", "AgentErrorMessage", "UserMessage", "AgentMessage", "ToolStarted", "ToolCompleted", "StopAgent"]
 
 class StreamEvent(BaseModel):
     event_type: str

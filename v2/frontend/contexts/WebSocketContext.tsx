@@ -1,22 +1,24 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { webSocketService, WebSocketStatus } from '../services/webSocketService';
-import { WebSocketMessage } from '../types/websockets';
+import { WebSocketMessage } from '@/app/types';
 
 interface WebSocketContextType {
   status: WebSocketStatus;
   sendMessage: (message: WebSocketMessage) => void;
-  lastMessage: WebSocketMessage | null;
+  messages: WebSocketMessage[];
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
 
 export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [status, setStatus] = useState<WebSocketStatus>('CLOSED');
-  const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
+  const [messages, setMessages] = useState<WebSocketMessage[]>([]);
 
   useEffect(() => {
     webSocketService.onStatusChange = setStatus;
-    webSocketService.onMessage = setLastMessage;
+    webSocketService.onMessage = (message) => {
+      setMessages((prevMessages) => [...prevMessages, message]);
+    };
     webSocketService.connect();
 
     return () => {
@@ -29,7 +31,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
 
   return (
-    <WebSocketContext.Provider value={{ status, sendMessage, lastMessage }}>
+    <WebSocketContext.Provider value={{ status, sendMessage, messages }}>
       {children}
     </WebSocketContext.Provider>
   );
