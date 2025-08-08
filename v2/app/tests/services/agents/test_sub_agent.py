@@ -1,6 +1,6 @@
 import pytest
 import asyncio
-from app.services.agents.base import BaseSubAgent
+from app.agents.base import BaseSubAgent
 from unittest.mock import MagicMock
 
 class ConcreteSubAgent(BaseSubAgent):

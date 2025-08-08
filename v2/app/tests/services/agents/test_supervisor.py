@@ -1,9 +1,9 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from app.services.agents.supervisor import Supervisor
+from app.agents.supervisor import Supervisor
 from app.schemas import AnalysisRequest, Settings, RequestModel
 from langchain_core.messages import AIMessage
-from app.services.agents.base import BaseSubAgent
+from app.agents.base import BaseSubAgent
 
 @pytest.fixture
 def supervisor():
