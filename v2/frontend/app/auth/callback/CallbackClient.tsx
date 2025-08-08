@@ -8,7 +8,8 @@ import { useAuth } from '@/hooks/useAuth';
 export default function CallbackClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setToken, fetchUser } = useAppStore();
+  const setToken = useAppStore((state) => state.setToken);
+  const fetchUser = useAppStore((state) => state.fetchUser);
   const { login } = useAuth();
 
   useEffect(() => {
