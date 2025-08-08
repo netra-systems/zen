@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, List
 from app.services.agents.base import BaseSubAgent
-from app.schemas import AnalysisRequest
+from app.schemas import AnalysisRequest, SubAgentLifecycle
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.connection_manager import manager
@@ -17,20 +17,21 @@ logger = logging.getLogger(__name__)
 
 class Supervisor(BaseSubAgent):
     def __init__(self, db_session: AsyncSession, llm_manager: LLMManager, websocket_manager: any):
+        super().__init__(llm_manager)
         self.db_session = db_session
-        self.llm_manager = llm_manager
         self.websocket_manager = websocket_manager
         self.sub_agents: List[BaseSubAgent] = [
-            TriageSubAgent(),
-            DataSubAgent(),
-            OptimizationsCoreSubAgent(),
-            ActionsToMeetGoalsSubAgent(),
-            ReportingSubAgent(),
+            TriageSubAgent(llm_manager),
+            DataSubAgent(llm_manager),
+            OptimizationsCoreSubAgent(llm_manager),
+            ActionsToMeetGoalsSubAgent(llm_manager),
+            ReportingSubAgent(llm_manager),
         ]
         self.run_states = {}
 
     async def run(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
         logger.info(f"Supervisor starting for run_id: {run_id}")
+        self.set_state(SubAgentLifecycle.RUNNING)
         self.run_states[run_id] = {"status": "running", "current_step": 0, "total_steps": len(self.sub_agents)}
         
         if stream_updates:
@@ -73,6 +74,7 @@ class Supervisor(BaseSubAgent):
                 )
 
         self.run_states[run_id]["status"] = "finished"
+        self.set_state(SubAgentLifecycle.COMPLETED)
         logger.info(f"Supervisor finished for run_id: {run_id}")
         return current_data
 
@@ -81,3 +83,4 @@ class Supervisor(BaseSubAgent):
 
     async def shutdown(self):
         logger.info("Supervisor shutdown.")
+        self.set_state(SubAgentLifecycle.SHUTDOWN)

@@ -1,18 +1,37 @@
-from app.services.agents.base import BaseSubAgent
-from typing import Any, Dict
 import logging
+from typing import Any, Dict, Optional
+
+from app.llm.llm_manager import LLMManager
+from app.schemas import SubAgentLifecycle
+from app.services.agents.base import BaseSubAgent
 
 logger = logging.getLogger(__name__)
 
 class ActionsToMeetGoalsSubAgent(BaseSubAgent):
+    def __init__(self, llm_manager: LLMManager):
+        super().__init__(llm_manager)
+        self.prompt_template = """
+        Based on the following optimizations, please create a detailed action plan.
+        Optimizations: {optimizations}
+        Original request: {original_request}
+
+        Please provide a detailed action plan with steps.
+        Return the result as a JSON object with an "action_plan" key containing a title and a list of steps.
+        """
+
     async def run(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
         logger.info(f"ActionsToMeetGoalsSubAgent starting for run_id: {run_id}")
+        self.set_state(SubAgentLifecycle.RUNNING)
 
         optimizations = input_data.get("optimizations", [])
         original_request = input_data.get("original_request", "")
 
-        # Simulate creating a plan of action based on the optimizations
         if optimizations:
+            prompt = self.prompt_template.format(
+                optimizations=optimizations,
+                original_request=original_request
+            )
+            # Simulate LLM call for now
             action_plan = {
                 "title": "Action Plan for Optimizations",
                 "steps": [
@@ -37,6 +56,7 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
             action_plan = {}
 
         logger.info(f"ActionsToMeetGoalsSubAgent finished for run_id: {run_id}")
+        self.set_state(SubAgentLifecycle.COMPLETED)
 
         return {
             "action_plan": action_plan,

@@ -34,6 +34,13 @@ class TokenizerAlgorithm(str):
     UNIGRAM = "Unigram"
     SENTENCEPIECE = "SentencePiece"
 
+class SubAgentLifecycle(str, enum.Enum):
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    SHUTDOWN = "shutdown"
+
 # --- User Schemas ---
 
 class GoogleUser(BaseModel):

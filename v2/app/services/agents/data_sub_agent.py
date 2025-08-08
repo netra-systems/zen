@@ -1,20 +1,38 @@
-from app.services.agents.base import BaseSubAgent
-from typing import Any, Dict
 import logging
+from typing import Any, Dict, Optional
+
+from app.llm.llm_manager import LLMManager
+from app.schemas import SubAgentLifecycle
+from app.services.agents.base import BaseSubAgent
 
 logger = logging.getLogger(__name__)
 
 class DataSubAgent(BaseSubAgent):
+    def __init__(self, llm_manager: LLMManager):
+        super().__init__(llm_manager)
+        self.prompt_template = """
+        Based on the following triage result, please process the data.
+        Triage result: {triage_result}
+        Original request: {original_request}
+
+        Please provide a summary of the processed data and key findings.
+        Return the result as a JSON object with "summary" and "key_findings" keys.
+        """
+
     async def run(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
         logger.info(f"DataSubAgent starting for run_id: {run_id}")
+        self.set_state(SubAgentLifecycle.RUNNING)
 
-        # Extract the triage result from the previous agent's output
         triage_result = input_data.get("triage_result", {})
         original_request = input_data.get("original_request", "")
 
-        # Simulate data processing based on the triage result
         if triage_result.get("category") == "Data Analysis":
-            # In a real scenario, you would fetch and process data here.
+            prompt = self.prompt_template.format(
+                triage_result=triage_result,
+                original_request=original_request
+            )
+            
+            # Simulate LLM call for now
             processed_data = {
                 "dataset": "Sample Dataset",
                 "summary": "This is a summary of the processed data.",
@@ -28,8 +46,8 @@ class DataSubAgent(BaseSubAgent):
             processed_data = {}
 
         logger.info(f"DataSubAgent finished for run_id: {run_id}")
+        self.set_state(SubAgentLifecycle.COMPLETED)
 
-        # Pass the processed data to the next agent
         return {
             "processed_data": processed_data,
             "original_request": original_request
