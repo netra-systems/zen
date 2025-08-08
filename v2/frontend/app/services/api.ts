@@ -1,15 +1,5 @@
-import { apiSpecService } from "./apiSpec";
-import { config } from "../config";
+import axios from 'axios';
 
-export async function getEndpoint(endpointName: string, method: string) {
-  const spec = await apiSpecService.getSpec();
-  const path = spec.paths[endpointName];
-  if (!path) {
-    return null;
-  }
-  return path[method.toLowerCase()];
-}
-
-export function getApiUrl(path: string) {
-  return `${config.api.baseUrl}${path}`;
-}
+export const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v3',
+});

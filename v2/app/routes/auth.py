@@ -19,6 +19,7 @@ async def get_auth_endpoints(request: Request, user: schemas.User | None = Depen
             "logout": f"{settings.api_base_url}/api/v3/auth/logout",
             "token": f"{settings.api_base_url}/api/v3/auth/callback",
             "user": f"{settings.api_base_url}/api/v3/auth/user",
+            "dev_login": f"{settings.api_base_url}/api/v3/auth/dev_login",
         },
         "development_mode": settings.environment == "development",
         "user": user,
@@ -48,4 +49,24 @@ async def logout(request: Request):
 
 @router.get("/user", response_model=schemas.User)
 async def get_user(user: Annotated[schemas.User, Depends(get_current_user)]):
+    return user
+
+
+@router.post("/dev_login", response_model=schemas.User)
+async def dev_login():
+    """
+    Logs in a developer user. This is only available in the development environment.
+    """
+    if settings.environment != "development":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This endpoint is only available in the development environment.",
+        )
+    user = schemas.User(
+        id=uuid.uuid4(),
+        email=settings.dev_user_email,
+        full_name="Dev User",
+        is_active=True,
+        is_superuser=True,
+    )
     return user
