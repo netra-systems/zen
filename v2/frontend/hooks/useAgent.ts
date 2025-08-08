@@ -1,23 +1,19 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Message, UserMessage, EventMessage, TextMessage, ToolStartMessage, ToolEndMessage, ErrorMessage, StateUpdateMessage, ServerEvent, AgentStartedData, ChatModelStreamData, RunCompleteData, ToolEndData, ToolErrorData, UpdateStateData } from '../types';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { useWebSocketContext } from '@/app/providers/WebSocketProvider';
 
 export function useAgent(userId: string, initialMessages: Message[] = []) {
     const [messages, setMessages] = useState<Message[]>(initialMessages);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
-    const [ws, setWs] = useState<WebSocket | null>(null);
+    const { status, lastJsonMessage, sendMessage } = useWebSocketContext();
 
     useEffect(() => {
-        if (!userId) return;
-
- 
-       onmessage = (event) => {
-            console.log('Received message:', event.data);
+        if (lastJsonMessage) {
             try {
-                const parsedData: ServerEvent = JSON.parse(event.data);
+                const parsedData: ServerEvent = lastJsonMessage;
 
                 setMessages((prevMessages) => {
                     let updatedMessages = [...prevMessages];
@@ -195,23 +191,16 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
                         id: Math.random().toString(),
                         role: 'assistant',
                         type: 'error',
-                        content: `Could not parse message: ${event.data}`,
+                        content: `Could not parse message: ${lastJsonMessage}`,
                         isError: true,
                     } as ErrorMessage,
                 ]);
             }
-        };
+        }
+    }, [lastJsonMessage]);
 
-
-    }, [userId]);
-
-    const sendMessage = useCallback(
+    const handleSendMessage = useCallback(
         async (messageContent: string) => {
-            if (!ws || ws.readyState !== WebSocket.OPEN) {
-                setError(new Error('WebSocket is not connected.'));
-                return;
-            }
-
             if (!messageContent.trim()) return;
 
             const userMessage: UserMessage = {
@@ -224,7 +213,7 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
             setIsLoading(true);
 
             try {
-                ws.send(JSON.stringify({ type: 'user_message', data: messageContent }));
+                sendMessage({ type: 'user_message', data: messageContent });
             } catch (err) {
                 console.error('Failed to send message:', err);
                 setError(err instanceof Error ? err : new Error('Failed to send message'));
@@ -233,7 +222,7 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
                 setInput('');
             }
         },
-        [ws]
+        [sendMessage]
     );
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -245,7 +234,7 @@ export function useAgent(userId: string, initialMessages: Message[] = []) {
         input,
         isLoading,
         error,
-        sendMessage,
+        sendMessage: handleSendMessage,
         handleInputChange,
         setInput,
     };

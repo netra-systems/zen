@@ -1,4 +1,3 @@
-
 export interface Corpus {
   id: string;
   name: string;
@@ -8,27 +7,29 @@ export interface Corpus {
   updated_at: string;
 }
 
+// --- WebSocket Service Types ---
+
+export enum WebSocketStatus {
+    Connecting,
+    Open,
+    Closing,
+    Closed,
+    Error,
+}
+
 export interface WebSocketMessage {
-  event: string;
-  data: any;
-  run_id: string;
-}
-
-export interface RunCompleteMessage extends WebSocketMessage {
-  event: 'run_complete';
-}
-
-export interface ErrorData {
   type: string;
-  message: string;
+  payload: any;
 }
 
-export interface ErrorMessage extends WebSocketMessage {
-  event: 'error';
-  data: ErrorData;
-}
-
-export interface StreamEventMessage extends WebSocketMessage {
-  event: 'stream_event';
-  event_type: string;
+export interface AnalysisRequest {
+  settings: {
+    debug_mode: boolean;
+  };
+  request: {
+    user_id: string;
+    query: string;
+    workloads: any[];
+    references: any[];
+  };
 }
