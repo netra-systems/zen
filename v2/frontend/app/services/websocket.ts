@@ -1,5 +1,5 @@
 import { WebSocketStatus } from '@/types';
-import config from '../config';
+import config from '@/types';
 
 class WebSocketService {
     private static instance: WebSocketService;
