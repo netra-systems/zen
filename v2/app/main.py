@@ -129,16 +129,16 @@ from app.routes import supply, generation, admin, references, health, corpus, sy
 from app.routes.auth import auth_router
 
 app.include_router(auth_router, tags=["auth"])
-app.include_router(supply.router, prefix="/api/v3/supply", tags=["supply"])
-app.include_router(generation.router, prefix="/api/v3/generation", tags=["generation"])
+app.include_router(supply.router, prefix="/api/supply", tags=["supply"])
+app.include_router(generation.router, prefix="/api/generation", tags=["generation"])
 
 
 app.include_router(websockets_router, prefix="/ws", tags=["websockets"])
-app.include_router(admin.router, prefix="/api/v3", tags=["admin"])
-app.include_router(references.router, prefix="/api/v3", tags=["references"])
+app.include_router(admin.router, prefix="/api/", tags=["admin"])
+app.include_router(references.router, prefix="/api/", tags=["references"])
 app.include_router(health.router, prefix="/health", tags=["health"])
-app.include_router(corpus.router, prefix="/api/v3/corpus", tags=["corpus"])
-app.include_router(synthetic_data.router, prefix="/api/v3", tags=["synthetic_data"])
+app.include_router(corpus.router, prefix="/api/corpus", tags=["corpus"])
+app.include_router(synthetic_data.router, prefix="/api/", tags=["synthetic_data"])
 
 
 

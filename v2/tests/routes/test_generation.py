@@ -16,7 +16,7 @@ async def test_list_clickhouse_tables_success(mock_get_clickhouse_client):
     mock_async_context_manager.__aenter__.return_value = mock_client
     mock_get_clickhouse_client.return_value = mock_async_context_manager
 
-    response = client.get("/api/v3/generation/clickhouse_tables")
+    response = client.get("/api/generation/clickhouse_tables")
     assert response.status_code == 200
     assert response.json() == ['table1', 'table2']
 
@@ -26,6 +26,6 @@ async def test_list_clickhouse_tables_failure(mock_get_clickhouse_client):
     """Test that the /clickhouse_tables endpoint returns a 500 error when the ClickHouse client fails to connect."""
     mock_get_clickhouse_client.side_effect = Exception("Failed to connect")
 
-    response = client.get("/api/v3/generation/clickhouse_tables")
+    response = client.get("/api/generation/clickhouse_tables")
     assert response.status_code == 500
     assert response.json() == {'detail': 'Failed to fetch tables from ClickHouse: Failed to connect'}

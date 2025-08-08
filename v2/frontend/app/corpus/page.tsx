@@ -11,7 +11,7 @@ export default function CorpusAdminPage() {
     const { lastMessage } = useWebSocket();
 
     useEffect(() => {
-        fetch('/api/v3/corpus')
+        fetch('/api/corpus')
             .then(res => res.json())
             .then(data => setCorpora(data));
     }, []);
@@ -42,7 +42,7 @@ export default function CorpusAdminPage() {
     }, [lastMessage]);
 
     const handleCreateCorpus = () => {
-        fetch('/api/v3/corpus', {
+        fetch('/api/corpus', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

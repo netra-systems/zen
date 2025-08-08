@@ -1,4 +1,4 @@
-# A High-Performance Synthetic Data Generation System for the Unified LLM Operations Schema v3.0
+# A High-Performance Synthetic Data Generation System for the Unified LLM Operations Schema .0
 
 # USAGE:
 # 1. A default `config.yaml` will be created on first run. Customize it as needed.

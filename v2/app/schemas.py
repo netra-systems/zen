@@ -540,7 +540,7 @@ class OAuthConfig(BaseModel):
     client_secret: str = None
     token_uri: str = "https://oauth2.googleapis.com/token"
     auth_uri: str = "https://accounts.google.com/o/oauth2/v2/auth"
-    userinfo_endpoint: str = "https://www.googleapis.com/oauth2/v3/userinfo"
+    userinfo_endpoint: str = "https://www.googleapis.com/oauth2/userinfo"
     scopes: List[str] = ["openid", "email", "profile"]
     authorized_javascript_origins: List[str] = [
       "https://app.netrasystems.ai",

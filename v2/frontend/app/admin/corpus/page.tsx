@@ -35,13 +35,13 @@ export default function CorpusAdminPage() {
   }, [lastMessage]);
 
   const fetchCorpora = async () => {
-    const response = await fetch('/api/v3/corpus');
+    const response = await fetch('/api/corpus');
     const data = await response.json();
     setCorpora(data);
   };
 
   const createCorpus = async () => {
-    await fetch('/api/v3/corpus', {
+    await fetch('/api/corpus', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: newCorpusName, description: newCorpusDescription }),
@@ -52,7 +52,7 @@ export default function CorpusAdminPage() {
   };
 
   const deleteCorpus = async (id: string) => {
-    await fetch(`/api/v3/corpus/${id}`, { method: 'DELETE' });
+    await fetch(`/api/corpus/${id}`, { method: 'DELETE' });
     fetchCorpora();
   };
 

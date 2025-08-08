@@ -6,14 +6,14 @@
     "version": "2.0.0"
   },
   "paths": {
-    "/api/v3/auth/me": {
+    "/api/auth/me": {
       "get": {
         "tags": [
           "auth"
         ],
         "summary": "Get Current User Details",
         "description": "Returns the public information for the currently authenticated user.",
-        "operationId": "get_current_user_details_api_v3_auth_me_get",
+        "operationId": "get_current_user_details_api__auth_me_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -28,14 +28,14 @@
         }
       }
     },
-    "/api/v3/auth/logout": {
+    "/api/auth/logout": {
       "post": {
         "tags": [
           "auth"
         ],
         "summary": "Logout",
         "description": "Logs out the user by clearing the authentication cookie.",
-        "operationId": "logout_api_v3_auth_logout_post",
+        "operationId": "logout_api__auth_logout_post",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -48,13 +48,13 @@
         }
       }
     },
-    "/api/v3/auth/login/google": {
+    "/api/auth/login/google": {
       "get": {
         "tags": [
           "auth"
         ],
         "summary": "Login Via Google",
-        "operationId": "login_via_google_api_v3_auth_login_google_get",
+        "operationId": "login_via_google_api__auth_login_google_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -67,13 +67,13 @@
         }
       }
     },
-    "/api/v3/auth/google": {
+    "/api/auth/google": {
       "get": {
         "tags": [
           "auth"
         ],
         "summary": "Auth Via Google",
-        "operationId": "auth_via_google_api_v3_auth_google_get",
+        "operationId": "auth_via_google_api__auth_google_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -86,14 +86,14 @@
         }
       }
     },
-    "/api/v3/auth/user": {
+    "/api/auth/user": {
       "get": {
         "tags": [
           "auth"
         ],
         "summary": "Get User",
         "description": "Returns the current user from the session, if available.",
-        "operationId": "get_user_api_v3_auth_user_get",
+        "operationId": "get_user_api__auth_user_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -108,14 +108,14 @@
         }
       }
     },
-    "/api/v3/supply/supply-catalog/": {
+    "/api/supply/supply-catalog/": {
       "get": {
         "tags": [
           "supply"
         ],
         "summary": "Read Supply Catalog",
         "description": "Retrieves a list of all models in the supply catalog.",
-        "operationId": "read_supply_catalog_api_v3_supply_supply_catalog__get",
+        "operationId": "read_supply_catalog_api__supply_supply_catalog__get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -126,7 +126,7 @@
                     "$ref": "#/components/schemas/SupplyOption"
                   },
                   "type": "array",
-                  "title": "Response Read Supply Catalog Api V3 Supply Supply Catalog  Get"
+                  "title": "Response Read Supply Catalog Api  Supply Supply Catalog  Get"
                 }
               }
             }
@@ -139,7 +139,7 @@
         ],
         "summary": "Create Supply Option",
         "description": "Creates a new supply option in the catalog.",
-        "operationId": "create_supply_option_api_v3_supply_supply_catalog__post",
+        "operationId": "create_supply_option_api__supply_supply_catalog__post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -174,14 +174,14 @@
         }
       }
     },
-    "/api/v3/supply/supply-catalog/{option_id}": {
+    "/api/supply/supply-catalog/{option_id}": {
       "get": {
         "tags": [
           "supply"
         ],
         "summary": "Read Supply Option",
         "description": "Retrieves a single supply option by its ID.",
-        "operationId": "read_supply_option_api_v3_supply_supply_catalog__option_id__get",
+        "operationId": "read_supply_option_api__supply_supply_catalog__option_id__get",
         "parameters": [
           {
             "name": "option_id",
@@ -217,14 +217,14 @@
         }
       }
     },
-    "/api/v3/generation/content": {
+    "/api/generation/content": {
       "get": {
         "tags": [
           "generation"
         ],
         "summary": "List Content Corpuses",
         "description": "Lists all available, successfully generated content corpuses.",
-        "operationId": "list_content_corpuses_api_v3_generation_content_get",
+        "operationId": "list_content_corpuses_api__generation_content_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -236,7 +236,7 @@
                     "type": "object"
                   },
                   "type": "array",
-                  "title": "Response List Content Corpuses Api V3 Generation Content Get"
+                  "title": "Response List Content Corpuses Api  Generation Content Get"
                 }
               }
             }
@@ -249,7 +249,7 @@
         ],
         "summary": "Create Content Corpus",
         "description": "Starts a background job to generate a new content corpus.",
-        "operationId": "create_content_corpus_api_v3_generation_content_post",
+        "operationId": "create_content_corpus_api__generation_content_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -270,7 +270,7 @@
                     "type": "string"
                   },
                   "type": "object",
-                  "title": "Response Create Content Corpus Api V3 Generation Content Post"
+                  "title": "Response Create Content Corpus Api  Generation Content Post"
                 }
               }
             }
@@ -288,14 +288,14 @@
         }
       }
     },
-    "/api/v3/generation/logs": {
+    "/api/generation/logs": {
       "get": {
         "tags": [
           "generation"
         ],
         "summary": "List Log Sets",
         "description": "Lists all available, successfully generated synthetic log sets.",
-        "operationId": "list_log_sets_api_v3_generation_logs_get",
+        "operationId": "list_log_sets_api__generation_logs_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -307,7 +307,7 @@
                     "type": "object"
                   },
                   "type": "array",
-                  "title": "Response List Log Sets Api V3 Generation Logs Get"
+                  "title": "Response List Log Sets Api  Generation Logs Get"
                 }
               }
             }
@@ -320,7 +320,7 @@
         ],
         "summary": "Create Synthetic Logs",
         "description": "Starts a background job to generate a new set of synthetic logs.",
-        "operationId": "create_synthetic_logs_api_v3_generation_logs_post",
+        "operationId": "create_synthetic_logs_api__generation_logs_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -341,7 +341,7 @@
                     "type": "string"
                   },
                   "type": "object",
-                  "title": "Response Create Synthetic Logs Api V3 Generation Logs Post"
+                  "title": "Response Create Synthetic Logs Api  Generation Logs Post"
                 }
               }
             }
@@ -359,14 +359,14 @@
         }
       }
     },
-    "/api/v3/generation/content_corpus": {
+    "/api/generation/content_corpus": {
       "post": {
         "tags": [
           "generation"
         ],
         "summary": "Create Content Corpus",
         "description": "Starts a background job to generate a new content corpus and store it in ClickHouse.",
-        "operationId": "create_content_corpus_api_v3_generation_content_corpus_post",
+        "operationId": "create_content_corpus_api__generation_content_corpus_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -387,7 +387,7 @@
                     "type": "string"
                   },
                   "type": "object",
-                  "title": "Response Create Content Corpus Api V3 Generation Content Corpus Post"
+                  "title": "Response Create Content Corpus Api  Generation Content Corpus Post"
                 }
               }
             }
@@ -405,14 +405,14 @@
         }
       }
     },
-    "/api/v3/generation/ingest_data": {
+    "/api/generation/ingest_data": {
       "post": {
         "tags": [
           "generation"
         ],
         "summary": "Ingest Data",
         "description": "Starts a background job to ingest data into ClickHouse.",
-        "operationId": "ingest_data_api_v3_generation_ingest_data_post",
+        "operationId": "ingest_data_api__generation_ingest_data_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -433,7 +433,7 @@
                     "type": "string"
                   },
                   "type": "object",
-                  "title": "Response Ingest Data Api V3 Generation Ingest Data Post"
+                  "title": "Response Ingest Data Api  Generation Ingest Data Post"
                 }
               }
             }
@@ -451,14 +451,14 @@
         }
       }
     },
-    "/api/v3/generation/synthetic_data": {
+    "/api/generation/synthetic_data": {
       "post": {
         "tags": [
           "generation"
         ],
         "summary": "Create Synthetic Data",
         "description": "Starts a background job to generate new synthetic data.",
-        "operationId": "create_synthetic_data_api_v3_generation_synthetic_data_post",
+        "operationId": "create_synthetic_data_api__generation_synthetic_data_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -479,7 +479,7 @@
                     "type": "string"
                   },
                   "type": "object",
-                  "title": "Response Create Synthetic Data Api V3 Generation Synthetic Data Post"
+                  "title": "Response Create Synthetic Data Api  Generation Synthetic Data Post"
                 }
               }
             }
@@ -497,14 +497,14 @@
         }
       }
     },
-    "/api/v3/generation/jobs/{job_id}": {
+    "/api/generation/jobs/{job_id}": {
       "get": {
         "tags": [
           "generation"
         ],
         "summary": "Get Job Status",
         "description": "Retrieves the status of a generation job.",
-        "operationId": "get_job_status_api_v3_generation_jobs__job_id__get",
+        "operationId": "get_job_status_api__generation_jobs__job_id__get",
         "parameters": [
           {
             "name": "job_id",
@@ -538,14 +538,14 @@
         }
       }
     },
-    "/api/v3/generation/clickhouse_tables": {
+    "/api/generation/clickhouse_tables": {
       "get": {
         "tags": [
           "generation"
         ],
         "summary": "List Clickhouse Tables",
         "description": "Lists all tables in the ClickHouse database.",
-        "operationId": "list_clickhouse_tables_api_v3_generation_clickhouse_tables_get",
+        "operationId": "list_clickhouse_tables_api__generation_clickhouse_tables_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -556,7 +556,7 @@
                     "type": "string"
                   },
                   "type": "array",
-                  "title": "Response List Clickhouse Tables Api V3 Generation Clickhouse Tables Get"
+                  "title": "Response List Clickhouse Tables Api  Generation Clickhouse Tables Get"
                 }
               }
             }
@@ -564,14 +564,14 @@
         }
       }
     },
-    "/api/v3/agent/chat/start_agent": {
+    "/api/agent/chat/start_agent": {
       "post": {
         "tags": [
           "agent"
         ],
         "summary": "Start Agent",
         "description": "Starts the agent to analyze the user's request.",
-        "operationId": "start_agent_api_v3_agent_chat_start_agent_post",
+        "operationId": "start_agent_api__agent_chat_start_agent_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -604,14 +604,14 @@
         }
       }
     },
-    "/api/v3/agent/chat/start_agent_streaming/{client_id}": {
+    "/api/agent/chat/start_agent_streaming/{client_id}": {
       "post": {
         "tags": [
           "agent"
         ],
         "summary": "Start Agent Streaming",
         "description": "Starts the agent and streams updates to the client.",
-        "operationId": "start_agent_streaming_api_v3_agent_chat_start_agent_streaming__client_id__post",
+        "operationId": "start_agent_streaming_api__agent_chat_start_agent_streaming__client_id__post",
         "parameters": [
           {
             "name": "client_id",
@@ -655,13 +655,13 @@
         }
       }
     },
-    "/api/v3/agent/chat/{run_id}/status": {
+    "/api/agent/chat/{run_id}/status": {
       "get": {
         "tags": [
           "agent"
         ],
         "summary": "Get Agent Status",
-        "operationId": "get_agent_status_api_v3_agent_chat__run_id__status_get",
+        "operationId": "get_agent_status_api__agent_chat__run_id__status_get",
         "parameters": [
           {
             "name": "run_id",
@@ -695,14 +695,14 @@
         }
       }
     },
-    "/api/v3/settings": {
+    "/api/settings": {
       "get": {
         "tags": [
           "admin"
         ],
         "summary": "Get App Settings",
         "description": "Retrieve the current application settings.\nOnly accessible to authenticated users.",
-        "operationId": "get_app_settings_api_v3_settings_get",
+        "operationId": "get_app_settings_api__settings_get",
         "parameters": [
           {
             "name": "args",
@@ -745,14 +745,14 @@
         }
       }
     },
-    "/api/v3/settings/log_table": {
+    "/api/settings/log_table": {
       "post": {
         "tags": [
           "admin"
         ],
         "summary": "Set Log Table",
         "description": "Set the default ClickHouse log table.\nOnly accessible to superusers.",
-        "operationId": "set_log_table_api_v3_settings_log_table_post",
+        "operationId": "set_log_table_api__settings_log_table_post",
         "parameters": [
           {
             "name": "args",
@@ -803,14 +803,14 @@
         }
       }
     },
-    "/api/v3/settings/log_tables": {
+    "/api/settings/log_tables": {
       "post": {
         "tags": [
           "admin"
         ],
         "summary": "Add Log Table",
         "description": "Add a new ClickHouse log table to the list of available tables.\nOnly accessible to superusers.",
-        "operationId": "add_log_table_api_v3_settings_log_tables_post",
+        "operationId": "add_log_table_api__settings_log_tables_post",
         "parameters": [
           {
             "name": "args",
@@ -866,7 +866,7 @@
         ],
         "summary": "Remove Log Table",
         "description": "Remove a ClickHouse log table from the list of available tables.\nOnly accessible to superusers.",
-        "operationId": "remove_log_table_api_v3_settings_log_tables_delete",
+        "operationId": "remove_log_table_api__settings_log_tables_delete",
         "parameters": [
           {
             "name": "args",
@@ -917,14 +917,14 @@
         }
       }
     },
-    "/api/v3/settings/time_period": {
+    "/api/settings/time_period": {
       "post": {
         "tags": [
           "admin"
         ],
         "summary": "Set Time Period",
         "description": "Set the default time period for log analysis.\nOnly accessible to superusers.",
-        "operationId": "set_time_period_api_v3_settings_time_period_post",
+        "operationId": "set_time_period_api__settings_time_period_post",
         "parameters": [
           {
             "name": "args",
@@ -975,14 +975,14 @@
         }
       }
     },
-    "/api/v3/settings/default_log_table": {
+    "/api/settings/default_log_table": {
       "post": {
         "tags": [
           "admin"
         ],
         "summary": "Set Default Log Table For Context",
         "description": "Set the default ClickHouse log table for a specific context.\nOnly accessible to superusers.",
-        "operationId": "set_default_log_table_for_context_api_v3_settings_default_log_table_post",
+        "operationId": "set_default_log_table_for_context_api__settings_default_log_table_post",
         "parameters": [
           {
             "name": "args",
@@ -1038,7 +1038,7 @@
         ],
         "summary": "Remove Default Log Table For Context",
         "description": "Remove the default ClickHouse log table for a specific context.\nOnly accessible to superusers.",
-        "operationId": "remove_default_log_table_for_context_api_v3_settings_default_log_table_delete",
+        "operationId": "remove_default_log_table_for_context_api__settings_default_log_table_delete",
         "parameters": [
           {
             "name": "args",
@@ -1089,14 +1089,14 @@
         }
       }
     },
-    "/api/v3/references": {
+    "/api/references": {
       "get": {
         "tags": [
           "references"
         ],
         "summary": "Get References",
         "description": "Returns a list of available @reference items.",
-        "operationId": "get_references_api_v3_references_get",
+        "operationId": "get_references_api__references_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1116,7 +1116,7 @@
         ],
         "summary": "Create Reference",
         "description": "Creates a new @reference item.",
-        "operationId": "create_reference_api_v3_references_post",
+        "operationId": "create_reference_api__references_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1151,14 +1151,14 @@
         }
       }
     },
-    "/api/v3/references/{reference_id}": {
+    "/api/references/{reference_id}": {
       "get": {
         "tags": [
           "references"
         ],
         "summary": "Get Reference",
         "description": "Returns a specific @reference item.",
-        "operationId": "get_reference_api_v3_references__reference_id__get",
+        "operationId": "get_reference_api__references__reference_id__get",
         "parameters": [
           {
             "name": "reference_id",
@@ -1199,7 +1199,7 @@
         ],
         "summary": "Update Reference",
         "description": "Updates a specific @reference item.",
-        "operationId": "update_reference_api_v3_references__reference_id__put",
+        "operationId": "update_reference_api__references__reference_id__put",
         "parameters": [
           {
             "name": "reference_id",

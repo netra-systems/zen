@@ -4,7 +4,7 @@ DEFAULT_CONTENT_CORPUS = {
         ("Explain the concept of a 'vector database'.", "A vector database is a specialized database designed to store and query high-dimensional vectors, which are mathematical representations of data like text or images. It's essential for tasks like semantic search and retrieval-augmented generation (RAG)."),
     ],
     "rag_pipeline": [
-        ("Context: The v3.0 schema is designed to be the most comprehensive data model for LLM operations. Question: What is the main design goal of the v3.0 schema?", "Based on the context, the main design goal of the v3.0 schema is to be the most comprehensive data model for LLM operations."),
+        ("Context: The .0 schema is designed to be the most comprehensive data model for LLM operations. Question: What is the main design goal of the .0 schema?", "Based on the context, the main design goal of the .0 schema is to be the most comprehensive data model for LLM operations."),
         ("Context: The capital of France is Paris. Question: What is the capital of France?", "The capital of France is Paris.")
     ],
     "tool_use": [

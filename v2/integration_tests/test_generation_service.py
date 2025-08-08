@@ -42,7 +42,7 @@ async def test_content_generation_with_custom_table(mock_run_job, test_client):
     
     # Act
     response = test_client.post(
-        "/api/v3/generation/content_corpus",
+        "/api/generation/content_corpus",
         json={
             "samples_per_type": 1,
             "temperature": 0.1,
@@ -57,7 +57,7 @@ async def test_content_generation_with_custom_table(mock_run_job, test_client):
 
     # Poll for job completion
     for _ in range(200): # Poll for a maximum of 20 seconds
-        status_response = test_client.get(f"/api/v3/generation/jobs/{job_id}")
+        status_response = test_client.get(f"/api/generation/jobs/{job_id}")
         assert status_response.status_code == 200
         job_status = status_response.json()
         if job_status["status"] == "completed":
@@ -84,7 +84,7 @@ async def test_synthetic_data_generation_with_table_selection(mock_run_job, test
 
     # Act
     response = test_client.post(
-        "/api/v3/generation/synthetic_data",
+        "/api/generation/synthetic_data",
         json={
             "num_traces": 10,
             "source_table": source_table,
@@ -100,7 +100,7 @@ async def test_synthetic_data_generation_with_table_selection(mock_run_job, test
 
     # Poll for job completion
     for _ in range(200):
-        status_response = test_client.get(f"/api/v3/generation/jobs/{job_id}")
+        status_response = test_client.get(f"/api/generation/jobs/{job_id}")
         assert status_response.status_code == 200
         job_status = status_response.json()
         if job_status["status"] == "completed":

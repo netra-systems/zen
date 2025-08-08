@@ -39,12 +39,12 @@ def test_google_auth(mock_get_or_create_user, mock_google_oauth):
     with TestClient(app) as client:
         # 4. Initiate the Google login
         settings.environment = "production"
-        response = client.get("/api/v3/auth/login")
+        response = client.get("/api/auth/login")
         assert response.status_code == 302
         settings.environment = "development"
 
         # 5. Simulate the callback from Google
-        response = client.get("/api/v3/auth/google?state=test-state&code=test-code", follow_redirects=False)
+        response = client.get("/api/auth/google?state=test-state&code=test-code", follow_redirects=False)
         assert response.status_code == 307
         redirect_url = response.headers["location"]
         assert redirect_url == settings.frontend_url

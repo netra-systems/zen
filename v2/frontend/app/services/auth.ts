@@ -3,7 +3,7 @@ import { AuthConfigResponse, User } from "@/types";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function getAuthConfig(): Promise<AuthConfigResponse> {
-  const response = await fetch(`${API_URL}/api/v3/auth/endpoints`);
+  const response = await fetch(`${API_URL}/api/auth/endpoints`);
   if (!response.ok) {
     throw new Error("Failed to fetch auth config");
   }
@@ -11,7 +11,7 @@ export async function getAuthConfig(): Promise<AuthConfigResponse> {
 }
 
 export async function getUser(): Promise<User | null> {
-  const response = await fetch(`${API_URL}/api/v3/auth/user`);
+  const response = await fetch(`${API_URL}/api/auth/user`);
   if (!response.ok) {
     return null;
   }

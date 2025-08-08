@@ -25,13 +25,13 @@ export default function SyntheticDataPage() {
   }, [lastMessage]);
 
   const fetchCorpusTables = async () => {
-    const response = await fetch('/api/v3/corpus/tables');
+    const response = await fetch('/api/corpus/tables');
     const data = await response.json();
     setCorpusTables(data);
   };
 
   const generateSyntheticData = async () => {
-    await fetch('/api/v3/synthetic-data/generate', {
+    await fetch('/api/synthetic-data/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ corpus_id: selectedCorpus, num_logs: numLogs }),

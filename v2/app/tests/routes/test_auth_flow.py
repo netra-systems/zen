@@ -7,6 +7,6 @@ from app.config import settings
 async def test_login_redirect_in_production():
     settings.environment = "production"
     with TestClient(app) as client:
-        response = client.get("/api/v3/auth/login", follow_redirects=False)
+        response = client.get("/api/auth/login", follow_redirects=False)
         assert response.status_code == 302
     settings.environment = "development"

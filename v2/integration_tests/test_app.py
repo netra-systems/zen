@@ -43,7 +43,7 @@ async def test_generation_api(mock_generative_model):
         mock_generative_model.return_value = mock_model_instance
 
         # 1. Start content generation job
-        response = await ac.post("/api/v3/generation/content", json={"samples_per_type": 1, "max_cores": 1})
+        response = await ac.post("/api/generation/content", json={"samples_per_type": 1, "max_cores": 1})
         assert response.status_code == 202
         content_job_id = response.json()["job_id"]
 
@@ -51,7 +51,7 @@ async def test_generation_api(mock_generative_model):
         await poll_job_status(ac, content_job_id)
 
         # 3. Start log generation job
-        response = await ac.post("/api/v3/generation/logs", json={"corpus_id": content_job_id, "num_logs": 10})
+        response = await ac.post("/api/generation/logs", json={"corpus_id": content_job_id, "num_logs": 10})
         assert response.status_code == 202
         log_job_id = response.json()["job_id"]
 
@@ -60,7 +60,7 @@ async def test_generation_api(mock_generative_model):
         log_file_path = log_job_result["result_path"]
 
         # 5. Ingest data
-        response = await ac.post("/api/v3/generation/ingest_data", json={"data_path": log_file_path, "table_name": "test_logs"})
+        response = await ac.post("/api/generation/ingest_data", json={"data_path": log_file_path, "table_name": "test_logs"})
         assert response.status_code == 202
         ingestion_job_id = response.json()["job_id"]
 
@@ -78,7 +78,7 @@ async def test_generation_api(mock_generative_model):
 @pytest.mark.asyncio
 async def test_analysis_api():
     async with AsyncClient(app=app, base_url="http://test") as ac:
-        response = await ac.post("/api/v3/analysis/runs", json={"source_table": "test"})
+        response = await ac.post("/api/analysis/runs", json={"source_table": "test"})
         assert response.status_code == 404
 
 def test_multi_objective_controller():

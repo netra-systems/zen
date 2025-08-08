@@ -56,7 +56,7 @@ The system is composed of several key components that work together to provide i
 ### 2.2. Data Flow Example: A Single AI Request
 
 1.  A user interacts with the **Frontend**, submitting a prompt to be processed.
-2.  The Frontend sends a request to the **Backend API** (e.g., to an endpoint in `app/routes/v3.py`).
+2.  The Frontend sends a request to the **Backend API** (e.g., to an endpoint in `app/routes/.py`).
 3.  The **Demand Analyzer** receives the raw prompt and creates a detailed `WorkloadProfile`.
 4.  The **Multi-Objective Controller** takes this profile and queries the **Supply Catalog** for all suitable, certified models.
 5.  The Controller predicts the cost, latency, and risk for the workload on each viable model and identifies the optimal choices.
@@ -108,7 +108,7 @@ This is a breakdown of the most important directories and files:
     *   **Database Setup (`create_db.py`, `run_migrations.py`):** The process for initializing the database is standardized.
 
 *   **Under Active Development:**
-    *   **The Sentient Fabric (`app/core/`):** This is the core innovation of the project and is constantly being refined. The predictive models and optimization algorithms are subject to change and improvement. The `v3_simulation.py` file represents the latest thinking in this area.
+    *   **The Sentient Fabric (`app/core/`):** This is the core innovation of the project and is constantly being refined. The predictive models and optimization algorithms are subject to change and improvement. The `_simulation.py` file represents the latest thinking in this area.
     *   **DeepAgents (`app/deepagents/`, `app/services/engine_deepagents_v2.py`):** This is an advanced, experimental feature. The structure of the agent graph, the tools they use, and the prompts that define them are all evolving.
     *   **Data Generation & Ingestion (`app/services/generation_service.py`, `app/data/`):** As the analysis capabilities become more sophisticated, the requirements for the synthetic data used for testing and validation will also change.
     *   **Frontend UI/UX (`frontend/`):** The frontend is functional but will continue to evolve to better visualize the complex data and analysis results produced by the backend.

@@ -1,11 +1,11 @@
-# A Complete Synthetic Data Generation System for the Unified LLM Operations Schema v3.0
+# A Complete Synthetic Data Generation System for the Unified LLM Operations Schema .0
 #
 # This script generates realistic, multi-step LLM operation traces based on the detailed
-# schema provided in "Unified LLM Log Structure v3.0". It is designed to be flexible,
+# schema provided in "Unified LLM Log Structure .0". It is designed to be flexible,
 # allowing for customer-specific overrides to make the data relevant to any environment.
 #
 # Key Features:
-# 1.  Schema-Compliant: Uses Pydantic to strictly enforce the v3.0 schema.
+# 1.  Schema-Compliant: Uses Pydantic to strictly enforce the .0 schema.
 # 2.  Realistic Traces: Generates multi-span traces for common workflows (RAG, Tool Use, etc.).
 # 3.  AI-Powered Realism: Uses the Gemini Flash model to generate plausible prompts and responses.
 # 4.  Highly Flexible: Configuration is managed via a YAML file, allowing easy customization.
@@ -57,8 +57,8 @@ except ImportError:
 console = Console()
 fake = Faker()
 
-# --- 1. SCHEMA DEFINITION (Pydantic Models based on v3.0 Spec) ---
-# This section meticulously translates the Unified LLM Log Structure v3.0
+# --- 1. SCHEMA DEFINITION (Pydantic Models based on .0 Spec) ---
+# This section meticulously translates the Unified LLM Log Structure .0
 # into Pydantic models. This ensures all generated data is valid and schema-compliant.
 
 class EventMetadata(BaseModel):
@@ -460,7 +460,7 @@ class RealismEngine:
         user_prompts = {
             "chat": "What are the main benefits of using a unified logging schema for LLM operations?",
             "summarization": "The enterprise adoption of Large Language Models (LLMs) is occurring in a period of rapid, chaotic expansion...",
-            "rag": "Context: The v3.0 schema is designed to be the most comprehensive data model for LLM operations. Question: What is the main design goal of the v3.0 schema?",
+            "rag": "Context: The .0 schema is designed to be the most comprehensive data model for LLM operations. Question: What is the main design goal of the .0 schema?",
             "tool_use": "What's the weather like in San Francisco and what is 5*128?",
             "code": "Write a python function to calculate the factorial of a number."
         }
@@ -753,7 +753,7 @@ def main(args):
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="Synthetic Log Generator for Unified LLM Schema v3.0")
+    parser = argparse.ArgumentParser(description="Synthetic Log Generator for Unified LLM Schema .0")
     parser.add_argument("--config", default="config.yaml", help="Path to the configuration YAML file.")
     parser.add_argument("--num-traces", type=int, default=10, help="Number of traces to generate.")
     parser.add_argument("--output-file", default="generated_logs.json", help="Path to the output JSON file.")
