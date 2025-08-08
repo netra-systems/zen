@@ -1,15 +1,11 @@
-from typing import TypedDict, Annotated, List, Union
+from typing import List, Optional, TypedDict
 from langchain_core.messages import BaseMessage
-from langgraph.graph.message import add_messages
-
-class Todo(TypedDict):
-    id: str
-    task: str
-    status: str
-    items: List[str]
+from app.schemas import AnalysisRequest
 
 class DeepAgentState(TypedDict):
-    messages: Annotated[List[BaseMessage], add_messages]
-    todos: List[Todo]
-    files: dict
+    messages: List[BaseMessage]
+    run_id: str
+    stream_updates: bool
+    analysis_request: AnalysisRequest
     current_agent: str
+    tool_calls: Optional[List[dict]] = None

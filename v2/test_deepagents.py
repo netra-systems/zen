@@ -13,6 +13,18 @@ class ConcreteSubAgent(SubAgent):
     def get_initial_prompt(self):
         return "Initial prompt"
 
+class ConcreteSubAgent(SubAgent):
+    @property
+    def name(self) -> str:
+        return "test_agent"
+
+    @property
+    def description(self) -> str:
+        return "A test agent"
+
+    async def ainvoke(self, state):
+        return state
+
 @pytest.mark.asyncio
 async def test_agent_completes_todos():
     # Mock the language model
@@ -47,10 +59,8 @@ async def test_agent_completes_todos():
 
     # Define a simple agent with a todo list
     agent_def = ConcreteSubAgent(
-        name="test_agent",
-        description="A test agent",
+        llm_manager=llm_manager,
         tools=[update_todo],
-        llm_manager=llm_manager
     )
 
     # ... rest of the test

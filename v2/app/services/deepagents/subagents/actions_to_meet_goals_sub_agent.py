@@ -1,16 +1,23 @@
+
 from app.services.deepagents.sub_agent import SubAgent
+from app.llm.llm_manager import LLMManager
+from langchain_core.tools import BaseTool
+from typing import List
 
 class ActionsToMeetGoalsSubAgent(SubAgent):
-    def __init__(self, llm_manager, tools):
-        super().__init__(
-            name="ActionsToMeetGoalsSubAgent",
-            description="Formulates tangible actions and changes to meet optimization goals.",
-            llm_manager=llm_manager,
-            tools=tools,
-            sub_agent_type="actions_to_meet_goals"
-        )
+    def __init__(self, llm_manager: LLMManager, tools: List[BaseTool]):
+        super().__init__(llm_manager, tools)
 
-    def get_initial_prompt(self) -> str:
-        return """
-        You are the Actions to Meet Goals Sub-Agent. Your role is to formulate tangible actions and changes to meet optimization goals.
-        """
+    @property
+    def name(self) -> str:
+        return "ActionsToMeetGoalsSubAgent"
+
+    @property
+    def description(self) -> str:
+        return "This agent is responsible for formulating a plan of action to meet the user's goals."
+
+    async def ainvoke(self, state):
+        # This is a placeholder implementation. In a real application, this would involve
+        # calling the LLM to formulate a plan.
+        state["current_agent"] = "ReportingSubAgent"
+        return state

@@ -1,16 +1,23 @@
+
 from app.services.deepagents.sub_agent import SubAgent
+from app.llm.llm_manager import LLMManager
+from langchain_core.tools import BaseTool
+from typing import List
 
 class DataSubAgent(SubAgent):
-    def __init__(self, llm_manager, tools):
-        super().__init__(
-            name="DataSubAgent",
-            description="Gathers and enriches data for the optimization process.",
-            llm_manager=llm_manager,
-            tools=tools,
-            sub_agent_type="data"
-        )
+    def __init__(self, llm_manager: LLMManager, tools: List[BaseTool]):
+        super().__init__(llm_manager, tools)
 
-    def get_initial_prompt(self) -> str:
-        return """
-        You are the Data Sub-Agent. Your role is to gather and enrich data for the optimization process.
-        """
+    @property
+    def name(self) -> str:
+        return "DataSubAgent"
+
+    @property
+    def description(self) -> str:
+        return "This agent is responsible for fetching and processing data."
+
+    async def ainvoke(self, state):
+        # This is a placeholder implementation. In a real application, this would involve
+        # calling the LLM to process the data.
+        state["current_agent"] = "OptimizationsCoreSubAgent"
+        return state

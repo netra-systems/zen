@@ -7,11 +7,12 @@ google_redirect_uri = settings.api_base_url + '/api/v3/auth/callback'
 
 oauth.register(
     name='google',
-    client_id=settings.google_cloud.client_id,
-    client_secret=settings.google_cloud.client_secret,
+    client_id=settings.oauth_config.client_id,
+    client_secret=settings.oauth_config.client_secret,
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={
-        'scope': 'openid email profile',
-        'redirect_url': google_redirect_uri
+        'scope': settings.oauth_config.scopes,
+        'redirect_uris': settings.oauth_config.web['authorized_redirect_uris']
     }
 )
+

@@ -1,55 +1,29 @@
+
 from abc import ABC, abstractmethod
 from typing import List
-from langchain_core.tools import BaseTool
 from app.llm.llm_manager import LLMManager
-from app.services.deepagents.state import DeepAgentState
-from langchain_core.messages import HumanMessage
+from langchain_core.tools import BaseTool
 
 class SubAgent(ABC):
-    def __init__(
-        self,
-        name: str,
-        description: str,
-        llm_manager: LLMManager,
-        tools: List[BaseTool] = None,
-        sub_agent_type: str = "base"
-    ):
-        self.name = name
-        self.description = description
+    def __init__(self, llm_manager: LLMManager, tools: List[BaseTool]):
         self.llm_manager = llm_manager
-        self.tools = tools or []
-        self.sub_agent_type = sub_agent_type
+        self.tools = tools
+        self.llm_manager = llm_manager
+        self.tools = tools
 
+    @property
     @abstractmethod
-    def get_initial_prompt(self) -> str:
-        """
-        Returns the initial prompt for the sub-agent.
-        """
+    def name(self) -> str:
+        """The name of the agent."""
         pass
 
-    def as_runnable(self):
-        """
-        Returns a runnable that can be used in the graph.
-        """
-        return self
+    @property
+    @abstractmethod
+    def description(self) -> str:
+        """A description of the agent's purpose."""
+        pass
 
-    async def __call__(self, state: DeepAgentState):
-        """
-        The main entry point for the sub-agent.
-        """
-        # Add the initial prompt to the messages
-        initial_prompt = self.get_initial_prompt()
-        state["messages"].append(HumanMessage(content=initial_prompt))
-        
-        # Get the LLM
-        llm = self.llm_manager.get_llm(self.sub_agent_type)
-
-        # Invoke the LLM
-        response = await llm.ainvoke(state["messages"])
-
-        # Update the state
-        state["messages"].append(response)
-        state["tool_calls"] = response.tool_calls
-        state["current_agent"] = self.name
-
-        return state
+    @abstractmethod
+    async def ainvoke(self, state):
+        """Invokes the agent with the given state."""
+        pass

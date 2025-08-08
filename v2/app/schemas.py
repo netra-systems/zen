@@ -457,6 +457,12 @@ class GoogleCloudConfig(BaseModel):
     client_secret: str = None
 
 class OAuthConfig(BaseModel):
+    client_id: str = None
+    client_secret: str = None
+    token_uri: str = "https://oauth2.googleapis.com/token"
+    auth_uri: str = "https://accounts.google.com/o/oauth2/v2/auth"
+    userinfo_endpoint: str = "https://www.googleapis.com/oauth2/v3/userinfo"
+    scopes: List[str] = ["openid", "email", "profile"]
     web: Dict[str, List[str]] = {
         "authorized_javascript_origins": [
             "https://app.netrasystems.ai",
@@ -470,6 +476,26 @@ class OAuthConfig(BaseModel):
             "http://localhost:3000/auth/callback"
         ]
     }
+
+class DevUser(BaseModel):
+    email: str = "dev@example.com"
+    full_name: str = "Dev User"
+    picture: Optional[str] = None
+    is_dev: bool = True
+
+class AuthEndpoints(BaseModel):
+    login_url: str
+    logout_url: str
+    auth_callback_url: str
+    user_info_url: str
+    token_url: str
+    
+class AuthConfigResponse(BaseModel):
+    development_mode: bool
+    dev_user: Optional[DevUser] = None
+    endpoints: AuthEndpoints
+    google_client_id: str
+    google_redirect_uri: str
 
 class ClickHouseNativeConfig(BaseModel):
     host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
@@ -520,6 +546,7 @@ class AppConfig(BaseModel):
 
     environment: str = "development"
     google_cloud: GoogleCloudConfig = GoogleCloudConfig()
+    oauth_config: OAuthConfig = Field(default_factory=OAuthConfig)
     clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
     clickhouse_https: ClickHouseHTTPSConfig = ClickHouseHTTPSConfig()
     clickhouse_https_dev: ClickHouseHTTPSDevConfig = ClickHouseHTTPSDevConfig()
@@ -551,6 +578,26 @@ class AppConfig(BaseModel):
             provider="openai",
             model_name="gpt-4",
             generation_config={"temperature": 0.8},
+        ),
+        "triage": LLMConfig(
+            provider="google",
+            model_name="gemini-2.5-pro",
+        ),
+        "data": LLMConfig(
+            provider="google",
+            model_name="gemini-2.5-pro",
+        ),
+        "optimizations_core": LLMConfig(
+            provider="google",
+            model_name="gemini-2.5-pro",
+        ),
+        "actions_to_meet_goals": LLMConfig(
+            provider="google",
+            model_name="gemini-2.5-pro",
+        ),
+        "reporting": LLMConfig(
+            provider="google",
+            model_name="gemini-2.5-pro",
         ),
     }
 

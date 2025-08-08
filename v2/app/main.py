@@ -2,6 +2,7 @@ import logging
 import time
 import sys
 import os
+import asyncio
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -9,7 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 logging.getLogger("faker").setLevel(logging.WARNING)
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -18,11 +19,12 @@ from app.db.postgres import async_session_factory
 from app.config import settings
 from app.logging_config import central_logger
 from app.llm.llm_manager import LLMManager
-from app.services.deepagents.overall_supervisor import OverallSupervisor
+from app.services.deepagents.supervisor import Supervisor
 from app.services.agent_service import AgentService
 from app.services.key_manager import KeyManager
 from app.auth.services import SecurityService
 from app.websocket import manager as websocket_manager
+from app.background import BackgroundTaskManager
 
 
 @asynccontextmanager
@@ -34,6 +36,8 @@ async def lifespan(app: FastAPI):
     start_time = time.time()
     logger = central_logger.get_logger(__name__)
     logger.info("Application startup...")
+
+    app.state.background_task_manager = BackgroundTaskManager()
 
     key_manager = KeyManager.load_from_settings(settings)
     app.state.key_manager = key_manager
@@ -49,7 +53,7 @@ async def lifespan(app: FastAPI):
     app.state.db_session_factory = async_session_factory
 
     # Initialize the agent supervisor
-    app.state.agent_supervisor = OverallSupervisor(app.state.db_session_factory, app.state.llm_manager, websocket_manager)
+    app.state.agent_supervisor = Supervisor(app.state.db_session_factory, app.state.llm_manager, websocket_manager)
     app.state.agent_service = AgentService(app.state.agent_supervisor)
     
     elapsed_time = time.time() - start_time
@@ -60,6 +64,7 @@ async def lifespan(app: FastAPI):
     finally:
         # Shutdown
         logger.info("Application shutdown initiated...")
+        await app.state.background_task_manager.shutdown()
         await app.state.agent_supervisor.shutdown()
         central_logger.shutdown()
         logger.info("Application shutdown complete.")
@@ -137,21 +142,23 @@ def test_error():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
-        "main:app", 
-        host="0.0.0.0", 
-        port=8000, 
-        reload=True, 
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+        reload_dirs=["app"],
         lifespan="on"
     )
 
 if "pytest" in sys.modules:
     from app.db.postgres import async_session_factory
     from app.llm.llm_manager import LLMManager
-    from app.services.deepagents.overall_supervisor import OverallSupervisor
+    from app.services.deepagents.supervisor import Supervisor
     from app.websocket import manager as websocket_manager
 
     llm_manager = LLMManager(settings)
-    app.state.agent_supervisor = OverallSupervisor(async_session_factory, llm_manager, websocket_manager)
+    app.state.llm_manager = llm_manager
+    app.state.agent_supervisor = Supervisor(async_session_factory, llm_manager, websocket_manager)
 
     from app.db.testing import override_get_db, engine
     from app.db.base import Base
@@ -159,10 +166,13 @@ if "pytest" in sys.modules:
     @asynccontextmanager
     async def test_lifespan(app: FastAPI):
         async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        yield
-        async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
+            await conn.run_sync(Base.metadata.create_all)
+        try:
+            yield
+        finally:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.drop_all)
 
     from app.dependencies import get_db_session
     app.dependency_overrides[get_db_session] = override_get_db

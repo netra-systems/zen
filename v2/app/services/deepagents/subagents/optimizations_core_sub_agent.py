@@ -1,16 +1,23 @@
+
 from app.services.deepagents.sub_agent import SubAgent
+from app.llm.llm_manager import LLMManager
+from langchain_core.tools import BaseTool
+from typing import List
 
 class OptimizationsCoreSubAgent(SubAgent):
-    def __init__(self, llm_manager, tools):
-        super().__init__(
-            name="OptimizationsCoreSubAgent",
-            description="Analyzes data and formulates optimization strategies.",
-            llm_manager=llm_manager,
-            tools=tools,
-            sub_agent_type="optimizations_core"
-        )
+    def __init__(self, llm_manager: LLMManager, tools: List[BaseTool]):
+        super().__init__(llm_manager, tools)
 
-    def get_initial_prompt(self) -> str:
-        return """
-        You are the Optimizations Core Sub-Agent. Your role is to analyze data and formulate optimization strategies.
-        """
+    @property
+    def name(self) -> str:
+        return "OptimizationsCoreSubAgent"
+
+    @property
+    def description(self) -> str:
+        return "This agent is responsible for analyzing the data and proposing optimizations."
+
+    async def ainvoke(self, state):
+        # This is a placeholder implementation. In a real application, this would involve
+        # calling the LLM to analyze the data.
+        state["current_agent"] = "ActionsToMeetGoalsSubAgent"
+        return state

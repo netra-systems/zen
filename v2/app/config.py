@@ -5,6 +5,11 @@ from app.schemas import AppConfig, ProductionConfig, TestingConfig, DevelopmentC
 
 SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="gemini-api-key", target_model="llm_configs.default", target_field="api_key"),
+    SecretReference(name="gemini-api-key", target_model="llm_configs.triage", target_field="api_key"),
+    SecretReference(name="gemini-api-key", target_model="llm_configs.data", target_field="api_key"),
+    SecretReference(name="gemini-api-key", target_model="llm_configs.optimizations_core", target_field="api_key"),
+    SecretReference(name="gemini-api-key", target_model="llm_configs.actions_to_meet_goals", target_field="api_key"),
+    SecretReference(name="gemini-api-key", target_model="llm_configs.reporting", target_field="api_key"),
     SecretReference(name="google-client-id", target_model="google_cloud", target_field="client_id"),
     SecretReference(name="google-client-secret", target_model="google_cloud", target_field="client_secret"),
     SecretReference(name="langfuse-secret-key", target_model="langfuse", target_field="secret_key"),
@@ -13,7 +18,9 @@ SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="clickhouse-default-password", target_model="clickhouse_https", target_field="password"),
     SecretReference(name="clickhouse-development-password", target_model="clickhouse_https_dev", target_field="password"),
     SecretReference(name="jwt-secret-key", target_field="jwt_secret_key"),
-    SecretReference(name="fernet-key", target_field="fernet_key")
+    SecretReference(name="fernet-key", target_field="fernet_key"),
+    SecretReference(name="google-client-id", target_model="oauth_config", target_field="client_id"),
+    SecretReference(name="google-client-secret", target_model="oauth_config", target_field="client_secret"),
 ]
 
 def get_secret_client() -> secretmanager.SecretManagerServiceClient:
@@ -83,6 +90,7 @@ def get_settings() -> AppConfig:
         "development": DevelopmentConfig
     }
     config = config_map.get(environment, DevelopmentConfig)()
+    
     load_secrets(config)
     return config
 

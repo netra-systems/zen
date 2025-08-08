@@ -1,15 +1,17 @@
 import json
 import asyncio
 import logging
-from fastapi import WebSocket, WebSocketDisconnect
-from app.services.deepagents.overall_supervisor import OverallSupervisor
+from fastapi import WebSocket, WebSocketDisconnect, Depends
+from app.services.deepagents.supervisor import Supervisor
 from app import schemas
 from app.connection_manager import manager
+from app.llm.llm_manager import LLMManager
+from app.db.session import get_db_session
 
 logger = logging.getLogger(__name__)
 
 class AgentService:
-    def __init__(self, supervisor: OverallSupervisor):
+    def __init__(self, supervisor: Supervisor):
         self.supervisor = supervisor
 
     async def start_agent(self, analysis_request: schemas.AnalysisRequest, run_id: str, stream_updates: bool = False):
@@ -18,26 +20,28 @@ class AgentService:
         """
         return await self.supervisor.start_agent(analysis_request, run_id, stream_updates)
 
-    async def handle_websocket_message(self, run_id: str, message: schemas.WebSocketMessage):
+    async def handle_websocket_message(self, run_id: str, message: str):
         """
         Handles a message from the WebSocket.
         """
         logger.info(f"handle_websocket_message called for run_id: {run_id} with message: {message}")
         try:
-            if message.type == "start_agent":
-                payload = schemas.StartAgentPayload.parse_obj(message.payload)
+            data = json.loads(message)
+            message_type = data.get("type")
+            if message_type == "start_agent":
+                payload = data.get("payload")
                 analysis_request = schemas.AnalysisRequest(
-                    settings=payload.settings,
-                    request=payload.request
+                    settings=payload.get("settings"),
+                    request=payload.get("request")
                 )
                 # When started from a websocket, we always want to stream updates
                 response = await self.start_agent(analysis_request, run_id, stream_updates=True)
                 await manager.send_to_run(
-                    schemas.WebSocketMessage(
-                        event="agent_started",
-                        data=response,
-                        run_id=run_id
-                    ).dict()
+                    {
+                        "run_id": run_id,
+                        "event": "agent_finished",
+                        "data": response
+                    }
                 )
 
             else:
@@ -45,14 +49,6 @@ class AgentService:
         except Exception as e:
             logger.error(f"Error in handle_websocket_message for run_id: {run_id}: {e}", exc_info=True)
 
-    async def handle_websocket(self, websocket: WebSocket, run_id: str):
-        """
-        Handles the WebSocket connection for the agent.
-        """
-        await websocket.accept()
-        try:
-            while True:
-                await asyncio.sleep(0.1)  # Keep the connection alive
-        except WebSocketDisconnect:
-            manager.disconnect(run_id)
-            print(f"WebSocket disconnected for run_id: {run_id}")
+def get_agent_service(db_session = Depends(get_db_session), llm_manager: LLMManager = Depends(LLMManager)) -> AgentService:
+    supervisor = Supervisor(db_session, llm_manager, manager)
+    return AgentService(supervisor)

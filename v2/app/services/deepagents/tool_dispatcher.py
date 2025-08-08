@@ -4,10 +4,24 @@ from langchain_core.messages import ToolMessage
 from app.logging_config import central_logger, LogEntry
 from app.services.apex_optimizer_agent.models import ToolResult, ToolStatus, ToolInput
 import asyncio
+from app.services.deepagents.state import DeepAgentState
 
 class ToolDispatcher:
     def __init__(self, tools: List[BaseTool]):
         self.tools = {tool.name: tool for tool in tools}
+
+    async def ainvoke(self, state: DeepAgentState) -> DeepAgentState:
+        tool_messages = []
+        if "messages" in state and state["messages"]:
+            last_message = state["messages"][-1]
+            if hasattr(last_message, 'tool_calls') and last_message.tool_calls:
+                for tool_call in last_message.tool_calls:
+                    result = await self.dispatch(tool_call["name"], **tool_call["args"])
+                    tool_messages.append(ToolMessage(content=str(result.payload) if result.status == ToolStatus.SUCCESS else result.message, tool_call_id=tool_call["id"], is_error=result.status == ToolStatus.ERROR))
+        
+        new_state = state.copy()
+        new_state["messages"] = state["messages"] + tool_messages
+        return new_state
 
     async def dispatch(self, tool_name: str, **kwargs):
         central_logger.log(LogEntry(event="dispatch_tool", data={"tool_name": tool_name, "kwargs": kwargs}))
@@ -43,15 +57,3 @@ class ToolDispatcher:
         else:
             central_logger.log(LogEntry(event="tool_not_found", data={"tool_name": tool_name}))
             return ToolResult(tool_input=tool_input, status=ToolStatus.ERROR, message=f"Tool '{tool_name}' not found.")
-
-    def as_runnable(self):
-        async def dispatch_node(state):
-            tool_messages = []
-            if "messages" in state and state["messages"]:
-                last_message = state["messages"][-1]
-                if hasattr(last_message, 'tool_calls') and last_message.tool_calls:
-                    for tool_call in last_message.tool_calls:
-                        result = await self.dispatch(tool_call["name"], **tool_call["args"])
-                        tool_messages.append(ToolMessage(content=str(result.payload) if result.status == ToolStatus.SUCCESS else result.message, tool_call_id=tool_call["id"], is_error=result.status == ToolStatus.ERROR))
-            return {"messages": tool_messages}
-        return dispatch_node

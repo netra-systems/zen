@@ -1,45 +1,189 @@
-from langgraph.graph import StateGraph, END
-from app.services.deepagents.state import DeepAgentState
+from typing import List, Dict, Optional
 from app.services.deepagents.sub_agent import SubAgent
+from app.services.deepagents.state import DeepAgentState
 from app.llm.llm_manager import LLMManager
+from app.services.tool_registry import ToolRegistry
+from app.services.deepagents.subagents.triage_sub_agent import TriageSubAgent
+from app.services.deepagents.subagents.data_sub_agent import DataSubAgent
+from app.services.deepagents.subagents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+from app.services.deepagents.subagents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+from app.services.deepagents.subagents.reporting_sub_agent import ReportingSubAgent
+from langgraph.graph import StateGraph, END
+from app.schemas import AnalysisRequest
+from app.connection_manager import ConnectionManager
 from app.services.deepagents.tool_dispatcher import ToolDispatcher
-from app.logging_config import central_logger, LogEntry
-import json
-from langchain_core.messages import BaseMessage, ToolMessage
+import logging
 
-class MessageEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, BaseMessage):
-            return o.dict()
-        return super().default(o)
+logger = logging.getLogger(__name__)
 
 class Supervisor:
-    def __init__(self, sub_agents: list[SubAgent], llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
-        self.sub_agents = sub_agents
+    def __init__(self, db_session, llm_manager: LLMManager, manager: ConnectionManager):
+        self.db_session = db_session
         self.llm_manager = llm_manager
-        self.tool_dispatcher = tool_dispatcher
+        self.manager = manager
+        self.tool_registry = ToolRegistry(db_session)
+        self.sub_agents = self._initialize_sub_agents()
+        self.tool_dispatcher = ToolDispatcher(self.tool_registry.get_tools(["triage", "data", "optimizations_core", "actions_to_meet_goals", "reporting"]))
+        self.graph = self._define_graph()
 
-    def create_graph(self):
+    def _initialize_sub_agents(self) -> Dict[str, SubAgent]:
+        """Initializes all the sub-agents that will be used in the graph."""
+        triage_agent = TriageSubAgent(self.llm_manager, self.tool_registry.get_tools(["triage"]))
+        data_agent = DataSubAgent(self.llm_manager, self.tool_registry.get_tools(["data"]))
+        optimizations_core_agent = OptimizationsCoreSubAgent(self.llm_manager, self.tool_registry.get_tools(["optimizations_core"]))
+        actions_to_meet_goals_agent = ActionsToMeetGoalsSubAgent(self.llm_manager, self.tool_registry.get_tools(["actions_to_meet_goals"]))
+        reporting_agent = ReportingSubAgent(self.llm_manager, self.tool_registry.get_tools(["reporting"]))
+        
+        return {
+            "TriageSubAgent": triage_agent,
+            "DataSubAgent": data_agent,
+            "OptimizationsCoreSubAgent": optimizations_core_agent,
+            "ActionsToMeetGoalsSubAgent": actions_to_meet_goals_agent,
+            "ReportingSubAgent": reporting_agent,
+        }
+
+    def _define_graph(self):
+        """Defines the execution graph for the agent."""
         workflow = StateGraph(DeepAgentState)
-        
-        for sub_agent in self.sub_agents:
-            workflow.add_node(sub_agent.name, sub_agent.as_runnable())
-        workflow.add_node("tool_dispatcher", self.tool_dispatcher.as_runnable())
 
-        for i in range(len(self.sub_agents) - 1):
-            workflow.add_edge(self.sub_agents[i].name, self.sub_agents[i+1].name)
+        # Add nodes for each sub-agent
+        for name, agent in self.sub_agents.items():
+            workflow.add_node(name, agent.ainvoke)
+            
+        workflow.add_node("tool_node", self.tool_dispatcher.ainvoke)
 
+        # Define the edges
         workflow.add_conditional_edges(
-            self.sub_agents[-1].name,
-            lambda x: "__end__" if not x.get("tool_calls") else "tool_dispatcher",
-            {"__end__": END, "tool_dispatcher": "tool_dispatcher"}
+            "TriageSubAgent",
+            self.route,
+            {
+                "DataSubAgent": "DataSubAgent",
+                "OptimizationsCoreSubAgent": "OptimizationsCoreSubAgent",
+                "ActionsToMeetGoalsSubAgent": "ActionsToMeetGoalsSubAgent",
+                "ReportingSubAgent": "ReportingSubAgent",
+                "__end__": END,
+            },
         )
-
         workflow.add_conditional_edges(
-            "tool_dispatcher",
+            "DataSubAgent",
+            self.route,
+            {
+                "OptimizationsCoreSubAgent": "OptimizationsCoreSubAgent",
+                "__end__": END,
+            },
+        )
+        workflow.add_conditional_edges(
+            "OptimizationsCoreSubAgent",
+            self.route,
+            {
+                "ActionsToMeetGoalsSubAgent": "ActionsToMeetGoalsSubAgent",
+                "__end__": END,
+            },
+        )
+        workflow.add_conditional_edges(
+            "ActionsToMeetGoalsSubAgent",
+            self.route,
+            {
+                "ReportingSubAgent": "ReportingSubAgent",
+                "__end__": END,
+            },
+        )
+        workflow.add_edge("ReportingSubAgent", END)
+        
+        workflow.add_conditional_edges(
+            "tool_node",
             lambda x: x["current_agent"],
-            {sub_agent.name: sub_agent.name for sub_agent in self.sub_agents}
+            {agent_name: agent_name for agent_name in self.sub_agents.keys()},
+        )
+
+        workflow.set_entry_point("TriageSubAgent")
+        
+        return workflow.compile()
+
+    def route(self, state: DeepAgentState) -> str:
+        """Routes the request to the next appropriate sub-agent."""
+        if state.get("tool_calls"):
+            return "tool_node"
+
+        last_message = state["messages"][-1]
+        if "tool_calls" in last_message.additional_kwargs:
+            return "tool_node"
+
+        # Check the content of the last message for routing instructions
+        content = last_message.content.lower()
+        routing_config = {
+            "TriageSubAgent": "DataSubAgent",
+            "DataSubAgent": "OptimizationsCoreSubAgent",
+            "OptimizationsCoreSubAgent": "ActionsToMeetGoalsSubAgent",
+            "ActionsToMeetGoalsSubAgent": "ReportingSubAgent",
+            "ReportingSubAgent": "__end__",
+        }
+
+        current_agent = state.get("current_agent")
+        if current_agent in routing_config:
+            return routing_config[current_agent]
+        else:
+            return "__end__"
+
+    async def start_agent(self, analysis_request: AnalysisRequest, run_id: str, stream_updates: bool = False):
+        """Starts the agent with the given analysis request."""
+        logger.info(f"Starting agent for run_id: {run_id})")
+        initial_state = DeepAgentState(
+            messages=[],
+            run_id=run_id,
+            stream_updates=stream_updates,
+            analysis_request=analysis_request,
+            current_agent="TriageSubAgent"
         )
         
-        workflow.set_entry_point(self.sub_agents[0].name)
-        return workflow.compile()
+        final_state = None
+        try:
+            async for output in self.graph.astream(initial_state):
+                logger.info(f"Supervisor output: {output}")
+                final_state = output
+                if stream_updates:
+                    await self.manager.send_to_run(
+                        {
+                            "run_id": run_id,
+                            "event": "agent_update",
+                            "data": {
+                                "agent": output.get('current_agent'),
+                                "messages": [msg.dict() for msg in output.get('messages', [])]
+                            }
+                        },
+                        run_id
+                    )
+        except Exception as e:
+            logger.error(f"Error in agent execution for run_id: {run_id}", exc_info=True)
+            raise
+        
+        logger.info(f"Supervisor final_state: {final_state}")
+        return final_state
+
+    async def get_agent_state(self, run_id: str) -> Optional[Dict]:
+        """Gets the current state of the agent."""
+        # This is a placeholder. In a real application, you would fetch the state from a persistent store.
+        return None
+
+    async def list_agents(self) -> List[Dict]:
+        """Lists all available agents."""
+        return [
+            {
+                "name": agent.name,
+                "description": agent.description,
+                "tools": [tool.name for tool in agent.tools]
+            }
+            for agent in self.sub_agents.values()
+        ]
+
+    async def get_agent_details(self, agent_name: str) -> Optional[Dict]:
+        """Gets the details of a specific agent."""
+        agent = self.sub_agents.get(agent_name)
+        if not agent:
+            return None
+        
+        return {
+            "name": agent.name,
+            "description": agent.description,
+            "tools": [tool.name for tool in agent.tools]
+        }
