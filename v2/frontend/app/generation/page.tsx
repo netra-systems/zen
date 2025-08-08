@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { HelpCircle } from 'lucide-react';
 
-import config from '@/types';
+import config, { Corpus } from '@/types';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { GenericInput } from '@/components/GenericInput';
 import Thinking from '@/components/Thinking';
@@ -62,6 +62,7 @@ export default function GenerationPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [tables, setTables] = useState<string[]>([]);
+    const [corpora, setCorpora] = useState<Corpus[]>([]);
     const pollingJobIdRef = React.useRef<string | null>(null);
 
     useEffect(() => {
@@ -74,6 +75,18 @@ export default function GenerationPage() {
             }
         };
         fetchTables();
+    }, [token]);
+
+    useEffect(() => {
+        const fetchCorpora = async () => {
+            try {
+                const data = await apiService.get(`${config.api.baseUrl}/api/v3/corpus`, token);
+                setCorpora(data);
+            } catch (error: unknown) {
+                setError('Could not fetch corpora.');
+            }
+        };
+        fetchCorpora();
     }, [token]);
 
     const pollStatus = useCallback(async () => {
