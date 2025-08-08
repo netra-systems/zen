@@ -1,0 +1,19 @@
+SPEC:chat_ui_ux: UI/UX for Chat
+
+chat_ui_ux:1:0: AMAZING UI/UX experience for Chat.
+
+chat_ui_ux:1:0:0: Look at Schemas and Types that are existing to see what fields and concepts are available.
+
+chat_ui_ux:1:0:1:  The primary header is the SubAgent name 
+chat_ui_ux:1:0:1:0 Secondary items are things related to SubAgent status and state etc. e.g. Tools being used
+chat_ui_ux:1:0:2: Third is messages
+chat_ui_ux:1:0:3: Show relevant concepts as collapsible items inside cards etc.
+chat_ui_ux:1:0:4: Show errors if existing
+chat_ui_ux:1:0:6: Define with strong types which messages are shown to user by default (not all events we want to show)
+chat_ui_ux:1:0:7: User messages display user text and user references
+chat_ui_ux:1:0:8: UI/UX feels “alive” while still being subtle
+chat_ui_ux:1:0:9: An expandable “Raw” mode that can expand JSON objects at various processing stages (e.g JSON tree view)
+chat_ui_ux:1:0:10: A “Stop” processing button
+chat_ui_ux:1:0:11: KEEP existing examples concepts.
+
+chat_ui_ux:Remember: 0:7.  Remember: 0:1 to 0:7 to 1 including all sub items 1:0:0 through 1:011.

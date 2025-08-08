@@ -15,9 +15,9 @@ websockets_router = APIRouter()
 def get_agent_supervisor(request: Request) -> Supervisor:
     return request.app.state.agent_supervisor
 
-async def handle_message(user_id: str, data: str, supervisor: Supervisor):
+async def handle_message(user_id: str, data: dict, supervisor: Supervisor):
     try:
-        message = WebSocketMessage.parse_raw(data)
+        message = WebSocketMessage.parse_obj(data)
         if message.type == "analysis_request":
             if isinstance(message.payload, AnalysisRequest):
                 request_model = message.payload.request_model
@@ -33,9 +33,6 @@ async def handle_message(user_id: str, data: str, supervisor: Supervisor):
     except ValidationError as e:
         logger.error(f"WebSocket validation error for user {user_id}: {e}")
         await manager.send_error(user_id, f"Invalid message format: {e}")
-    except json.JSONDecodeError:
-        logger.error(f"Failed to decode JSON from WebSocket message for user {user_id}.")
-        await manager.send_error(user_id, "Invalid JSON format.")
     except Exception as e:
         logger.error(f"Error processing message for user {user_id}: {e}", exc_info=True)
         await manager.send_error(user_id, "An internal error occurred.")
@@ -50,7 +47,7 @@ async def websocket_endpoint(
     try:
         while True:
             try:
-                data = await asyncio.wait_for(websocket.receive_text(), timeout=300)
+                data = await asyncio.wait_for(websocket.receive_json(), timeout=300)
                 if data == 'ping':
                     await websocket.send_text('pong')
                     continue
