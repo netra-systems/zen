@@ -1,14 +1,15 @@
+
 'use client';
 
 import React, { useState } from 'react';
 import { ChatInput } from './ChatInput';
 import { ChatHistory } from './ChatHistory';
-import { useAgent } from '../hooks/useAgent';
+import { useAgentContext } from '../providers/AgentProvider';
 import { MessageFilter } from './MessageFilter';
-import { Message } from '@/app/types/index';
+import { Message, WebSocketStatus } from '@/app/types/index';
 
 export const Dashboard = () => {
-  const { messages, startAgent, isConnected } = useAgent();
+  const { messages, startAgent, wsStatus } = useAgentContext();
   const [filter, setFilter] = useState('all');
 
   const handleFilterChange = (newFilter: string) => {
@@ -32,7 +33,7 @@ export const Dashboard = () => {
         </div>
         <div className="flex justify-center space-x-4 mt-4">
           <p className="text-sm text-gray-500">
-            WebSocket status: {isConnected ? 'Connected' : 'Disconnected'}
+            WebSocket status: {wsStatus === WebSocketStatus.Open ? 'Connected' : 'Disconnected'}
           </p>
         </div>
       </div>

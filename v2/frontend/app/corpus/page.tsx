@@ -1,22 +1,24 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Corpus } from '../../types';
+import { useWebSocketContext } from '@/app/providers/WebSocketProvider';
 
 export default function CorpusAdminPage() {
     const [corpora, setCorpora] = useState<Corpus[]>([]);
     const [newCorpusName, setNewCorpusName] = useState('');
     const [newCorpusDescription, setNewCorpusDescription] = useState('');
+    const { lastJsonMessage } = useWebSocketContext();
 
     useEffect(() => {
         fetch('/api/v3/corpus')
             .then(res => res.json())
             .then(data => setCorpora(data));
+    }, []);
 
-        const ws = new WebSocket('ws://localhost:8000/ws');
-        ws.onmessage = event => {
-            const message = event.data;
+    useEffect(() => {
+        if (lastJsonMessage) {
+            const message = lastJsonMessage.data;
             const match = message.match(/Corpus (.*) progress: (.*)/);
             if (match) {
                 const corpusId = match[1];
@@ -36,12 +38,8 @@ export default function CorpusAdminPage() {
                     )
                 );
             }
-        };
-
-        return () => {
-            ws.close();
-        };
-    }, []);
+        }
+    }, [lastJsonMessage]);
 
     const handleCreateCorpus = () => {
         fetch('/api/v3/corpus', {
