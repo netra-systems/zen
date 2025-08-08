@@ -1,93 +1,76 @@
-import asyncio
-import json
-import logging
+from typing import List, Dict, Any
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Request, Query
-from pydantic import ValidationError
-from app.auth.services import SecurityService
-from app.agents.supervisor import Supervisor
+import logging
+import json
+import asyncio
 from app.schemas import WebSocketMessage, AnalysisRequest, RequestModel, User
+from app.auth.auth_dependencies import get_current_user_ws
+from app.agents.supervisor import Supervisor
+from app.dependencies import get_agent_supervisor
 from app.ws_manager import manager
-
-logger = logging.getLogger(__name__)
 
 websockets_router = APIRouter()
 
-def get_agent_supervisor(request: Request) -> Supervisor:
-    return request.app.state.agent_supervisor
-
-def get_security_service(request: Request) -> SecurityService:
-    return request.app.state.security_service
-
-async def get_user_from_token(token: str, security_service: SecurityService) -> User | None:
-    if not token:
-        return None
-    return await security_service.get_user_from_token(token)
+logger = logging.getLogger(__name__)
 
 async def handle_analysis_request(user_id: str, message: WebSocketMessage, supervisor: Supervisor):
-    if isinstance(message.payload, AnalysisRequest):
-        request_model = message.payload.request_model
-        asyncio.create_task(
-            supervisor.run(request_model.model_dump(), request_model.id, stream_updates=True)
-        )
-    else:
-        await manager.send_error(user_id, "Invalid payload for analysis_request")
+    try:
+        analysis_request = AnalysisRequest(**message.payload)
+        await supervisor.start_agent(user_id, analysis_request)
+    except Exception as e:
+        logger.error(f"Error handling analysis request for user {user_id}: {e}", exc_info=True)
+        await manager.send_error(user_id, f"Failed to start analysis: {e}")
 
 async def handle_unknown_message(user_id: str, message: WebSocketMessage):
-    logger.warning(f"Received unknown message type: {message.type}")
+    logger.warning(f"Unknown message type for user {user_id}: {message.type}")
     await manager.send_error(user_id, f"Unknown message type: {message.type}")
-
-async def handle_validation_error(user_id: str, e: ValidationError):
-    logger.error(f"WebSocket validation error for user {user_id}: {e}")
-    errors = e.errors()
-    error_messages = [f"{err['loc'][0]}: {err['msg']}" for err in errors]
-    await manager.send_error(user_id, f"Invalid message format: {', '.join(error_messages)}")
-
-async def handle_message(user_id: str, data: dict, supervisor: Supervisor):
-    try:
-        message = WebSocketMessage.parse_obj(data)
-        if message.type == "analysis_request":
-            await handle_analysis_request(user_id, message, supervisor)
-        else:
-            await handle_unknown_message(user_id, message)
-
-    except ValidationError as e:
-        await handle_validation_error(user_id, e)
-    except json.JSONDecodeError:
-        await manager.send_error(user_id, "Invalid JSON format")
-    except Exception as e:
-        logger.error(f"Error processing message for user {user_id}: {e}", exc_info=True)
-        await manager.send_error(user_id, "An internal error occurred.")
 
 @websockets_router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket, 
     token: str = Query(...),
-    supervisor: Supervisor = Depends(get_agent_supervisor),
-    security_service: SecurityService = Depends(get_security_service)
+    supervisor: Supervisor = Depends(get_agent_supervisor)
 ):
-    user = await get_user_from_token(token, security_service)
-    if not user:
-        await websocket.close(code=1008, reason="Invalid token")
+    try:
+        user = await get_current_user_ws(token, websocket)
+        if not user:
+            await websocket.close(code=1008, reason="Invalid token")
+            return
+    except Exception as e:
+        logger.error(f"WebSocket authentication failed: {e}", exc_info=True)
+        await websocket.close(code=1008, reason="Authentication failed")
         return
 
     await manager.connect(websocket, user.id)
+    logger.info(f"WebSocket connected for user {user.id}")
+
     try:
         while True:
             try:
                 data = await asyncio.wait_for(websocket.receive_json(), timeout=300)
-                if data == 'ping':
+                if data == {"type": "ping"}:
                     await websocket.send_text('pong')
                     continue
-                await handle_message(user.id, data, supervisor)
+                
+                message = WebSocketMessage.parse_obj(data)
+                
+                if message.type == "analysis_request":
+                    await handle_analysis_request(user.id, message, supervisor)
+                else:
+                    await handle_unknown_message(user.id, message)
 
             except asyncio.TimeoutError:
                 await websocket.send_text('pong') # Keep alive
             except WebSocketDisconnect:
                 logger.info(f"WebSocket gracefully disconnected for user {user.id}")
                 break
+            except json.JSONDecodeError:
+                logger.error(f"Invalid JSON received from user {user.id}")
+                await manager.send_error(user.id, "Invalid JSON format")
             except Exception as e:
                 logger.error(f"An unexpected error occurred in the WebSocket connection for user {user.id}: {e}", exc_info=True)
+                await manager.send_error(user.id, "An unexpected error occurred.")
                 break
-
     finally:
         manager.disconnect(user.id, websocket)
+        logger.info(f"WebSocket connection closed for user {user.id}")

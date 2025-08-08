@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, List
 from app.agents.base import BaseSubAgent
-from app.schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, SubAgentUpdate, AgentCompleted
+from app.schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, SubAgentUpdate, AgentCompleted, SubAgentState
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.agents.tool_dispatcher import ToolDispatcher
@@ -47,13 +47,18 @@ class Supervisor(BaseSubAgent):
             
             agent.set_state(SubAgentLifecycle.RUNNING)
             if stream_updates:
+                sub_agent_state = SubAgentState(
+                    messages=[],
+                    next_node="",
+                    lifecycle=agent.get_state()
+                )
                 await self.websocket_manager.send_to_client(
                     run_id,
                     WebSocketMessage(
                         type="sub_agent_update",
                         payload=SubAgentUpdate(
                             sub_agent_name=agent.name,
-                            state=agent.get_state()
+                            state=sub_agent_state
                         )
                     )
                 )
@@ -62,13 +67,18 @@ class Supervisor(BaseSubAgent):
 
             agent.set_state(SubAgentLifecycle.COMPLETED)
             if stream_updates:
+                sub_agent_state = SubAgentState(
+                    messages=[],
+                    next_node="",
+                    lifecycle=agent.get_state()
+                )
                 await self.websocket_manager.send_to_client(
                     run_id,
                     WebSocketMessage(
                         type="sub_agent_update",
                         payload=SubAgentUpdate(
                             sub_agent_name=agent.name,
-                            state=agent.get_state()
+                            state=sub_agent_state
                         )
                     )
                 )
