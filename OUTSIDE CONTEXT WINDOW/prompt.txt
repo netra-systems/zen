@@ -1,0 +1,2 @@
+Read: instructions.txt
+ACTION: ws.txt
