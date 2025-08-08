@@ -5,104 +5,62 @@ from app.agents.data_sub_agent import DataSubAgent
 from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from app.agents.reporting_sub_agent import ReportingSubAgent
-from app.schemas import AnalysisRequest, RequestModel, Settings
+from app.schemas import RequestModel, Settings
 from app.llm.llm_manager import LLMManager
 
 @pytest.fixture
 def mock_llm_manager():
     mock = MagicMock(spec=LLMManager)
     mock.arun = AsyncMock()
-    mock.ask_llm = AsyncMock()
+    mock.ask_llm = AsyncMock(return_value='{}')
     return mock
 
 @pytest.fixture
-def analysis_request():
-    return AnalysisRequest(
-        settings=Settings(debug_mode=True),
-        request=RequestModel(
-            id="test_run",
-            user_id="test_user",
-            query="Test message",
-            workloads=[]
-        )
+def request_model():
+    return RequestModel(
+        id="test_run",
+        user_id="test_user",
+        query="Test message",
+        workloads=[]
     )
 
 @pytest.mark.asyncio
-async def test_triage_sub_agent(mock_llm_manager, analysis_request):
-    mock_llm_manager.arun.return_value = '{"category": "Data Analysis", "justification": "The user wants to analyze data."}'
+async def test_triage_sub_agent(mock_llm_manager, request_model):
+    mock_llm_manager.ask_llm.return_value = '{"category": "Data Analysis"}'
     agent = TriageSubAgent(mock_llm_manager)
-    state = {
-        "analysis_request": analysis_request,
-        "messages": [],
-        "run_id": "test_run",
-        "stream_updates": False,
-        "current_agent": "TriageSubAgent",
-        "tool_calls": None,
-    }
-    result = await agent.run(state, "test_run", False)
-    assert result["current_agent"] == "DataSubAgent"
+    input_data = {"request": request_model.model_dump()}
+    result = await agent.run(input_data, "test_run", False)
+    assert "triage_result" in result
     assert result["triage_result"]["category"] == "Data Analysis"
 
 @pytest.mark.asyncio
-async def test_data_sub_agent(mock_llm_manager, analysis_request):
+async def test_data_sub_agent(mock_llm_manager, request_model):
+    mock_llm_manager.ask_llm.return_value = '{"data": "some data"}'
     agent = DataSubAgent(mock_llm_manager)
-    state = {
-        "analysis_request": analysis_request,
-        "messages": [],
-        "run_id": "test_run",
-        "stream_updates": False,
-        "current_agent": "DataSubAgent",
-        "tool_calls": None,
-        "triage_result": {"category": "Data Analysis"}
-    }
-    result = await agent.run(state, "test_run", False)
-    assert result["current_agent"] == "OptimizationsCoreSubAgent"
-    assert "processed_data" in result
+    input_data = {"request": request_model.model_dump(), "triage_result": {"category": "Data Analysis"}}
+    result = await agent.run(input_data, "test_run", False)
+    assert "data_result" in result
 
 @pytest.mark.asyncio
-async def test_optimizations_core_sub_agent(mock_llm_manager, analysis_request):
+async def test_optimizations_core_sub_agent(mock_llm_manager, request_model):
+    mock_llm_manager.ask_llm.return_value = '{"optimizations": ["optimization 1"]}'
     agent = OptimizationsCoreSubAgent(mock_llm_manager)
-    state = {
-        "analysis_request": analysis_request,
-        "messages": [],
-        "run_id": "test_run",
-        "stream_updates": False,
-        "current_agent": "OptimizationsCoreSubAgent",
-        "tool_calls": None,
-        "processed_data": {"summary": "some data"}
-    }
-    result = await agent.run(state, "test_run", False)
-    assert result["current_agent"] == "ActionsToMeetGoalsSubAgent"
-    assert "optimizations" in result
+    input_data = {"request": request_model.model_dump(), "data_result": {"data": "some data"}}
+    result = await agent.run(input_data, "test_run", False)
+    assert "optimizations_result" in result
 
 @pytest.mark.asyncio
-async def test_actions_to_meet_goals_sub_agent(mock_llm_manager, analysis_request):
+async def test_actions_to_meet_goals_sub_agent(mock_llm_manager, request_model):
+    mock_llm_manager.ask_llm.return_value = '{"action_plan": ["action 1"]}'
     agent = ActionsToMeetGoalsSubAgent(mock_llm_manager)
-    state = {
-        "analysis_request": analysis_request,
-        "messages": [],
-        "run_id": "test_run",
-        "stream_updates": False,
-        "current_agent": "ActionsToMeetGoalsSubAgent",
-        "tool_calls": None,
-        "optimizations": ["some optimization"]
-    }
-    result = await agent.run(state, "test_run", False)
-    assert result["current_agent"] == "ReportingSubAgent"
-    assert "action_plan" in result
+    input_data = {"request": request_model.model_dump(), "optimizations_result": {"optimizations": ["optimization 1"]}}
+    result = await agent.run(input_data, "test_run", False)
+    assert "action_plan_result" in result
 
 @pytest.mark.asyncio
-async def test_reporting_sub_agent(mock_llm_manager, analysis_request):
+async def test_reporting_sub_agent(mock_llm_manager, request_model):
+    mock_llm_manager.ask_llm.return_value = '{"report": "some report"}'
     agent = ReportingSubAgent(mock_llm_manager)
-    state = {
-        "analysis_request": analysis_request,
-        "messages": [],
-        "run_id": "test_run",
-        "stream_updates": False,
-        "current_agent": "ReportingSubAgent",
-        "tool_calls": None,
-        "action_plan_result": {"title": "some plan"}
-    }
-    result = await agent.run(state, "test_run", False)
-    assert result["current_agent"] == "__end__"
-    assert "report" in result
+    input_data = {"request": request_model.model_dump(), "action_plan_result": {"action_plan": ["action 1"]}}
+    result = await agent.run(input_data, "test_run", False)
+    assert "report_result" in result

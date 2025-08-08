@@ -1,7 +1,8 @@
+
 import pytest
 from unittest.mock import MagicMock, AsyncMock
 from app.agents.supervisor import Supervisor
-from app.schemas import AnalysisRequest, RequestModel, Settings
+from app.schemas import RequestModel, Settings
 from app.llm.llm_manager import LLMManager
 from app.websocket_manager import WebSocketManager
 
@@ -9,6 +10,7 @@ from app.websocket_manager import WebSocketManager
 def mock_llm_manager():
     mock = MagicMock(spec=LLMManager)
     mock.arun = AsyncMock()
+    mock.ask_llm = AsyncMock(return_value='{}')
     return mock
 
 @pytest.fixture
@@ -21,19 +23,16 @@ async def test_supervisor_logic(mock_llm_manager, mock_manager):
     db_session = MagicMock()
     supervisor = Supervisor(db_session, mock_llm_manager, mock_manager)
 
-    analysis_request = AnalysisRequest(
-        settings=Settings(debug_mode=True),
-        request=RequestModel(
-            id="test_run",
-            user_id="test_user",
-            query="Analyze my data and generate a report.",
-            workloads=[]
-        )
+    request_model = RequestModel(
+        id="test_run",
+        user_id="test_user",
+        query="Analyze my data and generate a report.",
+        workloads=[]
     )
     run_id = "test_run"
 
     # Act
-    final_state = await supervisor.run({"analysis_request": analysis_request.model_dump()}, run_id, stream_updates=False)
+    final_state = await supervisor.run(request_model.model_dump(), run_id, stream_updates=False)
 
     # Assert
-    assert final_state["current_agent"] == "__end__"
+    assert "report_result" in final_state

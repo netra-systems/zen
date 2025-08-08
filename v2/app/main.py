@@ -155,7 +155,7 @@ if __name__ == "__main__":
 if "pytest" in sys.modules:
     from app.db.postgres import async_session_factory
     from app.llm.llm_manager import LLMManager
-    from app.services.agents.supervisor import Supervisor
+    from app.agents.supervisor import Supervisor
     from app.websocket_manager import manager as websocket_manager
 
     llm_manager = LLMManager(settings)
