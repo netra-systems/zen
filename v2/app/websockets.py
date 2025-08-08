@@ -1,8 +1,7 @@
-
 import asyncio
 import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Request
-from app.auth.auth_dependencies import ActiveUserWsDep
+from app.auth.auth_dependencies import ActiveUserWsDep, get_current_active_user_ws
 from app.agents.supervisor import Supervisor
 from app.schemas import WebSocketMessage, RequestModel
 from app.logging_config import central_logger
@@ -37,7 +36,7 @@ def get_agent_supervisor(request: Request) -> Supervisor:
     return request.app.state.agent_supervisor
 
 @websockets_router.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, user: ActiveUserWsDep, supervisor: Supervisor = Depends(get_agent_supervisor)):
+async def websocket_endpoint(websocket: WebSocket, user: ActiveUserWsDep = Depends(get_current_active_user_ws), supervisor: Supervisor = Depends(get_agent_supervisor)):
     await manager.connect(websocket, user.id)
     logger = central_logger.get_logger(__name__)
     try:
@@ -70,6 +69,16 @@ async def websocket_endpoint(websocket: WebSocket, user: ActiveUserWsDep, superv
         logger.error(f"WebSocket connection failed for user {user.id}: {e}", exc_info=True)
     finally:
         manager.disconnect(websocket, user.id)
+
+@websockets_router.websocket("/dev")
+async def dev_websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_json()
+            await websocket.send_json({"echo": data})
+    except WebSocketDisconnect:
+        print("Dev WebSocket disconnected")
 
 async def send_update_to_client(client_id: str, message: Dict[str, Any]):
     await manager.broadcast_to_client(client_id, message)

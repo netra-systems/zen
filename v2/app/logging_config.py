@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore", category=UserWarning, message=".*is not a Pyth
 # ClickHouse
 from app.db.clickhouse_base import ClickHouseDatabase
 from app.config import settings
-from app.websocket_manager import manager as websocket_manager
+from app.websockets import manager as websocket_manager
 
 class LogEntry(BaseModel):
     """Pydantic model for a single log entry."""
