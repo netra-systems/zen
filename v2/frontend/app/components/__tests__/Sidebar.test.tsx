@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import { Sidebar } from '../Sidebar';
 import { useAuth } from '@/hooks/useAuth';
 
-jest.mock('@/providers/auth');
+jest.mock('@/hooks/useAuth');
 
 describe('Sidebar', () => {
   it('renders the sidebar with navigation links for an authenticated user', () => {

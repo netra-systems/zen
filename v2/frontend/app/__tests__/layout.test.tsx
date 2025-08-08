@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import { useAuth } from '@/providers/auth';
+import { useAuth } from '@/hooks/useAuth';
 import { AppWithLayout } from '@/layout';
 
-jest.mock('@/providers/auth');
+jest.mock('@/hooks/useAuth');
 
 describe('AppWithLayout', () => {
   it('renders sidebar and header for authenticated users', () => {

@@ -1,8 +1,8 @@
 import { renderHook, act } from '@testing-library/react';
-import { useAgent } from '../app/hooks/useAgent';
-import { agent } from '../app/services/agent/Agent';
+import { useAgent } from '@/hooks/useAgent';
+import { agent } from '@/services/agent/Agent';
 
-jest.mock('../app/services/agent/Agent', () => ({
+jest.mock('@/services/agent/Agent', () => ({
     agent: {
         initialize: jest.fn(),
         start: jest.fn(),
