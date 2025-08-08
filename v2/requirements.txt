@@ -31,4 +31,5 @@ itsdangerous
 pytest
 langfuse
 google-cloud-secret-manager
-langchain_google_genairedis 
+langchain-google-genai 
+pydantic-to-typescript

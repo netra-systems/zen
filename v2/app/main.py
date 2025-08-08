@@ -25,7 +25,8 @@ from app.services.agent_service import AgentService
 from app.services.key_manager import KeyManager
 from app.auth.services import SecurityService
 from app.background import BackgroundTaskManager
-from app.websockets import manager as websocket_manager
+from app.ws_manager import initialize_ws_manager
+from app.ws_manager import manager as websocket_manager
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.services.tool_registry import ToolRegistry
 from app.redis_manager import redis_manager
@@ -43,6 +44,7 @@ async def lifespan(app: FastAPI):
 
     await redis_manager.connect()
     app.state.redis_manager = redis_manager
+    initialize_ws_manager(await redis_manager.get_client())
 
     app.state.background_task_manager = BackgroundTaskManager()
 
