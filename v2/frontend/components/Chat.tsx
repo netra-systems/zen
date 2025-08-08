@@ -15,7 +15,14 @@ export function Chat() {
   const [message, setMessage] = useState('');
   const [messageHistory, setMessageHistory] = useState<WebSocketMessage[]>([]);
   const { user } = useAuth();
-  const { sendMessage, lastMessage, readyState } = useWebSocket(WEBSOCKET_URL, {
+  const socketUrl = useMemo(() => {
+    if (user?.id) {
+      return WEBSOCKET_URL.replace('{user_id}', user.id);
+    }
+    return null;
+  }, [user]);
+
+  const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl, {
     shouldReconnect: (closeEvent) => true,
   });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
