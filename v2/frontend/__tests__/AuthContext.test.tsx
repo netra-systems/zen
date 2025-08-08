@@ -1,12 +1,11 @@
-
 import { render, screen, waitFor } from '@testing-library/react';
-import { AuthProvider, useAuth } from '../app/contexts/AuthContext';
-import { getAuthConfig } from '../services/auth';
-import { AuthConfigResponse, User } from '@testing-library/react';
+import { AuthProvider, useAuth } from '@/app/contexts/AuthContext';
+import * as auth from '@/services/auth';
+import { mockAuthConfig, mockUser } from '@/mocks/auth';
 
-jest.mock('../services/auth');
+jest.mock('@/services/auth');
 
-const mockGetAuthConfig = getAuthConfig as jest.Mock;
+const mockGetAuthConfig = auth.getAuthConfig as jest.Mock;
 
 const TestComponent = () => {
   const { user, login, logout, loading } = useAuth();
@@ -19,12 +18,12 @@ const TestComponent = () => {
       </div>
     );
   }
-  return <button onClick={login}>Login</button>;
+  return <button onClick={login}>Login with Google</button>;
 };
 
 describe('AuthProvider', () => {
   it('should show loading state initially', () => {
-    mockGetAuthConfig.mockResolvedValueOnce({ development_mode: true, user: null });
+    mockGetAuthConfig.mockResolvedValueOnce(mockAuthConfig);
     render(
       <AuthProvider>
         <TestComponent />
@@ -34,20 +33,19 @@ describe('AuthProvider', () => {
   });
 
   it('should show login button when not authenticated', async () => {
-    mockGetAuthConfig.mockResolvedValueOnce({ development_mode: false, user: null });
+    mockGetAuthConfig.mockResolvedValueOnce(mockAuthConfig);
     render(
       <AuthProvider>
         <TestComponent />
       </AuthProvider>
     );
     await waitFor(() => {
-      expect(screen.getByText('Login')).toBeInTheDocument();
+      expect(screen.getByText('Login with Google')).toBeInTheDocument();
     });
   });
 
   it('should show user info when authenticated', async () => {
-    const user: User = { id: '1', email: 'test@example.com', full_name: 'Test User', is_active: true, is_superuser: false, picture: '' };
-    mockGetAuthConfig.mockResolvedValueOnce({ development_mode: false, user });
+    mockGetAuthConfig.mockResolvedValueOnce({ ...mockAuthConfig, user: mockUser });
     render(
       <AuthProvider>
         <TestComponent />
@@ -59,18 +57,18 @@ describe('AuthProvider', () => {
   });
 
   it('should call login function on button click', async () => {
-    const login = jest.fn();
-    mockGetAuthConfig.mockResolvedValueOnce({ development_mode: false, user: null, endpoints: { login: '/api/auth/login/google' } });
+    mockGetAuthConfig.mockResolvedValueOnce(mockAuthConfig);
+    const mockLogin = jest.spyOn(auth, 'handleLogin');
+
     render(
       <AuthProvider>
         <TestComponent />
       </AuthProvider>
     );
     await waitFor(() => {
-        const loginButton = screen.getByText('Login');
+        const loginButton = screen.getByText('Login with Google');
         loginButton.click();
-        // Not a great way to test this, but it's a start
-        expect(window.location.href).toBe('http://localhost/api/auth/login/google');
+        expect(mockLogin).toHaveBeenCalledWith(mockAuthConfig);
     });
   });
 });
