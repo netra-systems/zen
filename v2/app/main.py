@@ -1,4 +1,3 @@
-
 import logging
 import time
 import sys
@@ -174,7 +173,7 @@ if "pytest" in sys.modules:
 
     llm_manager = LLMManager(settings)
     app.state.llm_manager = llm_manager
-        tool_registry = ToolRegistry(async_session_factory)
+    tool_registry = ToolRegistry(async_session_factory)
     tool_dispatcher = ToolDispatcher(tool_registry.get_tools([]))
     app.state.agent_supervisor = Supervisor(async_session_factory, llm_manager, websocket_manager, tool_dispatcher)
 
