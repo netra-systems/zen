@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { User } from '@/lib/types';
+import { User } from '@/types';
 import { useWebSocketStore } from './websocket';
 
 interface AppState {
