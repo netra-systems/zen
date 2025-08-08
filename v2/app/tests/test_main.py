@@ -21,7 +21,7 @@ def client(mock_db_session_module):
     with patch('app.main.KeyManager.load_from_settings', return_value=mock_key_manager), \
          patch('app.main.LLMManager', autospec=True), \
          patch('app.logging_config.central_logger.clickhouse_db', autospec=True), \
-         patch('app.main.OverallSupervisor', autospec=True), \
+         patch('app.main.Supervisor', autospec=True), \
          patch('app.main.StreamingAgentSupervisor', autospec=True), \
          patch('app.main.AgentService', autospec=True):
         with TestClient(app) as c:

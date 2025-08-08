@@ -24,7 +24,7 @@ describe('ApexOptimizerAgentV2', () => {
       error: null,
     });
     (useAuth as jest.Mock).mockReturnValue({
-      user: { id: 'test-user', name: 'Test User', picture: '' },
+      user: { id: 'test-user', name: 'Test User', picture: 'https://example.com/avatar.png' },
       login: jest.fn(),
       logout: jest.fn(),
     });

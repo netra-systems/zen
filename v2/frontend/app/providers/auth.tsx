@@ -7,14 +7,14 @@ import config from '@/config';
 
 interface User {
   email: string;
-  // Add other user properties here
+  full_name: string;
+  picture: string;
 }
 
 interface AuthContextType {
   user: User | null;
   login: () => void;
   logout: () => Promise<void>;
-  handleAuthCallback: () => Promise<void>;
   fetchUser: () => Promise<void>;
 }
 
@@ -24,39 +24,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { setUser, user } = useAppStore();
+  const [authConfig, setAuthConfig] = useState(null);
+
+  useEffect(() => {
+    const fetchAuthConfig = async () => {
+      try {
+        const response = await fetch(`${config.apiBaseUrl}/api/v3/auth/config`);
+        const data = await response.json();
+        setAuthConfig(data);
+        if (data.development_mode) {
+          setUser(data.dev_user);
+        }
+      } catch (error) {
+        console.error('Failed to fetch auth config:', error);
+      }
+    };
+    fetchAuthConfig();
+  }, [setUser]);
 
   const login = () => {
-    window.location.href = `${config.apiBaseUrl}/api/v3/auth/login`;
+    if (authConfig) {
+      window.location.href = authConfig.endpoints.login_url;
+    }
   };
 
   const logout = async () => {
-    await fetch(`${config.apiBaseUrl}/api/v3/auth/logout`);
-    setUser(null);
-    router.push('/login');
-  };
-
-  const handleAuthCallback = async () => {
-    try {
-      const response = await fetch(`${config.apiBaseUrl}/api/v3/auth/get_user`);
-      if (response.ok) {
-        const user = await response.json();
-        if (user && user.email) {
-          setUser(user);
-        }
-        router.push('/');
-      } else {
-        router.push('/auth/error?message=Authentication failed');
-      }
-    } catch (error) {
-      console.error('Authentication callback failed:', error);
-      router.push('/auth/error?message=Authentication failed');
+    if (authConfig) {
+      await fetch(authConfig.endpoints.logout_url);
+      setUser(null);
+      router.push('/login');
     }
   };
 
   const fetchUser = useCallback(async () => {
-    if (user) return;
+    if (user || !authConfig) return;
     try {
-      const response = await fetch(`${config.apiBaseUrl}/api/v3/auth/get_user`);
+      const response = await fetch(authConfig.endpoints.user_info_url);
       if (response.ok) {
         const userJson = await response.json();
         if (userJson && userJson.email) {
@@ -66,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Failed to fetch user:', error);
     }
-  }, [user, setUser]);
+  }, [user, setUser, authConfig]);
 
   useEffect(() => {
     const publicPaths = ['/login', '/auth/error', '/auth/callback'];
@@ -79,7 +82,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     login,
     logout,
-    handleAuthCallback,
     fetchUser,
   };
 
