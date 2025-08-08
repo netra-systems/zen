@@ -7,7 +7,7 @@ import { UseAgentReturn, WebSocketStatus } from '../types';
 
 interface AgentContextValue extends UseAgentReturn {
     wsStatus: WebSocketStatus;
-    sendWsMessage: (message: any) => void;
+    sendWsMessage: (message: unknown) => void;
 }
 
 const AgentContext = createContext<AgentContextValue | undefined>(undefined);

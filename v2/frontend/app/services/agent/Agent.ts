@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { AgentState, AgentListener, Message, Reference, ToolCallChunk, ToolCall } from '@/types';
+import { AgentState, AgentListener, Reference, ToolCallChunk, ToolCall } from '@/types';
 import webSocketManager from '@/services/websocket';
 
 class Agent {
@@ -50,24 +50,24 @@ class Agent {
             enable_update_step_results: true,
         };
 
-        webSocketManager.sendMessage(streamInput as any);
+        webSocketManager.sendMessage(streamInput);
     }
 
     stop() {
         if (this.state.isThinking) {
-            webSocketManager.sendMessage({} as any);
+            webSocketManager.sendMessage({ type: 'stop' });
             this.setState(prev => ({ ...prev, isThinking: false }));
         }
     }
 
-    private handleWebSocketMessage = (serverEvent: any) => {
+    private handleWebSocketMessage = (serverEvent: { event: string; data: any; run_id: string }) => {
         try {
             const { event: eventName, data, run_id } = serverEvent;
 
             this.setState(prev => {
-                let newMessages = [...prev.messages];
+                const newMessages = [...prev.messages];
                 let isThinking = prev.isThinking;
-                let toolArgBuffers = { ...prev.toolArgBuffers };
+                const toolArgBuffers = { ...prev.toolArgBuffers };
 
                 const lastMessage = newMessages[newMessages.length - 1];
 
@@ -126,7 +126,7 @@ class Agent {
                                     toolArgBuffers[chunk.id] += chunk.args || "";
                                     try {
                                         lastMessage.tools[toolIndex].input = JSON.parse(toolArgBuffers[chunk.id]);
-                                    } catch (e) {
+                                    } catch (err) {
                                         // Invalid JSON, wait for more chunks
                                     }
                                 }
@@ -165,7 +165,7 @@ class Agent {
 
                     case 'todo_list_update':
                         if (lastMessage?.type === 'agent') {
-                            lastMessage.todos = data.map((todo: any) => ({
+                            lastMessage.todos = data.map((todo: { description: string; state: 'pending' | 'done' | 'error' }) => ({
                                 description: todo.description,
                                 state: todo.state,
                             }));

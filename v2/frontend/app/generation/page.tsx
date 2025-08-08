@@ -61,7 +61,6 @@ export default function GenerationPage() {
     const [isPolling, setIsPolling] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [tables, setTables] = useState<string[]>([]);
     const [corpora, setCorpora] = useState<Corpus[]>([]);
     const pollingJobIdRef = React.useRef<string | null>(null);
 

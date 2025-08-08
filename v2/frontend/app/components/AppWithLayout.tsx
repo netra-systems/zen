@@ -10,7 +10,6 @@ import { AppWithLayoutProps } from '@/types';
 
 export function AppWithLayout({ children }: AppWithLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { user } = useAuth();
   const pathname = usePathname();
 
   const toggleSidebar = () => {

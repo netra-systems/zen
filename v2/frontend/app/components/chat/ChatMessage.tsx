@@ -2,7 +2,7 @@ import React from 'react';
 import { Message } from '@/types/index';
 import { AgentMessageCard } from './AgentMessageCard';
 import { UserMessageCard } from './UserMessageCard';
-import { ThinkingMessage, ErrorMessage, EventMessage, TextMessage, ToolStartMessage, ToolEndMessage, StateUpdateMessage } from '@/types/index';
+import { ThinkingMessage, ErrorMessage, EventMessage, TextMessage } from '@/types/index';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface ChatMessageProps {
