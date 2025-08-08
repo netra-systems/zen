@@ -19,7 +19,7 @@ def client():
 def mock_supervisor(monkeypatch):
     mock = AsyncMock(spec=Supervisor)
     mock.run.return_value = {"result": "mocked result"}
-    monkeypatch.setattr("app.websockets.get_agent_supervisor", lambda: mock)
+    monkeypatch.setattr("app.ws_manager.get_agent_supervisor", lambda: mock)
     return mock
 
 def test_websocket_analysis_request(client, mock_supervisor):
