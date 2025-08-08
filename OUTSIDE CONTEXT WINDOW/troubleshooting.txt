@@ -17,3 +17,6 @@ e.g. some specific similar thing in the data
 10: LLM s are good at "local" changes and struggle with "global" changes
 11: Try to align to the LLMs preference / "standard/averages" whenever reasonable
 this avoids having to "fight" the default without need
+12: flat directory structures tend to work best
+13: strange errors come if it isn't obvious or defined where things go
+e.g. instead of using app/services it makes a new services folder
