@@ -1,0 +1,12 @@
+process
+1: Start Gemini --yolo  in the v2/ folders
+
+troubleshooting
+1: Sometimes needs to be run multiple times
+2: If persistent issue then instructions or spec needs editing
+3: Sometimes the pre-existing plan.md needs to be deleted to "restart" the context
+4: Other specs can cross-contaminte
+5: Repetition issues add things like "limit x to 20 items"
+6: Naming issues: use "netra" in naming conventions to help it know it should 
+autocomplete on all training data not get sucked into specific training dataset
+e.g. some specific similar thing in the data

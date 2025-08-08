@@ -37,7 +37,7 @@ Instructions:
 0:7:3:0: Update docs: Update “/docs/{spec_name}-doc.md”
 0:7:3:1: Update shared/schema.json for alignment.
 
-Remember: 0:7.  Remember: 0:1 to 0:7 to 1 including all sub items 1:0:0 through 1:011.
-Remember: {spec_name}:1:0:* through {spec_name}:1:*:*
+Remember: 0:7.  Remember: 0:1 to 0:7 including all sub items. Limit to 20 subitems.
+Remember: {spec_name}:1:0:* through {spec_name}:1:*:* Limit to 20 subitems.
 All other specs are for background context and coherence. Scope to an implment {spec_name} only.
 

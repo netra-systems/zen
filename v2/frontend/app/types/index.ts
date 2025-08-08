@@ -4,6 +4,23 @@
  * Do not modify it by hand.
  */
 
+export interface AuthConfigResponse {
+  google_client_id: string;
+  endpoints: AuthEndpoints;
+  development_mode: boolean;
+  user?: User | null;
+  authorized_javascript_origins: string[];
+  authorized_redirect_uris: string[];
+}
+
+export interface AuthEndpoints {
+  login: string;
+  logout: string;
+  token: string;
+  user: string;
+  dev_login: string;
+}
+
 export type SubAgentLifecycle = "pending" | "running" | "completed" | "failed" | "shutdown";
 export type ToolStatus = "success" | "error" | "partial_success" | "in_progress" | "complete";
 
