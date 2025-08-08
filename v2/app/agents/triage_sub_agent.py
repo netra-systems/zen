@@ -6,12 +6,14 @@ from app.llm.llm_manager import LLMManager
 from app.schemas import SubAgentLifecycle
 from app.agents.base import BaseSubAgent
 from app.agents.prompts import triage_prompt_template
+from app.agents.tool_dispatcher import ToolDispatcher
 
 logger = logging.getLogger(__name__)
 
 class TriageSubAgent(BaseSubAgent):
-    def __init__(self, llm_manager: LLMManager):
-        super().__init__(llm_manager)
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
+        super().__init__(llm_manager, name="TriageSubAgent", description="This agent triages the user request and categorizes it.")
+        self.tool_dispatcher = tool_dispatcher
 
     async def run(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
         logger.info(f"TriageSubAgent starting for run_id: {run_id}")

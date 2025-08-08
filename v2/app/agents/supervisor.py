@@ -1,10 +1,10 @@
-
 import logging
 from typing import Any, Dict, List
 from app.agents.base import BaseSubAgent
 from app.schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, SubAgentUpdate, AgentCompleted
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.agents.tool_dispatcher import ToolDispatcher
 
 # Import all the sub-agents
 from app.agents.triage_sub_agent import TriageSubAgent
@@ -16,16 +16,17 @@ from app.agents.reporting_sub_agent import ReportingSubAgent
 logger = logging.getLogger(__name__)
 
 class Supervisor(BaseSubAgent):
-    def __init__(self, db_session: AsyncSession, llm_manager: LLMManager, websocket_manager: any):
-        super().__init__(llm_manager)
+    def __init__(self, db_session: AsyncSession, llm_manager: LLMManager, websocket_manager: any, tool_dispatcher: ToolDispatcher):
+        super().__init__(llm_manager, name="Supervisor", description="The supervisor agent that orchestrates the sub-agents.")
         self.db_session = db_session
         self.websocket_manager = websocket_manager
+        self.tool_dispatcher = tool_dispatcher
         self.sub_agents: List[BaseSubAgent] = [
-            TriageSubAgent(llm_manager),
-            DataSubAgent(llm_manager),
-            OptimizationsCoreSubAgent(llm_manager),
-            ActionsToMeetGoalsSubAgent(llm_manager),
-            ReportingSubAgent(llm_manager),
+            TriageSubAgent(llm_manager, self.tool_dispatcher),
+            DataSubAgent(llm_manager, self.tool_dispatcher),
+            OptimizationsCoreSubAgent(llm_manager, self.tool_dispatcher),
+            ActionsToMeetGoalsSubAgent(llm_manager, self.tool_dispatcher),
+            ReportingSubAgent(llm_manager, self.tool_dispatcher),
         ]
         self.run_states = {}
 
@@ -49,7 +50,7 @@ class Supervisor(BaseSubAgent):
                     WebSocketMessage(
                         type="sub_agent_update",
                         payload=SubAgentUpdate(
-                            sub_agent_name=agent.__class__.__name__,
+                            sub_agent_name=agent.name,
                             state=agent.get_state()
                         )
                     )
@@ -64,7 +65,7 @@ class Supervisor(BaseSubAgent):
                     WebSocketMessage(
                         type="sub_agent_update",
                         payload=SubAgentUpdate(
-                            sub_agent_name=agent.__class__.__name__,
+                            sub_agent_name=agent.name,
                             state=agent.get_state()
                         )
                     )
