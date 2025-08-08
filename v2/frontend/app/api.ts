@@ -1,5 +1,5 @@
 import { apiClient } from './services/apiClient';
-import { AgentRun, AgentEvent, Reference, AnalysisRequest } from '@/app/types/index';
+import { AgentRun, AgentEvent, Reference, AnalysisRequest } from '@/types/index';
 
 // --- API Service ---
 export const apiService = {
