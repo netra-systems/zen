@@ -1,7 +1,7 @@
 import os
 from google.cloud import secretmanager
 from typing import List, Dict
-from app.schemas import AppConfig, ProductionConfig, TestingConfig, DevelopmentConfig, SecretReference, OAuthConfig
+from app.schemas import AppConfig, ProductionConfig, TestingConfig, DevelopmentConfig, SecretReference
 from tenacity import retry, stop_after_attempt, wait_fixed, RetryError
 
 SECRET_CONFIG: List[SecretReference] = [
@@ -98,7 +98,7 @@ def get_settings() -> AppConfig:
     try:
         load_secrets(config)
     except ConnectionError as e:
-        raise RuntimeError(f"Application startup failed: Could not load secrets. {e}")
+        print(f"Warning: Could not connect to Secret Manager. Using default development settings. {e}")
 
     return config
 

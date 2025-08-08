@@ -685,7 +685,7 @@ class DevelopmentConfig(AppConfig):
     """Development-specific settings can override defaults."""
     debug: bool = True
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra"
-    redis_url: str = "redis://localhost:6379"
+    redis_url: str = "redis://localhost:6379/0"
     dev_user_email: str = "dev@example.com"
 
 class ProductionConfig(AppConfig):
@@ -693,13 +693,13 @@ class ProductionConfig(AppConfig):
     environment: str = "production"
     debug: bool = False
     log_level: str = "INFO"
-    redis_url: str = "redis://redis:6379"
+    redis_url: str = "redis://redis:6379/0"
 
 class TestingConfig(AppConfig):
     """Testing-specific settings."""
     environment: str = "testing"
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"
-    redis_url: str = "redis://localhost:6379"
+    redis_url: str = "redis://localhost:6379/0"
 
 # --- LLM Schemas ---
 class ToolConfig(BaseModel):
