@@ -27,6 +27,8 @@ from app.services.key_manager import KeyManager
 from app.auth.services import SecurityService
 from app.background import BackgroundTaskManager
 from app.websockets import manager as websocket_manager
+from app.agents.tool_dispatcher import ToolDispatcher
+from app.services.tool_registry import ToolRegistry
 from app.redis_manager import redis_manager
 
 
@@ -59,7 +61,9 @@ async def lifespan(app: FastAPI):
     app.state.db_session_factory = async_session_factory
 
     # Initialize the agent supervisor
-        app.state.agent_supervisor = Supervisor(app.state.db_session_factory, app.state.llm_manager, websocket_manager, app.state.tool_dispatcher)
+    tool_registry = ToolRegistry(app.state.db_session_factory)
+    app.state.tool_dispatcher = ToolDispatcher(tool_registry.get_tools([]))
+    app.state.agent_supervisor = Supervisor(app.state.db_session_factory, app.state.llm_manager, websocket_manager, app.state.tool_dispatcher)
     app.state.agent_service = AgentService(app.state.agent_supervisor)
     
     elapsed_time = time.time() - start_time
@@ -170,7 +174,9 @@ if "pytest" in sys.modules:
 
     llm_manager = LLMManager(settings)
     app.state.llm_manager = llm_manager
-    app.state.agent_supervisor = Supervisor(async_session_factory, llm_manager, websocket_manager)
+        tool_registry = ToolRegistry(async_session_factory)
+    tool_dispatcher = ToolDispatcher(tool_registry.get_tools([]))
+    app.state.agent_supervisor = Supervisor(async_session_factory, llm_manager, websocket_manager, tool_dispatcher)
 
     from app.db.testing import override_get_db, engine
     from app.db.base import Base
