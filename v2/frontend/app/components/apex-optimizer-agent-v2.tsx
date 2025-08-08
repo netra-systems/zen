@@ -8,14 +8,42 @@ import { useAgentContext } from '../providers/AgentProvider';
 import { ChatWindow } from './chat/ChatWindow';
 import LoginButton from './LoginButton';
 import { examplePrompts } from '../lib/examplePrompts';
-import { MessageFilter } from '../types';
+import { MessageFilter, WebSocketMessage, AnalysisRequest } from '../types';
+import useAppStore from '../store';
 
 export function ApexOptimizerAgentV2() {
-  const { messages, showThinking, startAgent, error } = useAgentContext();
+  const { messages, showThinking, error, sendWsMessage } = useAgentContext();
   const [messageFilters, setMessageFilters] = useState<MessageFilter>({ 
     event: false, 
     thinking: true 
   });
+  const { user } = useAppStore();
+
+  const handleSendMessage = (message: string) => {
+    if (!user) {
+      console.error('User is not logged in.');
+      return;
+    }
+
+    const analysisRequest: AnalysisRequest = {
+      settings: {
+        debug_mode: true,
+      },
+      request: {
+        user_id: user.id.toString(),
+        query: message,
+        workloads: [],
+        references: [],
+      },
+    };
+
+    const wsMessage: WebSocketMessage = {
+      type: 'analysis_request',
+      payload: analysisRequest,
+    };
+
+    sendWsMessage(wsMessage);
+  };
 
   return (
     <Card className="w-full h-full flex flex-col" role="article">
@@ -26,7 +54,7 @@ export function ApexOptimizerAgentV2() {
       <CardContent className="flex-grow overflow-y-auto">
         <ChatWindow 
           messages={messages}
-          onSendMessage={startAgent}
+          onSendMessage={handleSendMessage}
           isLoading={showThinking}
           messageFilters={messageFilters}
           setMessageFilters={setMessageFilters}

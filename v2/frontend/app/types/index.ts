@@ -300,8 +300,8 @@ export enum WebSocketStatus {
 }
 
 export interface WebSocketMessage {
-    action: string;
-    payload: AnalysisRequest;
+    type: string;
+    payload: Record<string, unknown>;
 }
 
 // --- Reference Picker ---

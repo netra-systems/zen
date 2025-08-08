@@ -2,21 +2,20 @@ import asyncio
 import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Request
 from app.auth.auth_dependencies import ActiveUserWsDep
-from app.connection_manager import manager
+from app.websocket_manager import manager
 from app.services.agents.supervisor import Supervisor
-from app.schemas import AnalysisRequest
-from app.llm.llm_manager import LLMManager
-from app.db.session import get_db_session
-from sqlalchemy.ext.asyncio import AsyncSession
+from app.schemas import WebSocketMessage, AnalysisRequest
+from app.logging_config import central_logger
 
 router = APIRouter()
 
 def get_agent_supervisor(request: Request) -> Supervisor:
     return request.app.state.agent_supervisor
 
-@router.websocket("/{run_id}")
-async def websocket_endpoint(websocket: WebSocket, run_id: str, user: ActiveUserWsDep, supervisor: Supervisor = Depends(get_agent_supervisor)):
-    await manager.connect(websocket, run_id)
+@router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket, user: ActiveUserWsDep, supervisor: Supervisor = Depends(get_agent_supervisor)):
+    await manager.connect(websocket, user.id)
+    logger = central_logger.get_logger(__name__)
     try:
         while True:
             try:
@@ -24,15 +23,25 @@ async def websocket_endpoint(websocket: WebSocket, run_id: str, user: ActiveUser
                 if data == 'ping':
                     await websocket.send_text('pong')
                     continue
-                
+
                 try:
-                    analysis_request = AnalysisRequest.parse_raw(data)
-                    await supervisor.run(analysis_request.model_dump(), run_id, stream_updates=True)
+                    message = WebSocketMessage.parse_raw(data)
+                    if message.type == "analysis_request":
+                        analysis_request = AnalysisRequest.parse_obj(message.payload)
+                        # TODO: The run_id needs to be handled properly.
+                        await supervisor.run(analysis_request.model_dump(), "some_run_id", stream_updates=True)
+                    else:
+                        logger.warning(f"Received unknown message type: {message.type}")
+
+                except json.JSONDecodeError:
+                    logger.error("Failed to decode JSON from WebSocket message.")
                 except Exception as e:
-                    await websocket.send_text(f"Error parsing message: {e}")
+                    logger.error(f"Error processing message: {e}", exc_info=True)
+                    await manager.broadcast_to_client(user.id, {"error": "Internal server error."})
 
             except asyncio.TimeoutError:
-                # No message received within the timeout period, continue listening
                 continue
     except WebSocketDisconnect:
-        manager.disconnect(websocket, run_id)
+        logger.info(f"WebSocket disconnected for user {user.id}")
+    finally:
+        manager.disconnect(websocket, user.id)

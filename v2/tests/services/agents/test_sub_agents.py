@@ -60,7 +60,7 @@ async def test_data_sub_agent(mock_llm_manager, analysis_request):
 @pytest.mark.asyncio
 async def test_optimizations_core_sub_agent(mock_llm_manager, analysis_request):
     mock_llm_manager.arun.return_value = MagicMock(content="Optimization strategies formulated.")
-    agent = OptimizationsCoreSubAgent()
+    agent = OptimizationsCoreSubAgent(mock_llm_manager)
     state = {
         "analysis_request": analysis_request,
         "messages": [],
@@ -76,7 +76,7 @@ async def test_optimizations_core_sub_agent(mock_llm_manager, analysis_request):
 @pytest.mark.asyncio
 async def test_actions_to_meet_goals_sub_agent(mock_llm_manager, analysis_request):
     mock_llm_manager.arun.return_value = MagicMock(content="Actions formulated.")
-    agent = ActionsToMeetGoalsSubAgent()
+    agent = ActionsToMeetGoalsSubAgent(mock_llm_manager)
     state = {
         "analysis_request": analysis_request,
         "messages": [],
@@ -92,7 +92,7 @@ async def test_actions_to_meet_goals_sub_agent(mock_llm_manager, analysis_reques
 @pytest.mark.asyncio
 async def test_reporting_sub_agent(mock_llm_manager, analysis_request):
     mock_llm_manager.arun.return_value = MagicMock(content="Report generated.")
-    agent = ReportingSubAgent()
+    agent = ReportingSubAgent(mock_llm_manager)
     state = {
         "analysis_request": analysis_request,
         "messages": [],
