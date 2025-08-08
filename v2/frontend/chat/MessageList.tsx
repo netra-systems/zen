@@ -1,19 +1,18 @@
-"use client";
-
 import React from 'react';
-import { useChatStore } from '../store';
-import Message from './Message';
+import { useChatStore } from '@/store';
+import { Message } from './Message';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
-const MessageList: React.FC = () => {
+export const MessageList: React.FC = () => {
   const { messages } = useChatStore();
 
   return (
-    <div className="flex-1 overflow-y-auto p-4">
-      {messages.map((msg, index) => (
-        <Message key={index} message={msg} />
-      ))}
-    </div>
+    <ScrollArea className="h-[calc(100vh-200px)] p-4">
+      {messages
+        .filter((msg) => msg.displayed_to_user)
+        .map((msg) => (
+          <Message key={msg.id} message={msg} />
+        ))}
+    </ScrollArea>
   );
 };
-
-export default MessageList;

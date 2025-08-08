@@ -1,35 +1,34 @@
-"use client";
-
 import React, { useState } from 'react';
-import { Input } from '../components/ui/input';
-import { Button } from '../components/ui/button';
-import { useAgent } from '../hooks/useAgent';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useWebSocket } from '@/hooks/useWebSocket';
+import { useChatStore } from '@/store';
 
-const MessageInput: React.FC = () => {
-  const [inputValue, setInputValue] = useState('');
-  const { sendUserMessage } = useAgent();
+export const MessageInput: React.FC = () => {
+  const [message, setMessage] = useState('');
+  const { sendMessage } = useWebSocket();
+  const { setProcessing } = useChatStore();
 
-  const handleSendMessage = () => {
-    if (inputValue.trim()) {
-      sendUserMessage(inputValue);
-      setInputValue('');
+  const handleSend = () => {
+    if (message.trim()) {
+      sendMessage(JSON.stringify({ type: 'user_message', payload: { text: message } }));
+      setProcessing(true);
+      setMessage('');
     }
   };
 
   return (
     <div className="p-4 border-t flex">
       <Input
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        onKeyPress={(e) => e.key === 'Enter' && handleSend()}
         placeholder="Type your message..."
-        className="flex-1"
+        className="flex-grow"
       />
-      <Button onClick={handleSendMessage} className="ml-2">
+      <Button onClick={handleSend} className="ml-4">
         Send
       </Button>
     </div>
   );
 };
-
-export default MessageInput;

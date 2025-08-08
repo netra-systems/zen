@@ -1,9 +1,7 @@
-"use client";
-
 import React from 'react';
-import { useChatStore } from '../store';
+import { useChatStore } from '@/store';
 
-const Header: React.FC = () => {
+export const Header: React.FC = () => {
   const { subAgentName, subAgentStatus } = useChatStore();
 
   return (
@@ -13,5 +11,3 @@ const Header: React.FC = () => {
     </div>
   );
 };
-
-export default Header;

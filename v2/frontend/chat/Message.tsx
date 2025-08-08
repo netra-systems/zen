@@ -1,80 +1,53 @@
-
-"use client";
-
 import React from 'react';
-import { WebSocketMessage } from '../types';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../components/ui/collapsible';
-import { Button } from '../components/ui/button';
+import { Message as MessageType } from '@/types/chat';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { JsonViewer } from './JsonViewer';
 
 interface MessageProps {
-  message: WebSocketMessage;
+  message: MessageType;
 }
 
-const Message: React.FC<MessageProps> = ({ message }) => {
-  const [isRawViewOpen, setIsRawViewOpen] = React.useState(false);
+export const Message: React.FC<MessageProps> = ({ message }) => {
+  const { type, content, sub_agent_name, tool_info, raw_data } = message;
 
   const renderContent = () => {
-    switch (message.type) {
-      case 'user_message':
-        return <p>{message.payload.text}</p>;
-      case 'agent_message':
-        return <p>{message.payload.text}</p>;
-      case 'tool_started':
-        return (
-          <div>
-            <p>Tool started: <strong>{message.payload.tool_name}</strong></p>
-          </div>
-        );
-      case 'tool_completed':
-        return (
-          <div>
-            <p>Tool completed: <strong>{message.payload.tool_name}</strong></p>
-            <Collapsible>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  Show Result
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <pre className="bg-gray-100 p-2 rounded-md">
-                  {JSON.stringify(message.payload.result, null, 2)}
-                </pre>
-              </CollapsibleContent>
-            </Collapsible>
-          </div>
-        );
-      case 'sub_agent_update':
-        return (
-            <div>
-                <p>Sub-agent <strong>{message.payload.sub_agent_name}</strong> is now <strong>{message.payload.state.lifecycle}</strong></p>
-            </div>
-        )
-      default:
-        return <p>Unsupported message type: {message.type}</p>;
+    if (tool_info) {
+      return (
+        <Collapsible>
+          <CollapsibleTrigger className="text-blue-500">View Tool Info</CollapsibleTrigger>
+          <CollapsibleContent>
+            <JsonViewer data={tool_info} />
+          </CollapsibleContent>
+        </Collapsible>
+      );
     }
+    return <p>{content}</p>;
   };
 
   return (
-    <Card className="mb-4">
+    <Card className={`mb-4 ${type === 'user' ? 'bg-blue-50' : 'bg-gray-50'}`}>
       <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <span>{message.type}</span>
-          <Button variant="ghost" size="sm" onClick={() => setIsRawViewOpen(!isRawViewOpen)}>
-            {isRawViewOpen ? 'Hide Raw' : 'Show Raw'}
-          </Button>
-        </CardTitle>
+        <div className="flex items-center">
+          <Avatar className="mr-4">
+            <AvatarImage src={type === 'user' ? '' : '/bot.png'} />
+            <AvatarFallback>{type === 'user' ? 'U' : 'A'}</AvatarFallback>
+          </Avatar>
+          <CardTitle>{sub_agent_name || type}</CardTitle>
+        </div>
       </CardHeader>
       <CardContent>
         {renderContent()}
-        {isRawViewOpen && (
-          <pre className="bg-gray-100 p-2 rounded-md mt-4">
-            {JSON.stringify(message, null, 2)}
-          </pre>
+        {raw_data && (
+          <Collapsible>
+            <CollapsibleTrigger className="text-xs text-gray-500">View Raw Data</CollapsibleTrigger>
+            <CollapsibleContent>
+              <JsonViewer data={raw_data} />
+            </CollapsibleContent>
+          </Collapsible>
         )}
       </CardContent>
     </Card>
   );
 };
-
-export default Message;
