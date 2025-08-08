@@ -15,6 +15,7 @@ warnings.filterwarnings("ignore", category=UserWarning, message=".*is not a Pyth
 # ClickHouse
 from app.db.clickhouse_base import ClickHouseDatabase
 from app.config import settings
+from app.connection_manager import manager
 
 class LogEntry(BaseModel):
     """Pydantic model for a single log entry."""
@@ -39,6 +40,17 @@ class ClickHouseSink:
             self.db.insert_log(log_entry, self.table_name)
         except Exception as e:
             print(f"Failed to log to ClickHouse: {e}", file=sys.stderr)
+
+class FrontendStreamSink:
+    """A Loguru sink that streams logs to the frontend."""
+    def write(self, message):
+        if not message:
+            return
+        try:
+            log_entry = LogEntry.parse_raw(message)
+            asyncio.create_task(manager.broadcast(log_entry.json()))
+        except Exception as e:
+            print(f"Failed to stream log to frontend: {e}", file=sys.stderr)
 
 class CentralLogger:
     def __init__(self):
@@ -114,6 +126,10 @@ class CentralLogger:
             except Exception as e:
                 self.logger.error(f"Failed to initialize ClickHouse: {e}")
                 self.clickhouse_db = None
+        
+        # Add Frontend Stream Sink
+        frontend_sink = FrontendStreamSink()
+        self.logger.add(frontend_sink, level="INFO", format=self._format_log_entry)
 
     def _format_log_entry(self, record) -> str:
         if "log_entry" in record["extra"]:

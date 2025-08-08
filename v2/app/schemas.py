@@ -145,51 +145,6 @@ class StreamEventMessage(WebSocketMessage):
     event: str = "stream_event"
     event_type: str
 
-
-# --- Chat Schemas ---
-class ToolError(BaseModel):
-    tool_name: str
-    error_message: str
-
-class ChatMessageData(BaseModel):
-    sub_agent_name: Optional[str] = None
-    tools_used: Optional[List[str]] = None
-    ai_message: Optional[str] = None
-    tool_todo_list: Optional[List[Dict]] = None
-    tool_errors: Optional[List[ToolError]] = None
-    user_message: Optional[str] = None
-    user_references: Optional[List[Any]] = None
-
-    @classmethod
-    def from_langchain(cls, output: Dict[str, Any]) -> "ChatMessageData":
-        sub_agent_name = output.get('current_agent')
-        messages = output.get('messages', [])
-        last_message = messages[-1] if messages else None
-        
-        ai_message = None
-        tools_used = None
-        tool_errors = None
-
-        if last_message:
-            ai_message = last_message.content
-            if hasattr(last_message, 'tool_calls') and last_message.tool_calls:
-                tools_used = [tool['name'] for tool in last_message.tool_calls]
-                # You would need a mechanism to get tool errors. For now, we'll leave it empty.
-                tool_errors = []
-
-        return cls(
-            sub_agent_name=sub_agent_name,
-            tools_used=tools_used,
-            ai_message=ai_message,
-            tool_todo_list=output.get('todos', []),
-            tool_errors=tool_errors,
-        )
-
-class ChatMessage(WebSocketMessage):
-    event: str = "chat_message"
-    data: ChatMessageData
-
-
 # --- Supply Schemas ---
 
 class SupplyOptionBase(BaseModel):
@@ -856,10 +811,6 @@ class DeepAgentState(TypedDict):
     messages: Annotated[List[BaseMessage], add_messages]
     todos: List[Todo]
     files: dict
-    current_agent: str
-    run_id: str
-    stream_updates: bool
-    analysis_request: AnalysisRequest
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 import uuid

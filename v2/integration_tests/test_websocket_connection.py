@@ -1,13 +1,11 @@
 import pytest
-import asyncio
-import websockets
+from fastapi.testclient import TestClient
 from app.main import app
 from app.schemas import User
 from app.auth.auth_dependencies import ActiveUserWsDep
 
 @pytest.fixture
 def client():
-    from fastapi.testclient import TestClient
     return TestClient(app)
 
 def override_active_user_ws_dep():
@@ -15,9 +13,9 @@ def override_active_user_ws_dep():
 
 app.dependency_overrides[ActiveUserWsDep] = override_active_user_ws_dep
 
-@pytest.mark.asyncio
-async def test_websocket_connection():
-    async with websockets.connect("ws://localhost:8000/ws/test_run_ws") as websocket:
-        await websocket.send("ping")
-        response = await websocket.recv()
-        assert response == "pong"
+
+def test_websocket_connection(client):
+    with client.websocket_connect("/ws/test_run_ws") as websocket:
+        websocket.send_text("ping")
+        data = websocket.receive_text()
+        assert data == "pong"

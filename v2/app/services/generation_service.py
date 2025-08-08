@@ -24,9 +24,14 @@ from ..db.models_clickhouse import ContentCorpus, get_content_corpus_schema, get
 from ..data.ingestion import ingest_records
 from ..data.content_corpus import DEFAULT_CONTENT_CORPUS
 from .job_store import job_store
-from ..ws_manager import manager
+from ..websocket_manager import manager
 
 # --- Job Management ---
+
+async def update_job_status(job_id: str, status: str, **kwargs):
+    """Updates the status and other attributes of a generation job and sends a WebSocket message."""
+    await job_store.update(job_id, status, **kwargs)
+    await manager.broadcast_to_client(job_id, json.dumps({"job_id": job_id, "status": status, **kwargs}))
 
 async def get_corpus_from_clickhouse(table_name: str) -> dict:
     """Fetches the content corpus from a specified ClickHouse table."""
@@ -139,11 +144,11 @@ async def run_content_generation_job(job_id: str, params: ContentGenParams):
         if not settings.llm_configs['default'].api_key:
             raise ValueError("GEMINI_API_KEY not set")
     except ValueError as e:
-        await manager.send_to_run({"job_id": job_id, "status": "failed", "error": str(e)}, job_id)
+        await update_job_status(job_id, "failed", error=str(e))
         return
 
     total_tasks = len(list(META_PROMPTS.keys())) * params.get('samples_per_type', 10)
-    await manager.send_to_run({"job_id": job_id, "status": "running", "progress": 0, "total_tasks": total_tasks}, job_id)
+    await update_job_status(job_id, "running", progress=0, total_tasks=total_tasks)
 
     # Create a serializable dictionary for generation_config
     generation_config_dict = {
@@ -177,11 +182,11 @@ async def run_content_generation_job(job_id: str, params: ContentGenParams):
                 corpus[result['type']].append(result['data'])
             
             completed_tasks += 1
-            await manager.send_to_run({"job_id": job_id, "status": "running", "progress": completed_tasks}, job_id)
+            await update_job_status(job_id, "running", progress=completed_tasks)
 
     except Exception as e:
         logging.exception("An error occurred during content generation.")
-        await manager.send_to_run({"job_id": job_id, "status": "failed", "error": f"A worker process failed: {e}"}, job_id)
+        await update_job_status(job_id, "failed", error=f"A worker process failed: {e}")
         return
 
 
@@ -192,9 +197,9 @@ async def run_content_generation_job(job_id: str, params: ContentGenParams):
             "message": f"Corpus generated and saved to {clickhouse_table}",
             "counts": {w_type: len(samples) for w_type, samples in corpus.items()}
         }
-        await manager.send_to_run({"job_id": job_id, "status": "completed", "summary": summary, "result_path": os.path.join("app", "data", "generated", "content_corpuses", job_id, "content_corpus.json")}, job_id)
+        await update_job_status(job_id, "completed", summary=summary, result_path=os.path.join("app", "data", "generated", "content_corpuses", job_id, "content_corpus.json"))
     except Exception as e:
-        await manager.send_to_run({"job_id": job_id, "status": "failed", "error": f"Failed to save to ClickHouse: {e}"}, job_id)
+        await update_job_status(job_id, "failed", error=f"Failed to save to ClickHouse: {e}")
 
 
 # --- Synthetic Log Generation Service ---
@@ -242,7 +247,7 @@ def generate_data_chunk_for_service(args):
 
 async def run_log_generation_job(job_id: str, params: LogGenParams):
     """The core worker process for generating a synthetic log set."""
-    await manager.send_to_run({"job_id": job_id, "status": "running", "progress": {'completed_logs': 0, 'total_logs': params['num_logs']}}, job_id)
+    await update_job_status(job_id, "running", progress={'completed_logs': 0, 'total_logs': params['num_logs']})
     
     try:
         config = get_config()
@@ -267,7 +272,7 @@ async def run_log_generation_job(job_id: str, params: LogGenParams):
             for i, result_df in enumerate(pool.imap_unordered(generate_data_chunk_for_service, worker_args)):
                 results.append(result_df)
                 completed_logs += len(result_df)
-                await manager.send_to_run({"job_id": job_id, "status": "running", "progress": {'completed_logs': completed_logs, 'total_logs': num_logs}}, job_id)
+                await update_job_status(job_id, "running", progress={'completed_logs': completed_logs, 'total_logs': num_logs})
 
         
         combined_df = pd.concat(results, ignore_index=True)
@@ -280,24 +285,31 @@ async def run_log_generation_job(job_id: str, params: LogGenParams):
         with open(output_path, 'w') as f:
             json.dump(all_logs, f, indent=2)
 
-        await manager.send_to_run({"job_id": job_id, "status": "completed", "finished_at": time.time(), "result_path": output_path, "summary": {"logs_generated": len(all_logs)}}, job_id)
+        await job_store.update(job_id, "completed", 
+            finished_at=time.time(),
+            result_path=output_path,
+            summary={"logs_generated": len(all_logs)}
+        )
 
     except Exception as e:
         logging.exception("Error during log generation job")
-        await manager.send_to_run({"job_id": job_id, "status": "failed", "error": str(e)}, job_id)
+        await update_job_status(job_id, "failed", error=str(e))
 
 
 async def run_data_ingestion_job(job_id: str, params: dict):
     """The core worker process for ingesting data into ClickHouse."""
-    await manager.send_to_run({"job_id": job_id, "status": "running"}, job_id)
+    await update_job_status(job_id, "running")
     
     try:
         summary = await ingest_data_from_file(params['data_path'])
-        await manager.send_to_run({"job_id": job_id, "status": "completed", "finished_at": time.time(), "summary": summary}, job_id)
+        await job_store.update(job_id, "completed", 
+            finished_at=time.time(),
+            summary=summary
+        )
 
     except Exception as e:
         logging.exception("Error during data ingestion job")
-        await manager.send_to_run({"job_id": job_id, "status": "failed", "error": str(e)}, job_id)
+        await update_job_status(job_id, "failed", error=str(e))
 
 from app.data.synthetic.synthetic_data_v2 import main as synthetic_data_main
 
@@ -308,7 +320,7 @@ async def run_synthetic_data_generation_job(job_id: str, params: SyntheticDataGe
     source_table = params.get('source_table', 'content_corpus')
     destination_table = params.get('destination_table', 'synthetic_data')
     
-    await manager.send_to_run({"job_id": job_id, "status": "running", "progress": 0, "total_tasks": total_logs_to_gen, "records_ingested": 0}, job_id)
+    await update_job_status(job_id, "running", progress=0, total_tasks=total_logs_to_gen, records_ingested=0)
 
     client = ClickHouseDatabase(
         host=settings.clickhouse_https.host, port=settings.clickhouse_https.port,
@@ -342,18 +354,18 @@ async def run_synthetic_data_generation_job(job_id: str, params: SyntheticDataGe
                 ingested_count = await ingest_records(client, log_batch, destination_table)
                 records_ingested += ingested_count
                 log_batch.clear()
-                await manager.send_to_run({"job_id": job_id, "status": "running", "progress": i + 1, "records_ingested": records_ingested}, job_id)
+                await update_job_status(job_id, "running", progress=i + 1, records_ingested=records_ingested)
 
         if log_batch:
             ingested_count = await ingest_records(client, log_batch, destination_table)
             records_ingested += ingested_count
 
         summary = {"message": f"Synthetic data generated and saved to {destination_table}", "records_ingested": records_ingested}
-        await manager.send_to_run({"job_id": job_id, "status": "completed", "progress": total_logs_to_gen, "records_ingested": records_ingested, "summary": summary}, job_id)
+        await update_job_status(job_id, "completed", progress=total_logs_to_gen, records_ingested=records_ingested, summary=summary)
 
     except Exception as e:
         logging.exception("Error during synthetic data generation job")
-        await manager.send_to_run({"job_id": job_id, "status": "failed", "error": str(e)}, job_id)
+        await update_job_status(job_id, "failed", error=str(e))
     finally:
         if 'client' in locals() and client:
             client.disconnect()
