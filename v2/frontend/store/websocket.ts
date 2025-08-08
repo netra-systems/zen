@@ -1,5 +1,5 @@
 
-import create from 'zustand';
+import { create } from 'zustand';
 import { WebSocketStatus } from '@/types';
 import webSocketService from '@/app/services/websocket';
 
