@@ -1,28 +1,24 @@
-import { useState, useEffect, useCallback } from 'react';
-import { AgentState, UseAgentReturn, Reference } from '@/types';
-import { agent } from '../services/agent/Agent';
 
-export function useAgent(): UseAgentReturn {
-    const [state, setState] = useState<AgentState>({ messages: [], isThinking: false, error: null, toolArgBuffers: {} });
+import { useCallback } from 'react';
+import { useWebSocket } from './useWebSocket';
+import { UserMessage, StopAgent } from '../types';
 
-    useEffect(() => {
-        agent.initialize();
-        const unsubscribe = agent.subscribe((newState) => {
-            setState(newState);
-        });
-        return () => {
-            unsubscribe();
-            agent.stop();
-        };
-    }, []);
+export const useAgent = () => {
+  const webSocket = useWebSocket();
 
-    const startAgent = useCallback((message: string, references?: Reference[]) => {
-        agent.start(message, references);
-    }, []);
+  const sendUserMessage = useCallback((text: string) => {
+    const message: UserMessage = {
+      text,
+    };
+    webSocket?.sendMessage('user_message', message);
+  }, [webSocket]);
 
-    const stopAgent = useCallback(() => {
-        agent.stop();
-    }, []);
+  const stopAgent = useCallback(() => {
+    const message: StopAgent = {
+      run_id: '' // The backend will know which run to stop
+    };
+    webSocket?.sendMessage('stop_agent', message);
+  }, [webSocket]);
 
-    return { startAgent, stopAgent, messages: state.messages, showThinking: state.isThinking, error: state.error };
-}
+  return { sendUserMessage, stopAgent };
+};

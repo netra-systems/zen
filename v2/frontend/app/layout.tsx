@@ -1,7 +1,7 @@
 'use client';
 
 import './globals.css';
-import { WebSocketProvider } from '../contexts/WebSocketContext';
+import { WebSocketProvider } from './providers/WebSocketProvider';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 import { AppWithLayout } from '@/components/AppWithLayout';

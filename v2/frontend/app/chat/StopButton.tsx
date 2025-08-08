@@ -1,21 +1,16 @@
-
 "use client";
 
 import React from 'react';
+import { Button } from '../components/ui/button';
+import { useAgent } from '../hooks/useAgent';
 
 const StopButton: React.FC = () => {
-  const handleClick = () => {
-    // Handle stop logic here
-    console.log('Stop button clicked');
-  };
+  const { stopAgent } = useAgent();
 
   return (
-    <button
-      onClick={handleClick}
-      className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-    >
+    <Button onClick={stopAgent} variant="destructive">
       Stop
-    </button>
+    </Button>
   );
 };
 

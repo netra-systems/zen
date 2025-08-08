@@ -1,14 +1,16 @@
-
 "use client";
 
 import React from 'react';
+import { useChatStore } from '../store';
 
 const Header: React.FC = () => {
+  const { subAgentName, subAgentStatus } = useChatStore();
+
   return (
-    <header className="bg-gray-800 text-white p-4">
-      <h1 className="text-xl">SubAgent Name</h1>
-      {/* Add SubAgent status and state here */}
-    </header>
+    <div className="p-4 border-b">
+      <h1 className="text-xl font-bold">{subAgentName}</h1>
+      <p className="text-sm text-gray-500">{subAgentStatus}</p>
+    </div>
   );
 };
 

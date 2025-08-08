@@ -5,6 +5,7 @@ import React from 'react';
 import Header from './Header';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
+import StopButton from './StopButton';
 
 const ChatPage: React.FC = () => {
   return (

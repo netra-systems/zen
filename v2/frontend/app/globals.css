@@ -45,3 +45,15 @@
   --ring: 212.7 26.8% 83.9%;
 }
 
+/* Chat UI Styles */
+.message-user {
+  @apply bg-blue-500 text-white self-end;
+}
+
+.message-agent {
+  @apply bg-gray-300 text-black self-start;
+}
+
+.message-card {
+  @apply p-3 rounded-lg mb-2 max-w-lg;
+}
