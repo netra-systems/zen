@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { WebSocketStatus } from '@/app/types';
-import webSocketService from '@/app/services/websocket';
+import webSocketService from '@/services/websocket';
 
 const useWebSocket = () => {
     const [status, setStatus] = useState<WebSocketStatus>(WebSocketStatus.Closed);
