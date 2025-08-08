@@ -33,7 +33,7 @@ async def test_supervisor_logic(mock_llm_manager, mock_manager):
     run_id = "test_run"
 
     # Act
-    final_state = await supervisor.run(analysis_request.model_dump(), run_id, stream_updates=False)
+    final_state = await supervisor.run({"analysis_request": analysis_request.model_dump()}, run_id, stream_updates=False)
 
     # Assert
     assert final_state["current_agent"] == "__end__"

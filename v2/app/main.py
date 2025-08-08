@@ -120,8 +120,8 @@ app.include_router(agent_route.router, prefix="/api/v3/agent/chat", tags=["agent
 app.include_router(websocket.router, prefix="/ws", tags=["websockets"])
 app.include_router(admin.router, prefix="/api/v3", tags=["admin"])
 app.include_router(references.router, prefix="/api/v3", tags=["references"])
-app.include_router(corpus.router, prefix="/api/v3/corpus", tags=["corpus"])
 app.include_router(health.router, prefix="/health", tags=["health"])
+app.include_router(corpus.router, prefix="/api/v3/corpus", tags=["corpus"])
 
 
 

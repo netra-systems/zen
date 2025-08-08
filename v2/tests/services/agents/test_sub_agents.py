@@ -12,6 +12,7 @@ from app.llm.llm_manager import LLMManager
 def mock_llm_manager():
     mock = MagicMock(spec=LLMManager)
     mock.arun = AsyncMock()
+    mock.ask_llm = AsyncMock()
     return mock
 
 @pytest.fixture

@@ -13,6 +13,34 @@ export default function CorpusAdminPage() {
         fetch('/api/v3/corpus')
             .then(res => res.json())
             .then(data => setCorpora(data));
+
+        const ws = new WebSocket('ws://localhost:8000/ws');
+        ws.onmessage = event => {
+            const message = event.data;
+            const match = message.match(/Corpus (.*) progress: (.*)/);
+            if (match) {
+                const corpusId = match[1];
+                const progress = match[2];
+                setCorpora(prevCorpora =>
+                    prevCorpora.map(c =>
+                        c.id === corpusId ? { ...c, status: `running: ${progress}` } : c
+                    )
+                );
+            }
+            const completedMatch = message.match(/Corpus (.*) completed/);
+            if (completedMatch) {
+                const corpusId = completedMatch[1];
+                setCorpora(prevCorpora =>
+                    prevCorpora.map(c =>
+                        c.id === corpusId ? { ...c, status: 'completed' } : c
+                    )
+                );
+            }
+        };
+
+        return () => {
+            ws.close();
+        };
     }, []);
 
     const handleCreateCorpus = () => {
