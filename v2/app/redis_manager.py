@@ -6,7 +6,7 @@ class RedisManager:
         self.redis_client = None
 
     async def connect(self):
-        self.redis_client = redis.from_url(settings.REDIS_URL, encoding="utf-8", decode_responses=True)
+        self.redis_client = redis.from_url(settings.redis_url, encoding="utf-8", decode_responses=True)
         await self.redis_client.ping()
 
     async def disconnect(self):
