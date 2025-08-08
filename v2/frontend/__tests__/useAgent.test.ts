@@ -1,23 +1,37 @@
 import { renderHook, act } from '@testing-library/react';
 import { useAgent } from '@/app/hooks/useAgent';
-import { agent } from '@/services/agent/Agent';
+import { useChatStore } from '@/app/store';
 
-jest.mock('@/services/agent/Agent', () => ({
-    agent: {
-        initialize: jest.fn(),
-        start: jest.fn(),
-        stop: jest.fn(),
-        subscribe: jest.fn(() => () => {}),
-    },
+jest.mock('@/app/store', () => ({
+  useChatStore: jest.fn(),
+}));
+
+const mockSendMessage = jest.fn();
+
+jest.mock('@/app/hooks/useWebSocket', () => ({
+  useWebSocket: () => ({
+    sendMessage: mockSendMessage,
+  }),
 }));
 
 describe('useAgent', () => {
-    it('should subscribe to the agent and start it', () => {
-        const { result } = renderHook(() => useAgent());
-        act(() => {
-            result.current.startAgent('test message', []);
-        });
-        expect(agent.subscribe).toHaveBeenCalled();
-        expect(agent.start).toHaveBeenCalledWith('test message', []);
+  it('should send a user message', () => {
+    const { result } = renderHook(() => useAgent());
+
+    act(() => {
+      result.current.sendUserMessage('test message');
     });
+
+    expect(mockSendMessage).toHaveBeenCalledWith('user_message', { text: 'test message' });
+  });
+
+  it('should stop the agent', () => {
+    const { result } = renderHook(() => useAgent());
+
+    act(() => {
+      result.current.stopAgent();
+    });
+
+    expect(mockSendMessage).toHaveBeenCalledWith('stop_agent', { run_id: '' });
+  });
 });

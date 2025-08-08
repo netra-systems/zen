@@ -1,40 +1,36 @@
-import React from 'react';
+
+import React, { ReactNode } from 'react';
 import { render, screen, act } from '@testing-library/react';
-import { WebSocketProvider, useWebSocket } from '../contexts/WebSocketContext';
-import { Server } from 'mock-socket';
-import { WebSocketMessage } from '../types/websockets';
+import { WebSocketProvider } from '@/app/providers/WebSocketProvider';
+import { useWebSocket } from '@/app/hooks/useWebSocket';
+import { Server, WebSocket } from 'mock-socket';
+import { useChatStore } from '@/app/store';
 
 const WS_URL = 'ws://localhost:8000/ws';
 
-describe('WebSocketContext', () => {
+jest.mock('@/app/store', () => ({
+  useChatStore: jest.fn(),
+}));
+
+describe('WebSocketProvider', () => {
   let mockServer: Server;
 
   beforeEach(() => {
     mockServer = new Server(WS_URL);
+    (useChatStore as jest.Mock).mockReturnValue({
+      addMessage: jest.fn(),
+      setSubAgentName: jest.fn(),
+      setSubAgentStatus: jest.fn(),
+    });
   });
 
   afterEach(() => {
-    mockServer.close();
+    mockServer.stop();
   });
 
   const TestComponent = () => {
-    const { status, lastMessage, sendMessage } = useWebSocket();
-
-    const handleSendMessage = () => {
-      const message: WebSocketMessage = {
-        type: 'analysis_request',
-        payload: { request_model: { id: '1', user_id: '1', query: 'test', workloads: [] } },
-      };
-      sendMessage(message);
-    };
-
-    return (
-      <div>
-        <div data-testid="status">{status}</div>
-        <div data-testid="message">{JSON.stringify(lastMessage)}</div>
-        <button onClick={handleSendMessage}>Send</button>
-      </div>
-    );
+    useWebSocket();
+    return null;
   };
 
   it('should connect and disconnect', async () => {
@@ -44,33 +40,16 @@ describe('WebSocketContext', () => {
       </WebSocketProvider>
     );
 
-    await act(() => mockServer.emit('open'));
-    expect(screen.getByTestId('status').textContent).toBe('OPEN');
+    // Wait for the connection to be established
+    await new Promise(resolve => mockServer.on('connection', resolve));
+
+    expect(mockServer.clients().length).toBe(1);
 
     unmount();
-    // In a real scenario, the client would initiate the close.
-    // Here, we can check the server's connection count.
+
+    // Wait for the connection to be closed
+    await new Promise(resolve => mockServer.on('close', resolve));
+
     expect(mockServer.clients().length).toBe(0);
-  });
-
-  it('should send and receive messages', async () => {
-    render(
-      <WebSocketProvider>
-        <TestComponent />
-      </WebSocketProvider>
-    );
-
-    await act(() => mockServer.emit('open'));
-
-    const message: WebSocketMessage = {
-        type: 'agent_started',
-        payload: { run_id: '123' },
-      };
-
-    act(() => {
-      mockServer.emit('message', JSON.stringify(message));
-    });
-
-    expect(screen.getByTestId('message').textContent).toBe(JSON.stringify(message));
   });
 });

@@ -15,24 +15,37 @@ websockets_router = APIRouter()
 def get_agent_supervisor(request: Request) -> Supervisor:
     return request.app.state.agent_supervisor
 
+async def handle_analysis_request(user_id: str, message: WebSocketMessage, supervisor: Supervisor):
+    if isinstance(message.payload, AnalysisRequest):
+        request_model = message.payload.request_model
+        asyncio.create_task(
+            supervisor.run(request_model.model_dump(), request_model.id, stream_updates=True)
+        )
+    else:
+        await manager.send_error(user_id, "Invalid payload for analysis_request")
+
+async def handle_unknown_message(user_id: str, message: WebSocketMessage):
+    logger.warning(f"Received unknown message type: {message.type}")
+    await manager.send_error(user_id, f"Unknown message type: {message.type}")
+
+async def handle_validation_error(user_id: str, e: ValidationError):
+    logger.error(f"WebSocket validation error for user {user_id}: {e}")
+    errors = e.errors()
+    error_messages = [f"{err['loc'][0]}: {err['msg']}" for err in errors]
+    await manager.send_error(user_id, f"Invalid message format: {', '.join(error_messages)}")
+
 async def handle_message(user_id: str, data: dict, supervisor: Supervisor):
     try:
         message = WebSocketMessage.parse_obj(data)
         if message.type == "analysis_request":
-            if isinstance(message.payload, AnalysisRequest):
-                request_model = message.payload.request_model
-                asyncio.create_task(
-                    supervisor.run(request_model.model_dump(), request_model.id, stream_updates=True)
-                )
-            else:
-                await manager.send_error(user_id, "Invalid payload for analysis_request")
+            await handle_analysis_request(user_id, message, supervisor)
         else:
-            logger.warning(f"Received unknown message type: {message.type}")
-            await manager.send_error(user_id, f"Unknown message type: {message.type}")
+            await handle_unknown_message(user_id, message)
 
     except ValidationError as e:
-        logger.error(f"WebSocket validation error for user {user_id}: {e}")
-        await manager.send_error(user_id, f"Invalid message format: {e}")
+        await handle_validation_error(user_id, e)
+    except json.JSONDecodeError:
+        await manager.send_error(user_id, "Invalid JSON format")
     except Exception as e:
         logger.error(f"Error processing message for user {user_id}: {e}", exc_info=True)
         await manager.send_error(user_id, "An internal error occurred.")

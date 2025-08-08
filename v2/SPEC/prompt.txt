@@ -1,3 +1,2 @@
 Read: instructions.txt
-Read: As BACKGROUND CONTEXT ONLY: all files in Spec/*
 ACTION: ws.txt
