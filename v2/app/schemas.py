@@ -212,6 +212,15 @@ class ContentCorpusGenParams(BaseModel):
     clickhouse_table: str = Field('content_corpus', description="The name of the ClickHouse table to store the corpus in.")
 
 
+class LogEntry(BaseModel):
+    """Pydantic model for a single log entry."""
+    trace_id: Optional[str] = None
+    span_id: Optional[str] = None
+    event: str
+    data: Dict[str, Any] = Field(default_factory=dict)
+    source: str = "backend"
+    user_id: Optional[str] = None
+
 # --- WebSocket Schemas ---
 class WebSocketMessage(BaseModel):
     type: str

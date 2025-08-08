@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore", category=UserWarning, message=".*is not a Pyth
 # ClickHouse
 from app.db.clickhouse_base import ClickHouseDatabase
 from app.config import settings
-from app.websockets import WebSocketSink
+
 
 class LogEntry(BaseModel):
     """Pydantic model for a single log entry."""
@@ -94,6 +94,7 @@ class CentralLogger:
         logging.getLogger("uvicorn.access").handlers = [InterceptHandler()]
 
     def _initialize_services(self):
+        from app.websockets import WebSocketSink
         """Initializes external logging services like Langfuse and ClickHouse."""
         # ClickHouse
         if settings.clickhouse_logging.enabled:
