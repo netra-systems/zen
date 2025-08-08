@@ -131,31 +131,37 @@ class StartAgentMessage(BaseModel):
 
 # --- WebSocket Schemas ---
 class WebSocketError(BaseModel):
-    type: str = "error"
     message: str
 
 class AnalysisRequest(BaseModel):
-    type: str = "analysis_request"
-    payload: RequestModel
+    request_model: RequestModel
 
 class WebSocketMessage(BaseModel):
-    type: str
-    payload: Union[AnalysisRequest, WebSocketError, Dict[str, Any]]
+    type: Literal["analysis_request", "error", "stream_event", "run_complete", "sub_agent_update", "agent_started", "agent_completed", "agent_error"]
+    payload: Union[AnalysisRequest, WebSocketError, "StreamEvent", "RunComplete", "SubAgentUpdate", "AgentStarted", "AgentCompleted", "AgentErrorMessage"]
 
-class RunCompleteMessage(WebSocketMessage):
-    event: str = "run_complete"
-
-class ErrorData(BaseModel):
-    type: str
-    message: str
-
-class ErrorMessage(WebSocketMessage):
-    event: str = "error"
-    data: ErrorData
-
-class StreamEventMessage(WebSocketMessage):
-    event: str = "stream_event"
+class StreamEvent(BaseModel):
     event_type: str
+    data: Dict[str, Any]
+
+class RunComplete(BaseModel):
+    run_id: str
+    result: Any
+
+class SubAgentUpdate(BaseModel):
+    sub_agent_name: str
+    state: "SubAgentState"
+
+class AgentStarted(BaseModel):
+    run_id: str
+
+class AgentCompleted(BaseModel):
+    run_id: str
+    result: Any
+
+class AgentErrorMessage(BaseModel):
+    run_id: str
+    message: str
 
 # --- Supply Schemas ---
 
@@ -833,3 +839,30 @@ class DeepAgentState(TypedDict):
     messages: Annotated[List[BaseMessage], add_messages]
     todos: List[Todo]
     files: dict
+
+
+class SubAgentState(BaseModel):
+    messages: List[BaseMessage]
+    next_node: str
+    tool_results: Optional[List[Dict]] = None
+    lifecycle: SubAgentLifecycle = SubAgentLifecycle.PENDING
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    error_message: Optional[str] = None
+
+    def start(self):
+        self.lifecycle = SubAgentLifecycle.RUNNING
+        self.start_time = datetime.now()
+
+    def complete(self):
+        self.lifecycle = SubAgentLifecycle.COMPLETED
+        self.end_time = datetime.now()
+
+    def fail(self, error_message: str):
+        self.lifecycle = SubAgentLifecycle.FAILED
+        self.error_message = error_message
+        self.end_time = datetime.now()
+
+    def shutdown(self):
+        self.lifecycle = SubAgentLifecycle.SHUTDOWN
+        self.end_time = datetime.now()
