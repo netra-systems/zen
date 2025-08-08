@@ -13,5 +13,6 @@ netra_frontend_layout:1:0:4: Core (sidebar and header) should indeed be visible 
 netra_frontend_layout:1:0:5: The homepage loads and is visible by default
 
 netra_frontend_layout:1:0:6: Sidebar links are different for authenticated and unauthenticated users
-
+netra_frontend_layout:1:0:7: The project uses next.js  When needed use the next.js required "app" folder structure. 
+In every other case use the top level folders.
 netra_frontend_layout:END
