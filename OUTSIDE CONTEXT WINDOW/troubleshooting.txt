@@ -10,3 +10,5 @@ troubleshooting
 6: Naming issues: use "netra" in naming conventions to help it know it should 
 autocomplete on all training data not get sucked into specific training dataset
 e.g. some specific similar thing in the data
+7: check if plan generated actually matches intention of spec
+8: frame things in positive - LLMs have trouble with negation
