@@ -1,50 +1,38 @@
-
 # Sub-Agent Architecture
 
-This document describes the Sub-Agent architecture used in the Netra application.
+This document describes the sub-agent architecture used in the system.
 
 ## Overview
 
-The Sub-Agent architecture is a modular and scalable way to organize the different components of the Netra application. Each Sub-Agent is responsible for a specific task, and the Supervisor is responsible for orchestrating the flow between the different Sub-Agents.
+The system uses a supervisor-sub-agent architecture to handle user requests. The `Supervisor` agent is responsible for orchestrating the flow of data between a series of sub-agents. Each sub-agent is responsible for a specific task in the overall process.
 
-The Supervisor uses a sequential workflow to determine the next Sub-Agent to activate. This allows for a clear and predictable workflow.
+## Supervisor
 
-## BaseSubAgent
+The `Supervisor` is the main entry point for handling user requests. It is responsible for:
 
-The `BaseSubAgent` class is the base class for all sub-agents. It defines the common interface for all sub-agents, including the `run` method. Each sub-agent also has a lifecycle state, which is managed by the `SubAgentLifecycle` enum.
+- Creating and managing the lifecycle of the sub-agents.
+- Running the sub-agents in the correct order.
+- Passing data between the sub-agents.
+- Providing real-time updates to the user via WebSockets.
 
 ## Sub-Agents
 
-- **TriageSubAgent**: This Sub-Agent is responsible for triaging the user's request and determining the primary category of the request (e.g., Data Analysis, Code Optimization, General Inquiry).
-- **DataSubAgent**: This Sub-Agent is responsible for gathering and enriching data based on the triage result. For example, if the request is for data analysis, this agent will fetch and process the relevant data.
-- **OptimizationsCoreSubAgent**: This Sub-Agent is responsible for analyzing the data from the `DataSubAgent` and formulating optimization strategies.
-- **ActionsToMeetGoalsSubAgent**: This Sub-Agent is responsible for taking the optimization strategies and creating a concrete plan of action.
-- **ReportingSubAgent**: This Sub-Agent is responsible for summarizing the overall results and generating a final report for the user.
+Each sub-agent is a `BaseSubAgent` and has a `run` method that takes the input data and returns the processed data. The following sub-agents are currently implemented:
 
-## Workflow
+- **`TriageSubAgent`**: This agent triages the user request and categorizes it.
+- **`DataSubAgent`**: This agent gathers and enriches data based on the triage result.
+- **`OptimizationsCoreSubAgent`**: This agent formulates optimization strategies based on the gathered data.
+- **`ActionsToMeetGoalsSubAgent`**: This agent creates a plan of action based on the optimization strategies.
+- **`ReportingSubAgent`**: This agent generates a final report based on the action plan.
 
-The Supervisor orchestrates the SubAgent workflow in a predefined sequence:
+## Tool Dispatcher
 
-1.  **Supervisor**: The user's request is first received by the `Supervisor`.
-2.  **TriageSubAgent**: The `Supervisor` passes the request to the `TriageSubAgent`, which analyzes the initial user request and categorizes it.
-3.  **DataSubAgent**: The output of the `TriageSubAgent` is passed to the `DataSubAgent`, which gathers and processes the necessary data.
-4.  **OptimizationsCoreSubAgent**: The `OptimizationsCoreSubAgent` receives the processed data and formulates optimization strategies.
-5.  **ActionsToMeetGoalsSubAgent**: The `ActionsToMeetGoalsSubAgent` takes the optimization strategies and translates them into a concrete action plan.
-6.  **ReportingSubAgent**: Finally, the `ReportingSubAgent` takes the action plan and generates a comprehensive report for the user.
-7.  **Supervisor**: The `Supervisor` returns the final report to the user.
+The `ToolDispatcher` is responsible for providing tools to the sub-agents. Sub-agents can request tools from the `ToolDispatcher` and use them to perform their tasks. This allows for a more modular and extensible system, where new tools can be added without modifying the sub-agents themselves.
 
-```mermaid
-graph TD
-    A[User Request] --> B(Supervisor)
-    B --> C{TriageSubAgent}
-    C --> D{DataSubAgent}
-    D --> E{OptimizationsCoreSubAgent}
-    E --> F{ActionsToMeetGoalsSubAgent}
-    F --> G{ReportingSubAgent}
-    G --> B
-    B --> H[User Response]
-```
+## Creating a New Sub-Agent
 
-## WebSocket Communication
+To create a new sub-agent, you need to:
 
-The application uses WebSockets to provide real-time updates to the client. The `ConnectionManager` class is responsible for managing the WebSocket connections, and the `Supervisor` uses it to send updates to the client as the agent progresses through the workflow. At each step, the `Supervisor` sends a message to the client with the current agent's name and the data that has been processed so far.
+1.  Create a new class that inherits from `BaseSubAgent`.
+2.  Implement the `run` method.
+3.  Add the new sub-agent to the `sub_agents` list in the `Supervisor` class.
