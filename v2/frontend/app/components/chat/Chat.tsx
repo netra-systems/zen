@@ -1,37 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { useWebSocket } from '@/contexts/WebSocketContext';
-import { WebSocketMessage, UserMessage, StopAgent } from '@/app/types';
-import Header from './Header';
-import MessageList from './MessageList';
-import MessageInput from './MessageInput';
+import React, { useState, useContext } from 'react';
+import { WebSocketContext } from '@/contexts/WebSocketContext';
+import ChatHistory from '../ChatHistory';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 const Chat: React.FC = () => {
-  const { messages, sendMessage } = useWebSocket();
-  const [subAgentName, setSubAgentName] = useState('Triage');
-  const [agentStatus, setAgentStatus] = useState('Idle');
-  const [toolInUse, setToolInUse] = useState('None');
+  const ws = useContext(WebSocketContext);
+  const [newMessage, setNewMessage] = useState('');
 
-  const handleSendMessage = (message: string) => {
-    const userMessage: WebSocketMessage = {
-      type: 'user_message',
-      payload: { text: message } as UserMessage,
-    };
-    sendMessage(userMessage);
+  const handleSendMessage = () => {
+    if (ws && newMessage.trim()) {
+      ws.sendMessage(newMessage);
+      setNewMessage('');
+    }
   };
 
-  const handleStopAgent = () => {
-    const stopMessage: WebSocketMessage = {
-      type: 'stop_agent',
-      payload: { run_id: 'TODO' } as StopAgent, // TODO: Get the run_id from the agent
-    };
-    sendMessage(stopMessage);
+  const handleStop = () => {
+    if (ws) {
+      ws.stopProcessing();
+    }
   };
 
   return (
     <div className="flex flex-col h-full">
-      <Header subAgentName={subAgentName} agentStatus={agentStatus} toolInUse={toolInUse} />
-      <MessageList messages={messages} />
-      <MessageInput onSendMessage={handleSendMessage} onStopAgent={handleStopAgent} />
+      <ChatHistory />
+      <div className="p-4 border-t">
+        <div className="flex space-x-2">
+          <Input
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            placeholder="Type a message..."
+          />
+          <Button onClick={handleSendMessage}>Send</Button>
+          <Button onClick={handleStop} variant="destructive">Stop</Button>
+        </div>
+      </div>
     </div>
   );
 };

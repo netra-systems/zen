@@ -1,7 +1,8 @@
-"use client";
+'use client';
 
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import { WebSocketMessage } from '../types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface WebSocketContextType {
   sendMessage: (type: string, payload: any) => void;
@@ -18,9 +19,12 @@ interface WebSocketProviderProps {
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [messageHandlers, setMessageHandlers] = useState<((message: WebSocketMessage) => void)[]>([]);
+  const { user, token } = useAuth();
 
   useEffect(() => {
-    const newWs = new WebSocket('ws://localhost:8000/ws');
+    if (!user || !token) return;
+
+    const newWs = new WebSocket(`ws://localhost:8000/ws?token=${token}`);
 
     newWs.onopen = () => {
       console.log('WebSocket connected');
@@ -40,7 +44,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     return () => {
       newWs.close();
     };
-  }, [messageHandlers]);
+  }, [user, token, messageHandlers]);
 
   const sendMessage = (type: string, payload: any) => {
     if (ws) {

@@ -1,11 +1,11 @@
 import asyncio
 import json
 import logging
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Request
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Request, Query
 from pydantic import ValidationError
-from app.auth.auth_dependencies import ActiveUserWsDep
+from app.auth.services import SecurityService
 from app.agents.supervisor import Supervisor
-from app.schemas import WebSocketMessage, AnalysisRequest, RequestModel
+from app.schemas import WebSocketMessage, AnalysisRequest, RequestModel, User
 from app.ws_manager import manager
 
 logger = logging.getLogger(__name__)
@@ -14,6 +14,14 @@ websockets_router = APIRouter()
 
 def get_agent_supervisor(request: Request) -> Supervisor:
     return request.app.state.agent_supervisor
+
+def get_security_service(request: Request) -> SecurityService:
+    return request.app.state.security_service
+
+async def get_user_from_token(token: str, security_service: SecurityService) -> User | None:
+    if not token:
+        return None
+    return await security_service.get_user_from_token(token)
 
 async def handle_analysis_request(user_id: str, message: WebSocketMessage, supervisor: Supervisor):
     if isinstance(message.payload, AnalysisRequest):
@@ -53,9 +61,15 @@ async def handle_message(user_id: str, data: dict, supervisor: Supervisor):
 @websockets_router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket, 
-    user: ActiveUserWsDep, 
-    supervisor: Supervisor = Depends(get_agent_supervisor)
+    token: str = Query(...),
+    supervisor: Supervisor = Depends(get_agent_supervisor),
+    security_service: SecurityService = Depends(get_security_service)
 ):
+    user = await get_user_from_token(token, security_service)
+    if not user:
+        await websocket.close(code=1008, reason="Invalid token")
+        return
+
     await manager.connect(websocket, user.id)
     try:
         while True:
@@ -76,4 +90,4 @@ async def websocket_endpoint(
                 break
 
     finally:
-        manager.disconnect(user.id)
+        manager.disconnect(user.id, websocket)

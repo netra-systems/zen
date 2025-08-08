@@ -1,14 +1,21 @@
-'use client';
+import React, { useContext } from 'react';
+import { WebSocketContext } from '@/contexts/WebSocketContext';
+import Message from './Message';
 
-import { MessageCard } from './MessageCard';
-import { ChatHistoryProps } from '@/types/index';
+const ChatHistory: React.FC = () => {
+  const ws = useContext(WebSocketContext);
 
-export function ChatHistory({ messages }: ChatHistoryProps) {
+  if (!ws) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="w-full max-w-2xl flex-grow overflow-y-auto">
-      {messages.map((msg, index) => (
-        <MessageCard key={index} message={msg} />
+    <div className="flex-1 overflow-y-auto p-4">
+      {ws.messages.map((msg) => (
+        <Message key={msg.id} message={msg} />
       ))}
     </div>
   );
-}
+};
+
+export default ChatHistory;

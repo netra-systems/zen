@@ -15,5 +15,3 @@ chat_ui_ux:1:0:8: UI/UX feels “alive” while still being subtle
 chat_ui_ux:1:0:9: An expandable “Raw” mode that can expand JSON objects at various processing stages (e.g JSON tree view)
 chat_ui_ux:1:0:10: A “Stop” processing button
 chat_ui_ux:1:0:11: KEEP existing examples concepts.
-
-chat_ui_ux:Remember: 0:7.  Remember: 0:1 to 0:7 to 1 including all sub items 1:0:0 through 1:011.

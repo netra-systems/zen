@@ -23,5 +23,3 @@ userauth:1:0:7: Schema: MUST add this to Schema.py and USE AN EXACT URL from the
 }
 userauth:1:0:8: The login button for OAuth on the front end looks good and is large.
 userauth:1:0:9: The backend MUST provide discovery of OAUTH endpoints to frontend, e.g. the complete path including base url etc. a dict with login, logout, auth, etc. etc. etc. This can lean on existing OpenAPI / Fast API spec if possible.
-
-userauth:Remember: 0:7.  Remember: 0:1 to 0:7. Remember userauth:1:0:0 through userauth:1:0:8.

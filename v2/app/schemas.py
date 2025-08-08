@@ -133,29 +133,55 @@ class StartAgentMessage(BaseModel):
 class WebSocketError(BaseModel):
     message: str
 
+
+class MessageType(str, enum.Enum):
+    USER = "user"
+    AGENT = "agent"
+    SYSTEM = "system"
+    ERROR = "error"
+    TOOL = "tool"
+
+
+class Message(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    created_at: datetime = Field(default_factory=datetime.now)
+    content: str
+    type: MessageType
+    sub_agent_name: Optional[str] = None
+    tool_info: Optional[Dict[str, Any]] = None
+    raw_data: Optional[Dict[str, Any]] = None
+    displayed_to_user: bool = True
+
+
 class AnalysisRequest(BaseModel):
     request_model: RequestModel
+
 
 class UserMessage(BaseModel):
     text: str
     references: List[str] = []
 
+
 class AgentMessage(BaseModel):
     text: str
 
+
 class ToolStarted(BaseModel):
     tool_name: str
+
 
 class ToolCompleted(BaseModel):
     tool_name: str
     result: Any
 
+
 class StopAgent(BaseModel):
     run_id: str
 
+
 class WebSocketMessage(BaseModel):
-    type: Literal["analysis_request", "error", "stream_event", "run_complete", "sub_agent_update", "agent_started", "agent_completed", "agent_error", "user_message", "agent_message", "tool_started", "tool_completed", "stop_agent"]
-    payload: Union[AnalysisRequest, WebSocketError, "StreamEvent", "RunComplete", "SubAgentUpdate", "AgentStarted", "AgentCompleted", "AgentErrorMessage", "UserMessage", "AgentMessage", "ToolStarted", "ToolCompleted", "StopAgent"]
+    type: Literal["analysis_request", "error", "stream_event", "run_complete", "sub_agent_update", "agent_started", "agent_completed", "agent_error", "user_message", "agent_message", "tool_started", "tool_completed", "stop_agent", "message"]
+    payload: Union[AnalysisRequest, WebSocketError, "StreamEvent", "RunComplete", "SubAgentUpdate", "AgentStarted", "AgentCompleted", "AgentErrorMessage", "UserMessage", "AgentMessage", "ToolStarted", "ToolCompleted", "StopAgent", Message]
 
 class StreamEvent(BaseModel):
     event_type: str

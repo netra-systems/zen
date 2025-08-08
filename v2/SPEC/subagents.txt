@@ -24,6 +24,4 @@ subagents:1:0:2:1: Test the default flow: Input from user: SupervisorAgent: Tria
 
 subagents:1:0:2:2: WS Integrations: Validate all Agent WS and communication end to end.
 subagents:1:0:2:4: Check Lifecycle and shut down concepts
-subagents:1:0:2:5: Every SubAgent has all required fields to operate completed. E.g. its prompt definition etc. all completely filled out. 
-
-subagents:Remember: 0:7.  Remember: 0:1 to 0:7. Remember userauth:subagents:1:0:0 through userauth:subagents:1:0:8.
+subagents:1:0:2:5: Every SubAgent has all required fields to operate completed. E.g. its prompt definition etc. all completely filled out.

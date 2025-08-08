@@ -6,6 +6,7 @@ Instructions:
 0:1:0:3: CRITICAL: Consider coherence with all BACKGROUND CONTEXT including existing specs and plans.
 0:1:0:4: Read and be prepared to discuss all existing relevant code and system concepts. 
 0:1:0:5: Reflect on work in progress if relevant.
+0:1:0:6: ACTION only the defined ACTION: spec. this is the {spec_name}
 
 0:1:1: Project Conventions:
 0:1:1:0: Types: 
@@ -19,7 +20,7 @@ Instructions:
 0:1:1:4: Connection between services look at shared/schema.json for alignment.
 
 0:1:1: Commercial context outside of code: The intention of the overall business is to offer the most intelligent optimization agents in the world. All actions are in support of this overarching goal.
-0:2: Plan: Make a plan to execute the detailed instructions 1:0 (“1:0”). Look at all items from 1:0 through 1:0:0 (if existing) 1:0:0:0 (if existing) through to the end. Plan to fix potential new bugs introduced from changes and related classes of issues at the same time. Zoom in and out and look at it from a spherical point of view.  Save the plan to “/plans/{*}-plan.md”.
+0:2: Plan: Make a plan to execute the detailed instructions {spec_name}:1:0 ({spec_name}:“1:0”). Look at all items from 1:0 through 1:0:0 (if existing) 1:0:0:0 (if existing) through to the end. Plan to fix potential new bugs introduced from changes and related classes of issues at the same time. Zoom in and out and look at it from a spherical point of view.  Save the plan to “/plans/{*}-plan.md”.
 0:3: Review: Review the plan and the required concepts, including very careful and thoughtful integration with all existing code. Update “/plans/{*}-plan.md”.
 0:4: Background: Think deeply and carefully to architect and implement holistic, complete, and working components and concepts. The code must be scalable, clean, robust, reliable, and easy to ready for human engineers.  Update “/plans/{*}-plan.md”.
 0:5: Go: After planning, execute all steps. Complete all items to consider your overall task complete. Keep rerunning tests until they pass. 
@@ -30,9 +31,13 @@ Instructions:
 0:6:4: Use as strong type checking and types as possible. 
 0:6:5: Validate up to five (5) steps in any direction in the system, especially with data marshalling and unmarshalling. E.g. double check concepts are only being cast as types an appropriate amount of times. 
 0:7: SUPER CRITICAL: Code must be globally coherent and well integrated with the global application context.
-0:7:1: Scope: Keep scope of “1:0” changes in mind. Focus on making changes strictly relevant to the scope described in “1:0” as the primary goal and limit side effects and focus on related changes to the scope of “1:0” only.
+0:7:1: Scope: Keep scope of “{spec_name}:1:0” changes in mind. Focus on making changes strictly relevant to the scope described in “1:0” as the primary goal and limit side effects and focus on related changes to the scope of “1:0” only.
 0:7:2: Every added line, function, file, class, etc: Use 0:1:1: Project Conventions.
-0:7:3: Once completed “1:0”: 
-0:7:3:0: Update docs: Update “/docs/{*}-doc.md”
+0:7:3: Once completed “{spec_name}:1:0”: 
+0:7:3:0: Update docs: Update “/docs/{spec_name}-doc.md”
 0:7:3:1: Update shared/schema.json for alignment.
+
+Remember: 0:7.  Remember: 0:1 to 0:7 to 1 including all sub items 1:0:0 through 1:011.
+Remember: {spec_name}:1:0:* through {spec_name}:1:*:*
+All other specs are for background context and coherence. Scope to an implment {spec_name} only.
 
