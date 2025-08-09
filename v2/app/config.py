@@ -3,86 +3,96 @@ from google.cloud import secretmanager
 from typing import List, Dict
 from app import schemas
 from tenacity import retry, stop_after_attempt, wait_fixed, RetryError
-from schemas import SECRET_CONFIG
+from app.schemas import SECRET_CONFIG
 
+class Settings:
+    def __init__(self):
+        self.config = self._get_settings()
+        if self.config.log_secrets:
+            print(self.config.model_dump_json(indent=2))
 
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
-def get_secret_client() -> secretmanager.SecretManagerServiceClient:
-    """Initializes and returns a Secret Manager service client with retry logic."""
-    try:
-        return secretmanager.SecretManagerServiceClient()
-    except Exception as e:
-        print(f"Attempt to initialize Secret Manager client failed: {e}")
-        raise ConnectionError(f"Failed to connect to Secret Manager: {e}")
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
+    def _get_secret_client(self) -> secretmanager.SecretManagerServiceClient:
+        """Initializes and returns a Secret Manager service client with retry logic."""
+        try:
+            return secretmanager.SecretManagerServiceClient()
+        except Exception as e:
+            print(f"Attempt to initialize Secret Manager client failed: {e}")
+            raise ConnectionError(f"Failed to connect to Secret Manager: {e}")
 
-def fetch_secrets(client: secretmanager.SecretManagerServiceClient, secret_references: List[schemas.SecretReference], log_secrets: bool = False) -> Dict[str, str]:
-    """Fetches multiple secrets from Google Cloud Secret Manager."""
-    secrets = {}
-    if not client:
+    def _fetch_secrets(self, client: secretmanager.SecretManagerServiceClient, secret_references: List[schemas.SecretReference], log_secrets: bool = False) -> Dict[str, str]:
+        """Fetches multiple secrets from Google Cloud Secret Manager."""
+        secrets = {}
+        if not client:
+            return secrets
+
+        for ref in secret_references:
+            try:
+                name = f"projects/{ref.project_id}/secrets/{ref.name}/versions/{ref.version}"
+                response = client.access_secret_version(name=name)
+                secrets[ref.name] = response.payload.data.decode("UTF-8")
+                if log_secrets:
+                    print(f"Fetched secret: {ref.name}")
+            except Exception as e:
+                if log_secrets:
+                    print(f"Error fetching secret {ref.name}: {e}")
+                secrets[ref.name] = None
         return secrets
 
-    for ref in secret_references:
+    def _load_secrets(self, config: schemas.AppConfig):
+        """Fetches secrets from Secret Manager and populates the config object."""
         try:
-            name = f"projects/{ref.project_id}/secrets/{ref.name}/versions/{ref.version}"
-            response = client.access_secret_version(name=name)
-            secrets[ref.name] = response.payload.data.decode("UTF-8")
-            if log_secrets:
-                print(f"Fetched secret: {ref.name}")
-        except Exception as e:
-            if log_secrets:
-                print(f"Error fetching secret {ref.name}: {e}")
-            secrets[ref.name] = None
-    return secrets
+            client = self._get_secret_client()
+        except ConnectionError as e:
+            print(f"Warning: Could not connect to Secret Manager. Using default settings. {e}")
+            return
 
-def load_secrets(config: schemas.AppConfig):
-    """Fetches secrets from Secret Manager and populates the config object."""
-    client = get_secret_client()
-    if not client:
-        print("Could not create Secret Manager client. Skipping secret loading.")
-        return
+        if not client:
+            print("Could not create Secret Manager client. Skipping secret loading.")
+            return
 
-    fetched_secrets = fetch_secrets(client, SECRET_CONFIG, config.log_secrets)
+        fetched_secrets = self._fetch_secrets(client, SECRET_CONFIG, config.log_secrets)
 
-    for ref in SECRET_CONFIG:
-        secret_value = fetched_secrets.get(ref.name)
-        if secret_value is None:
-            continue
+        for ref in SECRET_CONFIG:
+            secret_value = fetched_secrets.get(ref.name)
+            if secret_value is None:
+                continue
 
-        target_obj = config
-        if ref.target_model:
-            if '.' in ref.target_model:
-                parts = ref.target_model.split('.', 1)
-                dict_name = parts[0]
-                key_name = parts[1]
-                target_dict = getattr(config, dict_name)
-                target_obj = target_dict.get(key_name)
-            else:
-                target_obj = getattr(config, ref.target_model)
+            target_obj = config
+            if ref.target_model:
+                if '.' in ref.target_model:
+                    parts = ref.target_model.split('.', 1)
+                    dict_name = parts[0]
+                    key_name = parts[1]
+                    target_dict = getattr(config, dict_name)
+                    target_obj = target_dict.get(key_name)
+                else:
+                    target_obj = getattr(config, ref.target_model)
 
-        if target_obj:
-            setattr(target_obj, ref.target_field, secret_value)
+            if target_obj:
+                setattr(target_obj, ref.target_field, secret_value)
+
+    def _get_settings(self) -> schemas.AppConfig:
+        """Returns the appropriate configuration class based on the environment."""
+        environment = os.environ.get("environment", "development").lower()
+        if os.environ.get("TESTING"):
+            environment = "testing"
+        print(f"|| Loading configuration for: {environment} ||")
+        config_map = {
+            "production": schemas.ProductionConfig,
+            "testing": schemas.TestingConfig,
+            "development": schemas.DevelopmentConfig
+        }
+        config = config_map.get(environment, schemas.DevelopmentConfig)()
+        
+        self._load_secrets(config)
+
+        return config
+
+    def get_config(self) -> schemas.AppConfig:
+        return self.config
+
+settings = Settings()
 
 def get_settings() -> schemas.AppConfig:
-    """Returns the appropriate configuration class based on the environment."""
-    environment = os.environ.get("environment", "development").lower()
-    if os.environ.get("TESTING"):
-        environment = "testing"
-    print(f"|| Loading configuration for: {environment} ||")
-    config_map = {
-        "production": schemas.ProductionConfig,
-        "testing": schemas.TestingConfig,
-        "development": schemas.DevelopmentConfig
-    }
-    config = config_map.get(environment, schemas.DevelopmentConfig)()
-    
-    try:
-        load_secrets(config)
-    except ConnectionError as e:
-        print(f"Warning: Could not connect to Secret Manager. Using default development settings. {e}")
-
-    return config
-
-settings = get_settings()
-
-if settings.log_secrets:
-    print(settings.model_dump_json(indent=2))
+    return settings.get_config()

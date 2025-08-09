@@ -17,7 +17,9 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.routes.websockets import router as websockets_router
 from app.db.postgres import async_session_factory
-from app.config import settings
+from app.config import get_settings
+
+settings = get_settings()
 from app.logging_config import central_logger
 from app.llm.llm_manager import LLMManager
 from app.agents.supervisor import Supervisor
