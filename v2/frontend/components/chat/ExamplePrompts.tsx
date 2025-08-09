@@ -1,10 +1,12 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { examplePrompts } from '@/lib/examplePrompts';
-import { useChatStore } from '@/store';
+import { useChatStore } from '@/store/chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
+import { ChevronDown, Send } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export const ExamplePrompts: React.FC = () => {
   const { sendMessage } = useWebSocket();
@@ -18,26 +20,36 @@ export const ExamplePrompts: React.FC = () => {
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
-      <div className="flex items-center justify-between px-4 py-2 bg-gray-100 rounded-t-lg">
-        <h2 className="text-lg font-semibold">Example Prompts</h2>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full bg-gray-50 p-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-700">Example Prompts</h2>
         <CollapsibleTrigger asChild>
-          <Button variant="ghost" size="sm">
-            {isOpen ? "Hide" : "Show"}
+          <Button variant="ghost" size="sm" className="flex items-center">
+            <span className="mr-2">{isOpen ? 'Hide' : 'Show'}</span>
+            <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
           </Button>
         </CollapsibleTrigger>
       </div>
-      <CollapsibleContent className="p-4 bg-gray-50 rounded-b-lg">
+      <CollapsibleContent className="mt-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {examplePrompts.map((prompt, index) => (
-            <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handlePromptClick(prompt)}>
-              <CardHeader>
-                <CardTitle className="text-base font-medium">Example {index + 1}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-700 line-clamp-3">{prompt}</p>
-              </CardContent>
-            </Card>
+            <motion.div
+              key={index}
+              whileHover={{ scale: 1.03 }}
+              transition={{ type: 'spring', stiffness: 300 }}
+            >
+              <Card
+                className="cursor-pointer h-full flex flex-col justify-between bg-white shadow-md hover:shadow-lg transition-shadow rounded-lg overflow-hidden"
+                onClick={() => handlePromptClick(prompt)}
+              >
+                <CardContent className="p-4">
+                  <p className="text-sm text-gray-700">{prompt}</p>
+                </CardContent>
+                <div className="p-2 bg-gray-100 flex justify-end">
+                  <Send className="w-4 h-4 text-blue-500" />
+                </div>
+              </Card>
+            </motion.div>
           ))}
         </div>
       </CollapsibleContent>

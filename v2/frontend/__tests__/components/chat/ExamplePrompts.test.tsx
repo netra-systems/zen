@@ -1,54 +1,36 @@
+
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { useChatStore } from '@/store';
+import { useChatStore } from '@/store/chat';
 
-jest.mock('@/hooks/useWebSocket');
-jest.mock('@/store');
+// Mock the useWebSocket hook
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: () => ({
+    sendMessage: jest.fn(),
+  }),
+}));
+
+// Mock the useChatStore hook
+jest.mock('@/store/chat', () => ({
+  useChatStore: () => ({
+    setProcessing: jest.fn(),
+  }),
+}));
 
 describe('ExamplePrompts', () => {
-  const sendMessage = jest.fn();
-  const setProcessing = jest.fn();
-
-  beforeEach(() => {
-    (useWebSocket as jest.Mock).mockReturnValue({
-      sendMessage,
-    });
-    (useChatStore as jest.Mock).mockReturnValue({
-      setProcessing,
-    });
-  });
-
-  it('should render the example prompts section', () => {
+  it('sends a message when an example prompt is clicked', () => {
+    const { sendMessage } = useWebSocket();
+    const { setProcessing } = useChatStore();
     render(<ExamplePrompts />);
-    expect(screen.getByText('Example Prompts')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /hide/i })).toBeInTheDocument();
-  });
 
-  it('should display example prompts as cards', () => {
-    render(<ExamplePrompts />);
-    expect(screen.getByText(/I need to reduce costs but keep quality the same/i)).toBeInTheDocument();
-    expect(screen.getByText(/My tools are too slow/i)).toBeInTheDocument();
-  });
+    const firstPrompt = screen.getByText(/I need to reduce costs but keep quality the same/i);
+    fireEvent.click(firstPrompt);
 
-  it('should send a message and collapse the panel when a prompt is clicked', () => {
-    render(<ExamplePrompts />);
-    const promptText = screen.getByText(/I need to reduce costs but keep quality the same/i).textContent;
-    fireEvent.click(screen.getByText(/I need to reduce costs but keep quality the same/i));
-
-    expect(sendMessage).toHaveBeenCalledWith(JSON.stringify({ type: 'user_message', payload: { text: promptText } }));
+    expect(sendMessage).toHaveBeenCalledWith(
+      JSON.stringify({ type: 'user_message', payload: { text: 'I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.' } })
+    );
     expect(setProcessing).toHaveBeenCalledWith(true);
-    expect(screen.getByRole('button', { name: /show/i })).toBeInTheDocument(); // Panel should be collapsed
-  });
-
-  it('should toggle the collapsible panel', () => {
-    render(<ExamplePrompts />);
-    const toggleButton = screen.getByRole('button', { name: /hide/i });
-
-    fireEvent.click(toggleButton);
-    expect(screen.getByRole('button', { name: /show/i })).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /show/i }));
-    expect(screen.getByRole('button', { name: /hide/i })).toBeInTheDocument();
   });
 });

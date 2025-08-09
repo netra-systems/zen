@@ -9,6 +9,17 @@ const config = {
   testEnvironment: 'jest-environment-jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
+    '^@/chat/(.*)$': '<rootDir>/chat/$1',
+    '^@/components/ui/(.*)$': '<rootDir>/components/ui/$1',
+    '^@/components/(.*)$': '<rootDir>/components/$1',
+    '^@/contexts/(.*)$': '<rootDir>/contexts/$1',
+    '^@/hooks/(.*)$': '<rootDir>/hooks/$1',
+    '^@/lib/(.*)$': '<rootDir>/lib/$1',
+    '^@/mocks/(.*)$': '<rootDir>/mocks/$1',
+    '^@/services/(.*)$': '<rootDir>/services/$1',
+    '^@/store/(.*)$': '<rootDir>/store/$1',
+    '^@/types/(.*)$': '<rootDir>/types/$1',
+    '^@/auth/(.*)$': '<rootDir>/auth/$1',
     '^@/(.*)$': '<rootDir>/$1',
   },
 };

@@ -3,6 +3,7 @@ import { Message as BackendMessage } from './index';
 export type Message = Omit<BackendMessage, 'content'> & {
   content: string;
   references?: string[];
+  error?: string;
 };
 
 export enum SubAgentLifecycle {

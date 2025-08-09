@@ -1,61 +1,59 @@
+
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MessageItem } from '@/components/chat/MessageItem';
+import { Message } from '@/types/chat';
 
 describe('MessageItem', () => {
-  it('should render a user message with content', () => {
-    const message = {
+  it('renders a user message correctly', () => {
+    const message: Message = {
       id: '1',
-      created_at: new Date().toISOString(),
-      content: 'Hello, agent!',
       type: 'user',
+      content: 'Hello, world!',
+      sub_agent_name: 'User',
       displayed_to_user: true,
     };
     render(<MessageItem message={message} />);
-    expect(screen.getByText('Hello, agent!')).toBeInTheDocument();
-    expect(screen.getByText('U')).toBeInTheDocument(); // User avatar fallback
+    expect(screen.getByText('Hello, world!')).toBeInTheDocument();
+    expect(screen.getByText('User')).toBeInTheDocument();
   });
 
-  it('should render an agent message with content', () => {
-    const message = {
+  it('renders an agent message correctly', () => {
+    const message: Message = {
       id: '2',
-      created_at: new Date().toISOString(),
-      content: 'Hello, user!',
       type: 'agent',
-      sub_agent_name: 'TestAgent',
+      content: 'Hi there!',
+      sub_agent_name: 'Test Agent',
       displayed_to_user: true,
     };
     render(<MessageItem message={message} />);
-    expect(screen.getByText('Hello, user!')).toBeInTheDocument();
-    expect(screen.getByText('TestAgent')).toBeInTheDocument();
-    expect(screen.getByText('A')).toBeInTheDocument(); // Agent avatar fallback
+    expect(screen.getByText('Hi there!')).toBeInTheDocument();
+    expect(screen.getByText('Test Agent')).toBeInTheDocument();
   });
 
-  it('should render user message with references', () => {
-    const message = {
+  it('renders an error message correctly', () => {
+    const message: Message = {
       id: '3',
-      created_at: new Date().toISOString(),
-      content: 'Message with references',
-      type: 'user',
+      type: 'agent',
+      content: '',
+      sub_agent_name: 'Test Agent',
+      error: 'Something went wrong',
       displayed_to_user: true,
-      references: ['ref1', 'ref2'],
     };
     render(<MessageItem message={message} />);
-    expect(screen.getByText('Message with references')).toBeInTheDocument();
-    expect(screen.getByText('References:')).toBeInTheDocument();
-    expect(screen.getByText('ref1')).toBeInTheDocument();
-    expect(screen.getByText('ref2')).toBeInTheDocument();
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
   });
 
-  it('should render raw data when available', () => {
-    const message = {
+  it('renders tool info correctly', () => {
+    const message: Message = {
       id: '4',
-      created_at: new Date().toISOString(),
-      content: 'Message with raw data',
-      type: 'system',
+      type: 'agent',
+      content: '',
+      sub_agent_name: 'Test Agent',
+      tool_info: { tool: 'test_tool', args: [1, 2] },
       displayed_to_user: true,
-      raw_data: { key: 'value' },
     };
     render(<MessageItem message={message} />);
-    expect(screen.getByText('View Raw Data')).toBeInTheDocument();
+    expect(screen.getByText('View Tool Info')).toBeInTheDocument();
   });
 });

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useChatStore } from '@/store';
+import { useChatStore } from '@/store/chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { Square } from 'lucide-react';
 
 export const StopButton: React.FC = () => {
   const { isProcessing, setProcessing } = useChatStore();
@@ -13,7 +14,8 @@ export const StopButton: React.FC = () => {
   };
 
   return (
-    <Button onClick={handleClick} disabled={!isProcessing} variant="destructive">
+    <Button onClick={handleClick} disabled={!isProcessing} variant="destructive" className="mt-4 w-full flex items-center">
+      <Square className="w-4 h-4 mr-2" />
       Stop Processing
     </Button>
   );
