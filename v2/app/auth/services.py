@@ -1,6 +1,6 @@
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.user import User
+from app.db.models_postgres import User
 from sqlalchemy.future import select
 import uuid
 from app.services.key_manager import KeyManager

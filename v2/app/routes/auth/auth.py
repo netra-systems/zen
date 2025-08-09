@@ -7,7 +7,7 @@ from starlette.requests import Request
 from app.auth.auth import google
 from app.config import settings
 from app.dependencies import get_db
-from app.models.user import User
+from app.db.models_postgres import User
 from app.schemas import UserCreate, User as UserSchema, AuthConfigResponse
 from app.services.user_service import user_service
 from app.auth.auth_dependencies import get_current_user_ws

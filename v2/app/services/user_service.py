@@ -1,6 +1,6 @@
 from typing import Optional
 from sqlalchemy.orm import Session
-from app.models.user import User
+from app.db.models_postgres import User
 from app.schemas import UserCreate, UserUpdate
 from app.services.base import BaseService
 
