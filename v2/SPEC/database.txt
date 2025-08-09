@@ -7,8 +7,9 @@ database:1:1:2: The production, development, testing databases are Separate.
 
 database:1:0:1:0: Schema:
 database:1:0:1:0:0: The database schema is defined in app/models.
+database:1:0:1:0:0:0: Self-check at startup: At system startup the live database schema is validated against the schema defined in postgres models.
 database:1:0:1:0:1: The schema is versioned using Alembic.
-database:1:0:1:0:2: Migrations are run automatically on startup.
+database:1:0:1:0:1:1 Migrations are run automatically on startup.
 
 database:1:0:2:0: Models:
 database:1:0:2:0:0: Models are defined using SQLAlchemy aligned with Schema.
