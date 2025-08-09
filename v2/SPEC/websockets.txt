@@ -1,0 +1,35 @@
+SPEC:NETRA_WEBSOCKETS: NETRA_WEBSOCKETS Websockets
+
+NETRA_WEBSOCKETS:1:0: Primary Spec: Websockets Specification.
+NETRA_WEBSOCKETS:1:1:0: Goal: NETRA_WEBSOCKETS working as a complete end to end system.
+NETRA_WEBSOCKETS:1:1:1: CRITICAL: The Coherence of the system working in harmony front and backend together.
+NETRA_WEBSOCKETS:1:1:1:1: Coherence: Validate Coherence with SPEC:chat_ui_ux 
+NETRA_WEBSOCKETS:1:1:1:2: Coherence: Validate Coherence with SPEC:netra_user_auth
+NETRA_WEBSOCKETS:1:1:1:3: Coherence: Validate Coherence with SPEC:conventions
+NETRA_WEBSOCKETS:1:1:1:4: Coherence: Agent to Frontend communications using NETRA_WEBSOCKETS
+NETRA_WEBSOCKETS:1:1:1:5: Coherence: Frontend to Agent communications using NETRA_WEBSOCKETS
+NETRA_WEBSOCKETS:1:1:1:6: Coherence: Frontend loading into Chat UI/UX concepts using NETRA_WEBSOCKETS
+NETRA_WEBSOCKETS:1:1:1:7: Coherence: With service discovery: backend tells frontend NETRA_WEBSOCKETS config: frontend loads config from service discovery
+NETRA_WEBSOCKETS:1:1:1:8: Coherence: NETRA_WEBSOCKETS Auth uses existing auth concepts like SecurityService (e..g JWT) Keep all security conceps as is, only integrate. 
+
+NETRA_WEBSOCKETS:1:0:1:0: JSON first: Always send and recieve JSON.
+NETRA_WEBSOCKETS:1:0:1:2: Careful: Lanchain stream to JSON parsing
+NETRA_WEBSOCKETS:1:0:1:2: Careful: NETRA_WEBSOCKETS use JSON not string
+NETRA_WEBSOCKETS:1:0:1:3: Careful: Protect against multiple functions or processing double or triple wrapping JSON badly
+
+NETRA_WEBSOCKETS:1:0:1:0 WebSocket connection is established statefully on application state load (BEFORE the first message is sent.) It is an ERROR if NETRA_WEBSOCKETS can’t be established.
+NETRA_WEBSOCKETS:1:0:1:1: Authorization. think carefully dev auth, regular user auth, etc. all well typed.
+NETRA_WEBSOCKETS:1:0:2:2: WebSocket connection is persistent.
+NETRA_WEBSOCKETS:1:0:2:3: Important: WebSocket connection resilient to component re-renders and lifecycle changes.
+Websockets works with regular JSON etc. when the user sends chat messages or free text or clicking examples etc.
+NETRA_WEBSOCKETS:1:0:2:4: NETRA_WEBSOCKETS messages are passed properly and use types.
+
+NETRA_WEBSOCKETS:1:0:2:0: NETRA_WEBSOCKETS Startup profile: When application starts up or reloads, NETRA_WEBSOCKETS are available.
+NETRA_WEBSOCKETS:1:0:2:1: If the front end sends a socket but the backend rejects, it must be logged clearly. 
+NETRA_WEBSOCKETS:1:0:2:2: Backend sends responses using a single source of truth to manage NETRA_WEBSOCKETS.
+NETRA_WEBSOCKETS:1:0:2:5: The backend provides discovery of NETRA_WEBSOCKETS config to frontend.
+NETRA_WEBSOCKETS:1:0:2:5:1: The frontend discovers NETRA_WEBSOCKETS config at earilest reasonable application state.
+
+NETRA_WEBSOCKETS:1:0:3: NETRA_WEBSOCKETS End to end testing
+
+NETRA_WEBSOCKETS:ENDS
