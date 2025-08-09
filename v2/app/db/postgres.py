@@ -52,13 +52,17 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
         logger.error("async_session_factory is not initialized.")
         raise RuntimeError("Database not configured")
 
-    async with async_session_factory() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception as e:
-            await session.rollback()
-            logger.error(f"Async DB session error: {e}")
-            raise
-        finally:
-            await session.close()
+    try:
+        async with async_session_factory() as session:
+            try:
+                yield session
+                await session.commit()
+            except Exception as e:
+                await session.rollback()
+                logger.error(f"Async DB session error: {e}")
+                raise
+            finally:
+                await session.close()
+    except Exception as e:
+        logger.error(f"Error creating async db session: {e}")
+        raise

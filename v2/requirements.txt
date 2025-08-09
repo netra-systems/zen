@@ -38,3 +38,4 @@ rich
 pytest-asyncio
 langchain-community
 pytest-mock
+watchfiles
