@@ -11,7 +11,7 @@ class WebSocketService {
   public onMessage: ((message: WebSocketMessage) => void) | null = null;
 
   public async connect(url: string) {
-    if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
+    if (this.status === 'OPEN' || this.status === 'CONNECTING') {
       return;
     }
 
@@ -42,7 +42,8 @@ class WebSocketService {
 
       this.ws.onerror = (error) => {
         console.error('WebSocket error:', error);
-        this.ws?.close();
+        this.status = 'CLOSED';
+        this.onStatusChange?.(this.status);
       };
     } catch (error) {
       console.error('Failed to connect to WebSocket:', error);
@@ -60,7 +61,7 @@ class WebSocketService {
   }
 
   public disconnect() {
-    if (this.ws) {
+    if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
       this.ws.close();
     }
   }
