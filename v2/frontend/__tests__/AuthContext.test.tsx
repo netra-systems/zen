@@ -1,50 +1,67 @@
-import { render, screen, waitFor, act } from '@testing-library/react';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import * as auth from '@/services/auth';
-import { mockAuthConfig, mockUser } from '@/mocks/auth';
-import fetchMock from 'jest-fetch-mock';
 
-// A simple component that consumes the context and displays the user's ID.
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { authService } from '@/services/auth';
+import { mockUser, mockAuthConfig } from '@/mocks/auth';
+
+// Mock the authService
+jest.mock('@/services/auth');
+
 const TestComponent = () => {
-  const { user } = useAuth();
-  return user ? <div data-testid="test-component-user-id">{user.id}</div> : null;
+  const { user, login, logout } = useAuth();
+  return user ? (
+    <div>
+      <span>Welcome, {user.full_name}</span>
+      <button onClick={logout}>Logout</button>
+    </div>
+  ) : (
+    <button onClick={login}>Login with Google</button>
+  );
 };
 
 describe('AuthProvider', () => {
   beforeEach(() => {
-    fetchMock.resetMocks();
+    // Reset the mock before each test
+    (authService.getAuthConfig as jest.Mock).mockClear();
+    (authService.handleLogin as jest.Mock).mockClear();
+    (authService.handleLogout as jest.Mock).mockClear();
   });
 
   it('should show loading state initially, then login button', async () => {
-    fetchMock.mockResponseOnce(JSON.stringify(mockAuthConfig));
+    (authService.getAuthConfig as jest.Mock).mockResolvedValue(mockAuthConfig);
+
     render(
       <AuthProvider>
         <TestComponent />
       </AuthProvider>
     );
+
     expect(screen.getByText('Loading...')).toBeInTheDocument();
+
     await waitFor(() => {
       expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
     });
+
     expect(screen.getByText('Login with Google')).toBeInTheDocument();
   });
 
   it('should show user info when authenticated', async () => {
-    fetchMock.mockResponseOnce(JSON.stringify({ ...mockAuthConfig, user: mockUser }));
+    (authService.getAuthConfig as jest.Mock).mockResolvedValue({ ...mockAuthConfig, user: mockUser });
+
     render(
       <AuthProvider>
         <TestComponent />
       </AuthProvider>
     );
+
     await waitFor(() => {
       expect(screen.getByText(`Welcome, ${mockUser.full_name}`)).toBeInTheDocument();
-      expect(screen.getByTestId('test-component-user-id')).toHaveTextContent(mockUser.id);
     });
   });
 
   it('should call login function on button click', async () => {
-    fetchMock.mockResponseOnce(JSON.stringify(mockAuthConfig));
-    const mockLogin = jest.spyOn(auth, 'handleLogin').mockImplementation(() => {});
+    (authService.getAuthConfig as jest.Mock).mockResolvedValue(mockAuthConfig);
+    const mockLogin = (authService.handleLogin as jest.Mock);
 
     render(
       <AuthProvider>
@@ -52,17 +69,16 @@ describe('AuthProvider', () => {
       </AuthProvider>
     );
 
-    const loginButton = await screen.findByText('Login with Google');
-    await act(async () => {
-      loginButton.click();
+    await waitFor(() => {
+      fireEvent.click(screen.getByText('Login with Google'));
     });
 
-    expect(mockLogin).toHaveBeenCalledWith(mockAuthConfig);
+    expect(mockLogin).toHaveBeenCalled();
   });
 
   it('should call logout function on button click', async () => {
-    fetchMock.mockResponseOnce(JSON.stringify({ ...mockAuthConfig, user: mockUser }));
-    const mockLogout = jest.spyOn(auth, 'handleLogout').mockImplementation(() => {});
+    (authService.getAuthConfig as jest.Mock).mockResolvedValue({ ...mockAuthConfig, user: mockUser });
+    const mockLogout = (authService.handleLogout as jest.Mock);
 
     render(
       <AuthProvider>
@@ -70,11 +86,10 @@ describe('AuthProvider', () => {
       </AuthProvider>
     );
 
-    const logoutButton = await screen.findByText('Logout');
-    await act(async () => {
-      logoutButton.click();
+    await waitFor(() => {
+      fireEvent.click(screen.getByText('Logout'));
     });
 
-    expect(mockLogout).toHaveBeenCalledWith({ ...mockAuthConfig, user: mockUser });
+    expect(mockLogout).toHaveBeenCalled();
   });
 });

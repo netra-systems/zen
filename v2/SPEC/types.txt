@@ -5,8 +5,11 @@ refresh_types:1:0:1:0: Types:
 refresh_types:1:0:1:0:0: frontend: types/index.ts. 
 refresh_types:1:0:1:0:1: backend: schemas.py (Pydantic BaseModel)
 
-refresh_types:1:0:0: PRIMARY GOAL: Strong classes and types for every object in the system.
-
 refresh_types:1:0:1: Look for 3 functions outside of classes.
 refresh_types:1:0:2: Look for 3 sets of params without types.
-refresh_types:1:0:3: ONLY REFACTOR. Keep all existing concepts.
+
+refresh_types:1:0:3: Long term goal: Strong classes and types for every object in the system.
+Limit work in progress to practical. 
+Keep in single files for now.
+
+refresh_types:1:0:4: ONLY REFACTOR. Keep all existing concepts.

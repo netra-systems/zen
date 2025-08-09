@@ -1,9 +1,8 @@
 'use client';
 
 import { useMemo, type ReactNode } from 'react';
-import { AuthProvider } from '@/contexts/AuthContext';
 import { WebSocketProvider } from '@/contexts/WebSocketContext';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { config } from '@/config';
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -16,10 +15,8 @@ export function Providers({ children }: { children: ReactNode }) {
   }, [user]);
 
   return (
-    <AuthProvider>
       <WebSocketProvider url={socketUrl}>
         {children}
       </WebSocketProvider>
-    </AuthProvider>
   );
 }
