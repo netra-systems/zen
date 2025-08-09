@@ -1,7 +1,7 @@
 from typing import Annotated, Optional
 from fastapi import Depends, HTTPException, status, Query
 from app.db.postgres import get_async_db
-from app.auth.services import SecurityService
+from app.services.security_service import SecurityService
 from app.dependencies import get_security_service
 from app.db.models_postgres import User
 import logging
