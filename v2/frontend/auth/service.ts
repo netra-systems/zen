@@ -23,7 +23,6 @@ class AuthService {
       });
       if (response.ok) {
         const user = await response.json();
-        console.log('Dev login successful', user);
         return user;
       } else {
         console.error('Dev login failed');

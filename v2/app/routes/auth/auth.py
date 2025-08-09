@@ -79,7 +79,7 @@ class AuthRoutes:
             user = await user_service.create(db, obj_in=user_in)
 
         request.session["user"] = {"email": user.email, "name": user.full_name, "picture": user.picture}
-        return {"message": "Dev login successful", "user": user.email}
+        return user
 
     @router.get("/logout")
     async def logout(request: Request):

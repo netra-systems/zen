@@ -32,28 +32,30 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const [messages, setMessages] = useState<WebSocketMessage[]>([]);
 
   useEffect(() => {
-    const fetchConfigAndConnect = async () => {
-      try {
-        const response = await fetch(`${appConfig.apiUrl}/api/config`);
-        const config = await response.json();
-        webSocketService.onStatusChange = setStatus;
-        webSocketService.onMessage = (newMessage) => {
-          setMessages((prevMessages) => [...prevMessages, newMessage]);
-        };
-        if (user) {
+    if (user) {
+      const fetchConfigAndConnect = async () => {
+        try {
+          const response = await fetch(`${appConfig.apiUrl}/api/config`);
+          const config = await response.json();
+          webSocketService.onStatusChange = setStatus;
+          webSocketService.onMessage = (newMessage) => {
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
+          };
           webSocketService.connect(`${config.ws_url}?user_id=${user.id}`);
+        } catch (error) {
+          console.error('Failed to fetch config and connect to WebSocket', error);
         }
-      } catch (error) {
-        console.error('Failed to fetch config and connect to WebSocket', error);
-      }
-    };
+      };
 
-    fetchConfigAndConnect();
+      fetchConfigAndConnect();
+    }
 
     return () => {
-      webSocketService.disconnect();
+      if (user) {
+        webSocketService.disconnect();
+      }
     };
-  }, []);
+  }, [user]);
 
   const sendMessage = (message: WebSocketMessage) => {
     webSocketService.sendMessage(message);
