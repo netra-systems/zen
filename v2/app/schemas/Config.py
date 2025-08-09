@@ -93,6 +93,14 @@ class ClickHouseLoggingConfig(BaseModel):
     available_time_periods: List[int] = Field(default_factory=lambda: [1, 7, 30, 90])
 
 
+class LogTableSettings(BaseModel):
+    log_table: str
+
+
+class TimePeriodSettings(BaseModel):
+    days: int
+
+
 class LangfuseConfig(BaseModel):
     secret_key: str = ""
     public_key: str = ""
