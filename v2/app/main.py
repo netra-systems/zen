@@ -120,7 +120,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         content={"detail": exc.detail},
     )
 
-from app.routes import supply, generation, admin, references, health, corpus, synthetic_data
+from app.routes import supply, generation, admin, references, health, corpus, synthetic_data, config
 from app.routes.auth import auth as auth_router
 
 app.include_router(auth_router.router, prefix="/api/auth", tags=["auth"])
@@ -132,6 +132,7 @@ app.include_router(references.router, prefix="/api", tags=["references"])
 app.include_router(health.router, prefix="/health", tags=["health"])
 app.include_router(corpus.router, prefix="/api/corpus", tags=["corpus"])
 app.include_router(synthetic_data.router, prefix="/synthetic_data", tags=["synthetic_data"])
+app.include_router(config.router, prefix="/api", tags=["config"])
 
 @app.get("/")
 def read_root():
