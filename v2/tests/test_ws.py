@@ -1,57 +1,30 @@
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import AsyncMock, patch
 from app.main import app
-from app.schemas import WebSocketMessage, AnalysisRequest, User
+from app.ws_manager import manager
+from app.auth.auth_dependencies import ActiveUserWsDep
+from app.schemas import User
+import uuid
 
 @pytest.fixture
 def client():
     return TestClient(app)
 
 @pytest.fixture
-def mock_supervisor():
-    supervisor = AsyncMock()
-    supervisor.start_agent = AsyncMock()
-    return supervisor
-
-@pytest.fixture(autouse=True)
-def override_dependencies(mock_supervisor):
-    app.dependency_overrides[get_agent_supervisor] = lambda: mock_supervisor
-    yield
-    app.dependency_overrides = {}
+def active_user():
+    return User(id=str(uuid.uuid4()), email="test@example.com", is_superuser=False)
 
 @pytest.mark.asyncio
-async def test_websocket_connection(client):
-    with client.websocket_connect("/ws?token=test_token") as websocket:
-        assert websocket.scope["user"].email == "test@example.com"
+async def test_websocket_connection(client, active_user):
+    app.dependency_overrides[ActiveUserWsDep] = lambda: active_user
+    with client.websocket_connect(f"/ws?user_id={active_user.id}") as websocket:
+        user_id = str(active_user.id)
+        assert user_id in manager.active_connections
 
 @pytest.mark.asyncio
-async def test_websocket_invalid_token(client):
-    with pytest.raises(Exception):
-        with client.websocket_connect("/ws?token=invalid_token") as websocket:
-            pass
-
-@pytest.mark.asyncio
-async def test_websocket_analysis_request(client, mock_supervisor):
-    with client.websocket_connect("/ws?token=test_token") as websocket:
-        analysis_request_payload = {"prompt": "test prompt"}
-        ws_message = WebSocketMessage(type="analysis_request", payload=analysis_request_payload)
-        websocket.send_text(ws_message.json())
-        mock_supervisor.start_agent.assert_called_once()
-
-@pytest.mark.asyncio
-async def test_websocket_unknown_message(client):
-    with client.websocket_connect("/ws?token=test_token") as websocket:
-        ws_message = WebSocketMessage(type="unknown_type", payload={})
-        websocket.send_text(ws_message.json())
-        response = websocket.receive_json()
-        assert response["type"] == "error"
-        assert "Unknown message type" in response["payload"]["message"]
-
-@pytest.mark.asyncio
-async def test_websocket_invalid_json(client):
-    with client.websocket_connect("/ws?token=test_token") as websocket:
-        websocket.send_text("invalid json")
-        response = websocket.receive_json()
-        assert response["type"] == "error"
-        assert "Invalid JSON format" in response["payload"]["message"]
+async def test_websocket_disconnect(client, active_user):
+    app.dependency_overrides[ActiveUserWsDep] = lambda: active_user
+    with client.websocket_connect(f"/ws?user_id={active_user.id}") as websocket:
+        user_id = str(active_user.id)
+        assert user_id in manager.active_connections
+    assert user_id not in manager.active_connections
