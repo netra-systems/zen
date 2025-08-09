@@ -1,1 +1,2 @@
 read instructions.txt review chat_ui_ux.txt 
+Read instructions.txt PAUSE. Then read and do postgres.txt 
