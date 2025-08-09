@@ -64,11 +64,12 @@ async def lifespan(app: FastAPI):
 
     # Perform database self-check
     from app.services.db_check_service import check_db_schema
-    async with app.state.db_session_factory() as session:
-        if not await check_db_schema(session):
-            # In a real application, you might want to raise an exception here
-            # to prevent the application from starting with a bad schema.
-            logger.error("Database schema validation failed. The application might not work as expected.")
+    if "pytest" not in sys.modules:
+        async with app.state.db_session_factory() as session:
+            if not await check_db_schema(session):
+                # In a real application, you might want to raise an exception here
+                # to prevent the application from starting with a bad schema.
+                logger.error("Database schema validation failed. The application might not work as expected.")
 
     # Initialize the agent supervisor
     tool_registry = ToolRegistry(app.state.db_session_factory)
@@ -183,20 +184,6 @@ if "pytest" in sys.modules:
     tool_dispatcher = ToolDispatcher(tool_registry.get_tools([]))
     app.state.agent_supervisor = Supervisor(async_session_factory, llm_manager, websocket_manager, tool_dispatcher)
 
-    from app.db.testing import override_get_db, engine
-    from app.db.base import Base
-
-    @asynccontextmanager
-    async def test_lifespan(app: FastAPI):
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        try:
-            yield
-        finally:
-            async with engine.begin() as conn:
-                await conn.run_sync(Base.metadata.drop_all)
-
+    from app.db.testing import override_get_db
     from app.dependencies import get_db_session
     app.dependency_overrides[get_db_session] = override_get_db
-    if "client" not in sys.modules:
-        app.router.lifespan_context = test_lifespan

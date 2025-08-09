@@ -28,7 +28,7 @@ async def check_db_schema(db_session: AsyncSession):
         return False
 
 def _validate_schema_with_alembic(connection):
-    alembic_cfg = Config("alembic.ini")
+    alembic_cfg = Config("v2/alembic.ini")
     script = ScriptDirectory.from_config(alembic_cfg)
 
     # Get the head revision from the scripts

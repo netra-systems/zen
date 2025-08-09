@@ -6,6 +6,7 @@ import { AuthConfigResponse } from '@/auth';
 import { Button } from '@/components/ui/button';
 import { authService } from '@/auth';
 import { jwtDecode } from 'jwt-decode';
+import { webSocketService } from '@/services/webSocketService';
 
 export interface AuthContextType {
   user: User | null;
@@ -53,6 +54,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchAuthConfig();
   }, [fetchAuthConfig]);
 
+  useEffect(() => {
+    if (token) {
+      webSocketService.connect(token);
+    }
+  }, [token]);
+
   const login = () => {
     if (authConfig) {
       authService.handleLogin(authConfig);
@@ -70,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, authConfig }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, authConfig, token }}>
       {children}
     </AuthContext.Provider>
   );

@@ -17,6 +17,7 @@ async def get_db_session(request: Request) -> AsyncSession:
         yield session
 
 def get_security_service(request: Request) -> SecurityService:
+    print("GETTING SECURITY SERVICE")
     return request.app.state.security_service
 
 LLMManagerDep = Annotated[LLMManager, Depends(get_llm_manager)]
