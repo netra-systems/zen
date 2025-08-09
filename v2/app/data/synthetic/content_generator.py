@@ -44,23 +44,25 @@ META_PROMPTS = {
 
 # --- 3. Generation Logic ---
 
-def generate_content_sample(workload_type: str, model, generation_config) -> dict:
+def generate_content_sample(workload_type: str, model) -> dict:
     """Generates a single, schema-guaranteed sample for a given workload type using the LLM."""
     instruction, schema = META_PROMPTS[workload_type]
     
-    prompt = f"""
-    You are a synthetic data generator. Your task is to create a realistic data sample for the workload type: '{workload_type}'.
+    prompt = f"""    You are a synthetic data generator. Your task is to create a realistic data sample for the workload type: '{workload_type}'.
     Instructions: {instruction}
     Now, call the provided tool with the generated content.
     """
     
     try:
         # Use the schema as a "tool" to enforce structured output
-        response = model.generate_content(prompt, generation_config=generation_config, tools=[schema])
+        response = model.invoke(prompt, tools=[schema])
         
         # Extract the structured data from the tool call
-        tool_call = response.candidates[0].content.parts[0].function_call
-        args = tool_call.args
+        if not response.tool_calls:
+            return None
+        
+        tool_call = response.tool_calls[0]
+        args = tool_call['args']
 
         if not args:
             # console.print(f"[yellow]Warning: Model returned empty arguments for '{workload_type}'.")[/yellow]
@@ -80,12 +82,12 @@ def generate_content_sample(workload_type: str, model, generation_config) -> dic
     except (ValueError, IndexError, AttributeError, KeyError) as e:
         return None
 
-def generate_for_type(task_args, llm, generation_params):
+def generate_for_type(task_args, llm):
     """Worker function to generate multiple samples for a single workload type."""
     workload_type, num_samples = task_args
     samples = []
     for _ in range(num_samples):
-        sample = generate_content_sample(workload_type, llm, generation_params)
+        sample = generate_content_sample(workload_type, llm)
         if sample:
             samples.append(sample)
     return [s for s in samples if s]
@@ -119,7 +121,7 @@ def main(args):
 
     corpus = {key: [] for key in workload_types}
 
-    worker_func = partial(generate_for_type, llm=llm, generation_params=generation_params)
+    worker_func = partial(generate_for_type, llm=llm)
     tasks_for_pool = [(w_type, num_samples_per_type) for w_type in workload_types]
 
     with Pool(processes=num_processes) as pool:
