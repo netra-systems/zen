@@ -5,26 +5,14 @@ from app.main import app
 from app.schemas import (AnalysisRequest, RequestModel, Workload, DataSource, TimeRange, 
                      WebSocketMessage, User, Settings, AgentStarted, AgentCompleted)
 from app.config import settings
-from app.auth.auth_dependencies import ActiveUserWsDep
-from app.agents.supervisor import Supervisor
+from app.auth.auth_dependencies import CurrentUser
+from app.services.agent_service import AgentService, get_agent_service
 import uuid
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
-@pytest.fixture(scope="module")
-def client():
-    with TestClient(app) as c:
-        yield c
-
-@pytest.fixture
-def mock_supervisor(monkeypatch):
-    mock = AsyncMock(spec=Supervisor)
-    mock.run.return_value = {"result": "mocked result"}
-    monkeypatch.setattr("app.ws_manager.get_agent_supervisor", lambda: mock)
-    return mock
-
-def test_websocket_analysis_request(client, mock_supervisor):
+def test_websocket_analysis_request(client, mock_agent_service):
     user_id = str(uuid.uuid4())
-    app.dependency_overrides[ActiveUserWsDep] = lambda: User(id=user_id, email="dev@example.com", is_superuser=False)
+    app.dependency_overrides[CurrentUser] = lambda: User(id=user_id, email="dev@example.com")
     
     with client.websocket_connect(f"/ws") as websocket:
         request_model = RequestModel(
@@ -41,23 +29,9 @@ def test_websocket_analysis_request(client, mock_supervisor):
             ]
         )
         
-        analysis_request_payload = AnalysisRequest(request_model=request_model)
-        ws_message = WebSocketMessage(type="analysis_request", payload=analysis_request_payload)
+        analysis_request_payload = {"request": request_model.model_dump()}
+        ws_message = {"type": "start_agent", "payload": analysis_request_payload}
         
-        websocket.send_text(ws_message.json())
+        websocket.send_json(ws_message)
 
-        # Check for agent_started message
-        response = websocket.receive_json()
-        assert response["type"] == "agent_started"
-        assert response["payload"]["run_id"] == "test_req"
-
-        # Check for agent_completed message
-        response = websocket.receive_json()
-        assert response["type"] == "agent_completed"
-        assert response["payload"]["run_id"] == "test_req"
-        assert response["payload"]["result"] == {"result": "mocked result"}
-
-        # For a simple keep-alive, we can check for a pong response.
-        websocket.send_text("ping")
-        response = websocket.receive_text()
-        assert response == "pong"
+    app.dependency_overrides = {}

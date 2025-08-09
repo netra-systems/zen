@@ -1,16 +1,18 @@
 import pytest
-from sqlalchemy.ext.asyncio import create_async_engine
-from app.db.base import Base
-from app.config import settings
+from fastapi.testclient import TestClient
+from app.main import app
+from app.services.agent_service import AgentService, get_agent_service
+from unittest.mock import MagicMock, AsyncMock
 
-@pytest.fixture(scope="session", autouse=True)
-async def create_test_tables():
-    if settings.environment == "testing":
-        engine = create_async_engine(settings.database_url)
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        yield
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
-    else:
-        yield # Do nothing if not in testing environment
+@pytest.fixture
+def mock_agent_service():
+    mock = MagicMock(spec=AgentService)
+    mock.handle_websocket_message = AsyncMock()
+    return mock
+
+@pytest.fixture(scope="function")
+def client(mock_agent_service):
+    app.dependency_overrides[get_agent_service] = lambda: mock_agent_service
+    with TestClient(app) as c:
+        yield c
+    app.dependency_overrides = {}

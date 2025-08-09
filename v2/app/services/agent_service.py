@@ -19,11 +19,11 @@ class AgentService:
         """
         return await self.supervisor.run(request_model.model_dump(), run_id, stream_updates)
 
-    async def handle_websocket_message(self, run_id: str, message: str):
+    async def handle_websocket_message(self, user_id: str, message: str):
         """
         Handles a message from the WebSocket.
         """
-        logger.info(f"handle_websocket_message called for run_id: {run_id} with message: {message}")
+        logger.info(f"handle_websocket_message called for user_id: {user_id} with message: {message}")
         try:
             data = json.loads(message)
             message_type = data.get("type")
@@ -31,9 +31,9 @@ class AgentService:
                 payload = data.get("payload")
                 request_model = schemas.RequestModel(**payload.get("request"))
                 # When started from a websocket, we always want to stream updates
-                response = await self.run(request_model, run_id, stream_updates=True)
-                await manager.broadcast_to_user(
-                    run_id,
+                response = await self.run(request_model, user_id, stream_updates=True)
+                await manager.send_message(
+                    user_id,
                     {
                         "event": "agent_finished",
                         "data": response
@@ -41,9 +41,9 @@ class AgentService:
                 )
 
             else:
-                logger.warning(f"Received unhandled message for run_id: {run_id}: {message}")
+                logger.warning(f"Received unhandled message for user_id: {user_id}: {message}")
         except Exception as e:
-            logger.error(f"Error in handle_websocket_message for run_id: {run_id}: {e}", exc_info=True)
+            logger.error(f"Error in handle_websocket_message for user_id: {user_id}: {e}", exc_info=True)
 
 def get_agent_service(db_session = Depends(get_async_db), llm_manager: LLMManager = Depends(LLMManager)) -> AgentService:
     from app.agents.supervisor import Supervisor

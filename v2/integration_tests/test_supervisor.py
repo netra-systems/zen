@@ -47,7 +47,8 @@ async def test_supervisor_flow():
     # Run the supervisor
     user_request = "Analyze my data and suggest optimizations."
     run_id = "test_run"
-    final_state = await supervisor.run(user_request, run_id, stream_updates=False)
+    initial_state = DeepAgentState(user_request=user_request)
+    final_state = await supervisor.run(initial_state, run_id, stream_updates=False)
 
     # Assertions
     assert final_state.user_request == user_request

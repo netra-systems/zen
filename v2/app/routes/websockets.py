@@ -1,7 +1,8 @@
-from fastapi import APIRouter, WebSocket, Depends, WebSocketDisconnect, Query
+from fastapi import APIRouter, WebSocket, Depends, WebSocketDisconnect
 from app.ws_manager import manager
 from app import schemas
-from app.auth.auth_dependencies import ActiveUserWsDep
+from app.auth.auth_dependencies import CurrentUser
+from app.services.agent_service import AgentService, get_agent_service
 import logging
 
 logger = logging.getLogger(__name__)
@@ -10,7 +11,8 @@ router = APIRouter()
 @router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket,
-    user: schemas.User = Depends(ActiveUserWsDep),
+    user: schemas.User = Depends(CurrentUser),
+    agent_service: AgentService = Depends(get_agent_service),
 ):
     if user is None:
         await websocket.close(code=1008)
@@ -21,11 +23,7 @@ async def websocket_endpoint(
     try:
         while True:
             data = await websocket.receive_text()
-            # Here you would typically pass the data to a message handler
-            # For now, we'll just log it
-            logger.info(f"Received message from {user_id}: {data}")
-            # Example of sending a message back to the user
-            await manager.send_message(user_id, {"response": "Message received"})
+            await agent_service.handle_websocket_message(user_id, data)
 
     except WebSocketDisconnect:
         manager.disconnect(user_id)

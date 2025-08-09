@@ -186,4 +186,5 @@ if "pytest" in sys.modules:
 
     from app.dependencies import get_db_session
     app.dependency_overrides[get_db_session] = override_get_db
-    app.router.lifespan_context = test_lifespan
+    if "client" not in sys.modules:
+        app.router.lifespan_context = test_lifespan
