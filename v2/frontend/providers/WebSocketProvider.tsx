@@ -24,7 +24,10 @@ interface WebSocketProviderProps {
   children: ReactNode;
 }
 
+import { AuthContext } from '@/auth/context';
+
 export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
+  const { user } = useContext(AuthContext)!;
   const [status, setStatus] = useState<WebSocketStatus>('CLOSED');
   const [messages, setMessages] = useState<WebSocketMessage[]>([]);
 
@@ -37,7 +40,9 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         webSocketService.onMessage = (newMessage) => {
           setMessages((prevMessages) => [...prevMessages, newMessage]);
         };
-        webSocketService.connect(config.ws_url);
+        if (user) {
+          webSocketService.connect(`${config.ws_url}?user_id=${user.id}`);
+        }
       } catch (error) {
         console.error('Failed to fetch config and connect to WebSocket', error);
       }
