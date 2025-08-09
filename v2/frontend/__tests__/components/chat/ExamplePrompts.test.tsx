@@ -7,13 +7,17 @@ import { useChatStore } from '@/store/chat';
 
 const mockSendMessage = jest.fn();
 const mockSetProcessing = jest.fn();
+const mockAddMessage = jest.fn();
 
 jest.mock('@/hooks/useWebSocket', () => ({
   useWebSocket: () => ({ sendMessage: mockSendMessage }),
 }));
 
 jest.mock('@/store/chat', () => ({
-  useChatStore: () => ({ setProcessing: mockSetProcessing }),
+  useChatStore: () => ({ 
+    setProcessing: mockSetProcessing,
+    addMessage: mockAddMessage 
+  }),
 }));
 
 describe('ExamplePrompts', () => {
@@ -27,9 +31,18 @@ describe('ExamplePrompts', () => {
     const firstPrompt = screen.getByText(/I need to reduce costs but keep quality the same/i);
     fireEvent.click(firstPrompt);
 
-    expect(mockSendMessage).toHaveBeenCalledWith(
-      JSON.stringify({ type: 'user_message', payload: { text: 'I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.' } })
-    );
+    expect(mockAddMessage).toHaveBeenCalledWith(expect.objectContaining({
+      role: 'user',
+      content: 'I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.',
+      displayed_to_user: true
+    }));
+    expect(mockSendMessage).toHaveBeenCalledWith({
+      type: 'user_message',
+      payload: { 
+        text: 'I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.',
+        references: []
+      }
+    });
     expect(mockSetProcessing).toHaveBeenCalledWith(true);
   });
 });

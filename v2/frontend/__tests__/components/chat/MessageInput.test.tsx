@@ -13,19 +13,24 @@ jest.mock('@/hooks/useWebSocket', () => ({
 jest.mock('@/store/chat');
 
 describe('MessageInput', () => {
+  const mockAddMessage = jest.fn();
+  
   beforeEach(() => {
     jest.clearAllMocks();
+    (useChatStore as jest.Mock).mockReturnValue({ 
+      isProcessing: false,
+      addMessage: mockAddMessage,
+      setProcessing: jest.fn()
+    });
   });
 
   it('should render the input field and send button', () => {
-    (useChatStore as jest.Mock).mockReturnValue({ isProcessing: false });
     render(<MessageInput />);
     expect(screen.getByPlaceholderText('Type your message...')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /send/i })).toBeInTheDocument();
   });
 
   it('should update the input value on change', () => {
-    (useChatStore as jest.Mock).mockReturnValue({ isProcessing: false });
     render(<MessageInput />);
     const input = screen.getByPlaceholderText('Type your message...') as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'Test message' } });
@@ -34,7 +39,11 @@ describe('MessageInput', () => {
 
   it('should send a message when the send button is clicked', () => {
     const setProcessing = jest.fn();
-    (useChatStore as jest.Mock).mockReturnValue({ isProcessing: false, setProcessing });
+    (useChatStore as jest.Mock).mockReturnValue({ 
+      isProcessing: false, 
+      setProcessing,
+      addMessage: mockAddMessage 
+    });
     render(<MessageInput />);
     const input = screen.getByPlaceholderText('Type your message...') as HTMLInputElement;
     const sendButton = screen.getByRole('button', { name: /send/i });
@@ -42,27 +51,45 @@ describe('MessageInput', () => {
     fireEvent.change(input, { target: { value: 'Test message' } });
     fireEvent.click(sendButton);
 
-    expect(mockSendMessage).toHaveBeenCalledWith(JSON.stringify({ type: 'user_message', payload: { text: 'Test message' } }));
+    expect(mockAddMessage).toHaveBeenCalledWith(expect.objectContaining({
+      role: 'user',
+      content: 'Test message',
+      displayed_to_user: true
+    }));
+    expect(mockSendMessage).toHaveBeenCalledWith({ type: 'user_message', payload: { text: 'Test message', references: [] } });
     expect(setProcessing).toHaveBeenCalledWith(true);
     expect(input.value).toBe('');
   });
 
   it('should send a message when Enter key is pressed', () => {
     const setProcessing = jest.fn();
-    (useChatStore as jest.Mock).mockReturnValue({ isProcessing: false, setProcessing });
+    (useChatStore as jest.Mock).mockReturnValue({ 
+      isProcessing: false, 
+      setProcessing,
+      addMessage: mockAddMessage 
+    });
     render(<MessageInput />);
     const input = screen.getByPlaceholderText('Type your message...') as HTMLInputElement;
 
     fireEvent.change(input, { target: { value: 'Test message' } });
     fireEvent.keyPress(input, { key: 'Enter', code: 'Enter', charCode: 13 });
 
-    expect(mockSendMessage).toHaveBeenCalledWith(JSON.stringify({ type: 'user_message', payload: { text: 'Test message' } }));
+    expect(mockAddMessage).toHaveBeenCalledWith(expect.objectContaining({
+      role: 'user',
+      content: 'Test message',
+      displayed_to_user: true
+    }));
+    expect(mockSendMessage).toHaveBeenCalledWith({ type: 'user_message', payload: { text: 'Test message', references: [] } });
     expect(setProcessing).toHaveBeenCalledWith(true);
     expect(input.value).toBe('');
   });
 
   it('should disable input and button when processing', () => {
-    (useChatStore as jest.Mock).mockReturnValue({ isProcessing: true });
+    (useChatStore as jest.Mock).mockReturnValue({ 
+      isProcessing: true,
+      addMessage: mockAddMessage,
+      setProcessing: jest.fn()
+    });
     render(<MessageInput />);
     expect(screen.getByPlaceholderText('Agent is thinking...')).toBeDisabled();
     expect(screen.getByRole('button', { name: /send/i })).toBeDisabled();

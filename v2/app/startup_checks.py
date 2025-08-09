@@ -4,6 +4,10 @@ from app.schemas import AppConfig
 from app.redis_manager import RedisManager
 from app.db.clickhouse_base import ClickHouseDatabase
 from app.llm.llm_manager import LLMManager
+import time
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.models_postgres import Assistant
 
 logger = central_logger.get_logger(__name__)
 
@@ -53,9 +57,58 @@ async def check_llm(llm_manager: LLMManager):
         logger.error(f"LLM configuration validation failed: {e}. Check Auth Refresh expires every 16 hours (e.g. gcloud auth application-default login)")
         raise
 
+async def check_or_create_assistant(db_session_factory):
+    """Checks if Netra assistant exists, creates it if not."""
+    logger.info("Checking Netra assistant...")
+    try:
+        async with db_session_factory() as db:
+            # Check if assistant already exists
+            result = await db.execute(
+                select(Assistant).where(Assistant.id == "netra-assistant")
+            )
+            assistant = result.scalar_one_or_none()
+            
+            if not assistant:
+                # Create the assistant
+                assistant = Assistant(
+                    id="netra-assistant",
+                    object="assistant",
+                    created_at=int(time.time()),
+                    name="Netra AI Optimization Assistant",
+                    description="The world's best AI workload optimization assistant",
+                    model="gpt-4",
+                    instructions="You are Netra AI Workload Optimization Assistant. You help users optimize their AI workloads for cost, performance, and quality.",
+                    tools=[
+                        {"type": "data_analysis"},
+                        {"type": "optimization"},
+                        {"type": "reporting"}
+                    ],
+                    file_ids=[],
+                    metadata_={
+                        "version": "1.0",
+                        "capabilities": [
+                            "workload_analysis",
+                            "cost_optimization",
+                            "performance_optimization",
+                            "quality_optimization",
+                            "model_selection",
+                            "supply_catalog_management"
+                        ]
+                    }
+                )
+                db.add(assistant)
+                await db.commit()
+                logger.info("Created Netra assistant successfully")
+            else:
+                logger.info("Netra assistant already exists")
+    except Exception as e:
+        logger.error(f"Failed to check/create Netra assistant: {e}")
+        raise
+
 async def run_startup_checks(app):
     """Runs all startup checks."""
     await check_config(settings)
     await check_redis(app.state.redis_manager)
     await check_clickhouse()
     await check_llm(app.state.llm_manager)
+    await check_or_create_assistant(app.state.db_session_factory)
