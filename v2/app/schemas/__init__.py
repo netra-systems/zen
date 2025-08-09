@@ -60,6 +60,7 @@ from .Metrics import EnrichedMetrics, BaselineMetrics
 from .Log import UnifiedLogEntry
 from .Pattern import DiscoveredPattern
 from .Policy import LearnedPolicy, PredictedOutcome
+from .Analysis import AnalysisResult
 from .Request import (
     Settings,
     DataSource,
@@ -166,6 +167,7 @@ __all__ = [
     "DiscoveredPattern",
     "LearnedPolicy",
     "PredictedOutcome",
+    "AnalysisResult",
     "Settings",
     "DataSource",
     "TimeRange",
