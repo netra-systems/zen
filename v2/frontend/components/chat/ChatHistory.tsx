@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { WebSocketContext } from '@/contexts/WebSocketContext';
-import Message from './Message';
+import Message from '../Message';
 
 const ChatHistory: React.FC = () => {
   const ws = useContext(WebSocketContext);

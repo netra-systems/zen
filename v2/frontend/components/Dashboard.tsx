@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { ChatInput } from './ChatInput';
-import { ChatHistory } from './ChatHistory';
+import { ChatHistory } from './chat/ChatHistory';
 import { useAgentContext } from '../providers/AgentProvider';
 import { MessageFilter } from './MessageFilter';
 import { Message } from '@/types/index';

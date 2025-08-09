@@ -22,7 +22,7 @@ describe('ExamplePrompts', () => {
   it('should render the example prompts section', () => {
     render(<ExamplePrompts />);
     expect(screen.getByText('Example Prompts')).toBeInTheDocument();
-    expect(screen.getByText('Show')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /hide/i })).toBeInTheDocument();
   });
 
   it('should display example prompts as cards', () => {
@@ -33,22 +33,22 @@ describe('ExamplePrompts', () => {
 
   it('should send a message and collapse the panel when a prompt is clicked', () => {
     render(<ExamplePrompts />);
-    const promptText = /I need to reduce costs but keep quality the same/i;
-    fireEvent.click(screen.getByText(promptText));
+    const promptText = screen.getByText(/I need to reduce costs but keep quality the same/i).textContent;
+    fireEvent.click(screen.getByText(/I need to reduce costs but keep quality the same/i));
 
-    expect(sendMessage).toHaveBeenCalledWith(JSON.stringify({ type: 'user_message', payload: { text: screen.getByText(promptText).textContent } }));
+    expect(sendMessage).toHaveBeenCalledWith(JSON.stringify({ type: 'user_message', payload: { text: promptText } }));
     expect(setProcessing).toHaveBeenCalledWith(true);
-    expect(screen.getByText('Show')).toBeInTheDocument(); // Panel should be collapsed
+    expect(screen.getByRole('button', { name: /show/i })).toBeInTheDocument(); // Panel should be collapsed
   });
 
   it('should toggle the collapsible panel', () => {
     render(<ExamplePrompts />);
-    const toggleButton = screen.getByRole('button', { name: /show/i });
+    const toggleButton = screen.getByRole('button', { name: /hide/i });
 
     fireEvent.click(toggleButton);
-    expect(screen.getByText('Hide')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /show/i })).toBeInTheDocument();
 
-    fireEvent.click(toggleButton);
-    expect(screen.getByText('Show')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /show/i }));
+    expect(screen.getByRole('button', { name: /hide/i })).toBeInTheDocument();
   });
 });
