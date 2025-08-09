@@ -22,7 +22,7 @@ from app.llm.llm_manager import LLMManager
 from app.agents.supervisor import Supervisor
 from app.services.agent_service import AgentService
 from app.services.key_manager import KeyManager
-from app.auth.services import SecurityService
+from app.services.security_service import SecurityService
 from app.background import BackgroundTaskManager
 from app.ws_manager import manager as websocket_manager
 from app.agents.tool_dispatcher import ToolDispatcher

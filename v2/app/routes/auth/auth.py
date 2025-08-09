@@ -10,6 +10,7 @@ from app.dependencies import get_db_session, get_security_service
 from app.db.models_postgres import User
 from app.schemas.User import UserCreate, UserCreateOAuth, User as UserSchema
 from app.schemas.Auth import AuthConfigResponse, AuthEndpoints, DevLoginRequest
+from app.schemas.Token import TokenPayload
 from app.services.user_service import user_service
 from app.services.security_service import SecurityService
 
@@ -29,7 +30,7 @@ class AuthRoutes:
                 detail="Incorrect username or password",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        access_token = security_service.create_access_token(data={"sub": str(user.id)})
+        access_token = security_service.create_access_token(data=TokenPayload(sub=str(user.id)))
         return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -63,6 +64,9 @@ class AuthRoutes:
     async def auth(request: Request, db: AsyncSession = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):
         token = await google.authorize_access_token(request)
         user_info = await google.parse_id_token(request, token)
+        if not user_info or 'email' not in user_info:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid user info from provider")
+
         user = await user_service.get_by_email(db, email=user_info['email'])
         if not user:
             user_in = UserCreateOAuth(
@@ -72,7 +76,7 @@ class AuthRoutes:
             )
             user = await user_service.create(db, obj_in=user_in)
 
-        access_token = security_service.create_access_token(data={"sub": str(user.id)})
+        access_token = security_service.create_access_token(data=TokenPayload(sub=str(user.id)))
         return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -92,5 +96,5 @@ class AuthRoutes:
             )
             user = await user_service.create(db, obj_in=user_in)
 
-        access_token = security_service.create_access_token(data={"sub": str(user.id)})
+        access_token = security_service.create_access_token(data=TokenPayload(sub=str(user.id)))
         return {"access_token": access_token, "token_type": "bearer"}

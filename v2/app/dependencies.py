@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.postgres import get_async_db
 from app.llm.llm_manager import LLMManager
-from app.auth.services import SecurityService
+from app.services.security_service import SecurityService
 from app.agents.supervisor import Supervisor
 
 DbDep = Annotated[AsyncSession, Depends(get_async_db)]
