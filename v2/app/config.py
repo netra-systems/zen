@@ -3,28 +3,8 @@ from google.cloud import secretmanager
 from typing import List, Dict
 from app import schemas
 from tenacity import retry, stop_after_attempt, wait_fixed, RetryError
+from schemas import SECRET_CONFIG
 
-SECRET_CONFIG: List[schemas.SecretReference] = [
-    schemas.SecretReference(name="gemini-api-key", target_model="llm_configs.default", target_field="api_key"),
-    schemas.SecretReference(name="gemini-api-key", target_model="llm_configs.triage", target_field="api_key"),
-    schemas.SecretReference(name="gemini-api-key", target_model="llm_configs.data", target_field="api_key"),
-    schemas.SecretReference(name="gemini-api-key", target_model="llm_configs.optimizations_core", target_field="api_key"),
-    schemas.SecretReference(name="gemini-api-key", target_model="llm_configs.actions_to_meet_goals", target_field="api_key"),
-    schemas.SecretReference(name="gemini-api-key", target_model="llm_configs.reporting", target_field="api_key"),
-    schemas.SecretReference(name="google-client-id", target_model="google_cloud", target_field="client_id"),
-    schemas.SecretReference(name="google-client-secret", target_model="google_cloud", target_field="client_secret"),
-    schemas.SecretReference(name="langfuse-secret-key", target_model="langfuse", target_field="secret_key"),
-    schemas.SecretReference(name="langfuse-public-key", target_model="langfuse", target_field="public_key"),
-    schemas.SecretReference(name="clickhouse-default-password", target_model="clickhouse_native", target_field="password"),
-    schemas.SecretReference(name="clickhouse-default-password", target_model="clickhouse_https", target_field="password"),
-    schemas.SecretReference(name="clickhouse-development-password", target_model="clickhouse_https_dev", target_field="password"),
-    schemas.SecretReference(name="jwt-secret-key", target_field="jwt_secret_key"),
-    schemas.SecretReference(name="fernet-key", target_field="fernet_key"),
-    schemas.SecretReference(name="google-client-id", target_model="oauth_config", target_field="client_id"),
-    schemas.SecretReference(name="google-client-secret", target_model="oauth_config", target_field="client_secret"),
-]
-
-from tenacity import retry, stop_after_attempt, wait_fixed, RetryError
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
 def get_secret_client() -> secretmanager.SecretManagerServiceClient:
