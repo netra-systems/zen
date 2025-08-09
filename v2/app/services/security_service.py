@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from ..db import models_postgres
 from .. import schemas
 from .key_manager import KeyManager
+from ..config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -28,7 +29,7 @@ class SecurityService:
         if expires_delta:
             expire = datetime.utcnow() + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(minutes=15)
+            expire = datetime.utcnow() + timedelta(minutes=settings.access_token_expire_minutes)
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, self.key_manager.jwt_secret_key, algorithm="HS256")
         return encoded_jwt
