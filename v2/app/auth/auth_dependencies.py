@@ -4,12 +4,12 @@ from app.db.postgres import get_async_db
 from app.services.security_service import SecurityService
 from app.dependencies import get_security_service
 from app.db.models_postgres import User
-import logging
+from app.logging_config import central_logger
 from fastapi.security import OAuth2PasswordBearer
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
-logger = logging.getLogger(__name__)
+logger = central_logger.get_logger(__name__)
 
 async def get_current_user(
     token: str,

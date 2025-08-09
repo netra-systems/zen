@@ -1,6 +1,6 @@
 import json
 import time
-import logging
+from app.logging_config import central_logger
 from app.db.clickhouse_base import ClickHouseDatabase
 
 def prepare_data_for_insert(flattened_records: list[dict]) -> tuple[list[str], list[list]]:
@@ -51,10 +51,10 @@ async def ingest_records(client: ClickHouseDatabase, records: list[dict], table_
     Ingests a list of in-memory records into a specified ClickHouse table using an active client.
     """
     if not records or not isinstance(records, list):
-        logging.warning("No records provided or format is incorrect. Skipping ingestion.")
+        central_logger.get_logger(__name__).warning("No records provided or format is incorrect. Skipping ingestion.")
         return 0
 
-    logging.info(f"Ingesting batch of {len(records)} records into '{table_name}'...")
+    central_logger.get_logger(__name__).info(f"Ingesting batch of {len(records)} records into '{table_name}'...")
     
     flattened_records = [_flatten_json_first_level(record[0] if isinstance(record, list) and record else record) for record in records]
     ordered_columns, data_for_insert = prepare_data_for_insert(flattened_records)
@@ -64,5 +64,5 @@ async def ingest_records(client: ClickHouseDatabase, records: list[dict], table_
         return 0
 
     await client.insert_data(table_name, data_for_insert, column_names=ordered_columns)
-    logging.info(f"Successfully inserted batch of {len(flattened_records)} records.")
+    central_logger.get_logger(__name__).info(f"Successfully inserted batch of {len(flattened_records)} records.")
     return len(flattened_records)

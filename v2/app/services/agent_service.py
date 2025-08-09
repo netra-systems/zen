@@ -1,5 +1,5 @@
 import json
-import logging
+from app.logging_config import central_logger
 from fastapi import Depends
 from app.agents.supervisor import Supervisor
 from app import schemas
@@ -7,7 +7,7 @@ from app.ws_manager import manager
 from app.llm.llm_manager import LLMManager
 from app.db.postgres import get_async_db
 
-logger = logging.getLogger(__name__)
+logger = central_logger.get_logger(__name__)
 
 class AgentService:
     def __init__(self, supervisor: Supervisor):

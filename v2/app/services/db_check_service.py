@@ -12,7 +12,7 @@ from app.db.postgres import async_engine as engine
 
 logger = central_logger.get_logger(__name__)
 
-async def check_db_schema(db_session: AsyncSession):
+async def check_db_schema(db_session):
     """
     Validates the live database schema against the schema defined in the models and alembic revisions.
     """

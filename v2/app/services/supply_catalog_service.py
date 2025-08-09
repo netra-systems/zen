@@ -1,11 +1,11 @@
 # /v2/app/services/supply_catalog_service.py
-import logging
+from app.logging_config import central_logger
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from ..db import models_postgres
 from ..schemas import SupplyOptionCreate, SupplyOptionUpdate
 
-logger = logging.getLogger(__name__)
+logger = central_logger.get_logger(__name__)
 
 class SupplyCatalogService:
     """

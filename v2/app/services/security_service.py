@@ -1,5 +1,5 @@
 # /v2/app/services/security_service.py
-import logging
+
 from typing import Optional
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession

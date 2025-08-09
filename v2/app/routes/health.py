@@ -3,12 +3,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.postgres import get_async_db as get_db
 from app.logging_config import central_logger
-import logging
+
 import asyncio
 from typing import Dict
 
 router = APIRouter()
-logger = logging.getLogger(__name__)
+logger = central_logger.get_logger(__name__)
 
 class HealthRoutes:
 

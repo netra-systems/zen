@@ -1,4 +1,4 @@
-import logging
+from app.logging_config import central_logger
 from typing import Any, Dict, List
 from app.agents.base import BaseSubAgent
 from app.schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, SubAgentUpdate, AgentCompleted, SubAgentState
@@ -14,7 +14,7 @@ from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from app.agents.reporting_sub_agent import ReportingSubAgent
 
-logger = logging.getLogger(__name__)
+logger = central_logger.get_logger(__name__)
 
 class Supervisor(BaseSubAgent):
     def __init__(self, db_session: AsyncSession, llm_manager: LLMManager, websocket_manager: any, tool_dispatcher: ToolDispatcher):

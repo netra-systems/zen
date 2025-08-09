@@ -1,11 +1,11 @@
-import logging
+from app.logging_config import central_logger
 from app.config import settings
 from app.schemas import AppConfig
 from app.redis_manager import RedisManager
 from app.db.clickhouse_base import ClickHouseDatabase
 from app.llm.llm_manager import LLMManager
 
-logger = logging.getLogger(__name__)
+logger = central_logger.get_logger(__name__)
 
 async def check_config(settings: AppConfig):
     """Validates the application configuration."""

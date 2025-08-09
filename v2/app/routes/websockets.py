@@ -3,9 +3,9 @@ from app.ws_manager import manager
 from app import schemas
 from app.auth.auth_dependencies import ActiveUserWsDep
 from app.services.agent_service import AgentService, get_agent_service
-import logging
+from app.logging_config import central_logger
 
-logger = logging.getLogger(__name__)
+logger = central_logger.get_logger(__name__)
 router = APIRouter()
 
 @router.websocket("/ws")

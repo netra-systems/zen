@@ -1,9 +1,9 @@
 
 import asyncio
-import logging
+from app.logging_config import central_logger
 from typing import Coroutine
 
-logger = logging.getLogger(__name__)
+logger = central_logger.get_logger(__name__)
 
 class BackgroundTaskManager:
     def __init__(self):

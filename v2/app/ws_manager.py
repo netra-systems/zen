@@ -1,8 +1,8 @@
-import logging
+from app.logging_config import central_logger
 from fastapi import WebSocket
 from typing import List, Dict, Any
 
-logger = logging.getLogger(__name__)
+logger = central_logger.get_logger(__name__)
 
 class WebSocketManager:
     _instance = None

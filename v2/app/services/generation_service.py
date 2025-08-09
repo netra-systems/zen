@@ -4,7 +4,7 @@ import os
 import json
 import time
 import uuid
-import logging
+from app.logging_config import central_logger
 from multiprocessing import Pool, cpu_count
 from functools import partial
 import random
@@ -52,11 +52,11 @@ async def get_corpus_from_clickhouse(table_name: str) -> dict:
         for row in results:
             corpus[row['workload_type']].append((row['prompt'], row['response']))
             
-        logging.info(f"Successfully loaded {len(results)} records from corpus table {table_name}")
+        central_logger.get_logger(__name__).info(f"Successfully loaded {len(results)} records from corpus table {table_name}")
         return dict(corpus)
 
     except Exception as e:
-        logging.exception(f"Failed to load corpus from ClickHouse table {table_name}")
+        central_logger.get_logger(__name__).exception(f"Failed to load corpus from ClickHouse table {table_name}")
         raise
     finally:
         if 'db' in locals() and db:
@@ -101,18 +101,18 @@ async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str =
                     )
                     records.append(record)
                 else:
-                    logging.warning(f"Skipping malformed sample for workload '{w_type}': {sample}")
+                    central_logger.get_logger(__name__).warning(f"Skipping malformed sample for workload '{w_type}': {sample}")
                     continue
 
         if not records:
-            logging.info(f"No valid records to insert into ClickHouse table: {table_name}")
+            central_logger.get_logger(__name__).info(f"No valid records to insert into ClickHouse table: {table_name}")
             return
 
         await db.insert_data(table_name, [list(record.model_dump().values()) for record in records], list(ContentCorpus.model_fields.keys()))
-        logging.info(f"Successfully saved {len(records)} records to ClickHouse table: {table_name}")
+        central_logger.get_logger(__name__).info(f"Successfully saved {len(records)} records to ClickHouse table: {table_name}")
 
     except Exception as e:
-        logging.exception(f"Failed to save corpus to ClickHouse table {table_name}")
+        central_logger.get_logger(__name__).exception(f"Failed to save corpus to ClickHouse table {table_name}")
         raise
     finally:
         if 'db' in locals() and db:
@@ -185,7 +185,7 @@ async def run_content_generation_job(job_id: str, params: ContentGenParams):
             await update_job_status(job_id, "running", progress=completed_tasks)
 
     except Exception as e:
-        logging.exception("An error occurred during content generation.")
+        central_logger.get_logger(__name__).exception("An error occurred during content generation.")
         await update_job_status(job_id, "failed", error=f"A worker process failed: {e}")
         return
 
@@ -292,7 +292,7 @@ async def run_log_generation_job(job_id: str, params: LogGenParams):
         )
 
     except Exception as e:
-        logging.exception("Error during log generation job")
+        central_logger.get_logger(__name__).exception("Error during log generation job")
         await update_job_status(job_id, "failed", error=str(e))
 
 
@@ -308,7 +308,7 @@ async def run_data_ingestion_job(job_id: str, params: dict):
         )
 
     except Exception as e:
-        logging.exception("Error during data ingestion job")
+        central_logger.get_logger(__name__).exception("Error during data ingestion job")
         await update_job_status(job_id, "failed", error=str(e))
 
 from app.data.synthetic.synthetic_data_v2 import main as synthetic_data_main
@@ -364,7 +364,7 @@ async def run_synthetic_data_generation_job(job_id: str, params: SyntheticDataGe
         await update_job_status(job_id, "completed", progress=total_logs_to_gen, records_ingested=records_ingested, summary=summary)
 
     except Exception as e:
-        logging.exception("Error during synthetic data generation job")
+        central_logger.get_logger(__name__).exception("Error during synthetic data generation job")
         await update_job_status(job_id, "failed", error=str(e))
     finally:
         if 'client' in locals() and client:
