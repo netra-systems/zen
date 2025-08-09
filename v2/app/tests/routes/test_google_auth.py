@@ -7,11 +7,11 @@ from app.main import app
 from app.services.security_service import SecurityService
 from app.services.key_manager import KeyManager
 from app.config import settings
-from app.auth.auth import google as google_oauth
+from app.auth.auth import oauth_client
 from app.schemas import User
 import uuid
 
-@patch("app.auth.auth.google")
+@patch("app.auth.auth.oauth_client.google")
 @patch("app.services.user_service.user_service.get_or_create_user_from_oauth", new_callable=AsyncMock)
 def test_google_auth(mock_get_or_create_user, mock_google_oauth):
     # 1. Mock the Google OAuth flow
