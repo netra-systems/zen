@@ -38,6 +38,8 @@ async def lifespan(app: FastAPI):
     start_time = time.time()
     logger = central_logger.get_logger(__name__)
     logger.info("Application startup...")
+    if 'pytest' in sys.modules:
+        logger.info(f"pytest in sys.modules")
 
     # Initialize services
     app.state.redis_manager = redis_manager
@@ -67,9 +69,8 @@ async def lifespan(app: FastAPI):
     if "pytest" not in sys.modules:
         async with app.state.db_session_factory() as session:
             if not await check_db_schema(session):
-                # In a real application, you might want to raise an exception here
-                # to prevent the application from starting with a bad schema.
-                logger.error("Database schema validation failed. The application might not work as expected.")
+                logger.critical("CRITICAL: Database schema validation failed. Application shutting down.")
+                raise RuntimeError("Database schema validation failed.")
 
     # Initialize the agent supervisor
     tool_registry = ToolRegistry(app.state.db_session_factory)

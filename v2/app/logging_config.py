@@ -89,9 +89,7 @@ class CentralLogger:
             filter=console_structured_log_filter
         )
 
-        # Intercept standard logging
-        logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
-        logging.getLogger("uvicorn.access").handlers = [InterceptHandler()]
+        
 
     def _initialize_services(self):
         """Initializes external logging services like Langfuse and ClickHouse."""
@@ -134,22 +132,7 @@ class CentralLogger:
             await self.clickhouse_db.disconnect()
             self.logger.info("ClickHouse connection closed.")
 
-class InterceptHandler(logging.Handler):
-    """
-    Redirects standard logging messages to Loguru.
-    """
-    def emit(self, record):
-        try:
-            level = logger.level(record.levelname).name
-        except ValueError:
-            level = record.levelno
 
-        frame, depth = logging.currentframe(), 2
-        while frame and frame.f_code.co_filename == logging.__file__:
-            frame = frame.f_back
-            depth += 1
-
-        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
 # Instantiate the central logger
 central_logger = CentralLogger()
