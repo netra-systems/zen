@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { authService } from '@/services/auth';
+import { authService } from '@/auth';
 import { ApexOptimizerAgentV2 } from '@/components/apex-optimizer-agent-v2';
 import { useAgentContext } from '@/contexts/AgentContext';
 import { mockUser } from '@/mocks/auth';

@@ -4,7 +4,7 @@ import { useMemo, type ReactNode } from 'react';
 import { WebSocketProvider } from '@/contexts/WebSocketContext';
 ;
 import { config } from '@/config';
-import { authService } from '@/services/auth';
+import { authService } from '@/auth';
 
 export function Providers({ children }: { children: ReactNode }) {
   const { user } = authService.useAuth();

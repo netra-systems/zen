@@ -1,6 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { AuthProvider, AuthContext } from '@/contexts/AuthContext';
-import { authService } from '@/services/auth';
+import { AuthProvider, AuthContext, authService } from '@/auth';
 import { mockUser, mockAuthConfig } from '@/mocks/auth';
 
 // Mock the authService
