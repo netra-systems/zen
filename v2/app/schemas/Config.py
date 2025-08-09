@@ -101,6 +101,11 @@ class TimePeriodSettings(BaseModel):
     days: int
 
 
+class DefaultLogTableSettings(BaseModel):
+    context: str
+    log_table: str
+
+
 class LangfuseConfig(BaseModel):
     secret_key: str = ""
     public_key: str = ""
