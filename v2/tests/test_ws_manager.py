@@ -13,9 +13,10 @@ async def test_connect():
 @pytest.mark.asyncio
 async def test_disconnect():
     manager = WebSocketManager()
+    manager.active_connections.clear()
     websocket = AsyncMock()
     await manager.connect("user1", websocket)
-    manager.disconnect("user1")
+    manager.disconnect("user1", websocket)
     assert "user1" not in manager.active_connections
 
 @pytest.mark.asyncio
