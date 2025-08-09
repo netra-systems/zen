@@ -55,7 +55,7 @@ class AuthRoutes:
                 picture=user_info.get('picture'),
                 password="",  # Not used for OAuth
             )
-            user = user_service.create(db, obj_in=user_in)
+            user = await user_service.create(db, obj_in=user_in)
 
         request.session["user"] = user_info
 
@@ -76,7 +76,7 @@ class AuthRoutes:
                 picture=None,
                 password="",
             )
-            user = user_service.create(db, obj_in=user_in)
+            user = await user_service.create(db, obj_in=user_in)
 
         request.session["user"] = {"email": user.email, "name": user.full_name, "picture": user.picture}
         return {"message": "Dev login successful", "user": user.email}

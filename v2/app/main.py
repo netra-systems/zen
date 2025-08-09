@@ -2,6 +2,7 @@ import logging
 import time
 import sys
 import os
+import asyncio
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -71,6 +72,7 @@ async def lifespan(app: FastAPI):
     finally:
         # Shutdown
         logger.info("Application shutdown initiated...")
+        await asyncio.sleep(0.1)
         await app.state.background_task_manager.shutdown()
         await app.state.agent_supervisor.shutdown()
         await websocket_manager.shutdown()

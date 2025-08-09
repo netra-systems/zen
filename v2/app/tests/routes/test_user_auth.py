@@ -7,13 +7,17 @@ from app.main import app
 from app.config import settings
 from app.db.base import Base
 from app.db.testing import engine
+from app.dependencies import get_db_session
+from app.db.testing import override_get_db
 
-@pytest_asyncio.fixture(scope="module")
-async def client() -> AsyncClient:
+app.dependency_overrides[get_db_session] = override_get_db
+
+@pytest_asyncio.fixture(scope="function")
+async def client(test_db) -> AsyncClient:
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
 
-@pytest_asyncio.fixture(scope="module")
+@pytest_asyncio.fixture(scope="function")
 async def test_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
