@@ -58,6 +58,14 @@ async def lifespan(app: FastAPI):
     # Initialize Postgres
     app.state.db_session_factory = async_session_factory
 
+    # Perform database self-check
+    from app.services.db_check_service import check_db_schema
+    async with app.state.db_session_factory() as session:
+        if not await check_db_schema(session):
+            # In a real application, you might want to raise an exception here
+            # to prevent the application from starting with a bad schema.
+            logger.error("Database schema validation failed. The application might not work as expected.")
+
     # Initialize the agent supervisor
     tool_registry = ToolRegistry(app.state.db_session_factory)
     app.state.tool_dispatcher = ToolDispatcher(tool_registry.get_tools([]))
