@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useEffect, ReactNode, useState, useCallback } from 'react';
-import { User } from '@/types/User';
+import { User } from '@/types';
 import { AuthConfigResponse } from '@/auth';
 import { Button } from '@/components/ui/button';
 import { authService } from '@/auth';
@@ -28,9 +28,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.user) {
         setUser(data.user);
       } else if (data.development_mode) {
-        // In development mode, if there's no user, we can try to log in automatically.
-        // The backend will create a dev user if one doesn't exist.
-        authService.handleLogin(data);
+        const devUser = await authService.handleDevLogin(data);
+        if (devUser) {
+          setUser(devUser);
+        }
       }
     } catch (error) {
       console.error("Failed to fetch auth config:", error);

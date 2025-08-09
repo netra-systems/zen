@@ -28,4 +28,6 @@ netra_user_auth:1:0:8: The login button for OAuth on the front end looks good an
 netra_user_auth:1:0:9: The backend provides discovery of OAUTH endpoints to frontend, e.g. the complete path including base url etc. a dict with login, logout, auth, etc. This can lean on existing OpenAPI / Fast API spec if possible.
 netra_user_auth:1:0:10: Keep the development env. When front and backend in development mode: On Pageload: Automatically authentics as Dev user without using Google OAuth.
 
+netra_user_auth:1:0:11: the user should be stored somewhere so when calls are made anywhere in application it uses users id 
+
 netra_user_auth:ENDS
