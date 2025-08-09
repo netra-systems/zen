@@ -1,25 +1,30 @@
 from fastapi import APIRouter, WebSocket, Depends, WebSocketDisconnect
 from app.ws_manager import manager
-from app import schemas
-from app.services.agent_service import AgentService, get_agent_service
 from app.logging_config import central_logger
 from app.db.postgres import get_async_db
-from app.dependencies import get_security_service
-from app.services.security_service import SecurityService
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter()
 
-@router.websocket("/ws/{token}")
+@router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket,
-    token: str,
-    agent_service: AgentService = Depends(get_agent_service),
     db_session = Depends(get_async_db),
-    security_service: SecurityService = Depends(get_security_service),
 ):
     # Accept the connection first
     await websocket.accept()
+    
+    # Get token from query parameters
+    token = websocket.query_params.get("token")
+    if not token:
+        logger.error("No token provided in query parameters")
+        await websocket.close(code=1008, reason="No token provided")
+        return
+    
+    # Get services from app state
+    app = websocket.app
+    security_service = app.state.security_service
+    agent_service = app.state.agent_service
     
     # Authenticate the user using the token
     try:
@@ -54,6 +59,7 @@ async def websocket_endpoint(
     # Connection authenticated successfully
     user_id_str = str(user.id)
     await manager.connect(user_id_str, websocket)
+    logger.info(f"WebSocket connection established for user {user_id_str}")
     
     try:
         while True:
@@ -61,4 +67,5 @@ async def websocket_endpoint(
             await agent_service.handle_websocket_message(user_id_str, data)
 
     except WebSocketDisconnect:
+        logger.info(f"WebSocket disconnected for user {user_id_str}")
         manager.disconnect(user_id_str, websocket)

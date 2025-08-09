@@ -10,7 +10,7 @@ class WebSocketService {
   public onStatusChange: ((status: WebSocketStatus) => void) | null = null;
   public onMessage: ((message: WebSocketMessage) => void) | null = null;
 
-  public async connect(token: string) {
+  public async connect(url: string) {
     if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
       return;
     }
@@ -19,10 +19,6 @@ class WebSocketService {
     this.onStatusChange?.(this.status);
 
     try {
-      const response = await fetch(`${config.apiUrl}/api/config`);
-      const wsConfig = await response.json();
-      const url = `${wsConfig.ws_url}/${token}`;
-
       this.ws = new WebSocket(url);
 
       this.ws.onopen = () => {
