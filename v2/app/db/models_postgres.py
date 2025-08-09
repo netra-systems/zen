@@ -15,7 +15,7 @@ import uuid
 from datetime import datetime, timezone
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "userbase"
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     email = Column(String, unique=True, index=True, nullable=False)
     full_name = Column(String, index=True)
@@ -29,7 +29,7 @@ class User(Base):
 class Secret(Base):
     __tablename__ = "secrets"
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    user_id = Column(String, ForeignKey("userbase.id"), nullable=False)
     key = Column(String, nullable=False)
     encrypted_value = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
@@ -52,7 +52,7 @@ class Analysis(Base):
     name = Column(String, index=True, nullable=False)
     description = Column(String)
     status = Column(String, default="pending")  # e.g., pending, running, completed, failed
-    created_by_id = Column(String, ForeignKey("users.id"))
+    created_by_id = Column(String, ForeignKey("userbase.id"))
     created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
@@ -103,7 +103,7 @@ class Reference(Base):
     __tablename__ = "references"
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, index=True, nullable=False)  # backend literal name
-    friendly_name = Column(String, nullable=False)  # user-facing name
+    friendly_name = Column(String, nullable=False)  # -facing name
     description = Column(String, nullable=True)
     type = Column(String, nullable=False)  # e.g., 'source', 'time_period'
     value = Column(String, nullable=False)
@@ -118,7 +118,7 @@ class Corpus(Base):
     description = Column(String, nullable=True)
     table_name = Column(String, nullable=True)
     status = Column(String, default="pending")  # e.g., pending, running, completed, failed
-    created_by_id = Column(String, ForeignKey("users.id"))
+    created_by_id = Column(String, ForeignKey("userbase.id"))
     created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
     created_by = relationship("User")

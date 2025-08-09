@@ -1,6 +1,5 @@
-
 import pytest
-from httpx import AsyncClient
+from fastapi.testclient import TestClient
 from app.main import app
 from unittest.mock import patch, MagicMock
 from app.db.postgres import get_async_db
@@ -12,22 +11,17 @@ def cleanup_dependency_overrides():
     yield
     app.dependency_overrides = original_overrides
 
-@pytest.mark.asyncio
-async def test_live_endpoint():
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        response = await ac.get("/health/live")
-        assert response.status_code == 200
-        assert response.json() == {"status": "ok"}
+def test_live_endpoint(client: TestClient):
+    response = client.get("/health/live")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
 
-@pytest.mark.asyncio
-async def test_ready_endpoint_success():
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        response = await ac.get("/health/ready")
-        assert response.status_code == 200
-        assert response.json() == {"status": "ok"}
+def test_ready_endpoint_success(client: TestClient):
+    response = client.get("/health/ready")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
 
-@pytest.mark.asyncio
-async def test_ready_endpoint_db_failure():
+def test_ready_endpoint_db_failure(client: TestClient):
     mock_session = MagicMock()
     mock_session.execute.side_effect = Exception("DB connection failed")
 
@@ -36,15 +30,12 @@ async def test_ready_endpoint_db_failure():
 
     app.dependency_overrides[get_async_db] = mock_get_db_failure
 
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        response = await ac.get("/health/ready")
+    response = client.get("/health/ready")
+    assert response.status_code == 503
+    assert response.json() == {"detail": "Service Unavailable"}
+
+def test_ready_endpoint_clickhouse_failure(client: TestClient):
+    with patch("app.routes.health.central_logger.clickhouse_db.ping", return_value=False):
+        response = client.get("/health/ready")
         assert response.status_code == 503
         assert response.json() == {"detail": "Service Unavailable"}
-
-@pytest.mark.asyncio
-async def test_ready_endpoint_clickhouse_failure():
-    with patch("app.routes.health.central_logger.clickhouse_db.ping", return_value=False):
-        async with AsyncClient(app=app, base_url="http://test") as ac:
-            response = await ac.get("/health/ready")
-            assert response.status_code == 503
-            assert response.json() == {"detail": "Service Unavailable"}

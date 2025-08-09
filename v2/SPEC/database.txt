@@ -4,6 +4,7 @@ database:1:0: Primary Spec: Database Specification.
 database:1:1:0: Goal: Database working as a complete end to end system.
 database:1:1:1: CRITICAL: The Coherence of the system working in harmony with the application.
 database:1:1:2: The production, development, testing databases are Separate.
+database:1:1:3: Postgres specifics see SPEC:postgres
 
 database:1:0:1:0: Schema:
 database:1:0:1:0:0: The database schema is defined in app/models.

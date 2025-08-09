@@ -1,6 +1,6 @@
 import pytest
+from fastapi.testclient import TestClient
 import asyncio
-from httpx import AsyncClient
 from app.main import app
 from app.schemas import RequestModel, Workload, DataSource, TimeRange
 from app.llm.llm_manager import LLMManager
@@ -20,7 +20,7 @@ app.state.llm_manager = llm_manager
     "I want to audit all uses of KV caching in my system to find optimization opportunities.",
     "I need to reduce costs by 20% and improve latency by 2x. I'm also expecting a 30% increase in usage. What should I do?"
 ])
-async def test_apex_optimizer_agent(prompt: str):
+async def test_apex_optimizer_agent(prompt: str, client: TestClient):
     request_model = RequestModel(
         user_id="test_user",
         query=prompt,
@@ -33,8 +33,7 @@ async def test_apex_optimizer_agent(prompt: str):
             )
         ]
     )
-    async with AsyncClient(app=app, base_url="http://test") as client:
-        response = await client.post("/run_agent", json=request_model.model_dump())
-        assert response.status_code == 200
-        run_id = response.json()["run_id"]
-        assert isinstance(run_id, str)
+    response = client.post("/run_agent", json=request_model.model_dump())
+    assert response.status_code == 200
+    run_id = response.json()["run_id"]
+    assert isinstance(run_id, str)
