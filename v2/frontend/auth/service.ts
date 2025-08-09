@@ -14,7 +14,7 @@ class AuthService {
 
   handleLogin(authConfig: AuthConfigResponse) {
     if (authConfig.development_mode) {
-      window.location.href = authConfig.endpoints.dev_login;
+      /// nothing
     } else {
       window.location.href = authConfig.endpoints.login;
     }
