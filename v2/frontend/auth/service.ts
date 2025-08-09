@@ -3,6 +3,8 @@ import { useContext } from 'react';
 import { AuthContext, AuthContextType } from '@/auth';
 import { config } from '@/config';
 
+const TOKEN_KEY = 'jwt_token';
+
 class AuthService {
   async getAuthConfig(): Promise<AuthConfigResponse> {
     const response = await fetch(`${config.apiUrl}/api/auth/config`);
@@ -12,7 +14,7 @@ class AuthService {
     return response.json();
   }
 
-  async handleDevLogin(authConfig: AuthConfigResponse): Promise<User | null> {
+  async handleDevLogin(authConfig: AuthConfigResponse): Promise<{ access_token: string, token_type: string } | null> {
     try {
       const response = await fetch(authConfig.endpoints.dev_login, {
         method: 'POST',
@@ -22,8 +24,9 @@ class AuthService {
         body: JSON.stringify({ email: 'dev@example.com' }),
       });
       if (response.ok) {
-        const user = await response.json();
-        return user;
+        const data = await response.json();
+        localStorage.setItem(TOKEN_KEY, data.access_token);
+        return data;
       } else {
         console.error('Dev login failed');
         return null;
@@ -32,6 +35,14 @@ class AuthService {
       console.error('Error during dev login:', error);
       return null;
     }
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem(TOKEN_KEY);
+  }
+
+  removeToken(): void {
+    localStorage.removeItem(TOKEN_KEY);
   }
 
   handleLogin(authConfig: AuthConfigResponse) {
@@ -44,6 +55,7 @@ class AuthService {
   }
 
   handleLogout(authConfig: AuthConfigResponse) {
+    this.removeToken();
     window.location.href = authConfig.endpoints.logout;
   }
 

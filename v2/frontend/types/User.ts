@@ -5,4 +5,6 @@ export interface User {
   full_name?: string | null;
   picture?: string | null;
   id: string;
+  access_token?: string;
+  token_type?: string;
 }

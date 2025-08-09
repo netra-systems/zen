@@ -27,12 +27,12 @@ interface WebSocketProviderProps {
 import { AuthContext } from '@/auth/context';
 
 export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
-  const { user } = useContext(AuthContext)!;
+  const { token } = useContext(AuthContext)!;
   const [status, setStatus] = useState<WebSocketStatus>('CLOSED');
   const [messages, setMessages] = useState<WebSocketMessage[]>([]);
 
   useEffect(() => {
-    if (user) {
+    if (token) {
       const fetchConfigAndConnect = async () => {
         try {
           const response = await fetch(`${appConfig.apiUrl}/api/config`);
@@ -41,7 +41,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           webSocketService.onMessage = (newMessage) => {
             setMessages((prevMessages) => [...prevMessages, newMessage]);
           };
-          webSocketService.connect(`${config.ws_url}?user_id=${user.id}`);
+          webSocketService.connect(`${config.ws_url}?token=${token}`);
         } catch (error) {
           console.error('Failed to fetch config and connect to WebSocket', error);
         }
@@ -51,11 +51,11 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     }
 
     return () => {
-      if (user) {
+      if (token) {
         webSocketService.disconnect();
       }
     };
-  }, [user]);
+  }, [token]);
 
   const sendMessage = (message: WebSocketMessage) => {
     webSocketService.sendMessage(message);

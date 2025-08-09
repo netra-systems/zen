@@ -5,6 +5,7 @@ import { User } from '@/types';
 import { AuthConfigResponse } from '@/auth';
 import { Button } from '@/components/ui/button';
 import { authService } from '@/auth';
+import { jwtDecode } from 'jwt-decode';
 
 export interface AuthContextType {
   user: User | null;
@@ -12,6 +13,7 @@ export interface AuthContextType {
   logout: () => void;
   loading: boolean;
   authConfig: AuthConfigResponse | null;
+  token: string | null;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,17 +22,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [authConfig, setAuthConfig] = useState<AuthConfigResponse | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   const fetchAuthConfig = useCallback(async () => {
     try {
       const data = await authService.getAuthConfig();
       setAuthConfig(data);
-      if (data.user) {
-        setUser(data.user);
+
+      const storedToken = authService.getToken();
+      if (storedToken) {
+        setToken(storedToken);
+        const decodedUser = jwtDecode(storedToken) as User;
+        setUser(decodedUser);
       } else if (data.development_mode) {
-        const devUser = await authService.handleDevLogin(data);
-        if (devUser) {
-          setUser(devUser);
+        const devLoginResponse = await authService.handleDevLogin(data);
+        if (devLoginResponse) {
+          setToken(devLoginResponse.access_token);
+          const decodedUser = jwtDecode(devLoginResponse.access_token) as User;
+          setUser(decodedUser);
         }
       }
     } catch (error) {
