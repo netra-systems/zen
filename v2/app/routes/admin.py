@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.schemas import AppConfig
-from app.auth.auth_dependencies import ActiveUserWsDep
+from app.auth.auth_dependencies import ActiveUserDep
 from app import schemas
 from typing import List, Dict
 
@@ -9,7 +9,7 @@ router = APIRouter()
 class AdminRoutes:
 
     @router.get("/settings", response_model=AppConfig)
-    async def get_app_settings(self, current_user: schemas.User = Depends(ActiveUserWsDep)) -> AppConfig:
+    async def get_app_settings(self, current_user: schemas.User = ActiveUserDep) -> AppConfig:
         """
         Retrieve the current application settings.
         Only accessible to authenticated users.
@@ -19,7 +19,7 @@ class AdminRoutes:
         return settings
 
     @router.post("/settings/log_table")
-    async def set_log_table(self, data: schemas.LogTableSettings, current_user: schemas.User = Depends(ActiveUserWsDep)) -> Dict[str, str]:
+    async def set_log_table(self, data: schemas.LogTableSettings, current_user: schemas.User = ActiveUserDep) -> Dict[str, str]:
         """
         Set the default ClickHouse log table.
         Only accessible to superusers.
@@ -34,7 +34,7 @@ class AdminRoutes:
         return {"message": f"Default log table updated to: {data.log_table}"}
 
     @router.post("/settings/log_tables")
-    async def add_log_table(self, data: schemas.LogTableSettings, current_user: schemas.User = Depends(ActiveUserWsDep)) -> Dict[str, str]:
+    async def add_log_table(self, data: schemas.LogTableSettings, current_user: schemas.User = ActiveUserDep) -> Dict[str, str]:
         """
         Add a new ClickHouse log table to the list of available tables.
         Only accessible to superusers.
@@ -49,7 +49,7 @@ class AdminRoutes:
         return {"message": f"Log table '{data.log_table}' added to available tables."}
 
     @router.delete("/settings/log_tables")
-    async def remove_log_table(self, data: schemas.LogTableSettings, current_user: schemas.User = Depends(ActiveUserWsDep)) -> Dict[str, str]:
+    async def remove_log_table(self, data: schemas.LogTableSettings, current_user: schemas.User = ActiveUserDep) -> Dict[str, str]:
         """
         Remove a ClickHouse log table from the list of available tables.
         Only accessible to superusers.
@@ -67,7 +67,7 @@ class AdminRoutes:
         return {"message": f"Log table '{data.log_table}' removed from available tables."}
 
     @router.post("/settings/time_period")
-    async def set_time_period(self, data: schemas.TimePeriodSettings, current_user: schemas.User = Depends(ActiveUserWsDep)) -> Dict[str, str]:
+    async def set_time_period(self, data: schemas.TimePeriodSettings, current_user: schemas.User = ActiveUserDep) -> Dict[str, str]:
         """
         Set the default time period for log analysis.
         Only accessible to superusers.
@@ -82,7 +82,7 @@ class AdminRoutes:
         return {"message": f"Default time period updated to: {data.days} days"}
 
     @router.post("/settings/default_log_table")
-    async def set_default_log_table_for_context(self, data: schemas.DefaultLogTableSettings, current_user: schemas.User = Depends(ActiveUserWsDep)) -> Dict[str, str]:
+    async def set_default_log_table_for_context(self, data: schemas.DefaultLogTableSettings, current_user: schemas.User = ActiveUserDep) -> Dict[str, str]:
         """
         Set the default ClickHouse log table for a specific context.
         Only accessible to superusers.
@@ -97,7 +97,7 @@ class AdminRoutes:
         return {"message": f"Default log table for context '{data.context}' updated to: {data.log_table}"}
 
     @router.delete("/settings/default_log_table")
-    async def remove_default_log_table_for_context(self, data: schemas.DefaultLogTableSettings, current_user: schemas.User = Depends(ActiveUserWsDep)) -> Dict[str, str]:
+    async def remove_default_log_table_for_context(self, data: schemas.DefaultLogTableSettings, current_user: schemas.User = ActiveUserDep) -> Dict[str, str]:
         """
         Remove the default ClickHouse log table for a specific context.
         Only accessible to superusers.

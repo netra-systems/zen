@@ -70,6 +70,25 @@ class SecurityService:
         await db_session.refresh(db_user)
         return schemas.User.model_validate(db_user)
 
+    async def authenticate_user(self, db_session: AsyncSession, email: str, password: str) -> Optional[models_postgres.User]:
+        user = await self.get_user(db_session, email)
+        if not user:
+            return None
+        if not self.verify_password(password, user.hashed_password):
+            return None
+        return user
+
+    def decode_access_token(self, token: str) -> Optional[dict]:
+        try:
+            payload = jwt.decode(token, self.key_manager.jwt_secret_key, algorithms=["HS256"])
+            return payload
+        except JWTError:
+            return None
+
+    async def get_user_by_id(self, db_session: AsyncSession, user_id: str) -> Optional[models_postgres.User]:
+        result = await db_session.execute(select(models_postgres.User).filter(models_postgres.User.id == user_id))
+        return result.scalars().first()
+
     async def get_or_create_user_from_oauth(self, db_session: AsyncSession, user_info: dict) -> schemas.User:
         user = await self.get_user(db_session, user_info["email"])
         if user:

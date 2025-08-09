@@ -11,7 +11,7 @@ router = APIRouter()
 @router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket,
-    user: schemas.User = Depends(ActiveUserWsDep),
+    user: schemas.User = ActiveUserWsDep,
     agent_service: AgentService = Depends(get_agent_service),
 ):
     if user is None:
