@@ -1,7 +1,5 @@
-from fastapi import APIRouter, WebSocket, Depends, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.ws_manager import manager
-from app.dependencies import get_current_user
-from app.schemas import User
 
 router = APIRouter()
 

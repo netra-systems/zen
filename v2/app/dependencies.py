@@ -1,13 +1,11 @@
-
 from typing import Annotated
 from fastapi import Depends, Request
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.postgres import get_async_db
 from app.llm.llm_manager import LLMManager
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.services import SecurityService
 from app.agents.supervisor import Supervisor
-from app.agents.tool_dispatcher import ToolDispatcher
 
 DbDep = Annotated[AsyncSession, Depends(get_async_db)]
 
