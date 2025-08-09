@@ -2,7 +2,6 @@
 import logging
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import select
 from ..db import models_postgres
 from ..schemas import SupplyOptionCreate, SupplyOptionUpdate
 

@@ -1,9 +1,6 @@
-# /v2/app/routes/supply.py
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session
 
-from ..db import models_postgres
 from ..dependencies import DbDep
 from ..services.supply_catalog_service import SupplyCatalogService
 from .. import schemas
@@ -42,4 +39,3 @@ def read_supply_option(option_id: int, db: DbDep):
     if not db_option:
         raise HTTPException(status_code=404, detail="Supply option not found")
     return db_option
-
