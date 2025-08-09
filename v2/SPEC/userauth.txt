@@ -1,17 +1,22 @@
-SPEC:netra_user_auth: start: Netra netra_user_auth:
-PRIMARY GOAL: User Login, Logout, and OAuth. (Production and Dev).
+SPEC:NETRA_SECURITY:START:
 
-netra_user_auth:1:0:0: Use classes. Everything must be in a class.
+NETRA_SECURITY:1:0:0: Uses OAuth, JWT.
+SecurityService (e..g JWT) Keep all structural security conceps as is.
+The frontend JWT is stored securely and used in All WS, HTTP calls etc 
+THe backend provides the JWT as needed
+Conisder that OAuth URLS may not be relevant to UI/UX expiernece for loging logout
 
-netra_user_auth:1:0:1: The UI/UX base layout and header are persistent in all auth states.
-netra_user_auth:1:0:2: Only use official google OAuth libraries or similar. Make existing stuff work without major changes
-netra_user_auth:1:0:3: Validate that OAuth Login, OAuth Logout, 
+NETRA_SECURITY:1:0:1: The UI/UX base layout and header are persistent in all auth states.
+NETRA_SECURITY:1:0:2: Only use official OAuth libraries or similar
+NETRA_SECURITY:1:0:3: Validate that OAuth Login, OAuth Logout, 
 and development user context all works. Production ready.
-netra_user_auth:1:0:4: In development context: 
-Defaults to auto login. OAuth login supercedes dev login.
-netra_user_auth:1:0:5: Handle context of frontend and backend env hot reloading. 
-netra_user_auth:1:0:6: KEEP EXISTING STUFF. Keep existing stuff as much as possible. The point is to have the core wiring work. Focus on adding mixing things and break fix. Use Schemas.py and app/types/index.ts whenever possible for any static values, paths, config values, etc. etc.
-netra_user_auth:1:0:7: Schema: {
+NETRA_SECURITY:1:0:4: In development context: 
+Defaults to auto login, including JWT token etc. to simulate OAuth.
+
+NETRA_SECURITY:1:0:5: Consider context of frontend and backend env hot reloading. 
+
+NETRA_SECURITY:1:0:6: KEEP EXISTING STUFF. Keep existing stuff as much as possible. The point is to have the core wiring work. Focus on adding mixing things and break fix. Use Schemas.py and app/types/index.ts whenever possible for any static values, paths, config values, etc. etc.
+NETRA_SECURITY:1:0:7: Schema: {
   "web": {
     "authorized_javascript_origins": [
       "https://app.netrasystems.ai",
@@ -24,10 +29,12 @@ netra_user_auth:1:0:7: Schema: {
     ]
   }
 }
-netra_user_auth:1:0:8: The login button for OAuth on the front end looks good and is large.
-netra_user_auth:1:0:9: The backend provides discovery of OAUTH endpoints to frontend, e.g. the complete path including base url etc. a dict with login, logout, auth, etc. This can lean on existing OpenAPI / Fast API spec if possible.
-netra_user_auth:1:0:10: Keep the development env. When front and backend in development mode: On Pageload: Automatically authentics as Dev user without using Google OAuth.
+NETRA_SECURITY:1:0:8: The login button for OAuth on the front end looks good and is large.
+In dev mode, its shows the dev user and option to OAuth Login "Override" the dev mode login.
 
-netra_user_auth:1:0:11: the user should be stored somewhere so when calls are made anywhere in application it uses users id 
+NETRA_SECURITY:1:0:9: The backend provides discovery of OAUTH endpoints to frontend, e.g. the complete path including base url etc. a dict with login, logout, auth, etc. This can lean on existing OpenAPI / Fast API spec if possible.
+NETRA_SECURITY:1:0:10: Keep the development env. 
+When front and backend in development mode: 
+On Pageload: Automatically authentics as Dev user without using Google OAuth.
 
-netra_user_auth:ENDS
+NETRA_SECURITY:ENDS
