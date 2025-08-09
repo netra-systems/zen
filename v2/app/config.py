@@ -61,19 +61,27 @@ class Settings:
             if secret_value is None:
                 continue
 
-            target_obj = config
-            if ref.target_model:
-                if '.' in ref.target_model:
-                    parts = ref.target_model.split('.', 1)
-                    dict_name = parts[0]
-                    key_name = parts[1]
-                    target_dict = getattr(config, dict_name)
-                    target_obj = target_dict.get(key_name)
-                else:
-                    target_obj = getattr(config, ref.target_model)
+            if ref.target_models:
+                for target_model_str in ref.target_models:
+                    target_obj = config
+                    if '.' in target_model_str:
+                        parts = target_model_str.split('.', 1)
+                        dict_name = parts[0]
+                        key_name = parts[1]
+                        target_dict = getattr(config, dict_name)
+                        target_obj = target_dict.get(key_name)
+                    else:
+                        target_obj = getattr(config, target_model_str)
 
-            if target_obj:
-                setattr(target_obj, ref.target_field, secret_value)
+                    if target_obj:
+                        setattr(target_obj, ref.target_field, secret_value)
+            else:
+                setattr(config, ref.target_field, secret_value)
+
+        # Check for missing LLM API keys
+        for llm_name, llm_config in config.llm_configs.items():
+            if not llm_config.api_key:
+                print(f"Warning: API key for LLM '{llm_name}' is not set.")
 
     def _get_all_secrets_and_env_configs(self) -> schemas.AppConfig:
         """Returns the appropriate configuration class based on the environment."""

@@ -27,4 +27,4 @@ async def get_clickhouse_client():
         yield client
     finally:
         if client:
-            client.disconnect()
+            await client.disconnect()

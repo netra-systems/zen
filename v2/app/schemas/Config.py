@@ -19,7 +19,7 @@ class SecretReference(BaseModel):
 
 
 SECRET_CONFIG: List[SecretReference] = [
-    SecretReference(name="gemini-api-key", target_models=["llm_configs.default", "llm_configs.triage", "llm_configs.data", "llm_configs.optimizations_core", "llm_configs.actions_to_meet_goals", "llm_configs.reporting"], target_field="api_key"),
+    SecretReference(name="gemini-api-key", target_models=["llm_configs.default", "llm_configs.triage", "llm_configs.data", "llm_configs.optimizations_core", "llm_configs.actions_to_meet_goals", "llm_configs.reporting", "llm_configs.google"], target_field="api_key"),
     SecretReference(name="google-client-id", target_models=["google_cloud", "oauth_config"], target_field="client_id"),
     SecretReference(name="google-client-secret", target_models=["google_cloud", "oauth_config"], target_field="client_secret"),
     SecretReference(name="langfuse-secret-key", target_models=["langfuse"], target_field="secret_key"),
