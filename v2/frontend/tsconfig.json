@@ -30,6 +30,7 @@
       "@/services/*": ["./services/*"],
       "@/store/*": ["./store/*"],
       "@/types/*": ["./types/*"],
+      "@/auth/*": ["./src/auth/*"],
       "@/*": ["./*"]
     }
   },

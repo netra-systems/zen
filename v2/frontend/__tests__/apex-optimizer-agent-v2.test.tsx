@@ -6,7 +6,7 @@ import { mockUser } from '@/mocks/auth';
 
 
 jest.mock('@/contexts/AgentContext');
-jest.mock('@/services/auth');
+jest.mock('@/auth');
 
 describe('ApexOptimizerAgentV2', () => {
   const sendWsMessage = jest.fn();

@@ -1,6 +1,6 @@
 
 ;
-import { Button } from '@/components/ui/button';
+import { authService } from '@/auth';
 
 const TestLoginComponent = () => {
   const { login, loading, user, logout } = authService.useAuth();
