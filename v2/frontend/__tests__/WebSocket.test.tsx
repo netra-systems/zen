@@ -9,6 +9,7 @@ import WS from 'jest-websocket-mock';
 jest.mock('@/services/auth', () => ({
   authService: {
     useAuth: jest.fn(),
+    getAuthConfig: jest.fn(),
   }
 }));
 
@@ -20,6 +21,7 @@ describe('WebSocketProvider', () => {
   beforeEach(() => {
     server = new WS('ws://localhost:8000/ws/123');
     (authService.useAuth as jest.Mock).mockReturnValue({ user: mockUser });
+    (authService.getAuthConfig as jest.Mock).mockResolvedValue({ user: mockUser });
   });
 
   afterEach(() => {

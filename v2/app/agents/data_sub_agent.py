@@ -7,6 +7,7 @@ from app.schemas import SubAgentLifecycle
 from app.agents.base import BaseSubAgent
 from app.agents.prompts import data_prompt_template
 from app.agents.tool_dispatcher import ToolDispatcher
+from app.agents.state import DeepAgentState
 
 logger = logging.getLogger(__name__)
 
@@ -15,10 +16,10 @@ class DataSubAgent(BaseSubAgent):
         super().__init__(llm_manager, name="DataSubAgent", description="This agent gathers and enriches data.")
         self.tool_dispatcher = tool_dispatcher
 
-    async def run(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
+    async def run(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         logger.info(f"DataSubAgent starting for run_id: {run_id}")
 
-        prompt = data_prompt_template.format(triage_result=input_data["triage_result"])
+        prompt = data_prompt_template.format(triage_result=state.triage_result)
 
         llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='data')
         
@@ -30,6 +31,5 @@ class DataSubAgent(BaseSubAgent):
                 "data": "No data could be gathered.",
             }
 
+        state.data_result = data_result
         logger.info(f"DataSubAgent finished for run_id: {run_id}")
-
-        return {"data_result": data_result}

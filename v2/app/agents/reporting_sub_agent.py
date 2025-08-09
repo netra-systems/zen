@@ -7,6 +7,7 @@ from app.schemas import SubAgentLifecycle
 from app.agents.base import BaseSubAgent
 from app.agents.prompts import reporting_prompt_template
 from app.agents.tool_dispatcher import ToolDispatcher
+from app.agents.state import DeepAgentState
 
 logger = logging.getLogger(__name__)
 
@@ -15,10 +16,10 @@ class ReportingSubAgent(BaseSubAgent):
         super().__init__(llm_manager, name="ReportingSubAgent", description="This agent generates a final report.")
         self.tool_dispatcher = tool_dispatcher
 
-    async def run(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
+    async def run(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         logger.info(f"ReportingSubAgent starting for run_id: {run_id}")
 
-        prompt = reporting_prompt_template.format(action_plan=input_data["action_plan_result"])
+        prompt = reporting_prompt_template.format(action_plan=state.action_plan_result)
 
         llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='reporting')
         
@@ -30,6 +31,5 @@ class ReportingSubAgent(BaseSubAgent):
                 "report": "No report could be generated.",
             }
 
+        state.report_result = report_result
         logger.info(f"ReportingSubAgent finished for run_id: {run_id}")
-
-        return {"report_result": report_result}

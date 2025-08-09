@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
+import { authService } from '@/services/auth';
 
 export default function LoginButton() {
   const { user, login, logout } = authService.useAuth();

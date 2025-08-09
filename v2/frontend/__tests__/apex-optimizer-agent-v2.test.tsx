@@ -1,13 +1,15 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { authService } from '@/services/auth';
 import { ApexOptimizerAgentV2 } from '@/components/apex-optimizer-agent-v2';
 import { useAgentContext } from '@/contexts/AgentContext';
-import { useAuth } from '@/hooks/useAuth';
-import { authService } from '@/services/auth';
 import { mockUser } from '@/mocks/auth';
 
-jest.mock('@/hooks/useAuth');
+
 jest.mock('@/contexts/AgentContext');
 jest.mock('@/services/auth');
+jest.mock('@/components/chat/ChatWindow', () => ({
+  ChatWindow: () => <div data-testid="chat-window">Chat Window</div>,
+}));
 
 describe('ApexOptimizerAgentV2', () => {
   const sendWsMessage = jest.fn();
@@ -17,7 +19,7 @@ describe('ApexOptimizerAgentV2', () => {
       user: mockUser,
       loading: false,
     });
-    (authService.getAuthConfig as jest.Mock).mockResolvedValue({ user: mockUser });
+    
     (useAgentContext as jest.Mock).mockReturnValue({
       messages: [{ type: 'user', content: 'Test message', id: '1', created_at: new Date().toISOString() }],
       showThinking: false,
@@ -25,6 +27,7 @@ describe('ApexOptimizerAgentV2', () => {
       subAgentName: 'Test Agent',
       subAgentStatus: 'Test Status',
       exampleQueries: ['Example 1', 'Example 2'],
+      error: null,
     });
   });
 

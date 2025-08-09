@@ -5,6 +5,7 @@ from app.schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, SubAg
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.agents.tool_dispatcher import ToolDispatcher
+from app.agents.state import DeepAgentState
 
 # Import all the sub-agents
 from app.agents.triage_sub_agent import TriageSubAgent
@@ -30,7 +31,7 @@ class Supervisor(BaseSubAgent):
         ]
         self.run_states = {}
 
-    async def run(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
+    async def run(self, user_request: str, run_id: str, stream_updates: bool) -> DeepAgentState:
         logger.info(f"Supervisor starting for run_id: {run_id}")
         self.set_state(SubAgentLifecycle.RUNNING)
         self.run_states[run_id] = {"status": "running", "current_step": 0, "total_steps": len(self.sub_agents)}
@@ -41,15 +42,7 @@ class Supervisor(BaseSubAgent):
                 WebSocketMessage(type="agent_started", payload=AgentStarted(run_id=run_id))
             )
 
-        accumulated_results = {"request": input_data}
-
-        sub_agent_io_keys = {
-            "TriageSubAgent": ("triage_result", "request"),
-            "DataSubAgent": ("data_result", "triage_result"),
-            "OptimizationsCoreSubAgent": ("optimizations_result", "data_result"),
-            "ActionsToMeetGoalsSubAgent": ("action_plan_result", "optimizations_result"),
-            "ReportingSubAgent": ("report_result", "action_plan_result"),
-        }
+        state = DeepAgentState(user_request=user_request)
 
         for i, agent in enumerate(self.sub_agents):
             self.run_states[run_id]["current_step"] = i + 1
@@ -72,15 +65,7 @@ class Supervisor(BaseSubAgent):
                     )
                 )
             
-            output_key, input_key = sub_agent_io_keys[agent.name]
-            
-            if agent.name == "TriageSubAgent":
-                input_for_agent = accumulated_results
-            else:
-                input_for_agent = {input_key: accumulated_results[input_key]}
-
-            result = await agent.run(input_for_agent, run_id, stream_updates)
-            accumulated_results.update(result)
+            await agent.run(state, run_id, stream_updates)
 
             agent.set_state(SubAgentLifecycle.COMPLETED)
             if stream_updates:
@@ -105,7 +90,7 @@ class Supervisor(BaseSubAgent):
                         type="sub_agent_completed",
                         payload={
                             "sub_agent_name": agent.name,
-                            "result": accumulated_results
+                            "result": state.dict()
                         }
                     )
                 )
@@ -115,10 +100,10 @@ class Supervisor(BaseSubAgent):
         if stream_updates:
             await self.websocket_manager.send_to_client(
                 run_id,
-                WebSocketMessage(type="agent_completed", payload=AgentCompleted(run_id=run_id, result=accumulated_results))
+                WebSocketMessage(type="agent_completed", payload=AgentCompleted(run_id=run_id, result=state.dict()))
             )
         logger.info(f"Supervisor finished for run_id: {run_id}")
-        return accumulated_results
+        return state
 
     async def get_agent_state(self, run_id: str) -> Dict[str, Any]:
         return self.run_states.get(run_id, {"status": "not_found"})

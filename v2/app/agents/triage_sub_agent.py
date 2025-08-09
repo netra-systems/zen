@@ -7,6 +7,7 @@ from app.schemas import SubAgentLifecycle
 from app.agents.base import BaseSubAgent
 from app.agents.prompts import triage_prompt_template
 from app.agents.tool_dispatcher import ToolDispatcher
+from app.agents.state import DeepAgentState
 
 logger = logging.getLogger(__name__)
 
@@ -15,10 +16,10 @@ class TriageSubAgent(BaseSubAgent):
         super().__init__(llm_manager, name="TriageSubAgent", description="This agent triages the user request and categorizes it.")
         self.tool_dispatcher = tool_dispatcher
 
-    async def run(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
+    async def run(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         logger.info(f"TriageSubAgent starting for run_id: {run_id}")
 
-        prompt = triage_prompt_template.format(user_request=input_data["request"]["query"])
+        prompt = triage_prompt_template.format(user_request=state.user_request)
 
         llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='triage')
         
@@ -30,6 +31,5 @@ class TriageSubAgent(BaseSubAgent):
                 "category": "General Inquiry",
             }
 
+        state.triage_result = triage_result
         logger.info(f"TriageSubAgent finished for run_id: {run_id}")
-
-        return {"triage_result": triage_result}

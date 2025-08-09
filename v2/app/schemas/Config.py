@@ -143,6 +143,7 @@ class DevelopmentConfig(AppConfig):
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra"
     redis_url: str = "redis://127.0.0.1:6379"
     dev_user_email: str = "dev@example.com"
+    log_level: str = "DEBUG"
 
 class ProductionConfig(AppConfig):
     """Production-specific settings."""

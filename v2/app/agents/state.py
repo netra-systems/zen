@@ -2,6 +2,10 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel
 
 class DeepAgentState(BaseModel):
-    analysis_request: Optional[Dict[str, Any]] = None
-    results: List[Dict[str, Any]] = []
-    current_step: int = 0
+    user_request: str
+    triage_result: Optional[Dict[str, Any]] = None
+    data_result: Optional[Dict[str, Any]] = None
+    optimizations_result: Optional[Dict[str, Any]] = None
+    action_plan_result: Optional[Dict[str, Any]] = None
+    report_result: Optional[Dict[str, Any]] = None
+    final_report: Optional[str] = None

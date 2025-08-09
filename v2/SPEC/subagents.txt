@@ -1,6 +1,6 @@
-SPEC:subagents: SubAgents Overview
+SPEC:subagents: SubAgents
 
-subagents:1:0:0: Spec: PRIMARY GOAL: Dedicated SubAgent Specification: 
+subagents:1:0:0: SubAgent Specification: 
 
 subagents:1:0:0:0 Intent: The point of SubAgents is to manage it’s own context and protect the primary context from getting cluttered.
 subagents:1:0:0:1: Follow best practices for SubAgents including having clear entry and exit conditions.

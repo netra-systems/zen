@@ -4,6 +4,7 @@ import asyncio
 
 from app.llm.llm_manager import LLMManager
 from app.schemas import SubAgentLifecycle
+from app.agents.state import DeepAgentState
 
 class BaseSubAgent(ABC):
     def __init__(self, llm_manager: Optional[LLMManager] = None, name: str = "BaseSubAgent", description: str = "This is the base sub-agent."):
@@ -13,7 +14,7 @@ class BaseSubAgent(ABC):
         self.description = description
 
     @abstractmethod
-    async def run(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
+    async def run(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         pass
 
     def set_state(self, state: SubAgentLifecycle):
@@ -22,6 +23,6 @@ class BaseSubAgent(ABC):
     def get_state(self) -> SubAgentLifecycle:
         return self.state
 
-    async def run_in_background(self, input_data: Dict[str, Any], run_id: str, stream_updates: bool):
+    async def run_in_background(self, state: DeepAgentState, run_id: str, stream_updates: bool):
         loop = asyncio.get_event_loop()
-        loop.create_task(self.run(input_data, run_id, stream_updates))
+        loop.create_task(self.run(state, run_id, stream_updates))
