@@ -3,7 +3,7 @@ import os
 from cryptography.fernet import Fernet
 from pydantic import BaseModel, Field, ValidationError
 
-from app.schemas.config import AppConfig
+from app.schemas import AppConfig
 
 class KeyManager(BaseModel):
     jwt_secret_key: str = Field(..., min_length=32)

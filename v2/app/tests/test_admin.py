@@ -7,11 +7,10 @@ import datetime
 from app.main import app
 from app.schemas import User
 from app.auth.auth_dependencies import ActiveUserWsDep
-from app.config import get_settings
+from app.config import settings
 
 @pytest.fixture(scope="function", autouse=True)
 def settings_override():
-    settings = get_settings()
     original_tables = list(settings.clickhouse_logging.available_tables)
     original_default_table = settings.clickhouse_logging.default_table
     original_default_tables = dict(settings.clickhouse_logging.default_tables)
