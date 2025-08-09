@@ -4,19 +4,19 @@ import { MessageInput } from '@/components/chat/MessageInput';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useChatStore } from '@/store/chat';
 
-// Mock the useWebSocket hook
+const mockSendMessage = jest.fn();
+
 jest.mock('@/hooks/useWebSocket', () => ({
-  useWebSocket: () => ({
-    sendMessage: jest.fn(),
-  }),
+  useWebSocket: () => ({ sendMessage: mockSendMessage }),
 }));
 
-// Mock the useChatStore hook
-jest.mock('@/store/chat', () => ({
-  useChatStore: jest.fn(),
-}));
+jest.mock('@/store/chat');
 
 describe('MessageInput', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render the input field and send button', () => {
     (useChatStore as jest.Mock).mockReturnValue({ isProcessing: false });
     render(<MessageInput />);
@@ -33,9 +33,7 @@ describe('MessageInput', () => {
   });
 
   it('should send a message when the send button is clicked', () => {
-    const sendMessage = jest.fn();
     const setProcessing = jest.fn();
-    (useWebSocket as jest.Mock).mockReturnValue({ sendMessage });
     (useChatStore as jest.Mock).mockReturnValue({ isProcessing: false, setProcessing });
     render(<MessageInput />);
     const input = screen.getByPlaceholderText('Type your message...') as HTMLInputElement;
@@ -44,15 +42,13 @@ describe('MessageInput', () => {
     fireEvent.change(input, { target: { value: 'Test message' } });
     fireEvent.click(sendButton);
 
-    expect(sendMessage).toHaveBeenCalledWith(JSON.stringify({ type: 'user_message', payload: { text: 'Test message' } }));
+    expect(mockSendMessage).toHaveBeenCalledWith(JSON.stringify({ type: 'user_message', payload: { text: 'Test message' } }));
     expect(setProcessing).toHaveBeenCalledWith(true);
     expect(input.value).toBe('');
   });
 
   it('should send a message when Enter key is pressed', () => {
-    const sendMessage = jest.fn();
     const setProcessing = jest.fn();
-    (useWebSocket as jest.Mock).mockReturnValue({ sendMessage });
     (useChatStore as jest.Mock).mockReturnValue({ isProcessing: false, setProcessing });
     render(<MessageInput />);
     const input = screen.getByPlaceholderText('Type your message...') as HTMLInputElement;
@@ -60,7 +56,7 @@ describe('MessageInput', () => {
     fireEvent.change(input, { target: { value: 'Test message' } });
     fireEvent.keyPress(input, { key: 'Enter', code: 'Enter', charCode: 13 });
 
-    expect(sendMessage).toHaveBeenCalledWith(JSON.stringify({ type: 'user_message', payload: { text: 'Test message' } }));
+    expect(mockSendMessage).toHaveBeenCalledWith(JSON.stringify({ type: 'user_message', payload: { text: 'Test message' } }));
     expect(setProcessing).toHaveBeenCalledWith(true);
     expect(input.value).toBe('');
   });

@@ -5,32 +5,31 @@ import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useChatStore } from '@/store/chat';
 
-// Mock the useWebSocket hook
+const mockSendMessage = jest.fn();
+const mockSetProcessing = jest.fn();
+
 jest.mock('@/hooks/useWebSocket', () => ({
-  useWebSocket: () => ({
-    sendMessage: jest.fn(),
-  }),
+  useWebSocket: () => ({ sendMessage: mockSendMessage }),
 }));
 
-// Mock the useChatStore hook
 jest.mock('@/store/chat', () => ({
-  useChatStore: () => ({
-    setProcessing: jest.fn(),
-  }),
+  useChatStore: () => ({ setProcessing: mockSetProcessing }),
 }));
 
 describe('ExamplePrompts', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('sends a message when an example prompt is clicked', () => {
-    const { sendMessage } = useWebSocket();
-    const { setProcessing } = useChatStore();
     render(<ExamplePrompts />);
 
     const firstPrompt = screen.getByText(/I need to reduce costs but keep quality the same/i);
     fireEvent.click(firstPrompt);
 
-    expect(sendMessage).toHaveBeenCalledWith(
+    expect(mockSendMessage).toHaveBeenCalledWith(
       JSON.stringify({ type: 'user_message', payload: { text: 'I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.' } })
     );
-    expect(setProcessing).toHaveBeenCalledWith(true);
+    expect(mockSetProcessing).toHaveBeenCalledWith(true);
   });
 });
