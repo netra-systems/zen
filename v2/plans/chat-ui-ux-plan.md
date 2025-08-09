@@ -2,66 +2,26 @@
 
 This document outlines the plan to implement the chat UI/UX as specified in `chat_ui_ux.txt`.
 
-## 1. Component Scaffolding
+## 1. Consolidate Chat Components
 
-Create the basic file structure for the new chat components. This will include:
+There are two directories with chat components: `components/chat` and `chat`. I will analyze the contents of both and consolidate them into a single `components/chat` directory to have a single source of truth. I will move the files from `chat` to `components/chat` and update the imports.
 
--   `components/chat/ChatWindow.tsx`: The main container for the chat interface.
--   `components/chat/ChatHeader.tsx`: The header component, which will display the sub-agent name and status.
--   `components/chat/MessageList.tsx`: The component that will display the list of messages.
--   `components/chat/MessageItem.tsx`: The component for a single message in the list.
--   `components/chat/RawJsonView.tsx`: The component to display the raw JSON data.
+## 2. Implement the Chat UI based on the spec
 
-## 2. State Management
+- **`ChatHeader.tsx` (`chat_ui_ux:1:0:1`):** I will modify `components/chat/Header.tsx` to display the SubAgent name and status, including the tools being used (`chat_ui_ux:1:0:1:0`).
+- **`MessageList.tsx` and `Message.tsx` (`chat_ui_ux:1:0:2`, `chat_ui_ux:1:0:7`):** I will update `components/chat/MessageList.tsx` and `components/chat/Message.tsx` to render the messages. I will ensure user messages display the user's text and references.
+- **Collapsible JSON View (`chat_ui_ux:1:0:3`, `chat_ui_ux:1:0:9`):** I will implement a collapsible JSON view within `Message.tsx` for displaying raw message data, using `JsonViewer.tsx`.
+- **Error Display (`chat_ui_ux:1:0:4`):** I will implement error display functionality, likely in `ChatWindow.tsx` or a new `ErrorDisplay.tsx` component.
+- **"Alive" UI (`chat_ui_ux:1:0:8`):** I will add subtle animations and transitions to make the UI feel more alive.
+- **Stop Button (`chat_ui_ux:1:0:10`):** I will integrate the `StopButton.tsx` component into the `ChatWindow.tsx`.
 
-Set up state management for the chat interface. This will involve:
+## 3. Implement Example Prompts (`chat_ui_ux:1:0:11`)
 
--   Creating a new store slice for the chat.
--   Defining the state shape, including messages, sub-agent status, and errors.
--   Creating actions and reducers to update the state.
+- I will create a new component `components/chat/ExamplePrompts.tsx`.
+- I will import the example prompts from a new file `lib/examplePrompts.ts` (`chat_ui_ux:1:0:11:Examples:0`).
+- The component will display the prompts as cards (`chat_ui_ux:1:0:11:Examples:2`).
+- Clicking an example will send it to the chat and collapse the examples panel (`chat_ui_ux:1:0:11:Examples:3`).
 
-## 3. WebSocket Integration
+## 4. Add Tests (`chat_ui_ux:1:0:12`)
 
-Connect the UI to the backend via WebSockets to handle real-time communication. This will include:
-
--   Creating a WebSocket service to manage the connection.
--   Handling the different message types from the `WebSocketMessage` schema.
--   Dispatching actions to update the state based on the received messages.
-
-## 4. UI Implementation
-
-Build the UI for each component, adhering to the `chat_ui_ux.txt` spec. This will include:
-
--   Implementing the header with the sub-agent name, status, and tools.
--   Rendering the list of messages, including user messages, agent messages, and tool messages.
--   Displaying the message content, references, and a collapsible raw JSON view.
--   Styling the components to match the design specifications.
-
-## 5. "Alive" UI
-
-Add subtle animations and transitions to make the UI feel more alive and responsive. This will include:
-
--   Animating new messages as they appear.
--   Adding loading indicators to show when the agent is processing.
--   Using transitions to smoothly show and hide UI elements.
-
-## 6. Error Handling
-
-Display errors from the backend. This will include:
-
--   Displaying a notification or an inline message when an error occurs.
--   Providing a way for the user to dismiss the error.
-
-## 7. Stop Functionality
-
-Implement the "Stop" button to terminate the agent process. This will involve:
-
--   Adding a "Stop" button to the UI.
--   Sending a `stop_agent` message to the backend when the button is clicked.
-
-## 8. Testing
-
-Write unit and integration tests for the new components and functionality. This will include:
-
--   Writing unit tests for each component.
--   Writing integration tests for the chat feature as a whole.
+- I will add tests for the new and modified components.

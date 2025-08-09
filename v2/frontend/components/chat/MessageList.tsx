@@ -1,15 +1,25 @@
-import React from 'react';
-import { useChat } from '@/contexts/ChatContext';
+import React, { useEffect, useRef } from 'react';
+import { useChatStore } from '@/store';
 import { MessageItem } from './MessageItem';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
-export const MessageList = () => {
-  const { state } = useChat();
+export const MessageList: React.FC = () => {
+  const { messages } = useChatStore();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   return (
-    <div className="flex-1 p-4 overflow-y-auto">
-      {state.messages.map((msg, index) => (
-        <MessageItem key={index} message={msg} />
-      ))}
-    </div>
+    <ScrollArea ref={scrollAreaRef} className="h-[calc(100vh-200px)] p-4">
+      {messages
+        .filter((msg) => msg.displayed_to_user)
+        .map((msg) => (
+          <MessageItem key={msg.id} message={msg} />
+        ))}
+    </ScrollArea>
   );
 };

@@ -1,13 +1,15 @@
 import React from 'react';
+import { JsonView, allExpanded, defaultStyles } from 'react-json-view-lite';
+import 'react-json-view-lite/dist/index.css';
 
-interface RawJsonViewProps {
-  json: unknown;
+interface JsonViewerProps {
+  data: any;
 }
 
-export const RawJsonView = ({ json }: RawJsonViewProps) => {
+export const JsonViewer: React.FC<JsonViewerProps> = ({ data }) => {
   return (
-    <pre className="p-2 my-2 text-xs bg-gray-800 text-white rounded overflow-x-auto">
-      {JSON.stringify(json, null, 2)}
-    </pre>
+    <div className="p-4 bg-gray-100 rounded-lg">
+      <JsonView data={data} shouldExpandNode={allExpanded} style={defaultStyles} />
+    </div>
   );
 };

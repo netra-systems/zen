@@ -1,13 +1,13 @@
 import React from 'react';
-import { Header } from './Header';
-import { MessageList } from './MessageList';
-import { MessageInput } from './MessageInput';
-import { StopButton } from './StopButton';
+import { ChatHeader } from '@/components/chat/ChatHeader';
+import { MessageList } from '@/components/chat/MessageList';
+import { MessageInput } from '@/components/chat/MessageInput';
+import { StopButton } from '@/components/chat/StopButton';
 
 const ChatLayout: React.FC = () => {
   return (
     <div className="flex flex-col h-screen">
-      <Header />
+      <ChatHeader />
       <div className="flex-grow">
         <MessageList />
       </div>

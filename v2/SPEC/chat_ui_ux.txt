@@ -14,7 +14,12 @@ chat_ui_ux:1:0:7: User messages display user text and user references
 chat_ui_ux:1:0:8: UI/UX feels “alive” while still being subtle
 chat_ui_ux:1:0:9: An expandable “Raw” mode that can expand JSON objects at various processing stages (e.g JSON tree view)
 chat_ui_ux:1:0:10: A “Stop” processing button
-chat_ui_ux:1:0:11: Use existing examples concepts with prexisting examples.
+chat_ui_ux:1:0:11:Examples:
+chat_ui_ux:1:0:11:Examples:0: Import examplePrompts.ts. Keep examplePrompts.ts exactly as is.
+chat_ui_ux:1:0:11:Examples:1: Show examples to user.
+chat_ui_ux:1:0:11:Examples:2: Examples are shown as cards with great visual UI/UX style
+chat_ui_ux:1:0:11:Examples:3: Clicking an example sends it to chat and collapses examples panel
+
 chat_ui_ux:1:0:12: add tests for chat_ui_ux:1:0:1 through chat_ui_ux:1:0:11 
 
 chat_ui_ux:ENDs

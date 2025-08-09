@@ -1,29 +1,26 @@
-import React, { useEffect } from 'react';
-import { useWebSocket } from '@/contexts/WebSocketContext';
-import { useChat } from '@/contexts/ChatContext';
-import { ChatHeader } from './ChatHeader';
-import { MessageList } from './MessageList';
-import { MessageInput } from './MessageInput';
+import React from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
-export const ChatWindow = () => {
-  const { lastMessage } = useWebSocket();
-  const { dispatch } = useChat();
+export const ChatWindow = ({ onSendMessage }: { onSendMessage: (message: string) => void }) => {
+  const [input, setInput] = React.useState('');
 
-  useEffect(() => {
-    if (lastMessage) {
-      // Here you would add logic to dispatch different actions based on the message type
-      // For now, we'll just add every message to the chat
-      if(lastMessage.type !== 'pong') {
-        dispatch({ type: 'ADD_MESSAGE', payload: lastMessage });
-      }
+  const handleSend = () => {
+    if (input.trim()) {
+      onSendMessage(input);
+      setInput('');
     }
-  }, [lastMessage, dispatch]);
+  };
 
   return (
-    <div className="flex flex-col h-full">
-      <ChatHeader />
-      <MessageList />
-      <MessageInput />
+    <div>
+      <Input
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+        placeholder="Type your message..."
+      />
+      <Button onClick={handleSend}>Send</Button>
     </div>
   );
 };
