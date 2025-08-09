@@ -2,8 +2,16 @@ import { render, screen } from '@testing-library/react';
 import { authService } from '@/auth';
 import { ApexOptimizerAgentV2 } from '@/components/apex-optimizer-agent-v2';
 import { useAgentContext } from '@/contexts/AgentContext';
-import { mockUser } from '@/mocks/auth';
+import { User } from '@/types/User';
 
+const mockUser: User = {
+  id: '1',
+  email: 'test@example.com',
+  full_name: 'Test User',
+  picture: 'https://example.com/avatar.png',
+  is_active: true,
+  is_superuser: false,
+};
 
 jest.mock('@/contexts/AgentContext');
 jest.mock('@/auth');

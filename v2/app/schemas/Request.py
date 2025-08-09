@@ -26,6 +26,13 @@ class RequestModel(BaseModel):
     workloads: List[Workload]
     constraints: Optional[Any] = None
 
+class Response(BaseModel):
+    response: Dict[str, Any]
+    completion: Dict[str, Any]
+    tool_calls: Dict[str, Any]
+    usage: Dict[str, Any]
+    system: Dict[str, Any]
+
 class StartAgentPayload(BaseModel):
     settings: Settings
     request: RequestModel

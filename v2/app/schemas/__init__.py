@@ -49,17 +49,24 @@ from .Generation import (
     DataIngestionParams,
     ContentCorpusGenParams,
 )
-from .Event import EventMetadata
+from .Event import EventMetadata, TraceContext
 from .Message import (
     MessageType,
     Message,
 )
+from .Performance import Performance
+from .FinOps import FinOps
+from .Metrics import EnrichedMetrics
+from .Log import UnifiedLogEntry
+from .Pattern import DiscoveredPattern
+from .Policy import LearnedPolicy, PredictedOutcome
 from .Request import (
     Settings,
     DataSource,
     TimeRange,
     Workload,
     RequestModel,
+    Response,
     StartAgentPayload,
     StartAgentMessage,
 )
@@ -147,13 +154,22 @@ __all__ = [
     "DataIngestionParams",
     "ContentCorpusGenParams",
     "EventMetadata",
+    "TraceContext",
     "MessageType",
     "Message",
+    "Performance",
+    "FinOps",
+    "EnrichedMetrics",
+    "UnifiedLogEntry",
+    "DiscoveredPattern",
+    "LearnedPolicy",
+    "PredictedOutcome",
     "Settings",
     "DataSource",
     "TimeRange",
     "Workload",
     "RequestModel",
+    "Response",
     "StartAgentPayload",
     "StartAgentMessage",
     "RunComplete",

@@ -2,14 +2,7 @@ from langchain_core.tools import tool
 from typing import List, Any
 from pydantic import BaseModel, Field
 from app.services.context import ToolContext
-
-class LearnedPolicy(BaseModel):
-    pattern_name: str = Field(..., description="The name of the pattern.")
-    optimal_supply_option_name: str = Field(..., description="The name of the optimal supply option.")
-
-class PredictedOutcome(BaseModel):
-    supply_option_name: str = Field(..., description="The name of the supply option.")
-    explanation: str = Field(..., description="The explanation of the outcome.")
+from app.schemas import LearnedPolicy, PredictedOutcome
 
 @tool
 async def final_report_generator(context: ToolContext, learned_policies: List[LearnedPolicy], predicted_outcomes: List[PredictedOutcome]) -> str:
