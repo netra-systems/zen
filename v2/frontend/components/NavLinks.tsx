@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Icons } from '@/components/Icons';
-import { authService } from '@/services/auth';
+import { authService } from '@/auth';
 import { NavItem } from '@/types';
 
 const navItems: NavItem[] = [
