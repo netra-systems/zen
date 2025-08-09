@@ -11,6 +11,7 @@ from app.db.models_postgres import User
 from app.schemas.User import UserCreate, UserCreateOAuth, User as UserSchema
 from app.schemas.Auth import AuthConfigResponse, AuthEndpoints, DevLoginRequest
 from app.services.user_service import user_service
+from app.services.security_service import SecurityService
 
 
 

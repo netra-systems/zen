@@ -19,9 +19,7 @@ class User(UserBase):
     id: str
     is_active: bool
     is_superuser: bool
+    hashed_password: Optional[str] = None
 
     class Config:
         from_attributes = True
-
-class UserInDB(User):
-    hashed_password: str

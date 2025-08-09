@@ -103,7 +103,6 @@ from .User import (
     UserCreateOAuth,
     UserUpdate,
     User,
-    UserInDB,
 )
 from .WebSocket import (
     WebSocketError,
@@ -213,7 +212,6 @@ __all__ = [
     "UserCreateOAuth",
     "UserUpdate",
     "User",
-    "UserInDB",
     "WebSocketError",
     "MessageToUser",
     "AnalysisRequest",
