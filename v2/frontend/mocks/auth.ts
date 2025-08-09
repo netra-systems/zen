@@ -18,5 +18,5 @@ export const mockUser: User = {
   full_name: 'Test User',
   is_active: true,
   is_superuser: false,
-  picture: '',
+  picture: 'https://placehold.co/600x400',
 };
