@@ -182,6 +182,8 @@ class DevelopmentConfig(AppConfig):
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra"
     dev_user_email: str = "dev@example.com"
     log_level: str = "DEBUG"
+    jwt_secret_key: str = "development_secret_key_for_jwt_do_not_use_in_production"
+    fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Generated with Fernet.generate_key()
 
 class ProductionConfig(AppConfig):
     """Production-specific settings."""
