@@ -1,28 +1,27 @@
-import uuid
-from typing import Optional
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 class UserBase(BaseModel):
     email: EmailStr
-    is_active: bool = True
-    is_superuser: bool = False
     full_name: Optional[str] = None
     picture: Optional[str] = None
 
 class UserCreate(UserBase):
     password: str
 
+class UserCreateOAuth(UserBase):
+    pass
+
 class UserUpdate(UserBase):
     pass
 
-class UserInDBBase(UserBase):
-    id: uuid.UUID
+class User(UserBase):
+    id: str
+    is_active: bool
+    is_superuser: bool
 
     class Config:
         from_attributes = True
 
-class User(UserInDBBase):
-    pass
-
-class UserInDB(UserInDBBase):
+class UserInDB(User):
     hashed_password: str

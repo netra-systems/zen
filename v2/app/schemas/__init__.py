@@ -100,8 +100,8 @@ from .Tool import (
 from .User import (
     UserBase,
     UserCreate,
+    UserCreateOAuth,
     UserUpdate,
-    UserInDBBase,
     User,
     UserInDB,
 )
@@ -210,8 +210,8 @@ __all__ = [
     "ToolCompleted",
     "UserBase",
     "UserCreate",
+    "UserCreateOAuth",
     "UserUpdate",
-    "UserInDBBase",
     "User",
     "UserInDB",
     "WebSocketError",

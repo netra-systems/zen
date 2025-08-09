@@ -1,5 +1,3 @@
-
-from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.responses import RedirectResponse
@@ -10,8 +8,8 @@ from app.auth.auth import google
 from app.config import settings
 from app.dependencies import get_db_session, get_security_service
 from app.db.models_postgres import User
-from app.schemas import UserCreate, User as UserSchema, AuthConfigResponse
-from app.schemas.Auth import AuthEndpoints, DevLoginRequest
+from app.schemas.User import UserCreate, UserCreateOAuth, User as UserSchema
+from app.schemas.Auth import AuthConfigResponse, AuthEndpoints, DevLoginRequest
 from app.services.user_service import user_service
 
 
@@ -19,6 +17,7 @@ from app.services.user_service import user_service
 router = APIRouter()
 
 class AuthRoutes:
+    
     
     @router.post("/token")
     async def token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):
@@ -65,11 +64,10 @@ class AuthRoutes:
         user_info = await google.parse_id_token(request, token)
         user = await user_service.get_by_email(db, email=user_info['email'])
         if not user:
-            user_in = UserCreate(
+            user_in = UserCreateOAuth(
                 email=user_info['email'],
                 full_name=user_info.get('name'),
                 picture=user_info.get('picture'),
-                password="",  # Not used for OAuth
             )
             user = await user_service.create(db, obj_in=user_in)
 
@@ -95,6 +93,3 @@ class AuthRoutes:
 
         access_token = security_service.create_access_token(data={"sub": str(user.id)})
         return {"access_token": access_token, "token_type": "bearer"}
-
-
-    

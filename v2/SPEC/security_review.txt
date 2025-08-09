@@ -1,0 +1,3 @@
+│ do a complete secuirty review. is it modern OAuth? is JWT complaint? Are there redudent or         │
+│   bad security items? is the dev mode functional? Is JWT used on WS, http, etc. similar way? is      │
+│   items stored in db properly? just the reivew and plan any fixes if needed
