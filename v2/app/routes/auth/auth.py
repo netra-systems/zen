@@ -6,7 +6,7 @@ from starlette.requests import Request
 
 from app.auth.auth import google
 from app.config import settings
-from app.dependencies import get_db
+from app.dependencies import get_db_session
 from app.db.models_postgres import User
 from app.schemas import UserCreate, User as UserSchema, AuthConfigResponse
 from app.services.user_service import user_service
@@ -36,7 +36,7 @@ class AuthRoutes:
 
 
     @router.get("/auth")
-    async def auth(request: Request, db: Session = Depends(get_db)):
+    async def auth(request: Request, db: Session = Depends(get_db_session)):
         token = await google.authorize_access_token(request)
         user_info = await google.parse_id_token(request, token)
         user = user_service.get_by_email(db, email=user_info['email'])
@@ -61,7 +61,7 @@ class AuthRoutes:
 
 
     @router.get("/me", response_model=UserSchema)
-    async def get_me(request: Request, db: Session = Depends(get_db)):
+    async def get_me(request: Request, db: Session = Depends(get_db_session)):
         user_info = request.session.get("user")
         if not user_info:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
