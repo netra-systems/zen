@@ -2,14 +2,14 @@ import os
 from google.cloud import secretmanager
 from typing import List, Dict
 from app import schemas
-from tenacity import retry, stop_after_attempt, wait_fixed, RetryError
+from tenacity import retry, stop_after_attempt, wait_fixed
 from app.schemas import SECRET_CONFIG
 
 class Settings:
     def __init__(self):
         self.loaded_settings = self._get_all_secrets_and_env_configs()
         if self.loaded_settings.log_secrets:
-            print(self.config.model_dump_json(indent=2))
+            print(self.loaded_settings.model_dump_json(indent=2))
         
     def get_settings(self) -> schemas.AppConfig:
         return self.loaded_settings
