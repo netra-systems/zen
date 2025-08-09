@@ -2,8 +2,11 @@ SPEC:chat_ui_ux: UI/UX for Chat
 
 chat_ui_ux:1:0: AMAZING UI/UX experience for Chat.
 
-chat_ui_ux:1:0:0: Look at Schemas and Types that are existing to see what fields and concepts are available.
-
+chat_ui_ux:1:0:0: Conventions:
+chat_ui_ux:1:0:0:0 See Schemas and Types that are existing to see what fields and concepts are available.
+chat_ui_ux:1:0:0:1: ALL chat components stay in components/chat
+chat_ui_ux:1:0:0:2: There is a single MainChat: "drop in" component that has all sub chat components
+chat_ui_ux:1:0:0:2: MainChat is the only item imported into the next.js formatted app/chat folder
 chat_ui_ux:1:0:1:  The primary header is the SubAgent name 
 chat_ui_ux:1:0:1:0 Secondary items are things related to SubAgent status and state etc. e.g. Tools being used
 chat_ui_ux:1:0:2: Third is messages
