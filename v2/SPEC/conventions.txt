@@ -2,7 +2,7 @@ SPEC:Conventions:Start
 
 0:1:1: Project Conventions:
 0:1:1:0: Types: 
-0:1:1:0:0: frontend: types/index.ts. 
+0:1:1:0:0: frontend: types/*.ts. 
 0:1:1:0:1: backend: schemas.py. 
 0:1:1:0:2: ALWAYS use existing or add new types using (“0:1:1:0:0:”, “0:1:1:0:1”).
 0:1:1:1: Use single sources of truth. Every unique concept is only defined once and then references the rest of the places. E.g. for each frontend concept, e.g. Context, Hooks, Store, etc. etc. MUST be only ONE
