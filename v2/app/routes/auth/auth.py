@@ -9,7 +9,7 @@ from app.config import settings
 from app.dependencies import get_db_session
 from app.db.models_postgres import User
 from app.schemas import UserCreate, User as UserSchema, AuthConfigResponse
-from app.schemas.Auth import AuthEndpoints
+from app.schemas.Auth import AuthEndpoints, DevLoginRequest
 from app.services.user_service import user_service
 from app.auth.auth_dependencies import get_current_user_ws
 
@@ -61,6 +61,25 @@ class AuthRoutes:
 
         return RedirectResponse(url=settings.frontend_url)
 
+
+    @router.post("/dev_login")
+    async def dev_login(request: Request, dev_login_request: DevLoginRequest, db: Session = Depends(get_db_session)):
+        if settings.environment != "development":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Dev login is only available in development environment")
+
+        user = user_service.get_by_email(db, email=dev_login_request.email)
+        if not user:
+            # Create a new dev user if not exists
+            user_in = UserCreate(
+                email=dev_login_request.email,
+                full_name="Dev User",
+                picture=None,
+                password="",
+            )
+            user = user_service.create(db, obj_in=user_in)
+
+        request.session["user"] = {"email": user.email, "name": user.full_name, "picture": user.picture}
+        return {"message": "Dev login successful", "user": user.email}
 
     @router.get("/logout")
     async def logout(request: Request):
