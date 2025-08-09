@@ -162,11 +162,6 @@ class AppConfig(BaseModel):
             model_name="gemini-2.5-pro",
             generation_config={"temperature": 0.5},
         ),
-        "gpt-4": LLMConfig(
-            provider="openai",
-            model_name="gpt-4",
-            generation_config={"temperature": 0.8},
-        ),
         "triage": LLMConfig(
             provider="google",
             model_name="gemini-2.5-pro",

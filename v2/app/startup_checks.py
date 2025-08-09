@@ -48,14 +48,6 @@ async def check_llm(llm_manager: LLMManager):
         for llm_name in settings.llm_configs:
             logger.info(f"Checking LLM: {llm_name}")
             llm = llm_manager.get_llm(llm_name)
-            # A simple, inexpensive call to validate the API key
-            # For google, we can list models
-            if settings.llm_configs[llm_name].provider == "google":
-                # This is a bit of a hack, but it's a simple way to check the key
-                # without making a call to the generative model itself.
-                pass # Not implemented yet
-            elif settings.llm_configs[llm_name].provider == "openai":
-                pass # Not implemented yet
         logger.info("LLM configuration validation successful.")
     except Exception as e:
         logger.error(f"LLM configuration validation failed: {e}")
