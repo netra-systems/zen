@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User } from '@/types';
+import { User } from '@/types/User';
 
 interface AuthContextType {
   user: User | null;
@@ -11,7 +11,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>({ id: 'test-user', email: 'test@example.com' });
+  const [user, setUser] = useState<User | null>({ id: 'test-user', email: 'test@example.com', full_name: 'Test User' });
   const [loading, setLoading] = useState(false);
 
   const login = async () => {

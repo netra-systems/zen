@@ -1,9 +1,9 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AppWithLayout } from '@/components/AppWithLayout';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 // Mock the useAuth hook
-jest.mock('@/contexts/AuthContext', () => ({
+jest.mock('@/hooks/useAuth', () => ({
   useAuth: jest.fn(),
 }));
 

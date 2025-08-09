@@ -2,7 +2,7 @@
 
 import { useMemo, type ReactNode } from 'react';
 import { WebSocketProvider } from '@/contexts/WebSocketContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { config } from '@/config';
 
 export function Providers({ children }: { children: ReactNode }) {

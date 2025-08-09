@@ -1,6 +1,7 @@
 
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { authService } from '@/services/auth';
 import { mockUser, mockAuthConfig } from '@/mocks/auth';
 

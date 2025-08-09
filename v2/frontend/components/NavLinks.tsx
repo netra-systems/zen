@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Icons } from '@/components/Icons';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 import { NavItem } from '@/types';
 

@@ -1,12 +1,12 @@
-
 'use client';
 
-import { createContext, useContext, useEffect, ReactNode, useState, useCallback } from 'react';
-import { User, AuthConfigResponse } from '@/types';
+import { createContext, useEffect, ReactNode, useState, useCallback } from 'react';
+import { User } from '@/types/User';
+import { AuthConfigResponse } from '@/types/Auth';
 import { Button } from '@/components/ui/button';
 import { authService } from '@/services/auth';
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null;
   login: () => void;
   logout: () => void;
@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // The backend will create a dev user if one doesn't exist.
         authService.handleLogin(data);
       }
-    } catch (error) { 
+    } catch (error) {
       console.error("Failed to fetch auth config:", error);
     } finally {
       setLoading(false);
@@ -65,11 +65,3 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     </AuthContext.Provider>
   );
 }
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};

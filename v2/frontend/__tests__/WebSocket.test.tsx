@@ -2,12 +2,11 @@
 import { render, waitFor } from '@testing-library/react';
 import { WebSocketProvider } from '@/contexts/WebSocketContext';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import WS from 'jest-websocket-mock';
 
 // Mock the useAuth hook
-jest.mock('@/contexts/AuthContext', () => ({
-  ...jest.requireActual('@/contexts/AuthContext'),
+jest.mock('@/hooks/useAuth', () => ({
   useAuth: jest.fn(),
 }));
 
