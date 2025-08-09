@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { config } from '@/config';
 
 export function Providers({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user } = authService.useAuth();
   const socketUrl = useMemo(() => {
     if (user?.id) {
       return config.wsUrl.replace('{user_id}', user.id);

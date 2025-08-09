@@ -3,8 +3,10 @@ import { AppWithLayout } from '@/components/AppWithLayout';
 import { useAuth } from '@/hooks/useAuth';
 
 // Mock the useAuth hook
-jest.mock('@/hooks/useAuth', () => ({
-  useAuth: jest.fn(),
+jest.mock('@/services/auth', () => ({
+  authService: {
+    useAuth: jest.fn(),
+  }
 }));
 
 // Mock the Sidebar and Header components
@@ -22,7 +24,7 @@ jest.mock('@/components/Header', () => ({
 describe('AppWithLayout', () => {
   it('renders the Header and Sidebar when the user is authenticated', () => {
     // Arrange
-    (useAuth as jest.Mock).mockReturnValue({ user: { full_name: 'Test User' } });
+    (authService.useAuth as jest.Mock).mockReturnValue({ user: { full_name: 'Test User' } });
 
     // Act
     render(<AppWithLayout><div>Child</div></AppWithLayout>);
@@ -34,7 +36,7 @@ describe('AppWithLayout', () => {
 
   it('does not render the Sidebar when it is toggled off', () => {
     // Arrange
-    (useAuth as jest.Mock).mockReturnValue({ user: { full_name: 'Test User' } });
+    (authService.useAuth as jest.Mock).mockReturnValue({ user: { full_name: 'Test User' } });
 
     // Act
     render(<AppWithLayout><div>Child</div></AppWithLayout>);

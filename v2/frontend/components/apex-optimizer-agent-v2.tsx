@@ -15,7 +15,7 @@ export function ApexOptimizerAgentV2() {
     event: false, 
     thinking: true 
   });
-  const { user } = useAuth();
+  const { user } = authService.useAuth();
 
   const handleSendMessage = (message: string) => {
     if (!user) {

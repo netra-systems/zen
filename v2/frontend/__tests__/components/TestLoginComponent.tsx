@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 
 const TestLoginComponent = () => {
-  const { login, loading, user, logout } = useAuth();
+  const { login, loading, user, logout } = authService.useAuth();
 
   if (loading) {
     return <div>Loading...</div>;

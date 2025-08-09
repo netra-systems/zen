@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function LoginButton() {
-  const { user, login, logout } = useAuth();
+  const { user, login, logout } = authService.useAuth();
 
   if (user) {
     return (

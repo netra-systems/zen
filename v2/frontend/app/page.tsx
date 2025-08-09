@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 const HomePage: NextPage = () => {
-  const { user, loading } = useAuth();
+  const { user, loading } = authService.useAuth();
   const router = useRouter();
 
   useEffect(() => {

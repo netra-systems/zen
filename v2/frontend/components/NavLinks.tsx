@@ -47,7 +47,7 @@ const navItems: NavItem[] = [
 ];
 
 export function NavLinks() {
-  const { user } = useAuth();
+  const { user } = authService.useAuth();
 
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">

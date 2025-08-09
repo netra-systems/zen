@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 
 export default function LoginPage() {
-  const { login, loading } = useAuth();
+  const { login, loading } = authService.useAuth();
 
   return (
     <div className="flex items-center justify-center h-screen">

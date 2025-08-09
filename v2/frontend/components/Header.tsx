@@ -12,7 +12,7 @@ import { LoginButton } from './auth/LoginButton';
 import { HeaderProps } from '../types';
 
 export const Header = ({ toggleSidebar }: HeaderProps) => {
-  const { user, logout } = useAuth();
+  const { user, logout } = authService.useAuth();
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
