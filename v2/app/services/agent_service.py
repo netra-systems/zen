@@ -1,12 +1,11 @@
 import json
-import asyncio
 import logging
-from fastapi import WebSocket, WebSocketDisconnect, Depends
+from fastapi import Depends
 from app.agents.supervisor import Supervisor
 from app import schemas
 from app.ws_manager import manager
 from app.llm.llm_manager import LLMManager
-from app.db.session import get_db_session
+from app.db.postgres import get_async_db
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +32,7 @@ class AgentService:
                 request_model = schemas.RequestModel(**payload.get("request"))
                 # When started from a websocket, we always want to stream updates
                 response = await self.run(request_model, run_id, stream_updates=True)
-                await manager.broadcast_to_client(
+                await manager.broadcast_to_user(
                     run_id,
                     {
                         "event": "agent_finished",
@@ -46,7 +45,7 @@ class AgentService:
         except Exception as e:
             logger.error(f"Error in handle_websocket_message for run_id: {run_id}: {e}", exc_info=True)
 
-def get_agent_service(db_session = Depends(get_db_session), llm_manager: LLMManager = Depends(LLMManager)) -> AgentService:
+def get_agent_service(db_session = Depends(get_async_db), llm_manager: LLMManager = Depends(LLMManager)) -> AgentService:
     from app.agents.supervisor import Supervisor
     from app.agents.tool_dispatcher import ToolDispatcher
     tool_dispatcher = ToolDispatcher(db_session)
