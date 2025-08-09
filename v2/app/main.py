@@ -3,6 +3,10 @@ import time
 import sys
 import os
 import asyncio
+import alembic.config
+import alembic.script
+from alembic.runtime.migration import MigrationContext
+from sqlalchemy import create_engine
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -28,6 +32,52 @@ from app.ws_manager import manager as websocket_manager
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.services.tool_registry import ToolRegistry
 from app.redis_manager import redis_manager
+
+def run_migrations(logger):
+    """Run database migrations automatically on startup."""
+    try:
+        logger.info("Checking database migrations...")
+        
+        # Get the database URL
+        database_url = settings.database_url
+        if not database_url:
+            logger.warning("No database URL configured, skipping migrations")
+            return
+            
+        # Convert async URL to sync for Alembic
+        if database_url.startswith("postgresql+asyncpg://"):
+            sync_database_url = database_url.replace("postgresql+asyncpg://", "postgresql://")
+        else:
+            sync_database_url = database_url
+            
+        # Check current revision
+        engine = create_engine(sync_database_url)
+        with engine.connect() as connection:
+            context = MigrationContext.configure(connection)
+            current_rev = context.get_current_revision()
+            logger.info(f"Current database revision: {current_rev}")
+        
+        # Run migrations
+        alembic_cfg = alembic.config.Config("alembic.ini")
+        alembic_cfg.set_main_option("sqlalchemy.url", sync_database_url)
+        
+        # Check if we need to upgrade
+        script = alembic.script.ScriptDirectory.from_config(alembic_cfg)
+        head_rev = script.get_current_head()
+        
+        if current_rev != head_rev:
+            logger.info(f"Migrating database from {current_rev} to {head_rev}...")
+            alembic.config.main(argv=["--raiseerr", "upgrade", "head"])
+            logger.info("Database migrations completed successfully")
+        else:
+            logger.info("Database is already up to date")
+            
+    except Exception as e:
+        logger.error(f"Failed to run migrations: {e}")
+        if settings.environment == "production":
+            raise
+        else:
+            logger.warning("Continuing without migrations in development mode")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
