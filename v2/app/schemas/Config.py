@@ -36,6 +36,7 @@ SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="fernet-key", target_field="fernet_key"),
     SecretReference(name="google-client-id", target_model="oauth_config", target_field="client_id"),
     SecretReference(name="google-client-secret", target_model="oauth_config", target_field="client_secret"),
+    SecretReference(name="redis-default", target_field="redis_password"),
 ]
 
 class GoogleCloudConfig(BaseModel):
@@ -139,7 +140,8 @@ class AppConfig(BaseModel):
     log_level: str = "DEBUG"
     log_secrets: bool = False
     frontend_url: str = "http://localhost:3000"
-    redis_url: Optional[str] = None
+    redis_password: Optional[str] = None
+    
 
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(
@@ -182,7 +184,6 @@ class DevelopmentConfig(AppConfig):
     """Development-specific settings can override defaults."""
     debug: bool = True
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra"
-    redis_url: str = "redis://127.0.0.1:6379"
     dev_user_email: str = "dev@example.com"
     log_level: str = "DEBUG"
 
@@ -196,4 +197,4 @@ class TestingConfig(AppConfig):
     """Testing-specific settings."""
     environment: str = "testing"
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"
-    redis_url: str = "redis://127.0.0.1:6379"
+    

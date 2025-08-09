@@ -6,11 +6,18 @@ class RedisManager:
         self.redis_client = None
 
     async def connect(self):
-        self.redis_client = redis.from_url(settings.redis_url, encoding="utf-8", decode_responses=True)
+        self.redis_client = redis.Redis(
+            host='redis-10504.fcrce190.us-east-1-1.ec2.redns.redis-cloud.com',
+            port=10504,
+            decode_responses=True,
+            username="default",
+            password=settings.redis_password,
+        )
         await self.redis_client.ping()
 
     async def disconnect(self):
-        await self.redis_client.close()
+        if self.redis_client:
+            await self.redis_client.close()
 
     async def get_client(self):
         return self.redis_client
