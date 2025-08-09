@@ -26,7 +26,7 @@ async def test_db():
         await conn.run_sync(Base.metadata.drop_all)
 
 @pytest.mark.asyncio
-async def test_get_auth_config_dev_mode(client: AsyncClient, test_db):
+async def test_get_auth_config_dev_mode(client: AsyncClient):
     settings.environment = "development"
     response = await client.get("/api/auth/config")
     assert response.status_code == 200
@@ -35,7 +35,7 @@ async def test_get_auth_config_dev_mode(client: AsyncClient, test_db):
     assert data["endpoints"]["dev_login"] is not None
 
 @pytest.mark.asyncio
-async def test_get_auth_config_prod_mode(client: AsyncClient, test_db):
+async def test_get_auth_config_prod_mode(client: AsyncClient):
     settings.environment = "production"
     response = await client.get("/api/auth/config")
     assert response.status_code == 200
@@ -43,13 +43,13 @@ async def test_get_auth_config_prod_mode(client: AsyncClient, test_db):
     assert data["development_mode"] is False
 
 @pytest.mark.asyncio
-async def test_dev_login_get_not_allowed(client: AsyncClient, test_db):
+async def test_dev_login_get_not_allowed(client: AsyncClient):
     settings.environment = "development"
     response = await client.get("/api/auth/dev_login", follow_redirects=False)
     assert response.status_code == 405  # Method Not Allowed
 
 @pytest.mark.asyncio
-async def test_dev_login_success(client: AsyncClient, test_db):
+async def test_dev_login_success(client: AsyncClient):
     settings.environment = "development"
     response = await client.post("/api/auth/dev_login", json={"email": "test@example.com"})
     assert response.status_code == 200
@@ -58,19 +58,19 @@ async def test_dev_login_success(client: AsyncClient, test_db):
     assert data["user"] == "test@example.com"
 
 @pytest.mark.asyncio
-async def test_dev_login_prod_mode(client: AsyncClient, test_db):
+async def test_dev_login_prod_mode(client: AsyncClient):
     settings.environment = "production"
     response = await client.post("/api/auth/dev_login", json={"email": "test@example.com"})
     assert response.status_code == 403
 
 @pytest.mark.asyncio
-async def test_google_login_redirect(client: AsyncClient, test_db):
+async def test_google_login_redirect(client: AsyncClient):
     response = await client.get("/api/auth/login/google", follow_redirects=False)
     assert response.status_code == 302  # Found
     assert "accounts.google.com" in response.headers["location"]
 
 @pytest.mark.asyncio
-async def test_logout_redirect(client: AsyncClient, test_db):
+async def test_logout_redirect(client: AsyncClient):
     response = await client.get("/api/auth/logout", follow_redirects=False)
     assert response.status_code == 307  # Temporary Redirect
     assert response.headers["location"] == "/login"
