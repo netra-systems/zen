@@ -138,7 +138,7 @@ class Assistant(Base):
 
 class Thread(Base):
     __tablename__ = "threads"
-    id = Column(String, primary_key=True)
+    id = Column(String, primary_key=Ture)
     object = Column(String, nullable=False, default="thread")
     created_at = Column(Integer, nullable=False)
     metadata_ = Column(JSON, nullable=True)
