@@ -1,11 +1,7 @@
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-from sqlalchemy import create_engine
-from app.db.base import Base
-from app.db.models_postgres import User, Supply, Analysis, AnalysisResult, SupplyOption
 
 DATABASE_NAME = "netra"
-DATABASE_URL = f"postgresql://postgres:123@localhost/{DATABASE_NAME}"
 
 # 1. Drop and recreate the database
 conn = psycopg2.connect(dbname="postgres", user="postgres", host="localhost", password="123")
@@ -31,9 +27,4 @@ print(f"Database '{DATABASE_NAME}' created successfully.")
 cur.close()
 conn.close()
 
-# 2. Create tables
-engine = create_engine(DATABASE_URL)
-Base.metadata.create_all(bind=engine)
-print("Tables created successfully.")
-
-print(f"Database '{DATABASE_NAME}' refreshed successfully.")
+print(f"Database '{DATABASE_NAME}' created successfully. Now run migrations.")
