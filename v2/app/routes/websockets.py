@@ -26,4 +26,4 @@ async def websocket_endpoint(
             await agent_service.handle_websocket_message(user_id, data)
 
     except WebSocketDisconnect:
-        manager.disconnect(user_id)
+        manager.disconnect(user_id, websocket)

@@ -47,3 +47,13 @@ class LLMManager:
 
         self._llm_cache[cache_key] = llm
         return llm
+
+    async def ask_llm(self, prompt: str, llm_config_name: str) -> str:
+        llm = self.get_llm(llm_config_name)
+        response = await llm.ainvoke(prompt)
+        return response.content
+
+    async def stream_llm(self, prompt: str, llm_config_name: str):
+        llm = self.get_llm(llm_config_name)
+        async for chunk in llm.astream(prompt):
+            yield chunk.content

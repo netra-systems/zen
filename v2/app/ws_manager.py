@@ -20,9 +20,11 @@ class WebSocketManager:
         self.active_connections[user_id].append(websocket)
         logger.info(f"WebSocket connected for user {user_id}")
 
-    def disconnect(self, user_id: str):
+    def disconnect(self, user_id: str, websocket: WebSocket):
         if user_id in self.active_connections:
-            del self.active_connections[user_id]
+            self.active_connections[user_id].remove(websocket)
+            if not self.active_connections[user_id]:
+                del self.active_connections[user_id]
             logger.info(f"WebSocket disconnected for user {user_id}")
 
     async def send_message(self, user_id: str, message: Dict[str, Any]):
