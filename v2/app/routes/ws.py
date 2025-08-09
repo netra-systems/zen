@@ -1,13 +1,16 @@
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
-from app.dependencies import get_current_user_ws
+from sqlalchemy.orm import Session
+from app.auth.services import security_service
 from app.ws_manager import manager
 from app.db.models_postgres import User
+from app.db.session import get_db
 
 router = APIRouter()
 
 @router.websocket("/ws/{token}")
-async def websocket_endpoint(websocket: WebSocket, token: str, user: User = Depends(get_current_user_ws)):
+async def websocket_endpoint(websocket: WebSocket, token: str, db: Session = Depends(get_db)):
+    user = security_service.get_current_user_ws(db=db, token=token)
     if user is None:
         await websocket.close(code=4001)
         return
