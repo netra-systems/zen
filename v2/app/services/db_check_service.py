@@ -1,4 +1,5 @@
 import logging
+import os
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.engine import reflection
 from alembic.config import Config
@@ -28,7 +29,11 @@ async def check_db_schema(db_session: AsyncSession):
         return False
 
 def _validate_schema_with_alembic(connection):
-    alembic_cfg = Config("app/alembic.ini")
+    # Construct the path to alembic.ini relative to this file
+    # This makes the path independent of the current working directory
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    alembic_ini_path = os.path.join(current_dir, '..', '..', 'alembic.ini')
+    alembic_cfg = Config(alembic_ini_path)
     script = ScriptDirectory.from_config(alembic_cfg)
 
     # Get the head revision from the scripts
