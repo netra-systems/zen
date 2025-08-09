@@ -39,18 +39,28 @@ async def lifespan(app: FastAPI):
     logger = central_logger.get_logger(__name__)
     logger.info("Application startup...")
 
-    await redis_manager.connect()
+    # Initialize services
     app.state.redis_manager = redis_manager
-    
-
     app.state.background_task_manager = BackgroundTaskManager()
-
     key_manager = KeyManager.load_from_settings(settings)
     app.state.key_manager = key_manager
     app.state.security_service = SecurityService(key_manager)
-
-    # Initialize LLMManager
     app.state.llm_manager = LLMManager(settings)
+
+    # Run startup checks
+    from app.startup_checks import run_startup_checks
+    try:
+        await run_startup_checks(app)
+    except Exception as e:
+        logger.critical(f"Startup checks failed: {e}", exc_info=True)
+        # Exit the application if startup checks fail
+        # This is important to prevent the app from running in a broken state
+        # You might want to handle this more gracefully in a production environment
+        # For example, by sending an alert to an admin
+        # For now, we will just exit
+        # Note: This will not work as expected with uvicorn --reload
+        import sys
+        sys.exit(1)
 
     # The ClickHouse client is now managed by the central_logger
     app.state.clickhouse_client = central_logger.clickhouse_db
