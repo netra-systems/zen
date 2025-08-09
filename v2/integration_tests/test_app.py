@@ -6,6 +6,7 @@ from httpx import AsyncClient
 from app.main import app
 from app.db.testing import override_get_db
 from app.dependencies import get_async_db
+from app.schemas.Generation import ContentGenParams, LogGenParams, DataIngestionParams
 
 app.dependency_overrides[get_async_db] = override_get_db
 
@@ -43,7 +44,8 @@ async def test_generation_api(mock_generative_model):
         mock_generative_model.return_value = mock_model_instance
 
         # 1. Start content generation job
-        response = await ac.post("/api/generation/content", json={"samples_per_type": 1, "max_cores": 1})
+        content_params = ContentGenParams(samples_per_type=1, max_cores=1)
+        response = await ac.post("/api/generation/content", json=content_params.model_dump())
         assert response.status_code == 202
         content_job_id = response.json()["job_id"]
 
@@ -51,7 +53,8 @@ async def test_generation_api(mock_generative_model):
         await poll_job_status(ac, content_job_id)
 
         # 3. Start log generation job
-        response = await ac.post("/api/generation/logs", json={"corpus_id": content_job_id, "num_logs": 10})
+        log_params = LogGenParams(corpus_id=content_job_id, num_logs=10)
+        response = await ac.post("/api/generation/logs", json=log_params.model_dump())
         assert response.status_code == 202
         log_job_id = response.json()["job_id"]
 
@@ -60,7 +63,8 @@ async def test_generation_api(mock_generative_model):
         log_file_path = log_job_result["result_path"]
 
         # 5. Ingest data
-        response = await ac.post("/api/generation/ingest_data", json={"data_path": log_file_path, "table_name": "test_logs"})
+        ingestion_params = DataIngestionParams(data_path=log_file_path, table_name="test_logs")
+        response = await ac.post("/api/generation/ingest_data", json=ingestion_params.model_dump())
         assert response.status_code == 202
         ingestion_job_id = response.json()["job_id"]
 
