@@ -2,7 +2,6 @@ import logging
 import time
 import sys
 import os
-import asyncio
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -14,7 +13,6 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
-
 from app.routes.websockets import router as websockets_router
 from app.db.postgres import async_session_factory
 from app.config import settings
@@ -25,12 +23,10 @@ from app.services.agent_service import AgentService
 from app.services.key_manager import KeyManager
 from app.auth.services import SecurityService
 from app.background import BackgroundTaskManager
-from app.ws_manager import initialize_ws_manager
-from app.ws_manager import manager as websocket_manager
+from app.ws_manager import initialize_ws_manager, manager as websocket_manager
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.services.tool_registry import ToolRegistry
 from app.redis_manager import redis_manager
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -82,8 +78,6 @@ async def lifespan(app: FastAPI):
         central_logger.shutdown()
         logger.info("Application shutdown complete.")
 
-
-
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(lifespan=lifespan)
@@ -124,23 +118,18 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         content={"detail": exc.detail},
     )
 
-
 from app.routes import supply, generation, admin, references, health, corpus, synthetic_data
 from app.routes.auth import auth as auth_router
 
 app.include_router(auth_router.router, prefix="/api/auth", tags=["auth"])
 app.include_router(supply.router, prefix="/api/supply", tags=["supply"])
 app.include_router(generation.router, prefix="/api/generation", tags=["generation"])
-
-
 app.include_router(websockets_router, tags=["websockets"])
 app.include_router(admin.router, prefix="/api", tags=["admin"])
 app.include_router(references.router, prefix="/api", tags=["references"])
 app.include_router(health.router, prefix="/health", tags=["health"])
 app.include_router(corpus.router, prefix="/api/corpus", tags=["corpus"])
 app.include_router(synthetic_data.router, prefix="/synthetic_data", tags=["synthetic_data"])
-
-
 
 @app.get("/")
 def read_root():
@@ -169,12 +158,6 @@ if __name__ == "__main__":
     )
 
 if "pytest" in sys.modules:
-    from app.db.postgres import async_session_factory
-    from app.llm.llm_manager import LLMManager
-    from app.agents.supervisor import Supervisor
-    from app.services.key_manager import KeyManager
-    from app.auth.services import SecurityService
-
     llm_manager = LLMManager(settings)
     app.state.llm_manager = llm_manager
     key_manager = KeyManager.load_from_settings(settings)
@@ -196,7 +179,6 @@ if "pytest" in sys.modules:
         finally:
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.drop_all)
-
 
     from app.dependencies import get_db_session
     app.dependency_overrides[get_db_session] = override_get_db
