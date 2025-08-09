@@ -1,16 +1,15 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ChatAnalysisRequest, Reference } from '../types';
-import { useWebSocket } from '@/app/hooks/useWebSocket';
+import { AnalysisRequest, ReferenceItem } from '@/types';
+import { useWebSocket } from '@/hooks/useWebSocket';
 import { examplePrompts } from '../lib/examplePrompts';
 
 export function ChatInput() {
     const [inputValue, setInputValue] = useState('');
     const [showReferences, setShowReferences] = useState(false);
-    const [references, setReferences] = useState<Reference[]>([]);
-    const [selectedReferences, setSelectedReferences] = useState<Reference[]>([]);
+    const [references, setReferences] = useState<ReferenceItem[]>([]);
+    const [selectedReferences, setSelectedReferences] = useState<ReferenceItem[]>([]);
     const { sendMessage } = useWebSocket();
 
     const loadExample = () => {
@@ -32,7 +31,7 @@ export function ChatInput() {
         }
     };
 
-    const handleReferenceClick = (reference: Reference) => {
+    const handleReferenceClick = (reference: ReferenceItem) => {
         setInputValue(inputValue.slice(0, -1) + ` @${reference.friendly_name} `);
         setSelectedReferences([...selectedReferences, reference]);
         setShowReferences(false);
@@ -44,11 +43,8 @@ export function ChatInput() {
         const source = selectedReferences.find((ref) => ref.type === 'source')?.value || 'synthetic_data';
         const timePeriod = selectedReferences.find((ref) => ref.type === 'time_period')?.value || 'last_7_days';
 
-        const analysisRequest: ChatAnalysisRequest = {
-            settings: {
-                debug_mode: true,
-            },
-            request: {
+        const analysisRequest: AnalysisRequest = {
+            request_model: {
                 user_id: '123',
                 query: inputValue,
                 workloads: [

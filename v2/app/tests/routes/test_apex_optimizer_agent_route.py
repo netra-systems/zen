@@ -2,7 +2,7 @@ import pytest
 import asyncio
 from httpx import AsyncClient
 from app.main import app
-from app.schemas import AnalysisRequest, Settings, RequestModel, Workload, DataSource, TimeRange
+from app.schemas import RequestModel, Workload, DataSource, TimeRange
 from app.llm.llm_manager import LLMManager
 from app.config import settings
 
@@ -21,23 +21,20 @@ app.state.llm_manager = llm_manager
     "I need to reduce costs by 20% and improve latency by 2x. I'm also expecting a 30% increase in usage. What should I do?"
 ])
 async def test_apex_optimizer_agent(prompt: str):
-    analysis_request = AnalysisRequest(
-        settings=Settings(debug_mode=True),
-        request=RequestModel(
-            user_id="test_user",
-            query=prompt,
-            workloads=[
-                Workload(
-                    run_id="test_run",
-                    query=prompt,
-                    data_source=DataSource(source_table="test_table").model_dump(),
-                    time_range=TimeRange(start_time="2025-01-01T00:00:00Z", end_time="2025-01-02T00:00:00Z").model_dump()
-                )
-            ]
-        )
+    request_model = RequestModel(
+        user_id="test_user",
+        query=prompt,
+        workloads=[
+            Workload(
+                run_id="test_run",
+                query=prompt,
+                data_source=DataSource(source_table="test_table"),
+                time_range=TimeRange(start_time="2025-01-01T00:00:00Z", end_time="2025-01-02T00:00:00Z")
+            )
+        ]
     )
     async with AsyncClient(app=app, base_url="http://test") as client:
-        response = await client.post("/api/agent/chat/start", json=analysis_request.model_dump())
+        response = await client.post("/run_agent", json=request_model.model_dump())
         assert response.status_code == 200
         run_id = response.json()["run_id"]
         assert isinstance(run_id, str)

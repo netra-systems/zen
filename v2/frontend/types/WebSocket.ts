@@ -1,80 +1,18 @@
 // frontend/types/WebSocket.ts
+import { RequestModel } from './Request';
+import { StreamEvent } from './StreamEvent';
+import { RunComplete } from './Run';
+import { SubAgentUpdate, AgentStarted, AgentCompleted, AgentErrorMessage, StopAgent, SubAgentStatus } from './Assistant';
+import { UserMessage, AgentMessage, MessageToUser } from './Message';
+import { ToolStarted, ToolCompleted } from './Tool';
 
 export interface WebSocketError {
   message: string;
 }
 
 export interface AnalysisRequest {
-  request_model: any; // placeholder
+  request_model: RequestModel;
 }
-
-export interface StreamEvent {
-  event_type: string;
-  data: {
-    [k: string]: any;
-  };
-}
-
-export interface RunComplete {
-  run_id: string;
-  result: any;
-}
-
-export interface SubAgentUpdate {
-    sub_agent_name: string;
-    state: any; // placeholder
-}
-
-export interface AgentStarted {
-    run_id: string;
-}
-
-export interface AgentCompleted {
-    run_id: string;
-    result: any;
-}
-
-export interface AgentErrorMessage {
-    run_id: string;
-    message: string;
-}
-
-export interface UserMessage {
-  text: string;
-  references?: string[];
-}
-
-export interface AgentMessage {
-  text: string;
-}
-
-export interface ToolStarted {
-  tool_name: string;
-}
-
-export interface ToolCompleted {
-  tool_name: string;
-  result: any;
-}
-
-export interface StopAgent {
-  run_id: string;
-}
-
-export interface SubAgentStatus {
-  agent_name: string;
-  tools: string[];
-  status: string;
-}
-
-export interface MessageToUser {
-  sender: string;
-  content: string;
-  references?: string[] | null;
-  raw_json?: { [k: string]: any } | null;
-  error?: string | null;
-}
-
 
 export interface WebSocketMessage {
   type:

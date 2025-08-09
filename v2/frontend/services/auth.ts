@@ -1,4 +1,4 @@
-import { AuthConfigResponse } from '@/types';
+import { AuthConfigResponse } from '@/types/Auth';
 
 class AuthService {
   async getAuthConfig(): Promise<AuthConfigResponse> {

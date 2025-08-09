@@ -8,3 +8,20 @@ export interface Message {
   raw_data?: { [k: string]: any } | null;
   displayed_to_user?: boolean;
 }
+
+export interface UserMessage {
+  text: string;
+  references?: string[];
+}
+
+export interface AgentMessage {
+  text: string;
+}
+
+export interface MessageToUser {
+  sender: string;
+  content: string;
+  references?: string[] | null;
+  raw_json?: { [k: string]: any } | null;
+  error?: string | null;
+}

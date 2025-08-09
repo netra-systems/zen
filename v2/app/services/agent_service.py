@@ -14,11 +14,11 @@ class AgentService:
     def __init__(self, supervisor: Supervisor):
         self.supervisor = supervisor
 
-    async def run(self, analysis_request: schemas.AnalysisRequest, run_id: str, stream_updates: bool = False):
+    async def run(self, request_model: schemas.RequestModel, run_id: str, stream_updates: bool = False):
         """
         Starts the agent. The supervisor will stream logs back to the websocket if requested.
         """
-        return await self.supervisor.run(analysis_request.model_dump(), run_id, stream_updates)
+        return await self.supervisor.run(request_model.model_dump(), run_id, stream_updates)
 
     async def handle_websocket_message(self, run_id: str, message: str):
         """
@@ -30,12 +30,9 @@ class AgentService:
             message_type = data.get("type")
             if message_type == "start_agent":
                 payload = data.get("payload")
-                analysis_request = schemas.AnalysisRequest(
-                    settings=payload.get("settings"),
-                    request=payload.get("request")
-                )
+                request_model = schemas.RequestModel(**payload.get("request"))
                 # When started from a websocket, we always want to stream updates
-                response = await self.run(analysis_request, run_id, stream_updates=True)
+                response = await self.run(request_model, run_id, stream_updates=True)
                 await manager.broadcast_to_client(
                     run_id,
                     {
@@ -51,5 +48,7 @@ class AgentService:
 
 def get_agent_service(db_session = Depends(get_db_session), llm_manager: LLMManager = Depends(LLMManager)) -> AgentService:
     from app.agents.supervisor import Supervisor
-    supervisor = Supervisor(db_session, llm_manager, manager)
+    from app.agents.tool_dispatcher import ToolDispatcher
+    tool_dispatcher = ToolDispatcher(db_session)
+    supervisor = Supervisor(db_session, llm_manager, manager, tool_dispatcher)
     return AgentService(supervisor)

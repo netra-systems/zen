@@ -7,7 +7,7 @@ import { ChatWindow } from '../chat/ChatWindow';
 import LoginButton from './LoginButton';
 import { examplePrompts } from '../lib/examplePrompts';
 import { MessageFilter, WebSocketMessage, AnalysisRequest } from '@/app/types';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export function ApexOptimizerAgentV2() {
   const { messages, showThinking, error, sendWsMessage } = useAgentContext();

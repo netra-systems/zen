@@ -19,7 +19,7 @@ describe('ApexOptimizerAgentV2', () => {
     });
     (authService.getAuthConfig as jest.Mock).mockResolvedValue({ user: mockUser });
     (useAgentContext as jest.Mock).mockReturnValue({
-      messages: [{ type: 'user', content: 'Test message', id: '1' }],
+      messages: [{ type: 'user', content: 'Test message', id: '1', created_at: new Date().toISOString() }],
       showThinking: false,
       sendWsMessage,
       subAgentName: 'Test Agent',
