@@ -114,6 +114,12 @@ from .WebSocket import (
     StreamEvent,
     WebSocketMessage,
 )
+from .Reference import (
+    ReferenceGetResponse,
+    ReferenceItem,
+    ReferenceCreateRequest,
+    ReferenceUpdateRequest,
+)
 
 __all__ = [
     "SubAgentLifecycle",
@@ -212,4 +218,8 @@ __all__ = [
     "StopAgent",
     "StreamEvent",
     "WebSocketMessage",
+    "ReferenceGetResponse",
+    "ReferenceItem",
+    "ReferenceCreateRequest",
+    "ReferenceUpdateRequest",
 ]
