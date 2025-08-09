@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 
 export function LoginButton() {
-  const { user, login, logout, loading } = useAuth();
+  const { user, login, logout, loading } = authService.useAuth();
 
   if (loading) {
     return <Button disabled>Loading...</Button>;
