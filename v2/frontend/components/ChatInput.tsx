@@ -8,7 +8,7 @@ import { examplePrompts } from '../lib/examplePrompts';
 export function ChatInput() {
     const [inputValue, setInputValue] = useState('');
     const [showReferences, setShowReferences] = useState(false);
-    const [references, setReferences] = useState<ReferenceItem[]>([]);
+    const [references] = useState<ReferenceItem[]>([]);
     const [selectedReferences, setSelectedReferences] = useState<ReferenceItem[]>([]);
     const { sendMessage } = useWebSocket();
 

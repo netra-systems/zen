@@ -3,7 +3,7 @@
 import { Fragment } from 'react';
 import { NextPage } from 'next';
 import { authService } from '@/auth';
-import { Chat as ChatWindow } from '@/components/Chat';
+import { ChatWindow } from '@/chat/ChatWindow';
 ;
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -26,10 +26,14 @@ const HomePage: NextPage = () => {
     );
   }
 
+  const handleSendMessage = (message: string) => {
+    console.log(message);
+  };
+
   return (
     <Fragment>
       <div className="flex flex-col h-screen">
-        <ChatWindow />
+        <ChatWindow onSendMessage={handleSendMessage} />
       </div>
     </Fragment>
   );

@@ -2,7 +2,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-export const ChatWindow = ({ onSendMessage }) => {
+export const ChatWindow = ({ onSendMessage }: { onSendMessage: (message: string) => void }) => {
   const [input, setInput] = React.useState('');
 
   const handleSend = () => {
