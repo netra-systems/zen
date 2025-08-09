@@ -38,14 +38,11 @@ async def get_current_user(
         return None
 
 async def get_current_user_ws(
-    token: str,
+    token: Annotated[str, Query()],
     db_session = Depends(get_async_db),
     security_service: SecurityService = Depends(get_security_service),
 ) -> Optional[User]:
-    user = await get_current_user(token, db_session, security_service)
-    if user and not user.is_active:
-        return None
-    return user
+    return await get_current_user(token, db_session, security_service)
 
 async def get_current_active_user(
     token: str = Depends(oauth2_scheme),
