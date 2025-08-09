@@ -35,7 +35,7 @@ async def check_clickhouse():
         
         from app.db.clickhouse import get_clickhouse_client
         async with get_clickhouse_client() as client:
-            await client.ping()
+            client.ping()
         logger.info("ClickHouse connection successful.")
     except Exception as e:
         logger.error(f"ClickHouse connection failed: {e}")
