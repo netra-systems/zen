@@ -36,4 +36,7 @@ class StreamEvent(BaseModel):
     event_type: str
     data: Dict[str, Any]
 
-
+class WebSocketMessage(BaseModel):
+    type: str
+    payload: Dict[str, Any]
+    sender: str | None = None

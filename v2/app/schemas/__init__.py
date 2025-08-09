@@ -112,6 +112,7 @@ from .WebSocket import (
     AgentMessage,
     StopAgent,
     StreamEvent,
+    WebSocketMessage,
 )
 from .Reference import (
     ReferenceGetResponse,
@@ -120,7 +121,7 @@ from .Reference import (
     ReferenceUpdateRequest,
 )
 
-from .ws import WebSocketMessage
+# WebSocketMessage is now imported from WebSocket module above
 
 __all__ = [
     "WebSocketMessage",
