@@ -1,7 +1,6 @@
 import logging
-import json
 from fastapi import WebSocket
-from typing import List, Dict, Any
+from typing import List, Dict
 from redis.asyncio import Redis
 from app.schemas import WebSocketMessage, User
 
@@ -37,7 +36,7 @@ class WebSocketManager:
                 await connection.send_json(message.dict())
 
     async def broadcast(self, message: WebSocketMessage):
-        for user_id, connections in self.active_connections.items():
+        for connections in self.active_connections.values():
             for connection in connections:
                 await connection.send_json(message.dict())
 
@@ -50,7 +49,7 @@ class WebSocketManager:
         await self.send_personal_message(error, user_id)
 
     async def shutdown(self):
-        for user_id, connections in self.active_connections.items():
+        for connections in self.active_connections.values():
             for connection in connections:
                 await connection.close(code=1001)
         self.active_connections.clear()

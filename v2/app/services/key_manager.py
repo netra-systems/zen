@@ -1,5 +1,3 @@
-# /v2/app/services/key_manager.py
-import os
 from cryptography.fernet import Fernet
 from pydantic import BaseModel, Field, ValidationError
 
