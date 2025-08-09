@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Refresh Types</name>
+        <type>refresh_types</type>
+        <version>1.0</version>
+    </metadata>
+    
+    <conventions>
+        <types>
+            <frontend>types/index.ts</frontend>
+            <backend>schemas/ (Pydantic BaseModel)</backend>
+        </types>
+    </conventions>
+    
+    <tasks>
+        <task id="1">Look for 3 functions outside of classes</task>
+        <task id="2">Look for 3 sets of params without types</task>
+    </tasks>
+    
+    <goals>
+        <goal type="long-term">Strong classes and types for every object in the system</goal>
+        <constraint>Limit work in progress to practical</constraint>
+        <constraint>Keep in single files for now</constraint>
+    </goals>
+    
+    <directive priority="high">ONLY REFACTOR. Keep all existing concepts</directive>
+</specification>

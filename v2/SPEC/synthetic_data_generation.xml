@@ -1,0 +1,656 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE synthetic_data_generation_spec SYSTEM "spec.dtd">
+<synthetic_data_generation_spec version="2.0">
+    <metadata>
+        <title>Synthetic Data Generation Specification</title>
+        <description>
+            Comprehensive specification for generating synthetic AI agent workload data with
+            real-time ClickHouse ingestion, WebSocket updates, and CORPUS-based content generation.
+        </description>
+        <last_updated>2025-01-09</last_updated>
+        <primary_focus>Real-time AI Agent Tool Use Creation with Live Data Ingestion</primary_focus>
+    </metadata>
+
+    <core_concepts>
+        <corpus_foundation>
+            <description>
+                The CORPUS is the fundamental content repository managed through the Corpus Admin interface,
+                serving as the source of truth for all synthetic data generation. Content is stored in
+                ClickHouse tables with metadata tracked in PostgreSQL for lifecycle management.
+            </description>
+            <management>
+                <admin_interface>/admin/corpus - Full CRUD operations for corpus management</admin_interface>
+                <status_tracking>creating | available | failed | updating</status_tracking>
+                <metadata_storage>PostgreSQL - corpus records with status and ownership</metadata_storage>
+                <content_storage>ClickHouse - dedicated table per corpus (netra_content_corpus_*)</content_storage>
+            </management>
+            <storage>
+                <primary>ClickHouse database (dynamically created corpus tables)</primary>
+                <table_naming>netra_content_corpus_{uuid}</table_naming>
+                <fallback>DEFAULT_CONTENT_CORPUS from content_corpus.py</fallback>
+                <schema>
+                    <field name="record_id" type="UUID"/>
+                    <field name="workload_type" type="String"/>
+                    <field name="prompt" type="String"/>
+                    <field name="response" type="String"/>
+                    <field name="metadata" type="JSON"/>
+                </schema>
+            </storage>
+            <categories>
+                <category name="simple_chat">Basic Q&A interactions</category>
+                <category name="rag_pipeline">Retrieval-augmented generation workflows</category>
+                <category name="tool_use">Single tool invocation patterns</category>
+                <category name="multi_turn_tool_use">Complex multi-step agent conversations</category>
+                <category name="failed_request">Error handling and edge cases</category>
+                <category name="custom_domain">Customer-specific workloads</category>
+            </categories>
+        </corpus_foundation>
+
+        <workload_types>
+            <workload_type id="tool_orchestration">
+                <description>Complex agent workflows requiring multiple tool invocations</description>
+                <characteristics>
+                    <trace_structure>Multi-span hierarchical traces</trace_structure>
+                    <tool_patterns>Sequential, parallel, and conditional tool calls</tool_patterns>
+                    <state_management>Persistent context across tool invocations</state_management>
+                </characteristics>
+            </workload_type>
+            
+            <workload_type id="data_analysis">
+                <description>Agent-driven data retrieval and analysis from ClickHouse</description>
+                <characteristics>
+                    <data_sources>Time-series logs, metrics, events</data_sources>
+                    <query_patterns>Aggregations, filtering, windowing functions</query_patterns>
+                    <result_processing>Structured data transformation and summarization</result_processing>
+                </characteristics>
+            </workload_type>
+
+            <workload_type id="optimization_workflows">
+                <description>AI-driven optimization and recommendation generation</description>
+                <characteristics>
+                    <analysis_types>Cost optimization, latency reduction, quality improvement</analysis_types>
+                    <decision_trees>Multi-criteria decision making patterns</decision_trees>
+                    <feedback_loops>Iterative refinement based on metrics</feedback_loops>
+                </characteristics>
+            </workload_type>
+        </workload_types>
+    </core_concepts>
+
+    <real_time_ingestion>
+        <description>
+            All synthetic data is ingested into ClickHouse in real-time as it's generated,
+            with WebSocket updates providing live progress feedback to the UI.
+        </description>
+        
+        <streaming_architecture>
+            <generation_pipeline>
+                <step order="1">User initiates generation via UI (/data/synthetic)</step>
+                <step order="2">Backend creates background task via BackgroundTaskManager</step>
+                <step order="3">Task begins streaming data generation in batches</step>
+                <step order="4">Each batch is immediately ingested to ClickHouse</step>
+                <step order="5">Progress updates sent via WebSocket to all connected clients</step>
+            </generation_pipeline>
+            
+            <batch_processing>
+                <batch_size>100-1000 records per batch</batch_size>
+                <ingestion_method>Async bulk insert to ClickHouse</ingestion_method>
+                <error_handling>Failed batches logged, generation continues</error_handling>
+                <backpressure>Automatic throttling based on ClickHouse response times</backpressure>
+            </batch_processing>
+            
+            <websocket_updates>
+                <update_frequency>Every batch completion or every 1000 records</update_frequency>
+                <message_format>
+                    <type>generation_progress | generation_complete | generation_error</type>
+                    <payload>
+                        <job_id>UUID of generation job</job_id>
+                        <corpus_id>Source corpus identifier</corpus_id>
+                        <progress_percentage>0-100</progress_percentage>
+                        <records_generated>Current count of generated records</records_generated>
+                        <records_ingested>Current count of ingested records</records_ingested>
+                        <current_batch>Batch number being processed</current_batch>
+                        <estimated_time_remaining>Seconds</estimated_time_remaining>
+                    </payload>
+                </message_format>
+            </websocket_updates>
+        </streaming_architecture>
+
+        <clickhouse_ingestion>
+            <table_creation>
+                <timing>Tables created on-demand before first data insertion</timing>
+                <naming>netra_synthetic_data_{job_id}</naming>
+                <schema>Inherits from unified log schema with synthetic metadata</schema>
+            </table_creation>
+            
+            <insertion_strategy>
+                <method>Asynchronous bulk inserts via clickhouse-driver</method>
+                <optimization>
+                    <use_native_protocol>True for maximum performance</use_native_protocol>
+                    <compression>LZ4 for network transfer</compression>
+                    <batch_deduplication>UUID-based deduplication within batch</batch_deduplication>
+                </optimization>
+            </insertion_strategy>
+            
+            <monitoring>
+                <metrics>
+                    <ingestion_rate>Records per second</ingestion_rate>
+                    <latency>Time from generation to ClickHouse confirmation</latency>
+                    <error_rate>Failed insertions per batch</error_rate>
+                </metrics>
+                <alerts>
+                    <slow_ingestion>Alert if rate drops below threshold</slow_ingestion>
+                    <connection_issues>Alert on ClickHouse connection failures</connection_issues>
+                </alerts>
+            </monitoring>
+        </clickhouse_ingestion>
+    </real_time_ingestion>
+
+    <ui_ux_experience>
+        <generation_interface>
+            <location>/data/synthetic - Main synthetic data generation page</location>
+            <components>
+                <corpus_selector>
+                    <description>Dropdown populated from ClickHouse corpus tables</description>
+                    <real_time_update>List refreshes when new corpus created</real_time_update>
+                    <validation>Only shows 'available' status corpora</validation>
+                </corpus_selector>
+                
+                <parameter_form>
+                    <num_traces>Slider or input for trace count</num_traces>
+                    <workload_pattern>Dropdown with predefined patterns</workload_pattern>
+                    <error_rate>Percentage slider</error_rate>
+                    <time_distribution>Graph showing event distribution over time</time_distribution>
+                    <advanced_settings>Collapsible section for tool configuration</advanced_settings>
+                </parameter_form>
+                
+                <generation_button>
+                    <states>
+                        <idle>Generate Data</idle>
+                        <generating>Generating... (with spinner)</generating>
+                        <completed>Generation Complete</completed>
+                        <error>Generation Failed - Retry</error>
+                    </states>
+                </generation_button>
+            </components>
+        </generation_interface>
+
+        <real_time_feedback>
+            <progress_indicator>
+                <type>Linear progress bar with percentage</type>
+                <updates>Real-time via WebSocket</updates>
+                <details>Shows records generated vs target</details>
+            </progress_indicator>
+            
+            <live_statistics>
+                <records_per_second>Current generation rate</records_per_second>
+                <estimated_completion>Dynamic ETA calculation</estimated_completion>
+                <ingestion_status>ClickHouse write confirmation</ingestion_status>
+            </live_statistics>
+            
+            <preview_panel>
+                <description>Live preview of generated data</description>
+                <sample_size>Last 10 generated records</sample_size>
+                <format>Collapsible JSON viewer</format>
+                <refresh_rate>Every 5 seconds during generation</refresh_rate>
+            </preview_panel>
+            
+            <error_handling>
+                <inline_errors>Toast notifications for non-critical issues</inline_errors>
+                <error_modal>Detailed error information for failures</error_modal>
+                <retry_mechanism>One-click retry with same parameters</retry_mechanism>
+            </error_handling>
+        </real_time_feedback>
+
+        <post_generation>
+            <completion_summary>
+                <total_records>Final count of generated records</total_records>
+                <time_taken>Total generation duration</time_taken>
+                <destination_table>ClickHouse table name with copy button</destination_table>
+                <download_sample>Export first 1000 records as JSON</download_sample>
+            </completion_summary>
+            
+            <next_actions>
+                <view_in_analytics>Direct link to analytics dashboard</view_in_analytics>
+                <run_optimization>Start optimization analysis on generated data</run_optimization>
+                <generate_more>Reset form for another generation</generate_more>
+            </next_actions>
+        </post_generation>
+
+        <websocket_integration>
+            <connection_management>
+                <auto_reconnect>Automatic reconnection on disconnect</auto_reconnect>
+                <connection_status>Visual indicator (green/yellow/red)</connection_status>
+                <fallback>Polling mechanism if WebSocket unavailable</fallback>
+            </connection_management>
+            
+            <message_handling>
+                <subscription>Subscribe to generation_{job_id} channel</subscription>
+                <unsubscribe>Clean up on component unmount</unsubscribe>
+                <state_updates>Redux/Zustand store updates from messages</state_updates>
+            </message_handling>
+        </websocket_integration>
+    </ui_ux_experience>
+
+    <generation_configuration>
+        <customer_adjustable_parameters>
+            <parameter name="domain_focus" type="string" required="true">
+                <description>Primary business domain (e.g., finance, healthcare, e-commerce)</description>
+                <examples>
+                    <example>financial_services</example>
+                    <example>healthcare_diagnostics</example>
+                    <example>retail_customer_service</example>
+                </examples>
+            </parameter>
+
+            <parameter name="tool_catalog" type="array" required="true">
+                <description>Available tools for agent use</description>
+                <tool_definition>
+                    <name>Tool identifier</name>
+                    <type>Tool category (query, action, analysis, external_api)</type>
+                    <latency_ms>Expected execution time</latency_ms>
+                    <cost_per_invocation>Optional cost metric</cost_per_invocation>
+                    <failure_rate>Probability of tool failure (0.0-1.0)</failure_rate>
+                </tool_definition>
+                <default_tools>
+                    <tool name="clickhouse_query" type="query" latency_ms="50-500"/>
+                    <tool name="postgres_lookup" type="query" latency_ms="20-200"/>
+                    <tool name="llm_analysis" type="analysis" latency_ms="1000-5000"/>
+                    <tool name="external_api_call" type="external_api" latency_ms="100-2000"/>
+                    <tool name="cache_lookup" type="query" latency_ms="5-50"/>
+                    <tool name="vector_search" type="query" latency_ms="100-1000"/>
+                </default_tools>
+            </parameter>
+
+            <parameter name="workload_distribution" type="object" required="true">
+                <description>Percentage distribution of different workload types</description>
+                <defaults>
+                    <simple_queries>0.30</simple_queries>
+                    <tool_orchestration>0.25</tool_orchestration>
+                    <data_analysis>0.20</data_analysis>
+                    <optimization_workflows>0.15</optimization_workflows>
+                    <error_scenarios>0.10</error_scenarios>
+                </defaults>
+            </parameter>
+
+            <parameter name="scale_parameters" type="object" required="true">
+                <num_traces>Total number of traces to generate</num_traces>
+                <time_window_hours>Simulated time period for data</time_window_hours>
+                <concurrent_users>Number of unique user contexts</concurrent_users>
+                <peak_load_multiplier>Traffic spike simulation factor</peak_load_multiplier>
+            </parameter>
+
+            <parameter name="agent_configuration" type="object" required="false">
+                <description>Agent-specific behavior patterns</description>
+                <supervisor_strategy>round_robin | priority_based | load_balanced</supervisor_strategy>
+                <sub_agent_types>
+                    <triage>Initial request classification</triage>
+                    <data_analysis>Data retrieval and processing</data_analysis>
+                    <optimization>Strategy formulation</optimization>
+                    <reporting>Result compilation</reporting>
+                    <action_execution>Tool invocation handler</action_execution>
+                </sub_agent_types>
+                <retry_policy>
+                    <max_retries>3</max_retries>
+                    <backoff_strategy>exponential</backoff_strategy>
+                </retry_policy>
+            </parameter>
+        </customer_adjustable_parameters>
+
+        <corpus_customization>
+            <custom_content_injection>
+                <description>
+                    Customers can provide domain-specific conversation examples
+                    that will be incorporated into the generation process
+                </description>
+                <format>JSON array of prompt-response pairs</format>
+                <validation>Content must align with selected domain_focus</validation>
+                <integration_method>
+                    <step>Upload custom corpus via API or UI</step>
+                    <step>System validates and categorizes content</step>
+                    <step>Content stored in dedicated ClickHouse table</step>
+                    <step>Generation process blends custom and default content</step>
+                </integration_method>
+            </custom_content_injection>
+        </corpus_customization>
+    </generation_configuration>
+
+    <agent_data_sourcing>
+        <description>
+            Agents query ClickHouse in real-time to retrieve meaningful data for analysis
+            and decision-making, with results feeding directly into synthetic workload generation.
+        </description>
+        
+        <real_time_queries>
+            <corpus_availability>
+                <description>Agents verify corpus availability before generation</description>
+                <query>
+                    SELECT table_name, count(*) as record_count 
+                    FROM system.tables 
+                    WHERE database = 'default' 
+                    AND table LIKE 'netra_content_corpus_%'
+                </query>
+            </corpus_availability>
+            
+            <dynamic_sampling>
+                <description>Real-time sampling from corpus during generation</description>
+                <strategy>Weighted random sampling based on workload distribution</strategy>
+                <caching>LRU cache for frequently accessed corpus entries</caching>
+            </dynamic_sampling>
+        </real_time_queries>
+        
+        <query_patterns>
+                <pattern name="time_series_aggregation">
+                    <sql_template>
+                        SELECT 
+                            toStartOfHour(timestamp_utc) as hour,
+                            COUNT(*) as event_count,
+                            AVG(latency_ms) as avg_latency,
+                            quantile(0.95)(latency_ms) as p95_latency
+                        FROM {table_name}
+                        WHERE timestamp_utc >= {start_time}
+                        AND timestamp_utc <= {end_time}
+                        GROUP BY hour
+                        ORDER BY hour
+                    </sql_template>
+                </pattern>
+
+                <pattern name="tool_usage_analytics">
+                    <sql_template>
+                        SELECT 
+                            tool_name,
+                            COUNT(*) as invocation_count,
+                            AVG(execution_time_ms) as avg_time,
+                            SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) / COUNT(*) as failure_rate
+                        FROM tool_invocations
+                        WHERE trace_id IN (SELECT trace_id FROM {corpus_table})
+                        GROUP BY tool_name
+                    </sql_template>
+                </pattern>
+
+                <pattern name="corpus_sampling">
+                    <sql_template>
+                        SELECT 
+                            workload_type,
+                            prompt,
+                            response,
+                            metadata
+                        FROM {corpus_table}
+                        WHERE workload_type = {workload_type}
+                        ORDER BY rand()
+                        LIMIT {sample_size}
+                    </sql_template>
+                </pattern>
+            </query_patterns>
+
+            <data_enrichment>
+                <description>
+                    Synthetic data can be enriched with real metrics from ClickHouse
+                    to ensure realistic performance characteristics
+                </description>
+                <metrics_injection>
+                    <latency_distributions>Pull actual p50, p95, p99 from historical data</latency_distributions>
+                    <error_patterns>Replicate real error frequencies and types</error_patterns>
+                    <cost_models>Use actual pricing data for cost calculations</cost_models>
+                </metrics_injection>
+            </data_enrichment>
+            
+            <agent_tool_integration>
+                <tool_dispatcher>
+                    <description>Coordinates tool calls for data retrieval during generation</description>
+                    <available_tools>
+                        <tool name="clickhouse_query">Direct ClickHouse queries</tool>
+                        <tool name="corpus_sampler">Intelligent corpus content selection</tool>
+                        <tool name="metrics_analyzer">Historical metrics analysis</tool>
+                        <tool name="pattern_detector">Workload pattern identification</tool>
+                    </available_tools>
+                </tool_dispatcher>
+                
+                <data_flow>
+                    <step>Agent receives generation request with parameters</step>
+                    <step>Tool dispatcher queries corpus availability</step>
+                    <step>Metrics analyzer retrieves historical patterns</step>
+                    <step>Corpus sampler fetches relevant content</step>
+                    <step>Generation engine creates synthetic data</step>
+                    <step>Real-time ingestion to ClickHouse</step>
+                    <step>WebSocket updates to UI</step>
+                </data_flow>
+            </agent_tool_integration>
+        </agent_data_sourcing>
+
+        <storage_schema>
+            <synthetic_data_tables>
+                <table name="synthetic_workload_events">
+                    <columns>
+                        <column name="event_id" type="UUID" primary="true"/>
+                        <column name="trace_id" type="UUID" index="true"/>
+                        <column name="span_id" type="UUID"/>
+                        <column name="parent_span_id" type="Nullable(UUID)"/>
+                        <column name="timestamp_utc" type="DateTime64(3)"/>
+                        <column name="workload_type" type="String"/>
+                        <column name="agent_type" type="String"/>
+                        <column name="tool_invocations" type="Array(String)"/>
+                        <column name="request_payload" type="JSON"/>
+                        <column name="response_payload" type="JSON"/>
+                        <column name="metrics" type="JSON"/>
+                        <column name="corpus_reference_id" type="Nullable(UUID)"/>
+                    </columns>
+                    <engine>MergeTree()</engine>
+                    <partition_by>toYYYYMM(timestamp_utc)</partition_by>
+                    <order_by>(timestamp_utc, trace_id)</order_by>
+                </table>
+
+                <table name="synthetic_tool_invocations">
+                    <columns>
+                        <column name="invocation_id" type="UUID" primary="true"/>
+                        <column name="trace_id" type="UUID" index="true"/>
+                        <column name="span_id" type="UUID"/>
+                        <column name="tool_name" type="String"/>
+                        <column name="tool_type" type="String"/>
+                        <column name="input_params" type="JSON"/>
+                        <column name="output_result" type="JSON"/>
+                        <column name="execution_time_ms" type="UInt32"/>
+                        <column name="status" type="Enum('success', 'failed', 'timeout')"/>
+                        <column name="error_details" type="Nullable(String)"/>
+                    </columns>
+                </table>
+            </synthetic_data_tables>
+            
+            <real_time_ingestion_tables>
+                <table name="generation_progress">
+                    <description>Tracks real-time generation progress</description>
+                    <columns>
+                        <column name="job_id" type="UUID" primary="true"/>
+                        <column name="corpus_id" type="UUID"/>
+                        <column name="timestamp" type="DateTime64(3)"/>
+                        <column name="records_generated" type="UInt64"/>
+                        <column name="records_ingested" type="UInt64"/>
+                        <column name="current_batch" type="UInt32"/>
+                        <column name="status" type="String"/>
+                    </columns>
+                    <ttl>DELETE WHERE timestamp + INTERVAL 7 DAY &lt; now()</ttl>
+                </table>
+            </real_time_ingestion_tables>
+        </storage_schema>
+    </agent_data_sourcing>
+
+    <tool_use_generation>
+        <tool_invocation_patterns>
+            <pattern name="sequential_chain">
+                <description>Tools called in sequence with output feeding to next input</description>
+                <example>
+                    <step>clickhouse_query -> extract metrics</step>
+                    <step>llm_analysis -> analyze metrics</step>
+                    <step>postgres_lookup -> get optimization configs</step>
+                    <step>action_executor -> apply optimizations</step>
+                </example>
+            </pattern>
+
+            <pattern name="parallel_gather">
+                <description>Multiple tools called simultaneously to gather data</description>
+                <example>
+                    <parallel>
+                        <tool>clickhouse_query -> get performance data</tool>
+                        <tool>postgres_lookup -> get configuration</tool>
+                        <tool>cache_lookup -> get recent results</tool>
+                    </parallel>
+                    <merge>llm_analysis -> synthesize findings</merge>
+                </example>
+            </pattern>
+
+            <pattern name="conditional_branching">
+                <description>Tool selection based on previous results</description>
+                <example>
+                    <initial>triage_tool -> classify request</initial>
+                    <branch condition="if optimization_needed">
+                        <tool>optimization_analyzer</tool>
+                    </branch>
+                    <branch condition="if data_needed">
+                        <tool>data_retrieval_tool</tool>
+                    </branch>
+                </example>
+            </pattern>
+
+            <pattern name="retry_with_fallback">
+                <description>Error handling with alternative tool paths</description>
+                <example>
+                    <try>primary_api_call</try>
+                    <catch>
+                        <retry attempts="3">primary_api_call</retry>
+                        <fallback>cache_lookup or secondary_api</fallback>
+                    </catch>
+                </example>
+            </pattern>
+        </tool_invocation_patterns>
+
+        <tool_specific_behaviors>
+            <clickhouse_tools>
+                <query_complexity>Simple aggregations to complex window functions</query_complexity>
+                <data_volume>Configurable result set sizes</data_volume>
+                <performance_profile>Realistic query execution times based on complexity</performance_profile>
+            </clickhouse_tools>
+
+            <llm_tools>
+                <model_selection>Different models for different task complexities</model_selection>
+                <token_usage>Realistic prompt and completion token counts</token_usage>
+                <streaming_behavior>Simulated token streaming for real-time responses</streaming_behavior>
+            </llm_tools>
+
+            <external_api_tools>
+                <latency_simulation>Network delays and API response times</latency_simulation>
+                <rate_limiting>Realistic API throttling scenarios</rate_limiting>
+                <authentication>OAuth, API key, and JWT patterns</authentication>
+            </external_api_tools>
+        </tool_specific_behaviors>
+    </tool_use_generation>
+
+    <output_formats>
+        <unified_log_schema>
+            <description>
+                All synthetic data conforms to the Netra unified logging schema
+                for seamless integration with existing analysis pipelines
+            </description>
+            <required_fields>
+                <event_metadata>Event ID, timestamp, ingestion source</event_metadata>
+                <trace_context>Trace ID, span ID, parent span, span type</trace_context>
+                <identity_context>User ID, organization ID, session ID</identity_context>
+                <request>Model info, prompt, generation config</request>
+                <response>Completion, usage metrics, status</response>
+                <performance>Latency measurements, throughput</performance>
+                <tool_usage>Tool invocations, parameters, results</tool_usage>
+            </required_fields>
+        </unified_log_schema>
+
+        <export_options>
+            <json_lines>Newline-delimited JSON for streaming</json_lines>
+            <parquet>Columnar format for efficient analytics</parquet>
+            <clickhouse_native>Direct insertion into ClickHouse tables</clickhouse_native>
+            <api_stream>Real-time streaming via WebSocket or SSE</api_stream>
+        </export_options>
+    </output_formats>
+
+    <usage_examples>
+        <example name="financial_services_workload">
+            <configuration>
+                <domain_focus>financial_services</domain_focus>
+                <tool_catalog>
+                    <tool name="market_data_api" type="external_api" latency_ms="100-500"/>
+                    <tool name="risk_calculator" type="analysis" latency_ms="2000-5000"/>
+                    <tool name="compliance_checker" type="query" latency_ms="50-200"/>
+                    <tool name="portfolio_optimizer" type="analysis" latency_ms="3000-10000"/>
+                </tool_catalog>
+                <workload_distribution>
+                    <market_analysis>0.40</market_analysis>
+                    <risk_assessment>0.30</risk_assessment>
+                    <compliance_queries>0.20</compliance_queries>
+                    <optimization_requests>0.10</optimization_requests>
+                </workload_distribution>
+                <scale_parameters>
+                    <num_traces>100000</num_traces>
+                    <time_window_hours>24</time_window_hours>
+                    <concurrent_users>500</concurrent_users>
+                    <peak_load_multiplier>3.0</peak_load_multiplier>
+                </scale_parameters>
+            </configuration>
+        </example>
+
+        <example name="healthcare_diagnostics">
+            <configuration>
+                <domain_focus>healthcare_diagnostics</domain_focus>
+                <tool_catalog>
+                    <tool name="patient_records_db" type="query" latency_ms="20-100"/>
+                    <tool name="medical_knowledge_base" type="query" latency_ms="100-500"/>
+                    <tool name="diagnostic_ai_model" type="analysis" latency_ms="1000-3000"/>
+                    <tool name="lab_results_api" type="external_api" latency_ms="500-2000"/>
+                </tool_catalog>
+                <workload_distribution>
+                    <patient_lookup>0.35</patient_lookup>
+                    <diagnostic_assistance>0.30</diagnostic_assistance>
+                    <lab_integration>0.20</lab_integration>
+                    <knowledge_queries>0.15</knowledge_queries>
+                </workload_distribution>
+            </configuration>
+        </example>
+    </usage_examples>
+
+    <implementation_notes>
+        <corpus_coherence>
+            <backend_services>
+                <corpus_service>app/services/corpus_service.py - CRUD operations</corpus_service>
+                <synthetic_data_service>app/services/synthetic_data_service.py - Generation orchestration</synthetic_data_service>
+                <clickhouse_service>app/services/clickhouse_service.py - Database operations</clickhouse_service>
+            </backend_services>
+            
+            <frontend_components>
+                <corpus_admin>/admin/corpus - Corpus management interface</corpus_admin>
+                <synthetic_generator>/data/synthetic - Generation interface</synthetic_generator>
+                <websocket_provider>Real-time updates via WebSocketProvider</websocket_provider>
+            </frontend_components>
+            
+            <data_flow_coherence>
+                <corpus_creation>PostgreSQL metadata → ClickHouse table creation</corpus_creation>
+                <content_loading>ClickHouse corpus → Generation engine</content_loading>
+                <real_time_ingestion>Generation batches → ClickHouse tables</real_time_ingestion>
+                <progress_updates>Backend tasks → WebSocket → UI components</progress_updates>
+            </data_flow_coherence>
+        </corpus_coherence>
+        
+        <performance_considerations>
+            <parallel_generation>Use multiprocessing Pool for high-volume generation</parallel_generation>
+            <batch_processing>100-1000 records per batch for optimal throughput</batch_processing>
+            <async_io>Async ClickHouse client for non-blocking operations</async_io>
+            <streaming_ingestion>Continuous data flow without memory buildup</streaming_ingestion>
+        </performance_considerations>
+
+        <quality_assurance>
+            <validation>Ensure generated data passes schema validation</validation>
+            <statistical_verification>Verify distributions match configuration</statistical_verification>
+            <referential_integrity>Maintain valid trace and span relationships</referential_integrity>
+        </quality_assurance>
+
+        <extensibility>
+            <plugin_architecture>Support for custom tool implementations</plugin_architecture>
+            <corpus_expansion>Easy addition of new workload categories</corpus_expansion>
+            <metric_collectors>Pluggable metrics and monitoring</metric_collectors>
+        </extensibility>
+    </implementation_notes>
+</synthetic_data_generation_spec>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Conventions</name>
+        <type>conventions</type>
+        <version>1.0</version>
+    </metadata>
+    
+    <project-conventions>
+        <convention id="types">
+            <title>Types</title>
+            <rules>
+                <rule location="frontend">types/*.ts</rule>
+                <rule location="backend">schemas.py</rule>
+                <rule priority="high">ALWAYS use existing or add new types using defined locations</rule>
+            </rules>
+        </convention>
+        
+        <convention id="single-source-of-truth">
+            <title>Single Sources of Truth</title>
+            <description>Every unique concept is only defined once and then references the rest of the places. E.g. for each frontend concept, e.g. Context, Hooks, Store, etc. etc. MUST be only ONE</description>
+        </convention>
+        
+        <convention id="frontend-imports">
+            <title>Frontend Imports</title>
+            <rules>
+                <rule>Use tsconfig.json, named exports (export const ...)</rule>
+                <rule>All import paths must be absolute using the @/ alias from tsconfig</rule>
+                <rule>All imports use { item } over defaults</rule>
+            </rules>
+        </convention>
+        
+        <convention id="classes">
+            <title>Classes</title>
+            <rules>
+                <rule>Always use classes (interfaces). All functions must be inside of classes</rule>
+                <rule>Always import at class level</rule>
+            </rules>
+        </convention>
+        
+        <convention id="frontend-architecture">
+            <title>Frontend Architecture</title>
+            <rule>Always prefer typescript classes over react concepts. The core logic is always in typescript, react is just the view related concepts when it make sense</rule>
+        </convention>
+        
+        <convention id="react-context">
+            <title>React Context</title>
+            <rule>`createContext`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive</rule>
+        </convention>
+        
+        <convention id="python-patterns">
+            <title>Python Patterns</title>
+            <rules>
+                <rule>Uses Async Await pattern whenever possible</rule>
+                <rule>All logging uses CentralLogger</rule>
+            </rules>
+        </convention>
+        
+        <convention id="testing">
+            <title>Testing</title>
+            <rule location="backend">Backend uses: "testing": schemas.TestingConfig</rule>
+        </convention>
+    </project-conventions>
+</specification>

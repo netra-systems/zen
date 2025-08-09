@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Security Review</name>
+        <type>security_review</type>
+        <version>1.0</version>
+    </metadata>
+    
+    <task>
+        <description>Complete security review</description>
+        <review-items>
+            <item>Is it modern OAuth?</item>
+            <item>Is JWT compliant?</item>
+            <item>Are there redundant or bad security items?</item>
+            <item>Is the dev mode functional?</item>
+            <item>Is JWT used on WS, http, etc. similar way?</item>
+            <item>Are items stored in db properly?</item>
+        </review-items>
+        <deliverable>Review and plan any fixes if needed</deliverable>
+    </task>
+</specification>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>SubAgents</name>
+        <type>subagents</type>
+        <version>1.0</version>
+    </metadata>
+    
+    <subagent-specification>
+        <intent>The point of SubAgents is to manage its own context and protect the primary context from getting cluttered</intent>
+        <requirements>
+            <requirement>Follow best practices for SubAgents including having clear entry and exit conditions</requirement>
+            <requirement>The End to end flow from frontend to backend and back must work. Code must be PRODUCTION grade and include all concepts needed to the best of your ability</requirement>
+            <requirement>SubAgents use prompt templates to communicate with an LLM. They are LLM based always. Always include the complete prompt template and LLM usage</requirement>
+        </requirements>
+        <coherence>
+            <item>Agents expect to work for a user and on a chat thread</item>
+            <item>Every new chat thread has its own id</item>
+            <item>Agents persist work to memory, Redis, postgres, clickhouse, etc. as needed</item>
+            <item>With WS</item>
+        </coherence>
+    </subagent-specification>
+    
+    <agents>
+        <directive priority="critical">Keep ALL existing Agents. Only Update Agents. Keep files where they are. Implement all updates as needed</directive>
+        <agent id="supervisor">SupervisorAgent</agent>
+        <agent id="triage">TriageSubAgent: The triage process is its own SubAgent</agent>
+        <agent id="data">DataSubAgent: Data tools, enrichment type tools, etc. process</agent>
+        <agent id="optimization-core">OptimizationsCoreSubAgent: Takes data from DataSubAgent and is the initial "Core" of everything between DataSubAgent and ActionsToMeetGoalsSubAgent</agent>
+        <agent id="actions-to-meet-goals">ActionsToMeetGoalsSubAgent: Takes all concepts from OptimizationsCoreSubAgent and formulates everything to do with tangible actions and changes and supply configs etc. to make it happen</agent>
+        <agent id="reporting">ReportingAgent: Summarizes overall results and reports to users</agent>
+    </agents>
+    
+    <general-requirements>
+        <requirement id="1">Validate all existing tools and functions are KEPT. This is only about ADDING and organizing subagent concepts. SubAgents may share many tools if needed. Modular concepts. Expect other subagents to be in the future</requirement>
+        <requirement id="2">
+            <title>Test the default flow</title>
+            <flow>Input from user → SupervisorAgent → TriageSubAgent → SupervisorAgent → DataSubAgent → SupervisorAgent → OptimizationsCoreSubAgent → SupervisorAgent → ActionsToMeetGoalsSubAgent → SupervisorAgent → ReportingAgent → SupervisorAgent → Output back to user</flow>
+        </requirement>
+        <requirement id="3">Validate WS Integrations: Validate all Agent WS and communication end to end</requirement>
+        <requirement id="4">Check Lifecycle and shut down concepts</requirement>
+        <requirement id="5">Every SubAgent has all required fields to operate completed. E.g. its prompt definition etc. all completely filled out</requirement>
+    </general-requirements>
+</specification>

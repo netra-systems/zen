@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Example Netra Prompts</name>
+        <type>exampleNetraPrompts</type>
+        <version>1.0</version>
+    </metadata>
+    
+    <example-prompts>
+        <category>Cost Optimization</category>
+        <prompts>
+            <prompt>I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.</prompt>
+            <prompt>My tools are too slow. I need to reduce the latency by 3x, but I can't spend more money.</prompt>
+            <prompt>I need to reduce costs by 20% and improve latency by 2x. I'm also expecting a 30% increase in usage. What should I do?</prompt>
+        </prompts>
+        
+        <category>Capacity Planning</category>
+        <prompts>
+            <prompt>I'm expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?</prompt>
+        </prompts>
+        
+        <category>Function Optimization</category>
+        <prompts>
+            <prompt>I need to optimize the 'user_authentication' function. What advanced methods can I use?</prompt>
+        </prompts>
+        
+        <category>Model Selection</category>
+        <prompts>
+            <prompt>I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?</prompt>
+            <prompt>@Netra which of our Agent tools should switch to GPT-5? Which versions? What to set the verbosity to?</prompt>
+            <prompt>@Netra GPT-5 is way too expensive for the real time chat feature. Move to claude 4.1 or GPT-5-mini? Validate quality impact</prompt>
+        </prompts>
+        
+        <category>System Audit</category>
+        <prompts>
+            <prompt>I want to audit all uses of KV caching in my system to find optimization opportunities.</prompt>
+        </prompts>
+        
+        <category>Rollback Analysis</category>
+        <prompts>
+            <prompt>@Netra was the upgrade yesterday to GPT-5 worth it? Rollback anything where quality didn't improve much but cost was higher</prompt>
+        </prompts>
+    </example-prompts>
+</specification>

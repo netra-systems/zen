@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Core</name>
+        <type>core</type>
+        <version>1.0</version>
+    </metadata>
+    
+    <primary-spec>
+        <description>Core Specification</description>
+        <goals>
+            <goal priority="high">Core components working as a complete end to end system</goal>
+            <goal priority="critical">The Coherence of the system working in harmony with the application</goal>
+        </goals>
+    </primary-spec>
+    
+    <sections>
+        <section id="utilities" order="1">
+            <title>Utilities</title>
+            <requirements>
+                <requirement>Core utilities are located in app/utils</requirement>
+                <requirement>Utilities are generic and reusable</requirement>
+                <requirement>Utilities are well-documented and tested</requirement>
+            </requirements>
+        </section>
+        
+        <section id="config" order="2">
+            <title>Config</title>
+            <requirements>
+                <requirement>Application configuration is handled by app/config.py</requirement>
+                <requirement>Configuration can be loaded from multiple sources</requirement>
+                <requirement>Configuration is validated on startup</requirement>
+            </requirements>
+        </section>
+        
+        <section id="logging" order="3">
+            <title>Logging</title>
+            <requirements>
+                <requirement>Logging is configured in app/logging_config.py</requirement>
+                <requirement>Logs are structured and easily searchable</requirement>
+                <requirement>Log levels are configurable</requirement>
+            </requirements>
+        </section>
+    </sections>
+</specification>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Netra WebSockets</name>
+        <type>NETRA_WEBSOCKETS</type>
+        <version>1.0</version>
+    </metadata>
+    
+    <primary-spec>
+        <description>Websockets Specification</description>
+        <goals>
+            <goal priority="high">NETRA_WEBSOCKETS working as a complete end to end system</goal>
+            <goal priority="critical">The Coherence of the system working in harmony front and backend together</goal>
+        </goals>
+    </primary-spec>
+    
+    <coherence-requirements>
+        <coherence>Validate Coherence with SPEC:chat_ui_ux</coherence>
+        <coherence>Validate Coherence with SPEC:netra_user_auth</coherence>
+        <coherence>Validate Coherence with SPEC:conventions</coherence>
+        <coherence>Agent to Frontend communications using NETRA_WEBSOCKETS</coherence>
+        <coherence>Frontend to Agent communications using NETRA_WEBSOCKETS</coherence>
+        <coherence>Frontend loading into Chat UI/UX concepts using NETRA_WEBSOCKETS</coherence>
+        <coherence>With service discovery: backend tells frontend NETRA_WEBSOCKETS config: frontend loads config from service discovery</coherence>
+        <coherence>NETRA_WEBSOCKETS Auth uses existing auth concepts like SecurityService (e.g JWT) Keep all security concepts as is, only integrate</coherence>
+    </coherence-requirements>
+    
+    <technical-requirements>
+        <requirement id="json-first">
+            <title>JSON First</title>
+            <description>Always send and receive JSON</description>
+            <careful-considerations>
+                <consideration>Langchain stream to JSON parsing</consideration>
+                <consideration>NETRA_WEBSOCKETS use JSON not string</consideration>
+                <consideration>Protect against multiple functions or processing double or triple wrapping JSON badly</consideration>
+            </careful-considerations>
+        </requirement>
+        
+        <requirement id="connection-establishment">
+            <title>Connection Establishment</title>
+            <description>WebSocket connection is established statefully on application state load (BEFORE the first message is sent.) It is an ERROR if NETRA_WEBSOCKETS can't be established</description>
+        </requirement>
+        
+        <requirement id="authorization">
+            <title>Authorization</title>
+            <description>Think carefully dev auth, regular user auth, etc. all well typed</description>
+        </requirement>
+        
+        <requirement id="persistence">
+            <title>Persistence</title>
+            <items>
+                <item>WebSocket connection is persistent</item>
+                <item>Important: WebSocket connection resilient to component re-renders and lifecycle changes</item>
+                <item>Websockets works with regular JSON etc. when the user sends chat messages or free text or clicking examples etc.</item>
+                <item>NETRA_WEBSOCKETS messages are passed properly and use types</item>
+            </items>
+        </requirement>
+        
+        <requirement id="startup-profile">
+            <title>Startup Profile</title>
+            <description>When application starts up or reloads, NETRA_WEBSOCKETS are available</description>
+        </requirement>
+        
+        <requirement id="error-handling">
+            <title>Error Handling</title>
+            <description>If the front end sends a socket but the backend rejects, it must be logged clearly</description>
+        </requirement>
+        
+        <requirement id="backend-management">
+            <title>Backend Management</title>
+            <description>Backend sends responses using a single source of truth to manage NETRA_WEBSOCKETS</description>
+        </requirement>
+        
+        <requirement id="service-discovery">
+            <title>Service Discovery</title>
+            <items>
+                <item>The backend provides discovery of NETRA_WEBSOCKETS config to frontend</item>
+                <item>The frontend discovers NETRA_WEBSOCKETS config at earliest reasonable application state</item>
+            </items>
+        </requirement>
+        
+        <requirement id="testing">
+            <title>End to End Testing</title>
+            <description>NETRA_WEBSOCKETS End to end testing</description>
+        </requirement>
+    </technical-requirements>
+</specification>

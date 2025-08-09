@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Netra Security</name>
+        <type>NETRA_SECURITY</type>
+        <version>1.0</version>
+    </metadata>
+    
+    <security-requirements>
+        <requirement id="1">
+            <title>OAuth and JWT</title>
+            <description>Uses OAuth, JWT. SecurityService (e.g JWT) Keep all structural security concepts as is</description>
+            <details>
+                <detail>The frontend JWT is stored securely and used in All WS, HTTP calls etc</detail>
+                <detail>The backend provides the JWT as needed</detail>
+                <detail>Consider that OAuth URLs may not be relevant to UI/UX experience for login logout</detail>
+            </details>
+        </requirement>
+        
+        <requirement id="2">The UI/UX base layout and header are persistent in all auth states</requirement>
+        
+        <requirement id="3">Only use official OAuth libraries or similar</requirement>
+        
+        <requirement id="4">Validate that OAuth Login, OAuth Logout, and development user context all works. Production ready</requirement>
+        
+        <requirement id="5">
+            <title>Development Context</title>
+            <description>In development context: Defaults to auto login, including JWT token etc. to simulate OAuth</description>
+        </requirement>
+        
+        <requirement id="6">Consider context of frontend and backend env hot reloading</requirement>
+        
+        <requirement id="7" priority="high">
+            <title>Keep Existing</title>
+            <description>KEEP EXISTING STUFF. Keep existing stuff as much as possible. The point is to have the core wiring work. Focus on adding mixing things and break fix. Use Schemas.py and app/types/index.ts whenever possible for any static values, paths, config values, etc. etc.</description>
+        </requirement>
+        
+        <requirement id="8">
+            <title>OAuth Schema</title>
+            <schema>
+                <web>
+                    <authorized_javascript_origins>
+                        <origin>https://app.netrasystems.ai</origin>
+                        <origin>https://127.0.0.1</origin>
+                        <origin>http://localhost</origin>
+                    </authorized_javascript_origins>
+                    <authorized_redirect_uris>
+                        <uri>https://app.netrasystems.ai/oauth2callback</uri>
+                        <uri>http://localhost:3000/auth/callback</uri>
+                    </authorized_redirect_uris>
+                </web>
+            </schema>
+        </requirement>
+        
+        <requirement id="9">
+            <title>Login Button UI</title>
+            <description>The login button for OAuth on the front end looks good and is large. In dev mode, it shows the dev user and option to OAuth Login "Override" the dev mode login</description>
+        </requirement>
+        
+        <requirement id="10">
+            <title>Service Discovery</title>
+            <description>The backend provides discovery of OAUTH endpoints to frontend, e.g. the complete path including base url etc. a dict with login, logout, auth, etc. This can lean on existing OpenAPI / Fast API spec if possible</description>
+        </requirement>
+        
+        <requirement id="11">
+            <title>Development Environment</title>
+            <description>Keep the development env. When front and backend in development mode: On Pageload: Automatically authenticates as Dev user without using Google OAuth</description>
+        </requirement>
+    </security-requirements>
+</specification>

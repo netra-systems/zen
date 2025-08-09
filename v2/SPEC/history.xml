@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>History</name>
+        <type>history</type>
+        <version>1.0</version>
+    </metadata>
+    
+    <content>
+        <!-- Empty or minimal content file -->
+    </content>
+</specification>

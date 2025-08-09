@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Coding Agent Documentation</name>
+        <type>coding-agent</type>
+        <version>1.0</version>
+    </metadata>
+    
+    <task>
+        <description>Document the entire codebase in a way that Agent programs like Gemini CLI or Claude code can more effectively get up to speed, especially on structural parts or tribal knowledge</description>
+        <target-audience>
+            <audience>Agent programs</audience>
+            <examples>
+                <example>Gemini CLI</example>
+                <example>Claude Code</example>
+            </examples>
+        </target-audience>
+        <focus-areas>
+            <area>Structural parts of the codebase</area>
+            <area>Tribal knowledge</area>
+        </focus-areas>
+    </task>
+</specification>
