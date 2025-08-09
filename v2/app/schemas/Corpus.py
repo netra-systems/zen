@@ -22,6 +22,7 @@ class CorpusInDBBase(CorpusBase):
 
     class Config:
         from_attributes = True
+        extra = "allow"
 
 class Corpus(CorpusInDBBase):
     pass
@@ -35,3 +36,4 @@ class ContentCorpus(BaseModel):
 
     class Config:
         from_attributes = True
+        extra = "allow"

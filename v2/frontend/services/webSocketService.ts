@@ -1,4 +1,4 @@
-import { WebSocketMessage } from '../types/websocket';
+import { WebSocketMessage } from '../types/backend_schema_auto_generated';
 
 export type WebSocketStatus = 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
 

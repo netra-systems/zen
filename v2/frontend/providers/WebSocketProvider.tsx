@@ -1,7 +1,7 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { webSocketService, WebSocketStatus } from '../services/webSocketService';
-import { WebSocketMessage } from '../types/websocket';
+import { WebSocketMessage } from '../types/backend_schema_auto_generated';
 import { config as appConfig } from '@/config';
 
 interface WebSocketContextType {

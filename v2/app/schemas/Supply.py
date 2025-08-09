@@ -20,6 +20,7 @@ class SupplyOptionInDBBase(SupplyOptionBase):
 
     class Config:
         from_attributes = True
+        extra = "allow"
 
 class SupplyOption(SupplyOptionInDBBase):
     pass
