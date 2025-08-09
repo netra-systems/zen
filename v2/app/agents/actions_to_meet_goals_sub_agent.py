@@ -1,13 +1,11 @@
 import json
 import logging
-from typing import Any, Dict
 
 from app.llm.llm_manager import LLMManager
-from app.schemas import SubAgentLifecycle
 from app.agents.base import BaseSubAgent
 from app.agents.prompts import actions_to_meet_goals_prompt_template
 from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.state import DeepAgentState
+from app.schemas import DeepAgentState
 
 logger = logging.getLogger(__name__)
 
