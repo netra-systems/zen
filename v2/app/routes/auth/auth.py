@@ -9,6 +9,7 @@ from app.config import settings
 from app.dependencies import get_db_session
 from app.db.models_postgres import User
 from app.schemas import UserCreate, User as UserSchema, AuthConfigResponse
+from app.schemas.Auth import AuthEndpoints
 from app.services.user_service import user_service
 from app.auth.auth_dependencies import get_current_user_ws
 
@@ -24,7 +25,16 @@ class AuthRoutes:
         """
         return AuthConfigResponse(
             development_mode=settings.environment == "development",
-            endpoints=settings.oauth_config.endpoints,
+            google_client_id=settings.oauth_config.client_id,
+            endpoints=AuthEndpoints(
+                login=f"{settings.api_base_url}/login",
+                logout=f"{settings.api_base_url}/logout",
+                token=f"{settings.api_base_url}/auth",
+                user=f"{settings.api_base_url}/me",
+                dev_login=f"{settings.api_base_url}/dev_login",
+            ),
+            authorized_javascript_origins=settings.oauth_config.authorized_javascript_origins,
+            authorized_redirect_uris=settings.oauth_config.authorized_redirect_uris,
         )
 
     @router.get("/login")
