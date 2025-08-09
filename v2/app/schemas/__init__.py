@@ -55,8 +55,8 @@ from .Message import (
     Message,
 )
 from .Performance import Performance
-from .FinOps import FinOps
-from .Metrics import EnrichedMetrics
+from .FinOps import FinOps, CostComparison
+from .Metrics import EnrichedMetrics, BaselineMetrics
 from .Log import UnifiedLogEntry
 from .Pattern import DiscoveredPattern
 from .Policy import LearnedPolicy, PredictedOutcome
@@ -159,7 +159,9 @@ __all__ = [
     "Message",
     "Performance",
     "FinOps",
+    "CostComparison",
     "EnrichedMetrics",
+    "BaselineMetrics",
     "UnifiedLogEntry",
     "DiscoveredPattern",
     "LearnedPolicy",
