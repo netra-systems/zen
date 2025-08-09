@@ -1,8 +1,7 @@
 
-'use client';
-
 import { Button } from '@/components/ui/button';
 import { authService } from '@/auth';
+import Image from 'next/image';
 
 export default function LoginButton() {
   const { user, login, logout } = authService.useAuth();
@@ -10,7 +9,7 @@ export default function LoginButton() {
   if (user) {
     return (
       <div className="flex items-center gap-4">
-        <img src={user.picture} alt={user.full_name} className="w-8 h-8 rounded-full" />
+        <Image src={user.picture} alt={user.full_name} width={32} height={32} className="rounded-full" />
         <span>{user.full_name}</span>
         <Button onClick={logout}>Logout</Button>
       </div>

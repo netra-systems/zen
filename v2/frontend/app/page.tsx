@@ -3,6 +3,7 @@
 import { Fragment } from 'react';
 import { NextPage } from 'next';
 import { authService } from '@/auth';
+import { ChatWindow } from '@/components/ChatWindow';
 ;
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';

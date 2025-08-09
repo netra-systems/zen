@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface RawJsonViewProps {
-  json: any;
+  json: unknown;
 }
 
 export const RawJsonView = ({ json }: RawJsonViewProps) => {

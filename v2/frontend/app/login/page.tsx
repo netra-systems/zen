@@ -3,6 +3,7 @@
 
 ;
 import { authService } from '@/auth';
+import { Button } from '@/components/ui/button';
 
 export default function LoginPage() {
   const { login, loading } = authService.useAuth();
