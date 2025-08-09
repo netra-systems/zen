@@ -36,6 +36,6 @@ def client(db_session):
         yield db_session
 
     app.dependency_overrides[get_db_session] = override_get_db
-    with TestClient(app, lifespan="on") as c:
+    with TestClient(app) as c:
         yield c
     del app.dependency_overrides[get_db_session]

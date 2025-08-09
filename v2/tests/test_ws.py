@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from starlette.testclient import WebSocketDenialResponse
 from app.main import app
 from app.ws_manager import manager
-from app.auth.auth_dependencies import ActiveUserWsDep, get_dev_user
+from app.auth.auth_dependencies import ActiveUserWsDep
 from app.schemas import User
 import uuid
 from fastapi import HTTPException
@@ -40,5 +40,3 @@ async def test_websocket_unauthorized(client):
     with pytest.raises(WebSocketDenialResponse):
         with client.websocket_connect(f"/ws?user_id=unauthorized") as websocket:
             pass
-
-
