@@ -19,6 +19,7 @@ class AuthService {
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ email: 'dev@example.com' }),
       });
       if (response.ok) {
         const user = await response.json();

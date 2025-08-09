@@ -47,7 +47,7 @@ class AuthRoutes:
     async def auth(request: Request, db: Session = Depends(get_db_session)):
         token = await google.authorize_access_token(request)
         user_info = await google.parse_id_token(request, token)
-        user = user_service.get_by_email(db, email=user_info['email'])
+        user = await user_service.get_by_email(db, email=user_info['email'])
         if not user:
             user_in = UserCreate(
                 email=user_info['email'],
@@ -67,7 +67,7 @@ class AuthRoutes:
         if settings.environment != "development":
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Dev login is only available in development environment")
 
-        user = user_service.get_by_email(db, email=dev_login_request.email)
+        user = await user_service.get_by_email(db, email=dev_login_request.email)
         if not user:
             # Create a new dev user if not exists
             user_in = UserCreate(
@@ -92,7 +92,7 @@ class AuthRoutes:
         user_info = request.session.get("user")
         if not user_info:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-        user = user_service.get_by_email(db, email=user_info['email'])
+        user = await user_service.get_by_email(db, email=user_info['email'])
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         return user
