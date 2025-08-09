@@ -1,0 +1,5 @@
+
+SPEC:HISTORY:
+
+0:1 Learn about the projects history by reading the specs and plans
+0:2 In the future, this doc will contain errors that tend to recurr for your reference.

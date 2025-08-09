@@ -7,7 +7,8 @@
       "Bash(rm:*)",
       "Bash(npm test:*)",
       "Bash(pytest:*)",
-      "Bash(pip show:*)"
+      "Bash(pip show:*)",
+      "Bash(del test_fixes.py)"
     ],
     "deny": []
   }
