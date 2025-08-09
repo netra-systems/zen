@@ -36,6 +36,7 @@ from .Config import (
     DevelopmentConfig,
     ProductionConfig,
     TestingConfig,
+    WebSocketConfig,
 )
 from .Corpus import (
     CorpusBase,
@@ -157,6 +158,7 @@ __all__ = [
     "DevelopmentConfig",
     "ProductionConfig",
     "TestingConfig",
+    "WebSocketConfig",
     "CorpusBase",
     "CorpusCreate",
     "CorpusUpdate",
