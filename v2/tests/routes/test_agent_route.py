@@ -6,7 +6,7 @@ from app.main import app
 from app.services.agent_service import AgentService
 from app.auth.auth_dependencies import ActiveUserDep
 from app.schemas import User
-from app.routes.agent_route import get_agent_supervisor
+from app.dependencies import get_agent_supervisor
 import uuid
 
 @pytest.fixture

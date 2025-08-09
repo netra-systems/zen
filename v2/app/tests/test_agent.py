@@ -5,7 +5,7 @@ from app.main import app
 from app.services.agent_service import AgentService
 from app.auth.auth_dependencies import get_current_user, ActiveUserWsDep
 from app.schemas import User, RequestModel
-from app.routes.agent_route import get_agent_supervisor
+from app.dependencies import get_agent_supervisor
 import uuid
 from fastapi import HTTPException
 

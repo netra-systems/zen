@@ -1,7 +1,7 @@
 import json
 from typing import Any
 from app.services.apex_optimizer_agent.models import AgentState
-from app.schemas.config import AppConfig
+from app.schemas import AppConfig
 
 class ToolDispatcher:
     def __init__(self, llm_connector: any, settings: AppConfig):

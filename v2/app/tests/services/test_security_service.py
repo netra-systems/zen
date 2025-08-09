@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
 from app.services.security_service import SecurityService, KeyManager
-from app.schemas.config import AppConfig
+from app.schemas import AppConfig
 from cryptography.fernet import Fernet
 
 @pytest.fixture

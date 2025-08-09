@@ -2,7 +2,7 @@
 import pytest
 from pydantic import ValidationError
 from app.services.key_manager import KeyManager
-from app.schemas.config import AppConfig
+from app.schemas import AppConfig
 
 # Mock AppConfig for testing
 class MockAppConfig(AppConfig):
