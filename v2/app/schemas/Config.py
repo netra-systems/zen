@@ -124,6 +124,9 @@ class LLMConfig(BaseModel):
     api_key: Optional[str] = Field(None, description="The API key for the LLM provider.")
     generation_config: Dict[str, Any] = Field({}, description="A dictionary of generation parameters, e.g., temperature, max_tokens.")
 
+class WebSocketConfig(BaseModel):
+    ws_url: str = Field(default="ws://localhost:8000/ws", description="The WebSocket URL for the frontend to connect to.")
+
 class AppConfig(BaseModel):
     """Base configuration class."""
 
@@ -135,6 +138,7 @@ class AppConfig(BaseModel):
     clickhouse_https_dev: ClickHouseHTTPSDevConfig = ClickHouseHTTPSDevConfig()
     clickhouse_logging: ClickHouseLoggingConfig = ClickHouseLoggingConfig()
     langfuse: LangfuseConfig = LangfuseConfig()
+    ws_config: WebSocketConfig = Field(default_factory=WebSocketConfig)
 
     secret_key: str = "default_secret_key"
     algorithm: str = "HS256"
@@ -202,4 +206,3 @@ class TestingConfig(AppConfig):
     """Testing-specific settings."""
     environment: str = "testing"
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"
-    
