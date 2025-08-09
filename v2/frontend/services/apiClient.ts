@@ -7,7 +7,7 @@ class ApiClient {
       throw new Error(`Endpoint ${endpointName} not found`);
     }
 
-    const url = getApiUrl(endpointName);
+    const url = getApiUrl(endpoint.path);
     const response = await fetch(url, options);
     return response.json();
   }

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from app.config import settings, AppConfig
+from app.schemas.config import AppConfig
 from app.auth.auth_dependencies import ActiveUserWsDep
 from app import schemas
 from typing import List, Dict

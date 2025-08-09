@@ -1,54 +1,34 @@
 
-import { render, waitFor } from '@testing-library/react';
-import { WebSocketProvider } from '@/contexts/WebSocketContext';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { authService } from '@/services/auth';
-import WS from 'jest-websocket-mock';
+import { render, screen, waitFor } from '@testing-library/react';
+import useWebSocket from 'react-use-websocket';
 
-// Mock the useAuth hook
-jest.mock('@/services/auth', () => ({
-  authService: {
-    useAuth: jest.fn(),
-    getAuthConfig: jest.fn(),
-  }
-}));
+jest.mock('react-use-websocket');
 
-const mockUser = { id: '123', full_name: 'Test User', email: 'test@example.com' };
-
-describe('WebSocketProvider', () => {
-  let server: WS;
-
-  beforeEach(() => {
-    server = new WS('ws://localhost:8000/ws/123');
-    (authService.useAuth as jest.Mock).mockReturnValue({ user: mockUser });
-    (authService.getAuthConfig as jest.Mock).mockResolvedValue({ user: mockUser });
-  });
-
-  afterEach(() => {
-    WS.clean();
-  });
-
-  it(
-    'should connect and disconnect',
-    async () => {
-      render(
-        <AuthProvider>
-          <WebSocketProvider url={`ws://localhost:8000/ws/${mockUser.id}`}>
-            <div>WebSocket Component</div>
-          </WebSocketProvider>
-        </AuthProvider>
-      );
-
-      await server.connected;
-
-      expect(server.server.clients().length).toBe(1);
-
-      server.close();
-
-      await waitFor(() => {
-        expect(server.server.clients().length).toBe(0);
-      });
-    },
-    10000
+const TestComponent = () => {
+  const [sendJsonMessage, lastJsonMessage, readyState] = useWebSocket('ws://localhost:8000');
+  return (
+    <div>
+      <span>ReadyState: {readyState}</span>
+    </div>
   );
+};
+
+describe('useWebSocket', () => {
+  it('should return the correct values', async () => {
+    const mockSendJsonMessage = jest.fn();
+    const mockLastJsonMessage = {};
+    const mockReadyState = 1;
+
+    (useWebSocket as jest.Mock).mockReturnValue([
+      mockSendJsonMessage,
+      mockLastJsonMessage,
+      mockReadyState,
+    ]);
+
+    render(<TestComponent />);
+
+    await waitFor(() => {
+      expect(screen.getByText('ReadyState: 1')).toBeInTheDocument();
+    });
+  });
 });

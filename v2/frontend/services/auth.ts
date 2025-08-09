@@ -1,10 +1,11 @@
 import { AuthConfigResponse } from '@/types/Auth';
 import { useContext } from 'react';
 import { AuthContext, AuthContextType } from '@/contexts/AuthContext';
+import { config } from '@/config';
 
 class AuthService {
   async getAuthConfig(): Promise<AuthConfigResponse> {
-    const response = await fetch('/api/auth/config');
+    const response = await fetch(`${config.apiUrl}/api/auth/config`);
     if (!response.ok) {
       throw new Error('Failed to fetch auth config');
     }
