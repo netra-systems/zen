@@ -3,15 +3,18 @@ SPEC:WS: WS Websockets
 WS:1:0: Primary Spec: WS Websockets Specification.
 WS:1:1:0: Goal: WS working as a complete end to end system.
 WS:1:1:1: CRITICAL: The Coherence of the system working in harmony front and backend together.
-WS:1:1:1:0: Cohernece: Coherence with User Auth using WS
-WS:1:1:1:1: Coherence: Agent to Frontend communications using WS
-WS:1:1:1:1: Coherence: Frontend to Agent communications using WS
-WS:1:1:1:1: Coherence: Frontend loading into Chat UI/UX concepts using WS
+WS:1:1:1:1: Coherence: Validate Coherence with SPEC:chat_ui_ux 
+WS:1:1:1:2: Coherence: Validate Coherence with SPEC:netra_user_auth
+WS:1:1:1:3: Coherence: Validate Coherence with SPEC:conventions
+WS:1:1:1:4: Coherence: Agent to Frontend communications using WS
+WS:1:1:1:5: Coherence: Frontend to Agent communications using WS
+WS:1:1:1:6: Coherence: Frontend loading into Chat UI/UX concepts using WS
+WS:1:1:1:6: Coherence: With service discovery, backend tells frontend WS config
 
 WS:1:0:1:0: JSON first: Always send and recieve JSON.
-WS:1:0:1:0: Careful: Lanchain stream to JSON parsing
-WS:1:0:1:1: Careful: WS use JSON not string
-WS:1:0:1:2: Careful: Protect against multiple functions or processing double or triple wrapping JSON badly
+WS:1:0:1:2: Careful: Lanchain stream to JSON parsing
+WS:1:0:1:2: Careful: WS use JSON not string
+WS:1:0:1:3: Careful: Protect against multiple functions or processing double or triple wrapping JSON badly
 
 WS:1:0:1:0 WebSocket connection is established statefully on application state load (BEFORE the first message is sent.) It is an ERROR if WS can’t be established.
 WS:1:0:1:1: Authorization considerations. think carefully dev auth, regular user auth, etc. all well typed.
