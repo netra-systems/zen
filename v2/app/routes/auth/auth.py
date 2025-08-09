@@ -1,7 +1,7 @@
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.responses import RedirectResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
 from app.auth.auth import google
@@ -21,7 +21,7 @@ class AuthRoutes:
     
     
     @router.post("/token")
-    async def token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):
+    async def token(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):
         user = await security_service.authenticate_user(db, form_data.username, form_data.password)
         if not user:
             raise HTTPException(
@@ -60,7 +60,7 @@ class AuthRoutes:
 
 
     @router.get("/auth")
-    async def auth(request: Request, db: Session = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):
+    async def auth(request: Request, db: AsyncSession = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):
         token = await google.authorize_access_token(request)
         user_info = await google.parse_id_token(request, token)
         user = await user_service.get_by_email(db, email=user_info['email'])
@@ -77,7 +77,7 @@ class AuthRoutes:
 
 
     @router.post("/dev_login")
-    async def dev_login(request: Request, dev_login_request: DevLoginRequest, db: Session = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):
+    async def dev_login(request: Request, dev_login_request: DevLoginRequest, db: AsyncSession = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):
         if settings.environment != "development":
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Dev login is only available in development environment")
 
