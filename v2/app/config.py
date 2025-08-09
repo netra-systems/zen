@@ -7,10 +7,13 @@ from app.schemas import SECRET_CONFIG
 
 class Settings:
     def __init__(self):
-        self.config = self._get_settings()
-        if self.config.log_secrets:
+        self.loaded_settings = self._get_all_secrets_and_env_configs()
+        if self.loaded_settings.log_secrets:
             print(self.config.model_dump_json(indent=2))
-
+        
+    def get_settings(self) -> schemas.AppConfig:
+        return self.loaded_settings
+    
     @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
     def _get_secret_client(self) -> secretmanager.SecretManagerServiceClient:
         """Initializes and returns a Secret Manager service client with retry logic."""
@@ -72,7 +75,7 @@ class Settings:
             if target_obj:
                 setattr(target_obj, ref.target_field, secret_value)
 
-    def _get_settings(self) -> schemas.AppConfig:
+    def _get_all_secrets_and_env_configs(self) -> schemas.AppConfig:
         """Returns the appropriate configuration class based on the environment."""
         environment = os.environ.get("environment", "development").lower()
         if os.environ.get("TESTING"):
@@ -89,10 +92,4 @@ class Settings:
 
         return config
 
-    def get_config(self) -> schemas.AppConfig:
-        return self.config
-
-settings = Settings()
-
-def get_settings() -> schemas.AppConfig:
-    return settings.get_config()
+settings = Settings().get_settings()
