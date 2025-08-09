@@ -6,7 +6,7 @@ import { config as appConfig } from '@/config';
 
 interface WebSocketContextType {
   status: WebSocketStatus;
-  lastMessage: WebSocketMessage | null;
+  messages: WebSocketMessage[];
   sendMessage: (message: WebSocketMessage) => void;
 }
 
@@ -26,7 +26,7 @@ interface WebSocketProviderProps {
 
 export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const [status, setStatus] = useState<WebSocketStatus>('CLOSED');
-  const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
+  const [messages, setMessages] = useState<WebSocketMessage[]>([]);
 
   useEffect(() => {
     const fetchConfigAndConnect = async () => {
@@ -34,7 +34,9 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         const response = await fetch(`${appConfig.apiUrl}/api/config`);
         const config = await response.json();
         webSocketService.onStatusChange = setStatus;
-        webSocketService.onMessage = setLastMessage;
+        webSocketService.onMessage = (newMessage) => {
+          setMessages((prevMessages) => [...prevMessages, newMessage]);
+        };
         webSocketService.connect(config.ws_url);
       } catch (error) {
         console.error('Failed to fetch config and connect to WebSocket', error);
@@ -54,7 +56,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
 
   const contextValue = {
     status,
-    lastMessage,
+    messages,
     sendMessage,
   };
 

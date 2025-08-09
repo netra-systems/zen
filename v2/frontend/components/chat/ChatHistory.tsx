@@ -11,8 +11,8 @@ const ChatHistory: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-y-auto p-4">
-      {ws.messages.map((msg) => (
-        <Message key={msg.id} message={msg} />
+      {ws.messages.map((msg, index) => (
+        <Message key={index} message={msg} />
       ))}
     </div>
   );

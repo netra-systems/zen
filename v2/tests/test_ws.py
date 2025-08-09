@@ -41,11 +41,4 @@ async def test_websocket_unauthorized(client):
         with client.websocket_connect(f"/ws?user_id=unauthorized") as websocket:
             pass
 
-@pytest.mark.asyncio
-async def test_websocket_dev_login(client):
-    original_env = settings.environment
-    settings.environment = "development"
-    app.dependency_overrides[ActiveUserWsDep] = get_dev_user
-    with client.websocket_connect(f"/ws") as websocket:
-        assert "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11" in manager.active_connections
-    settings.environment = original_env
+

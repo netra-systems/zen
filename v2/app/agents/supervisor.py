@@ -37,9 +37,9 @@ class Supervisor(BaseSubAgent):
         self.run_states[run_id] = {"status": "running", "current_step": 0, "total_steps": len(self.sub_agents)}
 
         if stream_updates:
-            await self.websocket_manager.send_to_client(
+            await self.websocket_manager.send_message(
                 run_id,
-                WebSocketMessage(type="agent_started", payload=AgentStarted(run_id=run_id))
+                WebSocketMessage(type="agent_started", payload=AgentStarted(run_id=run_id)).dict()
             )
 
         state = DeepAgentState(user_request=user_request)
@@ -54,7 +54,7 @@ class Supervisor(BaseSubAgent):
                     next_node="",
                     lifecycle=agent.get_state()
                 )
-                await self.websocket_manager.send_to_client(
+                await self.websocket_manager.send_message(
                     run_id,
                     WebSocketMessage(
                         type="sub_agent_update",
@@ -62,7 +62,7 @@ class Supervisor(BaseSubAgent):
                             sub_agent_name=agent.name,
                             state=sub_agent_state
                         )
-                    )
+                    ).dict()
                 )
             
             await agent.run(state, run_id, stream_updates)
@@ -74,7 +74,7 @@ class Supervisor(BaseSubAgent):
                     next_node="",
                     lifecycle=agent.get_state()
                 )
-                await self.websocket_manager.send_to_client(
+                await self.websocket_manager.send_message(
                     run_id,
                     WebSocketMessage(
                         type="sub_agent_update",
@@ -82,9 +82,9 @@ class Supervisor(BaseSubAgent):
                             sub_agent_name=agent.name,
                             state=sub_agent_state
                         )
-                    )
+                    ).dict()
                 )
-                await self.websocket_manager.send_to_client(
+                await self.websocket_manager.send_message(
                     run_id,
                     WebSocketMessage(
                         type="sub_agent_completed",
@@ -92,15 +92,15 @@ class Supervisor(BaseSubAgent):
                             "sub_agent_name": agent.name,
                             "result": state.dict()
                         }
-                    )
+                    ).dict()
                 )
 
         self.run_states[run_id]["status"] = "finished"
         self.set_state(SubAgentLifecycle.COMPLETED)
         if stream_updates:
-            await self.websocket_manager.send_to_client(
+            await self.websocket_manager.send_message(
                 run_id,
-                WebSocketMessage(type="agent_completed", payload=AgentCompleted(run_id=run_id, result=state.dict()))
+                WebSocketMessage(type="agent_completed", payload=AgentCompleted(run_id=run_id, result=state.dict())).dict()
             )
         logger.info(f"Supervisor finished for run_id: {run_id}")
         return state
