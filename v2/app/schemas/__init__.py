@@ -18,6 +18,7 @@ from .Auth import (
     AuthConfigResponse,
 )
 from .Config import (
+    ClickHouseCredentials,
     SecretReference,
     SECRET_CONFIG,
     GoogleCloudConfig,
@@ -117,6 +118,7 @@ __all__ = [
     "DevLoginRequest",
     "AuthEndpoints",
     "AuthConfigResponse",
+    "ClickHouseCredentials",
     "SecretReference",
     "SECRET_CONFIG",
     "GoogleCloudConfig",

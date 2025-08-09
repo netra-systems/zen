@@ -3,6 +3,13 @@ from pydantic import BaseModel, Field
 from .Auth import AuthEndpoints, AuthConfigResponse, DevUser
 from .User import User
 
+class ClickHouseCredentials(BaseModel):
+    host: str
+    port: int
+    user: str
+    password: str
+    database: str
+
 class SecretReference(BaseModel):
     name: str
     target_field: str
