@@ -7,7 +7,7 @@ import { useChatStore } from '@/store';
 export const MessageInput: React.FC = () => {
   const [message, setMessage] = useState('');
   const { sendMessage } = useWebSocket();
-  const { setProcessing } = useChatStore();
+  const { setProcessing, isProcessing } = useChatStore();
 
   const handleSend = () => {
     if (message.trim()) {
@@ -23,10 +23,11 @@ export const MessageInput: React.FC = () => {
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-        placeholder="Type your message..."
+        placeholder={isProcessing ? "Agent is thinking..." : "Type your message..."}
         className="flex-grow"
+        disabled={isProcessing}
       />
-      <Button onClick={handleSend} className="ml-4">
+      <Button onClick={handleSend} className="ml-4" disabled={isProcessing}>
         Send
       </Button>
     </div>
