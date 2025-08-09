@@ -39,6 +39,7 @@ from .Corpus import (
     CorpusUpdate,
     CorpusInDBBase,
     Corpus,
+    ContentCorpus,
 )
 from .Generation import (
     ContentGenParams,
@@ -135,6 +136,7 @@ __all__ = [
     "CorpusUpdate",
     "CorpusInDBBase",
     "Corpus",
+    "ContentCorpus",
     "ContentGenParams",
     "LogGenParams",
     "SyntheticDataGenParams",

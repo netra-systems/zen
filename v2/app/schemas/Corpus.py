@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
+import uuid
 
 class CorpusBase(BaseModel):
     name: str
@@ -24,3 +25,13 @@ class CorpusInDBBase(CorpusBase):
 
 class Corpus(CorpusInDBBase):
     pass
+
+class ContentCorpus(BaseModel):
+    record_id: uuid.UUID
+    workload_type: str
+    prompt: str
+    response: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
