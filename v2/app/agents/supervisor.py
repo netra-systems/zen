@@ -5,7 +5,7 @@ from app.schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, SubAg
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.state import DeepAgentState
+from app.schemas import DeepAgentState
 
 # Import all the sub-agents
 from app.agents.triage_sub_agent import TriageSubAgent

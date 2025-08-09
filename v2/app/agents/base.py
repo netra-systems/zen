@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Optional
 import asyncio
 
 from app.llm.llm_manager import LLMManager
-from app.schemas import SubAgentLifecycle
-from app.agents.state import DeepAgentState
+from app.schemas import SubAgentLifecycle, DeepAgentState
 
 class BaseSubAgent(ABC):
     def __init__(self, llm_manager: Optional[LLMManager] = None, name: str = "BaseSubAgent", description: str = "This is the base sub-agent."):

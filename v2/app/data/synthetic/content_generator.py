@@ -12,7 +12,8 @@ from rich.console import Console
 from rich.progress import Progress
 from dotenv import load_dotenv
 
-from app.llm.llm_manager import LLMManager, LLMConfig
+from app.llm.llm_manager import LLMManager
+from app.schemas import LLMConfig
 
 console = Console()
 
@@ -62,7 +63,7 @@ def generate_content_sample(workload_type: str, model, generation_config) -> dic
         args = tool_call.args
 
         if not args:
-            # console.print(f"[yellow]Warning: Model returned empty arguments for '{workload_type}'.[/yellow]")
+            # console.print(f"[yellow]Warning: Model returned empty arguments for '{workload_type}'.")[/yellow]
             return None
 
         if workload_type == 'multi_turn_tool_use':
