@@ -1,17 +1,17 @@
-
 import { http, HttpResponse } from 'msw';
+import { User } from '@/types/User';
 
 export const handlers = [
   // Mock for login
   http.post('/api/login', async ({ request }) => {
     const { username } = await request.json();
     if (username === 'testuser') {
-      return HttpResponse.json({
+      const user: User = {
         id: 'c7b3d8e0-5e0b-4b0f-8b3a-3b9f4b3d3b3d',
-        firstName: 'John',
-        lastName: 'Maverick',
+        full_name: 'John Maverick',
         email: 'testuser@example.com',
-      });
+      };
+      return HttpResponse.json(user);
     } else {
       return new HttpResponse(null, { status: 401 });
     }

@@ -1,3 +1,5 @@
+import { Message, WebSocketMessage } from '@/types';
+
 describe('Chat UI', () => {
   beforeEach(() => {
     cy.visit('/chat');
@@ -12,16 +14,17 @@ describe('Chat UI', () => {
 
     // Mock a response from the websocket
     cy.window().then((win) => {
-      const message = {
+      const payload: Message = {
+        id: '1',
+        created_at: new Date().toISOString(),
+        content: 'This is a response from the agent.',
+        type: 'agent',
+        sub_agent_name: 'Test Agent',
+        displayed_to_user: true,
+      };
+      const message: WebSocketMessage = {
         type: 'message',
-        payload: {
-          id: '1',
-          created_at: new Date().toISOString(),
-          content: 'This is a response from the agent.',
-          type: 'agent',
-          sub_agent_name: 'Test Agent',
-          displayed_to_user: true,
-        },
+        payload: payload,
       };
       // @ts-ignore
       win.ws.onmessage({ data: JSON.stringify(message) });
@@ -34,17 +37,18 @@ describe('Chat UI', () => {
   it('should show and hide raw data', () => {
     // Mock a message with raw data
     cy.window().then((win) => {
-      const message = {
+      const payload: Message = {
+        id: '2',
+        created_at: new Date().toISOString(),
+        content: 'This message has raw data.',
+        type: 'agent',
+        sub_agent_name: 'Test Agent',
+        raw_data: { key: 'value' },
+        displayed_to_user: true,
+      };
+      const message: WebSocketMessage = {
         type: 'message',
-        payload: {
-          id: '2',
-          created_at: new Date().toISOString(),
-          content: 'This message has raw data.',
-          type: 'agent',
-          sub_agent_name: 'Test Agent',
-          raw_data: { key: 'value' },
-          displayed_to_user: true,
-        },
+        payload: payload,
       };
       // @ts-ignore
       win.ws.onmessage({ data: JSON.stringify(message) });
