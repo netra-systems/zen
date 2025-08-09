@@ -1,7 +1,7 @@
 from fastapi import APIRouter, WebSocket, Depends, WebSocketDisconnect
 from app.ws_manager import manager
 from app import schemas
-from app.auth.auth_dependencies import CurrentUser
+from app.auth.auth_dependencies import ActiveUserWsDep
 from app.services.agent_service import AgentService, get_agent_service
 import logging
 
@@ -11,7 +11,7 @@ router = APIRouter()
 @router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket,
-    user: schemas.User = Depends(CurrentUser),
+    user: schemas.User = Depends(ActiveUserWsDep),
     agent_service: AgentService = Depends(get_agent_service),
 ):
     if user is None:

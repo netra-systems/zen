@@ -6,7 +6,6 @@ from app.db.postgres import AsyncSession
 from app.dependencies import get_db_session, get_security_service
 from app.auth.services import SecurityService
 import json
-
 import logging
 
 async def get_dev_user() -> auth_schemas.User:
@@ -22,7 +21,9 @@ async def get_current_user(
     db_session: Annotated[AsyncSession, Depends(get_db_session)],
     security_service: Annotated[SecurityService, Depends(get_security_service)],
 ) -> Optional[auth_schemas.User]:
+    logger.info(f"get_current_user called for request: {request}")
     user_json = request.session.get('user')
+    logger.info(f"user_json: {user_json}")
 
     if settings.environment == "development" and not user_json:
         return await get_dev_user()
@@ -49,6 +50,7 @@ async def get_current_user_ws(
     and development environments.
     """
     logger = logging.getLogger(__name__)
+    logger.info(f"get_current_user_ws called with user_id: {user_id}")
 
     if settings.environment == "development":
         logger.info("Development mode: Providing dev user.")
