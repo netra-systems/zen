@@ -6,6 +6,10 @@ subagents:1:0:0:0 Intent: The point of SubAgents is to manage it’s own context
 subagents:1:0:0:1: Follow best practices for SubAgents including having clear entry and exit conditions.
 subagents:1:0:0:2: The End to end flow from frontend to backend and back must work. Code must be PRODUCTION grade and include all concepts needed to the best of your ability.
 subagents:1:0:0:3: SubAgents use prompt templates to communicate with an LLM. They are LLM based always. Always include the complete prompt template and LLM usage.
+subagents:1:0:0:4: Coherence: Agents expect to work for a user and on a chat thread.
+subagents:1:0:0:4:0 every new chat thread has it's own id
+subagents:1:0:0:5: Coherence: Agents persist work to memory, Redis, postgres, clickhouse, etc. as needed
+subagents:1:0:0:6: Coherence: With WS
 
 subagents:1:0:1: Agents:
 subagents:1:0:1:0: Keep ALL existing Agents. Only Update Agents. Keep files where they are. Implement all updates as needed.
@@ -22,7 +26,7 @@ subagents:1:0:2:0: Validate all existing tools and functions are KEPT. This is o
 
 subagents:1:0:2:1: Test the default flow: Input from user: SupervisorAgent: TriageSubAgent: SupervisorAgent: DataSubAgent: SupervisorAgent: OptimizationsCoreSubAgent: SupervisorAgent: ActionsToMeetGoalsSubAgent: SupervisorAgent: ReportingAgent: SupervisorAgent: Output back to user
 
-subagents:1:0:2:2: WS Integrations: Validate all Agent WS and communication end to end.
+subagents:1:0:2:2: Validate WS Integrations: Validate all Agent WS and communication end to end.
 subagents:1:0:2:4: Check Lifecycle and shut down concepts
 subagents:1:0:2:5: Every SubAgent has all required fields to operate completed. E.g. its prompt definition etc. all completely filled out.
 

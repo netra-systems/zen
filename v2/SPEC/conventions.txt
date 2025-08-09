@@ -15,5 +15,6 @@ All imports use { item } over defaults.
 0:1:1:7: Frontend: `createContext`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
 0:1:1:8: Python: uses Async Await pattern whenever possible.
 0:1:1:9: Python: All logging uses CentralLogger
+0:1:1:10: Testing: Backend uses: "testing": schemas.TestingConfig
 
 SPEC:Conventions:End

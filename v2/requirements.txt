@@ -34,3 +34,7 @@ google-cloud-secret-manager
 langchain-google-genai 
 pydantic-to-typescript
 tenacity
+rich
+pytest-asyncio
+langchain-community
+pytest-mock
