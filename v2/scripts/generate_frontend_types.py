@@ -129,7 +129,7 @@ def main():
         ["app.schemas"],
         schema_list
     )
-    with open("frontend/types/websockets.ts", "w") as f:
+    with open("frontend/types/backend_schema_auto_generated.ts", "w") as f:
         f.write(ts_defs)
 
 

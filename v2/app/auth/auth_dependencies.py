@@ -11,6 +11,7 @@ import logging
 async def get_dev_user() -> auth_schemas.User:
     """Provides a default user for development environments."""
     return auth_schemas.User(
+        id="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
         email=settings.dev_user_email,
         full_name="Dev User",
     )

@@ -9,7 +9,7 @@ WS:1:1:1:3: Coherence: Validate Coherence with SPEC:conventions
 WS:1:1:1:4: Coherence: Agent to Frontend communications using WS
 WS:1:1:1:5: Coherence: Frontend to Agent communications using WS
 WS:1:1:1:6: Coherence: Frontend loading into Chat UI/UX concepts using WS
-WS:1:1:1:6: Coherence: With service discovery, backend tells frontend WS config
+WS:1:1:1:7: Coherence: With service discovery: backend tells frontend WS config: frontend loads config from service discovery
 
 WS:1:0:1:0: JSON first: Always send and recieve JSON.
 WS:1:0:1:2: Careful: Lanchain stream to JSON parsing
