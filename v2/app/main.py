@@ -44,7 +44,9 @@ async def lifespan(app: FastAPI):
     # Initialize services
     app.state.redis_manager = redis_manager
     app.state.background_task_manager = BackgroundTaskManager()
+    logger.info("Loading key manager...")
     key_manager = KeyManager.load_from_settings(settings)
+    logger.info("Key manager loaded.")
     app.state.key_manager = key_manager
     app.state.security_service = SecurityService(key_manager)
     app.state.llm_manager = LLMManager(settings)
