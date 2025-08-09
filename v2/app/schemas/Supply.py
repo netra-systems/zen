@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 from typing import Optional
 
+class ModelIdentifier(BaseModel):
+    provider: str
+    model_name: str
+
 class SupplyOptionBase(BaseModel):
     name: str
     description: Optional[str] = None

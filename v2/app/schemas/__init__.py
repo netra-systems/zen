@@ -64,6 +64,7 @@ from .Request import (
 )
 from .Run import RunComplete
 from .Supply import (
+    ModelIdentifier,
     SupplyOptionBase,
     SupplyOptionCreate,
     SupplyOptionUpdate,
@@ -154,6 +155,7 @@ __all__ = [
     "StartAgentPayload",
     "StartAgentMessage",
     "RunComplete",
+    "ModelIdentifier",
     "SupplyOptionBase",
     "SupplyOptionCreate",
     "SupplyOptionUpdate",
