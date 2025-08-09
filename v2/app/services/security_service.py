@@ -71,7 +71,11 @@ class SecurityService:
         try:
             payload = jwt.decode(token, self.key_manager.jwt_secret_key, algorithms=["HS256"])
             return payload
-        except JWTError:
+        except jwt.ExpiredSignatureError:
+            print(f"Token expired: {token}")
+            return None
+        except JWTError as e:
+            print(f"JWT decode error: {e}, token: {token}")
             return None
 
     async def get_user_by_id(self, db_session: AsyncSession, user_id: str) -> Optional[models_postgres.User]:

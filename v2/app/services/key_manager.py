@@ -16,9 +16,6 @@ class KeyManager(BaseModel):
         jwt_secret_key = settings.jwt_secret_key
         fernet_key = settings.fernet_key
 
-        if settings.environment == "development" and jwt_secret_key == "jwt_secret_key":
-            jwt_secret_key = "a_super_secret_jwt_key_for_development_that_is_long_enough"
-
         fernet_key_bytes = fernet_key.encode() if isinstance(fernet_key, str) else fernet_key
 
         try:
