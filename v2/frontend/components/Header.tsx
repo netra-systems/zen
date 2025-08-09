@@ -7,7 +7,7 @@ import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Icons } from './Icons';
-import { LoginButton } from './auth/LoginButton';
+import { authService } from '@/auth';
 
 import { HeaderProps } from '../types';
 
