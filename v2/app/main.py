@@ -77,7 +77,7 @@ async def lifespan(app: FastAPI):
         await app.state.agent_supervisor.shutdown()
         await websocket_manager.shutdown()
         await redis_manager.disconnect()
-        central_logger.shutdown()
+        await central_logger.shutdown()
         logger.info("Application shutdown complete.")
 
 from fastapi.middleware.cors import CORSMiddleware

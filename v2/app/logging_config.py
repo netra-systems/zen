@@ -129,9 +129,9 @@ class CentralLogger:
         """Returns a Loguru logger instance, optionally named."""
         return self.logger.patch(lambda record: record.update(name=name) if name else None)
 
-    def shutdown(self):
+    async def shutdown(self):
         if self.clickhouse_db:
-            self.clickhouse_db.client.close()
+            await self.clickhouse_db.disconnect()
             self.logger.info("ClickHouse connection closed.")
 
 class InterceptHandler(logging.Handler):

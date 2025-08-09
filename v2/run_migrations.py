@@ -5,7 +5,7 @@ print(os.getcwd())
 os.environ['DATABASE_URL'] = 'postgresql+asyncpg://postgres:123@localhost/netra'
 alembic_args = [
     '-c',
-    'app/migration/alembic.ini',
+    'v2/alembic.ini',
     'upgrade',
     'head',
 ]

@@ -60,7 +60,7 @@ class ClickHouseDatabase:
             raise ConnectionError("Not connected to ClickHouse.")
         return await asyncio.to_thread(self.client.insert, table, data, column_names=column_names)
 
-    def disconnect(self):
+    async def disconnect(self):
         if self.client:
-            self.client.close()
+            await asyncio.to_thread(self.client.close)
             self.client = None
