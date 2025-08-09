@@ -6,24 +6,19 @@ import { NavItem } from '@/types';
 
 const navItems: NavItem[] = [
   {
-    href: '/',
-    icon: <Icons.home className="h-4 w-4" />,
-    label: 'Dashboard',
+    href: '/chat',
+    icon: <Icons.apexOptimizer className="h-4 w-4" />,
+    label: 'Chat',
   },
   {
-    href: '/generation',
+    href: '/ingest-synthetic-data',
     icon: <Icons.syntheticData className="h-4 w-4" />,
-    label: 'Synthetic Data',
+    label: 'Ingestion (Synthetic)',
   },
   {
     href: '/corpus-admin',
     icon: <Icons.corpusAdmin className="h-4 w-4" />,
     label: 'Corpus Admin',
-  },
-  {
-    href: '/chat',
-    icon: <Icons.apexOptimizer className="h-4 w-4" />,
-    label: 'Chat',
   },
   {
     href: '#',
