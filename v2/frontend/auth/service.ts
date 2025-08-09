@@ -1,6 +1,6 @@
-import { AuthConfigResponse } from '@/auth/types';
+import { AuthConfigResponse } from '@/auth';
 import { useContext } from 'react';
-import { AuthContext, AuthContextType } from '@/auth/contexts';
+import { AuthContext, AuthContextType } from '@/auth';
 import { config } from '@/config';
 
 class AuthService {

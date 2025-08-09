@@ -2,9 +2,9 @@
 
 import { createContext, useEffect, ReactNode, useState, useCallback } from 'react';
 import { User } from '@/types/User';
-import { AuthConfigResponse } from '@/auth/types';
+import { AuthConfigResponse } from '@/auth';
 import { Button } from '@/components/ui/button';
-import { authService } from '@/auth/service';
+import { authService } from '@/auth';
 
 export interface AuthContextType {
   user: User | null;
