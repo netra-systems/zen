@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { authService } from '@/auth';
 import Image from 'next/image';
@@ -9,7 +8,15 @@ export default function LoginButton() {
   if (user) {
     return (
       <div className="flex items-center gap-4">
-        <Image src={user.picture} alt={user.full_name} width={32} height={32} className="rounded-full" />
+        {user.picture && (
+          <Image
+            src={user.picture}
+            alt={user.full_name || 'User avatar'}
+            width={32}
+            height={32}
+            className="rounded-full"
+          />
+        )}
         <span>{user.full_name}</span>
         <Button onClick={logout}>Logout</Button>
       </div>
