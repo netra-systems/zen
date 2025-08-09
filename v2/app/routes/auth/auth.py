@@ -24,8 +24,6 @@ class AuthRoutes:
         """
         return AuthConfigResponse(
             development_mode=settings.environment == "development",
-            message=f"Welcome to the API, {current_user.email if current_user else 'guest'}",
-            user=current_user,
             endpoints=settings.oauth_config.endpoints,
         )
 
