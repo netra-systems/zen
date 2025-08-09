@@ -49,6 +49,7 @@ from .Generation import (
     DataIngestionParams,
     ContentCorpusGenParams,
 )
+from .Event import EventMetadata
 from .Message import (
     MessageType,
     Message,
@@ -145,6 +146,7 @@ __all__ = [
     "SyntheticDataGenParams",
     "DataIngestionParams",
     "ContentCorpusGenParams",
+    "EventMetadata",
     "MessageType",
     "Message",
     "Settings",
