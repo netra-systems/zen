@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { AppWithLayout } from '@/components/AppWithLayout';
 import { Providers } from '@/components/Providers';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider } from '@/auth';
 import { ChatProvider } from '@/contexts/ChatContext';
 import './globals.css';
 
