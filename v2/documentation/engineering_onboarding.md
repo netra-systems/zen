@@ -173,7 +173,7 @@ Follow these steps to get the project running on your local machine.
 
 7.  **Run the Backend Server:**
     ```bash
-    uvicorn app.main:app --reload --reload-exclude tests --port 8000
+    python run_server.py
     ```
     The backend API should now be running at `http://localhost:8000`.
 
