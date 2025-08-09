@@ -50,7 +50,7 @@ async def check_llm(llm_manager: LLMManager):
             llm = llm_manager.get_llm(llm_name)
         logger.info("LLM configuration validation successful.")
     except Exception as e:
-        logger.error(f"LLM configuration validation failed: {e}")
+        logger.error(f"LLM configuration validation failed: {e}. Check Auth Refresh expires every 16 hours (e.g. gcloud auth application-default login)")
         raise
 
 async def run_startup_checks(app):

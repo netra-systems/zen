@@ -6,6 +6,7 @@ from app.db.postgres import AsyncSession
 from app.dependencies import get_db_session, get_security_service
 from app.auth.services import SecurityService
 import json
+
 import logging
 
 async def get_dev_user() -> auth_schemas.User:

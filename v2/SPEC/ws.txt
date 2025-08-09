@@ -18,7 +18,7 @@ WS:1:0:1:2: Careful: WS use JSON not string
 WS:1:0:1:3: Careful: Protect against multiple functions or processing double or triple wrapping JSON badly
 
 WS:1:0:1:0 WebSocket connection is established statefully on application state load (BEFORE the first message is sent.) It is an ERROR if WS can’t be established.
-WS:1:0:1:1: Authorization considerations. think carefully dev auth, regular user auth, etc. all well typed.
+WS:1:0:1:1: Authorization. think carefully dev auth, regular user auth, etc. all well typed.
 WS:1:0:2:2: WebSocket connection is persistent.
 WS:1:0:2:3: Important: WebSocket connection resilient to component re-renders and lifecycle changes.
 Websockets works with regular JSON etc. when the user sends chat messages or free text or clicking examples etc.
@@ -30,8 +30,6 @@ WS:1:0:2:2: Backend sends responses using a single source of truth to manage WS.
 WS:1:0:2:5: The backend provides discovery of WS config to frontend.
 WS:1:0:2:5:1: The frontend discovers WS config at earilest reasonable application state.
 
-WS:1:0:3: Python classes. Strong python types and classes every possible WS related item.
-Seperate out sub parts here. Think about what is the generic WS handling, and when other parts
-of the application want to handle it.
+WS:1:0:3: WS End to end testing
 
 WS:ENDS

@@ -28,7 +28,7 @@ class LLMManager:
 
         if config.provider == "google":
             if not config.api_key:
-                raise ValueError(f"config.provider: {config.provider} api_key: {config.api_key} API key not found in config.")
+                raise ValueError(f"LLM '{name}': API key for provider 'google' is missing. Check Auth Refresh expires every 16 hours (e.g. gcloud auth application-default login)")
 
             # Defer genai.configure until a Google model is actually used
             llm = ChatGoogleGenerativeAI(
