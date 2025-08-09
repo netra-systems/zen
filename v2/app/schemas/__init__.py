@@ -61,6 +61,14 @@ from .Request import (
     StartAgentMessage,
 )
 from .Run import RunComplete
+from .Supply import (
+    SupplyOptionBase,
+    SupplyOptionCreate,
+    SupplyOptionUpdate,
+    SupplyOptionInDBBase,
+    SupplyOption,
+    SupplyOptionInDB,
+)
 from .Token import (
     Token,
     TokenPayload,
@@ -142,6 +150,12 @@ __all__ = [
     "StartAgentPayload",
     "StartAgentMessage",
     "RunComplete",
+    "SupplyOptionBase",
+    "SupplyOptionCreate",
+    "SupplyOptionUpdate",
+    "SupplyOptionInDBBase",
+    "SupplyOption",
+    "SupplyOptionInDB",
     "Token",
     "TokenPayload",
     "ToolStatus",
