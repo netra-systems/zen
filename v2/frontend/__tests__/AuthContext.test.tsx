@@ -76,9 +76,14 @@ describe('AuthProvider', () => {
       login: jest.fn(),
       logout: jest.fn(),
       loading: true,
-    })
+    }).mockReturnValueOnce({
+      user: mockUser,
+      login: jest.fn(),
+      logout: jest.fn(),
+      loading: false,
+    });
 
-    const { getByText, queryByText, rerender } = render(
+    const { getByText, queryByText } = render(
       <AuthProvider>
         <TestComponent />
       </AuthProvider>
@@ -87,19 +92,6 @@ describe('AuthProvider', () => {
     await waitFor(() => {
       expect(queryByText('Loading...')).not.toBeInTheDocument();
     });
-
-    (authService.useAuth as jest.Mock).mockReturnValueOnce({
-      user: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
-      loading: false,
-    });
-
-    rerender(
-      <AuthProvider>
-        <TestComponent />
-      </AuthProvider>
-    );
 
     await waitFor(() => {
       expect(getByText(`Welcome, ${mockUser.full_name}`)).toBeInTheDocument();

@@ -1,6 +1,6 @@
 import { WebSocketMessage } from '../types/websockets';
 
-import { WEBSOCKET_URL } from '@/config';
+import { WEBSOCKET_URL } from './apiConfig';
 
 export type WebSocketStatus = 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
 
