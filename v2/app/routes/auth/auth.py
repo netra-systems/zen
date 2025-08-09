@@ -17,7 +17,7 @@ router = APIRouter()
 class AuthRoutes:
     
     @router.get("/config", response_model=AuthConfigResponse)
-    async def get_auth_config(request: Request, current_user: User | None = Depends(get_current_user_ws)):
+    async def get_auth_config(request: Request):
         """
         Returns the authentication configuration.
         This endpoint is used by the frontend to determine how to behave.
