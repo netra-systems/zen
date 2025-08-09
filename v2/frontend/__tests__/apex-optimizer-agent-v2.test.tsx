@@ -13,7 +13,7 @@ describe('ApexOptimizerAgentV2', () => {
   const sendWsMessage = jest.fn();
 
   beforeEach(() => {
-    (useAuth as jest.Mock).mockReturnValue({
+    (authService.useAuth as jest.Mock).mockReturnValue({
       user: mockUser,
       loading: false,
     });

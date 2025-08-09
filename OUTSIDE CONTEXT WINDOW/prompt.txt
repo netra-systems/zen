@@ -1,2 +1,5 @@
 read instructions.txt review chat_ui_ux.txt 
 Read instructions.txt PAUSE. Then read and do postgres.txt 
+
+use instructions.txt read SPEC/conventions.txt. Move useAuth on the frontend into the right class.
+

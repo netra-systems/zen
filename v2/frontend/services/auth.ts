@@ -1,4 +1,6 @@
 import { AuthConfigResponse } from '@/types/Auth';
+import { useContext } from 'react';
+import { AuthContext, AuthContextType } from '@/contexts/AuthContext';
 
 class AuthService {
   async getAuthConfig(): Promise<AuthConfigResponse> {
@@ -20,6 +22,14 @@ class AuthService {
   handleLogout(authConfig: AuthConfigResponse) {
     window.location.href = authConfig.endpoints.logout;
   }
+
+  useAuth = (): AuthContextType => {
+    const context = useContext(AuthContext);
+    if (context === undefined) {
+      throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+  };
 }
 
 export const authService = new AuthService();

@@ -1,7 +1,7 @@
 
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { useAuth } from '@/hooks/useAuth';
+import { authService } from '@/services/auth';
 import { authService } from '@/services/auth';
 import { mockUser, mockAuthConfig } from '@/mocks/auth';
 
@@ -9,7 +9,7 @@ import { mockUser, mockAuthConfig } from '@/mocks/auth';
 jest.mock('@/services/auth');
 
 const TestComponent = () => {
-  const { user, login, logout } = useAuth();
+  const { user, login, logout } = authService.useAuth();
   return user ? (
     <div>
       <span>Welcome, {user.full_name}</span>

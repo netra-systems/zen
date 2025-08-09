@@ -2,12 +2,14 @@
 import { render, waitFor } from '@testing-library/react';
 import { WebSocketProvider } from '@/contexts/WebSocketContext';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { useAuth } from '@/hooks/useAuth';
+import { authService } from '@/services/auth';
 import WS from 'jest-websocket-mock';
 
 // Mock the useAuth hook
-jest.mock('@/hooks/useAuth', () => ({
-  useAuth: jest.fn(),
+jest.mock('@/services/auth', () => ({
+  authService: {
+    useAuth: jest.fn(),
+  }
 }));
 
 const mockUser = { id: '123', full_name: 'Test User', email: 'test@example.com' };
@@ -17,7 +19,7 @@ describe('WebSocketProvider', () => {
 
   beforeEach(() => {
     server = new WS('ws://localhost:8000/ws/123');
-    (useAuth as jest.Mock).mockReturnValue({ user: mockUser });
+    (authService.useAuth as jest.Mock).mockReturnValue({ user: mockUser });
   });
 
   afterEach(() => {
