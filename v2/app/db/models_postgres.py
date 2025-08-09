@@ -19,6 +19,7 @@ class User(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     email = Column(String, unique=True, index=True, nullable=False)
     full_name = Column(String, index=True)
+    hashed_password = Column(String, nullable=True)
     picture = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
