@@ -1,27 +1,27 @@
 import os
 from google.cloud import secretmanager
 from typing import List, Dict
-from app.schemas import AppConfig, ProductionConfig, TestingConfig, DevelopmentConfig, SecretReference
+from app import schemas
 from tenacity import retry, stop_after_attempt, wait_fixed, RetryError
 
-SECRET_CONFIG: List[SecretReference] = [
-    SecretReference(name="gemini-api-key", target_model="llm_configs.default", target_field="api_key"),
-    SecretReference(name="gemini-api-key", target_model="llm_configs.triage", target_field="api_key"),
-    SecretReference(name="gemini-api-key", target_model="llm_configs.data", target_field="api_key"),
-    SecretReference(name="gemini-api-key", target_model="llm_configs.optimizations_core", target_field="api_key"),
-    SecretReference(name="gemini-api-key", target_model="llm_configs.actions_to_meet_goals", target_field="api_key"),
-    SecretReference(name="gemini-api-key", target_model="llm_configs.reporting", target_field="api_key"),
-    SecretReference(name="google-client-id", target_model="google_cloud", target_field="client_id"),
-    SecretReference(name="google-client-secret", target_model="google_cloud", target_field="client_secret"),
-    SecretReference(name="langfuse-secret-key", target_model="langfuse", target_field="secret_key"),
-    SecretReference(name="langfuse-public-key", target_model="langfuse", target_field="public_key"),
-    SecretReference(name="clickhouse-default-password", target_model="clickhouse_native", target_field="password"),
-    SecretReference(name="clickhouse-default-password", target_model="clickhouse_https", target_field="password"),
-    SecretReference(name="clickhouse-development-password", target_model="clickhouse_https_dev", target_field="password"),
-    SecretReference(name="jwt-secret-key", target_field="jwt_secret_key"),
-    SecretReference(name="fernet-key", target_field="fernet_key"),
-    SecretReference(name="google-client-id", target_model="oauth_config", target_field="client_id"),
-    SecretReference(name="google-client-secret", target_model="oauth_config", target_field="client_secret"),
+SECRET_CONFIG: List[schemas.SecretReference] = [
+    schemas.SecretReference(name="gemini-api-key", target_model="llm_configs.default", target_field="api_key"),
+    schemas.SecretReference(name="gemini-api-key", target_model="llm_configs.triage", target_field="api_key"),
+    schemas.SecretReference(name="gemini-api-key", target_model="llm_configs.data", target_field="api_key"),
+    schemas.SecretReference(name="gemini-api-key", target_model="llm_configs.optimizations_core", target_field="api_key"),
+    schemas.SecretReference(name="gemini-api-key", target_model="llm_configs.actions_to_meet_goals", target_field="api_key"),
+    schemas.SecretReference(name="gemini-api-key", target_model="llm_configs.reporting", target_field="api_key"),
+    schemas.SecretReference(name="google-client-id", target_model="google_cloud", target_field="client_id"),
+    schemas.SecretReference(name="google-client-secret", target_model="google_cloud", target_field="client_secret"),
+    schemas.SecretReference(name="langfuse-secret-key", target_model="langfuse", target_field="secret_key"),
+    schemas.SecretReference(name="langfuse-public-key", target_model="langfuse", target_field="public_key"),
+    schemas.SecretReference(name="clickhouse-default-password", target_model="clickhouse_native", target_field="password"),
+    schemas.SecretReference(name="clickhouse-default-password", target_model="clickhouse_https", target_field="password"),
+    schemas.SecretReference(name="clickhouse-development-password", target_model="clickhouse_https_dev", target_field="password"),
+    schemas.SecretReference(name="jwt-secret-key", target_field="jwt_secret_key"),
+    schemas.SecretReference(name="fernet-key", target_field="fernet_key"),
+    schemas.SecretReference(name="google-client-id", target_model="oauth_config", target_field="client_id"),
+    schemas.SecretReference(name="google-client-secret", target_model="oauth_config", target_field="client_secret"),
 ]
 
 from tenacity import retry, stop_after_attempt, wait_fixed, RetryError
@@ -35,7 +35,7 @@ def get_secret_client() -> secretmanager.SecretManagerServiceClient:
         print(f"Attempt to initialize Secret Manager client failed: {e}")
         raise ConnectionError(f"Failed to connect to Secret Manager: {e}")
 
-def fetch_secrets(client: secretmanager.SecretManagerServiceClient, secret_references: List[SecretReference], log_secrets: bool = False) -> Dict[str, str]:
+def fetch_secrets(client: secretmanager.SecretManagerServiceClient, secret_references: List[schemas.SecretReference], log_secrets: bool = False) -> Dict[str, str]:
     """Fetches multiple secrets from Google Cloud Secret Manager."""
     secrets = {}
     if not client:
@@ -54,7 +54,7 @@ def fetch_secrets(client: secretmanager.SecretManagerServiceClient, secret_refer
             secrets[ref.name] = None
     return secrets
 
-def load_secrets(config: AppConfig):
+def load_secrets(config: schemas.AppConfig):
     """Fetches secrets from Secret Manager and populates the config object."""
     client = get_secret_client()
     if not client:
@@ -82,18 +82,18 @@ def load_secrets(config: AppConfig):
         if target_obj:
             setattr(target_obj, ref.target_field, secret_value)
 
-def get_settings() -> AppConfig:
+def get_settings() -> schemas.AppConfig:
     """Returns the appropriate configuration class based on the environment."""
     environment = os.environ.get("environment", "development").lower()
     if os.environ.get("TESTING"):
         environment = "testing"
     print(f"|| Loading configuration for: {environment} ||")
     config_map = {
-        "production": ProductionConfig,
-        "testing": TestingConfig,
-        "development": DevelopmentConfig
+        "production": schemas.ProductionConfig,
+        "testing": schemas.TestingConfig,
+        "development": schemas.DevelopmentConfig
     }
-    config = config_map.get(environment, DevelopmentConfig)()
+    config = config_map.get(environment, schemas.DevelopmentConfig)()
     
     try:
         load_secrets(config)

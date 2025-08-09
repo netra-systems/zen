@@ -29,6 +29,13 @@ class ClickHouseConfig(BaseModel):
     password: Optional[str] = None
     database: str
 
+class PostgresConfig(BaseModel):
+    host: str
+    port: int
+    user: str
+    password: str
+    database: str
+
 class OAuthConfig(BaseModel):
     client_id: Optional[str] = None
     client_secret: Optional[str] = None
@@ -41,9 +48,14 @@ class AppConfig(BaseModel):
     clickhouse_native: ClickHouseConfig
     clickhouse_https: ClickHouseConfig
     clickhouse_https_dev: ClickHouseConfig
+    postgres: PostgresConfig
     jwt_secret_key: Optional[str] = None
     fernet_key: Optional[str] = None
     oauth_config: OAuthConfig
+
+    @property
+    def database_url(self) -> str:
+        return f"postgresql+asyncpg://{self.postgres.user}:{self.postgres.password}@{self.postgres.host}:{self.postgres.port}/{self.postgres.database}"
 
 class ProductionConfig(AppConfig):
     pass
@@ -55,6 +67,7 @@ class DevelopmentConfig(AppConfig):
     clickhouse_native: ClickHouseConfig = Field(default_factory=lambda: ClickHouseConfig(host="localhost", port=9000, user="default", password="", database="netra"))
     clickhouse_https: ClickHouseConfig = Field(default_factory=lambda: ClickHouseConfig(host="localhost", port=8443, user="default", password="", database="netra"))
     clickhouse_https_dev: ClickHouseConfig = Field(default_factory=lambda: ClickHouseConfig(host="localhost", port=8443, user="default", password="", database="netra_dev"))
+    postgres: PostgresConfig = Field(default_factory=lambda: PostgresConfig(host="localhost", port=5432, user="postgres", password="123", database="netra"))
     oauth_config: OAuthConfig = Field(default_factory=OAuthConfig)
 
 
@@ -65,4 +78,5 @@ class TestingConfig(AppConfig):
     clickhouse_native: ClickHouseConfig = Field(default_factory=lambda: ClickHouseConfig(host="localhost", port=9000, user="default", password="", database="netra_test"))
     clickhouse_https: ClickHouseConfig = Field(default_factory=lambda: ClickHouseConfig(host="localhost", port=8443, user="default", password="", database="netra_test"))
     clickhouse_https_dev: ClickHouseConfig = Field(default_factory=lambda: ClickHouseConfig(host="localhost", port=8443, user="default", password="", database="netra_dev_test"))
+    postgres: PostgresConfig = Field(default_factory=lambda: PostgresConfig(host="localhost", port=5432, user="postgres", password="123", database="netra_test"))
     oauth_config: OAuthConfig = Field(default_factory=OAuthConfig)
