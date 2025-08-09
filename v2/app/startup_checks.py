@@ -1,5 +1,6 @@
 import logging
-from app.config import settings, AppConfig
+from app.config import settings
+from app.schemas import AppConfig
 from app.redis_manager import RedisManager
 from app.db.clickhouse_base import ClickHouseDatabase
 from app.llm.llm_manager import LLMManager
@@ -8,13 +9,10 @@ logger = logging.getLogger(__name__)
 
 async def check_config(settings: AppConfig):
     """Validates the application configuration."""
-    logger.info("Validating configuration...")
-    if not settings.postgres_dsn:
-        raise ValueError("POSTGRES_DSN is not set.")
     if not settings.redis.host:
         raise ValueError("REDIS_HOST is not set.")
-    # Add more checks as needed
-    logger.info("Configuration validation successful.")
+    # TBD thinking about how this integrated with existing pydantic auto validations
+ 
 
 async def check_redis(redis_manager: RedisManager):
     """Checks the connection to Redis."""
