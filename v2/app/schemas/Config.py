@@ -36,8 +36,14 @@ SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="fernet-key", target_field="fernet_key"),
     SecretReference(name="google-client-id", target_model="oauth_config", target_field="client_id"),
     SecretReference(name="google-client-secret", target_model="oauth_config", target_field="client_secret"),
-    SecretReference(name="redis-default", target_field="redis_password"),
+    SecretReference(name="redis-default", target_model="redis", target_field="password"),
 ]
+
+class RedisConfig(BaseModel):
+    host: str = 'redis-10504.fcrce190.us-east-1-1.ec2.redns.redis-cloud.com'
+    port: int = 10504
+    username: str = "default"
+    password: Optional[str] = None
 
 class GoogleCloudConfig(BaseModel):
     project_id: str = "cryptic-net-466001-n0"
@@ -140,8 +146,7 @@ class AppConfig(BaseModel):
     log_level: str = "DEBUG"
     log_secrets: bool = False
     frontend_url: str = "http://localhost:3000"
-    redis_password: Optional[str] = None
-    
+    redis: "RedisConfig" = Field(default_factory=lambda: RedisConfig())
 
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(

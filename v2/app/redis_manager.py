@@ -7,11 +7,11 @@ class RedisManager:
 
     async def connect(self):
         self.redis_client = redis.Redis(
-            host='redis-10504.fcrce190.us-east-1-1.ec2.redns.redis-cloud.com',
-            port=10504,
+            host=settings.redis.host,
+            port=settings.redis.port,
             decode_responses=True,
-            username="default",
-            password=settings.redis_password,
+            username=settings.redis.username,
+            password=settings.redis.password,
         )
         await self.redis_client.ping()
 
