@@ -13,30 +13,22 @@ class ClickHouseCredentials(BaseModel):
 class SecretReference(BaseModel):
     name: str
     target_field: str
-    target_model: Optional[str] = None
+    target_models: Optional[List[str]] = None
     project_id: str = "304612253870"
     version: str = "latest"
 
 
 SECRET_CONFIG: List[SecretReference] = [
-    SecretReference(name="gemini-api-key", target_model="llm_configs.default", target_field="api_key"),
-    SecretReference(name="gemini-api-key", target_model="llm_configs.triage", target_field="api_key"),
-    SecretReference(name="gemini-api-key", target_model="llm_configs.data", target_field="api_key"),
-    SecretReference(name="gemini-api-key", target_model="llm_configs.optimizations_core", target_field="api_key"),
-    SecretReference(name="gemini-api-key", target_model="llm_configs.actions_to_meet_goals", target_field="api_key"),
-    SecretReference(name="gemini-api-key", target_model="llm_configs.reporting", target_field="api_key"),
-    SecretReference(name="google-client-id", target_model="google_cloud", target_field="client_id"),
-    SecretReference(name="google-client-secret", target_model="google_cloud", target_field="client_secret"),
-    SecretReference(name="langfuse-secret-key", target_model="langfuse", target_field="secret_key"),
-    SecretReference(name="langfuse-public-key", target_model="langfuse", target_field="public_key"),
-    SecretReference(name="clickhouse-default-password", target_model="clickhouse_native", target_field="password"),
-    SecretReference(name="clickhouse-default-password", target_model="clickhouse_https", target_field="password"),
-    SecretReference(name="clickhouse-development-password", target_model="clickhouse_https_dev", target_field="password"),
+    SecretReference(name="gemini-api-key", target_models=["llm_configs.default", "llm_configs.triage", "llm_configs.data", "llm_configs.optimizations_core", "llm_configs.actions_to_meet_goals", "llm_configs.reporting"], target_field="api_key"),
+    SecretReference(name="google-client-id", target_models=["google_cloud", "oauth_config"], target_field="client_id"),
+    SecretReference(name="google-client-secret", target_models=["google_cloud", "oauth_config"], target_field="client_secret"),
+    SecretReference(name="langfuse-secret-key", target_models=["langfuse"], target_field="secret_key"),
+    SecretReference(name="langfuse-public-key", target_models=["langfuse"], target_field="public_key"),
+    SecretReference(name="clickhouse-default-password", target_models=["clickhouse_native", "clickhouse_https"], target_field="password"),
+    SecretReference(name="clickhouse-development-password", target_models=["clickhouse_https_dev"], target_field="password"),
     SecretReference(name="jwt-secret-key", target_field="jwt_secret_key"),
     SecretReference(name="fernet-key", target_field="fernet_key"),
-    SecretReference(name="google-client-id", target_model="oauth_config", target_field="client_id"),
-    SecretReference(name="google-client-secret", target_model="oauth_config", target_field="client_secret"),
-    SecretReference(name="redis-default", target_model="redis", target_field="password"),
+    SecretReference(name="redis-default", target_models=["redis"], target_field="password"),
 ]
 
 class RedisConfig(BaseModel):
