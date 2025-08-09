@@ -5,7 +5,7 @@ from app.main import app
 from app.schemas import (AnalysisRequest, RequestModel, Workload, DataSource, TimeRange, 
                      WebSocketMessage, User, Settings, AgentStarted, AgentCompleted)
 from app.config import settings
-from app.auth.auth_dependencies import CurrentUser
+from app.auth.auth_dependencies import ActiveUserDep
 from app.services.agent_service import AgentService, get_agent_service
 import uuid
 from unittest.mock import AsyncMock, MagicMock
@@ -25,7 +25,7 @@ def client(mock_agent_service):
 
 def test_websocket_analysis_request(client, mock_agent_service):
     user_id = str(uuid.uuid4())
-    app.dependency_overrides[CurrentUser] = lambda: User(id=user_id, email="dev@example.com")
+    app.dependency_overrides[ActiveUserDep] = lambda: User(id=user_id, email="dev@example.com")
     
     with client.websocket_connect(f"/ws") as websocket:
         request_model = RequestModel(
