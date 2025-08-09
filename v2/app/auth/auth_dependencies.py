@@ -1,13 +1,12 @@
 from typing import Annotated, Optional
-from fastapi import Depends, HTTPException, status, Request, WebSocket
+from fastapi import Depends, HTTPException, status, Request
 from app.config import settings
 from app import schemas as auth_schemas
-import uuid
-from datetime import datetime
 from app.db.postgres import AsyncSession
 from app.dependencies import get_db_session, get_security_service
 from app.auth.services import SecurityService
 import json
+import logging
 
 async def get_dev_user() -> auth_schemas.User:
     """Provides a default user for development environments."""
@@ -37,8 +36,6 @@ async def get_current_user(
     user = await security_service.get_or_create_user_from_oauth(db_session, user_info)
 
     return auth_schemas.User.model_validate(user)
-
-import logging
 
 async def get_current_user_ws(
     user_id: str,

@@ -17,10 +17,10 @@ import numpy as np
 from faker import Faker
 
 from ..config import settings
-from ..schemas import ContentGenParams, LogGenParams, SyntheticDataGenParams
-from ..data.synthetic.content_generator import META_PROMPTS, generate_content_sample
+from ..schemas import ContentGenParams, LogGenParams, SyntheticDataGenParams, ContentCorpus
+from ..data.synthetic.content_generator import META_PROMPTS
 from ..db.clickhouse_base import ClickHouseDatabase
-from ..db.models_clickhouse import ContentCorpus, get_content_corpus_schema, get_llm_events_table_schema
+from ..db.models_clickhouse import get_content_corpus_schema, get_llm_events_table_schema
 from ..data.ingestion import ingest_records
 from ..data.content_corpus import DEFAULT_CONTENT_CORPUS
 from .job_store import job_store
@@ -31,7 +31,7 @@ from ..ws_manager import manager
 async def update_job_status(job_id: str, status: str, **kwargs):
     """Updates the status and other attributes of a generation job and sends a WebSocket message."""
     await job_store.update(job_id, status, **kwargs)
-    await manager.broadcast_to_client(job_id, json.dumps({"job_id": job_id, "status": status, **kwargs}))
+    await manager.broadcast(json.dumps({"job_id": job_id, "status": status, **kwargs}))
 
 async def get_corpus_from_clickhouse(table_name: str) -> dict:
     """Fetches the content corpus from a specified ClickHouse table."""

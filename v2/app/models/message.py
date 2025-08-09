@@ -2,7 +2,7 @@ import uuid
 from sqlalchemy import Column, String, DateTime, JSON, Boolean
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 from sqlalchemy.sql import func
-from app.db.postgres import Base
+from app.db.base import Base
 from app.schemas.Message import MessageType
 
 class Message(Base):

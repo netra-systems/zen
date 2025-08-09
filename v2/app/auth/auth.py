@@ -1,4 +1,3 @@
-
 from authlib.integrations.starlette_client import OAuth
 from app.config import settings
 
