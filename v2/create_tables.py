@@ -6,7 +6,6 @@ DATABASE_URL = "postgresql://postgres:123@localhost/netra"
 
 engine = create_engine(DATABASE_URL)
 
-Base.metadata.drop_all(bind=engine)
-Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine, checkfirst=True)
 
-print("Tables created successfully.")
+print("Tables created successfully (if they didn't already exist).")
