@@ -25,9 +25,9 @@ export const ExamplePrompts: React.FC = () => {
     // Add user message to chat immediately
     const userMessage: Message = {
       id: `msg_${Date.now()}`,
-      role: 'user',
+      type: 'user',
       content: prompt,
-      timestamp: new Date().toISOString(),
+      created_at: new Date().toISOString(),
       displayed_to_user: true
     };
     addMessage(userMessage);

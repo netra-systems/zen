@@ -104,8 +104,6 @@ export const ImprovedMessageItem: React.FC<MessageProps> = ({
         return <Wrench className="w-4 h-4" />;
       case 'error':
         return <AlertCircle className="w-4 h-4 text-red-500" />;
-      case 'thinking':
-        return <BrainCircuit className="w-4 h-4 animate-pulse" />;
       default:
         if (sub_agent_name?.includes('optimization')) {
           return <Sparkles className="w-4 h-4" />;

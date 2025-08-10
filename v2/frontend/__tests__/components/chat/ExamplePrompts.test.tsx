@@ -5,6 +5,7 @@ import { WebSocketProvider } from '../providers/WebSocketProvider';
 import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useChatStore } from '@/store/chat';
+import { useAuthStore } from '@/store/authStore';
 
 const mockSendMessage = jest.fn();
 const mockSetProcessing = jest.fn();
@@ -18,6 +19,12 @@ jest.mock('@/store/chat', () => ({
   useChatStore: () => ({ 
     setProcessing: mockSetProcessing,
     addMessage: mockAddMessage 
+  }),
+}));
+
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: () => ({ 
+    isAuthenticated: true
   }),
 }));
 
@@ -45,5 +52,26 @@ describe('ExamplePrompts', () => {
       }
     });
     expect(mockSetProcessing).toHaveBeenCalledWith(true);
+  });
+
+  it('does not send message when user is not authenticated', () => {
+    // Override the mock for this test only
+    jest.mocked(useAuthStore).mockReturnValueOnce({ 
+      isAuthenticated: false 
+    } as any);
+    
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    
+    render(<ExamplePrompts />);
+    
+    const firstPrompt = screen.getByText(/I need to reduce costs but keep quality the same/i);
+    fireEvent.click(firstPrompt);
+    
+    expect(consoleErrorSpy).toHaveBeenCalledWith('User must be authenticated to send messages');
+    expect(mockAddMessage).not.toHaveBeenCalled();
+    expect(mockSendMessage).not.toHaveBeenCalled();
+    expect(mockSetProcessing).not.toHaveBeenCalled();
+    
+    consoleErrorSpy.mockRestore();
   });
 });

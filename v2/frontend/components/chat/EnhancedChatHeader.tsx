@@ -81,7 +81,7 @@ export const EnhancedChatHeader: React.FC<EnhancedChatHeaderProps> = ({
 
   const getStatusColor = () => {
     if (!subAgentStatus) return 'bg-gray-100';
-    switch (subAgentStatus.status) {
+    switch (subAgentStatus.lifecycle) {
       case 'running': return 'bg-green-100 text-green-800';
       case 'completed': return 'bg-blue-100 text-blue-800';
       case 'failed': return 'bg-red-100 text-red-800';
@@ -91,7 +91,7 @@ export const EnhancedChatHeader: React.FC<EnhancedChatHeaderProps> = ({
 
   const getStatusIcon = () => {
     if (!subAgentStatus) return <Bot className="w-4 h-4" />;
-    switch (subAgentStatus.status) {
+    switch (subAgentStatus.lifecycle) {
       case 'running': return <Activity className="w-4 h-4 animate-pulse" />;
       case 'completed': return <TrendingUp className="w-4 h-4" />;
       case 'failed': return <Pause className="w-4 h-4" />;
@@ -132,14 +132,15 @@ export const EnhancedChatHeader: React.FC<EnhancedChatHeaderProps> = ({
                 <div className="flex items-center gap-2 mt-1">
                   <Badge className={`text-xs ${getStatusColor()}`}>
                     {getStatusIcon()}
-                    <span className="ml-1">{subAgentStatus.status}</span>
+                    <span className="ml-1">{subAgentStatus.lifecycle}</span>
                   </Badge>
+                  {/* Tools display commented out - SubAgentState doesn't have tools property
                   {subAgentStatus.tools && subAgentStatus.tools.length > 0 && (
                     <Badge variant="outline" className="text-xs">
                       <Zap className="w-3 h-3 mr-1" />
                       {subAgentStatus.tools.length} tools
                     </Badge>
-                  )}
+                  )} */}
                 </div>
               )}
             </div>
@@ -248,7 +249,7 @@ export const EnhancedChatHeader: React.FC<EnhancedChatHeaderProps> = ({
                   <Settings className="w-4 h-4 text-gray-400" />
                   <div>
                     <p className="text-gray-500">Status</p>
-                    <p className="font-medium">{subAgentStatus?.status || 'idle'}</p>
+                    <p className="font-medium">{subAgentStatus?.lifecycle || 'idle'}</p>
                   </div>
                 </div>
               </div>
