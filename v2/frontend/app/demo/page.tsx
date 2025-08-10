@@ -13,7 +13,6 @@ import DemoChat from '@/components/demo/DemoChat'
 import ROICalculator from '@/components/demo/ROICalculator'
 import PerformanceMetrics from '@/components/demo/PerformanceMetrics'
 import SyntheticDataViewer from '@/components/demo/SyntheticDataViewer'
-import AgentOrchestration from '@/components/demo/AgentOrchestration'
 import ImplementationRoadmap from '@/components/demo/ImplementationRoadmap'
 import IndustrySelector from '@/components/demo/IndustrySelector'
 import { useAuthStore } from '@/store/authStore'
@@ -29,7 +28,7 @@ interface DemoStep {
 
 export default function EnterpriseDemo() {
   const router = useRouter()
-  const { user } = useAuthStore()
+  const { } = useAuthStore()
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedIndustry, setSelectedIndustry] = useState<string>('')
   const [demoProgress, setDemoProgress] = useState(0)
@@ -91,7 +90,7 @@ export default function EnterpriseDemo() {
     }
   }
 
-  const handleStartDemo = () => {
+  const _handleStartDemo = () => {
     setDemoStarted(true)
     setActiveTab('optimization')
   }

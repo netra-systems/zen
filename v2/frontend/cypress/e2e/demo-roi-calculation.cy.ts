@@ -247,7 +247,7 @@ describe('Demo E2E Test Suite 2: ROI Calculation and Value Demonstration', () =>
       cy.get('input[id="spend"]').focus()
       cy.get('input[id="spend"]').should('have.focus')
       
-      cy.get('input[id="spend"]').tab()
+      cy.get('input[id="spend"]').type('{tab}')
       cy.get('input[id="requests"]').should('have.focus')
     })
   })

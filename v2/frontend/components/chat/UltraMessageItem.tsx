@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Message as MessageType } from '@/types/chat';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -15,7 +15,6 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import {
   User,
   Bot,
-  Clock,
   Copy,
   Check,
   ChevronDown,
@@ -32,7 +31,6 @@ import {
   Code,
   Terminal,
   Cpu,
-  BarChart3,
   Timer,
   Zap,
   Database,
@@ -76,7 +74,6 @@ interface UltraMessageProps {
   isCurrentAgent?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const agentIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   'TriageSubAgent': Target,
   'DataSubAgent': Database,
@@ -105,7 +102,7 @@ export const UltraMessageItem: React.FC<UltraMessageProps> = ({
   const [showDetails, setShowDetails] = useState(false);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [helpfulness, setHelpfulness] = useState<'helpful' | 'not-helpful' | null>(null);
-  const codeBlockRef = useRef<HTMLDivElement>(null);
+  const _codeBlockRef = useRef<HTMLDivElement>(null);
 
   // Real-time elapsed timer
   useEffect(() => {
@@ -316,8 +313,8 @@ export const UltraMessageItem: React.FC<UltraMessageProps> = ({
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  code(props: any) {
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                    code(props: any) {
                     const { className, children } = props;
                     const inline = props.inline as boolean | undefined;
                     const match = /language-(\w+)/.exec(className || '');

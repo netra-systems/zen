@@ -45,7 +45,7 @@ git clone https://github.com/netrasystems/netra-core-generation-1.git
 cd netra-core-generation-1/v2
 
 # Run the automated installer
-setup.bat
+scripts\setup.bat
 ```
 
 #### macOS/Linux
@@ -55,8 +55,8 @@ git clone https://github.com/netrasystems/netra-core-generation-1.git
 cd netra-core-generation-1/v2
 
 # Run the automated installer
-chmod +x setup.sh
-./setup.sh
+chmod +x scripts/setup.sh
+./scripts/setup.sh
 ```
 
 The installer will automatically:
@@ -101,14 +101,14 @@ pip install -r requirements.txt
 cd frontend && npm install && cd ..
 
 # 3. Configure environment
-cp .env.example .env  # Edit with your settings
+cp config/.env.example .env  # Edit with your settings
 
 # 4. Set up databases
-python create_db.py
-python run_migrations.py
+python database_scripts/create_db.py
+python database_scripts/run_migrations.py
 
 # 5. Start services
-python dev_launcher.py --dynamic --no-backend-reload
+python scripts/dev_launcher.py --dynamic --no-backend-reload
 ```
 
 ### 🔧 Troubleshooting
@@ -117,7 +117,7 @@ If the installer fails:
 1. Ensure Python 3.9+ is installed and in PATH
 2. Ensure Node.js 18+ is installed
 3. On Windows, you may need to run as Administrator
-4. Check `install_dev_env.py` output for specific errors
+4. Check `scripts/install_dev_env.py` output for specific errors
 
 For database issues:
 - PostgreSQL: The installer will use SQLite if PostgreSQL is unavailable
@@ -180,7 +180,7 @@ For database issues:
 
 ### Automated Installation
 
-The project includes a comprehensive installer (`install_dev_env.py`) that handles all setup automatically:
+The project includes a comprehensive installer (`scripts/install_dev_env.py`) that handles all setup automatically:
 
 **Features:**
 - 🔍 Detects operating system (Windows/macOS/Linux)
@@ -200,7 +200,7 @@ The project includes a comprehensive installer (`install_dev_env.py`) that handl
 
 Run the installer directly:
 ```bash
-python install_dev_env.py
+python scripts/install_dev_env.py
 ```
 
 ### Environment Configuration
@@ -249,7 +249,7 @@ GRANT ALL PRIVILEGES ON DATABASE netra_db TO your_user;
 
 Run migrations:
 ```bash
-python run_migrations.py
+python database_scripts/run_migrations.py
 ```
 
 #### ClickHouse (Optional)
@@ -345,7 +345,7 @@ v2/
 ```bash
 # BEST CONFIGURATION FOR NEW DEVELOPERS
 # Single command that handles everything optimally
-python dev_launcher.py --dynamic --no-backend-reload --load-secrets
+python scripts/dev_launcher.py --dynamic --no-backend-reload --load-secrets
 
 # What this does:
 # ✅ Finds free ports automatically (no conflicts)
@@ -358,13 +358,13 @@ python dev_launcher.py --dynamic --no-backend-reload --load-secrets
 ##### Other Useful Configurations:
 ```bash
 # Development with hot reload (slower but auto-refreshes)
-python dev_launcher.py --dynamic
+python scripts/dev_launcher.py --dynamic
 
 # Maximum performance (no hot reload at all)
-python dev_launcher.py --dynamic --no-reload
+python scripts/dev_launcher.py --dynamic --no-reload
 
 # Custom ports
-python dev_launcher.py --backend-port 8080 --frontend-port 3001
+python scripts/dev_launcher.py --backend-port 8080 --frontend-port 3001
 
 # Check service status
 python scripts/service_discovery.py status
@@ -375,7 +375,7 @@ python scripts/service_discovery.py status
 # Backend development with auto-reload
 uvicorn app.main:app --reload --port 8000
 # Or with dynamic port
-python run_server.py --dynamic-port
+python scripts/run_server.py --dynamic-port
 
 # Frontend development with hot-reload
 cd frontend && npm run dev

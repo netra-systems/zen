@@ -70,9 +70,10 @@ describe('Critical Authentication Flow', () => {
     // 2. Click login button and intercept the OAuth flow
     cy.intercept('GET', '**/auth/**', (req) => {
       // Delay response to see loading state
-      req.reply((res) => {
-        res.delay(1000);
-        res.send({ statusCode: 302, headers: { location: '/auth/callback' } });
+      req.reply({
+        statusCode: 302,
+        headers: { location: '/auth/callback' },
+        delay: 1000
       });
     });
     

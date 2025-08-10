@@ -134,7 +134,7 @@ describe('Synthetic Data Generation Flow', () => {
         cy.get('body').then($body => {
           // Look for format selection options
           const formatOptions = ['JSON', 'CSV', 'SQL', 'XML', 'Parquet'];
-          let foundFormats = [];
+          let foundFormats: string[] = [];
           
           formatOptions.forEach(format => {
             if (new RegExp(format, 'i').test($body.text())) {
@@ -181,7 +181,7 @@ describe('Synthetic Data Generation Flow', () => {
             'template'
           ];
           
-          let workflowSteps = [];
+          let workflowSteps: string[] = [];
           workflowKeywords.forEach(keyword => {
             if (new RegExp(keyword, 'i').test($body.text())) {
               workflowSteps.push(keyword);

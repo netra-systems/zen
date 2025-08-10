@@ -5,11 +5,11 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { RawJsonView } from './RawJsonView';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   AlertCircle, Bot, ChevronDown, ChevronRight, Clock, Code, FileText, 
   User, Wrench, Copy, Check, ThumbsUp, ThumbsDown, RefreshCw, Edit2, 
-  MessageSquare, Sparkles, BrainCircuit
+  Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';

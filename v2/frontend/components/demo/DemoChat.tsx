@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Send, 
   Sparkles, 
@@ -74,8 +73,6 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = false
   const {
     isConnected,
     sendChatMessage: wsSendChatMessage,
-    lastMessage: wsLastMessage,
-    error: wsError
   } = useDemoWebSocket({
     onMessage: (data) => {
       if (data.type === 'agent_update') {

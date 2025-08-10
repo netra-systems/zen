@@ -16,7 +16,6 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import {
-  Bot,
   Activity,
   Plus,
   Settings,
@@ -28,7 +27,6 @@ import {
   Moon,
   Sun,
   Sparkles,
-  Zap,
   Clock,
   CheckCircle,
   AlertCircle,
@@ -252,6 +250,7 @@ export const UltraChatHeader: React.FC<UltraChatHeaderProps> = ({
                 <Avatar className="w-8 h-8">
                   <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
                     {userAvatar ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
                       <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
                     ) : (
                       <User className="w-4 h-4" />

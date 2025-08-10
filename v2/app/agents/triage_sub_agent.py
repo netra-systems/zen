@@ -273,19 +273,24 @@ class TriageSubAgent(BaseSubAgent):
             "recommend": ["recommend", "suggest", "advise", "best"]
         }
         
-        primary_intent = "analyze"  # Default
+        primary_intent = None
         secondary_intents = []
         action_required = False
+        found_intents = []
         
         for intent, keywords in intent_keywords.items():
             if any(keyword in request_lower for keyword in keywords):
-                if primary_intent == "analyze":
-                    primary_intent = intent
-                else:
-                    secondary_intents.append(intent)
+                found_intents.append(intent)
                 
                 if intent in ["optimize", "configure", "troubleshoot"]:
                     action_required = True
+        
+        # Set primary and secondary intents
+        if found_intents:
+            primary_intent = found_intents[0]
+            secondary_intents = found_intents[1:]
+        else:
+            primary_intent = "analyze"  # Default if no intents found
         
         return UserIntent(
             primary_intent=primary_intent,

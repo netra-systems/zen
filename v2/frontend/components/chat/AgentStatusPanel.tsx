@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Activity, Zap, Clock, Database, Brain, TrendingUp, 
-  AlertCircle, CheckCircle2, Loader2, ChevronRight,
-  BarChart3, Sparkles, Settings, Eye
+  CheckCircle2, Loader2, ChevronRight,
+  Settings, Eye
 } from 'lucide-react';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { useChatStore } from '@/store/chat';
@@ -18,13 +18,11 @@ interface StatusZone {
 }
 
 const AgentStatusPanel: React.FC = () => {
-  const { subAgentName, subAgentStatus, isProcessing } = useChatStore();
+  const { subAgentName, isProcessing } = useChatStore();
   const { 
     workflowProgress, 
-    agentStatus, 
     activeTools,
-    toolExecutionStatus,
-    aggregatedResults 
+    toolExecutionStatus
   } = useChatWebSocket();
 
   const [statusZones, setStatusZones] = useState<StatusZone[]>([]);
@@ -58,7 +56,7 @@ const AgentStatusPanel: React.FC = () => {
       }, 5000);
       return () => clearInterval(interval);
     }
-  }, [isProcessing]);
+  }, [isProcessing, processingQuips]);
 
   // Update status zones based on agent activity
   useEffect(() => {

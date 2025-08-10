@@ -1,13 +1,9 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 ;
 import { Button } from './ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Icons } from './Icons';
-import { authService } from '@/auth';
 import LoginButton from './LoginButton';
 
 interface HeaderProps {

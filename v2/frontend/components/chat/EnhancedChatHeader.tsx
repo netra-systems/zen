@@ -15,7 +15,6 @@ import {
   Sparkles,
   Timer,
   TrendingUp,
-  Zap,
   ChevronDown,
   ChevronUp
 } from 'lucide-react';

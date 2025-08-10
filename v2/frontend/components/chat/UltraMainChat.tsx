@@ -21,11 +21,11 @@ const UltraMainChat: React.FC = () => {
     isProcessing, 
     messages, 
     currentSubAgent,
-    subAgentStatus 
+ 
   } = useChatStore();
   
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [showAgentStatus, setShowAgentStatus] = useState(true);
+  const [showAgentStatus] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showFinalReport, setShowFinalReport] = useState(false);

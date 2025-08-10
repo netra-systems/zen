@@ -1,4 +1,4 @@
-import { WebSocketMessage, Message } from '@/types';
+import { Message } from '@/types';\nimport { WebSocketMessage } from '@/types/chat';
 
 describe('WebSocket Connection Resilience', () => {
   beforeEach(() => {

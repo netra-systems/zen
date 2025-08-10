@@ -1,4 +1,4 @@
-import { Message, WebSocketMessage } from '@/types';
+import { Message, WebSocketMessage } from '@/types/chat';
 
 describe('Chat UI', () => {
   beforeEach(() => {

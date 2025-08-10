@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -13,7 +13,6 @@ import {
   Users,
   Activity,
   GitBranch,
-  ArrowRight,
   Play,
   Pause,
   RotateCcw,
@@ -52,7 +51,7 @@ interface WorkflowStep {
 
 export default function AgentOrchestration({ industry = 'Technology' }: AgentOrchestrationProps) {
   const [isRunning, setIsRunning] = useState(false)
-  const [currentStep, setCurrentStep] = useState(0)
+  const [, setCurrentStep] = useState(0)
   const [agents, setAgents] = useState<Agent[]>([
     {
       id: 'supervisor',

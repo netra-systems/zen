@@ -2,7 +2,7 @@
 import React from 'react';
 import { Message as MessageType } from '@/types/chat';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { RawJsonView } from './RawJsonView';
 import { motion } from 'framer-motion';

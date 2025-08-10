@@ -200,9 +200,12 @@ describe('Demo E2E Test Suite 1: Authentication and Onboarding Flow', () => {
       cy.visit('/demo')
       
       cy.get('button').each(($button) => {
-        cy.wrap($button).should('have.attr', 'aria-label')
-          .or('have.attr', 'aria-labelledby')
-          .or('contain.text')
+        // Check that button has accessible text or label
+        const hasAriaLabel = $button.attr('aria-label');
+        const hasAriaLabelledBy = $button.attr('aria-labelledby');
+        const hasText = $button.text().trim();
+        
+        expect(hasAriaLabel || hasAriaLabelledBy || hasText).to.not.be.empty;
       })
       
       // Check for accessibility attributes
@@ -213,7 +216,7 @@ describe('Demo E2E Test Suite 1: Authentication and Onboarding Flow', () => {
       cy.visit('/demo')
       
       // Tab through interactive elements
-      cy.get('body').tab()
+      cy.get('body').type('{tab}')
       cy.focused().should('have.prop', 'tagName').and('match', /BUTTON|A|INPUT/)
       
       // Enter key interaction

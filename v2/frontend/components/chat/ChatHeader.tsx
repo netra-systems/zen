@@ -1,6 +1,6 @@
 import React from 'react';
 import { useChatStore } from '@/store/chat';
-import { Bot, Zap, Terminal, Activity, Shield, Database, Cpu, Brain } from 'lucide-react';
+import { Bot, Zap, Activity, Shield, Database, Cpu, Brain } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const ChatHeader: React.FC = () => {

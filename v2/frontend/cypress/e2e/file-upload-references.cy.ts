@@ -1,4 +1,4 @@
-import { Message, WebSocketMessage } from '@/types';
+import { Message, WebSocketMessage } from '@/types/chat';
 
 describe('File Upload and Reference Management', () => {
   beforeEach(() => {
@@ -505,7 +505,7 @@ describe('File Upload and Reference Management', () => {
       stages.forEach((stage, index) => {
         setTimeout(() => {
           const statusUpdate: WebSocketMessage = {
-            type: 'reference_status',
+            type: 'message',
             payload: {
               reference_id: 'ref-processing',
               status: stage.status,

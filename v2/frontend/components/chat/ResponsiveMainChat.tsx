@@ -27,7 +27,7 @@ const ResponsiveMainChat: React.FC = () => {
   useChatWebSocket();
   
   // Initialize keyboard shortcuts
-  const { setMessageInputRef } = useKeyboardShortcuts();
+  const { } = useKeyboardShortcuts();
 
   const hasMessages = messages.filter(m => m.displayed_to_user).length > 0;
 

@@ -244,45 +244,8 @@ class DevLauncher:
         else:
             port = self.frontend_port
         
-        # Determine the npm command based on reload setting
-        npm_command = "dev" if self.frontend_reload else "start"
-        
-        # If production mode (no hot reload), build the frontend first
-        if not self.frontend_reload:
-            self._print("🔨", "BUILD", "Building frontend for production mode...")
-            
-            # Prepare environment for build
-            build_env = os.environ.copy()
-            build_env["NEXT_PUBLIC_API_URL"] = backend_info["api_url"]
-            build_env["NEXT_PUBLIC_WS_URL"] = backend_info["ws_url"]
-            
-            # Use appropriate command for Windows vs Unix
-            if sys.platform == "win32":
-                build_cmd = ["cmd", "/c", "npm run build"]
-            else:
-                build_cmd = ["npm", "run", "build"]
-            
-            try:
-                # Change to frontend directory and run build
-                print("   This may take a few minutes for the first build...")
-                build_result = subprocess.run(
-                    build_cmd,
-                    cwd="frontend",
-                    env=build_env,
-                    capture_output=True,
-                    text=True,
-                    shell=(sys.platform == "win32")  # Use shell on Windows for npm
-                )
-                
-                if build_result.returncode == 0:
-                    self._print("✅", "OK", "Frontend build completed successfully")
-                else:
-                    self._print("❌", "ERROR", f"Frontend build failed: {build_result.stderr}")
-                    return None
-                    
-            except Exception as e:
-                self._print("❌", "ERROR", f"Failed to build frontend: {e}")
-                return None
+        # Always use dev command for simplicity - we'll control hot reload via env var
+        npm_command = "dev"
         
         # Build command based on OS - avoid shell=True with arguments to prevent deprecation warning
         if sys.platform == "win32":
@@ -303,6 +266,18 @@ class DevLauncher:
         env["NEXT_PUBLIC_API_URL"] = backend_info["api_url"]
         env["NEXT_PUBLIC_WS_URL"] = backend_info["ws_url"]
         env["PORT"] = str(port)
+        
+        # Disable hot reload if requested
+        # Next.js respects WATCHPACK_POLLING environment variable
+        # Setting it to a very high value effectively disables file watching
+        if not self.frontend_reload:
+            # Disable file watching by setting a very high polling interval
+            env["WATCHPACK_POLLING"] = "false"
+            # Also disable Fast Refresh
+            env["NEXT_DISABLE_FAST_REFRESH"] = "true"
+            print("   Hot reload: DISABLED (dev server without file watching)")
+        else:
+            print("   Hot reload: ENABLED")
         
         # Start process
         try:
@@ -333,7 +308,6 @@ class DevLauncher:
             
             self._print("✅", "OK", f"Frontend started on port {port}")
             print(f"   URL: http://localhost:{port}")
-            print(f"   Hot reload: {'ENABLED' if self.frontend_reload else 'DISABLED'}")
             
             # Write frontend info to service discovery
             self.service_discovery.write_frontend_info(port)
@@ -447,13 +421,19 @@ class DevLauncher:
             self._print("\n🎆", "RECOMMENDED", "Running with RECOMMENDED configuration:")
             print("   * Dynamic ports: YES (avoiding conflicts)")
             print("   * Backend hot reload: NO (30-50% faster)")
+            print(f"   * Frontend hot reload: {'YES' if self.frontend_reload else 'NO (faster compilation)'}")
             if self.load_secrets:
                 print("   * Secret loading: YES (from Google Cloud)")
             print("   Perfect for first-time setup!\n")
-        elif self.dynamic_ports:
+        elif self.dynamic_ports or not self.backend_reload or not self.frontend_reload:
             self._print("\n📝", "Configuration", ":")
-            print("   * Dynamic ports: YES")
-            print("   * Hot reload: YES (development mode)\n")
+            if self.dynamic_ports:
+                print("   * Dynamic ports: YES")
+            print(f"   * Backend hot reload: {'YES' if self.backend_reload else 'NO (faster)'}")
+            print(f"   * Frontend hot reload: {'YES' if self.frontend_reload else 'NO (faster compilation)'}")
+            if self.load_secrets:
+                print("   * Secret loading: YES")
+            print("")
         
         # Check dependencies
         if not self.check_dependencies():
@@ -583,7 +563,8 @@ Examples:
   python dev_launcher.py --dynamic --no-backend-reload  # Best for most developers
   python dev_launcher.py                    # Start with defaults
   python dev_launcher.py --dynamic          # Auto port allocation
-  python dev_launcher.py --no-reload        # Maximum performance
+  python dev_launcher.py --no-reload        # Maximum performance (no hot reload)
+  python dev_launcher.py --no-frontend-reload  # Frontend dev server without hot reload
   python dev_launcher.py --no-browser       # Don't open browser automatically
   python dev_launcher.py --load-secrets --project-id my-project  # With GCP secrets
   python dev_launcher.py --verbose          # Detailed output
@@ -624,7 +605,7 @@ Examples:
     parser.add_argument(
         "--no-frontend-reload",
         action="store_true",
-        help="Disable frontend hot reload (file watching)"
+        help="Disable frontend hot reload while keeping dev server (no file watching)"
     )
     
     parser.add_argument(

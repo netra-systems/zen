@@ -45,7 +45,7 @@ describe('Optimization Results and Reporting Flow', () => {
             'workload'
           ];
           
-          let foundKeywords = [];
+          let foundKeywords: string[] = [];
           optimizationKeywords.forEach(keyword => {
             if (new RegExp(keyword, 'i').test(text)) {
               foundKeywords.push(keyword);
@@ -175,7 +175,7 @@ describe('Optimization Results and Reporting Flow', () => {
           
           // Check for format options mentioned
           const formats = ['PDF', 'CSV', 'JSON', 'Excel', 'Markdown'];
-          let foundFormats = [];
+          let foundFormats: string[] = [];
           formats.forEach(format => {
             if (new RegExp(format, 'i').test($body.text())) {
               foundFormats.push(format);
@@ -210,7 +210,7 @@ describe('Optimization Results and Reporting Flow', () => {
             'priority'
           ];
           
-          let foundRecommendations = [];
+          let foundRecommendations: string[] = [];
           recommendationKeywords.forEach(keyword => {
             if (new RegExp(keyword, 'i').test(text)) {
               foundRecommendations.push(keyword);
@@ -343,7 +343,7 @@ describe('Optimization Results and Reporting Flow', () => {
             'improvement'
           ];
           
-          let foundKeywords = [];
+          let foundKeywords: string[] = [];
           costBenefitKeywords.forEach(keyword => {
             if (new RegExp(keyword, 'i').test(text)) {
               foundKeywords.push(keyword);

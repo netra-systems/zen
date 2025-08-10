@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
-  Calendar,
   CheckCircle2,
   Clock,
   Download,
@@ -56,7 +55,7 @@ export default function ImplementationRoadmap({
   onExport 
 }: ImplementationRoadmapProps) {
   const [activeTab, setActiveTab] = useState('phases')
-  const [exportFormat, setExportFormat] = useState<'pdf' | 'json' | 'csv'>('pdf')
+  const [exportFormat] = useState<'pdf' | 'json' | 'csv'>('pdf')
 
   const phases: Phase[] = [
     {
@@ -271,7 +270,7 @@ export default function ImplementationRoadmap({
     }
   }
 
-  const getPhaseProgress = (phase: Phase) => {
+  const _getPhaseProgress = (phase: Phase) => {
     const completedTasks = phase.tasks.filter(t => 
       completedSteps.includes(t.id)
     ).length

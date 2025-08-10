@@ -7,12 +7,9 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
-  Activity,
   TrendingUp,
   TrendingDown,
-  Zap,
   Clock,
-  DollarSign,
   Server,
   Cpu,
   HardDrive,
@@ -20,7 +17,6 @@ import {
   BarChart3,
   ArrowUp,
   ArrowDown,
-  AlertCircle,
   CheckCircle,
   RefreshCw
 } from 'lucide-react'

@@ -6,10 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { ArrowRight, BarChart3, Brain, Code2, Database, Layers, LineChart, Lock, Rocket, Shield, Sparkles, Zap, ChevronRight, CheckCircle } from 'lucide-react';
+import { ArrowRight, BarChart3, Brain, Database, Rocket, Shield, Sparkles, ChevronRight, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WorkloadSelector from '@/components/demo/WorkloadSelector';
 import { useChatStore } from '@/store/chat';
@@ -22,9 +21,9 @@ const EnhancedEnterpriseDemoPage: NextPage = () => {
   const router = useRouter();
   const [demoStep, setDemoStep] = useState<'welcome' | 'workload' | 'generating' | 'analyzing' | 'results'>('welcome');
   const [selectedWorkload, setSelectedWorkload] = useState<string | null>(null);
-  const [syntheticDataGenerated, setSyntheticDataGenerated] = useState(false);
+  const [, setSyntheticDataGenerated] = useState(false);
   const { sendUserMessage } = useAgent();
-  const { agentStatus, isStreaming } = useChatWebSocket();
+  const { } = useChatWebSocket();
   const { isProcessing } = useChatStore();
 
   useEffect(() => {

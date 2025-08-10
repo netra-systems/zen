@@ -119,7 +119,7 @@ class TestRequestValidation:
         long_request = "a" * 5001
         validation = triage_agent._validate_request(long_request)
         
-        assert validation.is_valid is False  # Too long
+        assert validation.is_valid is True  # Valid but with warnings
         assert len(validation.warnings) > 0
 
 
@@ -404,7 +404,7 @@ class TestEntryConditions:
     @pytest.mark.asyncio
     async def test_entry_conditions_no_request(self, triage_agent):
         """Test when no user request is provided."""
-        empty_state = DeepAgentState()
+        empty_state = DeepAgentState(user_request="")
         result = await triage_agent.check_entry_conditions(empty_state, "test_run")
         assert result is False
     

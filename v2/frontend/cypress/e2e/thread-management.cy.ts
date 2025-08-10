@@ -1,4 +1,4 @@
-import { Message, WebSocketMessage } from '@/types';
+import { Message, WebSocketMessage } from '@/types/chat';
 
 describe('Thread Management and Conversation History', () => {
   beforeEach(() => {
