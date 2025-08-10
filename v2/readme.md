@@ -334,7 +334,13 @@ v2/
 │   └── services/         # Service tests
 ├── docs/                  # Documentation
 ├── SPEC/                  # XML specifications
-└── scripts/              # Utility scripts
+├── scripts/              # Utility scripts
+├── config/               # Configuration files
+├── database_scripts/     # Database setup & migrations
+├── deployment_docs/      # Deployment guides
+├── test_scripts/         # Test runners & utilities
+├── test_reports/         # Test results & coverage
+└── marketing_materials/  # Marketing & investor docs
 ```
 
 ### Development Commands
@@ -672,10 +678,13 @@ This project is proprietary software owned by Netra Systems.
 
 ## 🔗 Links
 
-- [Documentation](https://docs.netrasystems.ai)
-- [API Reference](https://api.netrasystems.ai/docs)
+- [Documentation](docs/)
+- [Deployment Guides](deployment_docs/)
+- [API Reference](docs/API_REFERENCE.md)
+- [Testing Guide](docs/TESTING_GUIDE.md)
+- [Architecture Overview](docs/ARCHITECTURE.md)
+- [WebSocket Implementation](docs/WEBSOCKET_IMPLEMENTATION.md)
 - [Issue Tracker](https://github.com/netrasystems/netra-core/issues)
-- [Changelog](CHANGELOG.md)
 
 ## 👥 Team
 

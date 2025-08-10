@@ -123,7 +123,7 @@ describe('Optimization Results and Reporting Flow', () => {
             /savings/i
           ];
           
-          let metricsFound = [];
+          let metricsFound: string[] = [];
           metricIndicators.forEach(pattern => {
             if (pattern.test(text)) {
               metricsFound.push(pattern.toString());

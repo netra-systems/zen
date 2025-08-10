@@ -20,9 +20,9 @@ describe('Simple Agent Workflow', () => {
     cy.contains(request).should('be.visible');
     
     // Simulate agent response via WebSocket
-    cy.window().then((win) => {
+    cy.window().then((win: any) => {
       // Check if ws exists before using it
-      if (win.ws && win.ws.onmessage) {
+      if ((win as any).ws && (win as any).ws.onmessage) {
         const agentMessage = {
           type: 'message',
           payload: {
@@ -34,7 +34,7 @@ describe('Simple Agent Workflow', () => {
             displayed_to_user: true
           }
         };
-        win.ws.onmessage({ data: JSON.stringify(agentMessage) });
+        (win as any).ws.onmessage({ data: JSON.stringify(agentMessage) });
       }
     });
     

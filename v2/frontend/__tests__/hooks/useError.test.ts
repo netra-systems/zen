@@ -181,8 +181,8 @@ describe('useError', () => {
       result.current.setError('');
     });
     
-    expect(result.current.error).toEqual({ message: '' });
-    expect(result.current.isError).toBe(true); // ErrorState object is truthy
+    expect(result.current.error).toBeNull();
+    expect(result.current.isError).toBe(false); // Empty string should be treated as no error
   });
 
   it('should handle ErrorState objects', () => {

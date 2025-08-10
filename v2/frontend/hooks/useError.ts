@@ -17,7 +17,7 @@ export function useError(): UseErrorReturn {
   const [error, setErrorState] = useState<ErrorState | null>(null);
 
   const setError = useCallback((error: Error | string | ErrorState | null) => {
-    if (!error) {
+    if (!error || (typeof error === 'string' && error === '')) {
       setErrorState(null);
       return;
     }
