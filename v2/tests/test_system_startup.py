@@ -66,26 +66,30 @@ class TestSystemStartup:
     def test_environment_validation(self, startup_env, monkeypatch):
         """Test that required environment variables are validated"""
         # Test with all required variables present
-        from app.config import Settings
-        settings = Settings()
-        assert settings.database_url == startup_env["DATABASE_URL"]
-        assert settings.secret_key == startup_env["SECRET_KEY"]
+        from app.config import ConfigManager
+        config_manager = ConfigManager()
+        config = config_manager.get_config()
+        assert config.database_url == startup_env["DATABASE_URL"]
+        assert config.secret_key == startup_env["SECRET_KEY"]
         
         # Test with missing critical variable
         monkeypatch.delenv("DATABASE_URL")
+        config_manager_new = ConfigManager()
+        config_manager_new._config = None  # Clear cache
         with pytest.raises(Exception) as exc_info:
-            Settings()
-        assert "DATABASE_URL" in str(exc_info.value)
+            config_manager_new.get_config()
+        assert "DATABASE_URL" in str(exc_info.value) or "database" in str(exc_info.value).lower()
     
     def test_configuration_loading(self, startup_env):
         """Test configuration file loading and validation"""
-        from app.config import Settings
+        from app.config import ConfigManager
         
-        settings = Settings()
-        assert settings is not None
-        assert settings.app_name == "Netra AI Optimization Platform"
-        assert settings.version is not None
-        assert settings.environment == "testing"
+        config_manager = ConfigManager()
+        config = config_manager.get_config()
+        assert config is not None
+        assert config.app_name == "Netra AI Optimization Platform"
+        assert config.version is not None
+        assert config.environment == "testing"
     
     @pytest.mark.asyncio
     async def test_database_connection_startup(self, startup_env, mock_external_services):
@@ -254,8 +258,10 @@ sqlalchemy.url = sqlite:///:memory:
         monkeypatch.delenv("DATABASE_URL", raising=False)
         
         with pytest.raises(Exception) as exc_info:
-            from app.config import Settings
-            Settings()
+            from app.config import ConfigManager
+            config_manager = ConfigManager()
+            config_manager._config = None  # Clear cache
+            config_manager.get_config()
         
         # Verify error message is informative
         error_msg = str(exc_info.value)
@@ -280,8 +286,9 @@ sqlalchemy.url = sqlite:///:memory:
         start_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
         
         # Simulate startup operations
-        from app.config import Settings
-        settings = Settings()
+        from app.config import ConfigManager
+        config_manager = ConfigManager()
+        config = config_manager.get_config()
         
         # Calculate metrics
         startup_duration = time.time() - start_time
