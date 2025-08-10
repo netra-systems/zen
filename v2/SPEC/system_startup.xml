@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification type="system_startup">
+    <metadata>
+        <title>System Startup and Initialization Specification</title>
+        <version>1.0.0</version>
+        <created>2025-08-10</created>
+        <description>
+            Comprehensive specification for system startup, initialization, and first-time run procedures
+            for the Netra AI Optimization Platform
+        </description>
+    </metadata>
+
+    <section id="startup-overview">
+        <title>System Startup Overview</title>
+        <description>
+            Defines the complete startup sequence for both backend and frontend systems,
+            including all initialization procedures, health checks, and validation steps.
+        </description>
+        
+        <requirements>
+            <requirement id="REQ-STARTUP-001">
+                <description>System must support graceful startup with dependency checks</description>
+                <priority>CRITICAL</priority>
+            </requirement>
+            <requirement id="REQ-STARTUP-002">
+                <description>All startup failures must be logged with clear error messages</description>
+                <priority>HIGH</priority>
+            </requirement>
+            <requirement id="REQ-STARTUP-003">
+                <description>System must verify all external dependencies before accepting traffic</description>
+                <priority>CRITICAL</priority>
+            </requirement>
+            <requirement id="REQ-STARTUP-004">
+                <description>First-time run must include database initialization and migrations</description>
+                <priority>CRITICAL</priority>
+            </requirement>
+        </requirements>
+    </section>
+
+    <section id="backend-startup">
+        <title>Backend Startup Sequence</title>
+        <description>Complete startup sequence for the FastAPI backend application</description>
+        
+        <startup-sequence>
+            <step order="1" critical="true">
+                <name>Environment Validation</name>
+                <description>Validate all required environment variables are set</description>
+                <checks>
+                    <check>DATABASE_URL exists and is valid</check>
+                    <check>SECRET_KEY exists and meets security requirements</check>
+                    <check>REDIS_URL exists and is valid</check>
+                    <check>CLICKHOUSE_URL exists and is valid (if configured)</check>
+                    <check>API keys are present (ANTHROPIC_API_KEY, etc.)</check>
+                </checks>
+                <failure-action>Exit with error code 1 and detailed error message</failure-action>
+            </step>
+            
+            <step order="2" critical="true">
+                <name>Configuration Loading</name>
+                <description>Load and validate application configuration</description>
+                <implementation>app/config.py</implementation>
+                <checks>
+                    <check>Configuration file exists (app/config.yaml)</check>
+                    <check>Configuration schema is valid</check>
+                    <check>All required configuration keys are present</check>
+                </checks>
+                <failure-action>Exit with error code 2 and configuration errors</failure-action>
+            </step>
+            
+            <step order="3" critical="true">
+                <name>Logging Initialization</name>
+                <description>Initialize centralized logging system</description>
+                <implementation>app/logging_config.py</implementation>
+                <checks>
+                    <check>Log directory is writable</check>
+                    <check>Log level is valid</check>
+                    <check>Log rotation is configured</check>
+                </checks>
+            </step>
+            
+            <step order="4" critical="true">
+                <name>Database Connection - PostgreSQL</name>
+                <description>Establish connection to PostgreSQL database</description>
+                <implementation>app/db/postgres.py</implementation>
+                <checks>
+                    <check>Database server is reachable</check>
+                    <check>Authentication successful</check>
+                    <check>Database exists or can be created</check>
+                    <check>Connection pool initialized</check>
+                </checks>
+                <timeout>30 seconds</timeout>
+                <retry>3 attempts with exponential backoff</retry>
+                <failure-action>Exit with error code 3 and database connection error</failure-action>
+            </step>
+            
+            <step order="5" critical="true">
+                <name>Database Migrations</name>
+                <description>Run Alembic migrations to ensure schema is up to date</description>
+                <implementation>alembic upgrade head</implementation>
+                <checks>
+                    <check>Migration history table exists</check>
+                    <check>All migrations apply successfully</check>
+                    <check>Schema validation passes</check>
+                </checks>
+                <failure-action>Rollback migrations and exit with error code 4</failure-action>
+            </step>
+            
+            <step order="6" critical="true">
+                <name>Database Schema Validation</name>
+                <description>Validate live database schema against defined models</description>
+                <implementation>app/models validation</implementation>
+                <checks>
+                    <check>All required tables exist</check>
+                    <check>Column types match model definitions</check>
+                    <check>Indexes are present</check>
+                    <check>Foreign key constraints are valid</check>
+                </checks>
+            </step>
+            
+            <step order="7" critical="false">
+                <name>ClickHouse Connection</name>
+                <description>Establish connection to ClickHouse for analytics</description>
+                <implementation>app/db/clickhouse.py</implementation>
+                <checks>
+                    <check>ClickHouse server is reachable</check>
+                    <check>Database exists</check>
+                    <check>Tables are created</check>
+                </checks>
+                <failure-action>Log warning and continue without analytics</failure-action>
+            </step>
+            
+            <step order="8" critical="true">
+                <name>Redis Connection</name>
+                <description>Establish connection to Redis for caching</description>
+                <implementation>app/redis_manager.py</implementation>
+                <checks>
+                    <check>Redis server is reachable</check>
+                    <check>Authentication successful</check>
+                    <check>Can write and read test key</check>
+                </checks>
+                <timeout>10 seconds</timeout>
+                <failure-action>Exit with error code 5 and Redis connection error</failure-action>
+            </step>
+            
+            <step order="9" critical="true">
+                <name>Service Container Initialization</name>
+                <description>Initialize dependency injection container</description>
+                <implementation>app/services/core/service_interfaces.py</implementation>
+                <checks>
+                    <check>All services registered</check>
+                    <check>Dependency graph is valid</check>
+                    <check>No circular dependencies</check>
+                </checks>
+            </step>
+            
+            <step order="10" critical="true">
+                <name>Agent System Initialization</name>
+                <description>Initialize multi-agent system components</description>
+                <implementation>app/agents/</implementation>
+                <checks>
+                    <check>Tool registry initialized</check>
+                    <check>Tool dispatcher configured</check>
+                    <check>All sub-agents registered</check>
+                    <check>Agent prompts loaded</check>
+                </checks>
+            </step>
+            
+            <step order="11" critical="true">
+                <name>Authentication System</name>
+                <description>Initialize authentication and OAuth providers</description>
+                <implementation>app/auth/</implementation>
+                <checks>
+                    <check>JWT secret key configured</check>
+                    <check>OAuth providers configured (if enabled)</check>
+                    <check>Password hashing configured</check>
+                </checks>
+            </step>
+            
+            <step order="12" critical="true">
+                <name>WebSocket Manager</name>
+                <description>Initialize WebSocket connection manager</description>
+                <implementation>app/ws_manager.py</implementation>
+                <checks>
+                    <check>WebSocket manager initialized</check>
+                    <check>Connection tracking ready</check>
+                    <check>Heartbeat mechanism configured</check>
+                </checks>
+            </step>
+            
+            <step order="13" critical="true">
+                <name>FastAPI Application</name>
+                <description>Initialize FastAPI application with middleware and routes</description>
+                <implementation>app/main.py</implementation>
+                <checks>
+                    <check>All routes registered</check>
+                    <check>CORS configured</check>
+                    <check>Middleware chain initialized</check>
+                    <check>Error handlers registered</check>
+                    <check>OpenAPI documentation available</check>
+                </checks>
+            </step>
+            
+            <step order="14" critical="false">
+                <name>Background Tasks</name>
+                <description>Start background task workers</description>
+                <checks>
+                    <check>Task queue initialized</check>
+                    <check>Workers started</check>
+                    <check>Scheduler running (if configured)</check>
+                </checks>
+            </step>
+            
+            <step order="15" critical="true">
+                <name>Health Check Validation</name>
+                <description>Perform internal health check before accepting traffic</description>
+                <endpoint>/api/health</endpoint>
+                <checks>
+                    <check>Database connectivity</check>
+                    <check>Redis connectivity</check>
+                    <check>Agent system ready</check>
+                    <check>All critical services healthy</check>
+                </checks>
+                <failure-action>Exit with error code 6 and health check failures</failure-action>
+            </step>
+            
+            <step order="16" critical="true">
+                <name>Server Start</name>
+                <description>Start Uvicorn server and begin accepting requests</description>
+                <implementation>uvicorn app.main:app</implementation>
+                <checks>
+                    <check>Port binding successful</check>
+                    <check>Server listening on configured host:port</check>
+                    <check>Ready to accept HTTP/WebSocket connections</check>
+                </checks>
+                <success-log>Backend server started successfully on {host}:{port}</success-log>
+            </step>
+        </startup-sequence>
+    </section>
+
+    <section id="frontend-startup">
+        <title>Frontend Startup Sequence</title>
+        <description>Complete startup sequence for the Next.js frontend application</description>
+        
+        <startup-sequence>
+            <step order="1" critical="true">
+                <name>Environment Validation</name>
+                <description>Validate frontend environment variables</description>
+                <checks>
+                    <check>NEXT_PUBLIC_API_URL is set</check>
+                    <check>NEXT_PUBLIC_WS_URL is set</check>
+                    <check>Build environment variables present</check>
+                </checks>
+            </step>
+            
+            <step order="2" critical="true">
+                <name>Dependency Installation</name>
+                <description>Ensure all npm packages are installed</description>
+                <command>npm install</command>
+                <checks>
+                    <check>node_modules directory exists</check>
+                    <check>No missing dependencies</check>
+                    <check>Package versions match lock file</check>
+                </checks>
+            </step>
+            
+            <step order="3" critical="true">
+                <name>Build Process (Production)</name>
+                <description>Build production bundle</description>
+                <command>npm run build</command>
+                <checks>
+                    <check>TypeScript compilation successful</check>
+                    <check>No build errors</check>
+                    <check>.next directory created</check>
+                    <check>Static assets generated</check>
+                </checks>
+            </step>
+            
+            <step order="4" critical="true">
+                <name>Development Server (Development)</name>
+                <description>Start Next.js development server</description>
+                <command>npm run dev</command>
+                <checks>
+                    <check>Port 3000 available</check>
+                    <check>Hot reload configured</check>
+                    <check>TypeScript compiler running</check>
+                </checks>
+            </step>
+            
+            <step order="5" critical="true">
+                <name>API Connectivity Check</name>
+                <description>Verify backend API is reachable</description>
+                <checks>
+                    <check>Health endpoint responds</check>
+                    <check>CORS headers present</check>
+                    <check>API version compatible</check>
+                </checks>
+                <retry>5 attempts with 2 second delay</retry>
+            </step>
+            
+            <step order="6" critical="true">
+                <name>WebSocket Connectivity</name>
+                <description>Test WebSocket connection to backend</description>
+                <checks>
+                    <check>WebSocket upgrade successful</check>
+                    <check>Heartbeat mechanism working</check>
+                    <check>Can send and receive messages</check>
+                </checks>
+            </step>
+            
+            <step order="7" critical="true">
+                <name>Production Server Start</name>
+                <description>Start production server</description>
+                <command>npm start</command>
+                <checks>
+                    <check>Server listening on port</check>
+                    <check>All routes accessible</check>
+                    <check>Static assets served correctly</check>
+                </checks>
+                <success-log>Frontend server started successfully on port {port}</success-log>
+            </step>
+        </startup-sequence>
+    </section>
+
+    <section id="first-time-run">
+        <title>First-Time Run Procedures</title>
+        <description>Special procedures for initial system setup</description>
+        
+        <procedures>
+            <procedure id="database-init">
+                <name>Database Initialization</name>
+                <description>Create database and initial schema</description>
+                <steps>
+                    <step>Create database if not exists</step>
+                    <step>Run all migrations from beginning</step>
+                    <step>Create default admin user (if configured)</step>
+                    <step>Seed reference data</step>
+                    <step>Create indexes</step>
+                </steps>
+            </procedure>
+            
+            <procedure id="clickhouse-init">
+                <name>ClickHouse Initialization</name>
+                <description>Setup ClickHouse analytics database</description>
+                <steps>
+                    <step>Create database</step>
+                    <step>Create workload_events table</step>
+                    <step>Setup materialized views</step>
+                    <step>Configure retention policies</step>
+                </steps>
+            </procedure>
+            
+            <procedure id="redis-init">
+                <name>Redis Initialization</name>
+                <description>Configure Redis caching</description>
+                <steps>
+                    <step>Test connection</step>
+                    <step>Set up key namespaces</step>
+                    <step>Configure expiration policies</step>
+                </steps>
+            </procedure>
+            
+            <procedure id="oauth-setup">
+                <name>OAuth Provider Setup</name>
+                <description>Configure OAuth providers</description>
+                <steps>
+                    <step>Validate Google OAuth credentials</step>
+                    <step>Test OAuth flow</step>
+                    <step>Store provider configurations</step>
+                </steps>
+            </procedure>
+        </procedures>
+    </section>
+
+    <section id="health-checks">
+        <title>Health Check Endpoints</title>
+        <description>System health monitoring endpoints</description>
+        
+        <endpoints>
+            <endpoint path="/api/health" method="GET">
+                <description>Basic health check</description>
+                <response>
+                    <status>OK/ERROR</status>
+                    <timestamp>ISO-8601 timestamp</timestamp>
+                    <version>Application version</version>
+                </response>
+            </endpoint>
+            
+            <endpoint path="/api/health/detailed" method="GET">
+                <description>Detailed health check with component status</description>
+                <response>
+                    <database>PostgreSQL connection status</database>
+                    <clickhouse>ClickHouse connection status</clickhouse>
+                    <redis>Redis connection status</redis>
+                    <websocket>WebSocket manager status</websocket>
+                    <agents>Agent system status</agents>
+                    <memory>Memory usage statistics</memory>
+                    <uptime>Server uptime</uptime>
+                </response>
+            </endpoint>
+            
+            <endpoint path="/api/health/ready" method="GET">
+                <description>Readiness probe for container orchestration</description>
+                <checks>
+                    <check>All critical services initialized</check>
+                    <check>Database migrations complete</check>
+                    <check>Can accept requests</check>
+                </checks>
+            </endpoint>
+            
+            <endpoint path="/api/health/live" method="GET">
+                <description>Liveness probe for container orchestration</description>
+                <checks>
+                    <check>Process is running</check>
+                    <check>Can respond to requests</check>
+                    <check>Not in deadlock state</check>
+                </checks>
+            </endpoint>
+        </endpoints>
+    </section>
+
+    <section id="error-handling">
+        <title>Startup Error Handling</title>
+        <description>How to handle various startup failures</description>
+        
+        <error-codes>
+            <error code="1">
+                <name>Environment Validation Failed</name>
+                <description>Required environment variables missing or invalid</description>
+                <recovery>Check .env file and environment variable configuration</recovery>
+            </error>
+            
+            <error code="2">
+                <name>Configuration Loading Failed</name>
+                <description>Unable to load or parse configuration files</description>
+                <recovery>Verify config.yaml syntax and required keys</recovery>
+            </error>
+            
+            <error code="3">
+                <name>Database Connection Failed</name>
+                <description>Cannot connect to PostgreSQL database</description>
+                <recovery>Check DATABASE_URL, network connectivity, and database server status</recovery>
+            </error>
+            
+            <error code="4">
+                <name>Migration Failed</name>
+                <description>Database migrations could not be applied</description>
+                <recovery>Review migration files and database state, consider manual intervention</recovery>
+            </error>
+            
+            <error code="5">
+                <name>Redis Connection Failed</name>
+                <description>Cannot connect to Redis server</description>
+                <recovery>Check REDIS_URL and Redis server status</recovery>
+            </error>
+            
+            <error code="6">
+                <name>Health Check Failed</name>
+                <description>System health checks did not pass</description>
+                <recovery>Review detailed health check output for specific component failures</recovery>
+            </error>
+        </error-codes>
+    </section>
+
+    <section id="monitoring">
+        <title>Startup Monitoring</title>
+        <description>Metrics and logs to monitor during startup</description>
+        
+        <metrics>
+            <metric name="startup_time_seconds">Total time from process start to ready state</metric>
+            <metric name="database_connection_time">Time to establish database connection</metric>
+            <metric name="migration_execution_time">Time to run database migrations</metric>
+            <metric name="service_initialization_time">Time to initialize each service</metric>
+            <metric name="total_memory_allocated">Memory usage after startup</metric>
+        </metrics>
+        
+        <logs>
+            <log-level level="INFO">Normal startup progress messages</log-level>
+            <log-level level="WARNING">Non-critical issues during startup</log-level>
+            <log-level level="ERROR">Critical failures preventing startup</log-level>
+            <log-level level="DEBUG">Detailed diagnostic information (development only)</log-level>
+        </logs>
+    </section>
+
+    <section id="shutdown">
+        <title>Graceful Shutdown</title>
+        <description>Procedures for clean system shutdown</description>
+        
+        <shutdown-sequence>
+            <step order="1">Stop accepting new requests</step>
+            <step order="2">Wait for in-flight requests to complete (max 30 seconds)</step>
+            <step order="3">Close WebSocket connections gracefully</step>
+            <step order="4">Flush Redis cache writes</step>
+            <step order="5">Complete pending database transactions</step>
+            <step order="6">Close database connections</step>
+            <step order="7">Stop background workers</step>
+            <step order="8">Flush logs</step>
+            <step order="9">Exit process with code 0</step>
+        </shutdown-sequence>
+    </section>
+
+    <section id="testing">
+        <title>Startup Testing Requirements</title>
+        <description>Test cases for validating startup procedures</description>
+        
+        <test-categories>
+            <category name="unit">
+                <test>Each startup step can be tested independently</test>
+                <test>Error handling for each failure mode</test>
+                <test>Configuration validation logic</test>
+            </category>
+            
+            <category name="integration">
+                <test>Full startup sequence with all dependencies</test>
+                <test>Startup with missing optional components</test>
+                <test>Recovery from transient failures</test>
+            </category>
+            
+            <category name="e2e">
+                <test>Complete system startup from cold state</test>
+                <test>User login after fresh startup</test>
+                <test>Agent system functionality after startup</test>
+                <test>WebSocket connections after startup</test>
+            </category>
+            
+            <category name="performance">
+                <test>Startup time under normal conditions</test>
+                <test>Startup time with large database</test>
+                <test>Memory usage during startup</test>
+            </category>
+        </test-categories>
+    </section>
+</specification>

@@ -125,9 +125,8 @@ async def lifespan(app: FastAPI):
     app.state.security_service = SecurityService(key_manager)
     app.state.llm_manager = LLMManager(settings)
 
-    # The ClickHouse client is now managed by the central_logger
-    # TODO: Fix ClickHouse client initialization
-    app.state.clickhouse_client = None  # central_logger.clickhouse_db
+    # ClickHouse client managed by central_logger
+    app.state.clickhouse_client = None
 
     # Initialize Postgres - must be done before startup checks
     app.state.db_session_factory = async_session_factory
@@ -243,7 +242,7 @@ app.add_exception_handler(ValidationError, validation_exception_handler)
 app.add_exception_handler(HTTPException, http_exception_handler)
 app.add_exception_handler(Exception, general_exception_handler)
 
-from app.routes import supply, generation, admin, references, health, corpus, synthetic_data, config
+from app.routes import supply, generation, admin, references, health, corpus, synthetic_data, config, demo
 from app.routes.auth import auth as auth_router
 from app.routes.agent_route import router as agent_router
 from app.routes.llm_cache import router as llm_cache_router
@@ -262,21 +261,13 @@ app.include_router(health.router, prefix="/health", tags=["health"])
 app.include_router(corpus.router, prefix="/api/corpus", tags=["corpus"])
 app.include_router(synthetic_data.router, tags=["synthetic_data"])
 app.include_router(config.router, prefix="/api", tags=["config"])
+app.include_router(demo.router, tags=["demo"])
 
 @app.get("/")
 def read_root():
     logger = central_logger.get_logger(__name__)
     logger.info("Root endpoint was hit.")
     return {"message": "Welcome to Netra API"}
-
-@app.get("/test-error")
-def test_error():
-    logger = central_logger.get_logger(__name__)
-    try:
-        raise HTTPException(status_code=500, detail="This is a test error.")
-    except HTTPException as e:
-        logger.error(f"An HTTP exception occurred: {e.detail}", exc_info=True)
-        raise e
 
 if __name__ == "__main__":
     import uvicorn
