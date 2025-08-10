@@ -3,16 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import { useThreadStore } from '@/store/threadStore';
 import { useChatStore } from '@/store/chat';
-import { ThreadService, Thread } from '@/services/threadService';
+import { ThreadService } from '@/services/threadService';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  PlusIcon, 
-  ChatBubbleLeftIcon,
-  TrashIcon,
-  PencilIcon,
-  XMarkIcon,
-  CheckIcon
-} from '@heroicons/react/24/outline';
+  Plus, 
+  MessageSquare,
+  Trash2,
+  Pencil,
+  X,
+  Check
+} from 'lucide-react';
 
 export const ThreadSidebar: React.FC = () => {
   const { 
@@ -133,7 +133,7 @@ export const ThreadSidebar: React.FC = () => {
           disabled={isCreatingNew}
           className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
         >
-          <PlusIcon className="w-5 h-5" />
+          <Plus className="w-5 h-5" />
           <span>New Conversation</span>
         </button>
       </div>
@@ -156,7 +156,7 @@ export const ThreadSidebar: React.FC = () => {
               onClick={() => handleSelectThread(thread.id)}
             >
               <div className="flex items-start gap-3">
-                <ChatBubbleLeftIcon className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                <MessageSquare className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
                 
                 <div className="flex-1 min-w-0">
                   {editingThreadId === thread.id ? (
@@ -176,13 +176,13 @@ export const ThreadSidebar: React.FC = () => {
                         onClick={() => handleUpdateTitle(thread.id)}
                         className="p-1 text-green-600 hover:bg-green-50 rounded"
                       >
-                        <CheckIcon className="w-4 h-4" />
+                        <Check className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setEditingThreadId(null)}
                         className="p-1 text-gray-600 hover:bg-gray-100 rounded"
                       >
-                        <XMarkIcon className="w-4 h-4" />
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
                   ) : (
@@ -214,7 +214,7 @@ export const ThreadSidebar: React.FC = () => {
                       }}
                       className="p-1 text-gray-600 hover:bg-gray-100 rounded"
                     >
-                      <PencilIcon className="w-4 h-4" />
+                      <Pencil className="w-4 h-4" />
                     </button>
                     <button
                       onClick={(e) => {
@@ -223,7 +223,7 @@ export const ThreadSidebar: React.FC = () => {
                       }}
                       className="p-1 text-red-600 hover:bg-red-50 rounded"
                     >
-                      <TrashIcon className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 )}
@@ -234,7 +234,7 @@ export const ThreadSidebar: React.FC = () => {
 
         {threads.length === 0 && (
           <div className="text-center py-8 text-gray-500">
-            <ChatBubbleLeftIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+            <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-300" />
             <p className="text-sm">No conversations yet</p>
             <p className="text-xs mt-1">Start a new conversation to begin</p>
           </div>

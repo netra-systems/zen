@@ -12,9 +12,27 @@ export const MessageInput: React.FC = () => {
   const [message, setMessage] = useState('');
   const { sendMessage } = useWebSocket();
   const { setProcessing, isProcessing, addMessage } = useChatStore();
+  const { currentThreadId, setCurrentThread, addThread } = useThreadStore();
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (message.trim()) {
+      let threadId = currentThreadId;
+      
+      // Create a new thread if none exists
+      if (!threadId) {
+        try {
+          const newThread = await ThreadService.createThread(
+            message.substring(0, 50) + (message.length > 50 ? '...' : '')
+          );
+          addThread(newThread);
+          setCurrentThread(newThread.id);
+          threadId = newThread.id;
+        } catch (error) {
+          console.error('Failed to create thread:', error);
+          return;
+        }
+      }
+      
       // Add user message to chat immediately
       const userMessage: Message = {
         id: `msg_${Date.now()}`,
@@ -25,8 +43,15 @@ export const MessageInput: React.FC = () => {
       };
       addMessage(userMessage);
       
-      // Send message via WebSocket
-      sendMessage({ type: 'user_message', payload: { text: message, references: [] } });
+      // Send message via WebSocket with thread_id
+      sendMessage({ 
+        type: 'user_message', 
+        payload: { 
+          text: message, 
+          references: [],
+          thread_id: threadId 
+        } 
+      });
       setProcessing(true);
       setMessage('');
     }

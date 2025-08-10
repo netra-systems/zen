@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   CheckCircle2, 
@@ -21,16 +20,15 @@ import {
   TrendingUp,
   AlertCircle,
   Download,
-  Copy,
-  Eye
+  Copy
 } from 'lucide-react';
 
 interface FinalReportProps {
   reportData: {
-    data_result?: any;
-    optimizations_result?: any;
-    action_plan_result?: any;
-    report_result?: any;
+    data_result?: Record<string, unknown>;
+    optimizations_result?: Record<string, unknown>;
+    action_plan_result?: Array<Record<string, unknown>> | Record<string, unknown>;
+    report_result?: Record<string, unknown>;
     final_report?: string;
     execution_metrics?: {
       total_duration: number;
@@ -284,7 +282,7 @@ export const FinalReportView: React.FC<FinalReportProps> = ({ reportData }) => {
               <CardContent>
                 <div className="space-y-3">
                   {Array.isArray(reportData.action_plan_result) ? (
-                    reportData.action_plan_result.map((action: any, idx: number) => (
+                    reportData.action_plan_result.map((action, idx) => (
                       <Alert key={idx} className="border-l-4 border-l-blue-500">
                         <AlertCircle className="h-4 w-4" />
                         <AlertDescription>

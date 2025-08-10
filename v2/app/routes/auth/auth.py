@@ -65,6 +65,9 @@ class AuthRoutes:
     async def callback(request: Request, db: AsyncSession = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):
         """Handle OAuth callback from Google"""
         try:
+            # Log the callback request for debugging
+            print(f"OAuth callback received with params: {dict(request.query_params)}")
+            
             token = await oauth_client.google.authorize_access_token(request)
             user_info = await oauth_client.google.parse_id_token(request, token)
             if not user_info or 'email' not in user_info:

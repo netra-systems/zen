@@ -11,7 +11,6 @@ import {
   Clock, 
   Layers, 
   Pause, 
-  Play, 
   Settings, 
   Sparkles,
   Timer,

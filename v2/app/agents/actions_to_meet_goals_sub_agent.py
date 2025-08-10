@@ -38,9 +38,30 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
         
         action_plan_result = extract_json_from_response(llm_response_str)
         if not action_plan_result:
-            self.logger.warning(f"Could not extract JSON from LLM response for run_id: {run_id}. Using default action plan.")
+            self.logger.warning(
+                f"Could not extract JSON from LLM response for run_id: {run_id}. "
+                f"Response length: {len(llm_response_str) if llm_response_str else 0} chars. "
+                f"First 500 chars: {llm_response_str[:500] if llm_response_str else 'None'}"
+            )
+            # Provide a more comprehensive default action plan structure
             action_plan_result = {
-                "action_plan": [],
+                "action_plan_summary": "Failed to generate action plan from LLM response",
+                "total_estimated_time": "Unknown",
+                "required_approvals": [],
+                "actions": [],
+                "execution_timeline": [],
+                "supply_config_updates": [],
+                "post_implementation": {
+                    "monitoring_period": "Not determined",
+                    "success_metrics": [],
+                    "optimization_review_schedule": "Not scheduled",
+                    "documentation_updates": []
+                },
+                "cost_benefit_analysis": {
+                    "implementation_cost": {"effort_hours": 0, "resource_cost": 0},
+                    "expected_benefits": {"cost_savings_per_month": 0, "performance_improvement_percentage": 0, "roi_months": 0}
+                },
+                "error": "JSON extraction failed - using default structure"
             }
 
         state.action_plan_result = action_plan_result

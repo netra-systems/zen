@@ -26,6 +26,7 @@ describe('ChatHeader', () => {
       subAgentStatus: { status: 'running', tools: ['tool1', 'tool2'] },
     });
     render(<ChatHeader />);
-    expect(screen.getByText('Tools: tool1, tool2')).toBeInTheDocument();
+    expect(screen.getByText('tool1')).toBeInTheDocument();
+    expect(screen.getByText('tool2')).toBeInTheDocument();
   });
 });

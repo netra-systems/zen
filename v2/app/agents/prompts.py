@@ -295,6 +295,12 @@ actions_to_meet_goals_prompt_template = PromptTemplate(
 
     **Task**: Create a detailed, step-by-step action plan that implements the optimization strategies. Each action should be specific, measurable, and immediately executable.
 
+    **Output Requirements**:
+    - You MUST return ONLY valid JSON without any additional text, explanations, or markdown formatting
+    - Do NOT include markdown code blocks (``` or ```json)
+    - Ensure all JSON is properly formatted with correct quotes, commas, and brackets
+    - Start your response directly with { and end with }
+    
     **Output**:
     Return a JSON object with the following structure:
     {{

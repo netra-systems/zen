@@ -196,8 +196,8 @@ app.add_middleware(
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.secret_key,
-    same_site="lax" if settings.environment != "development" else "none",
-    https_only=settings.environment != "development",
+    same_site="lax",
+    https_only=False,
 )
 
 @app.exception_handler(HTTPException)
@@ -224,7 +224,7 @@ app.include_router(admin.router, prefix="/api", tags=["admin"])
 app.include_router(references.router, prefix="/api", tags=["references"])
 app.include_router(health.router, prefix="/health", tags=["health"])
 app.include_router(corpus.router, prefix="/api/corpus", tags=["corpus"])
-app.include_router(synthetic_data.router, prefix="/synthetic_data", tags=["synthetic_data"])
+app.include_router(synthetic_data.router, tags=["synthetic_data"])
 app.include_router(config.router, prefix="/api", tags=["config"])
 
 @app.get("/")
