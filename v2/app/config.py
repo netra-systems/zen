@@ -51,7 +51,10 @@ class ConfigManager:
             
             return config
             
-        except (ValidationError, ConfigurationError) as e:
+        except ValidationError as e:
+            self._logger.error(f"Configuration loading failed: {e}")
+            raise ConfigurationError(f"Failed to load configuration: {e}")
+        except Exception as e:
             self._logger.error(f"Configuration loading failed: {e}")
             raise ConfigurationError(f"Failed to load configuration: {e}")
     

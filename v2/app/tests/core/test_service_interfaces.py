@@ -141,10 +141,11 @@ class TestBaseService:
             raise Exception("Init failed")
         
         with patch.object(service, '_initialize_impl', side_effect=failing_init):
-            with pytest.raises(ServiceError):
-                await service.initialize()
-            
-            assert not service.is_initialized
+            with patch('app.core.error_context.ErrorContext.get_all_context', return_value={}):
+                with pytest.raises(ServiceError):
+                    await service.initialize()
+                
+                assert not service.is_initialized
     
     @pytest.mark.asyncio
     async def test_initialize_idempotent(self):

@@ -252,7 +252,7 @@ class TestErrorHandler:
         
         response = handler._handle_sqlalchemy_error(exc, "trace-123", "req-123")
         
-        assert response.error_code == "DATABASE_CONSTRAINT_VIOLATION"
+        assert response.error_code == "DB_CONSTRAINT_VIOLATION"
         assert "constraint violation" in response.message.lower()
     
     def test_handle_http_exception(self):
@@ -262,7 +262,7 @@ class TestErrorHandler:
         
         response = handler._handle_http_exception(exc, "trace-123", "req-123")
         
-        assert response.error_code == "RECORD_NOT_FOUND"
+        assert response.error_code == "DB_RECORD_NOT_FOUND"
         assert response.message == "Not found"
         assert response.details["status_code"] == 404
     

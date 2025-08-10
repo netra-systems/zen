@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<code_cleanup_specification version="1.0" last_updated="2025-01-10">
+    <metadata>
+        <title>Code Cleanup and Technical Debt Management Specification</title>
+        <purpose>Define standards and procedures for identifying, tracking, and removing legacy code</purpose>
+        <scope>All Python and TypeScript/JavaScript code in the Netra AI Platform</scope>
+        <owner>Engineering Team</owner>
+    </metadata>
+
+    <principles>
+        <principle id="P1">
+            <name>Backward Compatibility</name>
+            <description>Maintain backward compatibility through deprecation cycles and wrapper patterns</description>
+        </principle>
+        <principle id="P2">
+            <name>Incremental Cleanup</name>
+            <description>Clean code in small, testable increments rather than large rewrites</description>
+        </principle>
+        <principle id="P3">
+            <name>Documentation First</name>
+            <description>Document what will be removed and why before removing it</description>
+        </principle>
+        <principle id="P4">
+            <name>Test Coverage</name>
+            <description>Ensure tests pass after each cleanup step</description>
+        </principle>
+    </principles>
+
+    <identification>
+        <dead_code_indicators>
+            <indicator type="import">
+                <pattern>Unused imports detected by static analysis</pattern>
+                <detection_method>flake8, pylint, ESLint</detection_method>
+                <priority>HIGH</priority>
+            </indicator>
+            <indicator type="conditional">
+                <pattern>try/except ImportError with fallback implementations</pattern>
+                <detection_method>grep "except ImportError" | manual review</detection_method>
+                <priority>MEDIUM</priority>
+            </indicator>
+            <indicator type="comment">
+                <pattern>Commented-out code blocks</pattern>
+                <detection_method>grep -E "^[[:space:]]*#.*def |^[[:space:]]*#.*class "</detection_method>
+                <priority>HIGH</priority>
+            </indicator>
+            <indicator type="todo">
+                <pattern>TODO/FIXME/DEPRECATED comments older than 6 months</pattern>
+                <detection_method>grep -E "TODO|FIXME|DEPRECATED" | check dates</detection_method>
+                <priority>MEDIUM</priority>
+            </indicator>
+            <indicator type="duplicate">
+                <pattern>Multiple implementations of same functionality</pattern>
+                <detection_method>Code similarity analysis, manual review</detection_method>
+                <priority>HIGH</priority>
+            </indicator>
+            <indicator type="unreferenced">
+                <pattern>Classes/functions with no imports or calls</pattern>
+                <detection_method>grep -r "class ClassName" | grep -r "ClassName"</detection_method>
+                <priority>HIGH</priority>
+            </indicator>
+            <indicator type="test">
+                <pattern>Tests that mock non-existent modules</pattern>
+                <detection_method>Review test fixtures and mocks</detection_method>
+                <priority>MEDIUM</priority>
+            </indicator>
+        </dead_code_indicators>
+
+        <scanning_tools>
+            <tool name="vulture" language="python">
+                <purpose>Find unused code</purpose>
+                <command>vulture app/ --min-confidence 80</command>
+            </tool>
+            <tool name="flake8" language="python">
+                <purpose>Find unused imports</purpose>
+                <command>flake8 --select=F401,F841 app/</command>
+            </tool>
+            <tool name="coverage" language="python">
+                <purpose>Find untested code paths</purpose>
+                <command>pytest --cov=app --cov-report=html</command>
+            </tool>
+            <tool name="deadcode" language="typescript">
+                <purpose>Find unused exports</purpose>
+                <command>npx ts-prune frontend/</command>
+            </tool>
+        </scanning_tools>
+    </identification>
+
+    <cleanup_process>
+        <phase number="1" name="Discovery">
+            <steps>
+                <step>Run automated scanning tools</step>
+                <step>Review scan results and prioritize</step>
+                <step>Create cleanup backlog in issue tracker</step>
+                <step>Estimate impact and risk for each item</step>
+            </steps>
+        </phase>
+        
+        <phase number="2" name="Analysis">
+            <steps>
+                <step>Trace all references to target code</step>
+                <step>Check for external dependencies</step>
+                <step>Review git history for context</step>
+                <step>Identify migration path if needed</step>
+            </steps>
+            <commands>
+                <command>grep -r "ClassName" --include="*.py"</command>
+                <command>grep -r "from module import" --include="*.py"</command>
+                <command>git log -p --follow path/to/file.py</command>
+                <command>git blame path/to/file.py</command>
+            </commands>
+        </phase>
+        
+        <phase number="3" name="Deprecation">
+            <steps>
+                <step>Add deprecation decorator/comment</step>
+                <step>Log deprecation warnings</step>
+                <step>Update documentation</step>
+                <step>Notify stakeholders</step>
+            </steps>
+            <deprecation_decorator><![CDATA[
+import warnings
+from functools import wraps
+from typing import Callable
+
+def deprecated(reason: str, version: str, removal_version: str) -> Callable:
+    """Mark function as deprecated"""
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            warnings.warn(
+                f"{func.__name__} is deprecated since {version} and will be "
+                f"removed in {removal_version}. {reason}",
+                DeprecationWarning,
+                stacklevel=2
+            )
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+# Usage:
+@deprecated(
+    reason="Use new_function instead",
+    version="2.0.0",
+    removal_version="3.0.0"
+)
+def old_function():
+    pass
+            ]]></deprecation_decorator>
+        </phase>
+        
+        <phase number="4" name="Migration">
+            <steps>
+                <step>Create wrapper/adapter if needed</step>
+                <step>Update all internal references</step>
+                <step>Run tests to verify compatibility</step>
+                <step>Deploy with compatibility layer</step>
+            </steps>
+            <wrapper_pattern><![CDATA[
+# Wrapper pattern for backward compatibility
+class LegacyAPI:
+    """Wrapper for backward compatibility - DEPRECATED"""
+    def __init__(self):
+        self._new_impl = NewAPI()
+        warnings.warn(
+            "LegacyAPI is deprecated, use NewAPI instead",
+            DeprecationWarning
+        )
+    
+    def old_method(self, *args, **kwargs):
+        # Delegate to new implementation
+        return self._new_impl.new_method(*args, **kwargs)
+            ]]></wrapper_pattern>
+        </phase>
+        
+        <phase number="5" name="Removal">
+            <steps>
+                <step>Remove deprecated code</step>
+                <step>Remove associated tests</step>
+                <step>Update imports in remaining code</step>
+                <step>Run full test suite</step>
+                <step>Update documentation</step>
+            </steps>
+            <validation>
+                <check>All tests pass</check>
+                <check>No broken imports</check>
+                <check>Documentation updated</check>
+                <check>Changelog updated</check>
+            </validation>
+        </phase>
+        
+        <phase number="6" name="Verification">
+            <steps>
+                <step>Run smoke tests</step>
+                <step>Check application startup</step>
+                <step>Verify critical paths</step>
+                <step>Monitor for errors in staging</step>
+            </steps>
+        </phase>
+    </cleanup_process>
+
+    <deprecation_policy>
+        <timeline>
+            <stage name="Deprecation" duration="3 months">
+                <action>Add deprecation warnings</action>
+                <action>Update documentation</action>
+                <action>Notify users via changelog</action>
+            </stage>
+            <stage name="Migration" duration="3 months">
+                <action>Provide migration guide</action>
+                <action>Support both old and new APIs</action>
+                <action>Help users migrate</action>
+            </stage>
+            <stage name="Removal" duration="immediate">
+                <action>Remove deprecated code</action>
+                <action>Clean up tests</action>
+                <action>Final documentation update</action>
+            </stage>
+        </timeline>
+        
+        <exceptions>
+            <exception>Security vulnerabilities: immediate removal allowed</exception>
+            <exception>Unused internal code: 1 month deprecation sufficient</exception>
+            <exception>Breaking changes: require major version bump</exception>
+        </exceptions>
+    </deprecation_policy>
+
+    <cleanup_checklist>
+        <before_cleanup>
+            <item>Run full test suite</item>
+            <item>Document current behavior</item>
+            <item>Create backup branch</item>
+            <item>Review with team</item>
+        </before_cleanup>
+        
+        <during_cleanup>
+            <item>Work in small commits</item>
+            <item>Test after each change</item>
+            <item>Keep detailed notes</item>
+            <item>Update tests as needed</item>
+        </during_cleanup>
+        
+        <after_cleanup>
+            <item>Run full test suite</item>
+            <item>Update documentation</item>
+            <item>Update changelog</item>
+            <item>Create cleanup report</item>
+            <item>Monitor for issues</item>
+        </after_cleanup>
+    </cleanup_checklist>
+
+    <common_patterns>
+        <pattern name="Duplicate Implementations">
+            <description>Multiple implementations of same feature</description>
+            <solution>Consolidate to single implementation with clear interface</solution>
+            <example>Supervisor and SupervisorConsolidated -> Single Supervisor</example>
+        </pattern>
+        
+        <pattern name="Transition Code">
+            <description>Try/except imports with fallback logic</description>
+            <solution>Complete transition and remove fallback</solution>
+            <example>USE_CONSOLIDATED flag pattern</example>
+        </pattern>
+        
+        <pattern name="Mock Dependencies">
+            <description>Tests creating fake implementations</description>
+            <solution>Remove tests for non-existent features</solution>
+            <example>Mock AgentOrchestrator in tests</example>
+        </pattern>
+        
+        <pattern name="Commented Code">
+            <description>Large blocks of commented-out code</description>
+            <solution>Delete - version control preserves history</solution>
+            <example># from old_module import OldClass</example>
+        </pattern>
+    </common_patterns>
+
+    <automation>
+        <ci_cd_integration>
+            <pre_commit_hooks>
+                <hook>flake8 --select=F401</hook>
+                <hook>isort --check-only</hook>
+                <hook>black --check</hook>
+            </pre_commit_hooks>
+            
+            <ci_checks>
+                <check>vulture app/ --min-confidence 80</check>
+                <check>coverage report --fail-under=70</check>
+                <check>mypy app/</check>
+            </ci_checks>
+        </ci_cd_integration>
+        
+        <scheduled_scans>
+            <scan frequency="weekly">
+                <action>Run vulture to find dead code</action>
+                <action>Check for old TODO comments</action>
+                <action>Report unused imports</action>
+            </scan>
+            
+            <scan frequency="monthly">
+                <action>Full code coverage analysis</action>
+                <action>Dependency usage audit</action>
+                <action>Deprecation timeline review</action>
+            </scan>
+        </scheduled_scans>
+    </automation>
+
+    <documentation>
+        <required_docs>
+            <document>CHANGELOG.md entry for removals</document>
+            <document>Migration guide for breaking changes</document>
+            <document>Cleanup report in reports/history/</document>
+        </required_docs>
+        
+        <templates>
+            <changelog_template><![CDATA[
+### Removed
+- **[Breaking]** Removed legacy `/old-endpoint` - use `/new-endpoint` instead
+- Removed unused `OldModule` class (deprecated since v2.0)
+- Cleaned up duplicate implementation of feature X
+            ]]></changelog_template>
+            
+            <migration_guide_template><![CDATA[
+# Migration Guide: OldAPI to NewAPI
+
+## What Changed
+The OldAPI has been deprecated and will be removed in v3.0.
+
+## Migration Steps
+1. Update imports:
+   ```python
+   # Old
+   from app.old_module import OldAPI
+   
+   # New
+   from app.new_module import NewAPI
+   ```
+
+2. Update method calls:
+   ```python
+   # Old
+   api.old_method(param)
+   
+   # New
+   api.new_method(param=param)
+   ```
+
+## Timeline
+- v2.5: Deprecation warnings added
+- v2.8: Migration period
+- v3.0: Old API removed
+            ]]></migration_guide_template>
+        </templates>
+    </documentation>
+
+    <metrics>
+        <tracking>
+            <metric name="Lines of Code" measure="Total LOC over time"/>
+            <metric name="Dead Code Ratio" measure="Dead LOC / Total LOC"/>
+            <metric name="Import Health" measure="Unused imports count"/>
+            <metric name="Test Coverage" measure="Covered lines / Total lines"/>
+            <metric name="Technical Debt" measure="Hours to clean up"/>
+        </tracking>
+        
+        <targets>
+            <target metric="Dead Code Ratio" value="< 5%"/>
+            <target metric="Import Health" value="0 unused imports"/>
+            <target metric="Test Coverage" value="> 80%"/>
+        </targets>
+    </metrics>
+
+    <best_practices>
+        <practice>Always grep before removing</practice>
+        <practice>Keep deprecation periods consistent</practice>
+        <practice>Document why code was removed</practice>
+        <practice>Clean tests alongside code</practice>
+        <practice>Use wrapper patterns for compatibility</practice>
+        <practice>Commit cleanup separately from features</practice>
+        <practice>Tag cleanup commits clearly</practice>
+        <practice>Review cleanup with another developer</practice>
+    </best_practices>
+
+    <anti_patterns>
+        <anti_pattern>Leaving commented code "just in case"</anti_pattern>
+        <anti_pattern>Removing without checking all references</anti_pattern>
+        <anti_pattern>Skipping deprecation for public APIs</anti_pattern>
+        <anti_pattern>Large, monolithic cleanup commits</anti_pattern>
+        <anti_pattern>Cleanup without tests</anti_pattern>
+        <anti_pattern>Ignoring external dependencies</anti_pattern>
+    </anti_patterns>
+</code_cleanup_specification>
