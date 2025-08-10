@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useThreadStore } from '@/store/threadStore';
 import { useChatStore } from '@/store/chat';
+import { useAuthStore } from '@/store/authStore';
 import { ThreadService } from '@/services/threadService';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -28,13 +29,17 @@ export const ThreadSidebar: React.FC = () => {
   } = useThreadStore();
   
   const { clearMessages, loadMessages } = useChatStore();
+  const { isAuthenticated } = useAuthStore();
   const [editingThreadId, setEditingThreadId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
   useEffect(() => {
-    loadThreads();
-  }, []);
+    // Only load threads if user is authenticated
+    if (isAuthenticated) {
+      loadThreads();
+    }
+  }, [isAuthenticated]);
 
   const loadThreads = async () => {
     try {
@@ -131,12 +136,27 @@ export const ThreadSidebar: React.FC = () => {
     return date.toLocaleDateString();
   };
 
+  // Show authentication message if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col h-full">
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="text-center">
+            <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <p className="text-gray-600 mb-2">Please sign in to view conversations</p>
+            <p className="text-sm text-gray-500">Sign in to access your chat history</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col h-full">
       <div className="p-4 border-b border-gray-200">
         <button
           onClick={handleCreateThread}
-          disabled={isCreatingNew}
+          disabled={isCreatingNew || !isAuthenticated}
           className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
         >
           <Plus className="w-5 h-5" />
