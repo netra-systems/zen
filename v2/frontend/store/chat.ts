@@ -2,17 +2,36 @@
 import { create } from 'zustand';
 import { Message, SubAgentState as SubAgentStatus } from '@/types/chat';
 
+interface SubAgentStatusData {
+  status: string;
+  tools?: string[];
+  progress?: {
+    current: number;
+    total: number;
+    message?: string;
+  };
+  error?: string;
+  description?: string;
+  executionTime?: number;
+}
+
 interface ChatState {
   messages: Message[];
   subAgentName: string;
   currentSubAgent: string | null;
-  subAgentStatus: SubAgentStatus | null;
+  subAgentStatus: SubAgentStatus | string | null;
+  subAgentTools: string[];
+  subAgentProgress: { current: number; total: number; message?: string } | null;
+  subAgentError: string | null;
+  subAgentDescription: string | null;
+  subAgentExecutionTime: number | null;
+  queuedSubAgents: string[];
   isProcessing: boolean;
   activeThreadId: string | null;
   addMessage: (message: Message) => void;
   updateMessage: (messageId: string, updates: Partial<Message>) => void;
   setSubAgentName: (name: string) => void;
-  setSubAgentStatus: (status: SubAgentStatus) => void;
+  setSubAgentStatus: (status: SubAgentStatus | SubAgentStatusData) => void;
   setSubAgent: (name: string, status: string) => void;
   setProcessing: (isProcessing: boolean) => void;
   clearMessages: () => void;
@@ -30,6 +49,12 @@ export const useChatStore = create<ChatState>((set) => ({
   subAgentName: 'Netra Agent',
   currentSubAgent: null,
   subAgentStatus: null,
+  subAgentTools: [],
+  subAgentProgress: null,
+  subAgentError: null,
+  subAgentDescription: null,
+  subAgentExecutionTime: null,
+  queuedSubAgents: [],
   isProcessing: false,
   activeThreadId: null,
   
@@ -52,7 +77,31 @@ export const useChatStore = create<ChatState>((set) => ({
   
   setSubAgentName: (name) => set({ subAgentName: name, currentSubAgent: name }),
   
-  setSubAgentStatus: (status) => set({ subAgentStatus: status }),
+  setSubAgentStatus: (status) => set((state) => {
+    // Handle both SubAgentStatus object and SubAgentStatusData object formats
+    if (typeof status === 'object' && status !== null && 'status' in status) {
+      // SubAgentStatusData format
+      const statusData = status as SubAgentStatusData;
+      return {
+        subAgentStatus: statusData.status,
+        subAgentTools: statusData.tools || [],
+        subAgentProgress: statusData.progress || null,
+        subAgentError: statusData.error || null,
+        subAgentDescription: statusData.description || null,
+        subAgentExecutionTime: statusData.executionTime || null
+      };
+    } else {
+      // Simple status or SubAgentStatus object
+      return { 
+        subAgentStatus: status,
+        subAgentTools: [],
+        subAgentProgress: null,
+        subAgentError: null,
+        subAgentDescription: null,
+        subAgentExecutionTime: null
+      };
+    }
+  }),
   
   setSubAgent: (name, status) => set({ 
     subAgentName: name, 
@@ -67,7 +116,13 @@ export const useChatStore = create<ChatState>((set) => ({
   clearSubAgent: () => set({ 
     subAgentName: 'Netra Agent', 
     currentSubAgent: null,
-    subAgentStatus: null 
+    subAgentStatus: null,
+    subAgentTools: [],
+    subAgentProgress: null,
+    subAgentError: null,
+    subAgentDescription: null,
+    subAgentExecutionTime: null,
+    queuedSubAgents: []
   }),
   
   setActiveThread: (threadId) => set({ 
@@ -122,7 +177,13 @@ export const useChatStore = create<ChatState>((set) => ({
     messages: [], 
     subAgentName: 'Netra Agent', 
     currentSubAgent: null,
-    subAgentStatus: null, 
+    subAgentStatus: null,
+    subAgentTools: [],
+    subAgentProgress: null,
+    subAgentError: null,
+    subAgentDescription: null,
+    subAgentExecutionTime: null,
+    queuedSubAgents: [],
     isProcessing: false,
     activeThreadId: null 
   }),

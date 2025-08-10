@@ -1,6 +1,6 @@
 import React from 'react';
-import { useWebSocket } from '@/contexts/WebSocketContext';
-import { WebSocketMessage } from '@/types';
+import { useWebSocket } from '@/hooks/useWebSocket';
+import { WebSocketMessage } from '@/types/chat';
 
 export const WebSocketTest: React.FC = () => {
   const { isConnected, lastMessage, sendMessage } = useWebSocket();

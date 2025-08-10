@@ -81,20 +81,28 @@ export const EnhancedChatHeader: React.FC<EnhancedChatHeaderProps> = ({
 
   const getStatusColor = () => {
     if (!subAgentStatus) return 'bg-gray-100';
-    switch (subAgentStatus.lifecycle) {
-      case 'running': return 'bg-green-100 text-green-800';
-      case 'completed': return 'bg-blue-100 text-blue-800';
-      case 'failed': return 'bg-red-100 text-red-800';
+    const lifecycle = typeof subAgentStatus === 'string' ? subAgentStatus : subAgentStatus.lifecycle;
+    switch (lifecycle) {
+      case 'running':
+      case 'RUNNING': return 'bg-green-100 text-green-800';
+      case 'completed':
+      case 'COMPLETED': return 'bg-blue-100 text-blue-800';
+      case 'failed':
+      case 'FAILED': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusIcon = () => {
     if (!subAgentStatus) return <Bot className="w-4 h-4" />;
-    switch (subAgentStatus.lifecycle) {
-      case 'running': return <Activity className="w-4 h-4 animate-pulse" />;
-      case 'completed': return <TrendingUp className="w-4 h-4" />;
-      case 'failed': return <Pause className="w-4 h-4" />;
+    const lifecycle = typeof subAgentStatus === 'string' ? subAgentStatus : subAgentStatus.lifecycle;
+    switch (lifecycle) {
+      case 'running':
+      case 'RUNNING': return <Activity className="w-4 h-4 animate-pulse" />;
+      case 'completed':
+      case 'COMPLETED': return <TrendingUp className="w-4 h-4" />;
+      case 'failed':
+      case 'FAILED': return <Pause className="w-4 h-4" />;
       default: return <Bot className="w-4 h-4" />;
     }
   };
@@ -132,7 +140,7 @@ export const EnhancedChatHeader: React.FC<EnhancedChatHeaderProps> = ({
                 <div className="flex items-center gap-2 mt-1">
                   <Badge className={`text-xs ${getStatusColor()}`}>
                     {getStatusIcon()}
-                    <span className="ml-1">{subAgentStatus.lifecycle}</span>
+                    <span className="ml-1">{typeof subAgentStatus === 'string' ? subAgentStatus : subAgentStatus.lifecycle}</span>
                   </Badge>
                   {/* Tools display commented out - SubAgentState doesn't have tools property
                   {subAgentStatus.tools && subAgentStatus.tools.length > 0 && (
@@ -249,7 +257,7 @@ export const EnhancedChatHeader: React.FC<EnhancedChatHeaderProps> = ({
                   <Settings className="w-4 h-4 text-gray-400" />
                   <div>
                     <p className="text-gray-500">Status</p>
-                    <p className="font-medium">{subAgentStatus?.lifecycle || 'idle'}</p>
+                    <p className="font-medium">{subAgentStatus ? (typeof subAgentStatus === 'string' ? subAgentStatus : subAgentStatus.lifecycle) : 'idle'}</p>
                   </div>
                 </div>
               </div>

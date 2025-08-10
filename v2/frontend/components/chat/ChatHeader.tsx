@@ -95,11 +95,11 @@ export const ChatHeader: React.FC = () => {
                 className="flex items-center space-x-6"
               >
                 <div className="flex items-center space-x-2 px-3 py-1.5 bg-white rounded-lg border border-gray-200">
-                  <div className={`${getStatusColor(subAgentStatus.lifecycle)}`}>
-                    {getStatusIcon(subAgentStatus.lifecycle)}
+                  <div className={`${getStatusColor(typeof subAgentStatus === 'object' && subAgentStatus !== null && 'lifecycle' in subAgentStatus ? subAgentStatus.lifecycle : 'IDLE')}`}>
+                    {getStatusIcon(typeof subAgentStatus === 'object' && subAgentStatus !== null && 'lifecycle' in subAgentStatus ? subAgentStatus.lifecycle : 'IDLE')}
                   </div>
                   <span className="text-sm font-medium text-gray-700 capitalize">
-                    {subAgentStatus.lifecycle || 'Ready'}
+                    {(typeof subAgentStatus === 'object' && subAgentStatus !== null && 'lifecycle' in subAgentStatus ? subAgentStatus.lifecycle : subAgentStatus) || 'Ready'}
                   </span>
                   {isProcessing && (
                     <motion.div

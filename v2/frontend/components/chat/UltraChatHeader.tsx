@@ -94,7 +94,8 @@ export const UltraChatHeader: React.FC<UltraChatHeaderProps> = ({
 
   const getStatusIcon = () => {
     if (!isProcessing) return <CheckCircle className="w-4 h-4 text-green-500" />;
-    if (subAgentStatus?.lifecycle === 'failed' || subAgentStatus?.error_message) return <AlertCircle className="w-4 h-4 text-red-500" />;
+    if ((typeof subAgentStatus === 'object' && subAgentStatus !== null && 'lifecycle' in subAgentStatus && subAgentStatus.lifecycle === 'failed') || 
+        (typeof subAgentStatus === 'object' && subAgentStatus !== null && 'error_message' in subAgentStatus && subAgentStatus.error_message)) return <AlertCircle className="w-4 h-4 text-red-500" />;
     return <Activity className="w-4 h-4 text-blue-500 animate-pulse" />;
   };
 

@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 
-import { Reference } from '@/types/Reference';
+import { ReferenceItem as Reference } from '@/types/Reference';
 
 interface ReferencePickerProps {
   onSelect: (reference: Reference) => void;
