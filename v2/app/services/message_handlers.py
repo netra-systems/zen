@@ -24,8 +24,18 @@ class MessageHandlerService:
         """Handle start_agent message type"""
         request_data = payload.get("request", {})
         user_request = request_data.get("query", "") or request_data.get("user_request", "")
+        thread_id = payload.get("thread_id", None)  # Get thread_id from payload
         
-        thread = await self.thread_service.get_or_create_thread(db_session, user_id)
+        # If thread_id provided, use it; otherwise get_or_create
+        if thread_id:
+            thread = await self.thread_service.get_thread(db_session, thread_id)
+            # Verify user owns the thread
+            if thread and thread.metadata_.get("user_id") != user_id:
+                await manager.send_error(user_id, "Access denied to thread")
+                return
+        
+        if not thread_id or not thread:
+            thread = await self.thread_service.get_or_create_thread(db_session, user_id)
         if not thread:
             await manager.send_error(user_id, "Failed to create or retrieve thread")
             return
@@ -85,14 +95,24 @@ class MessageHandlerService:
         """Handle user_message type"""
         text = payload.get("text", "")
         references = payload.get("references", [])
-        logger.info(f"Received user message from {user_id}: {text}")
+        thread_id = payload.get("thread_id", None)  # Get thread_id from payload
+        logger.info(f"Received user message from {user_id}: {text}, thread_id: {thread_id}")
         
         thread = None
         run = None
         
         if db_session:
             try:
-                thread = await self.thread_service.get_or_create_thread(db_session, user_id)
+                # If thread_id provided, use it; otherwise get_or_create
+                if thread_id:
+                    thread = await self.thread_service.get_thread(db_session, thread_id)
+                    # Verify user owns the thread
+                    if thread and thread.metadata_.get("user_id") != user_id:
+                        await manager.send_error(user_id, "Access denied to thread")
+                        return
+                
+                if not thread:
+                    thread = await self.thread_service.get_or_create_thread(db_session, user_id)
                 
                 if thread:
                     await self.thread_service.create_message(

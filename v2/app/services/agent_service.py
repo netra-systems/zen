@@ -52,6 +52,18 @@ class AgentService:
             elif message_type == "stop_agent":
                 await self.message_handler.handle_stop_agent(user_id)
             
+            elif message_type == "create_thread":
+                await self.message_handler.handle_create_thread(user_id, payload, db_session)
+            
+            elif message_type == "switch_thread":
+                await self.message_handler.handle_switch_thread(user_id, payload, db_session)
+            
+            elif message_type == "delete_thread":
+                await self.message_handler.handle_delete_thread(user_id, payload, db_session)
+            
+            elif message_type == "list_threads":
+                await self.message_handler.handle_list_threads(user_id, db_session)
+            
             else:
                 logger.warning(f"Received unhandled message type '{message_type}' for user_id: {user_id}")
         except json.JSONDecodeError as e:

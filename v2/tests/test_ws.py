@@ -15,7 +15,7 @@ def client():
 
 @pytest.fixture
 def active_user():
-    return User(id=str(uuid.uuid4()), email="test@example.com", is_superuser=False)
+    return User(id=str(uuid.uuid4()), email="test@example.com", is_active=True, is_superuser=False)
 
 @pytest.mark.asyncio
 async def test_websocket_connection(client, active_user):
