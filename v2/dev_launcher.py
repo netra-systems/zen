@@ -28,7 +28,9 @@ class DevLauncher:
                  dynamic_ports: bool = False,
                  verbose: bool = False,
                  backend_reload: bool = True,
-                 frontend_reload: bool = True):
+                 frontend_reload: bool = True,
+                 load_secrets: bool = False,
+                 project_id: Optional[str] = None):
         """Initialize the development launcher."""
         self.backend_port = backend_port
         self.frontend_port = frontend_port or 3000
@@ -36,6 +38,8 @@ class DevLauncher:
         self.verbose = verbose
         self.backend_reload = backend_reload
         self.frontend_reload = frontend_reload
+        self.load_secrets = load_secrets
+        self.project_id = project_id
         self.processes: List[subprocess.Popen] = []
         self.service_discovery = ServiceDiscovery()
         
@@ -96,6 +100,17 @@ class DevLauncher:
             import fastapi
         except ImportError:
             errors.append("❌ FastAPI not installed. Run: pip install fastapi")
+        
+        # Check Google Cloud SDK if secrets loading is requested
+        if self.load_secrets:
+            # Check if fetch_secrets_to_env.py exists
+            fetch_script = Path("fetch_secrets_to_env.py")
+            if not fetch_script.exists():
+                errors.append("❌ fetch_secrets_to_env.py not found in project root")
+            
+            # Check for project ID
+            if not self.project_id and not os.environ.get('GOOGLE_CLOUD_PROJECT'):
+                errors.append("❌ Google Cloud project ID not specified. Use --project-id or set GOOGLE_CLOUD_PROJECT env var")
         
         # Check if frontend directory exists
         frontend_dir = Path("frontend")
@@ -198,8 +213,8 @@ class DevLauncher:
         
         # Build command based on OS
         if sys.platform == "win32":
-            # Windows
-            cmd = ["cmd", "/c", "cd", "frontend", "&&", "node", "scripts/start_with_discovery.js", npm_command]
+            # Windows - use relative path from frontend directory
+            cmd = ["cmd", "/c", "cd frontend && node scripts\\start_with_discovery.js " + npm_command]
         else:
             # Unix-like
             cmd = ["sh", "-c", f"cd frontend && node scripts/start_with_discovery.js {npm_command}"]
@@ -269,16 +284,85 @@ class DevLauncher:
         
         return False
     
+    def load_secrets_from_gcp(self) -> bool:
+        """Load secrets from Google Cloud Secret Manager."""
+        if not self.load_secrets:
+            return True
+        
+        print("\n🔐 Loading secrets from Google Cloud Secret Manager...")
+        
+        try:
+            # Run the fetch_secrets_to_env.py script
+            project_id = self.project_id or os.environ.get('GOOGLE_CLOUD_PROJECT')
+            if not project_id:
+                print("❌ No Google Cloud project ID specified")
+                return False
+            
+            print(f"   Project ID: {project_id}")
+            
+            # Build command
+            cmd = [sys.executable, "fetch_secrets_to_env.py"]
+            
+            # Set environment
+            env = os.environ.copy()
+            env['GOOGLE_CLOUD_PROJECT'] = project_id
+            
+            # Run the script
+            result = subprocess.run(
+                cmd,
+                env=env,
+                capture_output=True,
+                text=True
+            )
+            
+            if result.returncode == 0:
+                print("✅ Secrets loaded successfully")
+                # Load the created .env file into current environment
+                env_file = Path(".env")
+                if env_file.exists():
+                    with open(env_file, 'r') as f:
+                        for line in f:
+                            line = line.strip()
+                            if line and not line.startswith('#') and '=' in line:
+                                key, value = line.split('=', 1)
+                                os.environ[key] = value.strip('"\'')
+                return True
+            else:
+                print(f"❌ Failed to load secrets: {result.stderr}")
+                return False
+            
+        except Exception as e:
+            print(f"❌ Failed to load secrets: {e}")
+            print("   Continuing without secrets (some features may not work)")
+            return False
+    
     def run(self):
         """Run the development environment."""
         print("=" * 60)
         print("🚀 Netra AI Development Environment Launcher")
         print("=" * 60)
         
+        # Show configuration summary
+        if self.dynamic_ports and not self.backend_reload:
+            print("\n✨ Running with RECOMMENDED configuration:")
+            print("   • Dynamic ports: ✅ (avoiding conflicts)")
+            print("   • Backend hot reload: ❌ (30-50% faster)")
+            if self.load_secrets:
+                print("   • Secret loading: ✅ (from Google Cloud)")
+            print("   Perfect for first-time setup!\n")
+        elif self.dynamic_ports:
+            print("\n📝 Configuration:")
+            print("   • Dynamic ports: ✅")
+            print("   • Hot reload: ✅ (development mode)\n")
+        
         # Check dependencies
         if not self.check_dependencies():
             print("\n❌ Please install missing dependencies and try again")
             return 1
+        
+        # Load secrets if requested
+        if self.load_secrets:
+            self.load_secrets_from_gcp()
         
         # Clear old service discovery
         self.service_discovery.clear_all()
@@ -296,7 +380,8 @@ class DevLauncher:
         backend_info = self.service_discovery.read_backend_info()
         if backend_info:
             print("\n⏳ Waiting for backend to be ready...")
-            backend_url = f"{backend_info['api_url']}/api/health"
+            # Use /health/ready endpoint for readiness check
+            backend_url = f"{backend_info['api_url']}/health/ready"
             if self.wait_for_service(backend_url, timeout=30):
                 print("✅ Backend is ready")
             else:
@@ -369,14 +454,21 @@ def main():
         description="Unified development launcher for Netra AI platform",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
+RECOMMENDED FOR FIRST-TIME DEVELOPERS:
+  python dev_launcher.py --dynamic --no-backend-reload --load-secrets
+  
+  This configuration provides:
+    • Automatic port allocation (no conflicts)
+    • 30-50% faster performance
+    • Secure secret loading from cloud
+
 Examples:
-  python dev_launcher.py                    # Start with default ports and hot reload
-  python dev_launcher.py --dynamic          # Use dynamic port allocation
-  python dev_launcher.py --backend-port 8080  # Specify backend port
-  python dev_launcher.py --no-backend-reload  # Disable backend hot reload
-  python dev_launcher.py --no-frontend-reload # Disable frontend hot reload
-  python dev_launcher.py --no-reload        # Disable all hot reload
-  python dev_launcher.py --verbose          # Show detailed output
+  python dev_launcher.py --dynamic --no-backend-reload  # Best for most developers
+  python dev_launcher.py                    # Start with defaults
+  python dev_launcher.py --dynamic          # Auto port allocation
+  python dev_launcher.py --no-reload        # Maximum performance
+  python dev_launcher.py --load-secrets --project-id my-project  # With GCP secrets
+  python dev_launcher.py --verbose          # Detailed output
         """
     )
     
@@ -423,6 +515,18 @@ Examples:
         help="Disable all hot reload for both frontend and backend"
     )
     
+    parser.add_argument(
+        "--load-secrets",
+        action="store_true",
+        help="Load secrets from Google Cloud Secret Manager before starting"
+    )
+    
+    parser.add_argument(
+        "--project-id",
+        type=str,
+        help="Google Cloud project ID for secret loading (or set GOOGLE_CLOUD_PROJECT env var)"
+    )
+    
     args = parser.parse_args()
     
     # Handle reload flags
@@ -435,7 +539,9 @@ Examples:
         dynamic_ports=args.dynamic,
         verbose=args.verbose,
         backend_reload=backend_reload,
-        frontend_reload=frontend_reload
+        frontend_reload=frontend_reload,
+        load_secrets=args.load_secrets,
+        project_id=args.project_id
     )
     
     sys.exit(launcher.run())

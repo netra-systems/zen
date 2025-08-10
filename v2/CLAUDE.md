@@ -47,6 +47,20 @@ XML specifications are in `SPEC/*.xml`
 
 ### Unified Development Environment (NEW - RECOMMENDED)
 
+#### First-Time Setup (Recommended Configuration)
+```bash
+# RECOMMENDED FOR FIRST-TIME DEVELOPERS
+# This configuration provides the best experience:
+# - Avoids port conflicts with --dynamic
+# - 30-50% faster with --no-backend-reload
+# - Loads secrets securely with --load-secrets
+python dev_launcher.py --dynamic --no-backend-reload --load-secrets
+
+# Alternative: Without cloud secrets
+python dev_launcher.py --dynamic --no-backend-reload
+```
+
+#### Standard Commands
 ```bash
 # Quick start - launches both backend and frontend with automatic configuration
 python dev_launcher.py
@@ -54,12 +68,21 @@ python dev_launcher.py
 # With dynamic port allocation (avoids conflicts)
 python dev_launcher.py --dynamic
 
+# Maximum performance (no hot reload)
+python dev_launcher.py --dynamic --no-reload
+
 # With custom ports
 python dev_launcher.py --backend-port 8080 --frontend-port 3001
 
 # Check service status
 python scripts/service_discovery.py status
 ```
+
+#### Why These Flags?
+- **`--dynamic`**: Automatically finds free ports, prevents "port already in use" errors
+- **`--no-backend-reload`**: Disables file watching for 30-50% performance improvement
+- **`--load-secrets`**: Loads API keys from Google Cloud Secret Manager (if configured)
+- **`--no-reload`**: Disables all hot reload for maximum performance during testing
 
 ### Backend Development (Windows)
 

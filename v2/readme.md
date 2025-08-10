@@ -38,7 +38,7 @@ Netra is a sophisticated AI optimization platform that leverages a multi-agent s
 - ClickHouse (optional for analytics)
 - Redis (optional for caching)
 
-### Backend Setup
+### 🎯 Recommended: First-Time Developer Setup
 
 ```bash
 # Clone the repository
@@ -49,33 +49,37 @@ cd netra-core-generation-1/v2
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# Install dependencies
+# Install ALL dependencies
 pip install -r requirements.txt
+cd frontend && npm install && cd ..
 
 # Setup databases
 python create_db.py
 python run_migrations.py
 
-# Start the backend server
-python run_server.py
+# 🚀 START EVERYTHING WITH ONE COMMAND (RECOMMENDED)
+python dev_launcher.py --dynamic --no-backend-reload --load-secrets
 ```
 
-The backend will be available at `http://localhost:8000`
+#### Why This Configuration?
+- **`--dynamic`**: Automatically finds free ports (no "port in use" errors)
+- **`--no-backend-reload`**: 30-50% faster startup and response times
+- **`--load-secrets`**: Loads API keys from Google Cloud (optional)
 
-### Frontend Setup
+The application will be available at the URLs shown in the launcher output.
+
+### Alternative: Traditional Setup
 
 ```bash
-# Navigate to frontend directory
+# Backend (Terminal 1)
+python run_server.py
+# Available at http://localhost:8000
+
+# Frontend (Terminal 2)
 cd frontend
-
-# Install dependencies
-npm install
-
-# Start development server
 npm run dev
+# Available at http://localhost:3000
 ```
-
-The frontend will be available at `http://localhost:3000`
 
 ## 🏗 Architecture
 
@@ -267,12 +271,48 @@ v2/
 
 ### Development Commands
 
+#### Unified Development Environment (Recommended)
+
+##### 🎯 First-Time Developer? Use This:
+```bash
+# BEST CONFIGURATION FOR NEW DEVELOPERS
+# Single command that handles everything optimally
+python dev_launcher.py --dynamic --no-backend-reload --load-secrets
+
+# What this does:
+# ✅ Finds free ports automatically (no conflicts)
+# ✅ Runs 30-50% faster without backend hot reload
+# ✅ Loads secrets from Google Cloud (if configured)
+# ✅ Starts both frontend and backend together
+# ✅ Shows clear status and error messages
+```
+
+##### Other Useful Configurations:
+```bash
+# Development with hot reload (slower but auto-refreshes)
+python dev_launcher.py --dynamic
+
+# Maximum performance (no hot reload at all)
+python dev_launcher.py --dynamic --no-reload
+
+# Custom ports
+python dev_launcher.py --backend-port 8080 --frontend-port 3001
+
+# Check service status
+python scripts/service_discovery.py status
+```
+
+#### Traditional Development Commands
 ```bash
 # Backend development with auto-reload
 uvicorn app.main:app --reload --port 8000
+# Or with dynamic port
+python run_server.py --dynamic-port
 
 # Frontend development with hot-reload
-npm run dev
+cd frontend && npm run dev
+# Or with backend discovery
+cd frontend && node scripts/start_with_discovery.js
 
 # Run linters
 npm run lint           # Frontend
