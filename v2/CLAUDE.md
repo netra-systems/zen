@@ -12,7 +12,10 @@ Netra AI Optimization Platform - The world's best, highest quality, most intelli
 XML specifications are in V2/SPEC/*.XML
 
 ### Backend Development
-```bash
+
+You are on a windows machine.
+
+```
 # Setup virtual environment
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
@@ -29,7 +32,7 @@ python run_server.py
 ```
 
 ### Frontend Development
-```bash
+```
 cd frontend
 npm install
 npm run dev      # Development server
@@ -39,13 +42,13 @@ npm run lint     # Run linter
 ```
 
 ### Testing
-```bash
+```
 # Backend tests
 pytest                    # Run all tests
 pytest tests/test_auth.py # Run specific test file
 pytest -k "test_login"    # Run tests matching pattern
 
-# Frontend tests
+# Frontend
 cd frontend
 npm test                  # Jest tests
 npm run cypress:open      # Interactive Cypress tests
