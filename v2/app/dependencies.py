@@ -5,7 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.postgres import get_async_db
 from app.llm.llm_manager import LLMManager
 from app.services.security_service import SecurityService
-from app.agents.supervisor import Supervisor
+from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
+from app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
 
 DbDep = Annotated[AsyncSession, Depends(get_async_db)]
 
@@ -17,7 +20,7 @@ async def get_db_session(request: Request) -> AsyncSession:
         yield session
 
 def get_security_service(request: Request) -> SecurityService:
-    print("GETTING SECURITY SERVICE")
+    logger.debug("Getting security service from app state")
     return request.app.state.security_service
 
 LLMManagerDep = Annotated[LLMManager, Depends(get_llm_manager)]

@@ -33,11 +33,14 @@ XML specifications are in `SPEC/*.xml`
   - Type definitions must stay synchronized
   - Test coverage requirements must be met
   - See full checklist in the specification
-- `SPEC/test_update_spec.xml` - **AUTOMATED TEST IMPROVEMENT**: Achieve 97% coverage
+- `SPEC/test_update_spec.xml` - **AUTOMATED TEST IMPROVEMENT WITH ULTRA-THINKING**: Achieve 97% coverage
   - Run `python scripts/test_updater.py --execute-spec` or say "run test_update_spec.xml"
+  - **NEW**: Ultra-thinking capabilities for intelligent test analysis
+  - **NEW**: Autonomous test review with `python scripts/test_autonomous_review.py --auto`
   - Automatically generates missing tests, updates legacy patterns, optimizes performance
   - Daily/weekly/monthly automated test improvement cycles
   - Self-healing test capabilities and coverage tracking
+  - AI agent metadata tracking for all modifications
 - `SPEC/conventions.xml` - Project conventions and coding standards
 - `SPEC/instructions.xml` - General development instructions
 - `SPEC/LEGACY_CODE_CLEANUP.xml` - Legacy code identification and cleanup procedures

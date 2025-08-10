@@ -175,12 +175,12 @@ async def lifespan(app: FastAPI):
         logger.info("Application shutdown complete.")
 
 from fastapi.middleware.cors import CORSMiddleware
-from app.auth.auth import init_oauth
+from app.auth.auth import oauth_client
 
 app = FastAPI(lifespan=lifespan)
 
 # Initialize OAuth
-init_oauth(app)
+oauth_client.init_app(app)
 
 @app.middleware("http")
 async def error_context_middleware(request: Request, call_next):

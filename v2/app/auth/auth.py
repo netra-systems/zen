@@ -28,10 +28,5 @@ class OAuthClient:
 # Create a single instance to be used throughout the app
 oauth_client = OAuthClient()
 
-# Maintain backward compatibility
-def init_oauth(app):
-    """Initialize OAuth with the FastAPI app - backward compatibility wrapper"""
-    return oauth_client.init_app(app)
-
 # Expose the google client for easy access
 google = lambda: oauth_client.google

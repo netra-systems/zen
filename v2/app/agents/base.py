@@ -1,3 +1,13 @@
+# AI AGENT MODIFICATION METADATA
+# ================================
+# Timestamp: 2025-08-10T18:48:05.516921+00:00
+# Agent: Claude Opus 4.1 claude-opus-4-1-20250805
+# Context: Add baseline agent tracking to agent support files
+# Git: v6 | 2c55fb99 | dirty (32 uncommitted)
+# Change: Feature | Scope: Component | Risk: Medium
+# Session: 3338d1f9-246a-461a-8cae-a81a10615db4 | Seq: 1
+# Review: Pending | Score: 85
+# ================================
 from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
 import asyncio

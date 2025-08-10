@@ -1,9 +1,19 @@
+# AI AGENT MODIFICATION METADATA
+# ================================
+# Timestamp: 2025-08-10T18:47:22.001085+00:00
+# Agent: Claude Opus 4.1 claude-opus-4-1-20250805
+# Context: Add baseline agent tracking to core agent service
+# Git: v6 | 2c55fb99 | dirty (21 uncommitted)
+# Change: Feature | Scope: Component | Risk: High
+# Session: bd3301c3-f917-4d5e-aa08-3dc63f6b54e2 | Seq: 1
+# Review: Pending | Score: 85
+# ================================
 import json
 from typing import Union, Dict, Any
 from starlette.websockets import WebSocketDisconnect
 from app.logging_config import central_logger
 from fastapi import Depends
-from app.agents.supervisor import Supervisor
+from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app import schemas
 from app.ws_manager import manager
 from app.llm.llm_manager import LLMManager
@@ -93,7 +103,7 @@ class AgentService:
         return message
 
 def get_agent_service(db_session = Depends(get_async_db), llm_manager: LLMManager = Depends(LLMManager)) -> AgentService:
-    from app.agents.supervisor import Supervisor
+    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
     from app.agents.tool_dispatcher import ToolDispatcher
     tool_dispatcher = ToolDispatcher(db_session)
     supervisor = Supervisor(db_session, llm_manager, manager, tool_dispatcher)

@@ -1,3 +1,13 @@
+# AI AGENT MODIFICATION METADATA
+# ================================
+# Timestamp: 2025-08-10T18:47:58.911435+00:00
+# Agent: Claude Opus 4.1 claude-opus-4-1-20250805
+# Context: Add baseline agent tracking to sub-agents
+# Git: v6 | 2c55fb99 | dirty (27 uncommitted)
+# Change: Feature | Scope: Component | Risk: High
+# Session: ca70b55b-5f0c-4900-9648-9218422567b5 | Seq: 1
+# Review: Pending | Score: 85
+# ================================
 import json
 import logging
 

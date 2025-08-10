@@ -1,6 +1,6 @@
 from langchain_core.tools import tool
 from typing import Any, Dict, List, Union
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 import json
 from app.services.apex_optimizer_agent.models import ToolInvocation, ToolStatus
 import asyncio
@@ -11,7 +11,8 @@ class Workload(BaseModel):
     data_source: Union[Dict[str, Any], str] = Field(..., description="The data source for the workload.")
     timeout: int = Field(default=60, description="The timeout for the workload in seconds.")
 
-    @validator('time_range', 'data_source', pre=True)
+    @field_validator('time_range', 'data_source', mode='before')
+    @classmethod
     def parse_str_to_dict(cls, v):
         if isinstance(v, str):
             try:

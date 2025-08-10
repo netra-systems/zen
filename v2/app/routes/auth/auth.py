@@ -13,6 +13,9 @@ from app.schemas.Auth import AuthConfigResponse, AuthEndpoints, DevLoginRequest
 from app.schemas.Token import TokenPayload
 from app.services.user_service import user_service
 from app.services.security_service import SecurityService
+from app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
 
 
 
@@ -66,7 +69,7 @@ class AuthRoutes:
         """Handle OAuth callback from Google"""
         try:
             # Log the callback request for debugging
-            print(f"OAuth callback received with params: {dict(request.query_params)}")
+            logger.info(f"OAuth callback received with params: {dict(request.query_params)}")
             
             token = await oauth_client.google.authorize_access_token(request)
             user_info = await oauth_client.google.parse_id_token(request, token)

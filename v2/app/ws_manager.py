@@ -6,7 +6,7 @@ import time
 import asyncio
 import json
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import threading
 
 logger = central_logger.get_logger(__name__)
@@ -16,8 +16,8 @@ class ConnectionInfo:
     """Information about a WebSocket connection."""
     websocket: WebSocket
     user_id: str
-    connected_at: datetime = field(default_factory=datetime.utcnow)
-    last_ping: datetime = field(default_factory=datetime.utcnow)
+    connected_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    last_ping: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     last_pong: Optional[datetime] = None
     message_count: int = 0
     error_count: int = 0
@@ -129,7 +129,7 @@ class WebSocketManager:
                     logger.debug(f"Error closing WebSocket: {e}")
             
             # Log disconnection with statistics
-            duration = (datetime.utcnow() - conn_info.connected_at).total_seconds()
+            duration = (datetime.now(timezone.utc) - conn_info.connected_at).total_seconds()
             logger.info(
                 f"WebSocket disconnected for user {user_id} "
                 f"(ID: {conn_info.connection_id}, Duration: {duration:.1f}s, "
@@ -220,7 +220,7 @@ class WebSocketManager:
             return False
         
         # Check heartbeat timeout
-        time_since_ping = (datetime.utcnow() - conn_info.last_ping).total_seconds()
+        time_since_ping = (datetime.now(timezone.utc) - conn_info.last_ping).total_seconds()
         if time_since_ping > self.HEARTBEAT_TIMEOUT:
             logger.warning(f"Connection {conn_info.connection_id} heartbeat timeout")
             return False
@@ -236,7 +236,7 @@ class WebSocketManager:
                     "type": "ping",
                     "timestamp": time.time()
                 })
-                conn_info.last_ping = datetime.utcnow()
+                conn_info.last_ping = datetime.now(timezone.utc)
                 
                 # Wait for next heartbeat interval
                 await asyncio.sleep(self.HEARTBEAT_INTERVAL)
@@ -259,7 +259,7 @@ class WebSocketManager:
         """Handle pong response from client."""
         for conn_info in self.active_connections.get(user_id, []):
             if conn_info.websocket == websocket:
-                conn_info.last_pong = datetime.utcnow()
+                conn_info.last_pong = datetime.now(timezone.utc)
                 break
 
     async def send_error(self, user_id: str, error_message: str, sub_agent_name: str = "System"):

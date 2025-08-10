@@ -1,6 +1,5 @@
 """Centralized error handling utilities and FastAPI exception handlers."""
 
-import logging
 from typing import Dict, Any, Optional, Union
 from uuid import uuid4
 from datetime import datetime, timezone
@@ -20,6 +19,7 @@ from starlette.status import (
     HTTP_503_SERVICE_UNAVAILABLE,
 )
 
+from app.logging_config import central_logger
 from .exceptions import (
     NetraException,
     ErrorCode,
@@ -58,7 +58,7 @@ class ErrorHandler:
     """Centralized error handling and logging utility."""
     
     def __init__(self):
-        self._logger = logging.getLogger(__name__)
+        self._logger = central_logger.get_logger(__name__)
     
     def handle_exception(
         self,
@@ -169,7 +169,7 @@ class ErrorHandler:
             )
         
         # General SQLAlchemy error
-        self._logger.error(f"Database error: {exc}")
+        self._logger.error(f"Database error: {exc}", exc_info=True)
         return ErrorResponse(
             error_code=ErrorCode.DATABASE_QUERY_FAILED.value,
             message="Database operation failed",

@@ -5,7 +5,7 @@ Implements intelligent caching with invalidation strategies.
 
 from typing import Optional, Dict, Any, List, Tuple
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import hashlib
 import json
 import asyncio
@@ -27,8 +27,8 @@ class CacheEntry:
     """Represents a cache entry"""
     key: str
     value: Any
-    created_at: datetime = field(default_factory=datetime.utcnow)
-    accessed_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    accessed_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     access_count: int = 0
     ttl: Optional[int] = None
     tags: List[str] = field(default_factory=list)
@@ -39,12 +39,12 @@ class CacheEntry:
         if not self.ttl:
             return False
         
-        age = (datetime.utcnow() - self.created_at).total_seconds()
+        age = (datetime.now(timezone.utc) - self.created_at).total_seconds()
         return age > self.ttl
     
     def update_access(self) -> None:
         """Update access statistics"""
-        self.accessed_at = datetime.utcnow()
+        self.accessed_at = datetime.now(timezone.utc)
         self.access_count += 1
 
 class CacheStatistics:

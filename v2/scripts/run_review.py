@@ -53,7 +53,7 @@ class CodeReviewer:
     
     def run_smoke_tests(self):
         """Run critical system smoke tests"""
-        print("\n🔍 Running Critical Smoke Tests...")
+        print("\n[SMOKE TESTS] Running Critical Smoke Tests...")
         
         tests = [
             ("Backend Imports", "python -c \"from app.main import app; print('✓ FastAPI app imports successfully')\""),
@@ -72,16 +72,16 @@ class CodeReviewer:
             self.smoke_test_results[test_name] = success
             
             if success:
-                print(f"  ✅ {test_name}: PASS")
+                print(f"  [PASS] {test_name}")
             else:
-                print(f"  ❌ {test_name}: FAIL")
+                print(f"  [FAIL] {test_name}")
                 self.issues["critical"].append(f"Smoke test failed: {test_name}")
                 all_passed = False
                 if self.mode == "quick":
                     print(f"     Error: {output[:200]}")
         
         # Frontend tests
-        print("\n  🔍 Testing Frontend...")
+        print("\n  [FRONTEND] Testing Frontend...")
         frontend_tests = [
             ("Frontend Lint", "cd frontend && npm run lint --silent"),
             ("TypeScript Check", "cd frontend && npm run type-check"),
@@ -92,20 +92,20 @@ class CodeReviewer:
             self.smoke_test_results[test_name] = success
             
             if success:
-                print(f"  ✅ {test_name}: PASS")
+                print(f"  [PASS] {test_name}")
             else:
-                print(f"  ⚠️  {test_name}: FAIL (non-critical)")
+                print(f"  [WARN] {test_name}: FAIL (non-critical)")
                 self.issues["medium"].append(f"Frontend check failed: {test_name}")
         
         # Quick import test
-        print("\n  🔍 Running Import Tests...")
+        print("\n  [IMPORTS] Running Import Tests...")
         success, output = self.run_command("python test_runner.py --mode quick", timeout=180)
         self.smoke_test_results["Import Tests"] = success
         
         if success:
-            print(f"  ✅ Import Tests: PASS")
+            print(f"  [PASS] Import Tests")
         else:
-            print(f"  ❌ Import Tests: FAIL")
+            print(f"  [FAIL] Import Tests")
             self.issues["critical"].append("Import validation tests failed")
             all_passed = False
         
@@ -113,7 +113,7 @@ class CodeReviewer:
     
     def analyze_recent_changes(self):
         """Analyze recent git changes for potential issues"""
-        print("\n📊 Analyzing Recent Changes...")
+        print("\n[GIT] Analyzing Recent Changes...")
         
         # Get recent commits
         success, output = self.run_command(f"git log --oneline -n {self.recent_commits}")
@@ -137,7 +137,7 @@ class CodeReviewer:
                             hotspots.append(file)
             
             if hotspots:
-                print(f"  ⚠️  Found {len(hotspots)} frequently changed files (potential bug hotspots)")
+                print(f"  [WARN] Found {len(hotspots)} frequently changed files (potential bug hotspots)")
                 for file in hotspots[:5]:
                     self.issues["medium"].append(f"High-churn file (bug-prone): {file}")
         
@@ -161,13 +161,13 @@ class CodeReviewer:
         if success and output.strip():
             unstaged_files = output.strip().split('\n')
             if len(unstaged_files) > 0:
-                print(f"  ⚠️  Found {len(unstaged_files)} files with unstaged changes")
+                print(f"  [WARN] Found {len(unstaged_files)} files with unstaged changes")
                 if len(unstaged_files) > 10:
                     self.issues["medium"].append(f"Many unstaged changes ({len(unstaged_files)} files)")
     
     def check_spec_code_alignment(self):
         """Check alignment between specifications and code"""
-        print("\n🔍 Checking Spec-Code Alignment...")
+        print("\n[SPEC] Checking Spec-Code Alignment...")
         
         spec_dir = self.project_root / "SPEC"
         if not spec_dir.exists():
@@ -211,12 +211,12 @@ class CodeReviewer:
                 spec_pattern = f"*{module_name}*.xml"
                 matching_specs = list(spec_dir.glob(spec_pattern))
                 if not matching_specs:
-                    print(f"  ⚠️  No specification found for: {module}")
+                    print(f"  [WARN] No specification found for: {module}")
                     self.issues["medium"].append(f"Code without specification: {module}")
     
     def detect_ai_coding_issues(self):
         """Detect common issues from AI-assisted coding"""
-        print("\n🤖 Detecting AI Coding Issues...")
+        print("\n[AI] Detecting AI Coding Issues...")
         
         if self.focus == "ai-issues" or self.mode == "full":
             # Check for duplicate function implementations
@@ -337,7 +337,7 @@ class CodeReviewer:
     
     def check_performance_issues(self):
         """Check for potential performance problems"""
-        print("\n⚡ Checking Performance Issues...")
+        print("\n[PERF] Checking Performance Issues...")
         
         # Check for N+1 query patterns
         success, output = self.run_command(
@@ -363,7 +363,7 @@ class CodeReviewer:
     
     def check_security_issues(self):
         """Check for security vulnerabilities"""
-        print("\n🔒 Checking Security Issues...")
+        print("\n[SECURITY] Checking Security Issues...")
         
         # Check for hardcoded secrets
         patterns = [
@@ -450,7 +450,7 @@ class CodeReviewer:
         if self.security_issues:
             report.append("## Security Issues")
             for issue in self.security_issues:
-                report.append(f"- ⚠️  {issue}")
+                report.append(f"- [WARNING] {issue}")
             report.append("")
         
         # Action Items
@@ -480,7 +480,7 @@ class CodeReviewer:
         report.append("## Recommendations")
         
         if len(self.issues["critical"]) > 0:
-            report.append("- 🚨 **URGENT**: Address critical issues before any new development")
+            report.append("- **URGENT**: Address critical issues before any new development")
         
         if len(self.ai_issues_found) > 5:
             report.append("- Consider manual review of recent AI-generated code")
@@ -511,13 +511,13 @@ class CodeReviewer:
         with open(report_file, 'w', encoding='utf-8') as f:
             f.write(report)
         
-        print(f"\n📄 Report saved to: {report_file}")
+        print(f"\n[REPORT] Report saved to: {report_file}")
         return report_file
     
     def run(self):
         """Execute the complete review process"""
         print("=" * 60)
-        print("🔍 NETRA CODE REVIEW SYSTEM")
+        print("NETRA CODE REVIEW SYSTEM")
         print(f"   Mode: {self.mode.upper()}")
         if self.focus:
             print(f"   Focus: {self.focus}")
@@ -554,22 +554,22 @@ class CodeReviewer:
         
         # Display summary
         print("\n" + "=" * 60)
-        print("📊 REVIEW SUMMARY")
+        print("REVIEW SUMMARY")
         print("=" * 60)
         
         total_issues = sum(len(issues) for issues in self.issues.values())
         
         if len(self.issues["critical"]) > 0:
-            print(f"🚨 CRITICAL Issues: {len(self.issues['critical'])}")
+            print(f"[CRITICAL] Issues: {len(self.issues['critical'])}")
             for issue in self.issues["critical"][:3]:
                 print(f"   - {issue}")
         
         if len(self.issues["high"]) > 0:
-            print(f"⚠️  HIGH Priority Issues: {len(self.issues['high'])}")
+            print(f"[HIGH] Priority Issues: {len(self.issues['high'])}")
             for issue in self.issues["high"][:3]:
                 print(f"   - {issue}")
         
-        print(f"\n📈 Total Issues Found: {total_issues}")
+        print(f"\n[TOTAL] Issues Found: {total_issues}")
         print(f"   Critical: {len(self.issues['critical'])}")
         print(f"   High: {len(self.issues['high'])}")
         print(f"   Medium: {len(self.issues['medium'])}")
@@ -580,13 +580,13 @@ class CodeReviewer:
         
         # Return status based on critical issues
         if len(self.issues["critical"]) > 0:
-            print("\n❌ Review FAILED - Critical issues must be addressed")
+            print("\n[FAILED] Review FAILED - Critical issues must be addressed")
             return False
         elif len(self.issues["high"]) > 5:
-            print("\n⚠️  Review PASSED with warnings - Many high priority issues")
+            print("\n[WARNING] Review PASSED with warnings - Many high priority issues")
             return True
         else:
-            print("\n✅ Review PASSED")
+            print("\n[PASSED] Review PASSED")
             return True
 
 

@@ -85,6 +85,16 @@
           <action>Integrate validated tests into test suite</action>
           <command>python scripts/test_integrator.py --merge-tests</command>
         </step>
+        <step order="6">
+          <action>Add AI metadata headers to generated test files</action>
+          <command>python scripts/metadata_header_generator.py --batch generated_tests/</command>
+          <metadata_info>
+            - Mark as AI-generated content
+            - Include generation context and parameters
+            - Track coverage improvements
+            - Link to parent code files being tested
+          </metadata_info>
+        </step>
       </execution_steps>
     </process>
     
@@ -131,6 +141,16 @@
             - Refresh database fixtures
             - Modernize factory patterns
           </updates>
+        </step>
+        <step order="5">
+          <action>Update metadata headers for modified tests</action>
+          <command>python scripts/metadata_header_updater.py --update-modified</command>
+          <tracking>
+            - Record modernization changes
+            - Document pattern updates
+            - Track performance improvements
+            - Note breaking changes
+          </tracking>
         </step>
       </execution_steps>
     </process>
@@ -400,7 +420,7 @@
         <trigger>Test failure pattern detected</trigger>
         <trigger>Performance degradation observed</trigger>
       </triggers>
-      <automation_script>scripts/run_review.py</automation_script>
+      <automation_script>scripts/test_autonomous_review.py</automation_script>
     </capability>
     
     <capability id="UTC3">
@@ -468,6 +488,626 @@
       <automation_script>scripts/predictive_optimizer.py</automation_script>
     </capability>
   </ultra_thinking_capabilities>
+
+  <ai_agent_file_metadata_tracking>
+    <metadata>
+      <name>AI Agent File Modification Tracking System</name>
+      <version>1.0</version>
+      <purpose>Create comprehensive audit trail for all AI-assisted code modifications</purpose>
+      <description>Every file modified by an AI agent includes detailed metadata header for change tracking, accountability, and rollback capabilities</description>
+      <implementation_date>2025-08-10</implementation_date>
+    </metadata>
+
+    <tracking_requirement id="AAFMT1">
+      <name>Mandatory Metadata Header</name>
+      <description>All files modified by AI agents must include a metadata header at the top</description>
+      <enforcement>Automatic via pre-commit hooks and agent tooling</enforcement>
+      <format>
+        <location>Top of file after shebang/encoding declarations</location>
+        <style>Language-appropriate comment format</style>
+        <structure>
+          /*
+           * AI AGENT MODIFICATION METADATA
+           * ================================
+           * Timestamp: ISO-8601 format with timezone
+           * Agent: Model name and version
+           * Context: Task description or prompt summary
+           * Git State: Branch, commit hash, dirty status
+           * Change Type: Feature/Fix/Refactor/Test/Docs
+           * Risk Level: Low/Medium/High/Critical
+           * Review Status: Pending/Reviewed/Approved
+           * Session ID: Unique identifier for tracking
+           * ================================
+           */
+        </structure>
+      </format>
+    </tracking_requirement>
+
+    <metadata_fields>
+      <field id="MF1">
+        <name>Timestamp</name>
+        <format>ISO-8601 with timezone (e.g., 2025-08-10T14:30:00Z)</format>
+        <required>true</required>
+        <example>2025-08-10T14:30:00-07:00</example>
+      </field>
+      
+      <field id="MF2">
+        <name>Agent Information</name>
+        <components>
+          <component>Model Name (e.g., Claude, GPT-4)</component>
+          <component>Model Version (e.g., claude-opus-4-1-20250805)</component>
+          <component>Tool Version (e.g., claude-code v1.2.3)</component>
+        </components>
+        <required>true</required>
+        <example>Claude Opus 4.1 (claude-opus-4-1-20250805) via claude-code v1.2.3</example>
+      </field>
+      
+      <field id="MF3">
+        <name>Context Information</name>
+        <components>
+          <component>Task Description (first 200 chars of prompt)</component>
+          <component>Execution Plan Summary</component>
+          <component>Parent Task ID (if part of larger workflow)</component>
+          <component>User Intent Category</component>
+        </components>
+        <required>true</required>
+        <example>Task: Add dark mode toggle to settings | Plan: Implement UI component, add state management, update styles</example>
+      </field>
+      
+      <field id="MF4">
+        <name>Git State</name>
+        <components>
+          <component>Current Branch</component>
+          <component>Base Commit Hash (8 chars)</component>
+          <component>Working Directory Status (clean/dirty)</component>
+          <component>Uncommitted Changes Count</component>
+        </components>
+        <required>true</required>
+        <example>Branch: feature/dark-mode | Commit: a1b2c3d4 | Status: dirty (3 uncommitted)</example>
+      </field>
+      
+      <field id="MF5">
+        <name>Change Classification</name>
+        <components>
+          <component>Change Type (Feature/Bugfix/Refactor/Test/Documentation/Performance/Security)</component>
+          <component>Impact Scope (File/Module/Component/System)</component>
+          <component>Breaking Change Flag (true/false)</component>
+          <component>Dependencies Modified (true/false)</component>
+        </components>
+        <required>true</required>
+        <example>Type: Feature | Scope: Component | Breaking: false | Dependencies: true</example>
+      </field>
+      
+      <field id="MF6">
+        <name>Risk Assessment</name>
+        <levels>
+          <level name="Low">Cosmetic changes, documentation, simple refactors</level>
+          <level name="Medium">New features, non-critical bug fixes</level>
+          <level name="High">Core logic changes, API modifications</level>
+          <level name="Critical">Security changes, payment logic, authentication</level>
+        </levels>
+        <required>true</required>
+        <auto_detection>Based on file path, change type, and keywords</auto_detection>
+      </field>
+      
+      <field id="MF7">
+        <name>Review Tracking</name>
+        <components>
+          <component>Review Status (Pending/InReview/Reviewed/Approved/Rejected)</component>
+          <component>Reviewer (if reviewed)</component>
+          <component>Review Comments</component>
+          <component>Auto-Review Score (0-100)</component>
+        </components>
+        <required>true</required>
+        <example>Status: Pending | Auto-Score: 85/100</example>
+      </field>
+      
+      <field id="MF8">
+        <name>Session Tracking</name>
+        <components>
+          <component>Session ID (UUID)</component>
+          <component>Conversation ID</component>
+          <component>Request Sequence Number</component>
+          <component>Total Files Modified in Session</component>
+        </components>
+        <required>true</required>
+        <example>Session: 550e8400-e29b-41d4-a716-446655440000 | Conv: chat_123 | Seq: 5 | Files: 12</example>
+      </field>
+      
+      <field id="MF9">
+        <name>Quality Metrics</name>
+        <components>
+          <component>Lines Added/Modified/Deleted</component>
+          <component>Complexity Delta (before/after)</component>
+          <component>Test Coverage Delta</component>
+          <component>Linting Issues Introduced</component>
+        </components>
+        <required>false</required>
+        <example>+45/-12 lines | Complexity: 12→10 | Coverage: 75%→80% | Lint: 0 issues</example>
+      </field>
+      
+      <field id="MF10">
+        <name>Rollback Information</name>
+        <components>
+          <component>Previous Version Hash</component>
+          <component>Rollback Command</component>
+          <component>Backup Location</component>
+          <component>Recovery Instructions</component>
+        </components>
+        <required>true</required>
+        <example>Previous: abc123de | Rollback: git checkout abc123de -- path/to/file.py</example>
+      </field>
+    </metadata_fields>
+
+    <implementation_strategy>
+      <strategy id="IS1">
+        <name>Automatic Header Injection</name>
+        <description>Modify AI agent tools to automatically prepend metadata headers</description>
+        <implementation_steps>
+          <step>Hook into Edit, Write, and MultiEdit tools</step>
+          <step>Gather metadata before file modification</step>
+          <step>Prepend formatted header to file content</step>
+          <step>Preserve existing headers for history</step>
+          <step>Update header on subsequent modifications</step>
+        </implementation_steps>
+        <code_location>app/tools/file_operations.py</code_location>
+      </strategy>
+      
+      <strategy id="IS2">
+        <name>Git Integration</name>
+        <description>Integrate with git hooks for metadata enforcement</description>
+        <git_hooks>
+          <hook name="pre-commit">
+            <action>Verify metadata headers exist in modified files</action>
+            <action>Validate metadata format and completeness</action>
+            <action>Block commit if metadata missing or invalid</action>
+          </hook>
+          <hook name="post-commit">
+            <action>Update metadata with commit hash</action>
+            <action>Archive metadata to audit log</action>
+          </hook>
+        </git_hooks>
+        <script>scripts/git_hooks/metadata_validator.py</script>
+      </strategy>
+      
+      <strategy id="IS3">
+        <name>Metadata Database</name>
+        <description>Central database for tracking all AI modifications</description>
+        <schema>
+          <table name="ai_modifications">
+            <column>id (UUID PRIMARY KEY)</column>
+            <column>file_path (TEXT)</column>
+            <column>timestamp (TIMESTAMP WITH TIMEZONE)</column>
+            <column>agent_info (JSONB)</column>
+            <column>git_state (JSONB)</column>
+            <column>change_metadata (JSONB)</column>
+            <column>session_id (UUID)</column>
+            <column>user_id (UUID)</column>
+          </table>
+        </schema>
+        <features>
+          <feature>Query modifications by agent, user, or time range</feature>
+          <feature>Track modification patterns and trends</feature>
+          <feature>Generate audit reports</feature>
+          <feature>Support rollback operations</feature>
+        </features>
+      </strategy>
+      
+      <strategy id="IS4">
+        <name>Intelligent Metadata Extraction</name>
+        <description>Automatically extract context from prompts and conversations</description>
+        <extraction_methods>
+          <method>NLP analysis of user prompts</method>
+          <method>Task classification using ML models</method>
+          <method>Dependency graph analysis</method>
+          <method>Impact assessment algorithms</method>
+        </extraction_methods>
+        <script>scripts/metadata_extractor.py</script>
+      </strategy>
+    </implementation_strategy>
+
+    <header_formats>
+      <format language="python">
+        <template><![CDATA[
+# AI AGENT MODIFICATION METADATA
+# ================================
+# Timestamp: {timestamp}
+# Agent: {agent_name} {agent_version}
+# Context: {task_description}
+# Git: {git_branch} | {git_commit} | {git_status}
+# Change: {change_type} | Scope: {scope} | Risk: {risk_level}
+# Session: {session_id} | Seq: {sequence_number}
+# Review: {review_status} | Score: {auto_score}
+# ================================
+        ]]></template>
+      </format>
+      
+      <format language="javascript">
+        <template><![CDATA[
+/**
+ * AI AGENT MODIFICATION METADATA
+ * ================================
+ * Timestamp: {timestamp}
+ * Agent: {agent_name} {agent_version}
+ * Context: {task_description}
+ * Git: {git_branch} | {git_commit} | {git_status}
+ * Change: {change_type} | Scope: {scope} | Risk: {risk_level}
+ * Session: {session_id} | Seq: {sequence_number}
+ * Review: {review_status} | Score: {auto_score}
+ * ================================
+ */
+        ]]></template>
+      </format>
+      
+      <format language="typescript">
+        <template><![CDATA[
+/**
+ * AI AGENT MODIFICATION METADATA
+ * ================================
+ * @timestamp {timestamp}
+ * @agent {agent_name} {agent_version}
+ * @context {task_description}
+ * @git {git_branch} | {git_commit} | {git_status}
+ * @change {change_type} | Scope: {scope} | Risk: {risk_level}
+ * @session {session_id} | Seq: {sequence_number}
+ * @review {review_status} | Score: {auto_score}
+ * ================================
+ */
+        ]]></template>
+      </format>
+      
+      <format language="html">
+        <template><![CDATA[
+<!--
+  AI AGENT MODIFICATION METADATA
+  ================================
+  Timestamp: {timestamp}
+  Agent: {agent_name} {agent_version}
+  Context: {task_description}
+  Git: {git_branch} | {git_commit} | {git_status}
+  Change: {change_type} | Scope: {scope} | Risk: {risk_level}
+  Session: {session_id} | Seq: {sequence_number}
+  Review: {review_status} | Score: {auto_score}
+  ================================
+-->
+        ]]></template>
+      </format>
+      
+      <format language="css">
+        <template><![CDATA[
+/*
+ * AI AGENT MODIFICATION METADATA
+ * ================================
+ * Timestamp: {timestamp}
+ * Agent: {agent_name} {agent_version}
+ * Context: {task_description}
+ * Git: {git_branch} | {git_commit} | {git_status}
+ * Change: {change_type} | Scope: {scope} | Risk: {risk_level}
+ * Session: {session_id} | Seq: {sequence_number}
+ * Review: {review_status} | Score: {auto_score}
+ * ================================
+ */
+        ]]></template>
+      </format>
+      
+      <format language="sql">
+        <template><![CDATA[
+-- AI AGENT MODIFICATION METADATA
+-- ================================
+-- Timestamp: {timestamp}
+-- Agent: {agent_name} {agent_version}
+-- Context: {task_description}
+-- Git: {git_branch} | {git_commit} | {git_status}
+-- Change: {change_type} | Scope: {scope} | Risk: {risk_level}
+-- Session: {session_id} | Seq: {sequence_number}
+-- Review: {review_status} | Score: {auto_score}
+-- ================================
+        ]]></template>
+      </format>
+      
+      <format language="yaml">
+        <template><![CDATA[
+# AI AGENT MODIFICATION METADATA
+# ================================
+# metadata:
+#   timestamp: {timestamp}
+#   agent: {agent_name} {agent_version}
+#   context: {task_description}
+#   git:
+#     branch: {git_branch}
+#     commit: {git_commit}
+#     status: {git_status}
+#   change:
+#     type: {change_type}
+#     scope: {scope}
+#     risk: {risk_level}
+#   session:
+#     id: {session_id}
+#     sequence: {sequence_number}
+#   review:
+#     status: {review_status}
+#     score: {auto_score}
+# ================================
+        ]]></template>
+      </format>
+      
+      <format language="xml">
+        <template><![CDATA[
+<!--
+  AI AGENT MODIFICATION METADATA
+  ================================
+  <metadata>
+    <timestamp>{timestamp}</timestamp>
+    <agent>{agent_name} {agent_version}</agent>
+    <context>{task_description}</context>
+    <git>
+      <branch>{git_branch}</branch>
+      <commit>{git_commit}</commit>
+      <status>{git_status}</status>
+    </git>
+    <change>
+      <type>{change_type}</type>
+      <scope>{scope}</scope>
+      <risk>{risk_level}</risk>
+    </change>
+    <session>
+      <id>{session_id}</id>
+      <sequence>{sequence_number}</sequence>
+    </session>
+    <review>
+      <status>{review_status}</status>
+      <score>{auto_score}</score>
+    </review>
+  </metadata>
+  ================================
+-->
+        ]]></template>
+      </format>
+    </header_formats>
+
+    <automation_tools>
+      <tool id="AT1">
+        <name>Metadata Header Generator</name>
+        <description>Automatically generate metadata headers for files</description>
+        <command>python scripts/metadata_header_generator.py --file {file_path}</command>
+        <features>
+          <feature>Auto-detect file language</feature>
+          <feature>Extract git information</feature>
+          <feature>Gather session context</feature>
+          <feature>Format appropriate header</feature>
+        </features>
+      </tool>
+      
+      <tool id="AT2">
+        <name>Metadata Validator</name>
+        <description>Validate metadata headers in modified files</description>
+        <command>python scripts/metadata_validator.py --validate {file_path}</command>
+        <validations>
+          <validation>Check header presence</validation>
+          <validation>Verify required fields</validation>
+          <validation>Validate timestamp format</validation>
+          <validation>Confirm git state accuracy</validation>
+        </validations>
+      </tool>
+      
+      <tool id="AT3">
+        <name>Metadata Audit Reporter</name>
+        <description>Generate audit reports from metadata</description>
+        <command>python scripts/metadata_audit_reporter.py --generate-report</command>
+        <reports>
+          <report>Daily modification summary</report>
+          <report>Agent activity analysis</report>
+          <report>Risk assessment overview</report>
+          <report>Review status tracking</report>
+        </reports>
+      </tool>
+      
+      <tool id="AT4">
+        <name>Metadata History Viewer</name>
+        <description>View modification history for files</description>
+        <command>python scripts/metadata_history.py --file {file_path}</command>
+        <features>
+          <feature>Show all modifications chronologically</feature>
+          <feature>Filter by agent or user</feature>
+          <feature>Display change diffs</feature>
+          <feature>Export history to JSON/CSV</feature>
+        </features>
+      </tool>
+      
+      <tool id="AT5">
+        <name>Rollback Manager</name>
+        <description>Rollback AI modifications using metadata</description>
+        <command>python scripts/rollback_manager.py --rollback {session_id}</command>
+        <capabilities>
+          <capability>Rollback single file</capability>
+          <capability>Rollback entire session</capability>
+          <capability>Selective rollback by criteria</capability>
+          <capability>Preview rollback changes</capability>
+        </capabilities>
+      </tool>
+    </automation_tools>
+
+    <monitoring_and_compliance>
+      <compliance id="MC1">
+        <name>Metadata Coverage</name>
+        <metric>Percentage of AI-modified files with valid metadata</metric>
+        <target>100%</target>
+        <enforcement>Block commits without metadata</enforcement>
+      </compliance>
+      
+      <compliance id="MC2">
+        <name>Review Completion</name>
+        <metric>Percentage of AI modifications reviewed</metric>
+        <target>100% for high/critical risk changes</target>
+        <alert_threshold>Any critical change unreviewed for >1 hour</alert_threshold>
+      </compliance>
+      
+      <compliance id="MC3">
+        <name>Audit Trail Integrity</name>
+        <metric>Complete chain of modifications traceable</metric>
+        <verification>Daily audit trail validation</verification>
+        <backup>Redundant storage of metadata</backup>
+      </compliance>
+      
+      <compliance id="MC4">
+        <name>Session Tracking</name>
+        <metric>All modifications linked to sessions</metric>
+        <requirement>No orphaned modifications</requirement>
+        <validation>Session ID validation on every change</validation>
+      </compliance>
+    </monitoring_and_compliance>
+
+    <integration_with_test_automation>
+      <integration id="ITA1">
+        <name>Test Generation Metadata</name>
+        <description>Include metadata in AI-generated tests</description>
+        <additional_fields>
+          <field>Test Coverage Delta</field>
+          <field>Test Type (unit/integration/e2e)</field>
+          <field>Tested Components</field>
+          <field>Expected Behavior Description</field>
+        </additional_fields>
+      </integration>
+      
+      <integration id="ITA2">
+        <name>Test Update Tracking</name>
+        <description>Track when tests are modified by AI</description>
+        <tracking>
+          <track>Reason for test modification</track>
+          <track>Previous test behavior</track>
+          <track>New assertions added</track>
+          <track>Performance impact</track>
+        </tracking>
+      </integration>
+      
+      <integration id="ITA3">
+        <name>Coverage Impact Analysis</name>
+        <description>Link code changes to coverage changes</description>
+        <analysis>
+          <analyze>Coverage before modification</analyze>
+          <analyze>Coverage after modification</analyze>
+          <analyze>New lines requiring tests</analyze>
+          <analyze>Test recommendations</analyze>
+        </analysis>
+      </integration>
+    </integration_with_test_automation>
+
+    <benefits>
+      <benefit id="B1">
+        <name>Complete Audit Trail</name>
+        <description>Every AI modification is tracked and traceable</description>
+        <value>Regulatory compliance and accountability</value>
+      </benefit>
+      
+      <benefit id="B2">
+        <name>Quick Rollback Capability</name>
+        <description>Instantly revert problematic changes</description>
+        <value>Reduced risk and faster recovery</value>
+      </benefit>
+      
+      <benefit id="B3">
+        <name>Quality Insights</name>
+        <description>Analyze AI agent performance and patterns</description>
+        <value>Continuous improvement of AI assistance</value>
+      </benefit>
+      
+      <benefit id="B4">
+        <name>Security and Compliance</name>
+        <description>Track all changes for security audits</description>
+        <value>Meet regulatory requirements</value>
+      </benefit>
+      
+      <benefit id="B5">
+        <name>Team Collaboration</name>
+        <description>Clear visibility of AI-assisted changes</description>
+        <value>Better code review and knowledge sharing</value>
+      </benefit>
+    </benefits>
+
+    <rollout_plan>
+      <phase id="RP1">
+        <name>Phase 1: Core Implementation</name>
+        <timeline>Week 1-2</timeline>
+        <tasks>
+          <task>Implement metadata header generator</task>
+          <task>Modify AI agent tools to inject headers</task>
+          <task>Create basic validation scripts</task>
+          <task>Set up metadata database</task>
+        </tasks>
+      </phase>
+      
+      <phase id="RP2">
+        <name>Phase 2: Integration</name>
+        <timeline>Week 3-4</timeline>
+        <tasks>
+          <task>Integrate with git hooks</task>
+          <task>Connect to test automation</task>
+          <task>Implement audit reporting</task>
+          <task>Add rollback capabilities</task>
+        </tasks>
+      </phase>
+      
+      <phase id="RP3">
+        <name>Phase 3: Enforcement</name>
+        <timeline>Week 5-6</timeline>
+        <tasks>
+          <task>Enable mandatory metadata validation</task>
+          <task>Block commits without metadata</task>
+          <task>Set up monitoring alerts</task>
+          <task>Train team on new requirements</task>
+        </tasks>
+      </phase>
+      
+      <phase id="RP4">
+        <name>Phase 4: Optimization</name>
+        <timeline>Week 7-8</timeline>
+        <tasks>
+          <task>Optimize metadata extraction</task>
+          <task>Enhance auto-review scoring</task>
+          <task>Implement advanced analytics</task>
+          <task>Create compliance dashboards</task>
+        </tasks>
+      </phase>
+    </rollout_plan>
+
+    <execution_commands>
+      <command id="EC1">
+        <name>Enable Metadata Tracking</name>
+        <description>Turn on automatic metadata tracking for all AI modifications</description>
+        <primary_command>python scripts/enable_metadata_tracking.py --activate</primary_command>
+        <what_it_does>
+          <action>Installs git hooks for metadata validation</action>
+          <action>Configures AI agent tools to inject headers</action>
+          <action>Sets up metadata database</action>
+          <action>Enables monitoring and alerts</action>
+        </what_it_does>
+      </command>
+      
+      <command id="EC2">
+        <name>Generate Metadata Report</name>
+        <description>Create comprehensive report of AI modifications</description>
+        <primary_command>python scripts/metadata_report.py --generate</primary_command>
+        <options>
+          <option>--date-range: Specify time period</option>
+          <option>--agent: Filter by specific agent</option>
+          <option>--risk-level: Filter by risk level</option>
+          <option>--format: Output format (html/pdf/json)</option>
+        </options>
+      </command>
+      
+      <command id="EC3">
+        <name>Validate Project Metadata</name>
+        <description>Check all files for proper metadata headers</description>
+        <primary_command>python scripts/validate_all_metadata.py --scan</primary_command>
+        <actions>
+          <action>Scan all project files</action>
+          <action>Identify files missing metadata</action>
+          <action>Validate existing metadata</action>
+          <action>Generate compliance report</action>
+        </actions>
+      </command>
+    </execution_commands>
+  </ai_agent_file_metadata_tracking>
 
   <continuous_improvement>
     <improvement id="CI1">
@@ -555,7 +1195,7 @@
         <action>Remove redundant tests</action>
         <action>Fix flaky tests automatically</action>
       </actions>
-      <command>python scripts/run_review.py --auto</command>
+      <command>python scripts/test_autonomous_review.py --auto</command>
     </management>
     
     <management id="ATM2">
@@ -630,13 +1270,16 @@
         <step>Execute autonomous test review</step>
         <step>Run coverage gap analysis</step>
         <step>Generate missing tests for critical paths</step>
+        <step>Add AI metadata headers to all generated files</step>
         <step>Update outdated test patterns</step>
         <step>Clean up legacy tests</step>
+        <step>Update metadata for all modified files</step>
         <step>Execute comprehensive test suite</step>
         <step>Generate coverage report</step>
+        <step>Generate AI modification audit report</step>
         <step>Create improvement tasks</step>
       </steps>
-      <command>python scripts/test_updater.py --daily-cycle</command>
+      <command>python scripts/test_updater.py --daily-cycle --with-metadata</command>
     </workflow>
     
     <workflow id="EW2">
@@ -801,36 +1444,100 @@
     </integration>
   </integration_points>
 
+  <master_execution_commands>
+    <command id="MEC1">
+      <name>Run Complete Test Update Specification</name>
+      <description>Single command to execute all test improvements</description>
+      <usage>User can say: "run test_update_spec.xml"</usage>
+      <primary_command>python scripts/test_updater.py --execute-spec</primary_command>
+      <alternative_commands>
+        <command>python scripts/test_autonomous_review.py --full-analysis</command>
+        <command>python scripts/test_updater.py --ultra-think</command>
+        <command>make test-update-spec</command>
+      </alternative_commands>
+      <what_it_does>
+        <action>Analyzes entire codebase with ultra-thinking capabilities</action>
+        <action>Identifies all test gaps and quality issues</action>
+        <action>Generates missing tests automatically</action>
+        <action>Updates and modernizes existing tests</action>
+        <action>Removes redundant and legacy tests</action>
+        <action>Optimizes test performance</action>
+        <action>Ensures 97% coverage goal achievement</action>
+        <action>Creates comprehensive reports</action>
+        <action>Sets up continuous improvement</action>
+      </what_it_does>
+    </command>
+    
+    <command id="MEC2">
+      <name>Quick Test Refresh</name>
+      <description>Fast test update for immediate improvements</description>
+      <usage>User can say: "refresh tests" or "update tests"</usage>
+      <primary_command>python scripts/test_autonomous_review.py --quick</primary_command>
+      <execution_time>< 5 minutes</execution_time>
+      <actions>
+        <action>Quick coverage analysis</action>
+        <action>Generate tests for top 10 uncovered files</action>
+        <action>Fix obvious test issues</action>
+        <action>Update deprecated patterns</action>
+      </actions>
+    </command>
+    
+    <command id="MEC3">
+      <name>Add Specific Test Types</name>
+      <description>Generate specific test categories on demand</description>
+      <usage>User doesn't need to specify "add unit tests" or "add e2e tests"</usage>
+      <intelligent_detection>System automatically determines what tests are needed</intelligent_detection>
+      <primary_command>python scripts/test_autonomous_review.py --smart-generate</primary_command>
+      <auto_detection>
+        <detect>Missing unit tests for services</detect>
+        <detect>Missing integration tests for APIs</detect>
+        <detect>Missing E2E tests for user flows</detect>
+        <detect>Missing performance tests for critical paths</detect>
+        <detect>Missing security tests for auth flows</detect>
+      </auto_detection>
+    </command>
+  </master_execution_commands>
+
   <quick_start_guide>
     <step order="1">
-      <title>Initial Setup</title>
-      <command>python scripts/test_updater.py --setup</command>
-      <description>Install dependencies and configure test update system</description>
-    </step>
-    
-    <step order="2">
-      <title>Baseline Analysis</title>
-      <command>python scripts/test_updater.py --analyze-baseline</command>
-      <description>Analyze current test suite and coverage</description>
-    </step>
-    
-    <step order="3">
-      <title>Execute Spec</title>
+      <title>One-Command Setup and Execution</title>
       <command>python scripts/test_updater.py --execute-spec</command>
-      <description>Run full test update specification</description>
+      <description>Automatically sets up, analyzes, and improves entire test suite to 97% coverage</description>
+      <note>This is all you need! The system handles everything else automatically.</note>
     </step>
     
-    <step order="4">
-      <title>Schedule Automation</title>
-      <command>python scripts/test_updater.py --schedule-automation</command>
-      <description>Set up automated test improvement cycles</description>
-    </step>
+    <alternative_simple_commands>
+      <command>
+        <trigger>User says: "run test_update_spec.xml"</trigger>
+        <execution>python scripts/test_updater.py --execute-spec</execution>
+      </command>
+      <command>
+        <trigger>User says: "improve tests"</trigger>
+        <execution>python scripts/test_autonomous_review.py --auto</execution>
+      </command>
+      <command>
+        <trigger>User says: "update test coverage"</trigger>
+        <execution>python scripts/test_updater.py --execute-spec</execution>
+      </command>
+      <command>
+        <trigger>User says: "clean up tests"</trigger>
+        <execution>python scripts/legacy_test_cleaner.py --aggressive</execution>
+      </command>
+    </alternative_simple_commands>
     
-    <step order="5">
-      <title>Monitor Progress</title>
-      <command>python scripts/test_updater.py --monitor</command>
-      <description>Track coverage improvements toward 97% goal</description>
-    </step>
+    <optional_advanced_steps>
+      <step order="2">
+        <title>Schedule Continuous Automation (Optional)</title>
+        <command>python scripts/test_updater.py --schedule-automation</command>
+        <description>Set up automated test improvement cycles</description>
+      </step>
+      
+      <step order="3">
+        <title>Monitor Progress (Optional)</title>
+        <command>python scripts/test_updater.py --monitor</command>
+        <description>Track coverage improvements toward 97% goal</description>
+      </step>
+    </optional_advanced_steps>
   </quick_start_guide>
 
   <success_criteria>
@@ -900,6 +1607,18 @@
       <specification>SPEC/ai_slop_prevention_spec.xml</specification>
       <relationship>Ensures generated tests avoid AI anti-patterns</relationship>
       <integration>Test generation follows quality guidelines</integration>
+    </reference>
+    
+    <reference id="XR6">
+      <specification>AI Agent File Metadata Tracking</specification>
+      <relationship>Provides comprehensive audit trail for all AI-modified files including tests</relationship>
+      <integration>All AI-generated or modified tests include metadata headers for tracking</integration>
+      <benefits>
+        - Complete traceability of AI-generated tests
+        - Rollback capability for problematic test changes
+        - Quality metrics tracking for test improvements
+        - Audit compliance for regulatory requirements
+      </benefits>
     </reference>
   </cross_references>
 </test_update_specification>

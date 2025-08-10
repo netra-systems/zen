@@ -5,7 +5,7 @@ Provides centralized state management with transaction support.
 
 from typing import Dict, Any, Optional, List, Type, Callable
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 import asyncio
 import json
@@ -52,7 +52,7 @@ class StateTransaction:
             "operation": operation,
             "key": key,
             "value": value,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         })
 
 class StateManager:
@@ -122,7 +122,7 @@ class StateManager:
     @asynccontextmanager
     async def transaction(self):
         """Create a state transaction context"""
-        transaction_id = f"txn_{datetime.utcnow().timestamp()}"
+        transaction_id = f"txn_{datetime.now(timezone.utc).timestamp()}"
         transaction = StateTransaction(id=transaction_id)
         
         self._transactions[transaction_id] = transaction
@@ -225,7 +225,7 @@ class StateManager:
     
     async def _create_snapshot(self) -> StateSnapshot:
         """Create a state snapshot"""
-        snapshot_id = f"snapshot_{datetime.utcnow().timestamp()}"
+        snapshot_id = f"snapshot_{datetime.now(timezone.utc).timestamp()}"
         
         if self.storage in [StateStorage.MEMORY, StateStorage.HYBRID]:
             data = dict(self._memory_store)
@@ -240,7 +240,7 @@ class StateManager:
         
         snapshot = StateSnapshot(
             id=snapshot_id,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             data=data,
             metadata={
                 "storage": self.storage.value,
