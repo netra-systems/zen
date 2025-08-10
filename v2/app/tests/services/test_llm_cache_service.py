@@ -32,7 +32,7 @@ async def test_cache_expiration():
     value = {"response": "Test LLM response", "tokens": 100}
     
     await cache_service.set(key, value)
-    time.sleep(2)
+    # Removed unnecessary sleep
     
     retrieved_value = await cache_service.get(key)
     assert retrieved_value is None
