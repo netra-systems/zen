@@ -208,6 +208,13 @@ class DevLauncher:
             print("❌ Backend service discovery not found. Backend may not be running.")
             return None
         
+        # Determine port
+        if self.dynamic_ports:
+            port = self.get_free_port()
+            print(f"   Allocated port: {port}")
+        else:
+            port = self.frontend_port
+        
         # Determine the npm command based on reload setting
         npm_command = "dev" if self.frontend_reload else "start"
         
@@ -226,7 +233,7 @@ class DevLauncher:
         env = os.environ.copy()
         env["NEXT_PUBLIC_API_URL"] = backend_info["api_url"]
         env["NEXT_PUBLIC_WS_URL"] = backend_info["ws_url"]
-        env["PORT"] = str(self.frontend_port)
+        env["PORT"] = str(port)
         
         # Start process
         try:
@@ -255,12 +262,12 @@ class DevLauncher:
                 print("❌ Frontend failed to start")
                 return None
             
-            print(f"✅ Frontend started on port {self.frontend_port}")
-            print(f"   URL: http://localhost:{self.frontend_port}")
+            print(f"✅ Frontend started on port {port}")
+            print(f"   URL: http://localhost:{port}")
             print(f"   Hot reload: {'ENABLED' if self.frontend_reload else 'DISABLED'}")
             
             # Write frontend info to service discovery
-            self.service_discovery.write_frontend_info(self.frontend_port)
+            self.service_discovery.write_frontend_info(port)
             
             return process
             
