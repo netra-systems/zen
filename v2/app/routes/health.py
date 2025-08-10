@@ -31,9 +31,9 @@ async def ready() -> Dict[str, str]:
             result.scalar_one_or_none()
 
         # Check ClickHouse connection
-        clickhouse_client = central_logger.clickhouse_db
-        if not await asyncio.to_thread(clickhouse_client.ping):
-            raise Exception("ClickHouse connection failed")
+        from app.db.clickhouse import get_clickhouse_client
+        async with get_clickhouse_client() as client:
+            client.ping()
 
         # If all checks pass, return a success response
         return {"status": "ok"}

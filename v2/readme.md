@@ -32,54 +32,97 @@ Netra is a sophisticated AI optimization platform that leverages a multi-agent s
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.9+ (3.11+ recommended)
 - Node.js 18+
-- PostgreSQL 14+
-- ClickHouse (optional for analytics)
-- Redis (optional for caching)
+- Git
 
-### 🎯 Recommended: First-Time Developer Setup
+### 🎯 One-Command Installation (Recommended for New Developers)
 
+#### Windows
 ```bash
 # Clone the repository
 git clone https://github.com/netrasystems/netra-core-generation-1.git
 cd netra-core-generation-1/v2
 
-# Create virtual environment
+# Run the automated installer
+setup.bat
+```
+
+#### macOS/Linux
+```bash
+# Clone the repository
+git clone https://github.com/netrasystems/netra-core-generation-1.git
+cd netra-core-generation-1/v2
+
+# Run the automated installer
+chmod +x setup.sh
+./setup.sh
+```
+
+The installer will automatically:
+✅ Check all prerequisites
+✅ Create Python virtual environment
+✅ Install all Python packages
+✅ Install all frontend dependencies
+✅ Set up databases (PostgreSQL/SQLite)
+✅ Configure environment variables
+✅ Create startup scripts
+✅ Run verification tests
+
+### 🚀 Starting the Development Environment
+
+After installation, start everything with one command:
+
+#### Windows
+```bash
+start_dev.bat
+```
+
+#### macOS/Linux
+```bash
+./start_dev.sh
+```
+
+This will launch:
+- Backend API at http://localhost:8000
+- Frontend UI at http://localhost:3000
+
+### Alternative: Manual Setup
+
+If you prefer manual control or the installer encounters issues:
+
+```bash
+# 1. Set up Python environment
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# Install ALL dependencies
+# 2. Install dependencies
 pip install -r requirements.txt
 cd frontend && npm install && cd ..
 
-# Setup databases
+# 3. Configure environment
+cp .env.example .env  # Edit with your settings
+
+# 4. Set up databases
 python create_db.py
 python run_migrations.py
 
-# 🚀 START EVERYTHING WITH ONE COMMAND (RECOMMENDED)
-python dev_launcher.py --dynamic --no-backend-reload --load-secrets
+# 5. Start services
+python dev_launcher.py --dynamic --no-backend-reload
 ```
 
-#### Why This Configuration?
-- **`--dynamic`**: Automatically finds free ports (no "port in use" errors)
-- **`--no-backend-reload`**: 30-50% faster startup and response times
-- **`--load-secrets`**: Loads API keys from Google Cloud (optional)
+### 🔧 Troubleshooting
 
-The application will be available at the URLs shown in the launcher output.
+If the installer fails:
+1. Ensure Python 3.9+ is installed and in PATH
+2. Ensure Node.js 18+ is installed
+3. On Windows, you may need to run as Administrator
+4. Check `install_dev_env.py` output for specific errors
 
-### Alternative: Traditional Setup
-
-```bash
-# Backend (Terminal 1)
-python run_server.py
-# Available at http://localhost:8000
-
-# Frontend (Terminal 2)
-cd frontend
-npm run dev
-# Available at http://localhost:3000
-```
+For database issues:
+- PostgreSQL: The installer will use SQLite if PostgreSQL is unavailable
+- Redis: Optional for development (caching will be disabled)
+- ClickHouse: Optional for development (analytics will be limited)
 
 ## 🏗 Architecture
 
@@ -135,9 +178,34 @@ npm run dev
 
 ## 💾 Installation
 
+### Automated Installation
+
+The project includes a comprehensive installer (`install_dev_env.py`) that handles all setup automatically:
+
+**Features:**
+- 🔍 Detects operating system (Windows/macOS/Linux)
+- ✅ Checks and validates prerequisites
+- 📦 Installs all dependencies
+- 🗄️ Sets up databases (with fallbacks)
+- 🔧 Configures environment variables
+- 🚀 Creates startup scripts
+- 🧪 Runs verification tests
+
+**What it installs:**
+- Python virtual environment with all packages
+- Frontend Node.js dependencies
+- PostgreSQL (or falls back to SQLite)
+- Redis (optional, for caching)
+- ClickHouse (optional, for analytics)
+
+Run the installer directly:
+```bash
+python install_dev_env.py
+```
+
 ### Environment Configuration
 
-Create a `.env` file in the root directory:
+The installer creates a `.env` file automatically. You can also create it manually:
 
 ```env
 # Database
