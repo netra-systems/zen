@@ -163,7 +163,7 @@ class TestUpdater:
     
     async def analyze_current_coverage(self) -> TestMetrics:
         """Analyze current test coverage and metrics"""
-        print("\n🔍 Analyzing current test coverage...")
+        print("\n[ANALYZE] Analyzing current test coverage...")
         
         metrics = TestMetrics()
         
@@ -263,7 +263,7 @@ class TestUpdater:
     
     async def generate_missing_tests(self, modules: List[str]) -> int:
         """Generate tests for modules without coverage"""
-        print(f"\n🤖 Generating tests for {len(modules)} untested modules...")
+        print(f"\n[GENERATE] Generating tests for {len(modules)} untested modules...")
         
         generated_count = 0
         
@@ -278,7 +278,7 @@ class TestUpdater:
                 
             if generated:
                 generated_count += 1
-                print(f"  ✅ Generated test for {module}")
+                print(f"  [OK] Generated test for {module}")
         
         return generated_count
     
@@ -316,7 +316,7 @@ class Test{module_path.stem.title().replace("_", "")}:
 
 '''
         
-        test_path.write_text(test_content)
+        test_path.write_text(test_content, encoding='utf-8')
         return True
     
     async def _generate_typescript_test(self, module_path: Path) -> bool:
@@ -364,12 +364,12 @@ describe('{module_path.stem}', () => {{
 }});
 '''
         
-        test_path.write_text(test_content)
+        test_path.write_text(test_content, encoding='utf-8')
         return True
     
     async def update_legacy_tests(self) -> int:
         """Update legacy test patterns to modern standards"""
-        print("\n🔧 Updating legacy test patterns...")
+        print("\n[UPDATE] Updating legacy test patterns...")
         
         updated_count = 0
         
@@ -387,7 +387,7 @@ describe('{module_path.stem}', () => {{
     
     async def _update_python_test_patterns(self, test_file: Path) -> bool:
         """Update Python test file to modern patterns"""
-        content = test_file.read_text()
+        content = test_file.read_text(encoding='utf-8', errors='replace')
         original_content = content
         
         # Update old unittest patterns to pytest
@@ -404,14 +404,14 @@ describe('{module_path.stem}', () => {{
         content = re.sub(r'time\.sleep\(\d+\)', '# Removed unnecessary sleep', content)
         
         if content != original_content:
-            test_file.write_text(content)
+            test_file.write_text(content, encoding='utf-8')
             return True
         
         return False
     
     async def _update_typescript_test_patterns(self, test_file: Path) -> bool:
         """Update TypeScript test file to modern patterns"""
-        content = test_file.read_text()
+        content = test_file.read_text(encoding='utf-8', errors='replace')
         original_content = content
         
         # Update mock patterns
@@ -435,14 +435,14 @@ import { WebSocketProvider } from '../providers/WebSocketProvider';''',
         content = re.sub(r'\.toBeCalledWith\(', '.toHaveBeenCalledWith(', content)
         
         if content != original_content:
-            test_file.write_text(content)
+            test_file.write_text(content, encoding='utf-8')
             return True
         
         return False
     
     async def optimize_test_performance(self) -> Dict[str, Any]:
         """Optimize test execution performance"""
-        print("\n⚡ Optimizing test performance...")
+        print("\n[OPTIMIZE] Optimizing test performance...")
         
         optimizations = {
             "parallelization": False,
@@ -454,10 +454,10 @@ import { WebSocketProvider } from '../providers/WebSocketProvider';''',
         # Enable test parallelization
         pytest_ini = self.project_root / "pytest.ini"
         if pytest_ini.exists():
-            content = pytest_ini.read_text()
+            content = pytest_ini.read_text(encoding='utf-8', errors='replace')
             if "-n auto" not in content:
                 content += "\naddopts = -n auto  # Enable parallel test execution\n"
-                pytest_ini.write_text(content)
+                pytest_ini.write_text(content, encoding='utf-8')
                 optimizations["parallelization"] = True
         
         # Configure test caching
@@ -468,7 +468,7 @@ import { WebSocketProvider } from '../providers/WebSocketProvider';''',
         # Update database configuration for tests
         test_config = self.project_root / "app" / "test_config.py"
         if test_config.exists():
-            content = test_config.read_text()
+            content = test_config.read_text(encoding='utf-8', errors='replace')
             if "sqlite:///:memory:" not in content:
                 # Update to use in-memory database
                 optimizations["database"] = True
@@ -477,40 +477,40 @@ import { WebSocketProvider } from '../providers/WebSocketProvider';''',
     
     async def execute_specification(self) -> None:
         """Execute the full test update specification"""
-        print("\n🚀 Executing Test Update Specification")
+        print("\n[EXECUTE] Executing Test Update Specification")
         print("=" * 60)
         
         # Step 1: Analyze baseline
         metrics = await self.analyze_current_coverage()
-        print(f"\n📊 Current Coverage: {metrics.coverage_percentage:.1f}%")
-        print(f"📊 Target Coverage: {self.coverage_goal}%")
+        print(f"\n[COVERAGE] Current Coverage: {metrics.coverage_percentage:.1f}%")
+        print(f"[TARGET] Target Coverage: {self.coverage_goal}%")
         
         if metrics.coverage_percentage >= self.coverage_goal:
-            print(f"\n✅ Coverage goal already achieved!")
+            print(f"\n[SUCCESS] Coverage goal already achieved!")
             return
         
         # Step 2: Generate missing tests
         if metrics.untested_modules:
-            print(f"\n📝 Found {len(metrics.untested_modules)} untested modules")
+            print(f"\n[INFO] Found {len(metrics.untested_modules)} untested modules")
             generated = await self.generate_missing_tests(metrics.untested_modules[:10])
-            print(f"✅ Generated {generated} new test files")
+            print(f"[SUCCESS] Generated {generated} new test files")
         
         # Step 3: Update legacy tests
         updated = await self.update_legacy_tests()
-        print(f"✅ Updated {updated} legacy test files")
+        print(f"[SUCCESS] Updated {updated} legacy test files")
         
         # Step 4: Optimize performance
         optimizations = await self.optimize_test_performance()
-        print(f"✅ Applied {sum(optimizations.values())} performance optimizations")
+        print(f"[SUCCESS] Applied {sum(optimizations.values())} performance optimizations")
         
         # Step 5: Run comprehensive test suite
-        print("\n🧪 Running comprehensive test suite...")
+        print("\n[TEST] Running comprehensive test suite...")
         await self.run_comprehensive_tests()
         
         # Step 6: Generate reports
         await self.generate_reports()
         
-        print("\n✨ Test Update Specification execution complete!")
+        print("\n[COMPLETE] Test Update Specification execution complete!")
     
     async def run_comprehensive_tests(self) -> None:
         """Run comprehensive test suite with coverage"""
@@ -521,7 +521,7 @@ import { WebSocketProvider } from '../providers/WebSocketProvider';''',
     
     async def generate_reports(self) -> None:
         """Generate test update reports"""
-        print("\n📄 Generating reports...")
+        print("\n[REPORT] Generating reports...")
         
         # Create reports directory
         self.reports_dir.mkdir(parents=True, exist_ok=True)
@@ -558,12 +558,12 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 - Set up coverage tracking dashboards
 """
         
-        coverage_report.write_text(report_content)
-        print(f"✅ Report saved to {coverage_report}")
+        coverage_report.write_text(report_content, encoding='utf-8')
+        print(f"[SUCCESS] Report saved to {coverage_report}")
     
     async def setup(self) -> None:
         """Initial setup for test update system"""
-        print("\n🔧 Setting up Test Update System...")
+        print("\n[SETUP] Setting up Test Update System...")
         
         # Install required dependencies
         dependencies = [
@@ -589,11 +589,11 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         for dir_path in dirs:
             dir_path.mkdir(parents=True, exist_ok=True)
         
-        print("✅ Setup complete!")
+        print("[SUCCESS] Setup complete!")
     
     async def schedule_automation(self) -> None:
         """Schedule automated test update cycles"""
-        print("\n⏰ Scheduling automated test updates...")
+        print("\n[SCHEDULE] Scheduling automated test updates...")
         
         # Create cron job or task scheduler entry
         cron_content = f"""
@@ -605,11 +605,11 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         
         print("Cron schedule:")
         print(cron_content)
-        print("\n✅ Add above entries to your crontab or task scheduler")
+        print("\n[INFO] Add above entries to your crontab or task scheduler")
     
     async def monitor(self) -> None:
         """Monitor test coverage progress"""
-        print("\n📈 Monitoring test coverage progress...")
+        print("\n[MONITOR] Monitoring test coverage progress...")
         
         metrics = await self.analyze_current_coverage()
         
@@ -623,17 +623,17 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         print(f"Current: {metrics.coverage_percentage:.1f}% | Target: {self.coverage_goal}%")
         
         # Show trends
-        print("\n📊 Coverage Trends:")
+        print("\n[STATS] Coverage Trends:")
         print("  Last 7 days: +2.3%")
         print("  Last 30 days: +5.7%")
         print("  Projected to reach goal: 6 weeks")
         
         # Show problem areas
         if metrics.flaky_tests:
-            print(f"\n⚠️ Flaky Tests: {len(metrics.flaky_tests)}")
+            print(f"\n[WARNING] Flaky Tests: {len(metrics.flaky_tests)}")
         
         if metrics.untested_modules:
-            print(f"⚠️ Untested Modules: {len(metrics.untested_modules)}")
+            print(f"[WARNING] Untested Modules: {len(metrics.untested_modules)}")
 
 
 async def main():

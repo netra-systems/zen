@@ -672,4 +672,36 @@
       <measurement>No untested critical functionality</measurement>
     </criterion>
   </success_criteria>
+
+  <cross_references>
+    <reference id="XR1">
+      <specification>SPEC/code_changes.xml</specification>
+      <relationship>Extends test coverage requirements from 70%/60% to 97%</relationship>
+      <integration>Code changes must trigger test update automation</integration>
+    </reference>
+    
+    <reference id="XR2">
+      <specification>SPEC/LEGACY_CODE_CLEANUP.xml</specification>
+      <relationship>Provides test cleanup procedures for legacy code removal</relationship>
+      <integration>Legacy test cleanup is part of overall code cleanup strategy</integration>
+    </reference>
+    
+    <reference id="XR3">
+      <specification>CLAUDE.md</specification>
+      <relationship>Documents test update commands for AI agents</relationship>
+      <integration>Agents can execute "run test_update_spec.xml" directly</integration>
+    </reference>
+    
+    <reference id="XR4">
+      <specification>SPEC/conventions.xml</specification>
+      <relationship>Follows project testing conventions</relationship>
+      <integration>Generated tests comply with established patterns</integration>
+    </reference>
+    
+    <reference id="XR5">
+      <specification>SPEC/ai_slop_prevention_spec.xml</specification>
+      <relationship>Ensures generated tests avoid AI anti-patterns</relationship>
+      <integration>Test generation follows quality guidelines</integration>
+    </reference>
+  </cross_references>
 </test_update_specification>

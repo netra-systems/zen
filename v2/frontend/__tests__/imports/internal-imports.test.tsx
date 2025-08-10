@@ -65,11 +65,15 @@ describe('Internal Frontend Module Import Tests', () => {
   describe('Provider imports', () => {
     it('should import context providers', () => {
       expect(() => require('@/providers/WebSocketProvider')).not.toThrow();
+      expect(() => require('@/providers/AgentProvider')).not.toThrow();
       
       // Check that providers export the expected items
       const wsProvider = require('@/providers/WebSocketProvider');
       expect(wsProvider.WebSocketProvider).toBeDefined();
       expect(wsProvider.useWebSocketContext).toBeDefined();
+      
+      const agentProvider = require('@/providers/AgentProvider');
+      expect(agentProvider.AgentProvider).toBeDefined();
     });
   });
 
