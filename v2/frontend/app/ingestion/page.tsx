@@ -17,7 +17,7 @@ import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Upload, Database, FileJson, Cloud, Server, Webhook, 
-  FileText, Code, Image, Video, Music, Archive,
+  FileText, Code, Image as ImageIcon, Video, Music, Archive,
   CheckCircle, XCircle, Clock, AlertCircle, Play, Pause, RefreshCw
 } from 'lucide-react';
 
@@ -153,7 +153,7 @@ const IngestionPage: NextPage = () => {
       case 'jpg':
       case 'png':
       case 'gif':
-        return <Image className="h-4 w-4" />;
+        return <ImageIcon className="h-4 w-4" />;
       case 'mp4':
       case 'avi':
         return <Video className="h-4 w-4" />;

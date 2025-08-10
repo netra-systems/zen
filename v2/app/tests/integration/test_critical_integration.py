@@ -277,7 +277,9 @@ class TestCriticalIntegration:
         
         # Mock WebSocket connection
         mock_websocket = AsyncMock()
+        mock_websocket.client_state = WebSocketState.CONNECTED
         mock_websocket.accept = AsyncMock()
+        mock_websocket.send_json = AsyncMock()  # WebSocketManager uses send_json
         mock_websocket.send_text = AsyncMock()
         mock_websocket.receive_text = AsyncMock()
         mock_websocket.close = AsyncMock()
@@ -315,8 +317,8 @@ class TestCriticalIntegration:
         assert sent_data["type"] == "agent_request"
         assert sent_data["payload"]["query"] == "Test authenticated request"
         
-        # Test broadcast to user's connections
-        await ws_manager.broadcast_to_user(
+        # Test sending message to user's connections
+        await ws_manager.send_message(
             user_id,
             {"type": "notification", "message": "Test broadcast"}
         )
@@ -325,8 +327,8 @@ class TestCriticalIntegration:
         assert mock_websocket.send_json.call_count >= 2
         
         # Test connection cleanup
-        await ws_manager.disconnect(connection_id)
-        assert connection_id not in ws_manager.active_connections
+        await ws_manager.disconnect(user_id, mock_websocket)
+        assert user_id not in ws_manager.active_connections
         
         # Test unauthorized access (no token)
         unauthorized_conn_id = f"conn_unauthorized_{uuid.uuid4()}"
@@ -468,16 +470,14 @@ class TestCriticalIntegration:
         
         # Verify complete execution
         final_recovered = await state_service.load_agent_state(
-            thread_id=thread.id,
             run_id=run_id,
-            agent_name="supervisor"
+            db_session=session
         )
         
-        assert final_recovered["status"] == "completed"
-        assert len(final_recovered["completed_agents"]) == 3
-        assert "triage" in final_recovered["agent_outputs"]
-        assert "data" in final_recovered["agent_outputs"]
-        assert "optimization" in final_recovered["agent_outputs"]
+        assert final_recovered is not None
+        assert final_recovered.triage_result is not None
+        assert final_recovered.data_result is not None
+        assert final_recovered.optimizations_result is not None
         
         # Verify thread context recovery
         thread_context = await state_service.get_thread_context(thread.id)

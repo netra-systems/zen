@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -31,7 +31,7 @@ interface DataSample {
   id: string
   timestamp: string
   type: string
-  data: any
+  data: Record<string, unknown>
   metadata: {
     source: string
     processingTime: number
@@ -46,8 +46,8 @@ export default function SyntheticDataViewer({ industry }: SyntheticDataViewerPro
   const [dataSamples, setDataSamples] = useState<DataSample[]>([])
   const [selectedSample, setSelectedSample] = useState<DataSample | null>(null)
 
-  const generateIndustryData = () => {
-    const industryTemplates: Record<string, any> = {
+  const generateIndustryData = useCallback(() => {
+    const industryTemplates: Record<string, Record<string, unknown>> = {
       'Financial Services': {
         transaction_id: `TXN-${Date.now()}`,
         amount: (Math.random() * 10000).toFixed(2),
@@ -128,9 +128,9 @@ export default function SyntheticDataViewer({ industry }: SyntheticDataViewerPro
     }
 
     return industryTemplates[industry] || industryTemplates['Technology']
-  }
+  }, [industry])
 
-  const generateDataSample = (): DataSample => {
+  const generateDataSample = useCallback((): DataSample => {
     const types = ['inference', 'training', 'preprocessing', 'evaluation']
     const type = types[Math.floor(Math.random() * types.length)]
     
@@ -145,14 +145,14 @@ export default function SyntheticDataViewer({ industry }: SyntheticDataViewerPro
         dataPoints: Math.floor(Math.random() * 10000)
       }
     }
-  }
+  }, [industry, generateIndustryData])
 
   useEffect(() => {
     // Generate initial data samples
     const initialSamples = Array.from({ length: 5 }, () => generateDataSample())
     setDataSamples(initialSamples)
     setSelectedSample(initialSamples[0])
-  }, [industry])
+  }, [industry, generateDataSample])
 
   const handleGenerateData = async () => {
     setIsGenerating(true)
@@ -167,7 +167,7 @@ export default function SyntheticDataViewer({ industry }: SyntheticDataViewerPro
     setIsGenerating(false)
   }
 
-  const handleCopy = (data: any, id: string) => {
+  const handleCopy = (data: Record<string, unknown>, id: string) => {
     navigator.clipboard.writeText(JSON.stringify(data, null, 2))
     setCopiedId(id)
     setTimeout(() => setCopiedId(null), 2000)
@@ -465,7 +465,7 @@ export default function SyntheticDataViewer({ industry }: SyntheticDataViewerPro
                         required: Math.random() > 0.3
                       }
                       return acc
-                    }, {} as any),
+                    }, {} as Record<string, { type: string; description: string; example: unknown; required: boolean }>),
                     "required": Object.keys(generateIndustryData()).filter(() => Math.random() > 0.5)
                   }, null, 2)}
                 </pre>
