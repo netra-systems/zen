@@ -17,8 +17,22 @@ export const MessageItem: React.FC<MessageProps> = ({ message }) => {
   const [isToolExpanded, setIsToolExpanded] = React.useState(false);
   const [isRawExpanded, setIsRawExpanded] = React.useState(false);
 
-  const formatTimestamp = (timestamp: string) => {
+  const formatTimestamp = (timestamp: string | undefined) => {
+    if (!timestamp) {
+      return new Date().toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
     const date = new Date(timestamp);
+    if (isNaN(date.getTime())) {
+      return new Date().toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
     return date.toLocaleTimeString('en-US', { 
       hour: '2-digit', 
       minute: '2-digit',
@@ -109,11 +123,10 @@ export const MessageItem: React.FC<MessageProps> = ({ message }) => {
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-3">
               <Avatar className="w-9 h-9 border-2 border-white shadow-sm">
-                <AvatarImage src={type === 'user' ? '' : '/bot.png'} />
                 <AvatarFallback className={`font-bold text-sm ${
-                  type === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-500 text-white'
+                  type === 'user' ? 'bg-blue-500 text-white' : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
                 }`}>
-                  {type === 'user' ? 'U' : 'A'}
+                  {type === 'user' ? 'U' : 'AI'}
                 </AvatarFallback>
               </Avatar>
               <div>

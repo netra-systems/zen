@@ -32,9 +32,16 @@ export const useChatStore = create<ChatState>((set) => ({
   isProcessing: false,
   activeThreadId: null,
   
-  addMessage: (message) => set((state) => ({ 
-    messages: [...state.messages, { ...message }] 
-  })),
+  addMessage: (message) => set((state) => {
+    // Ensure message has a unique ID
+    const messageWithId = {
+      ...message,
+      id: message.id || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    };
+    return {
+      messages: [...state.messages, messageWithId]
+    };
+  }),
   
   updateMessage: (messageId, updates) => set((state) => ({
     messages: state.messages.map(msg => 
@@ -67,29 +74,32 @@ export const useChatStore = create<ChatState>((set) => ({
     messages: [] 
   }),
   
-  loadThreadMessages: (messages) => set({ messages }),
+  loadThreadMessages: (messages) => set({ 
+    messages: messages.map(msg => ({
+      ...msg,
+      id: msg.id || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    }))
+  }),
   
   addError: (error) => set((state) => ({
     messages: [...state.messages, {
       id: `error-${Date.now()}`,
-      role: 'system' as const,
+      type: 'error' as const,
       content: error,
-      timestamp: new Date().toISOString(),
+      created_at: new Date().toISOString(),
       displayed_to_user: true,
-      isError: true,
-      error: true,
+      error: error,
     }]
   })),
   
   addErrorMessage: (error) => set((state) => ({
     messages: [...state.messages, {
       id: `error-${Date.now()}`,
-      role: 'system' as const,
+      type: 'error' as const,
       content: error,
-      timestamp: new Date().toISOString(),
+      created_at: new Date().toISOString(),
       displayed_to_user: true,
-      isError: true,
-      error: true,
+      error: error,
     }]
   })),
   
