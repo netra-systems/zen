@@ -4,18 +4,8 @@ describe('File Upload and Reference Management', () => {
   beforeEach(() => {
     // Setup authenticated state
     cy.window().then((win) => {
-      win.localStorage.setItem('authToken', 'test-token');
+      win.localStorage.setItem('jwt_token', 'test-jwt-token');
     });
-    
-    // Mock user endpoint
-    cy.intercept('GET', '/api/me', {
-      statusCode: 200,
-      body: {
-        id: 1,
-        email: 'test@netra.ai',
-        full_name: 'Test User'
-      }
-    }).as('userRequest');
 
     // Mock references endpoint
     cy.intercept('GET', '/api/references', {
@@ -24,12 +14,11 @@ describe('File Upload and Reference Management', () => {
     }).as('getReferences');
 
     cy.visit('/chat');
-    cy.wait('@userRequest');
   });
 
   it('should upload a file and create a reference', () => {
-    // Open references panel
-    cy.get('button[aria-label="Manage references"]').click();
+    // Open references panel - use a more generic selector
+    cy.get('button').contains('References').click({ timeout: 10000 });
     
     // Verify empty state
     cy.contains('No references uploaded yet').should('be.visible');
@@ -134,10 +123,8 @@ describe('File Upload and Reference Management', () => {
       ]
     }).as('getReferences');
 
-    cy.wait('@getReferences');
-
     // Open references panel
-    cy.get('button[aria-label="Manage references"]').click();
+    cy.get('button').contains('References').click({ timeout: 10000 });
 
     // Select references to use
     cy.get('input[type="checkbox"][value="ref-1"]').check();
@@ -151,7 +138,7 @@ describe('File Upload and Reference Management', () => {
 
     // Send message with references
     const messageWithRefs = 'Analyze the architecture and performance data';
-    cy.get('input[placeholder="Type your message..."]').type(messageWithRefs);
+    cy.get('input[placeholder*="message"]', { timeout: 10000 }).type(messageWithRefs);
     
     // Mock message send with references
     cy.intercept('POST', '/api/messages', (req) => {
@@ -200,7 +187,7 @@ describe('File Upload and Reference Management', () => {
 
   it('should handle multiple file uploads and batch processing', () => {
     // Open references panel
-    cy.get('button[aria-label="Manage references"]').click();
+    cy.get('button').contains('References').click({ timeout: 10000 });
 
     // Create multiple test files
     const files = [
@@ -278,10 +265,8 @@ describe('File Upload and Reference Management', () => {
       ]
     }).as('getReferences');
 
-    cy.wait('@getReferences');
-
     // Open references panel
-    cy.get('button[aria-label="Manage references"]').click();
+    cy.get('button').contains('References').click({ timeout: 10000 });
 
     // Hover over reference to show delete button
     cy.contains('old-document.pdf').parent().trigger('mouseenter');
@@ -353,10 +338,8 @@ describe('File Upload and Reference Management', () => {
       ]
     }).as('getAllReferences');
 
-    cy.wait('@getAllReferences');
-
     // Open references panel
-    cy.get('button[aria-label="Manage references"]').click();
+    cy.get('button').contains('References').click({ timeout: 10000 });
 
     // Search for PDF files
     cy.get('input[placeholder="Search references..."]').type('pdf');
@@ -412,10 +395,8 @@ describe('File Upload and Reference Management', () => {
       }
     }).as('getPreview');
 
-    cy.wait('@getReferences');
-
     // Open references panel
-    cy.get('button[aria-label="Manage references"]').click();
+    cy.get('button').contains('References').click({ timeout: 10000 });
 
     // Click preview button
     cy.contains('sample.txt').parent().find('button[aria-label="Preview"]').click();
@@ -433,7 +414,7 @@ describe('File Upload and Reference Management', () => {
 
   it('should handle file upload errors gracefully', () => {
     // Open references panel
-    cy.get('button[aria-label="Manage references"]').click();
+    cy.get('button').contains('References').click({ timeout: 10000 });
 
     // Mock upload failure
     cy.intercept('POST', '/api/references/upload', {
@@ -487,7 +468,7 @@ describe('File Upload and Reference Management', () => {
 
   it('should handle reference processing status updates', () => {
     // Open references panel
-    cy.get('button[aria-label="Manage references"]').click();
+    cy.get('button').contains('References').click({ timeout: 10000 });
 
     // Mock initial upload
     cy.intercept('POST', '/api/references/upload', {

@@ -82,6 +82,7 @@ describe('Internal Frontend Module Import Tests', () => {
       expect(() => require('@/hooks/useThread')).not.toThrow();
       expect(() => require('@/hooks/useToast')).not.toThrow();
       expect(() => require('@/hooks/useError')).not.toThrow();
+      expect(() => require('@/hooks/useDemoWebSocket')).not.toThrow();
       
       // Verify hook exports
       const useWebSocket = require('@/hooks/useWebSocket');
@@ -125,6 +126,7 @@ describe('Internal Frontend Module Import Tests', () => {
       expect(() => require('@/services/agent')).not.toThrow();
       expect(() => require('@/services/thread')).not.toThrow();
       expect(() => require('@/services/websocket')).not.toThrow();
+      expect(() => require('@/services/demoService')).not.toThrow();
       
       // Verify service exports
       const api = require('@/services/api');

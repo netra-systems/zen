@@ -12,8 +12,9 @@ import time
 import argparse
 import subprocess
 import threading
+import re
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from datetime import datetime
 
 # Add project root to path
@@ -53,15 +54,72 @@ TEST_CONFIGS = {
 class TestRunner:
     def __init__(self):
         self.results = {
-            "backend": {"status": "pending", "duration": 0, "exit_code": None},
-            "frontend": {"status": "pending", "duration": 0, "exit_code": None},
+            "backend": {
+                "status": "pending", 
+                "duration": 0, 
+                "exit_code": None,
+                "test_details": {},  # Service-level test details
+                "summary": {"passed": 0, "failed": 0, "skipped": 0, "error": 0}
+            },
+            "frontend": {
+                "status": "pending", 
+                "duration": 0, 
+                "exit_code": None,
+                "test_details": {},  # Component-level test details
+                "summary": {"passed": 0, "failed": 0, "skipped": 0, "error": 0}
+            },
             "overall": {"status": "pending", "start_time": None, "end_time": None},
         }
         self.reports_dir = PROJECT_ROOT / "reports"
         self.reports_dir.mkdir(exist_ok=True)
         
+    def parse_pytest_output(self, output: str) -> Dict:
+        """Parse pytest output to extract test statistics per service"""
+        service_stats = {}
+        current_service = "unknown"
+        
+        # Match patterns for test results
+        test_pattern = re.compile(r'(app/[\w/]+)/test_\w+\.py::\w+\s+(PASSED|FAILED|SKIPPED|ERROR)')
+        summary_pattern = re.compile(r'(\d+) passed(?:, (\d+) failed)?(?:, (\d+) skipped)?(?:, (\d+) error)?')
+        
+        for line in output.split('\n'):
+            # Extract test results by file/service
+            match = test_pattern.search(line)
+            if match:
+                service_path = match.group(1)
+                status = match.group(2).lower()
+                
+                # Extract service name from path
+                parts = service_path.split('/')
+                if 'tests' in parts:
+                    idx = parts.index('tests')
+                    if idx + 1 < len(parts):
+                        service = parts[idx + 1]
+                    else:
+                        service = 'core'
+                else:
+                    service = parts[-1] if parts else 'unknown'
+                
+                if service not in service_stats:
+                    service_stats[service] = {"passed": 0, "failed": 0, "skipped": 0, "error": 0}
+                
+                service_stats[service][status] = service_stats[service].get(status, 0) + 1
+            
+            # Extract overall summary
+            summary_match = summary_pattern.search(line)
+            if summary_match:
+                total_stats = {
+                    "passed": int(summary_match.group(1) or 0),
+                    "failed": int(summary_match.group(2) or 0),
+                    "skipped": int(summary_match.group(3) or 0),
+                    "error": int(summary_match.group(4) or 0)
+                }
+                return {"services": service_stats, "total": total_stats}
+        
+        return {"services": service_stats, "total": {"passed": 0, "failed": 0, "skipped": 0, "error": 0}}
+    
     def run_backend_tests(self, args: List[str]) -> int:
-        """Run backend tests"""
+        """Run backend tests with detailed output capture"""
         print("\n" + "=" * 80)
         print("RUNNING BACKEND TESTS")
         print("=" * 80)
@@ -69,8 +127,22 @@ class TestRunner:
         start_time = time.time()
         self.results["backend"]["status"] = "running"
         
+        # Add verbose flag to get detailed output
+        if "-v" not in args and "--verbose" not in args:
+            args = args + ["-v"]
+        
         cmd = [sys.executable, "scripts/test_backend.py"] + args
-        result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+        result = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
+        
+        # Print the output
+        print(result.stdout)
+        if result.stderr:
+            print(result.stderr, file=sys.stderr)
+        
+        # Parse test output for detailed statistics
+        test_stats = self.parse_pytest_output(result.stdout)
+        self.results["backend"]["test_details"] = test_stats.get("services", {})
+        self.results["backend"]["summary"] = test_stats.get("total", {"passed": 0, "failed": 0, "skipped": 0, "error": 0})
         
         duration = time.time() - start_time
         self.results["backend"]["duration"] = duration
@@ -79,8 +151,48 @@ class TestRunner:
         
         return result.returncode
     
+    def parse_jest_output(self, output: str) -> Dict:
+        """Parse Jest output to extract test statistics per component"""
+        component_stats = {}
+        
+        # Match patterns for Jest test results
+        suite_pattern = re.compile(r'\s+(PASS|FAIL)\s+([\w/]+\.test\.[tj]sx?)')
+        test_summary_pattern = re.compile(r'Tests:\s+(\d+)\s+passed(?:,\s+(\d+)\s+failed)?(?:,\s+(\d+)\s+skipped)?(?:,\s+(\d+)\s+total)?')
+        
+        for line in output.split('\n'):
+            # Extract test results by file/component
+            match = suite_pattern.search(line)
+            if match:
+                status = match.group(1).lower()
+                file_path = match.group(2)
+                
+                # Extract component name from path
+                parts = file_path.replace('.test.tsx', '').replace('.test.ts', '').split('/')
+                component = parts[-1] if parts else 'unknown'
+                
+                if component not in component_stats:
+                    component_stats[component] = {"passed": 0, "failed": 0, "skipped": 0, "error": 0}
+                
+                if status == 'pass':
+                    component_stats[component]["passed"] += 1
+                else:
+                    component_stats[component]["failed"] += 1
+            
+            # Extract overall summary
+            summary_match = test_summary_pattern.search(line)
+            if summary_match:
+                total_stats = {
+                    "passed": int(summary_match.group(1) or 0),
+                    "failed": int(summary_match.group(2) or 0),
+                    "skipped": int(summary_match.group(3) or 0),
+                    "error": 0
+                }
+                return {"components": component_stats, "total": total_stats}
+        
+        return {"components": component_stats, "total": {"passed": 0, "failed": 0, "skipped": 0, "error": 0}}
+    
     def run_frontend_tests(self, args: List[str]) -> int:
-        """Run frontend tests"""
+        """Run frontend tests with detailed output capture"""
         print("\n" + "=" * 80)
         print("RUNNING FRONTEND TESTS")
         print("=" * 80)
@@ -89,7 +201,17 @@ class TestRunner:
         self.results["frontend"]["status"] = "running"
         
         cmd = [sys.executable, "scripts/test_frontend.py"] + args
-        result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+        result = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
+        
+        # Print the output
+        print(result.stdout)
+        if result.stderr:
+            print(result.stderr, file=sys.stderr)
+        
+        # Parse test output for detailed statistics
+        test_stats = self.parse_jest_output(result.stdout)
+        self.results["frontend"]["test_details"] = test_stats.get("components", {})
+        self.results["frontend"]["summary"] = test_stats.get("total", {"passed": 0, "failed": 0, "skipped": 0, "error": 0})
         
         duration = time.time() - start_time
         self.results["frontend"]["duration"] = duration

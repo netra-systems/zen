@@ -1,4 +1,4 @@
-import { apiConfig } from './apiConfig'
+import { API_BASE_URL } from './apiConfig'
 
 export interface DemoChatRequest {
   message: string
@@ -67,7 +67,7 @@ class DemoService {
   private baseUrl: string
 
   constructor() {
-    this.baseUrl = apiConfig.baseURL
+    this.baseUrl = API_BASE_URL
   }
 
   private async fetchWithAuth(url: string, options: RequestInit = {}) {

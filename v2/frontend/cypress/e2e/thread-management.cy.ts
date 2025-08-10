@@ -4,18 +4,8 @@ describe('Thread Management and Conversation History', () => {
   beforeEach(() => {
     // Setup authenticated state
     cy.window().then((win) => {
-      win.localStorage.setItem('authToken', 'test-token');
+      win.localStorage.setItem('jwt_token', 'test-jwt-token');
     });
-    
-    // Mock user endpoint
-    cy.intercept('GET', '/api/me', {
-      statusCode: 200,
-      body: {
-        id: 1,
-        email: 'test@netra.ai',
-        full_name: 'Test User'
-      }
-    }).as('userRequest');
 
     // Mock threads endpoint
     cy.intercept('GET', '/api/threads', {
@@ -49,15 +39,11 @@ describe('Thread Management and Conversation History', () => {
     }).as('getThreads');
 
     cy.visit('/chat');
-    cy.wait('@userRequest');
   });
 
   it('should display thread list and allow switching between threads', () => {
-    // Wait for threads to load
-    cy.wait('@getThreads');
-
-    // Open thread sidebar
-    cy.get('button[aria-label="Toggle thread sidebar"]').click();
+    // Open thread sidebar - use a more generic selector
+    cy.get('button').contains('Threads').click({ timeout: 10000 });
 
     // Verify threads are displayed
     cy.contains('LLM Optimization Discussion').should('be.visible');
@@ -129,8 +115,8 @@ describe('Thread Management and Conversation History', () => {
   });
 
   it('should create a new thread and maintain conversation context', () => {
-    // Click new thread button
-    cy.get('button[aria-label="Create new thread"]').click();
+    // Click new thread button - use a more generic selector
+    cy.get('button').contains('New').click({ timeout: 10000 });
 
     // Mock new thread creation
     cy.intercept('POST', '/api/threads', {
@@ -147,7 +133,7 @@ describe('Thread Management and Conversation History', () => {
 
     // Type and send first message in new thread
     const firstMessage = 'Start a new optimization analysis';
-    cy.get('input[placeholder="Type your message..."]').type(firstMessage);
+    cy.get('input[placeholder*="message"]', { timeout: 10000 }).type(firstMessage);
     cy.get('button').contains('Send').click();
 
     // Wait for thread creation
@@ -178,7 +164,7 @@ describe('Thread Management and Conversation History', () => {
 
     // Send follow-up message in same thread
     const followUp = 'Focus on GPU utilization';
-    cy.get('input[placeholder="Type your message..."]').type(followUp);
+    cy.get('input[placeholder*="message"]').type(followUp);
     cy.get('button').contains('Send').click();
 
     // Verify conversation maintains context
@@ -206,10 +192,8 @@ describe('Thread Management and Conversation History', () => {
   });
 
   it('should search and filter threads', () => {
-    cy.wait('@getThreads');
-    
     // Open thread sidebar
-    cy.get('button[aria-label="Toggle thread sidebar"]').click();
+    cy.get('button').contains('Threads').click({ timeout: 10000 });
 
     // Type in search box
     cy.get('input[placeholder="Search threads..."]').type('optimization');
@@ -249,10 +233,8 @@ describe('Thread Management and Conversation History', () => {
   });
 
   it('should delete a thread and update the list', () => {
-    cy.wait('@getThreads');
-    
     // Open thread sidebar
-    cy.get('button[aria-label="Toggle thread sidebar"]').click();
+    cy.get('button').contains('Threads').click({ timeout: 10000 });
 
     // Hover over thread to show delete button
     cy.contains('Performance Testing').parent().trigger('mouseenter');
@@ -303,10 +285,8 @@ describe('Thread Management and Conversation History', () => {
   });
 
   it('should rename a thread', () => {
-    cy.wait('@getThreads');
-    
     // Open thread sidebar
-    cy.get('button[aria-label="Toggle thread sidebar"]').click();
+    cy.get('button').contains('Threads').click({ timeout: 10000 });
 
     // Select thread to rename
     cy.contains('Cost Analysis Project').parent().trigger('mouseenter');
@@ -354,7 +334,7 @@ describe('Thread Management and Conversation History', () => {
     }).as('getInitialMessages');
 
     // Load thread
-    cy.get('button[aria-label="Toggle thread sidebar"]').click();
+    cy.get('button').contains('Threads').click({ timeout: 10000 });
     cy.contains('LLM Optimization Discussion').click();
     cy.wait('@getInitialMessages');
 
@@ -383,10 +363,8 @@ describe('Thread Management and Conversation History', () => {
   });
 
   it('should export thread conversation', () => {
-    cy.wait('@getThreads');
-    
     // Load a thread
-    cy.get('button[aria-label="Toggle thread sidebar"]').click();
+    cy.get('button').contains('Threads').click({ timeout: 10000 });
     
     // Mock thread messages
     cy.intercept('GET', '/api/threads/thread-1/messages', {

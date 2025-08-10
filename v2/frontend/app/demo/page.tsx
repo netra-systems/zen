@@ -300,6 +300,7 @@ export default function EnterpriseDemo() {
             <TabsContent value="optimization">
               <DemoChat 
                 industry={selectedIndustry}
+                useWebSocket={true}
                 onInteraction={() => {
                   if (!completedSteps.has('chat')) {
                     handleStepComplete('chat')

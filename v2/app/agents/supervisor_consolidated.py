@@ -7,7 +7,7 @@ to provide a robust, maintainable agent orchestration system.
 from typing import Any, Dict, List, Optional, Tuple
 from enum import Enum
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 import asyncio
 from app.logging_config import central_logger
 from app.agents.base import BaseSubAgent
@@ -49,7 +49,7 @@ class AgentExecutionContext:
     max_retries: int = 3
     timeout: Optional[int] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
-    started_at: datetime = field(default_factory=datetime.utcnow)
+    started_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 @dataclass 
 class AgentExecutionResult:
@@ -121,6 +121,11 @@ class SupervisorAgent(BaseSubAgent):
         """Backward compatibility property for tests expecting sub_agents attribute"""
         return list(self.agents.values())
     
+    @sub_agents.setter
+    def sub_agents(self, agents: list) -> None:
+        """Backward compatibility setter for tests"""
+        self.agents = {f"agent_{i}": agent for i, agent in enumerate(agents)}
+    
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute method for BaseSubAgent compatibility"""
         # This method is here to satisfy the abstract method requirement
@@ -178,7 +183,7 @@ class SupervisorAgent(BaseSubAgent):
             result = AgentExecutionResult(
                 success=True,
                 state=state,
-                duration=(datetime.utcnow() - context.started_at).total_seconds()
+                duration=(datetime.now(timezone.utc) - context.started_at).total_seconds()
             )
             self.run_history.append(result)
             
@@ -195,7 +200,7 @@ class SupervisorAgent(BaseSubAgent):
             result = AgentExecutionResult(
                 success=False,
                 error=str(e),
-                duration=(datetime.utcnow() - context.started_at).total_seconds()
+                duration=(datetime.now(timezone.utc) - context.started_at).total_seconds()
             )
             self.run_history.append(result)
             
@@ -327,7 +332,7 @@ class SupervisorAgent(BaseSubAgent):
                         )
                     )
                 
-                # Execute the agent
+                # Execute the agent (modifies state in place)
                 if context.timeout:
                     await asyncio.wait_for(
                         agent.execute(state, context.run_id, stream_updates),
@@ -362,7 +367,7 @@ class SupervisorAgent(BaseSubAgent):
                 logger.error(last_error)
                 
             except Exception as e:
-                last_error = e
+                last_error = str(e)
                 logger.error(f"Agent {agent.name} failed (attempt {retry_count + 1}): {e}")
                 
             # Execute retry hook

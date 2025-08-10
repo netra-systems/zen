@@ -7,3 +7,4 @@ v2/test.db
 v2/app/.coverage
 /v2/.venv
 /v2/venv
+/v2/venv_test
