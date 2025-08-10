@@ -17,7 +17,7 @@ export const WebSocketTest: React.FC = () => {
     <div>
       <h2>WebSocket Test</h2>
       <p>Connection Status: {status}</p>
-      <button onClick={handleSendMessage} disabled={status !== 'connected'}>
+      <button onClick={handleSendMessage} disabled={status !== 'OPEN'}>
         Send Message
       </button>
       {messages.length > 0 && (
