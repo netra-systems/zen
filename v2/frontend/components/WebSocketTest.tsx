@@ -3,11 +3,11 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { WebSocketMessage } from '@/types/chat';
 
 export const WebSocketTest: React.FC = () => {
-  const { isConnected, lastMessage, sendMessage } = useWebSocket();
+  const { status, messages, sendMessage } = useWebSocket();
 
   const handleSendMessage = () => {
     const message: WebSocketMessage = {
-      type: 'user_message',
+      type: 'message',
       payload: { text: 'Hello, from the client!' },
     };
     sendMessage(message);
@@ -16,14 +16,14 @@ export const WebSocketTest: React.FC = () => {
   return (
     <div>
       <h2>WebSocket Test</h2>
-      <p>Connection Status: {isConnected ? 'Connected' : 'Disconnected'}</p>
-      <button onClick={handleSendMessage} disabled={!isConnected}>
+      <p>Connection Status: {status}</p>
+      <button onClick={handleSendMessage} disabled={status !== 'connected'}>
         Send Message
       </button>
-      {lastMessage && (
+      {messages.length > 0 && (
         <div>
           <h3>Last Message Received:</h3>
-          <pre>{JSON.stringify(lastMessage, null, 2)}</pre>
+          <pre>{JSON.stringify(messages[messages.length - 1], null, 2)}</pre>
         </div>
       )}
     </div>
