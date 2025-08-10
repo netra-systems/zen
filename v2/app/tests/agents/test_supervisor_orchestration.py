@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
-from app.agents.supervisor import Supervisor
+from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.agents.base import BaseSubAgent
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.agents.state import DeepAgentState
