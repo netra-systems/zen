@@ -7,66 +7,61 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 @pytest.mark.asyncio
 async def test_agent_service_initialization():
-    # Mock database session and LLM manager
-    mock_db = AsyncMock(spec=AsyncSession)
-    mock_llm = AsyncMock()
+    # Mock supervisor
+    mock_supervisor = AsyncMock(spec=Supervisor)
     
-    service = AgentService(mock_db, mock_llm)
-    assert service.db_session is not None
-    assert service.llm_manager is not None
+    service = AgentService(mock_supervisor)
+    assert service.supervisor is not None
+    assert service.thread_service is not None
+    assert service.message_handler is not None
 
 @pytest.mark.asyncio
 async def test_agent_service_process_request():
-    # Mock dependencies
-    mock_db = AsyncMock(spec=AsyncSession)
-    mock_llm = AsyncMock()
+    # Mock supervisor
+    mock_supervisor = AsyncMock(spec=Supervisor)
+    mock_supervisor.run = AsyncMock(return_value={"status": "completed", "result": "test_result"})
     
-    service = AgentService(mock_db, mock_llm)
+    service = AgentService(mock_supervisor)
     
-    # Mock the start_agent_run method
-    service.start_agent_run = AsyncMock(return_value="run_id_123")
-    
-    user_id = "user_456"
-    thread_id = "thread_123"
-    request = "Test message"
-    
-    run_id = await service.start_agent_run(
-        user_id=user_id,
-        thread_id=thread_id, 
-        request=request
+    # Create a request model
+    from app.schemas import RequestModel
+    request_model = RequestModel(
+        id="test_id",
+        user_id="user_456",
+        query="Test message",
+        workloads=[]
     )
     
-    assert run_id == "run_id_123"
-    service.start_agent_run.assert_called_once()
+    run_id = "run_id_123"
+    result = await service.run(request_model, run_id, stream_updates=True)
+    
+    assert result["status"] == "completed"
+    mock_supervisor.run.assert_called_once()
 
 @pytest.mark.asyncio
-async def test_agent_service_session_management():
-    # Mock dependencies
+async def test_agent_service_websocket_message_handling():
+    # Mock supervisor and dependencies
+    mock_supervisor = AsyncMock(spec=Supervisor)
     mock_db = AsyncMock(spec=AsyncSession)
-    mock_llm = AsyncMock()
     
-    service = AgentService(mock_db, mock_llm)
+    service = AgentService(mock_supervisor)
     
-    # Add session management methods if they don't exist
-    if not hasattr(service, 'active_sessions'):
-        service.active_sessions = {}
+    # Mock the message handler
+    service.message_handler.handle_user_message = AsyncMock()
     
-    if not hasattr(service, 'create_session'):
-        async def create_session(user_id, context):
-            session_id = f"session_{user_id}_{len(service.active_sessions)}"
-            service.active_sessions[session_id] = {'user_id': user_id, 'context': context}
-            return session_id
-        service.create_session = create_session
+    # Test handling a user message
+    user_id = "user_123"
+    message = {
+        "type": "user_message",
+        "payload": {
+            "content": "Test message",
+            "thread_id": "thread_123"
+        }
+    }
     
-    if not hasattr(service, 'end_session'):
-        async def end_session(session_id):
-            if session_id in service.active_sessions:
-                del service.active_sessions[session_id]
-        service.end_session = end_session
+    await service.handle_websocket_message(user_id, message, mock_db)
     
-    session_id = await service.create_session("user_123", {"context": "test"})
-    assert session_id in service.active_sessions
-    assert service.active_sessions[session_id]['user_id'] == "user_123"
-    
-    await service.end_session(session_id)
-    assert session_id not in service.active_sessions
+    # Verify the message handler was called
+    service.message_handler.handle_user_message.assert_called_once_with(
+        user_id, message["payload"], mock_db
+    )

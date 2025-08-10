@@ -29,12 +29,14 @@ async def test_overall_supervisor_workflow():
     mock_settings = Settings(debug_mode=True)
 
     mock_analysis_request = AnalysisRequest(
-        request=mock_request_model,
-        settings=mock_settings
+        request_model=mock_request_model
     )
 
+    # Mock tool dispatcher
+    tool_dispatcher = MagicMock()
+    
     # Instantiate the supervisor
-    supervisor = OverallSupervisor(db_session, llm_manager, websocket_manager)
+    supervisor = OverallSupervisor(db_session, llm_manager, websocket_manager, tool_dispatcher)
 
     # Start the agent
     supervisor.run = AsyncMock(return_value={"status": "completed"})

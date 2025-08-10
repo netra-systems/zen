@@ -13,6 +13,9 @@ from typing import Any, Dict
 from langchain_core.tools import StructuredTool
 from pydantic import create_model, BaseModel
 import asyncio
+from app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
 
 from app.services.context import ToolContext
 from app.services.apex_optimizer_agent.tools.cost_analyzer import cost_analyzer
@@ -42,10 +45,23 @@ def create_async_tool_wrapper(tool_func, context, has_args):
     async def wrapper(**kwargs):
         # LangChain automatically adds this, so we filter it out
         kwargs.pop('callbacks', None)
-        if has_args:
-            return await tool_func(context, **kwargs)
-        else:
-            return await tool_func(context)
+        tool_name = tool_func.__name__
+        
+        logger.debug(f"Executing tool: {tool_name} with args: {has_args}")
+        
+        try:
+            if has_args:
+                result = await tool_func(context, **kwargs)
+            else:
+                result = await tool_func(context)
+            
+            logger.debug(f"Tool {tool_name} completed successfully")
+            return result
+        
+        except Exception as e:
+            logger.error(f"Tool {tool_name} execution failed: {e}", exc_info=True)
+            raise
+    
     return wrapper
 
 class ToolBuilder:

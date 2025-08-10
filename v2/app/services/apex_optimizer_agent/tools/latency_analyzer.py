@@ -11,15 +11,26 @@
 from langchain_core.tools import tool
 from typing import List, Any
 from app.services.context import ToolContext
+from app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
 
 @tool
 async def latency_analyzer(context: ToolContext) -> str:
     """Analyzes the current latency of the system."""
-    total_latency = 0
-    for log in context.logs:
-        latency_result = await context.performance_predictor.execute(log.request.prompt_text, log.model_dump())
-        total_latency += latency_result["predicted_latency_ms"]
+    logger.info(f"Starting latency analysis for {len(context.logs)} logs")
     
-    average_latency = total_latency / len(context.logs) if context.logs else 0
+    try:
+        total_latency = 0
+        for log in context.logs:
+            latency_result = await context.performance_predictor.execute(log.request.prompt_text, log.model_dump())
+            total_latency += latency_result["predicted_latency_ms"]
+        
+        average_latency = total_latency / len(context.logs) if context.logs else 0
+        
+        logger.info(f"Latency analysis complete. Average predicted latency: {average_latency:.2f}ms")
+        return f"Analyzed current latency. Average predicted latency: {average_latency:.2f}ms"
     
-    return f"Analyzed current latency. Average predicted latency: {average_latency:.2f}ms"
+    except Exception as e:
+        logger.error(f"Latency analysis failed: {e}", exc_info=True)
+        raise
