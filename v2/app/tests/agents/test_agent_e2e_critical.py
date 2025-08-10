@@ -59,8 +59,8 @@ class TestAgentE2ECritical:
         supervisor.thread_id = str(uuid.uuid4())
         supervisor.user_id = str(uuid.uuid4())
         
-        # Create Agent Service
-        agent_service = AgentService(db_session, llm_manager)
+        # Create Agent Service with Supervisor
+        agent_service = AgentService(supervisor)
         agent_service.websocket_manager = websocket_manager
         
         return {

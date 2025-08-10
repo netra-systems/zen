@@ -3,12 +3,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { ChatInterface } from '@/components/ChatInterface';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useChatStore } from '@/store/chat';
-import { useAuth } from '@/auth/context';
+import { useAuthStore } from '@/store/authStore';
 
 // Mock all dependencies
 jest.mock('@/hooks/useWebSocket');
 jest.mock('@/store/chat');
-jest.mock('@/auth/context');
+jest.mock('@/store/authStore');
 jest.mock('@/components/chat/MessageList', () => ({
   MessageList: () => <div data-testid="message-list">Message List</div>,
 }));
@@ -46,7 +46,7 @@ describe('ChatInterface', () => {
     jest.clearAllMocks();
     (useWebSocket as jest.Mock).mockReturnValue(mockWebSocket);
     (useChatStore as jest.Mock).mockReturnValue(mockChatStore);
-    (useAuth as jest.Mock).mockReturnValue(mockAuth);
+    (useAuthStore as jest.Mock).mockReturnValue(mockAuth);
   });
 
   it('should render all chat components', () => {

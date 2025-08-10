@@ -9,7 +9,12 @@
       "Bash(pytest:*)",
       "Bash(pip show:*)",
       "Bash(del test_fixes.py)",
-      "Bash(npm run cy:run:*)"
+      "Bash(npm run cy:run:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm install:*)",
+      "Bash(pip install:*)",
+      "Bash(venvScripts:*)",
+      "Bash(venv/Scripts/python.exe -m pip install:*)"
     ],
     "deny": []
   }

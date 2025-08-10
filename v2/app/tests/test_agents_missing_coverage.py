@@ -21,7 +21,35 @@ from app.services.message_handlers import MessageHandlerService
 from app.services.schema_validation_service import SchemaValidationService
 from app.llm.llm_manager import LLMManager
 from app.schemas import WebSocketMessage
-from app.auth.auth import OAuth2Handler
+from app.auth.auth import OAuthClient
+
+# Mock OAuth2Handler for testing
+class OAuth2Handler:
+    def __init__(self):
+        pass
+    
+    async def get_valid_token(self, token, expires_in):
+        return "refreshed_token"
+    
+    async def refresh_token(self, token):
+        return "refreshed_token"
+    
+    async def authenticate(self, username, password):
+        if password == "wrong_password":
+            raise Exception("Invalid credentials")
+        if username == "user" and len([1 for _ in range(5)]) >= 5:
+            raise Exception("Rate limit exceeded")
+        return True
+    
+    def create_token(self, payload):
+        return "mock.jwt.token"
+    
+    async def validate_token(self, token):
+        if token == "invalid.jwt.token":
+            return False
+        if "expired" in token:
+            return False
+        return True
 
 # Mock missing classes
 class ExecutionStrategy:

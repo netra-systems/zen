@@ -40,7 +40,7 @@ async def test_supervisor_runs_sub_agents_in_order(mock_db_session, mock_llm_man
         mock_reporting_agent
     ]
     
-    input_data = {"query": "test query"}
+    input_data = "test query"
     run_id = "test_run_id"
     
     # Act
