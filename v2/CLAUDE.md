@@ -33,8 +33,14 @@ XML specifications are in `SPEC/*.xml`
   - Type definitions must stay synchronized
   - Test coverage requirements must be met
   - See full checklist in the specification
+- `SPEC/test_update_spec.xml` - **AUTOMATED TEST IMPROVEMENT**: Achieve 97% coverage
+  - Run `python scripts/test_updater.py --execute-spec` or say "run test_update_spec.xml"
+  - Automatically generates missing tests, updates legacy patterns, optimizes performance
+  - Daily/weekly/monthly automated test improvement cycles
+  - Self-healing test capabilities and coverage tracking
 - `SPEC/conventions.xml` - Project conventions and coding standards
 - `SPEC/instructions.xml` - General development instructions
+- `SPEC/LEGACY_CODE_CLEANUP.xml` - Legacy code identification and cleanup procedures
 
 ### Backend Development (Windows)
 
@@ -140,9 +146,10 @@ npm run cy:run          # Headless Cypress tests
 #### Test Configurations
 
 ##### Coverage Requirements
-- Backend minimum coverage: 70%
-- Frontend minimum coverage: 60%
+- **Target coverage: 97%** (automated improvement via `SPEC/test_update_spec.xml`)
+- Current baseline: Backend 70%, Frontend 60%
 - Coverage reports: `reports/coverage/html/index.html`
+- Automated coverage improvement: `python scripts/test_updater.py --execute-spec`
 
 ##### Environment Setup
 Tests automatically configure these environment variables:
@@ -167,6 +174,12 @@ python test_runner.py --mode quick
 
 # Full test suite with coverage
 python test_runner.py --mode comprehensive
+
+# AUTOMATED TEST IMPROVEMENT (achieves 97% coverage goal)
+python scripts/test_updater.py --execute-spec  # Run full test update specification
+python scripts/test_updater.py --monitor       # Track progress toward 97% goal
+python scripts/test_updater.py --daily-cycle   # Daily test improvements
+python scripts/test_updater.py --weekly-optimization  # Weekly optimization
 
 # Test only authentication flows
 python scripts/test_backend.py --category auth
