@@ -144,9 +144,11 @@ class MessageHandlerService:
                 except Exception as e:
                     logger.error(f"Error persisting assistant message: {e}")
             
-            # Convert response to dict if it's a DeepAgentState object
+            # Convert response to dict if it's a DeepAgentState object or Pydantic model
             response_data = response
-            if hasattr(response, 'dict'):
+            if hasattr(response, 'model_dump'):
+                response_data = response.model_dump()
+            elif hasattr(response, 'dict'):
                 response_data = response.dict()
             elif hasattr(response, '__dict__'):
                 response_data = response.__dict__

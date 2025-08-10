@@ -40,11 +40,42 @@ async def websocket_endpoint(
             await websocket.close(code=1008, reason="Invalid token")
             return
         
-        user = await security_service.get_user_by_id(db_session, user_id)
+        logger.info(f"Attempting to authenticate user with ID: {user_id}")
+        
+        # Add retry logic and better error handling
+        user = None
+        try:
+            user = await security_service.get_user_by_id(db_session, user_id)
+        except Exception as db_error:
+            logger.error(f"Database error while fetching user {user_id}: {db_error}")
+            # Try to refresh the database session
+            try:
+                await db_session.rollback()
+                user = await security_service.get_user_by_id(db_session, user_id)
+            except Exception as retry_error:
+                logger.error(f"Retry failed for user {user_id}: {retry_error}")
+        
         if user is None:
-            logger.error(f"User with ID {user_id} not found")
-            await websocket.close(code=1008, reason="User not found")
-            return
+            # Check if this might be an email instead of ID (legacy tokens)
+            if "@" in user_id:
+                logger.warning(f"Token contains email {user_id} instead of user ID, attempting email lookup")
+                user = await security_service.get_user(db_session, user_id)
+            
+            if user is None:
+                logger.error(f"User with ID {user_id} not found in database")
+                # Log additional debug info
+                logger.debug(f"Token payload: {payload}")
+                
+                # Check if database has any users at all (helpful for debugging empty databases)
+                from sqlalchemy import select, func
+                from app.db.models_postgres import User
+                user_count_result = await db_session.execute(select(func.count()).select_from(User))
+                user_count = user_count_result.scalar()
+                if user_count == 0:
+                    logger.warning("Database has no users. Run 'python create_test_user.py' to create a test user.")
+                
+                await websocket.close(code=1008, reason="User not found")
+                return
         
         if not user.is_active:
             logger.error(f"User {user_id} is not active")
@@ -52,7 +83,7 @@ async def websocket_endpoint(
             return
             
     except Exception as e:
-        logger.error(f"Error authenticating WebSocket connection: {e}")
+        logger.error(f"Error authenticating WebSocket connection: {e}", exc_info=True)
         await websocket.close(code=1008, reason="Authentication failed")
         return
 

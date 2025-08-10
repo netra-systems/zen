@@ -272,7 +272,7 @@ describe('MessageService', () => {
       expect(saveResult.queued).toBe(true);
       
       // Verify the message is in the queue
-      const queuedMessages = await messageService.getQueuedMessages();
+      let queuedMessages = await messageService.getQueuedMessages();
       expect(queuedMessages).toHaveLength(1);
       
       // Clear the mock to reset call count
@@ -289,6 +289,10 @@ describe('MessageService', () => {
       expect(retryResults.successful).toBe(1);
       expect(retryResults.failed).toBe(0);
       expect(fetch).toHaveBeenCalledTimes(1);
+      
+      // Verify queue is now empty after successful retry
+      queuedMessages = await messageService.getQueuedMessages();
+      expect(queuedMessages).toHaveLength(0);
     });
   });
 

@@ -226,7 +226,7 @@ class StatePersistenceService:
                 )
                 reference = result.scalar_one_or_none()
                 if reference:
-                    return json.loads(reference.content)
+                    return json.loads(reference.value)
             
             return None
             

@@ -19,6 +19,7 @@ class BaseSubAgent(ABC):
         self.end_time = None
         self.context = {}  # Protected context for this agent
         self.websocket_manager = None  # Will be set by Supervisor
+        self.user_id = None  # Will be set by Supervisor for WebSocket messages
         self.logger = central_logger.get_logger(name)
 
     async def _pre_run(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> bool:
@@ -66,8 +67,9 @@ class BaseSubAgent(ABC):
             if not await self._pre_run(state, run_id, stream_updates):
                 self.logger.warning(f"{self.name} entry conditions not met for run_id: {run_id}")
                 if stream_updates and self.websocket_manager:
+                    ws_user_id = self.user_id if self.user_id else run_id
                     await self.websocket_manager.send_agent_log(
-                        run_id, "warning", 
+                        ws_user_id, "warning", 
                         f"Entry conditions not met for {self.name}",
                         self.name
                     )
@@ -83,8 +85,9 @@ class BaseSubAgent(ABC):
         except Exception as e:
             self.logger.error(f"{self.name} failed for run_id: {run_id}: {e}")
             if stream_updates and self.websocket_manager:
+                ws_user_id = self.user_id if self.user_id else run_id
                 await self.websocket_manager.send_error(
-                    run_id, 
+                    ws_user_id, 
                     f"{self.name} encountered an error: {str(e)}",
                     self.name
                 )
@@ -122,8 +125,10 @@ class BaseSubAgent(ABC):
                 next_node="",
                 lifecycle=self.get_state()
             )
+            # Get user_id from supervisor if available, otherwise use run_id
+            ws_user_id = getattr(self.websocket_manager, '_current_user_id', run_id) if hasattr(self.websocket_manager, '_current_user_id') else run_id
             await self.websocket_manager.send_message(
-                run_id,
+                ws_user_id,
                 WebSocketMessage(
                     type="sub_agent_update",
                     payload=SubAgentUpdate(

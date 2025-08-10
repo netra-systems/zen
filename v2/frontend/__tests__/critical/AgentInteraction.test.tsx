@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
@@ -6,10 +7,17 @@ import { useChatWebSocket } from '../../hooks/useChatWebSocket';
 import { WebSocketProvider } from '../../providers/WebSocketProvider';
 import MainChat from '../../components/chat/MainChat';
 import SubAgentStatus from '../../components/SubAgentStatus';
+import { MockAuthProvider } from '../test-utils/mockProviders';
 
 describe('Agent Interaction Tests', () => {
   let server: WS;
   const mockRunId = 'test-run-id-123';
+  
+  const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+    <MockAuthProvider>
+      <WebSocketProvider>{children}</WebSocketProvider>
+    </MockAuthProvider>
+  );
   
   beforeEach(() => {
     server = new WS(`ws://localhost:8000/ws/${mockRunId}`);
@@ -21,13 +29,15 @@ describe('Agent Interaction Tests', () => {
 
   describe('Agent Lifecycle Management', () => {
     it('should start agent workflow on user message submission', async () => {
-      const TestWrapper = () => (
-        <WebSocketProvider>
-          <MainChat />
-        </WebSocketProvider>
+      const TestComponent = () => (
+        <MockAuthProvider>
+          <WebSocketProvider>
+            <MainChat />
+          </WebSocketProvider>
+        </MockAuthProvider>
       );
 
-      render(<TestWrapper />);
+      render(<TestComponent />);
       
       const messageInput = screen.getByPlaceholderText(/type your message/i);
       const sendButton = screen.getByRole('button', { name: /send/i });
@@ -46,7 +56,7 @@ describe('Agent Interaction Tests', () => {
 
     it('should handle agent_started event and show workflow progress', async () => {
       const { result } = renderHook(() => useChatWebSocket(mockRunId), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await server.connected;
@@ -134,7 +144,7 @@ describe('Agent Interaction Tests', () => {
   describe('Real-time Message Streaming', () => {
     it('should handle streaming message updates in real-time', async () => {
       const { result } = renderHook(() => useChatWebSocket(mockRunId), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await server.connected;
@@ -162,7 +172,7 @@ describe('Agent Interaction Tests', () => {
 
     it('should handle concurrent streaming from multiple sub-agents', async () => {
       const { result } = renderHook(() => useChatWebSocket(mockRunId), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await server.connected;
@@ -204,7 +214,7 @@ describe('Agent Interaction Tests', () => {
   describe('Error Handling and Recovery', () => {
     it('should handle sub-agent failures gracefully', async () => {
       const { result } = renderHook(() => useChatWebSocket(mockRunId), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await server.connected;
@@ -237,7 +247,7 @@ describe('Agent Interaction Tests', () => {
 
     it('should implement fallback strategies for agent failures', async () => {
       const { result } = renderHook(() => useChatWebSocket(mockRunId), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await server.connected;
@@ -263,7 +273,7 @@ describe('Agent Interaction Tests', () => {
 
     it('should handle partial workflow completion', async () => {
       const { result } = renderHook(() => useChatWebSocket(mockRunId), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await server.connected;
@@ -297,7 +307,7 @@ describe('Agent Interaction Tests', () => {
   describe('Agent Result Processing', () => {
     it('should aggregate results from all sub-agents', async () => {
       const { result } = renderHook(() => useChatWebSocket(mockRunId), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await server.connected;
@@ -353,7 +363,7 @@ describe('Agent Interaction Tests', () => {
 
     it('should handle result validation and formatting', async () => {
       const { result } = renderHook(() => useChatWebSocket(mockRunId), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await server.connected;
@@ -393,7 +403,7 @@ describe('Agent Interaction Tests', () => {
       sessionStorage.setItem(`agent_workflow_${mockRunId}`, JSON.stringify(mockState));
 
       const { result } = renderHook(() => useChatWebSocket(mockRunId), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await waitFor(() => {
@@ -405,7 +415,7 @@ describe('Agent Interaction Tests', () => {
 
     it('should handle workflow resumption after interruption', async () => {
       const { result } = renderHook(() => useChatWebSocket(mockRunId), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await server.connected;

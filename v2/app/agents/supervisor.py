@@ -46,9 +46,12 @@ class Supervisor(BaseSubAgent):
         self.set_state(SubAgentLifecycle.RUNNING)
         self.run_states[run_id] = {"status": "running", "current_step": 0, "total_steps": len(self.sub_agents)}
 
+        # Use user_id for WebSocket messages (run_id is used internally)
+        ws_user_id = self.user_id if self.user_id else run_id
+
         if stream_updates:
             await self.websocket_manager.send_message(
-                run_id,
+                ws_user_id,
                 WebSocketMessage(type="agent_started", payload=AgentStarted(run_id=run_id).model_dump()).model_dump()
             )
 
@@ -86,6 +89,7 @@ class Supervisor(BaseSubAgent):
             
             # Set the websocket manager for streaming updates
             agent.websocket_manager = self.websocket_manager
+            agent.user_id = ws_user_id  # Pass user_id to sub-agent
             
             agent.set_state(SubAgentLifecycle.RUNNING)
             if stream_updates:
@@ -95,7 +99,7 @@ class Supervisor(BaseSubAgent):
                     lifecycle=agent.get_state()
                 )
                 await self.websocket_manager.send_message(
-                    run_id,
+                    ws_user_id,
                     WebSocketMessage(
                         type="sub_agent_update",
                         payload=SubAgentUpdate(
@@ -105,7 +109,18 @@ class Supervisor(BaseSubAgent):
                     ).model_dump()
                 )
             
-            await agent.run(state, run_id, stream_updates)
+            try:
+                await agent.run(state, run_id, stream_updates)
+            except Exception as e:
+                self.logger.error(f"Error in {agent.name}: {e}")
+                if stream_updates:
+                    await self.websocket_manager.send_error(
+                        ws_user_id,
+                        f"Error in {agent.name}: {str(e)}",
+                        agent.name
+                    )
+                # Continue with next agent despite the error
+                continue
             
             # Save sub-agent result
             if self.thread_id and self.db_session:
@@ -144,7 +159,7 @@ class Supervisor(BaseSubAgent):
                     lifecycle=agent.get_state()
                 )
                 await self.websocket_manager.send_message(
-                    run_id,
+                    ws_user_id,
                     WebSocketMessage(
                         type="sub_agent_update",
                         payload=SubAgentUpdate(
@@ -154,7 +169,7 @@ class Supervisor(BaseSubAgent):
                     ).model_dump()
                 )
                 await self.websocket_manager.send_message(
-                    run_id,
+                    ws_user_id,
                     WebSocketMessage(
                         type="sub_agent_completed",
                         payload={
@@ -179,7 +194,7 @@ class Supervisor(BaseSubAgent):
         
         if stream_updates:
             await self.websocket_manager.send_message(
-                run_id,
+                ws_user_id,
                 WebSocketMessage(type="agent_completed", payload=AgentCompleted(run_id=run_id, result=state.model_dump()).model_dump()).model_dump()
             )
         logger.info(f"Supervisor finished for run_id: {run_id}")

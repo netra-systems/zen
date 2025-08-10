@@ -1,0 +1,36 @@
+C:\Users\antho\miniconda3\Lib\site-packages\pytest_asyncio\plugin.py:211: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts =============================
+platform win32 -- Python 3.12.4, pytest-8.3.2, pluggy-1.5.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2
+configfile: pytest.ini
+plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... || Loading configuration for: development ||
+[32m2025-08-09 19:52:03.033[0m | [1mINFO    [0m | [36mapp.logging_config[0m:[36m_initialize_services[0m:[36m109[0m - [1mClickHouse connection verified.[0mPostgreSQL async engine created successfully.
+collected 337 items
+
+app/tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_1_complete_agent_lifecycle_request_to_completion PASSED [  0%]
+app/tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_2_websocket_real_time_streaming PASSED [  0%]
+app/tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_3_supervisor_orchestration_logic FAILED [  0%]
+app/tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_4_tool_dispatcher_integration PASSED [  1%]
+app/tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_5_state_persistence_and_recovery PASSED [  1%]
+app/tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_6_error_handling_and_recovery PASSED [  1%]
+app/tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_7_authentication_and_authorization PASSED [  2%]
+app/tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_8_multi_agent_collaboration PASSED [  2%]
+app/tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_9_concurrent_request_handling PASSED [  2%]
+app/tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_10_performance_and_timeout_handling PASSED [  2%]
+app/tests/agents/test_subagent_workflow.py::test_subagent_workflow_end_to_end PASSED [  3%]
+app/tests/agents/test_supervisor_advanced.py::test_supervisor_error_handling PASSED [  3%]
+app/tests/agents/test_supervisor_advanced.py::test_supervisor_state_management PASSED [  3%]
+app/tests/agents/test_supervisor_advanced.py::test_supervisor_concurrent_requests PASSED [  4%]
+app/tests/agents/test_supervisor_agent.py::test_supervisor_runs_sub_agents_in_order PASSED [  4%]
+app/tests/agents/test_supervisor_orchestration.py::TestSupervisorOrchestration::test_supervisor_agent_selection PASSED [  4%]
+app/tests/agents/test_supervisor_orchestration.py::TestSupervisorOrchestration::test_multi_agent_coordination PASSED [  5%]
+app/tests/agents/test_supervisor_orchestration.py::TestSupervisorOrchestration::test_error_handling_in_orchestration PASSED [  5%]
+app/tests/routes/test_apex_optimizer_agent_route.py::test_apex_optimizer_agent[I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.] FAILED [  5%]
+app/tests/routes/test_apex_optimizer_agent_route.py::test_apex_optimizer_agent[My tools are too slow. I need to reduce the latency by 3x, but I can't spend more money.] ERROR [  5%]
+app/tests/routes/test_apex_optimizer_agent_route.py::test_apex_optimizer_agent[I'm expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?] 

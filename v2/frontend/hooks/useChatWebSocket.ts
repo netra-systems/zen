@@ -49,6 +49,20 @@ export const useChatWebSocket = () => {
             console.error('Failed to set sub-agent status:', error);
           }
         }
+        // Show message updates from sub-agents
+        if (payload?.state?.messages && payload.state.messages.length > 0) {
+          const message = payload.state.messages[0];
+          const agentMessage: Message = {
+            id: generateMessageId(),
+            role: 'assistant',
+            content: message.content || '',
+            timestamp: new Date().toISOString(),
+            subAgentName: payload.sub_agent_name,
+            displayed_to_user: true,
+            metadata: { type: 'status_update' }
+          };
+          addMessage(agentMessage);
+        }
       } else if (wsMessage.type === 'agent_started') {
         setProcessing(true);
       } else if (wsMessage.type === 'agent_finished' || wsMessage.type === 'agent_completed') {
@@ -65,16 +79,55 @@ export const useChatWebSocket = () => {
         addMessage(completionMessage);
       } else if (wsMessage.type === 'error') {
         setProcessing(false);
+        const payload = wsMessage.payload as any;
         const errorMessage: Message = {
           id: generateMessageId(),
           role: 'assistant',
-          content: `Error: ${(wsMessage.payload as any)?.error || 'An error occurred'}`,
+          content: `❌ Error: ${payload?.error || 'An error occurred'}`,
           timestamp: new Date().toISOString(),
-          subAgentName: 'System',
+          subAgentName: payload?.sub_agent_name || 'System',
           displayed_to_user: true,
           error: true
         };
         addMessage(errorMessage);
+      } else if (wsMessage.type === 'agent_log') {
+        const payload = wsMessage.payload as any;
+        const logPrefix = payload.level === 'error' ? '❌' : 
+                         payload.level === 'warning' ? '⚠️' : 'ℹ️';
+        const logMessage: Message = {
+          id: generateMessageId(),
+          role: 'assistant',
+          content: `${logPrefix} ${payload.message}`,
+          timestamp: new Date().toISOString(),
+          subAgentName: payload.sub_agent_name || 'System',
+          displayed_to_user: true,
+          metadata: { type: 'log', level: payload.level }
+        };
+        addMessage(logMessage);
+      } else if (wsMessage.type === 'tool_call') {
+        const payload = wsMessage.payload as any;
+        const toolMessage: Message = {
+          id: generateMessageId(),
+          role: 'assistant',
+          content: `🔧 Calling tool: ${payload.tool_name}`,
+          timestamp: new Date().toISOString(),
+          subAgentName: payload.sub_agent_name || 'System',
+          displayed_to_user: true,
+          metadata: { type: 'tool_call', tool_name: payload.tool_name, tool_args: payload.tool_args }
+        };
+        addMessage(toolMessage);
+      } else if (wsMessage.type === 'tool_result') {
+        const payload = wsMessage.payload as any;
+        const resultMessage: Message = {
+          id: generateMessageId(),
+          role: 'assistant',
+          content: `✅ Tool result from ${payload.tool_name}: ${JSON.stringify(payload.result).substring(0, 200)}...`,
+          timestamp: new Date().toISOString(),
+          subAgentName: payload.sub_agent_name || 'System',
+          displayed_to_user: true,
+          metadata: { type: 'tool_result', tool_name: payload.tool_name, result: payload.result }
+        };
+        addMessage(resultMessage);
       } else if (wsMessage.type === 'message_received') {
         // Acknowledgment that message was received - don't add duplicate
         // User messages are already added immediately when sent

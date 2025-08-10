@@ -21,5 +21,17 @@ class RedisManager:
 
     async def get_client(self):
         return self.redis_client
+    
+    async def get(self, key: str):
+        """Get a value from Redis"""
+        if self.redis_client:
+            return await self.redis_client.get(key)
+        return None
+    
+    async def set(self, key: str, value: str, ex: int = None):
+        """Set a value in Redis with optional expiration"""
+        if self.redis_client:
+            return await self.redis_client.set(key, value, ex=ex)
+        return None
 
 redis_manager = RedisManager()

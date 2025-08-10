@@ -41,6 +41,11 @@ class AuthService {
     return localStorage.getItem(TOKEN_KEY);
   }
 
+  getAuthHeaders(): Record<string, string> {
+    const token = this.getToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
   removeToken(): void {
     localStorage.removeItem(TOKEN_KEY);
   }

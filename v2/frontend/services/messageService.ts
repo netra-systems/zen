@@ -198,8 +198,9 @@ class MessageService {
     let successful = 0;
     let failed = 0;
     const remainingQueued: QueuedMessage[] = [];
+    const messagesToRetry = [...this.queuedMessages];
 
-    for (const queued of this.queuedMessages) {
+    for (const queued of messagesToRetry) {
       try {
         await this.saveMessage(queued.thread_id, queued.message);
         successful++;

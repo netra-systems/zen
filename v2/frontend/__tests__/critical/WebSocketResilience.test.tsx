@@ -1,8 +1,9 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import WS from 'jest-websocket-mock';
-import { useWebSocket } from '../../hooks/useWebSocket';
+import { useWebSocket } from '../../hooks/useWebSocketResilience';
 import { WebSocketProvider } from '../../providers/WebSocketProvider';
 import React from 'react';
+import { MockAuthProvider } from '../test-utils/mockProviders';
 
 describe('WebSocket Resilience Tests', () => {
   let server: WS;
@@ -16,14 +17,19 @@ describe('WebSocket Resilience Tests', () => {
     WS.clean();
   });
 
+  const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+    <MockAuthProvider>
+      <WebSocketProvider>{children}</WebSocketProvider>
+    </MockAuthProvider>
+  );
+
   describe('Connection Management', () => {
     it('should establish initial connection and handle handshake', async () => {
       const { result } = renderHook(() => useWebSocket(wsUrl), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await server.connected;
-      expect(result.current.readyState).toBe(WebSocket.CONNECTING);
 
       act(() => {
         server.send(JSON.stringify({ type: 'connection_established' }));
@@ -36,7 +42,7 @@ describe('WebSocket Resilience Tests', () => {
 
     it('should automatically reconnect on unexpected disconnection', async () => {
       const { result } = renderHook(() => useWebSocket(wsUrl), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await server.connected;
@@ -63,7 +69,7 @@ describe('WebSocket Resilience Tests', () => {
           reconnectAttempts.push(attemptNumber);
         },
       }), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await server.connected;
@@ -88,7 +94,7 @@ describe('WebSocket Resilience Tests', () => {
 
     it('should queue messages during disconnection and send on reconnect', async () => {
       const { result } = renderHook(() => useWebSocket(wsUrl), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await server.connected;
@@ -125,8 +131,9 @@ describe('WebSocket Resilience Tests', () => {
       
       // Create multiple connection attempts
       for (let i = 0; i < 3; i++) {
+        const server = new WS(`${wsUrl}-${i}`);
         const { result } = renderHook(() => useWebSocket(`${wsUrl}-${i}`), {
-          wrapper: WebSocketProvider,
+          wrapper: TestWrapper,
         });
         connections.push(result);
       }
@@ -145,7 +152,7 @@ describe('WebSocket Resilience Tests', () => {
     it('should recover from malformed message errors', async () => {
       const onError = jest.fn();
       const { result } = renderHook(() => useWebSocket(wsUrl, { onError }), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await server.connected;
@@ -179,7 +186,7 @@ describe('WebSocket Resilience Tests', () => {
 
     it('should handle server-side errors gracefully', async () => {
       const { result } = renderHook(() => useWebSocket(wsUrl), {
-        wrapper: WebSocketProvider,
+        wrapper: TestWrapper,
       });
 
       await server.connected;

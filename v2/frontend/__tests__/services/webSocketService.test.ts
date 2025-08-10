@@ -142,9 +142,10 @@ describe('WebSocketService', () => {
 
     it('should handle binary data correctly', async () => {
       const onBinaryMessage = jest.fn();
+      const onOpen = jest.fn();
       
       webSocketService.connect(mockUrl, {
-        onOpen: jest.fn(),
+        onOpen,
         onMessage: jest.fn(),
         onError: jest.fn(),
         onClose: jest.fn(),
@@ -153,8 +154,14 @@ describe('WebSocketService', () => {
 
       await server.connected;
       
+      // Wait for onOpen to be called
+      await new Promise(resolve => setTimeout(resolve, 0));
+      
       const binaryData = new ArrayBuffer(8);
       server.send(binaryData);
+      
+      // Wait for message processing
+      await new Promise(resolve => setTimeout(resolve, 0));
       
       expect(onBinaryMessage).toHaveBeenCalledWith(binaryData);
     });
@@ -164,8 +171,9 @@ describe('WebSocketService', () => {
     it('should track connection state accurately', async () => {
       expect(webSocketService.getState()).toBe('disconnected');
       
+      const onOpen = jest.fn();
       webSocketService.connect(mockUrl, {
-        onOpen: jest.fn(),
+        onOpen,
         onMessage: jest.fn(),
         onError: jest.fn(),
         onClose: jest.fn(),
@@ -174,6 +182,8 @@ describe('WebSocketService', () => {
       expect(webSocketService.getState()).toBe('connecting');
       
       await server.connected;
+      await new Promise(resolve => setTimeout(resolve, 0));
+      
       expect(webSocketService.getState()).toBe('connected');
       
       webSocketService.disconnect();
@@ -181,10 +191,10 @@ describe('WebSocketService', () => {
     });
 
     it('should manage heartbeat/ping-pong correctly', async () => {
-      jest.useFakeTimers();
+      const onOpen = jest.fn();
       
       webSocketService.connect(mockUrl, {
-        onOpen: jest.fn(),
+        onOpen,
         onMessage: jest.fn(),
         onError: jest.fn(),
         onClose: jest.fn(),
@@ -192,6 +202,7 @@ describe('WebSocketService', () => {
       });
 
       await server.connected;
+      await new Promise(resolve => setTimeout(resolve, 0));
       
       jest.advanceTimersByTime(30000);
       
@@ -207,18 +218,22 @@ describe('WebSocketService', () => {
   describe('Error Handling', () => {
     it('should emit detailed error events', async () => {
       const onError = jest.fn();
+      const onOpen = jest.fn();
       
       webSocketService.connect(mockUrl, {
-        onOpen: jest.fn(),
+        onOpen,
         onMessage: jest.fn(),
         onError,
         onClose: jest.fn(),
       });
 
       await server.connected;
+      await new Promise(resolve => setTimeout(resolve, 0));
       
       const errorEvent = new Error('WebSocket error');
       server.error(errorEvent);
+      
+      await new Promise(resolve => setTimeout(resolve, 0));
       
       expect(onError).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -230,9 +245,10 @@ describe('WebSocketService', () => {
 
     it('should handle rate limiting', async () => {
       const onRateLimit = jest.fn();
+      const onOpen = jest.fn();
       
       webSocketService.connect(mockUrl, {
-        onOpen: jest.fn(),
+        onOpen,
         onMessage: jest.fn(),
         onError: jest.fn(),
         onClose: jest.fn(),
@@ -241,6 +257,7 @@ describe('WebSocketService', () => {
       });
 
       await server.connected;
+      await new Promise(resolve => setTimeout(resolve, 0));
       
       for (let i = 0; i < 15; i++) {
         webSocketService.send({ type: 'test', id: i });
