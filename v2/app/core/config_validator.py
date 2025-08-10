@@ -80,9 +80,9 @@ class ConfigValidator:
             
         # Check OAuth configuration
         oauth = config.oauth_config
-        if not oauth.client_id and config.environment != "testing":
+        if not oauth.client_id and config.environment not in ["testing", "development"]:
             errors.append("OAuth client ID is not configured")
-        if not oauth.client_secret and config.environment != "testing":
+        if not oauth.client_secret and config.environment not in ["testing", "development"]:
             errors.append("OAuth client secret is not configured")
             
         if errors:

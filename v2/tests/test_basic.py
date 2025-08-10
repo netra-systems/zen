@@ -7,11 +7,18 @@ import os
 # Ensure proper path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+# Set required environment variables for imports to work
+os.environ["JWT_SECRET_KEY"] = "test-jwt-secret-key-for-testing-only-do-not-use-in-production"
+os.environ["FERNET_KEY"] = "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao="  
+os.environ["ENCRYPTION_KEY"] = "test-encryption-key-32-chars-long"
+
 def test_environment_setup():
     """Test that environment variables are set correctly"""
     assert os.environ.get("TESTING") == "1"
     assert os.environ.get("REDIS_HOST") == "localhost"
     assert os.environ.get("CLICKHOUSE_HOST") == "localhost"
+    assert os.environ.get("JWT_SECRET_KEY") is not None
+    assert os.environ.get("FERNET_KEY") is not None
 
 def test_imports():
     """Test that core modules can be imported"""

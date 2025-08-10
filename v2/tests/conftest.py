@@ -11,6 +11,11 @@ os.environ["REDIS_HOST"] = "localhost"
 os.environ["CLICKHOUSE_HOST"] = "localhost"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
+# Set authentication secrets required for tests
+os.environ["JWT_SECRET_KEY"] = "test-jwt-secret-key-for-testing-only-do-not-use-in-production"
+os.environ["FERNET_KEY"] = "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao="  # Test key only
+os.environ["ENCRYPTION_KEY"] = "test-encryption-key-32-chars-long"
+
 # Add parent directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 

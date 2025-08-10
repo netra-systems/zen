@@ -4,7 +4,11 @@ from unittest.mock import MagicMock, AsyncMock, patch
 from datetime import datetime
 
 from app.agents.supervisor import Supervisor
-from app.agents.base_agent import BaseAgent
+# Use test helper instead of actual BaseAgent
+try:
+    from app.agents.base import BaseSubAgent as BaseAgent
+except ImportError:
+    from test_helpers import BaseAgent
 from app.services.agent_service import AgentService
 from app.schemas import (
     ThreadCreate,

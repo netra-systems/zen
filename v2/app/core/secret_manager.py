@@ -22,6 +22,12 @@ class SecretManager:
         
     def load_secrets(self) -> Dict[str, Any]:
         """Load secrets from Secret Manager or environment variables as fallback."""
+        # Skip Google Cloud Secret Manager in local development
+        environment = os.environ.get("ENVIRONMENT", "development").lower()
+        if environment in ["development", "testing"] or not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
+            self._logger.info("Using environment variables for secrets (local development mode)")
+            return self._load_from_environment()
+        
         try:
             secrets = self._load_from_secret_manager()
             if secrets:

@@ -126,7 +126,8 @@ async def lifespan(app: FastAPI):
     app.state.llm_manager = LLMManager(settings)
 
     # The ClickHouse client is now managed by the central_logger
-    app.state.clickhouse_client = central_logger.clickhouse_db
+    # TODO: Fix ClickHouse client initialization
+    app.state.clickhouse_client = None  # central_logger.clickhouse_db
 
     # Initialize Postgres - must be done before startup checks
     app.state.db_session_factory = async_session_factory

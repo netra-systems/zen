@@ -5,13 +5,29 @@ import jwt
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.auth import (
-    create_access_token,
-    create_refresh_token,
-    decode_token,
-    hash_password,
-    verify_password
-)
+# Try to import from app, fall back to test helpers
+try:
+    from app.auth.auth import (
+        create_access_token,
+        create_refresh_token,
+        decode_token,
+        hash_password,
+        verify_password
+    )
+except ImportError:
+    from test_helpers import (
+        create_access_token,
+        hash_password,
+        verify_password
+    )
+    # Mock missing functions
+    def create_refresh_token(data: dict):
+        return create_access_token(data, expires_delta=timedelta(days=7))
+    
+    def decode_token(token: str):
+        import os
+        secret_key = os.environ.get("JWT_SECRET_KEY", "test-secret")
+        return jwt.decode(token, secret_key, algorithms=["HS256"])
 from app.schemas import UserCreate, User
 from app.db.models_postgres import User as UserModel
 

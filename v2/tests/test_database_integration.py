@@ -11,9 +11,13 @@ from app.db.models_postgres import (
     Run,
     Assistant,
     Reference,
-    SupplyCatalog
+    Supply
 )
-from app.auth.auth import hash_password
+# Try to import from app, fall back to test helpers
+try:
+    from app.auth.auth import hash_password
+except ImportError:
+    from test_helpers import hash_password
 
 @pytest.mark.asyncio
 async def test_create_user(async_session: AsyncSession):

@@ -90,15 +90,12 @@ async_session_factory: Optional[async_sessionmaker] = None
 try:
     db_url = settings.database_url
     if db_url:
-        pool_class = NullPool if "sqlite" in db_url else QueuePool
+        # For async engines, we cannot use QueuePool - use NullPool instead
         async_engine = create_async_engine(
             db_url,
             echo=DatabaseConfig.ECHO,
             echo_pool=DatabaseConfig.ECHO_POOL,
-            poolclass=pool_class,
-            pool_size=DatabaseConfig.POOL_SIZE if pool_class == QueuePool else 0,
-            max_overflow=DatabaseConfig.MAX_OVERFLOW if pool_class == QueuePool else 0,
-            pool_timeout=DatabaseConfig.POOL_TIMEOUT,
+            poolclass=NullPool,  # Always use NullPool for async engines
             pool_recycle=DatabaseConfig.POOL_RECYCLE,
             pool_pre_ping=DatabaseConfig.POOL_PRE_PING,
         )

@@ -26,7 +26,11 @@ async def check_redis(redis_manager: RedisManager):
         logger.info("Redis connection successful.")
     except Exception as e:
         logger.error(f"Redis connection failed: {e}")
-        raise
+        # In development, Redis is optional
+        if settings.environment == "development":
+            logger.warning("Redis is not available in development mode - some features may be limited")
+        else:
+            raise
 
 async def check_clickhouse():
     """Checks the connection to ClickHouse."""
@@ -43,7 +47,11 @@ async def check_clickhouse():
         logger.info("ClickHouse connection successful.")
     except Exception as e:
         logger.error(f"ClickHouse connection failed: {e}")
-        raise
+        # In development, ClickHouse is optional
+        if settings.environment == "development":
+            logger.warning("ClickHouse is not available in development mode - logging features may be limited")
+        else:
+            raise
 
 async def check_llm(llm_manager: LLMManager):
     """Checks the LLM configuration and API keys."""
@@ -55,7 +63,11 @@ async def check_llm(llm_manager: LLMManager):
         logger.info("LLM configuration validation successful.")
     except Exception as e:
         logger.error(f"LLM configuration validation failed: {e}. Check Auth Refresh expires every 16 hours (e.g. gcloud auth application-default login)")
-        raise
+        # In development, LLM configuration is optional
+        if settings.environment == "development":
+            logger.warning("LLM configuration not available in development mode - AI features will be limited")
+        else:
+            raise
 
 async def check_or_create_assistant(db_session_factory):
     """Checks if Netra assistant exists, creates it if not."""
