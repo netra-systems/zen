@@ -179,6 +179,69 @@ python scripts/test_frontend.py --update-snapshots
 python scripts/test_frontend.py --watch
 ```
 
+#### Test Troubleshooting & Common Issues
+
+##### Backend Test Issues
+1. **Missing Dependencies**: Ensure all required packages are installed
+   ```bash
+   pip install sqlalchemy aiosqlite asyncpg psycopg2-binary
+   ```
+
+2. **Database Test Failures**: Tests use in-memory SQLite by default
+   - Check `TESTING=1` environment variable is set
+   - Verify `conftest.py` fixtures are working
+
+##### Frontend Test Issues
+1. **WebSocket Hook Tests**: Always wrap `useWebSocket` tests with WebSocketProvider
+   ```typescript
+   const wrapper = ({ children }: { children: React.ReactNode }) => (
+     <WebSocketProvider>{children}</WebSocketProvider>
+   );
+   const { result } = renderHook(() => useWebSocket(), { wrapper });
+   ```
+
+2. **Fetch Mock Issues**: Use `mockImplementationOnce` for async responses
+   ```typescript
+   // ❌ Wrong - may not work correctly
+   (fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => data });
+   
+   // ✅ Correct - reliable async handling
+   (fetch as jest.Mock).mockImplementationOnce(async () => ({
+     ok: true,
+     json: async () => data,
+   }));
+   ```
+
+3. **Date.now Mock Issues**: Already handled in `jest.setup.ts` - preserves original function
+   ```typescript
+   // Automatically restored after each test
+   const originalDateNow = Date.now;
+   beforeEach(() => { Date.now = originalDateNow; });
+   afterEach(() => { Date.now = originalDateNow; });
+   ```
+
+4. **Hook API Mismatches**: Check actual hook implementation before testing
+   ```typescript
+   // Example: useError hook actual API
+   const { error, setError, clearError, isError } = useError();
+   // NOT: addError, validateApplicationState, processStateUpdate, etc.
+   ```
+
+5. **Test Timeouts**: Increase timeout for complex integration tests
+   ```typescript
+   it('should handle complex flow', async () => {
+     // test code
+   }, 10000); // 10 second timeout
+   ```
+
+##### Quick Test Fix Checklist
+- [ ] All dependencies installed (backend: SQLAlchemy, frontend: npm packages)
+- [ ] Mock implementations match actual API signatures
+- [ ] React hooks wrapped with appropriate providers
+- [ ] Async operations use proper mock implementations
+- [ ] Test timeouts adequate for operations being tested
+- [ ] Environment variables properly set (TESTING=1, etc.)
+
 ## Architecture Overview
 
 ### Core Components

@@ -24,7 +24,7 @@ from app.db.postgres import async_session_factory
 from app.config import settings
 from app.logging_config import central_logger
 from app.llm.llm_manager import LLMManager
-from app.agents.supervisor import Supervisor
+from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.services.agent_service import AgentService
 from app.services.key_manager import KeyManager
 from app.services.security_service import SecurityService

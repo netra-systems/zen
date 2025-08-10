@@ -49,8 +49,8 @@ async def test_supervisor_runs_sub_agents_in_order(mock_db_session, mock_llm_man
     mock_reporting_agent.name = "ReportingSubAgent"
     mock_reporting_agent.execute.return_value = None
     
-    # Replace the agents in the consolidated supervisor
-    supervisor._impl.agents = {
+    # Replace the agents in the supervisor directly
+    supervisor.agents = {
         "triage": mock_triage_agent,
         "data": mock_data_agent,
         "optimization": mock_optimization_agent,

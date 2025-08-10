@@ -2,6 +2,7 @@ import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
+import { AuthContext } from '@/auth/AuthContext';
 import { authService } from '@/auth/service';
 import WS from 'jest-websocket-mock';
 
@@ -12,9 +13,11 @@ describe('useWebSocket', () => {
   const mockToken = 'test-token';
   const wsUrl = 'ws://localhost:8000/ws';
 
-  // Create wrapper component with WebSocketProvider
+  // Create wrapper component with AuthContext and WebSocketProvider
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <WebSocketProvider>{children}</WebSocketProvider>
+    <AuthContext.Provider value={{ token: mockToken, user: null, login: jest.fn(), logout: jest.fn(), isAuthenticated: true }}>
+      <WebSocketProvider>{children}</WebSocketProvider>
+    </AuthContext.Provider>
   );
 
   beforeEach(() => {

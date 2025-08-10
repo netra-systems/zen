@@ -33,6 +33,7 @@ class WebSocketManager:
     HEARTBEAT_TIMEOUT = 60  # seconds
     MAX_RETRY_ATTEMPTS = 3
     RETRY_DELAY = 1  # seconds
+    MAX_CONNECTIONS_PER_USER = 5  # Prevent memory exhaustion attacks
 
     def __new__(cls):
         with cls._lock:
@@ -57,11 +58,18 @@ class WebSocketManager:
 
     async def connect(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Establish and register a new WebSocket connection."""
-        conn_info = ConnectionInfo(websocket=websocket, user_id=user_id)
-        
         # Initialize user's connection list if needed
         if user_id not in self.active_connections:
             self.active_connections[user_id] = []
+        
+        # Check connection limit
+        if len(self.active_connections[user_id]) >= self.MAX_CONNECTIONS_PER_USER:
+            # Close oldest connection to make room
+            oldest_conn = self.active_connections[user_id][0]
+            logger.warning(f"User {user_id} exceeded connection limit, closing oldest connection {oldest_conn.connection_id}")
+            await self.disconnect(user_id, oldest_conn.websocket, code=1008, reason="Connection limit exceeded")
+        
+        conn_info = ConnectionInfo(websocket=websocket, user_id=user_id)
         
         # Add connection to tracking structures
         self.active_connections[user_id].append(conn_info)
@@ -313,25 +321,65 @@ class WebSocketManager:
             }
         )
 
-    async def broadcast(self, message: Dict[str, Any]):
-        for user_id, connections in self.active_connections.items():
-            for connection in connections:
+    async def broadcast(self, message: Dict[str, Any]) -> Dict[str, int]:
+        """Broadcast a message to all connected users.
+        
+        Returns:
+            Dict with counts of successful and failed sends
+        """
+        successful_sends = 0
+        failed_sends = 0
+        connections_to_remove = []
+        
+        # Add timestamp if not present
+        if "timestamp" not in message:
+            message["timestamp"] = time.time()
+        
+        for user_id, connections in list(self.active_connections.items()):
+            for conn_info in connections[:]:  # Use slice copy to avoid modification during iteration
                 try:
-                    await connection.send_json(message)
+                    if conn_info.websocket.client_state == WebSocketState.CONNECTED:
+                        await conn_info.websocket.send_json(message)
+                        successful_sends += 1
+                        conn_info.message_count += 1
+                        self._stats["total_messages_sent"] += 1
+                    else:
+                        # Connection is not in CONNECTED state
+                        connections_to_remove.append((user_id, conn_info))
+                        failed_sends += 1
+                except (RuntimeError, ConnectionError) as e:
+                    logger.debug(f"Connection error during broadcast to {user_id} ({conn_info.connection_id}): {e}")
+                    connections_to_remove.append((user_id, conn_info))
+                    failed_sends += 1
                 except Exception as e:
-                    logger.error(f"Error broadcasting to {user_id}: {e}")
+                    logger.error(f"Unexpected error broadcasting to {user_id} ({conn_info.connection_id}): {e}")
+                    conn_info.error_count += 1
+                    self._stats["total_errors"] += 1
+                    failed_sends += 1
+        
+        # Clean up dead connections
+        for user_id, conn_info in connections_to_remove:
+            await self.disconnect(user_id, conn_info.websocket, code=1001, reason="Connection lost during broadcast")
+        
+        if failed_sends > 0:
+            logger.warning(f"Broadcast completed: {successful_sends} successful, {failed_sends} failed")
+        
+        return {"successful": successful_sends, "failed": failed_sends}
 
     async def shutdown(self):
         """Gracefully shutdown all connections."""
         logger.info("Starting WebSocket manager shutdown...")
         
         # Cancel all heartbeat tasks
-        for task in self.heartbeat_tasks.values():
-            task.cancel()
+        tasks_to_cancel = []
+        for task_id, task in self.heartbeat_tasks.items():
+            if not task.done():
+                task.cancel()
+                tasks_to_cancel.append(task)
         
         # Wait for tasks to cancel
-        if self.heartbeat_tasks:
-            await asyncio.gather(*self.heartbeat_tasks.values(), return_exceptions=True)
+        if tasks_to_cancel:
+            await asyncio.gather(*tasks_to_cancel, return_exceptions=True)
         
         # Close all connections
         for user_id, connections in list(self.active_connections.items()):
