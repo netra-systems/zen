@@ -26,7 +26,7 @@ const navItems: NavItem[] = [
     label: 'Corpus Management',
   },
   {
-    href: '/ingest-synthetic-data',
+    href: '/synthetic-data-generation',
     icon: <Icons.syntheticData className="h-4 w-4" />,
     label: 'Synthetic Data',
   },
