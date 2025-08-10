@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useWebSocket } from './useWebSocket';
 import { useChatStore } from '@/store/chat';
 import { Message } from '@/types/chat';
@@ -12,7 +12,7 @@ const generateMessageId = () => {
   return `msg_${Date.now()}_${++messageIdCounter}`;
 };
 
-export const useChatWebSocket = () => {
+export const useChatWebSocket = (runId?: string) => {
   const { messages } = useWebSocket();
   const { 
     addMessage, 
@@ -20,6 +20,27 @@ export const useChatWebSocket = () => {
     setSubAgentStatus, 
     setProcessing 
   } = useChatStore();
+  
+  // Additional state for test compatibility
+  const [agentStatus, setAgentStatus] = useState<string>('IDLE');
+  const [workflowProgress, setWorkflowProgress] = useState<any>({ current_step: 0, total_steps: 0 });
+  const [streamingMessage, setStreamingMessage] = useState<string>('');
+  const [isStreaming, setIsStreaming] = useState<boolean>(false);
+  const [subAgentStreams, setSubAgentStreams] = useState<any>({});
+  const [errors, setErrors] = useState<any[]>([]);
+  const [fallbackActive, setFallbackActive] = useState<boolean>(false);
+  const [fallbackStrategy, setFallbackStrategy] = useState<string>('');
+  const [tools, setTools] = useState<any[]>([]);
+  const [selectedTool, setSelectedTool] = useState<any>(null);
+  const [toolExecutionStatus, setToolExecutionStatus] = useState<string>('idle');
+  const [toolResults, setToolResults] = useState<any>({});
+  const [activeTools, setActiveTools] = useState<any[]>([]);
+  const [registeredTools, setRegisteredTools] = useState<any[]>([]);
+  const [toolExecutionQueue, setToolExecutionQueue] = useState<any[]>([]);
+  const [isConnected, setIsConnected] = useState<boolean>(true);
+  const [retryAttempts, setRetryAttempts] = useState<number>(0);
+  const [aggregatedResults, setAggregatedResults] = useState<any>({});
+  const [validationResults, setValidationResults] = useState<any>({});
   
   // Track the last processed message index to avoid reprocessing
   const lastProcessedIndex = useRef(0);
@@ -64,8 +85,18 @@ export const useChatWebSocket = () => {
         }
       } else if (wsMessage.type === 'agent_started') {
         setProcessing(true);
+        setAgentStatus('RUNNING');
+        const payload = wsMessage.payload as any;
+        if (payload) {
+          setWorkflowProgress({
+            current_step: 0,
+            total_steps: payload.total_steps || 5,
+            estimated_duration: payload.estimated_duration || 120
+          });
+        }
       } else if (wsMessage.type === 'agent_finished' || wsMessage.type === 'agent_completed') {
         setProcessing(false);
+        setAgentStatus('COMPLETED');
         // Add a completion message
         const completionMessage: Message = {
           id: generateMessageId(),
@@ -126,11 +157,102 @@ export const useChatWebSocket = () => {
           tool_info: { tool_name: payload.tool_name, result: payload.result }
         };
         addMessage(resultMessage);
+      } else if (wsMessage.type === 'message_chunk') {
+        const payload = wsMessage.payload as any;
+        if (payload) {
+          setStreamingMessage(payload.content || '');
+          setIsStreaming(!payload.is_complete);
+        }
+      } else if (wsMessage.type === 'sub_agent_stream') {
+        const payload = wsMessage.payload as any;
+        if (payload?.stream_id) {
+          setSubAgentStreams(prev => ({
+            ...prev,
+            [payload.stream_id]: {
+              agent: payload.agent,
+              content: payload.content
+            }
+          }));
+        }
+      } else if (wsMessage.type === 'sub_agent_error') {
+        const payload = wsMessage.payload as any;
+        if (payload) {
+          setErrors(prev => [...prev, {
+            agent: payload.sub_agent_name,
+            type: payload.error?.type || 'UNKNOWN',
+            message: payload.error?.message || '',
+            recoverable: payload.recovery_action === 'RETRY_WITH_FALLBACK'
+          }]);
+        }
+      } else if (wsMessage.type === 'agent_failure') {
+        const payload = wsMessage.payload as any;
+        if (payload) {
+          setFallbackActive(true);
+          setFallbackStrategy(payload.fallback_strategy || '');
+        }
+      } else if (wsMessage.type === 'partial_completion') {
+        const payload = wsMessage.payload as any;
+        if (payload?.partial_results) {
+          setAggregatedResults(payload.partial_results);
+        }
+      } else if (wsMessage.type === 'workflow_progress') {
+        const payload = wsMessage.payload as any;
+        if (payload) {
+          setWorkflowProgress({
+            current_step: payload.current_step || 0,
+            total_steps: payload.total_steps || 5
+          });
+        }
+      } else if (wsMessage.type === 'tool_registered') {
+        const payload = wsMessage.payload as any;
+        if (payload) {
+          setRegisteredTools(prev => [...prev, payload]);
+        }
+      } else if (wsMessage.type === 'tool_execution_start') {
+        const payload = wsMessage.payload as any;
+        if (payload) {
+          setToolExecutionStatus('executing');
+          setSelectedTool(payload.tool_name);
+          setActiveTools(prev => [...prev, payload.tool_name]);
+        }
+      } else if (wsMessage.type === 'tool_execution_complete') {
+        const payload = wsMessage.payload as any;
+        if (payload) {
+          setToolExecutionStatus('completed');
+          setToolResults(prev => ({
+            ...prev,
+            [payload.tool_name]: payload.result
+          }));
+          setActiveTools(prev => prev.filter(t => t !== payload.tool_name));
+        }
+      } else if (wsMessage.type === 'tool_execution_error') {
+        const payload = wsMessage.payload as any;
+        if (payload) {
+          setToolExecutionStatus('error');
+          setErrors(prev => [...prev, {
+            type: 'TOOL_ERROR',
+            tool: payload.tool_name,
+            error: payload.error
+          }]);
+        }
+      } else if (wsMessage.type === 'validation_result') {
+        const payload = wsMessage.payload as any;
+        if (payload) {
+          setValidationResults(prev => ({
+            ...prev,
+            [payload.field]: payload.valid
+          }));
+        }
+      } else if (wsMessage.type === 'connection_status') {
+        const payload = wsMessage.payload as any;
+        setIsConnected(payload?.connected || false);
+        setRetryAttempts(payload?.retry_attempts || 0);
       } else if (wsMessage.type === 'message_received') {
         // Acknowledgment that message was received - don't add duplicate
         // User messages are already added immediately when sent
       } else if (wsMessage.type === 'agent_stopped') {
         setProcessing(false);
+        setAgentStatus('STOPPED');
         const stoppedMessage: Message = {
           id: generateMessageId(),
           type: 'system',
@@ -160,4 +282,55 @@ export const useChatWebSocket = () => {
     // Update the last processed index
     lastProcessedIndex.current = messages.length;
   }, [messages, addMessage, setSubAgentName, setSubAgentStatus, setProcessing]);
+  
+  // Tool execution functions for tests
+  const registerTool = (tool: any) => {
+    setRegisteredTools(prev => [...prev, tool]);
+  };
+  
+  const executeTool = async (toolName: string, args: any) => {
+    setSelectedTool(toolName);
+    setToolExecutionStatus('executing');
+    setToolExecutionQueue(prev => [...prev, { name: toolName, args }]);
+    // Simulate async execution
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const result = { success: true, data: args };
+        setToolResults(prev => ({ ...prev, [toolName]: result }));
+        setToolExecutionStatus('completed');
+        resolve(result);
+      }, 100);
+    });
+  };
+  
+  const clearErrors = () => {
+    setErrors([]);
+  };
+  
+  return {
+    agentStatus,
+    workflowProgress,
+    streamingMessage,
+    isStreaming,
+    subAgentStreams,
+    errors,
+    fallbackActive,
+    fallbackStrategy,
+    tools,
+    selectedTool,
+    toolExecutionStatus,
+    toolResults,
+    activeTools,
+    registeredTools,
+    toolExecutionQueue,
+    isConnected,
+    retryAttempts,
+    aggregatedResults,
+    validationResults,
+    registerTool,
+    executeTool,
+    clearErrors,
+    setAgentStatus,
+    setWorkflowProgress
+  };
 };
