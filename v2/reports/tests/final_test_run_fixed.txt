@@ -1,0 +1,28 @@
+
+============================================================
+RUNNING CRITICAL COMPONENT TESTS
+============================================================
+
+[PASS] Config loading test PASSED
+[FAIL] test_authentication_functions FAILED: cannot import name 'verify_password' from 'app.auth.auth' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\app\auth\auth.py)
+[PASS] WebSocket manager test PASSED
+[32m2025-08-10 06:09:36.472[0m | [36mINFO    [0m | [36mapp.db.postgres[0m:[36m<module>[0m:[36m109[0m - [36mPostgreSQL async engine created with connection pooling[0m
+[PASS] Database engine test PASSED
+[PASS] User schema validation test PASSED
+[PASS] WebSocket message schema test PASSED
+[FAIL] test_custom_exception_class FAILED: NetraException.__init__() got an unexpected keyword argument 'status_code'
+[FAIL] test_central_logger FAILED: 
+[FAIL] test_redis_manager FAILED: 
+[FAIL] test_key_manager_with_valid_settings FAILED: Key validation failed: 1 validation error for KeyManager
+fernet_key
+  Input should be a valid bytes [type=bytes_type, input_value=<Mock name='mock.fernet_key' id='2509380082272'>, input_type=Mock]
+    For further information visit https://errors.pydantic.dev/2.11/v/bytes_type
+[FAIL] test_thread_creation_schema FAILED: No module named 'app.schemas.threads'
+[FAIL] test_agent_service_init FAILED: AgentService.__init__() missing 1 required positional argument: 'supervisor'
+[FAIL] test_supply_catalog_service FAILED: 
+[PASS] WebSocket message types test PASSED
+[PASS] Health check schema test PASSED
+
+============================================================
+RESULTS: 7 PASSED, 8 FAILED
+============================================================

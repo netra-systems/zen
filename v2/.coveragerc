@@ -1,0 +1,39 @@
+[run]
+source = app
+omit = 
+    */tests/*
+    */test_*.py
+    */__pycache__/*
+    */venv/*
+    */migrations/*
+    */alembic/*
+    app/config.py
+    app/main.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    def __str__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstractmethod
+    @abc.abstractmethod
+    except ImportError:
+    pass
+
+ignore_errors = True
+precision = 2
+show_missing = True
+skip_covered = False
+
+[html]
+directory = reports/coverage/html
+
+[json]
+output = reports/coverage/coverage.json
+
+[xml]
+output = reports/coverage/coverage.xml
