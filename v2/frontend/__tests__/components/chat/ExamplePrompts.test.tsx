@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { WebSocketProvider } from '../providers/WebSocketProvider';
 import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useChatStore } from '@/store/chat';
