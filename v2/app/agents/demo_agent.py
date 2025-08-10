@@ -9,6 +9,8 @@ from app.llm.llm_manager import LLMManager
 from app.ws_manager import WebSocketManager
 from app.logging_config import central_logger
 
+logger = central_logger.get_logger(__name__)
+
 class DemoAgent(BaseAgent):
     """
     Specialized agent for handling demo interactions.
@@ -68,7 +70,7 @@ class DemoAgent(BaseAgent):
             }
             
         except Exception as e:
-            central_logger.error(f"Demo agent processing error: {str(e)}")
+            logger.error(f"Demo agent processing error: {str(e)}")
             return {
                 "status": "error",
                 "error": str(e),
@@ -187,7 +189,7 @@ Format as JSON with keys: category, priority, recommendation"""
             }
             
         except Exception as e:
-            central_logger.error(f"Demo triage error: {str(e)}")
+            logger.error(f"Demo triage error: {str(e)}")
             return {
                 "status": "error",
                 "error": str(e),
@@ -247,7 +249,7 @@ Use industry-specific terminology and examples."""
             }
             
         except Exception as e:
-            central_logger.error(f"Demo optimization error: {str(e)}")
+            logger.error(f"Demo optimization error: {str(e)}")
             return {
                 "status": "error",
                 "error": str(e),
@@ -315,7 +317,7 @@ Include specific metrics and timelines where possible."""
             return report
             
         except Exception as e:
-            central_logger.error(f"Demo reporting error: {str(e)}")
+            logger.error(f"Demo reporting error: {str(e)}")
             return {
                 "status": "error",
                 "error": str(e),

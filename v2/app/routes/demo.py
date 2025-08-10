@@ -7,8 +7,8 @@ from datetime import datetime
 import uuid
 
 from app.auth.auth_dependencies import get_current_user
-from app.services.demo_service import DemoService
-from app.core.logger import central_logger
+from app.services.demo_service import DemoService, get_demo_service
+from app.logging_config import central_logger
 
 router = APIRouter(prefix="/api/demo", tags=["demo"])
 
@@ -75,7 +75,7 @@ class DemoMetrics(BaseModel):
 async def demo_chat(
     request: DemoChatRequest,
     background_tasks: BackgroundTasks,
-    demo_service: DemoService = Depends(),
+    demo_service: DemoService = Depends(get_demo_service),
     current_user: Optional[Dict] = Depends(get_current_user)
 ):
     """
@@ -113,13 +113,14 @@ async def demo_chat(
         )
         
     except Exception as e:
-        central_logger.error(f"Demo chat error: {str(e)}")
+        logger = central_logger.get_logger(__name__)
+        logger.error(f"Demo chat error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Demo chat processing failed: {str(e)}")
 
 @router.get("/industry/{industry}/templates", response_model=List[IndustryTemplate])
 async def get_industry_templates(
     industry: str,
-    demo_service: DemoService = Depends()
+    demo_service: DemoService = Depends(get_demo_service)
 ):
     """
     Get industry-specific demo templates and scenarios.
@@ -133,14 +134,15 @@ async def get_industry_templates(
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        central_logger.error(f"Failed to get industry templates: {str(e)}")
+        logger = central_logger.get_logger(__name__)
+        logger.error(f"Failed to get industry templates: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to retrieve templates")
 
 @router.post("/roi/calculate", response_model=ROICalculationResponse)
 async def calculate_roi(
     request: ROICalculationRequest,
     background_tasks: BackgroundTasks,
-    demo_service: DemoService = Depends()
+    demo_service: DemoService = Depends(get_demo_service)
 ):
     """
     Calculate ROI and cost savings for AI optimization.
@@ -167,14 +169,15 @@ async def calculate_roi(
         return ROICalculationResponse(**result)
         
     except Exception as e:
-        central_logger.error(f"ROI calculation error: {str(e)}")
+        logger = central_logger.get_logger(__name__)
+        logger.error(f"ROI calculation error: {str(e)}")
         raise HTTPException(status_code=500, detail="ROI calculation failed")
 
 @router.get("/metrics/synthetic", response_model=DemoMetrics)
 async def get_synthetic_metrics(
     scenario: str = "standard",
     duration_hours: int = 24,
-    demo_service: DemoService = Depends()
+    demo_service: DemoService = Depends(get_demo_service)
 ):
     """
     Generate synthetic performance metrics for demonstrations.
@@ -189,14 +192,15 @@ async def get_synthetic_metrics(
         )
         return DemoMetrics(**metrics)
     except Exception as e:
-        central_logger.error(f"Synthetic metrics generation error: {str(e)}")
+        logger = central_logger.get_logger(__name__)
+        logger.error(f"Synthetic metrics generation error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to generate metrics")
 
 @router.post("/export/report")
 async def export_demo_report(
     request: ExportReportRequest,
     background_tasks: BackgroundTasks,
-    demo_service: DemoService = Depends(),
+    demo_service: DemoService = Depends(get_demo_service),
     current_user: Optional[Dict] = Depends(get_current_user)
 ):
     """
@@ -231,13 +235,14 @@ async def export_demo_report(
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        central_logger.error(f"Report export error: {str(e)}")
+        logger = central_logger.get_logger(__name__)
+        logger.error(f"Report export error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to export report")
 
 @router.get("/session/{session_id}/status")
 async def get_demo_session_status(
     session_id: str,
-    demo_service: DemoService = Depends()
+    demo_service: DemoService = Depends(get_demo_service)
 ):
     """
     Get the current status of a demo session.
@@ -250,14 +255,15 @@ async def get_demo_session_status(
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        central_logger.error(f"Session status error: {str(e)}")
+        logger = central_logger.get_logger(__name__)
+        logger.error(f"Session status error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to get session status")
 
 @router.post("/session/{session_id}/feedback")
 async def submit_demo_feedback(
     session_id: str,
     feedback: Dict[str, Any],
-    demo_service: DemoService = Depends()
+    demo_service: DemoService = Depends(get_demo_service)
 ):
     """
     Submit feedback for a demo session.
@@ -268,13 +274,14 @@ async def submit_demo_feedback(
         await demo_service.submit_feedback(session_id, feedback)
         return {"status": "success", "message": "Feedback received"}
     except Exception as e:
-        central_logger.error(f"Feedback submission error: {str(e)}")
+        logger = central_logger.get_logger(__name__)
+        logger.error(f"Feedback submission error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to submit feedback")
 
 @router.get("/analytics/summary")
 async def get_demo_analytics(
     days: int = 30,
-    demo_service: DemoService = Depends(),
+    demo_service: DemoService = Depends(get_demo_service),
     current_user: Dict = Depends(get_current_user)
 ):
     """
@@ -290,5 +297,6 @@ async def get_demo_analytics(
         analytics = await demo_service.get_analytics_summary(days=days)
         return analytics
     except Exception as e:
-        central_logger.error(f"Analytics retrieval error: {str(e)}")
+        logger = central_logger.get_logger(__name__)
+        logger.error(f"Analytics retrieval error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to get analytics")

@@ -6,10 +6,11 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 import random
 import numpy as np
-from fastapi import Depends
 
 from app.logging_config import central_logger
-from app.redis_manager import get_redis_client
+
+logger = central_logger.get_logger(__name__)
+from app.redis_manager import redis_manager
 from app.agents.supervisor import SupervisorAgent
 from app.services.agent_service import AgentService
 
@@ -62,7 +63,7 @@ class DemoService:
     
     def __init__(
         self,
-        agent_service: AgentService = Depends()
+        agent_service: Optional[AgentService] = None
     ):
         self.agent_service = agent_service
         self.redis_client = None
@@ -70,7 +71,7 @@ class DemoService:
     async def _get_redis(self):
         """Get Redis client lazily."""
         if not self.redis_client:
-            self.redis_client = await get_redis_client()
+            self.redis_client = await redis_manager.get_client()
         return self.redis_client
         
     async def process_demo_chat(
@@ -163,7 +164,7 @@ class DemoService:
             }
             
         except Exception as e:
-            central_logger.error(f"Demo chat processing error: {str(e)}")
+            logger.error(f"Demo chat processing error: {str(e)}")
             raise
             
     def _generate_demo_response(
@@ -364,7 +365,7 @@ Provide specific optimization recommendations."""
             }
             
         except Exception as e:
-            central_logger.error(f"ROI calculation error: {str(e)}")
+            logger.error(f"ROI calculation error: {str(e)}")
             raise
             
     async def generate_synthetic_metrics(
@@ -428,7 +429,7 @@ Provide specific optimization recommendations."""
             }
             
         except Exception as e:
-            central_logger.error(f"Synthetic metrics generation error: {str(e)}")
+            logger.error(f"Synthetic metrics generation error: {str(e)}")
             raise
             
     async def generate_report(
@@ -486,7 +487,7 @@ Provide specific optimization recommendations."""
             return report_url
             
         except Exception as e:
-            central_logger.error(f"Report generation error: {str(e)}")
+            logger.error(f"Report generation error: {str(e)}")
             raise
             
     async def get_session_status(self, session_id: str) -> Dict[str, Any]:
@@ -525,7 +526,7 @@ Provide specific optimization recommendations."""
             }
             
         except Exception as e:
-            central_logger.error(f"Session status error: {str(e)}")
+            logger.error(f"Session status error: {str(e)}")
             raise
             
     async def submit_feedback(
@@ -557,7 +558,7 @@ Provide specific optimization recommendations."""
             )
             
         except Exception as e:
-            central_logger.error(f"Feedback submission error: {str(e)}")
+            logger.error(f"Feedback submission error: {str(e)}")
             raise
             
     async def track_demo_interaction(
@@ -589,7 +590,7 @@ Provide specific optimization recommendations."""
             await redis.expire(analytics_key, 3600 * 24 * 90)  # 90 day expiry
             
         except Exception as e:
-            central_logger.error(f"Analytics tracking error: {str(e)}")
+            logger.error(f"Analytics tracking error: {str(e)}")
             # Don't raise - analytics shouldn't break the flow
             
     async def get_analytics_summary(self, days: int = 30) -> Dict[str, Any]:
@@ -645,5 +646,12 @@ Provide specific optimization recommendations."""
             }
             
         except Exception as e:
-            central_logger.error(f"Analytics summary error: {str(e)}")
+            logger.error(f"Analytics summary error: {str(e)}")
             raise
+
+def get_demo_service() -> DemoService:
+    """Factory function to create DemoService instance for dependency injection."""
+    from app.services.agent_service import get_agent_service, AgentService
+    from fastapi import Depends
+    # Create DemoService without agent_service for now (it's optional in constructor)
+    return DemoService(agent_service=None)
