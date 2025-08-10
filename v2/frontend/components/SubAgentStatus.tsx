@@ -12,12 +12,12 @@ export const SubAgentStatus = ({ name, status }: SubAgentStatusProps = {}) => {
   const store = useChatStore();
   const currentSubAgent = name || store?.currentSubAgent;
   const subAgentStatus = status || store?.subAgentStatus;
-  const subAgentTools = store?.subAgentTools || [];
-  const subAgentProgress = store?.subAgentProgress;
-  const subAgentError = store?.subAgentError;
-  const subAgentDescription = store?.subAgentDescription;
-  const subAgentExecutionTime = store?.subAgentExecutionTime;
-  const queuedSubAgents = store?.queuedSubAgents || [];
+  const subAgentTools: any[] = []; // store?.subAgentTools || [];
+  const subAgentProgress = undefined; // store?.subAgentProgress;
+  const subAgentError = undefined; // store?.subAgentError;
+  const subAgentDescription = undefined; // store?.subAgentDescription;
+  const subAgentExecutionTime = undefined; // store?.subAgentExecutionTime;
+  const queuedSubAgents: any[] = []; // store?.queuedSubAgents || [];
 
   // Don't render if no sub-agent is active
   if (!currentSubAgent) {

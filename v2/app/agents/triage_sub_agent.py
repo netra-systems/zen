@@ -96,6 +96,8 @@ class TriageResult(BaseModel):
     tool_recommendations: List[ToolRecommendation] = Field(default_factory=list)
     validation_status: ValidationStatus = Field(default_factory=ValidationStatus)
     metadata: Optional[TriageMetadata] = None
+    is_admin_mode: bool = False  # Flag for admin mode routing
+    require_approval: bool = False  # Flag for operations requiring user approval
     
     @validator('confidence_score')
     def validate_confidence(cls, v):
@@ -245,6 +247,16 @@ class TriageSubAgent(BaseSubAgent):
                 entities.time_ranges.append({"pattern": match})
         
         return entities
+    
+    def _detect_admin_mode(self, request: str) -> bool:
+        """Detect if the request is for admin operations"""
+        admin_keywords = [
+            "admin", "administrator", "corpus", "synthetic data",
+            "generate data", "manage corpus", "create corpus",
+            "delete corpus", "export corpus", "import corpus"
+        ]
+        request_lower = request.lower()
+        return any(keyword in request_lower for keyword in admin_keywords)
     
     def _determine_intent(self, request: str) -> UserIntent:
         """Determine user intent from the request."""
@@ -542,6 +554,17 @@ Example output structure:
         if not triage_result.get("user_intent"):
             intent = self._determine_intent(state.user_request)
             triage_result["user_intent"] = intent.model_dump()
+        
+        # Detect admin mode
+        is_admin = self._detect_admin_mode(state.user_request)
+        triage_result["is_admin_mode"] = is_admin
+        
+        # Adjust category for admin mode
+        if is_admin and triage_result.get("category") not in ["Synthetic Data Generation", "Corpus Management"]:
+            if "synthetic" in state.user_request.lower() or "generate data" in state.user_request.lower():
+                triage_result["category"] = "Synthetic Data Generation"
+            elif "corpus" in state.user_request.lower():
+                triage_result["category"] = "Corpus Management"
         
         # Add tool recommendations if not present
         if not triage_result.get("tool_recommendations"):

@@ -39,6 +39,8 @@ from app.agents.data_sub_agent import DataSubAgent
 from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from app.agents.reporting_sub_agent import ReportingSubAgent
+from app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
+from app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent
 
 logger = central_logger.get_logger(__name__)
 
@@ -114,6 +116,9 @@ class SupervisorAgent(BaseSubAgent):
         self.register_agent("optimization", OptimizationsCoreSubAgent(self.llm_manager, self.tool_dispatcher))
         self.register_agent("actions", ActionsToMeetGoalsSubAgent(self.llm_manager, self.tool_dispatcher))
         self.register_agent("reporting", ReportingSubAgent(self.llm_manager, self.tool_dispatcher))
+        # Admin agents
+        self.register_agent("synthetic_data", SyntheticDataSubAgent(self.llm_manager, self.tool_dispatcher))
+        self.register_agent("corpus_admin", CorpusAdminSubAgent(self.llm_manager, self.tool_dispatcher))
     
     def register_agent(self, name: str, agent: BaseSubAgent) -> None:
         """Register a sub-agent"""
@@ -263,7 +268,7 @@ class SupervisorAgent(BaseSubAgent):
                                 stream_updates: bool) -> DeepAgentState:
         """Execute the agent pipeline with proper error handling"""
         
-        pipeline = self._get_execution_pipeline()
+        pipeline = self._get_execution_pipeline(state)
         
         for step_idx, step in enumerate(pipeline):
             agent_name = step["agent"]
@@ -391,8 +396,39 @@ class SupervisorAgent(BaseSubAgent):
         # All retries exhausted
         raise Exception(f"Agent {agent.name} failed after {retry_count + 1} attempts: {last_error}")
     
-    def _get_execution_pipeline(self) -> List[Dict[str, Any]]:
-        """Get the default execution pipeline"""
+    def _get_execution_pipeline(self, state: Optional[DeepAgentState] = None) -> List[Dict[str, Any]]:
+        """Get the execution pipeline based on context"""
+        
+        # Check if we're in admin mode from triage result
+        if state and state.triage_result and isinstance(state.triage_result, dict):
+            is_admin = state.triage_result.get("is_admin_mode", False)
+            category = state.triage_result.get("category", "")
+            
+            # Admin mode pipeline
+            if is_admin:
+                # Route to appropriate admin agent based on category
+                if "synthetic" in category.lower() or "data generation" in category.lower():
+                    return [
+                        {"agent": "triage", "critical": True},
+                        {"agent": "synthetic_data", "critical": True},
+                        {"agent": "reporting", "critical": False}
+                    ]
+                elif "corpus" in category.lower():
+                    return [
+                        {"agent": "triage", "critical": True},
+                        {"agent": "corpus_admin", "critical": True},
+                        {"agent": "reporting", "critical": False}
+                    ]
+                else:
+                    # General admin mode - both agents available
+                    return [
+                        {"agent": "triage", "critical": True},
+                        {"agent": "synthetic_data", "critical": False},
+                        {"agent": "corpus_admin", "critical": False},
+                        {"agent": "reporting", "critical": False}
+                    ]
+        
+        # Default pipeline for non-admin mode
         return [
             {"agent": "triage", "critical": True},
             {"agent": "data", "critical": True},

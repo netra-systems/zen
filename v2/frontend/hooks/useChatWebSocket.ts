@@ -41,6 +41,7 @@ export const useChatWebSocket = (runId?: string) => {
   const [retryAttempts, setRetryAttempts] = useState<number>(0);
   const [aggregatedResults, setAggregatedResults] = useState<any>({});
   const [validationResults, setValidationResults] = useState<any>({});
+  const [pendingApproval, setPendingApproval] = useState<any>(null);
   
   // Track the last processed message index to avoid reprocessing
   const lastProcessedIndex = useRef(0);
@@ -262,6 +263,20 @@ export const useChatWebSocket = (runId?: string) => {
           displayed_to_user: true
         };
         addMessage(stoppedMessage);
+      } else if (wsMessage.type === 'approval_required') {
+        const payload = wsMessage.payload as any;
+        setPendingApproval(payload);
+        // Add approval message to chat
+        const approvalMessage: Message = {
+          id: generateMessageId(),
+          type: 'approval',
+          content: payload.message || 'Approval required for this operation',
+          created_at: new Date().toISOString(),
+          sub_agent_name: payload.sub_agent_name || 'System',
+          displayed_to_user: true,
+          approval_data: payload
+        };
+        addMessage(approvalMessage);
       }
       
       // Handle any message with displayed_to_user flag
@@ -327,6 +342,8 @@ export const useChatWebSocket = (runId?: string) => {
     retryAttempts,
     aggregatedResults,
     validationResults,
+    pendingApproval,
+    setPendingApproval,
     registerTool,
     executeTool,
     clearErrors,

@@ -13,43 +13,19 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
+    href: '/chat',
+    icon: <Icons.apexOptimizer className="h-4 w-4" />,
+    label: 'Chat',
+  },
+  {
     href: '/enterprise-demo',
     icon: <Icons.apexOptimizer className="h-4 w-4" />,
     label: 'Enterprise Demo',
   },
   {
-    href: '/chat',
-    icon: <Icons.apexOptimizer className="h-4 w-4" />,
-    label: 'AI Assistant',
-  },
-  {
-    href: '/ingestion',
-    icon: <Icons.ingestion className="h-4 w-4" />,
-    label: 'Data Ingestion',
-  },
-  {
-    href: '/corpus',
-    icon: <Icons.corpusAdmin className="h-4 w-4" />,
-    label: 'Corpus Management',
-  },
-  {
-    href: '/synthetic-data-generation',
-    icon: <Icons.syntheticData className="h-4 w-4" />,
-    label: 'Synthetic Data',
-  },
-  {
-    href: '#',
-    icon: <Icons.supplyCatalog className="h-4 w-4" />,
-    label: 'Supply Catalog',
-    disabled: true,
-    placeholder: true,
-  },
-  {
-    href: '#',
+    href: '/admin',
     icon: <Icons.settings className="h-4 w-4" />,
-    label: 'Settings',
-    disabled: true,
-    placeholder: true,
+    label: 'Admin',
   },
 ];
 

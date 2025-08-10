@@ -7,6 +7,7 @@ import { MessageInput } from '@/components/chat/MessageInput';
 import { StopButton } from '@/components/chat/StopButton';
 import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
 import { ThreadSidebar } from '@/components/chat/ThreadSidebar';
+import AgentStatusPanel from '@/components/chat/AgentStatusPanel';
 import { useChatStore } from '@/store/chat';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,6 +24,9 @@ const MainChat: React.FC = () => {
     <div className="flex h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <ThreadSidebar />
       <div className="flex flex-col flex-1 max-w-full">
+        <AnimatePresence>
+          {isProcessing && <AgentStatusPanel />}
+        </AnimatePresence>
         <ChatHeader />
         
         <div className="flex-grow overflow-hidden relative">
