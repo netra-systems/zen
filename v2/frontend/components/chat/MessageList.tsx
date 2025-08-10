@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useLayoutEffect } from 'react';
 import { useChatStore } from '@/store/chat';
 import { MessageItem } from './MessageItem';
+import { ThinkingIndicator } from './ThinkingIndicator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
 
