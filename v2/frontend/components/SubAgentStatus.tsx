@@ -36,7 +36,7 @@ export const SubAgentStatus = ({ name, status }: SubAgentStatusProps = {}) => {
   };
 
   const isRunning = subAgentStatus === 'RUNNING';
-  const statusColor = getStatusColor(subAgentStatus || 'PENDING');
+  const statusColor = getStatusColor(String(subAgentStatus || 'PENDING'));
 
   return (
     <div className="text-sm text-muted-foreground">
