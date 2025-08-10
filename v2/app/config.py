@@ -1,150 +1,219 @@
+"""Simplified configuration management with validation and reduced circular dependencies."""
+
 import os
-from google.cloud import secretmanager
-from typing import List, Dict
-from app import schemas
-from tenacity import retry, stop_after_attempt, wait_fixed
-from app.schemas import SECRET_CONFIG
+import logging
+from functools import lru_cache
+from typing import Optional, Dict, Any
+from pydantic import ValidationError
 
-class Settings:
+# Import the schemas without circular dependency
+try:
+    from app.schemas.Config import AppConfig, DevelopmentConfig, ProductionConfig, TestingConfig
+except ImportError:
+    # Fallback for testing/development scenarios
+    from schemas.Config import AppConfig, DevelopmentConfig, ProductionConfig, TestingConfig
+
+from .core.secret_manager import SecretManager
+from .core.config_validator import ConfigValidator
+
+
+class ConfigurationError(Exception):
+    """Raised when configuration loading or validation fails."""
+    pass
+
+
+class ConfigManager:
+    """Simplified configuration manager with clear separation of concerns."""
+    
     def __init__(self):
-        self.loaded_settings = self._get_all_secrets_and_env_configs()
-        if self.loaded_settings.log_secrets:
-            print(self.loaded_settings.model_dump_json(indent=2))
+        self._config: Optional[AppConfig] = None
+        self._secret_manager = SecretManager()
+        self._validator = ConfigValidator()
+        self._logger = logging.getLogger(__name__)
         
-    def get_settings(self) -> schemas.AppConfig:
-        return self.loaded_settings
+    @lru_cache(maxsize=1)
+    def get_config(self) -> AppConfig:
+        """Get the application configuration (cached)."""
+        if self._config is None:
+            self._config = self._load_configuration()
+        return self._config
     
-    @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
-    def _get_secret_client(self) -> secretmanager.SecretManagerServiceClient:
-        """Initializes and returns a Secret Manager service client with retry logic."""
+    def _load_configuration(self) -> AppConfig:
+        """Load and validate configuration from environment."""
         try:
-            return secretmanager.SecretManagerServiceClient()
-        except Exception as e:
-            print(f"Attempt to initialize Secret Manager client failed: {e}")
-            raise ConnectionError(f"Failed to connect to Secret Manager: {e}")
-
-    def _fetch_secrets(self, client: secretmanager.SecretManagerServiceClient, secret_references: List[schemas.SecretReference], log_secrets: bool = False) -> Dict[str, str]:
-        """Fetches multiple secrets from Google Cloud Secret Manager."""
-        secrets = {}
-        if not client:
-            return secrets
-
-        for ref in secret_references:
-            try:
-                name = f"projects/{ref.project_id}/secrets/{ref.name}/versions/{ref.version}"
-                response = client.access_secret_version(name=name)
-                secrets[ref.name] = response.payload.data.decode("UTF-8")
-                if log_secrets:
-                    print(f"Fetched secret: {ref.name}")
-            except Exception as e:
-                if log_secrets:
-                    print(f"Error fetching secret {ref.name}: {e}")
-                secrets[ref.name] = None
-        return secrets
+            environment = self._get_environment()
+            self._logger.info(f"Loading configuration for: {environment}")
+            
+            # Create base config
+            config = self._create_base_config(environment)
+            
+            # Load secrets
+            self._load_secrets_into_config(config)
+            
+            # Validate configuration
+            self._validator.validate_config(config)
+            
+            return config
+            
+        except (ValidationError, ConfigurationError) as e:
+            self._logger.error(f"Configuration loading failed: {e}")
+            raise ConfigurationError(f"Failed to load configuration: {e}")
     
-    def _load_from_env_vars(self, config: schemas.AppConfig):
-        """Fallback method to load secrets from environment variables for local development."""
-        env_var_mapping = {
-            "google-client-id": "GOOGLE_CLIENT_ID",
-            "google-client-secret": "GOOGLE_CLIENT_SECRET",
-            "gemini-api-key": "GEMINI_API_KEY",
-            "langfuse-secret-key": "LANGFUSE_SECRET_KEY",
-            "langfuse-public-key": "LANGFUSE_PUBLIC_KEY",
-            "clickhouse-default-password": "CLICKHOUSE_DEFAULT_PASSWORD",
-            "clickhouse-development-password": "CLICKHOUSE_DEVELOPMENT_PASSWORD",
-            "jwt-secret-key": "JWT_SECRET_KEY",
-            "fernet-key": "FERNET_KEY",
-            "redis-default": "REDIS_PASSWORD",
-        }
-        
-        for ref in SECRET_CONFIG:
-            env_var_name = env_var_mapping.get(ref.name)
-            if not env_var_name:
-                continue
-                
-            secret_value = os.environ.get(env_var_name)
-            if not secret_value:
-                continue
-                
-            if ref.target_models:
-                for target_model_str in ref.target_models:
-                    target_obj = config
-                    if '.' in target_model_str:
-                        parts = target_model_str.split('.', 1)
-                        dict_name = parts[0]
-                        key_name = parts[1]
-                        target_dict = getattr(config, dict_name)
-                        target_obj = target_dict.get(key_name)
-                    else:
-                        target_obj = getattr(config, target_model_str)
-
-                    if target_obj:
-                        setattr(target_obj, ref.target_field, secret_value)
-            else:
-                setattr(config, ref.target_field, secret_value)
-        
-        print("Loaded secrets from environment variables (development mode)")
-
-    def _load_secrets(self, config: schemas.AppConfig):
-        """Fetches secrets from Secret Manager and populates the config object."""
-        try:
-            client = self._get_secret_client()
-        except ConnectionError as e:
-            print(f"Warning: Could not connect to Secret Manager. Using default settings. {e}")
-            # Fallback to environment variables for local development
-            self._load_from_env_vars(config)
-            return
-
-        if not client:
-            print("Could not create Secret Manager client. Skipping secret loading.")
-            # Fallback to environment variables for local development
-            self._load_from_env_vars(config)
-            return
-
-        fetched_secrets = self._fetch_secrets(client, SECRET_CONFIG, config.log_secrets)
-
-        for ref in SECRET_CONFIG:
-            secret_value = fetched_secrets.get(ref.name)
-            if secret_value is None:
-                continue
-
-            if ref.target_models:
-                for target_model_str in ref.target_models:
-                    target_obj = config
-                    if '.' in target_model_str:
-                        parts = target_model_str.split('.', 1)
-                        dict_name = parts[0]
-                        key_name = parts[1]
-                        target_dict = getattr(config, dict_name)
-                        target_obj = target_dict.get(key_name)
-                    else:
-                        target_obj = getattr(config, target_model_str)
-
-                    if target_obj:
-                        setattr(target_obj, ref.target_field, secret_value)
-            else:
-                setattr(config, ref.target_field, secret_value)
-
-        # Check for missing LLM API keys
-        for llm_name, llm_config in config.llm_configs.items():
-            if not llm_config.api_key:
-                print(f"Warning: API key for LLM '{llm_name}' is not set.")
-
-    def _get_all_secrets_and_env_configs(self) -> schemas.AppConfig:
-        """Returns the appropriate configuration class based on the environment."""
-        environment = os.environ.get("environment", "development").lower()
+    def _get_environment(self) -> str:
+        """Determine the current environment."""
         if os.environ.get("TESTING"):
-            environment = "testing"
-        print(f"|| Loading configuration for: {environment} ||")
-        config_map = {
-            "production": schemas.ProductionConfig,
-            "testing": schemas.TestingConfig,
-            "development": schemas.DevelopmentConfig
+            return "testing"
+        return os.environ.get("ENVIRONMENT", "development").lower()
+    
+    def _create_base_config(self, environment: str) -> AppConfig:
+        """Create the base configuration object for the environment."""
+        config_classes = {
+            "production": ProductionConfig,
+            "testing": TestingConfig,
+            "development": DevelopmentConfig
         }
-        config = config_map.get(environment, schemas.DevelopmentConfig)()
         
-        self._load_secrets(config)
+        config_class = config_classes.get(environment, DevelopmentConfig)
+        return config_class()
+    
+    def _load_secrets_into_config(self, config: AppConfig):
+        """Load secrets into the configuration object."""
+        try:
+            secrets = self._secret_manager.load_secrets()
+            self._apply_secrets_to_config(config, secrets)
+        except Exception as e:
+            self._logger.warning(f"Failed to load secrets: {e}. Using environment variables.")
+            self._load_from_environment_variables(config)
+    
+    def _apply_secrets_to_config(self, config: AppConfig, secrets: Dict[str, Any]):
+        """Apply loaded secrets to configuration object."""
+        # Apply secrets based on predefined mapping
+        secret_mappings = self._get_secret_mappings()
+        
+        for secret_name, secret_value in secrets.items():
+            if secret_value and secret_name in secret_mappings:
+                mapping = secret_mappings[secret_name]
+                self._apply_secret_mapping(config, mapping, secret_value)
+    
+    def _get_secret_mappings(self) -> Dict[str, Dict[str, Any]]:
+        """Get the mapping of secrets to configuration fields."""
+        return {
+            "gemini-api-key": {
+                "targets": ["llm_configs.default", "llm_configs.triage", "llm_configs.data", 
+                          "llm_configs.optimizations_core", "llm_configs.actions_to_meet_goals", 
+                          "llm_configs.reporting", "llm_configs.google", "llm_configs.analysis"],
+                "field": "api_key"
+            },
+            "google-client-id": {
+                "targets": ["google_cloud", "oauth_config"],
+                "field": "client_id"
+            },
+            "google-client-secret": {
+                "targets": ["google_cloud", "oauth_config"],
+                "field": "client_secret"
+            },
+            "langfuse-secret-key": {
+                "targets": ["langfuse"],
+                "field": "secret_key"
+            },
+            "langfuse-public-key": {
+                "targets": ["langfuse"],
+                "field": "public_key"
+            },
+            "clickhouse-default-password": {
+                "targets": ["clickhouse_native", "clickhouse_https"],
+                "field": "password"
+            },
+            "clickhouse-development-password": {
+                "targets": ["clickhouse_https_dev"],
+                "field": "password"
+            },
+            "jwt-secret-key": {
+                "targets": [],
+                "field": "jwt_secret_key"
+            },
+            "fernet-key": {
+                "targets": [],
+                "field": "fernet_key"
+            },
+            "redis-default": {
+                "targets": ["redis"],
+                "field": "password"
+            }
+        }
+    
+    def _apply_secret_mapping(self, config: AppConfig, mapping: Dict[str, Any], secret_value: str):
+        """Apply a single secret mapping to the configuration."""
+        if not mapping["targets"]:
+            # Direct field assignment
+            setattr(config, mapping["field"], secret_value)
+        else:
+            # Nested field assignment
+            for target in mapping["targets"]:
+                self._set_nested_field(config, target, mapping["field"], secret_value)
+    
+    def _set_nested_field(self, config: AppConfig, target_path: str, field: str, value: str):
+        """Set a nested field in the configuration object."""
+        try:
+            if '.' in target_path:
+                parts = target_path.split('.', 1)
+                parent_attr = getattr(config, parts[0])
+                if isinstance(parent_attr, dict) and parts[1] in parent_attr:
+                    target_obj = parent_attr[parts[1]]
+                    if target_obj and hasattr(target_obj, field):
+                        setattr(target_obj, field, value)
+            else:
+                target_obj = getattr(config, target_path, None)
+                if target_obj and hasattr(target_obj, field):
+                    setattr(target_obj, field, value)
+        except AttributeError as e:
+            self._logger.warning(f"Failed to set field {field} on {target_path}: {e}")
+    
+    def _load_from_environment_variables(self, config: AppConfig):
+        """Fallback method to load configuration from environment variables."""
+        env_mappings = {
+            "GOOGLE_CLIENT_ID": ("oauth_config", "client_id"),
+            "GOOGLE_CLIENT_SECRET": ("oauth_config", "client_secret"),
+            "GEMINI_API_KEY": ("llm_configs.default", "api_key"),
+            "JWT_SECRET_KEY": (None, "jwt_secret_key"),
+            "FERNET_KEY": (None, "fernet_key"),
+            "DATABASE_URL": (None, "database_url"),
+            "LOG_LEVEL": (None, "log_level"),
+        }
+        
+        for env_var, (target_path, field) in env_mappings.items():
+            value = os.environ.get(env_var)
+            if value:
+                if target_path:
+                    if target_path.startswith("llm_configs."):
+                        # Handle LLM config specifically
+                        llm_name = target_path.split(".")[1]
+                        if llm_name in config.llm_configs:
+                            setattr(config.llm_configs[llm_name], field, value)
+                    else:
+                        target_obj = getattr(config, target_path, None)
+                        if target_obj:
+                            setattr(target_obj, field, value)
+                else:
+                    setattr(config, field, value)
+    
+    def reload_config(self):
+        """Force reload the configuration (clears cache)."""
+        self.get_config.cache_clear()
+        self._config = None
 
-        return config
 
-settings = Settings().get_settings()
+# Global configuration manager instance
+_config_manager = ConfigManager()
+
+# Convenient access functions
+def get_config() -> AppConfig:
+    """Get the current application configuration."""
+    return _config_manager.get_config()
+
+def reload_config():
+    """Reload the configuration from environment."""
+    _config_manager.reload_config()
+
+# For backward compatibility
+settings = get_config()
