@@ -48,8 +48,8 @@ describe('Thread Management - Simplified', () => {
     // Simulate WebSocket connection
     cy.window().then((win: any) => {
       // Mock WebSocket if needed
-      if (!win.ws) {
-        win.ws = {
+      if (!(win as any).ws) {
+        (win as any).ws = {
           readyState: 1,
           send: cy.stub(),
           close: cy.stub()
