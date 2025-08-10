@@ -206,7 +206,7 @@ const AdminChat: React.FC = () => {
                 <Shield className="w-3 h-3" />
                 <span>Admin mode active - Enhanced capabilities enabled</span>
               </div>
-              <MessageInput placeholder="Enter admin command or query..." />
+              <MessageInput />
               
               {isProcessing && (
                 <motion.div
