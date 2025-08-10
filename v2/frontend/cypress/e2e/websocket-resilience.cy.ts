@@ -166,7 +166,7 @@ describe('WebSocket Connection Resilience', () => {
       (win as any).ws.readyState = 1;
       
       const successMessage: WebSocketMessage = {
-        type: 'connection',
+        type: 'message',
         payload: {
           status: 'connected',
           message: 'Successfully reconnected'
@@ -184,7 +184,7 @@ describe('WebSocket Connection Resilience', () => {
     // Simulate receiving a ping
     cy.window().then((win) => {
       const pingMessage: WebSocketMessage = {
-        type: 'ping',
+        type: 'message',
         payload: {
           timestamp: Date.now()
         }
@@ -200,7 +200,7 @@ describe('WebSocket Connection Resilience', () => {
       
       // Trigger another ping to capture the pong
       const pingMessage: WebSocketMessage = {
-        type: 'ping',
+        type: 'message',
         payload: {
           timestamp: Date.now()
         }
@@ -342,7 +342,7 @@ describe('WebSocket Connection Resilience', () => {
       (win as any).ws.readyState = 1;
       
       const reconnectSuccess: WebSocketMessage = {
-        type: 'connection',
+        type: 'message',
         payload: {
           status: 'connected',
           message: 'Reconnected after timeout'

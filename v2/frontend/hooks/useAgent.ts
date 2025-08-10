@@ -7,17 +7,23 @@ export const useAgent = () => {
   const webSocket = useWebSocket();
 
   const sendUserMessage = useCallback((text: string) => {
-    const message: UserMessage = {
-      text,
+    const message = {
+      type: 'message' as const,
+      payload: {
+        text,
+      },
     };
-    webSocket?.sendMessage('user_message', message);
+    webSocket?.sendMessage(message);
   }, [webSocket]);
 
   const stopAgent = useCallback(() => {
-    const message: StopAgent = {
-      run_id: '' // The backend will know which run to stop
+    const message = {
+      type: 'message' as const,
+      payload: {
+        run_id: '' // The backend will know which run to stop
+      },
     };
-    webSocket?.sendMessage('stop_agent', message);
+    webSocket?.sendMessage(message);
   }, [webSocket]);
 
   return { sendUserMessage, stopAgent };

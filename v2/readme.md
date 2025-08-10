@@ -646,7 +646,7 @@ LOG_LEVEL=INFO
 
 ### Development Workflow
 
-1. Fork the repository
+1. Clone repo
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
 4. Run tests (`pytest && npm test`)
@@ -686,11 +686,6 @@ This project is proprietary software owned by Netra Systems.
 - [WebSocket Implementation](docs/WEBSOCKET_IMPLEMENTATION.md)
 - [Issue Tracker](https://github.com/netrasystems/netra-core/issues)
 
-## 👥 Team
-
-- **Engineering Lead**: [Contact](mailto:engineering@netrasystems.ai)
-- **Product**: [Contact](mailto:product@netrasystems.ai)
-- **Support**: [Contact](mailto:support@netrasystems.ai)
 
 ---
 

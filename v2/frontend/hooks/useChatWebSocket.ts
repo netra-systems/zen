@@ -167,7 +167,7 @@ export const useChatWebSocket = (runId?: string) => {
       } else if (wsMessage.type === 'sub_agent_stream') {
         const payload = wsMessage.payload as any;
         if (payload?.stream_id) {
-          setSubAgentStreams(prev => ({
+          setSubAgentStreams((prev: Record<string, any>) => ({
             ...prev,
             [payload.stream_id]: {
               agent: payload.agent,
@@ -178,7 +178,7 @@ export const useChatWebSocket = (runId?: string) => {
       } else if (wsMessage.type === 'sub_agent_error') {
         const payload = wsMessage.payload as any;
         if (payload) {
-          setErrors(prev => [...prev, {
+          setErrors((prev: any[]) => [...prev, {
             agent: payload.sub_agent_name,
             type: payload.error?.type || 'UNKNOWN',
             message: payload.error?.message || '',
@@ -207,30 +207,30 @@ export const useChatWebSocket = (runId?: string) => {
       } else if (wsMessage.type === 'tool_registered') {
         const payload = wsMessage.payload as any;
         if (payload) {
-          setRegisteredTools(prev => [...prev, payload]);
+          setRegisteredTools((prev: any[]) => [...prev, payload]);
         }
       } else if (wsMessage.type === 'tool_execution_start') {
         const payload = wsMessage.payload as any;
         if (payload) {
           setToolExecutionStatus('executing');
           setSelectedTool(payload.tool_name);
-          setActiveTools(prev => [...prev, payload.tool_name]);
+          setActiveTools((prev: any[]) => [...prev, payload.tool_name]);
         }
       } else if (wsMessage.type === 'tool_execution_complete') {
         const payload = wsMessage.payload as any;
         if (payload) {
           setToolExecutionStatus('completed');
-          setToolResults(prev => ({
+          setToolResults((prev: Record<string, any>) => ({
             ...prev,
             [payload.tool_name]: payload.result
           }));
-          setActiveTools(prev => prev.filter(t => t !== payload.tool_name));
+          setActiveTools((prev: any[]) => prev.filter((t: any) => t !== payload.tool_name));
         }
       } else if (wsMessage.type === 'tool_execution_error') {
         const payload = wsMessage.payload as any;
         if (payload) {
           setToolExecutionStatus('error');
-          setErrors(prev => [...prev, {
+          setErrors((prev: any[]) => [...prev, {
             type: 'TOOL_ERROR',
             tool: payload.tool_name,
             error: payload.error
@@ -239,7 +239,7 @@ export const useChatWebSocket = (runId?: string) => {
       } else if (wsMessage.type === 'validation_result') {
         const payload = wsMessage.payload as any;
         if (payload) {
-          setValidationResults(prev => ({
+          setValidationResults((prev: any) => ({
             ...prev,
             [payload.field]: payload.valid
           }));
@@ -300,18 +300,18 @@ export const useChatWebSocket = (runId?: string) => {
   
   // Tool execution functions for tests
   const registerTool = (tool: any) => {
-    setRegisteredTools(prev => [...prev, tool]);
+    setRegisteredTools((prev: any[]) => [...prev, tool]);
   };
   
   const executeTool = async (toolName: string, args: any) => {
     setSelectedTool(toolName);
     setToolExecutionStatus('executing');
-    setToolExecutionQueue(prev => [...prev, { name: toolName, args }]);
+    setToolExecutionQueue((prev: any[]) => [...prev, { name: toolName, args }]);
     // Simulate async execution
     return new Promise((resolve) => {
       setTimeout(() => {
         const result = { success: true, data: args };
-        setToolResults(prev => ({ ...prev, [toolName]: result }));
+        setToolResults((prev: Record<string, any>) => ({ ...prev, [toolName]: result }));
         setToolExecutionStatus('completed');
         resolve(result);
       }, 100);
