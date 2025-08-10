@@ -25,6 +25,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const authStore = useAuthStore();
 
+  const syncAuthStore = useCallback((userData: User | null, tokenData: string | null) => {
+    if (userData && tokenData) {
+      authStore.login({
+        id: userData.id || userData.sub || '',
+        email: userData.email,
+        name: userData.full_name || userData.name,
+        role: userData.role
+      }, tokenData);
+    } else {
+      authStore.logout();
+    }
+  }, []);
+
   const fetchAuthConfig = useCallback(async () => {
     try {
       const data = await authService.getAuthConfig();
@@ -40,16 +53,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const decodedUser = jwtDecode(storedToken) as User;
           setUser(decodedUser);
           // Sync with Zustand store
-          authStore.login({
-            id: decodedUser.id || decodedUser.sub || '',
-            email: decodedUser.email,
-            name: decodedUser.full_name || decodedUser.name,
-            role: decodedUser.role
-          }, storedToken);
+          syncAuthStore(decodedUser, storedToken);
         } catch (e) {
           console.error("Invalid token:", e);
           authService.removeToken();
-          authStore.logout();
+          syncAuthStore(null, null);
         }
       } else if (data.development_mode) {
         // Check if user explicitly logged out in dev mode
@@ -63,12 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const decodedUser = jwtDecode(devLoginResponse.access_token) as User;
             setUser(decodedUser);
             // Sync with Zustand store
-            authStore.login({
-              id: decodedUser.id || decodedUser.sub || '',
-              email: decodedUser.email,
-              name: decodedUser.full_name || decodedUser.name,
-              role: decodedUser.role
-            }, devLoginResponse.access_token);
+            syncAuthStore(decodedUser, devLoginResponse.access_token);
           }
         }
       }
@@ -77,25 +80,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [authStore]);
+  }, [syncAuthStore]);
 
   useEffect(() => {
     fetchAuthConfig();
   }, [fetchAuthConfig]);
-
-  // Sync user and token changes with Zustand store
-  useEffect(() => {
-    if (user && token) {
-      authStore.login({
-        id: user.id || user.sub || '',
-        email: user.email,
-        name: user.full_name || user.name,
-        role: user.role
-      }, token);
-    } else if (!user && !token) {
-      authStore.logout();
-    }
-  }, [user, token, authStore]);
 
   const login = () => {
     if (authConfig) {
@@ -113,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       await authService.handleLogout(authConfig);
       // Clear Zustand store
-      authStore.logout();
+      syncAuthStore(null, null);
     }
   };
 

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Local Storage</title>
+</head>
+<body>
+    <h1>Clearing Local Storage...</h1>
+    <script>
+        // Clear the dev logout flag
+        localStorage.removeItem('dev_logout_flag');
+        localStorage.removeItem('jwt_token');
+        console.log('Cleared dev_logout_flag and jwt_token');
+        document.body.innerHTML = '<h1>Storage cleared! You can close this window.</h1>';
+    </script>
+</body>
+</html>
