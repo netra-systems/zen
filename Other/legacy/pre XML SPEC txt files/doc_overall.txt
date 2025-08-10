@@ -1,4 +1,0 @@
-
-
-Make a plan to make extensive documentation for new engineers coming to review this codebase. It should explain in multiple levels of detail and abstraction how everything works. High level, how components flow together, hierarchy, mature and developing parts of codebase etc.
-Save this in a new documentation folder under a single .md file

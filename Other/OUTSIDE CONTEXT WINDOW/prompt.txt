@@ -1,7 +1,0 @@
-read instructions.txt review chat_ui_ux.txt 
-read instructions.txt PAUSE. Then read and do postgres.txt 
-
-read instructions.txt read SPEC/conventions.txt. Move useAuth on the frontend into the right class.
-
- read instructions.txt read security.txt, websockets.txt. review the current state of the system and   │
-│    spot gaps or incohernece 

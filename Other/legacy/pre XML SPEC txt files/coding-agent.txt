@@ -1,3 +1,0 @@
-
-Document the entire codebase in a way that Agent programs like Gemini CLI or Claude code
-can more effectively get up to speed, especially on structural parts or tribal knowledge.
