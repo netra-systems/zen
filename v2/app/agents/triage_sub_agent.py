@@ -219,14 +219,16 @@ class TriageSubAgent(BaseSubAgent):
                 entities.metrics_mentioned.append(keyword)
         
         # Extract numerical values as potential thresholds/targets
-        number_pattern = r'\b\d+(?:\.\d+)?(?:\s*(?:ms|s|%|tokens?|requests?|USD|dollars?))?\b'
+        number_pattern = r'\b\d+(?:\.\d+)?(?:\s*(?:ms|s|%|tokens?|requests?|USD|dollars?))?'
         numbers = re.findall(number_pattern, request)
-        for num in numbers:
-            if 'ms' in num or 's' in num:
+        for i, num in enumerate(numbers):
+            # Check if this number is followed by a unit
+            remaining_text = request[request.find(num):]
+            if 'ms' in remaining_text[:10] or (num.endswith('ms') or num.endswith('s')):
                 entities.thresholds.append({"type": "time", "value": num})
-            elif '%' in num:
-                entities.targets.append({"type": "percentage", "value": num})
-            elif 'token' in num.lower():
+            elif '%' in remaining_text[:5] or num.endswith('%'):
+                entities.targets.append({"type": "percentage", "value": num + '%' if not num.endswith('%') else num})
+            elif 'token' in remaining_text[:20].lower():
                 entities.thresholds.append({"type": "tokens", "value": num})
         
         # Extract time ranges

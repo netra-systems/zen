@@ -379,6 +379,20 @@ class TestCriticalIntegration:
         state_service = StatePersistenceService()
         state_service.db_session = session
         
+        # Create a Run object in the database first
+        from app.db.models_postgres import Run
+        import time
+        run = Run(
+            id=run_id,
+            thread_id=thread.id,
+            assistant_id="test-assistant",
+            status="in_progress",
+            created_at=int(time.time()),
+            metadata_={}
+        )
+        session.add(run)
+        await session.commit()
+        
         # Initial agent state
         initial_state = DeepAgentState(
             user_request="Optimize performance"

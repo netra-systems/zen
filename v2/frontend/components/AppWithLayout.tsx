@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { cn } from '@/lib/utils';
-import { AppWithLayoutProps } from '@/types';
 import { useAppStore } from '@/store';
+
+interface AppWithLayoutProps {
+  children: React.ReactNode;
+}
 
 export function AppWithLayout({ children }: AppWithLayoutProps) {
   const { isSidebarCollapsed, toggleSidebar } = useAppStore();
