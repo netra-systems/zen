@@ -83,34 +83,17 @@ class MessageService {
     options: SaveMessageOptions = {}
   ): Promise<any> {
     if (options.offline) {
-      try {
-        const response = await fetch(`/api/threads/${threadId}/messages`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': this.getAuthHeader(),
-          },
-          body: JSON.stringify(message),
-        });
+      // Queue for later when offline
+      this.queuedMessages.push({
+        message,
+        thread_id: threadId,
+        timestamp: Date.now(),
+      });
 
-        if (!response.ok) {
-          throw new Error('Failed to save message');
-        }
-
-        return response.json();
-      } catch (error) {
-        // Queue for later
-        this.queuedMessages.push({
-          message,
-          thread_id: threadId,
-          timestamp: Date.now(),
-        });
-
-        return {
-          queued: true,
-          message,
-        };
-      }
+      return {
+        queued: true,
+        message,
+      };
     }
 
     const response = await fetch(`/api/threads/${threadId}/messages`, {

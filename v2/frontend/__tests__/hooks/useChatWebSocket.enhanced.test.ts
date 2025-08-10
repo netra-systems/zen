@@ -439,7 +439,7 @@ describe('useChatWebSocket', () => {
       
       expect(new Set(messageIds).size).toBe(messageIds.length);
       messageIds.forEach(id => {
-        expect(id).toMatch(/^msg_\d+$/);
+        expect(id).toMatch(/^msg_\d+(_\d+)?$/);
       });
     });
 

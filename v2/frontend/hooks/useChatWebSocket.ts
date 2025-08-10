@@ -5,6 +5,13 @@ import { useWebSocket } from './useWebSocket';
 import { useChatStore } from '@/store/chat';
 import { Message } from '@/types/chat';
 
+// Counter to ensure unique message IDs
+let messageIdCounter = 0;
+
+const generateMessageId = () => {
+  return `msg_${Date.now()}_${++messageIdCounter}`;
+};
+
 export const useChatWebSocket = () => {
   const { messages } = useWebSocket();
   const { 
@@ -25,14 +32,22 @@ export const useChatWebSocket = () => {
       // Handle different message types
       if (wsMessage.type === 'sub_agent_update') {
         const payload = wsMessage.payload as any;
-        if (payload.sub_agent_name) {
-          setSubAgentName(payload.sub_agent_name);
+        if (payload?.sub_agent_name) {
+          try {
+            setSubAgentName(payload.sub_agent_name);
+          } catch (error) {
+            console.error('Failed to set sub-agent name:', error);
+          }
         }
-        if (payload.state) {
-          setSubAgentStatus({
-            status: payload.state.lifecycle || 'idle',
-            tools: payload.state.tools || []
-          });
+        if (payload?.state) {
+          try {
+            setSubAgentStatus({
+              status: payload.state.lifecycle || 'idle',
+              tools: payload.state.tools || []
+            });
+          } catch (error) {
+            console.error('Failed to set sub-agent status:', error);
+          }
         }
       } else if (wsMessage.type === 'agent_started') {
         setProcessing(true);
@@ -40,7 +55,7 @@ export const useChatWebSocket = () => {
         setProcessing(false);
         // Add a completion message
         const completionMessage: Message = {
-          id: `msg_${Date.now()}`,
+          id: generateMessageId(),
           role: 'assistant',
           content: 'Task completed successfully.',
           timestamp: new Date().toISOString(),
@@ -51,9 +66,9 @@ export const useChatWebSocket = () => {
       } else if (wsMessage.type === 'error') {
         setProcessing(false);
         const errorMessage: Message = {
-          id: `msg_${Date.now()}`,
+          id: generateMessageId(),
           role: 'assistant',
-          content: `Error: ${(wsMessage.payload as any).error || 'An error occurred'}`,
+          content: `Error: ${(wsMessage.payload as any)?.error || 'An error occurred'}`,
           timestamp: new Date().toISOString(),
           subAgentName: 'System',
           displayed_to_user: true,
@@ -66,7 +81,7 @@ export const useChatWebSocket = () => {
       } else if (wsMessage.type === 'agent_stopped') {
         setProcessing(false);
         const stoppedMessage: Message = {
-          id: `msg_${Date.now()}`,
+          id: generateMessageId(),
           role: 'assistant',
           content: 'Processing stopped.',
           timestamp: new Date().toISOString(),

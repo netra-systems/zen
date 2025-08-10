@@ -1,7 +1,8 @@
-import { renderHook, act, waitFor } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import WS from 'jest-websocket-mock';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import { WebSocketProvider } from '../../providers/WebSocketProvider';
+import React from 'react';
 
 describe('WebSocket Resilience Tests', () => {
   let server: WS;

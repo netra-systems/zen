@@ -33,7 +33,7 @@ export const useChatStore = create<ChatState>((set) => ({
   activeThreadId: null,
   
   addMessage: (message) => set((state) => ({ 
-    messages: [...state.messages, message] 
+    messages: [...state.messages, { ...message }] 
   })),
   
   updateMessage: (messageId, updates) => set((state) => ({

@@ -6,37 +6,39 @@ import { NavItem } from '@/types';
 
 const navItems: NavItem[] = [
   {
+    href: '/enterprise-demo',
+    icon: <Icons.apexOptimizer className="h-4 w-4" />,
+    label: 'Enterprise Demo',
+  },
+  {
     href: '/chat',
     icon: <Icons.apexOptimizer className="h-4 w-4" />,
-    label: 'Chat',
+    label: 'AI Assistant',
+  },
+  {
+    href: '/ingestion',
+    icon: <Icons.ingestion className="h-4 w-4" />,
+    label: 'Data Ingestion',
+  },
+  {
+    href: '/corpus',
+    icon: <Icons.corpusAdmin className="h-4 w-4" />,
+    label: 'Corpus Management',
   },
   {
     href: '/ingest-synthetic-data',
     icon: <Icons.syntheticData className="h-4 w-4" />,
-    label: 'Ingestion (Synthetic)',
+    label: 'Synthetic Data',
   },
   {
-    href: '/corpus-admin',
-    icon: <Icons.corpusAdmin className="h-4 w-4" />,
-    label: 'Corpus Admin',
-  },
-  {
-    href: '#',
-    icon: <Icons.ingestion className="h-4 w-4" />,
-    label: 'Ingestion',
-    disabled: true,
-  },
-  {
-    href: '#',
+    href: '/supply-catalog',
     icon: <Icons.supplyCatalog className="h-4 w-4" />,
     label: 'Supply Catalog',
-    disabled: true,
   },
   {
-    href: '#',
+    href: '/settings',
     icon: <Icons.settings className="h-4 w-4" />,
     label: 'Settings',
-    disabled: true,
   },
 ];
 
