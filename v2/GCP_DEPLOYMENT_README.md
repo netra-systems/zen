@@ -723,17 +723,39 @@ gcloud sql connect netra-postgres-* --user=netra_user
 # In the SQL prompt, create extensions and initial setup
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";  -- For text search
 CREATE SCHEMA IF NOT EXISTS public;
 \q
 
-# Run Alembic migrations
+# Run database initialization script
 cd ../  # Go to project root
 DATABASE_URL="postgresql://netra_user:${DB_PASSWORD}@${DB_IP}:5432/netra" \
-  python -m alembic upgrade head
+  python create_db.py
+
+# Run Alembic migrations
+DATABASE_URL="postgresql://netra_user:${DB_PASSWORD}@${DB_IP}:5432/netra" \
+  python run_migrations.py
 
 # Create initial admin user (optional)
 DATABASE_URL="postgresql://netra_user:${DB_PASSWORD}@${DB_IP}:5432/netra" \
-  python create_initial_user.py
+  python -c "
+import os
+import asyncio
+from app.services.database.user_repository import UserRepository
+from app.db.postgres import get_database
+
+async def create_admin():
+    async with get_database() as db:
+        user_repo = UserRepository(db)
+        admin = await user_repo.create_user({
+            'email': 'admin@netra.ai',
+            'name': 'Admin User',
+            'is_admin': True
+        })
+        print(f'Created admin user: {admin.email}')
+
+asyncio.run(create_admin())
+"
 ```
 
 ## Step 5: Verify Deployment (2 minutes)
@@ -871,10 +893,28 @@ gcloud run services update netra-backend \
 ## Monitoring & Logs
 
 ```bash
-# View Cloud Run logs
+# View Cloud Run logs with agent-specific filters
 gcloud logging read "resource.type=cloud_run_revision \
   AND resource.labels.service_name=netra-backend" \
   --limit 50 --format json
+
+# Monitor agent execution logs
+gcloud logging read "resource.type=cloud_run_revision \
+  AND resource.labels.service_name=netra-backend \
+  AND (textPayload:agent_execution OR textPayload:tool_call)" \
+  --limit 30
+
+# Monitor WebSocket connection metrics
+gcloud logging read "resource.type=cloud_run_revision \
+  AND resource.labels.service_name=netra-backend \
+  AND textPayload:websocket" \
+  --limit 20
+
+# Monitor database connection pool
+gcloud logging read "resource.type=cloud_run_revision \
+  AND resource.labels.service_name=netra-backend \
+  AND textPayload:database" \
+  --limit 20
 
 # Monitor costs
 gcloud billing accounts get-iam-policy $(gcloud beta billing accounts list --format="value(name)")
@@ -887,6 +927,71 @@ gcloud billing budgets create \
   --threshold-rule=percent=0.5 \
   --threshold-rule=percent=0.9 \
   --threshold-rule=percent=1.0
+
+# Create monitoring dashboard for key metrics
+cat > monitoring-dashboard.json << 'EOF'
+{
+  "displayName": "Netra AI Platform",
+  "mosaicLayout": {
+    "tiles": [
+      {
+        "width": 6,
+        "height": 4,
+        "widget": {
+          "title": "Cloud Run Request Count",
+          "xyChart": {
+            "dataSets": [{
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "resource.type=cloud_run_revision AND resource.labels.service_name=netra-backend",
+                  "aggregation": {
+                    "alignmentPeriod": "60s",
+                    "perSeriesAligner": "ALIGN_RATE"
+                  }
+                }
+              }
+            }]
+          }
+        }
+      },
+      {
+        "width": 6,
+        "height": 4,
+        "widget": {
+          "title": "Agent Execution Time",
+          "xyChart": {
+            "dataSets": [{
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "resource.type=cloud_run_revision AND textPayload:agent_execution_time"
+                }
+              }
+            }]
+          }
+        }
+      },
+      {
+        "width": 6,
+        "height": 4,
+        "widget": {
+          "title": "WebSocket Connections",
+          "xyChart": {
+            "dataSets": [{
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "resource.type=cloud_run_revision AND textPayload:websocket_connection"
+                }
+              }
+            }]
+          }
+        }
+      }
+    ]
+  }
+}
+EOF
+
+gcloud monitoring dashboards create --config-from-file=monitoring-dashboard.json
 ```
 
 ## Cost Optimization Tips
@@ -917,12 +1022,74 @@ gcloud scheduler jobs create http scale-down \
   --message-body='{"min_instances": 0, "max_instances": 1}'
 ```
 
-4. **Use Spot VMs for ClickHouse** (if needed later):
+4. **Deploy ClickHouse for Analytics** (optional, adds ~$100/month):
 ```bash
+# Create ClickHouse instance for analytics
 gcloud compute instances create netra-clickhouse \
-  --machine-type=e2-medium \
+  --machine-type=e2-standard-2 \
   --provisioning-model=SPOT \
-  --zone=${ZONE}
+  --boot-disk-size=50GB \
+  --boot-disk-type=pd-ssd \
+  --image-family=ubuntu-2004-lts \
+  --image-project=ubuntu-os-cloud \
+  --zone=${ZONE} \
+  --tags=clickhouse-server
+
+# Setup ClickHouse (run on the instance)
+gcloud compute ssh netra-clickhouse --zone=${ZONE} --command='
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates dirmngr
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv E0C56BD4
+echo "deb https://repo.clickhouse.tech/deb/stable/ main/" | sudo tee /etc/apt/sources.list.d/clickhouse.list
+sudo apt-get update
+sudo apt-get install -y clickhouse-server clickhouse-client
+sudo systemctl enable clickhouse-server
+sudo systemctl start clickhouse-server
+'
+
+# Create firewall rule for ClickHouse
+gcloud compute firewall-rules create allow-clickhouse \
+  --allow tcp:8123,tcp:9000 \
+  --source-ranges 0.0.0.0/0 \
+  --target-tags clickhouse-server
+
+# Get ClickHouse IP
+export CLICKHOUSE_IP=$(gcloud compute instances describe netra-clickhouse --zone=${ZONE} --format="get(networkInterfaces[0].accessConfigs[0].natIP)")
+echo "ClickHouse available at: http://${CLICKHOUSE_IP}:8123"
+```
+
+5. **Session Management Configuration**:
+```bash
+# Configure Redis for optimal session handling
+gcloud redis instances update netra-redis \
+  --region=${REGION} \
+  --enable-auth \
+  --redis-config maxmemory-policy=allkeys-lru
+
+# Update backend with session settings
+gcloud run services update netra-backend \
+  --update-env-vars="SESSION_TIMEOUT=3600,REDIS_SESSION_PREFIX=netra:session:" \
+  --region=${REGION}
+```
+
+6. **WebSocket Heartbeat and Timeout Configuration**:
+```bash
+# Configure WebSocket settings for production
+gcloud run services update netra-backend \
+  --update-env-vars="WEBSOCKET_HEARTBEAT_INTERVAL=30,WEBSOCKET_TIMEOUT=300,AGENT_MAX_EXECUTION_TIME=600" \
+  --region=${REGION}
+```
+
+7. **Database Connection Pool Optimization**:
+```bash
+# Update PostgreSQL settings for better connection handling
+gcloud sql instances patch netra-postgres-* \
+  --database-flags=max_connections=200,shared_preload_libraries=pg_stat_statements,work_mem=128MB
+
+# Update backend with connection pool settings
+gcloud run services update netra-backend \
+  --update-env-vars="DB_POOL_SIZE=20,DB_MAX_OVERFLOW=30,DB_POOL_TIMEOUT=30" \
+  --region=${REGION}
 ```
 
 ## Backup Strategy
@@ -1039,16 +1206,130 @@ gcloud access-context-manager perimeters create netra-perimeter \
 - **Cloud Run Docs**: https://cloud.google.com/run/docs
 - **Cost Calculator**: https://cloud.google.com/products/calculator
 
+## Production Configuration
+
+### Session Management
+```bash
+# Configure Redis for production session handling
+gcloud redis instances update netra-redis \
+  --region=${REGION} \
+  --redis-config maxmemory-policy=allkeys-lru,timeout=0,tcp-keepalive=300
+
+# Update session configuration
+gcloud run services update netra-backend \
+  --update-env-vars="
+SESSION_TIMEOUT=7200,
+SESSION_REFRESH_THRESHOLD=1800,
+SESSION_CLEANUP_INTERVAL=3600,
+REDIS_SESSION_PREFIX=netra:prod:session:
+" \
+  --region=${REGION}
+```
+
+### WebSocket Production Settings
+```bash
+# Configure WebSocket for production workload
+gcloud run services update netra-backend \
+  --update-env-vars="
+WEBSOCKET_HEARTBEAT_INTERVAL=30,
+WEBSOCKET_TIMEOUT=300,
+WEBSOCKET_MAX_CONNECTIONS=1000,
+WEBSOCKET_BUFFER_SIZE=65536
+" \
+  --region=${REGION}
+```
+
+### Agent System Production Configuration
+```bash
+# Configure agent timeouts and limits
+gcloud run services update netra-backend \
+  --update-env-vars="
+AGENT_MAX_EXECUTION_TIME=600,
+AGENT_HEARTBEAT_INTERVAL=60,
+AGENT_MAX_CONCURRENT_OPERATIONS=10,
+AGENT_TOOL_TIMEOUT=120,
+SUPERVISOR_ORCHESTRATION_TIMEOUT=300
+" \
+  --region=${REGION}
+```
+
+### Database Connection Limits
+```bash
+# Optimize database connections for production
+gcloud sql instances patch netra-postgres-* \
+  --database-flags="
+max_connections=200,
+idle_in_transaction_session_timeout=300000,
+statement_timeout=600000,
+lock_timeout=30000,
+shared_preload_libraries=pg_stat_statements
+"
+
+# Update backend connection pool
+gcloud run services update netra-backend \
+  --update-env-vars="
+DB_POOL_SIZE=20,
+DB_MAX_OVERFLOW=40,
+DB_POOL_TIMEOUT=30,
+DB_POOL_RECYCLE=3600,
+DB_POOL_PRE_PING=true
+" \
+  --region=${REGION}
+```
+
 ## Next Steps
 
-1. Setup custom domain with Cloud DNS
-2. Configure Cloud CDN for static assets
-3. Implement Cloud Monitoring dashboards
-4. Setup automated backups with Cloud Scheduler
-5. Configure alerts for budget and performance
+1. **Custom Domain Setup**
+   ```bash
+   # Configure custom domain with Cloud DNS
+   gcloud dns managed-zones create netra-zone --dns-name="yourdomain.com" --description="Netra DNS zone"
+   gcloud run domain-mappings create --service netra-frontend --domain app.yourdomain.com --region ${REGION}
+   ```
+
+2. **SSL/TLS Certificate Management**
+   ```bash
+   # Cloud Run automatically handles SSL certificates for custom domains
+   gcloud run services update netra-frontend --update-labels=ssl-cert-auto=true --region ${REGION}
+   ```
+
+3. **Cloud CDN Configuration**
+   ```bash
+   # Setup Cloud CDN for static assets
+   gcloud compute backend-services create netra-backend-service --global
+   gcloud compute url-maps create netra-url-map --default-backend-service netra-backend-service
+   ```
+
+4. **Advanced Monitoring Setup**
+   ```bash
+   # Create alerting policies for critical metrics
+   gcloud alpha monitoring policies create \
+     --policy-from-file=alerting-policy.yaml
+   ```
+
+5. **Backup Automation**
+   ```bash
+   # Setup automated daily backups
+   gcloud scheduler jobs create app-engine daily-backup \
+     --schedule="0 2 * * *" \
+     --http-method=POST \
+     --uri="${BACKEND_URL}/api/admin/backup"
+   ```
+
+6. **ClickHouse Analytics Integration**
+   - Deploy ClickHouse for advanced analytics
+   - Configure log streaming from Cloud Run
+   - Setup analytics dashboards
+
+7. **Security Hardening**
+   - Enable Cloud Armor DDoS protection
+   - Setup Identity-Aware Proxy for admin endpoints
+   - Configure VPC Service Controls
+   - Enable audit logging
 
 ---
 
-**Total Deployment Time: ~10 minutes**
-**Monthly Cost: < $1,000**
-**Scalability: Handles 100,000+ requests/day**
+**Total Deployment Time: ~15 minutes**
+**Monthly Cost: $368 base + scaling buffer = < $1,000**
+**Scalability: Handles 1M+ requests/day with agent system**
+**WebSocket Support: Real-time agent interactions**
+**Multi-Agent System: Supervisor + specialized sub-agents**

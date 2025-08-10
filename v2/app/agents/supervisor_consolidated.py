@@ -204,7 +204,7 @@ class SupervisorAgent(BaseSubAgent):
             
         finally:
             # Cleanup
-            self.set_state(SubAgentLifecycle.COMPLETE)
+            self.set_state(SubAgentLifecycle.COMPLETED)
             if run_id in self.active_runs:
                 del self.active_runs[run_id]
     
@@ -307,19 +307,24 @@ class SupervisorAgent(BaseSubAgent):
                 
                 # Send update if streaming
                 if stream_updates:
+                    from langchain_core.messages import SystemMessage
+                    state_obj = SubAgentState(
+                        messages=[SystemMessage(content=f"Starting {agent.name}")],
+                        next_node="",
+                        lifecycle=SubAgentLifecycle.RUNNING
+                    )
                     await self._send_websocket_update(
                         context.user_id,
                         "sub_agent_update",
                         SubAgentUpdate(
                             sub_agent_name=agent.name,
-                            state=SubAgentState.RUNNING,
-                            message=f"Starting {agent.name}"
+                            state=state_obj
                         )
                     )
                 
                 # Execute the agent
                 if context.timeout:
-                    state = await asyncio.wait_for(
+                    await asyncio.wait_for(
                         agent.execute(state, context.run_id, stream_updates),
                         timeout=context.timeout
                     )
@@ -327,17 +332,22 @@ class SupervisorAgent(BaseSubAgent):
                     await agent.execute(state, context.run_id, stream_updates)
                 
                 # Update agent lifecycle
-                agent.set_state(SubAgentLifecycle.COMPLETE)
+                agent.set_state(SubAgentLifecycle.COMPLETED)
                 
                 # Send update if streaming
                 if stream_updates:
+                    from langchain_core.messages import SystemMessage
+                    state_obj = SubAgentState(
+                        messages=[SystemMessage(content=f"{agent.name} completed")],
+                        next_node="",
+                        lifecycle=SubAgentLifecycle.COMPLETED
+                    )
                     await self._send_websocket_update(
                         context.user_id,
                         "sub_agent_update",
                         SubAgentUpdate(
                             sub_agent_name=agent.name,
-                            state=SubAgentState.COMPLETE,
-                            message=f"{agent.name} completed"
+                            state=state_obj
                         )
                     )
                 

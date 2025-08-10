@@ -125,7 +125,14 @@ class TestAgentE2ECritical:
             assert first_call[0][1]["type"] == "agent_started"
         
         # Verify all sub-agents were created
-        assert len(supervisor.sub_agents) == 5  # Triage, Data, Optimizations, Actions, Reporting
+        if hasattr(supervisor, '_impl') and supervisor._impl:
+            # Consolidated supervisor uses agents dict
+            if hasattr(supervisor._impl, 'agents'):
+                assert len(supervisor._impl.agents) == 5  # Triage, Data, Optimizations, Actions, Reporting
+            else:
+                assert len(supervisor._impl.sub_agents) == 5
+        else:
+            assert len(supervisor.sub_agents) == 5  # Legacy implementation
 
     @pytest.mark.asyncio
     async def test_2_websocket_real_time_streaming(self, setup_agent_infrastructure):
@@ -191,12 +198,26 @@ class TestAgentE2ECritical:
         execution_order = []
         
         # Mock each sub-agent's execute method to track execution
-        for agent in supervisor.sub_agents:
+        if hasattr(supervisor, '_impl') and supervisor._impl:
+            # Consolidated supervisor uses agents dict
+            if hasattr(supervisor._impl, 'agents'):
+                sub_agents = list(supervisor._impl.agents.values())
+            else:
+                sub_agents = supervisor._impl.sub_agents
+        else:
+            sub_agents = supervisor.sub_agents
+            
+        for agent in sub_agents:
             agent_name = agent.name
-            async def track_execute(state, rid, stream, name=agent_name):
-                execution_order.append(name)
-                return state
-            agent.execute = AsyncMock(side_effect=track_execute)
+            # Create a proper mock that doesn't raise an exception
+            def make_track_execute(name):
+                async def track_execute(state, rid, stream):
+                    execution_order.append(name)
+                    # Agent execute methods modify state in-place
+                    # Don't raise any exceptions
+                    pass
+                return track_execute
+            agent.execute = make_track_execute(agent_name)
         
         # Execute orchestration with proper state persistence mocking
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
@@ -340,7 +361,14 @@ class TestAgentE2ECritical:
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     # Simulate error in one sub-agent
-                    supervisor.sub_agents[2].execute = AsyncMock(side_effect=Exception("Sub-agent failure"))
+                    if hasattr(supervisor, '_impl') and supervisor._impl:
+                        if hasattr(supervisor._impl, 'agents'):
+                            sub_agents = list(supervisor._impl.agents.values())
+                        else:
+                            sub_agents = supervisor._impl.sub_agents
+                    else:
+                        sub_agents = supervisor.sub_agents
+                    sub_agents[2].execute = AsyncMock(side_effect=Exception("Sub-agent failure"))
         
         error_messages = []
         
@@ -371,7 +399,14 @@ class TestAgentE2ECritical:
                 raise Exception("Temporary failure")
             return state
             
-        supervisor.sub_agents[2].execute = retry_execute
+        if hasattr(supervisor, '_impl') and supervisor._impl:
+            if hasattr(supervisor._impl, 'agents'):
+                sub_agents = list(supervisor._impl.agents.values())
+            else:
+                sub_agents = supervisor._impl.sub_agents
+        else:
+            sub_agents = supervisor.sub_agents
+        sub_agents[2].execute = retry_execute
         
         # Should succeed after retries
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):

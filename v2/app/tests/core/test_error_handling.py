@@ -66,9 +66,9 @@ class TestErrorDetails:
             severity=ErrorSeverity.MEDIUM
         )
         
-        assert details.code == ErrorCode.VALIDATION_ERROR
+        assert details.code == ErrorCode.VALIDATION_ERROR.value
         assert details.message == "Test validation error"
-        assert details.severity == ErrorSeverity.MEDIUM
+        assert details.severity == ErrorSeverity.MEDIUM.value
         assert isinstance(details.timestamp, datetime)
     
     def test_error_details_with_context(self):
@@ -81,6 +81,7 @@ class TestErrorDetails:
             trace_id="trace-123"
         )
         
+        assert details.code == ErrorCode.DATABASE_ERROR.value
         assert details.context == context
         assert details.trace_id == "trace-123"
     
@@ -105,7 +106,7 @@ class TestNetraExceptions:
         exc = NetraException("Test error")
         
         assert str(exc) == "INTERNAL_ERROR: Test error"
-        assert exc.error_details.code == ErrorCode.INTERNAL_ERROR
+        assert exc.error_details.code == ErrorCode.INTERNAL_ERROR.value
         assert exc.error_details.message == "Test error"
     
     def test_netra_exception_with_code(self):
@@ -116,8 +117,8 @@ class TestNetraExceptions:
             severity=ErrorSeverity.HIGH
         )
         
-        assert exc.error_details.code == ErrorCode.AUTHENTICATION_FAILED
-        assert exc.error_details.severity == ErrorSeverity.HIGH
+        assert exc.error_details.code == ErrorCode.AUTHENTICATION_FAILED.value
+        assert exc.error_details.severity == ErrorSeverity.HIGH.value
     
     def test_netra_exception_to_dict(self):
         """Test NetraException serialization."""
@@ -132,8 +133,8 @@ class TestNetraExceptions:
         """Test ConfigurationError."""
         exc = ConfigurationError("Config missing")
         
-        assert exc.error_details.code == ErrorCode.CONFIGURATION_ERROR
-        assert exc.error_details.severity == ErrorSeverity.HIGH
+        assert exc.error_details.code == ErrorCode.CONFIGURATION_ERROR.value
+        assert exc.error_details.severity == ErrorSeverity.HIGH.value
         assert "Config missing" in exc.error_details.message
     
     def test_validation_error_with_errors(self):
@@ -141,7 +142,7 @@ class TestNetraExceptions:
         validation_errors = ["Field required", "Invalid format"]
         exc = ValidationError(validation_errors=validation_errors)
         
-        assert exc.error_details.code == ErrorCode.VALIDATION_ERROR
+        assert exc.error_details.code == ErrorCode.VALIDATION_ERROR.value
         assert exc.error_details.details["validation_errors"] == validation_errors
         assert exc.error_details.user_message == "Please check your input and try again"
     
@@ -149,36 +150,36 @@ class TestNetraExceptions:
         """Test AuthenticationError."""
         exc = AuthenticationError("Invalid credentials")
         
-        assert exc.error_details.code == ErrorCode.AUTHENTICATION_FAILED
-        assert exc.error_details.severity == ErrorSeverity.HIGH
+        assert exc.error_details.code == ErrorCode.AUTHENTICATION_FAILED.value
+        assert exc.error_details.severity == ErrorSeverity.HIGH.value
         assert "Invalid credentials" in exc.error_details.message
     
     def test_authorization_error(self):
         """Test AuthorizationError."""
         exc = AuthorizationError("Access denied")
         
-        assert exc.error_details.code == ErrorCode.AUTHORIZATION_FAILED
+        assert exc.error_details.code == ErrorCode.AUTHORIZATION_FAILED.value
         assert exc.error_details.user_message == "You don't have permission to perform this action"
     
     def test_token_expired_error(self):
         """Test TokenExpiredError."""
         exc = TokenExpiredError()
         
-        assert exc.error_details.code == ErrorCode.TOKEN_EXPIRED
+        assert exc.error_details.code == ErrorCode.TOKEN_EXPIRED.value
         assert "expired" in exc.error_details.message.lower()
     
     def test_database_error(self):
         """Test DatabaseError."""
         exc = DatabaseError("Connection failed")
         
-        assert exc.error_details.code == ErrorCode.DATABASE_QUERY_FAILED
-        assert exc.error_details.severity == ErrorSeverity.HIGH
+        assert exc.error_details.code == ErrorCode.DATABASE_QUERY_FAILED.value
+        assert exc.error_details.severity == ErrorSeverity.HIGH.value
     
     def test_record_not_found_error(self):
         """Test RecordNotFoundError."""
         exc = RecordNotFoundError("User", "123")
         
-        assert exc.error_details.code == ErrorCode.RECORD_NOT_FOUND
+        assert exc.error_details.code == ErrorCode.RECORD_NOT_FOUND.value
         assert "User not found (ID: 123)" in exc.error_details.message
         assert exc.error_details.details["resource"] == "User"
         assert exc.error_details.details["identifier"] == "123"
@@ -187,14 +188,14 @@ class TestNetraExceptions:
         """Test ServiceError."""
         exc = ServiceError("payment", "Payment failed")
         
-        assert exc.error_details.code == ErrorCode.SERVICE_UNAVAILABLE
+        assert exc.error_details.code == ErrorCode.SERVICE_UNAVAILABLE.value
         assert exc.error_details.details["service"] == "payment"
     
     def test_llm_request_error(self):
         """Test LLMRequestError."""
         exc = LLMRequestError("openai", "gpt-4")
         
-        assert exc.error_details.code == ErrorCode.LLM_REQUEST_FAILED
+        assert exc.error_details.code == ErrorCode.LLM_REQUEST_FAILED.value
         assert exc.error_details.details["provider"] == "openai"
         assert exc.error_details.details["model"] == "gpt-4"
     
@@ -202,8 +203,8 @@ class TestNetraExceptions:
         """Test WebSocketError."""
         exc = WebSocketError("Connection lost")
         
-        assert exc.error_details.code == ErrorCode.WEBSOCKET_CONNECTION_FAILED
-        assert exc.error_details.severity == ErrorSeverity.MEDIUM
+        assert exc.error_details.code == ErrorCode.WEBSOCKET_CONNECTION_FAILED.value
+        assert exc.error_details.severity == ErrorSeverity.MEDIUM.value
 
 
 class TestErrorHandler:

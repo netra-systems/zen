@@ -234,7 +234,7 @@ def run_tests(pytest_args: List[str], args) -> int:
         print("\nChecking dependencies...")
         deps = check_dependencies()
         for dep, available in deps.items():
-            status = "✅" if available else "❌"
+            status = "[OK]" if available else "[MISSING]"
             print(f"  {status} {dep}")
         print()
     
@@ -264,9 +264,9 @@ def run_tests(pytest_args: List[str], args) -> int:
     # Display results
     print("=" * 80)
     if exit_code == 0:
-        print(f"✅ ALL TESTS PASSED in {duration:.2f}s")
+        print(f"[PASS] ALL TESTS PASSED in {duration:.2f}s")
     else:
-        print(f"❌ TESTS FAILED with exit code {exit_code} after {duration:.2f}s")
+        print(f"[FAIL] TESTS FAILED with exit code {exit_code} after {duration:.2f}s")
     
     # Show coverage summary if enabled
     if args.coverage and exit_code == 0:
@@ -275,13 +275,13 @@ def run_tests(pytest_args: List[str], args) -> int:
             with open(coverage_file) as f:
                 coverage_data = json.load(f)
                 total_coverage = coverage_data.get("totals", {}).get("percent_covered", 0)
-                print(f"\n📊 Total Coverage: {total_coverage:.2f}%")
+                print(f"\n[Coverage] Total Coverage: {total_coverage:.2f}%")
     
     # Show report locations
     if args.html_output:
-        print(f"\n📄 HTML Report: reports/tests/report.html")
+        print(f"\n[Report] HTML Report: reports/tests/report.html")
     if args.coverage:
-        print(f"📊 Coverage Report: reports/coverage/html/index.html")
+        print(f"[Coverage] Coverage Report: reports/coverage/html/index.html")
     
     print("=" * 80)
     
