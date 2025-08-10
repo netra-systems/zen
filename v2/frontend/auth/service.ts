@@ -16,6 +16,7 @@ class AuthService {
   }
 
   async handleDevLogin(authConfig: AuthConfigResponse): Promise<{ access_token: string, token_type: string } | null> {
+    console.log('Attempting dev login...');
     try {
       const response = await fetch(authConfig.endpoints.dev_login, {
         method: 'POST',
@@ -26,12 +27,13 @@ class AuthService {
       });
       if (response.ok) {
         const data = await response.json();
+        console.log('Dev login successful');
         localStorage.setItem(TOKEN_KEY, data.access_token);
         // Clear the logout flag on successful dev login
         this.clearDevLogoutFlag();
         return data;
       } else {
-        console.error('Dev login failed');
+        console.error('Dev login failed with status:', response.status);
         return null;
       }
     } catch (error) {
