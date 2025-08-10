@@ -16,14 +16,80 @@ import webbrowser
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Robust path resolution
+def get_project_root():
+    """Find the project root directory robustly."""
+    current_file = Path(__file__).resolve()
+    
+    # Check if we're in scripts directory
+    if current_file.parent.name == 'scripts':
+        return current_file.parent.parent
+    # Check if we're already in project root
+    elif (current_file.parent / 'frontend').exists() or (current_file.parent / 'app').exists():
+        return current_file.parent
+    # Try to find project root by looking for key files/dirs
+    else:
+        for parent in current_file.parents:
+            if (parent / 'frontend').exists() or (parent / 'app').exists() or (parent / 'requirements.txt').exists():
+                return parent
+    
+    # Fallback to parent of parent
+    return current_file.parent.parent
 
+# Get project root and add to path
+PROJECT_ROOT = get_project_root()
+sys.path.insert(0, str(PROJECT_ROOT))
+
+# Try multiple import strategies
 try:
     from scripts.service_discovery import ServiceDiscovery
 except ImportError:
-    # If running from scripts directory, try direct import
-    from service_discovery import ServiceDiscovery
+    try:
+        # If running from scripts directory, try direct import
+        from service_discovery import ServiceDiscovery
+    except ImportError:
+        # Last resort - try to import from the scripts directory
+        scripts_dir = PROJECT_ROOT / 'scripts'
+        if scripts_dir.exists():
+            sys.path.insert(0, str(scripts_dir))
+            from service_discovery import ServiceDiscovery
+        else:
+            print("ERROR: Could not import ServiceDiscovery. Please check your installation.")
+            sys.exit(1)
+
+def resolve_path(*parts, required=False, search_dirs=None):
+    """Resolve a path robustly, checking multiple locations.
+    
+    Args:
+        *parts: Path components to join
+        required: If True, raise error if path not found
+        search_dirs: Additional directories to search in
+    
+    Returns:
+        Path object if found, None otherwise
+    """
+    # Default search directories
+    if search_dirs is None:
+        search_dirs = [
+            Path.cwd(),  # Current working directory
+            PROJECT_ROOT,  # Project root
+            Path(__file__).parent,  # Script directory
+            Path(__file__).parent.parent,  # Parent of script directory
+        ]
+    
+    # Try each search directory
+    for base_dir in search_dirs:
+        path = base_dir / Path(*parts)
+        if path.exists():
+            return path.resolve()
+    
+    # If required and not found, raise error
+    if required:
+        searched = ', '.join(str(d) for d in search_dirs)
+        raise FileNotFoundError(f"Could not find {'/'.join(parts)} in any of: {searched}")
+    
+    # Return the path relative to project root as fallback
+    return PROJECT_ROOT / Path(*parts)
 
 class DevLauncher:
     """Manages the development environment launch process."""
@@ -50,6 +116,12 @@ class DevLauncher:
         self.processes: List[subprocess.Popen] = []
         self.service_discovery = ServiceDiscovery()
         self.use_emoji = self._check_emoji_support()
+        self.project_root = PROJECT_ROOT
+        
+        if self.verbose:
+            print(f"[DEBUG] Project root detected: {self.project_root}")
+            print(f"[DEBUG] Current working directory: {Path.cwd()}")
+            print(f"[DEBUG] Script location: {Path(__file__).resolve()}")
         
         # Register cleanup handler
         signal.signal(signal.SIGINT, self._cleanup_handler)
@@ -134,30 +206,46 @@ class DevLauncher:
         
         # Check Google Cloud SDK if secrets loading is requested
         if self.load_secrets:
-            # Check if fetch_secrets_to_env.py exists
-            # Try both current directory and parent directory
-            fetch_script = Path("fetch_secrets_to_env.py")
+            # Check if fetch_secrets_to_env.py exists - try PROJECT_ROOT first
+            fetch_script = PROJECT_ROOT / "fetch_secrets_to_env.py"
             if not fetch_script.exists():
-                fetch_script = Path(__file__).parent.parent / "fetch_secrets_to_env.py"
-                if not fetch_script.exists():
-                    errors.append("❌ fetch_secrets_to_env.py not found in project root")
+                # Try scripts directory
+                fetch_script = PROJECT_ROOT / "scripts" / "fetch_secrets_to_env.py"
+            if not fetch_script.exists():
+                # Try resolve_path as last resort
+                fetch_script = resolve_path("fetch_secrets_to_env.py")
+            
+            if not fetch_script or not fetch_script.exists():
+                errors.append("❌ fetch_secrets_to_env.py not found")
+                if self.verbose:
+                    errors.append(f"   Searched in: {PROJECT_ROOT} and {PROJECT_ROOT / 'scripts'}")
             
             # Check for project ID
             if not self.project_id and not os.environ.get('GOOGLE_CLOUD_PROJECT'):
                 errors.append("❌ Google Cloud project ID not specified. Use --project-id or set GOOGLE_CLOUD_PROJECT env var")
         
-        # Check if frontend directory exists
-        # Try both current directory and parent directory
-        frontend_dir = Path("frontend")
+        # Check if frontend directory exists - force using PROJECT_ROOT
+        frontend_dir = PROJECT_ROOT / "frontend"
         if not frontend_dir.exists():
-            frontend_dir = Path(__file__).parent.parent / "frontend"
-        if not frontend_dir.exists():
+            # Try resolve_path as fallback
+            frontend_dir = resolve_path("frontend")
+        
+        if not frontend_dir or not frontend_dir.exists():
             errors.append("❌ Frontend directory not found")
+            if self.verbose:
+                errors.append(f"   Searched in: {PROJECT_ROOT}")
+                errors.append(f"   Current directory: {Path.cwd()}")
+                # List what directories ARE present
+                try:
+                    dirs = [d.name for d in PROJECT_ROOT.iterdir() if d.is_dir()]
+                    errors.append(f"   Available directories: {', '.join(dirs[:10])}")
+                except:
+                    pass
         else:
             # Check if node_modules exists
             node_modules = frontend_dir / "node_modules"
             if not node_modules.exists():
-                errors.append("❌ Frontend dependencies not installed. Run: cd frontend && npm install")
+                errors.append(f"❌ Frontend dependencies not installed. Run: cd {frontend_dir} && npm install")
         
         if errors:
             print("Dependency check failed:")
@@ -180,10 +268,17 @@ class DevLauncher:
             port = self.backend_port or 8000
         
         # Build command
-        # Find run_server.py in the parent directory
-        run_server_path = Path("run_server.py")
-        if not run_server_path.exists():
-            run_server_path = Path(__file__).parent.parent / "run_server.py"
+        # Find run_server.py robustly
+        run_server_path = resolve_path("run_server.py")
+        if not run_server_path or not run_server_path.exists():
+            # Try scripts directory as fallback
+            run_server_path = resolve_path("scripts", "run_server.py")
+        
+        if not run_server_path or not run_server_path.exists():
+            self._print("❌", "ERROR", "Could not find run_server.py")
+            if self.verbose:
+                print(f"   Searched in: {PROJECT_ROOT}")
+            return None
         
         cmd = [
             sys.executable,
@@ -263,19 +358,32 @@ class DevLauncher:
         npm_command = "dev"
         
         # Build command based on OS - avoid shell=True with arguments to prevent deprecation warning
-        # Determine frontend path
-        frontend_path = Path("frontend")
-        if not frontend_path.exists():
-            frontend_path = Path(__file__).parent.parent / "frontend"
+        # Determine frontend path robustly
+        frontend_path = resolve_path("frontend")
+        if not frontend_path or not frontend_path.exists():
+            self._print("❌", "ERROR", "Frontend directory not found")
+            if self.verbose:
+                print(f"   Searched in: {PROJECT_ROOT}")
+            return None
         
-        if sys.platform == "win32":
-            # Windows - use node directly without shell
-            cmd = ["node", "scripts/start_with_discovery.js", npm_command]
-            cwd_path = str(frontend_path)
+        # Check if start_with_discovery.js exists
+        start_script = frontend_path / "scripts" / "start_with_discovery.js"
+        if not start_script.exists():
+            self._print("⚠️", "WARN", "start_with_discovery.js not found, using npm directly")
+            # Fallback to npm directly
+            if sys.platform == "win32":
+                cmd = ["npm.cmd", "run", npm_command]
+            else:
+                cmd = ["npm", "run", npm_command]
         else:
-            # Unix-like - use node directly without shell
-            cmd = ["node", "scripts/start_with_discovery.js", npm_command]
-            cwd_path = str(frontend_path)
+            if sys.platform == "win32":
+                # Windows - use node directly without shell
+                cmd = ["node", "scripts/start_with_discovery.js", npm_command]
+            else:
+                # Unix-like - use node directly without shell
+                cmd = ["node", "scripts/start_with_discovery.js", npm_command]
+        
+        cwd_path = str(frontend_path)
         
         if self.verbose:
             print(f"   Command: {' '.join(cmd)}")
@@ -395,10 +503,15 @@ class DevLauncher:
             print(f"   Project ID: {project_id}")
             
             # Build command
-            # Find fetch_secrets_to_env.py
-            fetch_script = Path("fetch_secrets_to_env.py")
-            if not fetch_script.exists():
-                fetch_script = Path(__file__).parent.parent / "fetch_secrets_to_env.py"
+            # Find fetch_secrets_to_env.py robustly
+            fetch_script = resolve_path("fetch_secrets_to_env.py")
+            if not fetch_script or not fetch_script.exists():
+                # Try scripts directory
+                fetch_script = resolve_path("scripts", "fetch_secrets_to_env.py")
+            
+            if not fetch_script or not fetch_script.exists():
+                self._print("⚠️", "WARN", "fetch_secrets_to_env.py not found, skipping secret loading")
+                return False
             
             cmd = [sys.executable, str(fetch_script)]
             
@@ -417,11 +530,9 @@ class DevLauncher:
             if result.returncode == 0:
                 self._print("✅", "OK", "Secrets loaded successfully")
                 # Load the created .env file into current environment
-                # Try both current directory and parent directory
-                env_file = Path(".env")
-                if not env_file.exists():
-                    env_file = Path(__file__).parent.parent / ".env"
-                if env_file.exists():
+                # Try multiple locations for .env file
+                env_file = resolve_path(".env")
+                if env_file and env_file.exists():
                     with open(env_file, 'r') as f:
                         for line in f:
                             line = line.strip()
@@ -443,6 +554,16 @@ class DevLauncher:
         print("=" * 60)
         self._print("🚀", "LAUNCH", "Netra AI Development Environment Launcher")
         print("=" * 60)
+        
+        # Add diagnostic info in verbose mode
+        if self.verbose:
+            print("\n[DIAGNOSTIC INFO]")
+            print(f"  Python: {sys.version}")
+            print(f"  Platform: {sys.platform}")
+            print(f"  Project Root: {self.project_root}")
+            print(f"  Current Dir: {Path.cwd()}")
+            print(f"  Script Path: {Path(__file__).resolve()}")
+            print("-" * 60)
         
         # Show configuration summary
         if self.dynamic_ports and not self.backend_reload:
@@ -572,6 +693,98 @@ class DevLauncher:
         return 0
 
 
+def run_diagnostic():
+    """Run diagnostic checks to help identify issues."""
+    print("=" * 60)
+    print("NETRA AI DEVELOPMENT LAUNCHER - DIAGNOSTIC MODE")
+    print("=" * 60)
+    
+    print("\n1. ENVIRONMENT INFO:")
+    print(f"   Python Version: {sys.version}")
+    print(f"   Python Executable: {sys.executable}")
+    print(f"   Platform: {sys.platform}")
+    print(f"   Current Directory: {Path.cwd()}")
+    print(f"   Script Location: {Path(__file__).resolve()}")
+    
+    print("\n2. PROJECT STRUCTURE:")
+    project_root = get_project_root()
+    print(f"   Detected Project Root: {project_root}")
+    print(f"   Project Root Exists: {project_root.exists()}")
+    
+    # Check key directories
+    dirs_to_check = ['frontend', 'app', 'scripts', 'alembic', 'terraform-gcp']
+    print("\n   Key Directories:")
+    for dir_name in dirs_to_check:
+        dir_path = project_root / dir_name
+        # Use safe characters for Windows console
+        status = "[OK]" if dir_path.exists() else "[MISSING]"
+        print(f"     {status} {dir_name}: {dir_path.exists()}")
+    
+    # Check key files
+    files_to_check = ['requirements.txt', 'run_server.py', 'package.json', 'CLAUDE.md']
+    print("\n   Key Files:")
+    for file_name in files_to_check:
+        file_path = project_root / file_name
+        status = "[OK]" if file_path.exists() else "[MISSING]"
+        print(f"     {status} {file_name}: {file_path.exists()}")
+    
+    print("\n3. FRONTEND STATUS:")
+    frontend_dir = resolve_path("frontend")
+    if frontend_dir and frontend_dir.exists():
+        print(f"   Frontend Directory: {frontend_dir}")
+        package_json = frontend_dir / "package.json"
+        node_modules = frontend_dir / "node_modules"
+        print(f"   package.json exists: {package_json.exists()}")
+        print(f"   node_modules exists: {node_modules.exists()}")
+        if node_modules.exists():
+            try:
+                module_count = len(list(node_modules.iterdir()))
+                print(f"   node_modules count: {module_count}")
+            except:
+                print("   node_modules count: Unable to count")
+    else:
+        print("   Frontend directory not found!")
+    
+    print("\n4. BACKEND STATUS:")
+    run_server = resolve_path("run_server.py")
+    if run_server and run_server.exists():
+        print(f"   run_server.py: {run_server}")
+    else:
+        print("   run_server.py not found!")
+    
+    # Check Python packages
+    print("\n   Python Packages:")
+    packages = ['fastapi', 'uvicorn', 'sqlalchemy', 'pydantic']
+    for package in packages:
+        try:
+            __import__(package)
+            print(f"     [OK] {package} installed")
+        except ImportError:
+            print(f"     [MISSING] {package} NOT installed")
+    
+    print("\n5. PATH RESOLUTION TEST:")
+    test_paths = [
+        ("frontend",),
+        ("frontend", "package.json"),
+        ("run_server.py",),
+        ("scripts", "service_discovery.py"),
+        (".env",),
+    ]
+    for path_parts in test_paths:
+        resolved = resolve_path(*path_parts)
+        exists = resolved.exists() if resolved else False
+        status = "[OK]" if exists else "[MISSING]"
+        print(f"   {status} {'/'.join(path_parts)}: {resolved if resolved else 'Not found'}")
+    
+    print("\n" + "=" * 60)
+    print("DIAGNOSTIC COMPLETE")
+    print("=" * 60)
+    print("\nIf you see issues above, please:")
+    print("1. Ensure you're in the correct directory")
+    print("2. Run 'pip install -r requirements.txt' for backend deps")
+    print("3. Run 'cd frontend && npm install' for frontend deps")
+    print("4. Check that all project files are present")
+
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
@@ -660,7 +873,18 @@ Examples:
         help="Don't open the browser automatically after frontend is ready"
     )
     
+    parser.add_argument(
+        "--diagnostic",
+        action="store_true",
+        help="Run diagnostic checks to identify configuration issues"
+    )
+    
     args = parser.parse_args()
+    
+    # Run diagnostic mode if requested
+    if args.diagnostic:
+        run_diagnostic()
+        return 0
     
     # Handle reload flags
     backend_reload = not args.no_backend_reload and not args.no_reload
