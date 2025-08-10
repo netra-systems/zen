@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>Netra Apex Marketing Page Specification</title>
+    <version>1.0.0</version>
+    <created>2025-01-10</created>
+    <description>Complete specification for the single-page marketing website</description>
+    <file>netra-marketing.html</file>
+  </metadata>
+
+  <overview>
+    <purpose>
+      A comprehensive single-page marketing website that showcases Netra Apex as the world's leading
+      AI optimization platform, targeting enterprises and startups looking to reduce AI costs while
+      improving performance.
+    </purpose>
+    <target-audience>
+      - CTOs and Engineering Leaders at AI-native companies
+      - FinOps teams managing AI infrastructure costs
+      - Startups building agent-based applications
+      - Enterprise teams scaling AI operations
+    </target-audience>
+    <key-messages>
+      - 20-80% cost reduction on AI infrastructure
+      - Trusted by OpenAI, Anthropic, and Fortune 100
+      - Intelligent multi-agent optimization system
+      - 5-minute setup with existing infrastructure
+    </key-messages>
+  </overview>
+
+  <structure>
+    <section id="header">
+      <description>Sticky navigation header with logo and primary navigation</description>
+      <components>
+        <logo>Netra Apex with brain icon</logo>
+        <navigation>
+          <link>Features</link>
+          <link>AI Agents</link>
+          <link>Pricing</link>
+          <link>Demo</link>
+          <link>Docs (external)</link>
+          <cta>Start Free Trial</cta>
+        </navigation>
+        <mobile-menu>Hamburger menu for responsive design</mobile-menu>
+      </components>
+      <styling>
+        - Background: White with 95% opacity and backdrop blur
+        - Sticky positioning with shadow on scroll
+        - Responsive collapse to mobile menu at 768px
+      </styling>
+    </section>
+
+    <section id="hero">
+      <description>Primary value proposition and call-to-action</description>
+      <content>
+        <headline>The World's Most Intelligent AI Optimization Platform</headline>
+        <subheadline>Cut AI costs by 20-80% while improving quality and latency</subheadline>
+        <cta-primary>Start Free Trial</cta-primary>
+        <cta-secondary>View Live Demo</cta-secondary>
+        <trust-badges>
+          - Trusted by OpenAI
+          - Powers Anthropic
+          - Used by Fortune 100
+          - $10M+ Saved Monthly
+        </trust-badges>
+      </content>
+      <animations>
+        - Typing effect on headline
+        - Floating gradient background
+        - Fade-in animation on load
+      </animations>
+    </section>
+
+    <section id="stats">
+      <description>Key performance metrics in card format</description>
+      <metrics>
+        <metric>
+          <value>20-80%</value>
+          <label>Cost Reduction</label>
+        </metric>
+        <metric>
+          <value>2.3x</value>
+          <label>Faster Response Times</label>
+        </metric>
+        <metric>
+          <value>99.9%</value>
+          <label>Uptime SLA</label>
+        </metric>
+        <metric>
+          <value>&lt;5min</value>
+          <label>Setup Time</label>
+        </metric>
+      </metrics>
+      <styling>
+        - White background with shadow
+        - Grid layout, responsive
+        - Gradient text for numbers
+      </styling>
+    </section>
+
+    <section id="features">
+      <description>Core platform features in grid layout</description>
+      <features>
+        <feature>
+          <icon>💰</icon>
+          <title>Intelligent Cost Optimization</title>
+          <description>AI agents optimize the cost-quality-latency-throughput quadrilemma</description>
+        </feature>
+        <feature>
+          <icon>🛡️</icon>
+          <title>Anomaly Detection</title>
+          <description>Real-time detection of unusual spending patterns</description>
+        </feature>
+        <feature>
+          <icon>📊</icon>
+          <title>Actionable Analytics</title>
+          <description>Transform volatile expenses into predictable costs</description>
+        </feature>
+        <feature>
+          <icon>🎯</icon>
+          <title>Elastic Control</title>
+          <description>Dynamically balance cost, quality, and performance goals</description>
+        </feature>
+        <feature>
+          <icon>🚀</icon>
+          <title>Vendor-Neutral</title>
+          <description>Works across all major AI providers and gateways</description>
+        </feature>
+        <feature>
+          <icon>⚡</icon>
+          <title>Easy Integration</title>
+          <description>Connect via ClickHouse or API in under 5 minutes</description>
+        </feature>
+      </features>
+    </section>
+
+    <section id="agents">
+      <description>AI Agent system showcase with gradient background</description>
+      <agents>
+        <agent>
+          <name>Triage Agent</name>
+          <role>Analyzes requests and determines optimal approach</role>
+        </agent>
+        <agent>
+          <name>Data Agent</name>
+          <role>Collects and analyzes performance metrics</role>
+        </agent>
+        <agent>
+          <name>Optimization Agent</name>
+          <role>Generates optimization recommendations</role>
+        </agent>
+        <agent>
+          <name>Action Agent</name>
+          <role>Creates actionable plans to meet goals</role>
+        </agent>
+        <agent>
+          <name>Reporting Agent</name>
+          <role>Compiles comprehensive reports</role>
+        </agent>
+        <agent>
+          <name>Apex Optimizer</name>
+          <role>Production-ready optimizer with simulation</role>
+        </agent>
+      </agents>
+      <styling>
+        - Gradient background (purple to violet)
+        - Glass morphism cards
+        - White text
+      </styling>
+    </section>
+
+    <section id="pricing">
+      <description>Pricing tiers with feature comparison</description>
+      <tiers>
+        <tier type="free">
+          <name>Free</name>
+          <price>$0/month</price>
+          <description>For developers exploring core features</description>
+          <features>
+            - Basic log analysis
+            - Limited analysis depth
+            - 1 user
+            - Community support
+          </features>
+        </tier>
+        <tier type="professional">
+          <name>Professional</name>
+          <price>$300/month</price>
+          <description>For startups needing deeper analysis</description>
+          <features>
+            - Deeper analysis
+            - Up to 5 users
+            - Email &amp; chat support
+            - Basic alerting
+          </features>
+        </tier>
+        <tier type="premium" featured="true">
+          <name>Premium</name>
+          <price>$2,500/month + 2.9% of managed spend</price>
+          <description>For production teams optimizing at scale</description>
+          <features>
+            - Deepest analysis &amp; insights
+            - Latest optimizations
+            - Unlimited users
+            - Full API &amp; SDK access
+            - Forecasting &amp; alerts
+            - Priority support
+          </features>
+        </tier>
+        <tier type="enterprise">
+          <name>Enterprise</name>
+          <price>Custom</price>
+          <description>For organizations needing compliance</description>
+          <features>
+            - Advanced FinOps tools
+            - SSO &amp; granular RBAC
+            - Auditable attribution
+            - SOC 2 &amp; HIPAA
+            - Dedicated support
+            - 1-hour SLA
+          </features>
+        </tier>
+      </tiers>
+    </section>
+
+    <section id="demo">
+      <description>Interactive demo cards with modal popups</description>
+      <demos>
+        <demo id="bill">
+          <title>Bill Analysis</title>
+          <description>Analyze your LLM costs and identify savings</description>
+          <modal-content>Shows potential savings calculation</modal-content>
+        </demo>
+        <demo id="savings">
+          <title>Savings Report</title>
+          <description>See real-world optimization examples</description>
+          <modal-content>Before/after comparison</modal-content>
+        </demo>
+        <demo id="supply">
+          <title>Supply Chain</title>
+          <description>Master the AI supply-demand balance</description>
+          <modal-content>Dynamic routing examples</modal-content>
+        </demo>
+        <demo id="anomaly">
+          <title>Anomaly Detection</title>
+          <description>Catch issues before they impact budget</description>
+          <modal-content>Alert system showcase</modal-content>
+        </demo>
+        <demo id="forecast">
+          <title>Cost Forecasting</title>
+          <description>Predict and control future AI spend</description>
+          <modal-content>Forecasting visualization</modal-content>
+        </demo>
+        <demo id="game">
+          <title>Optimization Game</title>
+          <description>Learn optimization strategies interactively</description>
+          <modal-content>Interactive optimization challenge</modal-content>
+        </demo>
+      </demos>
+    </section>
+
+    <section id="cta">
+      <description>Final call-to-action with dark gradient background</description>
+      <content>
+        <headline>Ready to Transform Your AI Operations?</headline>
+        <subheadline>Join leading companies saving millions on AI infrastructure</subheadline>
+        <cta-primary>Start Free Trial</cta-primary>
+        <cta-secondary>Schedule Demo</cta-secondary>
+      </content>
+    </section>
+
+    <section id="footer">
+      <description>Footer with company information and links</description>
+      <columns>
+        <column>
+          <title>Company Info</title>
+          <content>Logo, description, social links</content>
+        </column>
+        <column>
+          <title>Product</title>
+          <links>Features, AI Agents, Pricing, Demo, API</links>
+        </column>
+        <column>
+          <title>Resources</title>
+          <links>Documentation, Blog, Case Studies, Support, Status</links>
+        </column>
+        <column>
+          <title>Company</title>
+          <links>About, Careers, Contact, Privacy, Terms</links>
+        </column>
+      </columns>
+      <copyright>© 2025 Netra Inc. All rights reserved.</copyright>
+    </section>
+  </structure>
+
+  <design-system>
+    <colors>
+      <primary>#4f46e5</primary>
+      <primary-light>#6366f1</primary-light>
+      <primary-dark>#4338ca</primary-dark>
+      <secondary>#0ea5e9</secondary>
+      <accent>#8b5cf6</accent>
+      <success>#10b981</success>
+      <warning>#f59e0b</warning>
+      <danger>#ef4444</danger>
+      <dark>#0f172a</dark>
+      <gray>#64748b</gray>
+      <light-gray>#f1f5f9</light-gray>
+      <white>#ffffff</white>
+    </colors>
+    <typography>
+      <font-family>Inter, system-ui, sans-serif</font-family>
+      <heading-sizes>
+        <h1>clamp(2.5rem, 5vw, 4rem)</h1>
+        <h2>clamp(2rem, 4vw, 3rem)</h2>
+        <h3>1.5rem</h3>
+      </heading-sizes>
+      <body-text>1rem with 1.6 line-height</body-text>
+    </typography>
+    <spacing>
+      <section-padding>4rem vertical</section-padding>
+      <container-max-width>1280px</container-max-width>
+      <card-padding>2rem</card-padding>
+      <border-radius>8px to 16px</border-radius>
+    </spacing>
+    <effects>
+      <shadows>
+        <sm>0 1px 2px 0 rgb(0 0 0 / 0.05)</sm>
+        <default>0 4px 6px -1px rgb(0 0 0 / 0.1)</default>
+        <lg>0 20px 25px -5px rgb(0 0 0 / 0.1)</lg>
+        <xl>0 25px 50px -12px rgb(0 0 0 / 0.25)</xl>
+      </shadows>
+      <transitions>all 0.3s cubic-bezier(0.4, 0, 0.2, 1)</transitions>
+      <hover-effects>
+        - Cards lift on hover (translateY -5px)
+        - Buttons scale and shadow increase
+        - Links show underline animation
+      </hover-effects>
+    </effects>
+  </design-system>
+
+  <javascript-functionality>
+    <mobile-menu>
+      <description>Toggle mobile navigation menu</description>
+      <function>toggleMobileMenu()</function>
+    </mobile-menu>
+    <demo-modals>
+      <description>Show interactive demo content in modal</description>
+      <functions>
+        - showDemo(demoType)
+        - closeModal()
+        - gameChoice(choice)
+      </functions>
+    </demo-modals>
+    <smooth-scroll>
+      <description>Smooth scrolling for anchor links</description>
+    </smooth-scroll>
+    <scroll-animations>
+      <description>Intersection Observer for fade-in animations</description>
+    </scroll-animations>
+    <header-scroll>
+      <description>Dynamic header styling on scroll</description>
+    </header-scroll>
+    <typing-effect>
+      <description>Animated typing for hero headline</description>
+    </typing-effect>
+  </javascript-functionality>
+
+  <update-guidelines>
+    <content-updates>
+      <pricing>
+        Update pricing tiers in the pricing section
+        Modify tier features as needed
+        Update featured tier designation
+      </pricing>
+      <features>
+        Add/remove feature cards in features grid
+        Update icons and descriptions
+        Maintain consistent card structure
+      </features>
+      <agents>
+        Update agent names and descriptions
+        Add new agents to the grid
+        Maintain gradient background styling
+      </agents>
+      <testimonials>
+        Update trust badges in hero section
+        Modify customer logos and stats
+        Keep metrics current
+      </testimonials>
+    </content-updates>
+    
+    <styling-updates>
+      <colors>
+        Modify CSS variables in :root
+        Update gradient definitions
+        Maintain contrast ratios for accessibility
+      </colors>
+      <responsive>
+        Test all breakpoints (768px, 992px, 1200px)
+        Ensure mobile menu works properly
+        Check modal display on mobile
+      </responsive>
+    </styling-updates>
+    
+    <performance>
+      <optimization>
+        Keep all assets inline for single-file deployment
+        Minimize JavaScript execution
+        Use CSS animations over JavaScript where possible
+      </optimization>
+      <loading>
+        Implement progressive enhancement
+        Ensure core content loads first
+        Add loading states for interactive elements
+      </loading>
+    </performance>
+    
+    <seo>
+      <meta-tags>
+        Update title and description tags
+        Add Open Graph tags if needed
+        Include structured data for better search visibility
+      </meta-tags>
+      <content>
+        Use semantic HTML elements
+        Include alt text for visual elements
+        Maintain heading hierarchy
+      </content>
+    </seo>
+  </update-guidelines>
+
+  <deployment>
+    <hosting>
+      Can be hosted on any static web server
+      No server-side requirements
+      Single HTML file deployment
+    </hosting>
+    <compatibility>
+      - Chrome 90+
+      - Firefox 88+
+      - Safari 14+
+      - Edge 90+
+      - Mobile browsers (iOS Safari, Chrome Mobile)
+    </compatibility>
+    <analytics>
+      Add Google Analytics or similar tracking code
+      Track CTA clicks and demo interactions
+      Monitor conversion rates
+    </analytics>
+  </deployment>
+
+  <future-enhancements>
+    <potential-features>
+      - Live chat integration
+      - Customer testimonial carousel
+      - ROI calculator widget
+      - Video demos embedded in modals
+      - Multi-language support
+      - A/B testing variants
+      - Progressive Web App capabilities
+      - Newsletter signup form
+      - Case study section
+      - Integration marketplace showcase
+    </potential-features>
+  </future-enhancements>
+</specification>

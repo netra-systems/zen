@@ -200,7 +200,6 @@ def build_pytest_args(args) -> List[str]:
     pytest_args.extend([
         "--tb=short",
         "--asyncio-mode=auto",
-        "--asyncio-default-fixture-loop-scope=function",
         "--color=yes",
         "--strict-markers",
         "--disable-warnings" if not args.show_warnings else "",

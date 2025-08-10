@@ -437,9 +437,15 @@ class TestBusinessValueCritical:
         # Make one agent flaky
         # Handle both consolidated and legacy implementations
         sub_agents = []
-        if hasattr(supervisor, '_impl') and supervisor._impl and hasattr(supervisor._impl, 'sub_agents'):
-            sub_agents = supervisor._impl.sub_agents
+        if hasattr(supervisor, '_impl') and supervisor._impl:
+            # Consolidated implementation uses agents dictionary
+            if hasattr(supervisor._impl, 'agents'):
+                # Convert dictionary values to list for consistent handling
+                sub_agents = list(supervisor._impl.agents.values())
+            elif hasattr(supervisor._impl, 'sub_agents'):
+                sub_agents = supervisor._impl.sub_agents
         elif hasattr(supervisor, 'sub_agents'):
+            # Legacy implementation
             sub_agents = supervisor.sub_agents
             
         if len(sub_agents) > 2:

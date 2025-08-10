@@ -172,11 +172,10 @@ class TestClickHouseConnection:
     async def test_clickhouse_error_handling(self):
         """Test ClickHouse error handling."""
         try:
-            client = await get_clickhouse_client()
-            
-            # Test invalid query - should raise exception
-            with pytest.raises(Exception):
-                await client.execute("INVALID SQL QUERY")
+            async with get_clickhouse_client() as client:
+                # Test invalid query - should raise exception
+                with pytest.raises(Exception):
+                    await client.execute("INVALID SQL QUERY")
         except Exception as e:
             if "not available" in str(e):
                 pytest.skip(f"ClickHouse not available: {e}")

@@ -4,6 +4,7 @@ import logging
 import traceback
 from typing import Dict, Any, Optional, Union
 from uuid import uuid4
+from datetime import datetime, timezone
 
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
@@ -109,8 +110,9 @@ class ErrorHandler:
         # Log the error
         self._log_error(exc, exc.error_details.severity)
         
+        error_code_value = exc.error_details.code if isinstance(exc.error_details.code, str) else exc.error_details.code.value
         return ErrorResponse(
-            error_code=exc.error_details.code.value,
+            error_code=error_code_value,
             message=exc.error_details.message,
             user_message=exc.error_details.user_message,
             details=exc.error_details.details,
@@ -143,7 +145,7 @@ class ErrorHandler:
                 "error_count": len(validation_errors)
             },
             trace_id=trace_id,
-            timestamp=ErrorDetails().timestamp.isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
             request_id=request_id
         )
     
@@ -163,7 +165,7 @@ class ErrorHandler:
                 user_message="The operation could not be completed due to data constraints",
                 details={"original_error": str(exc.orig) if hasattr(exc, 'orig') else str(exc)},
                 trace_id=trace_id,
-                timestamp=ErrorDetails().timestamp.isoformat(),
+                timestamp=datetime.now(timezone.utc).isoformat(),
                 request_id=request_id
             )
         
@@ -175,7 +177,7 @@ class ErrorHandler:
             user_message="A database error occurred. Please try again",
             details={"error_type": type(exc).__name__},
             trace_id=trace_id,
-            timestamp=ErrorDetails().timestamp.isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
             request_id=request_id
         )
     
@@ -207,7 +209,7 @@ class ErrorHandler:
             user_message=str(exc.detail),
             details={"status_code": exc.status_code, "headers": dict(exc.headers) if exc.headers else None},
             trace_id=trace_id,
-            timestamp=ErrorDetails().timestamp.isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
             request_id=request_id
         )
     
@@ -230,7 +232,7 @@ class ErrorHandler:
                 "exception_message": str(exc)
             },
             trace_id=trace_id,
-            timestamp=ErrorDetails().timestamp.isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
             request_id=request_id
         )
     

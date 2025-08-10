@@ -236,7 +236,7 @@ async def preview_synthetic_data(
 @router.post("/corpus/create")
 async def create_corpus(
     corpus_data: schemas.CorpusCreate,
-    content_source: str = Query("upload", regex="^(upload|generate|import)$"),
+    content_source: str = Query("upload", pattern="^(upload|generate|import)$"),
     db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):

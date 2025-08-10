@@ -299,7 +299,7 @@ actions_to_meet_goals_prompt_template = PromptTemplate(
     - You MUST return ONLY valid JSON without any additional text, explanations, or markdown formatting
     - Do NOT include markdown code blocks (``` or ```json)
     - Ensure all JSON is properly formatted with correct quotes, commas, and brackets
-    - Start your response directly with { and end with }
+    - Start your response directly with {{ and end with }}
     
     **Output**:
     Return a JSON object with the following structure:

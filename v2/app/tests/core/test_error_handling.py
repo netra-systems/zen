@@ -1,7 +1,7 @@
 """Tests for the standardized error handling system."""
 
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
@@ -75,13 +75,13 @@ class TestErrorDetails:
         """Test ErrorDetails with additional context."""
         context = {"user_id": "123", "request_id": "abc"}
         details = ErrorDetails(
-            code=ErrorCode.DATABASE_ERROR,
+            code=ErrorCode.DATABASE_QUERY_FAILED,
             message="Database error",
             context=context,
             trace_id="trace-123"
         )
         
-        assert details.code == ErrorCode.DATABASE_ERROR.value
+        assert details.code == ErrorCode.DATABASE_QUERY_FAILED.value
         assert details.context == context
         assert details.trace_id == "trace-123"
     
@@ -447,7 +447,8 @@ class TestErrorResponseModel:
         response = ErrorResponse(
             error_code="TEST_ERROR",
             message="Test message",
-            trace_id="trace-123"
+            trace_id="trace-123",
+            timestamp=datetime.now(timezone.utc).isoformat()
         )
         
         assert response.error is True
@@ -462,6 +463,7 @@ class TestErrorResponseModel:
             error_code="VALIDATION_ERROR",
             message="Validation failed",
             trace_id="trace-123",
+            timestamp=datetime.now(timezone.utc).isoformat(),
             details=details
         )
         

@@ -7,11 +7,7 @@ from typing import Optional, Dict, Any
 from pydantic import ValidationError
 
 # Import the schemas without circular dependency
-try:
-    from app.schemas.Config import AppConfig, DevelopmentConfig, ProductionConfig, TestingConfig
-except ImportError:
-    # Fallback for testing/development scenarios
-    from schemas.Config import AppConfig, DevelopmentConfig, ProductionConfig, TestingConfig
+from app.schemas.Config import AppConfig, DevelopmentConfig, ProductionConfig, TestingConfig
 
 from .core.secret_manager import SecretManager
 from .core.config_validator import ConfigValidator

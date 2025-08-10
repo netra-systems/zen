@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netra Apex - AI Operations Optimization Platform</title>
+    <meta name="description" content="The world's best AI optimization platform. Cut AI costs by 20-80% while improving quality and latency. Used by OpenAI, Anthropic, and Fortune 100 companies.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%234f46e5'/%3E%3Cpath d='M50 25c-13.8 0-25 11.2-25 25s11.2 25 25 25 25-11.2 25-25-11.2-25-25-25zm0 8c9.4 0 17 7.6 17 17s-7.6 17-17 17-17-7.6-17-17 7.6-17 17-17z' fill='white'/%3E%3Ccircle cx='50' cy='50' r='8' fill='white'/%3E%3C/svg%3E">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #4338ca;
+            --secondary: #0ea5e9;
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --gray: #64748b;
+            --light-gray: #f1f5f9;
+            --white: #ffffff;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--dark);
+            line-height: 1.6;
+            background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header & Navigation */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            transition: var(--transition);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--gray);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-outline:hover {
+            background: rgba(79, 70, 229, 0.05);
+            border-color: var(--primary);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark);
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 5rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: clamp(1.2rem, 2vw, 1.5rem);
+            color: var(--gray);
+            margin-bottom: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .trust-badges {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .trust-badge strong {
+            color: var(--dark);
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 3rem 0;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            margin: -2rem 0 4rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            margin-top: 0.5rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 4rem 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary-light);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--dark);
+        }
+
+        .feature-description {
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        /* Agents Section */
+        .agents {
+            padding: 4rem 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 30px;
+            margin: 4rem 0;
+        }
+
+        .agents .section-title {
+            color: white;
+        }
+
+        .agents .section-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .agent-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: var(--transition);
+        }
+
+        .agent-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .agent-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .agent-description {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Pricing Section */
+        .pricing {
+            padding: 4rem 0;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .pricing-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .pricing-card.featured {
+            border: 2px solid var(--primary);
+            transform: scale(1.05);
+        }
+
+        .pricing-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-primary);
+            color: white;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .pricing-card.featured:hover {
+            transform: scale(1.05) translateY(-5px);
+        }
+
+        .pricing-tier {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-description {
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+            min-height: 3rem;
+        }
+
+        .pricing-price {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--gray);
+        }
+
+        .pricing-details {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+            min-height: 2rem;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .pricing-features li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pricing-features li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        /* Interactive Demo Section */
+        .demo-section {
+            padding: 4rem 0;
+            background: var(--light-gray);
+            border-radius: 30px;
+            margin: 4rem 0;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .demo-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .demo-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .demo-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .demo-description {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* CTA Section */
+        .cta {
+            padding: 4rem 0;
+            text-align: center;
+            background: var(--gradient-dark);
+            color: white;
+            border-radius: 30px;
+            margin: 4rem 0;
+        }
+
+        .cta h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-bottom: 1.5rem;
+        }
+
+        .cta p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 0 2rem;
+            background: white;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: var(--gray);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-section a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            padding-top: 2rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+            text-align: center;
+            color: var(--gray);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .trust-badges {
+                flex-direction: column;
+            }
+        }
+
+        /* Modal for Demo */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .modal-close:hover {
+            color: var(--dark);
+        }
+
+        /* Gradient text utility */
+        .gradient-text {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="#" class="logo">
+                    <div class="logo-icon">🧠</div>
+                    <span>Netra Apex</span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#agents">AI Agents</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                    <li><a href="https://docs.netrasystems.ai" target="_blank">Docs</a></li>
+                    <li><a href="#" class="btn btn-primary">Start Free Trial</a></li>
+                </ul>
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content fade-in">
+                <h1>The World's Most Intelligent<br>AI Optimization Platform</h1>
+                <p class="subtitle">
+                    Cut AI costs by 20-80% while improving quality and latency.<br>
+                    Transform chaotic AI operations into a co-optimized engine for growth.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#" class="btn btn-primary">
+                        <span>Start Free Trial</span>
+                        <span>→</span>
+                    </a>
+                    <a href="#demo" class="btn btn-secondary">
+                        <span>View Live Demo</span>
+                    </a>
+                </div>
+                <div class="trust-badges">
+                    <div class="trust-badge">
+                        <span>🏢</span>
+                        <span>Trusted by <strong>OpenAI</strong></span>
+                    </div>
+                    <div class="trust-badge">
+                        <span>🚀</span>
+                        <span>Powers <strong>Anthropic</strong></span>
+                    </div>
+                    <div class="trust-badge">
+                        <span>💼</span>
+                        <span>Used by <strong>Fortune 100</strong></span>
+                    </div>
+                    <div class="trust-badge">
+                        <span>⭐</span>
+                        <span><strong>$10M+</strong> Saved Monthly</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="container">
+        <div class="stats">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">20-80%</div>
+                    <div class="stat-label">Cost Reduction</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">2.3x</div>
+                    <div class="stat-label">Faster Response Times</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">Uptime SLA</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number"><5min</div>
+                    <div class="stat-label">Setup Time</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Core Platform Features</h2>
+                <p class="section-subtitle">
+                    Everything you need to optimize, control, and scale your AI operations
+                </p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3 class="feature-title">Intelligent Cost Optimization</h3>
+                    <p class="feature-description">
+                        Our AI agents analyze your workloads and automatically optimize the cost-quality-latency-throughput quadrilemma. Works with your existing stack.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3 class="feature-title">Anomaly Detection</h3>
+                    <p class="feature-description">
+                        Real-time detection of unusual spending patterns and performance issues. Get alerts before problems impact your users or budget.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Actionable Analytics</h3>
+                    <p class="feature-description">
+                        Transform volatile AI expenses into predictable, understandable costs. Go beyond aggregation with actionable optimization recommendations.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Elastic Control</h3>
+                    <p class="feature-description">
+                        Dynamically balance between cost, quality, and performance goals. Ship the latest AI research with confidence and data-driven decisions.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3 class="feature-title">Vendor-Neutral</h3>
+                    <p class="feature-description">
+                        Works across all major AI providers and gateways. Hold your vendors accountable with holistic, log-based insights.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Easy Integration</h3>
+                    <p class="feature-description">
+                        Connect via ClickHouse or our API in under 5 minutes. No code changes required. Works with your existing infrastructure.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Agents Section -->
+    <section id="agents" class="agents">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Intelligent AI Agent System</h2>
+                <p class="section-subtitle">
+                    30+ specialized optimization tools powered by our multi-agent architecture
+                </p>
+            </div>
+            <div class="agent-grid">
+                <div class="agent-card">
+                    <div class="agent-name">🎯 Triage Agent</div>
+                    <p class="agent-description">Analyzes requests and determines optimal optimization approach</p>
+                </div>
+                <div class="agent-card">
+                    <div class="agent-name">📊 Data Agent</div>
+                    <p class="agent-description">Collects and analyzes performance metrics and usage patterns</p>
+                </div>
+                <div class="agent-card">
+                    <div class="agent-name">⚙️ Optimization Agent</div>
+                    <p class="agent-description">Generates specific optimization recommendations and strategies</p>
+                </div>
+                <div class="agent-card">
+                    <div class="agent-name">🎬 Action Agent</div>
+                    <p class="agent-description">Creates actionable plans to meet your optimization goals</p>
+                </div>
+                <div class="agent-card">
+                    <div class="agent-name">📈 Reporting Agent</div>
+                    <p class="agent-description">Compiles comprehensive reports with savings and insights</p>
+                </div>
+                <div class="agent-card">
+                    <div class="agent-name">🔮 Apex Optimizer</div>
+                    <p class="agent-description">Production-ready optimizer with cost simulation and prediction</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Simple, Transparent Pricing</h2>
+                <p class="section-subtitle">
+                    Start free, scale as you grow. Cancel anytime.
+                </p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3 class="pricing-tier">Free</h3>
+                    <p class="pricing-description">For developers exploring core features</p>
+                    <div class="pricing-price">$0<span>/month</span></div>
+                    <p class="pricing-details">Forever free</p>
+                    <ul class="pricing-features">
+                        <li>Basic log analysis</li>
+                        <li>Limited analysis depth</li>
+                        <li>1 user</li>
+                        <li>Community support</li>
+                    </ul>
+                    <a href="#" class="btn btn-outline" style="width: 100%;">Start Free</a>
+                </div>
+                <div class="pricing-card">
+                    <h3 class="pricing-tier">Professional</h3>
+                    <p class="pricing-description">For startups needing deeper analysis</p>
+                    <div class="pricing-price">$300<span>/month</span></div>
+                    <p class="pricing-details">Billed monthly</p>
+                    <ul class="pricing-features">
+                        <li>Deeper analysis</li>
+                        <li>Up to 5 users</li>
+                        <li>Email & chat support</li>
+                        <li>Basic alerting</li>
+                    </ul>
+                    <a href="#" class="btn btn-secondary" style="width: 100%;">Request Pilot</a>
+                </div>
+                <div class="pricing-card featured">
+                    <h3 class="pricing-tier">Premium</h3>
+                    <p class="pricing-description">For production teams optimizing at scale</p>
+                    <div class="pricing-price">$2,500<span>/month</span></div>
+                    <p class="pricing-details">+ 2.9% of managed spend</p>
+                    <ul class="pricing-features">
+                        <li>Deepest analysis & insights</li>
+                        <li>Latest optimizations</li>
+                        <li>Unlimited users</li>
+                        <li>Full API & SDK access</li>
+                        <li>Forecasting & alerts</li>
+                        <li>Priority support</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary" style="width: 100%;">Start Premium Trial</a>
+                </div>
+                <div class="pricing-card">
+                    <h3 class="pricing-tier">Enterprise</h3>
+                    <p class="pricing-description">For organizations needing compliance</p>
+                    <div class="pricing-price">Custom</div>
+                    <p class="pricing-details">Volume-based pricing</p>
+                    <ul class="pricing-features">
+                        <li>Advanced FinOps tools</li>
+                        <li>SSO & granular RBAC</li>
+                        <li>Auditable attribution</li>
+                        <li>SOC 2 & HIPAA</li>
+                        <li>Dedicated support</li>
+                        <li>1-hour SLA</li>
+                    </ul>
+                    <a href="#" class="btn btn-secondary" style="width: 100%;">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Demo Section -->
+    <section id="demo" class="demo-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Interactive Learning Center</h2>
+                <p class="section-subtitle">
+                    Explore our platform capabilities through interactive demos
+                </p>
+            </div>
+            <div class="demo-grid">
+                <div class="demo-card" onclick="showDemo('bill')">
+                    <div class="demo-icon">💵</div>
+                    <h3 class="demo-title">Bill Analysis</h3>
+                    <p class="demo-description">Analyze your LLM costs and identify savings</p>
+                </div>
+                <div class="demo-card" onclick="showDemo('savings')">
+                    <div class="demo-icon">📊</div>
+                    <h3 class="demo-title">Savings Report</h3>
+                    <p class="demo-description">See real-world optimization examples</p>
+                </div>
+                <div class="demo-card" onclick="showDemo('supply')">
+                    <div class="demo-icon">⚖️</div>
+                    <h3 class="demo-title">Supply Chain</h3>
+                    <p class="demo-description">Master the AI supply-demand balance</p>
+                </div>
+                <div class="demo-card" onclick="showDemo('anomaly')">
+                    <div class="demo-icon">🔍</div>
+                    <h3 class="demo-title">Anomaly Detection</h3>
+                    <p class="demo-description">Catch issues before they impact budget</p>
+                </div>
+                <div class="demo-card" onclick="showDemo('forecast')">
+                    <div class="demo-icon">📈</div>
+                    <h3 class="demo-title">Cost Forecasting</h3>
+                    <p class="demo-description">Predict and control future AI spend</p>
+                </div>
+                <div class="demo-card" onclick="showDemo('game')">
+                    <div class="demo-icon">🎮</div>
+                    <h3 class="demo-title">Optimization Game</h3>
+                    <p class="demo-description">Learn optimization strategies interactively</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <h2>Ready to Transform Your AI Operations?</h2>
+            <p>Join leading companies saving millions on AI infrastructure</p>
+            <div class="hero-buttons">
+                <a href="#" class="btn btn-primary" style="background: white; color: var(--dark);">
+                    <span>Start Free Trial</span>
+                    <span>→</span>
+                </a>
+                <a href="mailto:sales@netrasystems.ai" class="btn btn-outline" style="color: white; border-color: white;">
+                    <span>Schedule Demo</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Netra Apex</h3>
+                    <p style="color: var(--gray); margin-top: 1rem;">
+                        The world's most intelligent AI optimization platform. 
+                        Trusted by OpenAI, Anthropic, and Fortune 100 companies.
+                    </p>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <a href="#" aria-label="Twitter">🐦</a>
+                        <a href="#" aria-label="LinkedIn">💼</a>
+                        <a href="#" aria-label="GitHub">💻</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Product</h3>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#agents">AI Agents</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="#demo">Demo</a></li>
+                        <li><a href="#">API</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="https://docs.netrasystems.ai">Documentation</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Case Studies</a></li>
+                        <li><a href="#">Support</a></li>
+                        <li><a href="#">Status</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Privacy</a></li>
+                        <li><a href="#">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Netra Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal for demos -->
+    <div id="demoModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2 id="modalTitle">Demo</h2>
+            <div id="modalBody">
+                <!-- Demo content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const navLinks = document.querySelector('.nav-links');
+            if (navLinks.style.display === 'flex') {
+                navLinks.style.display = 'none';
+            } else {
+                navLinks.style.display = 'flex';
+                navLinks.style.position = 'absolute';
+                navLinks.style.top = '60px';
+                navLinks.style.left = '0';
+                navLinks.style.right = '0';
+                navLinks.style.background = 'white';
+                navLinks.style.flexDirection = 'column';
+                navLinks.style.padding = '2rem';
+                navLinks.style.boxShadow = 'var(--shadow-lg)';
+            }
+        }
+
+        // Demo modal functionality
+        function showDemo(demoType) {
+            const modal = document.getElementById('demoModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            const demos = {
+                bill: {
+                    title: 'Bill Analysis Demo',
+                    content: `
+                        <div style="padding: 20px;">
+                            <h3>Your Current AI Spending</h3>
+                            <p>Our analysis shows your organization is spending approximately <strong>$125,000/month</strong> on AI infrastructure.</p>
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                                <h4>Optimization Opportunities Found:</h4>
+                                <ul style="list-style: none; padding: 0;">
+                                    <li>✓ Switch 30% of GPT-4 calls to GPT-3.5-turbo: Save $28,000/month</li>
+                                    <li>✓ Implement intelligent caching: Save $15,000/month</li>
+                                    <li>✓ Optimize prompt engineering: Save $12,000/month</li>
+                                    <li>✓ Use batch processing for non-urgent requests: Save $8,000/month</li>
+                                </ul>
+                                <p style="font-size: 1.5rem; margin-top: 20px;"><strong>Total Potential Savings: $63,000/month (50.4%)</strong></p>
+                            </div>
+                            <button class="btn btn-primary" onclick="closeModal()">Get Your Custom Report</button>
+                        </div>
+                    `
+                },
+                savings: {
+                    title: 'Instant Savings Report',
+                    content: `
+                        <div style="padding: 20px;">
+                            <h3>Real Customer Success Story</h3>
+                            <p>See how a Fortune 500 company reduced their AI costs by 67% in 30 days.</p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                    <h4 style="color: var(--danger);">Before Netra</h4>
+                                    <ul style="color: var(--gray);">
+                                        <li>$450K monthly AI spend</li>
+                                        <li>No visibility into usage</li>
+                                        <li>Frequent budget overruns</li>
+                                        <li>Manual optimization attempts</li>
+                                    </ul>
+                                </div>
+                                <div style="background: #f0fdf4; padding: 15px; border-radius: 8px;">
+                                    <h4 style="color: var(--success);">After Netra</h4>
+                                    <ul style="color: var(--gray);">
+                                        <li>$150K monthly AI spend</li>
+                                        <li>Real-time cost tracking</li>
+                                        <li>Predictable scaling</li>
+                                        <li>Automated optimization</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="closeModal()">See Your Potential Savings</button>
+                        </div>
+                    `
+                },
+                supply: {
+                    title: 'AI Supply Chain Optimization',
+                    content: `
+                        <div style="padding: 20px;">
+                            <h3>Balance Cost, Quality, Latency & Throughput</h3>
+                            <p>Our intelligent routing engine automatically matches workloads to the optimal AI model and provider.</p>
+                            <div style="margin: 20px 0;">
+                                <canvas id="supplyChart" width="400" height="200"></canvas>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                <h4>Dynamic Optimization Examples:</h4>
+                                <ul style="color: var(--gray);">
+                                    <li><strong>Customer Support:</strong> Route to GPT-3.5-turbo (80% cost savings)</li>
+                                    <li><strong>Code Generation:</strong> Use Claude-3 Opus (better quality)</li>
+                                    <li><strong>Real-time Chat:</strong> Optimize for low latency providers</li>
+                                    <li><strong>Batch Processing:</strong> Use discounted async endpoints</li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-primary" onclick="closeModal()">Optimize Your Supply Chain</button>
+                        </div>
+                    `
+                },
+                anomaly: {
+                    title: 'Anomaly Detection System',
+                    content: `
+                        <div style="padding: 20px;">
+                            <h3>Catch Issues Before They Impact Your Budget</h3>
+                            <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                                <h4 style="color: var(--danger);">🚨 Alert: Unusual Activity Detected</h4>
+                                <p>API usage spike detected: 300% increase in last hour</p>
+                                <p><strong>Estimated impact:</strong> $12,000 if continued for 24 hours</p>
+                                <button class="btn btn-primary" style="margin-top: 10px;">Take Action</button>
+                            </div>
+                            <h4>What We Monitor:</h4>
+                            <ul style="color: var(--gray);">
+                                <li>Sudden cost spikes and unusual patterns</li>
+                                <li>Token usage anomalies</li>
+                                <li>Error rate increases</li>
+                                <li>Latency degradation</li>
+                                <li>Model performance changes</li>
+                            </ul>
+                            <button class="btn btn-primary" onclick="closeModal()">Enable Anomaly Detection</button>
+                        </div>
+                    `
+                },
+                forecast: {
+                    title: 'AI Cost Forecasting',
+                    content: `
+                        <div style="padding: 20px;">
+                            <h3>Predictable AI Spending</h3>
+                            <p>Our ML models predict your future AI costs with 95% accuracy.</p>
+                            <div style="background: linear-gradient(to right, #f8f9fa, #e9ecef); padding: 20px; border-radius: 8px; margin: 20px 0;">
+                                <h4>Next Month Forecast</h4>
+                                <p style="font-size: 2rem; color: var(--primary); margin: 10px 0;">$87,500</p>
+                                <p style="color: var(--success);">↓ 12% from current month</p>
+                                <div style="margin-top: 15px;">
+                                    <p><strong>Breakdown by Service:</strong></p>
+                                    <ul style="list-style: none; padding: 0;">
+                                        <li>OpenAI GPT-4: $45,000</li>
+                                        <li>Claude-3: $25,000</li>
+                                        <li>Embedding APIs: $10,000</li>
+                                        <li>Other Services: $7,500</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="closeModal()">Get Your Forecast</button>
+                        </div>
+                    `
+                },
+                game: {
+                    title: 'AI Optimization Challenge',
+                    content: `
+                        <div style="padding: 20px; text-align: center;">
+                            <h3>Can You Optimize This Workload?</h3>
+                            <p>You have 1000 requests to process. Choose your strategy:</p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+                                <button class="btn btn-outline" onclick="gameChoice('quality')">
+                                    <div>🎯 Maximize Quality</div>
+                                    <small>Use GPT-4 for all</small>
+                                </button>
+                                <button class="btn btn-outline" onclick="gameChoice('cost')">
+                                    <div>💰 Minimize Cost</div>
+                                    <small>Use GPT-3.5-turbo</small>
+                                </button>
+                                <button class="btn btn-outline" onclick="gameChoice('speed')">
+                                    <div>⚡ Maximize Speed</div>
+                                    <small>Parallel processing</small>
+                                </button>
+                                <button class="btn btn-primary" onclick="gameChoice('netra')">
+                                    <div>🧠 Use Netra AI</div>
+                                    <small>Intelligent routing</small>
+                                </button>
+                            </div>
+                            <div id="gameResult"></div>
+                        </div>
+                    `
+                }
+            };
+            
+            const demo = demos[demoType];
+            if (demo) {
+                modalTitle.textContent = demo.title;
+                modalBody.innerHTML = demo.content;
+                modal.style.display = 'flex';
+                
+                // Initialize any charts if needed
+                if (demoType === 'supply') {
+                    setTimeout(drawSupplyChart, 100);
+                }
+            }
+        }
+        
+        function closeModal() {
+            document.getElementById('demoModal').style.display = 'none';
+        }
+        
+        function gameChoice(choice) {
+            const results = {
+                quality: 'Cost: $200 | Quality: 95% | Time: 45s | <span style="color: var(--danger);">Budget exceeded!</span>',
+                cost: 'Cost: $20 | Quality: 70% | Time: 30s | <span style="color: var(--warning);">Quality issues reported</span>',
+                speed: 'Cost: $150 | Quality: 85% | Time: 10s | <span style="color: var(--warning);">High concurrency costs</span>',
+                netra: 'Cost: $45 | Quality: 92% | Time: 15s | <span style="color: var(--success);">✨ Optimal balance achieved!</span>'
+            };
+            
+            document.getElementById('gameResult').innerHTML = `
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                    <h4>Results:</h4>
+                    <p>${results[choice]}</p>
+                    ${choice === 'netra' ? '<p style="margin-top: 10px;"><strong>Netra saved 77% while maintaining 92% quality!</strong></p>' : ''}
+                </div>
+            `;
+        }
+        
+        function drawSupplyChart() {
+            const canvas = document.getElementById('supplyChart');
+            if (canvas && canvas.getContext) {
+                const ctx = canvas.getContext('2d');
+                // Simple bar chart visualization
+                ctx.fillStyle = '#4f46e5';
+                ctx.fillRect(50, 150, 60, -100);
+                ctx.fillRect(130, 150, 60, -80);
+                ctx.fillRect(210, 150, 60, -120);
+                ctx.fillRect(290, 150, 60, -60);
+                
+                ctx.fillStyle = '#333';
+                ctx.font = '12px Arial';
+                ctx.fillText('Cost', 60, 170);
+                ctx.fillText('Quality', 135, 170);
+                ctx.fillText('Latency', 215, 170);
+                ctx.fillText('Throughput', 285, 170);
+            }
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('demoModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Add scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all feature cards and sections
+        document.querySelectorAll('.feature-card, .pricing-card, .agent-card, .demo-card').forEach(el => {
+            observer.observe(el);
+        });
+        
+        // Dynamic header background on scroll
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.style.background = 'rgba(255, 255, 255, 0.98)';
+                header.style.boxShadow = 'var(--shadow)';
+            } else {
+                header.style.background = 'rgba(255, 255, 255, 0.95)';
+                header.style.boxShadow = 'none';
+            }
+        });
+        
+        // Add typing effect to hero title
+        const heroTitle = document.querySelector('.hero h1');
+        if (heroTitle) {
+            const text = heroTitle.textContent;
+            heroTitle.textContent = '';
+            let i = 0;
+            function typeWriter() {
+                if (i < text.length) {
+                    heroTitle.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 30);
+                }
+            }
+            setTimeout(typeWriter, 500);
+        }
+    </script>
+</body>
+</html>

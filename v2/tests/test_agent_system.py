@@ -10,15 +10,7 @@ try:
 except ImportError:
     from test_helpers import BaseAgent
 from app.services.agent_service import AgentService
-from app.schemas import (
-    ThreadCreate,
-    MessageCreate,
-    RunCreate,
-    Thread,
-    Message,
-    Run,
-    User
-)
+from app.db.models_postgres import Thread, Message, Run, User
 
 @pytest.fixture
 def mock_supervisor():

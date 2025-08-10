@@ -7,7 +7,7 @@ import json
 import warnings
 import asyncio
 from typing import Optional, Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from functools import lru_cache
 
@@ -29,7 +29,7 @@ class LogLevel:
 
 class LogEntry(BaseModel):
     """Structured log entry model."""
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     level: str
     message: str
     trace_id: Optional[str] = None
@@ -66,7 +66,7 @@ class PerformanceLogHandler:
         self._buffer_size = 100
         self._enable_clickhouse = enable_clickhouse
         self._clickhouse_client = None
-        self._last_flush = datetime.utcnow()
+        self._last_flush = datetime.now(timezone.utc)
         self._flush_interval = 30  # seconds
     
     def add_log(self, entry: LogEntry):
@@ -75,7 +75,7 @@ class PerformanceLogHandler:
         
         # Auto-flush if buffer is full or time interval exceeded
         if (len(self._buffer) >= self._buffer_size or 
-            (datetime.utcnow() - self._last_flush).seconds >= self._flush_interval):
+            (datetime.now(timezone.utc) - self._last_flush).seconds >= self._flush_interval):
             asyncio.create_task(self._flush_buffer())
     
     async def _flush_buffer(self):
@@ -85,7 +85,7 @@ class PerformanceLogHandler:
         
         buffer_copy = self._buffer.copy()
         self._buffer.clear()
-        self._last_flush = datetime.utcnow()
+        self._last_flush = datetime.now(timezone.utc)
         
         # Send to ClickHouse if enabled
         if self._enable_clickhouse and self._clickhouse_client:

@@ -1,45 +1,94 @@
-[32m2025-08-10 06:02:47.274[0m | [36mINFO    [0m | [36mlogging[0m:[36mcallHandlers[0m:[36m1762[0m - [36mLoading configuration for: development[0m
-[32m2025-08-10 06:02:47.275[0m | [36mINFO    [0m | [36mlogging[0m:[36mcallHandlers[0m:[36m1762[0m - [36mUsing environment variables for secrets (local development mode)[0m
-[32m2025-08-10 06:02:47.275[0m | [36mINFO    [0m | [36mlogging[0m:[36mcallHandlers[0m:[36m1762[0m - [36mLoaded 0 secrets from environment variables[0m
-[32m2025-08-10 06:02:47.275[0m | [33mWARNING [0m | [36mlogging[0m:[36mcallHandlers[0m:[36m1762[0m - [33mLLM configuration warnings: LLM 'default' is missing API key, LLM 'analysis' is missing API key, LLM 'triage' is missing API key, LLM 'data' is missing API key, LLM 'optimizations_core' is missing API key, LLM 'actions_to_meet_goals' is missing API key, LLM 'reporting' is missing API key[0m
-[32m2025-08-10 06:02:47.276[0m | [36mINFO    [0m | [36mlogging[0m:[36mcallHandlers[0m:[36m1762[0m - [36mConfiguration validation completed successfully[0m
-[32m2025-08-10 06:02:47.297[0m | [36mINFO    [0m | [36mapp.db.postgres[0m:[36m<module>[0m:[36m109[0m - [36mPostgreSQL async engine created with connection pooling[0m
-============================= test session starts =============================
-platform win32 -- Python 3.12.4, pytest-8.3.2, pluggy-1.5.0
-rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\app
-configfile: pytest.ini
-plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-1.1.0, cov-6.2.1, html-4.1.1, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
-asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
-collected 0 items
 
-============================== warnings summary ===============================
-..\..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_config.py:323
-..\..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_config.py:323
-..\..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_config.py:323
-..\..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_config.py:323
-..\..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_config.py:323
-..\..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_config.py:323
-..\..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_config.py:323
-..\..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_config.py:323
-  C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_config.py:323: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
-    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
-
-..\..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_generate_schema.py:298
-  C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_generate_schema.py:298: PydanticDeprecatedSince20: `json_encoders` is deprecated. See https://docs.pydantic.dev/2.11/concepts/serialization/#custom-serializers for alternatives. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
-    warnings.warn(
-
-app\core\logging_manager.py:69
-  C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\app\core\logging_manager.py:69: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-    self._last_flush = datetime.utcnow()
-
-app\core\exceptions.py:70
-  C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\app\core\exceptions.py:70: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-    timestamp: datetime = datetime.utcnow()
-
-app\routes\synthetic_data.py:239
-  C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\app\routes\synthetic_data.py:239: DeprecationWarning: `regex` has been deprecated, please use `pattern` instead
-    content_source: str = Query("upload", regex="^(upload|generate|import)$"),
-
--- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-- Generated html report: file:///C:/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1/v2/reports/tests/backend_tests_run1.html -
-============================ 12 warnings in 0.07s =============================
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_1_complete_agent_lifecycle_request_to_completion PASSED [  0%]
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_2_websocket_real_time_streaming PASSED [  0%]
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_3_supervisor_orchestration_logic PASSED [  0%]
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_4_tool_dispatcher_integration PASSED [  0%]
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_5_state_persistence_and_recovery PASSED [  1%]
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_6_error_handling_and_recovery +++++++++++++++++++++++++++++++++++ Timeout +++++++++++++++++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Captured stdout ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[32m2025-08-10 06:49:29.690[0m | [31mERROR   [0m | [36mapp.services.state_persistence_service[0m:[36msave_agent_state[0m:[36m90[0m - [31mFailed to save agent state for run cc64f5ca-fc93-4cfd-8f89-7048b5f57f44: 'coroutine' object has no attribute 'metadata_'[0m
+[32m2025-08-10 06:49:29.690[0m | [31mERROR   [0m | [36mapp.services.state_persistence_service[0m:[36msave_agent_state[0m:[36m90[0m - [31mFailed to save agent state for run cc64f5ca-fc93-4cfd-8f89-7048b5f57f44: 'coroutine' object has no attribute 'metadata_'[0m
+[32m2025-08-10 06:49:29.690[0m | [31mERROR   [0m | [36mapp.services.state_persistence_service[0m:[36msave_agent_state[0m:[36m90[0m - [31mFailed to save agent state for run cc64f5ca-fc93-4cfd-8f89-7048b5f57f44: 'coroutine' object has no attribute 'metadata_'[0m
+[32m2025-08-10 06:49:29.690[0m | [31mERROR   [0m | [36mapp.agents.supervisor_consolidated[0m:[36m_execute_agent_with_retry[0m:[36m362[0m - [31mAgent OptimizationsCoreSubAgent failed (attempt 1): Sub-agent failure[0m
+[32m2025-08-10 06:49:31.701[0m | [31mERROR   [0m | [36mapp.agents.supervisor_consolidated[0m:[36m_execute_agent_with_retry[0m:[36m362[0m - [31mAgent OptimizationsCoreSubAgent failed (attempt 2): Sub-agent failure[0m
+[32m2025-08-10 06:49:35.718[0m | [31mERROR   [0m | [36mapp.agents.supervisor_consolidated[0m:[36m_execute_agent_with_retry[0m:[36m362[0m - [31mAgent OptimizationsCoreSubAgent failed (attempt 3): Sub-agent failure[0m
+~~~~~~~~~~~~~~~~~~~~~~~~~ Stack of MainThread (44332) ~~~~~~~~~~~~~~~~~~~~~~~~~
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pytest\__main__.py", line 9, in <module>
+    raise SystemExit(pytest.console_main())
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\config\__init__.py", line 201, in console_main
+    code = main()
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\config\__init__.py", line 175, in main
+    ret: ExitCode | int = config.hook.pytest_cmdline_main(config=config)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py", line 513, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 103, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\main.py", line 330, in pytest_cmdline_main
+    return wrap_session(config, _main)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\main.py", line 283, in wrap_session
+    session.exitstatus = doit(config, session) or 0
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\main.py", line 337, in _main
+    config.hook.pytest_runtestloop(session=session)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py", line 513, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 103, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\main.py", line 362, in pytest_runtestloop
+    item.config.hook.pytest_runtest_protocol(item=item, nextitem=nextitem)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py", line 513, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 103, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py", line 113, in pytest_runtest_protocol
+    runtestprotocol(item, nextitem=nextitem)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py", line 132, in runtestprotocol
+    reports.append(call_and_report(item, "call", log))
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py", line 241, in call_and_report
+    call = CallInfo.from_call(
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py", line 341, in from_call
+    result: TResult | None = func()
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py", line 242, in <lambda>
+    lambda: runtest_hook(item=item, **kwds), when=when, reraise=reraise
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py", line 513, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 103, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py", line 174, in pytest_runtest_call
+    item.runtest()
+  File "C:\Users\antho\miniconda3\Lib\site-packages\pytest_asyncio\plugin.py", line 426, in runtest
+    super().runtest()
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py", line 1627, in runtest
+    self.ihook.pytest_pyfunc_call(pyfuncitem=self)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py", line 513, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 103, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py", line 159, in pytest_pyfunc_call
+    result = testfunction(**testargs)
+  File "C:\Users\antho\miniconda3\Lib\site-packages\pytest_asyncio\plugin.py", line 642, in inner
+    _loop.run_until_complete(task)
+  File "C:\Users\antho\miniconda3\Lib\asyncio\base_events.py", line 674, in run_until_complete
+    self.run_forever()
+  File "C:\Users\antho\miniconda3\Lib\asyncio\windows_events.py", line 322, in run_forever
+    super().run_forever()
+  File "C:\Users\antho\miniconda3\Lib\asyncio\base_events.py", line 641, in run_forever
+    self._run_once()
+  File "C:\Users\antho\miniconda3\Lib\asyncio\base_events.py", line 1949, in _run_once
+    event_list = self._selector.select(timeout)
+  File "C:\Users\antho\miniconda3\Lib\asyncio\windows_events.py", line 445, in select
+    self._poll(timeout)
+  File "C:\Users\antho\miniconda3\Lib\asyncio\windows_events.py", line 774, in _poll
+    status = _overlapped.GetQueuedCompletionStatus(self._iocp, ms)
++++++++++++++++++++++++++++++++++++ Timeout +++++++++++++++++++++++++++++++++++

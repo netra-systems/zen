@@ -39,7 +39,7 @@ async def test_agent_flow(mock_llm_manager, mock_tool_dispatcher, mock_websocket
     supervisor = Supervisor(mock_db_session, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher)
     supervisor.sub_agents = [triage_agent, data_agent, optimizations_agent, actions_agent, reporting_agent]
 
-    input_data = {"query": "test query"}
+    input_data = "test query"
     run_id = "test_run_id"
 
     # Act

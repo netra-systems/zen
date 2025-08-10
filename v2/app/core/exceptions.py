@@ -3,8 +3,8 @@
 import traceback
 from typing import Any, Dict, Optional, Union, List
 from enum import Enum
-from datetime import datetime
-from pydantic import BaseModel
+from datetime import datetime, timezone
+from pydantic import BaseModel, Field
 
 
 class ErrorCode(Enum):
@@ -67,7 +67,7 @@ class ErrorDetails(BaseModel):
     severity: ErrorSeverity = ErrorSeverity.MEDIUM
     details: Optional[Dict[str, Any]] = None
     user_message: Optional[str] = None
-    timestamp: datetime = datetime.utcnow()
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     trace_id: Optional[str] = None
     context: Optional[Dict[str, Any]] = None
     
@@ -103,10 +103,11 @@ class NetraException(Exception):
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert exception to dictionary for serialization."""
-        return self.error_details.dict()
+        return self.error_details.model_dump()
     
     def __str__(self) -> str:
-        return f"{self.error_details.code.value}: {self.error_details.message}"
+        code_value = self.error_details.code if isinstance(self.error_details.code, str) else self.error_details.code.value
+        return f"{code_value}: {self.error_details.message}"
 
 
 # Configuration Exceptions
@@ -169,25 +170,27 @@ class AuthorizationError(NetraException):
         )
 
 
-class TokenExpiredError(AuthenticationError):
+class TokenExpiredError(NetraException):
     """Raised when authentication token has expired."""
     
     def __init__(self, message: str = None, **kwargs):
         super().__init__(
             message=message or "Authentication token has expired",
             code=ErrorCode.TOKEN_EXPIRED,
+            severity=ErrorSeverity.HIGH,
             user_message="Your session has expired. Please log in again",
             **kwargs
         )
 
 
-class TokenInvalidError(AuthenticationError):
+class TokenInvalidError(NetraException):
     """Raised when authentication token is invalid."""
     
     def __init__(self, message: str = None, **kwargs):
         super().__init__(
             message=message or "Authentication token is invalid",
             code=ErrorCode.TOKEN_INVALID,
+            severity=ErrorSeverity.HIGH,
             user_message="Invalid authentication token. Please log in again",
             **kwargs
         )
@@ -207,7 +210,7 @@ class DatabaseError(NetraException):
         )
 
 
-class DatabaseConnectionError(DatabaseError):
+class DatabaseConnectionError(NetraException):
     """Raised when database connection fails."""
     
     def __init__(self, message: str = None, **kwargs):
@@ -220,7 +223,7 @@ class DatabaseConnectionError(DatabaseError):
         )
 
 
-class RecordNotFoundError(DatabaseError):
+class RecordNotFoundError(NetraException):
     """Raised when a requested record is not found."""
     
     def __init__(self, resource: str = None, identifier: Any = None, **kwargs):
@@ -238,7 +241,7 @@ class RecordNotFoundError(DatabaseError):
         )
 
 
-class RecordAlreadyExistsError(DatabaseError):
+class RecordAlreadyExistsError(NetraException):
     """Raised when trying to create a record that already exists."""
     
     def __init__(self, resource: str = None, identifier: Any = None, **kwargs):
@@ -337,7 +340,7 @@ class AgentError(NetraException):
         )
 
 
-class LLMRequestError(AgentError):
+class LLMRequestError(NetraException):
     """Raised when LLM API request fails."""
     
     def __init__(self, provider: str = None, model: str = None, **kwargs):
@@ -356,7 +359,7 @@ class LLMRequestError(AgentError):
         )
 
 
-class LLMRateLimitError(LLMRequestError):
+class LLMRateLimitError(NetraException):
     """Raised when LLM API rate limit is exceeded."""
     
     def __init__(self, retry_after: Optional[int] = None, **kwargs):

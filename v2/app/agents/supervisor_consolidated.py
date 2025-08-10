@@ -164,7 +164,7 @@ class SupervisorAgent(BaseSubAgent):
                     "agent_completed",
                     AgentCompleted(
                         run_id=run_id,
-                        final_report=state.get("final_report", "Workflow completed successfully")
+                        result=state.final_report or "Workflow completed successfully"
                     )
                 )
             
