@@ -46,7 +46,7 @@ describe('Thread Management - Simplified', () => {
 
   it('should maintain conversation context', () => {
     // Simulate WebSocket connection
-    cy.window().then((win) => {
+    cy.window().then((win: any) => {
       // Mock WebSocket if needed
       if (!win.ws) {
         win.ws = {
@@ -78,8 +78,8 @@ describe('Thread Management - Simplified', () => {
       };
       
       // Trigger message handler if WebSocket exists
-      if (win.ws && win.ws.onmessage) {
-        win.ws.onmessage({ data: JSON.stringify(response) });
+      if ((win as any).ws && (win as any).ws.onmessage) {
+        (win as any).ws.onmessage({ data: JSON.stringify(response) });
       }
     });
     

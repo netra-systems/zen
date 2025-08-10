@@ -179,7 +179,7 @@ describe('File Upload and Reference Management', () => {
         } as Message
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(agentResponse) });
+      (win as any).ws.onmessage({ data: JSON.stringify(agentResponse) });
     });
 
     cy.contains('Based on the architecture.md and performance-data.csv').should('be.visible');
@@ -514,9 +514,9 @@ describe('File Upload and Reference Management', () => {
             }
           };
           // @ts-ignore
-          if (win.ws) {
+          if ((win as any).ws) {
             // @ts-ignore
-            win.ws.onmessage({ data: JSON.stringify(statusUpdate) });
+            (win as any).ws.onmessage({ data: JSON.stringify(statusUpdate) });
           }
         }, index * 1000);
       });

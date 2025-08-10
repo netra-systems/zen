@@ -1,4 +1,5 @@
-import { Message } from '@/types';\nimport { WebSocketMessage } from '@/types/chat';
+import { Message } from '@/types';
+import { WebSocketMessage } from '@/types/chat';
 
 describe('WebSocket Connection Resilience', () => {
   beforeEach(() => {
@@ -25,9 +26,9 @@ describe('WebSocket Connection Resilience', () => {
     // Verify initial connection
     cy.window().then((win) => {
       // @ts-ignore
-      expect(win.ws).to.exist;
+      expect((win as any).ws).to.exist;
       // @ts-ignore
-      expect(win.ws.readyState).to.equal(1); // OPEN state
+      expect((win as any).ws.readyState).to.equal(1); // OPEN state
     });
 
     // Send a message to verify connection works
@@ -38,7 +39,7 @@ describe('WebSocket Connection Resilience', () => {
     // Simulate connection drop
     cy.window().then((win) => {
       // @ts-ignore
-      win.ws.close();
+      (win as any).ws.close();
     });
 
     // Wait for reconnection attempt
@@ -50,7 +51,7 @@ describe('WebSocket Connection Resilience', () => {
     // Simulate successful reconnection
     cy.window().then((win) => {
       // @ts-ignore
-      win.ws = {
+      (win as any).ws = {
         readyState: 1,
         send: cy.stub(),
         onmessage: null,
@@ -61,16 +62,16 @@ describe('WebSocket Connection Resilience', () => {
 
       // Trigger reconnection success
       const reconnectMessage: WebSocketMessage = {
-        type: 'connection',
+        type: 'message',
         payload: {
           status: 'connected',
           message: 'WebSocket reconnected successfully'
         }
       };
       // @ts-ignore
-      if (win.ws.onmessage) {
+      if ((win as any).ws.onmessage) {
         // @ts-ignore
-        win.ws.onmessage({ data: JSON.stringify(reconnectMessage) });
+        (win as any).ws.onmessage({ data: JSON.stringify(reconnectMessage) });
       }
     });
 
@@ -87,7 +88,7 @@ describe('WebSocket Connection Resilience', () => {
     // Simulate connection drop
     cy.window().then((win) => {
       // @ts-ignore
-      win.ws.readyState = 0; // CONNECTING state
+      (win as any).ws.readyState = 0; // CONNECTING state
     });
 
     // Try to send messages while disconnected
@@ -104,7 +105,7 @@ describe('WebSocket Connection Resilience', () => {
     // Simulate reconnection
     cy.window().then((win) => {
       // @ts-ignore
-      win.ws.readyState = 1; // OPEN state
+      (win as any).ws.readyState = 1; // OPEN state
       
       // Simulate queued messages being sent
       const queuedMessage1: WebSocketMessage = {
@@ -130,9 +131,9 @@ describe('WebSocket Connection Resilience', () => {
       };
       
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(queuedMessage1) });
+      (win as any).ws.onmessage({ data: JSON.stringify(queuedMessage1) });
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(queuedMessage2) });
+      (win as any).ws.onmessage({ data: JSON.stringify(queuedMessage2) });
     });
 
     // Verify queued messages are displayed
@@ -147,9 +148,9 @@ describe('WebSocket Connection Resilience', () => {
     // Simulate WebSocket error
     cy.window().then((win) => {
       // @ts-ignore
-      if (win.ws.onerror) {
+      if ((win as any).ws.onerror) {
         // @ts-ignore
-        win.ws.onerror(new Event('error'));
+        (win as any).ws.onerror(new Event('error'));
       }
     });
 
@@ -162,7 +163,7 @@ describe('WebSocket Connection Resilience', () => {
     // Simulate successful reconnection after retry
     cy.window().then((win) => {
       // @ts-ignore
-      win.ws.readyState = 1;
+      (win as any).ws.readyState = 1;
       
       const successMessage: WebSocketMessage = {
         type: 'connection',
@@ -172,7 +173,7 @@ describe('WebSocket Connection Resilience', () => {
         }
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(successMessage) });
+      (win as any).ws.onmessage({ data: JSON.stringify(successMessage) });
     });
 
     // Error message should disappear
@@ -189,13 +190,13 @@ describe('WebSocket Connection Resilience', () => {
         }
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(pingMessage) });
+      (win as any).ws.onmessage({ data: JSON.stringify(pingMessage) });
     });
 
     // Verify pong is sent (checking that send was called)
     cy.window().then((win) => {
       // @ts-ignore
-      const sendSpy = cy.spy(win.ws, 'send');
+      const sendSpy = cy.spy((win as any).ws, 'send');
       
       // Trigger another ping to capture the pong
       const pingMessage: WebSocketMessage = {
@@ -205,7 +206,7 @@ describe('WebSocket Connection Resilience', () => {
         }
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(pingMessage) });
+      (win as any).ws.onmessage({ data: JSON.stringify(pingMessage) });
       
       // Verify pong was sent
       expect(sendSpy).to.have.been.calledWith(
@@ -235,7 +236,7 @@ describe('WebSocket Connection Resilience', () => {
         }
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(rateLimitMessage) });
+      (win as any).ws.onmessage({ data: JSON.stringify(rateLimitMessage) });
     });
 
     // Should show rate limit warning
@@ -259,9 +260,9 @@ describe('WebSocket Connection Resilience', () => {
     // Simulate brief disconnection
     cy.window().then((win) => {
       // @ts-ignore
-      const originalWs = win.ws;
+      const originalWs = (win as any).ws;
       // @ts-ignore
-      win.ws.readyState = 0; // CONNECTING
+      (win as any).ws.readyState = 0; // CONNECTING
       
       // Send message during disconnection
       cy.get('input[placeholder="Type your message..."]').type('Message B');
@@ -269,7 +270,7 @@ describe('WebSocket Connection Resilience', () => {
       
       // Reconnect
       // @ts-ignore
-      win.ws.readyState = 1;
+      (win as any).ws.readyState = 1;
       
       // Messages should arrive in order
       const messageA: WebSocketMessage = {
@@ -297,9 +298,9 @@ describe('WebSocket Connection Resilience', () => {
       };
       
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(messageA) });
+      (win as any).ws.onmessage({ data: JSON.stringify(messageA) });
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(messageB) });
+      (win as any).ws.onmessage({ data: JSON.stringify(messageB) });
     });
 
     // Verify messages appear in correct order
@@ -312,9 +313,9 @@ describe('WebSocket Connection Resilience', () => {
     cy.window().then((win) => {
       // Trigger timeout by not receiving heartbeat
       // @ts-ignore
-      if (win.wsHeartbeatTimeout) {
+      if ((win as any).wsHeartbeatTimeout) {
         // @ts-ignore
-        clearTimeout(win.wsHeartbeatTimeout);
+        clearTimeout((win as any).wsHeartbeatTimeout);
       }
       
       // Simulate timeout event
@@ -326,7 +327,7 @@ describe('WebSocket Connection Resilience', () => {
         }
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(timeoutMessage) });
+      (win as any).ws.onmessage({ data: JSON.stringify(timeoutMessage) });
     });
 
     // Should show timeout message
@@ -338,7 +339,7 @@ describe('WebSocket Connection Resilience', () => {
     // Simulate successful reconnection
     cy.window().then((win) => {
       // @ts-ignore
-      win.ws.readyState = 1;
+      (win as any).ws.readyState = 1;
       
       const reconnectSuccess: WebSocketMessage = {
         type: 'connection',
@@ -348,7 +349,7 @@ describe('WebSocket Connection Resilience', () => {
         }
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(reconnectSuccess) });
+      (win as any).ws.onmessage({ data: JSON.stringify(reconnectSuccess) });
     });
     
     // Should clear error messages

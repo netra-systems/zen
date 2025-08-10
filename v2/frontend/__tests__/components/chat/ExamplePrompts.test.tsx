@@ -22,15 +22,15 @@ jest.mock('@/store/chat', () => ({
   }),
 }));
 
-jest.mock('@/store/authStore', () => ({
-  useAuthStore: () => ({ 
-    isAuthenticated: true
-  }),
-}));
+jest.mock('@/store/authStore');
 
 describe('ExamplePrompts', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Default mock for authenticated user
+    (useAuthStore as jest.Mock).mockReturnValue({
+      isAuthenticated: true
+    });
   });
 
   it('sends a message when an example prompt is clicked', () => {
@@ -40,7 +40,7 @@ describe('ExamplePrompts', () => {
     fireEvent.click(firstPrompt);
 
     expect(mockAddMessage).toHaveBeenCalledWith(expect.objectContaining({
-      role: 'user',
+      type: 'user',
       content: 'I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.',
       displayed_to_user: true
     }));
@@ -56,9 +56,9 @@ describe('ExamplePrompts', () => {
 
   it('does not send message when user is not authenticated', () => {
     // Override the mock for this test only
-    jest.mocked(useAuthStore).mockReturnValueOnce({ 
-      isAuthenticated: false 
-    } as any);
+    (useAuthStore as jest.Mock).mockReturnValue({
+      isAuthenticated: false
+    });
     
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     

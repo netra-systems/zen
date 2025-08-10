@@ -27,7 +27,7 @@ describe('Chat UI', () => {
         payload: payload,
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(message) });
+      (win as any).ws.onmessage({ data: JSON.stringify(message) });
     });
 
     // Assert that the agent's message is displayed
@@ -51,7 +51,7 @@ describe('Chat UI', () => {
         payload: payload,
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(message) });
+      (win as any).ws.onmessage({ data: JSON.stringify(message) });
     });
 
     cy.get('.bg-gray-50').should('contain', 'This message has raw data.');
@@ -73,7 +73,7 @@ describe('Chat UI', () => {
         },
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(message) });
+      (win as any).ws.onmessage({ data: JSON.stringify(message) });
     });
     cy.get('h1').should('contain', 'Optimization Agent');
     cy.get('p').should('contain', 'running');
@@ -95,7 +95,7 @@ describe('Chat UI', () => {
         payload: payload,
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(message) });
+      (win as any).ws.onmessage({ data: JSON.stringify(message) });
     });
     cy.get('.bg-blue-50').should('contain', 'User query with references.');
     cy.get('.bg-blue-50').should('contain', 'References:');

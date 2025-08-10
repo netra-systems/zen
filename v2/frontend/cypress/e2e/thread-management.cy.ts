@@ -157,7 +157,7 @@ describe('Thread Management and Conversation History', () => {
         } as Message
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(agentResponse) });
+      (win as any).ws.onmessage({ data: JSON.stringify(agentResponse) });
     });
 
     cy.contains('Starting new optimization analysis').should('be.visible');
@@ -185,7 +185,7 @@ describe('Thread Management and Conversation History', () => {
         } as Message
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(contextResponse) });
+      (win as any).ws.onmessage({ data: JSON.stringify(contextResponse) });
     });
 
     cy.contains('Focusing the optimization analysis on GPU utilization').should('be.visible');

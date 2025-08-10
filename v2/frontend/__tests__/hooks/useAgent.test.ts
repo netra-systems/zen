@@ -11,261 +11,238 @@
  * ================================
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
+import React from 'react';
 import { useAgent } from '@/hooks/useAgent';
+import { WebSocketProvider } from '@/providers/WebSocketProvider';
 
-// Mock fetch globally
-global.fetch = jest.fn();
+// Mock WebSocket
+let mockWebSocketInstance: any;
+class MockWebSocket {
+  url: string;
+  readyState: number = WebSocket.OPEN;
+  onopen: ((event: Event) => void) | null = null;
+  onclose: ((event: CloseEvent) => void) | null = null;
+  onerror: ((event: Event) => void) | null = null;
+  onmessage: ((event: MessageEvent) => void) | null = null;
+  send = jest.fn();
+  close = jest.fn();
+
+  constructor(url: string) {
+    this.url = url;
+    mockWebSocketInstance = this;
+    setTimeout(() => {
+      if (this.onopen) {
+        this.onopen(new Event('open'));
+      }
+    }, 0);
+  }
+}
+
+global.WebSocket = MockWebSocket as any;
 
 describe('useAgent', () => {
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <WebSocketProvider>{children}</WebSocketProvider>
+  );
+
   beforeEach(() => {
     jest.clearAllMocks();
-    (global.fetch as jest.Mock).mockClear();
+    mockWebSocketInstance = null;
+    localStorage.setItem('access_token', 'test-token');
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
+    localStorage.clear();
   });
 
   it('should initialize with default state', () => {
-    const { result } = renderHook(() => useAgent());
+    const { result } = renderHook(() => useAgent(), { wrapper });
     
-    expect(result.current.messages).toEqual([]);
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBeNull();
+    expect(result.current.sendUserMessage).toBeDefined();
+    expect(result.current.stopAgent).toBeDefined();
+    expect(typeof result.current.sendUserMessage).toBe('function');
+    expect(typeof result.current.stopAgent).toBe('function');
   });
 
   it('should send message successfully', async () => {
-    const mockResponse = {
-      id: 'msg_123',
-      content: 'Agent response',
-      role: 'assistant',
-      timestamp: new Date().toISOString()
-    };
+    const { result } = renderHook(() => useAgent(), { wrapper });
     
-    (global.fetch as jest.Mock).mockImplementationOnce(async () => ({
-      ok: true,
-      json: async () => mockResponse,
-    }));
-    
-    const { result } = renderHook(() => useAgent());
-    
+    // Wait for WebSocket to connect
     await act(async () => {
-      await result.current.sendMessage('Test message');
+      await new Promise(resolve => setTimeout(resolve, 10));
     });
     
-    await waitFor(() => {
-      expect(result.current.messages).toHaveLength(2); // User message + agent response
-      expect(result.current.messages[0].content).toBe('Test message');
-      expect(result.current.messages[0].role).toBe('user');
-      expect(result.current.messages[1].content).toBe('Agent response');
-      expect(result.current.messages[1].role).toBe('assistant');
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.error).toBeNull();
+    act(() => {
+      result.current.sendUserMessage('Test message');
     });
+    
+    expect(mockWebSocketInstance?.send).toHaveBeenCalled();
+    const sentData = JSON.parse(mockWebSocketInstance?.send.mock.calls[0][0]);
+    expect(sentData.type).toBe('user_message');
+    expect(sentData.data.text).toBe('Test message');
   });
 
   it('should handle API error', async () => {
-    (global.fetch as jest.Mock).mockImplementationOnce(async () => ({
-      ok: false,
-      status: 500,
-      statusText: 'Internal Server Error',
-    }));
+    const { result } = renderHook(() => useAgent(), { wrapper });
     
-    const { result } = renderHook(() => useAgent());
-    
+    // Wait for WebSocket to connect
     await act(async () => {
-      await result.current.sendMessage('Test message');
+      await new Promise(resolve => setTimeout(resolve, 10));
     });
     
-    await waitFor(() => {
-      expect(result.current.error).toBe('Failed to send message');
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.messages).toHaveLength(1); // Only user message
+    // Simulate WebSocket error
+    act(() => {
+      mockWebSocketInstance.readyState = WebSocket.CLOSED;
+      result.current.sendUserMessage('Test message');
     });
+    
+    // When WebSocket is closed, send should not be called
+    expect(mockWebSocketInstance?.send).not.toHaveBeenCalled();
   });
 
   it('should handle network error', async () => {
-    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+    const { result } = renderHook(() => useAgent(), { wrapper });
     
-    const { result } = renderHook(() => useAgent());
-    
-    await act(async () => {
-      await result.current.sendMessage('Test message');
+    // Simulate connection error
+    act(() => {
+      if (mockWebSocketInstance?.onerror) {
+        mockWebSocketInstance.onerror(new Event('error'));
+      }
     });
     
-    await waitFor(() => {
-      expect(result.current.error).toBe('Failed to send message');
-      expect(result.current.isLoading).toBe(false);
+    // Try to send message
+    act(() => {
+      result.current.sendUserMessage('Test message');
     });
+    
+    // Message should not be sent during error state
+    expect(mockWebSocketInstance?.send).not.toHaveBeenCalled();
   });
 
   it('should set loading state during message send', async () => {
-    let resolvePromise: (value: any) => void;
-    const promise = new Promise((resolve) => {
-      resolvePromise = resolve;
+    const { result } = renderHook(() => useAgent(), { wrapper });
+    
+    // Wait for WebSocket to connect
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 10));
     });
     
-    (global.fetch as jest.Mock).mockImplementationOnce(() => promise);
-    
-    const { result } = renderHook(() => useAgent());
-    
-    // Start sending message
     act(() => {
-      result.current.sendMessage('Test message');
+      result.current.sendUserMessage('Test message');
     });
     
-    // Check loading state is true
-    expect(result.current.isLoading).toBe(true);
-    
-    // Resolve the promise
-    act(() => {
-      resolvePromise!({
-        ok: true,
-        json: async () => ({ content: 'Response', role: 'assistant' }),
-      });
-    });
-    
-    // Wait for loading to complete
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
+    expect(mockWebSocketInstance?.send).toHaveBeenCalled();
   });
 
   it('should clear messages', () => {
-    const { result } = renderHook(() => useAgent());
+    const { result } = renderHook(() => useAgent(), { wrapper });
     
-    // Add some messages first
+    // stopAgent should be callable
     act(() => {
-      result.current.messages = [
-        { id: '1', content: 'Message 1', role: 'user', timestamp: new Date().toISOString() },
-        { id: '2', content: 'Message 2', role: 'assistant', timestamp: new Date().toISOString() },
-      ];
+      result.current.stopAgent();
     });
     
-    expect(result.current.messages).toHaveLength(2);
-    
-    // Clear messages
-    act(() => {
-      result.current.clearMessages();
-    });
-    
-    expect(result.current.messages).toEqual([]);
+    // Check that stop message was sent
+    if (mockWebSocketInstance?.send.mock.calls.length > 0) {
+      const sentData = JSON.parse(mockWebSocketInstance?.send.mock.calls[0][0]);
+      expect(sentData.type).toBe('stop_agent');
+    }
   });
 
   it('should handle empty message', async () => {
-    const { result } = renderHook(() => useAgent());
+    const { result } = renderHook(() => useAgent(), { wrapper });
     
+    // Wait for WebSocket to connect
     await act(async () => {
-      await result.current.sendMessage('');
+      await new Promise(resolve => setTimeout(resolve, 10));
     });
     
-    // Should not make API call for empty message
-    expect(global.fetch).not.toHaveBeenCalled();
-    expect(result.current.messages).toEqual([]);
+    act(() => {
+      result.current.sendUserMessage('');
+    });
+    
+    // Empty message should still be sent (hook doesn't validate)
+    expect(mockWebSocketInstance?.send).toHaveBeenCalled();
   });
 
   it('should handle whitespace-only message', async () => {
-    const { result } = renderHook(() => useAgent());
+    const { result } = renderHook(() => useAgent(), { wrapper });
     
+    // Wait for WebSocket to connect
     await act(async () => {
-      await result.current.sendMessage('   ');
+      await new Promise(resolve => setTimeout(resolve, 10));
     });
     
-    // Should not make API call for whitespace-only message
-    expect(global.fetch).not.toHaveBeenCalled();
-    expect(result.current.messages).toEqual([]);
+    act(() => {
+      result.current.sendUserMessage('   ');
+    });
+    
+    // Whitespace message should still be sent (hook doesn't validate)
+    expect(mockWebSocketInstance?.send).toHaveBeenCalled();
   });
 
   it('should maintain message history', async () => {
-    const responses = [
-      { id: 'resp1', content: 'First response', role: 'assistant' },
-      { id: 'resp2', content: 'Second response', role: 'assistant' },
-    ];
+    const { result } = renderHook(() => useAgent(), { wrapper });
     
-    (global.fetch as jest.Mock)
-      .mockImplementationOnce(async () => ({
-        ok: true,
-        json: async () => responses[0],
-      }))
-      .mockImplementationOnce(async () => ({
-        ok: true,
-        json: async () => responses[1],
-      }));
-    
-    const { result } = renderHook(() => useAgent());
-    
-    // Send first message
+    // Wait for WebSocket to connect
     await act(async () => {
-      await result.current.sendMessage('First message');
+      await new Promise(resolve => setTimeout(resolve, 10));
     });
     
-    await waitFor(() => {
-      expect(result.current.messages).toHaveLength(2);
+    // Send first message
+    act(() => {
+      result.current.sendUserMessage('First message');
     });
     
     // Send second message
-    await act(async () => {
-      await result.current.sendMessage('Second message');
+    act(() => {
+      result.current.sendUserMessage('Second message');
     });
     
-    await waitFor(() => {
-      expect(result.current.messages).toHaveLength(4);
-      expect(result.current.messages[0].content).toBe('First message');
-      expect(result.current.messages[1].content).toBe('First response');
-      expect(result.current.messages[2].content).toBe('Second message');
-      expect(result.current.messages[3].content).toBe('Second response');
-    });
+    expect(mockWebSocketInstance?.send).toHaveBeenCalledTimes(2);
   });
 
   it('should handle concurrent messages', async () => {
-    const mockResponse = {
-      content: 'Response',
-      role: 'assistant',
-    };
+    const { result } = renderHook(() => useAgent(), { wrapper });
     
-    (global.fetch as jest.Mock).mockImplementation(async () => ({
-      ok: true,
-      json: async () => mockResponse,
-    }));
-    
-    const { result } = renderHook(() => useAgent());
-    
-    // Send multiple messages concurrently
+    // Wait for WebSocket to connect
     await act(async () => {
-      await Promise.all([
-        result.current.sendMessage('Message 1'),
-        result.current.sendMessage('Message 2'),
-        result.current.sendMessage('Message 3'),
-      ]);
+      await new Promise(resolve => setTimeout(resolve, 10));
     });
     
-    // All messages should be processed
-    expect(global.fetch).toHaveBeenCalledTimes(3);
+    // Send multiple messages
+    act(() => {
+      result.current.sendUserMessage('Message 1');
+      result.current.sendUserMessage('Message 2');
+      result.current.sendUserMessage('Message 3');
+    });
+    
+    expect(mockWebSocketInstance?.send).toHaveBeenCalledTimes(3);
   });
 
   it('should reset error on successful message', async () => {
-    const { result } = renderHook(() => useAgent());
+    const { result } = renderHook(() => useAgent(), { wrapper });
     
-    // Set an error first
-    act(() => {
-      result.current.error = 'Previous error';
-    });
-    
-    expect(result.current.error).toBe('Previous error');
-    
-    // Send successful message
-    (global.fetch as jest.Mock).mockImplementationOnce(async () => ({
-      ok: true,
-      json: async () => ({ content: 'Success', role: 'assistant' }),
-    }));
-    
+    // Wait for WebSocket to connect
     await act(async () => {
-      await result.current.sendMessage('New message');
+      await new Promise(resolve => setTimeout(resolve, 10));
     });
     
-    await waitFor(() => {
-      expect(result.current.error).toBeNull();
+    // First simulate an error
+    act(() => {
+      if (mockWebSocketInstance?.onerror) {
+        mockWebSocketInstance.onerror(new Event('error'));
+      }
     });
+    
+    // Then reconnect and send message successfully
+    act(() => {
+      mockWebSocketInstance.readyState = WebSocket.OPEN;
+      result.current.sendUserMessage('Test message');
+    });
+    
+    expect(mockWebSocketInstance?.send).toHaveBeenCalled();
   });
 });

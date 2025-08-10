@@ -44,7 +44,7 @@ describe('Full Agent Optimization Workflow', () => {
         }
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(triageStart) });
+      (win as any).ws.onmessage({ data: JSON.stringify(triageStart) });
 
       // 2. Triage Agent message
       const triageMessage: WebSocketMessage = {
@@ -59,7 +59,7 @@ describe('Full Agent Optimization Workflow', () => {
         } as Message
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(triageMessage) });
+      (win as any).ws.onmessage({ data: JSON.stringify(triageMessage) });
 
       // 3. Data Agent starts
       const dataStart: WebSocketMessage = {
@@ -73,7 +73,7 @@ describe('Full Agent Optimization Workflow', () => {
         }
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(dataStart) });
+      (win as any).ws.onmessage({ data: JSON.stringify(dataStart) });
 
       // 4. Data Agent message
       const dataMessage: WebSocketMessage = {
@@ -94,7 +94,7 @@ describe('Full Agent Optimization Workflow', () => {
         } as Message
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(dataMessage) });
+      (win as any).ws.onmessage({ data: JSON.stringify(dataMessage) });
 
       // 5. Optimization Core Agent starts
       const optimizationStart: WebSocketMessage = {
@@ -108,7 +108,7 @@ describe('Full Agent Optimization Workflow', () => {
         }
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(optimizationStart) });
+      (win as any).ws.onmessage({ data: JSON.stringify(optimizationStart) });
 
       // 6. Optimization Agent message with recommendations
       const optimizationMessage: WebSocketMessage = {
@@ -138,7 +138,7 @@ describe('Full Agent Optimization Workflow', () => {
         } as Message
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(optimizationMessage) });
+      (win as any).ws.onmessage({ data: JSON.stringify(optimizationMessage) });
 
       // 7. Actions Agent starts
       const actionsStart: WebSocketMessage = {
@@ -152,7 +152,7 @@ describe('Full Agent Optimization Workflow', () => {
         }
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(actionsStart) });
+      (win as any).ws.onmessage({ data: JSON.stringify(actionsStart) });
 
       // 8. Actions Agent message
       const actionsMessage: WebSocketMessage = {
@@ -172,7 +172,7 @@ describe('Full Agent Optimization Workflow', () => {
         } as Message
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(actionsMessage) });
+      (win as any).ws.onmessage({ data: JSON.stringify(actionsMessage) });
 
       // 9. Reporting Agent final report
       const reportingStart: WebSocketMessage = {
@@ -186,7 +186,7 @@ describe('Full Agent Optimization Workflow', () => {
         }
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(reportingStart) });
+      (win as any).ws.onmessage({ data: JSON.stringify(reportingStart) });
 
       const finalReport: WebSocketMessage = {
         type: 'message',
@@ -228,7 +228,7 @@ Your LLM inference pipeline can achieve **35% latency reduction** and **$2,800/m
         } as Message
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(finalReport) });
+      (win as any).ws.onmessage({ data: JSON.stringify(finalReport) });
 
       // 10. Complete status
       const completeStatus: WebSocketMessage = {
@@ -242,7 +242,7 @@ Your LLM inference pipeline can achieve **35% latency reduction** and **$2,800/m
         }
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(completeStatus) });
+      (win as any).ws.onmessage({ data: JSON.stringify(completeStatus) });
     });
 
     // Verify all agents ran in sequence
@@ -291,7 +291,7 @@ Your LLM inference pipeline can achieve **35% latency reduction** and **$2,800/m
         }
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(agentStart) });
+      (win as any).ws.onmessage({ data: JSON.stringify(agentStart) });
     });
 
     // Stop button should be available
@@ -313,7 +313,7 @@ Your LLM inference pipeline can achieve **35% latency reduction** and **$2,800/m
         } as Message
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(stopMessage) });
+      (win as any).ws.onmessage({ data: JSON.stringify(stopMessage) });
     });
 
     // Verify stop message
@@ -351,7 +351,7 @@ Your LLM inference pipeline can achieve **35% latency reduction** and **$2,800/m
           }
         };
         // @ts-ignore
-        win.ws.onmessage({ data: JSON.stringify(progressUpdate) });
+        (win as any).ws.onmessage({ data: JSON.stringify(progressUpdate) });
       });
 
       // Verify agent name is displayed in header
@@ -373,7 +373,7 @@ Your LLM inference pipeline can achieve **35% latency reduction** and **$2,800/m
         }
       };
       // @ts-ignore
-      win.ws.onmessage({ data: JSON.stringify(complete) });
+      (win as any).ws.onmessage({ data: JSON.stringify(complete) });
     });
 
     cy.get('p').should('contain', 'completed');
