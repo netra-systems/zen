@@ -54,7 +54,7 @@ async def test_logging():
     result = await slow_operation()
     print(f"Test 5: Performance logging - operation result: {result}")
     
-    print("\n✅ All logging tests passed successfully!")
+    print("\n[OK] All logging tests passed successfully!")
     
     # Test 6: Tool execution logging
     print("\nTest 6: Tool logging...")
@@ -72,7 +72,7 @@ async def test_logging():
     tool_result = await wrapper()
     print(f"Tool result: {tool_result}")
     
-    print("\n🎉 All tests completed successfully!")
+    print("\n[SUCCESS] All tests completed successfully!")
 
 if __name__ == "__main__":
     asyncio.run(test_logging())

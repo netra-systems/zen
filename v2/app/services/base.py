@@ -1,6 +1,7 @@
 """Enhanced base service classes using the new service interfaces."""
 
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+from datetime import datetime
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -123,7 +124,6 @@ class ServiceHealthChecker:
     async def check_multiple_services(services: List[BaseService]) -> Dict[str, ServiceHealth]:
         """Check health of multiple services concurrently."""
         import asyncio
-        from datetime import datetime
         
         tasks = [
             ServiceHealthChecker.check_service_health(service)
