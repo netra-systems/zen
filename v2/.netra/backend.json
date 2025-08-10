@@ -1,7 +1,0 @@
-{
-  "host": "localhost",
-  "port": 8000,
-  "api_url": "http://localhost:8000",
-  "ws_url": "ws://localhost:8000/ws",
-  "pid": 34144
-}

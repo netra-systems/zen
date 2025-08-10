@@ -45,6 +45,22 @@ XML specifications are in `SPEC/*.xml`
 - `SPEC/instructions.xml` - General development instructions
 - `SPEC/LEGACY_CODE_CLEANUP.xml` - Legacy code identification and cleanup procedures
 
+### Unified Development Environment (NEW - RECOMMENDED)
+
+```bash
+# Quick start - launches both backend and frontend with automatic configuration
+python dev_launcher.py
+
+# With dynamic port allocation (avoids conflicts)
+python dev_launcher.py --dynamic
+
+# With custom ports
+python dev_launcher.py --backend-port 8080 --frontend-port 3001
+
+# Check service status
+python scripts/service_discovery.py status
+```
+
 ### Backend Development (Windows)
 
 ```bash
@@ -59,8 +75,14 @@ pip install -r requirements.txt
 python create_db.py
 python run_migrations.py
 
-# Run backend server
+# Run backend server (traditional)
 python run_server.py
+
+# Run with dynamic port allocation (NEW)
+python run_server.py --dynamic-port
+
+# Run with specific port
+python run_server.py --port 8080
 ```
 
 ### Frontend Development
@@ -71,6 +93,9 @@ npm run dev      # Development server
 npm run build    # Production build
 npm run test     # Run tests
 npm run lint     # Run linter
+
+# Start with automatic backend discovery (NEW)
+node scripts/start_with_discovery.js
 ```
 
 ### Testing

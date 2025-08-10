@@ -51,7 +51,8 @@ function startFrontend() {
   console.log(`   WebSocket: ${wsUrl}`);
   
   // Determine the npm command based on the first argument
-  const command = process.argv[2] || 'dev';
+  const command = process.argv[2] || 'dev';  // 'dev' for hot reload, 'start' for production mode
+  console.log(`   Mode: ${command === 'dev' ? 'Development (with hot reload)' : 'Production (no hot reload)'}`);
   
   // Start Next.js
   const child = spawn('npm', ['run', command], {

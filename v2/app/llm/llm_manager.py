@@ -7,12 +7,43 @@ from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
+class MockLLM:
+    """Mock LLM for when LLMs are disabled in dev mode."""
+    
+    def __init__(self, model_name: str):
+        self.model_name = model_name
+    
+    async def ainvoke(self, prompt: str):
+        class MockResponse:
+            content = f"[Dev Mode - LLM Disabled] Mock response for: {prompt[:100]}..."
+        return MockResponse()
+    
+    async def astream(self, prompt: str):
+        for word in f"[Dev Mode - LLM Disabled] Mock streaming response for: {prompt[:50]}...".split():
+            yield type('obj', (object,), {'content': word + ' '})()
+
 class LLMManager:
     def __init__(self, settings: AppConfig):
         self.settings = settings
         self._llm_cache: Dict[str, Any] = {}
+        self.enabled = self._check_if_enabled()
+
+    def _check_if_enabled(self):
+        """Check if LLMs should be enabled based on environment and config."""
+        if self.settings.environment == "development":
+            enabled = self.settings.dev_mode_llm_enabled
+            if not enabled:
+                logger.info("LLMs are disabled in development mode")
+            return enabled
+        # LLMs are always enabled in production and testing
+        return True
 
     def get_llm(self, name: str, generation_config: Optional[Dict[str, Any]] = None) -> Any:
+        # Return mock LLM if disabled in dev mode
+        if not self.enabled:
+            logger.debug(f"Returning mock LLM for '{name}' - LLMs disabled in dev mode")
+            return MockLLM(name)
+        
         cache_key = name
         if generation_config:
             # Create a unique cache key for this combination of name and generation_config
