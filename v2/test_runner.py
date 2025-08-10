@@ -243,7 +243,26 @@ class TestRunner:
         return backend_result[0], frontend_result[0]
     
     def generate_html_report(self, report, tests_dir, timestamp):
-        """Generate HTML test report"""
+        """Generate HTML test report with service-level statistics"""
+        # Generate service details HTML
+        backend_html = ""
+        if report.get('service_details', {}).get('backend'):
+            backend_html = "<h3>Backend Services Test Results</h3>\n<table>\n"
+            backend_html += "<tr><th>Service</th><th>Passed</th><th>Failed</th><th>Skipped</th><th>Error</th><th>Total</th></tr>\n"
+            for service, stats in report['service_details']['backend'].items():
+                total = stats['passed'] + stats['failed'] + stats['skipped'] + stats['error']
+                backend_html += f"<tr><td>{service}</td><td>{stats['passed']}</td><td>{stats['failed']}</td><td>{stats['skipped']}</td><td>{stats['error']}</td><td>{total}</td></tr>\n"
+            backend_html += "</table>\n"
+        
+        frontend_html = ""
+        if report.get('service_details', {}).get('frontend'):
+            frontend_html = "<h3>Frontend Components Test Results</h3>\n<table>\n"
+            frontend_html += "<tr><th>Component</th><th>Passed</th><th>Failed</th><th>Skipped</th><th>Error</th><th>Total</th></tr>\n"
+            for component, stats in report['service_details']['frontend'].items():
+                total = stats['passed'] + stats['failed'] + stats['skipped'] + stats['error']
+                frontend_html += f"<tr><td>{component}</td><td>{stats['passed']}</td><td>{stats['failed']}</td><td>{stats['skipped']}</td><td>{stats['error']}</td><td>{total}</td></tr>\n"
+            frontend_html += "</table>\n"
+        
         html_content = f"""
 <!DOCTYPE html>
 <html>
@@ -252,12 +271,15 @@ class TestRunner:
     <style>
         body {{ font-family: Arial, sans-serif; margin: 20px; }}
         h1 {{ color: #333; }}
+        h2 {{ color: #555; margin-top: 30px; }}
+        h3 {{ color: #666; margin-top: 20px; }}
         .summary {{ background: #f5f5f5; padding: 15px; border-radius: 5px; }}
         .passed {{ color: green; font-weight: bold; }}
         .failed {{ color: red; font-weight: bold; }}
         table {{ border-collapse: collapse; width: 100%; margin-top: 20px; }}
         th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
         th {{ background-color: #4CAF50; color: white; }}
+        .test-stats {{ margin: 20px 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #4CAF50; }}
     </style>
 </head>
 <body>
@@ -273,13 +295,25 @@ class TestRunner:
         <p><strong>Total Duration:</strong> {report['summary']['total_duration']:.2f}s</p>
     </div>
     
-    <h2>Test Results</h2>
+    <div class="test-stats">
+        <h3>Test Statistics</h3>
+        <p><strong>Backend:</strong> {report['summary'].get('backend_test_summary', {}).get('passed', 0)} passed, 
+           {report['summary'].get('backend_test_summary', {}).get('failed', 0)} failed, 
+           {report['summary'].get('backend_test_summary', {}).get('skipped', 0)} skipped</p>
+        <p><strong>Frontend:</strong> {report['summary'].get('frontend_test_summary', {}).get('passed', 0)} passed, 
+           {report['summary'].get('frontend_test_summary', {}).get('failed', 0)} failed, 
+           {report['summary'].get('frontend_test_summary', {}).get('skipped', 0)} skipped</p>
+    </div>
+    
+    <h2>Component Results</h2>
     <table>
         <tr>
             <th>Component</th>
             <th>Status</th>
             <th>Duration</th>
             <th>Exit Code</th>
+            <th>Tests Passed</th>
+            <th>Tests Failed</th>
         </tr>
         <tr>
             <td>Backend</td>
@@ -288,6 +322,8 @@ class TestRunner:
             </td>
             <td>{report['results']['backend']['duration']:.2f}s</td>
             <td>{report['results']['backend']['exit_code']}</td>
+            <td>{report['summary'].get('backend_test_summary', {}).get('passed', 0)}</td>
+            <td>{report['summary'].get('backend_test_summary', {}).get('failed', 0)}</td>
         </tr>
         <tr>
             <td>Frontend</td>
@@ -296,8 +332,14 @@ class TestRunner:
             </td>
             <td>{report['results']['frontend']['duration']:.2f}s</td>
             <td>{report['results']['frontend']['exit_code']}</td>
+            <td>{report['summary'].get('frontend_test_summary', {}).get('passed', 0)}</td>
+            <td>{report['summary'].get('frontend_test_summary', {}).get('failed', 0)}</td>
         </tr>
     </table>
+    
+    <h2>Detailed Service Results</h2>
+    {backend_html}
+    {frontend_html}
 </body>
 </html>
 """
@@ -307,7 +349,7 @@ class TestRunner:
             f.write(html_content)
     
     def generate_report(self, args):
-        """Generate test report"""
+        """Generate test report with detailed service statistics"""
         report = {
             "timestamp": datetime.now().isoformat(),
             "configuration": vars(args),
@@ -320,7 +362,13 @@ class TestRunner:
                     self.results["backend"]["status"] == "passed" and 
                     self.results["frontend"]["status"] == "passed"
                 ),
+                "backend_test_summary": self.results["backend"]["summary"],
+                "frontend_test_summary": self.results["frontend"]["summary"],
             },
+            "service_details": {
+                "backend": self.results["backend"]["test_details"],
+                "frontend": self.results["frontend"]["test_details"]
+            }
         }
         
         # Save JSON report
@@ -334,19 +382,59 @@ class TestRunner:
         return report
     
     def generate_markdown_report(self, report):
-        """Generate markdown test report"""
+        """Generate markdown test report with service-level statistics"""
+        # Generate service details tables
+        backend_details = ""
+        if report.get('service_details', {}).get('backend'):
+            backend_details = "\n### Backend Services Test Results\n\n"
+            backend_details += "| Service | Passed | Failed | Skipped | Error | Total |\n"
+            backend_details += "|---------|--------|--------|---------|-------|-------|\n"
+            
+            for service, stats in report['service_details']['backend'].items():
+                total = stats['passed'] + stats['failed'] + stats['skipped'] + stats['error']
+                backend_details += f"| {service} | {stats['passed']} | {stats['failed']} | {stats['skipped']} | {stats['error']} | {total} |\n"
+            
+            # Add backend summary
+            summary = report['summary'].get('backend_test_summary', {})
+            total = summary.get('passed', 0) + summary.get('failed', 0) + summary.get('skipped', 0) + summary.get('error', 0)
+            backend_details += f"| **Total** | **{summary.get('passed', 0)}** | **{summary.get('failed', 0)}** | **{summary.get('skipped', 0)}** | **{summary.get('error', 0)}** | **{total}** |\n"
+        
+        frontend_details = ""
+        if report.get('service_details', {}).get('frontend'):
+            frontend_details = "\n### Frontend Components Test Results\n\n"
+            frontend_details += "| Component | Passed | Failed | Skipped | Error | Total |\n"
+            frontend_details += "|-----------|--------|--------|---------|-------|-------|\n"
+            
+            for component, stats in report['service_details']['frontend'].items():
+                total = stats['passed'] + stats['failed'] + stats['skipped'] + stats['error']
+                frontend_details += f"| {component} | {stats['passed']} | {stats['failed']} | {stats['skipped']} | {stats['error']} | {total} |\n"
+            
+            # Add frontend summary
+            summary = report['summary'].get('frontend_test_summary', {})
+            total = summary.get('passed', 0) + summary.get('failed', 0) + summary.get('skipped', 0) + summary.get('error', 0)
+            frontend_details += f"| **Total** | **{summary.get('passed', 0)}** | **{summary.get('failed', 0)}** | **{summary.get('skipped', 0)}** | **{summary.get('error', 0)}** | **{total}** |\n"
+        
         md_content = f"""# Netra AI Platform - Test Report
 
 Generated: {report['timestamp']}
 
 ## Summary
 
-| Component | Status | Duration | Exit Code |
-|-----------|--------|----------|-----------|
-| Backend   | {self._status_emoji(report['results']['backend']['status'])} {report['results']['backend']['status']} | {report['results']['backend']['duration']:.2f}s | {report['results']['backend']['exit_code']} |
-| Frontend  | {self._status_emoji(report['results']['frontend']['status'])} {report['results']['frontend']['status']} | {report['results']['frontend']['duration']:.2f}s | {report['results']['frontend']['exit_code']} |
+| Component | Status | Duration | Exit Code | Tests Passed | Tests Failed |
+|-----------|--------|----------|-----------|--------------|---------------|
+| Backend   | {self._status_emoji(report['results']['backend']['status'])} {report['results']['backend']['status']} | {report['results']['backend']['duration']:.2f}s | {report['results']['backend']['exit_code']} | {report['summary'].get('backend_test_summary', {}).get('passed', 0)} | {report['summary'].get('backend_test_summary', {}).get('failed', 0)} |
+| Frontend  | {self._status_emoji(report['results']['frontend']['status'])} {report['results']['frontend']['status']} | {report['results']['frontend']['duration']:.2f}s | {report['results']['frontend']['exit_code']} | {report['summary'].get('frontend_test_summary', {}).get('passed', 0)} | {report['summary'].get('frontend_test_summary', {}).get('failed', 0)} |
 
 **Total Duration**: {report['summary']['total_duration']:.2f}s
+
+## Test Statistics
+
+### Overall Test Results
+- **Backend**: {report['summary'].get('backend_test_summary', {}).get('passed', 0)} passed, {report['summary'].get('backend_test_summary', {}).get('failed', 0)} failed, {report['summary'].get('backend_test_summary', {}).get('skipped', 0)} skipped
+- **Frontend**: {report['summary'].get('frontend_test_summary', {}).get('passed', 0)} passed, {report['summary'].get('frontend_test_summary', {}).get('failed', 0)} failed, {report['summary'].get('frontend_test_summary', {}).get('skipped', 0)} skipped
+
+{backend_details}
+{frontend_details}
 
 ## Configuration
 
@@ -393,7 +481,7 @@ Overall Status: **{self._status_emoji(report['summary']['overall_passed'])} {'PA
             return "[PENDING]"
     
     def print_summary(self):
-        """Print test summary"""
+        """Print test summary with detailed statistics"""
         print("\n" + "=" * 80)
         print("TEST SUMMARY")
         print("=" * 80)
@@ -402,11 +490,31 @@ Overall Status: **{self._status_emoji(report['summary']['overall_passed'])} {'PA
         print(f"  Status: {self._status_emoji(self.results['backend']['status'])} {self.results['backend']['status'].upper()}")
         print(f"  Duration: {self.results['backend']['duration']:.2f}s")
         print(f"  Exit Code: {self.results['backend']['exit_code']}")
+        backend_summary = self.results['backend']['summary']
+        print(f"  Test Results: {backend_summary['passed']} passed, {backend_summary['failed']} failed, {backend_summary['skipped']} skipped")
+        
+        # Print backend service details if available
+        if self.results['backend']['test_details']:
+            print("  Service Breakdown:")
+            for service, stats in self.results['backend']['test_details'].items():
+                total = stats['passed'] + stats['failed'] + stats['skipped'] + stats['error']
+                if total > 0:
+                    print(f"    - {service}: {stats['passed']}/{total} passed")
         
         print(f"\nFrontend Tests:")
         print(f"  Status: {self._status_emoji(self.results['frontend']['status'])} {self.results['frontend']['status'].upper()}")
         print(f"  Duration: {self.results['frontend']['duration']:.2f}s")
         print(f"  Exit Code: {self.results['frontend']['exit_code']}")
+        frontend_summary = self.results['frontend']['summary']
+        print(f"  Test Results: {frontend_summary['passed']} passed, {frontend_summary['failed']} failed, {frontend_summary['skipped']} skipped")
+        
+        # Print frontend component details if available
+        if self.results['frontend']['test_details']:
+            print("  Component Breakdown:")
+            for component, stats in self.results['frontend']['test_details'].items():
+                total = stats['passed'] + stats['failed'] + stats['skipped'] + stats['error']
+                if total > 0:
+                    print(f"    - {component}: {stats['passed']}/{total} passed")
         
         total_duration = self.results['backend']['duration'] + self.results['frontend']['duration']
         overall_passed = (
@@ -417,6 +525,9 @@ Overall Status: **{self._status_emoji(report['summary']['overall_passed'])} {'PA
         print(f"\nOverall:")
         print(f"  Status: {self._status_emoji(overall_passed)} {'PASSED' if overall_passed else 'FAILED'}")
         print(f"  Total Duration: {total_duration:.2f}s")
+        total_tests_passed = backend_summary['passed'] + frontend_summary['passed']
+        total_tests_failed = backend_summary['failed'] + frontend_summary['failed']
+        print(f"  Total Tests: {total_tests_passed} passed, {total_tests_failed} failed")
         
         print("\nReports:")
         print(f"  - Test Report: reports/test_report.json")
