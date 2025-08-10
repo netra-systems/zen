@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from app.services.agent_service import AgentService
 from app.schemas import AgentMessage, WebSocketMessage
-from app.agents.supervisor import Supervisor
+from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from sqlalchemy.ext.asyncio import AsyncSession
 
 @pytest.mark.asyncio

@@ -1,4 +1,3 @@
-import logging
 import time
 import sys
 import os
@@ -11,6 +10,11 @@ from sqlalchemy import create_engine
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+# Import unified logging first to ensure interceptor is set up
+from app.logging_config import central_logger
+
+# Configure loggers after unified logging is initialized
+import logging
 logging.getLogger("faker").setLevel(logging.WARNING)
 
 from contextlib import asynccontextmanager
@@ -22,7 +26,6 @@ from pydantic import ValidationError
 from app.routes.websockets import router as websockets_router
 from app.db.postgres import async_session_factory
 from app.config import settings
-from app.logging_config import central_logger
 from app.llm.llm_manager import LLMManager
 from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.services.agent_service import AgentService

@@ -16,6 +16,9 @@ from app.core.service_interfaces import (
 )
 from app.core.exceptions import RecordNotFoundError, ServiceError
 from app.core.error_context import ErrorContext
+from app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
@@ -89,7 +92,8 @@ class EnhancedCRUDService(CRUDService[ModelType, Any, CreateSchemaType, UpdateSc
             async with self.get_db_session() as session:
                 await session.execute(select(1))
             return {"database": "healthy"}
-        except Exception:
+        except Exception as e:
+            logger.error(f"Database health check failed: {e}", exc_info=True)
             return {"database": "unhealthy"}
     
     def _to_response_schema(self, entity: ModelType) -> ModelType:
@@ -106,6 +110,7 @@ class ServiceHealthChecker:
         try:
             return await service.health_check()
         except Exception as e:
+            logger.error(f"Service health check failed for {service.service_name}: {e}", exc_info=True)
             return ServiceHealth(
                 service_name=service.service_name,
                 status="unhealthy",
@@ -130,6 +135,7 @@ class ServiceHealthChecker:
         health_status = {}
         for service, result in zip(services, results):
             if isinstance(result, Exception):
+                logger.error(f"Service health check failed for {service.service_name}: {result}")
                 health_status[service.service_name] = ServiceHealth(
                     service_name=service.service_name,
                     status="unhealthy",
@@ -166,6 +172,7 @@ class ServiceMixin:
                     await self._initialize_impl()
                 self._initialized = True
             except Exception as e:
+                logger.error(f"Failed to initialize service {self._service_name}: {e}", exc_info=True)
                 raise ServiceError(
                     service_name=self._service_name,
                     message=f"Failed to initialize {self._service_name}: {e}",
@@ -180,6 +187,7 @@ class ServiceMixin:
                     await self._shutdown_impl()
                 self._initialized = False
             except Exception as e:
+                logger.error(f"Failed to shutdown service {self._service_name}: {e}", exc_info=True)
                 raise ServiceError(
                     service_name=self._service_name,
                     message=f"Failed to shutdown {self._service_name}: {e}",

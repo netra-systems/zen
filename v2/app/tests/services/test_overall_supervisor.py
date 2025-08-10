@@ -1,7 +1,7 @@
 import pytest
 import asyncio
 from unittest.mock import MagicMock, AsyncMock
-from app.agents.supervisor import Supervisor as OverallSupervisor
+from app.agents.supervisor_consolidated import SupervisorAgent as OverallSupervisor
 from app.schemas import AnalysisRequest, RequestModel, Settings
 from langchain_community.chat_models.fake import FakeListChatModel
 
