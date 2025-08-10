@@ -102,7 +102,6 @@ export const UltraMessageItem: React.FC<UltraMessageProps> = ({
   const [showDetails, setShowDetails] = useState(false);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [helpfulness, setHelpfulness] = useState<'helpful' | 'not-helpful' | null>(null);
-  const _codeBlockRef = useRef<HTMLDivElement>(null);
 
   // Real-time elapsed timer
   useEffect(() => {

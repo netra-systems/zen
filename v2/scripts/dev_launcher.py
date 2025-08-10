@@ -17,9 +17,13 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List
 
 # Add project root to path
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from scripts.service_discovery import ServiceDiscovery
+try:
+    from scripts.service_discovery import ServiceDiscovery
+except ImportError:
+    # If running from scripts directory, try direct import
+    from service_discovery import ServiceDiscovery
 
 class DevLauncher:
     """Manages the development environment launch process."""

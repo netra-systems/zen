@@ -270,12 +270,7 @@ export default function ImplementationRoadmap({
     }
   }
 
-  const _getPhaseProgress = (phase: Phase) => {
-    const completedTasks = phase.tasks.filter(t => 
-      completedSteps.includes(t.id)
-    ).length
-    return (completedTasks / phase.tasks.length) * 100
-  }
+  // Removed unused function - phase progress handled by getPhaseCompletion
 
   return (
     <div className="space-y-6">

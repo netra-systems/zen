@@ -90,10 +90,7 @@ export default function EnterpriseDemo() {
     }
   }
 
-  const _handleStartDemo = () => {
-    setDemoStarted(true)
-    setActiveTab('optimization')
-  }
+  // Removed unused function - demo state handled inline
 
   const valueProps = [
     {

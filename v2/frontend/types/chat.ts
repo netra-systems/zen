@@ -1,10 +1,13 @@
-import { Message as BackendMessage } from './index';
+import { Message as BackendMessage } from './backend_schema_auto_generated';
 
-export type Message = Omit<BackendMessage, 'content'> & {
+export type ChatMessage = Omit<BackendMessage, 'content'> & {
   content: string;
   references?: string[];
   error?: string;
 };
+
+// Re-export as Message for backwards compatibility
+export type Message = ChatMessage;
 
 export enum SubAgentLifecycle {
   PENDING = "pending",
