@@ -1,0 +1,31 @@
+# terraform.tfvars.example - Example configuration file
+# Copy this to terraform.tfvars and update with your values
+
+project_id = "your-gcp-project-id"  # Replace with your actual GCP project ID
+region     = "us-central1"          # Choose region closest to your users
+zone       = "us-central1-a"        # Availability zone
+
+# Redis URL (if setup separately)
+redis_url = "redis://your-redis-host:6379"
+
+# Environment
+environment = "production"
+
+# Resource sizing (adjust based on budget)
+# Current settings optimize for < $200/month base cost
+
+# Database settings
+db_tier      = "db-f1-micro"  # Smallest tier (~$8/month)
+db_disk_size = 20              # Minimum 20GB
+
+# Backend settings
+backend_cpu           = "1"     # 1 vCPU
+backend_memory        = "2Gi"   # 2GB RAM
+backend_min_instances = 1       # Always have 1 running
+backend_max_instances = 5       # Scale up to 5 if needed
+
+# Frontend settings  
+frontend_cpu           = "0.5"  # 0.5 vCPU
+frontend_memory        = "1Gi"  # 1GB RAM
+frontend_min_instances = 1      # Always have 1 running
+frontend_max_instances = 3      # Scale up to 3 if needed

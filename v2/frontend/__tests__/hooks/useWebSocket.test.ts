@@ -12,9 +12,7 @@ describe('useWebSocket', () => {
 
   beforeEach(() => {
     server = new WS(`${wsUrl}?token=${mockToken}`);
-    (authService.getAuthHeaders as jest.Mock).mockReturnValue({
-      Authorization: `Bearer ${mockToken}`,
-    });
+    (authService.getToken as jest.Mock).mockReturnValue(mockToken);
     localStorage.setItem('access_token', mockToken);
   });
 

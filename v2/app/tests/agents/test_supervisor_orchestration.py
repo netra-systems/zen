@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from app.agents.supervisor import Supervisor
 from app.agents.base import BaseSubAgent
 from sqlalchemy.ext.asyncio import AsyncSession

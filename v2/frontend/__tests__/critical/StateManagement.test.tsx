@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { create } from 'zustand';
 import { useChatStore } from '../../store/chatStore';
 import { useAuthStore } from '../../store/authStore';

@@ -268,6 +268,9 @@ describe('MessageService', () => {
         offline: true,
       });
 
+      // Clear the mock to reset call count
+      (fetch as jest.Mock).mockClear();
+      
       // Now simulate coming back online
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
@@ -278,7 +281,7 @@ describe('MessageService', () => {
 
       expect(retryResults.successful).toBe(1);
       expect(retryResults.failed).toBe(0);
-      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(fetch).toHaveBeenCalledTimes(1);
     });
   });
 

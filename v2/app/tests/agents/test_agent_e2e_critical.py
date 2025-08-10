@@ -29,7 +29,7 @@ class TestAgentE2ECritical:
     """Critical end-to-end test cases for the agent system"""
 
     @pytest.fixture
-    async def setup_agent_infrastructure(self):
+    def setup_agent_infrastructure(self):
         """Setup complete agent infrastructure for testing"""
         # Mock database session
         db_session = AsyncMock(spec=AsyncSession)
@@ -81,7 +81,7 @@ class TestAgentE2ECritical:
         - All sub-agents execute in sequence
         - Final response returned to user
         """
-        infra = await setup_agent_infrastructure
+        infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         websocket_manager = infra["websocket_manager"]
         
@@ -121,7 +121,7 @@ class TestAgentE2ECritical:
         - Verify message ordering and completeness
         - Test streaming vs non-streaming modes
         """
-        infra = await setup_agent_infrastructure
+        infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         websocket_manager = infra["websocket_manager"]
         
@@ -162,7 +162,7 @@ class TestAgentE2ECritical:
         - Verify sub-agent execution order
         - Test state passing between sub-agents
         """
-        infra = await setup_agent_infrastructure
+        infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         
         run_id = str(uuid.uuid4())
@@ -202,7 +202,7 @@ class TestAgentE2ECritical:
         - Verify tool results are properly integrated
         - Test multiple tool calls in sequence
         """
-        infra = await setup_agent_infrastructure
+        infra = setup_agent_infrastructure
         tool_dispatcher = infra["tool_dispatcher"]
         llm_manager = infra["llm_manager"]
         
@@ -248,7 +248,7 @@ class TestAgentE2ECritical:
         - Test state recovery after interruption
         - Test thread context preservation
         """
-        infra = await setup_agent_infrastructure
+        infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         db_session = infra["db_session"]
         
@@ -301,7 +301,7 @@ class TestAgentE2ECritical:
         - Test supervisor error recovery strategies
         - Test error propagation to user
         """
-        infra = await setup_agent_infrastructure
+        infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         websocket_manager = infra["websocket_manager"]
         
@@ -357,7 +357,7 @@ class TestAgentE2ECritical:
         - Test authorization for different agent capabilities
         - Test secure token handling
         """
-        infra = await setup_agent_infrastructure
+        infra = setup_agent_infrastructure
         agent_service = infra["agent_service"]
         
         # Test unauthorized access
@@ -411,7 +411,7 @@ class TestAgentE2ECritical:
         - Test inter-agent communication
         - Test collaborative decision making
         """
-        infra = await setup_agent_infrastructure
+        infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         
         run_id = str(uuid.uuid4())
@@ -488,7 +488,7 @@ class TestAgentE2ECritical:
         - Test resource isolation between requests
         - Test performance under concurrent load
         """
-        infra = await setup_agent_infrastructure
+        infra = setup_agent_infrastructure
         agent_service = infra["agent_service"]
         
         num_concurrent_requests = 10
@@ -544,7 +544,7 @@ class TestAgentE2ECritical:
         - Test performance monitoring and metrics
         - Test graceful degradation under load
         """
-        infra = await setup_agent_infrastructure
+        infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         
         run_id = str(uuid.uuid4())

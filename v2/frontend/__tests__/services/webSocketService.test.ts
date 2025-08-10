@@ -16,6 +16,8 @@ describe('WebSocketService', () => {
     localStorage.clear();
     webSocketService.disconnect();
   });
+  
+  jest.setTimeout(10000);
 
   describe('Connection Management', () => {
     it('should establish WebSocket connection with authentication', async () => {

@@ -38,11 +38,11 @@ async def test_subagent_workflow_end_to_end(mock_db_session, mock_llm_manager, m
         '{"report": "Final report"}',      # ReportingSubAgent
     ]
 
-    input_data = {"query": "test query"}
+    input_data = "test query"
     run_id = "test_run_id"
 
     # Act
     result = await supervisor.run(input_data, run_id, stream_updates=False)
 
     # Assert
-    assert result["report_result"]["report"] == "Final report"
+    assert result.report_result["report"] == "Final report"

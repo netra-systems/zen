@@ -410,7 +410,7 @@ export default function SyntheticDataViewer({ industry }: SyntheticDataViewerPro
               <Alert className="mb-4">
                 <Code className="h-4 w-4" />
                 <AlertDescription>
-                  Use JSON path expressions to filter and transform data. Example: $.user_behavior.conversion_likelihood > 0.5
+                  Use JSON path expressions to filter and transform data. Example: $.user_behavior.conversion_likelihood 0.5 
                 </AlertDescription>
               </Alert>
               
