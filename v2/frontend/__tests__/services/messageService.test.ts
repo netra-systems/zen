@@ -8,6 +8,8 @@ describe('MessageService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
+    // Set up default auth token for all tests
+    localStorage.setItem('auth_token', 'test-token');
     // Reset the messageService singleton state
     (messageService as any)._reset();
   });
@@ -274,6 +276,7 @@ describe('MessageService', () => {
       // Verify the message is in the queue
       let queuedMessages = await messageService.getQueuedMessages();
       expect(queuedMessages).toHaveLength(1);
+      expect(queuedMessages[0].message.id).toBe('msg-retry');
       
       // Clear the mock to reset call count
       (fetch as jest.Mock).mockClear();
@@ -283,6 +286,10 @@ describe('MessageService', () => {
         ok: true,
         json: async () => ({ ...message, persisted: true }),
       });
+
+      // Double-check queue before retry
+      const queueBeforeRetry = await messageService.getQueuedMessages();
+      expect(queueBeforeRetry).toHaveLength(1);
 
       const retryResults = await messageService.retryQueuedMessages();
 

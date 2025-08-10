@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.agents.state import DeepAgentState
 from app.services.state_persistence_service import state_persistence_service
+from starlette.websockets import WebSocketDisconnect
 
 # Import all the sub-agents
 from app.agents.triage_sub_agent import TriageSubAgent
@@ -50,10 +51,14 @@ class Supervisor(BaseSubAgent):
         ws_user_id = self.user_id if self.user_id else run_id
 
         if stream_updates:
-            await self.websocket_manager.send_message(
-                ws_user_id,
-                WebSocketMessage(type="agent_started", payload=AgentStarted(run_id=run_id).model_dump()).model_dump()
-            )
+            try:
+                await self.websocket_manager.send_message(
+                    ws_user_id,
+                    WebSocketMessage(type="agent_started", payload=AgentStarted(run_id=run_id).model_dump()).model_dump()
+                )
+            except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
+                logger.info(f"WebSocket disconnected when sending agent_started: {e}")
+                # Continue processing even if WebSocket is disconnected
 
         # Try to load existing state from previous runs in this thread
         state = None
@@ -93,32 +98,43 @@ class Supervisor(BaseSubAgent):
             
             agent.set_state(SubAgentLifecycle.RUNNING)
             if stream_updates:
-                sub_agent_state = SubAgentState(
-                    messages=[],
-                    next_node="",
-                    lifecycle=agent.get_state()
-                )
-                await self.websocket_manager.send_message(
-                    ws_user_id,
-                    WebSocketMessage(
-                        type="sub_agent_update",
-                        payload=SubAgentUpdate(
-                            sub_agent_name=agent.name,
-                            state=sub_agent_state
+                try:
+                    sub_agent_state = SubAgentState(
+                        messages=[],
+                        next_node="",
+                        lifecycle=agent.get_state()
+                    )
+                    await self.websocket_manager.send_message(
+                        ws_user_id,
+                        WebSocketMessage(
+                            type="sub_agent_update",
+                            payload=SubAgentUpdate(
+                                sub_agent_name=agent.name,
+                                state=sub_agent_state
+                            ).model_dump()
                         ).model_dump()
-                    ).model_dump()
-                )
+                    )
+                except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
+                    logger.debug(f"WebSocket disconnected when sending sub_agent_update: {e}")
             
             try:
                 await agent.run(state, run_id, stream_updates)
+            except WebSocketDisconnect as e:
+                logger.info(f"WebSocket disconnected during {agent.name} execution: {e}")
+                # Continue processing even if WebSocket is disconnected
+                stream_updates = False  # Disable further streaming
             except Exception as e:
                 self.logger.error(f"Error in {agent.name}: {e}")
                 if stream_updates:
-                    await self.websocket_manager.send_error(
-                        ws_user_id,
-                        f"Error in {agent.name}: {str(e)}",
-                        agent.name
-                    )
+                    try:
+                        await self.websocket_manager.send_error(
+                            ws_user_id,
+                            f"Error in {agent.name}: {str(e)}",
+                            agent.name
+                        )
+                    except (WebSocketDisconnect, RuntimeError, ConnectionError):
+                        logger.debug(f"WebSocket disconnected when sending error")
+                        stream_updates = False  # Disable further streaming
                 # Continue with next agent despite the error
                 continue
             
@@ -153,31 +169,42 @@ class Supervisor(BaseSubAgent):
 
             agent.set_state(SubAgentLifecycle.COMPLETED)
             if stream_updates:
-                sub_agent_state = SubAgentState(
-                    messages=[],
-                    next_node="",
-                    lifecycle=agent.get_state()
-                )
-                await self.websocket_manager.send_message(
-                    ws_user_id,
-                    WebSocketMessage(
-                        type="sub_agent_update",
-                        payload=SubAgentUpdate(
-                            sub_agent_name=agent.name,
-                            state=sub_agent_state
+                try:
+                    sub_agent_state = SubAgentState(
+                        messages=[],
+                        next_node="",
+                        lifecycle=agent.get_state()
+                    )
+                    await self.websocket_manager.send_message(
+                        ws_user_id,
+                        WebSocketMessage(
+                            type="sub_agent_update",
+                            payload=SubAgentUpdate(
+                                sub_agent_name=agent.name,
+                                state=sub_agent_state
+                            ).model_dump()
                         ).model_dump()
-                    ).model_dump()
-                )
-                await self.websocket_manager.send_message(
-                    ws_user_id,
-                    WebSocketMessage(
-                        type="sub_agent_completed",
-                        payload={
-                            "sub_agent_name": agent.name,
-                            "result": state.model_dump()
-                        }
-                    ).model_dump()
-                )
+                    )
+                except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
+                    logger.debug(f"WebSocket disconnected when sending completion update: {e}")
+                    stream_updates = False  # Disable further streaming
+                
+                # Send sub_agent_completed message
+                if stream_updates:
+                    try:
+                        await self.websocket_manager.send_message(
+                            ws_user_id,
+                            WebSocketMessage(
+                                type="sub_agent_completed",
+                                payload={
+                                    "sub_agent_name": agent.name,
+                                    "result": state.model_dump()
+                                }
+                            ).model_dump()
+                        )
+                    except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
+                        logger.debug(f"WebSocket disconnected when sending sub_agent_completed: {e}")
+                        stream_updates = False  # Disable further streaming
 
         self.run_states[run_id]["status"] = "finished"
         self.set_state(SubAgentLifecycle.COMPLETED)
@@ -193,10 +220,13 @@ class Supervisor(BaseSubAgent):
             )
         
         if stream_updates:
-            await self.websocket_manager.send_message(
-                ws_user_id,
-                WebSocketMessage(type="agent_completed", payload=AgentCompleted(run_id=run_id, result=state.model_dump()).model_dump()).model_dump()
-            )
+            try:
+                await self.websocket_manager.send_message(
+                    ws_user_id,
+                    WebSocketMessage(type="agent_completed", payload=AgentCompleted(run_id=run_id, result=state.model_dump()).model_dump()).model_dump()
+                )
+            except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
+                logger.info(f"WebSocket disconnected when sending agent_completed: {e}")
         logger.info(f"Supervisor finished for run_id: {run_id}")
         return state
 

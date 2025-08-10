@@ -1,5 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { render, screen, fireEvent, waitFor, renderHook, act } from '@testing-library/react';
 import { useAuth } from '../../auth/context';
 import { AuthProvider } from '../../auth/AuthProvider';
 import LoginPage from '../../app/login/page';

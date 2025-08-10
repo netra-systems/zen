@@ -33,10 +33,10 @@ export const useChatStore = create<ChatState>((set) => ({
   activeThreadId: null,
   
   addMessage: (message) => set((state) => {
-    // Ensure message has a unique ID
+    // Ensure message has a unique ID and it's never an empty string
     const messageWithId = {
       ...message,
-      id: message.id || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      id: (message.id && message.id.trim() !== '') ? message.id : `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     };
     return {
       messages: [...state.messages, messageWithId]
@@ -75,9 +75,9 @@ export const useChatStore = create<ChatState>((set) => ({
   }),
   
   loadThreadMessages: (messages) => set({ 
-    messages: messages.map(msg => ({
+    messages: messages.map((msg, index) => ({
       ...msg,
-      id: msg.id || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      id: (msg.id && msg.id.trim() !== '') ? msg.id : `msg_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`
     }))
   }),
   

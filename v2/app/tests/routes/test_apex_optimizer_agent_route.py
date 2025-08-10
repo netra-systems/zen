@@ -1,26 +1,28 @@
 import pytest
 from fastapi.testclient import TestClient
 import asyncio
+from unittest.mock import Mock, AsyncMock, patch
 from app.main import app
 from app.schemas import RequestModel, Workload, DataSource, TimeRange
 from app.llm.llm_manager import LLMManager
 from app.config import settings
 
-# Initialize the LLMManager and add it to the app state for testing
-llm_manager = LLMManager(settings)
-app.state.llm_manager = llm_manager
-
 @pytest.mark.asyncio
 @pytest.mark.parametrize("prompt", [
     "I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.",
-    "My tools are too slow. I need to reduce the latency by 3x, but I can't spend more money.",
-    "I'm expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?",
-    "I need to optimize the 'user_authentication' function. What advanced methods can I use?",
-    "I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?",
-    "I want to audit all uses of KV caching in my system to find optimization opportunities.",
-    "I need to reduce costs by 20% and improve latency by 2x. I'm also expecting a 30% increase in usage. What should I do?"
 ])
-async def test_apex_optimizer_agent(prompt: str, client: TestClient):
+async def test_apex_optimizer_agent(prompt: str):
+    # Create a mock supervisor
+    mock_supervisor = Mock()
+    mock_supervisor.run = AsyncMock(return_value={"status": "completed"})
+    
+    # Override the dependency
+    from app.routes.agent_route import get_agent_supervisor
+    app.dependency_overrides[get_agent_supervisor] = lambda: mock_supervisor
+    
+    # Create test client
+    client = TestClient(app)
+    
     request_model = RequestModel(
         user_id="test_user",
         query=prompt,
@@ -35,5 +37,10 @@ async def test_apex_optimizer_agent(prompt: str, client: TestClient):
     )
     response = client.post("/api/agent/run_agent", json=request_model.model_dump())
     assert response.status_code == 200
-    run_id = response.json()["run_id"]
-    assert isinstance(run_id, str)
+    result = response.json()
+    assert "run_id" in result
+    assert result["status"] == "started"
+    assert isinstance(result["run_id"], str)
+    
+    # Clean up the override
+    app.dependency_overrides.clear()

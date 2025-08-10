@@ -94,7 +94,7 @@ export const MessageItem: React.FC<MessageProps> = ({ message }) => {
             </div>
             <ul className="space-y-1">
               {references.map((ref, index) => (
-                <li key={index} className="text-sm text-blue-700 flex items-start">
+                <li key={`${id}-ref-${index}-${ref.substring(0, 20)}`} className="text-sm text-blue-700 flex items-start">
                   <span className="mr-2 text-blue-500">•</span>
                   <span>{ref}</span>
                 </li>

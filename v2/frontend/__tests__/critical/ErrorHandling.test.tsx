@@ -1,5 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { render, screen, fireEvent, waitFor, renderHook, act } from '@testing-library/react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useError } from '../../hooks/useError';
 import ErrorFallback from '../../components/ErrorFallback';

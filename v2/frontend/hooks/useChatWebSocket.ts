@@ -54,12 +54,11 @@ export const useChatWebSocket = () => {
           const message = payload.state.messages[0];
           const agentMessage: Message = {
             id: generateMessageId(),
-            role: 'assistant',
+            type: 'agent',
             content: message.content || '',
-            timestamp: new Date().toISOString(),
-            subAgentName: payload.sub_agent_name,
-            displayed_to_user: true,
-            metadata: { type: 'status_update' }
+            created_at: new Date().toISOString(),
+            sub_agent_name: payload.sub_agent_name,
+            displayed_to_user: true
           };
           addMessage(agentMessage);
         }
@@ -70,10 +69,10 @@ export const useChatWebSocket = () => {
         // Add a completion message
         const completionMessage: Message = {
           id: generateMessageId(),
-          role: 'assistant',
+          type: 'agent',
           content: 'Task completed successfully.',
-          timestamp: new Date().toISOString(),
-          subAgentName: useChatStore.getState().subAgentName,
+          created_at: new Date().toISOString(),
+          sub_agent_name: useChatStore.getState().subAgentName,
           displayed_to_user: true
         };
         addMessage(completionMessage);
@@ -82,12 +81,12 @@ export const useChatWebSocket = () => {
         const payload = wsMessage.payload as any;
         const errorMessage: Message = {
           id: generateMessageId(),
-          role: 'assistant',
+          type: 'error',
           content: `❌ Error: ${payload?.error || 'An error occurred'}`,
-          timestamp: new Date().toISOString(),
-          subAgentName: payload?.sub_agent_name || 'System',
+          created_at: new Date().toISOString(),
+          sub_agent_name: payload?.sub_agent_name || 'System',
           displayed_to_user: true,
-          error: true
+          error: payload?.error || 'An error occurred'
         };
         addMessage(errorMessage);
       } else if (wsMessage.type === 'agent_log') {
@@ -96,36 +95,35 @@ export const useChatWebSocket = () => {
                          payload.level === 'warning' ? '⚠️' : 'ℹ️';
         const logMessage: Message = {
           id: generateMessageId(),
-          role: 'assistant',
+          type: 'system',
           content: `${logPrefix} ${payload.message}`,
-          timestamp: new Date().toISOString(),
-          subAgentName: payload.sub_agent_name || 'System',
-          displayed_to_user: true,
-          metadata: { type: 'log', level: payload.level }
+          created_at: new Date().toISOString(),
+          sub_agent_name: payload.sub_agent_name || 'System',
+          displayed_to_user: true
         };
         addMessage(logMessage);
       } else if (wsMessage.type === 'tool_call') {
         const payload = wsMessage.payload as any;
         const toolMessage: Message = {
           id: generateMessageId(),
-          role: 'assistant',
+          type: 'tool',
           content: `🔧 Calling tool: ${payload.tool_name}`,
-          timestamp: new Date().toISOString(),
-          subAgentName: payload.sub_agent_name || 'System',
+          created_at: new Date().toISOString(),
+          sub_agent_name: payload.sub_agent_name || 'System',
           displayed_to_user: true,
-          metadata: { type: 'tool_call', tool_name: payload.tool_name, tool_args: payload.tool_args }
+          tool_info: { tool_name: payload.tool_name, tool_args: payload.tool_args }
         };
         addMessage(toolMessage);
       } else if (wsMessage.type === 'tool_result') {
         const payload = wsMessage.payload as any;
         const resultMessage: Message = {
           id: generateMessageId(),
-          role: 'assistant',
+          type: 'tool',
           content: `✅ Tool result from ${payload.tool_name}: ${JSON.stringify(payload.result).substring(0, 200)}...`,
-          timestamp: new Date().toISOString(),
-          subAgentName: payload.sub_agent_name || 'System',
+          created_at: new Date().toISOString(),
+          sub_agent_name: payload.sub_agent_name || 'System',
           displayed_to_user: true,
-          metadata: { type: 'tool_result', tool_name: payload.tool_name, result: payload.result }
+          tool_info: { tool_name: payload.tool_name, result: payload.result }
         };
         addMessage(resultMessage);
       } else if (wsMessage.type === 'message_received') {
@@ -135,10 +133,10 @@ export const useChatWebSocket = () => {
         setProcessing(false);
         const stoppedMessage: Message = {
           id: generateMessageId(),
-          role: 'assistant',
+          type: 'system',
           content: 'Processing stopped.',
-          timestamp: new Date().toISOString(),
-          subAgentName: 'System',
+          created_at: new Date().toISOString(),
+          sub_agent_name: 'System',
           displayed_to_user: true
         };
         addMessage(stoppedMessage);
@@ -148,12 +146,12 @@ export const useChatWebSocket = () => {
       if ((wsMessage as any).displayed_to_user) {
         const chatMessage: Message = {
           id: `msg_${Date.now()}`,
-          role: (wsMessage as any).role || 'assistant',
+          type: (wsMessage as any).type || 'agent',
           content: (wsMessage as any).content || JSON.stringify(wsMessage.payload),
-          timestamp: new Date().toISOString(),
-          subAgentName: (wsMessage as any).subAgentName || useChatStore.getState().subAgentName,
+          created_at: new Date().toISOString(),
+          sub_agent_name: (wsMessage as any).sub_agent_name || useChatStore.getState().subAgentName,
           displayed_to_user: true,
-          metadata: wsMessage.payload
+          raw_data: wsMessage.payload
         };
         addMessage(chatMessage);
       }
