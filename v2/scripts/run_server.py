@@ -15,6 +15,14 @@ else:
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+# Verify app module can be found
+app_dir = project_root / "app"
+if not app_dir.exists():
+    print(f"ERROR: app directory not found at {app_dir}")
+    print(f"Current directory: {Path.cwd()}")
+    print(f"Project root: {project_root}")
+    sys.exit(1)
+
 # Now import the rest
 import uvicorn
 import argparse
@@ -31,7 +39,8 @@ def get_free_port():
 
 def write_service_discovery(port: int, host: str = "localhost"):
     """Write service discovery info for frontend."""
-    discovery_dir = Path(".netra")
+    # Always write to project root's .netra directory
+    discovery_dir = project_root / ".netra"
     discovery_dir.mkdir(exist_ok=True)
     
     discovery_file = discovery_dir / "backend.json"
@@ -59,6 +68,8 @@ if __name__ == "__main__":
                         help='Automatically find and use a free port')
     parser.add_argument('--host', type=str, default='0.0.0.0',
                         help='Host to bind the server to (default: 0.0.0.0)')
+    parser.add_argument('--verbose', action='store_true',
+                        help='Show verbose debug output')
     args = parser.parse_args()
     
     # Determine port
@@ -81,6 +92,13 @@ if __name__ == "__main__":
     print(f"Starting Netra AI server on {args.host}:{port}")
     print(f"API URL: http://{discovery_host}:{port}")
     print(f"WebSocket URL: ws://{discovery_host}:{port}/ws")
+    
+    if args.verbose:
+        print(f"\nDebug Info:")
+        print(f"  Project root: {project_root}")
+        print(f"  Python path: {sys.path[:3]}")
+        print(f"  App directory exists: {(project_root / 'app').exists()}")
+        print(f"  Current directory: {Path.cwd()}")
     
     uvicorn.run(
         "app.main:app",

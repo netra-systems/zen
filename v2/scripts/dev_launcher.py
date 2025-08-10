@@ -293,6 +293,10 @@ class DevLauncher:
         else:
             print("   Hot reload: ENABLED")
         
+        # Add verbose flag if requested
+        if self.verbose:
+            cmd.append("--verbose")
+        
         if self.verbose:
             print(f"   Command: {' '.join(cmd)}")
         
