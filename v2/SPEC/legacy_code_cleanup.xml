@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<legacy_code_cleanup_specification version="1.0">
+  <metadata>
+    <title>Legacy Code Cleanup Specification</title>
+    <purpose>Define systematic approach for identifying and removing legacy code while maintaining production stability</purpose>
+    <created>2025-08-10</created>
+    <scope>Routine maintenance and technical debt reduction</scope>
+  </metadata>
+
+  <design_principles>
+    <principle id="P1">
+      <name>Production Safety First</name>
+      <description>Never break production functionality. All changes must be backward compatible during transition periods.</description>
+    </principle>
+    <principle id="P2">
+      <name>Incremental Migration</name>
+      <description>Large changes should be broken into small, testable increments with feature flags when necessary.</description>
+    </principle>
+    <principle id="P3">
+      <name>Maintain System Design Goals</name>
+      <description>Preserve architectural patterns, separation of concerns, and existing design decisions.</description>
+    </principle>
+    <principle id="P4">
+      <name>Reduce Complexity</name>
+      <description>Each cleanup should result in simpler, more maintainable code without adding new abstractions.</description>
+    </principle>
+    <principle id="P5">
+      <name>Document Deprecation</name>
+      <description>Mark deprecated code clearly with removal timelines and migration paths.</description>
+    </principle>
+  </design_principles>
+
+  <identification_criteria>
+    <criterion category="duplicate_code">
+      <pattern>Multiple implementations of same functionality</pattern>
+      <indicators>
+        <indicator>Files with similar names (e.g., service.py vs service_v2.py)</indicator>
+        <indicator>Duplicate class definitions with minor variations</indicator>
+        <indicator>Copy-pasted code blocks with slight modifications</indicator>
+      </indicators>
+      <action>Consolidate to single implementation with clear interfaces</action>
+    </criterion>
+
+    <criterion category="dead_code">
+      <pattern>Unused code that is never called or imported</pattern>
+      <indicators>
+        <indicator>Unreferenced functions, classes, or modules</indicator>
+        <indicator>Commented-out code blocks > 10 lines</indicator>
+        <indicator>Feature flags permanently set to false</indicator>
+        <indicator>Empty directories with only __init__.py files</indicator>
+      </indicators>
+      <action>Remove after verification through static analysis and test coverage</action>
+    </criterion>
+
+    <criterion category="deprecated_patterns">
+      <pattern>Outdated coding patterns or libraries</pattern>
+      <indicators>
+        <indicator>Old API versions still in use</indicator>
+        <indicator>Synchronous code in async codebase</indicator>
+        <indicator>Legacy authentication methods</indicator>
+        <indicator>Deprecated library usage</indicator>
+      </indicators>
+      <action>Migrate to modern patterns with deprecation warnings</action>
+    </criterion>
+
+    <criterion category="inconsistent_naming">
+      <pattern>Inconsistent naming conventions across codebase</pattern>
+      <indicators>
+        <indicator>Mixed camelCase and snake_case in same module</indicator>
+        <indicator>Inconsistent file naming patterns</indicator>
+        <indicator>Database field naming inconsistencies</indicator>
+      </indicators>
+      <action>Standardize naming with automated refactoring tools</action>
+    </criterion>
+
+    <criterion category="migration_artifacts">
+      <pattern>Temporary code from incomplete migrations</pattern>
+      <indicators>
+        <indicator>Files with _old, _legacy, _deprecated suffixes</indicator>
+        <indicator>Wrapper functions that only call other functions</indicator>
+        <indicator>Compatibility layers older than 2 releases</indicator>
+        <indicator>TODO/FIXME comments older than 3 months</indicator>
+      </indicators>
+      <action>Complete migration or remove if no longer needed</action>
+    </criterion>
+
+    <criterion category="test_debt">
+      <pattern>Outdated or ineffective tests</pattern>
+      <indicators>
+        <indicator>Tests for non-existent functionality</indicator>
+        <indicator>Skipped tests without justification</indicator>
+        <indicator>Tests with hardcoded values that break frequently</indicator>
+        <indicator>Duplicate test implementations</indicator>
+      </indicators>
+      <action>Update or remove tests to match current implementation</action>
+    </criterion>
+  </identification_criteria>
+
+  <cleanup_process>
+    <phase id="1" name="Discovery">
+      <steps>
+        <step>Run static analysis tools to identify unused code</step>
+        <step>Generate code coverage reports to find untested paths</step>
+        <step>Search for duplicate implementations using similarity detection</step>
+        <step>Identify deprecated library usage and outdated patterns</step>
+        <step>Review TODO/FIXME comments and technical debt documentation</step>
+      </steps>
+      <deliverable>Legacy code inventory with priority rankings</deliverable>
+    </phase>
+
+    <phase id="2" name="Impact Analysis">
+      <steps>
+        <step>Trace dependencies of identified legacy code</step>
+        <step>Identify production usage through logs and metrics</step>
+        <step>Assess risk level for each cleanup item</step>
+        <step>Determine backward compatibility requirements</step>
+        <step>Estimate effort and complexity of changes</step>
+      </steps>
+      <deliverable>Risk assessment and migration plan</deliverable>
+    </phase>
+
+    <phase id="3" name="Planning">
+      <steps>
+        <step>Group related cleanup items into logical batches</step>
+        <step>Define success criteria for each cleanup</step>
+        <step>Create rollback plans for risky changes</step>
+        <step>Schedule cleanup work to avoid conflicts with feature development</step>
+        <step>Identify required test updates or additions</step>
+      </steps>
+      <deliverable>Detailed cleanup implementation plan</deliverable>
+    </phase>
+
+    <phase id="4" name="Implementation">
+      <steps>
+        <step>Create feature branch for cleanup work</step>
+        <step>Implement deprecation warnings before removal</step>
+        <step>Update or add tests to maintain coverage</step>
+        <step>Refactor code following established patterns</step>
+        <step>Update documentation and migration guides</step>
+      </steps>
+      <deliverable>Clean code with passing tests</deliverable>
+    </phase>
+
+    <phase id="5" name="Validation">
+      <steps>
+        <step>Run full test suite including integration tests</step>
+        <step>Perform manual testing of affected features</step>
+        <step>Verify performance metrics haven't degraded</step>
+        <step>Check for new linting or type checking errors</step>
+        <step>Review changes with team for architectural compliance</step>
+      </steps>
+      <deliverable>Validated and reviewed code changes</deliverable>
+    </phase>
+
+    <phase id="6" name="Deployment">
+      <steps>
+        <step>Deploy to staging environment first</step>
+        <step>Monitor error rates and performance metrics</step>
+        <step>Execute smoke tests on critical paths</step>
+        <step>Deploy to production with monitoring alerts</step>
+        <step>Keep rollback plan ready for quick reversion</step>
+      </steps>
+      <deliverable>Successfully deployed cleanup changes</deliverable>
+    </phase>
+
+    <phase id="7" name="Post-Deployment">
+      <steps>
+        <step>Monitor production metrics for 24-48 hours</step>
+        <step>Document lessons learned and update cleanup guides</step>
+        <step>Remove feature flags after stability period</step>
+        <step>Update technical debt tracking systems</step>
+        <step>Schedule follow-up for removing deprecation warnings</step>
+      </steps>
+      <deliverable>Completed cleanup with documentation</deliverable>
+    </phase>
+  </cleanup_process>
+
+  <migration_strategies>
+    <strategy name="Strangler Fig Pattern">
+      <when_to_use>Large monolithic components that need gradual replacement</when_to_use>
+      <approach>
+        <step>Create new implementation alongside old one</step>
+        <step>Route new traffic to new implementation</step>
+        <step>Gradually migrate existing usage</step>
+        <step>Remove old implementation when fully migrated</step>
+      </approach>
+    </strategy>
+
+    <strategy name="Branch by Abstraction">
+      <when_to_use>Replacing implementations that have many consumers</when_to_use>
+      <approach>
+        <step>Create abstraction layer over existing implementation</step>
+        <step>Update all consumers to use abstraction</step>
+        <step>Replace implementation behind abstraction</step>
+        <step>Remove abstraction if no longer needed</step>
+      </approach>
+    </strategy>
+
+    <strategy name="Parallel Run">
+      <when_to_use>Critical functionality where correctness must be verified</when_to_use>
+      <approach>
+        <step>Run both old and new implementations</step>
+        <step>Compare results and log discrepancies</step>
+        <step>Fix issues in new implementation</step>
+        <step>Switch to new implementation when verified</step>
+      </approach>
+    </strategy>
+
+    <strategy name="Feature Toggle">
+      <when_to_use>Any risky change that needs quick rollback capability</when_to_use>
+      <approach>
+        <step>Implement change behind feature flag</step>
+        <step>Enable for small percentage of traffic</step>
+        <step>Monitor metrics and gradually increase</step>
+        <step>Remove flag and old code after stability period</step>
+      </approach>
+    </strategy>
+  </migration_strategies>
+
+  <best_practices>
+    <practice category="code_removal">
+      <rule>Never remove code that might be in use without deprecation period</rule>
+      <rule>Always check for dynamic imports or reflection usage</rule>
+      <rule>Verify removal doesn't break external integrations</rule>
+      <rule>Keep removal commits separate from feature changes</rule>
+    </practice>
+
+    <practice category="refactoring">
+      <rule>Maintain existing public APIs during refactoring</rule>
+      <rule>Add comprehensive tests before refactoring</rule>
+      <rule>Refactor in small, reviewable increments</rule>
+      <rule>Update documentation as part of refactoring</rule>
+    </practice>
+
+    <practice category="deprecation">
+      <rule>Use @deprecated decorators with removal timeline</rule>
+      <rule>Log deprecation warnings in production</rule>
+      <rule>Provide clear migration path in deprecation message</rule>
+      <rule>Announce deprecations in release notes</rule>
+    </practice>
+
+    <practice category="testing">
+      <rule>Maintain or improve test coverage during cleanup</rule>
+      <rule>Add regression tests for bugs found during cleanup</rule>
+      <rule>Update integration tests to reflect new patterns</rule>
+      <rule>Remove tests for deleted functionality</rule>
+    </practice>
+
+    <practice category="documentation">
+      <rule>Update architecture diagrams after major cleanups</rule>
+      <rule>Document migration guides for breaking changes</rule>
+      <rule>Keep CHANGELOG updated with cleanup activities</rule>
+      <rule>Update README files to reflect current state</rule>
+    </practice>
+  </best_practices>
+
+  <metrics>
+    <metric name="code_coverage">
+      <description>Percentage of code covered by tests</description>
+      <target>Maintain or increase during cleanup</target>
+      <measurement>Coverage reports from test suite</measurement>
+    </metric>
+
+    <metric name="technical_debt_ratio">
+      <description>Ratio of remediation cost to development cost</description>
+      <target>Reduce by at least 10% per quarter</target>
+      <measurement>Static analysis tools like SonarQube</measurement>
+    </metric>
+
+    <metric name="duplicate_code_percentage">
+      <description>Percentage of code that is duplicated</description>
+      <target>Keep below 5% of codebase</target>
+      <measurement>Duplicate detection tools</measurement>
+    </metric>
+
+    <metric name="deprecation_age">
+      <description>Average age of deprecated code still in codebase</description>
+      <target>Remove deprecated code within 2 release cycles</target>
+      <measurement>Git history and deprecation timestamps</measurement>
+    </metric>
+
+    <metric name="build_time">
+      <description>Time to build and test the application</description>
+      <target>Reduce or maintain after cleanup</target>
+      <measurement>CI/CD pipeline metrics</measurement>
+    </metric>
+
+    <metric name="cyclomatic_complexity">
+      <description>Complexity of code paths</description>
+      <target>Reduce average complexity per function</target>
+      <measurement>Static analysis complexity metrics</measurement>
+    </metric>
+  </metrics>
+
+  <automation_tools>
+    <tool category="static_analysis">
+      <name>Ruff</name>
+      <purpose>Python linting and dead code detection</purpose>
+      <configuration>Enable unused import and variable detection</configuration>
+    </tool>
+
+    <tool category="coverage">
+      <name>pytest-cov</name>
+      <purpose>Code coverage analysis</purpose>
+      <configuration>Set minimum coverage thresholds</configuration>
+    </tool>
+
+    <tool category="dependency_analysis">
+      <name>pipdeptree</name>
+      <purpose>Identify unused dependencies</purpose>
+      <configuration>Regular dependency audits</configuration>
+    </tool>
+
+    <tool category="complexity_analysis">
+      <name>radon</name>
+      <purpose>Cyclomatic complexity measurement</purpose>
+      <configuration>Flag functions with complexity > 10</configuration>
+    </tool>
+
+    <tool category="duplicate_detection">
+      <name>pylint</name>
+      <purpose>Find duplicate code blocks</purpose>
+      <configuration>Configure similarity threshold</configuration>
+    </tool>
+  </automation_tools>
+
+  <risk_mitigation>
+    <risk level="high">
+      <description>Breaking production functionality</description>
+      <mitigation>
+        <action>Comprehensive testing in staging environment</action>
+        <action>Feature flags for gradual rollout</action>
+        <action>Automated rollback procedures</action>
+        <action>Monitoring and alerting on key metrics</action>
+      </mitigation>
+    </risk>
+
+    <risk level="medium">
+      <description>Performance degradation</description>
+      <mitigation>
+        <action>Performance testing before and after changes</action>
+        <action>Profile code to identify bottlenecks</action>
+        <action>Load testing with production-like data</action>
+      </mitigation>
+    </risk>
+
+    <risk level="medium">
+      <description>Breaking external integrations</description>
+      <mitigation>
+        <action>Maintain backward compatibility</action>
+        <action>Version APIs appropriately</action>
+        <action>Communicate changes to integration partners</action>
+      </mitigation>
+    </risk>
+
+    <risk level="low">
+      <description>Team resistance to changes</description>
+      <mitigation>
+        <action>Involve team in planning process</action>
+        <action>Document benefits of cleanup</action>
+        <action>Provide training on new patterns</action>
+      </mitigation>
+    </risk>
+  </risk_mitigation>
+
+  <checklist>
+    <item phase="before">Identify all consumers of code to be changed</item>
+    <item phase="before">Create comprehensive test coverage</item>
+    <item phase="before">Document current behavior</item>
+    <item phase="before">Set up monitoring for affected areas</item>
+    <item phase="during">Make changes in small increments</item>
+    <item phase="during">Run tests after each change</item>
+    <item phase="during">Update documentation inline</item>
+    <item phase="during">Commit frequently with clear messages</item>
+    <item phase="after">Verify all tests pass</item>
+    <item phase="after">Check performance metrics</item>
+    <item phase="after">Update deployment documentation</item>
+    <item phase="after">Monitor production for 48 hours</item>
+    <item phase="after">Remove feature flags after stability</item>
+    <item phase="after">Schedule follow-up for deprecation removal</item>
+  </checklist>
+
+  <reporting>
+    <report frequency="weekly" audience="development_team">
+      <content>Files cleaned, lines removed, test coverage changes</content>
+    </report>
+    <report frequency="monthly" audience="management">
+      <content>Technical debt reduction, complexity metrics, time saved</content>
+    </report>
+    <report frequency="quarterly" audience="stakeholders">
+      <content>System health improvements, performance gains, cost savings</content>
+    </report>
+  </reporting>
+</legacy_code_cleanup_specification>

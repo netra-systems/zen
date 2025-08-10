@@ -203,29 +203,75 @@ export default function DemoChat({ industry, onInteraction }: DemoChatProps) {
     setIsProcessing(true)
     setActiveAgent('triage')
     
-    // Simulate triage agent
-    await new Promise(resolve => setTimeout(resolve, 800))
-    setActiveAgent('analysis')
-    
-    // Simulate analysis agent
-    await new Promise(resolve => setTimeout(resolve, 1200))
-    setActiveAgent('optimization')
-    
-    // Simulate optimization agent
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Generate response based on input
-    const optimizationTypes = ['Model Compression', 'Batch Optimization', 'Caching Strategy', 'Infrastructure Scaling', 'Pipeline Parallelization']
-    const selectedOptimization = optimizationTypes[Math.floor(Math.random() * optimizationTypes.length)]
-    
-    const processingTime = 2500 + Math.random() * 1500
-    const tokensUsed = 1500 + Math.floor(Math.random() * 1000)
-    const costSaved = 15000 + Math.floor(Math.random() * 35000)
-    
-    const response: Message = {
-      id: Date.now().toString(),
-      role: 'assistant',
-      content: `Based on my analysis of your ${industry.toLowerCase()} workload, I've identified significant optimization opportunities:
+    try {
+      // Try to use the backend API
+      const sessionId = localStorage.getItem('demo-session-id') || `demo-${Date.now()}`
+      localStorage.setItem('demo-session-id', sessionId)
+      
+      // Make API call to backend
+      const response = await fetch('/api/demo/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          industry: industry,
+          session_id: sessionId,
+          context: {}
+        })
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        
+        // Simulate agent progression for visual effect
+        await new Promise(resolve => setTimeout(resolve, 800))
+        setActiveAgent('analysis')
+        await new Promise(resolve => setTimeout(resolve, 1200))
+        setActiveAgent('optimization')
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        const responseMessage: Message = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: data.response,
+          timestamp: new Date(),
+          metadata: {
+            processingTime: 3000,
+            tokensUsed: 1500,
+            costSaved: data.optimization_metrics?.estimated_annual_savings 
+              ? Math.round(data.optimization_metrics.estimated_annual_savings / 12) 
+              : 25000,
+            optimizationType: data.agents_involved?.join(' → ') || 'Multi-Agent Optimization'
+          }
+        }
+        
+        setMessages(prev => [...prev, responseMessage])
+      } else {
+        throw new Error('API call failed')
+      }
+    } catch (error) {
+      console.error('Demo chat API error:', error)
+      
+      // Fallback to simulation if API fails
+      await new Promise(resolve => setTimeout(resolve, 800))
+      setActiveAgent('analysis')
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      setActiveAgent('optimization')
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      const optimizationTypes = ['Model Compression', 'Batch Optimization', 'Caching Strategy', 'Infrastructure Scaling', 'Pipeline Parallelization']
+      const selectedOptimization = optimizationTypes[Math.floor(Math.random() * optimizationTypes.length)]
+      
+      const processingTime = 2500 + Math.random() * 1500
+      const tokensUsed = 1500 + Math.floor(Math.random() * 1000)
+      const costSaved = 15000 + Math.floor(Math.random() * 35000)
+      
+      const response: Message = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: `Based on my analysis of your ${industry.toLowerCase()} workload, I've identified significant optimization opportunities:
 
 **Current State Analysis:**
 - Processing ${Math.floor(10 + Math.random() * 90)}M requests/month
@@ -249,22 +295,24 @@ export default function DemoChat({ industry, onInteraction }: DemoChatProps) {
 - ${Math.floor(30 + Math.random() * 30)}% reduction in operational overhead
 
 Would you like me to generate a detailed implementation roadmap or explore specific optimization techniques?`,
-      timestamp: new Date(),
-      metadata: {
-        processingTime: processingTime,
-        tokensUsed: tokensUsed,
-        costSaved: costSaved,
-        optimizationType: selectedOptimization
+        timestamp: new Date(),
+        metadata: {
+          processingTime: processingTime,
+          tokensUsed: tokensUsed,
+          costSaved: costSaved,
+          optimizationType: selectedOptimization
+        }
       }
-    }
-    
-    setMessages(prev => [...prev, response])
-    setIsProcessing(false)
-    setActiveAgent(null)
-    setShowOptimization(true)
-    
-    if (onInteraction) {
-      onInteraction()
+      
+      setMessages(prev => [...prev, response])
+    } finally {
+      setIsProcessing(false)
+      setActiveAgent(null)
+      setShowOptimization(true)
+      
+      if (onInteraction) {
+        onInteraction()
+      }
     }
   }
 

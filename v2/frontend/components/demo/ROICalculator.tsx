@@ -55,6 +55,7 @@ export default function ROICalculator({ industry, onComplete }: ROICalculatorPro
 
   const [savings, setSavings] = useState<Savings | null>(null)
   const [calculated, setCalculated] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const industryMultipliers: Record<string, number> = {
     'Financial Services': 1.3,
@@ -65,48 +66,115 @@ export default function ROICalculator({ industry, onComplete }: ROICalculatorPro
     'default': 1.0
   }
 
-  const calculateROI = () => {
-    const multiplier = industryMultipliers[industry] || industryMultipliers.default
+  const calculateROI = async () => {
+    setIsLoading(true)
     
-    // Calculate infrastructure savings (40-60% reduction)
-    const infrastructureSavingsPercent = 0.45 + (Math.random() * 0.15)
-    const infrastructureCost = metrics.currentMonthlySpend * infrastructureSavingsPercent * multiplier
-    
-    // Calculate operational savings
-    const operationalSavingsPercent = 0.25
-    const operationalCost = (metrics.teamSize * 10000) * operationalSavingsPercent
-    
-    // Performance improvements value
-    const latencyImprovement = 0.6 // 60% latency reduction
-    const performanceValue = (metrics.requestsPerMonth / 1000000) * 500 * latencyImprovement
-    
-    // Total savings
-    const totalMonthlySavings = infrastructureCost + operationalCost + performanceValue
-    const totalAnnualSavings = totalMonthlySavings * 12
-    
-    // Implementation cost (one-time)
-    const implementationCost = metrics.currentMonthlySpend * 2
-    
-    // Payback period in months
-    const paybackPeriod = implementationCost / totalMonthlySavings
-    
-    // 3-year ROI
-    const threeYearSavings = totalAnnualSavings * 3
-    const threeYearROI = ((threeYearSavings - implementationCost) / implementationCost) * 100
+    try {
+      // Try to call the backend API first
+      const response = await fetch('/api/demo/roi/calculate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          current_spend: metrics.currentMonthlySpend,
+          request_volume: metrics.requestsPerMonth,
+          average_latency: metrics.averageLatency,
+          industry: industry
+        })
+      })
 
-    setSavings({
-      infrastructureCost,
-      operationalCost,
-      performanceGain: performanceValue,
-      totalMonthlySavings,
-      totalAnnualSavings,
-      paybackPeriod,
-      threeYearROI
-    })
-    
-    setCalculated(true)
-    if (onComplete) {
-      setTimeout(onComplete, 1500)
+      if (response.ok) {
+        const data = await response.json()
+        
+        // Map API response to our Savings interface
+        setSavings({
+          infrastructureCost: (data.current_annual_cost - data.optimized_annual_cost) / 12 * 0.7,
+          operationalCost: (data.current_annual_cost - data.optimized_annual_cost) / 12 * 0.2,
+          performanceGain: (data.current_annual_cost - data.optimized_annual_cost) / 12 * 0.1,
+          totalMonthlySavings: data.annual_savings / 12,
+          totalAnnualSavings: data.annual_savings,
+          paybackPeriod: data.roi_months,
+          threeYearROI: (data.three_year_tco_reduction / (metrics.currentMonthlySpend * 2)) * 100
+        })
+      } else {
+        // Fallback to local calculation if API fails
+        const multiplier = industryMultipliers[industry] || industryMultipliers.default
+        
+        // Calculate infrastructure savings (40-60% reduction)
+        const infrastructureSavingsPercent = 0.45 + (Math.random() * 0.15)
+        const infrastructureCost = metrics.currentMonthlySpend * infrastructureSavingsPercent * multiplier
+        
+        // Calculate operational savings
+        const operationalSavingsPercent = 0.25
+        const operationalCost = (metrics.teamSize * 10000) * operationalSavingsPercent
+        
+        // Performance improvements value
+        const latencyImprovement = 0.6 // 60% latency reduction
+        const performanceValue = (metrics.requestsPerMonth / 1000000) * 500 * latencyImprovement
+        
+        // Total savings
+        const totalMonthlySavings = infrastructureCost + operationalCost + performanceValue
+        const totalAnnualSavings = totalMonthlySavings * 12
+        
+        // Implementation cost (one-time)
+        const implementationCost = metrics.currentMonthlySpend * 2
+        
+        // Payback period in months
+        const paybackPeriod = implementationCost / totalMonthlySavings
+        
+        // 3-year ROI
+        const threeYearSavings = totalAnnualSavings * 3
+        const threeYearROI = ((threeYearSavings - implementationCost) / implementationCost) * 100
+
+        setSavings({
+          infrastructureCost,
+          operationalCost,
+          performanceGain: performanceValue,
+          totalMonthlySavings,
+          totalAnnualSavings,
+          paybackPeriod,
+          threeYearROI
+        })
+      }
+      
+      setCalculated(true)
+      if (onComplete) {
+        setTimeout(onComplete, 1500)
+      }
+    } catch (error) {
+      console.error('ROI calculation error:', error)
+      // Fallback to local calculation
+      const multiplier = industryMultipliers[industry] || industryMultipliers.default
+      const infrastructureSavingsPercent = 0.45 + (Math.random() * 0.15)
+      const infrastructureCost = metrics.currentMonthlySpend * infrastructureSavingsPercent * multiplier
+      const operationalSavingsPercent = 0.25
+      const operationalCost = (metrics.teamSize * 10000) * operationalSavingsPercent
+      const latencyImprovement = 0.6
+      const performanceValue = (metrics.requestsPerMonth / 1000000) * 500 * latencyImprovement
+      const totalMonthlySavings = infrastructureCost + operationalCost + performanceValue
+      const totalAnnualSavings = totalMonthlySavings * 12
+      const implementationCost = metrics.currentMonthlySpend * 2
+      const paybackPeriod = implementationCost / totalMonthlySavings
+      const threeYearSavings = totalAnnualSavings * 3
+      const threeYearROI = ((threeYearSavings - implementationCost) / implementationCost) * 100
+
+      setSavings({
+        infrastructureCost,
+        operationalCost,
+        performanceGain: performanceValue,
+        totalMonthlySavings,
+        totalAnnualSavings,
+        paybackPeriod,
+        threeYearROI
+      })
+      
+      setCalculated(true)
+      if (onComplete) {
+        setTimeout(onComplete, 1500)
+      }
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -248,10 +316,11 @@ export default function ROICalculator({ industry, onComplete }: ROICalculatorPro
             <Button 
               size="lg" 
               onClick={calculateROI}
+              disabled={isLoading}
               className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
             >
               <Calculator className="w-4 h-4 mr-2" />
-              Calculate ROI
+              {isLoading ? 'Calculating...' : 'Calculate ROI'}
             </Button>
           </div>
         </CardContent>
