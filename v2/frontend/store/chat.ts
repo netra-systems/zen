@@ -19,6 +19,7 @@ interface ChatState {
   clearSubAgent: () => void;
   setActiveThread: (threadId: string) => void;
   loadThreadMessages: (messages: Message[]) => void;
+  loadMessages: (messages: any[]) => void;
   addError: (error: string) => void;
   addErrorMessage: (error: string) => void;
   reset: () => void;
@@ -78,6 +79,17 @@ export const useChatStore = create<ChatState>((set) => ({
     messages: messages.map((msg, index) => ({
       ...msg,
       id: (msg.id && msg.id.trim() !== '') ? msg.id : `msg_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`
+    }))
+  }),
+
+  loadMessages: (messages) => set({
+    messages: messages.map((msg, index) => ({
+      id: msg.id || `msg_${Date.now()}_${index}`,
+      type: msg.role === 'user' ? 'user' : 'ai',
+      content: msg.content,
+      created_at: msg.created_at || new Date().toISOString(),
+      displayed_to_user: true,
+      ...msg
     }))
   }),
   

@@ -211,9 +211,11 @@ from app.routes import supply, generation, admin, references, health, corpus, sy
 from app.routes.auth import auth as auth_router
 from app.routes.agent_route import router as agent_router
 from app.routes.llm_cache import router as llm_cache_router
+from app.routes.threads_route import router as threads_router
 
 app.include_router(auth_router.router, prefix="/api/auth", tags=["auth"])
 app.include_router(agent_router, prefix="/api/agent", tags=["agent"])
+app.include_router(threads_router, tags=["threads"])
 app.include_router(llm_cache_router, prefix="/api/llm-cache", tags=["llm-cache"])
 app.include_router(supply.router, prefix="/api/supply", tags=["supply"])
 app.include_router(generation.router, prefix="/api/generation", tags=["generation"])
