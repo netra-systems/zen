@@ -153,28 +153,36 @@ class MessageHandlerService:
             elif hasattr(response, '__dict__'):
                 response_data = response.__dict__
             
-            await manager.send_message(
-                user_id,
-                {
-                    "event": "agent_finished",
-                    "data": response_data
-                }
-            )
-        except WebSocketDisconnect:
-            logger.info(f"WebSocket disconnected for user {user_id}")
-            # Don't try to send messages to disconnected WebSocket
-        except Exception as e:
-            logger.error(f"Error processing user message: {e}")
+            # Attempt to send the response, but handle disconnection gracefully
             try:
                 await manager.send_message(
                     user_id,
                     {
-                        "event": "error",
-                        "data": {"error": str(e)}
+                        "event": "agent_finished",
+                        "data": response_data
                     }
                 )
+            except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
+                logger.info(f"WebSocket disconnected when sending response to user {user_id}: {e}")
+                # Don't re-raise, just log and continue
+        except WebSocketDisconnect:
+            logger.info(f"WebSocket disconnected for user {user_id} during processing")
+            # Don't try to send messages to disconnected WebSocket
+        except RuntimeError as e:
+            if "Cannot call" in str(e) or "close" in str(e).lower():
+                logger.info(f"WebSocket already closed for user {user_id}: {e}")
+            else:
+                logger.error(f"Runtime error processing user message: {e}")
+                try:
+                    await manager.send_error(user_id, str(e))
+                except Exception:
+                    logger.debug(f"Could not send error to user {user_id}")
+        except Exception as e:
+            logger.error(f"Error processing user message: {e}")
+            try:
+                await manager.send_error(user_id, f"Internal server error: {str(e)}")
             except Exception:
-                logger.warning(f"Could not send error to disconnected user {user_id}")
+                logger.debug(f"Could not send error to user {user_id}")
     
     async def handle_thread_history(
         self,

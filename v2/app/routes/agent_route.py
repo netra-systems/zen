@@ -21,10 +21,10 @@ async def run_agent(
     """
     try:
         result = await supervisor.run(
-            request_model.model_dump(), 
+            request_model.query, 
             request_model.id, 
             stream_updates=True)
-        return result
+        return {"run_id": request_model.id, "status": "started"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

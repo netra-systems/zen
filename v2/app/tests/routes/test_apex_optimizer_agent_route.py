@@ -33,7 +33,7 @@ async def test_apex_optimizer_agent(prompt: str, client: TestClient):
             )
         ]
     )
-    response = client.post("/run_agent", json=request_model.model_dump())
+    response = client.post("/api/agent/run_agent", json=request_model.model_dump())
     assert response.status_code == 200
     run_id = response.json()["run_id"]
     assert isinstance(run_id, str)
