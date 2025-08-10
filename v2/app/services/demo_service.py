@@ -651,9 +651,7 @@ Provide specific optimization recommendations."""
 
 from fastapi import Depends
 
-def get_demo_service(
-    agent_service: Optional[AgentService] = None
-) -> DemoService:
+def get_demo_service() -> DemoService:
     """
     Factory function to create DemoService instance for dependency injection.
     
@@ -661,12 +659,12 @@ def get_demo_service(
         DemoService instance ready for use in FastAPI routes
     """
     # Import here to avoid circular dependency
+    agent_service = None
     try:
         from app.services.agent_service import get_agent_service
         # If we can import agent_service, use it
-        if not agent_service:
-            # Note: This is a simplified version, in production you'd properly inject this
-            agent_service = None  # AgentService is optional for demo
+        # Note: This is a simplified version, in production you'd properly inject this
+        agent_service = None  # AgentService is optional for demo
     except ImportError:
         agent_service = None
     

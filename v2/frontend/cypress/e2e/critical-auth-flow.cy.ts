@@ -13,8 +13,8 @@ describe('Critical Authentication Flow', () => {
 
   it('should complete full authentication lifecycle', () => {
     // 1. Navigate to login page
-    cy.visit('/auth/login');
-    cy.url().should('include', '/auth/login');
+    cy.visit('/login');
+    cy.url().should('include', '/login');
     
     // 2. Verify login form is present
     cy.get('input[type="email"]').should('be.visible');
@@ -60,7 +60,7 @@ describe('Critical Authentication Flow', () => {
     cy.get('button').contains(/logout|sign out/i).click();
     
     // 10. Verify logout redirects to login
-    cy.url().should('include', '/auth/login');
+    cy.url().should('include', '/login');
     
     // 11. Verify token is cleared
     cy.window().then((win) => {
@@ -72,12 +72,12 @@ describe('Critical Authentication Flow', () => {
     
     // 12. Attempt to access protected route after logout
     cy.visit('/chat');
-    cy.url().should('include', '/auth/login');
+    cy.url().should('include', '/login');
   });
 
   it('should handle session expiration gracefully', () => {
     // Login first
-    cy.visit('/auth/login');
+    cy.visit('/login');
     cy.get('input[type="email"]').type(testUser.email);
     cy.get('input[type="password"]').type(testUser.password);
     cy.get('button[type="submit"]').click();
@@ -94,13 +94,13 @@ describe('Critical Authentication Flow', () => {
     cy.visit('/chat');
     
     // Should redirect to login
-    cy.url().should('include', '/auth/login');
+    cy.url().should('include', '/login');
     cy.contains(/session expired|please login/i).should('be.visible');
   });
 
   it('should maintain authentication state across multiple tabs', () => {
     // Login in first tab
-    cy.visit('/auth/login');
+    cy.visit('/login');
     cy.get('input[type="email"]').type(testUser.email);
     cy.get('input[type="password"]').type(testUser.password);
     cy.get('button[type="submit"]').click();

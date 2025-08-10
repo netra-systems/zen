@@ -8,7 +8,7 @@ describe('Critical WebSocket Communication Flow', () => {
     // Login first
     cy.clearLocalStorage();
     cy.clearCookies();
-    cy.visit('/auth/login');
+    cy.visit('/login');
     cy.get('input[type="email"]').type(testUser.email);
     cy.get('input[type="password"]').type(testUser.password);
     cy.get('button[type="submit"]').click();

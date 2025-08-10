@@ -1,14 +1,17 @@
 """Demo API routes for enterprise demonstrations."""
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 import uuid
+import json
+import asyncio
 
 from app.auth.auth_dependencies import get_current_user
 from app.services.demo_service import DemoService, get_demo_service
 from app.logging_config import central_logger
+from app.ws_manager import manager
 
 router = APIRouter(prefix="/api/demo", tags=["demo"])
 
@@ -300,3 +303,96 @@ async def get_demo_analytics(
         logger = central_logger.get_logger(__name__)
         logger.error(f"Analytics retrieval error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to get analytics")
+
+@router.websocket("/ws")
+async def demo_websocket_endpoint(
+    websocket: WebSocket,
+    demo_service: DemoService = Depends(get_demo_service)
+):
+    """
+    WebSocket endpoint for real-time demo interactions.
+    
+    Provides streaming responses and live optimization feedback.
+    """
+    await websocket.accept()
+    logger = central_logger.get_logger(__name__)
+    
+    # Generate session ID for this WebSocket connection
+    session_id = f"demo-ws-{uuid.uuid4()}"
+    
+    try:
+        await websocket.send_json({
+            "type": "connection_established",
+            "session_id": session_id,
+            "message": "Connected to Netra AI Demo WebSocket"
+        })
+        
+        while True:
+            # Receive message from client
+            data = await websocket.receive_text()
+            message_data = json.loads(data)
+            
+            # Handle different message types
+            if message_data.get("type") == "chat":
+                # Send initial acknowledgment
+                await websocket.send_json({
+                    "type": "processing_started",
+                    "agents": ["triage", "analysis", "optimization"]
+                })
+                
+                # Simulate agent progression with real-time updates
+                agents = ["triage", "analysis", "optimization", "reporting"]
+                for i, agent in enumerate(agents):
+                    await asyncio.sleep(0.8)  # Simulate processing time
+                    await websocket.send_json({
+                        "type": "agent_update",
+                        "active_agent": agent,
+                        "progress": (i + 1) / len(agents) * 100,
+                        "message": f"Agent {agent} is processing your request..."
+                    })
+                
+                # Process the actual chat message
+                result = await demo_service.process_demo_chat(
+                    message=message_data.get("message", ""),
+                    industry=message_data.get("industry", "technology"),
+                    session_id=session_id,
+                    context=message_data.get("context", {})
+                )
+                
+                # Send the final response
+                await websocket.send_json({
+                    "type": "chat_response",
+                    "response": result["response"],
+                    "agents_involved": result["agents"],
+                    "optimization_metrics": result["metrics"],
+                    "session_id": session_id
+                })
+                
+            elif message_data.get("type") == "metrics":
+                # Stream synthetic metrics
+                metrics = await demo_service.generate_synthetic_metrics(
+                    scenario=message_data.get("scenario", "standard"),
+                    duration_hours=1
+                )
+                
+                # Send metrics in chunks for real-time visualization
+                for i in range(len(metrics["timestamps"])):
+                    await websocket.send_json({
+                        "type": "metrics_update",
+                        "timestamp": metrics["timestamps"][i].isoformat() if hasattr(metrics["timestamps"][i], 'isoformat') else str(metrics["timestamps"][i]),
+                        "values": {
+                            key: values[i] if i < len(values) else 0
+                            for key, values in metrics["values"].items()
+                        }
+                    })
+                    await asyncio.sleep(0.1)  # Stream data points
+                    
+            elif message_data.get("type") == "ping":
+                # Handle ping for connection keep-alive
+                await websocket.send_json({"type": "pong"})
+                
+    except WebSocketDisconnect:
+        logger.info(f"Demo WebSocket disconnected: {session_id}")
+    except Exception as e:
+        logger.error(f"Demo WebSocket error: {str(e)}")
+        await websocket.close(code=1011, reason=str(e))

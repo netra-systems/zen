@@ -33,10 +33,12 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { demoService } from '@/services/demoService'
+import { useDemoWebSocket } from '@/hooks/useDemoWebSocket'
 
 interface DemoChatProps {
   industry: string
   onInteraction?: () => void
+  useWebSocket?: boolean
 }
 
 interface Message {
@@ -60,13 +62,45 @@ interface Template {
   category: string
 }
 
-export default function DemoChat({ industry, onInteraction }: DemoChatProps) {
+export default function DemoChat({ industry, onInteraction, useWebSocket = false }: DemoChatProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [activeAgent, setActiveAgent] = useState<string | null>(null)
   const [showOptimization, setShowOptimization] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  
+  // WebSocket hook for real-time interactions
+  const {
+    isConnected,
+    sendChatMessage: wsSendChatMessage,
+    lastMessage: wsLastMessage,
+    error: wsError
+  } = useDemoWebSocket({
+    onMessage: (data) => {
+      if (data.type === 'agent_update') {
+        setActiveAgent(data.active_agent)
+      } else if (data.type === 'chat_response') {
+        const responseMessage: Message = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: data.response,
+          timestamp: new Date(),
+          metadata: {
+            processingTime: 3000,
+            tokensUsed: 1500,
+            costSaved: data.optimization_metrics?.estimated_annual_savings 
+              ? Math.round(data.optimization_metrics.estimated_annual_savings / 12) 
+              : 25000,
+            optimizationType: data.agents_involved?.join(' → ') || 'Multi-Agent Optimization'
+          }
+        }
+        setMessages(prev => [...prev, responseMessage])
+        setIsProcessing(false)
+        setActiveAgent(null)
+      }
+    }
+  })
 
   const industryTemplates: Record<string, Template[]> = {
     'Financial Services': [
@@ -205,7 +239,15 @@ export default function DemoChat({ industry, onInteraction }: DemoChatProps) {
     setActiveAgent('triage')
     
     try {
-      // Try to use the backend API
+      // Check if we should use WebSocket for real-time updates
+      if (useWebSocket && isConnected) {
+        // Send via WebSocket for real-time streaming
+        wsSendChatMessage(userMessage, industry)
+        // Response will be handled by the WebSocket onMessage handler
+        return
+      }
+      
+      // Otherwise use standard HTTP API
       const sessionId = localStorage.getItem('demo-session-id') || `demo-${Date.now()}`
       localStorage.setItem('demo-session-id', sessionId)
       
@@ -339,7 +381,27 @@ Would you like me to generate a detailed implementation roadmap or explore speci
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>AI Optimization Assistant</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  AI Optimization Assistant
+                  {useWebSocket && (
+                    <Badge 
+                      variant={isConnected ? "success" : "secondary"}
+                      className="text-xs"
+                    >
+                      {isConnected ? (
+                        <>
+                          <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse" />
+                          Live
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full mr-1" />
+                          Connecting...
+                        </>
+                      )}
+                    </Badge>
+                  )}
+                </CardTitle>
                 <CardDescription>Powered by multi-agent orchestration</CardDescription>
               </div>
               <div className="flex items-center gap-2">
