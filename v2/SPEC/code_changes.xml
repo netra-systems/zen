@@ -57,21 +57,29 @@
     <checklist-item id="test-coverage" critical="true">
       <title>Maintain Test Coverage</title>
       <description>
-        Test coverage must meet minimum requirements
+        Test coverage must meet minimum requirements and work toward 97% goal
       </description>
       <requirements>
-        <requirement type="backend">Minimum 70% coverage</requirement>
-        <requirement type="frontend">Minimum 60% coverage</requirement>
+        <requirement type="current-minimum-backend">Minimum 70% coverage</requirement>
+        <requirement type="current-minimum-frontend">Minimum 60% coverage</requirement>
+        <requirement type="target">97% overall coverage (see SPEC/test_update_spec.xml)</requirement>
       </requirements>
       <actions>
         <action>Write unit tests for new functions/methods</action>
         <action>Write integration tests for new API endpoints</action>
         <action>Write component tests for new React components</action>
+        <action>Run automated test improvement: python scripts/test_updater.py --execute-spec</action>
       </actions>
       <validation>
         Backend: python scripts/test_backend.py --coverage
         Frontend: python scripts/test_frontend.py --coverage
+        Automated improvement: python scripts/test_updater.py --monitor
       </validation>
+      <automation>
+        For automatic test generation and coverage improvement, use:
+        python scripts/test_updater.py --execute-spec
+        This will generate missing tests, update legacy patterns, and optimize performance
+      </automation>
     </checklist-item>
     
     <checklist-item id="agent-tracking" critical="true">
@@ -332,6 +340,28 @@
         <action>Ensure new dependencies are installed in CI environment</action>
         <action>Update Docker images if base requirements change</action>
       </actions>
+    </checklist-item>
+    
+    <checklist-item id="test-automation">
+      <title>Automated Test Improvement</title>
+      <description>
+        Use the test update specification for continuous test improvement
+      </description>
+      <reference>SPEC/test_update_spec.xml</reference>
+      <actions>
+        <action>Run test updater to achieve 97% coverage: python scripts/test_updater.py --execute-spec</action>
+        <action>Monitor coverage progress: python scripts/test_updater.py --monitor</action>
+        <action>Schedule daily improvements: python scripts/test_updater.py --daily-cycle</action>
+        <action>Perform weekly optimizations: python scripts/test_updater.py --weekly-optimization</action>
+        <action>Conduct monthly audits: python scripts/test_updater.py --monthly-audit</action>
+      </actions>
+      <benefits>
+        <benefit>Automatic test generation for untested code</benefit>
+        <benefit>Legacy test pattern modernization</benefit>
+        <benefit>Test performance optimization</benefit>
+        <benefit>Self-healing test capabilities</benefit>
+        <benefit>Coverage gap analysis and filling</benefit>
+      </benefits>
     </checklist-item>
     
     <checklist-item id="pre-commit-hooks">

@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification name="review" version="1.0">
+  <title>Comprehensive Code Review Specification</title>
+  <description>
+    CRITICAL: This specification defines the comprehensive review process for the Netra AI platform.
+    It ensures code quality, spec alignment, and identifies issues from rapid development and AI-assisted coding.
+    This review should be run regularly, especially after significant changes or AI-assisted development sessions.
+  </description>
+  
+  <metadata>
+    <created>2025-08-10</created>
+    <priority>CRITICAL</priority>
+    <frequency>After each feature/sprint, before releases, after AI coding sessions</frequency>
+    <estimated-time>15-30 minutes</estimated-time>
+  </metadata>
+
+  <section name="spec-code-alignment">
+    <title>Specification and Code Alignment Validation</title>
+    <description>Ensure bidirectional consistency between specifications and implementation</description>
+    
+    <review-item id="spec-to-code" critical="true">
+      <title>Validate Code Reflects Specifications</title>
+      <description>Verify that all specifications are properly implemented in code</description>
+      <checks>
+        <check type="implementation">
+          Review SPEC/*.xml files and verify corresponding implementations exist
+        </check>
+        <check type="completeness">
+          Ensure all specification requirements are fully implemented
+        </check>
+        <check type="accuracy">
+          Validate that implementations match specification details exactly
+        </check>
+      </checks>
+      <key-specs>
+        <spec>SPEC/code_changes.xml - Import tests and type synchronization</spec>
+        <spec>SPEC/websockets.xml - WebSocket connection management</spec>
+        <spec>SPEC/subagents.xml - Agent lifecycle and orchestration</spec>
+        <spec>SPEC/security.xml - Authentication and authorization</spec>
+        <spec>SPEC/database.xml - Repository pattern and UoW</spec>
+      </key-specs>
+    </review-item>
+    
+    <review-item id="code-to-spec" critical="true">
+      <title>Validate Specifications Reflect Code</title>
+      <description>Ensure specifications are updated when code changes</description>
+      <checks>
+        <check type="documentation">
+          Verify new features/changes are documented in specifications
+        </check>
+        <check type="deprecation">
+          Check for deprecated code that should be removed from specs
+        </check>
+        <check type="accuracy">
+          Validate spec descriptions match actual implementation behavior
+        </check>
+      </checks>
+    </review-item>
+    
+    <review-item id="conflict-resolution" critical="true">
+      <title>Conflict Resolution Rules</title>
+      <description>Rules for resolving spec-code conflicts</description>
+      <rules>
+        <rule priority="1">
+          If conflict involves security: Code implementation takes precedence (fix spec)
+        </rule>
+        <rule priority="2">
+          If conflict involves critical functionality: Review git history, take most recent working version
+        </rule>
+        <rule priority="3">
+          If conflict is minor: Prefer specification intent, update code to match
+        </rule>
+        <rule priority="4">
+          When uncertain: Consult CLAUDE.md and git commit history for context
+        </rule>
+        <rule priority="5">
+          Documentation conflicts: Always update docs to reflect current code behavior
+        </rule>
+      </rules>
+    </review-item>
+  </section>
+
+  <section name="critical-smoke-tests">
+    <title>Critical System Smoke Tests</title>
+    <description>Quick validation of major subsystems to catch critical issues early</description>
+    
+    <smoke-test id="backend-startup" critical="true">
+      <title>Backend Startup Validation</title>
+      <commands>
+        <command>python -c "from app.main import app; print('✓ FastAPI app imports successfully')"</command>
+        <command>python -c "from app.db.postgres import get_engine; print('✓ Database connection configured')"</command>
+        <command>python -c "from app.redis_manager import RedisManager; print('✓ Redis manager available')"</command>
+      </commands>
+    </smoke-test>
+    
+    <smoke-test id="agent-system" critical="true">
+      <title>Agent System Health Check</title>
+      <commands>
+        <command>python -c "from app.agents.supervisor import SupervisorAgent; print('✓ Supervisor agent loads')"</command>
+        <command>python -c "from app.services.agent_service import AgentService; print('✓ Agent service available')"</command>
+        <command>python -c "from app.agents.tool_dispatcher import ToolDispatcher; print('✓ Tool dispatcher functional')"</command>
+      </commands>
+    </smoke-test>
+    
+    <smoke-test id="websocket-system" critical="true">
+      <title>WebSocket System Validation</title>
+      <commands>
+        <command>python -c "from app.ws_manager import WebSocketManager; print('✓ WebSocket manager loads')"</command>
+        <command>python -c "from app.services.websocket.message_handler import MessageHandler; print('✓ Message handler available')"</command>
+      </commands>
+    </smoke-test>
+    
+    <smoke-test id="frontend-build" critical="true">
+      <title>Frontend Build Validation</title>
+      <commands>
+        <command>cd frontend && npm run lint --silent && echo "✓ Frontend linting passes"</command>
+        <command>cd frontend && npm run type-check && echo "✓ TypeScript compilation successful"</command>
+      </commands>
+    </smoke-test>
+    
+    <smoke-test id="import-tests" critical="true">
+      <title>Import Test Suite</title>
+      <commands>
+        <command>python test_runner.py --mode quick</command>
+      </commands>
+    </smoke-test>
+  </section>
+
+  <section name="ai-coding-issues">
+    <title>AI and Rapid Development Issue Detection</title>
+    <description>Focus on common issues from AI-assisted coding and rapid iterations</description>
+    
+    <ai-issue id="duplicate-implementations" severity="high">
+      <title>Duplicate Function/Class Implementations</title>
+      <description>AI often creates duplicate implementations instead of reusing existing code</description>
+      <detection>
+        <step>Search for duplicate function names across codebase</step>
+        <step>Check for similar functionality with different names</step>
+        <step>Review recently added utility functions for existing equivalents</step>
+      </detection>
+      <common-locations>
+        <location>app/services/ - Service layer duplications</location>
+        <location>app/utils/ - Utility function duplications</location>
+        <location>frontend/utils/ - Frontend helper duplications</location>
+        <location>Test files - Duplicate test helpers</location>
+      </common-locations>
+    </ai-issue>
+    
+    <ai-issue id="import-inconsistencies" severity="high">
+      <title>Import Path Inconsistencies</title>
+      <description>AI may use incorrect or inconsistent import paths</description>
+      <detection>
+        <step>Verify all imports use absolute paths from project root</step>
+        <step>Check for mixed relative/absolute imports</step>
+        <step>Validate no circular dependencies introduced</step>
+      </detection>
+    </ai-issue>
+    
+    <ai-issue id="type-mismatches" severity="high">
+      <title>Type Definition Mismatches</title>
+      <description>Frontend/backend type synchronization issues</description>
+      <detection>
+        <step>Compare Pydantic models with TypeScript interfaces</step>
+        <step>Check for any 'any' types added in TypeScript</step>
+        <step>Verify optional/required field consistency</step>
+      </detection>
+    </ai-issue>
+    
+    <ai-issue id="error-handling-gaps" severity="medium">
+      <title>Incomplete Error Handling</title>
+      <description>AI often misses edge cases and error scenarios</description>
+      <detection>
+        <step>Check for unhandled promise rejections</step>
+        <step>Verify try-catch blocks have proper error handling</step>
+        <step>Ensure WebSocket disconnections are handled</step>
+        <step>Validate database transaction rollbacks</step>
+      </detection>
+    </ai-issue>
+    
+    <ai-issue id="state-management" severity="high">
+      <title>State Management Issues</title>
+      <description>Race conditions and state synchronization problems</description>
+      <detection>
+        <step>Review WebSocket state updates for race conditions</step>
+        <step>Check Zustand store updates for proper immutability</step>
+        <step>Verify database transaction isolation levels</step>
+      </detection>
+    </ai-issue>
+    
+    <ai-issue id="test-coverage-gaps" severity="medium">
+      <title>Missing or Incorrect Tests</title>
+      <description>AI-generated code often lacks proper test coverage</description>
+      <detection>
+        <step>Check if new functions have corresponding tests</step>
+        <step>Verify test assertions match actual behavior</step>
+        <step>Ensure mocks are properly configured</step>
+      </detection>
+    </ai-issue>
+  </section>
+
+  <section name="recent-changes-review">
+    <title>Recent Changes Analysis</title>
+    <description>Focus review on recently modified areas prone to bugs</description>
+    
+    <git-analysis id="recent-commits">
+      <title>Analyze Recent Commits</title>
+      <commands>
+        <command>git log --oneline -20 --pretty=format:"%h %s" | head -20</command>
+        <command>git diff --stat HEAD~5..HEAD</command>
+      </commands>
+      <focus-areas>
+        <area>Files with multiple recent modifications (high churn)</area>
+        <area>Large commits that may have introduced bugs</area>
+        <area>Merge commits that may have conflicts</area>
+      </focus-areas>
+    </git-analysis>
+    
+    <git-analysis id="unstaged-changes">
+      <title>Review Unstaged Changes</title>
+      <commands>
+        <command>git status --short</command>
+        <command>git diff --stat</command>
+      </commands>
+    </git-analysis>
+    
+    <git-analysis id="hotspot-detection">
+      <title>Detect Code Hotspots</title>
+      <description>Identify frequently changed files that are bug-prone</description>
+      <commands>
+        <command>git log --pretty=format: --name-only | sort | uniq -c | sort -rg | head -20</command>
+      </commands>
+    </git-analysis>
+  </section>
+
+  <section name="common-bug-patterns">
+    <title>Common Bug Patterns from Rapid Development</title>
+    <description>Specific patterns to check based on common rapid development issues</description>
+    
+    <pattern id="async-await-issues">
+      <title>Async/Await Problems</title>
+      <checks>
+        <check>Missing await keywords on async function calls</check>
+        <check>Synchronous code in async context blocking event loop</check>
+        <check>Unhandled promise rejections</check>
+        <check>Race conditions in concurrent operations</check>
+      </checks>
+    </pattern>
+    
+    <pattern id="null-undefined-checks">
+      <title>Null/Undefined Reference Errors</title>
+      <checks>
+        <check>Optional chaining missing on potentially null objects</check>
+        <check>Array/object destructuring without defaults</check>
+        <check>Missing null checks before method calls</check>
+      </checks>
+    </pattern>
+    
+    <pattern id="resource-leaks">
+      <title>Resource Leak Detection</title>
+      <checks>
+        <check>Database connections not properly closed</check>
+        <check>WebSocket connections not cleaned up</check>
+        <check>Event listeners not removed on cleanup</check>
+        <check>File handles left open</check>
+        <check>Redis connections not released</check>
+      </checks>
+    </pattern>
+    
+    <pattern id="security-vulnerabilities">
+      <title>Security Issue Detection</title>
+      <checks>
+        <check>SQL injection vulnerabilities in raw queries</check>
+        <check>XSS vulnerabilities in user input rendering</check>
+        <check>Exposed secrets or API keys in code</check>
+        <check>Missing authentication/authorization checks</check>
+        <check>CORS configuration issues</check>
+      </checks>
+    </pattern>
+  </section>
+
+  <section name="performance-review">
+    <title>Performance Impact Review</title>
+    <description>Check for performance degradations from recent changes</description>
+    
+    <perf-check id="database-queries">
+      <title>Database Query Optimization</title>
+      <checks>
+        <check>N+1 query problems in new code</check>
+        <check>Missing database indexes on frequently queried fields</check>
+        <check>Inefficient JOIN operations</check>
+        <check>Large data transfers without pagination</check>
+      </checks>
+    </perf-check>
+    
+    <perf-check id="frontend-bundles">
+      <title>Frontend Bundle Size</title>
+      <checks>
+        <check>New dependencies significantly increasing bundle size</check>
+        <check>Missing code splitting for large components</check>
+        <check>Duplicate dependencies in package.json</check>
+      </checks>
+    </perf-check>
+    
+    <perf-check id="memory-leaks">
+      <title>Memory Leak Detection</title>
+      <checks>
+        <check>Circular references preventing garbage collection</check>
+        <check>Large objects stored in memory without cleanup</check>
+        <check>Event emitter listener accumulation</check>
+      </checks>
+    </perf-check>
+  </section>
+
+  <section name="review-execution">
+    <title>Review Execution Process</title>
+    <description>Step-by-step process for conducting the review</description>
+    
+    <step order="1">
+      <title>Run Critical Smoke Tests</title>
+      <action>Execute all smoke tests to ensure system stability</action>
+      <fail-fast>true</fail-fast>
+    </step>
+    
+    <step order="2">
+      <title>Analyze Recent Changes</title>
+      <action>Review git history and identify high-risk changes</action>
+    </step>
+    
+    <step order="3">
+      <title>Check Spec-Code Alignment</title>
+      <action>Validate specifications match implementation</action>
+    </step>
+    
+    <step order="4">
+      <title>Scan for AI Coding Issues</title>
+      <action>Look for common AI-generated code problems</action>
+    </step>
+    
+    <step order="5">
+      <title>Review Bug Patterns</title>
+      <action>Check for common rapid development issues</action>
+    </step>
+    
+    <step order="6">
+      <title>Performance Analysis</title>
+      <action>Evaluate performance impact of changes</action>
+    </step>
+    
+    <step order="7">
+      <title>Generate Review Report</title>
+      <action>Create comprehensive report of findings</action>
+    </step>
+  </section>
+
+  <section name="review-report-template">
+    <title>Review Report Template</title>
+    <template>
+      # Code Review Report - [DATE]
+      
+      ## Executive Summary
+      - Review Type: [Routine/Pre-release/Post-AI-coding]
+      - Critical Issues Found: [COUNT]
+      - High Priority Issues: [COUNT]
+      - Medium Priority Issues: [COUNT]
+      
+      ## System Health
+      ### Smoke Test Results
+      - [ ] Backend startup: [PASS/FAIL]
+      - [ ] Agent system: [PASS/FAIL]
+      - [ ] WebSocket system: [PASS/FAIL]
+      - [ ] Frontend build: [PASS/FAIL]
+      - [ ] Import tests: [PASS/FAIL]
+      
+      ## Spec-Code Alignment
+      ### Specifications Not Implemented
+      - [List any specs without corresponding code]
+      
+      ### Code Without Specifications
+      - [List any significant code without specs]
+      
+      ### Conflicts Resolved
+      - [List any conflicts and resolutions]
+      
+      ## Recent Changes Analysis
+      ### High-Risk Changes
+      - [List files/features with high change frequency]
+      
+      ### Potential Bug Areas
+      - [List areas likely to have issues]
+      
+      ## AI Coding Issues Detected
+      ### Duplications Found
+      - [List duplicate implementations]
+      
+      ### Type Mismatches
+      - [List type synchronization issues]
+      
+      ### Missing Error Handling
+      - [List error handling gaps]
+      
+      ## Performance Concerns
+      - [List any performance degradations]
+      
+      ## Security Issues
+      - [List any security vulnerabilities]
+      
+      ## Action Items
+      ### Critical (Must fix immediately)
+      1. [Action item]
+      
+      ### High (Fix before next release)
+      1. [Action item]
+      
+      ### Medium (Fix in next sprint)
+      1. [Action item]
+      
+      ## Recommendations
+      - [Suggestions for improving code quality]
+      - [Process improvements to prevent issues]
+    </template>
+  </section>
+  
+  <section name="automation">
+    <title>Review Automation</title>
+    <description>Scripts and commands to automate the review process</description>
+    
+    <script id="full-review" language="python">
+      <title>Complete Review Script</title>
+      <location>scripts/run_review.py</location>
+      <description>
+        Python script that executes all review checks and generates report
+      </description>
+    </script>
+    
+    <command id="quick-review">
+      <title>Quick Review Command</title>
+      <cmd>python scripts/run_review.py --mode quick</cmd>
+      <description>Runs only critical checks for rapid feedback</description>
+    </command>
+    
+    <command id="full-review">
+      <title>Full Review Command</title>
+      <cmd>python scripts/run_review.py --mode full --report</cmd>
+      <description>Comprehensive review with detailed report generation</description>
+    </command>
+    
+    <command id="ai-review">
+      <title>AI-Focused Review</title>
+      <cmd>python scripts/run_review.py --focus ai-issues --recent-commits 20</cmd>
+      <description>Focuses on AI-generated code issues in recent commits</description>
+    </command>
+  </section>
+</specification>
