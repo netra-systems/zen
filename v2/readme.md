@@ -8,12 +8,14 @@ Netra is a sophisticated AI optimization platform that leverages a multi-agent s
 
 ### Key Features
 
-- **Multi-Agent Intelligence**: Supervisor-orchestrated agents for specialized optimization tasks
-- **Real-Time Communication**: WebSocket-based live updates and interactions
-- **Dual Database System**: PostgreSQL for transactional data, ClickHouse for analytics
-- **Enterprise Security**: OAuth 2.0 authentication with JWT tokens
-- **Modern UI/UX**: React-based chat interface with real-time status updates
-- **Scalable Architecture**: Async-first design with microservices patterns
+- **Multi-Agent Intelligence**: Five specialized sub-agents orchestrated by advanced supervisor
+- **Real-Time Communication**: WebSocket manager with heartbeat, retry logic, and connection pooling
+- **Dual Database System**: PostgreSQL for transactional data, ClickHouse for time-series analytics
+- **Enterprise Security**: Google OAuth 2.0 integration with JWT tokens and secure session management
+- **Modern UI/UX**: Next.js 14 chat interface with real-time agent status and thinking indicators
+- **Apex Optimizer Agent**: 30+ specialized optimization tools for cost, latency, and performance analysis
+- **State Persistence**: Database-backed conversation continuity and recovery
+- **Scalable Architecture**: Async-first design with repository pattern and dependency injection
 
 ## 📋 Table of Contents
 
@@ -137,11 +139,13 @@ Create a `.env` file in the root directory:
 # Database
 DATABASE_URL=postgresql://user:password@localhost:5432/netra_db
 CLICKHOUSE_URL=clickhouse://localhost:9000/netra_analytics
+REDIS_URL=redis://localhost:6379
 
 # Authentication
-JWT_SECRET_KEY=your-secret-key-here
-OAUTH_CLIENT_ID=your-oauth-client-id
-OAUTH_CLIENT_SECRET=your-oauth-client-secret
+SECRET_KEY=your-secret-key-here
+GOOGLE_CLIENT_ID=your-google-oauth-client-id
+GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
+FRONTEND_URL=http://localhost:3000
 
 # API Keys
 OPENAI_API_KEY=your-openai-key
@@ -149,7 +153,14 @@ ANTHROPIC_API_KEY=your-anthropic-key
 
 # Environment
 ENVIRONMENT=development
-DEBUG=true
+LOG_LEVEL=DEBUG
+
+# Database Pool
+MAX_CONNECTIONS=10
+POOL_SIZE=5
+
+# CORS
+CORS_ORIGINS=http://localhost:3000,http://localhost:8000
 ```
 
 ### Database Setup
@@ -194,32 +205,63 @@ ORDER BY timestamp;
 v2/
 ├── app/                      # Backend application
 │   ├── agents/              # Multi-agent system
-│   │   ├── supervisor.py    # Main orchestrator
+│   │   ├── supervisor.py    # Legacy supervisor
+│   │   ├── supervisor_consolidated.py  # Enhanced supervisor with hooks
+│   │   ├── orchestration/   # Orchestration components
 │   │   ├── triage_sub_agent.py
-│   │   └── reporting_sub_agent.py
+│   │   ├── data_sub_agent.py
+│   │   ├── optimizations_core_sub_agent.py
+│   │   ├── actions_to_meet_goals_sub_agent.py
+│   │   ├── reporting_sub_agent.py
+│   │   └── tool_dispatcher.py
 │   ├── routes/              # API endpoints
-│   │   ├── auth/           # Authentication routes
-│   │   ├── websockets.py   # WebSocket handlers
+│   │   ├── auth/           # OAuth and JWT authentication
+│   │   ├── websockets.py   # WebSocket with heartbeat
+│   │   ├── agent_route.py  # Agent execution
+│   │   ├── threads_route.py # Thread management
 │   │   └── health.py       # Health checks
 │   ├── services/            # Business logic
 │   │   ├── agent_service.py
-│   │   ├── database/       # Database services
-│   │   └── websocket/      # WebSocket services
+│   │   ├── apex_optimizer_agent/  # 30+ optimization tools
+│   │   │   ├── tools/      # Individual tool implementations
+│   │   │   └── tool_builder.py
+│   │   ├── database/       # Repository pattern
+│   │   ├── websocket/      # Message handling
+│   │   └── state/          # State persistence
 │   ├── schemas/            # Pydantic models
-│   ├── models/             # SQLAlchemy models
-│   └── main.py             # Application entry
+│   ├── db/                 # Database models
+│   │   ├── models_postgres.py
+│   │   └── models_clickhouse.py
+│   ├── core/               # Core utilities
+│   │   ├── exceptions.py   # Error handling
+│   │   └── error_context.py # Trace IDs
+│   └── main.py             # App entry with auto-migration
 ├── frontend/               # Frontend application
-│   ├── app/               # Next.js app router
+│   ├── app/               # Next.js 14 app router
+│   │   ├── chat/          # Main chat interface
+│   │   ├── auth/          # OAuth pages
+│   │   └── (other pages)
 │   ├── components/        # React components
 │   │   ├── chat/         # Chat UI components
-│   │   └── ui/           # Shared UI components
-│   ├── auth/             # Authentication
-│   ├── hooks/            # React hooks
-│   ├── store/            # Zustand state
-│   └── types/            # TypeScript types
-├── tests/                 # Backend tests
+│   │   │   ├── MessageItem.tsx
+│   │   │   ├── MessageInput.tsx
+│   │   │   └── ThinkingIndicator.tsx
+│   │   └── ui/           # shadcn/ui components
+│   ├── providers/        # Context providers
+│   │   └── WebSocketProvider.tsx
+│   ├── hooks/            # Custom hooks
+│   │   ├── useWebSocket.ts
+│   │   └── useAgent.ts
+│   ├── store/            # Zustand state stores
+│   │   ├── chat.ts
+│   │   └── authStore.ts
+│   └── types/            # TypeScript definitions
+├── tests/                 # Backend test suite
+│   ├── agents/           # Agent tests
+│   ├── routes/           # API tests
+│   └── services/         # Service tests
 ├── docs/                  # Documentation
-├── SPEC/                  # System specifications
+├── SPEC/                  # XML specifications
 └── scripts/              # Utility scripts
 ```
 
@@ -257,51 +299,86 @@ mypy app/              # Backend
 ### REST Endpoints
 
 #### Authentication
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
-- `GET /api/auth/me` - Get current user
-- `GET /api/auth/google/authorize` - OAuth authorization
-- `GET /api/auth/google/callback` - OAuth callback
+- `POST /api/auth/login` - User login with email/password
+- `POST /api/auth/logout` - User logout and session cleanup
+- `GET /api/auth/me` - Get current authenticated user
+- `GET /api/auth/google/authorize` - Initiate Google OAuth flow
+- `GET /api/auth/google/callback` - Handle OAuth callback
 
 #### Agent Operations
-- `POST /api/agent/execute` - Execute agent workflow
-- `GET /api/agent/status/{run_id}` - Get execution status
+- `WebSocket /ws` - Real-time agent execution via WebSocket
+- `GET /api/agent/status/{run_id}` - Get run status
 - `GET /api/agent/history` - Get execution history
 
+#### Thread Management
+- `POST /api/threads` - Create new conversation thread
+- `GET /api/threads` - List user's threads
+- `DELETE /api/threads/{thread_id}` - Delete thread
+- `PUT /api/threads/{thread_id}/switch` - Switch active thread
+
+#### Supply Catalog
+- `GET /api/supply/catalog` - Get available models/providers
+- `POST /api/supply/estimate` - Estimate optimization costs
+
+#### Content Generation
+- `POST /api/generation/start` - Start content generation
+- `GET /api/generation/status/{job_id}` - Check generation status
+
 #### Health & Monitoring
-- `GET /health` - Health check
-- `GET /health/ready` - Readiness probe
-- `GET /health/dependencies` - Dependency status
+- `GET /health` - Basic health check
+- `GET /health/ready` - Readiness with dependency checks
+- `GET /health/dependencies` - Detailed dependency status
 
 ### WebSocket Events
 
 ```typescript
-// Connection
+// Connection with JWT authentication
 ws://localhost:8000/ws?token={jwt_token}
 
 // Message Types
-interface AgentMessage {
-  type: 'agent_update' | 'status' | 'result' | 'error';
+interface WebSocketMessage {
+  type: 'agent_started' | 'sub_agent_update' | 'agent_completed' | 
+        'tool_call' | 'tool_result' | 'agent_log' | 'error' | 
+        'connection_established' | 'heartbeat';
   data: any;
-  timestamp: string;
+  metadata?: {
+    thread_id?: string;
+    run_id?: string;
+    agent_name?: string;
+    timestamp: string;
+  };
 }
 
-// Example: Send optimization request
+// Example: Start agent execution
 {
-  "type": "optimization_request",
+  "action": "start_agent",
   "data": {
-    "workload_id": "wl-123",
-    "parameters": {...}
+    "message": "Optimize my AI workload costs",
+    "thread_id": "thread-123"
   }
 }
 
-// Example: Receive agent status
+// Example: Receive sub-agent status
 {
-  "type": "agent_update",
+  "type": "sub_agent_update",
   "data": {
-    "agent": "DataSubAgent",
-    "status": "processing",
-    "message": "Analyzing workload patterns..."
+    "agent_name": "TriageSubAgent",
+    "status": "thinking",
+    "message": "Analyzing request and determining optimization approach..."
+  },
+  "metadata": {
+    "thread_id": "thread-123",
+    "run_id": "run-456",
+    "timestamp": "2024-01-15T10:30:00Z"
+  }
+}
+
+// Example: Tool execution
+{
+  "type": "tool_call",
+  "data": {
+    "tool_name": "cost_analyzer",
+    "parameters": {...}
   }
 }
 ```
@@ -383,18 +460,32 @@ services:
     environment:
       - ENVIRONMENT=production
       - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
     ports:
       - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     
   frontend:
     image: netra/frontend:latest
     environment:
       - NEXT_PUBLIC_API_URL=https://api.netrasystems.ai
+      - NEXT_PUBLIC_WS_URL=wss://api.netrasystems.ai/ws
     ports:
       - "3000:3000"
     
   postgres:
     image: postgres:14
+    environment:
+      - POSTGRES_DB=netra_db
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     
@@ -402,6 +493,16 @@ services:
     image: clickhouse/clickhouse-server
     volumes:
       - clickhouse_data:/var/lib/clickhouse
+    
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  clickhouse_data:
+  redis_data:
 ```
 
 ### Environment Variables

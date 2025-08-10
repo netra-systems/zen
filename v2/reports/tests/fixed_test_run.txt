@@ -1,0 +1,120 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.4, pytest-8.3.2, pluggy-1.5.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.3.2', 'pluggy': '1.5.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '1.1.0', 'cov': '6.2.1', 'html': '4.1.1', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2
+configfile: pytest.ini
+plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-1.1.0, cov-6.2.1, html-4.1.1, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 15 items
+run-last-failure: 185 known failures not in selected tests
+
+tests/test_fixed_critical.py::test_config_loading PASSED                 [  6%]
+tests/test_fixed_critical.py::test_authentication_token_creation FAILED  [ 13%]
+tests/test_fixed_critical.py::test_websocket_manager_structure FAILED    [ 20%]
+tests/test_fixed_critical.py::test_database_engine FAILED                [ 26%]
+tests/test_fixed_critical.py::test_user_schema_validation PASSED         [ 33%]
+tests/test_fixed_critical.py::test_websocket_message_schema FAILED       [ 40%]
+tests/test_fixed_critical.py::test_error_exception_classes FAILED        [ 46%]
+tests/test_fixed_critical.py::test_logging_configuration FAILED          [ 53%]
+tests/test_fixed_critical.py::test_redis_manager_structure FAILED        [ 60%]
+tests/test_fixed_critical.py::test_key_manager FAILED                    [ 66%]
+tests/test_fixed_critical.py::test_thread_schema FAILED                  [ 73%]
+tests/test_fixed_critical.py::test_agent_service_structure FAILED        [ 80%]
+tests/test_fixed_critical.py::test_supply_catalog_service_structure FAILED [ 86%]
+tests/test_fixed_critical.py::test_message_handler_types FAILED          [ 93%]
+tests/test_fixed_critical.py::test_health_response_schema FAILED         [100%]
+
+================================== FAILURES ===================================
+_____________________ test_authentication_token_creation ______________________
+tests\test_fixed_critical.py:28: in test_authentication_token_creation
+    from app.auth.auth import create_access_token, decode_access_token
+E   ImportError: cannot import name 'create_access_token' from 'app.auth.auth' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\app\auth\auth.py)
+______________________ test_websocket_manager_structure _______________________
+tests\test_fixed_critical.py:44: in test_websocket_manager_structure
+    from app.ws_manager import WebSocketConnectionManager
+E   ImportError: cannot import name 'WebSocketConnectionManager' from 'app.ws_manager' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\app\ws_manager.py)
+____________________________ test_database_engine _____________________________
+tests\test_fixed_critical.py:56: in test_database_engine
+    from app.db.postgres import engine
+E   ImportError: cannot import name 'engine' from 'app.db.postgres' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\app\db\postgres.py)
+---------------------------- Captured stdout call -----------------------------
+[32m2025-08-10 06:08:05.503[0m | [36mINFO    [0m | [36mapp.db.postgres[0m:[36m<module>[0m:[36m109[0m - [36mPostgreSQL async engine created with connection pooling[0m
+________________________ test_websocket_message_schema ________________________
+tests\test_fixed_critical.py:84: in test_websocket_message_schema
+    message = WebSocketMessage(
+E   pydantic_core._pydantic_core.ValidationError: 1 validation error for WebSocketMessage
+E   payload
+E     Field required [type=missing, input_value={'type': 'user_message', ...737-bce3-0fd4c2fd02c0'}}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.11/v/missing
+________________________ test_error_exception_classes _________________________
+tests\test_fixed_critical.py:109: in test_error_exception_classes
+    error = NetraException(
+E   TypeError: NetraException.__init__() got an unexpected keyword argument 'error_code'
+_________________________ test_logging_configuration __________________________
+tests\test_fixed_critical.py:125: in test_logging_configuration
+    assert hasattr(central_logger, 'info')
+E   AssertionError: assert False
+E    +  where False = hasattr(<app.logging_config.CentralLogger object at 0x00000187038BE150>, 'info')
+________________________ test_redis_manager_structure _________________________
+tests\test_fixed_critical.py:138: in test_redis_manager_structure
+    assert hasattr(manager, 'url')
+E   AssertionError: assert False
+E    +  where False = hasattr(<app.redis_manager.RedisManager object at 0x0000018703DB6690>, 'url')
+______________________________ test_key_manager _______________________________
+app\services\key_manager.py:22: in load_from_settings
+    return cls(jwt_secret_key=jwt_secret_key, fernet_key=fernet_key_bytes)
+E   pydantic_core._pydantic_core.ValidationError: 2 validation errors for KeyManager
+E   jwt_secret_key
+E     Input should be a valid string [type=string_type, input_value=<Mock name='mock.jwt_secr...key' id='1679386926528'>, input_type=Mock]
+E       For further information visit https://errors.pydantic.dev/2.11/v/string_type
+E   fernet_key
+E     Input should be a valid bytes [type=bytes_type, input_value=<Mock name='mock.fernet_key' id='1679399018544'>, input_type=Mock]
+E       For further information visit https://errors.pydantic.dev/2.11/v/bytes_type
+
+The above exception was the direct cause of the following exception:
+tests\test_fixed_critical.py:150: in test_key_manager
+    key_manager = KeyManager.load_from_settings(mock_settings)
+app\services\key_manager.py:25: in load_from_settings
+    raise ValueError(
+E   ValueError: JWT secret key is too short. It must be at least 32 characters long. Update it in your .env file or configuration.
+_____________________________ test_thread_schema ______________________________
+tests\test_fixed_critical.py:158: in test_thread_schema
+    from app.schemas import ThreadCreate
+E   ImportError: cannot import name 'ThreadCreate' from 'app.schemas' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\app\schemas\__init__.py)
+________________________ test_agent_service_structure _________________________
+tests\test_fixed_critical.py:179: in test_agent_service_structure
+    service = AgentService(
+E   TypeError: AgentService.__init__() got an unexpected keyword argument 'thread_service'
+____________________ test_supply_catalog_service_structure ____________________
+tests\test_fixed_critical.py:196: in test_supply_catalog_service_structure
+    service = SupplyCatalogService(supply_catalog_repository=mock_repo)
+E   TypeError: SupplyCatalogService() takes no arguments
+_________________________ test_message_handler_types __________________________
+tests\test_fixed_critical.py:205: in test_message_handler_types
+    from app.services.websocket.message_handler import MessageType
+E   ImportError: cannot import name 'MessageType' from 'app.services.websocket.message_handler' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\app\services\websocket\message_handler.py)
+_________________________ test_health_response_schema _________________________
+tests\test_fixed_critical.py:215: in test_health_response_schema
+    from app.schemas.common import HealthResponse
+E   ModuleNotFoundError: No module named 'app.schemas.common'
+=========================== short test summary info ===========================
+FAILED tests/test_fixed_critical.py::test_authentication_token_creation - ImportError: cannot import name 'create_access_token' from 'app.auth.auth' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\app\auth\auth.py)
+FAILED tests/test_fixed_critical.py::test_websocket_manager_structure - ImportError: cannot import name 'WebSocketConnectionManager' from 'app.ws_manager' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\app\ws_manager.py)
+FAILED tests/test_fixed_critical.py::test_database_engine - ImportError: cannot import name 'engine' from 'app.db.postgres' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\app\db\postgres.py)
+FAILED tests/test_fixed_critical.py::test_websocket_message_schema - pydantic_core._pydantic_core.ValidationError: 1 validation error for WebSocketMessage
+payload
+  Field required [type=missing, input_value={'type': 'user_message', ...737-bce3-0fd4c2fd02c0'}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+FAILED tests/test_fixed_critical.py::test_error_exception_classes - TypeError: NetraException.__init__() got an unexpected keyword argument 'error_code'
+FAILED tests/test_fixed_critical.py::test_logging_configuration - AssertionError: assert False
+ +  where False = hasattr(<app.logging_config.CentralLogger object at 0x00000187038BE150>, 'info')
+FAILED tests/test_fixed_critical.py::test_redis_manager_structure - AssertionError: assert False
+ +  where False = hasattr(<app.redis_manager.RedisManager object at 0x0000018703DB6690>, 'url')
+FAILED tests/test_fixed_critical.py::test_key_manager - ValueError: JWT secret key is too short. It must be at least 32 characters long. Update it in your .env file or configuration.
+FAILED tests/test_fixed_critical.py::test_thread_schema - ImportError: cannot import name 'ThreadCreate' from 'app.schemas' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\app\schemas\__init__.py)
+FAILED tests/test_fixed_critical.py::test_agent_service_structure - TypeError: AgentService.__init__() got an unexpected keyword argument 'thread_service'
+FAILED tests/test_fixed_critical.py::test_supply_catalog_service_structure - TypeError: SupplyCatalogService() takes no arguments
+FAILED tests/test_fixed_critical.py::test_message_handler_types - ImportError: cannot import name 'MessageType' from 'app.services.websocket.message_handler' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\app\services\websocket\message_handler.py)
+FAILED tests/test_fixed_critical.py::test_health_response_schema - ModuleNotFoundError: No module named 'app.schemas.common'
+================== 13 failed, 2 passed, 10 warnings in 2.50s ==================

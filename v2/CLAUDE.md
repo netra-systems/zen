@@ -117,63 +117,91 @@ npm run cy:run           # Headless Cypress tests
    - **WebSocket**: Real-time communication with backend
 
 3. **Agent System Architecture**
-   - **Supervisor**: Orchestrates sub-agents and manages workflow
-   - **Sub-agents**: Specialized agents for different tasks
-   - **Tool Dispatcher**: Routes tool calls to appropriate handlers
-   - **Tool Registry**: Dynamic tool registration system
-   - **State Management**: Shared state across agent conversations
-   - **Apex Optimizer Agent**: Advanced optimization agent with specialized tools
+   - **Supervisor**: Dual implementation with legacy and consolidated versions
+     - Consolidated supervisor includes hooks, execution strategies, and retry logic
+   - **Sub-agents**: Five specialized agents for triage, data, optimization, actions, and reporting
+   - **Tool Dispatcher**: Dynamic routing with 30+ optimization tools
+   - **Tool Registry**: Service-based dynamic tool registration
+   - **State Management**: Database-backed persistence with recovery
+   - **Apex Optimizer Agent**: Production-ready optimizer with:
+     - Cost analysis and simulation tools
+     - Latency bottleneck identification
+     - KV cache optimization
+     - Performance prediction
+     - Policy simulation and optimization
 
 ### Key Design Patterns
 
-1. **WebSocket Communication**: Real-time bidirectional communication for agent interactions
+1. **WebSocket Communication**: Advanced WebSocket manager with:
+   - Connection pooling and per-user tracking
+   - Heartbeat mechanism (30s intervals, 60s timeout)
+   - Automatic retry with exponential backoff
+   - Comprehensive statistics and monitoring
 2. **Dependency Injection**: Services injected via FastAPI dependency system
 3. **Async/Await**: Pervasive async patterns for scalability
-4. **Type Safety**: Pydantic models for request/response validation
-5. **Multi-Agent Orchestration**: Supervisor pattern for coordinating specialized agents
+4. **Type Safety**: Pydantic models with auto-generated TypeScript types
+5. **Multi-Agent Orchestration**: Pipeline-based execution with hooks
 6. **Repository Pattern**: Database access through repositories with unit of work
-7. **Error Context**: Comprehensive error tracking with trace IDs
-8. **OAuth Integration**: Support for OAuth authentication flows
+7. **Error Context**: Trace IDs with middleware-based tracking
+8. **OAuth Integration**: Complete Google OAuth2 implementation
 
 ### Database Schema
 
 - **PostgreSQL Tables**: 
-  - `users` - User accounts and authentication
-  - `threads` - Conversation threads
-  - `messages` - Chat messages
-  - `runs` - Agent execution runs
-  - `references` - Document references
-  - `supply_catalog` - Supply catalog data
+  - `userbase` - User accounts and authentication (renamed from users)
+  - `threads` - Conversation threads with user association
+  - `messages` - Chat messages with role and metadata
+  - `runs` - Agent execution runs with detailed tracking
+  - `thread_runs` - Association between threads and runs
+  - `agent_runs` - Individual agent execution records
+  - `agent_reports` - Generated reports from agents
+  - `references` - Document references with embedding support
+  - `supply_catalog` - Model and provider catalog
+  - `user_secrets` - Encrypted user API keys
+  - `oauth_secrets` - OAuth provider configurations
 - **ClickHouse Tables**: 
-  - `workload_events` - Time-series log data
+  - `workload_events` - Time-series log data with structured event tracking
 
 ### Authentication Flow
 
 1. **Standard Login**:
    - Frontend sends login request to `/api/auth/login`
-   - Backend validates credentials against PostgreSQL
-   - JWT token generated and returned
-   - Frontend stores token and includes in subsequent requests
+   - Backend validates credentials using bcrypt hashing
+   - JWT token generated with user context
+   - Frontend stores token in localStorage/cookies
+   - Token included in Authorization header for API calls
 
-2. **OAuth Flow**:
-   - User initiates OAuth login
-   - Redirected to provider for authorization
-   - Callback processes authorization code
-   - JWT token issued for authenticated session
+2. **Google OAuth Flow**:
+   - User clicks Google login button
+   - Redirected to Google OAuth consent screen
+   - Callback to `/api/auth/google/callback` with authorization code
+   - Backend exchanges code for user info
+   - Creates/updates user in database
+   - JWT token issued and returned to frontend
+   - Session management with secure cookies
 
 3. **WebSocket Authentication**:
-   - Connections authenticated via JWT token
-   - Token validated on connection establishment
+   - JWT token passed as query parameter on connection
+   - Token validated and user context established
+   - Connection tracked in WebSocket manager
+   - Automatic cleanup on disconnection
 
 ### Agent Workflow
 
-1. User message received via WebSocket
-2. Message queued in WebSocket message handler
-3. Supervisor agent triages request
-4. Appropriate sub-agent(s) selected based on task
-5. Sub-agents use tools to gather data and perform analysis
-6. Results aggregated and sent back via WebSocket
-7. State persisted for conversation continuity
+1. User message received via WebSocket with authentication
+2. Message validated and queued in handler with rate limiting
+3. Thread context loaded or created for conversation
+4. Supervisor agent initialized with state recovery
+5. Sequential execution of sub-agents:
+   - TriageSubAgent analyzes request and determines approach
+   - DataSubAgent collects relevant data and context
+   - OptimizationsCoreSubAgent generates optimization recommendations
+   - ActionsToMeetGoalsSubAgent creates action plans
+   - ReportingSubAgent compiles final report
+6. Each agent streams updates via WebSocket events
+7. State persisted to database after each agent
+8. Final report sent with markdown formatting
+9. Thread and run records updated in database
 
 ### Error Handling
 
@@ -282,38 +310,56 @@ python run_server.py  # Migrations run automatically
 
 Key environment variables to configure:
 - `DATABASE_URL` - PostgreSQL connection string
-- `CLICKHOUSE_URL` - ClickHouse connection string
+- `CLICKHOUSE_URL` - ClickHouse connection string  
 - `REDIS_URL` - Redis connection string
-- `SECRET_KEY` - Application secret key
-- `ANTHROPIC_API_KEY` - Anthropic API key for LLM
-- `OPENAI_API_KEY` - OpenAI API key (if used)
+- `SECRET_KEY` - Application secret key for JWT signing
+- `ANTHROPIC_API_KEY` - Anthropic API key for Claude models
+- `OPENAI_API_KEY` - OpenAI API key (optional)
 - `ENVIRONMENT` - Environment (development/staging/production)
+- `GOOGLE_CLIENT_ID` - Google OAuth client ID
+- `GOOGLE_CLIENT_SECRET` - Google OAuth client secret
+- `FRONTEND_URL` - Frontend URL for OAuth redirects
+- `LOG_LEVEL` - Logging level (DEBUG/INFO/WARNING/ERROR)
+- `MAX_CONNECTIONS` - Database connection pool size
+- `CORS_ORIGINS` - Allowed CORS origins (comma-separated)
 
 ## Testing Strategy
 
-### Backend Testing
-- Unit tests for services and utilities
-- Integration tests for API endpoints
-- Agent system tests for sub-agents and supervisor
-- WebSocket connection tests
-- Database repository tests
+### Backend Testing (`app/tests/`)
+- **Agent Tests**: End-to-end agent workflows, supervisor orchestration
+- **Route Tests**: API endpoint validation, authentication flows
+- **Service Tests**: Business logic, agent service, generation service
+- **Core Tests**: Configuration, error handling, service interfaces
+- **WebSocket Tests**: Connection lifecycle, message handling, error recovery
+- **Database Tests**: Repository pattern, unit of work, migrations
+- **Performance Tests**: Load testing, optimization validation
 
-### Frontend Testing
-- Component tests with Jest
-- Integration tests with Cypress
-- WebSocket provider tests
-- Store tests for state management
-- Hook tests for custom hooks
+### Frontend Testing (`frontend/__tests__/`)
+- **Component Tests**: React components with React Testing Library
+- **Critical Path Tests**: Authentication, chat, WebSocket resilience
+- **Hook Tests**: Custom React hooks (useWebSocket, useAgent, etc.)
+- **Store Tests**: Zustand state management and updates
+- **Integration Tests**: API client services, WebSocket provider
+- **E2E Tests**: Cypress tests for complete user flows
+- **Accessibility Tests**: WCAG compliance validation
 
 ## Deployment
 
 ### Docker
-- `Dockerfile` - Main container configuration
-- `Dockerfile.backend` - Backend-specific container
+- `Dockerfile` - Multi-stage build for production
+- `Dockerfile.backend` - Backend-only container for microservices
+- Environment-specific configurations
+- Health check endpoints configured
 
 ### Terraform (GCP)
-- `terraform-gcp/` - GCP deployment configuration
-- Includes scripts for deployment automation
+- `terraform-gcp/main.tf` - Infrastructure as code
+- `terraform-gcp/variables.tf` - Configuration variables
+- `terraform-gcp/deploy.sh` - Deployment automation script
+- Includes Cloud Run, Cloud SQL, Redis setup
 
-### GCP Deployment
-See `GCP_DEPLOYMENT_README.md` for detailed deployment instructions
+### Production Deployment
+- See `GCP_DEPLOYMENT_README.md` for GCP deployment
+- Database migrations run automatically on startup
+- WebSocket connections via Cloud Run WebSockets
+- Monitoring via Cloud Logging and Cloud Monitoring
+- Secrets managed via Secret Manager
