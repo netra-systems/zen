@@ -1,6 +1,5 @@
 from sqlalchemy import text
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, HTTPException
 from app.db.postgres import get_async_db as get_db, async_engine
 from app.logging_config import central_logger
 from app.services.database_env_service import DatabaseEnvironmentValidator
@@ -21,14 +20,15 @@ async def live() -> Dict[str, str]:
     return {"status": "ok"}
 
 @router.get("/ready")
-async def ready(db: AsyncSession = Depends(get_db)) -> Dict[str, str]:
+async def ready() -> Dict[str, str]:
     """
     Readiness probe to check if the application is ready to serve requests.
     """
     try:
         # Check Postgres connection
-        result = await db.execute(text("SELECT 1"))
-        result.scalar_one_or_none()
+        async with get_db() as db:
+            result = await db.execute(text("SELECT 1"))
+            result.scalar_one_or_none()
 
         # Check ClickHouse connection
         clickhouse_client = central_logger.clickhouse_db
