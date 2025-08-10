@@ -7,10 +7,10 @@ from sqlalchemy.future import select
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 
-from ..db import models_postgres
-from .. import schemas
-from .key_manager import KeyManager
-from ..config import settings
+from app.db import models_postgres
+from app import schemas
+from app.services.key_manager import KeyManager
+from app.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

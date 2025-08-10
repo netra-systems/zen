@@ -9,12 +9,12 @@ from typing import List, Optional, Dict
 from pydantic import BaseModel, Field
 from datetime import datetime
 
-from .. import schemas
-from ..services.synthetic_data_service import synthetic_data_service
-from ..services.corpus_service import corpus_service
-from ..dependencies import get_db_session
-from ..auth.auth_dependencies import get_current_user
-from ..db.models_postgres import User
+from app import schemas
+from app.services.synthetic_data_service import synthetic_data_service
+from app.services.corpus_service import corpus_service
+from app.dependencies import get_db_session
+from app.auth.auth_dependencies import get_current_user
+from app.db.models_postgres import User
 
 
 # Request/Response Models

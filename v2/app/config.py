@@ -9,8 +9,8 @@ from pydantic import ValidationError
 # Import the schemas without circular dependency
 from app.schemas.Config import AppConfig, DevelopmentConfig, ProductionConfig, TestingConfig
 
-from .core.secret_manager import SecretManager
-from .core.config_validator import ConfigValidator
+from app.core.secret_manager import SecretManager
+from app.core.config_validator import ConfigValidator
 
 
 class ConfigurationError(Exception):

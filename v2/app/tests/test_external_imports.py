@@ -71,8 +71,9 @@ class TestExternalImports:
         ("openai", "openai"),
         ("tiktoken", "tiktoken"),
         ("langchain", "langchain"),
-        ("langchain.embeddings", "langchain.embeddings"),
-        ("langchain.vectorstores", "langchain.vectorstores"),
+        ("langchain_community", "langchain_community"),
+        ("langchain_community.embeddings", "langchain_community.embeddings"),
+        ("langchain_community.vectorstores", "langchain_community.vectorstores"),
         
         # Data processing
         ("pandas", "pandas"),

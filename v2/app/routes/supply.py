@@ -1,9 +1,9 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from ..dependencies import DbDep
-from ..services.supply_catalog_service import SupplyCatalogService
-from .. import schemas
+from app.dependencies import DbDep
+from app.services.supply_catalog_service import SupplyCatalogService
+from app import schemas
 
 router = APIRouter()
 catalog_service = SupplyCatalogService()

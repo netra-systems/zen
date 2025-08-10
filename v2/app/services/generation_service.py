@@ -16,15 +16,15 @@ import pandas as pd
 import numpy as np
 from faker import Faker
 
-from ..config import settings
-from ..schemas import ContentGenParams, LogGenParams, SyntheticDataGenParams, ContentCorpus
-from ..data.synthetic.content_generator import META_PROMPTS
-from ..db.clickhouse_base import ClickHouseDatabase
-from ..db.models_clickhouse import get_content_corpus_schema, get_llm_events_table_schema
-from ..data.ingestion import ingest_records
-from ..data.content_corpus import DEFAULT_CONTENT_CORPUS
-from .job_store import job_store
-from ..ws_manager import manager
+from app.config import settings
+from app.schemas import ContentGenParams, LogGenParams, SyntheticDataGenParams, ContentCorpus
+from app.data.synthetic.content_generator import META_PROMPTS
+from app.db.clickhouse_base import ClickHouseDatabase
+from app.db.models_clickhouse import get_content_corpus_schema, get_llm_events_table_schema
+from app.data.ingestion import ingest_records
+from app.data.content_corpus import DEFAULT_CONTENT_CORPUS
+from app.services.job_store import job_store
+from app.ws_manager import manager
 
 # --- Job Management ---
 

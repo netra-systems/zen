@@ -1,11 +1,11 @@
 from typing import List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
 from sqlalchemy.orm import Session
-from .. import schemas
-from ..services import corpus_service, clickhouse_service
-from ..dependencies import get_db_session
-from ..auth.auth_dependencies import get_current_user
-from ..db.models_postgres import User
+from app import schemas
+from app.services import corpus_service, clickhouse_service
+from app.dependencies import get_db_session
+from app.auth.auth_dependencies import get_current_user
+from app.db.models_postgres import User
 
 router = APIRouter()
 

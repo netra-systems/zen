@@ -7,9 +7,9 @@ from typing import List, Dict, Any, Optional
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status, Depends
 
-from ..services.generation_service import run_content_generation_job, run_log_generation_job, run_synthetic_data_generation_job, run_data_ingestion_job
-from ..services.job_store import job_store
-from ..db.clickhouse import get_clickhouse_client
+from app.services.generation_service import run_content_generation_job, run_log_generation_job, run_synthetic_data_generation_job, run_data_ingestion_job
+from app.services.job_store import job_store
+from app.db.clickhouse import get_clickhouse_client
 from app.logging_config import central_logger
 from app.schemas import (LogGenParams, SyntheticDataGenParams, ContentGenParams, 
                          DataIngestionParams, ContentCorpusGenParams)

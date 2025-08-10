@@ -42,6 +42,7 @@ class DevLauncher:
         self.project_id = project_id
         self.processes: List[subprocess.Popen] = []
         self.service_discovery = ServiceDiscovery()
+        self.use_emoji = self._check_emoji_support()
         
         # Register cleanup handler
         signal.signal(signal.SIGINT, self._cleanup_handler)
@@ -50,6 +51,29 @@ class DevLauncher:
         # Windows-specific signal
         if sys.platform == "win32":
             signal.signal(signal.SIGBREAK, self._cleanup_handler)
+    
+    def _check_emoji_support(self) -> bool:
+        """Check if the terminal supports emoji output."""
+        try:
+            # Try to encode an emoji
+            "✅".encode(sys.stdout.encoding or 'utf-8')
+            # Check if we're on Windows terminal that supports emojis
+            if sys.platform == "win32":
+                # Windows Terminal and VS Code terminal support emojis
+                return os.environ.get('WT_SESSION') or os.environ.get('TERM_PROGRAM') == 'vscode'
+            return True
+        except (UnicodeEncodeError, AttributeError):
+            return False
+    
+    def _print(self, emoji: str, text: str, message: str):
+        """Print with emoji if supported, otherwise with text prefix."""
+        if self.use_emoji:
+            try:
+                print(f"{emoji} {message}")
+                return
+            except UnicodeEncodeError:
+                pass
+        print(f"[{text}] {message}")
     
     def get_free_port(self) -> int:
         """Get a free port by binding to port 0."""
@@ -61,7 +85,7 @@ class DevLauncher:
     
     def _cleanup_handler(self, signum, frame):
         """Handle cleanup on exit."""
-        print("\n[STOP] Shutting down development environment...")
+        self._print("🛑", "STOP", "\nShutting down development environment...")
         self.cleanup()
         sys.exit(0)
     
@@ -84,7 +108,7 @@ class DevLauncher:
         
         # Clear service discovery
         self.service_discovery.clear_all()
-        print("[OK] Cleanup complete")
+        self._print("✅", "OK", "Cleanup complete")
     
     def check_dependencies(self) -> bool:
         """Check if all required dependencies are available."""
@@ -128,12 +152,12 @@ class DevLauncher:
                 print(f"  {error}")
             return False
         
-        print("[OK] All dependencies satisfied")
+        self._print("✅", "OK", "All dependencies satisfied")
         return True
     
     def start_backend(self) -> Optional[subprocess.Popen]:
         """Start the backend server."""
-        print("\n[LAUNCH] Starting backend server...")
+        self._print("\n🚀", "LAUNCH", "Starting backend server...")
         
         # Determine port
         if self.dynamic_ports:
@@ -185,33 +209,35 @@ class DevLauncher:
             
             # Check if process is still running
             if process.poll() is not None:
-                print("[ERROR] Backend failed to start")
+                self._print("❌", "ERROR", "Backend failed to start")
                 return None
             
-            print(f"[OK] Backend started on port {port}")
+            self._print("✅", "OK", f"Backend started on port {port}")
             print(f"   API URL: http://localhost:{port}")
             print(f"   WebSocket URL: ws://localhost:{port}/ws")
             
             return process
             
         except Exception as e:
-            print(f"[ERROR] Failed to start backend: {e}")
+            self._print("❌", "ERROR", f"Failed to start backend: {e}")
             return None
     
     def start_frontend(self) -> Optional[subprocess.Popen]:
         """Start the frontend server."""
-        print("\n[LAUNCH] Starting frontend server...")
+        self._print("\n🚀", "LAUNCH", "Starting frontend server...")
         
         # Read backend info from service discovery
         backend_info = self.service_discovery.read_backend_info()
         if not backend_info:
-            print("[ERROR] Backend service discovery not found. Backend may not be running.")
+            self._print("❌", "ERROR", "Backend service discovery not found. Backend may not be running.")
             return None
         
         # Determine port
         if self.dynamic_ports:
             port = self.get_free_port()
             print(f"   Allocated port: {port}")
+            # Update the frontend_port to the actual allocated port
+            self.frontend_port = port
         else:
             port = self.frontend_port
         
@@ -259,10 +285,10 @@ class DevLauncher:
             
             # Check if process is still running
             if process.poll() is not None:
-                print("[ERROR] Frontend failed to start")
+                self._print("❌", "ERROR", "Frontend failed to start")
                 return None
             
-            print(f"[OK] Frontend started on port {port}")
+            self._print("✅", "OK", f"Frontend started on port {port}")
             print(f"   URL: http://localhost:{port}")
             print(f"   Hot reload: {'ENABLED' if self.frontend_reload else 'DISABLED'}")
             
@@ -272,7 +298,7 @@ class DevLauncher:
             return process
             
         except Exception as e:
-            print(f"[ERROR] Failed to start frontend: {e}")
+            self._print("❌", "ERROR", f"Failed to start frontend: {e}")
             return None
     
     def wait_for_service(self, url: str, timeout: int = 30) -> bool:
@@ -303,13 +329,13 @@ class DevLauncher:
         if not self.load_secrets:
             return True
         
-        print("\n[SECRETS] Loading secrets from Google Cloud Secret Manager...")
+        self._print("\n🔐", "SECRETS", "Loading secrets from Google Cloud Secret Manager...")
         
         try:
             # Run the fetch_secrets_to_env.py script
             project_id = self.project_id or os.environ.get('GOOGLE_CLOUD_PROJECT')
             if not project_id:
-                print("[ERROR] No Google Cloud project ID specified")
+                self._print("❌", "ERROR", "No Google Cloud project ID specified")
                 return False
             
             print(f"   Project ID: {project_id}")
@@ -330,7 +356,7 @@ class DevLauncher:
             )
             
             if result.returncode == 0:
-                print("[OK] Secrets loaded successfully")
+                self._print("✅", "OK", "Secrets loaded successfully")
                 # Load the created .env file into current environment
                 env_file = Path(".env")
                 if env_file.exists():
@@ -342,36 +368,36 @@ class DevLauncher:
                                 os.environ[key] = value.strip('"\'')
                 return True
             else:
-                print(f"[ERROR] Failed to load secrets: {result.stderr}")
+                self._print("❌", "ERROR", f"Failed to load secrets: {result.stderr}")
                 return False
             
         except Exception as e:
-            print(f"[ERROR] Failed to load secrets: {e}")
+            self._print("❌", "ERROR", f"Failed to load secrets: {e}")
             print("   Continuing without secrets (some features may not work)")
             return False
     
     def run(self):
         """Run the development environment."""
         print("=" * 60)
-        print("[LAUNCH] Netra AI Development Environment Launcher")
+        self._print("🚀", "LAUNCH", "Netra AI Development Environment Launcher")
         print("=" * 60)
         
         # Show configuration summary
         if self.dynamic_ports and not self.backend_reload:
-            print("\n[RECOMMENDED] Running with RECOMMENDED configuration:")
+            self._print("\n🎆", "RECOMMENDED", "Running with RECOMMENDED configuration:")
             print("   * Dynamic ports: YES (avoiding conflicts)")
             print("   * Backend hot reload: NO (30-50% faster)")
             if self.load_secrets:
                 print("   * Secret loading: YES (from Google Cloud)")
             print("   Perfect for first-time setup!\n")
         elif self.dynamic_ports:
-            print("\n📝 Configuration:")
+            self._print("\n📝", "Configuration", ":")
             print("   * Dynamic ports: YES")
             print("   * Hot reload: YES (development mode)\n")
         
         # Check dependencies
         if not self.check_dependencies():
-            print("\n[ERROR] Please install missing dependencies and try again")
+            self._print("\n❌", "ERROR", "Please install missing dependencies and try again")
             return 1
         
         # Load secrets if requested
@@ -384,7 +410,7 @@ class DevLauncher:
         # Start backend
         backend_process = self.start_backend()
         if not backend_process:
-            print("[ERROR] Failed to start backend")
+            self._print("❌", "ERROR", "Failed to start backend")
             self.cleanup()
             return 1
         
@@ -393,25 +419,25 @@ class DevLauncher:
         # Wait for backend to be ready
         backend_info = self.service_discovery.read_backend_info()
         if backend_info:
-            print("\n[WAIT] Waiting for backend to be ready...")
+            self._print("\n⏳", "WAIT", "Waiting for backend to be ready...")
             # Use /health/ready endpoint for readiness check
             backend_url = f"{backend_info['api_url']}/health/ready"
             if self.wait_for_service(backend_url, timeout=30):
-                print("[OK] Backend is ready")
+                self._print("✅", "OK", "Backend is ready")
             else:
-                print("[WARN] Backend health check timed out, continuing anyway...")
+                self._print("⚠️", "WARN", "Backend health check timed out, continuing anyway...")
         
         # Start frontend
         frontend_process = self.start_frontend()
         if not frontend_process:
-            print("[ERROR] Failed to start frontend")
+            self._print("❌", "ERROR", "Failed to start frontend")
             self.cleanup()
             return 1
         
         self.processes.append(frontend_process)
         
         # Wait for frontend to be ready
-        print("\n[WAIT] Waiting for frontend to be ready...")
+        self._print("\n⏳", "WAIT", "Waiting for frontend to be ready...")
         frontend_url = f"http://localhost:{self.frontend_port}"
         
         # Give Next.js a bit more time to compile initially
@@ -419,32 +445,32 @@ class DevLauncher:
         time.sleep(3)
         
         if self.wait_for_service(frontend_url, timeout=90):
-            print("[OK] Frontend is ready")
+            self._print("✅", "OK", "Frontend is ready")
         else:
-            print("[WARN] Frontend readiness check timed out (this is usually OK)")
+            self._print("⚠️", "WARN", "Frontend readiness check timed out (this is usually OK)")
             print("   The frontend may still be compiling. You can proceed.")
         
         # Print summary
         print("\n" + "=" * 60)
-        print("[SUCCESS] Development environment is running!")
+        self._print("✨", "SUCCESS", "Development environment is running!")
         print("=" * 60)
         
         if backend_info:
-            print(f"\n[INFO] Backend:")
+            self._print("\nℹ️", "INFO", "Backend:")
             print(f"   API: {backend_info['api_url']}")
             print(f"   WebSocket: {backend_info['ws_url']}")
         
-        print(f"\n🌐 Frontend:")
+        self._print("\n🌐", "Frontend", "")
         print(f"   URL: http://localhost:{self.frontend_port}")
         
-        print("\n📝 Service Discovery:")
+        self._print("\n📝", "Service Discovery", ":")
         print(f"   Info stored in: .netra/")
         
         print("\n[COMMANDS]:")
         print("   Press Ctrl+C to stop all services")
         print("   Run 'python scripts/service_discovery.py status' to check service status")
         
-        print("\n📊 Logs:")
+        self._print("\n📊", "Logs", ":")
         print("   Backend and frontend logs will appear here")
         print("-" * 60)
         
@@ -455,14 +481,14 @@ class DevLauncher:
                 for i, process in enumerate(self.processes):
                     if process.poll() is not None:
                         service_name = "Backend" if i == 0 else "Frontend"
-                        print(f"\n[WARN] {service_name} process has stopped")
+                        self._print(f"\n⚠️", "WARN", f"{service_name} process has stopped")
                         self.cleanup()
                         return 1
                 
                 time.sleep(1)
                 
         except KeyboardInterrupt:
-            print("\n\nReceived interrupt signal")
+            self._print("\n\n🔄", "INTERRUPT", "Received interrupt signal")
         
         self.cleanup()
         return 0

@@ -1223,7 +1223,7 @@
       <name>Test Categorization Engine</name>
       <description>Automatically categorize and organize tests</description>
       <categories>
-        <category name="smoke" criteria="Critical path, <1s execution"/>
+        <category name="smoke" criteria="Critical path, &lt;1s execution"/>
         <category name="unit" criteria="Single function/class testing"/>
         <category name="integration" criteria="Multi-component interaction"/>
         <category name="e2e" criteria="Full user journey"/>
@@ -1473,7 +1473,7 @@
       <description>Fast test update for immediate improvements</description>
       <usage>User can say: "refresh tests" or "update tests"</usage>
       <primary_command>python scripts/test_autonomous_review.py --quick</primary_command>
-      <execution_time>< 5 minutes</execution_time>
+      <execution_time>&lt; 5 minutes</execution_time>
       <actions>
         <action>Quick coverage analysis</action>
         <action>Generate tests for top 10 uncovered files</action>

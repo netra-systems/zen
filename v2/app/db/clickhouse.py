@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from app.db.clickhouse_base import ClickHouseDatabase
-from ..config import settings
+from app.config import settings
 import logging
 
 logger = logging.getLogger(__name__)

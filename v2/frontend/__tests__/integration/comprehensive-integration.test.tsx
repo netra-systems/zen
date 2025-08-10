@@ -114,7 +114,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
         const formData = new FormData();
         formData.append('file', file);
         
-        corpusService.uploadDocument.mockResolvedValueOnce(mockDocument);
+        corpusService.uploadDocument.mockImplementationOnce(async () => mockDocument);
         const response = await corpusService.uploadDocument(formData);
         useCorpusStore.getState().addDocument(response);
         return response;
@@ -881,10 +881,10 @@ describe('Comprehensive Frontend Integration Tests', () => {
       };
       
       (fetch as jest.Mock)
-        .mockResolvedValueOnce({ ok: true })
-        .mockResolvedValueOnce({ ok: true })
-        .mockResolvedValueOnce({ ok: true })
-        .mockResolvedValueOnce({ ok: true });
+        .mockImplementationOnce(async () => { ok: true })
+        .mockImplementationOnce(async () => { ok: true })
+        .mockImplementationOnce(async () => { ok: true })
+        .mockImplementationOnce(async () => { ok: true });
       
       const { getByText, getByTestId } = render(<TestComponent />);
       
@@ -950,9 +950,9 @@ describe('Comprehensive Frontend Integration Tests', () => {
 
     it('should handle migration rollback on failure', async () => {
       (fetch as jest.Mock)
-        .mockResolvedValueOnce({ ok: true })
+        .mockImplementationOnce(async () => { ok: true })
         .mockRejectedValueOnce(new Error('Migration failed'))
-        .mockResolvedValueOnce({ ok: true });
+        .mockImplementationOnce(async () => { ok: true });
       
       const applyMigration = async (version: string) => {
         try {
@@ -1054,7 +1054,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
       const task = jest.fn()
         .mockRejectedValueOnce(new Error('Fail 1'))
         .mockRejectedValueOnce(new Error('Fail 2'))
-        .mockResolvedValueOnce({ success: true });
+        .mockImplementationOnce(async () => { success: true });
       
       const result = await executeWithRetry(task);
       
@@ -1252,7 +1252,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
       
       (fetch as jest.Mock)
         .mockRejectedValueOnce(new Error('API Error'))
-        .mockResolvedValueOnce({ ok: true });
+        .mockImplementationOnce(async () => { ok: true });
       
       const { getByText, getByTestId } = render(<TestComponent />);
       
@@ -2045,10 +2045,10 @@ describe('Comprehensive Frontend Integration Tests', () => {
       };
       
       (fetch as jest.Mock)
-        .mockResolvedValueOnce({ ok: true, json: async () => ({ data: 'collected' }) })
-        .mockResolvedValueOnce({ ok: true, json: async () => ({ analysis: 'complete' }) })
-        .mockResolvedValueOnce({ ok: true, json: async () => ({ optimized: true }) })
-        .mockResolvedValueOnce({ ok: true, json: async () => ({ report: 'generated' }) });
+        .mockImplementationOnce(async () => { ok: true, json: async () => ({ data: 'collected' }) })
+        .mockImplementationOnce(async () => { ok: true, json: async () => ({ analysis: 'complete' }) })
+        .mockImplementationOnce(async () => { ok: true, json: async () => ({ optimized: true }) })
+        .mockImplementationOnce(async () => { ok: true, json: async () => ({ report: 'generated' }) });
       
       const { getByText, getByTestId } = render(<TestComponent />);
       
@@ -2100,8 +2100,8 @@ describe('Comprehensive Frontend Integration Tests', () => {
       };
       
       (fetch as jest.Mock)
-        .mockResolvedValueOnce({ ok: true, json: async () => ({ persisted: true }) })
-        .mockResolvedValueOnce({ ok: true, json: async () => mockPersistedState });
+        .mockImplementationOnce(async () => { ok: true, json: async () => ({ persisted: true }) })
+        .mockImplementationOnce(async () => { ok: true, json: async () => mockPersistedState });
       
       await saveState(mockPersistedState);
       const restored = await restoreState();
@@ -2157,7 +2157,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
         );
       };
       
-      (fetch as jest.Mock).mockResolvedValueOnce({ ok: true });
+      (fetch as jest.Mock).mockImplementationOnce(async () => { ok: true });
       
       const { getByText, getByTestId } = render(<TestComponent />);
       
