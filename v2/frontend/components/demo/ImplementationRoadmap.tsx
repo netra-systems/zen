@@ -397,8 +397,8 @@ export default function ImplementationRoadmap({
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant={
-                        phase.risk === 'low' ? 'success' :
-                        phase.risk === 'medium' ? 'warning' :
+                        phase.risk === 'low' ? 'secondary' :
+                        phase.risk === 'medium' ? 'outline' :
                         'destructive'
                       }>
                         {phase.risk} risk
@@ -513,7 +513,7 @@ export default function ImplementationRoadmap({
                         </div>
                         <Badge variant={
                           item.severity === 'low' ? 'outline' :
-                          item.severity === 'medium' ? 'warning' :
+                          item.severity === 'medium' ? 'secondary' :
                           'destructive'
                         }>
                           {item.severity}

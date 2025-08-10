@@ -3,7 +3,24 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { GenericInputProps } from '@/types/index';
+
+interface GenericInputProps {
+    title: string;
+    description?: string;
+    inputFields: Array<{
+        name: string;
+        label: string;
+        type: 'text' | 'number' | 'select';
+        placeholder?: string;
+        required?: boolean;
+        defaultValue?: string | number;
+        options?: Array<{ value: string; label: string }>;
+    }>;
+    onSubmit: (data: Record<string, string | number>) => void;
+    isLoading?: boolean;
+    submitButtonText?: string;
+    onClear?: () => void;
+}
 
 type FormState = Record<string, string | number>;
 
@@ -37,8 +54,8 @@ export function GenericInput({ title, description, inputFields, onSubmit, isLoad
             <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {inputFields.map((field) => (
-                        <div key={field.id} className="space-y-2">
-                            <label htmlFor={field.id} className="text-sm font-medium">{field.label}</label>
+                        <div key={field.name} className="space-y-2">
+                            <label htmlFor={field.name} className="text-sm font-medium">{field.label}</label>
                             {field.type === 'select' ? (
                                 <Select
                                     name={field.name}
@@ -51,20 +68,19 @@ export function GenericInput({ title, description, inputFields, onSubmit, isLoad
                                     </SelectTrigger>
                                     <SelectContent>
                                         {field.options?.map((option) => (
-                                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                             ) : (
                                 <Input
-                                    id={field.id}
+                                    id={field.name}
                                     name={field.name}
                                     type={field.type}
                                     required={field.required}
                                     value={formState[field.name]}
                                     onChange={(e) => handleChange(field.name, e.target.value)}
                                     className="w-full"
-                                    step={field.step}
                                 />
                             )}
                         </div>

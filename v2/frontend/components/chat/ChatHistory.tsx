@@ -12,7 +12,7 @@ const ChatHistory: React.FC = () => {
 
   // Transform WebSocket messages to Message type
   const transformedMessages: Message[] = ws.messages.map((msg, index) => {
-    const payload = msg.payload as any;
+    const payload = msg.payload as Record<string, unknown>;
     return {
       id: `msg-${index}`,
       type: msg.type,

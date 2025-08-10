@@ -145,7 +145,7 @@ export default function PerformanceMetrics({ industry, onView }: PerformanceMetr
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium">{metric.label}</CardTitle>
-            <Badge variant={isImproved ? 'success' : 'destructive'} className="text-xs">
+            <Badge variant={isImproved ? 'secondary' : 'destructive'} className="text-xs">
               {isImproved ? <ArrowUp className="w-3 h-3 mr-1" /> : <ArrowDown className="w-3 h-3 mr-1" />}
               {Math.abs(metric.improvement)}%
             </Badge>
@@ -428,7 +428,7 @@ export default function PerformanceMetrics({ industry, onView }: PerformanceMetr
                         <span className="text-sm text-muted-foreground">
                           Top {100 - benchmark.percentile}%
                         </span>
-                        <Badge variant="success">
+                        <Badge variant="default">
                           {benchmark.score}/100
                         </Badge>
                       </div>

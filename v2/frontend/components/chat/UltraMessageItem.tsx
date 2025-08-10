@@ -137,7 +137,7 @@ export const UltraMessageItem: React.FC<UltraMessageProps> = ({
 
   const isUser = message.type === 'user';
   const isError = message.type === 'error';
-  const isAI = message.type === 'ai' || message.type === 'agent';
+  const isAI = message.type === 'agent';
 
   // Render agent transition banner
   if (message.agent_transition) {
@@ -290,7 +290,8 @@ export const UltraMessageItem: React.FC<UltraMessageProps> = ({
             {/* Tool Info Badges */}
             {message.tool_info && (
               <div className="flex flex-wrap gap-1 mt-2">
-                {message.tool_info.map((tool, idx) => (
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                {message.tool_info.map((tool: any, idx: number) => (
                   <Badge key={idx} variant="outline" className="text-xs">
                     <Wrench className="w-3 h-3 mr-1" />
                     {tool.tool_name}
@@ -315,7 +316,10 @@ export const UltraMessageItem: React.FC<UltraMessageProps> = ({
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  code({ inline, className, children, ...props }) {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  code(props: any) {
+                    const { className, children } = props;
+                    const inline = props.inline as boolean | undefined;
                     const match = /language-(\w+)/.exec(className || '');
                     const language = match ? match[1] : 'text';
                     

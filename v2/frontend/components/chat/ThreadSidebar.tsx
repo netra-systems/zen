@@ -221,7 +221,7 @@ export const ThreadSidebar: React.FC = () => {
                         <span className="text-xs text-gray-500">
                           {formatDate(thread.created_at)}
                         </span>
-                        {thread.message_count > 0 && (
+                        {thread.message_count && thread.message_count > 0 && (
                           <span className="text-xs text-gray-400">
                             · {thread.message_count} messages
                           </span>

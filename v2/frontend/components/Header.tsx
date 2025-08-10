@@ -10,7 +10,9 @@ import { Icons } from './Icons';
 import { authService } from '@/auth';
 import LoginButton from './LoginButton';
 
-import { HeaderProps } from '../types';
+interface HeaderProps {
+  toggleSidebar: () => void;
+}
 
 export const Header = ({ toggleSidebar }: HeaderProps) => {
 

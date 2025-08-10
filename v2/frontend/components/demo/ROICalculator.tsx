@@ -305,7 +305,7 @@ export default function ROICalculator({ industry, onComplete }: ROICalculatorPro
                 Projected Savings & ROI
               </span>
               {calculated && (
-                <Badge variant="success" className="text-lg px-3 py-1">
+                <Badge variant="default" className="text-lg px-3 py-1">
                   <CheckCircle2 className="w-4 h-4 mr-2" />
                   {Math.round(savings.threeYearROI)}% ROI
                 </Badge>

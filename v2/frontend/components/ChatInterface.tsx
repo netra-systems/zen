@@ -32,9 +32,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
     const message: Message = {
       id: `msg-${Date.now()}`,
-      role: 'user',
+      type: 'user',
       content: inputValue,
-      timestamp: new Date().toISOString(),
+      created_at: new Date().toISOString(),
       displayed_to_user: true,
     };
 
@@ -90,12 +90,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             <div
               key={message.id}
               className={`flex ${
-                message.role === 'user' ? 'justify-end' : 'justify-start'
+                message.type === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
               <div
                 className={`max-w-[70%] rounded-lg p-3 ${
-                  message.role === 'user'
+                  message.type === 'user'
                     ? 'bg-blue-500 text-white'
                     : 'bg-gray-100 text-gray-900'
                 }`}
@@ -105,12 +105,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 </div>
                 <div
                   className={`text-xs mt-1 ${
-                    message.role === 'user'
+                    message.type === 'user'
                       ? 'text-blue-100'
                       : 'text-gray-500'
                   }`}
                 >
-                  {new Date(message.timestamp).toLocaleTimeString()}
+                  {new Date(message.created_at).toLocaleTimeString()}
                 </div>
               </div>
             </div>

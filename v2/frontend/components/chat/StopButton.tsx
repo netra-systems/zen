@@ -9,7 +9,7 @@ export const StopButton: React.FC = () => {
   const { sendMessage } = useWebSocket();
 
   const handleClick = () => {
-    sendMessage(JSON.stringify({ type: 'stop_agent', payload: {} }));
+    sendMessage({ type: 'stop_agent', payload: {} });
     setProcessing(false);
   };
 

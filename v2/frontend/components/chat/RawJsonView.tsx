@@ -9,7 +9,8 @@ interface JsonViewerProps {
 export const RawJsonView: React.FC<JsonViewerProps> = ({ data }) => {
   return (
     <div className="p-4 bg-gray-100 rounded-lg">
-      <JsonView data={data} shouldExpandNode={allExpanded} style={defaultStyles} />
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <JsonView data={data as object | any[]} shouldExpandNode={allExpanded} style={defaultStyles} />
     </div>
   );
 };

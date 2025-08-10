@@ -385,7 +385,7 @@ Would you like me to generate a detailed implementation roadmap or explore speci
                   AI Optimization Assistant
                   {useWebSocket && (
                     <Badge 
-                      variant={isConnected ? "success" : "secondary"}
+                      variant={isConnected ? "default" : "secondary"}
                       className="text-xs"
                     >
                       {isConnected ? (
@@ -466,7 +466,7 @@ Would you like me to generate a detailed implementation roadmap or explore speci
                                 </Badge>
                               )}
                               {message.metadata.costSaved && (
-                                <Badge variant="success" className="text-xs">
+                                <Badge variant="default" className="text-xs">
                                   <TrendingUp className="w-3 h-3 mr-1" />
                                   ${message.metadata.costSaved.toLocaleString()} saved
                                 </Badge>

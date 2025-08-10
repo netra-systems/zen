@@ -82,7 +82,7 @@ const UltraMainChat: React.FC = () => {
   // Mock agent status data (replace with real data from WebSocket)
   const agentStatusData = {
     agentName: currentSubAgent || 'Netra AI',
-    status: isProcessing ? 'executing' : 'idle' as const,
+    status: (isProcessing ? 'executing' : 'idle') as "error" | "idle" | "success" | "executing" | "thinking" | "cancelled",
     currentAction: isProcessing ? 'Processing your request...' : undefined,
     progress: isProcessing ? 65 : 0,
     tools: isProcessing ? [
@@ -101,8 +101,7 @@ const UltraMainChat: React.FC = () => {
   // Check if we should show final report
   useEffect(() => {
     const hasReport = messages.some(m => 
-      m.type === 'report' || 
-      (m.sub_agent_name === 'ReportingSubAgent' && m.content?.includes('## Final Report'))
+      m.sub_agent_name === 'ReportingSubAgent' && m.content?.includes('## Final Report')
     );
     if (hasReport && !isProcessing) {
       setShowFinalReport(true);
@@ -193,7 +192,7 @@ const UltraMainChat: React.FC = () => {
                         Welcome to Netra AI
                       </h2>
                       <p className="text-gray-500 max-w-md mx-auto">
-                        The world's most intelligent AI optimization platform. Start by typing a message or selecting an example below.
+                        The world&apos;s most intelligent AI optimization platform. Start by typing a message or selecting an example below.
                       </p>
                     </motion.div>
                     
@@ -272,13 +271,15 @@ const UltraMainChat: React.FC = () => {
                     </Button>
                   </div>
                   <FinalReportView
-                    data_result={{}}
-                    optimizations_result={{}}
-                    action_plan_result={{}}
-                    execution_metrics={{
-                      total_duration: 15000,
-                      agent_timings: [],
-                      tool_calls: []
+                    reportData={{
+                      data_result: {},
+                      optimizations_result: {},
+                      action_plan_result: {},
+                      execution_metrics: {
+                        total_duration: 15000,
+                        agent_timings: [],
+                        tool_calls: []
+                      }
                     }}
                   />
                 </div>

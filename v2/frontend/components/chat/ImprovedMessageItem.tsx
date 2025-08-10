@@ -171,10 +171,13 @@ export const ImprovedMessageItem: React.FC<MessageProps> = ({
             remarkPlugins={[remarkGfm, remarkMath]}
             rehypePlugins={[rehypeKatex]}
             components={{
-              code({ node, inline, className, children, ...props }) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              code(props: any) {
+                const { className, children } = props;
                 const match = /language-(\w+)/.exec(className || '');
                 const codeString = String(children).replace(/\n$/, '');
                 const codeId = `code-${id}-${Math.random()}`;
+                const inline = props.inline as boolean | undefined;
                 
                 return !inline && match ? (
                   <div className="relative group my-3">

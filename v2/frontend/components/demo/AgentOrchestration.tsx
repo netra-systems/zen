@@ -301,7 +301,7 @@ export default function AgentOrchestration({ industry = 'Technology' }: AgentOrc
                       </div>
                       <Badge variant={
                         agent.status === 'processing' ? 'default' :
-                        agent.status === 'completed' ? 'success' :
+                        agent.status === 'completed' ? 'secondary' :
                         'outline'
                       }>
                         {agent.status}

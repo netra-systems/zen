@@ -462,6 +462,7 @@ export default function SyntheticDataViewer({ industry }: SyntheticDataViewerPro
                       acc[key] = {
                         type: typeof value === 'object' ? 'object' : typeof value,
                         description: `${key} field for ${industry} data`,
+                        example: value,
                         required: Math.random() > 0.3
                       }
                       return acc
