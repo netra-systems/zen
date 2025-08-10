@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netra Apex | Turn AI Spend From a Chaotic Expense
+        Into a Strategic Asset.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.378.0/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border-color: #e2e8f0;
+            --accent-color: #4f46e5;
+            --accent-light: #eef2ff;
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+        .card { 
+            background-color: var(--card-bg); 
+            border-radius: 0.75rem; 
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+            display: flex;
+            flex-direction: column;
+        }
+        .scroll-container {
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) transparent;
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .step-header { display: flex; align-items: center; }
+        .step-number {
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+            font-weight: 700;
+            border-radius: 9999px;
+            width: 2rem;
+            height: 2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        .pattern-card.selected { background-color: var(--accent-light); border-color: var(--accent-color); }
+        .policy-card.optimal { border-left-color: var(--accent-color); }
+        
+        .panel {
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease-in-out;
+            opacity: 1;
+        }
+        .panel.collapsed { 
+            flex-basis: 60px !important; 
+            cursor: pointer;
+        }
+        .panel.collapsed .panel-content-wrapper { display: none; }
+        .panel .collapsed-view { display: none; }
+        .panel.collapsed .collapsed-view { 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 0.5rem;
+            background-color: var(--card-bg);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+        .panel.collapsed .collapsed-view .collapsed-text {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+        
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .panel-content { flex-grow: 1; overflow: hidden; }
+        
+        .activate-option { transition: background-color 0.2s, border-color 0.2s; }
+        .activate-option:hover { background-color: var(--accent-light); border-color: var(--accent-color); }
+        .activate-option.disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .explanation-text {
+            line-height: 1.6;
+            background-color: #f8fafc;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            color: var(--text-secondary);
+        }
+        .tooltip { position: relative; display: inline-flex; align-items: center; }
+        .tooltip .tooltiptext {
+            visibility: hidden; width: 250px; background-color: #1e293b;
+            color: #fff; text-align: left; border-radius: 6px; padding: 8px 12px;
+            position: absolute; z-index: 50; bottom: 125%; left: 50%;
+            transform: translateX(-50%); opacity: 0; transition: opacity 0.3s;
+            font-size: 0.75rem; font-weight: 500;
+        }
+        .tooltip .tooltiptext-title { font-weight: 700; color: var(--accent-light); margin-bottom: 4px; display: block;}
+        .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+        .radio-card.checked { border-color: var(--accent-color); background-color: var(--accent-light); }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="flex flex-col h-screen">
+        <header class="flex-shrink-0 bg-white border-b border-slate-200 px-6 py-3">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900"><a href="https://netrasystems.ai/" class="hover:underline">Netra Apex</a></h1>
+                    <p class="text-sm text-slate-500">Turn AI Spend From a Chaotic Expense
+                        Into a Strategic Asset.</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div id="status-container" class="text-xs text-slate-500 flex items-center gap-2">
+                        <div id="api-version-selector" class="flex items-center gap-1">
+                            <span class="font-semibold">API:</span>
+                            <select id="api-version-select" class="text-xs border-slate-300 rounded-md p-1 focus:ring-indigo-500 focus:border-indigo-500"></select>
+                        </div>
+                        <div id="heartbeat-indicator" class="flex items-center gap-1 hidden">
+                            <i data-lucide="activity" class="h-4 w-4"></i>
+                            <span><span id="heartbeat-ms">--</span>ms</span>
+                        </div>
+                    </div>
+                    <button id="run-analysis-btn" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i data-lucide="play-circle" class="h-5 w-5"></i> Run Analysis
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main id="main-content" class="flex-grow p-4 flex gap-4 overflow-hidden">
+            
+            <div id="panel-1" class="panel" style="flex-basis: 25%;">
+                <div class="panel-content-wrapper card p-4">
+                    <div class="panel-header">
+                        <div class="step-header">
+                            <span class="step-number">1</span>
+                             <div class="panel-header-title">
+                                <h2 class="text-xl font-bold text-slate-800">Simulate Logs</h2>
+                            </div>
+                        </div>
+                        <button class="panel-toggle p-1 text-slate-400 hover:text-indigo-600" data-panel="1"><i data-lucide="chevrons-left" class="h-5 w-5"></i></button>
+                    </div>
+                    <details class="mb-4 text-xs group">
+                        <summary class="cursor-pointer text-slate-500 hover:text-indigo-600 font-medium">Full-Product Info</summary>
+                        <div class="mt-2 p-3 bg-indigo-50 rounded-md border border-indigo-200 text-indigo-800">
+                             <p class="font-semibold flex items-center gap-1.5"><i data-lucide="lightbulb" class="h-4 w-4"></i>How Auto-Discovery Works</p>
+                            <p class="mt-1">The full Netra Apex product securely analyzes system logs to automatically Demand and define workloads, identifying the true sources of cost and latency.</p>
+                        </div>
+                    </details>
+                    <div class="flex items-center gap-2 mb-4">
+                        <button id="add-default-btn" class="flex-1 bg-slate-100 text-slate-700 font-semibold py-2 px-3 rounded-lg hover:bg-slate-200 flex items-center justify-center gap-2 text-sm"><i data-lucide="list-plus" class="h-4 w-4"></i> Add Defaults</button>
+                        <button id="add-custom-btn" class="flex-1 bg-indigo-100 text-indigo-700 font-semibold py-2 px-3 rounded-lg hover:bg-indigo-200 flex items-center justify-center gap-2 text-sm"><i data-lucide="plus-circle" class="h-4 w-4"></i> Add Custom</button>
+                    </div>
+                    <div id="workload-list" class="space-y-3 scroll-container flex-grow pr-1"></div>
+                    <div class="pt-4 mt-4 border-t border-slate-200">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Pinning & Constraints</label>
+                        <div id="constraints-form" class="space-y-2 text-sm">
+                            <div class="p-2 rounded-md hover:bg-slate-50">
+                                <label for="negotiated-discount" class="flex items-center gap-2">
+                                    <span>Negotiated Discount (%)</span>
+                                </label>
+                                <input type="number" name="negotiated_discount_percent" id="negotiated-discount" value="0" min="0" max="100" class="mt-1 w-full text-sm p-1 border-gray-300 rounded-md shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-slate-200 mt-4">
+                        <label class="block text-xs font-medium text-slate-500">Total Modeled Monthly Spend</label>
+                        <p id="summary-total-spend" class="text-2xl font-bold text-slate-800">$0</p>
+                    </div>
+                </div>
+                <div class="collapsed-view" data-panel="1">
+                    <i data-lucide="sliders-horizontal" class="h-6 w-6 text-indigo-600"></i>
+                    <span class="collapsed-text">Setup</span>
+                </div>
+            </div>
+
+            <div id="panel-2" class="panel" style="flex-basis: 25%;">
+                <div class="panel-content-wrapper card p-4">
+                    <div class="panel-header">
+                        <div class="step-header">
+                            <span class="step-number">2</span>
+                            <div class="panel-header-title">
+                                <h2 class="text-xl font-bold text-slate-800">Demand Patterns</h2>
+                                <p class="text-xs text-slate-500">The engine finds usage patterns.</p>
+                            </div>
+                        </div>
+                        <button class="panel-toggle p-1 text-slate-400 hover:text-indigo-600" data-panel="2"><i data-lucide="chevrons-left" class="h-5 w-5"></i></button>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-sm font-bold text-slate-700">Identified Patterns</h3>
+                        <div class="text-xs bg-slate-100 text-slate-600 font-semibold px-2 py-1 rounded-md">Top 3 Most Impactful</div>
+                    </div>
+                    <div id="pattern-list" class="space-y-2 scroll-container flex-grow pr-1"></div>
+                </div>
+                 <div class="collapsed-view" data-panel="2">
+                    <i data-lucide="bar-chart-big" class="h-6 w-6 text-indigo-600"></i>
+                    <span class="collapsed-text">Patterns</span>
+                </div>
+            </div>
+
+            <div id="panel-3" class="panel" style="flex-basis: 50%;">
+                <div class="panel-content-wrapper card p-4">
+                     <div class="panel-header">
+                        <div class="step-header">
+                            <span class="step-number">3</span>
+                             <div class="panel-header-title">
+                                <h2 class="text-xl font-bold text-slate-800">Supply Patterns</h2>
+                                <p class="text-xs text-slate-500">A set of optimal supply config and code changes to meet demand goals.</p>
+                            </div>
+                        </div>
+                        <button class="panel-toggle p-1 text-slate-400 hover:text-indigo-600" data-panel="3"><i data-lucide="chevrons-left" class="h-5 w-5"></i></button>
+                    </div>
+                    <details class="mb-4 text-xs group">
+                        <summary class="cursor-pointer text-slate-500 hover:text-indigo-600 font-medium">Simulated Recommendations</summary>
+                        <div class="mt-2 p-3 bg-indigo-50 rounded-md border border-indigo-200 text-indigo-800">
+                             <p class="font-semibold flex items-center gap-1.5"><i data-lucide="layers" class="h-4 w-4"></i>Model Granularity</p>
+                            <p class="mt-1">
+                                For this demo, models are referenced by their general name 
+                                (e.g., 'claude-3-opus'). The full platform provides deeper analysis,
+                                 differentiating between specific versions (e.g., 'claude-3-opus-20240229')
+                                  to capture performance and cost variations.</p>
+                            <p class="mt-1">
+                                Simulated Recommendation: Full-product shows API & self-hosted specific config sets of 30+ items</p>
+                        </div>
+                    </details>
+                    <div id="policy-details-container" class="flex-grow scroll-container pr-1"></div>
+                </div>
+                 <div class="collapsed-view" data-panel="3">
+                    <i data-lucide="clipboard-check" class="h-6 w-6 text-indigo-600"></i>
+                    <span class="collapsed-text">Policies</span>
+                </div>
+            </div>
+
+            <div id="advanced-steps-wrapper" class="flex flex-col gap-4" style="flex-basis: 25%;">
+                <div id="panel-4" class="panel collapsed">
+                    <div class="panel-content-wrapper card p-4">
+                        <div class="panel-header">
+                            <div class="step-header">
+                                <span class="step-number">4</span>
+                                <div class="panel-header-title">
+                                    <h2 class="text-xl font-bold text-slate-800">Get Value</h2>
+                                </div>
+                            </div>
+                            <button class="panel-toggle p-1 text-slate-400 hover:text-indigo-600" data-panel="4"><i data-lucide="chevrons-right" class="h-5 w-5"></i></button>
+                        </div>
+                        <h3 class="font-bold text-slate-700 mb-3">Cost Savings Breakdown</h3>
+                        <div id="cost-comparison-container" class="space-y-2 text-sm"></div>
+                        <details class="mt-4 text-xs group">
+                            <summary class="cursor-pointer text-slate-500 hover:text-indigo-600 font-medium">About Simulator Accuracy</summary>
+                            <div class="mt-2 p-3 bg-indigo-50 rounded-md border border-indigo-200 text-indigo-800">
+                                 <p class="font-semibold flex items-center gap-1.5"><i data-lucide="shield-check" class="h-4 w-4"></i>Simulator Information</p>
+                                 <p class="mt-1">All values in this simulator are calculated by a <b>low-fidelity</b> proxy simulation of the Netra Apex engine.</p>
+
+                                 <p class="mt-1">The full Netra Apex platform provides <b>SLA-guaranteed accuracy</b> for deterministic values by using your secure logs, user-defined settings, and human validation of set-level recommendations.</p>
+                                 
+                                 <p class="mt-1">Non-deterministic estimates have SLO options to meet rigorous standards for relevance and market data timeliness; however, they are <b>never guaranteed</b> to be completely free of error.</p>
+                            </div>
+                        </details>
+                    </div>
+                    <div class="collapsed-view" data-panel="4">
+                        <i data-lucide="gem" class="h-6 w-6 text-indigo-600"></i>
+                        <span class="collapsed-text">Value</span>
+                    </div>
+                </div>
+
+                <div id="panel-5" class="panel collapsed">
+                    <div class="panel-content-wrapper card p-4">
+                        <div class="panel-header">
+                            <div class="step-header">
+                                <span class="step-number">5</span>
+                                <div class="panel-header-title">
+                                    <h2 class="text-xl font-bold text-slate-800">Activate</h2>
+                                </div>
+                            </div>
+                            <button class="panel-toggle p-1 text-slate-400 hover:text-indigo-600" data-panel="5"><i data-lucide="chevrons-right" class="h-5 w-5"></i></button>
+                        </div>
+                        <h3 class="font-bold text-slate-700 mb-3">Activation Options</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="activate-option disabled p-3 border rounded-lg cursor-pointer"><p class="font-semibold flex items-center gap-2"><i data-lucide="code" class="h-5 w-5 text-indigo-500"></i>Add to IDE</p><p class="text-xs text-slate-500 pl-7">Get code snippets for manual implementation.</p></div>
+                            <div class="activate-option disabled p-3 border rounded-lg cursor-pointer"><p class="font-semibold flex items-center gap-2"><i data-lucide="git-pull-request-arrow" class="h-5 w-5 text-indigo-500"></i>Integrate with Config Mgmt</p><p class="text-xs text-slate-500 pl-7">Push configs to your feature flag system.</p></div>
+                            <div class="activate-option disabled p-3 border rounded-lg cursor-pointer"><p class="font-semibold flex items-center gap-2"><i data-lucide="arrow-right-left" class="h-5 w-5 text-indigo-500"></i>Add to Real-Time Gateway</p><p class="text-xs text-slate-500 pl-7">Enforce policies automatically via gateway.</p></div>
+                             <div class="activate-option disabled p-3 border rounded-lg cursor-pointer"><p class="font-semibold flex items-center gap-2"><i data-lucide="binary" class="h-5 w-5 text-indigo-500"></i>Add to CI/CD Flow</p><p class="text-xs text-slate-500 pl-7">Prevent sub-optimal configs from deploying.</p></div>
+                        </div>
+                    </div>
+                    <div class="collapsed-view" data-panel="5">
+                        <i data-lucide="power" class="h-6 w-6 text-indigo-600"></i>
+                        <span class="collapsed-text">Activate</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-container"></div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- CONFIG & STATE ---
+        const API_BASE_URL = 'https://ai-optimizer-304612253870.us-west2.run.app/';
+        let API_VERSION = 'v23'; // Default, will be updated by discovery
+        
+        const defaultWorkloads = [
+            { id: 'rag_dense', name: 'RAG for Enterprise Search', spend: 50000, model: 'claude-3-opus', goal: 'cost' },
+            { id: 'agent_code', name: 'Autonomous Coding Agent', spend: 75000, model: 'gpt-4o', goal: 'latency' },
+            { id: 'gen_apps', name: 'Generative Marketing Copy', spend: 20000, model: 'claude-3.5-sonnet', goal: 'cost' }
+        ];
+        let supplyCatalogOptions = [
+            { "name": "gpt-4o" }, { "name": "claude-3-opus" }, { "name": "claude-3.5-sonnet" }, 
+            { "name": "gemini-1.5-pro" }, { "name": "gemini-1.5-flash" }, { "name": "llama-3.1-70b-instruct" }
+        ];
+
+        const recommendations = {
+            cost: [
+                { icon: 'database', title: 'Enable Prefix Caching', text: 'Enable prefix caching in your vLLM server configuration to reduce redundant computation on long prompts. Impact: -28% Cost, -40% Latency.' },
+                { icon: 'scaling', title: 'Right-size Models', text: 'Switch to cost-effective models for simple tasks (e.g., gpt-3.5-turbo for FAQs) where powerful models are overkill. Impact: -94% Cost.' },
+                { icon: 'file-input', title: 'Auto-Trim Context', text: 'Implement automatic context trimming before sending requests to the LLM to eliminate redundant tokens. Impact: -18% Cost, -22% Latency.' },
+                { icon: 'box-select', title: 'Reduce Padding Waste', text: 'Optimize batch sizes and padding strategies (e.g., using vLLM\'s --disable-padding) to reduce waste. Impact: -12% Cost, +18% Throughput.' },
+                { icon: 'fingerprint', title: 'Review Quantization Strategy', text: 'Deploy 4-bit quantized models for non-critical workloads to save compute resources. Impact: -62% Cost, 3.2x Throughput.' },
+            ],
+            latency: [
+                { icon: 'rabbit', title: 'Implement Speculative Decoding', text: 'Use a smaller, faster "draft" model to generate token chunks verified by the larger model, speeding up generation. Impact: -60% Latency.' },
+                { icon: 'layers', title: 'Implement Dynamic Batching', text: 'Group incoming requests on-the-fly to maximize GPU utilization and increase throughput. Impact: +150% Throughput, -45% Cost/request.' },
+                { icon: 'album', title: 'Optimize KV Cache', text: 'Enable Paged Attention (e.g., in vLLM) to manage the KV cache more efficiently, allowing more concurrent requests. Impact: 2.2x Throughput.' },
+                { icon: 'file-output', title: 'Use Structured Outputs', text: 'Implement JSON mode for structured outputs to reduce token usage and eliminate parsing overhead. Impact: -19% Cost, -35% Processing Time.' },
+            ],
+            quality: [
+                 { icon: 'shield-check', title: 'Implement Output Guardrails', text: 'Use a guardrail layer to enforce structure, type-safety, and validation rules on model output, improving reliability. Impact: +Reliability, -50% Dev Time.'},
+                 { icon: 'book-up', title: 'Systematically Upgrade Models', text: 'Implement a quarterly review to migrate workloads to the latest stable model versions for better performance and cost. Impact: -50%+ Cost, +Features.'},
+                 { icon: 'file-cog', title: 'Optimize Tokenizer', text: 'Extend the model\'s tokenizer with domain-specific tokens to create more efficient, shorter token sequences. Impact: -8% Cost, -10% Latency.'},
+            ]
+        };
+
+        let workloads = [];
+        let analysisData = null;
+        let analysisStatusPoller = null;
+        let currentRunId = null;
+
+        // --- DOM Elements ---
+        const getEl = id => document.getElementById(id);
+        const runAnalysisBtn = getEl('run-analysis-btn');
+        const modalContainer = getEl('modal-container');
+        
+        // --- API & CORE LOGIC ---
+        async function discoverApiVersions() {
+            const versionSelect = getEl('api-version-select');
+            try {
+                const response = await fetch(`${API_BASE_URL}/versions`);
+                if (!response.ok) throw new Error('Version discovery failed');
+                const versions = await response.json();
+                API_VERSION = versions.includes('v23') ? 'v23' : (versions[0] || 'v23');
+                versionSelect.innerHTML = versions.map(v => `<option value="${v}">${v}</option>`).join('');
+                versionSelect.value = API_VERSION;
+            } catch (error) {
+                console.error("Could not discover API versions:", error);
+                versionSelect.innerHTML = `<option value="v23">v23 (fallback)</option>`;
+            }
+        }
+
+        function getApiEndpoint() {
+            return `${API_BASE_URL}/api/${API_VERSION}`;
+        }
+
+        async function pollStatus() {
+            if (!currentRunId) return;
+
+            try {
+                const response = await fetch(`${getApiEndpoint()}/status/${currentRunId}`);
+                if (!response.ok) throw new Error(`Status check failed: ${response.statusText}`);
+                const data = await response.json();
+
+                getEl('heartbeat-indicator').classList.remove('hidden');
+                getEl('heartbeat-ms').textContent = Math.round(data.heartbeat_ms);
+
+                if (data.execution_log && data.execution_log.length) {
+                    const latestLog = data.execution_log[data.execution_log.length - 1];
+                    const logText = latestLog.message.includes(']') ? latestLog.message.split('] ')[1] : latestLog.message;
+                    const timeText = latestLog.duration_ms ? ` <span class="text-indigo-500 font-semibold">(${latestLog.duration_ms.toFixed(0)}ms)</span>` : '';
+                    getEl('loading-text').innerHTML = logText + timeText;
+                }
+
+                if (data.status === 'completed') {
+                    clearInterval(analysisStatusPoller);
+                    analysisStatusPoller = null;
+                    const resultMap = new Map(Object.entries(data.result.span_map));
+                    data.result.span_map = resultMap;
+                    analysisData = data.result;
+                    renderAnalysisView();
+                    runAnalysisBtn.disabled = false;
+                    ['panel-4', 'panel-5'].forEach(id => getEl(id).classList.remove('collapsed'));
+                } else if (data.status === 'failed') {
+                    clearInterval(analysisStatusPoller);
+                    analysisStatusPoller = null;
+                    getEl('pattern-list').innerHTML = `<div class="text-red-500 p-4 bg-red-50 rounded-lg"><h4 class="font-bold">Analysis Failed</h4><p class="text-sm mt-1">${data.error || 'Unknown error'}</p></div>`;
+                    runAnalysisBtn.disabled = false;
+                }
+            } catch(error) {
+                console.error("Error polling status:", error);
+                clearInterval(analysisStatusPoller);
+                analysisStatusPoller = null;
+                runAnalysisBtn.disabled = false;
+            }
+        }
+
+        async function runAnalysis() {
+            if (workloads.length === 0) return;
+            
+            renderAnalysisPlaceholder();
+            renderPolicyPlaceholder();
+            renderCostComparisonPlaceholder();
+            getEl('loading-indicator').classList.remove('hidden');
+            getEl('pre-analysis-msg').classList.add('hidden');
+            runAnalysisBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${getApiEndpoint()}/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        workloads: workloads,
+                        debug_mode: true,
+                        constraints: {},
+                        negotiated_discount_percent: parseFloat(getEl('negotiated-discount').value) || 0
+                    })
+                });
+
+                if (response.status !== 202) throw new Error(`Backend error: ${await response.text()}`);
+                
+                const data = await response.json();
+                currentRunId = data.run_id;
+                analysisStatusPoller = setInterval(pollStatus, 1500);
+
+            } catch (error) {
+                console.error("Error running analysis:", error);
+                getEl('pattern-list').innerHTML = `<div class="text-red-500 p-4 bg-red-50 rounded-lg"><h4 class="font-bold">Analysis Failed</h4><p class="text-sm mt-1">${error.message}</p></div>`;
+                runAnalysisBtn.disabled = false;
+            }
+        }
+        
+        // --- WORKLOAD MANAGEMENT ---
+        function addWorkload(wl) {
+            workloads.push({ ...wl, localId: `local_${Date.now()}` });
+            renderWorkloadList();
+            updateSummary();
+            return true;
+        }
+
+        function deleteWorkload(localId) {
+            const initialLength = workloads.length;
+            workloads = workloads.filter(w => w.localId !== localId);
+            renderWorkloadList();
+            updateSummary();
+            return workloads.length < initialLength;
+        }
+        
+        function openCustomWorkloadModal(workload = null) {
+            renderCustomWorkloadModal(workload);
+            getEl('workload-modal').classList.remove('hidden');
+        }
+
+        function saveCustomWorkload(e) {
+            e.preventDefault();
+            const form = e.target;
+            const localId = form.querySelector('#workload-id').value;
+            const selectedTypeId = form.querySelector('#workload-type').value;
+            const selectedType = defaultWorkloads.find(d => d.id === selectedTypeId);
+
+            const workloadData = {
+                localId: localId || `local_${Date.now()}`,
+                id: selectedType.id,
+                name: selectedType.name,
+                spend: parseFloat(form.querySelector('#workload-spend').value) || 0,
+                model: form.querySelector('#current-model').value,
+                goal: form.querySelector('input[name="modalGoal"]:checked').value
+            };
+
+            if (localId) {
+                workloads = workloads.map(wl => wl.localId === localId ? workloadData : wl);
+            } else {
+                workloads.push(workloadData);
+            }
+            renderWorkloadList();
+            updateSummary();
+            closeModal('workload-modal');
+        }
+
+        function closeModal(modalId) {
+            const modal = getEl(modalId);
+            if(modal) modal.remove();
+        }
+
+        // --- RENDER FUNCTIONS ---
+        function renderWorkloadList() {
+            const workloadListEl = getEl('workload-list');
+            if (!workloadListEl) return;
+
+            if (workloads.length === 0) {
+                workloadListEl.innerHTML = `
+                <div id="empty-state" class="text-center py-8 border-2 border-dashed border-slate-200 rounded-lg h-full flex flex-col justify-center">
+                    <i data-lucide="folder-plus" class="mx-auto h-10 w-10 text-slate-400"></i>
+                    <h3 class="mt-2 text-base font-medium text-slate-800">No workloads defined</h3>
+                    <p class="mt-1 text-xs text-slate-500">Add workloads to begin.</p>
+                </div>`;
+            } else {
+                workloadListEl.innerHTML = workloads.map(wl => `
+                    <div class="card p-3 flex items-start justify-between gap-2 fade-in">
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="file-cog" class="h-6 w-6 text-indigo-500 flex-shrink-0 mt-1"></i>
+                            <div>
+                                <p class="font-bold text-sm text-slate-800">${wl.name}</p>
+                                <p class="text-xs text-slate-500">
+                                    ${formatCurrency(wl.spend)}/mo | ${wl.model} | Goal: <span class="capitalize">${wl.goal}</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 flex-shrink-0">
+                            <button class="edit-btn p-1 text-slate-400 hover:text-indigo-600" data-id="${wl.localId}"><i data-lucide="edit" class="h-4 w-4"></i></button>
+                            <button class="delete-btn p-1 text-slate-400 hover:text-red-600" data-id="${wl.localId}"><i data-lucide="trash-2" class="h-4 w-4"></i></button>
+                        </div>
+                    </div>`).join('');
+            }
+            lucide.createIcons();
+        }
+
+        function updateSummary() {
+            const totalSpend = workloads.reduce((sum, wl) => sum + wl.spend, 0);
+            getEl('summary-total-spend').textContent = formatCurrency(totalSpend);
+            runAnalysisBtn.disabled = workloads.length === 0;
+        }
+
+        function renderAnalysisView() {
+            if (analysisData.supply_catalog && analysisData.supply_catalog.length > 0) {
+                supplyCatalogOptions = analysisData.supply_catalog.map(s => ({ name: s.model.name }));
+            }
+            renderCostComparison(analysisData.cost_comparison);
+            
+            const patternListEl = getEl('pattern-list');
+            patternListEl.innerHTML = analysisData.discovered_patterns.map(p => {
+                const iconMap = { 'generation': 'message-square-plus', 'prefill': 'file-check-2', 'tool': 'wrench', 'embedding': 'database', 'agent': 'bot', 'rag': 'book-open-check', 'default': 'cpu' };
+                const patternNameLower = p.pattern_name.toLowerCase();
+                let icon = iconMap.default;
+                for (const key in iconMap) { if (patternNameLower.includes(key)) { icon = iconMap[key]; break; } }
+                return `<div class="pattern-card card p-3 cursor-pointer border-2 border-transparent hover:border-indigo-400" data-id="${p.pattern_id}">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="${icon}" class="h-6 w-6 text-indigo-600"></i>
+                        <div>
+                            <p class="font-bold text-slate-900 text-sm">${p.pattern_name}</p>
+                            <p class="text-xs text-slate-500 font-medium">${p.member_count} Spans | ${p.pattern_description}</p>
+                        </div>
+                    </div>
+                </div>`
+            }).join('');
+            
+            if (analysisData.discovered_patterns.length > 0) {
+                selectPattern(analysisData.discovered_patterns[0].pattern_id);
+            } else { 
+                 patternListEl.innerHTML = `<div class="text-center py-16 border-2 border-dashed rounded-lg"><i data-lucide="search-x" class="mx-auto h-10 w-10 text-slate-400"></i><h3 class="mt-2 text-base font-medium">No Patterns Discovered</h3></div>`;
+            }
+            lucide.createIcons();
+        }
+
+        function renderCostComparison(data) {
+            const container = getEl('cost-comparison-container');
+            const savingsColor = data.projected_monthly_savings >= 0 ? 'text-green-600' : 'text-red-600';
+            const deltaColor = data.delta_percent >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+            
+            container.innerHTML = `
+                <div class="bg-slate-50 p-3 rounded-lg">
+                    <div class="flex justify-between items-center text-xs text-slate-500">
+                        <span>Prior Spend</span>
+                        <span class="font-medium text-slate-700">${formatCurrency(data.prior_monthly_spend)}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-slate-500 mt-1">
+                        <span>Projected Spend</span>
+                        <span class="font-medium text-slate-700">${formatCurrency(data.projected_monthly_spend)}</span>
+                    </div>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg text-center mt-2">
+                    <p class="text-xs text-green-700 uppercase font-semibold">Projected Monthly Savings</p>
+                    <p class="text-3xl font-bold ${savingsColor}">${formatCurrency(data.projected_monthly_savings)}</p>
+                    <p class="text-sm font-semibold px-2 py-1 rounded-full inline-block mt-2 ${deltaColor}">${data.delta_percent.toFixed(1)}%</p>
+                </div>
+            `;
+        }
+        
+        function selectPattern(patternId) {
+            document.querySelectorAll('.pattern-card').forEach(c => c.classList.remove('selected'));
+            document.querySelector(`.pattern-card[data-id="${patternId}"]`)?.classList.add('selected');
+
+            const policy = analysisData.learned_policies.find(p => p.pattern_id === patternId);
+            const pattern = analysisData.discovered_patterns.find(p => p.pattern_id === patternId);
+            if (!policy || !pattern) return; 
+
+            const supplyMap = new Map(analysisData.supply_catalog.map(s => [s.option_id, s]));
+            const allOutcomes = [policy.predicted_outcome, ...policy.alternative_outcomes];
+            
+            getEl('policy-details-container').innerHTML = `
+                <h3 class="text-lg font-bold text-slate-800 mb-2">Policy for "${pattern.pattern_name}"</h3>
+                <div class="space-y-3">
+                    ${allOutcomes.map((outcome, index) => renderPolicyCard(outcome, supplyMap.get(outcome.supply_option_id), index === 0, policy.baseline_metrics)).join('')}
+                    <div class="pt-4">
+                        <h3 class="font-bold text-sm mb-2">Cost vs. Latency Trade-offs</h3>
+                        <div class="bg-slate-50 p-2 rounded-lg h-48"><canvas id="tradeoff-chart"></canvas></div>
+                    </div>
+                </div>`;
+            renderTradeoffChart(allOutcomes, supplyMap);
+            lucide.createIcons();
+        }
+
+        function renderPolicyCard(outcome, supply, isOptimal, baseline) {
+            if (!supply || !outcome) return '';
+            
+            const recsToShow = [];
+            if (outcome.predicted_cost_usd < baseline.avg_cost_usd) recsToShow.push(...recommendations.cost);
+            if (outcome.predicted_latency_ms < baseline.avg_latency_ms) recsToShow.push(...recommendations.latency);
+            if (outcome.predicted_quality_score > baseline.avg_quality_score) recsToShow.push(...recommendations.quality);
+            const uniqueRecs = [...new Map(recsToShow.map(item => [item['title'], item])).values()];
+            const finalRecs = uniqueRecs.sort(() => 0.5 - Math.random()).slice(0, 3);
+
+            const formatDelta = (current, base, unit = '', higherIsBetter = false, isPercent = false) => {
+                if (base === 0 && current > 0) isPercent = false;
+                const delta = isPercent ? (current - base) / base : current - base;
+                if (Math.abs(delta) < (isPercent ? 0.01 : 0.0001)) return `<span class="text-slate-400 font-medium">--</span>`;
+                const isGood = higherIsBetter ? delta > 0 : delta < 0;
+                const color = isGood ? 'text-green-600' : 'text-red-600';
+                const sign = delta > 0 ? '+' : '';
+                const formattedDelta = isPercent ? (delta * 100).toFixed(0) : delta.toFixed(unit === 'ms' ? 0 : 5);
+                return `<span class="${color} font-medium">(${sign}${formattedDelta}${isPercent ? '%' : ''})</span>`;
+            };
+            
+            return `<div class="policy-card card p-3 border-l-4 ${isOptimal ? 'optimal bg-indigo-50/50' : ''}">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-xs font-bold uppercase ${isOptimal ? 'text-indigo-600' : 'text-slate-500'}">${isOptimal ? 'Optimal Policy' : 'Alternative'}</span>
+                        <h4 class="font-bold">${supply.model.name}</h4>
+                    </div>
+                    ${isOptimal ? '<i data-lucide="sparkles" class="text-amber-400 fill-current"></i>' : ''}
+                </div>
+                <div class="mt-2 pt-2 border-t grid grid-cols-4 gap-3 text-sm text-center">
+                    <div>
+                        <p class="text-xs text-slate-500">Cost</p>
+                        <p class="font-bold">${formatCurrency(outcome.predicted_cost_usd, 4)}</p>
+                        <p class="text-xs">${formatDelta(outcome.predicted_cost_usd, baseline.avg_cost_usd, '', false, true)}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">Latency</p>
+                        <p class="font-bold">${Math.round(outcome.predicted_latency_ms)}ms</p>
+                        
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">Quality</p>
+                        <p class="font-bold">${outcome.predicted_quality_score.toFixed(2)}</p>
+                        <p class="text-xs">${formatDelta(outcome.predicted_quality_score, baseline.avg_quality_score, '', true)}</p>
+                    </div>
+                    <div>
+                         <p class="text-xs text-slate-500 mb-1">Simulated Recommendations</p>
+                         <div class="flex items-center justify-center gap-3">
+                            ${finalRecs.map(rec => `
+                                <div class="tooltip">
+                                    <i data-lucide="${rec.icon}" class="h-5 w-5 text-slate-500 hover:text-indigo-600"></i>
+                                    <span class="tooltiptext"><span class="tooltiptext-title">${rec.title}</span>${rec.text}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                <details class="mt-2 text-xs group">
+                    <summary class="cursor-pointer text-slate-500 hover:text-indigo-600">Explanation</summary>
+                    <p class="mt-2 pt-2 border-t border-dashed explanation-text">${outcome.explanation.replace(/\n/g, '<br>')}</p>
+                </details>
+            </div>`;
+        }
+        
+        function renderTradeoffChart(outcomes, supplyMap) {
+            const chartEl = getEl('tradeoff-chart');
+            if (!chartEl) return;
+            const data = outcomes.map(o => {
+                const supply = supplyMap.get(o.supply_option_id);
+                return supply ? { x: o.predicted_latency_ms, y: o.predicted_cost_usd, r: o.predicted_quality_score * 10 + 2, label: supply.model.name } : null;
+            }).filter(Boolean);
+
+            new Chart(chartEl.getContext('2d'), {
+                type: 'bubble', data: { datasets: [{ data: data, backgroundColor: 'rgba(79, 70, 229, 0.5)', borderColor: 'rgb(79, 70, 229)' }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: 'Latency (ms)' } }, y: { title: { display: true, text: 'Cost (per span)' } } }, plugins: { legend: { display: false } } }
+            });
+        }
+
+        // --- RENDER PLACEHOLDER FUNCTIONS ---
+        function renderAnalysisPlaceholder() {
+            getEl('pattern-list').innerHTML = `<div id="analysis-placeholder" class="text-center py-16 border-2 border-dashed border-slate-200 rounded-lg h-full flex flex-col justify-center">
+                <div id="loading-indicator" class="hidden">
+                    <svg class="animate-spin h-8 w-8 text-indigo-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <p id="loading-text" class="mt-4 text-sm text-slate-600 transition-opacity duration-500 px-4">Kicking off analysis...</p>
+                </div>
+                <div id="pre-analysis-msg">
+                    <i data-lucide="brain-circuit" class="mx-auto h-10 w-10 text-slate-400"></i>
+                    <h3 class="mt-2 text-base font-medium text-slate-800">Ready for Analysis</h3>
+                    <p class="mt-1 text-xs text-slate-500">Add workloads and run analysis.</p>
+                </div>
+            </div>`;
+            lucide.createIcons();
+        }
+
+        function renderPolicyPlaceholder() {
+            getEl('policy-details-container').innerHTML = `<div id="policy-placeholder" class="text-center py-16 border-2 border-dashed border-slate-200 rounded-lg h-full flex flex-col justify-center">
+                <i data-lucide="mouse-pointer-click" class="mx-auto h-10 w-10 text-slate-400"></i>
+                <h3 class="mt-2 text-base font-medium text-slate-800">Select a Pattern</h3>
+                <p class="mt-1 text-xs text-slate-500">View its optimal policy and alternatives.</p>
+            </div>`;
+            lucide.createIcons();
+        }
+
+        function renderCostComparisonPlaceholder() {
+            getEl('cost-comparison-container').innerHTML = `<div class="text-center p-4 border-2 border-dashed rounded-lg">
+                <p class="text-slate-500 text-sm">Run analysis to see savings.</p>
+            </div>`;
+        }
+
+        function formatCurrency(amount, digits = 0) {
+            if (amount < 1 && amount > 0) {
+                digits = 4;
+            } else {
+                digits = 0;
+            }
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: digits, maximumFractionDigits: digits }).format(amount); 
+        }
+
+        // --- MODAL RENDER FUNCTIONS ---
+        function renderCustomWorkloadModal(workload = null) {
+            const isEdit = workload !== null;
+            const goal = isEdit ? workload.goal : 'quality';
+            modalContainer.innerHTML = `
+            <div id="workload-modal" class="fixed inset-0 z-50 overflow-y-auto">
+                <div class="flex items-center justify-center min-h-screen p-4">
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75" data-modal-id="workload-modal"></div>
+                    <div class="bg-white rounded-lg text-left overflow-hidden shadow-xl transform sm:max-w-lg sm:w-full">
+                        <form id="workload-form">
+                            <div class="bg-white px-6 pt-5 pb-4">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">${isEdit ? 'Edit' : 'Add Custom'} Workload</h3>
+                                <div class="mt-4 space-y-4">
+                                    <input type="hidden" id="workload-id" value="${workload?.localId || ''}">
+                                    <div>
+                                        <label for="workload-type" class="block text-sm font-medium text-gray-700">Workload Type</label>
+                                        <select id="workload-type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">${defaultWorkloads.map(def => `<option value="${def.id}" ${isEdit && workload.id === def.id ? 'selected' : ''}>${def.name}</option>`).join('')}</select>
+                                    </div>
+                                    <div>
+                                        <label for="workload-spend" class="block text-sm font-medium text-gray-700">Monthly Spend</label>
+                                        <input type="number" id="workload-spend" class="block w-full rounded-md border-gray-300 shadow-sm" value="${isEdit ? workload.spend : ''}" required>
+                                    </div>
+                                    <div>
+                                        <label for="current-model" class="block text-sm font-medium text-gray-700">Current Model</label>
+                                        <select id="current-model" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">${supplyCatalogOptions.map(opt => `<option value="${opt.name}" ${isEdit && workload.model === opt.name ? 'selected' : ''}>${opt.name}</option>`).join('')}</select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Primary Goal</label>
+                                        <div class="grid grid-cols-3 gap-2" id="goal-cards-modal">
+                                             <label class="radio-card cursor-pointer p-3 border-2 rounded-lg text-center flex flex-col items-center justify-center gap-1 ${goal === 'cost' ? 'checked' : ''}"><input type="radio" name="modalGoal" value="cost" class="sr-only" ${goal === 'cost' ? 'checked' : ''}><i data-lucide="dollar-sign" class="h-5 w-5"></i><span class="text-xs font-semibold">Cost</span></label>
+                                             <label class="radio-card cursor-pointer p-3 border-2 rounded-lg text-center flex flex-col items-center justify-center gap-1 ${goal === 'latency' ? 'checked' : ''}"><input type="radio" name="modalGoal" value="latency" class="sr-only" ${goal === 'latency' ? 'checked' : ''}><i data-lucide="zap" class="h-5 w-5"></i><span class="text-xs font-semibold">Latency</span></label>
+                                             <label class="radio-card cursor-pointer p-3 border-2 rounded-lg text-center flex flex-col items-center justify-center gap-1 ${goal === 'quality' ? 'checked' : ''}"><input type="radio" name="modalGoal" value="quality" class="sr-only" ${goal === 'quality' ? 'checked' : ''}><i data-lucide="award" class="h-5 w-5"></i><span class="text-xs font-semibold">Quality</span></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 sm:ml-3 sm:w-auto sm:text-sm">Save</button>
+                                <button type="button" class="cancel-btn mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 sm:mt-0 sm:w-auto sm:text-sm" data-modal="workload-modal">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>`;
+             lucide.createIcons();
+        }
+
+        // --- UI & EVENT LISTENERS ---
+        function setupEventListeners() {
+            runAnalysisBtn.addEventListener('click', runAnalysis);
+            getEl('api-version-select').addEventListener('change', (e) => { API_VERSION = e.target.value; });
+            
+            document.querySelectorAll('.panel-toggle').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    togglePanel(btn.dataset.panel)
+                });
+            });
+
+            document.querySelectorAll('.collapsed-view').forEach(view => {
+                view.addEventListener('click', () => togglePanel(view.dataset.panel));
+            });
+
+            getEl('main-content').addEventListener('click', e => {
+                const patternCard = e.target.closest('.pattern-card');
+                if (patternCard) selectPattern(patternCard.dataset.id);
+            });
+            
+            getEl('add-default-btn').addEventListener('click', () => {
+                addWorkload(defaultWorkloads[Math.floor(Math.random() * defaultWorkloads.length)]);
+            });
+            getEl('add-custom-btn').addEventListener('click', () => openCustomWorkloadModal());
+            getEl('workload-list').addEventListener('click', e => {
+                const deleteBtn = e.target.closest('.delete-btn');
+                if (deleteBtn) deleteWorkload(deleteBtn.dataset.id);
+                const editBtn = e.target.closest('.edit-btn');
+                if (editBtn) openCustomWorkloadModal(workloads.find(wl => wl.localId === editBtn.dataset.id));
+            });
+
+            modalContainer.addEventListener('click', e => {
+                const cancelBtn = e.target.closest('.cancel-btn');
+                if (cancelBtn) closeModal(cancelBtn.dataset.modal);
+                if (e.target.dataset.modalId) closeModal(e.target.dataset.modalId);
+            });
+
+            modalContainer.addEventListener('submit', e => {
+                if (e.target.id === 'workload-form') saveCustomWorkload(e);
+            });
+
+            modalContainer.addEventListener('change', e => {
+                if (e.target.name === 'modalGoal') {
+                    document.querySelectorAll('#goal-cards-modal .radio-card').forEach(card => card.classList.remove('checked'));
+                    e.target.closest('.radio-card').classList.add('checked');
+                }
+            });
+        }
+
+        function togglePanel(panelNumber) {
+            const panel = getEl(`panel-${panelNumber}`);
+            if (!panel) return;
+            panel.classList.toggle('collapsed');
+        }
+
+        // --- STARTUP SELF-TESTS ---
+        function runFrontendTests() {
+            console.log("--- Running Frontend Startup Tests ---");
+            const testWorkload = { id: 'test_id', name: 'Frontend Test Workload', spend: 1, model: 'test-model', goal: 'cost' };
+            
+            // Test 1: Add workload
+            const added = addWorkload(testWorkload);
+            const addedWorkload = workloads.find(w => w.id === 'test_id');
+            if (added && addedWorkload) {
+                console.log("✅ PASS: addWorkload successfully added item to state.");
+            } else {
+                console.error("❌ FAIL: addWorkload did not add item to state.");
+                return;
+            }
+
+            // Test 2: Delete workload
+            const deleted = deleteWorkload(addedWorkload.localId);
+            const deletedWorkload = workloads.find(w => w.id === 'test_id');
+            if(deleted && !deletedWorkload) {
+                console.log("✅ PASS: deleteWorkload successfully removed item from state.");
+            } else {
+                console.error("❌ FAIL: deleteWorkload did not remove item from state.");
+            }
+            console.log("--- Frontend Startup Tests Complete ---");
+        }
+
+        // --- Initial Setup ---
+        async function initialize() {
+            await discoverApiVersions();
+            setupEventListeners();
+            renderWorkloadList();
+            renderAnalysisPlaceholder();
+            renderPolicyPlaceholder();
+            renderCostComparisonPlaceholder();
+            addWorkload(defaultWorkloads[0]);
+            lucide.createIcons();
+            runFrontendTests(); // Run self-tests on startup
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

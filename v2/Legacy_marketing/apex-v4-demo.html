@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netra Apex v4.0 Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.378.0/dist/umd/lucide.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.2s ease-in-out;
+        }
+        .accordion-header {
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .accordion-header:hover {
+            background-color: #f1f5f9; /* slate-100 */
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        .accordion-content.open {
+            max-height: 5000px; /* Large enough for content */
+            padding-top: 1.5rem; /* py-6 */
+            padding-bottom: 1.5rem; /* py-6 */
+        }
+        .chevron-icon {
+            transition: transform 0.3s ease-in-out;
+        }
+        .accordion-header.open .chevron-icon {
+            transform: rotate(180deg);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-slate-900">Netra Apex v4.0</h1>
+            <p class="text-slate-500 mt-2">Automated LLM Cost & Performance Optimization</p>
+        </header>
+
+        <!-- Controls -->
+        <div class="flex justify-center mb-8">
+            <button id="run-workflow-btn" class="bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-indigo-700 transition-all duration-300 flex items-center space-x-2">
+                <i data-lucide="play-circle"></i>
+                <span>Generate Instant Savings Report</span>
+            </button>
+        </div>
+        
+        <div id="loading-indicator" class="hidden text-center my-8">
+            <div role="status" class="flex justify-center items-center space-x-2">
+                <svg aria-hidden="true" class="w-8 h-8 text-slate-200 animate-spin dark:text-slate-600 fill-indigo-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0492C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg>
+                <span class="text-lg text-slate-600">Analyzing logs for volatility and waste patterns...</span>
+            </div>
+        </div>
+        
+        <main id="dashboard-content" class="hidden space-y-4">
+            <!-- Section 1: Workload Profiles -->
+            <div class="bg-white rounded-xl shadow-md">
+                <div class="accordion-header p-6 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold flex items-center"><i data-lucide="search-code" class="mr-3 text-indigo-600"></i>Step 1: Discovered Sub-Workload Patterns</h2>
+                        <p class="text-slate-500 mt-1 ml-10">Your teams know they run "AI Agents", but they don't see the costly sub-patterns. We analyze your logs to pinpoint the specific, granular workloads that are the true source of cost and latency.</p>
+                    </div>
+                    <i data-lucide="chevron-down" class="chevron-icon"></i>
+                </div>
+                <div class="accordion-content px-6">
+                    <div id="profiles-container" class="space-y-8">
+                        <!-- Profile groups will be injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Learned Policies & Recommendations -->
+            <div class="bg-white rounded-xl shadow-md">
+                <div class="accordion-header p-6 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold flex items-center"><i data-lucide="brain-circuit" class="mr-3 text-indigo-600"></i>Step 2: Optimal Configuration Policies</h2>
+                        <p class="text-slate-500 mt-1 ml-10">For each granular pattern, our engine simulates hundreds of configurations to find the single best policy that balances cost, latency, and quality, stopping the bleed with no code changes.</p>
+                    </div>
+                    <i data-lucide="chevron-down" class="chevron-icon"></i>
+                </div>
+                <div class="accordion-content px-6">
+                    <div id="policies-container" class="space-y-6">
+                        <!-- Policy cards will be injected here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section 3: Validation Workbench -->
+            <div class="bg-white rounded-xl shadow-md">
+                <div class="accordion-header p-6 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold flex items-center"><i data-lucide="clipboard-check" class="mr-3 text-indigo-600"></i>Step 3: Proven Savings & Validation</h2>
+                        <p class="text-slate-500 mt-1 ml-10">This is your Instant Savings Report. We validate our recommendations by comparing predicted performance against a mock run, proving the concrete savings and performance gains you can expect.</p>
+                    </div>
+                    <i data-lucide="chevron-down" class="chevron-icon"></i>
+                </div>
+                <div class="accordion-content px-6">
+                    <div id="validation-container">
+                        <!-- Validation report will be injected here -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const runWorkflowBtn = document.getElementById('run-workflow-btn');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const dashboardContent = document.getElementById('dashboard-content');
+        const profilesContainer = document.getElementById('profiles-container');
+        const policiesContainer = document.getElementById('policies-container');
+        const validationContainer = document.getElementById('validation-container');
+
+        // --- Event Listeners ---
+        runWorkflowBtn.addEventListener('click', runFullWorkflow);
+        dashboardContent.addEventListener('click', function(e) {
+            const header = e.target.closest('.accordion-header');
+            if (header) {
+                const content = header.nextElementSibling;
+                const wasOpen = content.classList.contains('open');
+                document.querySelectorAll('.accordion-content.open').forEach(openContent => {
+                    openContent.classList.remove('open');
+                    openContent.previousElementSibling.classList.remove('open');
+                });
+                if (!wasOpen) {
+                    content.classList.add('open');
+                    header.classList.add('open');
+                }
+            }
+        });
+
+        // --- Core Workflow Logic ---
+        function runFullWorkflow() {
+            dashboardContent.classList.add('hidden');
+            loadingIndicator.classList.remove('hidden');
+            profilesContainer.innerHTML = '';
+            policiesContainer.innerHTML = '';
+            validationContainer.innerHTML = '';
+            
+            document.querySelectorAll('.accordion-content.open').forEach(c => c.classList.remove('open'));
+            document.querySelectorAll('.accordion-header.open').forEach(h => h.classList.remove('open'));
+
+            setTimeout(() => {
+                const mockProfileGroups = generateMockWorkloadProfiles();
+                
+                // Flatten sub-workloads for policies and validation
+                const allSubWorkloads = mockProfileGroups.flatMap(group => 
+                    group.sub_workloads.map(sub => ({ ...sub, main_category: group.category }))
+                );
+
+                const mockRecommendations = generateMockRecommendations(allSubWorkloads);
+                const mockValidationReports = generateMockValidationReports(mockRecommendations);
+
+                renderWorkloadProfiles(mockProfileGroups);
+                renderLearnedPolicies(mockRecommendations);
+                renderValidationReports(mockValidationReports);
+
+                loadingIndicator.classList.add('hidden');
+                dashboardContent.classList.remove('hidden');
+                
+                const firstHeader = document.querySelector('.accordion-header');
+                if(firstHeader) {
+                    firstHeader.classList.add('open');
+                    firstHeader.nextElementSibling.classList.add('open');
+                }
+                
+                lucide.createIcons();
+            }, 1500);
+        }
+
+        // --- Mock Data Generation (Granular Sub-Workloads) ---
+        function generateMockWorkloadProfiles() {
+            return [
+                {
+                    category: 'AI Agents',
+                    company_example: 'Adept, Cognition Labs (Devin), Sierra',
+                    sub_workloads: [
+                        { id: 'agent_cot', name: 'Chain-of-Thought Reasoning', pain_point: 'High latency from sequential, dependent LLM calls.', volatility_score: 0.88 },
+                        { id: 'agent_tool', name: 'Tool-Using Function Calls', pain_point: 'Token waste in verbose function definitions and arguments.', volatility_score: 0.95 },
+                        { id: 'agent_code', name: 'Autonomous Code Generation', pain_point: 'Massive, unpredictable token usage in long-running tasks.', volatility_score: 0.91 }
+                    ]
+                },
+                {
+                    category: 'RAG & Enterprise Search',
+                    company_example: 'Glean, Perplexity AI, Hebbia',
+                    sub_workloads: [
+                        { id: 'rag_dense', name: 'Dense Context Retrieval', pain_point: 'Extreme cost from stuffing 100K+ tokens into context.', volatility_score: 0.93 },
+                        { id: 'rag_rerank', name: 'Re-ranking & Summarization', pain_point: 'Quality degradation from using cheap models to process search results.', volatility_score: 0.75 },
+                        { id: 'rag_multiquery', name: 'Multi-Query Expansion', pain_point: 'Cost amplification from generating and running multiple query variations.', volatility_score: 0.82 }
+                    ]
+                },
+                {
+                    category: 'Generative AI Apps',
+                    company_example: 'Jasper, Copy.ai, Tome',
+                    sub_workloads: [
+                        { id: 'app_short', name: 'Short-Form Content (Tweets, Ads)', pain_point: 'High per-request cost for low-value, high-volume generations.', volatility_score: 0.65 },
+                        { id: 'app_long', name: 'Long-Form Article Generation', pain_point: 'Slow time-to-first-token and high latency frustrate users.', volatility_score: 0.80 },
+                        { id: 'app_structured', name: 'Structured Data Output (JSON)', pain_point: 'High error rates and re-tries when forcing unstructured models to produce JSON.', volatility_score: 0.88 }
+                    ]
+                }
+            ];
+        }
+
+        function generateMockRecommendations(subWorkloads) {
+            const models = {
+                pro: { provider: 'google', name: 'gemini-1.5-pro-latest' },
+                flash: { provider: 'google', name: 'gemini-1.5-flash-latest' },
+            };
+
+            return subWorkloads.map(sub => {
+                const isComplex = sub.id.includes('cot') || sub.id.includes('code') || sub.id.includes('dense');
+                const bestModel = isComplex ? models.pro : models.flash;
+                
+                return {
+                    workload_id: sub.id,
+                    workload_name: sub.name,
+                    main_category: sub.main_category,
+                    best_config: {
+                        model: bestModel,
+                        quantization: isComplex ? 'INT8' : null,
+                        speculative_decoding: !isComplex,
+                    },
+                    simulation_summary: {
+                        predicted_cost_per_1k_reqs: isComplex ? 3.75 : 0.45,
+                        predicted_avg_latency_ms: isComplex ? 950 : 320,
+                        predicted_quality_score: isComplex ? 0.92 : 0.88,
+                        explanation: `For the '${sub.name}' pattern, this policy attacks the core pain of ${sub.pain_point.toLowerCase()} It uses a ${isComplex ? 'powerful model with quantization' : 'fast, cost-efficient model'} to optimize the specific cost/latency/quality tradeoff.`,
+                    }
+                };
+            });
+        }
+
+        function generateMockValidationReports(recommendations) {
+            return recommendations.map(rec => {
+                const sim = rec.simulation_summary;
+                const latencyNoise = (Math.random() - 0.5) * 0.1;
+                const costNoise = (Math.random() - 0.5) * 0.12;
+                const qualityNoise = (Math.random() - 0.5) * 0.05;
+
+                return {
+                    workload_id: rec.workload_id,
+                    workload_name: rec.workload_name,
+                    main_category: rec.main_category,
+                    metrics_comparison: {
+                        latency_ms: { predicted: sim.predicted_avg_latency_ms, actual: sim.predicted_avg_latency_ms * (1 + latencyNoise) },
+                        cost_per_req: { predicted: sim.predicted_cost_per_1k_reqs / 1000, actual: (sim.predicted_cost_per_1k_reqs / 1000) * (1 + costNoise) },
+                        quality_score: { predicted: sim.predicted_quality_score, actual: sim.predicted_quality_score * (1 + qualityNoise) },
+                    }
+                };
+            });
+        }
+
+        // --- UI Rendering Functions ---
+        function renderWorkloadProfiles(profileGroups) {
+            profilesContainer.innerHTML = profileGroups.map(group => `
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-1">${group.category}</h3>
+                    <p class="text-sm text-slate-500 mb-4">e.g., ${group.company_example}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${group.sub_workloads.map(sub => `
+                            <div class="card p-5 flex flex-col justify-between border-l-4 border-red-500">
+                                <div>
+                                    <h4 class="font-bold text-lg text-slate-800">${sub.name}</h4>
+                                    <p class="text-sm font-semibold text-red-600 mt-2">Pain Point: <span class="font-normal text-slate-600">${sub.pain_point}</span></p>
+                                </div>
+                                <div class="mt-4 pt-4 border-t border-slate-100">
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="font-semibold text-slate-700">Volatility Score:</span>
+                                        <span class="font-bold text-xl ${sub.volatility_score > 0.9 ? 'text-red-500' : 'text-amber-500'}">${(sub.volatility_score * 100).toFixed(0)}</span>
+                                    </div>
+                                    <div class="w-full bg-slate-200 rounded-full h-2 mt-2">
+                                        <div class="bg-gradient-to-r ${sub.volatility_score > 0.9 ? 'from-amber-500 to-red-500' : 'from-yellow-400 to-amber-500'} h-2 rounded-full" style="width: ${sub.volatility_score * 100}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderLearnedPolicies(recommendations) {
+            policiesContainer.innerHTML = recommendations.map(rec => {
+                const config = rec.best_config;
+                const sim = rec.simulation_summary;
+                return `
+                <div class="card overflow-hidden">
+                    <div class="p-5">
+                        <p class="text-xs font-semibold text-indigo-600 uppercase">${rec.main_category}</p>
+                        <h3 class="text-lg font-bold text-slate-800">${rec.workload_name}</h3>
+                        <p class="text-sm text-slate-500 mt-2">${sim.explanation}</p>
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <h4 class="font-semibold text-slate-700 mb-2 flex items-center"><i data-lucide="cpu" class="mr-2 h-5 w-5"></i>Optimal Policy</h4>
+                                <div class="space-y-1 text-sm">
+                                    <p><strong>Model:</strong> <span class="font-mono bg-slate-200 px-1.5 py-0.5 rounded">${config.model.name}</span></p>
+                                    <p><strong>Quantization:</strong> ${config.quantization ? `<span class="font-mono bg-slate-200 px-1.5 py-0.5 rounded">${config.quantization}</span>` : 'None'}</p>
+                                    <p><strong>Spec. Decoding:</strong> ${config.speculative_decoding ? '<span class="text-green-600 font-semibold">Enabled</span>' : '<span class="text-slate-500">Disabled</span>'}</p>
+                                </div>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <h4 class="font-semibold text-slate-700 mb-2 flex items-center"><i data-lucide="bar-chart-3" class="mr-2 h-5 w-5"></i>Predicted Gains</h4>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div><strong>Quality:</strong> <span class="text-blue-600 font-bold">${sim.predicted_quality_score.toFixed(2)}</span></div>
+                                    <div><strong>Cost/1k:</strong> <span class="text-red-600 font-bold">$${sim.predicted_cost_per_1k_reqs.toFixed(2)}</span></div>
+                                    <div><strong>Latency:</strong> <span class="text-amber-600 font-bold">${sim.predicted_avg_latency_ms.toFixed(0)}ms</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderValidationReports(reports) {
+            const tableHeader = `
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">Sub-Workload Pattern</th>
+                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Metric</th>
+                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Predicted</th>
+                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Validated (Actual)</th>
+                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Accuracy</th>
+                    </tr>
+                </thead>`;
+            
+            const tableBody = reports.map((report, index) => {
+                const metrics = report.metrics_comparison;
+                const rows = [
+                    { name: 'Latency (ms)', pred: metrics.latency_ms.predicted, actual: metrics.latency_ms.actual, format: (v) => v.toFixed(0) },
+                    { name: 'Cost / Req', pred: metrics.cost_per_req.predicted, actual: metrics.cost_per_req.actual, format: (v) => `$${v.toFixed(5)}` },
+                    { name: 'Quality Score', pred: metrics.quality_score.predicted, actual: metrics.quality_score.actual, format: (v) => v.toFixed(3) }
+                ];
+
+                return rows.map((metric, metricIndex) => {
+                    const error = Math.abs(((metric.actual - metric.pred) / metric.pred) * 100);
+                    const accuracy = 100 - error;
+                    const accuracyColor = accuracy > 95 ? 'text-green-600' : 'text-amber-600';
+                    const isFirstRow = metricIndex === 0;
+                    const borderClass = index > 0 && isFirstRow ? 'border-t border-slate-300' : '';
+                    
+                    return `
+                        <tr class="${borderClass}">
+                            ${isFirstRow ? `<td rowspan="3" class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6 align-top pt-6">
+                                <div>${report.workload_name}</div>
+                                <div class="text-xs text-slate-500">${report.main_category}</div>
+                            </td>` : ''}
+                            <td class="whitespace-nowrap px-3 py-2 text-sm text-slate-500">${metric.name}</td>
+                            <td class="whitespace-nowrap px-3 py-2 text-sm text-slate-500">${metric.format(metric.pred)}</td>
+                            <td class="whitespace-nowrap px-3 py-2 text-sm text-slate-500 font-bold">${metric.format(metric.actual)}</td>
+                            <td class="whitespace-nowrap px-3 py-2 text-sm font-medium ${accuracyColor}">${accuracy.toFixed(2)}%</td>
+                        </tr>`;
+                }).join('');
+            }).join('');
+
+            validationContainer.innerHTML = `
+                <div class="flow-root">
+                    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                            <table class="min-w-full divide-y divide-slate-200">
+                                ${tableHeader}
+                                <tbody class="divide-y divide-slate-200">${tableBody}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

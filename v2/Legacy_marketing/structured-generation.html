@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding Structured Generation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Source+Code+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .mono {
+            font-family: 'Source Code Pro', monospace;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-block {
+            animation: fadeIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+        .token-card {
+            transition: all 0.5s ease-out;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .token-structured {
+            background-color: #e0e7ff; /* Indigo-100 */
+            color: #4338ca; /* Indigo-800 */
+            font-weight: 600;
+            border: 1px solid #c7d2fe; /* Indigo-200 */
+        }
+        .token-predicted {
+            background-color: #dcfce7; /* Green-100 */
+            color: #166534; /* Green-800 */
+            border: 1px solid #bbf7d0; /* Green-200 */
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="max-w-4xl mx-auto p-4 sm:p-8">
+
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-900">What is Structured Generation?</h1>
+        </div>
+
+        <!-- Visual Proof -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 fade-in-block mb-12" style="animation-delay: 0.2s;">
+            <h2 class="text-2xl font-bold text-slate-800 mb-2 text-center">How it Works: A Token-by-Token View</h2>
+            <p class="text-center text-slate-600 mb-6">The model predicts the next "token". With a structure, we only allow it to predict tokens that fit our rules, which is faster and more reliable.</p>
+            
+            <div id="interactive-demo" class="space-y-3">
+                <!-- JS will populate this -->
+            </div>
+            <div class="text-center mt-6">
+                <button id="reset-button" class="bg-indigo-600 text-white font-semibold px-5 py-2 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
+                    ▶️ Run Simulation
+                </button>
+            </div>
+        </div>
+
+        <!-- Comparison Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 fade-in-block" style="animation-delay: 0.4s;">
+            
+            <!-- Standard Generation -->
+            <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                <h2 class="text-2xl font-bold text-slate-800 mb-4 text-center">Standard Output</h2>
+                <p class="text-center text-slate-600 mb-4">You ask the model for information, and it gives you a text paragraph. This is flexible but unpredictable and hard for programs to read.</p>
+                <div class="bg-slate-100 p-4 rounded-xl">
+                    <p class="font-semibold text-slate-700 mb-2 mono">PROMPT:</p>
+                    <p class="text-slate-900 mono">"Give me user details for Jane Doe."</p>
+                </div>
+                <div class="my-4 text-center text-2xl">⬇️</div>
+                <div class="bg-red-50 p-4 rounded-xl border border-red-200">
+                    <p class="font-semibold text-red-700 mb-2 mono">MODEL OUTPUT:</p>
+                    <p class="text-red-900 mono text-sm">
+                        "Sure, here are the details for the user Jane Doe. Her full name is Jane M. Doe, and she can be reached by email at jane.doe@example.com. She is 34 years old."
+                    </p>
+                </div>
+            </div>
+
+            <!-- Structured Generation -->
+            <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                <h2 class="text-2xl font-bold text-slate-800 mb-4 text-center">Structured Output</h2>
+                <p class="text-center text-slate-600 mb-4">You provide a template or schema. The model is <strong class="font-semibold">forced</strong> to fill it in, giving you clean, predictable data every time.</p>
+                 <div class="bg-slate-100 p-4 rounded-xl">
+                    <p class="font-semibold text-slate-700 mb-2 mono">PROMPT + SCHEMA:</p>
+                    <p class="text-slate-900 mono">"Give me user details for Jane Doe in JSON format: {name, email, age}"</p>
+                </div>
+                <div class="my-4 text-center text-2xl">⬇️</div>
+                <div class="bg-green-50 p-4 rounded-xl border border-green-200">
+                     <p class="font-semibold text-green-700 mb-2 mono">MODEL OUTPUT:</p>
+                    <div class="flex flex-wrap gap-2 mono text-sm">
+                        <span class="token token-structured px-2 py-1 rounded-md">"name":</span>
+                        <span class="token token-predicted px-2 py-1 rounded-md">"Jane Doe",</span>
+                        <span class="token token-structured px-2 py-1 rounded-md">"email":</span>
+                        <span class="token token-predicted px-2 py-1 rounded-md">"jane.doe@example.com",</span>
+                        <span class="token token-structured px-2 py-1 rounded-md">"age":</span>
+                        <span class="token token-predicted px-2 py-1 rounded-md">34</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- The Impact Section -->
+        <div class="mt-8 bg-white p-8 rounded-2xl shadow-lg border border-slate-200 fade-in-block" style="animation-delay: 0.6s;">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">The Impact: Reliability, Speed, and Cost Savings</h2>
+            <div class="space-y-6">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 text-2xl">🛡️</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Rock-Solid Reliability</h3>
+                        <p class="text-slate-600 mt-1">Structured generation turns a creative storyteller into a reliable data entry assistant. It's the key to building robust applications on top of LLMs because you can <strong class="font-semibold">trust the format of the data</strong> you get back. No more messy text parsing!</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 text-2xl">🚀</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Blazing-Fast Performance</h3>
+                        <p class="text-slate-600 mt-1">Instead of asking the model to wander through a huge library of possible words (standard output), you're giving it the exact shelf and book number (structured output). It finds the answer <strong class="font-semibold">faster and more efficiently</strong> because most of the choices have already been made for it.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 text-2xl">💰</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Lower Costs & Smaller Models</h3>
+                        <p class="text-slate-600 mt-1">Because the model does less "thinking" for the structural parts, you can often use a <strong class="font-semibold">smaller, faster, and cheaper model</strong> to get the same high-quality result. It also generates fewer tokens by avoiding conversational fluff ("Sure, here are the details..."), which <strong class="font-semibold">directly reduces API costs</strong>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Billing Perspective -->
+        <div class="mt-8 bg-white p-8 rounded-2xl shadow-lg border border-slate-200 fade-in-block" style="animation-delay: 0.8s;">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">Billing & Cost: API vs. Self-Hosted</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-slate-50 p-4 rounded-lg border">
+                    <h3 class="font-bold text-lg text-slate-800">API Service (Pay-per-use)</h3>
+                    <p class="text-slate-600 mt-2 text-sm">You pay for the <strong class="font-semibold">final output tokens</strong>, regardless of how they were generated. A "lookup" token and a "predicted" token cost the same because the bill is for the product delivered, not the effort.</p>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-lg border">
+                    <h3 class="font-bold text-lg text-slate-800">Self-Hosted Model</h3>
+                    <p class="text-slate-600 mt-2 text-sm">You pay for <strong class="font-semibold">computation (GPU time)</strong>. Here, the difference is huge. A "lookup" token is nearly free as it doesn't require a full forward pass of the model. The savings are direct and significant.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tools & Libraries -->
+        <div class="mt-8 bg-white p-8 rounded-2xl shadow-lg border border-slate-200 fade-in-block" style="animation-delay: 1.0s;">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">Tools & Libraries</h2>
+            <p class="text-center text-slate-600 mb-6 max-w-2xl mx-auto">Several open-source libraries make it easy to implement structured generation in your own projects. Here are a few popular ones:</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                <a href="https://github.com/outlines-dev/outlines" target="_blank" class="block p-4 bg-slate-50 rounded-lg hover:bg-slate-100 hover:shadow-md transition">
+                    <h3 class="font-bold text-indigo-600">Outlines</h3>
+                    <p class="text-sm text-slate-500 mt-1">A powerful library for guided text generation with a focus on correctness and performance.</p>
+                </a>
+                <a href="https://github.com/guidance-ai/guidance" target="_blank" class="block p-4 bg-slate-50 rounded-lg hover:bg-slate-100 hover:shadow-md transition">
+                    <h3 class="font-bold text-indigo-600">Guidance</h3>
+                    <p class="text-sm text-slate-500 mt-1">Uses a Handlebars-like syntax to interleave generation, prompting, and logic.</p>
+                </a>
+                <a href="https://lmql.ai/" target="_blank" class="block p-4 bg-slate-50 rounded-lg hover:bg-slate-100 hover:shadow-md transition">
+                    <h3 class="font-bold text-indigo-600">LMQL</h3>
+                    <p class="text-sm text-slate-500 mt-1">A query language for language models that supports advanced, multi-part prompting.</p>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const demoContainer = document.getElementById('interactive-demo');
+        const resetButton = document.getElementById('reset-button');
+
+        const tokens = [
+            { text: '{', type: 'structured', performance: 'Lookup (Schema)', constraint: 'JSON must start with "{"', time: '~1ms', cost: '1 token' },
+            { text: '"name"', type: 'structured', performance: 'Lookup (Schema)', constraint: 'First key must be "name"', time: '~1ms', cost: '1 token' },
+            { text: ':', type: 'structured', performance: 'Lookup (Schema)', constraint: 'Key must be followed by ":"', time: '~1ms', cost: '1 token'},
+            { text: '"Jane Doe"', type: 'predicted', performance: 'Forward Pass (Model)', constraint: 'Value must be a string. Model samples from all possible strings.', time: '~50ms', cost: '2 tokens' },
+            { text: ',', type: 'structured', performance: 'Lookup (Schema)', constraint: 'Separator must be ","', time: '~1ms', cost: '1 token' },
+            { text: '"email"', type: 'structured', performance: 'Lookup (Schema)', constraint: 'Next key must be "email"', time: '~1ms', cost: '1 token' },
+            { text: ':', type: 'structured', performance: 'Lookup (Schema)', constraint: 'Key must be followed by ":"', time: '~1ms', cost: '1 token'},
+            { text: '"jane.doe@example.com"', type: 'predicted', performance: 'Forward Pass (Model)', constraint: 'Value must be a string (email format). Model samples from valid strings.', time: '~80ms', cost: '5 tokens' },
+            { text: ',', type: 'structured', performance: 'Lookup (Schema)', constraint: 'Separator must be ","', time: '~1ms', cost: '1 token' },
+            { text: '"age"', type: 'structured', performance: 'Lookup (Schema)', constraint: 'Next key must be "age"', time: '~1ms', cost: '1 token' },
+            { text: ':', type: 'structured', performance: 'Lookup (Schema)', constraint: 'Key must be followed by ":"', time: '~1ms', cost: '1 token'},
+            { text: '34', type: 'predicted', performance: 'Forward Pass (Model)', constraint: 'Value must be a number. Model samples from all possible numbers.', time: '~30ms', cost: '1 token' },
+            { text: '}', type: 'structured', performance: 'Lookup (Schema)', constraint: 'JSON must end with "}"', time: '~1ms', cost: '1 token' },
+        ];
+
+        let currentIndex = 0;
+        let intervalId = null;
+
+        function createTokenElement(token) {
+            const card = document.createElement('div');
+            card.className = 'token-card bg-slate-100 p-3 rounded-lg border border-slate-200';
+
+            const isPredicted = token.type === 'predicted';
+            const bgColor = isPredicted ? 'bg-green-100' : 'bg-indigo-100';
+            const textColor = isPredicted ? 'text-green-800' : 'text-indigo-800';
+            const borderColor = isPredicted ? 'border-green-300' : 'border-indigo-300';
+            const perfColor = isPredicted ? 'text-green-600' : 'text-indigo-600';
+
+            card.innerHTML = `
+                <div class="flex items-start justify-between">
+                    <span class="mono text-lg font-bold ${textColor} ${bgColor} px-3 py-1 rounded-md border ${borderColor}">${token.text}</span>
+                    <span class="text-sm font-semibold ${perfColor} text-right">${token.performance}</span>
+                </div>
+                <div class="mt-2 text-xs text-slate-500 mono pl-1">
+                    <strong>Constraint:</strong> ${token.constraint}
+                </div>
+                <div class="mt-2 pt-2 border-t border-slate-200 flex justify-between text-xs text-slate-500 mono">
+                    <span><strong>Time:</strong> ${token.time}</span>
+                    <span><strong>Cost:</strong> ${token.cost}</span>
+                </div>
+            `;
+            return card;
+        }
+
+        function runSimulation() {
+            demoContainer.innerHTML = '<div class="text-center text-slate-500 p-4">Simulating model output...</div>';
+            resetButton.disabled = true;
+            resetButton.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            setTimeout(() => {
+                demoContainer.innerHTML = '';
+                currentIndex = 0;
+
+                // 1. Show the first token quickly
+                if (currentIndex < tokens.length) {
+                    const firstToken = tokens[currentIndex];
+                    const firstEl = createTokenElement(firstToken);
+                    demoContainer.appendChild(firstEl);
+                    setTimeout(() => {
+                        firstEl.style.opacity = '1';
+                        firstEl.style.transform = 'translateY(0)';
+                    }, 50);
+                    currentIndex++;
+                }
+
+                // 2. Show the rest with a delay
+                intervalId = setInterval(() => {
+                    if (currentIndex < tokens.length) {
+                        const token = tokens[currentIndex];
+                        const el = createTokenElement(token);
+                        demoContainer.appendChild(el);
+                        setTimeout(() => {
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateY(0)';
+                        }, 50);
+                        currentIndex++;
+                    } else {
+                        clearInterval(intervalId);
+                        resetButton.disabled = false;
+                        resetButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                }, 1200); // Slower interval for the rest
+            }, 500);
+        }
+
+        resetButton.addEventListener('click', runSimulation);
+        
+        // Initial welcome message
+        demoContainer.innerHTML = '<div class="text-center text-slate-500 p-4">Click the button to see how the model is forced to generate tokens that match the required JSON structure, step by step.</div>';
+    </script>
+
+</body>
+</html>

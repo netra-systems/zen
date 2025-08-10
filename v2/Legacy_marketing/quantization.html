@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding Model Quantization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Source+Code+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .mono {
+            font-family: 'Source Code Pro', monospace;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes highlight-value {
+            0% { background-color: #e0e7ff; }
+            100% { background-color: transparent; }
+        }
+        .fade-in-block {
+            animation: fadeIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+        .bit-bar-container {
+            height: 20px;
+            background-color: #e5e7eb; /* gray-200 */
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 1px solid #d1d5db; /* gray-300 */
+        }
+        .bit-bar {
+            height: 100%;
+            transition: width 0.5s ease-out;
+            background: linear-gradient(90deg, #a855f7, #4f46e5);
+        }
+        .data-type-card {
+            transition: all 0.3s ease-in-out;
+        }
+        .data-type-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .vector-value-pair {
+            transition: all 0.3s ease-in-out;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        .vector-value-pair.highlight {
+            animation: highlight-value 1s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="max-w-5xl mx-auto p-4 sm:p-8">
+
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-900">What is Model Quantization?</h1>
+            <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">It's the process of reducing the precision of the numbers used in a model—like weights and activations—to make it smaller, faster, and more efficient.</p>
+        </div>
+
+        <!-- The Spectrum of Precision -->
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-slate-200 fade-in-block mb-12" style="animation-delay: 0.2s;">
+            <h2 class="text-2xl font-bold text-slate-800 mb-4 text-center">The Spectrum of Precision</h2>
+            <div class="flex items-center justify-center gap-4 mb-4">
+                <label for="precision-slider" class="block text-sm font-medium text-slate-700">Adjust Precision</label>
+                <input id="precision-slider" type="range" min="0" max="4" value="0" class="w-full max-w-xs h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                 <button id="animate-button" class="bg-indigo-600 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition w-28">
+                    ▶️ Animate
+                </button>
+            </div>
+             <div class="flex justify-between text-xs text-gray-500 mt-1 mono max-w-sm mx-auto">
+                    <span>32-Bit</span>
+                    <span>16-Bit</span>
+                    <span>8-Bit</span>
+                    <span>4-Bit</span>
+                    <span>1-Bit</span>
+            </div>
+            <div class="space-y-6 mt-6" id="precision-slider-container">
+                <!-- JS will populate this -->
+            </div>
+        </div>
+        
+        <!-- Normal Float Explained -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 fade-in-block mb-12" style="animation-delay: 0.4s;">
+            <h2 class="text-2xl font-bold text-slate-800 mb-4 text-center">Anatomy of a Normal Float (FP32)</h2>
+            <p class="text-center text-slate-600 mb-6">Before quantizing, it helps to know what we're starting with. A standard 32-bit floating-point number is made of three parts that work together to represent a wide range of values.</p>
+            <div class="bg-slate-50 p-4 rounded-xl flex flex-col md:flex-row items-center gap-4 mono text-center">
+                <div class="flex items-center justify-center w-full">
+                    <!-- Sign -->
+                    <div class="bg-red-200 text-red-800 p-3 rounded-l-lg border-2 border-red-300">
+                        <div class="font-bold">Sign</div>
+                        <div class="text-sm">1 bit</div>
+                    </div>
+                    <!-- Exponent -->
+                    <div class="bg-blue-200 text-blue-800 p-3 border-t-2 border-b-2 border-blue-300 flex-grow">
+                        <div class="font-bold">Exponent</div>
+                        <div class="text-sm">8 bits</div>
+                    </div>
+                    <!-- Mantissa -->
+                    <div class="bg-green-200 text-green-800 p-3 rounded-r-lg border-2 border-green-300 flex-grow-[2]">
+                        <div class="font-bold">Mantissa (Precision)</div>
+                        <div class="text-sm">23 bits</div>
+                    </div>
+                </div>
+                <div class="text-slate-600 text-sm md:w-1/3 text-left p-2">
+                    The <strong class="text-red-600">Sign</strong> determines if the number is positive or negative. The <strong class="text-blue-600">Exponent</strong> controls the magnitude (how big or small). The <strong class="text-green-600">Mantissa</strong> provides the actual digits of precision. Quantization primarily reduces the bits available for the Mantissa and Exponent.
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Types in Quantization -->
+        <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200 fade-in-block mb-12" style="animation-delay: 0.6s;">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">Common Data Types</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- FP32 -->
+                <div class="data-type-card bg-slate-50 p-4 rounded-lg border h-full">
+                    <h3 class="font-bold text-lg text-slate-800">FP32 (32-bit Float)</h3>
+                    <p class="text-slate-600 mt-2 text-sm">The "normal" or baseline data type for training. Its high precision (23 mantissa bits) and wide dynamic range (8 exponent bits) are crucial for accurately accumulating small gradient updates during training.</p>
+                </div>
+                <!-- FP16 -->
+                <div class="data-type-card bg-slate-50 p-4 rounded-lg border h-full">
+                    <h3 class="font-bold text-lg text-slate-800">FP16 (16-bit Float)</h3>
+                    <p class="text-slate-600 mt-2 text-sm">Half the size of FP32. A balanced choice for reducing model size with minimal accuracy loss. Standard on modern GPUs for "mixed-precision" training.</p>
+                </div>
+                <!-- BF16 -->
+                <div class="data-type-card bg-slate-50 p-4 rounded-lg border h-full">
+                    <h3 class="font-bold text-lg text-slate-800">Brain Floating Point Format (Bfloat16)</h3>
+                    <p class="text-slate-600 mt-2 text-sm">A clever format from Google. It keeps the same 8 exponent bits as FP32 (preserving its wide dynamic range) but reduces the precision bits to 7. This makes training more stable than FP16 while still offering significant memory savings.</p>
+                </div>
+                <!-- INT8 -->
+                <div class="data-type-card bg-slate-50 p-4 rounded-lg border h-full">
+                    <h3 class="font-bold text-lg text-slate-800">INT8 (8-bit Integer)</h3>
+                    <p class="text-slate-600 mt-2 text-sm">Represents 256 distinct values. The most popular choice for inference, offering huge speedups on compatible hardware (CPU/GPU/TPU) with often negligible accuracy drop.</p>
+                </div>
+                <!-- INT4 -->
+                <div class="data-type-card bg-slate-50 p-4 rounded-lg border h-full">
+                    <h3 class="font-bold text-lg text-slate-800">INT4 (4-bit Integer)</h3>
+                    <p class="text-slate-600 mt-2 text-sm">Represents only 16 distinct values. Very small and fast, but can lead to noticeable accuracy degradation if not handled carefully with methods like QAT.</p>
+                </div>
+                <!-- 1-Bit -->
+                <div class="data-type-card bg-slate-50 p-4 rounded-lg border h-full">
+                    <h3 class="font-bold text-lg text-slate-800">1-Bit (Binary/Ternary)</h3>
+                    <p class="text-slate-600 mt-2 text-sm">The extreme. Weights are just -1 or 1. To regain accuracy, techniques like "weight binning" are used, where groups of low-precision weights work together to approximate a higher-precision value, creating "virtual" precision.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Types of Quantization -->
+        <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200 fade-in-block mb-12" style="animation-delay: 0.8s;">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">Quantization Methods</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- PTQ -->
+                <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-200 h-full">
+                    <h3 class="font-bold text-xl text-indigo-800">Post-Training Quantization (PTQ)</h3>
+                    <p class="text-indigo-700 mt-2">The "easy button." A trained FP32 model is converted to lower precision without retraining. The core idea is to find a <strong class="font-semibold">scale</strong> factor and <strong class="font-semibold">zero-point</strong> to map the float range to the integer range.</p>
+                    <p class="mt-4 text-sm mono bg-white p-2 rounded">int = round(float / scale) + zero_point</p>
+                    <p class="mt-2 text-sm text-indigo-600">The `scale` and `zero_point` are found by observing the min/max float values in a small "calibration" dataset.</p>
+                </div>
+                <!-- QAT -->
+                <div class="bg-green-50 p-6 rounded-xl border border-green-200 h-full">
+                    <h3 class="font-bold text-xl text-green-800">Quantization-Aware Training (QAT)</h3>
+                    <p class="text-green-700 mt-2">The "high-accuracy" method. It simulates quantization effects during training, allowing the model to adapt.</p>
+                    <p class="mt-4 text-sm text-green-600">This is done by inserting <strong class="font-semibold">"fake quantization"</strong> nodes into the model graph. In the forward pass, these nodes round weights to the target precision. In the backward pass, they use a <strong class="font-semibold">Straight-Through Estimator (STE)</strong> to pass the full-precision gradients through as if no quantization occurred, allowing the model to learn.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hardware's Role -->
+        <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200 fade-in-block mb-12" style="animation-delay: 1.0s;">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">Why Hardware Matters</h2>
+            <p class="text-center text-slate-600 mb-6 max-w-2xl mx-auto">Quantization isn't just about theory; it's about real-world speed. Modern chips are built to exploit lower precision for massive performance gains.</p>
+            <div class="space-y-6">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 text-3xl">⚙️</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Specialized Compute Units</h3>
+                        <p class="text-slate-600 mt-1">Hardware like <strong class="font-semibold">NVIDIA's Tensor Cores</strong> and <strong class="font-semibold">Google's TPUs</strong> have dedicated circuits that perform INT8 or FP16 math much faster than FP32 math. Using these data types unlocks the full potential of the hardware.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 text-3xl">💾</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Memory Bandwidth & Cache</h3>
+                        <p class="text-slate-600 mt-1">Moving data from memory to the processor is a major bottleneck. A 4x smaller model (FP32 to INT8) means you can move <strong class="font-semibold">4x more data</strong> with the same bandwidth, or fit <strong class="font-semibold">4x more of the model</strong> into the super-fast cache, dramatically reducing latency.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Research Areas -->
+        <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200 fade-in-block" style="animation-delay: 1.2s;">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">Emerging Research Areas</h2>
+            <p class="text-center text-slate-600 mb-6 max-w-2xl mx-auto">Quantization is a rapidly evolving field. Researchers are pushing the boundaries to make models even more efficient.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-slate-700">
+                <div class="bg-slate-50 p-4 rounded-lg border">
+                    <h4 class="font-bold">Mixed-Precision & Automated Quantization</h4>
+                    <p class="text-sm mt-1">Instead of using one precision for the whole model, algorithms automatically find the optimal bit-width for each layer to balance accuracy and performance.</p>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-lg border">
+                    <h4 class="font-bold">Quantizing Novel Architectures</h4>
+                    <p class="text-sm mt-1">Developing new techniques to effectively quantize complex models like Transformers and Mixture-of-Experts (MoE), which have unique sensitivity patterns.</p>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-lg border">
+                    <h4 class="font-bold">Zero-Shot & Data-Free Quantization</h4>
+                    <p class="text-sm mt-1">Methods that can quantize a model accurately without requiring access to the original training data or even a calibration set, which is crucial for privacy.</p>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-lg border">
+                    <h4 class="font-bold">Hardware-Aware Quantization</h4>
+                    <p class="text-sm mt-1">Designing quantization schemes (e.g., non-uniform value spacing) that are co-designed with the underlying hardware to maximize efficiency and speed.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const slider = document.getElementById('precision-slider');
+        const container = document.getElementById('precision-slider-container');
+        const animateButton = document.getElementById('animate-button');
+        const originalVector = [0.85292922, -1.2510347, 0.3088641, -0.655519, 1.950012, -0.109987];
+        let animationInterval = null;
+        let currentLevel = 0;
+        let highlightIdx = -1;
+
+        const precisionLevels = [
+            {
+                name: '32-Bit (FP32)',
+                bits: 32,
+                width: '100%',
+                description: 'The default for model training. It provides a high degree of precision, which is crucial for accumulating small gradients during training without errors. It is the baseline for accuracy.',
+                range: 'Very Wide (Float)',
+            },
+            {
+                name: '16-Bit (FP16/BF16)',
+                bits: 16,
+                width: '50%',
+                description: 'A popular choice for both training and inference. It cuts the model size in half compared to FP32 with very little loss in accuracy. The standard for mixed-precision training.',
+                range: 'Wide (Float)',
+            },
+            {
+                name: '8-Bit (INT8)',
+                bits: 8,
+                width: '25%',
+                description: 'The industry standard for inference. Offers a great balance of performance and accuracy, with 256 distinct values. Widely supported by CPUs, GPUs, and specialized accelerators.',
+                range: '[-128, 127]',
+            },
+            {
+                name: '4-Bit (INT4)',
+                bits: 4,
+                width: '12.5%',
+                description: 'A very aggressive level with only 16 distinct values. Hugely popular for running large models on consumer hardware. Requires careful techniques like QAT to maintain accuracy.',
+                range: '[-8, 7]',
+            },
+            {
+                name: '1-Bit (Binary)',
+                bits: 1,
+                width: '3.125%',
+                description: 'The most extreme form. Each weight is just +1 or -1. This transforms complex multiplications into simple additions. Accuracy is often regained using "binning", where groups of weights represent more values.',
+                range: '{-1, 1}',
+            }
+        ];
+        
+        function calculateRam(bits) {
+            const totalBits = 360 * 1e9 * bits;
+            const totalBytes = totalBits / 8;
+            const totalGB = totalBytes / (1024**3);
+            return totalGB.toFixed(1);
+        }
+
+        function quantizeVector(vector, level) {
+            switch(level.bits) {
+                case 32:
+                    return vector.map(v => v.toFixed(7));
+                case 16:
+                     return vector.map(v => v.toPrecision(4));
+                case 8: {
+                    const scale = 3.25 / 255; // Map [-1.95, 1.30] to [-128, 127] roughly
+                    return vector.map(v => Math.round(Math.max(-128, Math.min(127, v / scale))));
+                }
+                case 4: {
+                    const scale = 3.25 / 15; // Map [-1.95, 1.30] to [-8, 7] roughly
+                    return vector.map(v => Math.round(Math.max(-8, Math.min(7, v / scale))));
+                }
+                case 1:
+                    return vector.map(v => (v >= 0 ? 1 : -1));
+                default:
+                    return vector;
+            }
+        }
+
+        function updateDisplay(levelIndex, highlightIndex = -1) {
+            const level = precisionLevels[levelIndex];
+            const qVector = quantizeVector(originalVector, level);
+            const ram = calculateRam(level.bits);
+
+            let vectorHTML = '';
+            for (let i = 0; i < originalVector.length; i++) {
+                const highlightClass = i === highlightIndex ? 'highlight' : '';
+                vectorHTML += `
+                    <div class="vector-value-pair ${highlightClass} text-center">
+                        <div class="mono text-slate-400 text-sm">${originalVector[i]}</div>
+                        <div class="mono text-indigo-600 font-semibold text-lg">${qVector[i]}</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+                <div class="text-center">
+                    <h3 class="text-xl font-bold text-indigo-600 mono">${level.name}</h3>
+                </div>
+                <div class="mt-4">
+                    <div class="bit-bar-container">
+                        <div class="bit-bar" style="width: ${level.width};"></div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 bg-slate-50 p-3 rounded-lg border">
+                     <p class="text-sm text-center text-slate-600 mb-2">Original (FP32) vs. Quantized (${level.name})</p>
+                     <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
+                        ${vectorHTML}
+                     </div>
+                </div>
+
+                <p class="text-slate-600 mt-6 text-center min-h-[60px]">${level.description}</p>
+                <div class="mt-4 grid grid-cols-2 gap-4 text-center mono">
+                    <div>
+                        <p class="text-sm text-slate-500">Value Range</p>
+                        <p class="font-semibold text-slate-800">${level.range}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-slate-500">RAM for 360B Model</p>
+                        <p class="font-semibold text-slate-800">${ram} GB</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function stopAnimation() {
+            clearInterval(animationInterval);
+            animationInterval = null;
+            animateButton.innerHTML = '▶️ Animate';
+            animateButton.disabled = false;
+        }
+
+        function startAnimation() {
+            animateButton.innerHTML = '⏹️ Stop';
+            animateButton.disabled = false;
+
+            if (currentLevel >= precisionLevels.length) {
+                currentLevel = 0;
+                highlightIdx = -1;
+            }
+
+            animationInterval = setInterval(() => {
+                if (currentLevel >= precisionLevels.length) {
+                    stopAnimation();
+                    updateDisplay(0);
+                    slider.value = 0;
+                    return;
+                }
+
+                highlightIdx = (highlightIdx + 1) % (originalVector.length + 1);
+
+                if (highlightIdx === originalVector.length) {
+                    slider.value = currentLevel;
+                    updateDisplay(currentLevel);
+                    currentLevel++;
+                } else {
+                    slider.value = currentLevel;
+                    updateDisplay(currentLevel, highlightIdx);
+                }
+                
+            }, 1200);
+        }
+        
+        function toggleAnimation() {
+            if (animationInterval) {
+                stopAnimation();
+            } else {
+                startAnimation();
+            }
+        }
+
+        slider.addEventListener('input', (e) => {
+            stopAnimation();
+            currentLevel = parseInt(e.target.value, 10);
+            highlightIdx = -1;
+            updateDisplay(currentLevel);
+        });
+        
+        animateButton.addEventListener('click', toggleAnimation);
+
+        // Initial display
+        updateDisplay(slider.value);
+    </script>
+
+</body>
+</html>
