@@ -15,6 +15,7 @@ from typing import Dict, Any
 
 from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.agents.base import BaseSubAgent
+from app.agents.state import DeepAgentState
 from app.services.agent_service import AgentService
 from app.services.websocket.message_handler import BaseMessageHandler
 from app.services.state_persistence_service import StatePersistenceService
@@ -25,6 +26,7 @@ from app.ws_manager import WebSocketManager
 from app.schemas.WebSocket import (
     WebSocketMessage, AgentStarted, SubAgentUpdate, AgentCompleted
 )
+from starlette.websockets import WebSocketState
 from app.schemas.User import UserBase
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
@@ -197,11 +199,12 @@ class TestCriticalIntegration:
         
         # Mock WebSocket connection for streaming
         mock_websocket = AsyncMock()
-        connection_id = f"conn_{user_id}"
-        infra["websocket_manager"].active_connections[connection_id] = {
-            "websocket": mock_websocket,
-            "user_id": user_id
-        }
+        mock_websocket.client_state = WebSocketState.CONNECTED
+        mock_websocket.send_json = AsyncMock()  # Mock the send_json method
+        mock_websocket.send_text = AsyncMock()  # Mock send_text for compatibility
+        
+        # Use the WebSocketManager's connect method to properly register the connection
+        conn_info = await infra["websocket_manager"].connect(user_id, mock_websocket)
         
         # Execute agent workflow
         with patch('app.services.state_persistence_service.StatePersistenceService.save_agent_state', 
@@ -226,15 +229,15 @@ class TestCriticalIntegration:
         assert len(save_calls) >= 3  # At least triage, data, and optimization agents
         
         # Verify WebSocket messages were sent
-        assert mock_websocket.send_text.called
+        assert mock_websocket.send_json.called, "WebSocket should have sent JSON messages"
         ws_messages = [
-            call.args[0] for call in mock_websocket.send_text.call_args_list
+            call.args[0] for call in mock_websocket.send_json.call_args_list
         ]
         
         # Check for agent lifecycle messages
-        has_started = any("agent_started" in msg for msg in ws_messages)
-        has_updates = any("sub_agent_update" in msg for msg in ws_messages)
-        has_completed = any("agent_completed" in msg for msg in ws_messages)
+        has_started = any("agent_started" in str(msg) for msg in ws_messages)
+        has_updates = any("sub_agent_update" in str(msg) for msg in ws_messages)
+        has_completed = any("agent_completed" in str(msg) for msg in ws_messages)
         
         assert has_started, "Should have agent started message"
         assert has_updates, "Should have sub-agent updates"
@@ -306,9 +309,9 @@ class TestCriticalIntegration:
             test_message.model_dump()
         )
         
-        # Verify message was sent
-        mock_websocket.send_text.assert_called()
-        sent_data = json.loads(mock_websocket.send_text.call_args[0][0])
+        # Verify message was sent (WebSocketManager uses send_json)
+        mock_websocket.send_json.assert_called()
+        sent_data = mock_websocket.send_json.call_args[0][0]
         assert sent_data["type"] == "agent_request"
         assert sent_data["payload"]["query"] == "Test authenticated request"
         
@@ -319,7 +322,7 @@ class TestCriticalIntegration:
         )
         
         # Verify broadcast was sent
-        assert mock_websocket.send_text.call_count >= 2
+        assert mock_websocket.send_json.call_count >= 2
         
         # Test connection cleanup
         await ws_manager.disconnect(connection_id)
@@ -375,25 +378,17 @@ class TestCriticalIntegration:
         state_service.db_session = session
         
         # Initial agent state
-        initial_state = {
-            "thread_id": thread.id,
-            "run_id": run_id,
-            "user_id": user_id,
-            "current_agent": "triage",
-            "completed_agents": [],
-            "agent_outputs": {},
-            "metadata": {
-                "start_time": datetime.utcnow().isoformat(),
-                "request": "Optimize performance"
-            }
-        }
+        initial_state = DeepAgentState(
+            user_request="Optimize performance"
+        )
         
         # Save initial state
         await state_service.save_agent_state(
-            thread_id=thread.id,
             run_id=run_id,
-            agent_name="supervisor",
-            state=initial_state
+            thread_id=thread.id,
+            user_id=user_id,
+            state=initial_state,
+            db_session=session
         )
         
         # Simulate partial execution - triage completes
@@ -403,33 +398,30 @@ class TestCriticalIntegration:
             "priority": "high"
         }
         
-        partial_state = {
-            **initial_state,
-            "current_agent": "data",
-            "completed_agents": ["triage"],
-            "agent_outputs": {"triage": triage_output}
-        }
+        partial_state = DeepAgentState(
+            user_request="Optimize performance",
+            triage_result=triage_output
+        )
         
         await state_service.save_agent_state(
-            thread_id=thread.id,
             run_id=run_id,
-            agent_name="supervisor",
-            state=partial_state
+            thread_id=thread.id,
+            user_id=user_id,
+            state=partial_state,
+            db_session=session
         )
         
         # Simulate failure and recovery
         # Load state from database
         recovered_state = await state_service.load_agent_state(
-            thread_id=thread.id,
             run_id=run_id,
-            agent_name="supervisor"
+            db_session=session
         )
         
         # Verify state was recovered correctly
         assert recovered_state is not None
-        assert recovered_state["current_agent"] == "data"
-        assert recovered_state["completed_agents"] == ["triage"]
-        assert recovered_state["agent_outputs"]["triage"] == triage_output
+        assert recovered_state.triage_result == triage_output
+        assert recovered_state.data_result is None  # Not yet completed
         
         # Create new supervisor with recovered state
         supervisor = Supervisor(
@@ -450,31 +442,28 @@ class TestCriticalIntegration:
                                   AsyncMock(return_value={"optimizations": "applied"})):
                     
                     # Resume from data agent
-                    supervisor.state["completed_agents"] = ["triage", "data"]
-                    supervisor.state["agent_outputs"]["data"] = {"data": "collected"}
+                    # Note: In real usage, the supervisor manages state internally
+                    # For testing, we're mocking the internal method calls
                     
-                    # Continue with optimization
+                    # Continue with optimization (mocked to return a result)
                     optimization_result = await supervisor._run_optimizations_core_sub_agent(
                         "Continue optimization", thread.id, run_id
                     )
-                    
-                    # Update state
-                    supervisor.state["completed_agents"].append("optimization")
-                    supervisor.state["agent_outputs"]["optimization"] = optimization_result
         
-        # Save final state
-        final_state = {
-            **supervisor.state,
-            "current_agent": "completed",
-            "completed_agents": ["triage", "data", "optimization"],
-            "status": "completed"
-        }
+        # Save final state - create a proper DeepAgentState object
+        final_state = DeepAgentState(
+            user_request="Optimize performance",
+            triage_result=triage_output,
+            data_result={"data": "collected"},
+            optimizations_result={"optimizations": "applied"}
+        )
         
         await state_service.save_agent_state(
-            thread_id=thread.id,
             run_id=run_id,
-            agent_name="supervisor",
-            state=final_state
+            thread_id=thread.id,
+            user_id=user_id,
+            state=final_state,
+            db_session=session
         )
         
         # Verify complete execution

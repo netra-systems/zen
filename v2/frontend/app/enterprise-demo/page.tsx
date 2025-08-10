@@ -122,7 +122,7 @@ const EnterpriseDemoPage: NextPage = () => {
           Netra AI Optimization Platform
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          The world's most advanced AI optimization platform, trusted by industry leaders including OpenAI and Anthropic
+          The world&apos;s most advanced AI optimization platform, trusted by industry leaders including OpenAI and Anthropic
         </p>
         <div className="flex gap-4 justify-center pt-4">
           <Button size="lg" onClick={() => router.push('/chat')}>
@@ -203,7 +203,7 @@ const EnterpriseDemoPage: NextPage = () => {
       <Card>
         <CardHeader>
           <CardTitle>Trusted by Industry Leaders</CardTitle>
-          <CardDescription>Powering AI optimization for the world's most innovative companies</CardDescription>
+          <CardDescription>Powering AI optimization for the world&apos;s most innovative companies</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
@@ -220,7 +220,7 @@ const EnterpriseDemoPage: NextPage = () => {
       <div className="text-center space-y-4 py-8">
         <h2 className="text-3xl font-bold">Ready to Transform Your AI Operations?</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Join the leaders in AI optimization and experience the power of Netra's enterprise platform
+          Join the leaders in AI optimization and experience the power of Netra&apos;s enterprise platform
         </p>
         <div className="flex gap-4 justify-center">
           <Button size="lg" onClick={() => router.push('/ingestion')}>

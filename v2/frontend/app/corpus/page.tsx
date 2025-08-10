@@ -497,7 +497,7 @@ const CorpusPage: NextPage = () => {
               </div>
               <Alert>
                 <AlertDescription>
-                  Use advanced operators: AND, OR, NOT, "exact phrase", wildcard*
+                  Use advanced operators: AND, OR, NOT, &quot;exact phrase&quot;, wildcard*
                 </AlertDescription>
               </Alert>
             </CardContent>

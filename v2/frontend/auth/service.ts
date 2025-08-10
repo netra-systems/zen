@@ -4,6 +4,7 @@ import { AuthContext, AuthContextType } from '@/auth';
 import { config } from '@/config';
 
 const TOKEN_KEY = 'jwt_token';
+const DEV_LOGOUT_FLAG = 'dev_logout_flag';
 
 class AuthService {
   async getAuthConfig(): Promise<AuthConfigResponse> {
@@ -26,6 +27,8 @@ class AuthService {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem(TOKEN_KEY, data.access_token);
+        // Clear the logout flag on successful dev login
+        this.clearDevLogoutFlag();
         return data;
       } else {
         console.error('Dev login failed');
@@ -48,6 +51,18 @@ class AuthService {
 
   removeToken(): void {
     localStorage.removeItem(TOKEN_KEY);
+  }
+
+  getDevLogoutFlag(): boolean {
+    return localStorage.getItem(DEV_LOGOUT_FLAG) === 'true';
+  }
+
+  setDevLogoutFlag(): void {
+    localStorage.setItem(DEV_LOGOUT_FLAG, 'true');
+  }
+
+  clearDevLogoutFlag(): void {
+    localStorage.removeItem(DEV_LOGOUT_FLAG);
   }
 
   handleLogin(authConfig: AuthConfigResponse) {

@@ -139,37 +139,6 @@ export default function ROICalculator({ industry, onComplete }: ROICalculatorPro
       if (onComplete) {
         setTimeout(onComplete, 1500)
       }
-    } catch (error) {
-      console.error('ROI calculation error:', error)
-      // Fallback to local calculation
-      const multiplier = industryMultipliers[industry] || industryMultipliers.default
-      const infrastructureSavingsPercent = 0.45 + (Math.random() * 0.15)
-      const infrastructureCost = metrics.currentMonthlySpend * infrastructureSavingsPercent * multiplier
-      const operationalSavingsPercent = 0.25
-      const operationalCost = (metrics.teamSize * 10000) * operationalSavingsPercent
-      const latencyImprovement = 0.6
-      const performanceValue = (metrics.requestsPerMonth / 1000000) * 500 * latencyImprovement
-      const totalMonthlySavings = infrastructureCost + operationalCost + performanceValue
-      const totalAnnualSavings = totalMonthlySavings * 12
-      const implementationCost = metrics.currentMonthlySpend * 2
-      const paybackPeriod = implementationCost / totalMonthlySavings
-      const threeYearSavings = totalAnnualSavings * 3
-      const threeYearROI = ((threeYearSavings - implementationCost) / implementationCost) * 100
-
-      setSavings({
-        infrastructureCost,
-        operationalCost,
-        performanceGain: performanceValue,
-        totalMonthlySavings,
-        totalAnnualSavings,
-        paybackPeriod,
-        threeYearROI
-      })
-      
-      setCalculated(true)
-      if (onComplete) {
-        setTimeout(onComplete, 1500)
-      }
     } finally {
       setIsLoading(false)
     }

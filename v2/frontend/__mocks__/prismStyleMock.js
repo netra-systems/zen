@@ -1,0 +1,16 @@
+module.exports = {
+  oneDark: {},
+  vs: {},
+  vscDarkPlus: {},
+  atomDark: {},
+  materialDark: {},
+  materialLight: {},
+  dracula: {},
+  github: {},
+  nord: {},
+  okaidia: {},
+  tomorrow: {},
+  twilight: {},
+  duotoneDark: {},
+  duotoneLight: {},
+};

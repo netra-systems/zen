@@ -42,12 +42,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           authService.removeToken();
         }
       } else if (data.development_mode) {
-        // In development mode, auto-login with dev user if no token exists
-        const devLoginResponse = await authService.handleDevLogin(data);
-        if (devLoginResponse) {
-          setToken(devLoginResponse.access_token);
-          const decodedUser = jwtDecode(devLoginResponse.access_token) as User;
-          setUser(decodedUser);
+        // Check if user explicitly logged out in dev mode
+        const hasLoggedOut = authService.getDevLogoutFlag();
+        
+        if (!hasLoggedOut) {
+          // Only auto-login if user hasn't explicitly logged out
+          const devLoginResponse = await authService.handleDevLogin(data);
+          if (devLoginResponse) {
+            setToken(devLoginResponse.access_token);
+            const decodedUser = jwtDecode(devLoginResponse.access_token) as User;
+            setUser(decodedUser);
+          }
         }
       }
     } catch (error) {
@@ -63,12 +68,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = () => {
     if (authConfig) {
+      // Clear dev logout flag when user manually logs in
+      authService.clearDevLogoutFlag();
       authService.handleLogin(authConfig);
     }
   };
 
   const logout = async () => {
     if (authConfig) {
+      // Set dev logout flag in development mode
+      if (authConfig.development_mode) {
+        authService.setDevLogoutFlag();
+      }
       await authService.handleLogout(authConfig);
     }
   };
