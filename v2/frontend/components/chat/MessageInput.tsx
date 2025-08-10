@@ -3,8 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useChatStore } from '@/store/chat';
+import { useThreadStore } from '@/store/threadStore';
 import { Send } from 'lucide-react';
 import { Message } from '@/types/chat';
+import { ThreadService } from '@/services/threadService';
 
 export const MessageInput: React.FC = () => {
   const [message, setMessage] = useState('');
