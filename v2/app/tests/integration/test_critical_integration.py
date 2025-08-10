@@ -211,9 +211,9 @@ class TestCriticalIntegration:
                 
                 # Run the supervisor
                 result = await supervisor.run(
-                    user_query=message.content,
-                    thread_id=thread.id,
-                    run_id=str(uuid.uuid4())
+                    user_request=message.content,
+                    run_id=str(uuid.uuid4()),
+                    stream_updates=True
                 )
         
         # Verify results
@@ -302,7 +302,7 @@ class TestCriticalIntegration:
         
         # Send message through WebSocket
         await ws_manager.send_message(
-            connection_id,
+            user_id,
             test_message.model_dump()
         )
         

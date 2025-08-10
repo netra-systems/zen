@@ -2,6 +2,7 @@
 """
 Comprehensive frontend test runner for Netra AI Platform
 Designed for easy use by Claude Code and CI/CD pipelines
+Now with test isolation support for concurrent execution
 """
 
 import os
@@ -17,6 +18,12 @@ from typing import List, Optional, Dict
 PROJECT_ROOT = Path(__file__).parent.parent
 FRONTEND_DIR = PROJECT_ROOT / "frontend"
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# Import test isolation utilities
+try:
+    from scripts.test_isolation import TestIsolationManager
+except ImportError:
+    TestIsolationManager = None
 
 # Test categories for organized testing
 TEST_CATEGORIES = {
@@ -96,14 +103,18 @@ def check_dependencies() -> Dict[str, bool]:
     return status
 
 
-def run_jest_tests(args) -> int:
+def run_jest_tests(args, isolation_manager=None) -> int:
     """Run Jest tests"""
     jest_args = ["npm", "run", "test"]
     
     # Add Jest-specific arguments
     if args.coverage:
         jest_args.extend(["--", "--coverage"])
-        jest_args.extend(["--coverageDirectory=../reports/frontend-coverage"])
+        if isolation_manager and isolation_manager.directories:
+            coverage_dir = isolation_manager.directories.get('frontend_coverage')
+            jest_args.extend([f"--coverageDirectory={coverage_dir}"])
+        else:
+            jest_args.extend(["--coverageDirectory=../reports/frontend-coverage"])
     
     if args.watch:
         jest_args.extend(["--", "--watch"])
@@ -116,6 +127,14 @@ def run_jest_tests(args) -> int:
     
     if args.keyword:
         jest_args.extend(["--", f"--testNamePattern={args.keyword}"])
+    
+    # Add isolation-specific Jest arguments
+    if isolation_manager:
+        isolation_args = isolation_manager.get_jest_args()
+        # Only add cache directory arg as other args are already handled
+        for arg in isolation_args:
+            if "--cacheDirectory" in arg:
+                jest_args.extend([arg])
     
     if args.tests:
         jest_args.extend(["--"] + args.tests)
@@ -137,11 +156,11 @@ def run_jest_tests(args) -> int:
     return result.returncode
 
 
-def run_cypress_tests(args) -> int:
+def run_cypress_tests(args, isolation_manager=None) -> int:
     """Run Cypress E2E tests"""
     # Check if backend is running
-    backend_running = check_backend_running()
-    frontend_running = check_frontend_running()
+    backend_running = check_backend_running(isolation_manager)
+    frontend_running = check_frontend_running(isolation_manager)
     
     if not backend_running:
         print("⚠️  Backend server is not running. Starting it...")
@@ -179,21 +198,29 @@ def run_cypress_tests(args) -> int:
     return result.returncode
 
 
-def check_backend_running() -> bool:
+def check_backend_running(isolation_manager=None) -> bool:
     """Check if backend server is running"""
     try:
         import requests
-        response = requests.get("http://localhost:8000/health", timeout=1)
+        if isolation_manager and isolation_manager.ports:
+            port = isolation_manager.ports.get('backend', 8000)
+        else:
+            port = int(os.environ.get('BACKEND_PORT', 8000))
+        response = requests.get(f"http://localhost:{port}/health", timeout=1)
         return response.status_code == 200
     except:
         return False
 
 
-def check_frontend_running() -> bool:
+def check_frontend_running(isolation_manager=None) -> bool:
     """Check if frontend dev server is running"""
     try:
         import requests
-        response = requests.get("http://localhost:3000", timeout=1)
+        if isolation_manager and isolation_manager.ports:
+            port = isolation_manager.ports.get('frontend', 3000)
+        else:
+            port = int(os.environ.get('FRONTEND_PORT', 3000))
+        response = requests.get(f"http://localhost:{port}", timeout=1)
         return response.status_code == 200
     except:
         return False
@@ -375,7 +402,22 @@ Examples:
         help="Verbose output"
     )
     
+    # Isolation options
+    parser.add_argument(
+        "--isolation",
+        action="store_true",
+        help="Use test isolation for concurrent execution"
+    )
+    
     args = parser.parse_args()
+    
+    # Setup test isolation if requested
+    isolation_manager = None
+    if args.isolation and TestIsolationManager:
+        isolation_manager = TestIsolationManager()
+        isolation_manager.setup_environment()
+        isolation_manager.apply_environment()
+        isolation_manager.register_cleanup()
     
     print("=" * 80)
     print("NETRA AI PLATFORM - FRONTEND TEST RUNNER")
@@ -420,12 +462,12 @@ Examples:
         print("\n" + "=" * 80)
         print("Running Cypress E2E Tests")
         print("-" * 80)
-        test_result = run_cypress_tests(args)
+        test_result = run_cypress_tests(args, isolation_manager)
     else:
         print("\n" + "=" * 80)
         print("Running Jest Tests")
         print("-" * 80)
-        test_result = run_jest_tests(args)
+        test_result = run_jest_tests(args, isolation_manager)
     
     if test_result != 0:
         exit_code = test_result

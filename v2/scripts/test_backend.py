@@ -2,6 +2,7 @@
 """
 Comprehensive backend test runner for Netra AI Platform
 Designed for easy use by Claude Code and CI/CD pipelines
+Now with test isolation support for concurrent execution
 """
 
 import os
@@ -18,6 +19,12 @@ from typing import List, Optional
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+# Import test isolation utilities
+try:
+    from scripts.test_isolation import TestIsolationManager
+except ImportError:
+    TestIsolationManager = None
+
 # Test categories for organized testing
 TEST_CATEGORIES = {
     "unit": ["app/tests/services", "app/tests/core", "app/tests/utils"],
@@ -31,8 +38,16 @@ TEST_CATEGORIES = {
 }
 
 
-def setup_test_environment():
+def setup_test_environment(isolation_manager=None):
     """Setup test environment variables"""
+    # If using isolation manager, it will have already set up the environment
+    if isolation_manager:
+        # Just ensure asyncio is configured for Windows
+        if sys.platform == "win32":
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        return
+    
+    # Standard test environment setup (when not using isolation)
     test_env = {
         "TESTING": "1",
         "ENVIRONMENT": "testing",
@@ -213,16 +228,20 @@ def build_pytest_args(args) -> List[str]:
     return pytest_args
 
 
-def run_tests(pytest_args: List[str], args) -> int:
+def run_tests(pytest_args: List[str], args, isolation_manager=None) -> int:
     """Run tests with pytest"""
     import pytest
     
     # Create reports directory if needed
     if args.coverage or args.json_output or args.html_output:
-        reports_dir = PROJECT_ROOT / "reports"
-        reports_dir.mkdir(exist_ok=True)
-        (reports_dir / "tests").mkdir(exist_ok=True)
-        (reports_dir / "coverage").mkdir(exist_ok=True)
+        if isolation_manager and isolation_manager.directories:
+            # Use isolated directories
+            reports_dir = isolation_manager.directories.get('reports', PROJECT_ROOT / "reports")
+        else:
+            reports_dir = PROJECT_ROOT / "reports"
+            reports_dir.mkdir(exist_ok=True)
+            (reports_dir / "tests").mkdir(exist_ok=True)
+            (reports_dir / "coverage").mkdir(exist_ok=True)
     
     print("=" * 80)
     print("NETRA AI PLATFORM - BACKEND TEST RUNNER")
@@ -407,16 +426,36 @@ Examples:
         help="Show warning messages"
     )
     
+    # Isolation options
+    parser.add_argument(
+        "--isolation",
+        action="store_true",
+        help="Use test isolation for concurrent execution"
+    )
+    
     args = parser.parse_args()
     
+    # Setup test isolation if requested
+    isolation_manager = None
+    if args.isolation and TestIsolationManager:
+        isolation_manager = TestIsolationManager()
+        isolation_manager.setup_environment()
+        isolation_manager.apply_environment()
+        isolation_manager.register_cleanup()
+    
     # Setup environment
-    setup_test_environment()
+    setup_test_environment(isolation_manager)
     
     # Build pytest arguments
     pytest_args = build_pytest_args(args)
     
+    # Add isolation-specific pytest arguments
+    if isolation_manager:
+        isolation_args = isolation_manager.get_pytest_args()
+        pytest_args.extend(isolation_args)
+    
     # Run tests
-    exit_code = run_tests(pytest_args, args)
+    exit_code = run_tests(pytest_args, args, isolation_manager)
     
     sys.exit(exit_code)
 

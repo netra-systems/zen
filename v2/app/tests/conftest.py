@@ -2,14 +2,23 @@ import os
 import sys
 
 # Set test environment variables BEFORE importing any app modules
-os.environ["TESTING"] = "1"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-os.environ["REDIS_URL"] = "redis://localhost:6379/1"
-os.environ["SECRET_KEY"] = "test-secret-key-for-testing-only"
-os.environ["JWT_SECRET_KEY"] = "test-jwt-secret-key-for-testing-only-must-be-32-chars"
-os.environ["FERNET_KEY"] = "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw="
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["LOG_LEVEL"] = "ERROR"
+# Use isolated values if TEST_ISOLATION is enabled
+if os.environ.get("TEST_ISOLATION") == "1":
+    # When using test isolation, environment is already configured
+    # Just ensure critical test flags are set
+    os.environ.setdefault("TESTING", "1")
+    os.environ.setdefault("ENVIRONMENT", "testing")
+    os.environ.setdefault("LOG_LEVEL", "ERROR")
+else:
+    # Standard test environment setup
+    os.environ["TESTING"] = "1"
+    os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+    os.environ["REDIS_URL"] = "redis://localhost:6379/1"
+    os.environ["SECRET_KEY"] = "test-secret-key-for-testing-only"
+    os.environ["JWT_SECRET_KEY"] = "test-jwt-secret-key-for-testing-only-must-be-32-chars"
+    os.environ["FERNET_KEY"] = "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw="
+    os.environ["ENVIRONMENT"] = "testing"
+    os.environ["LOG_LEVEL"] = "ERROR"
 
 import pytest
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession

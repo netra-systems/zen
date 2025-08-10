@@ -700,10 +700,36 @@ Examples:
         help="Verbose output"
     )
     
+    # Isolation options
+    parser.add_argument(
+        "--no-isolation",
+        action="store_true",
+        help="Disable test isolation (use standard directories and ports)"
+    )
+    parser.add_argument(
+        "--keep-reports",
+        action="store_true",
+        help="Keep test reports in isolated directory after completion"
+    )
+    parser.add_argument(
+        "--show-isolation",
+        action="store_true",
+        help="Show test isolation configuration details"
+    )
+    
     args = parser.parse_args()
     
-    # Initialize test runner
-    runner = TestRunner()
+    # Initialize test runner with isolation setting
+    use_isolation = not args.no_isolation
+    runner = TestRunner(use_isolation=use_isolation)
+    
+    # Show isolation info if requested
+    if args.show_isolation and runner.isolation_manager:
+        runner.isolation_manager.print_isolation_info()
+    
+    # Set environment variable for keeping reports if specified
+    if args.keep_reports:
+        os.environ['KEEP_TEST_REPORTS'] = '1'
     
     # Determine test arguments
     backend_args = []

@@ -156,6 +156,16 @@ class TestIsolationManager:
             # Secret keys for testing
             'SECRET_KEY': f"test-secret-key-{self.test_id}",
             'JWT_SECRET': f"test-jwt-secret-{self.test_id}",
+            'JWT_SECRET_KEY': f"test-jwt-secret-key-for-testing-only-must-be-32-chars-{self.test_id[:8]}",
+            'FERNET_KEY': "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=",
+            
+            # API keys for testing (use existing if available)
+            'ANTHROPIC_API_KEY': os.getenv("ANTHROPIC_API_KEY", "test-api-key"),
+            'OPENAI_API_KEY': os.getenv("OPENAI_API_KEY", "test-api-key"),
+            
+            # OAuth configuration for testing
+            'GOOGLE_CLIENT_ID': "test-google-client",
+            'GOOGLE_CLIENT_SECRET': "test-google-secret",
         }
         
         return self.environment

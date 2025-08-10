@@ -1,4 +1,5 @@
 import asyncio
+import json
 import clickhouse_connect
 from clickhouse_connect.driver.client import Client
 from typing import List, Dict, Any, Iterable
@@ -59,6 +60,25 @@ class ClickHouseDatabase:
         if not self.client:
             raise ConnectionError("Not connected to ClickHouse.")
         return await asyncio.to_thread(self.client.insert, table, data, column_names=column_names)
+
+    async def insert_log(self, log_entry, table_name: str):
+        """Insert a log entry into ClickHouse."""
+        if not self.client:
+            raise ConnectionError("Not connected to ClickHouse.")
+        
+        # Convert log entry to appropriate format for insertion
+        data = [[
+            log_entry.trace_id,
+            log_entry.span_id,
+            log_entry.event,
+            json.dumps(log_entry.data) if isinstance(log_entry.data, dict) else str(log_entry.data),
+            log_entry.source,
+            log_entry.user_id
+        ]]
+        
+        column_names = ['trace_id', 'span_id', 'event', 'data', 'source', 'user_id']
+        
+        await self.insert_data(table_name, data, column_names=column_names)
 
     async def disconnect(self):
         if self.client:

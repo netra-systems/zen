@@ -73,6 +73,35 @@
         Frontend: python scripts/test_frontend.py --coverage
       </validation>
     </checklist-item>
+    
+    <checklist-item id="agent-tracking" critical="true">
+      <title>Add Agent Modification Tracking Headers</title>
+      <description>
+        All files modified by AI coding agents MUST include tracking metadata headers
+        as specified in SPEC/agent_tracking.xml. This provides traceability and accountability
+        for automated code changes.
+      </description>
+      <actions>
+        <action type="header">
+          Add or update agent tracking header at top of modified files
+        </action>
+        <action type="metadata">
+          Include timestamp, agent name, model version, git info, and change summary
+        </action>
+        <action type="history">
+          Maintain modification history for files with multiple agent changes (max 5 entries)
+        </action>
+        <action type="exclusions">
+          Skip headers for config files, generated files, binary files, and lock files
+        </action>
+      </actions>
+      <validation>
+        Verify header format matches language-specific template in SPEC/agent_tracking.xml
+      </validation>
+      <reference>
+        See SPEC/agent_tracking.xml for complete specification and examples
+      </reference>
+    </checklist-item>
   </section>
   
   <section name="backend-specific">
