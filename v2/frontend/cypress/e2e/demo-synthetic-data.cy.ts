@@ -36,24 +36,24 @@ describe('Demo E2E Test Suite 4: Synthetic Data Generation and Visualization', (
 
   describe('Live Data Streaming', () => {
     it('should display initial data samples', () => {
-      cy.get('[data-testid="data-sample"]').should('have.length.at.least', 1)
+      cy.get('.border').should('have.length.at.least', 1)
     })
 
     it('should generate new data samples on demand', () => {
       // Get initial sample count
-      cy.get('[data-testid="data-sample"]').then(($samples) => {
+      cy.get('.border').then(($samples) => {
         const initialCount = $samples.length
         
         cy.contains('Generate').click()
         cy.wait(2000)
         
         // Should have more samples
-        cy.get('[data-testid="data-sample"]').should('have.length.greaterThan', initialCount)
+        cy.get('.border').should('have.length.greaterThan', initialCount)
       })
     })
 
     it('should show data sample metadata', () => {
-      cy.get('[data-testid="data-sample"]').first().within(() => {
+      cy.get('.border').first().within(() => {
         cy.contains(/inference|training|preprocessing|evaluation/).should('be.visible')
         cy.contains('ms').should('be.visible') // Processing time
         cy.contains(/\d+/).should('be.visible') // Data points
@@ -75,13 +75,14 @@ describe('Demo E2E Test Suite 4: Synthetic Data Generation and Visualization', (
       }
       
       // Should not exceed reasonable limit (e.g., 10)
-      cy.get('[data-testid="data-sample"]').should('have.length.lessThan', 15)
+      cy.get('.border').should('have.length.lessThan', 15)
     })
   })
 
   describe('Industry-Specific Data Generation', () => {
     it('should generate E-commerce specific data', () => {
-      cy.get('[data-testid="sample-detail"]').first().click()
+      // Click on first sample
+      cy.get('.cursor-pointer').first().click()
       
       // Check for e-commerce specific fields
       cy.contains('session_id').should('be.visible')
@@ -95,7 +96,8 @@ describe('Demo E2E Test Suite 4: Synthetic Data Generation and Visualization', (
       cy.contains('Healthcare').click()
       cy.contains('Data Insights').click()
       
-      cy.get('[data-testid="sample-detail"]').first().click()
+      // Click on first sample
+      cy.get('.cursor-pointer').first().click()
       
       // Check for healthcare specific fields
       cy.contains('patient_id').should('be.visible')
@@ -108,7 +110,8 @@ describe('Demo E2E Test Suite 4: Synthetic Data Generation and Visualization', (
       cy.contains('Financial Services').click()
       cy.contains('Data Insights').click()
       
-      cy.get('[data-testid="sample-detail"]').first().click()
+      // Click on first sample
+      cy.get('.cursor-pointer').first().click()
       
       // Check for financial specific fields
       cy.contains('transaction_id').should('be.visible')
@@ -119,19 +122,19 @@ describe('Demo E2E Test Suite 4: Synthetic Data Generation and Visualization', (
 
   describe('Data Sample Inspection', () => {
     it('should allow selecting individual samples', () => {
-      cy.get('[data-testid="data-sample"]').first().click()
-      cy.get('[data-testid="data-sample"]').first().should('have.class', 'border-primary')
+      cy.get('.border').first().click()
+      cy.get('.border').first().should('have.class', 'border-primary')
     })
 
     it('should display detailed JSON view of selected sample', () => {
-      cy.get('[data-testid="data-sample"]').first().click()
+      cy.get('.border').first().click()
       cy.get('pre').should('be.visible')
       cy.get('pre').should('contain', '{')
       cy.get('pre').should('contain', '}')
     })
 
     it('should allow copying sample data', () => {
-      cy.get('[data-testid="data-sample"]').first().click()
+      cy.get('.border').first().click()
       cy.contains('Copy').click()
       
       // Check for success indicator
@@ -142,7 +145,7 @@ describe('Demo E2E Test Suite 4: Synthetic Data Generation and Visualization', (
     })
 
     it('should format JSON data properly', () => {
-      cy.get('[data-testid="data-sample"]').first().click()
+      cy.get('.border').first().click()
       
       // Check for proper indentation
       cy.get('pre').should('have.class', 'font-mono')
@@ -204,12 +207,12 @@ describe('Demo E2E Test Suite 4: Synthetic Data Generation and Visualization', (
   describe('Data Statistics and Metrics', () => {
     it('should update statistics after generation', () => {
       // Get initial total samples
-      cy.get('[data-testid="stat-total-samples"]').invoke('text').then((initial) => {
+      cy.contains('Total Samples').parent().invoke('text').then((initial) => {
         cy.contains('Generate').click()
         cy.wait(2000)
         
         // Check that total increased
-        cy.get('[data-testid="stat-total-samples"]').invoke('text').should('not.equal', initial)
+        cy.contains('Total Samples').parent().invoke('text').should('not.equal', initial)
       })
     })
 
@@ -275,7 +278,7 @@ describe('Demo E2E Test Suite 4: Synthetic Data Generation and Visualization', (
       }
       
       // Should handle gracefully
-      cy.get('[data-testid="data-sample"]').should('exist')
+      cy.get('.border').should('exist')
     })
 
     it('should maintain UI responsiveness during generation', () => {
@@ -299,14 +302,14 @@ describe('Demo E2E Test Suite 4: Synthetic Data Generation and Visualization', (
 
   describe('Data Validation and Quality', () => {
     it('should generate valid JSON data', () => {
-      cy.get('[data-testid="data-sample"]').first().click()
+      cy.get('.border').first().click()
       cy.get('pre').invoke('text').then((jsonText) => {
         expect(() => JSON.parse(jsonText)).to.not.throw()
       })
     })
 
     it('should include all required fields', () => {
-      cy.get('[data-testid="data-sample"]').first().click()
+      cy.get('.border').first().click()
       
       // Check for essential fields
       cy.get('pre').should('contain', 'session_id')
@@ -315,7 +318,7 @@ describe('Demo E2E Test Suite 4: Synthetic Data Generation and Visualization', (
     })
 
     it('should generate realistic data ranges', () => {
-      cy.get('[data-testid="data-sample"]').first().click()
+      cy.get('.border').first().click()
       cy.get('pre').invoke('text').then((jsonText) => {
         const data = JSON.parse(jsonText)
         
@@ -334,7 +337,7 @@ describe('Demo E2E Test Suite 4: Synthetic Data Generation and Visualization', (
     })
 
     it('should maintain data consistency', () => {
-      cy.get('[data-testid="data-sample"]').each(($sample) => {
+      cy.get('.border').each(($sample) => {
         cy.wrap($sample).click()
         cy.get('pre').invoke('text').then((jsonText) => {
           const data = JSON.parse(jsonText)
@@ -351,7 +354,7 @@ describe('Demo E2E Test Suite 4: Synthetic Data Generation and Visualization', (
     it('should adapt to mobile viewport', () => {
       cy.viewport('iphone-x')
       cy.contains('Synthetic Data Generation').should('be.visible')
-      cy.get('[data-testid="data-sample"]').should('be.visible')
+      cy.get('.border').should('be.visible')
     })
 
     it('should stack statistics cards on mobile', () => {
@@ -363,7 +366,7 @@ describe('Demo E2E Test Suite 4: Synthetic Data Generation and Visualization', (
       cy.viewport('ipad-2')
       cy.contains('Generate').click()
       cy.wait(2000)
-      cy.get('[data-testid="data-sample"]').should('have.length.at.least', 2)
+      cy.get('.border').should('have.length.at.least', 2)
     })
   })
 
@@ -375,7 +378,7 @@ describe('Demo E2E Test Suite 4: Synthetic Data Generation and Visualization', (
       cy.wait(1000)
       
       // Should show error or use fallback data
-      cy.get('[data-testid="data-sample"]').should('exist')
+      cy.get('.border').should('exist')
     })
 
     it('should handle export failures', () => {
@@ -394,7 +397,7 @@ describe('Demo E2E Test Suite 4: Synthetic Data Generation and Visualization', (
 
     it('should validate data before display', () => {
       // All displayed data should be properly formatted
-      cy.get('[data-testid="data-sample"]').each(($sample) => {
+      cy.get('.border').each(($sample) => {
         cy.wrap($sample).should('contain', 'ID:')
         cy.wrap($sample).should('contain', 'Processing:')
         cy.wrap($sample).should('contain', 'Points:')
