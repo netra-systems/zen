@@ -184,5 +184,58 @@ class TestE2EMinimal:
             assert response.status_code in [200, 301, 302, 307]
 
 
+class TestErrorHandlingFix:
+    """Test the critical bug fix for agent error handling"""
+    
+    @pytest.mark.asyncio
+    async def test_supervisor_error_string_formatting(self):
+        """Verify that supervisor_consolidated.py properly formats exception messages as strings"""
+        from app.agents.supervisor_consolidated import SupervisorAgent, AgentExecutionContext
+        from app.agents.state import DeepAgentState
+        from unittest.mock import Mock, AsyncMock
+        
+        # Create mock dependencies
+        mock_llm_manager = Mock()
+        mock_tool_dispatcher = Mock()
+        
+        # Create supervisor
+        supervisor = SupervisorAgent(
+            llm_manager=mock_llm_manager,
+            tool_dispatcher=mock_tool_dispatcher
+        )
+        
+        # Create a failing agent mock
+        mock_agent = Mock()
+        mock_agent.name = "TestAgent"
+        mock_agent.execute = AsyncMock(side_effect=RuntimeError("Test error message"))
+        mock_agent.set_state = Mock()
+        mock_agent.get_state = Mock()
+        
+        # Create context
+        context = AgentExecutionContext(
+            run_id="test-run-id",
+            thread_id="test-thread",
+            user_id="test-user",
+            max_retries=1
+        )
+        
+        # Create state
+        state = DeepAgentState(user_request="Test request")
+        
+        # Test that error is properly formatted
+        try:
+            await supervisor._execute_agent_with_retry(
+                mock_agent, state, context, stream_updates=False
+            )
+        except Exception as e:
+            error_msg = str(e)
+            # Verify the error message is properly formatted
+            assert "TestAgent failed after" in error_msg
+            assert "Test error message" in error_msg
+            # Ensure no raw exception objects in the message
+            assert "RuntimeError(" not in error_msg
+            assert "<" not in error_msg  # No object representations
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

@@ -10,7 +10,7 @@ Netra AI Optimization Platform - The world's best, highest quality, most intelli
 
 ### Quick Test Commands (Most Commonly Used)
 ```bash
-# RECOMMENDED: Run quick tests before any commit
+# RECOMMENDED: Run quick tests before any commit (includes import validation)
 python test_runner.py --mode quick
 
 # Run specific category of tests
@@ -26,6 +26,15 @@ python scripts/test_backend.py --failed-first
 
 ### Specifications
 XML specifications are in `SPEC/*.xml`
+
+**Important Specifications:**
+- `SPEC/code_changes.xml` - **CRITICAL**: Required updates when making code changes
+  - Import tests must be updated for new modules/dependencies
+  - Type definitions must stay synchronized
+  - Test coverage requirements must be met
+  - See full checklist in the specification
+- `SPEC/conventions.xml` - Project conventions and coding standards
+- `SPEC/instructions.xml` - General development instructions
 
 ### Backend Development (Windows)
 
@@ -411,6 +420,15 @@ python scripts/test_frontend.py --watch
 8. **State Management**: Use state persistence service for agent state
 
 ## Common Tasks
+
+### IMPORTANT: When Making Any Code Changes
+**Consult `SPEC/code_changes.xml` for the complete checklist**
+1. Update import tests for new modules:
+   - Backend: `app/tests/test_internal_imports.py` and `app/tests/test_external_imports.py`
+   - Frontend: `frontend/__tests__/imports/*.test.tsx`
+2. Run quick tests to validate: `python test_runner.py --mode quick`
+3. Update type definitions in both frontend and backend
+4. Ensure test coverage meets minimums (backend: 70%, frontend: 60%)
 
 ### Adding a New API Endpoint
 1. Create route handler in `app/routes/`
