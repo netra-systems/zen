@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { examplePrompts } from '@/lib/examplePrompts';
 import { useChatStore } from '@/store/chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { useAuthStore } from '@/store/authStore';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Send, Sparkles, Zap, TrendingUp, Shield, Database, Brain } from 'lucide-react';
@@ -12,9 +13,15 @@ import { Message } from '@/types/chat';
 export const ExamplePrompts: React.FC = () => {
   const { sendMessage } = useWebSocket();
   const { setProcessing, addMessage } = useChatStore();
+  const { isAuthenticated } = useAuthStore();
   const [isOpen, setIsOpen] = React.useState(true);
 
   const handlePromptClick = (prompt: string) => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      console.error('User must be authenticated to send messages');
+      return;
+    }
     // Add user message to chat immediately
     const userMessage: Message = {
       id: `msg_${Date.now()}`,
