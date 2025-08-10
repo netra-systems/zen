@@ -17,6 +17,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
+from pydantic import ValidationError
 
 from app.routes.websockets import router as websockets_router
 from app.db.postgres import async_session_factory
@@ -32,6 +33,16 @@ from app.ws_manager import manager as websocket_manager
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.services.tool_registry import ToolRegistry
 from app.redis_manager import redis_manager
+
+# Import new error handling components
+from app.core.exceptions import NetraException
+from app.core.error_handlers import (
+    netra_exception_handler,
+    validation_exception_handler,
+    http_exception_handler,
+    general_exception_handler,
+)
+from app.core.error_context import ErrorContext
 
 def run_migrations(logger):
     """Run database migrations automatically on startup."""
@@ -172,6 +183,30 @@ app = FastAPI(lifespan=lifespan)
 init_oauth(app)
 
 @app.middleware("http")
+async def error_context_middleware(request: Request, call_next):
+    """Middleware to set up error context for each request."""
+    # Generate trace ID for the request
+    trace_id = ErrorContext.generate_trace_id()
+    
+    # Set request ID if available in headers
+    request_id = request.headers.get("x-request-id")
+    if request_id:
+        ErrorContext.set_request_id(request_id)
+    
+    # Store in request state for access in handlers
+    request.state.trace_id = trace_id
+    request.state.request_id = request_id
+    
+    response = await call_next(request)
+    
+    # Add trace ID to response headers
+    response.headers["x-trace-id"] = trace_id
+    if request_id:
+        response.headers["x-request-id"] = request_id
+    
+    return response
+
+@app.middleware("http")
 async def log_requests(request: Request, call_next):
     logger = central_logger.get_logger("api")
     start_time = time.time()
@@ -181,7 +216,8 @@ async def log_requests(request: Request, call_next):
     process_time = (time.time() - start_time) * 1000
     formatted_process_time = f'{process_time:.2f}ms'
     
-    logger.info(f"Request: {request.method} {request.url.path} | Status: {response.status_code} | Duration: {formatted_process_time}")
+    trace_id = getattr(request.state, 'trace_id', 'unknown')
+    logger.info(f"Request: {request.method} {request.url.path} | Status: {response.status_code} | Duration: {formatted_process_time} | Trace: {trace_id}")
     
     return response
 
@@ -200,12 +236,11 @@ app.add_middleware(
     https_only=False,
 )
 
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"detail": exc.detail},
-    )
+# Register error handlers
+app.add_exception_handler(NetraException, netra_exception_handler)
+app.add_exception_handler(ValidationError, validation_exception_handler)
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(Exception, general_exception_handler)
 
 from app.routes import supply, generation, admin, references, health, corpus, synthetic_data, config
 from app.routes.auth import auth as auth_router
