@@ -9,15 +9,19 @@ interface SubAgentStatusProps {
 }
 
 export const SubAgentStatus = ({ name, status }: SubAgentStatusProps = {}) => {
-  const store = useChatStore();
-  const currentSubAgent = name || store?.currentSubAgent;
-  const subAgentStatus = status || store?.subAgentStatus;
-  const subAgentTools: string[] = []; // store?.subAgentTools || [];
-  const subAgentProgress = undefined; // store?.subAgentProgress;
-  const subAgentError = undefined; // store?.subAgentError;
-  const subAgentDescription = undefined; // store?.subAgentDescription;
-  const subAgentExecutionTime = undefined; // store?.subAgentExecutionTime;
-  const queuedSubAgents: string[] = []; // store?.queuedSubAgents || [];
+  const {
+    currentSubAgent: storeSubAgent,
+    subAgentStatus: storeStatus,
+    subAgentTools,
+    subAgentProgress,
+    subAgentError,
+    subAgentDescription,
+    subAgentExecutionTime,
+    queuedSubAgents
+  } = useChatStore();
+  
+  const currentSubAgent = name || storeSubAgent;
+  const subAgentStatus = status || storeStatus;
 
   // Don't render if no sub-agent is active
   if (!currentSubAgent) {
@@ -58,7 +62,7 @@ export const SubAgentStatus = ({ name, status }: SubAgentStatusProps = {}) => {
       {subAgentProgress && (
         <div className="mt-2">
           <div>Step {subAgentProgress.current} of {subAgentProgress.total}</div>
-          <div>{subAgentProgress.message}</div>
+          {subAgentProgress.message && <div>{subAgentProgress.message}</div>}
           <div 
             role="progressbar" 
             aria-valuenow={(subAgentProgress.current / subAgentProgress.total) * 100}

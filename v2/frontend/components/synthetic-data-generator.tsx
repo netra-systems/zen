@@ -21,7 +21,7 @@ const workloadPatterns = [
   { value: "high_error_rate", label: "High Error Rate" },
 ];
 
-export function SyntheticDataGenerator({ onGenerationComplete }) {
+export function SyntheticDataGenerator({ onGenerationComplete }: { onGenerationComplete?: (table: string) => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tables, setTables] = useState<string[]>([]);
@@ -55,7 +55,7 @@ export function SyntheticDataGenerator({ onGenerationComplete }) {
     fetchTables();
   }, []);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setGenerationParams((prev) => ({ ...prev, [name]: parseFloat(value) }));
   };
@@ -75,7 +75,7 @@ export function SyntheticDataGenerator({ onGenerationComplete }) {
       });
       if (!response.ok) throw new Error("Failed to generate synthetic data.");
       await response.json();
-      onGenerationComplete(generationParams.destination_table);
+      onGenerationComplete?.(generationParams.destination_table);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred.");
     } finally {
