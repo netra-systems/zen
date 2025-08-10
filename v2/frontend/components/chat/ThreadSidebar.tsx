@@ -42,8 +42,9 @@ export const ThreadSidebar: React.FC = () => {
       const fetchedThreads = await ThreadService.listThreads();
       setThreads(fetchedThreads);
     } catch (error) {
-      console.error('Failed to load threads:', error);
-      setError('Failed to load conversation history');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load conversation history';
+      console.error('Failed to load threads:', errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -56,8 +57,9 @@ export const ThreadSidebar: React.FC = () => {
       addThread(newThread);
       await handleSelectThread(newThread.id);
     } catch (error) {
-      console.error('Failed to create thread:', error);
-      setError('Failed to create new conversation');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create new conversation';
+      console.error('Failed to create thread:', errorMessage);
+      setError(errorMessage);
     } finally {
       setIsCreatingNew(false);
     }
@@ -76,8 +78,9 @@ export const ThreadSidebar: React.FC = () => {
         loadMessages(response.messages);
       }
     } catch (error) {
-      console.error('Failed to load thread messages:', error);
-      setError('Failed to load conversation');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load conversation';
+      console.error('Failed to load thread messages:', errorMessage);
+      setError(errorMessage);
     }
   };
 
@@ -93,7 +96,9 @@ export const ThreadSidebar: React.FC = () => {
       setEditingThreadId(null);
       setEditingTitle('');
     } catch (error) {
-      console.error('Failed to update thread title:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update thread title';
+      console.error('Failed to update thread title:', errorMessage);
+      setError(errorMessage);
     }
   };
 
@@ -108,8 +113,9 @@ export const ThreadSidebar: React.FC = () => {
         clearMessages();
       }
     } catch (error) {
-      console.error('Failed to delete thread:', error);
-      setError('Failed to delete conversation');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete conversation';
+      console.error('Failed to delete thread:', errorMessage);
+      setError(errorMessage);
     }
   };
 
