@@ -10,12 +10,23 @@
 # ================================
 from typing import List, Any
 from app.services.context import ToolContext
+from app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
 
 async def cost_analyzer(context: ToolContext) -> str:
     """Analyzes the current costs of the system."""
-    total_cost = 0
-    for log in context.logs:
-        cost_result = await context.cost_estimator.execute(log.request.prompt_text, log.model_dump())
-        total_cost += cost_result["estimated_cost_usd"]
+    logger.info(f"Starting cost analysis for {len(context.logs)} logs")
     
-    return f"Analyzed current costs. Total estimated cost: ${total_cost:.2f}"
+    try:
+        total_cost = 0
+        for log in context.logs:
+            cost_result = await context.cost_estimator.execute(log.request.prompt_text, log.model_dump())
+            total_cost += cost_result["estimated_cost_usd"]
+        
+        logger.info(f"Cost analysis complete. Total estimated cost: ${total_cost:.2f}")
+        return f"Analyzed current costs. Total estimated cost: ${total_cost:.2f}"
+    
+    except Exception as e:
+        logger.error(f"Cost analysis failed: {e}", exc_info=True)
+        raise

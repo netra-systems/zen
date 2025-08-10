@@ -106,7 +106,7 @@ async def lifespan(app: FastAPI):
         logger.info(f"pytest in sys.modules")
 
     # Validate database environment separation
-    if not 'pytest' in sys.modules:  # Skip during testing
+    if 'pytest' not in sys.modules:  # Skip during testing
         from app.services.database_env_service import validate_database_environment
         try:
             validate_database_environment()
@@ -115,7 +115,7 @@ async def lifespan(app: FastAPI):
             os._exit(1)
     
     # Run database migrations first (before initializing services that depend on DB)
-    if not 'pytest' in sys.modules:  # Skip migrations during testing
+    if 'pytest' not in sys.modules:  # Skip migrations during testing
         run_migrations(logger)
     
     # Initialize services
@@ -224,19 +224,28 @@ async def log_requests(request: Request, call_next):
     
     return response
 
+# Configure CORS based on environment
+allowed_origins = []
+if settings.environment == "production":
+    # In production, only allow specific origins
+    allowed_origins = settings.cors_origins.split(",") if settings.cors_origins else ["https://netra.ai"]
+else:
+    # In development, allow localhost origins
+    allowed_origins = ["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=["Authorization", "Content-Type", "X-Request-ID", "X-Trace-ID"],
 )
 
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.secret_key,
     same_site="lax",
-    https_only=False,
+    https_only=(settings.environment == "production"),  # Enable HTTPS-only cookies in production
 )
 
 # Register error handlers
