@@ -1,3 +1,10 @@
+"""Supervisor Agent Module
+
+This module provides the main Supervisor implementation that orchestrates sub-agents.
+It has been refactored to use the consolidated supervisor for improved architecture
+while maintaining backward compatibility.
+"""
+
 from app.logging_config import central_logger
 from typing import Any, Dict, List, Optional
 from app.agents.base import BaseSubAgent
@@ -9,16 +16,28 @@ from app.agents.state import DeepAgentState
 from app.services.state_persistence_service import state_persistence_service
 from starlette.websockets import WebSocketDisconnect
 
-# Import all the sub-agents
-from app.agents.triage_sub_agent import TriageSubAgent
-from app.agents.data_sub_agent import DataSubAgent
-from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-from app.agents.reporting_sub_agent import ReportingSubAgent
+# Import the consolidated supervisor
+try:
+    from app.agents.supervisor_consolidated import SupervisorAgent as ConsolidatedSupervisor
+    USE_CONSOLIDATED = True
+except ImportError:
+    USE_CONSOLIDATED = False
+    # Import all the sub-agents for legacy implementation
+    from app.agents.triage_sub_agent import TriageSubAgent
+    from app.agents.data_sub_agent import DataSubAgent
+    from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+    from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+    from app.agents.reporting_sub_agent import ReportingSubAgent
 
 logger = central_logger.get_logger(__name__)
 
 class Supervisor(BaseSubAgent):
+    """Main Supervisor class with backward compatibility
+    
+    This class either delegates to the consolidated supervisor for improved functionality
+    or falls back to the legacy implementation if the consolidated version is not available.
+    """
+    
     def __init__(self, db_session: AsyncSession, llm_manager: LLMManager, websocket_manager: any, tool_dispatcher: ToolDispatcher):
         super().__init__(llm_manager, name="Supervisor", description="The supervisor agent that orchestrates the sub-agents.")
         self.db_session = db_session
@@ -26,23 +45,49 @@ class Supervisor(BaseSubAgent):
         self.tool_dispatcher = tool_dispatcher
         self.thread_id = None  # Will be set by AgentService
         self.user_id = None  # Will be set by AgentService
-        self.sub_agents: List[BaseSubAgent] = [
-            TriageSubAgent(llm_manager, self.tool_dispatcher),
-            DataSubAgent(llm_manager, self.tool_dispatcher),
-            OptimizationsCoreSubAgent(llm_manager, self.tool_dispatcher),
-            ActionsToMeetGoalsSubAgent(llm_manager, self.tool_dispatcher),
-            ReportingSubAgent(llm_manager, self.tool_dispatcher),
-        ]
-        self.run_states = {}
-        self.state_persistence = state_persistence_service
+        
+        if USE_CONSOLIDATED:
+            # Use the improved consolidated supervisor
+            self._impl = ConsolidatedSupervisor(
+                db_session=db_session,
+                llm_manager=llm_manager,
+                websocket_manager=websocket_manager,
+                tool_dispatcher=tool_dispatcher
+            )
+            logger.info("Using consolidated supervisor implementation")
+        else:
+            # Legacy implementation
+            self.sub_agents: List[BaseSubAgent] = [
+                TriageSubAgent(llm_manager, self.tool_dispatcher),
+                DataSubAgent(llm_manager, self.tool_dispatcher),
+                OptimizationsCoreSubAgent(llm_manager, self.tool_dispatcher),
+                ActionsToMeetGoalsSubAgent(llm_manager, self.tool_dispatcher),
+                ReportingSubAgent(llm_manager, self.tool_dispatcher),
+            ]
+            self.run_states = {}
+            self.state_persistence = state_persistence_service
+            self._impl = None
+            logger.info("Using legacy supervisor implementation")
 
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute the supervisor's orchestration logic."""
-        # The supervisor doesn't use the standard execute pattern since it has its own run method
-        # This is here to satisfy the abstract method requirement
-        pass
+        if self._impl and hasattr(self._impl, 'execute'):
+            await self._impl.execute(state, run_id, stream_updates)
+        else:
+            # The supervisor doesn't use the standard execute pattern since it has its own run method
+            # This is here to satisfy the abstract method requirement
+            pass
     
     async def run(self, user_request: str, run_id: str, stream_updates: bool) -> DeepAgentState:
+        """Run the supervisor workflow"""
+        
+        # Delegate to consolidated implementation if available
+        if self._impl:
+            self._impl.thread_id = self.thread_id
+            self._impl.user_id = self.user_id
+            return await self._impl.run(user_request, run_id, stream_updates)
+        
+        # Legacy implementation
         logger.info(f"Supervisor starting for run_id: {run_id}")
         self.set_state(SubAgentLifecycle.RUNNING)
         self.run_states[run_id] = {"status": "running", "current_step": 0, "total_steps": len(self.sub_agents)}
