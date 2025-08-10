@@ -9,6 +9,7 @@ import importlib
 from typing import List, Tuple
 
 
+@pytest.mark.smoke
 class TestExternalImports:
     """Test that all external dependencies can be imported successfully."""
     

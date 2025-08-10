@@ -6,6 +6,7 @@
 import path from 'path';
 
 describe('Internal Frontend Module Import Tests', () => {
+  // @smoke-test
   describe('Component imports', () => {
     it('should import UI components', () => {
       // Core UI components

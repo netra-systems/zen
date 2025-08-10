@@ -4,6 +4,7 @@
  */
 
 describe('External NPM Dependencies Import Tests', () => {
+  // @smoke-test
   describe('Core React and Next.js imports', () => {
     it('should import React', () => {
       const React = require('react');

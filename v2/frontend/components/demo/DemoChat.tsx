@@ -32,6 +32,7 @@ import {
   Package
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { demoService } from '@/services/demoService'
 
 interface DemoChatProps {
   industry: string
@@ -208,49 +209,37 @@ export default function DemoChat({ industry, onInteraction }: DemoChatProps) {
       const sessionId = localStorage.getItem('demo-session-id') || `demo-${Date.now()}`
       localStorage.setItem('demo-session-id', sessionId)
       
-      // Make API call to backend
-      const response = await fetch('/api/demo/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userMessage,
-          industry: industry,
-          session_id: sessionId,
-          context: {}
-        })
+      // Make API call to backend using demoService
+      const data = await demoService.sendChatMessage({
+        message: userMessage,
+        industry: industry,
+        session_id: sessionId,
+        context: {}
       })
       
-      if (response.ok) {
-        const data = await response.json()
-        
-        // Simulate agent progression for visual effect
-        await new Promise(resolve => setTimeout(resolve, 800))
-        setActiveAgent('analysis')
-        await new Promise(resolve => setTimeout(resolve, 1200))
-        setActiveAgent('optimization')
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        const responseMessage: Message = {
-          id: Date.now().toString(),
-          role: 'assistant',
-          content: data.response,
-          timestamp: new Date(),
-          metadata: {
-            processingTime: 3000,
-            tokensUsed: 1500,
-            costSaved: data.optimization_metrics?.estimated_annual_savings 
-              ? Math.round(data.optimization_metrics.estimated_annual_savings / 12) 
-              : 25000,
-            optimizationType: data.agents_involved?.join(' → ') || 'Multi-Agent Optimization'
-          }
+      // Simulate agent progression for visual effect
+      await new Promise(resolve => setTimeout(resolve, 800))
+      setActiveAgent('analysis')
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      setActiveAgent('optimization')
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      const responseMessage: Message = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: data.response,
+        timestamp: new Date(),
+        metadata: {
+          processingTime: 3000,
+          tokensUsed: 1500,
+          costSaved: data.optimization_metrics?.estimated_annual_savings 
+            ? Math.round(data.optimization_metrics.estimated_annual_savings / 12) 
+            : 25000,
+          optimizationType: data.agents_involved?.join(' → ') || 'Multi-Agent Optimization'
         }
-        
-        setMessages(prev => [...prev, responseMessage])
-      } else {
-        throw new Error('API call failed')
       }
+      
+      setMessages(prev => [...prev, responseMessage])
     } catch (error) {
       console.error('Demo chat API error:', error)
       

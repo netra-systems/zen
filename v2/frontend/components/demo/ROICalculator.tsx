@@ -20,6 +20,7 @@ import {
   CheckCircle2
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { demoService } from '@/services/demoService'
 
 interface ROICalculatorProps {
   industry: string
@@ -71,34 +72,31 @@ export default function ROICalculator({ industry, onComplete }: ROICalculatorPro
     
     try {
       // Try to call the backend API first
-      const response = await fetch('/api/demo/roi/calculate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          current_spend: metrics.currentMonthlySpend,
-          request_volume: metrics.requestsPerMonth,
-          average_latency: metrics.averageLatency,
-          industry: industry
-        })
+      const data = await demoService.calculateROI({
+        current_spend: metrics.currentMonthlySpend,
+        request_volume: metrics.requestsPerMonth,
+        average_latency: metrics.averageLatency,
+        industry: industry
       })
-
-      if (response.ok) {
-        const data = await response.json()
         
-        // Map API response to our Savings interface
-        setSavings({
-          infrastructureCost: (data.current_annual_cost - data.optimized_annual_cost) / 12 * 0.7,
-          operationalCost: (data.current_annual_cost - data.optimized_annual_cost) / 12 * 0.2,
-          performanceGain: (data.current_annual_cost - data.optimized_annual_cost) / 12 * 0.1,
-          totalMonthlySavings: data.annual_savings / 12,
-          totalAnnualSavings: data.annual_savings,
-          paybackPeriod: data.roi_months,
-          threeYearROI: (data.three_year_tco_reduction / (metrics.currentMonthlySpend * 2)) * 100
-        })
-      } else {
-        // Fallback to local calculation if API fails
+      // Map API response to our Savings interface
+      setSavings({
+        infrastructureCost: (data.current_annual_cost - data.optimized_annual_cost) / 12 * 0.7,
+        operationalCost: (data.current_annual_cost - data.optimized_annual_cost) / 12 * 0.2,
+        performanceGain: (data.current_annual_cost - data.optimized_annual_cost) / 12 * 0.1,
+        totalMonthlySavings: data.annual_savings / 12,
+        totalAnnualSavings: data.annual_savings,
+        paybackPeriod: data.roi_months,
+        threeYearROI: (data.three_year_tco_reduction / (metrics.currentMonthlySpend * 2)) * 100
+      })
+      
+      setCalculated(true)
+      if (onComplete) {
+        setTimeout(onComplete, 1500)
+      }
+    } catch (error) {
+      console.error('ROI calculation error:', error)
+      // Fallback to local calculation if API fails
         const multiplier = industryMultipliers[industry] || industryMultipliers.default
         
         // Calculate infrastructure savings (40-60% reduction)
@@ -136,7 +134,6 @@ export default function ROICalculator({ industry, onComplete }: ROICalculatorPro
           paybackPeriod,
           threeYearROI
         })
-      }
       
       setCalculated(true)
       if (onComplete) {

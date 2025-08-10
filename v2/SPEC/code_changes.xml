@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification name="code-changes" version="1.0">
+  <title>Code Changes Checklist</title>
+  <description>
+    CRITICAL: This specification MUST be consulted whenever making code changes to the Netra AI platform.
+    It provides a comprehensive checklist to ensure all necessary updates are made when modifying code.
+  </description>
+  
+  <section name="mandatory-on-all-changes">
+    <title>Mandatory Updates for ALL Code Changes</title>
+    <description>These items MUST be updated regardless of the type or scope of change</description>
+    
+    <checklist-item id="import-tests" critical="true">
+      <title>Update Import Tests</title>
+      <description>
+        Import tests MUST be updated whenever adding new modules, files, or dependencies.
+        These tests are part of the quick smoke test suite and ensure the codebase structure remains valid.
+      </description>
+      <actions>
+        <action type="backend-internal">
+          Update app/tests/test_internal_imports.py with new internal module paths
+        </action>
+        <action type="backend-external">
+          Update app/tests/test_external_imports.py with new external dependencies
+        </action>
+        <action type="frontend-internal">
+          Update frontend/__tests__/imports/internal-imports.test.tsx with new components/modules
+        </action>
+        <action type="frontend-external">
+          Update frontend/__tests__/imports/external-imports.test.tsx with new npm packages
+        </action>
+      </actions>
+      <validation>
+        Run: python test_runner.py --mode quick
+        This will verify all imports are working correctly
+      </validation>
+    </checklist-item>
+    
+    <checklist-item id="type-sync" critical="true">
+      <title>Synchronize Type Definitions</title>
+      <description>
+        Type definitions must remain synchronized between backend and frontend
+      </description>
+      <actions>
+        <action type="backend">
+          Update Pydantic models in app/schemas/ when changing API contracts
+        </action>
+        <action type="frontend">
+          Update TypeScript types in frontend/types/ to match backend changes
+        </action>
+        <action type="shared">
+          Consider using auto-generation tools for type synchronization
+        </action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="test-coverage" critical="true">
+      <title>Maintain Test Coverage</title>
+      <description>
+        Test coverage must meet minimum requirements
+      </description>
+      <requirements>
+        <requirement type="backend">Minimum 70% coverage</requirement>
+        <requirement type="frontend">Minimum 60% coverage</requirement>
+      </requirements>
+      <actions>
+        <action>Write unit tests for new functions/methods</action>
+        <action>Write integration tests for new API endpoints</action>
+        <action>Write component tests for new React components</action>
+      </actions>
+      <validation>
+        Backend: python scripts/test_backend.py --coverage
+        Frontend: python scripts/test_frontend.py --coverage
+      </validation>
+    </checklist-item>
+  </section>
+  
+  <section name="backend-specific">
+    <title>Backend-Specific Changes</title>
+    
+    <checklist-item id="new-route">
+      <title>Adding New API Endpoint</title>
+      <actions>
+        <action>Create route handler in app/routes/</action>
+        <action>Define Pydantic schemas in app/schemas/</action>
+        <action>Implement service logic in app/services/</action>
+        <action>Add repository if database access needed in app/services/database/</action>
+        <action>Add route tests in app/tests/routes/</action>
+        <action>Update import tests with new modules</action>
+        <action>Update API documentation/OpenAPI spec</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="new-agent">
+      <title>Adding New Agent or Sub-Agent</title>
+      <actions>
+        <action>Create agent class extending BaseAgent in app/agents/</action>
+        <action>Define agent prompts in app/agents/prompts.py</action>
+        <action>Register agent with supervisor in app/agents/supervisor.py</action>
+        <action>Add agent-specific tools if needed</action>
+        <action>Update tool dispatcher if new tools added</action>
+        <action>Add agent tests in app/tests/agents/</action>
+        <action>Update import tests with new agent modules</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="database-changes">
+      <title>Database Schema Changes</title>
+      <actions>
+        <action>Create Alembic migration: alembic revision -m "description"</action>
+        <action>Update SQLAlchemy models in app/db/models.py</action>
+        <action>Update repositories in app/services/database/</action>
+        <action>Update Pydantic schemas to reflect changes</action>
+        <action>Add migration tests</action>
+        <action>Update seed data if applicable</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="websocket-events">
+      <title>Adding WebSocket Events</title>
+      <actions>
+        <action>Define event type in app/schemas/WebSocket.py</action>
+        <action>Add handler in app/services/websocket/message_handler.py</action>
+        <action>Update app/routes/websockets.py if needed</action>
+        <action>Add WebSocket tests in app/tests/</action>
+        <action>Update frontend WebSocketProvider to handle new event</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="external-dependencies">
+      <title>Adding External Dependencies</title>
+      <actions>
+        <action>Add to requirements.txt with version pinning</action>
+        <action>Update app/tests/test_external_imports.py</action>
+        <action>Document why the dependency is needed</action>
+        <action>Check for security vulnerabilities</action>
+        <action>Update Docker images if needed</action>
+      </actions>
+    </checklist-item>
+  </section>
+  
+  <section name="frontend-specific">
+    <title>Frontend-Specific Changes</title>
+    
+    <checklist-item id="new-component">
+      <title>Adding New Component</title>
+      <actions>
+        <action>Create component in appropriate directory under frontend/components/</action>
+        <action>Follow existing component patterns and conventions</action>
+        <action>Add component tests in frontend/__tests__/components/</action>
+        <action>Update internal import tests</action>
+        <action>Add Storybook story if applicable</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="new-hook">
+      <title>Adding New React Hook</title>
+      <actions>
+        <action>Create hook in frontend/hooks/</action>
+        <action>Add comprehensive hook tests in frontend/__tests__/hooks/</action>
+        <action>Wrap with appropriate providers in tests</action>
+        <action>Update internal import tests</action>
+        <action>Document hook API and usage</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="state-management">
+      <title>State Management Changes</title>
+      <actions>
+        <action>Update Zustand store in frontend/store/</action>
+        <action>Add store tests in frontend/__tests__/store/</action>
+        <action>Update components using the store</action>
+        <action>Ensure state persistence if needed</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="npm-dependencies">
+      <title>Adding NPM Dependencies</title>
+      <actions>
+        <action>Add to package.json with exact version</action>
+        <action>Update package-lock.json</action>
+        <action>Update frontend/__tests__/imports/external-imports.test.tsx</action>
+        <action>Check bundle size impact</action>
+        <action>Audit for security vulnerabilities</action>
+      </actions>
+    </checklist-item>
+  </section>
+  
+  <section name="testing-requirements">
+    <title>Testing Requirements</title>
+    
+    <checklist-item id="pre-commit-tests">
+      <title>Pre-Commit Testing</title>
+      <description>ALWAYS run these tests before committing</description>
+      <commands>
+        <command priority="1">python test_runner.py --mode quick</command>
+        <command priority="2">python scripts/test_backend.py --category unit</command>
+        <command priority="3">python scripts/test_frontend.py --category components</command>
+      </commands>
+    </checklist-item>
+    
+    <checklist-item id="comprehensive-tests">
+      <title>Comprehensive Testing</title>
+      <description>Run for major changes or before PR</description>
+      <commands>
+        <command>python test_runner.py --mode comprehensive</command>
+        <command>python scripts/test_backend.py --coverage</command>
+        <command>python scripts/test_frontend.py --coverage</command>
+      </commands>
+    </checklist-item>
+  </section>
+  
+  <section name="common-pitfalls">
+    <title>Common Pitfalls to Avoid</title>
+    
+    <pitfall id="missing-imports">
+      <title>Forgetting Import Test Updates</title>
+      <description>
+        New modules/dependencies added without updating import tests cause smoke test failures
+      </description>
+      <prevention>
+        Always update import tests immediately after adding new files or packages
+      </prevention>
+    </pitfall>
+    
+    <pitfall id="type-mismatch">
+      <title>Frontend/Backend Type Mismatches</title>
+      <description>
+        API contract changes without updating TypeScript types cause runtime errors
+      </description>
+      <prevention>
+        Update both Pydantic schemas and TypeScript types together
+      </prevention>
+    </pitfall>
+    
+    <pitfall id="websocket-provider">
+      <title>Missing WebSocket Provider in Tests</title>
+      <description>
+        Testing useWebSocket hook without WebSocketProvider wrapper causes test failures
+      </description>
+      <prevention>
+        Always wrap WebSocket-dependent components/hooks with WebSocketProvider in tests
+      </prevention>
+    </pitfall>
+    
+    <pitfall id="async-mocks">
+      <title>Incorrect Async Mock Implementation</title>
+      <description>
+        Using mockResolvedValueOnce instead of mockImplementationOnce for complex async operations
+      </description>
+      <prevention>
+        Use mockImplementationOnce for reliable async mock behavior
+      </prevention>
+    </pitfall>
+    
+    <pitfall id="env-vars">
+      <title>Missing Test Environment Variables</title>
+      <description>
+        Tests fail due to missing environment configuration
+      </description>
+      <prevention>
+        Ensure TESTING=1 and other test env vars are set
+      </prevention>
+    </pitfall>
+  </section>
+  
+  <section name="quick-reference">
+    <title>Quick Reference Commands</title>
+    
+    <command-group name="validation">
+      <title>Validation Commands</title>
+      <command>python test_runner.py --mode quick  # Quick smoke tests including imports</command>
+      <command>python scripts/test_backend.py --fail-fast  # Stop on first failure</command>
+      <command>python scripts/test_frontend.py --lint  # Run ESLint</command>
+    </command-group>
+    
+    <command-group name="specific-tests">
+      <title>Run Specific Test Categories</title>
+      <command>python scripts/test_backend.py --category smoke  # Smoke tests only</command>
+      <command>python scripts/test_backend.py --category unit  # Unit tests only</command>
+      <command>python scripts/test_backend.py --category agent  # Agent tests only</command>
+      <command>python scripts/test_frontend.py --category components  # Component tests only</command>
+    </command-group>
+    
+    <command-group name="coverage">
+      <title>Coverage Reports</title>
+      <command>python test_runner.py --mode comprehensive  # Full coverage</command>
+      <command>python scripts/test_backend.py --coverage  # Backend coverage</command>
+      <command>python scripts/test_frontend.py --coverage  # Frontend coverage</command>
+    </command-group>
+  </section>
+  
+  <section name="automation">
+    <title>Automation and CI/CD</title>
+    
+    <checklist-item id="ci-pipeline">
+      <title>CI/CD Pipeline Updates</title>
+      <description>
+        Ensure CI/CD pipelines are updated when adding new test requirements
+      </description>
+      <actions>
+        <action>Update GitHub Actions workflows if test commands change</action>
+        <action>Ensure new dependencies are installed in CI environment</action>
+        <action>Update Docker images if base requirements change</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="pre-commit-hooks">
+      <title>Pre-Commit Hooks</title>
+      <description>
+        Consider adding pre-commit hooks for automatic validation
+      </description>
+      <suggestions>
+        <suggestion>Run import tests automatically</suggestion>
+        <suggestion>Run linting and formatting</suggestion>
+        <suggestion>Check for uncommitted type changes</suggestion>
+      </suggestions>
+    </checklist-item>
+  </section>
+</specification>

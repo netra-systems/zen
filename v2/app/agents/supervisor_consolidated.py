@@ -116,6 +116,11 @@ class SupervisorAgent(BaseSubAgent):
         if event in self.hooks:
             self.hooks[event].append(handler)
     
+    @property
+    def sub_agents(self) -> list:
+        """Backward compatibility property for tests expecting sub_agents attribute"""
+        return list(self.agents.values())
+    
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute method for BaseSubAgent compatibility"""
         # This method is here to satisfy the abstract method requirement
