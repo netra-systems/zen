@@ -16,7 +16,6 @@
                 <item priority="critical">Consider coherence with all BACKGROUND CONTEXT including existing specs and plans</item>
                 <item>Read and be prepared to discuss all existing relevant code and system concepts</item>
                 <item>Reflect on work in progress if relevant</item>
-                <item>ACTION only the defined ACTION: spec. this is the {spec_name}</item>
             </items>
         </section>
         
@@ -35,7 +34,11 @@
         
         <section id="plan" order="0.2">
             <title>Plan</title>
-            <description>Make a plan to execute the detailed instructions {spec_name}:1:0 ({spec_name}:"1:0"). Look at all items from 1:0 through 1:0:0 (if existing) 1:0:0:0 (if existing) through to the end. Plan to fix potential new bugs introduced from changes and related classes of issues at the same time. Zoom in and out and look at it from a spherical point of view. Save the plan to "/plans/{*}-plan.md".</description>
+            <description>Make a plan to execute the detailed instructions {spec_name}.
+             Look at all items in order to the end. 
+             Plan to fix potential new bugs introduced from changes and related classes
+              of issues at the same time. Zoom in and out and look at it from a spherical point of view.
+               Save the plan to "/plans/{*}-plan.md".</description>
         </section>
         
         <section id="review" order="0.3">
@@ -69,10 +72,10 @@
             <description>Code must be coherent and well integrated with the entire Netra system application context</description>
             <items>
                 <item>Limit coherence reflection to be at most 30 most relevant categories and 100 items total</item>
-                <item>Scope: Keep scope of "{spec_name}:1:0" changes in mind. Focus on making changes strictly relevant to the scope described in "1:0" as the primary goal and limit side effects and focus on related changes to the scope of "1:0" only</item>
-                <item>Every added line, function, file, class, etc: Use 0:1:1: Project Conventions</item>
+                <item>Scope: Keep scope of changes in mind. Focus on making changes strictly relevant to the scope described in "1:0" as the primary goal and limit side effects and focus on related changes to the scope of "1:0" only</item>
+                <item>Every added line, function, file, class, etc: Use Project Conventions</item>
                 <item>
-                    <title>Once completed "{spec_name}:1:0":</title>
+                    <title>Once completed Spec:</title>
                     <subitems>
                         <subitem>Update docs: Update "/docs/{spec_name}-doc.md"</subitem>
                         <subitem>Update shared/schema.json for alignment</subitem>
@@ -87,7 +90,7 @@
         
         <remember>
             <item>0:7. Remember: 0:1 to 0:7 including all sub items. Limit to 20 subitems</item>
-            <item>Remember: {spec_name}:1:0:* through {spec_name}:1:*:* Limit to 20 subitems</item>
+            <item>Remember: {spec_name} items. Limit to 20 subitems</item>
             <item>All other specs are for background context and coherence. Scope to an implement {spec_name} only</item>
         </remember>
     </sections>
