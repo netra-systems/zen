@@ -29,7 +29,7 @@ const AgentStatusPanel: React.FC = () => {
 
   const [statusZones, setStatusZones] = useState<StatusZone[]>([]);
   const [expandedPreview, setExpandedPreview] = useState<string | null>(null);
-  const [dataPreview, setDataPreview] = useState<any[]>([]);
+  const [dataPreview, setDataPreview] = useState<Record<string, unknown>[]>([]);
   const [metrics, setMetrics] = useState({
     recordsProcessed: 0,
     processingRate: 0,

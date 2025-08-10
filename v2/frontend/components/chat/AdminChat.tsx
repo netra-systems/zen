@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ChatHeader } from '@/components/chat/ChatHeader';
 import { MessageList } from '@/components/chat/MessageList';
 import { MessageInput } from '@/components/chat/MessageInput';
@@ -8,11 +8,13 @@ import { StopButton } from '@/components/chat/StopButton';
 import { ThreadSidebar } from '@/components/chat/ThreadSidebar';
 import { useChatStore } from '@/store/chat';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
+import { useAgent } from '@/hooks/useAgent';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Database, Sparkles, AlertTriangle, CheckCircle } from 'lucide-react';
 
 const AdminChat: React.FC = () => {
-  const { isProcessing, messages, sendMessage } = useChatStore();
+  const { isProcessing, messages } = useChatStore();
+  const { sendUserMessage } = useAgent();
   
   // Connect WebSocket messages to chat store with admin context
   const { pendingApproval, setPendingApproval } = useChatWebSocket();
@@ -22,7 +24,7 @@ const AdminChat: React.FC = () => {
   const handleApproval = (approved: boolean) => {
     if (pendingApproval) {
       const approvalMessage = approved ? 'approve' : 'cancel';
-      sendMessage(approvalMessage);
+      sendUserMessage(approvalMessage);
       setPendingApproval(null);
     }
   };
@@ -149,7 +151,7 @@ const AdminChat: React.FC = () => {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.1 }}
-                          onClick={() => sendMessage(prompt.prompt)}
+                          onClick={() => sendUserMessage(prompt.prompt)}
                           className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all border border-gray-200 hover:border-purple-300 text-left group"
                         >
                           <div className="flex items-start space-x-3">

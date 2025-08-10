@@ -118,6 +118,8 @@ class TestInternalImports:
         "app.agents.optimizations_core_sub_agent",
         "app.agents.reporting_sub_agent",
         "app.agents.actions_to_meet_goals_sub_agent",
+        "app.agents.synthetic_data_sub_agent",
+        "app.agents.corpus_admin_sub_agent",
         
         # Agent orchestration
         "app.agents.orchestration.pipeline",
