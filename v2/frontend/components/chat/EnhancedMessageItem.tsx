@@ -134,7 +134,8 @@ export const EnhancedMessageItem: React.FC<EnhancedMessageProps> = ({
             <CollapsibleTrigger className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 font-medium text-sm">
               {isToolExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
               <Code className="w-4 h-4" />
-              <span>Tool: {tool_info.tool_name || 'Unknown'}</span>
+              <span>Tool: {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {(tool_info as any).tool_name || 'Unknown'}</span>
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-3">
               <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">

@@ -285,10 +285,10 @@ export const UltraMessageItem: React.FC<UltraMessageProps> = ({
             </div>
 
             {/* Tool Info Badges */}
-            {message.tool_info && (
+            {message.tool_info && Array.isArray(message.tool_info) && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {message.tool_info.map((tool: any, idx: number) => (
+                {(message.tool_info as any[]).map((tool: any, idx: number) => (
                   <Badge key={idx} variant="outline" className="text-xs">
                     <Wrench className="w-3 h-3 mr-1" />
                     {tool.tool_name}

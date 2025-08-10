@@ -110,7 +110,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                       : 'text-gray-500'
                   }`}
                 >
-                  {new Date(message.created_at).toLocaleTimeString()}
+                  {message.created_at ? new Date(message.created_at).toLocaleTimeString() : ''}
                 </div>
               </div>
             </div>

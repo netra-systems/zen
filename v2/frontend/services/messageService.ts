@@ -171,11 +171,15 @@ class MessageService {
       const messageMap = new Map<string, Message>();
       
       // Add server messages first (they have priority)
-      serverMessages.forEach(msg => messageMap.set(msg.id, msg));
+      serverMessages.forEach(msg => {
+        if (msg.id) {
+          messageMap.set(msg.id, msg);
+        }
+      });
       
       // Add local messages that aren't on server
       localMessages.forEach(msg => {
-        if (!messageMap.has(msg.id)) {
+        if (msg.id && !messageMap.has(msg.id)) {
           messageMap.set(msg.id, msg);
         }
       });

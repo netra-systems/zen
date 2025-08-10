@@ -41,9 +41,9 @@ export const handlers = [
 
   // Mock for DeepAgent chat
   http.post('/api/chat', async ({ request }) => {
-    const { message } = await request.json();
+    const body = await request.json() as { message: string };
     return HttpResponse.json({
-      reply: `You said: ${message}`,
+      reply: `You said: ${body.message}`,
     });
   }),
 ];
