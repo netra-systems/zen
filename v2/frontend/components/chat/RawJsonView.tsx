@@ -3,7 +3,7 @@ import { JsonView, allExpanded, defaultStyles } from 'react-json-view-lite';
 import 'react-json-view-lite/dist/index.css';
 
 interface JsonViewerProps {
-  data: any;
+  data: unknown;
 }
 
 export const RawJsonView: React.FC<JsonViewerProps> = ({ data }) => {

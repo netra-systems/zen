@@ -2,7 +2,14 @@
 import Link from 'next/link';
 import { Icons } from '@/components/Icons';
 import { authService } from '@/auth';
-import { NavItem } from '@/types';
+
+interface NavItem {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  disabled?: boolean;
+  placeholder?: boolean;
+}
 
 const navItems: NavItem[] = [
   {
@@ -31,14 +38,18 @@ const navItems: NavItem[] = [
     label: 'Synthetic Data',
   },
   {
-    href: '/supply-catalog',
+    href: '#',
     icon: <Icons.supplyCatalog className="h-4 w-4" />,
     label: 'Supply Catalog',
+    disabled: true,
+    placeholder: true,
   },
   {
-    href: '/settings',
+    href: '#',
     icon: <Icons.settings className="h-4 w-4" />,
     label: 'Settings',
+    disabled: true,
+    placeholder: true,
   },
 ];
 
@@ -48,22 +59,31 @@ export function NavLinks() {
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
       {user ? (
-        navItems.map(({ href, icon, label, disabled }) => (
+        navItems.map(({ href, icon, label, disabled, placeholder }) => (
           <Link
             key={label}
             href={href}
-            className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${
-              disabled ? 'cursor-not-allowed pointer-events-none opacity-50' : ''
+            className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all duration-200 ${
+              disabled 
+                ? 'cursor-not-allowed pointer-events-none opacity-50' 
+                : 'hover:text-primary hover:bg-accent hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
             }`}
           >
             {icon}
-            {label}
+            <span className="flex-1 flex items-center justify-between">
+              {label}
+              {placeholder && (
+                <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">
+                  Coming Soon
+                </span>
+              )}
+            </span>
           </Link>
         ))
       ) : (
         <Link
           href="/login"
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all duration-200 hover:text-primary hover:bg-accent hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
         >
           <Icons.dev className="h-4 w-4" />
           Login

@@ -105,37 +105,7 @@ export const MessageList: React.FC = () => {
           ))}
         </div>
         
-        {isProcessing && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="flex justify-start mt-4"
-          >
-            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 max-w-xs">
-              <div className="flex items-center space-x-3">
-                <div className="flex space-x-1">
-                  <motion.div
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
-                    className="w-2 h-2 bg-blue-500 rounded-full"
-                  />
-                  <motion.div
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
-                    className="w-2 h-2 bg-blue-500 rounded-full"
-                  />
-                  <motion.div
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
-                    className="w-2 h-2 bg-blue-500 rounded-full"
-                  />
-                </div>
-                <span className="text-sm text-gray-600">Agent is thinking...</span>
-              </div>
-            </div>
-          </motion.div>
-        )}
+        {isProcessing && <ThinkingIndicator type="thinking" />}
       </AnimatePresence>
       
       <div ref={messagesEndRef} className="h-4" />

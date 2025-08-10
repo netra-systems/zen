@@ -1,12 +1,12 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { examplePrompts } from '@/lib/examplePrompts';
 import { useChatStore } from '@/store/chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Send } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ChevronDown, Send, Sparkles, Zap, TrendingUp, Shield, Database, Brain } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Message } from '@/types/chat';
 
 export const ExamplePrompts: React.FC = () => {
@@ -31,40 +31,117 @@ export const ExamplePrompts: React.FC = () => {
     setIsOpen(false); // Collapse the panel after sending a prompt
   };
 
+  const getPromptIcon = (index: number) => {
+    const icons = [
+      <TrendingUp key="trending" className="w-5 h-5" />,
+      <Brain key="brain" className="w-5 h-5" />,
+      <Zap key="zap" className="w-5 h-5" />,
+      <Shield key="shield" className="w-5 h-5" />,
+      <Database key="database" className="w-5 h-5" />,
+      <Sparkles key="sparkles" className="w-5 h-5" />
+    ];
+    return icons[index % icons.length];
+  };
+
+  const getCardGradient = (index: number) => {
+    const gradients = [
+      'from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100',
+      'from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100',
+      'from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100',
+      'from-orange-50 to-red-50 hover:from-orange-100 hover:to-red-100',
+      'from-cyan-50 to-blue-50 hover:from-cyan-100 hover:to-blue-100',
+      'from-yellow-50 to-amber-50 hover:from-yellow-100 hover:to-amber-100'
+    ];
+    return gradients[index % gradients.length];
+  };
+
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full bg-gray-50 p-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-700">Example Prompts</h2>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full bg-gradient-to-b from-gray-50 to-white px-6 py-6">
+      <motion.div 
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="flex items-center justify-between mb-4"
+      >
+        <div className="flex items-center space-x-2">
+          <Sparkles className="w-5 h-5 text-purple-500" />
+          <h2 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            Quick Start Examples
+          </h2>
+        </div>
         <CollapsibleTrigger asChild>
-          <Button variant="ghost" size="sm" className="flex items-center">
-            <span className="mr-2">{isOpen ? 'Hide' : 'Show'}</span>
-            <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          <Button variant="ghost" size="sm" className="flex items-center hover:bg-gray-100 rounded-lg">
+            <span className="mr-2 text-sm font-medium">{isOpen ? 'Hide' : 'Show'}</span>
+            <motion.div
+              animate={{ rotate: isOpen ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ChevronDown className="w-4 h-4" />
+            </motion.div>
           </Button>
         </CollapsibleTrigger>
-      </div>
-      <CollapsibleContent className="mt-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {examplePrompts.map((prompt, index) => (
+      </motion.div>
+      
+      <AnimatePresence>
+        {isOpen && (
+          <CollapsibleContent forceMount>
             <motion.div
-              key={index}
-              whileHover={{ scale: 1.03 }}
-              transition={{ type: 'spring', stiffness: 300 }}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
             >
-              <Card
-                className="cursor-pointer h-full flex flex-col justify-between bg-white shadow-md hover:shadow-lg transition-shadow rounded-lg overflow-hidden"
-                onClick={() => handlePromptClick(prompt)}
-              >
-                <CardContent className="p-4">
-                  <p className="text-sm text-gray-700">{prompt}</p>
-                </CardContent>
-                <div className="p-2 bg-gray-100 flex justify-end">
-                  <Send className="w-4 h-4 text-blue-500" />
-                </div>
-              </Card>
+              {examplePrompts.map((prompt, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                >
+                  <Card
+                    className={`cursor-pointer h-full group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-gradient-to-br ${getCardGradient(index)}`}
+                    onClick={() => handlePromptClick(prompt)}
+                  >
+                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                    
+                    <CardContent className="p-5 flex flex-col h-full">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className={`p-2 rounded-lg bg-white/80 shadow-sm text-${['blue', 'purple', 'green', 'orange', 'cyan', 'yellow'][index % 6]}-600`}>
+                          {getPromptIcon(index)}
+                        </div>
+                        <motion.div
+                          className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          whileHover={{ scale: 1.1 }}
+                        >
+                          <Send className="w-4 h-4 text-gray-600" />
+                        </motion.div>
+                      </div>
+                      
+                      <p className="text-sm text-gray-700 font-medium leading-relaxed flex-grow">
+                        {prompt}
+                      </p>
+                      
+                      <div className="mt-3 pt-3 border-t border-gray-200/50">
+                        <span className="text-xs text-gray-500 flex items-center">
+                          <span className="mr-1">Click to send</span>
+                          <motion.span
+                            animate={{ x: [0, 2, 0] }}
+                            transition={{ duration: 1, repeat: Infinity }}
+                          >
+                            →
+                          </motion.span>
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
             </motion.div>
-          ))}
-        </div>
-      </CollapsibleContent>
+          </CollapsibleContent>
+        )}
+      </AnimatePresence>
     </Collapsible>
   );
 };

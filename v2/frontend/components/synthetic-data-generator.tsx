@@ -21,7 +21,7 @@ const workloadPatterns = [
   { value: "high_error_rate", label: "High Error Rate" },
 ];
 
-export default function SyntheticDataGenerator({ onGenerationComplete }) {
+export function SyntheticDataGenerator({ onGenerationComplete }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tables, setTables] = useState<string[]>([]);
@@ -38,7 +38,7 @@ export default function SyntheticDataGenerator({ onGenerationComplete }) {
   useEffect(() => {
     const fetchTables = async () => {
       try {
-        const response = await fetch("/api/generation/clickhouse_tables");
+        const response = await fetch("http://localhost:8000/api/generation/clickhouse_tables");
         if (!response.ok) throw new Error("Failed to fetch tables.");
         const data = await response.json();
         setTables(data);
@@ -68,7 +68,7 @@ export default function SyntheticDataGenerator({ onGenerationComplete }) {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/generation/synthetic_data", {
+      const response = await fetch("http://localhost:8000/api/generation/synthetic_data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(generationParams),
