@@ -11,7 +11,7 @@ from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 from app.redis_manager import redis_manager
-from app.agents.supervisor import SupervisorAgent
+from app.agents.supervisor_consolidated import SupervisorAgent
 from app.services.agent_service import AgentService
 
 class DemoService:

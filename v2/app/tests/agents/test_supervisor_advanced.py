@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from app.agents.supervisor import Supervisor
+from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.schemas import AgentMessage, WebSocketMessage, SubAgentLifecycle
 
 @pytest.mark.asyncio

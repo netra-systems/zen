@@ -179,10 +179,20 @@ python test_runner.py --mode quick
 python test_runner.py --mode comprehensive
 
 # AUTOMATED TEST IMPROVEMENT (achieves 97% coverage goal)
-python scripts/test_updater.py --execute-spec  # Run full test update specification
+python scripts/test_updater.py --execute-spec  # Run full test update specification with ultra-thinking
+python scripts/test_updater.py --ultra-think   # Enable ultra-thinking deep analysis
 python scripts/test_updater.py --monitor       # Track progress toward 97% goal
 python scripts/test_updater.py --daily-cycle   # Daily test improvements
 python scripts/test_updater.py --weekly-optimization  # Weekly optimization
+python scripts/test_updater.py --with-metadata # Include AI agent metadata tracking
+
+# AUTONOMOUS TEST REVIEW (ultra-thinking powered)
+python scripts/test_autonomous_review.py --auto           # Fully autonomous test improvement
+python scripts/test_autonomous_review.py --quick          # Quick test refresh (< 5 min)
+python scripts/test_autonomous_review.py --full-analysis  # Complete analysis with ultra-thinking
+python scripts/test_autonomous_review.py --smart-generate # Intelligently generate missing tests
+python scripts/test_autonomous_review.py --continuous     # Run continuous background review
+python scripts/test_autonomous_review.py --ultra-think    # Enable ultra-thinking capabilities
 
 # Test only authentication flows
 python scripts/test_backend.py --category auth

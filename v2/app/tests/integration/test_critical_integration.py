@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 import uuid
 from typing import Dict, Any
 
-from app.agents.supervisor import Supervisor
+from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.agents.base import BaseSubAgent
 from app.services.agent_service import AgentService
 from app.services.websocket.message_handler import BaseMessageHandler
