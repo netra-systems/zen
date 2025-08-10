@@ -182,7 +182,18 @@ describe('WebSocketService', () => {
       expect(webSocketService.getState()).toBe('connecting');
       
       await server.connected;
-      await new Promise(resolve => setTimeout(resolve, 0));
+      
+      // Wait for the onOpen callback to be executed
+      await new Promise(resolve => {
+        const checkState = () => {
+          if (webSocketService.getState() === 'connected' || onOpen.mock.calls.length > 0) {
+            resolve(undefined);
+          } else {
+            setTimeout(checkState, 10);
+          }
+        };
+        checkState();
+      });
       
       expect(webSocketService.getState()).toBe('connected');
       

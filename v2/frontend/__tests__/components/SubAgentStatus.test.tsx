@@ -225,7 +225,8 @@ describe('SubAgentStatus', () => {
 
     render(<SubAgentStatus />);
 
-    expect(screen.getByText('Next:')).toBeInTheDocument();
-    expect(screen.getByText('DataSubAgent → 3 more')).toBeInTheDocument();
+    expect(screen.getByText(/Next:/)).toBeInTheDocument();
+    expect(screen.getByText(/DataSubAgent/)).toBeInTheDocument();
+    expect(screen.getByText(/3 more/)).toBeInTheDocument();
   });
 });

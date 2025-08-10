@@ -54,6 +54,9 @@ class TestAgentE2ECritical:
         websocket_manager = Mock()
         websocket_manager.send_message = AsyncMock()
         websocket_manager.broadcast = AsyncMock()
+        websocket_manager.send_agent_log = AsyncMock()
+        websocket_manager.send_error = AsyncMock()
+        websocket_manager.send_sub_agent_update = AsyncMock()
         websocket_manager.active_connections = {}
         
         # Mock Tool Dispatcher

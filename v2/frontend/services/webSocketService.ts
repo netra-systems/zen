@@ -4,6 +4,11 @@ import { config } from '@/config';
 export type WebSocketStatus = 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
 export type WebSocketState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
 
+interface RateLimitConfig {
+  messages: number;
+  window: number;
+}
+
 interface WebSocketOptions {
   onOpen?: () => void;
   onMessage?: (message: any) => void;
@@ -13,6 +18,7 @@ interface WebSocketOptions {
   onBinaryMessage?: (data: ArrayBuffer) => void;
   onRateLimit?: () => void;
   heartbeatInterval?: number;
+  rateLimit?: RateLimitConfig;
 }
 
 class WebSocketService {
@@ -24,6 +30,7 @@ class WebSocketService {
   private reconnectTimer: NodeJS.Timeout | null = null;
   private heartbeatTimer: NodeJS.Timeout | null = null;
   private url: string = '';
+  private messageTimestamps: number[] = [];
 
   public onStatusChange: ((status: WebSocketStatus) => void) | null = null;
   public onMessage: ((message: WebSocketMessage) => void) | null = null;
@@ -142,6 +149,26 @@ class WebSocketService {
   }
 
   public send(message: any) {
+    // Check rate limit if configured
+    if (this.options.rateLimit) {
+      const now = Date.now();
+      const windowStart = now - this.options.rateLimit.window;
+      
+      // Remove timestamps outside the window
+      this.messageTimestamps = this.messageTimestamps.filter(ts => ts > windowStart);
+      
+      // Check if we've exceeded the rate limit
+      if (this.messageTimestamps.length >= this.options.rateLimit.messages) {
+        this.options.onRateLimit?.();
+        // Queue the message instead of dropping it
+        this.messageQueue.push(message);
+        return;
+      }
+      
+      // Add current timestamp
+      this.messageTimestamps.push(now);
+    }
+    
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
