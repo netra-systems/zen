@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Auth</title>
+</head>
+<body>
+    <h1>Testing Authentication</h1>
+    <button onclick="clearStorage()">Clear Storage and Reload</button>
+    <button onclick="window.location.href='http://localhost:52563'">Go to App</button>
+    <pre id="status"></pre>
+    
+    <script>
+        function clearStorage() {
+            localStorage.clear();
+            sessionStorage.clear();
+            document.getElementById('status').textContent = 'Storage cleared!';
+            setTimeout(() => {
+                window.location.href = 'http://localhost:52563';
+            }, 1000);
+        }
+        
+        // Display current storage
+        document.getElementById('status').textContent = 
+            'jwt_token: ' + (localStorage.getItem('jwt_token') || 'none') + '\n' +
+            'dev_logout_flag: ' + (localStorage.getItem('dev_logout_flag') || 'none');
+    </script>
+</body>
+</html>

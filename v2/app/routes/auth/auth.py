@@ -43,16 +43,19 @@ class AuthRoutes:
         Returns the authentication configuration.
         This endpoint is used by the frontend to determine how to behave.
         """
+        # Use the actual request URL to build endpoints (handles dynamic ports)
+        base_url = str(request.base_url).rstrip('/')
+        
         return AuthConfigResponse(
             development_mode=settings.environment == "development",
             google_client_id=settings.oauth_config.client_id,
             endpoints=AuthEndpoints(
-                login=f"{settings.api_base_url}/api/auth/login",
-                logout=f"{settings.api_base_url}/api/auth/logout",
-                callback=f"{settings.api_base_url}/api/auth/callback",
-                token=f"{settings.api_base_url}/api/auth/token",
-                user=f"{settings.api_base_url}/api/users/me",
-                dev_login=f"{settings.api_base_url}/api/auth/dev_login",
+                login=f"{base_url}/api/auth/login",
+                logout=f"{base_url}/api/auth/logout",
+                callback=f"{base_url}/api/auth/callback",
+                token=f"{base_url}/api/auth/token",
+                user=f"{base_url}/api/users/me",
+                dev_login=f"{base_url}/api/auth/dev_login",
             ),
             authorized_javascript_origins=settings.oauth_config.authorized_javascript_origins,
             authorized_redirect_uris=settings.oauth_config.authorized_redirect_uris,

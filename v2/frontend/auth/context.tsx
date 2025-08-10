@@ -62,9 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else if (data.development_mode) {
         // Check if user explicitly logged out in dev mode
         const hasLoggedOut = authService.getDevLogoutFlag();
+        console.log('Development mode detected. Has logged out:', hasLoggedOut);
         
         if (!hasLoggedOut) {
           // Only auto-login if user hasn't explicitly logged out
+          console.log('Attempting auto dev login...');
           const devLoginResponse = await authService.handleDevLogin(data);
           if (devLoginResponse) {
             setToken(devLoginResponse.access_token);
@@ -73,6 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Sync with Zustand store
             syncAuthStore(decodedUser, devLoginResponse.access_token);
           }
+        } else {
+          console.log('Skipping auto dev login - user has logged out');
         }
       }
     } catch (error) {

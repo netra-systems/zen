@@ -10,7 +10,16 @@ class ServiceDiscovery:
     
     def __init__(self, base_dir: Optional[Path] = None):
         """Initialize service discovery manager."""
-        self.base_dir = base_dir or Path(".netra")
+        # Find project root (parent of scripts directory)
+        if base_dir is None:
+            current_file = Path(__file__).resolve()
+            if current_file.parent.name == 'scripts':
+                project_root = current_file.parent.parent
+            else:
+                project_root = current_file.parent
+            base_dir = project_root / ".netra"
+        
+        self.base_dir = base_dir
         self.base_dir.mkdir(exist_ok=True)
     
     def read_backend_info(self) -> Optional[Dict[str, Any]]:

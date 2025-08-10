@@ -627,8 +627,8 @@ class DevLauncher:
         backend_info = self.service_discovery.read_backend_info()
         if backend_info:
             self._print("\n⏳", "WAIT", "Waiting for backend to be ready...")
-            # Use /health/ready endpoint for readiness check
-            backend_url = f"{backend_info['api_url']}/health/ready"
+            # Use /health/live endpoint for liveness check (more reliable in dev)
+            backend_url = f"{backend_info['api_url']}/health/live"
             if self.wait_for_service(backend_url, timeout=30):
                 self._print("✅", "OK", "Backend is ready")
             else:
