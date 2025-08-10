@@ -230,8 +230,8 @@ if settings.environment == "production":
     # In production, only allow specific origins
     allowed_origins = settings.cors_origins.split(",") if settings.cors_origins else ["https://netra.ai"]
 else:
-    # In development, allow localhost origins
-    allowed_origins = ["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000"]
+    # In development, allow all origins (supports dynamic ports from dev launcher)
+    allowed_origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
