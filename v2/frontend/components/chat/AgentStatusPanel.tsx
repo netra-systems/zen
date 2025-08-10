@@ -315,7 +315,7 @@ const AgentStatusPanel: React.FC = () => {
                         {Object.entries(item).map(([key, value]) => (
                           <div key={key} className="ml-2">
                             <span className="text-gray-500">{key}:</span>{' '}
-                            <span className="text-green-400">{value}</span>
+                            <span className="text-green-400">{String(value)}</span>
                           </div>
                         ))}
                       </div>
