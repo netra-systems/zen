@@ -135,16 +135,22 @@ class DevLauncher:
         # Check Google Cloud SDK if secrets loading is requested
         if self.load_secrets:
             # Check if fetch_secrets_to_env.py exists
+            # Try both current directory and parent directory
             fetch_script = Path("fetch_secrets_to_env.py")
             if not fetch_script.exists():
-                errors.append("❌ fetch_secrets_to_env.py not found in project root")
+                fetch_script = Path(__file__).parent.parent / "fetch_secrets_to_env.py"
+                if not fetch_script.exists():
+                    errors.append("❌ fetch_secrets_to_env.py not found in project root")
             
             # Check for project ID
             if not self.project_id and not os.environ.get('GOOGLE_CLOUD_PROJECT'):
                 errors.append("❌ Google Cloud project ID not specified. Use --project-id or set GOOGLE_CLOUD_PROJECT env var")
         
         # Check if frontend directory exists
+        # Try both current directory and parent directory
         frontend_dir = Path("frontend")
+        if not frontend_dir.exists():
+            frontend_dir = Path(__file__).parent.parent / "frontend"
         if not frontend_dir.exists():
             errors.append("❌ Frontend directory not found")
         else:
@@ -174,9 +180,14 @@ class DevLauncher:
             port = self.backend_port or 8000
         
         # Build command
+        # Find run_server.py in the parent directory
+        run_server_path = Path("run_server.py")
+        if not run_server_path.exists():
+            run_server_path = Path(__file__).parent.parent / "run_server.py"
+        
         cmd = [
             sys.executable,
-            "run_server.py",
+            str(run_server_path),
             "--port", str(port)
         ]
         
@@ -252,14 +263,19 @@ class DevLauncher:
         npm_command = "dev"
         
         # Build command based on OS - avoid shell=True with arguments to prevent deprecation warning
+        # Determine frontend path
+        frontend_path = Path("frontend")
+        if not frontend_path.exists():
+            frontend_path = Path(__file__).parent.parent / "frontend"
+        
         if sys.platform == "win32":
             # Windows - use node directly without shell
             cmd = ["node", "scripts/start_with_discovery.js", npm_command]
-            cwd_path = "frontend"
+            cwd_path = str(frontend_path)
         else:
             # Unix-like - use node directly without shell
             cmd = ["node", "scripts/start_with_discovery.js", npm_command]
-            cwd_path = "frontend"
+            cwd_path = str(frontend_path)
         
         if self.verbose:
             print(f"   Command: {' '.join(cmd)}")
@@ -379,7 +395,12 @@ class DevLauncher:
             print(f"   Project ID: {project_id}")
             
             # Build command
-            cmd = [sys.executable, "fetch_secrets_to_env.py"]
+            # Find fetch_secrets_to_env.py
+            fetch_script = Path("fetch_secrets_to_env.py")
+            if not fetch_script.exists():
+                fetch_script = Path(__file__).parent.parent / "fetch_secrets_to_env.py"
+            
+            cmd = [sys.executable, str(fetch_script)]
             
             # Set environment
             env = os.environ.copy()
@@ -396,7 +417,10 @@ class DevLauncher:
             if result.returncode == 0:
                 self._print("✅", "OK", "Secrets loaded successfully")
                 # Load the created .env file into current environment
+                # Try both current directory and parent directory
                 env_file = Path(".env")
+                if not env_file.exists():
+                    env_file = Path(__file__).parent.parent / ".env"
                 if env_file.exists():
                     with open(env_file, 'r') as f:
                         for line in f:
