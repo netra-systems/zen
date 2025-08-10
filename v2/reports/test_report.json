@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-08-10T06:16:07.056550",
+  "configuration": {
+    "mode": "comprehensive",
+    "backend_only": false,
+    "frontend_only": false,
+    "backend_args": null,
+    "frontend_args": null,
+    "parallel": false,
+    "no_report": false,
+    "verbose": false
+  },
+  "results": {
+    "backend": {
+      "status": "failed",
+      "duration": 0.14383888244628906,
+      "exit_code": 2
+    },
+    "frontend": {
+      "status": "failed",
+      "duration": 0.10760235786437988,
+      "exit_code": 1
+    },
+    "overall": {
+      "status": "pending",
+      "start_time": 1754831766.8051095,
+      "end_time": 1754831767.0565507
+    }
+  },
+  "summary": {
+    "total_duration": 0.25144124031066895,
+    "backend_passed": false,
+    "frontend_passed": false,
+    "overall_passed": false
+  }
+}

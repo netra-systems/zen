@@ -8,6 +8,22 @@ Netra AI Optimization Platform - The world's best, highest quality, most intelli
 
 ## Essential Commands
 
+### Quick Test Commands (Most Commonly Used)
+```bash
+# RECOMMENDED: Run quick tests before any commit
+python test_runner.py --mode quick
+
+# Run specific category of tests
+python scripts/test_backend.py --category unit    # Backend unit tests
+python scripts/test_frontend.py --category components  # Frontend component tests
+
+# Run with coverage
+python test_runner.py --mode comprehensive
+
+# Run failed tests first (after fixing issues)
+python scripts/test_backend.py --failed-first
+```
+
 ### Specifications
 XML specifications are in `SPEC/*.xml`
 
@@ -40,17 +56,127 @@ npm run lint     # Run linter
 ```
 
 ### Testing
-```bash
-# Backend tests
-pytest                    # Run all tests
-pytest tests/test_auth.py # Run specific test file
-pytest -k "test_login"    # Run tests matching pattern
 
-# Frontend
+#### Quick Start - Unified Test Runner
+```bash
+# Run quick smoke tests (< 1 minute)
+python test_runner.py --mode quick
+
+# Run standard test suite (~ 5 minutes)
+python test_runner.py --mode standard
+
+# Run comprehensive tests with coverage (~ 10 minutes)
+python test_runner.py --mode comprehensive
+
+# Full CI/CD pipeline (~ 15 minutes)
+python test_runner.py --mode ci --parallel
+```
+
+#### Backend Testing
+```bash
+# Using the comprehensive backend test runner
+python scripts/test_backend.py                  # Run all backend tests
+python scripts/test_backend.py --category unit  # Run unit tests only
+python scripts/test_backend.py --category agent # Run agent tests
+python scripts/test_backend.py --coverage       # Run with coverage reporting
+python scripts/test_backend.py --parallel auto  # Run tests in parallel
+python scripts/test_backend.py --fail-fast      # Stop on first failure
+
+# Test categories available:
+# - smoke: Quick health checks
+# - unit: Unit tests for services and utilities
+# - integration: API endpoint tests
+# - agent: Agent system tests
+# - websocket: WebSocket connection tests
+# - auth: Authentication tests
+# - database: Database repository tests
+# - critical: Critical path tests
+
+# Direct pytest usage (fallback)
+pytest                                # Run all tests
+pytest app/tests/test_auth.py       # Run specific test file
+pytest -k "test_login"               # Run tests matching pattern
+pytest --cov=app --cov-report=html  # Generate coverage report
+```
+
+#### Frontend Testing
+```bash
+# Using the comprehensive frontend test runner
+python scripts/test_frontend.py                    # Run all Jest tests
+python scripts/test_frontend.py --category components  # Test components only
+python scripts/test_frontend.py --coverage        # Run with coverage
+python scripts/test_frontend.py --lint            # Run ESLint
+python scripts/test_frontend.py --type-check      # TypeScript checking
+python scripts/test_frontend.py --e2e             # Run Cypress E2E tests
+python scripts/test_frontend.py --cypress-open    # Open Cypress GUI
+
+# Test categories available:
+# - smoke: Quick critical tests
+# - unit: Unit tests
+# - components: Component tests
+# - hooks: React hooks tests
+# - store: State management tests
+# - websocket: WebSocket provider tests
+# - auth: Authentication flow tests
+# - e2e: End-to-end Cypress tests
+
+# Direct npm usage (fallback)
 cd frontend
-npm test                  # Jest tests
-npm run cypress:open      # Interactive Cypress tests
-npm run cy:run           # Headless Cypress tests
+npm test                  # Run Jest tests
+npm run lint             # Run ESLint
+npm run cypress:open     # Interactive Cypress
+npm run cy:run          # Headless Cypress tests
+```
+
+#### Test Configurations
+
+##### Coverage Requirements
+- Backend minimum coverage: 70%
+- Frontend minimum coverage: 60%
+- Coverage reports: `reports/coverage/html/index.html`
+
+##### Environment Setup
+Tests automatically configure these environment variables:
+- `TESTING=1`
+- `DATABASE_URL=sqlite+aiosqlite:///:memory:`
+- `REDIS_URL=redis://localhost:6379/1`
+- `SECRET_KEY=test-secret-key-for-testing-only`
+
+##### Test Reports
+After running tests, find reports in:
+- `reports/test_report.json` - JSON test results
+- `reports/test_report.md` - Markdown summary
+- `reports/coverage/` - Backend coverage reports
+- `reports/frontend-coverage/` - Frontend coverage reports
+- `reports/tests/` - Detailed test reports
+
+#### Common Testing Tasks
+
+```bash
+# Quick validation before commit
+python test_runner.py --mode quick
+
+# Full test suite with coverage
+python test_runner.py --mode comprehensive
+
+# Test only authentication flows
+python scripts/test_backend.py --category auth
+python scripts/test_frontend.py --category auth
+
+# Test agent system
+python scripts/test_backend.py --category agent
+
+# Run failed tests first
+python scripts/test_backend.py --failed-first
+
+# Debug specific test
+pytest app/tests/test_main.py::test_specific_function -vv
+
+# Update Jest snapshots
+python scripts/test_frontend.py --update-snapshots
+
+# Run tests in watch mode (development)
+python scripts/test_frontend.py --watch
 ```
 
 ## Architecture Overview

@@ -64,36 +64,65 @@ gcloud services enable secretmanager.googleapis.com
     ┌──────────────▼────┐  ┌─────▼──────────────┐
     │  Cloud Run        │  │  Cloud Run         │
     │  Frontend         │  │  Backend           │
-    │  (1 instance)     │  │  (2 instances)     │
-    │  ($30/month)      │  │  ($80/month)       │
+    │  (Next.js)        │  │  (FastAPI)         │
+    │  1-3 instances    │  │  4GB RAM/2CPU      │
+    │  ($40/month)      │  │  ($120/month)      │
     └───────────────────┘  └────────────────────┘
+                   │              │
+                   │    ┌─────────▼──────────┐
+                   │    │  WebSocket         │
+                   │    │  Connections       │
+                   │    │  (Real-time)       │
+                   │    └────────────────────┘
                    │              │
     ┌──────────────▼──────────────▼─────────────┐
     │         Cloud SQL PostgreSQL              │
-    │         (db-f1-micro, 20GB)              │
-    │           ($40/month)                     │
-    └────────────────────────────────────────────┘
-                   │
-    ┌──────────────▼─────────────────────────────┐
-    │         Memorystore Redis                  │
-    │         (Setup separately)                 │
-    │         (Not included in budget)           │
-    └─────────────────────────────────────────────┘
+    │         (db-custom-2-7680, 50GB SSD)     │
+    │         Connection pooling enabled        │
+    │           ($80/month)                     │
+    └──────────┬─────────────────────────────────┘
+               │
+    ┌──────────▼─────────────────────────────┐
+    │         Memorystore Redis              │
+    │         (1GB basic tier)               │
+    │         Session & Cache Management     │
+    │           ($50/month)                  │
+    └────────────────────────────────────────┘
+               │
+    ┌──────────▼─────────────────────────────┐
+    │         Multi-Agent System             │
+    │  ┌─────────────┐ ┌─────────────────┐   │
+    │  │ Supervisor  │ │ Apex Optimizer  │   │
+    │  │ Agent       │ │ Agent (30+ tools│   │
+    │  └─────────────┘ └─────────────────┘   │
+    │  ┌─────────────┐ ┌─────────────────┐   │
+    │  │ Triage      │ │ Data Analysis   │   │
+    │  │ Sub-Agent   │ │ Sub-Agent       │   │
+    │  └─────────────┘ └─────────────────┘   │
+    └────────────────────────────────────────┘
+               │
+    ┌──────────▼─────────────────────────────┐
+    │      Optional: ClickHouse              │
+    │      (Analytics - Deploy later)        │
+    │      (Not included in base budget)     │
+    └────────────────────────────────────────┘
 ```
 
 ## Cost Breakdown
 
 | Service | Configuration | Monthly Cost |
 |---------|--------------|--------------|
-| Cloud Run (Backend) | 2 instances, 1 vCPU, 2GB RAM | $80 |
-| Cloud Run (Frontend) | 1 instance, 0.5 vCPU, 1GB RAM | $30 |
-| Cloud SQL PostgreSQL | db-f1-micro, 20GB SSD | $40 |
-| Cloud Load Balancing | HTTP(S) Load Balancer | $20 |
-| Container Registry | 10GB storage | $5 |
-| Cloud Storage | 50GB for backups | $5 |
-| Logging & Monitoring | Basic tier | $20 |
-| **Subtotal** | | **$200/month** |
-| **Buffer for scaling** | | **$800/month** |
+| Cloud Run (Backend) | 4GB RAM, 2 vCPU, WebSocket support | $120 |
+| Cloud Run (Frontend) | 1GB RAM, 1 vCPU, 1-3 instances | $40 |
+| Cloud SQL PostgreSQL | db-custom-2-7680, 50GB SSD, connection pooling | $80 |
+| Memorystore Redis | 1GB basic tier for sessions/cache | $50 |
+| Cloud Load Balancing | HTTP(S) LB with WebSocket support | $25 |
+| Container Registry | 20GB storage for multi-stage builds | $8 |
+| Cloud Storage | 100GB for backups and logs | $10 |
+| Secret Manager | Environment variables and API keys | $5 |
+| Logging & Monitoring | Agent execution and WebSocket metrics | $30 |
+| **Subtotal** | | **$368/month** |
+| **Buffer for scaling & ClickHouse** | | **$632/month** |
 | **Total Budget** | | **$1,000/month** |
 
 ## Step 1: Create Terraform Configuration (2 minutes)
@@ -149,7 +178,10 @@ resource "google_project_service" "apis" {
     "sqladmin.googleapis.com",
     "cloudrun.googleapis.com",
     "artifactregistry.googleapis.com",
-    "secretmanager.googleapis.com"
+    "secretmanager.googleapis.com",
+    "redis.googleapis.com",
+    "logging.googleapis.com",
+    "monitoring.googleapis.com"
   ])
   
   service = each.value
@@ -164,23 +196,29 @@ resource "google_artifact_registry_repository" "main" {
   description   = "Docker repository for Netra containers"
 }
 
-# Cloud SQL PostgreSQL Instance (Budget-optimized)
+# Cloud SQL PostgreSQL Instance (Agent-optimized)
 resource "google_sql_database_instance" "postgres" {
   name             = "netra-postgres-${random_id.db_name_suffix.hex}"
-  database_version = "POSTGRES_14"
+  database_version = "POSTGRES_15"
   region           = var.region
 
   settings {
-    tier = "db-f1-micro"  # Smallest instance for budget
+    tier = "db-custom-2-7680"  # 2 vCPU, 7.5GB RAM for agent workloads
     
-    disk_size = 20  # 20GB minimum
+    disk_size = 50  # 50GB for agent state and logs
     disk_type = "PD_SSD"
+    disk_autoresize = true
+    disk_autoresize_limit = 100
     
     backup_configuration {
       enabled                        = true
       start_time                     = "03:00"
       location                       = var.region
-      point_in_time_recovery_enabled = false  # Disabled to save costs
+      point_in_time_recovery_enabled = true  # Required for production
+      backup_retention_settings {
+        retained_backups = 7
+        retention_unit   = "COUNT"
+      }
     }
 
     ip_configuration {
@@ -195,7 +233,17 @@ resource "google_sql_database_instance" "postgres" {
 
     database_flags {
       name  = "max_connections"
-      value = "50"
+      value = "100"  # Increased for agent system
+    }
+    
+    database_flags {
+      name  = "shared_preload_libraries"
+      value = "pg_stat_statements"  # Enable query monitoring
+    }
+    
+    database_flags {
+      name  = "work_mem"
+      value = "64MB"  # Optimized for agent operations
     }
   }
 
@@ -238,6 +286,7 @@ resource "google_secret_manager_secret_version" "db_password" {
   secret_data = random_password.db_password.result
 }
 
+# Additional secrets for OAuth and API keys
 resource "google_secret_manager_secret" "jwt_secret" {
   secret_id = "netra-jwt-secret"
   
@@ -256,7 +305,55 @@ resource "random_password" "jwt_secret" {
   special = false
 }
 
-# Cloud Run Service - Backend
+# OAuth secrets
+resource "google_secret_manager_secret" "google_client_id" {
+  secret_id = "netra-google-client-id"
+  
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret" "google_client_secret" {
+  secret_id = "netra-google-client-secret"
+  
+  replication {
+    auto {}
+  }
+}
+
+# API keys
+resource "google_secret_manager_secret" "anthropic_api_key" {
+  secret_id = "netra-anthropic-api-key"
+  
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret" "openai_api_key" {
+  secret_id = "netra-openai-api-key"
+  
+  replication {
+    auto {}
+  }
+}
+
+# Memorystore Redis for sessions and caching
+resource "google_redis_instance" "cache" {
+  name           = "netra-redis"
+  tier           = "BASIC"
+  memory_size_gb = 1
+  region         = var.region
+  
+  redis_version     = "REDIS_7_0"
+  display_name      = "Netra Redis Cache"
+  reserved_ip_range = "10.0.0.0/29"
+  
+  auth_enabled = true
+}
+
+# Cloud Run Service - Backend (Agent-optimized)
 resource "google_cloud_run_service" "backend" {
   name     = "netra-backend"
   location = var.region
@@ -268,18 +365,30 @@ resource "google_cloud_run_service" "backend" {
         
         resources {
           limits = {
-            cpu    = "1"
-            memory = "2Gi"
+            cpu    = "2"    # Increased for agent processing
+            memory = "4Gi"  # Required for multi-agent system
           }
         }
         
+        ports {
+          container_port = 8000
+        }
+        
+        # Database configuration
         env {
           name  = "DATABASE_URL"
           value = "postgresql://${google_sql_user.main.name}:${random_password.db_password.result}@${google_sql_database_instance.postgres.public_ip_address}:5432/${google_sql_database.main.name}"
         }
         
+        # Redis configuration
         env {
-          name = "JWT_SECRET_KEY"
+          name  = "REDIS_URL"
+          value = "redis://:${google_redis_instance.cache.auth_string}@${google_redis_instance.cache.host}:${google_redis_instance.cache.port}"
+        }
+        
+        # Authentication secrets
+        env {
+          name = "SECRET_KEY"
           value_from {
             secret_key_ref {
               name = google_secret_manager_secret.jwt_secret.secret_id
@@ -289,18 +398,96 @@ resource "google_cloud_run_service" "backend" {
         }
         
         env {
-          name  = "REDIS_URL"
-          value = "redis://redis-standalone:6379"  # Update with actual Redis URL
+          name = "GOOGLE_CLIENT_ID"
+          value_from {
+            secret_key_ref {
+              name = google_secret_manager_secret.google_client_id.secret_id
+              key  = "latest"
+            }
+          }
+        }
+        
+        env {
+          name = "GOOGLE_CLIENT_SECRET"
+          value_from {
+            secret_key_ref {
+              name = google_secret_manager_secret.google_client_secret.secret_id
+              key  = "latest"
+            }
+          }
+        }
+        
+        # API Keys
+        env {
+          name = "ANTHROPIC_API_KEY"
+          value_from {
+            secret_key_ref {
+              name = google_secret_manager_secret.anthropic_api_key.secret_id
+              key  = "latest"
+            }
+          }
+        }
+        
+        env {
+          name = "OPENAI_API_KEY"
+          value_from {
+            secret_key_ref {
+              name = google_secret_manager_secret.openai_api_key.secret_id
+              key  = "latest"
+            }
+          }
+        }
+        
+        # Application configuration
+        env {
+          name  = "ENVIRONMENT"
+          value = "production"
+        }
+        
+        env {
+          name  = "LOG_LEVEL"
+          value = "INFO"
+        }
+        
+        env {
+          name  = "FRONTEND_URL"
+          value = "https://netra-frontend-${random_id.db_name_suffix.hex}-${data.google_client_config.default.region}-${data.google_client_config.default.project}.a.run.app"
+        }
+        
+        env {
+          name  = "CORS_ORIGINS"
+          value = "https://netra-frontend-${random_id.db_name_suffix.hex}-${data.google_client_config.default.region}-${data.google_client_config.default.project}.a.run.app,http://localhost:3000"
+        }
+        
+        # Health check configuration
+        liveness_probe {
+          http_get {
+            path = "/health/live"
+          }
+          initial_delay_seconds = 30
+          period_seconds = 10
+        }
+        
+        readiness_probe {
+          http_get {
+            path = "/health/ready"
+          }
+          initial_delay_seconds = 10
+          period_seconds = 5
         }
       }
       
+      # WebSocket configuration
+      timeout_seconds = 300  # 5 minutes for long-running agent operations
       service_account_name = google_service_account.cloudrun.email
     }
     
     metadata {
       annotations = {
         "autoscaling.knative.dev/minScale" = "1"
-        "autoscaling.knative.dev/maxScale" = "5"
+        "autoscaling.knative.dev/maxScale" = "10"
+        "run.googleapis.com/execution-environment" = "gen2"
+        "run.googleapis.com/cpu-throttling" = "false"  # Always-on CPU for WebSocket
       }
     }
   }
@@ -310,8 +497,11 @@ resource "google_cloud_run_service" "backend" {
     latest_revision = true
   }
   
-  depends_on = [google_project_service.apis]
+  depends_on = [google_project_service.apis, google_redis_instance.cache]
 }
+
+# Data source for current config
+data "google_client_config" "default" {}
 
 # Cloud Run Service - Frontend
 resource "google_cloud_run_service" "frontend" {
@@ -338,6 +528,26 @@ resource "google_cloud_run_service" "frontend" {
         env {
           name  = "NEXT_PUBLIC_WS_URL"
           value = replace(google_cloud_run_service.backend.status[0].url, "https", "wss")
+        }
+        
+        env {
+          name  = "NEXT_PUBLIC_ENVIRONMENT"
+          value = "production"
+        }
+        
+        env {
+          name  = "NEXTAUTH_URL"
+          value = "https://netra-frontend-${random_id.db_name_suffix.hex}-${data.google_client_config.default.region}-${data.google_client_config.default.project}.a.run.app"
+        }
+        
+        env {
+          name = "NEXTAUTH_SECRET"
+          value_from {
+            secret_key_ref {
+              name = google_secret_manager_secret.jwt_secret.secret_id
+              key  = "latest"
+            }
+          }
         }
       }
       
@@ -435,6 +645,16 @@ output "artifact_registry" {
   value = "${var.region}-docker.pkg.dev/${var.project_id}/netra-containers"
   description = "Container registry URL"
 }
+
+output "redis_host" {
+  value = google_redis_instance.cache.host
+  description = "Redis instance host"
+}
+
+output "websocket_url" {
+  value = replace(google_cloud_run_service.backend.status[0].url, "https", "wss")
+  description = "WebSocket connection URL"
+}
 ```
 
 Create `terraform.tfvars`:
@@ -471,14 +691,13 @@ gcloud auth configure-docker ${REGION}-docker.pkg.dev
 # Get the registry URL from terraform output
 export REGISTRY=$(terraform output -raw artifact_registry)
 
-# Build and push Backend
+# Build and push Backend (Multi-stage build)
 cd ../  # Go to project root
-docker build -f Dockerfile.backend -t ${REGISTRY}/backend:latest .
+docker build -f Dockerfile -t ${REGISTRY}/backend:latest --target backend .
 docker push ${REGISTRY}/backend:latest
 
-# Build and push Frontend
-cd frontend
-docker build -t ${REGISTRY}/frontend:latest .
+# Build and push Frontend (Multi-stage build)
+docker build -f Dockerfile -t ${REGISTRY}/frontend:latest --target frontend .
 docker push ${REGISTRY}/frontend:latest
 
 # Update Cloud Run services with new images
@@ -491,41 +710,162 @@ gcloud run deploy netra-frontend \
   --region ${REGION}
 ```
 
-## Step 4: Database Setup (1 minute)
+## Step 4: Database Setup and Migrations (2 minutes)
 
 ```bash
 # Get database connection info
 export DB_IP=$(terraform output -raw database_ip)
 export DB_PASSWORD=$(gcloud secrets versions access latest --secret="netra-db-password")
 
-# Connect to database and run migrations
+# Connect to database and setup extensions
 gcloud sql connect netra-postgres-* --user=netra_user
 
-# In the SQL prompt, create initial schema
+# In the SQL prompt, create extensions and initial setup
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
 CREATE SCHEMA IF NOT EXISTS public;
+\q
 
-# Exit SQL prompt and run migrations
+# Run Alembic migrations
 cd ../  # Go to project root
 DATABASE_URL="postgresql://netra_user:${DB_PASSWORD}@${DB_IP}:5432/netra" \
-  python run_migrations.py
+  python -m alembic upgrade head
+
+# Create initial admin user (optional)
+DATABASE_URL="postgresql://netra_user:${DB_PASSWORD}@${DB_IP}:5432/netra" \
+  python create_initial_user.py
 ```
 
-## Step 5: Verify Deployment (1 minute)
+## Step 5: Verify Deployment (2 minutes)
 
 ```bash
 # Get URLs
 export FRONTEND_URL=$(terraform output -raw frontend_url)
 export BACKEND_URL=$(terraform output -raw backend_url)
+export WEBSOCKET_URL=$(terraform output -raw websocket_url)
 
-# Test backend health
-curl ${BACKEND_URL}/health
+# Test backend health endpoints
+curl ${BACKEND_URL}/health/live
+curl ${BACKEND_URL}/health/ready
+
+# Test authentication endpoint
+curl ${BACKEND_URL}/api/auth/status
 
 # Test frontend
-curl ${FRONTEND_URL}
+curl -I ${FRONTEND_URL}
+
+# Test WebSocket connection (using wscat if available)
+# npm install -g wscat
+# wscat -c "${WEBSOCKET_URL}/ws"
 
 # Open in browser
 echo "Frontend: ${FRONTEND_URL}"
 echo "Backend API: ${BACKEND_URL}"
+echo "WebSocket: ${WEBSOCKET_URL}/ws"
+echo "Redis Host: $(terraform output -raw redis_host)"
+echo "Database IP: ${DB_IP}"
+
+# Save deployment info
+cat > deployment-urls.txt << EOF
+Deployment Information
+====================
+Frontend URL: ${FRONTEND_URL}
+Backend API: ${BACKEND_URL}
+WebSocket URL: ${WEBSOCKET_URL}/ws
+Database IP: ${DB_IP}
+Redis Host: $(terraform output -raw redis_host)
+Project ID: ${PROJECT_ID}
+Region: ${REGION}
+
+Next Steps:
+1. Configure OAuth in Google Console
+2. Add API keys to Secret Manager
+3. Test WebSocket connections
+4. Monitor agent system health
+EOF
+
+echo "Deployment information saved to deployment-urls.txt"
+```
+
+## Step 6: Configure OAuth Setup (3 minutes)
+
+```bash
+# Set up Google OAuth credentials
+# 1. Go to Google Cloud Console -> APIs & Services -> Credentials
+# 2. Create OAuth 2.0 Client ID
+# 3. Add authorized redirect URIs:
+#    - ${FRONTEND_URL}/auth/callback/google
+#    - http://localhost:3000/auth/callback/google (for development)
+
+# Store OAuth credentials in Secret Manager
+gcloud secrets versions add netra-google-client-id --data-file=- <<< "YOUR_GOOGLE_CLIENT_ID"
+gcloud secrets versions add netra-google-client-secret --data-file=- <<< "YOUR_GOOGLE_CLIENT_SECRET"
+
+# Store API keys
+gcloud secrets versions add netra-anthropic-api-key --data-file=- <<< "YOUR_ANTHROPIC_API_KEY"
+gcloud secrets versions add netra-openai-api-key --data-file=- <<< "YOUR_OPENAI_API_KEY"
+
+# Restart services to pick up new environment variables
+gcloud run deploy netra-backend --region=${REGION} --update-env-vars="RESTART=$(date +%s)"
+gcloud run deploy netra-frontend --region=${REGION} --update-env-vars="RESTART=$(date +%s)"
+```
+
+## Step 7: WebSocket Testing and Verification (1 minute)
+
+```bash
+# Install WebSocket testing tool
+npm install -g wscat
+
+# Test WebSocket connection
+echo "Testing WebSocket connection..."
+wscat -c "${WEBSOCKET_URL}/ws" -w 5000 <<EOF
+{"type": "ping", "data": {}}
+EOF
+
+# Expected response: {"type": "pong", "data": {}}
+
+# Test agent interaction via WebSocket
+wscat -c "${WEBSOCKET_URL}/ws" <<EOF
+{
+  "type": "agent_message",
+  "data": {
+    "message": "Hello, test the agent system",
+    "thread_id": "test-thread-123"
+  }
+}
+EOF
+
+# Monitor WebSocket logs
+gcloud logging read "resource.type=cloud_run_revision \
+  AND resource.labels.service_name=netra-backend \
+  AND textPayload:websocket" \
+  --limit 20
+```
+
+## Step 8: Agent System Configuration (2 minutes)
+
+```bash
+# Verify agent system health
+curl ${BACKEND_URL}/api/agents/health
+
+# Test supervisor agent
+curl -X POST ${BACKEND_URL}/api/agents/supervisor/test \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Test agent orchestration"}'
+
+# Check available sub-agents
+curl ${BACKEND_URL}/api/agents/available
+
+# Monitor agent execution metrics
+gcloud logging read "resource.type=cloud_run_revision \
+  AND resource.labels.service_name=netra-backend \
+  AND (textPayload:agent OR textPayload:supervisor)" \
+  --limit 30
+
+# Configure agent timeout settings (if needed)
+gcloud run services update netra-backend \
+  --update-env-vars="AGENT_TIMEOUT=300,WEBSOCKET_HEARTBEAT=30" \
+  --region=${REGION}
 ```
 
 ## Monitoring & Logs

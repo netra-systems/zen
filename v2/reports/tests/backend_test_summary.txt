@@ -1,0 +1,16 @@
+
+tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_1_complete_agent_lifecycle_request_to_completion FAILED [  0%]
+tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_2_websocket_real_time_streaming FAILED [  0%]
+tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_3_supervisor_orchestration_logic FAILED [  0%]
+tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_4_tool_dispatcher_integration PASSED [  0%]
+tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_5_state_persistence_and_recovery FAILED [  1%]
+tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_6_error_handling_and_recovery FAILED [  1%]
+tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_7_authentication_and_authorization FAILED [  1%]
+tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_8_multi_agent_collaboration FAILED [  1%]
+tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_9_concurrent_request_handling PASSED [  1%]
+tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_10_performance_and_timeout_handling FAILED [  2%]
+tests/agents/test_subagent_workflow.py::test_subagent_workflow_end_to_end FAILED [  2%]
+tests/agents/test_supervisor_advanced.py::test_supervisor_error_handling FAILED [  2%]
+tests/agents/test_supervisor_advanced.py::test_supervisor_state_management PASSED [  2%]
+tests/agents/test_supervisor_advanced.py::test_supervisor_concurrent_requests PASSED [  3%]
+tests/agents/test_supervisor_agent.py::test_supervisor_runs_sub_agents_in_order 
