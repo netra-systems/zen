@@ -67,9 +67,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     if (authConfig) {
-      authService.handleLogout(authConfig);
+      await authService.handleLogout(authConfig);
     }
   };
 

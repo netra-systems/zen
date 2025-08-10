@@ -56,9 +56,31 @@ class AuthService {
     window.location.href = authConfig.endpoints.login;
   }
 
-  handleLogout(authConfig: AuthConfigResponse) {
-    this.removeToken();
-    window.location.href = authConfig.endpoints.logout;
+  async handleLogout(authConfig: AuthConfigResponse) {
+    try {
+      const response = await fetch(authConfig.endpoints.logout, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.getAuthHeaders(),
+        },
+      });
+      
+      if (response.ok) {
+        this.removeToken();
+        window.location.href = '/';
+      } else {
+        console.error('Logout failed');
+        // Still remove token and redirect on error
+        this.removeToken();
+        window.location.href = '/';
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Still remove token and redirect on error
+      this.removeToken();
+      window.location.href = '/';
+    }
   }
 
   useAuth = (): AuthContextType => {

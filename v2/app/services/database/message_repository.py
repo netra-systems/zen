@@ -5,7 +5,7 @@ Handles all message-related database operations.
 
 from typing import Optional, List, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, desc
+from sqlalchemy import select, and_, desc, func
 from app.services.database.base_repository import BaseRepository
 from app.db.models_postgres import Message
 from app.logging_config import central_logger
@@ -110,3 +110,33 @@ class MessageRepository(BaseRepository[Message]):
             await db.rollback()
             logger.error(f"Error updating message {message_id}: {e}")
             return None
+    
+    async def count_by_thread(self, db: AsyncSession, thread_id: str) -> int:
+        """Count messages in a thread"""
+        try:
+            result = await db.execute(
+                select(func.count(Message.id)).where(Message.thread_id == thread_id)
+            )
+            return result.scalar() or 0
+        except Exception as e:
+            logger.error(f"Error counting messages for thread {thread_id}: {e}")
+            return 0
+    
+    async def find_by_thread(self, 
+                            db: AsyncSession, 
+                            thread_id: str,
+                            limit: int = 50,
+                            offset: int = 0) -> List[Message]:
+        """Find messages by thread with pagination"""
+        try:
+            result = await db.execute(
+                select(Message)
+                .where(Message.thread_id == thread_id)
+                .order_by(Message.created_at)
+                .limit(limit)
+                .offset(offset)
+            )
+            return list(result.scalars().all())
+        except Exception as e:
+            logger.error(f"Error finding messages for thread {thread_id}: {e}")
+            return []
