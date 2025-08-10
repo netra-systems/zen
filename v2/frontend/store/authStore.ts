@@ -40,7 +40,7 @@ export const useAuthStore = create<AuthState>()(
         state.error = null;
         // Store token in localStorage
         if (typeof window !== 'undefined') {
-          localStorage.setItem('auth_token', token);
+          localStorage.setItem('jwt_token', token);
         }
       }),
 
@@ -52,7 +52,7 @@ export const useAuthStore = create<AuthState>()(
         state.error = null;
         // Clear token from localStorage
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('auth_token');
+          localStorage.removeItem('jwt_token');
         }
       }),
 
@@ -81,7 +81,7 @@ export const useAuthStore = create<AuthState>()(
         state.loading = false;
         state.error = null;
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('auth_token');
+          localStorage.removeItem('jwt_token');
         }
       }),
   }))

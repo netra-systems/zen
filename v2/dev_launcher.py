@@ -250,19 +250,28 @@ class DevLauncher:
         # If production mode (no hot reload), build the frontend first
         if not self.frontend_reload:
             self._print("🔨", "BUILD", "Building frontend for production mode...")
-            build_cmd = ["npm", "run", "build"]
+            
+            # Prepare environment for build
             build_env = os.environ.copy()
             build_env["NEXT_PUBLIC_API_URL"] = backend_info["api_url"]
             build_env["NEXT_PUBLIC_WS_URL"] = backend_info["ws_url"]
             
+            # Use appropriate command for Windows vs Unix
+            if sys.platform == "win32":
+                build_cmd = ["cmd", "/c", "npm run build"]
+            else:
+                build_cmd = ["npm", "run", "build"]
+            
             try:
                 # Change to frontend directory and run build
+                print("   This may take a few minutes for the first build...")
                 build_result = subprocess.run(
                     build_cmd,
                     cwd="frontend",
                     env=build_env,
                     capture_output=True,
-                    text=True
+                    text=True,
+                    shell=(sys.platform == "win32")  # Use shell on Windows for npm
                 )
                 
                 if build_result.returncode == 0:
