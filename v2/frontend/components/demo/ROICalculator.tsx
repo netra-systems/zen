@@ -153,9 +153,7 @@ export default function ROICalculator({ industry, onComplete }: ROICalculatorPro
     }).format(value)
   }
 
-  const _formatNumber = (value: number) => {
-    return new Intl.NumberFormat('en-US').format(value)
-  }
+  // Removed unused function - number formatting handled by formatCurrency
 
   const exportReport = () => {
     const report = {

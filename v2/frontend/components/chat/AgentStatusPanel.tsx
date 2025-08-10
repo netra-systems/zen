@@ -35,8 +35,8 @@ const AgentStatusPanel: React.FC = () => {
     confidenceScore: 0
   });
 
-  // Humor elements
-  const processingQuips = [
+  // Humor elements - using useMemo to prevent re-creation on every render
+  const processingQuips = React.useMemo(() => [
     "Optimizing the optimizers...",
     "Teaching AI to be more intelligent...",
     "Convincing the models to cooperate...",
@@ -45,7 +45,7 @@ const AgentStatusPanel: React.FC = () => {
     "Asking the magic 8-ball for advice...",
     "Consulting the optimization oracle...",
     "Bribing the algorithms with more compute..."
-  ];
+  ], []);
 
   const [currentQuip, setCurrentQuip] = useState(processingQuips[0]);
 
