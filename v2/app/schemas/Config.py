@@ -148,6 +148,21 @@ class AppConfig(BaseModel):
     # LLM Cache Settings
     llm_cache_enabled: bool = True
     llm_cache_ttl: int = 3600  # 1 hour default
+    
+    # Development Mode Service Settings
+    # All services are enabled by default, can be disabled via environment variables
+    dev_mode_redis_enabled: bool = Field(
+        default=True, 
+        description="Enable Redis in development mode (default: True). Set DEV_MODE_DISABLE_REDIS=true to disable."
+    )
+    dev_mode_clickhouse_enabled: bool = Field(
+        default=True, 
+        description="Enable ClickHouse in development mode (default: True). Set DEV_MODE_DISABLE_CLICKHOUSE=true to disable."
+    )
+    dev_mode_llm_enabled: bool = Field(
+        default=True, 
+        description="Enable LLMs in development mode (default: True). Set DEV_MODE_DISABLE_LLM=true to disable."
+    )
 
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(
@@ -199,6 +214,18 @@ class DevelopmentConfig(AppConfig):
             "http://localhost:3000/auth/callback"
         ]
     )
+    
+    def __init__(self, **data):
+        import os
+        # Check environment variables to override dev mode settings
+        # Services are enabled by default, only disable if explicitly set
+        if os.environ.get("DEV_MODE_DISABLE_REDIS", "").lower() == "true":
+            data["dev_mode_redis_enabled"] = False
+        if os.environ.get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true":
+            data["dev_mode_clickhouse_enabled"] = False
+        if os.environ.get("DEV_MODE_DISABLE_LLM", "").lower() == "true":
+            data["dev_mode_llm_enabled"] = False
+        super().__init__(**data)
 
 class ProductionConfig(AppConfig):
     """Production-specific settings."""
