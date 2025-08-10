@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Dict
 from pydantic import BaseModel, Field
 from datetime import datetime
-import uuid
 
 from .. import schemas
 from ..services.synthetic_data_service import synthetic_data_service
@@ -423,16 +422,3 @@ async def clone_corpus(
         "status": new_corpus.status
     }
 
-
-# Legacy endpoint for backward compatibility
-@router.post("/synthetic-data/generate", response_model=schemas.Corpus)
-def generate_synthetic_data_legacy(
-    params: schemas.LogGenParams,
-    request: Request,
-    db: Session = Depends(get_db_session),
-    current_user: User = Depends(get_current_user),
-):
-    """Legacy endpoint for generating synthetic data"""
-    from ..services.synthetic_data_service import generate_synthetic_data
-    db_corpus = generate_synthetic_data(db=db, params=params, user_id=current_user.id)
-    return db_corpus

@@ -1,6 +1,5 @@
 """Standardized exception hierarchy and error handling patterns for the Netra application."""
 
-import traceback
 from typing import Any, Dict, Optional, Union, List
 from enum import Enum
 from datetime import datetime, timezone

@@ -1,0 +1,34 @@
+C:\Users\antho\miniconda3\Lib\site-packages\pytest_asyncio\plugin.py:211: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+================================================================================
+NETRA AI PLATFORM - BACKEND TEST RUNNER
+================================================================================
+Test Configuration:
+  Category: all
+  Parallel: disabled
+  Coverage: disabled
+  Fail Fast: disabled
+  Environment: testing
+
+Running command:
+  pytest app/tests tests integration_tests -v --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
+================================================================================
+[1m============================= test session starts =============================[0m
+platform win32 -- Python 3.12.4, pytest-8.3.2, pluggy-1.5.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.3.2', 'pluggy': '1.5.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '1.1.0', 'cov': '6.2.1', 'html': '4.1.1', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2
+configfile: pytest.ini
+plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-1.1.0, cov-6.2.1, html-4.1.1, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+[1mcollecting ... [0mcollected 665 items
+run-last-failure: rerun previous 365 failures first
+
+app/tests/agents/test_supervisor_agent.py::test_supervisor_runs_sub_agents_in_order [32mPASSED[0m[32m [  0%][0m
+app/tests/agents/test_supervisor_orchestration.py::TestSupervisorOrchestration::test_supervisor_agent_selection [32mPASSED[0m[32m [  0%][0m
+app/tests/agents/test_supervisor_orchestration.py::TestSupervisorOrchestration::test_multi_agent_coordination [32mPASSED[0m[32m [  0%][0m
+app/tests/agents/test_supervisor_orchestration.py::TestSupervisorOrchestration::test_error_handling_in_orchestration [32mPASSED[0m[32m [  0%][0m
+app/tests/routes/test_apex_optimizer_agent_route.py::test_apex_optimizer_agent[I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.] [32mPASSED[0m[32m [  0%][0m
+app/tests/routes/test_auth_flow.py::test_login_redirect_in_production 

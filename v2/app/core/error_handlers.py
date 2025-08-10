@@ -1,7 +1,6 @@
 """Centralized error handling utilities and FastAPI exception handlers."""
 
 import logging
-import traceback
 from typing import Dict, Any, Optional, Union
 from uuid import uuid4
 from datetime import datetime, timezone

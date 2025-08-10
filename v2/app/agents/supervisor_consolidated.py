@@ -21,6 +21,7 @@ from app.agents.tool_dispatcher import ToolDispatcher
 from app.agents.state import DeepAgentState
 from app.services.state_persistence_service import state_persistence_service
 from starlette.websockets import WebSocketDisconnect
+from langchain_core.messages import SystemMessage
 
 # Import all sub-agents
 from app.agents.triage_sub_agent import TriageSubAgent
@@ -307,7 +308,6 @@ class SupervisorAgent(BaseSubAgent):
                 
                 # Send update if streaming
                 if stream_updates:
-                    from langchain_core.messages import SystemMessage
                     state_obj = SubAgentState(
                         messages=[SystemMessage(content=f"Starting {agent.name}")],
                         next_node="",
@@ -336,7 +336,6 @@ class SupervisorAgent(BaseSubAgent):
                 
                 # Send update if streaming
                 if stream_updates:
-                    from langchain_core.messages import SystemMessage
                     state_obj = SubAgentState(
                         messages=[SystemMessage(content=f"{agent.name} completed")],
                         next_node="",
