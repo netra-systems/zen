@@ -324,11 +324,18 @@ class TestConfigurationIntegration:
             from app.config import ConfigManager
             manager = ConfigManager()
             
-            # Mock the _load_from_environment_variables to apply our DATABASE_URL
-            def mock_load_env(config):
-                config.database_url = test_env['DATABASE_URL']
+            # Override the _load_secrets_into_config to apply our DATABASE_URL
+            def mock_load_secrets(config):
+                # Load secrets from environment
+                try:
+                    secrets = manager._secret_manager.load_secrets()
+                    manager._apply_secrets_to_config(config, secrets)
+                except Exception:
+                    pass
+                # Always load environment variables including DATABASE_URL
+                manager._load_from_environment_variables(config)
                 
-            with patch.object(manager, '_load_from_environment_variables', side_effect=mock_load_env):
+            with patch.object(manager, '_load_secrets_into_config', side_effect=mock_load_secrets):
                 config = manager.get_config()
                 
                 assert isinstance(config, AppConfig)

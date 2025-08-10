@@ -396,6 +396,8 @@ class TestErrorHandlerFunctions:
     async def test_netra_exception_handler(self):
         """Test FastAPI NetraException handler."""
         request = Mock(spec=Request)
+        request.state.request_id = "test-request-123"
+        request.state.trace_id = "test-trace-123"
         exc = AuthenticationError("Auth failed")
         
         response = await netra_exception_handler(request, exc)
@@ -407,6 +409,8 @@ class TestErrorHandlerFunctions:
     async def test_validation_exception_handler(self):
         """Test FastAPI validation exception handler."""
         request = Mock(spec=Request)
+        request.state.request_id = "test-request-123"
+        request.state.trace_id = "test-trace-123"
         exc = Mock()
         exc.errors.return_value = [{"loc": ("field",), "msg": "required", "type": "value_error"}]
         exc.__class__ = PydanticValidationError
@@ -420,6 +424,8 @@ class TestErrorHandlerFunctions:
     async def test_http_exception_handler(self):
         """Test FastAPI HTTP exception handler."""
         request = Mock(spec=Request)
+        request.state.request_id = "test-request-123"
+        request.state.trace_id = "test-trace-123"
         exc = HTTPException(status_code=404, detail="Not found")
         
         response = await http_exception_handler(request, exc)
@@ -431,6 +437,8 @@ class TestErrorHandlerFunctions:
     async def test_general_exception_handler(self):
         """Test FastAPI general exception handler."""
         request = Mock(spec=Request)
+        request.state.request_id = "test-request-123"
+        request.state.trace_id = "test-trace-123"
         exc = ValueError("Unknown error")
         
         response = await general_exception_handler(request, exc)

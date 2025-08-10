@@ -92,10 +92,17 @@ afterAll(() => {
   console.warn = originalWarn;
 });
 
+// Ensure Date.now works properly in tests
+const originalDateNow = Date.now;
+beforeEach(() => {
+  Date.now = originalDateNow;
+});
+
 // Clean up after each test
 afterEach(() => {
   jest.clearAllMocks();
   fetchMock.resetMocks();
   localStorage.clear();
   sessionStorage.clear();
+  Date.now = originalDateNow;
 });

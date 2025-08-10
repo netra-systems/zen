@@ -1,5 +1,7 @@
+import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { authService } from '@/auth/service';
 import WS from 'jest-websocket-mock';
 
@@ -9,6 +11,11 @@ describe('useWebSocket', () => {
   let server: WS;
   const mockToken = 'test-token';
   const wsUrl = 'ws://localhost:8000/ws';
+
+  // Create wrapper component with WebSocketProvider
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <WebSocketProvider>{children}</WebSocketProvider>
+  );
 
   beforeEach(() => {
     server = new WS(`${wsUrl}?token=${mockToken}`);
@@ -23,7 +30,7 @@ describe('useWebSocket', () => {
   });
 
   it('should establish WebSocket connection with token', async () => {
-    const { result } = renderHook(() => useWebSocket());
+    const { result } = renderHook(() => useWebSocket(), { wrapper });
 
     await server.connected;
     
@@ -32,7 +39,7 @@ describe('useWebSocket', () => {
   });
 
   it('should handle incoming messages', async () => {
-    const { result } = renderHook(() => useWebSocket());
+    const { result } = renderHook(() => useWebSocket(), { wrapper });
     
     await server.connected;
 
@@ -51,7 +58,7 @@ describe('useWebSocket', () => {
   });
 
   it('should send messages correctly', async () => {
-    const { result } = renderHook(() => useWebSocket());
+    const { result } = renderHook(() => useWebSocket(), { wrapper });
     
     await server.connected;
 
@@ -68,7 +75,7 @@ describe('useWebSocket', () => {
   });
 
   it('should handle reconnection on disconnect', async () => {
-    const { result } = renderHook(() => useWebSocket());
+    const { result } = renderHook(() => useWebSocket(), { wrapper });
     
     await server.connected;
     expect(result.current.isConnected).toBe(true);
@@ -96,7 +103,7 @@ describe('useWebSocket', () => {
     // Force connection error by not starting server
     server.close();
     
-    const { result } = renderHook(() => useWebSocket());
+    const { result } = renderHook(() => useWebSocket(), { wrapper });
 
     await waitFor(() => {
       expect(result.current.isConnected).toBe(false);

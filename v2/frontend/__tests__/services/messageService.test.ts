@@ -281,11 +281,12 @@ describe('MessageService', () => {
       // Clear the mock to reset call count
       (fetch as jest.Mock).mockClear();
       
-      // Now simulate coming back online
-      (fetch as jest.Mock).mockResolvedValueOnce({
+      // Now simulate coming back online - need to mock the POST to messages endpoint
+      // Mock implementation that returns a proper response
+      (fetch as jest.Mock).mockImplementationOnce(async () => ({
         ok: true,
         json: async () => ({ ...message, persisted: true }),
-      });
+      }));
 
       // Double-check queue before retry
       const queueBeforeRetry = await messageService.getQueuedMessages();
@@ -296,6 +297,17 @@ describe('MessageService', () => {
       expect(retryResults.successful).toBe(1);
       expect(retryResults.failed).toBe(0);
       expect(fetch).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/threads/thread-123/messages',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer test-token',
+          }),
+          body: JSON.stringify(message),
+        })
+      );
       
       // Verify queue is now empty after successful retry
       queuedMessages = await messageService.getQueuedMessages();

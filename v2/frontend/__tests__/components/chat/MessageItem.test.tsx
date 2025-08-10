@@ -54,6 +54,6 @@ describe('MessageItem', () => {
       displayed_to_user: true,
     };
     render(<MessageItem message={message} />);
-    expect(screen.getByText('View Tool Info')).toBeInTheDocument();
+    expect(screen.getByText('Tool Information')).toBeInTheDocument();
   });
 });

@@ -235,14 +235,20 @@ class ErrorHandler:
             request_id=request_id
         )
     
-    def _log_error(self, exc: Exception, severity: ErrorSeverity):
+    def _log_error(self, exc: Exception, severity: Union[ErrorSeverity, str]):
         """Log error based on severity level."""
         
-        if severity == ErrorSeverity.CRITICAL:
+        # Convert string to enum if needed
+        if isinstance(severity, str):
+            severity_value = severity.lower()
+        else:
+            severity_value = severity.value
+        
+        if severity_value == ErrorSeverity.CRITICAL.value:
             self._logger.critical(f"Critical error: {exc}", exc_info=True)
-        elif severity == ErrorSeverity.HIGH:
+        elif severity_value == ErrorSeverity.HIGH.value:
             self._logger.error(f"High severity error: {exc}", exc_info=True)
-        elif severity == ErrorSeverity.MEDIUM:
+        elif severity_value == ErrorSeverity.MEDIUM.value:
             self._logger.warning(f"Medium severity error: {exc}")
         else:  # LOW
             self._logger.info(f"Low severity error: {exc}")
@@ -305,7 +311,17 @@ def get_http_status_code(error_code: ErrorCode) -> int:
 async def netra_exception_handler(request: Request, exc: NetraException) -> JSONResponse:
     """FastAPI exception handler for Netra exceptions."""
     error_response = handle_exception(exc, request)
-    status_code = get_http_status_code(exc.error_details.code)
+    
+    # Handle code whether it's an ErrorCode enum or string
+    code = exc.error_details.code
+    if isinstance(code, str):
+        # Convert string back to ErrorCode enum for status mapping
+        try:
+            code = next(ec for ec in ErrorCode if ec.value == code)
+        except StopIteration:
+            code = ErrorCode.INTERNAL_ERROR
+    
+    status_code = get_http_status_code(code)
     
     return JSONResponse(
         status_code=status_code,
