@@ -60,6 +60,7 @@ export const MessageList: React.FC = () => {
       <AnimatePresence initial={false}>
         {displayedMessages.length === 0 && (
           <motion.div
+            key="empty-state"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -88,24 +89,31 @@ export const MessageList: React.FC = () => {
           </motion.div>
         )}
         
-        <div className="space-y-2">
-          {displayedMessages.map((msg, index) => (
-            <motion.div
-              key={msg.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ 
-                duration: 0.3,
-                delay: index === displayedMessages.length - 1 ? 0 : 0
-              }}
-            >
-              <MessageItem message={msg} />
-            </motion.div>
-          ))}
-        </div>
+        {displayedMessages.map((msg, index) => (
+          <motion.div
+            key={msg.id || `msg-${index}`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ 
+              duration: 0.3,
+              delay: index === displayedMessages.length - 1 ? 0 : 0
+            }}
+          >
+            <MessageItem message={msg} />
+          </motion.div>
+        ))}
         
-        {isProcessing && <ThinkingIndicator type="thinking" />}
+        {isProcessing && (
+          <motion.div
+            key="thinking-indicator"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <ThinkingIndicator type="thinking" />
+          </motion.div>
+        )}
       </AnimatePresence>
       
       <div ref={messagesEndRef} className="h-4" />

@@ -12,6 +12,7 @@ import signal
 import socket
 import argparse
 import subprocess
+import webbrowser
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 
@@ -30,7 +31,8 @@ class DevLauncher:
                  backend_reload: bool = True,
                  frontend_reload: bool = True,
                  load_secrets: bool = False,
-                 project_id: Optional[str] = None):
+                 project_id: Optional[str] = None,
+                 no_browser: bool = False):
         """Initialize the development launcher."""
         self.backend_port = backend_port
         self.frontend_port = frontend_port or 3000
@@ -40,6 +42,7 @@ class DevLauncher:
         self.frontend_reload = frontend_reload
         self.load_secrets = load_secrets
         self.project_id = project_id
+        self.no_browser = no_browser
         self.processes: List[subprocess.Popen] = []
         self.service_discovery = ServiceDiscovery()
         self.use_emoji = self._check_emoji_support()
@@ -324,6 +327,23 @@ class DevLauncher:
         
         return False
     
+    def open_browser(self, url: str) -> bool:
+        """Open the browser with the given URL."""
+        if self.no_browser:
+            return False
+        
+        try:
+            # Add a small delay to ensure the page is ready
+            time.sleep(1)
+            
+            # Open the default browser
+            webbrowser.open(url)
+            self._print("🌐", "BROWSER", f"Opening browser at {url}")
+            return True
+        except Exception as e:
+            self._print("⚠️", "WARN", f"Could not open browser automatically: {e}")
+            return False
+    
     def load_secrets_from_gcp(self) -> bool:
         """Load secrets from Google Cloud Secret Manager."""
         if not self.load_secrets:
@@ -444,8 +464,14 @@ class DevLauncher:
         print("   Allowing Next.js to compile...")
         time.sleep(3)
         
+        frontend_ready = False
         if self.wait_for_service(frontend_url, timeout=90):
             self._print("✅", "OK", "Frontend is ready")
+            frontend_ready = True
+            
+            # Automatically open browser when frontend is ready
+            if not self.no_browser:
+                self.open_browser(frontend_url)
         else:
             self._print("⚠️", "WARN", "Frontend readiness check timed out (this is usually OK)")
             print("   The frontend may still be compiling. You can proceed.")
@@ -462,6 +488,10 @@ class DevLauncher:
         
         self._print("\n🌐", "Frontend", "")
         print(f"   URL: http://localhost:{self.frontend_port}")
+        if not self.no_browser and frontend_ready:
+            print("   Browser: Automatically opened")
+        elif self.no_browser:
+            print("   Browser: Manual open required (--no-browser flag used)")
         
         self._print("\n📝", "Service Discovery", ":")
         print(f"   Info stored in: .netra/")
@@ -507,12 +537,14 @@ RECOMMENDED FOR FIRST-TIME DEVELOPERS:
     • Automatic port allocation (no conflicts)
     • 30-50% faster performance
     • Secure secret loading from cloud
+    • Auto-launches browser when ready
 
 Examples:
   python dev_launcher.py --dynamic --no-backend-reload  # Best for most developers
   python dev_launcher.py                    # Start with defaults
   python dev_launcher.py --dynamic          # Auto port allocation
   python dev_launcher.py --no-reload        # Maximum performance
+  python dev_launcher.py --no-browser       # Don't open browser automatically
   python dev_launcher.py --load-secrets --project-id my-project  # With GCP secrets
   python dev_launcher.py --verbose          # Detailed output
         """
@@ -573,6 +605,12 @@ Examples:
         help="Google Cloud project ID for secret loading (or set GOOGLE_CLOUD_PROJECT env var)"
     )
     
+    parser.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="Don't open the browser automatically after frontend is ready"
+    )
+    
     args = parser.parse_args()
     
     # Handle reload flags
@@ -587,7 +625,8 @@ Examples:
         backend_reload=backend_reload,
         frontend_reload=frontend_reload,
         load_secrets=args.load_secrets,
-        project_id=args.project_id
+        project_id=args.project_id,
+        no_browser=args.no_browser
     )
     
     sys.exit(launcher.run())
