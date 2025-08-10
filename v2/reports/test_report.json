@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-10T10:33:49.017921",
+  "timestamp": "2025-08-10T10:36:15.294063",
   "configuration": {
     "mode": "quick",
     "backend_only": false,
@@ -13,22 +13,22 @@
   "results": {
     "backend": {
       "status": "failed",
-      "duration": 5.870427846908569,
+      "duration": 5.57373309135437,
       "exit_code": 4
     },
     "frontend": {
       "status": "failed",
-      "duration": 0.10282492637634277,
+      "duration": 0.08826947212219238,
       "exit_code": 1
     },
     "overall": {
       "status": "pending",
-      "start_time": 1754847223.0441632,
-      "end_time": 1754847229.0179212
+      "start_time": 1754847369.632061,
+      "end_time": 1754847375.2940636
     }
   },
   "summary": {
-    "total_duration": 5.973252773284912,
+    "total_duration": 5.6620025634765625,
     "backend_passed": false,
     "frontend_passed": false,
     "overall_passed": false
