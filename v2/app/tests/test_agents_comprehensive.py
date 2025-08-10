@@ -10,7 +10,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from datetime import datetime
 import json
 
-from app.agents.supervisor import Supervisor
+from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.agents.base import BaseSubAgent
 from app.agents.triage_sub_agent import TriageSubAgent
 from app.agents.data_sub_agent import DataSubAgent

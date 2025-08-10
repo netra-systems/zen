@@ -12,7 +12,7 @@ import uuid
 from typing import Dict, List, Any
 import random
 
-from app.agents.supervisor import Supervisor
+from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.agents.base import BaseSubAgent
 from app.agents.state import DeepAgentState
 from app.schemas import SubAgentLifecycle

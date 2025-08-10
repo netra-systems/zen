@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
-from app.agents.supervisor import Supervisor
+from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.schemas import RequestModel
 from typing import Dict, Any, Optional
 from app.services.state_persistence_service import state_persistence_service

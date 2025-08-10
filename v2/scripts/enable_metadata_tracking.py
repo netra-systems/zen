@@ -78,7 +78,7 @@ exit 0
             return True
             
         except Exception as e:
-            print(f"❌ Failed to install git hooks: {e}")
+            print(f"[ERROR] Failed to install git hooks: {e}")
             return False
     
     def create_metadata_database(self) -> bool:
@@ -150,11 +150,11 @@ exit 0
             conn.commit()
             conn.close()
             
-            print(f"✅ Metadata database created at {self.metadata_db_path}")
+            print(f"[SUCCESS] Metadata database created at {self.metadata_db_path}")
             return True
             
         except Exception as e:
-            print(f"❌ Failed to create metadata database: {e}")
+            print(f"[ERROR] Failed to create metadata database: {e}")
             return False
     
     def configure_tracking(self) -> bool:
@@ -199,11 +199,11 @@ exit 0
             with open(self.config_path, 'w') as f:
                 json.dump(config, f, indent=2)
             
-            print(f"✅ Configuration saved to {self.config_path}")
+            print(f"[SUCCESS] Configuration saved to {self.config_path}")
             return True
             
         except Exception as e:
-            print(f"❌ Failed to save configuration: {e}")
+            print(f"[ERROR] Failed to save configuration: {e}")
             return False
     
     def create_validator_script(self) -> bool:
@@ -345,11 +345,11 @@ if __name__ == "__main__":
             # Make script executable
             os.chmod(validator_path, 0o755)
             
-            print(f"✅ Validator script created at {validator_path}")
+            print(f"[SUCCESS] Validator script created at {validator_path}")
             return True
             
         except Exception as e:
-            print(f"❌ Failed to create validator script: {e}")
+            print(f"[ERROR] Failed to create validator script: {e}")
             return False
     
     def create_archiver_script(self) -> bool:
@@ -405,11 +405,11 @@ class MetadataArchiver:
             conn.commit()
             conn.close()
             
-            print(f"✅ Metadata archived for commit {commit_hash}")
+            print(f"[SUCCESS] Metadata archived for commit {commit_hash}")
             return True
             
         except Exception as e:
-            print(f"❌ Failed to archive metadata: {e}")
+            print(f"[ERROR] Failed to archive metadata: {e}")
             return False
 
 def main():
@@ -436,11 +436,11 @@ if __name__ == "__main__":
             # Make script executable
             os.chmod(archiver_path, 0o755)
             
-            print(f"✅ Archiver script created at {archiver_path}")
+            print(f"[SUCCESS] Archiver script created at {archiver_path}")
             return True
             
         except Exception as e:
-            print(f"❌ Failed to create archiver script: {e}")
+            print(f"[ERROR] Failed to create archiver script: {e}")
             return False
     
     def enable_all(self) -> bool:
