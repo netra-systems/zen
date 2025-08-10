@@ -1,0 +1,675 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<test_update_specification>
+  <metadata>
+    <version>1.0</version>
+    <created>2025-08-10</created>
+    <purpose>Automated test suite management, refreshing, and continuous improvement</purpose>
+    <scope>Comprehensive testing strategy with 97% coverage target and self-healing capabilities</scope>
+    <usage>
+      User can simply run: python scripts/test_updater.py --execute-spec
+      Or reference: "Run test_update_spec.xml" to trigger automated test improvements
+    </usage>
+  </metadata>
+
+  <coverage_goals>
+    <goal id="CG1">
+      <name>Overall Coverage Target</name>
+      <target>97%</target>
+      <current_baseline>
+        <backend>70%</backend>
+        <frontend>60%</frontend>
+      </current_baseline>
+      <milestones>
+        <milestone week="1">75% backend, 70% frontend</milestone>
+        <milestone week="2">80% backend, 80% frontend</milestone>
+        <milestone week="3">85% backend, 85% frontend</milestone>
+        <milestone week="4">90% backend, 90% frontend</milestone>
+        <milestone week="6">95% backend, 95% frontend</milestone>
+        <milestone week="8">97% overall coverage</milestone>
+      </milestones>
+    </goal>
+    
+    <goal id="CG2">
+      <name>Critical Path Coverage</name>
+      <target>100%</target>
+      <critical_paths>
+        - Authentication and authorization flows
+        - WebSocket connection lifecycle
+        - Agent orchestration pipeline
+        - Database transactions and rollbacks
+        - Payment processing (if applicable)
+        - Data privacy and security operations
+      </critical_paths>
+    </goal>
+    
+    <goal id="CG3">
+      <name>Edge Case Coverage</name>
+      <target>95%</target>
+      <focus_areas>
+        - Error handling paths
+        - Timeout scenarios
+        - Concurrent request handling
+        - Resource exhaustion cases
+        - Network failure recovery
+        - Data validation boundaries
+      </focus_areas>
+    </goal>
+  </coverage_goals>
+
+  <automated_test_processes>
+    <process id="ATP1">
+      <name>Test Discovery and Generation</name>
+      <description>Automatically identify untested code and generate test cases</description>
+      <execution_steps>
+        <step order="1">
+          <action>Scan codebase for functions/methods without tests</action>
+          <command>python scripts/test_discovery.py --find-untested</command>
+          <output>reports/untested_code.json</output>
+        </step>
+        <step order="2">
+          <action>Analyze code complexity and prioritize test generation</action>
+          <command>python scripts/test_priority.py --analyze-complexity</command>
+          <output>reports/test_priorities.json</output>
+        </step>
+        <step order="3">
+          <action>Generate test templates using AI assistance</action>
+          <command>python scripts/test_generator.py --create-templates</command>
+          <output>generated_tests/</output>
+        </step>
+        <step order="4">
+          <action>Validate generated tests</action>
+          <command>python scripts/test_validator.py --check-generated</command>
+          <output>reports/test_validation.json</output>
+        </step>
+        <step order="5">
+          <action>Integrate validated tests into test suite</action>
+          <command>python scripts/test_integrator.py --merge-tests</command>
+        </step>
+      </execution_steps>
+    </process>
+    
+    <process id="ATP2">
+      <name>Test Refresh and Update</name>
+      <description>Update existing tests to match code changes and modern patterns</description>
+      <execution_steps>
+        <step order="1">
+          <action>Detect outdated test patterns</action>
+          <command>python scripts/test_pattern_analyzer.py --find-outdated</command>
+          <triggers>
+            - Tests using deprecated APIs
+            - Tests with outdated mocking patterns
+            - Tests not following current conventions
+            - Tests with hardcoded values
+          </triggers>
+        </step>
+        <step order="2">
+          <action>Update test implementations</action>
+          <command>python scripts/test_modernizer.py --update-patterns</command>
+          <updates>
+            - Replace mockResolvedValueOnce with mockImplementationOnce
+            - Add proper WebSocketProvider wrappers
+            - Update to use latest testing utilities
+            - Convert to async/await patterns
+          </updates>
+        </step>
+        <step order="3">
+          <action>Enhance test assertions</action>
+          <command>python scripts/test_assertion_enhancer.py --improve</command>
+          <enhancements>
+            - Add more specific assertions
+            - Check for side effects
+            - Validate error messages
+            - Verify state transitions
+          </enhancements>
+        </step>
+        <step order="4">
+          <action>Update test data and fixtures</action>
+          <command>python scripts/test_fixture_updater.py --refresh</command>
+          <updates>
+            - Generate realistic test data
+            - Update mock responses
+            - Refresh database fixtures
+            - Modernize factory patterns
+          </updates>
+        </step>
+      </execution_steps>
+    </process>
+    
+    <process id="ATP3">
+      <name>Legacy Test Cleanup</name>
+      <description>Identify and remove or update legacy tests</description>
+      <execution_steps>
+        <step order="1">
+          <action>Identify legacy test patterns</action>
+          <command>python scripts/test_legacy_scanner.py --scan</command>
+          <patterns>
+            - Skipped tests without justification
+            - Tests for removed features
+            - Duplicate test scenarios
+            - Tests with sleep() or arbitrary waits
+            - Tests depending on external services
+            - Flaky tests with inconsistent results
+          </patterns>
+        </step>
+        <step order="2">
+          <action>Categorize legacy tests</action>
+          <command>python scripts/test_categorizer.py --classify-legacy</command>
+          <categories>
+            - REMOVE: Tests for deleted code
+            - UPDATE: Tests needing modernization
+            - FIX: Broken but needed tests
+            - REPLACE: Tests to be rewritten
+            - KEEP: Valid legacy tests to preserve
+          </categories>
+        </step>
+        <step order="3">
+          <action>Process legacy tests based on category</action>
+          <command>python scripts/test_legacy_processor.py --execute</command>
+          <actions>
+            - Remove obsolete tests
+            - Update test implementations
+            - Fix broken assertions
+            - Replace with modern equivalents
+            - Document preserved legacy tests
+          </actions>
+        </step>
+        <step order="4">
+          <action>Verify test suite integrity</action>
+          <command>python test_runner.py --mode comprehensive</command>
+        </step>
+      </execution_steps>
+    </process>
+    
+    <process id="ATP4">
+      <name>Coverage Gap Analysis</name>
+      <description>Continuously identify and fill coverage gaps</description>
+      <execution_steps>
+        <step order="1">
+          <action>Generate detailed coverage reports</action>
+          <command>python scripts/coverage_analyzer.py --detailed</command>
+          <reports>
+            - Line coverage by module
+            - Branch coverage analysis
+            - Path coverage metrics
+            - Mutation testing results
+          </reports>
+        </step>
+        <step order="2">
+          <action>Identify critical uncovered code</action>
+          <command>python scripts/coverage_gap_finder.py --priority</command>
+          <prioritization>
+            - Security-related code
+            - Financial transactions
+            - Data mutations
+            - Error handlers
+            - Integration points
+          </prioritization>
+        </step>
+        <step order="3">
+          <action>Generate coverage improvement plan</action>
+          <command>python scripts/coverage_planner.py --create-plan</command>
+          <output>reports/coverage_improvement_plan.md</output>
+        </step>
+        <step order="4">
+          <action>Track coverage trends</action>
+          <command>python scripts/coverage_tracker.py --update-metrics</command>
+          <metrics>
+            - Coverage delta per commit
+            - Coverage by feature area
+            - Test execution time trends
+            - Flakiness indicators
+          </metrics>
+        </step>
+      </execution_steps>
+    </process>
+    
+    <process id="ATP5">
+      <name>Test Performance Optimization</name>
+      <description>Improve test execution speed and reliability</description>
+      <execution_steps>
+        <step order="1">
+          <action>Profile test execution times</action>
+          <command>python scripts/test_profiler.py --analyze-performance</command>
+          <metrics>
+            - Individual test durations
+            - Setup/teardown overhead
+            - Database transaction times
+            - Network call latencies
+          </metrics>
+        </step>
+        <step order="2">
+          <action>Optimize slow tests</action>
+          <command>python scripts/test_optimizer.py --speed-up</command>
+          <optimizations>
+            - Parallelize independent tests
+            - Use in-memory databases
+            - Mock expensive operations
+            - Implement test data caching
+            - Reduce fixture complexity
+          </optimizations>
+        </step>
+        <step order="3">
+          <action>Implement test sharding</action>
+          <command>python scripts/test_sharder.py --configure</command>
+          <strategy>
+            - Group by execution time
+            - Separate by resource usage
+            - Isolate flaky tests
+            - Balance across workers
+          </strategy>
+        </step>
+        <step order="4">
+          <action>Monitor test reliability</action>
+          <command>python scripts/test_reliability_monitor.py --track</command>
+          <tracking>
+            - Flaky test detection
+            - Failure pattern analysis
+            - Environment sensitivity
+            - Resource leak detection
+          </tracking>
+        </step>
+      </execution_steps>
+    </process>
+  </automated_test_processes>
+
+  <test_types_enhancement>
+    <test_type id="TT1">
+      <name>Unit Tests</name>
+      <coverage_target>98%</coverage_target>
+      <enhancement_strategies>
+        <strategy>Parameterized testing for edge cases</strategy>
+        <strategy>Property-based testing with Hypothesis</strategy>
+        <strategy>Mutation testing to verify test quality</strategy>
+        <strategy>Snapshot testing for complex outputs</strategy>
+      </enhancement_strategies>
+      <automation_commands>
+        <command>python scripts/enhance_unit_tests.py --add-edge-cases</command>
+        <command>python scripts/enhance_unit_tests.py --add-property-tests</command>
+        <command>python scripts/mutation_testing.py --verify-quality</command>
+      </automation_commands>
+    </test_type>
+    
+    <test_type id="TT2">
+      <name>Integration Tests</name>
+      <coverage_target>95%</coverage_target>
+      <enhancement_strategies>
+        <strategy>Contract testing between services</strategy>
+        <strategy>Database transaction testing</strategy>
+        <strategy>API response validation</strategy>
+        <strategy>WebSocket event flow testing</strategy>
+      </enhancement_strategies>
+      <automation_commands>
+        <command>python scripts/enhance_integration_tests.py --add-contracts</command>
+        <command>python scripts/enhance_integration_tests.py --test-transactions</command>
+        <command>python scripts/enhance_integration_tests.py --validate-apis</command>
+      </automation_commands>
+    </test_type>
+    
+    <test_type id="TT3">
+      <name>End-to-End Tests</name>
+      <coverage_target>90%</coverage_target>
+      <enhancement_strategies>
+        <strategy>User journey mapping</strategy>
+        <strategy>Cross-browser testing</strategy>
+        <strategy>Mobile responsiveness testing</strategy>
+        <strategy>Performance testing under load</strategy>
+      </enhancement_strategies>
+      <automation_commands>
+        <command>python scripts/enhance_e2e_tests.py --map-journeys</command>
+        <command>python scripts/enhance_e2e_tests.py --add-browsers</command>
+        <command>python scripts/enhance_e2e_tests.py --test-mobile</command>
+        <command>python scripts/load_testing.py --simulate-users</command>
+      </automation_commands>
+    </test_type>
+    
+    <test_type id="TT4">
+      <name>Security Tests</name>
+      <coverage_target>100%</coverage_target>
+      <enhancement_strategies>
+        <strategy>SQL injection testing</strategy>
+        <strategy>XSS vulnerability scanning</strategy>
+        <strategy>Authentication bypass attempts</strategy>
+        <strategy>Rate limiting verification</strategy>
+        <strategy>OWASP Top 10 coverage</strategy>
+      </enhancement_strategies>
+      <automation_commands>
+        <command>python scripts/security_tests.py --scan-vulnerabilities</command>
+        <command>python scripts/security_tests.py --test-auth</command>
+        <command>python scripts/security_tests.py --verify-rate-limits</command>
+        <command>python scripts/security_tests.py --owasp-check</command>
+      </automation_commands>
+    </test_type>
+    
+    <test_type id="TT5">
+      <name>Performance Tests</name>
+      <coverage_target>95%</coverage_target>
+      <enhancement_strategies>
+        <strategy>Response time benchmarking</strategy>
+        <strategy>Memory leak detection</strategy>
+        <strategy>Concurrent user simulation</strategy>
+        <strategy>Database query optimization</strategy>
+        <strategy>CDN and caching effectiveness</strategy>
+      </enhancement_strategies>
+      <automation_commands>
+        <command>python scripts/performance_tests.py --benchmark</command>
+        <command>python scripts/performance_tests.py --detect-leaks</command>
+        <command>python scripts/performance_tests.py --stress-test</command>
+        <command>python scripts/performance_tests.py --profile-queries</command>
+      </automation_commands>
+    </test_type>
+  </test_types_enhancement>
+
+  <continuous_improvement>
+    <improvement id="CI1">
+      <name>AI-Powered Test Generation</name>
+      <description>Use AI to automatically generate comprehensive test cases</description>
+      <implementation>
+        <step>Analyze code structure and complexity</step>
+        <step>Generate test scenarios based on code paths</step>
+        <step>Create edge case tests using boundary analysis</step>
+        <step>Validate generated tests with mutation testing</step>
+        <step>Integrate high-quality tests into suite</step>
+      </implementation>
+      <automation_script>scripts/ai_test_generator.py</automation_script>
+    </improvement>
+    
+    <improvement id="CI2">
+      <name>Self-Healing Tests</name>
+      <description>Automatically fix broken tests when code changes</description>
+      <implementation>
+        <step>Detect test failures after code changes</step>
+        <step>Analyze failure patterns and root causes</step>
+        <step>Generate fix proposals</step>
+        <step>Apply fixes and validate</step>
+        <step>Create pull request with fixes</step>
+      </implementation>
+      <automation_script>scripts/self_healing_tests.py</automation_script>
+    </improvement>
+    
+    <improvement id="CI3">
+      <name>Test Impact Analysis</name>
+      <description>Run only affected tests based on code changes</description>
+      <implementation>
+        <step>Build dependency graph of code and tests</step>
+        <step>Detect changed files in commit</step>
+        <step>Identify affected test suites</step>
+        <step>Execute minimal test set</step>
+        <step>Report coverage impact</step>
+      </implementation>
+      <automation_script>scripts/test_impact_analyzer.py</automation_script>
+    </improvement>
+    
+    <improvement id="CI4">
+      <name>Predictive Test Failure</name>
+      <description>Predict which tests are likely to fail based on code changes</description>
+      <implementation>
+        <step>Train ML model on historical test results</step>
+        <step>Analyze code change patterns</step>
+        <step>Predict failure probability</step>
+        <step>Prioritize risky tests</step>
+        <step>Alert developers proactively</step>
+      </implementation>
+      <automation_script>scripts/predictive_test_failure.py</automation_script>
+    </improvement>
+    
+    <improvement id="CI5">
+      <name>Test Documentation Generation</name>
+      <description>Automatically generate and maintain test documentation</description>
+      <implementation>
+        <step>Extract test descriptions and purposes</step>
+        <step>Document test coverage areas</step>
+        <step>Generate test execution guides</step>
+        <step>Create test maintenance runbooks</step>
+        <step>Update documentation on changes</step>
+      </implementation>
+      <automation_script>scripts/test_doc_generator.py</automation_script>
+    </improvement>
+  </continuous_improvement>
+
+  <execution_workflow>
+    <workflow id="EW1">
+      <name>Daily Test Update Cycle</name>
+      <schedule>0 2 * * *</schedule>
+      <steps>
+        <step>Run coverage gap analysis</step>
+        <step>Generate missing tests for critical paths</step>
+        <step>Update outdated test patterns</step>
+        <step>Execute comprehensive test suite</step>
+        <step>Generate coverage report</step>
+        <step>Create improvement tasks</step>
+      </steps>
+      <command>python scripts/test_updater.py --daily-cycle</command>
+    </workflow>
+    
+    <workflow id="EW2">
+      <name>Weekly Test Optimization</name>
+      <schedule>0 3 * * 1</schedule>
+      <steps>
+        <step>Profile test performance</step>
+        <step>Identify slow tests</step>
+        <step>Apply optimization strategies</step>
+        <step>Clean up legacy tests</step>
+        <step>Update test fixtures</step>
+        <step>Validate improvements</step>
+      </steps>
+      <command>python scripts/test_updater.py --weekly-optimization</command>
+    </workflow>
+    
+    <workflow id="EW3">
+      <name>Monthly Test Audit</name>
+      <schedule>0 4 1 * *</schedule>
+      <steps>
+        <step>Comprehensive coverage analysis</step>
+        <step>Test quality assessment</step>
+        <step>Security test verification</step>
+        <step>Performance baseline update</step>
+        <step>Test debt evaluation</step>
+        <step>Generate executive report</step>
+      </steps>
+      <command>python scripts/test_updater.py --monthly-audit</command>
+    </workflow>
+  </execution_workflow>
+
+  <monitoring_and_alerts>
+    <metric id="MA1">
+      <name>Coverage Drop Alert</name>
+      <threshold>Coverage decreases by more than 2%</threshold>
+      <action>Block merge and notify team</action>
+    </metric>
+    
+    <metric id="MA2">
+      <name>Test Execution Time Alert</name>
+      <threshold>Test suite takes longer than 30 minutes</threshold>
+      <action>Trigger optimization workflow</action>
+    </metric>
+    
+    <metric id="MA3">
+      <name>Flaky Test Detection</name>
+      <threshold>Test fails intermittently 3 times in 24 hours</threshold>
+      <action>Quarantine test and create fix task</action>
+    </metric>
+    
+    <metric id="MA4">
+      <name>New Code Coverage</name>
+      <threshold>New code has less than 95% coverage</threshold>
+      <action>Request additional tests before merge</action>
+    </metric>
+    
+    <metric id="MA5">
+      <name>Test Debt Accumulation</name>
+      <threshold>More than 10 skipped tests</threshold>
+      <action>Schedule cleanup sprint</action>
+    </metric>
+  </monitoring_and_alerts>
+
+  <reporting>
+    <report id="R1">
+      <name>Test Coverage Dashboard</name>
+      <frequency>Real-time</frequency>
+      <location>reports/coverage/dashboard.html</location>
+      <contents>
+        - Overall coverage percentage
+        - Coverage by module
+        - Coverage trends over time
+        - Uncovered critical paths
+        - Recent coverage changes
+      </contents>
+    </report>
+    
+    <report id="R2">
+      <name>Test Health Report</name>
+      <frequency>Daily</frequency>
+      <location>reports/test_health.md</location>
+      <contents>
+        - Test suite execution time
+        - Flaky test list
+        - Failed test analysis
+        - Performance metrics
+        - Improvement recommendations
+      </contents>
+    </report>
+    
+    <report id="R3">
+      <name>Test Update Summary</name>
+      <frequency>Weekly</frequency>
+      <location>reports/test_update_summary.md</location>
+      <contents>
+        - Tests added/updated/removed
+        - Coverage improvements
+        - Performance optimizations
+        - Legacy test cleanup
+        - Upcoming improvements
+      </contents>
+    </report>
+    
+    <report id="R4">
+      <name>Executive Test Report</name>
+      <frequency>Monthly</frequency>
+      <location>reports/executive_test_report.pdf</location>
+      <contents>
+        - Coverage achievement vs goals
+        - Test reliability metrics
+        - Quality indicators
+        - Risk assessment
+        - Resource recommendations
+      </contents>
+    </report>
+  </reporting>
+
+  <integration_points>
+    <integration id="IP1">
+      <name>CI/CD Pipeline</name>
+      <description>Automatic test updates in continuous integration</description>
+      <hooks>
+        - Pre-commit: Quick test validation
+        - Pre-merge: Comprehensive testing
+        - Post-merge: Coverage tracking
+        - Nightly: Test optimization
+      </hooks>
+    </integration>
+    
+    <integration id="IP2">
+      <name>Code Review</name>
+      <description>Automated test quality checks in pull requests</description>
+      <checks>
+        - Coverage requirements met
+        - Test naming conventions
+        - Assertion quality
+        - Mock usage patterns
+        - Performance impact
+      </checks>
+    </integration>
+    
+    <integration id="IP3">
+      <name>IDE Integration</name>
+      <description>Real-time test feedback in development environment</description>
+      <features>
+        - Live coverage indicators
+        - Test generation suggestions
+        - Quick fix proposals
+        - Performance warnings
+      </features>
+    </integration>
+    
+    <integration id="IP4">
+      <name>Monitoring Systems</name>
+      <description>Production correlation with test coverage</description>
+      <correlations>
+        - Bug origin vs test coverage
+        - Performance issues vs test scenarios
+        - User errors vs E2E coverage
+        - Security incidents vs security tests
+      </correlations>
+    </integration>
+  </integration_points>
+
+  <quick_start_guide>
+    <step order="1">
+      <title>Initial Setup</title>
+      <command>python scripts/test_updater.py --setup</command>
+      <description>Install dependencies and configure test update system</description>
+    </step>
+    
+    <step order="2">
+      <title>Baseline Analysis</title>
+      <command>python scripts/test_updater.py --analyze-baseline</command>
+      <description>Analyze current test suite and coverage</description>
+    </step>
+    
+    <step order="3">
+      <title>Execute Spec</title>
+      <command>python scripts/test_updater.py --execute-spec</command>
+      <description>Run full test update specification</description>
+    </step>
+    
+    <step order="4">
+      <title>Schedule Automation</title>
+      <command>python scripts/test_updater.py --schedule-automation</command>
+      <description>Set up automated test improvement cycles</description>
+    </step>
+    
+    <step order="5">
+      <title>Monitor Progress</title>
+      <command>python scripts/test_updater.py --monitor</command>
+      <description>Track coverage improvements toward 97% goal</description>
+    </step>
+  </quick_start_guide>
+
+  <success_criteria>
+    <criterion id="SC1">
+      <name>Coverage Goal Achievement</name>
+      <target>97% overall test coverage</target>
+      <timeline>8 weeks from implementation</timeline>
+    </criterion>
+    
+    <criterion id="SC2">
+      <name>Test Execution Speed</name>
+      <target>Full suite runs in under 15 minutes</target>
+      <current>~30 minutes</current>
+    </criterion>
+    
+    <criterion id="SC3">
+      <name>Test Reliability</name>
+      <target>Less than 1% flaky tests</target>
+      <measurement>Consistent pass rate over 99%</measurement>
+    </criterion>
+    
+    <criterion id="SC4">
+      <name>Automated Test Generation</name>
+      <target>80% of new code automatically tested</target>
+      <measurement>Generated tests vs manual tests ratio</measurement>
+    </criterion>
+    
+    <criterion id="SC5">
+      <name>Legacy Test Elimination</name>
+      <target>Zero skipped tests without justification</target>
+      <measurement>Complete legacy test cleanup</measurement>
+    </criterion>
+    
+    <criterion id="SC6">
+      <name>Critical Path Coverage</name>
+      <target>100% coverage of business-critical paths</target>
+      <measurement>No untested critical functionality</measurement>
+    </criterion>
+  </success_criteria>
+</test_update_specification>
