@@ -13,6 +13,15 @@ from sqlalchemy.orm import relationship
 from .base import Base
 import uuid
 from datetime import datetime, timezone
+import os
+
+# Use JSON instead of ARRAY for SQLite compatibility during testing
+if os.getenv("TESTING", "0") == "1":
+    # For SQLite testing, use JSON instead of ARRAY
+    ArrayType = JSON
+else:
+    # For PostgreSQL production, use ARRAY
+    ArrayType = lambda t: ARRAY(t)
 
 class User(Base):
     __tablename__ = "userbase"
@@ -134,7 +143,7 @@ class Assistant(Base):
     model = Column(String, nullable=False)
     instructions = Column(String, nullable=True)
     tools = Column(JSON, nullable=False, default=[])
-    file_ids = Column(ARRAY(String), nullable=False, default=[])
+    file_ids = Column(ArrayType(String), nullable=False, default=[])
     metadata_ = Column(JSON, nullable=True)
 
 class Thread(Base):
@@ -156,7 +165,7 @@ class Message(Base):
     content = Column(JSON, nullable=False)
     assistant_id = Column(String, ForeignKey("assistants.id"), nullable=True)
     run_id = Column(String, ForeignKey("runs.id"), nullable=True)
-    file_ids = Column(ARRAY(String), nullable=False, default=[])
+    file_ids = Column(ArrayType(String), nullable=False, default=[])
     metadata_ = Column(JSON, nullable=True)
     thread = relationship("Thread", back_populates="messages")
     run = relationship("Run", back_populates="messages")
@@ -180,7 +189,7 @@ class Run(Base):
     model = Column(String, nullable=True)
     instructions = Column(String, nullable=True)
     tools = Column(JSON, nullable=False, default=[])
-    file_ids = Column(ARRAY(String), nullable=False, default=[])
+    file_ids = Column(ArrayType(String), nullable=False, default=[])
     metadata_ = Column(JSON, nullable=True)
     thread = relationship("Thread", back_populates="runs")
     assistant = relationship("Assistant")

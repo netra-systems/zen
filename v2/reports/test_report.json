@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-10T11:04:52.758515",
+  "timestamp": "2025-08-10T11:13:15.861023",
   "configuration": {
     "mode": "quick",
     "backend_only": false,
@@ -13,24 +13,54 @@
   "results": {
     "backend": {
       "status": "failed",
-      "duration": 5.990762948989868,
-      "exit_code": 4
+      "duration": 6.71970272064209,
+      "exit_code": 4,
+      "test_details": {},
+      "summary": {
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "error": 0
+      }
     },
     "frontend": {
       "status": "failed",
-      "duration": 0.08791780471801758,
-      "exit_code": 1
+      "duration": 0.11649942398071289,
+      "exit_code": 1,
+      "test_details": {},
+      "summary": {
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "error": 0
+      }
     },
     "overall": {
       "status": "pending",
-      "start_time": 1754849086.6798346,
-      "end_time": 1754849092.7585154
+      "start_time": 1754849589.0248208,
+      "end_time": 1754849595.861023
     }
   },
   "summary": {
-    "total_duration": 6.078680753707886,
+    "total_duration": 6.836202144622803,
     "backend_passed": false,
     "frontend_passed": false,
-    "overall_passed": false
+    "overall_passed": false,
+    "backend_test_summary": {
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "error": 0
+    },
+    "frontend_test_summary": {
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "error": 0
+    }
+  },
+  "service_details": {
+    "backend": {},
+    "frontend": {}
   }
 }

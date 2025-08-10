@@ -62,7 +62,12 @@ class TestCriticalIntegration:
         
         # Cleanup
         await engine.dispose()
-        os.unlink(db_file.name)
+        try:
+            os.unlink(db_file.name)
+        except PermissionError:
+            # On Windows, file may still be locked
+            # This is okay for test cleanup
+            pass
 
     @pytest.fixture
     def setup_integration_infrastructure(self):
@@ -274,22 +279,21 @@ class TestCriticalIntegration:
         mock_websocket.close = AsyncMock()
         
         # Simulate user connection
-        connection_id = f"conn_{user_id}_{uuid.uuid4()}"
+        # Note: connection_id is generated internally by WebSocketManager
         
         # Add connection with user context
-        await ws_manager.connect(mock_websocket, user_id, connection_id)
+        conn_info = await ws_manager.connect(user_id, mock_websocket)
+        connection_id = conn_info.connection_id
         
         # Verify connection is tracked
-        assert connection_id in ws_manager.active_connections
-        assert ws_manager.active_connections[connection_id]["user_id"] == user_id
-        
-        # Create message handler
-        handler = BaseMessageHandler(ws_manager, Mock(), Mock())
+        assert user_id in ws_manager.active_connections
+        assert connection_id in ws_manager.connection_registry
+        assert ws_manager.connection_registry[connection_id].user_id == user_id
         
         # Test sending authenticated message
         test_message = WebSocketMessage(
             type="agent_request",
-            data={
+            payload={
                 "query": "Test authenticated request",
                 "thread_id": str(uuid.uuid4())
             }
@@ -305,7 +309,7 @@ class TestCriticalIntegration:
         mock_websocket.send_text.assert_called()
         sent_data = json.loads(mock_websocket.send_text.call_args[0][0])
         assert sent_data["type"] == "agent_request"
-        assert sent_data["data"]["query"] == "Test authenticated request"
+        assert sent_data["payload"]["query"] == "Test authenticated request"
         
         # Test broadcast to user's connections
         await ws_manager.broadcast_to_user(

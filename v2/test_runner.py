@@ -35,12 +35,12 @@ TEST_CONFIGS = {
     },
     "comprehensive": {
         "description": "Comprehensive test suite with coverage (~ 10 minutes)",
-        "backend": ["--coverage", "--parallel", "auto"],
+        "backend": ["--coverage", "--parallel", "-1"],
         "frontend": ["--coverage", "--lint", "--type-check"],
     },
     "ci": {
         "description": "Full CI/CD pipeline (~ 15 minutes)",
-        "backend": ["--coverage", "--html-output", "--json-output", "--parallel", "auto", "--min-coverage", "70"],
+        "backend": ["--coverage", "--html-output", "--json-output", "--parallel", "-1", "--min-coverage", "70"],
         "frontend": ["--coverage", "--lint", "--type-check", "--build"],
     },
     "critical": {
@@ -76,47 +76,94 @@ class TestRunner:
     def parse_pytest_output(self, output: str) -> Dict:
         """Parse pytest output to extract test statistics per service"""
         service_stats = {}
-        current_service = "unknown"
         
         # Match patterns for test results
-        test_pattern = re.compile(r'(app/[\w/]+)/test_\w+\.py::\w+\s+(PASSED|FAILED|SKIPPED|ERROR)')
-        summary_pattern = re.compile(r'(\d+) passed(?:, (\d+) failed)?(?:, (\d+) skipped)?(?:, (\d+) error)?')
+        test_pattern = re.compile(r'(app[\\/]tests[\\/][\w_]+)\.py::([\w]+)::([\w_]+)\s+(PASSED|FAILED|SKIPPED|ERROR|XFAIL|XPASS)')
+        # Also match simpler pattern for single test files
+        simple_pattern = re.compile(r'(app[\\/]tests[\\/]test_[\w_]+)\.py::([\w_]+)\s+(PASSED|FAILED|SKIPPED|ERROR|XFAIL|XPASS)')
+        # Match the final summary line
+        summary_pattern = re.compile(r'=+\s*(\d+)\s+failed(?:,\s*)?(\d+)?\s*passed(?:,\s*)?(\d+)?\s*skipped')
+        alt_summary_pattern = re.compile(r'=+\s*(\d+)\s+passed(?:,\s*)?(\d+)?\s*failed(?:,\s*)?(\d+)?\s*skipped')
+        no_fail_pattern = re.compile(r'=+\s*(\d+)\s+passed(?:,\s*)?(\d+)?\s*skipped\s*in')
+        
+        total_stats = {"passed": 0, "failed": 0, "skipped": 0, "error": 0}
         
         for line in output.split('\n'):
-            # Extract test results by file/service
+            # Extract test results by file/service/class
             match = test_pattern.search(line)
             if match:
-                service_path = match.group(1)
-                status = match.group(2).lower()
+                file_path = match.group(1)
+                class_name = match.group(2)
+                test_name = match.group(3)
+                status = match.group(4).lower()
                 
-                # Extract service name from path
-                parts = service_path.split('/')
-                if 'tests' in parts:
-                    idx = parts.index('tests')
-                    if idx + 1 < len(parts):
-                        service = parts[idx + 1]
-                    else:
-                        service = 'core'
+                # Extract service name from file path
+                file_parts = file_path.replace('\\', '/').split('/')
+                if 'test_' in file_parts[-1]:
+                    # Extract service from filename like test_demo_service.py
+                    service = file_parts[-1].replace('test_', '').replace('.py', '')
+                    if service.endswith('_service'):
+                        service = service.replace('_service', '')
                 else:
-                    service = parts[-1] if parts else 'unknown'
+                    service = 'core'
                 
                 if service not in service_stats:
                     service_stats[service] = {"passed": 0, "failed": 0, "skipped": 0, "error": 0}
                 
-                service_stats[service][status] = service_stats[service].get(status, 0) + 1
+                if status in ['passed', 'failed', 'skipped', 'error']:
+                    service_stats[service][status] += 1
+            else:
+                # Try simple pattern
+                simple_match = simple_pattern.search(line)
+                if simple_match:
+                    file_path = simple_match.group(1)
+                    test_name = simple_match.group(2)
+                    status = simple_match.group(3).lower()
+                    
+                    # Extract service from filename
+                    file_parts = file_path.replace('\\', '/').split('/')
+                    filename = file_parts[-1].replace('test_', '').replace('.py', '')
+                    if filename.endswith('_service'):
+                        service = filename.replace('_service', '')
+                    else:
+                        service = filename or 'core'
+                    
+                    if service not in service_stats:
+                        service_stats[service] = {"passed": 0, "failed": 0, "skipped": 0, "error": 0}
+                    
+                    if status in ['passed', 'failed', 'skipped', 'error']:
+                        service_stats[service][status] += 1
             
-            # Extract overall summary
-            summary_match = summary_pattern.search(line)
-            if summary_match:
-                total_stats = {
-                    "passed": int(summary_match.group(1) or 0),
-                    "failed": int(summary_match.group(2) or 0),
-                    "skipped": int(summary_match.group(3) or 0),
-                    "error": int(summary_match.group(4) or 0)
-                }
-                return {"services": service_stats, "total": total_stats}
+            # Extract overall summary from lines like "1 failed, 6 passed, 1 skipped in 0.68s"
+            if '====' in line and ('passed' in line or 'failed' in line):
+                # Initialize counts
+                passed_count = 0
+                failed_count = 0
+                skipped_count = 0
+                
+                # Extract individual counts using simple patterns
+                failed_match = re.search(r'(\d+)\s+failed', line)
+                if failed_match:
+                    failed_count = int(failed_match.group(1))
+                
+                passed_match = re.search(r'(\d+)\s+passed', line)
+                if passed_match:
+                    passed_count = int(passed_match.group(1))
+                
+                skipped_match = re.search(r'(\d+)\s+skipped', line)
+                if skipped_match:
+                    skipped_count = int(skipped_match.group(1))
+                
+                # Update total stats if we found any matches
+                if passed_match or failed_match or skipped_match:
+                    total_stats = {
+                        "passed": passed_count,
+                        "failed": failed_count,
+                        "skipped": skipped_count,
+                        "error": 0
+                    }
         
-        return {"services": service_stats, "total": {"passed": 0, "failed": 0, "skipped": 0, "error": 0}}
+        return {"services": service_stats, "total": total_stats}
     
     def run_backend_tests(self, args: List[str]) -> int:
         """Run backend tests with detailed output capture"""
