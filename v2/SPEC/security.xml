@@ -8,12 +8,26 @@
     
     <security-requirements>
         <requirement id="1">
-            <title>OAuth and JWT</title>
+            <title>OAuth and JWT Token Management</title>
             <description>Uses OAuth, JWT. SecurityService (e.g JWT) Keep all structural security concepts as is</description>
             <details>
-                <detail>The frontend JWT is stored securely and used in All WS, HTTP calls etc</detail>
-                <detail>The backend provides the JWT as needed</detail>
-                <detail>Consider that OAuth URLs may not be relevant to UI/UX experience for login logout</detail>
+                <detail>Frontend JWT Storage:
+                    - Use single localStorage key: 'jwt_token' (not 'auth_token')
+                    - Token is stored on successful login (OAuth or dev)
+                    - Token is removed on logout
+                    - Token is included in all API calls via Authorization header</detail>
+                <detail>WebSocket Authentication:
+                    - Token passed as query parameter on initial connection
+                    - Connection validates token on backend
+                    - Automatic reconnection with fresh token if available</detail>
+                <detail>Token Validation:
+                    - Frontend validates token expiration using jwt-decode
+                    - Invalid/expired tokens are automatically removed
+                    - User redirected to login on invalid token</detail>
+                <detail>Session Management:
+                    - Pure token-based authentication (no server sessions)
+                    - Token contains user info (id, email, etc.)
+                    - Token refresh not implemented (user re-authenticates on expiry)</detail>
             </details>
         </requirement>
         
@@ -24,8 +38,15 @@
         <requirement id="4">Validate that OAuth Login, OAuth Logout, and development user context all works. Production ready</requirement>
         
         <requirement id="5">
-            <title>Development Context</title>
-            <description>In development context: Defaults to auto login, including JWT token etc. to simulate OAuth</description>
+            <title>Development Context Auto-Login</title>
+            <description>In development context: Defaults to auto login on first init, including JWT token etc. to simulate OAuth</description>
+            <details>
+                <detail>Auto-login ONLY happens on first page load when no token exists</detail>
+                <detail>If user explicitly logs out, the logout state MUST persist (no auto-login)</detail>
+                <detail>Store a 'dev_logout_flag' in localStorage to track explicit logout in dev mode</detail>
+                <detail>User can still manually login with OAuth to test OAuth flow</detail>
+                <detail>Clear the logout flag when user manually logs in</detail>
+            </details>
         </requirement>
         
         <requirement id="6">Consider context of frontend and backend env hot reloading</requirement>
@@ -63,8 +84,33 @@
         </requirement>
         
         <requirement id="11">
-            <title>Development Environment</title>
-            <description>Keep the development env. When front and backend in development mode: On Pageload: Automatically authenticates as Dev user without using Google OAuth</description>
+            <title>Development Environment Authentication Flow</title>
+            <description>Keep the development env. When front and backend in development mode: Conditional auto-authentication based on logout state</description>
+            <flow>
+                <step>On page load, check for existing JWT token</step>
+                <step>If token exists and is valid, use it (maintain session)</step>
+                <step>If no token exists:
+                    - Check for 'dev_logout_flag' in localStorage
+                    - If flag exists, DO NOT auto-login (user explicitly logged out)
+                    - If no flag, auto-login with dev user (first time or cleared state)</step>
+                <step>On manual login (OAuth or dev), clear the logout flag</step>
+                <step>On logout, set the logout flag and remove token</step>
+            </flow>
         </requirement>
     </security-requirements>
+    
+    <implementation-notes>
+        <note id="1">
+            <title>Token Storage Consistency</title>
+            <description>All components must use the same localStorage key 'jwt_token' for token storage. The authStore and authService should be synchronized.</description>
+        </note>
+        <note id="2">
+            <title>Frontend State Management</title>
+            <description>Auth state should be managed through AuthContext/Provider, with authStore as optional Zustand store for global state if needed. Avoid duplication.</description>
+        </note>
+        <note id="3">
+            <title>Error Handling</title>
+            <description>All auth operations should have proper error handling with user-friendly messages. Failed operations should clean up state appropriately.</description>
+        </note>
+    </implementation-notes>
 </specification>

@@ -7,15 +7,39 @@
     </metadata>
     
     <task>
-        <description>Complete security review</description>
+        <description>Complete security review with focus on authentication consistency</description>
         <review-items>
-            <item>Is it modern OAuth?</item>
-            <item>Is JWT compliant?</item>
-            <item>Are there redundant or bad security items?</item>
-            <item>Is the dev mode functional?</item>
-            <item>Is JWT used on WS, http, etc. similar way?</item>
-            <item>Are items stored in db properly?</item>
+            <item>Is it modern OAuth? ✓ Yes - Using Google OAuth with OIDC</item>
+            <item>Is JWT compliant? ✓ Yes - Using standard JWT with proper signing</item>
+            <item>Are there redundant or bad security items? ⚠️ Token storage inconsistency</item>
+            <item>Is the dev mode functional? ⚠️ Missing logout persistence</item>
+            <item>Is JWT used on WS, http, etc. similar way? ✓ HTTP uses Bearer, WS uses query param</item>
+            <item>Are items stored in db properly? ✓ Users table with proper hashing</item>
         </review-items>
-        <deliverable>Review and plan any fixes if needed</deliverable>
+        <identified-issues>
+            <issue priority="high">
+                <title>Token Storage Inconsistency</title>
+                <description>authStore uses 'auth_token' while authService uses 'jwt_token' as localStorage key</description>
+                <solution>Standardize on 'jwt_token' across all components</solution>
+            </issue>
+            <issue priority="high">
+                <title>Dev Logout Not Persistent</title>
+                <description>Dev mode auto-logins even after explicit logout</description>
+                <solution>Implement dev_logout_flag to track explicit logouts</solution>
+            </issue>
+            <issue priority="medium">
+                <title>Duplicate Auth State Management</title>
+                <description>Both AuthContext and authStore manage auth state</description>
+                <solution>Use AuthContext as primary, authStore as optional global state</solution>
+            </issue>
+        </identified-issues>
+        <action-items>
+            <action>Fix localStorage key inconsistency between authStore and authService</action>
+            <action>Implement dev logout persistence with flag</action>
+            <action>Add WebSocket reconnection with fresh token</action>
+            <action>Ensure token validation on frontend with jwt-decode</action>
+            <action>Test OAuth flow and dev mode transitions</action>
+        </action-items>
+        <deliverable>Implementation fixes for identified issues following updated security.xml spec</deliverable>
     </task>
 </specification>

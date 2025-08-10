@@ -247,16 +247,47 @@ class DevLauncher:
         # Determine the npm command based on reload setting
         npm_command = "dev" if self.frontend_reload else "start"
         
-        # Build command based on OS
+        # If production mode (no hot reload), build the frontend first
+        if not self.frontend_reload:
+            self._print("🔨", "BUILD", "Building frontend for production mode...")
+            build_cmd = ["npm", "run", "build"]
+            build_env = os.environ.copy()
+            build_env["NEXT_PUBLIC_API_URL"] = backend_info["api_url"]
+            build_env["NEXT_PUBLIC_WS_URL"] = backend_info["ws_url"]
+            
+            try:
+                # Change to frontend directory and run build
+                build_result = subprocess.run(
+                    build_cmd,
+                    cwd="frontend",
+                    env=build_env,
+                    capture_output=True,
+                    text=True
+                )
+                
+                if build_result.returncode == 0:
+                    self._print("✅", "OK", "Frontend build completed successfully")
+                else:
+                    self._print("❌", "ERROR", f"Frontend build failed: {build_result.stderr}")
+                    return None
+                    
+            except Exception as e:
+                self._print("❌", "ERROR", f"Failed to build frontend: {e}")
+                return None
+        
+        # Build command based on OS - avoid shell=True with arguments to prevent deprecation warning
         if sys.platform == "win32":
-            # Windows - use relative path from frontend directory
-            cmd = ["cmd", "/c", "cd frontend && node scripts\\start_with_discovery.js " + npm_command]
+            # Windows - use node directly without shell
+            cmd = ["node", "scripts/start_with_discovery.js", npm_command]
+            cwd_path = "frontend"
         else:
-            # Unix-like
-            cmd = ["sh", "-c", f"cd frontend && node scripts/start_with_discovery.js {npm_command}"]
+            # Unix-like - use node directly without shell
+            cmd = ["node", "scripts/start_with_discovery.js", npm_command]
+            cwd_path = "frontend"
         
         if self.verbose:
             print(f"   Command: {' '.join(cmd)}")
+            print(f"   Working directory: {cwd_path}")
         
         # Set environment with backend URLs
         env = os.environ.copy()
@@ -270,16 +301,16 @@ class DevLauncher:
                 # Windows: create new process group
                 process = subprocess.Popen(
                     cmd,
+                    cwd=cwd_path,
                     env=env,
-                    shell=True,
                     creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
                 )
             else:
                 # Unix: create new process group
                 process = subprocess.Popen(
                     cmd,
+                    cwd=cwd_path,
                     env=env,
-                    shell=True,
                     preexec_fn=os.setsid
                 )
             
