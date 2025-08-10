@@ -9,7 +9,8 @@
     "lint": "next lint",
     "test": "jest",
     "cypress:open": "cypress open",
-    "cy:run": "start-server-and-test dev http://localhost:3000 cypress:run",
+    "cy:run": "cypress run",
+    "cy:test": "start-server-and-test dev http://localhost:3000 cypress:run",
     "cypress:run": "cypress run"
   },
   "dependencies": {

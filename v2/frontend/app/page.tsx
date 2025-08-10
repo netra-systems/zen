@@ -11,8 +11,12 @@ const HomePage: NextPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
+    if (!loading) {
+      if (!user) {
+        router.push('/login');
+      } else {
+        router.push('/enterprise-demo');
+      }
     }
   }, [loading, user, router]);
 
