@@ -1,31 +1,19 @@
-"""Optimized logging configuration that replaces the circular-dependency-prone system."""
+"""Optimized logging configuration that replaces the original circular-dependency-prone system."""
 
 import os
 import logging
 from typing import Optional
 
-# Import the optimized logging system (no circular dependencies)
-try:
-    from app.core.logging_manager import (
-        LoggingFactory,
-        LoggingConfig,
-        LogLevel,
-        configure_logging,
-        get_logger,
-        log_structured,
-        shutdown_logging
-    )
-except ImportError:
-    # Fallback for development/testing
-    from core.logging_manager import (
-        LoggingFactory,
-        LoggingConfig,
-        LogLevel,
-        configure_logging,
-        get_logger,
-        log_structured,
-        shutdown_logging
-    )
+# Import the optimized logging system
+from app.core.logging_manager import (
+    LoggingFactory,
+    LoggingConfig,
+    LogLevel,
+    configure_logging,
+    get_logger,
+    log_structured,
+    shutdown_logging
+)
 
 
 class CentralLogger:
