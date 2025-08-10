@@ -12,6 +12,9 @@ from pydantic import BaseModel, Field
 from typing import Optional, Any
 from abc import ABC, abstractmethod
 from app.services.context import ToolContext
+from app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
 
 class ToolMetadata(BaseModel):
     name: str = Field(..., description="The unique name of the tool.")
@@ -28,4 +31,19 @@ class BaseTool(ABC):
 
     @abstractmethod
     async def run(self, context: ToolContext, **kwargs) -> Any:
+        """Execute the tool with logging."""
         pass
+    
+    async def execute(self, context: ToolContext, **kwargs) -> Any:
+        """Wrapper method that adds logging to tool execution."""
+        tool_name = self.metadata.name if hasattr(self, 'metadata') else self.__class__.__name__
+        
+        logger.debug(f"Executing tool: {tool_name} with params: {kwargs}")
+        
+        try:
+            result = await self.run(context, **kwargs)
+            logger.info(f"Tool {tool_name} executed successfully")
+            return result
+        except Exception as e:
+            logger.error(f"Tool {tool_name} failed: {e}", exc_info=True)
+            raise
