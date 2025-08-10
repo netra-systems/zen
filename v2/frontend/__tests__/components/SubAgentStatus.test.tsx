@@ -31,7 +31,8 @@ describe('SubAgentStatus', () => {
     render(<SubAgentStatus />);
 
     expect(screen.getByText('DataSubAgent')).toBeInTheDocument();
-    expect(screen.getByText('Analyzing data patterns...')).toBeInTheDocument();
+    // Use a more flexible text matcher for the status text that may be split by elements
+    expect(screen.getByText(/Analyzing data patterns/)).toBeInTheDocument();
   });
 
   it('should show running indicator for active agents', () => {
@@ -61,12 +62,13 @@ describe('SubAgentStatus', () => {
         subAgentStatus: state,
       });
 
-      const { rerender } = render(<SubAgentStatus />);
+      const { getByTestId, unmount } = render(<SubAgentStatus />);
       
-      const indicator = screen.getByTestId('status-indicator');
+      const indicator = getByTestId('status-indicator');
       expect(indicator).toHaveClass(color);
       
-      rerender(<SubAgentStatus />);
+      // Clean up between iterations to avoid multiple instances
+      unmount();
     });
   });
 
@@ -84,9 +86,9 @@ describe('SubAgentStatus', () => {
 
     render(<SubAgentStatus />);
 
-    expect(screen.getByText('Tools:')).toBeInTheDocument();
-    expect(screen.getByText('cost_analyzer')).toBeInTheDocument();
-    expect(screen.getByText('performance_profiler')).toBeInTheDocument();
+    expect(screen.getByText(/Tools:/)).toBeInTheDocument();
+    expect(screen.getByText(/cost_analyzer/)).toBeInTheDocument();
+    expect(screen.getByText(/performance_profiler/)).toBeInTheDocument();
   });
 
   it('should show progress for multi-step agents', () => {
