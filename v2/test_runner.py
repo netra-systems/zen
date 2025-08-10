@@ -3,6 +3,7 @@
 Unified test runner for Netra AI Platform
 Runs both backend and frontend tests with comprehensive reporting
 Optimized for Claude Code and CI/CD pipelines
+Now with test isolation for concurrent execution
 """
 
 import os
@@ -20,6 +21,12 @@ from datetime import datetime
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# Import test isolation utilities
+try:
+    from scripts.test_isolation import TestIsolationManager
+except ImportError:
+    TestIsolationManager = None
 
 # Test configuration
 TEST_CONFIGS = {
@@ -52,7 +59,7 @@ TEST_CONFIGS = {
 
 
 class TestRunner:
-    def __init__(self):
+    def __init__(self, use_isolation=True):
         self.results = {
             "backend": {
                 "status": "pending", 
@@ -70,8 +77,19 @@ class TestRunner:
             },
             "overall": {"status": "pending", "start_time": None, "end_time": None},
         }
-        self.reports_dir = PROJECT_ROOT / "reports"
-        self.reports_dir.mkdir(exist_ok=True)
+        
+        # Set up test isolation if available and enabled
+        self.isolation_manager = None
+        if use_isolation and TestIsolationManager:
+            self.isolation_manager = TestIsolationManager()
+            self.isolation_manager.setup_environment()
+            self.isolation_manager.apply_environment()
+            self.isolation_manager.register_cleanup()
+            self.reports_dir = self.isolation_manager.directories.get('reports', PROJECT_ROOT / "reports")
+        else:
+            self.reports_dir = PROJECT_ROOT / "reports"
+            
+        self.reports_dir.mkdir(exist_ok=True, parents=True)
         
     def parse_pytest_output(self, output: str) -> Dict:
         """Parse pytest output to extract test statistics per service"""
@@ -178,6 +196,10 @@ class TestRunner:
         if "-v" not in args and "--verbose" not in args:
             args = args + ["-v"]
         
+        # Add isolation arguments if using isolation manager
+        if self.isolation_manager:
+            args = args + ["--isolation"]
+        
         cmd = [sys.executable, "scripts/test_backend.py"] + args
         result = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
         
@@ -246,6 +268,10 @@ class TestRunner:
         
         start_time = time.time()
         self.results["frontend"]["status"] = "running"
+        
+        # Add isolation arguments if using isolation manager
+        if self.isolation_manager:
+            args = args + ["--isolation"]
         
         cmd = [sys.executable, "scripts/test_frontend.py"] + args
         result = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)

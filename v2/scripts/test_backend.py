@@ -27,7 +27,7 @@ TEST_CATEGORIES = {
     "auth": ["app/tests/test_auth*.py", "app/tests/routes/test_*auth*.py"],
     "database": ["app/tests/services/database", "app/tests/test_database*.py"],
     "critical": ["app/tests/test_main.py", "app/tests/test_agent_flow.py"],
-    "smoke": ["app/tests/routes/test_health*.py", "app/tests/test_main.py"],
+    "smoke": ["app/tests/routes/test_health_route.py", "app/tests/routes/test_health_endpoints.py", "app/tests/test_main.py"],
 }
 
 

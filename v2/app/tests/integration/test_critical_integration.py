@@ -4,6 +4,7 @@ Tests the most important cross-component interactions
 """
 
 import pytest
+from pytest_asyncio import fixture as pytest_asyncio_fixture
 import asyncio
 import json
 import jwt
@@ -35,7 +36,7 @@ import os
 class TestCriticalIntegration:
     """Critical integration tests for core system functionality"""
 
-    @pytest.fixture
+    @pytest_asyncio_fixture
     async def setup_real_database(self):
         """Setup a real in-memory SQLite database for integration testing"""
         # Create temporary database
@@ -152,14 +153,14 @@ class TestCriticalIntegration:
         - Persists state to database
         - Verifies final results in database
         """
-        db_setup = await setup_real_database
+        db_setup = setup_real_database
         infra = setup_integration_infrastructure
         session = db_setup["session"]
         
         # Create repositories
-        thread_repo = ThreadRepository(session)
-        message_repo = MessageRepository(session)
-        run_repo = RunRepository(session)
+        thread_repo = ThreadRepository()
+        message_repo = MessageRepository()
+        run_repo = RunRepository()
         
         # Create test user
         user_id = str(uuid.uuid4())
@@ -345,14 +346,14 @@ class TestCriticalIntegration:
         - Resumes execution from saved checkpoint
         - Verifies complete recovery and continuation
         """
-        db_setup = await setup_real_database
+        db_setup = setup_real_database
         session = db_setup["session"]
         infra = setup_integration_infrastructure
         
         # Create repositories
-        thread_repo = ThreadRepository(session)
-        run_repo = RunRepository(session)
-        message_repo = MessageRepository(session)
+        thread_repo = ThreadRepository()
+        run_repo = RunRepository()
+        message_repo = MessageRepository()
         
         # Setup test data
         user_id = str(uuid.uuid4())

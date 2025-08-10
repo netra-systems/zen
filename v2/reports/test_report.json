@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-10T11:13:15.861023",
+  "timestamp": "2025-08-10T11:14:46.201685",
   "configuration": {
     "mode": "quick",
     "backend_only": false,
@@ -13,7 +13,7 @@
   "results": {
     "backend": {
       "status": "failed",
-      "duration": 6.71970272064209,
+      "duration": 6.2612645626068115,
       "exit_code": 4,
       "test_details": {},
       "summary": {
@@ -25,7 +25,7 @@
     },
     "frontend": {
       "status": "failed",
-      "duration": 0.11649942398071289,
+      "duration": 0.09499144554138184,
       "exit_code": 1,
       "test_details": {},
       "summary": {
@@ -37,12 +37,12 @@
     },
     "overall": {
       "status": "pending",
-      "start_time": 1754849589.0248208,
-      "end_time": 1754849595.861023
+      "start_time": 1754849679.84543,
+      "end_time": 1754849686.201686
     }
   },
   "summary": {
-    "total_duration": 6.836202144622803,
+    "total_duration": 6.356256008148193,
     "backend_passed": false,
     "frontend_passed": false,
     "overall_passed": false,

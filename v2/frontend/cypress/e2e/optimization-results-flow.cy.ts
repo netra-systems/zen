@@ -29,8 +29,15 @@ describe('Optimization Results and Reporting Flow', () => {
         // Request comprehensive optimization report
         const reportRequest = 'Generate a complete optimization report for my AI infrastructure with executive summary, metrics, and recommendations';
         
-        cy.get('textarea, input[type="text"]').first().should('be.visible').type(reportRequest);
-        cy.get('button').contains(/send|submit|→|⏎/i).click();
+        cy.get('textarea, input[type="text"], [contenteditable="true"]').first().should('be.visible').type(reportRequest);
+        // Try different button selectors
+        cy.get('body').then($body => {
+          if ($body.find('button:contains("Send"), button:contains("Submit")').length > 0) {
+            cy.get('button').contains(/send|submit|→|⏎/i).click();
+          } else {
+            cy.get('button, [role="button"]').first().click();
+          }
+        });
         
         // Verify request sent
         cy.contains(reportRequest, { timeout: 10000 }).should('be.visible');
@@ -66,8 +73,15 @@ describe('Optimization Results and Reporting Flow', () => {
       if (!url.includes('/login')) {
         const metricsRequest = 'Show me optimization metrics with before/after comparison for cost, latency, and throughput';
         
-        cy.get('textarea, input[type="text"]').first().type(metricsRequest);
-        cy.get('button').contains(/send|submit|→|⏎/i).click();
+        cy.get('textarea, input[type="text"], [contenteditable="true"]').first().type(metricsRequest);
+        // Try different button selectors
+        cy.get('body').then($body => {
+          if ($body.find('button:contains("Send"), button:contains("Submit")').length > 0) {
+            cy.get('button').contains(/send|submit|→|⏎/i).click();
+          } else {
+            cy.get('button, [role="button"]').first().click();
+          }
+        });
         
         cy.contains(metricsRequest, { timeout: 10000 }).should('be.visible');
         
@@ -118,8 +132,15 @@ describe('Optimization Results and Reporting Flow', () => {
       if (!url.includes('/login')) {
         const actionRequest = 'Give me specific actionable steps to optimize my LLM deployment with priority and effort estimates';
         
-        cy.get('textarea, input[type="text"]').first().type(actionRequest);
-        cy.get('button').contains(/send|submit|→|⏎/i).click();
+        cy.get('textarea, input[type="text"], [contenteditable="true"]').first().type(actionRequest);
+        // Try different button selectors
+        cy.get('body').then($body => {
+          if ($body.find('button:contains("Send"), button:contains("Submit")').length > 0) {
+            cy.get('button').contains(/send|submit|→|⏎/i).click();
+          } else {
+            cy.get('button, [role="button"]').first().click();
+          }
+        });
         
         cy.contains(actionRequest, { timeout: 10000 }).should('be.visible');
         
@@ -154,8 +175,15 @@ describe('Optimization Results and Reporting Flow', () => {
       if (!url.includes('/login')) {
         const exportRequest = 'Generate optimization report and provide options to save or export it';
         
-        cy.get('textarea, input[type="text"]').first().type(exportRequest);
-        cy.get('button').contains(/send|submit|→|⏎/i).click();
+        cy.get('textarea, input[type="text"], [contenteditable="true"]').first().type(exportRequest);
+        // Try different button selectors
+        cy.get('body').then($body => {
+          if ($body.find('button:contains("Send"), button:contains("Submit")').length > 0) {
+            cy.get('button').contains(/send|submit|→|⏎/i).click();
+          } else {
+            cy.get('button, [role="button"]').first().click();
+          }
+        });
         
         cy.contains(exportRequest, { timeout: 10000 }).should('be.visible');
         
@@ -205,16 +233,30 @@ describe('Optimization Results and Reporting Flow', () => {
       if (!url.includes('/login')) {
         // First optimization request
         const firstRequest = 'Analyze current performance: 200ms latency, $100/hour cost';
-        cy.get('textarea, input[type="text"]').first().type(firstRequest);
-        cy.get('button').contains(/send|submit|→|⏎/i).click();
+        cy.get('textarea, input[type="text"], [contenteditable="true"]').first().type(firstRequest);
+        // Try different button selectors
+        cy.get('body').then($body => {
+          if ($body.find('button:contains("Send"), button:contains("Submit")').length > 0) {
+            cy.get('button').contains(/send|submit|→|⏎/i).click();
+          } else {
+            cy.get('button, [role="button"]').first().click();
+          }
+        });
         
         cy.contains(firstRequest, { timeout: 10000 }).should('be.visible');
         cy.contains(/analyzing|optimization/i, { timeout: 20000 }).should('exist');
         
         // Second optimization request
         const followUpRequest = 'Show me optimization trends and improvements over time';
-        cy.get('textarea, input[type="text"]').first().clear().type(followUpRequest);
-        cy.get('button').contains(/send|submit|→|⏎/i).click();
+        cy.get('textarea, input[type="text"], [contenteditable="true"]').first().clear().type(followUpRequest);
+        // Try different button selectors
+        cy.get('body').then($body => {
+          if ($body.find('button:contains("Send"), button:contains("Submit")').length > 0) {
+            cy.get('button').contains(/send|submit|→|⏎/i).click();
+          } else {
+            cy.get('button, [role="button"]').first().click();
+          }
+        });
         
         cy.contains(followUpRequest, { timeout: 10000 }).should('be.visible');
         
@@ -240,8 +282,15 @@ describe('Optimization Results and Reporting Flow', () => {
       if (!url.includes('/login')) {
         const costBenefitRequest = 'Provide cost-benefit analysis for each optimization recommendation including ROI and payback period';
         
-        cy.get('textarea, input[type="text"]').first().type(costBenefitRequest);
-        cy.get('button').contains(/send|submit|→|⏎/i).click();
+        cy.get('textarea, input[type="text"], [contenteditable="true"]').first().type(costBenefitRequest);
+        // Try different button selectors
+        cy.get('body').then($body => {
+          if ($body.find('button:contains("Send"), button:contains("Submit")').length > 0) {
+            cy.get('button').contains(/send|submit|→|⏎/i).click();
+          } else {
+            cy.get('button, [role="button"]').first().click();
+          }
+        });
         
         cy.contains(costBenefitRequest, { timeout: 10000 }).should('be.visible');
         
@@ -279,8 +328,15 @@ describe('Optimization Results and Reporting Flow', () => {
       if (!url.includes('/login')) {
         const customRequest = 'Generate optimization report focusing only on latency improvements, exclude cost analysis';
         
-        cy.get('textarea, input[type="text"]').first().type(customRequest);
-        cy.get('button').contains(/send|submit|→|⏎/i).click();
+        cy.get('textarea, input[type="text"], [contenteditable="true"]').first().type(customRequest);
+        // Try different button selectors
+        cy.get('body').then($body => {
+          if ($body.find('button:contains("Send"), button:contains("Submit")').length > 0) {
+            cy.get('button').contains(/send|submit|→|⏎/i).click();
+          } else {
+            cy.get('button, [role="button"]').first().click();
+          }
+        });
         
         cy.contains(customRequest, { timeout: 10000 }).should('be.visible');
         
