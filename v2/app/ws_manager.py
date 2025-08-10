@@ -1,5 +1,6 @@
 from app.logging_config import central_logger
-from fastapi import WebSocket, WebSocketState
+from fastapi import WebSocket
+from starlette.websockets import WebSocketState
 from typing import List, Dict, Any, Optional, Set
 import time
 import asyncio

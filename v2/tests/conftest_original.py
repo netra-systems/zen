@@ -5,40 +5,21 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from typing import AsyncGenerator, Generator
 import asyncio
 
-# Set testing environment variables
 os.environ["TESTING"] = "1"
 os.environ["REDIS_HOST"] = "localhost"
 os.environ["CLICKHOUSE_HOST"] = "localhost"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-# Add parent directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# Only import if available to avoid failures
-try:
-    from fastapi import FastAPI
-    from fastapi.testclient import TestClient
-    FASTAPI_AVAILABLE = True
-except ImportError:
-    FASTAPI_AVAILABLE = False
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.pool import StaticPool
 
-try:
-    from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-    from sqlalchemy.pool import StaticPool
-    SQLALCHEMY_AVAILABLE = True
-except ImportError:
-    SQLALCHEMY_AVAILABLE = False
-
-# Mock User class if app imports fail
-try:
-    from app.schemas import User
-except ImportError:
-    class User:
-        def __init__(self, id, email, is_active=True, is_superuser=False):
-            self.id = id
-            self.email = email
-            self.is_active = is_active
-            self.is_superuser = is_superuser
+from app.db.models_postgres import Base
+from app.schemas import User
+from app.config import settings
 
 pytest_plugins = ['pytest_asyncio']
 
@@ -50,7 +31,35 @@ def event_loop():
         loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     yield loop
-    # Don't close loop to avoid hanging
+    loop.close()
+
+@pytest.fixture
+async def async_engine():
+    engine = create_async_engine(
+        "sqlite+aiosqlite:///:memory:",
+        poolclass=StaticPool,
+        echo=False,
+    )
+    
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    
+    yield engine
+    
+    await engine.dispose()
+
+@pytest.fixture
+async def async_session_factory(async_engine):
+    return async_sessionmaker(
+        async_engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+    )
+
+@pytest.fixture
+async def async_session(async_session_factory) -> AsyncGenerator[AsyncSession, None]:
+    async with async_session_factory() as session:
+        yield session
 
 @pytest.fixture
 def mock_redis_manager():
@@ -122,6 +131,7 @@ def mock_agent_service():
 
 @pytest.fixture
 def app(
+    async_session_factory,
     mock_redis_manager,
     mock_clickhouse_client,
     mock_llm_manager,
@@ -133,13 +143,11 @@ def app(
     mock_agent_supervisor,
     mock_agent_service,
 ):
-    if not FASTAPI_AVAILABLE:
-        pytest.skip("FastAPI not available")
-        
     from contextlib import asynccontextmanager
     
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        app.state.db_session_factory = async_session_factory
         app.state.redis_manager = mock_redis_manager
         app.state.clickhouse_client = mock_clickhouse_client
         app.state.llm_manager = mock_llm_manager
@@ -153,25 +161,37 @@ def app(
     
     app = FastAPI(lifespan=lifespan)
     
-    # Only include routes if they can be imported
-    try:
-        from app.routes.websockets import router as websockets_router
-        app.include_router(websockets_router)
-    except ImportError:
-        pass
-        
-    try:
-        from app.routes.auth import router as auth_router
-        app.include_router(auth_router, prefix="/api/auth")
-    except ImportError:
-        pass
-        
+    from fastapi.middleware.cors import CORSMiddleware
+    from starlette.middleware.sessions import SessionMiddleware
+    
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key="test-secret-key",
+        same_site="lax",
+    )
+    
+    from app.routes.websockets import router as websockets_router
+    from app.routes.auth import router as auth_router
+    from app.routes.generation import router as generation_router
+    from app.routes.agent import router as agent_router
+    
+    app.include_router(websockets_router)
+    app.include_router(auth_router, prefix="/api/auth")
+    app.include_router(generation_router, prefix="/api")
+    app.include_router(agent_router, prefix="/api")
+    
     return app
 
 @pytest.fixture
 def client(app):
-    if not FASTAPI_AVAILABLE:
-        pytest.skip("FastAPI not available")
     return TestClient(app)
 
 @pytest.fixture
@@ -185,15 +205,40 @@ def test_user():
 
 @pytest.fixture
 def auth_headers(test_user):
-    try:
-        from app.auth.auth import create_access_token
-        token = create_access_token(data={"sub": test_user.email})
-        return {"Authorization": f"Bearer {token}"}
-    except ImportError:
-        # Return mock headers if auth module not available
-        return {"Authorization": "Bearer mock-token"}
+    from app.auth.auth import create_access_token
+    token = create_access_token(data={"sub": test_user.email})
+    return {"Authorization": f"Bearer {token}"}
 
-# Simple fixture for basic testing
-@pytest.fixture
-def sample_data():
-    return {"test": "data"}
+@pytest.fixture(autouse=True)
+def mock_startup_checks():
+    with patch("app.startup_checks.run_startup_checks", new_callable=AsyncMock) as mock:
+        mock.return_value = None
+        yield mock
+
+@pytest.fixture(autouse=True)
+def mock_database_validation():
+    with patch("app.services.database_env_service.validate_database_environment") as mock:
+        mock.return_value = None
+        yield mock
+
+@pytest.fixture(autouse=True)
+def mock_schema_validation():
+    with patch("app.services.schema_validation_service.run_comprehensive_validation", new_callable=AsyncMock) as mock:
+        mock.return_value = True
+        yield mock
+
+@pytest.fixture(autouse=True)
+def mock_migrations():
+    with patch("app.main.run_migrations") as mock:
+        mock.return_value = None
+        yield mock
+
+@pytest.fixture(autouse=True)
+def mock_central_logger():
+    with patch("app.logging_config.central_logger") as mock:
+        logger = MagicMock()
+        logger.get_logger = MagicMock(return_value=MagicMock())
+        logger.shutdown = AsyncMock(return_value=None)
+        logger.clickhouse_db = MagicMock()
+        mock.return_value = logger
+        yield mock
