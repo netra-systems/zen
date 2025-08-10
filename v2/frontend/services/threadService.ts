@@ -1,4 +1,4 @@
-import { apiClient } from '@/services/apiClient';
+import { apiClient } from '@/services/apiClientWrapper';
 
 export interface Thread {
   id: string;
