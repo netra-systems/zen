@@ -221,9 +221,9 @@ describe('useChatStore', () => {
       });
 
       expect(result.current.messages).toHaveLength(1);
-      expect(result.current.messages[0].role).toBe('system');
+      expect(result.current.messages[0].type).toBe('error');
       expect(result.current.messages[0].content).toContain(errorMessage);
-      expect(result.current.messages[0].error).toBe(true);
+      expect(result.current.messages[0].error).toBe(errorMessage);
     });
   });
 });

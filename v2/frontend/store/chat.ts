@@ -1,6 +1,6 @@
 
 import { create } from 'zustand';
-import { Message, SubAgentStatus } from '@/types/chat';
+import { Message, SubAgentState as SubAgentStatus } from '@/types/chat';
 
 interface ChatState {
   messages: Message[];
@@ -83,14 +83,17 @@ export const useChatStore = create<ChatState>((set) => ({
   }),
 
   loadMessages: (messages) => set({
-    messages: messages.map((msg, index) => ({
-      id: msg.id || `msg_${Date.now()}_${index}`,
-      type: msg.role === 'user' ? 'user' : 'ai',
-      content: msg.content,
-      created_at: msg.created_at || new Date().toISOString(),
-      displayed_to_user: true,
-      ...msg
-    }))
+    messages: messages.map((msg, index) => {
+      const { id: msgId, ...restMsg } = msg;
+      return {
+        ...restMsg,
+        id: (msgId && msgId.trim() !== '') ? msgId : `msg_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
+        type: msg.role === 'user' ? 'user' : 'ai',
+        content: msg.content,
+        created_at: msg.created_at || new Date().toISOString(),
+        displayed_to_user: true
+      };
+    })
   }),
   
   addError: (error) => set((state) => ({

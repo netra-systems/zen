@@ -74,11 +74,16 @@ class ApiClientWrapper {
       }
 
       if (!response.ok) {
-        throw new Error(
+        const errorMessage = 
           (responseData as any)?.detail || 
           (responseData as any)?.message || 
-          `Request failed with status ${response.status}`
-        );
+          (responseData as any)?.error ||
+          `Request failed with status ${response.status}`;
+        
+        const error = new Error(errorMessage);
+        (error as any).status = response.status;
+        (error as any).response = responseData;
+        throw error;
       }
 
       return {
@@ -90,7 +95,9 @@ class ApiClientWrapper {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error('An unexpected error occurred');
+      // Handle network errors or other unexpected cases
+      const errorMessage = String(error) || 'An unexpected error occurred';
+      throw new Error(errorMessage);
     }
   }
 

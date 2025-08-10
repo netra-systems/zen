@@ -10,7 +10,7 @@ from app.db.session import get_db_session as get_db
 from app.services.database.thread_repository import ThreadRepository
 from app.services.database.message_repository import MessageRepository
 from app.logging_config import central_logger
-from app.auth.auth_dependencies import get_current_user
+from app.auth.auth_dependencies import get_current_active_user
 from pydantic import BaseModel
 import time
 import uuid
@@ -42,7 +42,7 @@ class ThreadResponse(BaseModel):
 @router.get("/", response_model=List[ThreadResponse])
 async def list_threads(
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user = Depends(get_current_active_user),
     limit: int = Query(20, le=100),
     offset: int = Query(0, ge=0)
 ):
@@ -52,7 +52,7 @@ async def list_threads(
         message_repo = MessageRepository()
         
         # Get all threads for user
-        threads = await thread_repo.find_by_user(db, current_user["sub"])
+        threads = await thread_repo.find_by_user(db, current_user.id)
         
         # Convert to response model with message counts
         response_threads = []
@@ -79,7 +79,7 @@ async def list_threads(
 async def create_thread(
     thread_data: ThreadCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_active_user)
 ):
     """Create a new thread"""
     try:
@@ -90,7 +90,7 @@ async def create_thread(
         
         # Prepare metadata
         metadata = thread_data.metadata or {}
-        metadata["user_id"] = current_user["sub"]
+        metadata["user_id"] = current_user.id
         if thread_data.title:
             metadata["title"] = thread_data.title
         metadata["status"] = "active"
@@ -124,7 +124,7 @@ async def create_thread(
 async def get_thread(
     thread_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_active_user)
 ):
     """Get a specific thread"""
     try:
@@ -137,7 +137,7 @@ async def get_thread(
             raise HTTPException(status_code=404, detail="Thread not found")
         
         # Verify user owns thread
-        if thread.metadata_.get("user_id") != current_user["sub"]:
+        if thread.metadata_.get("user_id") != current_user.id:
             raise HTTPException(status_code=403, detail="Access denied")
         
         message_count = await message_repo.count_by_thread(db, thread_id)
@@ -163,7 +163,7 @@ async def update_thread(
     thread_id: str,
     thread_update: ThreadUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_active_user)
 ):
     """Update a thread"""
     try:
@@ -176,7 +176,7 @@ async def update_thread(
             raise HTTPException(status_code=404, detail="Thread not found")
         
         # Verify user owns thread
-        if thread.metadata_.get("user_id") != current_user["sub"]:
+        if thread.metadata_.get("user_id") != current_user.id:
             raise HTTPException(status_code=403, detail="Access denied")
         
         # Update metadata
@@ -216,7 +216,7 @@ async def update_thread(
 async def delete_thread(
     thread_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_active_user)
 ):
     """Delete (archive) a thread"""
     try:
@@ -228,7 +228,7 @@ async def delete_thread(
             raise HTTPException(status_code=404, detail="Thread not found")
         
         # Verify user owns thread
-        if thread.metadata_.get("user_id") != current_user["sub"]:
+        if thread.metadata_.get("user_id") != current_user.id:
             raise HTTPException(status_code=403, detail="Access denied")
         
         # Archive instead of delete
@@ -249,7 +249,7 @@ async def delete_thread(
 async def get_thread_messages(
     thread_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user = Depends(get_current_active_user),
     limit: int = Query(50, le=100),
     offset: int = Query(0, ge=0)
 ):
@@ -264,7 +264,7 @@ async def get_thread_messages(
             raise HTTPException(status_code=404, detail="Thread not found")
         
         # Verify user owns thread
-        if thread.metadata_.get("user_id") != current_user["sub"]:
+        if thread.metadata_.get("user_id") != current_user.id:
             raise HTTPException(status_code=403, detail="Access denied")
         
         # Get messages
