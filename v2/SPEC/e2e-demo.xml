@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>E2E Demo</name>
+        <type>Demo</type>
+        <version>1.0</version>
+    </metadata>
+    
+    <primary-spec>
+        <description>E2E (End to End) Demo Specification</description>
+        <goals>
+            <goal priority="high">A complete end to end demo that works for users.</goal>
+            <goal priority="critical">The Coherence of the system working in harmony.</goal>
+        </goals>
+    </primary-spec>
+    
+    <sections>
+        <section id="demo-concepts" order="1">
+            <title>Demo Goals</title>
+            <requirements>
+                <requirement>Get decision makers to commit to a Netra pilot.</requirement>
+                <requirement>Build credibility to have them want to connect their real data in a future demo.</requirement>
+                <requirement>Be easy, low effort, and see value in less than 5 minutes.</requirement>
+                <requirement>Be as realistic as reasonable for the context.</requirement>
+                <requirement> A user can picture connecting their real data and getting similar (real) outcome </requirement>
+            </requirements>
+        </section>
+        
+        <section id="data-order" order="2">
+            <title>Order</title>
+            <requirements>
+                <requirement>Signup with OAuth (and auto login) </requirement>
+                <requirement>A chat UI/UX that guides user in creating synthetic data similar to their workload</requirement>
+                <requirement>Visiability into key data elements, e.g. counts, speed, expandable JSON etc.</requirement>
+                <requirement>Example prompts that prove the value</requirement>
+                <requirement>Agentic outputs that work and show value</requirement>
+                <requirement>Actions: Next step suggestions to action the agent outputs (Okay if these are placeholder)</requirement>
+            </requirements>
+        </section>
+        
+        <section id="data-processing" order="3">
+            <title>Assumptions</title>
+            <requirements>
+                <requirement>The Netra default Corpus is available as a starting point.
+                <requirement> A reasonable default should be auto-seeded by the system at startup if not existing. </requirement>
+                <requirement> The assumption is the corpus represents the longer time generation part.</requirement>
+                <requirement> All user items are done via "chat" UI/UX. Buttons, toggles, cards etc. can be 
+                integrated and used as needed.</requirement>
+            </requirements>
+        </section>
+
+    </sections>
+</specification>
