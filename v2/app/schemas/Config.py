@@ -39,12 +39,12 @@ class RedisConfig(BaseModel):
 
 class GoogleCloudConfig(BaseModel):
     project_id: str = "cryptic-net-466001-n0"
-    client_id: str = None
-    client_secret: str = None
+    client_id: Optional[str] = ""
+    client_secret: Optional[str] = ""
 
 class OAuthConfig(BaseModel):
-    client_id: str = None
-    client_secret: str = None
+    client_id: Optional[str] = ""
+    client_secret: Optional[str] = ""
     token_uri: str = "https://oauth2.googleapis.com/token"
     auth_uri: str = "https://accounts.google.com/o/oauth2/v2/auth"
     userinfo_endpoint: str = "https://www.googleapis.com/oauth2/userinfo"
@@ -123,6 +123,7 @@ class AppConfig(BaseModel):
     """Base configuration class."""
 
     environment: str = "development"
+    app_name: str = "netra"  # Application name for identification
     google_cloud: GoogleCloudConfig = GoogleCloudConfig()
     oauth_config: OAuthConfig = Field(default_factory=OAuthConfig)
     clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
@@ -143,6 +144,10 @@ class AppConfig(BaseModel):
     log_secrets: bool = False
     frontend_url: str = "http://localhost:3000"
     redis: "RedisConfig" = Field(default_factory=lambda: RedisConfig())
+    
+    # LLM Cache Settings
+    llm_cache_enabled: bool = True
+    llm_cache_ttl: int = 3600  # 1 hour default
 
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(
@@ -184,6 +189,16 @@ class DevelopmentConfig(AppConfig):
     log_level: str = "DEBUG"
     jwt_secret_key: str = "development_secret_key_for_jwt_do_not_use_in_production"
     fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Generated with Fernet.generate_key()
+    
+    # OAuth configuration for development - populated by SecretReference system
+    oauth_config: OAuthConfig = OAuthConfig(
+        client_id="",  # Populated by SecretReference: google-client-id
+        client_secret="",  # Populated by SecretReference: google-client-secret
+        authorized_redirect_uris=[
+            "http://localhost:8000/api/auth/callback",
+            "http://localhost:3000/auth/callback"
+        ]
+    )
 
 class ProductionConfig(AppConfig):
     """Production-specific settings."""

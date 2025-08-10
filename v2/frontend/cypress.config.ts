@@ -1,12 +1,23 @@
 
 import { defineConfig } from 'cypress';
-import { API_BASE_URL } from './services/apiConfig';
 
 export default defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
-    baseUrl: API_BASE_URL.replace('8000', '3000'),
+    baseUrl: 'http://localhost:3000',
+    supportFile: false,
+    specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
+    watchForFileChanges: false,
+    video: false,
+    screenshotOnRunFailure: false,
+  },
+  component: {
+    devServer: {
+      framework: 'next',
+      bundler: 'webpack',
+    },
+    specPattern: 'cypress/component/**/*.{js,jsx,ts,tsx}',
   },
 });

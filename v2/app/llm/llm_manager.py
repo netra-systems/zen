@@ -2,6 +2,10 @@ from typing import Any, Dict, Optional
 from app.schemas import AppConfig
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
+from app.services.llm_cache_service import llm_cache_service
+from app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
 
 class LLMManager:
     def __init__(self, settings: AppConfig):
@@ -48,10 +52,23 @@ class LLMManager:
         self._llm_cache[cache_key] = llm
         return llm
 
-    async def ask_llm(self, prompt: str, llm_config_name: str) -> str:
+    async def ask_llm(self, prompt: str, llm_config_name: str, use_cache: bool = True) -> str:
+        # Check cache first if enabled
+        if use_cache:
+            cached_response = await llm_cache_service.get_cached_response(prompt, llm_config_name)
+            if cached_response:
+                return cached_response
+        
+        # Make LLM call
         llm = self.get_llm(llm_config_name)
         response = await llm.ainvoke(prompt)
-        return response.content
+        response_content = response.content
+        
+        # Cache the response if appropriate
+        if use_cache and llm_cache_service.should_cache_response(prompt, response_content):
+            await llm_cache_service.cache_response(prompt, response_content, llm_config_name)
+        
+        return response_content
 
     async def stream_llm(self, prompt: str, llm_config_name: str):
         llm = self.get_llm(llm_config_name)

@@ -1,4 +1,5 @@
 import json
+from typing import Union, Dict, Any
 from app.logging_config import central_logger
 from fastapi import Depends
 from app.agents.supervisor import Supervisor
@@ -6,78 +7,68 @@ from app import schemas
 from app.ws_manager import manager
 from app.llm.llm_manager import LLMManager
 from app.db.postgres import get_async_db
+from app.services.thread_service import ThreadService
+from app.services.message_handlers import MessageHandlerService
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = central_logger.get_logger(__name__)
 
 class AgentService:
+    """Service for managing agent interactions following conventions"""
+    
     def __init__(self, supervisor: Supervisor):
         self.supervisor = supervisor
+        self.thread_service = ThreadService()
+        self.message_handler = MessageHandlerService(supervisor, self.thread_service)
 
     async def run(self, request_model: schemas.RequestModel, run_id: str, stream_updates: bool = False):
         """
         Starts the agent. The supervisor will stream logs back to the websocket if requested.
         """
-        return await self.supervisor.run(request_model.model_dump(), run_id, stream_updates)
+        # Extract user_request from the request model
+        user_request = request_model.user_request if hasattr(request_model, 'user_request') else str(request_model.model_dump())
+        return await self.supervisor.run(user_request, run_id, stream_updates)
 
-    async def handle_websocket_message(self, user_id: str, message):
+    async def handle_websocket_message(self, user_id: str, message: Union[str, Dict], db_session: AsyncSession = None) -> None:
         """
         Handles a message from the WebSocket.
         """
-        logger.info(f"handle_websocket_message called for user_id: {user_id} with message: {message}")
+        logger.info(f"handle_websocket_message called for user_id: {user_id}")
         try:
-            # Handle both string and dict inputs
-            if isinstance(message, str):
-                data = json.loads(message)
-                # If json.loads returns a string, it means the JSON was double-encoded
-                if isinstance(data, str):
-                    data = json.loads(data)
-            else:
-                data = message
-            
+            data = self._parse_message(message)
             message_type = data.get("type")
             payload = data.get("payload", {})
             
             if message_type == "start_agent":
-                request_model = schemas.RequestModel(**payload.get("request"))
-                # When started from a websocket, we always want to stream updates
-                response = await self.run(request_model, user_id, stream_updates=True)
-                await manager.send_message(
-                    user_id,
-                    {
-                        "event": "agent_finished",
-                        "data": response
-                    }
-                )
+                await self.message_handler.handle_start_agent(user_id, payload, db_session)
             
             elif message_type == "user_message":
-                # Handle user messages - could be passed to the supervisor or stored
-                text = payload.get("text", "")
-                logger.info(f"Received user message from {user_id}: {text}")
-                # TODO: Implement user message handling based on your requirements
-                await manager.send_message(
-                    user_id,
-                    {
-                        "event": "message_received",
-                        "data": {"status": "received", "message": text}
-                    }
-                )
+                await self.message_handler.handle_user_message(user_id, payload, db_session)
+            
+            elif message_type == "get_thread_history":
+                await self.message_handler.handle_thread_history(user_id, db_session)
             
             elif message_type == "stop_agent":
-                # Handle stop agent request
-                logger.info(f"Received stop agent request from {user_id}")
-                # TODO: Implement agent stopping logic if needed
-                await manager.send_message(
-                    user_id,
-                    {
-                        "event": "agent_stopped",
-                        "data": {"status": "stopped"}
-                    }
-                )
+                await self.message_handler.handle_stop_agent(user_id)
             
             else:
                 logger.warning(f"Received unhandled message type '{message_type}' for user_id: {user_id}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in websocket message from user {user_id}: {e}")
+            await manager.send_error(user_id, "Invalid message format")
         except Exception as e:
             logger.error(f"Error in handle_websocket_message for user_id: {user_id}: {e}", exc_info=True)
+            await manager.send_error(user_id, "Internal server error")
+    
+    def _parse_message(self, message: Union[str, Dict]) -> Dict[str, Any]:
+        """Parse incoming message to dictionary"""
+        if isinstance(message, str):
+            data = json.loads(message)
+            # Handle double-encoded JSON
+            if isinstance(data, str):
+                data = json.loads(data)
+            return data
+        return message
 
 def get_agent_service(db_session = Depends(get_async_db), llm_manager: LLMManager = Depends(LLMManager)) -> AgentService:
     from app.agents.supervisor import Supervisor

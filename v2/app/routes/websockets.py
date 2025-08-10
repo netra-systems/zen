@@ -64,7 +64,8 @@ async def websocket_endpoint(
     try:
         while True:
             data = await websocket.receive_text()
-            await agent_service.handle_websocket_message(user_id_str, data)
+            # Pass the database session to handle_websocket_message
+            await agent_service.handle_websocket_message(user_id_str, data, db_session)
 
     except WebSocketDisconnect:
         logger.info(f"WebSocket disconnected for user {user_id_str}")

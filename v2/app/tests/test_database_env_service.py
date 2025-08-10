@@ -1,147 +1,103 @@
 """Tests for Database Environment Service"""
 
 import pytest
-from app.services.database_env_service import DatabaseEnvironmentService
+from unittest.mock import patch, MagicMock
+from app.services.database_env_service import DatabaseEnvironmentValidator, validate_database_environment
 
-class TestDatabaseEnvironmentService:
+class TestDatabaseEnvironmentValidator:
     
-    def test_validate_production_database_url(self):
-        """Test validation for production environment"""
-        # Valid production URL
-        result = DatabaseEnvironmentService.validate_database_url(
-            "postgresql+asyncpg://produser:password@prod-db.example.com/netra_prod",
-            "production"
-        )
-        assert result["valid"] is True
-        assert result["database_name"] == "netra_prod"
-        assert len(result["errors"]) == 0
-        
-        # Invalid - using localhost in production
-        result = DatabaseEnvironmentService.validate_database_url(
-            "postgresql+asyncpg://user:password@localhost/netra_prod",
-            "production"
-        )
-        assert result["valid"] is False
-        assert any("localhost" in error for error in result["errors"])
-        
-        # Invalid - using test database in production
-        result = DatabaseEnvironmentService.validate_database_url(
-            "postgresql+asyncpg://user:password@prod-db.example.com/netra_test",
-            "production"
-        )
-        assert result["valid"] is False
-        assert any("test" in error.lower() for error in result["errors"])
-        
-        # Warning - using postgres user
-        result = DatabaseEnvironmentService.validate_database_url(
-            "postgresql+asyncpg://postgres:password@prod-db.example.com/netra_prod",
-            "production"
-        )
-        assert result["valid"] is True
-        assert any("postgres" in warning for warning in result["warnings"])
-        
-        # Invalid - no password
-        result = DatabaseEnvironmentService.validate_database_url(
-            "postgresql+asyncpg://user:@prod-db.example.com/netra_prod",
-            "production"
-        )
-        assert result["valid"] is False
-        assert any("password" in error for error in result["errors"])
+    def test_keyword_constants(self):
+        """Test that environment keywords are properly defined"""
+        assert "prod" in DatabaseEnvironmentValidator.PROD_KEYWORDS
+        assert "production" in DatabaseEnvironmentValidator.PROD_KEYWORDS
+        assert "test" in DatabaseEnvironmentValidator.TEST_KEYWORDS
+        assert "dev" in DatabaseEnvironmentValidator.DEV_KEYWORDS
     
-    def test_validate_development_database_url(self):
-        """Test validation for development environment"""
-        # Valid development URL
-        result = DatabaseEnvironmentService.validate_database_url(
-            "postgresql+asyncpg://postgres:123@localhost/netra_dev",
-            "development"
-        )
-        assert result["valid"] is True
-        assert result["database_name"] == "netra_dev"
+    def test_validate_production_database_success(self):
+        """Test production database validation passes with valid URL"""
+        mock_settings = MagicMock()
+        mock_settings.environment = "production"
+        mock_settings.database_url = "postgresql://user:pass@prod-server/app_prod"
         
-        # Also valid - just "netra" in development
-        result = DatabaseEnvironmentService.validate_database_url(
-            "postgresql+asyncpg://postgres:123@localhost/netra",
-            "development"
-        )
-        assert result["valid"] is True
-        assert result["database_name"] == "netra"
-        
-        # Invalid - using production database
-        result = DatabaseEnvironmentService.validate_database_url(
-            "postgresql+asyncpg://postgres:123@localhost/netra_prod",
-            "development"
-        )
-        assert result["valid"] is False
-        assert any("production" in error for error in result["errors"])
+        with patch('app.services.database_env_service.settings', mock_settings):
+            # Should not raise any exception
+            DatabaseEnvironmentValidator.validate_database_environment()
     
-    def test_validate_testing_database_url(self):
-        """Test validation for testing environment"""
-        # Valid testing URL
-        result = DatabaseEnvironmentService.validate_database_url(
-            "postgresql+asyncpg://postgres:123@localhost/netra_test",
-            "testing"
-        )
-        assert result["valid"] is True
-        assert result["database_name"] == "netra_test"
+    def test_validate_production_database_failure_with_test_keyword(self):
+        """Test production database validation fails with test keyword"""
+        mock_settings = MagicMock()
+        mock_settings.environment = "production"
+        mock_settings.database_url = "postgresql://user:pass@server/app_test"
         
-        # Invalid - using production database
-        result = DatabaseEnvironmentService.validate_database_url(
-            "postgresql+asyncpg://postgres:123@localhost/netra_prod",
-            "testing"
-        )
-        assert result["valid"] is False
-        assert any("production" in error for error in result["errors"])
+        with patch('app.services.database_env_service.settings', mock_settings):
+            with pytest.raises(ValueError, match="Production environment cannot use database with 'test'"):
+                DatabaseEnvironmentValidator.validate_database_environment()
     
-    def test_cross_environment_detection(self):
-        """Test detection of cross-environment database usage"""
-        # Development database in production
-        result = DatabaseEnvironmentService.validate_database_url(
-            "postgresql+asyncpg://user:pass@prod-server/netra_dev",
-            "production"
-        )
-        assert result["valid"] is False
-        assert any("development" in error for error in result["errors"])
+    def test_validate_production_database_failure_with_dev_keyword(self):
+        """Test production database validation fails with dev keyword"""
+        mock_settings = MagicMock()
+        mock_settings.environment = "production"  
+        mock_settings.database_url = "postgresql://user:pass@server/app_dev"
         
-        # Test database in development
-        result = DatabaseEnvironmentService.validate_database_url(
-            "postgresql+asyncpg://postgres:123@localhost/netra_test",
-            "development"
-        )
-        assert result["valid"] is False
-        assert any("testing" in error for error in result["errors"])
+        with patch('app.services.database_env_service.settings', mock_settings):
+            with pytest.raises(ValueError, match="Production environment cannot use database with 'dev'"):
+                DatabaseEnvironmentValidator.validate_database_environment()
     
-    def test_get_safe_database_name(self):
-        """Test safe database name generation"""
-        assert DatabaseEnvironmentService.get_safe_database_name("production") == "netra_prod"
-        assert DatabaseEnvironmentService.get_safe_database_name("development") == "netra_dev"
-        assert DatabaseEnvironmentService.get_safe_database_name("testing") == "netra_test"
-        assert DatabaseEnvironmentService.get_safe_database_name("unknown") == "netra"
+    def test_validate_testing_database_success(self):
+        """Test testing database validation passes with valid URL"""
+        mock_settings = MagicMock()
+        mock_settings.environment = "testing"
+        mock_settings.database_url = "postgresql://user:pass@localhost/app_test"
+        
+        with patch('app.services.database_env_service.settings', mock_settings):
+            # Should not raise any exception
+            DatabaseEnvironmentValidator.validate_database_environment()
     
-    def test_environment_specific_connection_params(self):
-        """Test environment-specific connection parameter validation"""
-        service = DatabaseEnvironmentService()
+    def test_validate_testing_database_failure_with_prod_keyword(self):
+        """Test testing database validation fails with production keyword"""
+        mock_settings = MagicMock()
+        mock_settings.environment = "testing"
+        mock_settings.database_url = "postgresql://user:pass@server/app_prod"
         
-        prod_params = service.get_connection_params("production")
-        assert prod_params["pool_size"] > 10
-        assert prod_params["max_overflow"] > 5
-        assert prod_params["pool_timeout"] > 30
-        
-        dev_params = service.get_connection_params("development")
-        assert dev_params["pool_size"] <= 5
-        assert dev_params["echo"] is True
-        
-        test_params = service.get_connection_params("testing")
-        assert test_params["pool_size"] == 1
-        assert test_params["isolation_level"] == "AUTOCOMMIT"
+        with patch('app.services.database_env_service.settings', mock_settings):
+            with pytest.raises(ValueError, match="Testing environment cannot use production database"):
+                DatabaseEnvironmentValidator.validate_database_environment()
     
-    def test_connection_health_checks(self):
-        """Test database connection health monitoring"""
-        service = DatabaseEnvironmentService()
+    def test_validate_development_database_success(self):
+        """Test development database validation passes with valid URL"""
+        mock_settings = MagicMock()
+        mock_settings.environment = "development"
+        mock_settings.database_url = "postgresql://user:pass@localhost/app_dev"
         
-        health_check = service.create_health_check("production")
-        assert health_check["timeout"] < 30
-        assert health_check["retry_count"] >= 3
+        with patch('app.services.database_env_service.settings', mock_settings):
+            # Should not raise any exception
+            DatabaseEnvironmentValidator.validate_database_environment()
+    
+    def test_validate_development_database_warning_with_prod_keyword(self):
+        """Test development database validation warns with production keyword"""
+        mock_settings = MagicMock()
+        mock_settings.environment = "development"
+        mock_settings.database_url = "postgresql://user:pass@server/app_prod"
         
-        dev_health_check = service.create_health_check("development")
-        assert dev_health_check["timeout"] >= 30
-        assert dev_health_check["detailed_logging"] is True
+        with patch('app.services.database_env_service.settings', mock_settings):
+            with patch('app.services.database_env_service.logger') as mock_logger:
+                DatabaseEnvironmentValidator.validate_database_environment()
+                mock_logger.warning.assert_called_once()
+                assert "prod" in mock_logger.warning.call_args[0][0]
+    
+    def test_validate_database_environment_no_url(self):
+        """Test validation when no database URL is configured"""
+        mock_settings = MagicMock()
+        mock_settings.environment = "development"
+        mock_settings.database_url = None
+        
+        with patch('app.services.database_env_service.settings', mock_settings):
+            with patch('app.services.database_env_service.logger') as mock_logger:
+                DatabaseEnvironmentValidator.validate_database_environment()
+                mock_logger.warning.assert_called_with("No database URL configured")
+    
+    def test_validate_database_environment_convenience_function(self):
+        """Test the convenience function calls the validator"""
+        with patch.object(DatabaseEnvironmentValidator, 'validate_database_environment') as mock_validate:
+            validate_database_environment()
+            mock_validate.assert_called_once()

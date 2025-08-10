@@ -1,0 +1,140 @@
+"""Test supply catalog service for AI model and resource management."""
+
+import pytest
+from unittest.mock import MagicMock, patch
+from app.services.supply_catalog_service import SupplyCatalogService
+from app.db import models_postgres
+from app.schemas import SupplyOptionCreate, SupplyOptionUpdate
+
+
+@pytest.fixture
+def supply_catalog_service():
+    """Create a test supply catalog service instance."""
+    return SupplyCatalogService()
+
+
+@pytest.fixture  
+def mock_db_session():
+    """Create a mock database session."""
+    return MagicMock()
+
+
+class TestSupplyCatalogService:
+    """Test supply catalog service basic functionality."""
+
+    def test_get_all_options(self, supply_catalog_service, mock_db_session):
+        """Test retrieving all supply options."""
+        # Mock the database response
+        mock_options = [
+            MagicMock(id=1, name="gpt-4", provider="OpenAI"),
+            MagicMock(id=2, name="claude-3", provider="Anthropic")
+        ]
+        mock_db_session.query.return_value.all.return_value = mock_options
+        
+        result = supply_catalog_service.get_all_options(mock_db_session)
+        
+        assert len(result) == 2
+        assert result[0].name == "gpt-4"
+        assert result[1].provider == "Anthropic"
+        mock_db_session.query.assert_called_once()
+
+    def test_get_option_by_id(self, supply_catalog_service, mock_db_session):
+        """Test retrieving supply option by ID."""
+        mock_option = MagicMock(id=1, name="gpt-4", provider="OpenAI")
+        mock_db_session.get.return_value = mock_option
+        
+        result = supply_catalog_service.get_option_by_id(mock_db_session, 1)
+        
+        assert result is not None
+        assert result.name == "gpt-4"
+        mock_db_session.get.assert_called_once_with(models_postgres.SupplyOption, 1)
+
+    def test_get_option_by_name(self, supply_catalog_service, mock_db_session):
+        """Test retrieving supply option by name."""
+        mock_option = MagicMock(name="gpt-4", provider="OpenAI")
+        mock_db_session.query.return_value.filter.return_value.first.return_value = mock_option
+        
+        result = supply_catalog_service.get_option_by_name(mock_db_session, "gpt-4")
+        
+        assert result is not None
+        assert result.name == "gpt-4"
+        mock_db_session.query.assert_called_once()
+
+    def test_create_option(self, supply_catalog_service, mock_db_session):
+        """Test creating a new supply option."""
+        option_data = SupplyOptionCreate(
+            provider="OpenAI",
+            family="GPT-4",
+            name="gpt-4-test",
+            cost_per_million_tokens_usd={"prompt": 10.0, "completion": 30.0},
+            quality_score=0.95
+        )
+        
+        mock_option = MagicMock(id=1, name="gpt-4-test")
+        mock_db_session.add = MagicMock()
+        mock_db_session.commit = MagicMock()
+        mock_db_session.refresh = MagicMock()
+        
+        with patch.object(models_postgres, 'SupplyOption', return_value=mock_option):
+            result = supply_catalog_service.create_option(mock_db_session, option_data)
+            
+            assert result is not None
+            mock_db_session.add.assert_called_once()
+            mock_db_session.commit.assert_called_once()
+            mock_db_session.refresh.assert_called_once()
+
+    def test_update_option(self, supply_catalog_service, mock_db_session):
+        """Test updating an existing supply option."""
+        mock_option = MagicMock(id=1, name="gpt-4")
+        supply_catalog_service.get_option_by_id = MagicMock(return_value=mock_option)
+        
+        update_data = SupplyOptionUpdate(name="gpt-4-updated")
+        
+        result = supply_catalog_service.update_option(mock_db_session, 1, update_data)
+        
+        assert result is not None
+        mock_db_session.add.assert_called_once()
+        mock_db_session.commit.assert_called_once()
+        mock_db_session.refresh.assert_called_once()
+
+    def test_delete_option(self, supply_catalog_service, mock_db_session):
+        """Test deleting a supply option."""
+        mock_option = MagicMock(id=1, name="gpt-4")
+        supply_catalog_service.get_option_by_id = MagicMock(return_value=mock_option)
+        
+        result = supply_catalog_service.delete_option(mock_db_session, 1)
+        
+        assert result is True
+        mock_db_session.delete.assert_called_once_with(mock_option)
+        mock_db_session.commit.assert_called_once()
+
+    def test_delete_option_not_found(self, supply_catalog_service, mock_db_session):
+        """Test deleting non-existent supply option."""
+        supply_catalog_service.get_option_by_id = MagicMock(return_value=None)
+        
+        result = supply_catalog_service.delete_option(mock_db_session, 999)
+        
+        assert result is False
+        mock_db_session.delete.assert_not_called()
+        mock_db_session.commit.assert_not_called()
+
+    def test_autofill_catalog_empty(self, supply_catalog_service, mock_db_session):
+        """Test autofilling catalog when empty."""
+        supply_catalog_service.get_all_options = MagicMock(return_value=[])
+        supply_catalog_service.create_option = MagicMock()
+        
+        supply_catalog_service.autofill_catalog(mock_db_session)
+        
+        # Should create default options (5 in the implementation)
+        assert supply_catalog_service.create_option.call_count == 5
+
+    def test_autofill_catalog_existing_data(self, supply_catalog_service, mock_db_session):
+        """Test autofilling catalog when data already exists."""
+        supply_catalog_service.get_all_options = MagicMock(return_value=[MagicMock()])
+        supply_catalog_service.create_option = MagicMock()
+        
+        supply_catalog_service.autofill_catalog(mock_db_session)
+        
+        # Should not create new options if data exists
+        supply_catalog_service.create_option.assert_not_called()
+

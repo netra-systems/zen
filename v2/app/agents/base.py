@@ -7,6 +7,7 @@ from app.llm.llm_manager import LLMManager
 from app.schemas import SubAgentLifecycle, WebSocketMessage, SubAgentUpdate, SubAgentState
 from app.agents.state import DeepAgentState
 from app.logging_config import central_logger
+from langchain_core.messages import SystemMessage
 
 class BaseSubAgent(ABC):
     def __init__(self, llm_manager: Optional[LLMManager] = None, name: str = "BaseSubAgent", description: str = "This is the base sub-agent."):
@@ -100,8 +101,12 @@ class BaseSubAgent(ABC):
     async def _send_update(self, run_id: str, data: Dict[str, Any]) -> None:
         """Send WebSocket update for this agent."""
         if self.websocket_manager:
+            # Create a proper BaseMessage object
+            message_content = data.get("message", "")
+            message = SystemMessage(content=message_content)
+            
             sub_agent_state = SubAgentState(
-                messages=[data.get("message", "")],
+                messages=[message],
                 next_node="",
                 lifecycle=self.get_state()
             )
@@ -112,8 +117,8 @@ class BaseSubAgent(ABC):
                     payload=SubAgentUpdate(
                         sub_agent_name=self.name,
                         state=sub_agent_state
-                    )
-                ).dict()
+                    ).model_dump()
+                ).model_dump()
             )
 
     async def run_in_background(self, state: DeepAgentState, run_id: str, stream_updates: bool):

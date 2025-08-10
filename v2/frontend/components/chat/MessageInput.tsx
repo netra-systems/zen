@@ -4,15 +4,27 @@ import { Input } from '@/components/ui/input';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useChatStore } from '@/store/chat';
 import { Send } from 'lucide-react';
+import { Message } from '@/types/chat';
 
 export const MessageInput: React.FC = () => {
   const [message, setMessage] = useState('');
   const { sendMessage } = useWebSocket();
-  const { setProcessing, isProcessing } = useChatStore();
+  const { setProcessing, isProcessing, addMessage } = useChatStore();
 
   const handleSend = () => {
     if (message.trim()) {
-      sendMessage(JSON.stringify({ type: 'user_message', payload: { text: message } }));
+      // Add user message to chat immediately
+      const userMessage: Message = {
+        id: `msg_${Date.now()}`,
+        role: 'user',
+        content: message,
+        timestamp: new Date().toISOString(),
+        displayed_to_user: true
+      };
+      addMessage(userMessage);
+      
+      // Send message via WebSocket
+      sendMessage({ type: 'user_message', payload: { text: message, references: [] } });
       setProcessing(true);
       setMessage('');
     }

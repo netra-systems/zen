@@ -35,6 +35,12 @@ describe('AuthContext', () => {
     jest.clearAllMocks();
     (useRouter as jest.Mock).mockReturnValue(mockRouter);
     localStorage.clear();
+    
+    // Initialize mocks properly
+    (authService.checkAuth as jest.Mock) = jest.fn();
+    (authService.handleDevLogin as jest.Mock) = jest.fn();
+    (authService.login as jest.Mock) = jest.fn();
+    (authService.logout as jest.Mock) = jest.fn();
   });
 
   describe('Auto-login in development mode', () => {
@@ -81,6 +87,7 @@ describe('AuthContext', () => {
 
     it('should not auto-login in production mode', async () => {
       const mockCheckAuth = authService.checkAuth as jest.Mock;
+      const mockHandleDevLogin = authService.handleDevLogin as jest.Mock;
       
       // Mock production mode response
       mockCheckAuth.mockResolvedValue({

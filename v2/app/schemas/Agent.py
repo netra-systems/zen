@@ -1,9 +1,8 @@
 import enum
 from datetime import datetime
-from typing import List, Optional, Dict, Any, Annotated, TypedDict
+from typing import List, Optional, Dict, Any, TypedDict
 from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage
-from langgraph.graph.message import add_messages
 
 class SubAgentLifecycle(str, enum.Enum):
     PENDING = "pending"
@@ -22,11 +21,6 @@ class Todo(TypedDict):
     task: str
     status: str
     items: List[str]
-
-class DeepAgentState(TypedDict):
-    messages: Annotated[List[BaseMessage], add_messages]
-    todos: List[Todo]
-    files: dict
 
 class SubAgentState(BaseModel):
     messages: List[BaseMessage]

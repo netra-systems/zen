@@ -4,7 +4,7 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
-from app.auth.auth import google
+from app.auth.auth import oauth_client
 from app.config import settings
 from app.dependencies import get_db_session, get_security_service
 from app.db.models_postgres import User
@@ -46,6 +46,7 @@ class AuthRoutes:
             endpoints=AuthEndpoints(
                 login=f"{settings.api_base_url}/api/auth/login",
                 logout=f"{settings.api_base_url}/api/auth/logout",
+                callback=f"{settings.api_base_url}/api/auth/callback",
                 token=f"{settings.api_base_url}/api/auth/token",
                 user=f"{settings.api_base_url}/api/users/me",
                 dev_login=f"{settings.api_base_url}/api/auth/dev_login",
@@ -56,29 +57,44 @@ class AuthRoutes:
 
     @router.get("/login")
     async def login(request: Request):
-        redirect_uri = request.url_for('auth')
-        return await google.authorize_redirect(request, redirect_uri)
+        redirect_uri = f"{settings.api_base_url}/api/auth/callback"
+        return await oauth_client.google.authorize_redirect(request, redirect_uri)
 
 
-    @router.get("/auth")
-    async def auth(request: Request, db: AsyncSession = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):
-        token = await google.authorize_access_token(request)
-        user_info = await google.parse_id_token(request, token)
-        if not user_info or 'email' not in user_info:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid user info from provider")
+    @router.get("/callback")
+    async def callback(request: Request, db: AsyncSession = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):
+        """Handle OAuth callback from Google"""
+        try:
+            token = await oauth_client.google.authorize_access_token(request)
+            user_info = await oauth_client.google.parse_id_token(request, token)
+            if not user_info or 'email' not in user_info:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid user info from provider")
 
-        user = await user_service.get_by_email(db, email=user_info['email'])
-        if not user:
-            user_in = UserCreateOAuth(
-                email=user_info['email'],
-                full_name=user_info.get('name'),
-                picture=user_info.get('picture'),
-            )
-            user = await user_service.create(db, obj_in=user_in)
+            user = await user_service.get_by_email(db, email=user_info['email'])
+            if not user:
+                user_in = UserCreateOAuth(
+                    email=user_info['email'],
+                    full_name=user_info.get('name'),
+                    picture=user_info.get('picture'),
+                )
+                user = await user_service.create(db, obj_in=user_in)
 
-        access_token = security_service.create_access_token(data=TokenPayload(sub=str(user.id)))
-        return {"access_token": access_token, "token_type": "bearer"}
+            access_token = security_service.create_access_token(data=TokenPayload(sub=str(user.id)))
+            
+            # Redirect to frontend with token
+            frontend_callback_url = f"{settings.frontend_url}/auth/callback?token={access_token}"
+            return RedirectResponse(url=frontend_callback_url)
+        except Exception as e:
+            # Redirect to frontend with error
+            error_url = f"{settings.frontend_url}/auth/error?message={str(e)}"
+            return RedirectResponse(url=error_url)
 
+
+    @router.get("/logout")
+    async def logout(request: Request):
+        """Handle logout - redirect to frontend"""
+        logout_url = f"{settings.frontend_url}/auth/logout"
+        return RedirectResponse(url=logout_url)
 
     @router.post("/dev_login")
     async def dev_login(request: Request, dev_login_request: DevLoginRequest, db: AsyncSession = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):

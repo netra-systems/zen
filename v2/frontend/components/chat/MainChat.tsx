@@ -7,9 +7,13 @@ import { MessageInput } from '@/components/chat/MessageInput';
 import { StopButton } from '@/components/chat/StopButton';
 import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
 import { useChatStore } from '@/store/chat';
+import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 
 const MainChat: React.FC = () => {
   const { isProcessing } = useChatStore();
+  
+  // Connect WebSocket messages to chat store
+  useChatWebSocket();
 
   return (
     <div className="flex h-screen bg-gray-100">

@@ -7,14 +7,26 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Message } from '@/types/chat';
 
 export const ExamplePrompts: React.FC = () => {
   const { sendMessage } = useWebSocket();
-  const { setProcessing } = useChatStore();
+  const { setProcessing, addMessage } = useChatStore();
   const [isOpen, setIsOpen] = React.useState(true);
 
   const handlePromptClick = (prompt: string) => {
-    sendMessage(JSON.stringify({ type: 'user_message', payload: { text: prompt } }));
+    // Add user message to chat immediately
+    const userMessage: Message = {
+      id: `msg_${Date.now()}`,
+      role: 'user',
+      content: prompt,
+      timestamp: new Date().toISOString(),
+      displayed_to_user: true
+    };
+    addMessage(userMessage);
+    
+    // Send message via WebSocket
+    sendMessage({ type: 'user_message', payload: { text: prompt, references: [] } });
     setProcessing(true);
     setIsOpen(false); // Collapse the panel after sending a prompt
   };

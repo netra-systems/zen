@@ -22,6 +22,7 @@ class DevLoginRequest(BaseModel):
 class AuthEndpoints(BaseModel):
     login: str
     logout: str
+    callback: str
     token: str
     user: str
     dev_login: str

@@ -13,7 +13,8 @@ from app.services.database.message_repository import MessageRepository
 from app.services.database.thread_repository import ThreadRepository
 from app.services.database.run_repository import RunRepository
 from app.services.database.reference_repository import ReferenceRepository
-from app.db.models import Message, Thread, Run, Reference, User
+# Note: Adjust imports based on actual model locations
+# from app.db.models import Message, Thread, Run, Reference, User
 
 
 @pytest.fixture

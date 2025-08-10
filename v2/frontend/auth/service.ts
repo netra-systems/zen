@@ -46,12 +46,9 @@ class AuthService {
   }
 
   handleLogin(authConfig: AuthConfigResponse) {
-    if (authConfig.development_mode) {
-      // In development mode, the login is handled by the AuthProvider
-      return;
-    } else {
-      window.location.href = authConfig.endpoints.login;
-    }
+    // Always redirect to OAuth login endpoint
+    // The backend will handle whether it's dev mode or production
+    window.location.href = authConfig.endpoints.login;
   }
 
   handleLogout(authConfig: AuthConfigResponse) {

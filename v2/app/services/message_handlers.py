@@ -1,0 +1,208 @@
+from typing import Dict, Any, Optional
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.logging_config import central_logger
+from app.services.thread_service import ThreadService
+from app.ws_manager import manager
+import json
+
+logger = central_logger.get_logger(__name__)
+
+class MessageHandlerService:
+    """Handles different types of WebSocket messages following conventions"""
+    
+    def __init__(self, supervisor, thread_service: ThreadService):
+        self.supervisor = supervisor
+        self.thread_service = thread_service
+    
+    async def handle_start_agent(
+        self,
+        user_id: str,
+        payload: Dict[str, Any],
+        db_session: AsyncSession
+    ) -> None:
+        """Handle start_agent message type"""
+        request_data = payload.get("request", {})
+        user_request = request_data.get("query", "") or request_data.get("user_request", "")
+        
+        thread = await self.thread_service.get_or_create_thread(db_session, user_id)
+        if not thread:
+            await manager.send_error(user_id, "Failed to create or retrieve thread")
+            return
+        
+        await self.thread_service.create_message(
+            db_session,
+            thread_id=thread.id,
+            role="user",
+            content=user_request,
+            metadata={"user_id": user_id}
+        )
+        
+        run = await self.thread_service.create_run(
+            db_session,
+            thread_id=thread.id,
+            assistant_id="netra-assistant",
+            model="gpt-4",
+            instructions="You are Netra AI Workload Optimization Assistant"
+        )
+        
+        self.supervisor.thread_id = thread.id
+        self.supervisor.user_id = user_id
+        self.supervisor.db_session = db_session
+        
+        response = await self.supervisor.run(user_request, run.id, stream_updates=True)
+        
+        if response:
+            await self.thread_service.create_message(
+                db_session,
+                thread_id=thread.id,
+                role="assistant",
+                content=json.dumps(response) if isinstance(response, dict) else str(response),
+                assistant_id="netra-assistant",
+                run_id=run.id
+            )
+        
+        await self.thread_service.update_run_status(
+            db_session,
+            run_id=run.id,
+            status="completed"
+        )
+        
+        await manager.send_message(
+            user_id,
+            {
+                "event": "agent_finished",
+                "data": response
+            }
+        )
+    
+    async def handle_user_message(
+        self,
+        user_id: str,
+        payload: Dict[str, Any],
+        db_session: Optional[AsyncSession]
+    ) -> None:
+        """Handle user_message type"""
+        text = payload.get("text", "")
+        references = payload.get("references", [])
+        logger.info(f"Received user message from {user_id}: {text}")
+        
+        thread = None
+        run = None
+        
+        if db_session:
+            try:
+                thread = await self.thread_service.get_or_create_thread(db_session, user_id)
+                
+                if thread:
+                    await self.thread_service.create_message(
+                        db_session,
+                        thread.id,
+                        role="user",
+                        content=text,
+                        metadata={"references": references} if references else None
+                    )
+                    
+                    run = await self.thread_service.create_run(
+                        db_session,
+                        thread_id=thread.id,
+                        assistant_id="netra-assistant",
+                        model="gpt-4",
+                        instructions="You are Netra AI Workload Optimization Assistant"
+                    )
+                    
+                    self.supervisor.thread_id = thread.id
+                    self.supervisor.user_id = user_id
+                    self.supervisor.db_session = db_session
+                else:
+                    logger.warning(f"Could not get/create thread for user {user_id}")
+            except Exception as e:
+                logger.error(f"Error setting up thread/run: {e}")
+        
+        try:
+            run_id = run.id if run else user_id
+            response = await self.supervisor.run(text, run_id, stream_updates=True)
+            
+            if db_session and response and thread:
+                try:
+                    await self.thread_service.create_message(
+                        db_session,
+                        thread.id,
+                        role="assistant",
+                        content=str(response),
+                        metadata={"type": "agent_response"},
+                        assistant_id="netra-assistant",
+                        run_id=run.id if run else None
+                    )
+                    
+                    if run:
+                        await self.thread_service.update_run_status(
+                            db_session,
+                            run_id=run.id,
+                            status="completed"
+                        )
+                except Exception as e:
+                    logger.error(f"Error persisting assistant message: {e}")
+            
+            await manager.send_message(
+                user_id,
+                {
+                    "event": "agent_finished",
+                    "data": response
+                }
+            )
+        except Exception as e:
+            logger.error(f"Error processing user message: {e}")
+            await manager.send_message(
+                user_id,
+                {
+                    "event": "error",
+                    "data": {"error": str(e)}
+                }
+            )
+    
+    async def handle_thread_history(
+        self,
+        user_id: str,
+        db_session: Optional[AsyncSession]
+    ) -> None:
+        """Handle get_thread_history message type"""
+        if not db_session:
+            await manager.send_error(user_id, "Database session not available")
+            return
+        
+        thread = await self.thread_service.get_or_create_thread(db_session, user_id)
+        if not thread:
+            await manager.send_error(user_id, "Failed to retrieve thread history")
+            return
+        
+        messages = await self.thread_service.get_thread_messages(db_session, thread.id)
+        history = []
+        
+        for msg in messages:
+            content = msg.content[0]["text"]["value"] if msg.content else ""
+            history.append({
+                "role": msg.role,
+                "content": content,
+                "created_at": msg.created_at,
+                "id": msg.id
+            })
+        
+        await manager.send_message(
+            user_id,
+            {
+                "event": "thread_history",
+                "thread_id": thread.id,
+                "messages": history
+            }
+        )
+    
+    async def handle_stop_agent(self, user_id: str) -> None:
+        """Handle stop_agent message type"""
+        logger.info(f"Received stop agent request from {user_id}")
+        await manager.send_message(
+            user_id,
+            {
+                "event": "agent_stopped",
+                "data": {"status": "stopped"}
+            }
+        )

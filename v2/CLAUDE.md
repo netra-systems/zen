@@ -4,9 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Netra AI Workload Optimization Platform - An intelligent system for optimizing AI workloads by routing requests to the most suitable AI models based on cost, performance, and quality trade-offs.
+Netra AI Optimization Platform - The world's best, highest quality, most intelligent system for optimizing AI workloads including AI tools and Agents. Use by top startups, F100, OpenAI, and Anthropic.
 
 ## Essential Commands
+
+### XML Specs
+XML specifications are in V2/SPEC/*.XML
 
 ### Backend Development
 ```bash

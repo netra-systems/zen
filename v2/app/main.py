@@ -91,6 +91,19 @@ async def lifespan(app: FastAPI):
     if 'pytest' in sys.modules:
         logger.info(f"pytest in sys.modules")
 
+    # Validate database environment separation
+    if not 'pytest' in sys.modules:  # Skip during testing
+        from app.services.database_env_service import validate_database_environment
+        try:
+            validate_database_environment()
+        except ValueError as e:
+            logger.critical(f"Database environment validation failed: {e}")
+            os._exit(1)
+    
+    # Run database migrations first (before initializing services that depend on DB)
+    if not 'pytest' in sys.modules:  # Skip migrations during testing
+        run_migrations(logger)
+    
     # Initialize services
     app.state.redis_manager = redis_manager
     app.state.background_task_manager = BackgroundTaskManager()
@@ -101,6 +114,12 @@ async def lifespan(app: FastAPI):
     app.state.security_service = SecurityService(key_manager)
     app.state.llm_manager = LLMManager(settings)
 
+    # The ClickHouse client is now managed by the central_logger
+    app.state.clickhouse_client = central_logger.clickhouse_db
+
+    # Initialize Postgres - must be done before startup checks
+    app.state.db_session_factory = async_session_factory
+
     # Run startup checks
     from app.startup_checks import run_startup_checks
     try:
@@ -110,20 +129,17 @@ async def lifespan(app: FastAPI):
         logger.info("Application shutting down due to startup failure.")
         os._exit(1)
 
-    # The ClickHouse client is now managed by the central_logger
-    app.state.clickhouse_client = central_logger.clickhouse_db
-
-    # Initialize Postgres
-    app.state.db_session_factory = async_session_factory
-
-    # Perform database self-check
-    from app.services.db_check_service import check_db_schema
+    # Perform comprehensive schema validation
+    from app.services.schema_validation_service import run_comprehensive_validation
+    from app.db.postgres import async_engine
     if "pytest" not in sys.modules:
-        async with app.state.db_session_factory() as session:
-            if not await check_db_schema(session):
-                # In a real application, you might want to raise an exception here
-                # to prevent the application from starting with a bad schema.
-                logger.error("Database schema validation failed. The application might not work as expected.")
+        validation_passed = await run_comprehensive_validation(async_engine)
+        if not validation_passed:
+            if settings.environment == "production":
+                logger.critical("Schema validation failed in production. Shutting down.")
+                os._exit(1)
+            else:
+                logger.error("Schema validation failed. The application might not work as expected.")
 
     # Initialize the agent supervisor
     tool_registry = ToolRegistry(app.state.db_session_factory)
@@ -148,8 +164,12 @@ async def lifespan(app: FastAPI):
         logger.info("Application shutdown complete.")
 
 from fastapi.middleware.cors import CORSMiddleware
+from app.auth.auth import init_oauth
 
 app = FastAPI(lifespan=lifespan)
+
+# Initialize OAuth
+init_oauth(app)
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
@@ -189,8 +209,12 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 from app.routes import supply, generation, admin, references, health, corpus, synthetic_data, config
 from app.routes.auth import auth as auth_router
+from app.routes.agent_route import router as agent_router
+from app.routes.llm_cache import router as llm_cache_router
 
 app.include_router(auth_router.router, prefix="/api/auth", tags=["auth"])
+app.include_router(agent_router, prefix="/api/agent", tags=["agent"])
+app.include_router(llm_cache_router, prefix="/api/llm-cache", tags=["llm-cache"])
 app.include_router(supply.router, prefix="/api/supply", tags=["supply"])
 app.include_router(generation.router, prefix="/api/generation", tags=["generation"])
 app.include_router(websockets_router, tags=["websockets"])
@@ -227,17 +251,3 @@ if __name__ == "__main__":
         reload_excludes=["*/tests/*", "*/.pytest_cache/*"],
         lifespan="on"
     )
-
-if "pytest" in sys.modules:
-    llm_manager = LLMManager(settings)
-    app.state.llm_manager = llm_manager
-    key_manager = KeyManager.load_from_settings(settings)
-    app.state.key_manager = key_manager
-    app.state.security_service = SecurityService(key_manager)
-    tool_registry = ToolRegistry(async_session_factory)
-    tool_dispatcher = ToolDispatcher(tool_registry.get_tools([]))
-    app.state.agent_supervisor = Supervisor(async_session_factory, llm_manager, websocket_manager, tool_dispatcher)
-
-    from app.db.testing import override_get_db
-    from app.dependencies import get_db_session
-    app.dependency_overrides[get_db_session] = override_get_db

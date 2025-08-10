@@ -28,12 +28,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await authService.getAuthConfig();
       setAuthConfig(data);
 
+      // Check for existing token first (from OAuth callback or storage)
       const storedToken = authService.getToken();
+      
       if (storedToken) {
+        // Use existing token
         setToken(storedToken);
-        const decodedUser = jwtDecode(storedToken) as User;
-        setUser(decodedUser);
+        try {
+          const decodedUser = jwtDecode(storedToken) as User;
+          setUser(decodedUser);
+        } catch (e) {
+          console.error("Invalid token:", e);
+          authService.removeToken();
+        }
       } else if (data.development_mode) {
+        // In development mode, auto-login with dev user if no token exists
         const devLoginResponse = await authService.handleDevLogin(data);
         if (devLoginResponse) {
           setToken(devLoginResponse.access_token);

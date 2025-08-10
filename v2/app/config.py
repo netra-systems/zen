@@ -41,6 +41,49 @@ class Settings:
                     print(f"Error fetching secret {ref.name}: {e}")
                 secrets[ref.name] = None
         return secrets
+    
+    def _load_from_env_vars(self, config: schemas.AppConfig):
+        """Fallback method to load secrets from environment variables for local development."""
+        env_var_mapping = {
+            "google-client-id": "GOOGLE_CLIENT_ID",
+            "google-client-secret": "GOOGLE_CLIENT_SECRET",
+            "gemini-api-key": "GEMINI_API_KEY",
+            "langfuse-secret-key": "LANGFUSE_SECRET_KEY",
+            "langfuse-public-key": "LANGFUSE_PUBLIC_KEY",
+            "clickhouse-default-password": "CLICKHOUSE_DEFAULT_PASSWORD",
+            "clickhouse-development-password": "CLICKHOUSE_DEVELOPMENT_PASSWORD",
+            "jwt-secret-key": "JWT_SECRET_KEY",
+            "fernet-key": "FERNET_KEY",
+            "redis-default": "REDIS_PASSWORD",
+        }
+        
+        for ref in SECRET_CONFIG:
+            env_var_name = env_var_mapping.get(ref.name)
+            if not env_var_name:
+                continue
+                
+            secret_value = os.environ.get(env_var_name)
+            if not secret_value:
+                continue
+                
+            if ref.target_models:
+                for target_model_str in ref.target_models:
+                    target_obj = config
+                    if '.' in target_model_str:
+                        parts = target_model_str.split('.', 1)
+                        dict_name = parts[0]
+                        key_name = parts[1]
+                        target_dict = getattr(config, dict_name)
+                        target_obj = target_dict.get(key_name)
+                    else:
+                        target_obj = getattr(config, target_model_str)
+
+                    if target_obj:
+                        setattr(target_obj, ref.target_field, secret_value)
+            else:
+                setattr(config, ref.target_field, secret_value)
+        
+        print("Loaded secrets from environment variables (development mode)")
 
     def _load_secrets(self, config: schemas.AppConfig):
         """Fetches secrets from Secret Manager and populates the config object."""
@@ -48,10 +91,14 @@ class Settings:
             client = self._get_secret_client()
         except ConnectionError as e:
             print(f"Warning: Could not connect to Secret Manager. Using default settings. {e}")
+            # Fallback to environment variables for local development
+            self._load_from_env_vars(config)
             return
 
         if not client:
             print("Could not create Secret Manager client. Skipping secret loading.")
+            # Fallback to environment variables for local development
+            self._load_from_env_vars(config)
             return
 
         fetched_secrets = self._fetch_secrets(client, SECRET_CONFIG, config.log_secrets)
