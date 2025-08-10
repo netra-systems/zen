@@ -265,10 +265,12 @@ export const useEnhancedChatWebSocket = () => {
         const pendingMsgId = (window as any).__pendingToolCalls?.[toolName];
         if (pendingMsgId) {
           updateMessage(pendingMsgId, {
-            step_timing: {
-              start: new Date().toISOString(),
-              end: new Date().toISOString(),
-              duration: 100 // Would need to track actual duration
+            raw_data: {
+              step_timing: {
+                start: new Date().toISOString(),
+                end: new Date().toISOString(),
+                duration: 100 // Would need to track actual duration
+              }
             }
           });
           delete (window as any).__pendingToolCalls[toolName];

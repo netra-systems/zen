@@ -14,7 +14,7 @@ interface ShortcutHandler {
 
 export const useKeyboardShortcuts = () => {
   const router = useRouter();
-  const { messages, isProcessing, stopProcessing } = useChatStore();
+  const { messages, isProcessing, setProcessing } = useChatStore();
   const { threads, currentThreadId, setCurrentThread } = useThreadStore();
   const isSearchOpen = useRef(false);
   const messageInputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -111,7 +111,7 @@ export const useKeyboardShortcuts = () => {
     { key: 'ArrowRight', alt: true, handler: () => navigateThread('next'), description: 'Next thread' },
     
     // Message control
-    { key: 'Escape', handler: () => isProcessing && stopProcessing(), description: 'Stop processing' },
+    { key: 'Escape', handler: () => isProcessing && setProcessing(false), description: 'Stop processing' },
     { key: '/', handler: focusMessageInput, description: 'Focus message input' },
     { key: 'c', ctrl: true, shift: true, handler: copyLastMessage, description: 'Copy last message' },
     

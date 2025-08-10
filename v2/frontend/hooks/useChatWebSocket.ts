@@ -269,12 +269,12 @@ export const useChatWebSocket = (runId?: string) => {
         // Add approval message to chat
         const approvalMessage: Message = {
           id: generateMessageId(),
-          type: 'approval',
+          type: 'system',
           content: payload.message || 'Approval required for this operation',
           created_at: new Date().toISOString(),
           sub_agent_name: payload.sub_agent_name || 'System',
           displayed_to_user: true,
-          approval_data: payload
+          raw_data: { approval_data: payload }
         };
         addMessage(approvalMessage);
       }
