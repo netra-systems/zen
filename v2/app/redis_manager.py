@@ -20,7 +20,11 @@ class RedisManager:
             await self.redis_client.close()
 
     async def get_client(self):
-        return self.redis_client
+        """Get the Redis client instance. Returns None if not connected."""
+        # Ensure we never return self, only the actual redis client or None
+        if self.redis_client and hasattr(self.redis_client, 'get'):
+            return self.redis_client
+        return None
     
     async def get(self, key: str):
         """Get a value from Redis"""

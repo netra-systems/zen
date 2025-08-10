@@ -8,7 +8,7 @@ logger = central_logger.get_logger(__name__)
 
 class Database:
     def __init__(self, db_url: str):
-        self.engine = create_engine(db_url, echo=True)
+        self.engine = create_engine(db_url, echo=False)
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
 
     def connect(self):
@@ -29,7 +29,7 @@ class Database:
 try:
     async_engine = create_async_engine(
         settings.database_url,
-        echo=True,
+        echo=False,
     )
     async_session_factory = sessionmaker(
         bind=async_engine, class_=AsyncSession, expire_on_commit=False

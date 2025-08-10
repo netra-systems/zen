@@ -48,7 +48,14 @@ class LLMCacheService:
             cache_key = self._generate_cache_key(prompt, llm_config_name, generation_config)
             redis_client = await self.redis_manager.get_client()
             if not redis_client:
+                logger.debug("Redis client not available, skipping cache lookup")
                 return None
+            
+            # Verify we have the actual Redis client, not the manager
+            if not hasattr(redis_client, 'get'):
+                logger.error(f"Invalid redis client type: {type(redis_client)}, expected Redis client with 'get' method")
+                return None
+            
             cached_data = await redis_client.get(cache_key)
             
             if cached_data:
@@ -96,7 +103,14 @@ class LLMCacheService:
             # Store in Redis with TTL
             redis_client = await self.redis_manager.get_client()
             if not redis_client:
+                logger.debug("Redis client not available, skipping cache storage")
                 return False
+            
+            # Verify we have the actual Redis client, not the manager
+            if not hasattr(redis_client, 'set'):
+                logger.error(f"Invalid redis client type: {type(redis_client)}, expected Redis client with 'set' method")
+                return False
+            
             await redis_client.set(
                 cache_key,
                 json.dumps(cache_entry),

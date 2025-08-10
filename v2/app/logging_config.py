@@ -75,10 +75,10 @@ class CentralLogger:
         def formatter(record):
             if record["level"].name == "ERROR":
                 # Red for errors, including traceback
-                return "<red>{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}{extra[pretty_data]}\n{exception}</red>"
+                return "<red>{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}{extra[pretty_data]}\n{exception}</red>\n"
             
             # Default format for other levels
-            return "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}{extra[pretty_data]}</level>"
+            return "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}{extra[pretty_data]}</level>\n"
 
         # Basic console logger for development and debugging
         self.logger.add(
@@ -88,6 +88,30 @@ class CentralLogger:
             colorize=True,
             filter=console_structured_log_filter
         )
+
+        # Intercept standard Python logging to use loguru
+        class InterceptHandler(logging.Handler):
+            def emit(self, record):
+                # Get corresponding Loguru level if it exists
+                try:
+                    level = logger.level(record.levelname).name
+                except ValueError:
+                    level = record.levelno
+
+                # Find caller from where originated the logged message
+                frame, depth = logging.currentframe(), 2
+                while frame.f_code.co_filename == logging.__file__:
+                    frame = frame.f_back
+                    depth += 1
+
+                logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+
+        # Configure standard logging to use the intercept handler
+        logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
+
+        # Set SQLAlchemy logging to use the intercepted handler (WARN level to reduce noise)
+        logging.getLogger("sqlalchemy.engine").setLevel(logging.WARN)
+        logging.getLogger("sqlalchemy.pool").setLevel(logging.WARN)
 
         
 

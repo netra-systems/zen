@@ -90,11 +90,10 @@ class AuthRoutes:
             return RedirectResponse(url=error_url)
 
 
-    @router.get("/logout")
+    @router.post("/logout")
     async def logout(request: Request):
-        """Handle logout - redirect to frontend"""
-        logout_url = f"{settings.frontend_url}/auth/logout"
-        return RedirectResponse(url=logout_url)
+        """Handle logout - returns success response"""
+        return {"message": "Successfully logged out", "success": True}
 
     @router.post("/dev_login")
     async def dev_login(request: Request, dev_login_request: DevLoginRequest, db: AsyncSession = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):

@@ -16,7 +16,7 @@ def event_loop():
 
 @pytest.fixture(scope="function")
 async def test_engine():
-    engine = create_async_engine(settings.database_url, echo=True)
+    engine = create_async_engine(settings.database_url, echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield engine
