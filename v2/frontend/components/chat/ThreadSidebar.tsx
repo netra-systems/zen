@@ -39,6 +39,7 @@ export const ThreadSidebar: React.FC = () => {
     if (isAuthenticated) {
       loadThreads();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   const loadThreads = async () => {

@@ -247,6 +247,94 @@
     </checklist-item>
   </section>
   
+  <section name="authentication-patterns">
+    <title>Authentication Patterns and Requirements</title>
+    <description>
+      Components that interact with APIs or perform user-specific operations MUST check authentication
+      status before attempting those operations. This prevents 401 Unauthorized errors and improves UX.
+    </description>
+    
+    <checklist-item id="auth-check-on-mount">
+      <title>Check Authentication Before API Calls on Mount</title>
+      <description>
+        Components that fetch data on mount MUST check if the user is authenticated first.
+        This prevents authentication errors in the console and improves user experience.
+      </description>
+      <pattern>
+        <code language="typescript">
+          // Import authentication store
+          import { useAuthStore } from '@/store/authStore';
+          
+          // In component
+          const { isAuthenticated } = useAuthStore();
+          
+          useEffect(() => {
+            // Only load data if authenticated
+            if (isAuthenticated) {
+              loadData();
+            }
+          }, [isAuthenticated]);
+        </code>
+      </pattern>
+      <affected-components>
+        <component>ThreadSidebar - loads threads on mount</component>
+        <component>MessageInput - creates threads when sending messages</component>
+        <component>ExamplePrompts - sends messages via WebSocket</component>
+        <component>Any component making API calls on mount</component>
+      </affected-components>
+    </checklist-item>
+    
+    <checklist-item id="auth-ui-feedback">
+      <title>Provide UI Feedback for Unauthenticated State</title>
+      <description>
+        Components should show appropriate UI when user is not authenticated,
+        rather than failing silently or showing errors in console.
+      </description>
+      <patterns>
+        <pattern type="sidebar">
+          Show "Please sign in to view conversations" message
+        </pattern>
+        <pattern type="input">
+          Disable input fields and show "Please sign in to send messages" placeholder
+        </pattern>
+        <pattern type="buttons">
+          Disable action buttons when not authenticated
+        </pattern>
+      </patterns>
+    </checklist-item>
+    
+    <checklist-item id="auth-action-guards">
+      <title>Guard User Actions with Authentication Checks</title>
+      <description>
+        All user-initiated actions that require authentication should check auth status
+        before attempting the action.
+      </description>
+      <pattern>
+        <code language="typescript">
+          const handleAction = async () => {
+            // Check authentication first
+            if (!isAuthenticated) {
+              console.error('User must be authenticated to perform this action');
+              return;
+            }
+            
+            // Proceed with action
+            await performAction();
+          };
+        </code>
+      </pattern>
+    </checklist-item>
+    
+    <checklist-item id="websocket-auth">
+      <title>WebSocket Connection Authentication</title>
+      <description>
+        WebSocket connections should only be established when user has a valid token.
+        The WebSocketProvider already handles this pattern correctly.
+      </description>
+      <reference>frontend/providers/WebSocketProvider.tsx</reference>
+    </checklist-item>
+  </section>
+  
   <section name="common-pitfalls">
     <title>Common Pitfalls to Avoid</title>
     
