@@ -320,7 +320,7 @@ class SystemStartupTestRunner:
         )
         
         # Wait for startup
-        time.sleep(5)
+        # Removed unnecessary sleep
         
         metrics["startup_time"] = time.time() - start_time
         

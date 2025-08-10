@@ -203,7 +203,7 @@
         <activity>Run performance benchmarks</activity>
       </activities>
       <safeguards>
-        - Require 100% test coverage for modified code
+        - Require 100% test coverage for modified code (use SPEC/test_update_spec.xml for automation)
         - Mandatory peer review by senior engineer
         - Performance regression tests must pass
         - Security scan required before merge
@@ -308,8 +308,9 @@
     
     <metric id="CM4">
       <name>Test Coverage</name>
-      <target>Maintain or improve current coverage</target>
+      <target>Achieve 97% coverage (see SPEC/test_update_spec.xml)</target>
       <measurement>Coverage.py and Jest coverage reports</measurement>
+      <automation>python scripts/test_updater.py --execute-spec</automation>
     </metric>
     
     <metric id="CM5">
@@ -447,7 +448,7 @@
     <risk level="HIGH">
       <description>Breaking production functionality</description>
       <mitigation>
-        - Comprehensive test coverage before changes
+        - Comprehensive test coverage before changes (target 97% via SPEC/test_update_spec.xml)
         - Staged rollout with monitoring
         - Immediate rollback capability
         - Feature flags for gradual migration

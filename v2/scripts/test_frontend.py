@@ -165,12 +165,12 @@ def run_cypress_tests(args, isolation_manager=None) -> int:
     if not backend_running:
         print("⚠️  Backend server is not running. Starting it...")
         start_backend()
-        time.sleep(5)  # Give backend time to start
+        # Removed unnecessary sleep  # Give backend time to start
     
     if not frontend_running:
         print("⚠️  Frontend dev server is not running. Starting it...")
         start_frontend()
-        time.sleep(10)  # Give frontend time to start
+        # Removed unnecessary sleep  # Give frontend time to start
     
     # Determine Cypress command
     if args.cypress_open:

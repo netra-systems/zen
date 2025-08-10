@@ -124,7 +124,7 @@ class TestSystemE2E:
                 if response.status_code == 200:
                     return True
             except (requests.exceptions.RequestException, ConnectionError):
-                time.sleep(1)
+                # Removed unnecessary sleep
         raise TimeoutError(f"Service at {url} did not start within {timeout} seconds")
     
     def test_01_system_startup(self):
@@ -555,7 +555,7 @@ class TestSystemE2E:
         self.stop_backend()
         
         # Verify services are stopped
-        time.sleep(2)
+        # Removed unnecessary sleep
         try:
             response = requests.get(f"{self.backend_url}/api/health", timeout=1)
             assert False, "Backend should be stopped"
