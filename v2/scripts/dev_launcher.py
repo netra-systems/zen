@@ -300,6 +300,13 @@ class DevLauncher:
         env = os.environ.copy()
         env["BACKEND_PORT"] = str(port)
         
+        # Add project root to PYTHONPATH to ensure app module can be imported
+        python_path = env.get("PYTHONPATH", "")
+        if python_path:
+            env["PYTHONPATH"] = f"{PROJECT_ROOT}{os.pathsep}{python_path}"
+        else:
+            env["PYTHONPATH"] = str(PROJECT_ROOT)
+        
         # Start process
         try:
             if sys.platform == "win32":
@@ -394,6 +401,13 @@ class DevLauncher:
         env["NEXT_PUBLIC_API_URL"] = backend_info["api_url"]
         env["NEXT_PUBLIC_WS_URL"] = backend_info["ws_url"]
         env["PORT"] = str(port)
+        
+        # Also ensure PYTHONPATH is set for any Python scripts
+        python_path = env.get("PYTHONPATH", "")
+        if python_path:
+            env["PYTHONPATH"] = f"{PROJECT_ROOT}{os.pathsep}{python_path}"
+        else:
+            env["PYTHONPATH"] = str(PROJECT_ROOT)
         
         # Disable hot reload if requested
         # Next.js respects WATCHPACK_POLLING environment variable

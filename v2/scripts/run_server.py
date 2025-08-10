@@ -1,9 +1,25 @@
+import sys
+import os
+from pathlib import Path
+
+# Add project root to Python path to ensure app module can be imported
+current_file = Path(__file__).resolve()
+if current_file.parent.name == 'scripts':
+    # We're in the scripts directory, add parent (project root) to path
+    project_root = current_file.parent.parent
+else:
+    # We're in the project root already
+    project_root = current_file.parent
+
+# Add to Python path if not already there
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+# Now import the rest
 import uvicorn
 import argparse
 import socket
 import json
-import os
-from pathlib import Path
 
 def get_free_port():
     """Get a free port by binding to port 0."""
