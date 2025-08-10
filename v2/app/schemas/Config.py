@@ -142,7 +142,7 @@ class AppConfig(BaseModel):
     database_url: str = None
     log_level: str = "DEBUG"
     log_secrets: bool = False
-    frontend_url: str = "http://localhost:3000"
+    frontend_url: str = "http://localhost:3010"
     redis: "RedisConfig" = Field(default_factory=lambda: RedisConfig())
     
     # LLM Cache Settings
