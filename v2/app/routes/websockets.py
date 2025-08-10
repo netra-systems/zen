@@ -2,6 +2,7 @@ from fastapi import APIRouter, WebSocket, Depends, WebSocketDisconnect
 from app.ws_manager import manager
 from app.logging_config import central_logger
 from app.db.postgres import get_async_db
+import asyncio
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter()
@@ -89,15 +90,44 @@ async def websocket_endpoint(
 
     # Connection authenticated successfully
     user_id_str = str(user.id)
-    await manager.connect(user_id_str, websocket)
+    conn_info = await manager.connect(user_id_str, websocket)
     logger.info(f"WebSocket connection established for user {user_id_str}")
     
     try:
         while True:
-            data = await websocket.receive_text()
-            # Pass the database session to handle_websocket_message
-            await agent_service.handle_websocket_message(user_id_str, data, db_session)
-
-    except WebSocketDisconnect:
-        logger.info(f"WebSocket disconnected for user {user_id_str}")
-        manager.disconnect(user_id_str, websocket)
+            try:
+                # Receive message with timeout to allow periodic health checks
+                data = await asyncio.wait_for(
+                    websocket.receive_text(),
+                    timeout=manager.HEARTBEAT_TIMEOUT
+                )
+                
+                # Handle pong responses
+                if data == "pong":
+                    await manager.handle_pong(user_id_str, websocket)
+                    continue
+                
+                # Update connection statistics
+                manager._stats["total_messages_received"] += 1
+                
+                # Pass the database session to handle_websocket_message
+                await agent_service.handle_websocket_message(user_id_str, data, db_session)
+                
+            except asyncio.TimeoutError:
+                # Check if connection is still alive
+                if not manager._is_connection_alive(conn_info):
+                    logger.warning(f"Connection timeout for user {user_id_str}")
+                    break
+                continue
+                
+    except WebSocketDisconnect as e:
+        logger.info(f"WebSocket disconnected for user {user_id_str}: {e.code} - {e.reason}")
+        await manager.disconnect(user_id_str, websocket, code=e.code, reason=e.reason or "Client disconnect")
+    except Exception as e:
+        logger.error(f"WebSocket error for user {user_id_str}: {e}", exc_info=True)
+        await manager.disconnect(user_id_str, websocket, code=1011, reason="Server error")
+    finally:
+        # Ensure cleanup happens
+        if user_id_str in manager.active_connections:
+            if any(conn.websocket == websocket for conn in manager.active_connections.get(user_id_str, [])):
+                await manager.disconnect(user_id_str, websocket)
