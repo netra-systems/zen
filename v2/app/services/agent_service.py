@@ -1,5 +1,6 @@
 import json
 from typing import Union, Dict, Any
+from starlette.websockets import WebSocketDisconnect
 from app.logging_config import central_logger
 from fastapi import Depends
 from app.agents.supervisor import Supervisor
@@ -55,10 +56,19 @@ class AgentService:
                 logger.warning(f"Received unhandled message type '{message_type}' for user_id: {user_id}")
         except json.JSONDecodeError as e:
             logger.error(f"Invalid JSON in websocket message from user {user_id}: {e}")
-            await manager.send_error(user_id, "Invalid message format")
+            try:
+                await manager.send_error(user_id, "Invalid message format")
+            except (WebSocketDisconnect, Exception):
+                logger.warning(f"Could not send error to disconnected user {user_id}")
+        except WebSocketDisconnect:
+            logger.info(f"WebSocket disconnected for user {user_id} during message handling")
+            # Don't try to send messages to disconnected WebSocket
         except Exception as e:
             logger.error(f"Error in handle_websocket_message for user_id: {user_id}: {e}", exc_info=True)
-            await manager.send_error(user_id, "Internal server error")
+            try:
+                await manager.send_error(user_id, "Internal server error")
+            except (WebSocketDisconnect, Exception):
+                logger.warning(f"Could not send error to disconnected user {user_id}")
     
     def _parse_message(self, message: Union[str, Dict]) -> Dict[str, Any]:
         """Parse incoming message to dictionary"""

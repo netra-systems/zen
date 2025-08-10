@@ -7,17 +7,17 @@ describe('WebSocketService', () => {
   const mockToken = 'test-jwt-token';
 
   beforeEach(() => {
+    jest.useFakeTimers();
     server = new WS(mockUrl);
     localStorage.setItem('authToken', mockToken);
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     WS.clean();
     localStorage.clear();
     webSocketService.disconnect();
   });
-  
-  jest.setTimeout(10000);
 
   describe('Connection Management', () => {
     it('should establish WebSocket connection with authentication', async () => {

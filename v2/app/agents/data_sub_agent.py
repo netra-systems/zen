@@ -6,6 +6,7 @@ from app.agents.base import BaseSubAgent
 from app.agents.prompts import data_prompt_template
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.agents.state import DeepAgentState
+from app.agents.utils import extract_json_from_response
 
 logger = logging.getLogger(__name__)
 
@@ -35,10 +36,9 @@ class DataSubAgent(BaseSubAgent):
 
         llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='data')
         
-        try:
-            data_result = json.loads(llm_response_str)
-        except json.JSONDecodeError:
-            self.logger.error(f"Failed to decode LLM response for run_id: {run_id}. Response: {llm_response_str}")
+        data_result = extract_json_from_response(llm_response_str)
+        if not data_result:
+            self.logger.warning(f"Could not extract JSON from LLM response for run_id: {run_id}. Using default data.")
             data_result = {
                 "data": "No data could be gathered.",
             }

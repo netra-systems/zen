@@ -180,13 +180,12 @@ class StatePersistenceService:
             if db_session:
                 reference = Reference(
                     id=f"ref_{run_id}_{agent_name}",
+                    name=f"{agent_name}_result_{run_id[:8]}",
+                    friendly_name=f"{agent_name} Result",
+                    description=f"Result from {agent_name} for run {run_id}",
                     type="agent_result",
-                    content=json.dumps(result),
-                    metadata={
-                        "run_id": run_id,
-                        "agent_name": agent_name,
-                        "created_at": time.time()
-                    }
+                    value=json.dumps(result),
+                    version="1.0"
                 )
                 db_session.add(reference)
                 await db_session.commit()

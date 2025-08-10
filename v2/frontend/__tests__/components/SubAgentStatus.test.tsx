@@ -75,6 +75,11 @@ describe('SubAgentStatus', () => {
       currentSubAgent: 'OptimizationsCoreSubAgent',
       subAgentStatus: 'RUNNING',
       subAgentTools: ['cost_analyzer', 'performance_profiler'],
+      subAgentProgress: null,
+      subAgentError: null,
+      subAgentDescription: null,
+      subAgentExecutionTime: null,
+      queuedSubAgents: []
     });
 
     render(<SubAgentStatus />);
@@ -93,6 +98,11 @@ describe('SubAgentStatus', () => {
         total: 5,
         message: 'Generating visualizations...',
       },
+      subAgentTools: [],
+      subAgentError: null,
+      subAgentDescription: null,
+      subAgentExecutionTime: null,
+      queuedSubAgents: []
     });
 
     render(<SubAgentStatus />);
@@ -111,6 +121,12 @@ describe('SubAgentStatus', () => {
     mockUseChatStore.mockReturnValue({
       currentSubAgent: 'TriageSubAgent',
       subAgentStatus: 'COMPLETED',
+      subAgentTools: [],
+      subAgentProgress: null,
+      subAgentError: null,
+      subAgentDescription: null,
+      subAgentExecutionTime: null,
+      queuedSubAgents: []
     });
 
     rerender(<SubAgentStatus />);
@@ -120,6 +136,12 @@ describe('SubAgentStatus', () => {
     mockUseChatStore.mockReturnValue({
       currentSubAgent: 'DataSubAgent',
       subAgentStatus: 'RUNNING',
+      subAgentTools: [],
+      subAgentProgress: null,
+      subAgentError: null,
+      subAgentDescription: null,
+      subAgentExecutionTime: null,
+      queuedSubAgents: []
     });
 
     rerender(<SubAgentStatus />);
@@ -134,12 +156,17 @@ describe('SubAgentStatus', () => {
       currentSubAgent: 'ActionsToMeetGoalsSubAgent',
       subAgentStatus: 'FAILED',
       subAgentError: 'Unable to generate action plan: Insufficient data',
+      subAgentTools: [],
+      subAgentProgress: null,
+      subAgentDescription: null,
+      subAgentExecutionTime: null,
+      queuedSubAgents: []
     });
 
     render(<SubAgentStatus />);
 
     expect(screen.getByText('ActionsToMeetGoalsSubAgent')).toBeInTheDocument();
-    expect(screen.getByText('FAILED')).toBeInTheDocument();
+    expect(screen.getByText(/FAILED/)).toBeInTheDocument();
     expect(screen.getByText('Unable to generate action plan: Insufficient data')).toBeInTheDocument();
     
     const indicator = screen.getByTestId('status-indicator');
@@ -151,6 +178,11 @@ describe('SubAgentStatus', () => {
       currentSubAgent: 'DataSubAgent',
       subAgentStatus: 'RUNNING',
       subAgentDescription: 'Gathers and enriches data from various sources',
+      subAgentTools: [],
+      subAgentProgress: null,
+      subAgentError: null,
+      subAgentExecutionTime: null,
+      queuedSubAgents: []
     });
 
     render(<SubAgentStatus />);

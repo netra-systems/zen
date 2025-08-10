@@ -8,6 +8,8 @@ describe('MessageService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
+    // Reset the messageService singleton state
+    (messageService as any)._reset();
   });
 
   describe('Thread Management', () => {
@@ -261,13 +263,18 @@ describe('MessageService', () => {
         displayed_to_user: true,
       };
 
-      // First attempt fails
-      (fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
-
-      await messageService.saveMessage('thread-123', message, {
+      // Save with offline flag - this should queue the message
+      const saveResult = await messageService.saveMessage('thread-123', message, {
         offline: true,
       });
 
+      // Verify message was queued
+      expect(saveResult.queued).toBe(true);
+      
+      // Verify the message is in the queue
+      const queuedMessages = await messageService.getQueuedMessages();
+      expect(queuedMessages).toHaveLength(1);
+      
       // Clear the mock to reset call count
       (fetch as jest.Mock).mockClear();
       

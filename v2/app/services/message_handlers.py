@@ -1,5 +1,6 @@
 from typing import Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.websockets import WebSocketDisconnect
 from app.logging_config import central_logger
 from app.services.thread_service import ThreadService
 from app.ws_manager import manager
@@ -143,22 +144,35 @@ class MessageHandlerService:
                 except Exception as e:
                     logger.error(f"Error persisting assistant message: {e}")
             
+            # Convert response to dict if it's a DeepAgentState object
+            response_data = response
+            if hasattr(response, 'dict'):
+                response_data = response.dict()
+            elif hasattr(response, '__dict__'):
+                response_data = response.__dict__
+            
             await manager.send_message(
                 user_id,
                 {
                     "event": "agent_finished",
-                    "data": response
+                    "data": response_data
                 }
             )
+        except WebSocketDisconnect:
+            logger.info(f"WebSocket disconnected for user {user_id}")
+            # Don't try to send messages to disconnected WebSocket
         except Exception as e:
             logger.error(f"Error processing user message: {e}")
-            await manager.send_message(
-                user_id,
-                {
-                    "event": "error",
-                    "data": {"error": str(e)}
-                }
-            )
+            try:
+                await manager.send_message(
+                    user_id,
+                    {
+                        "event": "error",
+                        "data": {"error": str(e)}
+                    }
+                )
+            except Exception:
+                logger.warning(f"Could not send error to disconnected user {user_id}")
     
     async def handle_thread_history(
         self,

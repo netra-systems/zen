@@ -65,6 +65,12 @@ class BaseSubAgent(ABC):
             # Check entry conditions
             if not await self._pre_run(state, run_id, stream_updates):
                 self.logger.warning(f"{self.name} entry conditions not met for run_id: {run_id}")
+                if stream_updates and self.websocket_manager:
+                    await self.websocket_manager.send_agent_log(
+                        run_id, "warning", 
+                        f"Entry conditions not met for {self.name}",
+                        self.name
+                    )
                 await self._post_run(state, run_id, stream_updates, success=False)
                 return
             
@@ -76,6 +82,12 @@ class BaseSubAgent(ABC):
             
         except Exception as e:
             self.logger.error(f"{self.name} failed for run_id: {run_id}: {e}")
+            if stream_updates and self.websocket_manager:
+                await self.websocket_manager.send_error(
+                    run_id, 
+                    f"{self.name} encountered an error: {str(e)}",
+                    self.name
+                )
             await self._post_run(state, run_id, stream_updates, success=False)
             raise
     

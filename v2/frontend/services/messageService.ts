@@ -251,6 +251,12 @@ class MessageService {
       throw new Error(`Failed to update thread metadata: ${response.statusText}`);
     }
   }
+
+  // Reset method for testing
+  _reset(): void {
+    this.queuedMessages = [];
+    this.threadStates.clear();
+  }
 }
 
 export const messageService = new MessageService();

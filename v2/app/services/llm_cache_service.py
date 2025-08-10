@@ -18,7 +18,7 @@ class LLMCacheService:
     """Service for caching LLM responses"""
     
     def __init__(self):
-        self.redis = redis_manager
+        self.redis_manager = redis_manager
         self.enabled = getattr(settings, 'llm_cache_enabled', True)
         self.default_ttl = getattr(settings, 'llm_cache_ttl', 3600)  # 1 hour default
         self.cache_prefix = "llm_cache:"
@@ -46,7 +46,10 @@ class LLMCacheService:
             
         try:
             cache_key = self._generate_cache_key(prompt, llm_config_name, generation_config)
-            cached_data = await self.redis.get(cache_key)
+            redis_client = await self.redis_manager.get_client()
+            if not redis_client:
+                return None
+            cached_data = await redis_client.get(cache_key)
             
             if cached_data:
                 # Parse cached data
@@ -91,7 +94,10 @@ class LLMCacheService:
             cache_ttl = ttl or self.default_ttl
             
             # Store in Redis with TTL
-            await self.redis.set(
+            redis_client = await self.redis_manager.get_client()
+            if not redis_client:
+                return False
+            await redis_client.set(
                 cache_key,
                 json.dumps(cache_entry),
                 ex=cache_ttl
@@ -110,7 +116,10 @@ class LLMCacheService:
             stats_key = f"{self.stats_prefix}{llm_config_name}"
             
             # Get current stats or initialize
-            stats_data = await self.redis.get(stats_key)
+            redis_client = await self.redis_manager.get_client()
+            if not redis_client:
+                return
+            stats_data = await redis_client.get(stats_key)
             if stats_data:
                 stats = json.loads(stats_data)
             else:
@@ -127,7 +136,7 @@ class LLMCacheService:
             stats["hit_rate"] = stats["hits"] / stats["total"] if stats["total"] > 0 else 0
             
             # Store updated stats (keep for 7 days)
-            await self.redis.set(
+            await redis_client.set(
                 stats_key,
                 json.dumps(stats),
                 ex=604800  # 7 days
@@ -141,7 +150,10 @@ class LLMCacheService:
             if llm_config_name:
                 # Get stats for specific LLM config
                 stats_key = f"{self.stats_prefix}{llm_config_name}"
-                stats_data = await self.redis.get(stats_key)
+                redis_client = await self.redis_manager.get_client()
+                if not redis_client:
+                    return {"hits": 0, "misses": 0, "total": 0, "hit_rate": 0}
+                stats_data = await redis_client.get(stats_key)
                 if stats_data:
                     return json.loads(stats_data)
                 else:
@@ -150,11 +162,14 @@ class LLMCacheService:
                 # Get stats for all LLM configs
                 all_stats = {}
                 pattern = f"{self.stats_prefix}*"
-                keys = await self.redis.keys(pattern)
+                redis_client = await self.redis_manager.get_client()
+                if not redis_client:
+                    return {}
+                keys = await redis_client.keys(pattern)
                 
                 for key in keys:
                     config_name = key.replace(self.stats_prefix, "")
-                    stats_data = await self.redis.get(key)
+                    stats_data = await redis_client.get(key)
                     if stats_data:
                         all_stats[config_name] = json.loads(stats_data)
                 
@@ -174,10 +189,13 @@ class LLMCacheService:
                 # Clear all cache entries
                 pattern = f"{self.cache_prefix}*"
             
-            keys = await self.redis.keys(pattern)
+            redis_client = await self.redis_manager.get_client()
+            if not redis_client:
+                return 0
+            keys = await redis_client.keys(pattern)
             
             if keys:
-                deleted = await self.redis.delete(*keys)
+                deleted = await redis_client.delete(*keys)
                 logger.info(f"Cleared {deleted} cache entries")
                 return deleted
             else:
