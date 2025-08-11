@@ -329,6 +329,8 @@ gcloud config set project netra-staging
 # Initialize Terraform
 terraform init
 
+# bucket is: `netra-staging-terraform-state`
+
 # Create a workspace for initial setup
 terraform workspace new init
 
@@ -357,6 +359,7 @@ terraform plan
    ```
 
 4. Go to GitHub and create a Pull Request
+
 
 ### 7.2 Watch the Magic Happen
 
