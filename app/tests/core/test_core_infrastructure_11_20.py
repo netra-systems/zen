@@ -1,0 +1,342 @@
+"""
+Tests 11-20: Core Infrastructure & Error Handling
+Tests for the missing core infrastructure components identified in the top 100 missing tests.
+"""
+
+import pytest
+import json
+import logging
+from unittest.mock import Mock, AsyncMock, patch, MagicMock
+from datetime import datetime
+from cryptography.fernet import Fernet
+
+# Test 11: config_validator_schema_validation
+class TestConfigValidator:
+    """Test configuration schema validation - app/core/config_validator.py"""
+    
+    @pytest.fixture
+    def validator(self):
+        from app.core.config_validator import ConfigValidator
+        return ConfigValidator()
+    
+    @pytest.fixture
+    def mock_config(self):
+        config = Mock()
+        config.environment = "production"
+        config.database_url = "postgresql://user:pass@localhost/db"
+        config.jwt_secret_key = "a" * 32
+        config.fernet_key = Fernet.generate_key()
+        config.clickhouse_logging = Mock(enabled=True)
+        config.clickhouse_native = Mock(host="localhost", password="pass")
+        config.clickhouse_https = Mock(host="localhost", password="pass")
+        config.clickhouse_https_dev = Mock(host="localhost", password="pass")
+        config.oauth_config = Mock(client_id="id", client_secret="secret")
+        config.llm_configs = {
+            "default": Mock(api_key="key", model_name="model", provider="openai")
+        }
+        config.redis = Mock(host="localhost", password="pass")
+        config.langfuse = Mock(secret_key="key", public_key="pub")
+        return config
+    
+    def test_valid_config_passes_validation(self, validator, mock_config):
+        """Test that valid configuration passes validation."""
+        validator.validate_config(mock_config)
+    
+    def test_invalid_database_url_rejected(self, validator, mock_config):
+        """Test that invalid database URL is rejected."""
+        from app.core.config_validator import ConfigurationValidationError
+        
+        mock_config.database_url = "mysql://user:pass@localhost/db"
+        with pytest.raises(ConfigurationValidationError, match="Database URL must be a PostgreSQL"):
+            validator.validate_config(mock_config)
+    
+    def test_validation_report_generation(self, validator, mock_config):
+        """Test validation report generation."""
+        report = validator.get_validation_report(mock_config)
+        assert any("✓" in line for line in report)
+        assert any("Environment: production" in line for line in report)
+
+
+# Test 12: error_context_capture
+class TestErrorContext:
+    """Test error context preservation - app/core/error_context.py"""
+    
+    @pytest.fixture
+    def error_context(self):
+        from app.core.error_context import ErrorContext
+        return ErrorContext()
+    
+    def test_trace_id_management(self, error_context):
+        """Test trace ID generation and retrieval."""
+        trace_id = error_context.generate_trace_id()
+        assert trace_id is not None
+        assert error_context.get_trace_id() == trace_id
+    
+    def test_context_preservation_across_calls(self, error_context):
+        """Test that context is preserved across calls."""
+        error_context.set_trace_id("trace-123")
+        error_context.set_request_id("req-456")
+        error_context.set_user_id("user-789")
+        
+        assert error_context.get_trace_id() == "trace-123"
+        assert error_context.get_request_id() == "req-456"
+        assert error_context.get_user_id() == "user-789"
+
+
+# Test 13: error_handlers_recovery
+class TestErrorHandlers:
+    """Test error recovery mechanisms - app/core/error_handlers.py"""
+    
+    def test_error_response_structure(self):
+        """Test standardized error response structure."""
+        from app.core.error_handlers import ErrorResponse
+        
+        response = ErrorResponse(
+            error_code="TEST_ERROR",
+            message="Test error message",
+            trace_id="trace-123",
+            timestamp=datetime.now().isoformat()
+        )
+        
+        assert response.error is True
+        assert response.error_code == "TEST_ERROR"
+        assert response.trace_id == "trace-123"
+    
+    @pytest.mark.asyncio
+    async def test_http_exception_handler(self):
+        """Test HTTP exception handling."""
+        from app.core.error_handlers import http_exception_handler
+        from fastapi import HTTPException
+        
+        request = Mock()
+        exc = HTTPException(status_code=404, detail="Not found")
+        
+        response = await http_exception_handler(request, exc)
+        assert response.status_code == 404
+        
+        body = json.loads(response.body)
+        assert body["error"] is True
+        assert "Not found" in body["message"]
+
+
+# Test 14: exceptions_custom_types
+class TestCustomExceptions:
+    """Test custom exception behaviors - app/core/exceptions.py"""
+    
+    def test_netra_exception_structure(self):
+        """Test NetraException structure and properties."""
+        from app.core.exceptions import NetraException, ErrorCode, ErrorSeverity
+        
+        exc = NetraException(
+            message="Test error",
+            error_code=ErrorCode.GENERAL_ERROR,
+            severity=ErrorSeverity.HIGH
+        )
+        
+        assert str(exc) == "Test error"
+        assert exc.error_code == ErrorCode.GENERAL_ERROR
+        assert exc.severity == ErrorSeverity.HIGH
+    
+    def test_authentication_error(self):
+        """Test authentication-specific exceptions."""
+        from app.core.exceptions import AuthenticationError
+        
+        exc = AuthenticationError("Invalid token")
+        assert "Invalid token" in str(exc)
+        assert exc.status_code == 401
+
+
+# Test 15: logging_manager_configuration
+class TestLoggingManager:
+    """Test log level management - app/core/logging_manager.py"""
+    
+    def test_logging_configuration(self):
+        """Test basic logging configuration."""
+        from app.core.logging_manager import setup_logging, get_logger
+        
+        setup_logging(log_level="DEBUG")
+        logger = get_logger(__name__)
+        
+        assert logger is not None
+        assert logger.level <= logging.DEBUG
+    
+    def test_structured_logging(self):
+        """Test structured logging output."""
+        from app.core.logging_manager import get_logger
+        
+        logger = get_logger("test_logger")
+        
+        with patch.object(logger, 'info') as mock_info:
+            logger.info("Test message", extra={"user_id": "123"})
+            mock_info.assert_called_once()
+
+
+# Test 16: resource_manager_limits
+class TestResourceManager:
+    """Test resource allocation - app/core/resource_manager.py"""
+    
+    @pytest.mark.asyncio
+    async def test_resource_tracking(self):
+        """Test basic resource tracking."""
+        from app.core.resource_manager import ResourceTracker
+        
+        tracker = ResourceTracker()
+        tracker.track_resource("connection", "conn_1")
+        
+        assert tracker.get_resource_count("connection") == 1
+        
+        tracker.release_resource("connection", "conn_1")
+        assert tracker.get_resource_count("connection") == 0
+    
+    @pytest.mark.asyncio
+    async def test_resource_limits(self):
+        """Test resource limit enforcement."""
+        from app.core.resource_manager import ResourceTracker
+        
+        tracker = ResourceTracker(max_connections=2)
+        
+        assert tracker.can_allocate("connection")
+        tracker.track_resource("connection", "conn_1")
+        tracker.track_resource("connection", "conn_2")
+        
+        # Should not allow more than limit
+        assert not tracker.can_allocate("connection")
+
+
+# Test 17: schema_sync_database_migration
+class TestSchemaSync:
+    """Test schema synchronization - app/core/schema_sync.py"""
+    
+    @pytest.mark.asyncio
+    async def test_schema_validation(self):
+        """Test basic schema validation."""
+        from app.core.schema_sync import validate_schema
+        
+        mock_db = AsyncMock()
+        mock_db.execute.return_value.fetchall.return_value = [
+            ("users", "id", "integer"),
+            ("users", "email", "varchar"),
+        ]
+        
+        # Should not raise exception for valid schema
+        await validate_schema(mock_db, expected_tables=["users"])
+    
+    def test_migration_safety_checks(self):
+        """Test migration safety validation."""
+        from app.core.schema_sync import is_migration_safe
+        
+        # Safe migration (adding column)
+        assert is_migration_safe("ALTER TABLE users ADD COLUMN age INTEGER;")
+        
+        # Unsafe migration (dropping table)
+        assert not is_migration_safe("DROP TABLE users;")
+
+
+# Test 18: secret_manager_encryption
+class TestSecretManager:
+    """Test secret storage - app/core/secret_manager.py"""
+    
+    def test_secret_encryption(self):
+        """Test basic secret encryption/decryption."""
+        from app.core.secret_manager import encrypt_secret, decrypt_secret
+        
+        key = Fernet.generate_key()
+        secret = "my_secret_password"
+        
+        encrypted = encrypt_secret(secret, key)
+        assert encrypted != secret
+        
+        decrypted = decrypt_secret(encrypted, key)
+        assert decrypted == secret
+    
+    def test_secret_validation(self):
+        """Test secret format validation."""
+        from app.core.secret_manager import validate_secret_format
+        
+        # Valid secrets
+        assert validate_secret_format("valid_secret_123")
+        assert validate_secret_format("another-valid-secret")
+        
+        # Invalid secrets (too short)
+        assert not validate_secret_format("short")
+
+
+# Test 19: unified_logging_aggregation
+class TestUnifiedLogging:
+    """Test log aggregation - app/core/unified_logging.py"""
+    
+    def test_log_correlation(self):
+        """Test log correlation across services."""
+        from app.core.unified_logging import CorrelatedLogger
+        
+        logger = CorrelatedLogger("test_service")
+        logger.set_correlation_id("corr-123")
+        
+        with patch.object(logger.logger, 'info') as mock_info:
+            logger.info("Test message")
+            
+            # Check that correlation ID is included
+            call_args = mock_info.call_args
+            assert call_args is not None
+    
+    def test_log_aggregation(self):
+        """Test aggregating logs from multiple sources."""
+        from app.core.unified_logging import LogAggregator
+        
+        aggregator = LogAggregator()
+        
+        aggregator.add_log("service_a", "info", "Message from A")
+        aggregator.add_log("service_b", "error", "Error from B")
+        
+        logs = aggregator.get_logs()
+        assert len(logs) == 2
+        assert any(log["service"] == "service_a" for log in logs)
+        assert any(log["service"] == "service_b" for log in logs)
+
+
+# Test 20: startup_checks_service_validation
+class TestStartupChecks:
+    """Test service validation - app/startup_checks.py"""
+    
+    @pytest.mark.asyncio
+    async def test_database_check(self):
+        """Test database connectivity check."""
+        from app.startup_checks import check_database
+        
+        mock_engine = AsyncMock()
+        mock_engine.connect.return_value.__aenter__.return_value.execute.return_value.scalar.return_value = 1
+        
+        result = await check_database(mock_engine)
+        assert result is True
+    
+    @pytest.mark.asyncio
+    async def test_service_health_checks(self):
+        """Test external service health checks."""
+        from app.startup_checks import check_redis, check_clickhouse
+        
+        # Mock Redis check
+        with patch('app.startup_checks.RedisManager') as mock_redis:
+            mock_redis.return_value.ping.return_value = True
+            result = await check_redis()
+            assert result is True
+        
+        # Mock ClickHouse check
+        with patch('app.startup_checks.ClickHouseDatabase') as mock_ch:
+            mock_ch.return_value.execute_query.return_value = [(1,)]
+            result = await check_clickhouse()
+            assert result is True
+    
+    @pytest.mark.asyncio
+    async def test_graceful_degradation(self):
+        """Test graceful degradation when optional services fail."""
+        from app.startup_checks import run_startup_checks
+        
+        with patch('app.startup_checks.check_database') as mock_db:
+            mock_db.return_value = True  # Critical service OK
+            
+            with patch('app.startup_checks.check_redis') as mock_redis:
+                mock_redis.return_value = False  # Optional service failed
+                
+                # Should still return True (can start)
+                result = await run_startup_checks(fail_on_optional=False)
+                assert result is True

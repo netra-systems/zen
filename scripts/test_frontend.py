@@ -143,7 +143,10 @@ def run_jest_tests(args, isolation_manager=None) -> int:
         jest_args.extend(["--"] + args.tests)
     elif args.category and args.category != "e2e":
         patterns = TEST_CATEGORIES.get(args.category, [])
-        jest_args.extend(["--"] + patterns)
+        if patterns:
+            # Jest accepts multiple patterns, pass them properly
+            jest_args.append("--")
+            jest_args.extend(patterns)
     
     # Run Jest
     print(f"Running: {' '.join(jest_args)}")

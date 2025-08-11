@@ -51,7 +51,7 @@ export const useChatWebSocket = (runId?: string) => {
     isConnected: true, // WebSocket hook handles reconnection
     
     // Error state
-    errors: unifiedStore.messages.filter(m => m.type === 'error'),
+    errors: unifiedStore.messages?.filter(m => m.type === 'error') || [],
     
     // Streaming state
     isStreaming: unifiedStore.currentMessage?.mediumLayer?.partialContent ? true : false,
@@ -76,6 +76,8 @@ export const useChatWebSocket = (runId?: string) => {
     pendingApproval: null,
     subAgentStreams: {},
     setSubAgentName: () => {},
-    setSubAgentStatus: () => {}
+    setSubAgentStatus: () => {},
+    registerTool: () => {},
+    executeTool: () => {}
   };
 };

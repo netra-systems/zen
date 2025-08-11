@@ -1,0 +1,14 @@
+{
+  "qa": [
+    [
+      "Question?",
+      "Answer."
+    ]
+  ],
+  "generation": [
+    [
+      "Generate",
+      "Response"
+    ]
+  ]
+}

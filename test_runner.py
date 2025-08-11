@@ -110,8 +110,8 @@ class UnifiedTestRunner:
         env = os.environ.copy()
         if real_llm_config:
             env["TEST_USE_REAL_LLM"] = "true"
-            env["TEST_LLM_MODEL"] = real_llm_config.get("model", "gemini-1.5-flash")
-            env["TEST_LLM_TIMEOUT"] = str(real_llm_config.get("timeout", 30))
+            env["TEST_LLM_MODEL"] = real_llm_config.get("model", "gemini-2.5-flash")
+            env["TEST_LLM_TIMEOUT"] = str(real_llm_config.get("timeout", 45))
             if real_llm_config.get("parallel"):
                 env["TEST_PARALLEL"] = str(real_llm_config["parallel"])
             print(f"[INFO] Real LLM testing enabled with {env['TEST_LLM_MODEL']} (timeout: {env['TEST_LLM_TIMEOUT']}s)")

@@ -38,6 +38,9 @@ describe('useChatWebSocket', () => {
     handleWebSocketEvent: jest.fn(),
     setProcessing: jest.fn(),
     addMessage: jest.fn(),
+    clearMessages: jest.fn(),
+    messages: [],
+    currentMessage: null,
   };
 
   beforeEach(() => {

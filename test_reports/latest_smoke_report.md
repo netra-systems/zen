@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T14:05:23.055637  
+**Generated:** 2025-08-11T14:19:19.207923  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -8,11 +8,11 @@
 
 | Component | Status | Duration | Exit Code |
 |-----------|--------|----------|-----------|
-| Backend   | [PASSED] | 10.91s | 0 |
-| Frontend  | [PENDING] | 0.00s | None |
+| Backend   | [PASSED] | 9.12s | 0 |
+| Frontend  | [FAILED] | 0.11s | 1 |
 
 **Overall Status:** [FAILED]  
-**Total Duration:** 10.91s  
+**Total Duration:** 9.24s  
 **Final Exit Code:** 1
 
 ## Test Level Details
@@ -66,7 +66,7 @@ app\tests\routes\test_health_route.py::test_health_endpoint_direct [32mPASSED[
 
 [32m============================== [32m[1m2 passed[0m[32m in 0.11s[0m[32m ==============================[0m
 ================================================================================
-[PASS] ALL TESTS PASSED in 9.90s
+[PASS] ALL TESTS PASSED in 8.10s
 ================================================================================
 
 
@@ -74,6 +74,26 @@ app\tests\routes\test_health_route.py::test_health_endpoint_direct [32mPASSED[
 
 ### Frontend Output
 ```
+[INFO] Running frontend tests: npm run test:unit -- --passWithNoTests
+
+Traceback (most recent call last):
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\scripts\test_frontend_simple.py", line 73, in <module>
+    main()
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\scripts\test_frontend_simple.py", line 68, in main
+    success = run_frontend_tests(args.level, args.args)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\scripts\test_frontend_simple.py", line 51, in run_frontend_tests
+    result = subprocess.run(cmd, capture_output=False, text=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\miniconda3\Lib\subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\miniconda3\Lib\subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "C:\Users\antho\miniconda3\Lib\subprocess.py", line 1538, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [WinError 2] The system cannot find the file specified
 
 ```
 
