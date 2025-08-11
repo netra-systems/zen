@@ -1,0 +1,45 @@
+{
+  "timestamp": "2025-08-11T05:40:54.054292",
+  "test_level": "comprehensive",
+  "configuration": {
+    "description": "Full test suite with coverage (10-15 minutes)",
+    "purpose": "Pre-release validation, full system testing",
+    "backend_args": [
+      "--coverage",
+      "--parallel",
+      "auto",
+      "--html-output"
+    ],
+    "frontend_args": [
+      "--coverage",
+      "--watchAll=false"
+    ],
+    "timeout": 900,
+    "run_coverage": true,
+    "run_both": true
+  },
+  "results": {
+    "backend": {
+      "status": "failed",
+      "duration": 0.14815068244934082,
+      "exit_code": 2,
+      "output": "\nusage: test_backend.py [-h]\n                       [--category {unit,integration,agent,websocket,auth,database,critical,smoke}]\n                       [--keyword KEYWORD] [--markers MARKERS]\n                       [--parallel PARALLEL] [--fail-fast] [--failed-first]\n                       [--coverage] [--min-coverage MIN_COVERAGE] [--verbose]\n                       [--quiet] [--json-output] [--html-output] [--profile]\n                       [--check-deps] [--show-warnings] [--isolation]\n                       [tests ...]\ntest_backend.py: error: argument --parallel/-p: invalid int value: 'auto'\n"
+    },
+    "frontend": {
+      "status": "failed",
+      "duration": 0.09215974807739258,
+      "exit_code": 2,
+      "output": "\nusage: test_frontend.py [-h]\n                        [--category {unit,integration,components,hooks,store,websocket,auth,e2e,smoke}]\n                        [--keyword KEYWORD] [--e2e] [--cypress-open] [--watch]\n                        [--coverage] [--update-snapshots] [--lint] [--fix]\n                        [--type-check] [--build] [--check-deps]\n                        [--install-deps] [--verbose] [--isolation]\n                        [tests ...]\ntest_frontend.py: error: unrecognized arguments: --watchAll=false\n"
+    },
+    "overall": {
+      "status": "failed",
+      "start_time": 1754916053.8139822,
+      "end_time": 1754916054.0542927
+    }
+  },
+  "summary": {
+    "total_duration": 0.2403104305267334,
+    "overall_passed": false,
+    "exit_code": 2
+  }
+}

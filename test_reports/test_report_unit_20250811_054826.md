@@ -1,0 +1,99 @@
+# Netra AI Platform - Test Report
+
+**Generated:** 2025-08-11T05:48:26.152048  
+**Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
+**Purpose:** Development validation, component testing
+
+## Summary
+
+| Component | Status | Duration | Exit Code |
+|-----------|--------|----------|-----------|
+| Backend   | [FAILED] | 44.70s | 1 |
+| Frontend  | [FAILED] | 0.11s | 2 |
+
+**Overall Status:** [FAILED]  
+**Total Duration:** 44.81s  
+**Final Exit Code:** 2
+
+## Test Level Details
+
+- **Description:** Unit tests for isolated components (1-2 minutes)
+- **Purpose:** Development validation, component testing
+- **Timeout:** 120s
+- **Coverage Enabled:** No
+
+## Configuration
+
+### Backend Args
+```
+--category unit -v
+```
+
+### Frontend Args  
+```
+--testPathPattern=unit
+```
+
+## Test Output
+
+### Backend Output
+```
+================================================================================
+NETRA AI PLATFORM - BACKEND TEST RUNNER
+================================================================================
+Test Configuration:
+  Category: unit
+  Parallel: disabled
+  Coverage: disabled
+  Fail Fast: disabled
+  Environment: testing
+
+Running command:
+  pytest app/tests/services app/tests/core -vv --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
+================================================================================
+[1m============================= test session starts =============================[0m
+platform win32 -- Python 3.12.4, pytest-8.3.2, pluggy-1.5.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.3.2', 'pluggy': '1.5.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '1.1.0', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
+configfile: pytest.ini
+plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-1.1.0, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+[1mcollecting ... [0mcollected 519 items
+
+app\tests\services\agents\test_sub_agent.py::test_agent_node_is_coroutine <- ..\v2\app\tests\services\agents\test_sub_agent.py [31mFAILED[0m[31m [  0%][0m
+app\tests\services\agents\test_supervisor_service.py::test_supervisor_end_to_end <- ..\v2\app\tests\services\agents\test_supervisor_service.py [31mERROR[0m[31m [  0%][0m
+app\tests\services\agents\test_tools.py::test_tool_dispatcher <- ..\v2\app\tests\services\agents\test_tools.py [31mFAILED[0m[31m [  0%][0m
+app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found <- ..\v2\app\tests\services\agents\test_tools.py [31mFAILED[0m[31m [  0%][0m
+app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error <- ..\v2\app\tests\services\agents\test_tools.py [31mFAILED[0m[31m [  0%][0m
+app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher <- ..\v2\app\tests\services\apex_optimizer_agent\test_tool_builder.py [31mFAILED[0m[31m [  1%][0m
+app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool <- ..\v2\app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py [32mPASSED[0m[31m [  1%][0m
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic <- ..\v2\app\tests\services\apex_optimizer_agent\tools\test_base.py [32mPASSED[0m[31m [  1%][0m
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_full <- ..\v2\app\tests\services\apex_optimizer_agent\tools\test_base.py [32mPASSED[0m[31m [  1%][0m
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_validation_missing_required <- ..\v2\app\tests\services\apex_optimizer_agent\tools\test_base.py [32mPASSED[0m[31m [  1%][0m
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_dict_conversion <- ..\v2\app\tests\services\apex_optimizer_agent\tools\test_base.py [32mPASSED[0m[31m [  2%][0m
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_json_serialization <- ..\v2\app\tests\services\apex_optimizer_agent\tools\test_base.py [32mPASSED[0m[31m [  2%][0m
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases <- ..\v2\app\tests\services\apex_optimizer_agent\tools\test_base.py [32mPASSED[0m[31m [  2%][0m
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_instantiation <- ..\v2\app\tests\services\apex_optimizer_agent\tools\test_base.py [32mPASSED[0m[31m [  2%][0m
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_get_metadata <- ..\v2\app\tests\services\apex_optimizer_agent\tools\test_base.py [32mPASSED[0m[31m [  2%][0m
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper <- ..\v2\app\tests\services\apex_optimizer_agent\tools\test_base.py [32mPASSED[0m[31m [  3%][0m
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_failure <- ..\v2\app\tests\services\apex_optimizer_agent\tools\test_base.py [32mPASSED[0m[31m [  3%][0m
+app\tests\services\apex_optimizer_agent\tools\t...(truncated)
+```
+
+### Frontend Output
+```
+
+usage: test_frontend.py [-h]
+                        [--category {unit,integration,components,hooks,store,websocket,auth,e2e,smoke}]
+                        [--keyword KEYWORD] [--e2e] [--cypress-open] [--watch]
+                        [--coverage] [--update-snapshots] [--lint] [--fix]
+                        [--type-check] [--build] [--check-deps]
+                        [--install-deps] [--verbose] [--isolation]
+                        [tests ...]
+test_frontend.py: error: unrecognized arguments: --testPathPattern=unit
+
+```
+
+---
+*Generated by Netra AI Unified Test Runner*
