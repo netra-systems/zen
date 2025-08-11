@@ -125,6 +125,7 @@ class TestSystemE2E:
                     return True
             except (requests.exceptions.RequestException, ConnectionError):
                 # Removed unnecessary sleep
+                pass
         raise TimeoutError(f"Service at {url} did not start within {timeout} seconds")
     
     def test_01_system_startup(self):

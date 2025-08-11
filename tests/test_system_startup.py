@@ -17,7 +17,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.config import ConfigManager
-from app.schemas.Config import AppConfig, TestingConfig
+from app.schemas.Config import AppConfig
 from app.db.postgres import get_async_db
 from app.redis_manager import RedisManager
 from app.ws_manager import WebSocketManager

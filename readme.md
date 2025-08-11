@@ -8,7 +8,7 @@ Netra is a sophisticated AI optimization platform that leverages a multi-agent s
 
 ### Key Features
 
-- **Multi-Agent Intelligence**: Five specialized sub-agents orchestrated by advanced supervisor
+- **Multi-Agent Intelligence**: Seven specialized sub-agents orchestrated by advanced supervisor
 - **Real-Time Communication**: WebSocket manager with heartbeat, retry logic, and connection pooling
 - **Dual Database System**: PostgreSQL for transactional data, ClickHouse for time-series analytics
 - **Enterprise Security**: Google OAuth 2.0 integration with JWT tokens and secure session management
@@ -46,6 +46,9 @@ Netra is a sophisticated AI optimization platform that leverages a multi-agent s
 - Python 3.9+ (3.11+ recommended)
 - Node.js 18+
 - Git
+- PostgreSQL 14+ (optional - will use SQLite if not available)
+- Redis 7+ (optional - for caching)
+- ClickHouse (optional - for analytics)
 
 ### 🎯 One-Command Installation (Recommended for New Developers)
 
@@ -118,8 +121,8 @@ cp config/.env.example .env  # Edit with your settings
 python database_scripts/create_db.py
 python database_scripts/run_migrations.py
 
-# 5. Start services
-python scripts/dev_launcher.py --dynamic --no-backend-reload
+# 5. Start services (RECOMMENDED CONFIGURATION)
+python dev_launcher.py --dynamic --no-backend-reload --load-secrets
 ```
 
 ### 🔧 Troubleshooting
@@ -231,8 +234,9 @@ GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
 FRONTEND_URL=http://localhost:3000
 
 # API Keys
-OPENAI_API_KEY=your-openai-key
-ANTHROPIC_API_KEY=your-anthropic-key
+GEMINI_API_KEY=your-gemini-key  # Primary LLM provider
+OPENAI_API_KEY=your-openai-key  # Optional
+ANTHROPIC_API_KEY=your-anthropic-key  # Optional
 
 # Environment
 ENVIRONMENT=development
@@ -416,7 +420,7 @@ mypy app/              # Backend
 - **Python**: Follow PEP 8, use type hints, async/await for I/O
 - **TypeScript**: Use strict mode, define interfaces for all data structures
 - **React**: Functional components with hooks, proper component composition
-- **Testing**: Minimum 80% coverage, unit and integration tests
+- **Testing**: Target 97% coverage, comprehensive test suite with 5 levels
 
 ## 📚 API Documentation
 
@@ -509,7 +513,29 @@ interface WebSocketMessage {
 
 ## 🧪 Testing
 
-### Backend Testing
+### Unified Test Runner (RECOMMENDED)
+
+```bash
+# Quick smoke tests (< 30 seconds) - Use before commits
+python test_runner.py --level smoke
+
+# Unit tests (1-2 minutes) - Development validation
+python test_runner.py --level unit
+
+# Integration tests (3-5 minutes) - Feature validation
+python test_runner.py --level integration
+
+# Comprehensive tests with coverage (10-15 minutes)
+python test_runner.py --level comprehensive
+
+# Critical path tests only (1-2 minutes)
+python test_runner.py --level critical
+
+# Simple fallback runner if main runner has issues
+python test_runner.py --simple
+```
+
+### Traditional Backend Testing
 
 ```bash
 # Run all tests

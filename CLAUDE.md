@@ -225,6 +225,24 @@ response = await llm_manager.ask_llm(prompt, "gpt4")
 
 ## Recent Learnings (Update This Section!)
 
+### 2025-08-11: Documentation Refresh Insights
+- **Multi-Agent Architecture**: 7 specialized sub-agents (Triage, Data, OptimizationsCore, ActionsToMeetGoals, Reporting, SyntheticData, CorpusAdmin)
+- **Apex Optimizer**: 30+ specialized optimization tools with dynamic routing
+- **Test Levels**: Unified test runner with 5 levels (smoke, unit, integration, comprehensive, critical)
+- **Frontend V5**: Glassmorphic design, single MainChat component, three-layer response cards
+- **WebSocket**: Real-time with heartbeat, connection pooling, event buffering for debugging
+
+### 2025-08-11: Critical Test Runner Updates
+- **Unified Test Runner**: Single entry point `test_runner.py` replaces all individual runners
+- **Test Levels with Clear Times**:
+  - Smoke: < 30s for pre-commit validation
+  - Unit: 1-2 min for component testing
+  - Integration: 3-5 min for feature validation
+  - Comprehensive: 10-15 min with coverage
+  - Critical: 1-2 min for essential functionality
+- **Automatic Report Generation**: All test results saved to `test_reports/` with JSON summaries
+- **Simple Fallback**: Use `--simple` flag if main runner has issues
+
 ### 2025-01-11: Spec Organization
 - Moved testing details to `SPEC/testing.xml`
 - Moved architecture details to `SPEC/architecture.xml`
@@ -247,13 +265,13 @@ response = await llm_manager.ask_llm(prompt, "gpt4")
 - **Prevention**: Always verify method signatures match between caller and implementation
 - **Note**: ClickHouse client uses `execute_query()` not `execute()` for async operations
 
-### 2025-08-11: ClickHouse Startup Check Fix
+### 2025-01-11: ClickHouse Startup Check Fix
 - **Problem**: `'ClickHouseDatabase' object has no attribute 'execute'` error during startup checks
 - **Root Cause**: Using wrong method name - should be `execute_query()` not `execute()`
 - **Solution**: Updated `app/startup_checks.py` line 287 to use `client.execute_query()`
 - **Files Changed**: `app/startup_checks.py:287-290`
 
-### 2025-08-11: Database Schema Migration
+### 2025-01-11: Database Schema Migration
 - **Problem**: Missing tables and columns causing schema validation errors
 - **Tables Added**: `tool_usage_logs`, `ai_supply_items`, `research_sessions`, `supply_update_logs`
 - **Columns Added to userbase**: `tool_permissions`, `plan_expires_at`, `feature_flags`, `payment_status`, `auto_renew`, `plan_tier`, `plan_started_at`, `trial_period`
