@@ -293,7 +293,7 @@ app.add_exception_handler(ValidationError, validation_exception_handler)
 app.add_exception_handler(HTTPException, http_exception_handler)
 app.add_exception_handler(Exception, general_exception_handler)
 
-from app.routes import supply, generation, admin, references, health, corpus, synthetic_data, config, demo
+from app.routes import supply, generation, admin, references, health, corpus, synthetic_data, config, demo, unified_tools
 from app.routes.auth import auth as auth_router
 from app.routes.agent_route import router as agent_router
 from app.routes.llm_cache import router as llm_cache_router
@@ -313,6 +313,7 @@ app.include_router(corpus.router, prefix="/api/corpus", tags=["corpus"])
 app.include_router(synthetic_data.router, tags=["synthetic_data"])
 app.include_router(config.router, prefix="/api", tags=["config"])
 app.include_router(demo.router, tags=["demo"])
+app.include_router(unified_tools.router, prefix="/api/tools", tags=["unified-tools"])
 
 @app.get("/")
 def read_root():

@@ -1,5 +1,13 @@
 """
-Admin Tools for Agent System - Corpus, Synthetic Data, and System Management
+DEPRECATED: Admin Tools for Agent System
+
+This file is deprecated and replaced by the unified tool registry system.
+See: app/services/unified_tool_registry.py
+
+All admin functionality is now handled through the unified tools API at /api/tools
+with per-tool permissions instead of role-based admin access.
+
+Migration path: Use /api/tools/migrate-legacy endpoint to migrate users
 """
 from typing import Dict, List, Any, Optional
 from sqlalchemy.orm import Session

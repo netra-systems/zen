@@ -1,0 +1,301 @@
+"""
+Tool Permission Middleware - Integrates tool permissions into FastAPI request flow
+"""
+from typing import Callable, Optional
+from fastapi import Request, Response, HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy.orm import Session
+from app.db.models_postgres import User
+from app.db.postgres import get_db
+from app.services.tool_permission_service import ToolPermissionService
+from app.services.unified_tool_registry import UnifiedToolRegistry
+from app.schemas.ToolPermission import ToolExecutionContext, PermissionCheckResult
+from app.auth.auth_dependencies import get_current_user
+from app.logging_config import central_logger
+import json
+import time
+from datetime import datetime
+
+logger = central_logger
+
+
+class ToolPermissionMiddleware:
+    """Middleware to enforce tool permissions"""
+    
+    def __init__(
+        self, 
+        permission_service: ToolPermissionService,
+        tool_registry: UnifiedToolRegistry
+    ):
+        self.permission_service = permission_service
+        self.tool_registry = tool_registry
+    
+    async def __call__(self, request: Request, call_next: Callable):
+        """Process request with tool permission checking"""
+        start_time = time.time()
+        
+        try:
+            # Check if this is a tool execution endpoint
+            if await self._is_tool_endpoint(request):
+                # Extract tool information from request
+                tool_info = await self._extract_tool_info(request)
+                
+                if tool_info:
+                    # Get user from request
+                    user = await self._get_user_from_request(request)
+                    
+                    if user:
+                        # Check tool permissions
+                        permission_result = await self._check_tool_permissions(
+                            tool_info, user, request
+                        )
+                        
+                        if not permission_result.allowed:
+                            return self._permission_denied_response(permission_result)
+                        
+                        # Add permission context to request
+                        request.state.permission_check = permission_result
+                        request.state.tool_info = tool_info
+            
+            # Process request
+            response = await call_next(request)
+            
+            # Log tool execution if it was a tool endpoint
+            if hasattr(request.state, 'tool_info'):
+                await self._log_tool_execution(
+                    request, response, time.time() - start_time
+                )
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Tool permission middleware error: {e}", exc_info=True)
+            # Don't block requests due to middleware errors
+            return await call_next(request)
+    
+    async def _is_tool_endpoint(self, request: Request) -> bool:
+        """Check if request is for a tool execution endpoint"""
+        # Check for tool-related paths
+        tool_paths = [
+            "/api/tools/",
+            "/api/agents/",
+            "/api/mcp/",
+            "/api/admin/"  # Admin endpoints are now tool endpoints
+        ]
+        
+        return any(request.url.path.startswith(path) for path in tool_paths)
+    
+    async def _extract_tool_info(self, request: Request) -> Optional[dict]:
+        """Extract tool information from request"""
+        try:
+            # For POST requests, check body for tool name
+            if request.method == "POST":
+                if hasattr(request, "_body"):
+                    body = await request.body()
+                    if body:
+                        data = json.loads(body)
+                        if "tool_name" in data:
+                            return {
+                                "name": data["tool_name"],
+                                "arguments": data.get("arguments", {}),
+                                "action": data.get("action", "execute")
+                            }
+            
+            # Extract from URL path
+            path_parts = request.url.path.split("/")
+            if len(path_parts) >= 4 and path_parts[2] == "tools":
+                return {
+                    "name": path_parts[3],
+                    "action": path_parts[4] if len(path_parts) > 4 else "execute",
+                    "arguments": dict(request.query_params)
+                }
+            
+            # For MCP endpoints
+            if "/mcp/call" in request.url.path:
+                body = await request.body()
+                if body:
+                    data = json.loads(body)
+                    return {
+                        "name": data.get("method", "unknown"),
+                        "arguments": data.get("params", {}),
+                        "action": "execute"
+                    }
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error extracting tool info: {e}")
+            return None
+    
+    async def _get_user_from_request(self, request: Request) -> Optional[User]:
+        """Get user from request context"""
+        try:
+            # Try to get user from dependency injection context
+            if hasattr(request.state, 'user'):
+                return request.state.user
+            
+            # Fallback: extract from Authorization header
+            auth_header = request.headers.get("Authorization")
+            if auth_header and auth_header.startswith("Bearer "):
+                # This would typically validate the JWT token and get user
+                # For now, return None to skip permission checking
+                pass
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error getting user from request: {e}")
+            return None
+    
+    async def _check_tool_permissions(
+        self, 
+        tool_info: dict, 
+        user: User,
+        request: Request
+    ) -> PermissionCheckResult:
+        """Check if user has permission to use the tool"""
+        try:
+            # Create execution context
+            context = ToolExecutionContext(
+                user_id=str(user.id),
+                tool_name=tool_info["name"],
+                requested_action=tool_info.get("action", "execute"),
+                user_plan=getattr(user, 'plan_tier', 'free'),
+                user_roles=getattr(user, 'roles', []),
+                feature_flags=getattr(user, 'feature_flags', {}),
+                is_developer=getattr(user, 'is_developer', False),
+                environment=self._get_environment()
+            )
+            
+            # Check permissions
+            return await self.permission_service.check_tool_permission(context)
+            
+        except Exception as e:
+            logger.error(f"Error checking tool permissions: {e}")
+            return PermissionCheckResult(
+                allowed=False,
+                reason=f"Permission check failed: {str(e)}"
+            )
+    
+    def _get_environment(self) -> str:
+        """Get current environment"""
+        import os
+        return os.getenv("ENVIRONMENT", "production")
+    
+    def _permission_denied_response(
+        self, 
+        permission_result: PermissionCheckResult
+    ) -> Response:
+        """Create permission denied response"""
+        error_detail = {
+            "error": "permission_denied",
+            "message": permission_result.reason,
+            "required_permissions": permission_result.required_permissions,
+            "missing_permissions": permission_result.missing_permissions,
+            "upgrade_path": permission_result.upgrade_path
+        }
+        
+        if permission_result.rate_limit_status:
+            error_detail["rate_limit"] = permission_result.rate_limit_status
+        
+        return Response(
+            content=json.dumps(error_detail),
+            status_code=403,
+            headers={"Content-Type": "application/json"}
+        )
+    
+    async def _log_tool_execution(
+        self,
+        request: Request,
+        response: Response,
+        execution_time: float
+    ):
+        """Log tool execution for analytics"""
+        try:
+            tool_info = request.state.tool_info
+            permission_check = getattr(request.state, 'permission_check', None)
+            
+            log_entry = {
+                "timestamp": datetime.utcnow().isoformat(),
+                "tool_name": tool_info["name"],
+                "user_id": getattr(request.state, 'user_id', 'unknown'),
+                "action": tool_info.get("action", "execute"),
+                "status_code": response.status_code,
+                "execution_time_ms": int(execution_time * 1000),
+                "user_agent": request.headers.get("User-Agent"),
+                "ip_address": request.client.host if request.client else None,
+            }
+            
+            if permission_check:
+                log_entry.update({
+                    "permission_allowed": permission_check.allowed,
+                    "required_permissions": permission_check.required_permissions,
+                })
+            
+            # Log to central logger (could also send to analytics service)
+            logger.info("Tool execution", extra={"tool_execution": log_entry})
+            
+        except Exception as e:
+            logger.error(f"Error logging tool execution: {e}")
+
+
+def create_tool_permission_dependency(
+    permission_service: ToolPermissionService,
+    tool_registry: UnifiedToolRegistry
+):
+    """Create a dependency for checking tool permissions in FastAPI endpoints"""
+    
+    async def check_tool_permission(
+        tool_name: str,
+        action: str = "execute",
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
+    ):
+        """Dependency to check tool permissions"""
+        try:
+            # Create execution context
+            context = ToolExecutionContext(
+                user_id=str(current_user.id),
+                tool_name=tool_name,
+                requested_action=action,
+                user_plan=getattr(current_user, 'plan_tier', 'free'),
+                user_roles=getattr(current_user, 'roles', []),
+                feature_flags=getattr(current_user, 'feature_flags', {}),
+                is_developer=getattr(current_user, 'is_developer', False),
+            )
+            
+            # Check permissions
+            permission_result = await permission_service.check_tool_permission(context)
+            
+            if not permission_result.allowed:
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "error": "permission_denied",
+                        "message": permission_result.reason,
+                        "required_permissions": permission_result.required_permissions,
+                        "upgrade_path": permission_result.upgrade_path
+                    }
+                )
+            
+            return permission_result
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Tool permission dependency error: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail="Permission check failed"
+            )
+    
+    return check_tool_permission
+
+
+# Convenience function to create the middleware
+def create_tool_permission_middleware(
+    permission_service: ToolPermissionService,
+    tool_registry: UnifiedToolRegistry
+) -> ToolPermissionMiddleware:
+    """Create tool permission middleware instance"""
+    return ToolPermissionMiddleware(permission_service, tool_registry)
