@@ -22,7 +22,8 @@
       "Bash(taskkill:*)",
       "Bash(set PORT=3001)",
       "Bash(del test_websocket_fixes.py)",
-      "Bash(timeout 300 python -m pytest --tb=no -q --disable-warnings)"
+      "Bash(timeout 300 python -m pytest --tb=no -q --disable-warnings)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }

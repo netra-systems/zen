@@ -243,7 +243,8 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
         mediumLayerData: null,
         slowLayerData: null,
         currentRunId: null,
-        isProcessing: false
+        isProcessing: false,
+        messages: []
       }, false, 'resetLayers'),
       
       // Add message to history
