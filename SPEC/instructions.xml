@@ -93,5 +93,22 @@
             <item>Remember: {spec_name} items. Limit to 20 subitems</item>
             <item>All other specs are for background context and coherence. Scope to an implement {spec_name} only</item>
         </remember>
+        
+        <section id="ui-ux-patterns" order="0.65">
+            <title>UI/UX Pattern Validation</title>
+            <description>Ensure UI/UX changes follow established patterns and user expectations</description>
+            <items>
+                <item priority="critical">When implementing UI changes, validate against common patterns in popular applications (ChatGPT, Claude, etc.)</item>
+                <item>Check for dual-sidebar anti-patterns that create disconnected experiences</item>
+                <item>Ensure persistent elements (navigation, history) are globally accessible</item>
+                <item>Validate that chat history is integrated into the main application sidebar, not isolated within specific pages</item>
+                <item>Test responsive behavior across different viewport sizes</item>
+                <item>Consider user navigation flows and ensure consistency across all pages</item>
+            </items>
+            <rationale>
+                Recurring UI issues often stem from architectural decisions that diverge from user expectations.
+                Following established patterns from successful applications reduces user confusion and improves adoption.
+            </rationale>
+        </section>
     </sections>
 </specification>

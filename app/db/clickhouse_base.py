@@ -41,6 +41,17 @@ class ClickHouseDatabase:
         except Exception as e:
             return False
 
+    async def test_connection(self) -> bool:
+        """Test if the ClickHouse connection is working."""
+        try:
+            if not self.client:
+                return False
+            # Run a simple query to test the connection
+            await self.execute_query("SELECT 1")
+            return True
+        except Exception:
+            return False
+
     async def command(self, cmd: str, parameters: Dict[str, Any] | None = None, settings: Dict[str, Any] | None = None):
         if not self.client:
             raise ConnectionError("Not connected to ClickHouse.")

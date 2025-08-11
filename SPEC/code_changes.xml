@@ -387,6 +387,48 @@
         Ensure TESTING=1 and other test env vars are set
       </prevention>
     </pitfall>
+    
+    <pitfall id="database-session-dependency">
+      <title>Incorrect Database Session Dependency Type Hints</title>
+      <description>
+        Missing or incorrect type hints for database session dependencies in FastAPI routes 
+        can cause authentication failures with error: '_AsyncGeneratorContextManager' object has no attribute 'execute'.
+        This happens when the dependency injection system cannot properly resolve the AsyncSession type.
+      </description>
+      <prevention>
+        Always explicitly type database session parameters in dependency functions:
+        - Use: db_session: AsyncSession = Depends(get_db_session)
+        - NOT: db_session = Depends(get_db_session)
+        - Import AsyncSession from sqlalchemy.ext.asyncio
+        - Use get_db_session from app.dependencies (not get_async_db from app.db.postgres directly)
+      </prevention>
+      <example>
+        <code language="python">
+          # CORRECT:
+          from sqlalchemy.ext.asyncio import AsyncSession
+          from app.dependencies import get_db_session
+          
+          async def get_current_user(
+              token: str,
+              db_session: AsyncSession = Depends(get_db_session),  # Explicitly typed
+              security_service: SecurityService = Depends(get_security_service),
+          ) -> Optional[User]:
+              # Function implementation
+              
+          # INCORRECT:
+          async def get_current_user(
+              token: str,
+              db_session = Depends(get_db_session),  # Missing type hint - will cause errors
+              security_service: SecurityService = Depends(get_security_service),
+          ) -> Optional[User]:
+              # Function implementation
+        </code>
+      </example>
+      <affected-files>
+        <file>app/auth/auth_dependencies.py</file>
+        <file>app/routes/* (any route using database sessions)</file>
+      </affected-files>
+    </pitfall>
   </section>
   
   <section name="quick-reference">

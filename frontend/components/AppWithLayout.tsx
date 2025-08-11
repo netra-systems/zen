@@ -24,7 +24,7 @@ export function AppWithLayout({ children }: AppWithLayoutProps) {
     <div
       className={cn(
         'grid min-h-screen w-full',
-        showSidebar && 'md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]'
+        showSidebar && 'md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr]'
       )}
     >
       {showSidebar && <Sidebar />}

@@ -1,19 +1,19 @@
 from typing import Annotated, Optional
 from fastapi import Depends, HTTPException, status, Query
-from app.db.postgres import get_async_db
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.dependencies import get_db_session, get_security_service
 from app.services.security_service import SecurityService
-from app.dependencies import get_security_service
 from app.db.models_postgres import User
 from app.logging_config import central_logger
 from fastapi.security import OAuth2PasswordBearer
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token")
 
 logger = central_logger.get_logger(__name__)
 
 async def get_current_user(
     token: str,
-    db_session = Depends(get_async_db),
+    db_session: AsyncSession = Depends(get_db_session),
     security_service: SecurityService = Depends(get_security_service),
 ) -> Optional[User]:
     if not token:
@@ -39,14 +39,14 @@ async def get_current_user(
 
 async def get_current_user_ws(
     token: Annotated[str, Query()],
-    db_session = Depends(get_async_db),
+    db_session: AsyncSession = Depends(get_db_session),
     security_service: SecurityService = Depends(get_security_service),
 ) -> Optional[User]:
     return await get_current_user(token, db_session, security_service)
 
 async def get_current_active_user(
     token: str = Depends(oauth2_scheme),
-    db_session = Depends(get_async_db),
+    db_session: AsyncSession = Depends(get_db_session),
     security_service: SecurityService = Depends(get_security_service),
 ) -> Optional[User]:
     user = await get_current_user(token, db_session, security_service)

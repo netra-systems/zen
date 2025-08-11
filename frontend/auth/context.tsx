@@ -28,10 +28,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const syncAuthStore = useCallback((userData: User | null, tokenData: string | null) => {
     if (userData && tokenData) {
       authStore.login({
-        id: userData.id || userData.sub || '',
+        id: userData.id || (userData as any).sub || '',
         email: userData.email,
-        name: userData.full_name || userData.name,
-        role: userData.role
+        name: userData.full_name || (userData as any).name,
+        role: (userData as any).role
       }, tokenData);
     } else {
       authStore.logout();

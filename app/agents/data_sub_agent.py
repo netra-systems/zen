@@ -514,6 +514,16 @@ class DataSubAgent(BaseSubAgent):
                 
         except Exception as e:
             logger.error(f"Anomaly detection failed: {e}")
+            
+            # Check if the error is due to missing table
+            if "UNKNOWN_TABLE" in str(e) or "Unknown table" in str(e):
+                logger.warning("workload_events table not found during anomaly detection, attempting to create it...")
+                try:
+                    if await create_workload_events_table_if_missing():
+                        logger.info("workload_events table created, but no historical data for anomaly detection")
+                except Exception as create_error:
+                    logger.error(f"Error during table creation attempt: {create_error}")
+            
             return {
                 "has_anomalies": False,
                 "error": str(e)
@@ -592,6 +602,16 @@ class DataSubAgent(BaseSubAgent):
                 
         except Exception as e:
             logger.error(f"Usage pattern analysis failed: {e}")
+            
+            # Check if the error is due to missing table
+            if "UNKNOWN_TABLE" in str(e) or "Unknown table" in str(e):
+                logger.warning("workload_events table not found during usage pattern analysis, attempting to create it...")
+                try:
+                    if await create_workload_events_table_if_missing():
+                        logger.info("workload_events table created, but no historical data for usage patterns")
+                except Exception as create_error:
+                    logger.error(f"Error during table creation attempt: {create_error}")
+            
             return {
                 "has_patterns": False,
                 "error": str(e)

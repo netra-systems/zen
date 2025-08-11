@@ -48,6 +48,22 @@
             <rule>`createContext`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive</rule>
         </convention>
         
+        <convention id="ui-layout-architecture">
+            <title>UI Layout Architecture</title>
+            <description>Maintain consistent layout architecture across the application</description>
+            <rules>
+                <rule priority="critical">Chat history MUST be integrated into the main application sidebar, not as a separate sidebar within chat pages</rule>
+                <rule>The main Sidebar component should contain all persistent navigation and history elements</rule>
+                <rule>Avoid dual-sidebar patterns that create disconnected user experiences</rule>
+                <rule>Global navigation elements (chat history, nav links) should be accessible from any page</rule>
+                <rule>Use ChatHistorySection component for thread management in the main sidebar</rule>
+            </rules>
+            <rationale>
+                Users expect chat history to be persistently visible in the main sidebar (similar to ChatGPT/Claude).
+                Dual-sidebar patterns create confusion and poor UX as users can't see their conversation history when navigating to other pages.
+            </rationale>
+        </convention>
+        
         <convention id="python-patterns">
             <title>Python Patterns</title>
             <rules>
