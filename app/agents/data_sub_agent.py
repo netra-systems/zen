@@ -26,6 +26,7 @@ from app.agents.utils import extract_json_from_response
 from app.db.clickhouse import get_clickhouse_client
 from app.redis_manager import RedisManager
 from app.core.exceptions import NetraException
+from app.db.clickhouse_init import create_workload_events_table_if_missing
 
 logger = logging.getLogger(__name__)
 
@@ -439,6 +440,31 @@ class DataSubAgent(BaseSubAgent):
                 
         except Exception as e:
             logger.error(f"Failed to fetch workload events: {e}")
+            
+            # Check if the error is due to missing table
+            if "UNKNOWN_TABLE" in str(e) or "Unknown table" in str(e):
+                logger.warning("workload_events table not found, attempting to create it...")
+                try:
+                    # Attempt to create the table
+                    if await create_workload_events_table_if_missing():
+                        logger.info("workload_events table created successfully, retrying query...")
+                        # Retry the query once after creating the table
+                        try:
+                            async with get_clickhouse_client() as client:
+                                perf_query = self.query_builder.build_performance_metrics_query(
+                                    user_id, workload_id, start_time, end_time, aggregation_level
+                                )
+                                perf_results = await client.execute_query(perf_query)
+                                
+                                # Return empty result if still no data
+                                return {"status": "no_data", "message": "Table created but no data available yet"}
+                        except Exception as retry_error:
+                            logger.error(f"Query failed even after creating table: {retry_error}")
+                    else:
+                        logger.error("Failed to create workload_events table")
+                except Exception as create_error:
+                    logger.error(f"Error during table creation attempt: {create_error}")
+            
             return {
                 "status": "error",
                 "message": f"Database query failed: {str(e)}"

@@ -131,6 +131,16 @@ async def lifespan(app: FastAPI):
 
     # ClickHouse client managed by central_logger
     app.state.clickhouse_client = None
+    
+    # Initialize ClickHouse tables
+    if 'pytest' not in sys.modules:  # Skip during testing
+        try:
+            logger.info("Initializing ClickHouse tables...")
+            await initialize_clickhouse_tables()
+            logger.info("ClickHouse tables initialization complete")
+        except Exception as e:
+            logger.error(f"Failed to initialize ClickHouse tables: {e}")
+            # Don't fail startup, the app can still work with PostgreSQL
 
     # Initialize Postgres - must be done before startup checks
     app.state.db_session_factory = async_session_factory

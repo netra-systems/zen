@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { Icons } from '@/components/Icons';
 import { NavLinks } from './NavLinks';
+import { ChatHistorySection } from './ChatHistorySection';
 
 export function Sidebar() {
   return (
@@ -13,8 +14,11 @@ export function Sidebar() {
             <span className="">Netra</span>
           </Link>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 flex flex-col">
           <NavLinks />
+          <div className="mt-4 border-t flex-1 overflow-hidden">
+            <ChatHistorySection />
+          </div>
         </div>
       </div>
     </div>
