@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Tool Authentication and Permission System</name>
+        <type>tool_auth_system</type>
+        <version>2.0</version>
+        <created>2025-08-11</created>
+        <replaces>admin_unified_experience.xml</replaces>
+        <description>Comprehensive per-tool authentication and permission system with business logic integration</description>
+    </metadata>
+    
+    <primary-goal>Replace role-based admin system with granular per-tool permissions that integrate business logic, user plans, and progressive capabilities</primary-goal>
+    
+    <core-principles>
+        <principle id="tool-first-auth">
+            <name>Tool-First Authentication</name>
+            <description>Every tool declares its own permission requirements instead of relying on user roles</description>
+            <implementation>
+                <rule>Each tool specifies required permissions in its definition</rule>
+                <rule>Tools can require multiple permissions with AND/OR logic</rule>
+                <rule>Permission checks happen at tool execution time</rule>
+                <rule>Tools fail gracefully with clear permission error messages</rule>
+            </implementation>
+        </principle>
+        
+        <principle id="business-logic-integration">
+            <name>Business Logic Integration</name>
+            <description>Tool access determined by user plan, feature flags, and business rules</description>
+            <levels>
+                <level name="free">Basic tools with usage limits</level>
+                <level name="pro">Advanced tools and higher limits</level>
+                <level name="enterprise">All tools including admin capabilities</level>
+                <level name="developer">Full access for development and debugging</level>
+            </levels>
+        </principle>
+        
+        <principle id="unified-tool-registry">
+            <name>Unified Tool Registry</name>
+            <description>All tools (basic, admin, MCP, apex optimizer) managed by single registry</description>
+            <benefits>
+                <benefit>Consistent permission checking across all tools</benefit>
+                <benefit>Single source of truth for tool availability</benefit>
+                <benefit>Easy to add new tools with proper auth</benefit>
+                <benefit>Dynamic tool discovery based on permissions</benefit>
+            </benefits>
+        </principle>
+        
+        <principle id="progressive-disclosure">
+            <name>Progressive Capability Disclosure</name>
+            <description>UI and capabilities progressively revealed based on actual tool permissions</description>
+            <implementation>
+                <rule>Query available tools dynamically based on user permissions</rule>
+                <rule>Show/hide UI elements based on tool availability</rule>
+                <rule>Provide upgrade paths for locked tools</rule>
+                <rule>Clear messaging about why tools are unavailable</rule>
+            </implementation>
+        </principle>
+    </core-principles>
+    
+    <permission-system>
+        <tool-permissions>
+            <permission id="basic">
+                <description>Basic authenticated user tools</description>
+                <required_for>
+                    <tool>create_thread</tool>
+                    <tool>get_thread_history</tool>
+                    <tool>list_agents</tool>
+                </required_for>
+                <business_requirements>
+                    <requirement>authenticated_user</requirement>
+                </business_requirements>
+            </permission>
+            
+            <permission id="analytics">
+                <description>Workload analytics and basic optimization</description>
+                <required_for>
+                    <tool>analyze_workload</tool>
+                    <tool>get_agent_status</tool>
+                    <tool>query_corpus</tool>
+                </required_for>
+                <business_requirements>
+                    <requirement>plan_tier: ["pro", "enterprise"]</requirement>
+                </business_requirements>
+            </permission>
+            
+            <permission id="data_management">
+                <description>Data operations and corpus management</description>
+                <required_for>
+                    <tool>generate_synthetic_data</tool>
+                    <tool>corpus_manager</tool>
+                    <tool>optimize_prompt</tool>
+                </required_for>
+                <business_requirements>
+                    <requirement>plan_tier: ["pro", "enterprise"]</requirement>
+                    <requirement>feature_flag: "data_operations"</requirement>
+                </business_requirements>
+                <rate_limits>
+                    <limit tool="generate_synthetic_data" per_hour="100" per_day="1000"/>
+                    <limit tool="corpus_manager" per_hour="10" per_day="50"/>
+                </rate_limits>
+            </permission>
+            
+            <permission id="advanced_optimization">
+                <description>Advanced AI optimization tools</description>
+                <required_for>
+                    <tool>cost_analyzer</tool>
+                    <tool>latency_analyzer</tool>
+                    <tool>performance_predictor</tool>
+                    <tool>multi_objective_optimization</tool>
+                </required_for>
+                <business_requirements>
+                    <requirement>plan_tier: ["enterprise"]</requirement>
+                    <requirement>feature_flag: "advanced_optimization"</requirement>
+                </business_requirements>
+            </permission>
+            
+            <permission id="system_management">
+                <description>System configuration and management</description>
+                <required_for>
+                    <tool>system_configurator</tool>
+                    <tool>log_analyzer</tool>
+                    <tool>user_admin</tool>
+                </required_for>
+                <business_requirements>
+                    <requirement>plan_tier: ["enterprise"]</requirement>
+                    <requirement>role: ["admin", "developer"]</requirement>
+                </business_requirements>
+            </permission>
+            
+            <permission id="developer_tools">
+                <description>Development and debugging tools</description>
+                <required_for>
+                    <tool>debug_panel</tool>
+                    <tool>feature_flag_toggle</tool>
+                    <tool>impersonation_tool</tool>
+                </required_for>
+                <business_requirements>
+                    <requirement>developer_status: true</requirement>
+                    <requirement>environment: ["development", "staging"]</requirement>
+                </business_requirements>
+            </permission>
+        </tool-permissions>
+        
+        <user-plans>
+            <plan id="free">
+                <description>Free tier with basic functionality</description>
+                <permissions>
+                    <permission>basic</permission>
+                </permissions>
+                <tool_allowances>
+                    <allowance tool="create_thread" limit="10" per="day"/>
+                    <allowance tool="list_agents" limit="100" per="day"/>
+                </tool_allowances>
+            </plan>
+            
+            <plan id="pro">
+                <description>Professional tier with analytics and data tools</description>
+                <permissions>
+                    <permission>basic</permission>
+                    <permission>analytics</permission>
+                    <permission>data_management</permission>
+                </permissions>
+                <tool_allowances>
+                    <allowance tool="analyze_workload" limit="500" per="day"/>
+                    <allowance tool="generate_synthetic_data" limit="1000" per="day"/>
+                    <allowance tool="optimize_prompt" limit="100" per="day"/>
+                </tool_allowances>
+            </plan>
+            
+            <plan id="enterprise">
+                <description>Enterprise tier with full functionality</description>
+                <permissions>
+                    <permission>basic</permission>
+                    <permission>analytics</permission>
+                    <permission>data_management</permission>
+                    <permission>advanced_optimization</permission>
+                    <permission>system_management</permission>
+                </permissions>
+                <tool_allowances>
+                    <allowance tool="*" limit="unlimited"/>
+                </tool_allowances>
+            </plan>
+            
+            <plan id="developer">
+                <description>Developer access with all tools and debugging</description>
+                <permissions>
+                    <permission>*</permission>
+                </permissions>
+                <auto_detection>
+                    <condition>email_domain: "@netra.ai"</condition>
+                    <condition>environment_variable: "DEV_MODE=true"</condition>
+                    <condition>role: "developer"</condition>
+                </auto_detection>
+            </plan>
+        </user-plans>
+        
+        <permission-resolution>
+            <rule id="tool-level-check">
+                <description>Check tool-specific permissions before execution</description>
+                <process>
+                    <step>Get user's plan and permissions</step>
+                    <step>Check if tool requires any permissions</step>
+                    <step>Verify user has all required permissions</step>
+                    <step>Check business requirements (plan tier, feature flags)</step>
+                    <step>Verify rate limits not exceeded</step>
+                    <step>Allow or deny tool execution</step>
+                </process>
+            </rule>
+            
+            <rule id="dynamic-discovery">
+                <description>Dynamic tool discovery based on permissions</description>
+                <implementation>
+                    <step>Query all registered tools</step>
+                    <step>Filter by user permissions</step>
+                    <step>Apply business logic filters</step>
+                    <step>Return available tools with metadata</step>
+                </implementation>
+            </rule>
+            
+            <rule id="permission-caching">
+                <description>Cache permission decisions for performance</description>
+                <cache_key>user_id:tool_name:permission_hash</cache_key>
+                <ttl>300</ttl>
+                <invalidate_on>user_plan_change, permission_grant, permission_revoke</invalidate_on>
+            </rule>
+        </permission-resolution>
+    </permission-system>
+    
+    <unified-tool-registry>
+        <tool-definition>
+            <required_fields>
+                <field name="name" type="string" description="Unique tool identifier"/>
+                <field name="description" type="string" description="Human-readable description"/>
+                <field name="category" type="string" description="Tool category for organization"/>
+                <field name="permissions_required" type="array" description="List of required permissions"/>
+                <field name="business_requirements" type="object" description="Plan/feature requirements"/>
+                <field name="rate_limits" type="object" description="Usage limits"/>
+                <field name="input_schema" type="object" description="JSON schema for inputs"/>
+                <field name="output_schema" type="object" description="JSON schema for outputs"/>
+                <field name="handler" type="callable" description="Execution handler"/>
+            </required_fields>
+            
+            <example>
+                <tool>
+                    <name>corpus_manager</name>
+                    <description>Create and manage document corpora</description>
+                    <category>Data Management</category>
+                    <permissions_required>["data_management"]</permissions_required>
+                    <business_requirements>
+                        <plan_tier>["pro", "enterprise"]</plan_tier>
+                        <feature_flag>["data_operations"]</feature_flag>
+                    </business_requirements>
+                    <rate_limits>
+                        <per_hour>10</per_hour>
+                        <per_day>50</per_day>
+                    </rate_limits>
+                    <handler>corpus_manager_handler</handler>
+                </tool>
+            </example>
+        </tool-definition>
+        
+        <tool-categories>
+            <category id="basic">
+                <name>Basic Tools</name>
+                <description>Essential functionality available to all users</description>
+                <icon>user</icon>
+            </category>
+            
+            <category id="analytics">
+                <name>Analytics</name>
+                <description>Workload analysis and performance insights</description>
+                <icon>chart-bar</icon>
+            </category>
+            
+            <category id="data_management">
+                <name>Data Management</name>
+                <description>Corpus and synthetic data operations</description>
+                <icon>database</icon>
+            </category>
+            
+            <category id="optimization">
+                <name>AI Optimization</name>
+                <description>Advanced AI workload optimization tools</description>
+                <icon>cpu</icon>
+            </category>
+            
+            <category id="system_management">
+                <name>System Management</name>
+                <description>System configuration and administration</description>
+                <icon>cog</icon>
+            </category>
+            
+            <category id="developer">
+                <name>Developer Tools</name>
+                <description>Development and debugging utilities</description>
+                <icon>code</icon>
+            </category>
+        </tool-categories>
+    </unified-tool-registry>
+    
+    <migration-strategy>
+        <phase number="1" name="Core Infrastructure">
+            <task priority="critical">Create unified ToolRegistry with permission support</task>
+            <task priority="critical">Implement ToolPermissionService</task>
+            <task priority="critical">Add plan/business logic to User model</task>
+            <task priority="critical">Create tool permission checking middleware</task>
+        </phase>
+        
+        <phase number="2" name="Tool Migration">
+            <task priority="critical">Migrate MCP tools to unified registry</task>
+            <task priority="critical">Migrate admin tools to unified registry</task>
+            <task priority="critical">Migrate apex optimizer tools to unified registry</task>
+            <task>Add permission metadata to all existing tools</task>
+        </phase>
+        
+        <phase number="3" name="Business Logic Integration">
+            <task priority="critical">Implement user plan management</task>
+            <task priority="critical">Add rate limiting for tools</task>
+            <task priority="critical">Create tool availability API endpoint</task>
+            <task>Add usage tracking and analytics</task>
+        </phase>
+        
+        <phase number="4" name="Legacy Cleanup">
+            <task>Remove AdminToolRegistry</task>
+            <task>Remove role-based tool checking</task>
+            <task>Remove separate admin routes</task>
+            <task>Update UI to use dynamic tool discovery</task>
+        </phase>
+        
+        <phase number="5" name="Testing and Polish">
+            <task>Test permission system with all user plans</task>
+            <task>Test rate limiting and business logic</task>
+            <task>Test dynamic tool discovery</task>
+            <task>Performance test permission checking</task>
+        </phase>
+    </migration-strategy>
+    
+    <implementation-details>
+        <new-files>
+            <file>app/services/tool_permission_service.py</file>
+            <file>app/services/unified_tool_registry.py</file>
+            <file>app/schemas/ToolPermission.py</file>
+            <file>app/schemas/UserPlan.py</file>
+            <file>app/middleware/tool_permission_middleware.py</file>
+        </new-files>
+        
+        <modified-files>
+            <file>app/db/models_postgres.py (add plan fields)</file>
+            <file>app/services/permission_service.py (extend for tools)</file>
+            <file>app/agents/tool_dispatcher.py (use unified registry)</file>
+            <file>app/routes/admin.py (remove or integrate into tool system)</file>
+        </modified-files>
+        
+        <database-changes>
+            <table name="users">
+                <add_column name="plan_tier" type="varchar(50)" default="free"/>
+                <add_column name="plan_expires_at" type="timestamp" nullable="true"/>
+                <add_column name="feature_flags" type="jsonb" default="{}"/>
+                <add_column name="tool_permissions" type="jsonb" default="{}"/>
+            </table>
+            
+            <table name="tool_usage_logs" action="create">
+                <column name="id" type="uuid" primary_key="true"/>
+                <column name="user_id" type="uuid" references="users(id)"/>
+                <column name="tool_name" type="varchar(100)"/>
+                <column name="execution_time_ms" type="integer"/>
+                <column name="status" type="varchar(20)"/>
+                <column name="created_at" type="timestamp" default="now()"/>
+            </table>
+        </database-changes>
+    </implementation-details>
+    
+    <security-considerations>
+        <permission-enforcement>
+            <rule>All tool execution goes through permission middleware</rule>
+            <rule>Permission checks cannot be bypassed</rule>
+            <rule>Failed permission checks are logged for audit</rule>
+            <rule>Rate limiting enforced at middleware level</rule>
+        </permission-enforcement>
+        
+        <audit-logging>
+            <what>Log all tool executions with permission context</what>
+            <who>User ID, plan tier, permissions used</who>
+            <when>Timestamp with timezone</when>
+            <what_tool>Tool name, category, execution time</what_tool>
+            <result>Success, failure, permission_denied, rate_limited</result>
+        </audit-logging>
+        
+        <business-logic-security>
+            <rule>Plan tier cannot be modified by users</rule>
+            <rule>Feature flags require admin permission to modify</rule>
+            <rule>Rate limits enforced server-side only</rule>
+            <rule>Tool permissions verified on every execution</rule>
+        </business-logic-security>
+    </security-considerations>
+</specification>

@@ -17,6 +17,7 @@ htmlcov/
 .cache
 .mypy_cache/
 .ruff_cache/
+.coverage*
 
 # Node.js
 node_modules/

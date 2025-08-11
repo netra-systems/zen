@@ -8,7 +8,14 @@
         <description>Admin features as progressive enhancement of unified chat experience with intelligent permission system and agent-integrated tools</description>
     </metadata>
     
-    <primary-goal>Admin functionality seamlessly integrated into unified chat as contextual mixins, creating one cohesive experience with progressive disclosure based on permissions</primary-goal>
+    <primary-goal>DEPRECATED - This specification has been superseded by tool_auth_system.xml which implements per-tool permissions instead of role-based admin system</primary-goal>
+    
+    <deprecation-notice>
+        <deprecated-date>2025-08-11</deprecated-date>
+        <replacement>tool_auth_system.xml</replacement>
+        <reason>Admin functionality is now integrated into the universal tool permission system rather than being a separate layer</reason>
+        <migration-path>Admin tools become regular tools with higher permission requirements</migration-path>
+    </deprecation-notice>
     
     <core-principles>
         <principle id="unified-experience">
