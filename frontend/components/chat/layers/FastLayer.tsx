@@ -11,7 +11,7 @@ export const FastLayer: React.FC<FastLayerProps> = ({ data, isProcessing }) => {
   
   return (
     <div 
-      className="h-12 flex items-center px-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+      className="h-12 flex items-center px-4 bg-white/95 backdrop-blur-md border-b border-gray-200 text-zinc-800"
       style={{ height: '48px' }}
     >
       <div className="flex items-center justify-between w-full">
@@ -20,10 +20,12 @@ export const FastLayer: React.FC<FastLayerProps> = ({ data, isProcessing }) => {
           {/* Presence Indicator - ONLY frontend-generated visual */}
           {showPresenceIndicator && (
             <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className="flex items-center"
             >
-              <Activity className="w-4 h-4 opacity-80" />
+              <div className="w-2 h-2 bg-emerald-500 rounded-full" />
+              <div className="w-2 h-2 bg-emerald-500 rounded-full absolute animate-ping" />
             </motion.div>
           )}
           
@@ -51,9 +53,9 @@ export const FastLayer: React.FC<FastLayerProps> = ({ data, isProcessing }) => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ duration: 0 }}
-                  className="flex items-center space-x-1 bg-white/20 rounded-full px-2 py-1"
+                  className="flex items-center space-x-1 bg-white border border-emerald-500/30 rounded-full px-3 py-1 shadow-sm hover:shadow-md transition-shadow duration-200"
                 >
-                  <Zap className="w-3 h-3" />
+                  <Zap className="w-3 h-3 text-emerald-600" />
                   <span className="text-xs font-medium">{tool}</span>
                 </motion.div>
               ))}

@@ -546,6 +546,56 @@ python run_server.py  # Migrations run automatically
 3. Tool builder in `tool_builder.py` manages tool lifecycle
 4. Register new tools in tool dispatcher
 
+### ClickHouse Troubleshooting & Best Practices
+
+#### Working with Nested Types
+ClickHouse `Nested` types create parallel arrays. For the `workload_events` table:
+```sql
+-- Schema definition
+metrics Nested(
+    name Array(String),
+    value Array(Float64),
+    unit Array(String)
+)
+```
+
+This means `metrics.name[0]` corresponds to `metrics.value[0]` and `metrics.unit[0]`.
+
+#### Query Best Practices
+1. **Use proper array functions** for Nested types:
+   ```sql
+   -- ✅ Correct: Use arrayFirstIndex for finding position
+   arrayFirstIndex(x -> x = 'latency_ms', metrics.name) as idx
+   
+   -- ❌ Wrong: indexOf might cause type errors
+   indexOf(metrics.name, 'latency_ms') as idx
+   
+   -- ✅ Correct: Use arrayExists for checking existence
+   arrayExists(x -> x = 'latency_ms', metrics.name)
+   
+   -- ❌ Wrong: has might cause type errors
+   has(metrics.name, 'latency_ms')
+   ```
+
+2. **Inserting data** into Nested types:
+   ```python
+   # Correct: All fields must be arrays of same length
+   data = {
+       'metrics.name': ['latency_ms', 'throughput', 'cost_cents'],
+       'metrics.value': [150.5, 1000.0, 25.0],
+       'metrics.unit': ['ms', 'req/s', 'cents']
+   }
+   ```
+
+#### Common Errors and Solutions
+1. **Error: "NO_COMMON_TYPE" (Code 386)**
+   - Cause: Mixing Array and non-Array types in queries
+   - Solution: Use `arrayFirstIndex` and `arrayExists` instead of `indexOf` and `has`
+
+2. **Error: "UNKNOWN_TABLE"**
+   - Cause: Table not created or connection issues
+   - Solution: Run `await create_workload_events_table_if_missing()` from `app/db/clickhouse_init.py`
+
 ## Important Files to Know
 
 ### Core Configuration

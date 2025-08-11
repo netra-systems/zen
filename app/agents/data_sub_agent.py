@@ -67,9 +67,9 @@ class QueryBuilder:
         FROM (
             SELECT
                 *,
-                indexOf(metrics.name, 'latency_ms') as idx,
-                indexOf(metrics.name, 'throughput') as idx2,
-                indexOf(metrics.name, 'cost_cents') as idx3
+                arrayFirstIndex(x -> x = 'latency_ms', metrics.name) as idx,
+                arrayFirstIndex(x -> x = 'throughput', metrics.name) as idx2,
+                arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as idx3
             FROM workload_events
             WHERE user_id = {user_id}
                 AND timestamp >= '{start_time.isoformat()}'
@@ -99,12 +99,12 @@ class QueryBuilder:
             FROM (
                 SELECT
                     metrics.value,
-                    indexOf(metrics.name, '{metric_name}') as idx
+                    arrayFirstIndex(x -> x = '{metric_name}', metrics.name) as idx
                 FROM workload_events
                 WHERE user_id = {user_id}
                     AND timestamp >= '{(start_time - timedelta(days=7)).isoformat()}'
                     AND timestamp <= '{end_time.isoformat()}'
-                    AND has(metrics.name, '{metric_name}')
+                    AND arrayExists(x -> x = '{metric_name}', metrics.name)
             )
         )
         SELECT
@@ -123,12 +123,12 @@ class QueryBuilder:
         FROM (
             SELECT
                 *,
-                indexOf(metrics.name, '{metric_name}') as idx
+                arrayFirstIndex(x -> x = '{metric_name}', metrics.name) as idx
             FROM workload_events
             WHERE user_id = {user_id}
                 AND timestamp >= '{start_time.isoformat()}'
                 AND timestamp <= '{end_time.isoformat()}'
-                AND has(metrics.name, '{metric_name}')
+                AND arrayExists(x -> x = '{metric_name}', metrics.name)
         ), baseline_stats
         WHERE abs(z_score) > {z_score_threshold}
         ORDER BY abs(z_score) DESC
@@ -152,8 +152,8 @@ class QueryBuilder:
         FROM (
             SELECT
                 *,
-                indexOf(metrics.name, 'latency_ms') as idx,
-                indexOf(metrics.name, 'cost_cents') as idx2
+                arrayFirstIndex(x -> x = 'latency_ms', metrics.name) as idx,
+                arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as idx2
             FROM workload_events
             WHERE user_id = {user_id}
                 AND timestamp >= now() - INTERVAL {days_back} DAY
@@ -172,7 +172,7 @@ class QueryBuilder:
         """Build query for correlation analysis between metrics"""
         
         metric_selects = [
-            f"if(indexOf(metrics.name, '{metric}') > 0, arrayElement(metrics.value, indexOf(metrics.name, '{metric}')), 0) as {metric}"
+            f"if(arrayFirstIndex(x -> x = '{metric}', metrics.name) > 0, arrayElement(metrics.value, arrayFirstIndex(x -> x = '{metric}', metrics.name)), 0) as {metric}"
             for metric in metrics
         ]
         
@@ -184,7 +184,7 @@ class QueryBuilder:
         WHERE user_id = {user_id}
             AND timestamp >= '{start_time.isoformat()}'
             AND timestamp <= '{end_time.isoformat()}'
-            AND {' AND '.join([f"has(metrics.name, '{m}')" for m in metrics])}
+            AND {' AND '.join([f"arrayExists(x -> x = '{m}', metrics.name)" for m in metrics])}
         ORDER BY timestamp DESC
         LIMIT 10000
         """

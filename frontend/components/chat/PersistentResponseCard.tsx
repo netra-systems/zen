@@ -32,12 +32,12 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
         className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200"
       >
         <div 
-          className="px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white cursor-pointer flex items-center justify-between"
+          className="px-4 py-3 bg-white/95 backdrop-blur-md border border-emerald-500/20 text-zinc-800 cursor-pointer flex items-center justify-between hover:bg-emerald-50/50 transition-colors duration-200"
           onClick={onToggleCollapse}
         >
           <div className="flex items-center space-x-3">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span className="font-medium">Analysis Complete</span>
+            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="font-medium text-zinc-900">Analysis Complete</span>
             <span className="text-sm opacity-90">
               {slowLayerData.completedAgents.length} agents • {Math.round(slowLayerData.totalDuration / 1000)}s
             </span>

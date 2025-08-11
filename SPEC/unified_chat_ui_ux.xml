@@ -233,6 +233,28 @@
             <rule>Progress percentages calculated by backend based on actual work done</rule>
             <rule>Presence indicator is the ONLY frontend-generated visual (simple spinner)</rule>
         </data-flow>
+        <enhanced-websocket-handling>
+            <connection-management>
+                <rule>Maintain single WebSocket connection per active thread</rule>
+                <rule>Clean disconnect when switching threads</rule>
+                <rule>Automatic reconnection with exponential backoff</rule>
+                <rule>Queue messages during reconnection</rule>
+            </connection-management>
+            
+            <event-buffering>
+                <rule>Buffer last 1000 events for overflow panel</rule>
+                <rule>Circular buffer to prevent memory leaks</rule>
+                <rule>Timestamp all events with high precision</rule>
+                <rule>Track event source (agent, system, user)</rule>
+            </event-buffering>
+            
+            <performance-optimizations>
+                <rule>Batch UI updates within 50ms window</rule>
+                <rule>Use requestAnimationFrame for smooth animations</rule>
+                <rule>Debounce rapid status updates</rule>
+                <rule>Virtual scrolling for large message lists</rule>
+            </performance-optimizations>
+        </enhanced-websocket-handling>
     </backend-frontend-contract>
     
     <persistent-response-card>
@@ -308,6 +330,31 @@
             <rule>Card collapses to summary view after completion (expandable)</rule>
         </behavior>
     </persistent-response-card>
+    
+    <store-architecture>
+        <store id="UnifiedChatStore">
+            <description>Single source of truth for all chat state using Zustand</description>
+            <location>store/unified-chat.ts</location>
+            <state>
+                <field name="activeThreadId" type="string | null">Currently active thread</field>
+                <field name="threads" type="Map<string, Thread>">All loaded threads</field>
+                <field name="messages" type="Map<string, Message[]>">Messages by thread ID</field>
+                <field name="executedAgents" type="Map<string, AgentExecution>">Deduplication tracking</field>
+                <field name="fastLayerData" type="FastLayerData | null">Current fast layer state</field>
+                <field name="mediumLayerData" type="MediumLayerData | null">Current medium layer state</field>
+                <field name="slowLayerData" type="SlowLayerData | null">Current slow layer state</field>
+                <field name="isProcessing" type="boolean">Global processing state</field>
+                <field name="wsEventBuffer" type="CircularBuffer<WSEvent>">Event history for debugging</field>
+            </state>
+            <actions>
+                <action name="switchThread">Change active thread and load messages</action>
+                <action name="createThread">Create new thread and set as active</action>
+                <action name="updateLayerData">Update specific layer based on WS events</action>
+                <action name="trackAgentExecution">Record agent run for deduplication</action>
+                <action name="bufferWSEvent">Add event to circular buffer</action>
+            </actions>
+        </store>
+    </store-architecture>
     
     <component-architecture>
         <component id="MainChat">
@@ -449,6 +496,64 @@
     <type-definitions>
         <typescript-types>
             ```typescript
+            // Store architecture for proper state management
+            interface UnifiedChatStore {
+                // Thread Management
+                activeThreadId: string | null;
+                threads: Map<string, Thread>;
+                messages: Map<string, Message[]>;
+                
+                // Layer Data (from WebSocket events)
+                fastLayerData: FastLayerData | null;
+                mediumLayerData: MediumLayerData | null;
+                slowLayerData: SlowLayerData | null;
+                
+                // Agent Deduplication
+                executedAgents: Map<string, AgentExecution>;
+                agentIterations: Map<string, number>;
+                
+                // Processing State
+                isProcessing: boolean;
+                currentRunId: string | null;
+                
+                // Developer Tools
+                wsEventBuffer: CircularBuffer<WSEvent>;
+                performanceMetrics: PerformanceMetrics;
+                
+                // Actions
+                switchThread: (threadId: string) => Promise<void>;
+                createThread: () => Promise<string>;
+                handleWSMessage: (event: WSEvent) => void;
+                trackAgentExecution: (agentName: string, status: string) => void;
+                resetResponseCard: () => void;
+            }
+            
+            // Circular buffer for WebSocket events
+            class CircularBuffer<T> {
+                private buffer: T[];
+                private maxSize: number;
+                private pointer: number;
+                
+                constructor(maxSize: number = 1000) {
+                    this.maxSize = maxSize;
+                    this.buffer = [];
+                    this.pointer = 0;
+                }
+                
+                push(item: T): void {
+                    if (this.buffer.length < this.maxSize) {
+                        this.buffer.push(item);
+                    } else {
+                        this.buffer[this.pointer] = item;
+                        this.pointer = (this.pointer + 1) % this.maxSize;
+                    }
+                }
+                
+                getAll(): T[] {
+                    return [...this.buffer.slice(this.pointer), ...this.buffer.slice(0, this.pointer)];
+                }
+            }
+            
             // Exact match with backend WebSocket event payloads
             interface FastLayerData {
                 agentName: string;        // From agent_started event
@@ -784,6 +889,16 @@
             <test>Performance remains smooth with 100+ messages</test>
             <test>Graceful handling of WebSocket disconnection/reconnection</test>
         </e2e-tests>
+        <regression-tests>
+            <test priority="critical">Verify NO blue gradient bars remain in any component</test>
+            <test priority="critical">Test proper thread isolation - messages don't leak between threads</test>
+            <test priority="critical">Verify agent deduplication - same agent shows once with iteration count</test>
+            <test priority="high">Test ChatSidebar thread switching with 50+ threads</test>
+            <test priority="high">Verify overflow panel shows accurate WebSocket events</test>
+            <test priority="high">Test performance with 1000+ messages in single thread</test>
+            <test priority="medium">Verify glassmorphic styling renders correctly</test>
+            <test priority="medium">Test keyboard shortcuts for developer tools</test>
+        </regression-tests>
     </testing-requirements>
     
     <implementation-checklist>
