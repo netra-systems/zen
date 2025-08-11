@@ -107,9 +107,8 @@ describe('Internal Frontend Module Import Tests', () => {
       expect(() => require('@/store/chat')).not.toThrow();
       
       // Additional stores from comprehensive tests
+      // Note: Admin functionality is now integrated into main stores per admin_unified_experience.xml
       try {
-        require('@/store/corpusStore');
-        require('@/store/syntheticDataStore');
         require('@/store/llmCacheStore');
         require('@/store/supplyStore');
         require('@/store/configStore');
@@ -140,13 +139,11 @@ describe('Internal Frontend Module Import Tests', () => {
       expect(() => require('@/services/demoService')).not.toThrow();
       
       // Additional services from comprehensive tests
+      // Note: Admin services now integrated through agent tools per admin_unified_experience.xml
       try {
-        require('@/services/corpusService');
-        require('@/services/syntheticDataService');
         require('@/services/llmCacheService');
         require('@/services/supplyService');
         require('@/services/referenceService');
-        require('@/services/adminService');
         require('@/services/healthService');
         require('@/services/configService');
         require('@/services/generationService');
@@ -223,12 +220,11 @@ describe('Internal Frontend Module Import Tests', () => {
       expect(() => require('@/app/layout')).not.toThrow();
       
       // Check for specific pages
+      // Note: Admin pages removed - functionality integrated into chat UI per admin_unified_experience.xml
       try {
         require('@/app/chat/page');
         require('@/app/auth/login/page');
         require('@/app/auth/register/page');
-        require('@/app/corpus/page');
-        require('@/app/synthetic-data-generation/page');
       } catch (e) {
         console.log('Some app pages not found (may use different structure)');
       }

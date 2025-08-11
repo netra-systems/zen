@@ -137,9 +137,9 @@ export const useKeyboardShortcuts = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't trigger shortcuts when typing in input fields
-      const target = e.target as HTMLElement;
-      const isInputField = ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
-      const isEditable = target.contentEditable === 'true';
+      const target = e.target as HTMLElement | null;
+      const isInputField = target ? ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) : false;
+      const isEditable = target?.contentEditable === 'true';
       
       // Allow some shortcuts even in input fields
       const allowedInInput = ['Escape', 'k'];

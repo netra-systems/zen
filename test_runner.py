@@ -193,6 +193,12 @@ class UnifiedTestRunner:
             # Parse test counts from output
             self._parse_test_counts(result.stdout + result.stderr, "backend")
             
+            # Extract and update failing tests
+            if result.returncode != 0:
+                failures = self._extract_failing_tests(result.stdout + result.stderr, "backend")
+                if failures:
+                    self.update_failing_tests("backend", failures)
+            
             # Print output with proper encoding handling
             try:
                 print(result.stdout)
@@ -264,6 +270,12 @@ class UnifiedTestRunner:
             
             # Parse test counts from output
             self._parse_test_counts(result.stdout + result.stderr, "frontend")
+            
+            # Extract and update failing tests
+            if result.returncode != 0:
+                failures = self._extract_failing_tests(result.stdout + result.stderr, "frontend")
+                if failures:
+                    self.update_failing_tests("frontend", failures)
             
             # Print output with proper encoding handling
             try:
@@ -340,6 +352,12 @@ class UnifiedTestRunner:
             # Parse test counts from Cypress output
             self._parse_cypress_counts(result.stdout + result.stderr)
             
+            # Extract and update failing tests
+            if result.returncode != 0:
+                failures = self._extract_failing_tests(result.stdout + result.stderr, "e2e")
+                if failures:
+                    self.update_failing_tests("e2e", failures)
+            
             # Print output with proper encoding handling
             try:
                 print(result.stdout)
@@ -397,6 +415,240 @@ class UnifiedTestRunner:
             counts["total"] = counts["passed"] + counts["failed"] + counts["skipped"]
         
         self.results["e2e"]["test_counts"] = counts
+    
+    def _extract_failing_tests(self, output: str, component: str) -> List[Dict]:
+        """Extract failing test details from test output"""
+        failing_tests = []
+        
+        if component == "backend":
+            # Parse pytest failures
+            # Look for FAILED lines
+            failure_pattern = r"FAILED\s+([^\s]+)::([^\s]+)(?:\[([^\]]+)\])?\s*-\s*(.+)"
+            for match in re.finditer(failure_pattern, output):
+                test_path = match.group(1)
+                test_name = match.group(2)
+                if match.group(3):  # Parametrized test
+                    test_name += f"[{match.group(3)}]"
+                error_msg = match.group(4)
+                
+                failing_tests.append({
+                    "test_path": test_path,
+                    "test_name": test_name,
+                    "error_type": self._extract_error_type(error_msg),
+                    "error_message": error_msg[:500],  # Limit message length
+                    "traceback": self._extract_traceback(output, test_name)[:1000],
+                    "first_failed": datetime.now().isoformat(),
+                    "consecutive_failures": 1
+                })
+            
+            # Also look for ERROR lines
+            error_pattern = r"ERROR\s+([^\s]+)(?:::([^\s]+))?\s*-\s*(.+)"
+            for match in re.finditer(error_pattern, output):
+                test_path = match.group(1)
+                test_name = match.group(2) or "setup/teardown"
+                error_msg = match.group(3)
+                
+                failing_tests.append({
+                    "test_path": test_path,
+                    "test_name": test_name,
+                    "error_type": "Error",
+                    "error_message": error_msg[:500],
+                    "traceback": "",
+                    "first_failed": datetime.now().isoformat(),
+                    "consecutive_failures": 1
+                })
+                
+        elif component == "frontend":
+            # Parse Jest/Cypress failures
+            # Look for FAIL lines in Jest
+            fail_pattern = r"FAIL\s+([^\s]+)"
+            for match in re.finditer(fail_pattern, output):
+                test_path = match.group(1)
+                
+                # Extract test names from the output after the FAIL line
+                test_section = output[match.end():match.end() + 2000]
+                test_name_pattern = r"✕\s+(.+?)\s*\(\d+\s*ms\)"
+                for test_match in re.finditer(test_name_pattern, test_section):
+                    test_name = test_match.group(1)
+                    
+                    failing_tests.append({
+                        "test_path": test_path,
+                        "test_name": test_name,
+                        "error_type": "AssertionError",
+                        "error_message": "Test failed",
+                        "first_failed": datetime.now().isoformat(),
+                        "consecutive_failures": 1
+                    })
+            
+            # Look for Cypress failures
+            cypress_pattern = r"\d+\)\s+(.+?)\n\s+(.+?):"
+            for match in re.finditer(cypress_pattern, output):
+                if "failing" in output[max(0, match.start()-100):match.start()]:
+                    test_name = match.group(1)
+                    test_path = match.group(2)
+                    
+                    failing_tests.append({
+                        "test_path": test_path,
+                        "test_name": test_name,
+                        "error_type": "CypressError",
+                        "error_message": "Cypress test failed",
+                        "first_failed": datetime.now().isoformat(),
+                        "consecutive_failures": 1
+                    })
+        
+        return failing_tests
+    
+    def _extract_error_type(self, error_msg: str) -> str:
+        """Extract error type from error message"""
+        if "AssertionError" in error_msg:
+            return "AssertionError"
+        elif "ImportError" in error_msg or "ModuleNotFoundError" in error_msg:
+            return "ImportError"
+        elif "AttributeError" in error_msg:
+            return "AttributeError"
+        elif "TypeError" in error_msg:
+            return "TypeError"
+        elif "ValueError" in error_msg:
+            return "ValueError"
+        elif "KeyError" in error_msg:
+            return "KeyError"
+        elif "TimeoutError" in error_msg or "timeout" in error_msg.lower():
+            return "TimeoutError"
+        else:
+            return "Error"
+    
+    def _extract_traceback(self, output: str, test_name: str) -> str:
+        """Extract last few lines of traceback for a test"""
+        # Find the test in output and get traceback
+        test_pos = output.find(test_name)
+        if test_pos == -1:
+            return ""
+        
+        # Look for traceback after test name
+        traceback_section = output[test_pos:min(test_pos + 3000, len(output))]
+        
+        # Get last 5 lines of traceback
+        lines = traceback_section.split('\n')
+        traceback_lines = []
+        for line in lines:
+            if line.strip().startswith('>') or 'assert' in line.lower() or '==' in line:
+                traceback_lines.append(line)
+            if len(traceback_lines) >= 5:
+                break
+        
+        return '\n'.join(traceback_lines)
+    
+    def load_failing_tests(self) -> Dict:
+        """Load existing failing tests from JSON file"""
+        failing_tests_path = self.reports_dir / "failing_tests.json"
+        
+        if failing_tests_path.exists():
+            try:
+                with open(failing_tests_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except (json.JSONDecodeError, IOError):
+                pass
+        
+        # Return default structure if file doesn't exist or is invalid
+        return {
+            "last_updated": datetime.now().isoformat(),
+            "backend": {"count": 0, "failures": []},
+            "frontend": {"count": 0, "failures": []},
+            "e2e": {"count": 0, "failures": []}
+        }
+    
+    def update_failing_tests(self, component: str, new_failures: List[Dict], passed_tests: List[str] = None):
+        """Update failing tests log with new results"""
+        failing_tests = self.load_failing_tests()
+        
+        # Update timestamp
+        failing_tests["last_updated"] = datetime.now().isoformat()
+        
+        if component not in failing_tests:
+            failing_tests[component] = {"count": 0, "failures": []}
+        
+        # Remove tests that passed
+        if passed_tests:
+            failing_tests[component]["failures"] = [
+                f for f in failing_tests[component]["failures"]
+                if f"{f['test_path']}::{f['test_name']}" not in passed_tests
+            ]
+        
+        # Update or add new failures
+        for new_failure in new_failures:
+            existing = None
+            for i, old_failure in enumerate(failing_tests[component]["failures"]):
+                if (old_failure["test_path"] == new_failure["test_path"] and 
+                    old_failure["test_name"] == new_failure["test_name"]):
+                    existing = i
+                    break
+            
+            if existing is not None:
+                # Update existing failure
+                old_failure = failing_tests[component]["failures"][existing]
+                old_failure["consecutive_failures"] += 1
+                old_failure["error_message"] = new_failure["error_message"]
+                old_failure["error_type"] = new_failure["error_type"]
+                if "traceback" in new_failure:
+                    old_failure["traceback"] = new_failure["traceback"]
+            else:
+                # Add new failure
+                failing_tests[component]["failures"].append(new_failure)
+        
+        # Update counts
+        failing_tests[component]["count"] = len(failing_tests[component]["failures"])
+        
+        # Save updated failing tests
+        failing_tests_path = self.reports_dir / "failing_tests.json"
+        with open(failing_tests_path, 'w', encoding='utf-8') as f:
+            json.dump(failing_tests, f, indent=2)
+        
+        return failing_tests
+    
+    def run_failing_tests(self, max_fixes: int = None, backend_only: bool = False, frontend_only: bool = False) -> int:
+        """Run only the currently failing tests"""
+        failing_tests = self.load_failing_tests()
+        total_failures = 0
+        fixed_count = 0
+        
+        # Run backend failing tests
+        if not frontend_only and failing_tests["backend"]["count"] > 0:
+            print(f"\n[FAILING TESTS] Running {failing_tests['backend']['count']} failing backend tests...")
+            
+            for failure in failing_tests["backend"]["failures"][:max_fixes]:
+                test_spec = f"{failure['test_path']}::{failure['test_name']}"
+                print(f"  Testing: {test_spec}")
+                
+                cmd = [sys.executable, "-m", "pytest", test_spec, "-xvs"]
+                result = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
+                
+                if result.returncode == 0:
+                    print(f"    ✓ FIXED: {failure['test_name']}")
+                    fixed_count += 1
+                else:
+                    print(f"    ✗ Still failing: {failure['test_name']}")
+                    total_failures += 1
+        
+        # Run frontend failing tests  
+        if not backend_only and failing_tests["frontend"]["count"] > 0:
+            print(f"\n[FAILING TESTS] Running {failing_tests['frontend']['count']} failing frontend tests...")
+            
+            for failure in failing_tests["frontend"]["failures"][:max_fixes]:
+                print(f"  Testing: {failure['test_path']} - {failure['test_name']}")
+                
+                # Run specific Jest test
+                cmd = ["npm", "test", "--", failure["test_path"], "--testNamePattern", failure["test_name"]]
+                result = subprocess.run(cmd, cwd=PROJECT_ROOT / "frontend", capture_output=True, text=True)
+                
+                if result.returncode == 0:
+                    print(f"    ✓ FIXED: {failure['test_name']}")
+                    fixed_count += 1
+                else:
+                    print(f"    ✗ Still failing: {failure['test_name']}")
+                    total_failures += 1
+        
+        print(f"\n[SUMMARY] Fixed {fixed_count} tests, {total_failures} still failing")
+        return total_failures
     
     def run_simple_tests(self) -> Tuple[int, str]:
         """Run simple test runner for basic validation"""
@@ -1027,6 +1279,34 @@ Real LLM Testing:
         help="Output file for test results (for CI/CD integration)"
     )
     
+    # Failing test management options
+    parser.add_argument(
+        "--show-failing",
+        action="store_true",
+        help="Display currently failing tests from the log"
+    )
+    parser.add_argument(
+        "--run-failing",
+        action="store_true",
+        help="Run only the currently failing tests"
+    )
+    parser.add_argument(
+        "--fix-failing",
+        action="store_true",
+        help="Attempt to automatically fix failing tests (experimental)"
+    )
+    parser.add_argument(
+        "--max-fixes",
+        type=int,
+        default=None,
+        help="Maximum number of tests to attempt fixing (default: all)"
+    )
+    parser.add_argument(
+        "--clear-failing",
+        action="store_true",
+        help="Clear the failing tests log"
+    )
+    
     args = parser.parse_args()
     
     # Print header
@@ -1064,6 +1344,62 @@ Real LLM Testing:
     # Add staging flag to runner if needed
     if args.staging:
         runner.staging_mode = True
+    
+    # Handle failing test management commands
+    if args.show_failing:
+        # Display current failing tests
+        failing_tests = runner.load_failing_tests()
+        print("\n" + "=" * 80)
+        print("CURRENTLY FAILING TESTS")
+        print("=" * 80)
+        print(f"Last Updated: {failing_tests.get('last_updated', 'N/A')}\n")
+        
+        for component in ["backend", "frontend", "e2e"]:
+            if component in failing_tests and failing_tests[component]["count"] > 0:
+                print(f"\n{component.upper()} ({failing_tests[component]['count']} failures):")
+                print("-" * 40)
+                for i, failure in enumerate(failing_tests[component]["failures"], 1):
+                    print(f"{i}. {failure['test_path']}::{failure['test_name']}")
+                    print(f"   Error: {failure['error_type']} - {failure['error_message'][:100]}...")
+                    print(f"   Consecutive Failures: {failure.get('consecutive_failures', 1)}")
+        
+        if all(failing_tests.get(c, {}).get("count", 0) == 0 for c in ["backend", "frontend", "e2e"]):
+            print("No failing tests found!")
+        
+        print("\n" + "=" * 80)
+        sys.exit(0)
+    
+    elif args.clear_failing:
+        # Clear the failing tests log
+        failing_tests_path = runner.reports_dir / "failing_tests.json"
+        if failing_tests_path.exists():
+            failing_tests_path.unlink()
+            print("[INFO] Failing tests log cleared")
+        else:
+            print("[INFO] No failing tests log to clear")
+        sys.exit(0)
+    
+    elif args.run_failing:
+        # Run only the currently failing tests
+        print("\n" + "=" * 80)
+        print("RUNNING FAILING TESTS")
+        print("=" * 80)
+        
+        exit_code = runner.run_failing_tests(
+            max_fixes=args.max_fixes,
+            backend_only=args.backend_only if hasattr(args, 'backend_only') else False,
+            frontend_only=args.frontend_only if hasattr(args, 'frontend_only') else False
+        )
+        
+        print("\n" + "=" * 80)
+        sys.exit(exit_code)
+    
+    elif args.fix_failing:
+        # This would be where automatic fixing logic would go
+        # For now, just inform that it's not yet implemented
+        print("\n[INFO] Automatic test fixing is not yet implemented")
+        print("Use --run-failing to run only failing tests")
+        sys.exit(0)
     
     # Determine test configuration
     if args.simple:

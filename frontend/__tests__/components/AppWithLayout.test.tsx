@@ -1,20 +1,17 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AppWithLayout } from '@/components/AppWithLayout';
-import { authService } from '@/auth';
 
-// Mock the useAuth hook
-jest.mock('@/auth', () => ({
-  authService: {
-    useAuth: jest.fn(),
-  }
+// Mock the store
+jest.mock('@/store', () => ({
+  useAppStore: jest.fn(),
 }));
 
-// Mock the Sidebar and Header components
-jest.mock('@/components/Sidebar', () => ({
-  Sidebar: () => <div data-testid="sidebar">Sidebar</div>,
+// Mock the ChatSidebar and Header components
+jest.mock('@/components/chat/ChatSidebar', () => ({
+  ChatSidebar: () => <div data-testid="sidebar">ChatSidebar</div>,
 }));
 jest.mock('@/components/Header', () => ({
-  Header: ({ toggleSidebar }) => (
+  Header: ({ toggleSidebar }: { toggleSidebar: () => void }) => (
     <button onClick={toggleSidebar} data-testid="header">
       Header
     </button>
@@ -22,10 +19,15 @@ jest.mock('@/components/Header', () => ({
 }));
 
 describe('AppWithLayout', () => {
-  it('renders the Header and Sidebar when the user is authenticated', () => {
-    // Arrange
-    (authService.useAuth as jest.Mock).mockReturnValue({ user: { full_name: 'Test User' } });
+  beforeEach(() => {
+    const { useAppStore } = require('@/store');
+    (useAppStore as jest.Mock).mockReturnValue({
+      isSidebarCollapsed: false,
+      toggleSidebar: jest.fn(),
+    });
+  });
 
+  it('renders the Header and Sidebar when sidebar is not collapsed', () => {
     // Act
     render(<AppWithLayout><div>Child</div></AppWithLayout>);
 
@@ -34,15 +36,37 @@ describe('AppWithLayout', () => {
     expect(screen.getByTestId('sidebar')).toBeInTheDocument();
   });
 
-  it('does not render the Sidebar when it is toggled off', () => {
+  it('does not render the Sidebar when it is collapsed', () => {
     // Arrange
-    (authService.useAuth as jest.Mock).mockReturnValue({ user: { full_name: 'Test User' } });
+    const { useAppStore } = require('@/store');
+    const toggleSidebar = jest.fn();
+    (useAppStore as jest.Mock).mockReturnValue({
+      isSidebarCollapsed: true,
+      toggleSidebar,
+    });
+
+    // Act
+    render(<AppWithLayout><div>Child</div></AppWithLayout>);
+
+    // Assert
+    expect(screen.getByTestId('header')).toBeInTheDocument();
+    expect(screen.queryByTestId('sidebar')).not.toBeInTheDocument();
+  });
+
+  it('calls toggleSidebar when header button is clicked', () => {
+    // Arrange
+    const { useAppStore } = require('@/store');
+    const toggleSidebar = jest.fn();
+    (useAppStore as jest.Mock).mockReturnValue({
+      isSidebarCollapsed: false,
+      toggleSidebar,
+    });
 
     // Act
     render(<AppWithLayout><div>Child</div></AppWithLayout>);
     fireEvent.click(screen.getByTestId('header'));
 
     // Assert
-    expect(screen.queryByTestId('sidebar')).not.toBeInTheDocument();
+    expect(toggleSidebar).toHaveBeenCalled();
   });
 });

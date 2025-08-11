@@ -431,11 +431,11 @@ const EnhancedEnterpriseDemoPage: NextPage = () => {
                 <div className="flex gap-4 justify-center">
                   <Button 
                     size="lg"
-                    onClick={() => router.push('/admin')}
+                    onClick={() => router.push('/chat')}
                     className="bg-gradient-to-r from-purple-600 to-indigo-600"
                   >
                     <Shield className="mr-2 h-5 w-5" />
-                    Access Admin Console
+                    Access Admin Features
                   </Button>
                   <Button 
                     size="lg" 
