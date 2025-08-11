@@ -219,9 +219,14 @@ class TestBaseRepository:
 
     async def test_repository_bulk_create(self, unit_of_work):
         """Test bulk entity creation."""
+        import time
         async with unit_of_work as uow:
             threads_data = [
-                {"user_id": f"user_{i}", "title": f"Thread {i}"}
+                {
+                    "object": "thread",
+                    "created_at": int(time.time()),
+                    "metadata_": {"user_id": f"user_{i}", "title": f"Thread {i}"}
+                }
                 for i in range(10)
             ]
             

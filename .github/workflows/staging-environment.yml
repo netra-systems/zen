@@ -1,0 +1,476 @@
+name: Staging Environment Management
+
+on:
+  pull_request:
+    types: [opened, synchronize, closed, labeled, unlabeled]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Manual action'
+        required: true
+        type: choice
+        options:
+          - deploy
+          - destroy
+          - redeploy
+      pr_number:
+        description: 'PR number'
+        required: true
+        type: string
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_REGION: us-central1
+  TERRAFORM_VERSION: 1.5.0
+  STAGING_DOMAIN: staging.netra-ai.dev
+
+jobs:
+  check-eligibility:
+    name: Check Staging Eligibility
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+      environment_name: ${{ steps.check.outputs.environment_name }}
+    steps:
+      - name: Check labels and configuration
+        id: check
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          
+          # Check for exclusion labels
+          if [[ "${{ contains(github.event.pull_request.labels.*.name, 'no-staging') }}" == "true" ]]; then
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+            echo "❌ Staging skipped: 'no-staging' label present"
+            exit 0
+          fi
+          
+          if [[ "${{ contains(github.event.pull_request.labels.*.name, 'WIP') }}" == "true" ]]; then
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+            echo "❌ Staging skipped: 'WIP' label present"
+            exit 0
+          fi
+          
+          # Check for manual trigger
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ github.event.inputs.action }}" == "destroy" ]]; then
+              echo "should_deploy=false" >> $GITHUB_OUTPUT
+            else
+              echo "should_deploy=true" >> $GITHUB_OUTPUT
+            fi
+          # Check for PR close
+          elif [[ "${{ github.event.action }}" == "closed" ]]; then
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+          else
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "environment_name=pr-${PR_NUMBER}" >> $GITHUB_OUTPUT
+
+  deploy-staging:
+    name: Deploy Staging Environment
+    needs: check-eligibility
+    if: needs.check-eligibility.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+      url: https://pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}.${{ env.STAGING_DOMAIN }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Configure Docker for GCP
+        run: |
+          gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
+
+      - name: Load staging configuration
+        id: config
+        run: |
+          # Load configuration with defaults
+          if [ -f .github/staging.yml ]; then
+            TEST_LEVEL=$(yq e '.default_test_level // "integration"' .github/staging.yml)
+            MAX_INSTANCES=$(yq e '.resource_limits.compute.max_instances // 3' .github/staging.yml)
+          else
+            TEST_LEVEL="integration"
+            MAX_INSTANCES="3"
+          fi
+          
+          echo "test_level=$TEST_LEVEL" >> $GITHUB_OUTPUT
+          echo "max_instances=$MAX_INSTANCES" >> $GITHUB_OUTPUT
+
+      - name: Build and push backend container
+        id: backend-build
+        run: |
+          IMAGE_TAG="pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-${{ github.sha }}"
+          IMAGE_URL="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/backend:${IMAGE_TAG}"
+          
+          docker build -t $IMAGE_URL -f Dockerfile.backend .
+          docker push $IMAGE_URL
+          
+          echo "backend_image=$IMAGE_URL" >> $GITHUB_OUTPUT
+
+      - name: Build and push frontend container
+        id: frontend-build
+        run: |
+          IMAGE_TAG="pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-${{ github.sha }}"
+          IMAGE_URL="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/frontend:${IMAGE_TAG}"
+          
+          docker build -t $IMAGE_URL -f Dockerfile.frontend \
+            --build-arg NEXT_PUBLIC_API_URL=https://pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-api.${{ env.STAGING_DOMAIN }} .
+          docker push $IMAGE_URL
+          
+          echo "frontend_image=$IMAGE_URL" >> $GITHUB_OUTPUT
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Terraform Init
+        working-directory: ./terraform/staging
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ env.GCP_PROJECT_ID }}-terraform-state" \
+            -backend-config="prefix=staging/pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
+
+      - name: Terraform Plan
+        working-directory: ./terraform/staging
+        run: |
+          terraform plan \
+            -var="project_id=${{ env.GCP_PROJECT_ID }}" \
+            -var="region=${{ env.GCP_REGION }}" \
+            -var="pr_number=${{ github.event.pull_request.number || github.event.inputs.pr_number }}" \
+            -var="backend_image=${{ steps.backend-build.outputs.backend_image }}" \
+            -var="frontend_image=${{ steps.frontend-build.outputs.frontend_image }}" \
+            -var="max_instances=${{ steps.config.outputs.max_instances }}" \
+            -var="domain=${{ env.STAGING_DOMAIN }}" \
+            -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: ./terraform/staging
+        id: terraform
+        run: |
+          terraform apply -auto-approve tfplan
+          
+          # Capture outputs
+          BACKEND_URL=$(terraform output -raw backend_url)
+          FRONTEND_URL=$(terraform output -raw frontend_url)
+          DATABASE_HOST=$(terraform output -raw database_host)
+          REDIS_HOST=$(terraform output -raw redis_host)
+          
+          echo "backend_url=$BACKEND_URL" >> $GITHUB_OUTPUT
+          echo "frontend_url=$FRONTEND_URL" >> $GITHUB_OUTPUT
+          echo "database_host=$DATABASE_HOST" >> $GITHUB_OUTPUT
+          echo "redis_host=$REDIS_HOST" >> $GITHUB_OUTPUT
+
+      - name: Run database migrations
+        run: |
+          # Set database URL for migrations
+          export DATABASE_URL="postgresql://staging:${{ secrets.STAGING_DB_PASSWORD }}@${{ steps.terraform.outputs.database_host }}/netra_pr_${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
+          
+          # Run Alembic migrations
+          cd app
+          alembic upgrade head
+
+      - name: Seed test data
+        run: |
+          export DATABASE_URL="postgresql://staging:${{ secrets.STAGING_DB_PASSWORD }}@${{ steps.terraform.outputs.database_host }}/netra_pr_${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
+          export REDIS_URL="redis://${{ steps.terraform.outputs.redis_host }}:6379/0"
+          
+          python scripts/seed_staging_data.py \
+            --pr-number "${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
+
+      - name: Wait for services to be healthy
+        run: |
+          STAGING_URL="${{ steps.terraform.outputs.frontend_url }}"
+          API_URL="${{ steps.terraform.outputs.backend_url }}"
+          
+          echo "Waiting for frontend at $STAGING_URL..."
+          for i in {1..30}; do
+            if curl -s -o /dev/null -w "%{http_code}" "$STAGING_URL" | grep -q "200\|301\|302"; then
+              echo "✅ Frontend is ready!"
+              break
+            fi
+            echo "Attempt $i/30: Frontend not ready yet..."
+            sleep 10
+          done
+          
+          echo "Waiting for API at $API_URL/health..."
+          for i in {1..30}; do
+            if curl -s "$API_URL/health" | grep -q "healthy"; then
+              echo "✅ API is ready!"
+              break
+            fi
+            echo "Attempt $i/30: API not ready yet..."
+            sleep 10
+          done
+
+      - name: Run staging tests
+        id: tests
+        run: |
+          export STAGING_URL="${{ steps.terraform.outputs.frontend_url }}"
+          export STAGING_API_URL="${{ steps.terraform.outputs.backend_url }}"
+          
+          # Run test suite with staging flag
+          python test_runner.py \
+            --level "${{ steps.config.outputs.test_level }}" \
+            --staging \
+            --report-format json \
+            --output test_results.json
+          
+          # Extract summary for PR comment
+          PASSED=$(jq -r '.summary.passed' test_results.json)
+          FAILED=$(jq -r '.summary.failed' test_results.json)
+          SKIPPED=$(jq -r '.summary.skipped' test_results.json)
+          DURATION=$(jq -r '.summary.duration' test_results.json)
+          
+          echo "test_passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "test_failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "test_skipped=$SKIPPED" >> $GITHUB_OUTPUT
+          echo "test_duration=$DURATION" >> $GITHUB_OUTPUT
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          path: |
+            test_results.json
+            test_reports/
+
+      - name: Update PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr_number = context.payload.pull_request.number;
+            const staging_url = '${{ steps.terraform.outputs.frontend_url }}';
+            const api_url = '${{ steps.terraform.outputs.backend_url }}';
+            const test_passed = '${{ steps.tests.outputs.test_passed }}';
+            const test_failed = '${{ steps.tests.outputs.test_failed }}';
+            const test_duration = '${{ steps.tests.outputs.test_duration }}';
+            
+            const test_status = test_failed === '0' ? '✅' : '❌';
+            
+            const comment = `## 🚀 Staging Environment Ready
+            
+            **Environment:** pr-${pr_number}
+            **Status:** ${test_status} Deployed and Tested
+            
+            ### 🔗 Access URLs
+            - **Frontend:** ${staging_url}
+            - **API:** ${api_url}/docs
+            - **Health:** ${api_url}/health
+            
+            ### 🧪 Test Results
+            - **Passed:** ${test_passed} tests
+            - **Failed:** ${test_failed} tests
+            - **Duration:** ${test_duration}s
+            - **Test Level:** ${{ steps.config.outputs.test_level }}
+            
+            ### 📊 Resource Configuration
+            - **Max Instances:** ${{ steps.config.outputs.max_instances }}
+            - **Region:** ${{ env.GCP_REGION }}
+            
+            ### 🔐 Access Control
+            This staging environment is protected and only accessible to:
+            - PR author and reviewers
+            - Repository maintainers
+            
+            ---
+            
+            *This environment will be automatically destroyed when the PR is closed or merged.*
+            *Last updated: ${new Date().toISOString()}*`;
+            
+            // Find and update or create comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr_number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Staging Environment')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr_number,
+                body: comment
+              });
+            }
+
+      - name: Set commit status
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const test_failed = '${{ steps.tests.outputs.test_failed }}';
+            const state = test_failed === '0' ? 'success' : 'failure';
+            
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.payload.pull_request.head.sha,
+              state: state,
+              target_url: '${{ steps.terraform.outputs.frontend_url }}',
+              description: `Staging deployed with ${test_failed} test failures`,
+              context: 'staging/deployment'
+            });
+
+  destroy-staging:
+    name: Destroy Staging Environment
+    needs: check-eligibility
+    if: |
+      needs.check-eligibility.outputs.should_deploy == 'false' && 
+      (github.event.action == 'closed' || github.event.inputs.action == 'destroy')
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Export logs before destruction
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          
+          # Export Cloud Run logs
+          gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=staging-pr-${PR_NUMBER}" \
+            --format=json \
+            --project=${{ env.GCP_PROJECT_ID }} \
+            > staging-logs-pr-${PR_NUMBER}.json
+          
+          # Upload logs as artifact
+          echo "Logs exported for PR ${PR_NUMBER}"
+
+      - name: Upload logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: staging-logs-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          path: staging-logs-*.json
+          retention-days: 7
+
+      - name: Terraform Destroy
+        working-directory: ./terraform/staging
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ env.GCP_PROJECT_ID }}-terraform-state" \
+            -backend-config="prefix=staging/pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
+          
+          terraform destroy -auto-approve \
+            -var="project_id=${{ env.GCP_PROJECT_ID }}" \
+            -var="region=${{ env.GCP_REGION }}" \
+            -var="pr_number=${{ github.event.pull_request.number || github.event.inputs.pr_number }}" \
+            -var="backend_image=placeholder" \
+            -var="frontend_image=placeholder" \
+            -var="max_instances=1" \
+            -var="domain=${{ env.STAGING_DOMAIN }}"
+
+      - name: Clean up container images
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          
+          # Delete backend images
+          gcloud artifacts docker images delete \
+            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/backend:pr-${PR_NUMBER}-* \
+            --quiet || true
+          
+          # Delete frontend images
+          gcloud artifacts docker images delete \
+            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/frontend:pr-${PR_NUMBER}-* \
+            --quiet || true
+
+      - name: Update PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr_number = context.payload.pull_request.number;
+            
+            const comment = `## 🧹 Staging Environment Destroyed
+            
+            **Environment:** pr-${pr_number}
+            **Status:** ✅ Successfully cleaned up
+            **Destroyed at:** ${new Date().toISOString()}
+            
+            All resources associated with this staging environment have been removed.
+            Logs have been archived and are available as workflow artifacts for 7 days.`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr_number,
+              body: comment
+            });
+
+  cleanup-stale-environments:
+    name: Cleanup Stale Environments
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Find and destroy stale environments
+        run: |
+          # List all Cloud Run services with staging prefix
+          SERVICES=$(gcloud run services list \
+            --platform=managed \
+            --region=${{ env.GCP_REGION }} \
+            --format="value(name)" \
+            --filter="name:staging-pr-*")
+          
+          for SERVICE in $SERVICES; do
+            # Extract PR number from service name
+            PR_NUMBER=$(echo $SERVICE | grep -oP 'pr-\K[0-9]+')
+            
+            # Check if PR is still open
+            PR_STATE=$(gh pr view $PR_NUMBER --json state -q .state 2>/dev/null || echo "CLOSED")
+            
+            if [[ "$PR_STATE" == "CLOSED" ]] || [[ "$PR_STATE" == "MERGED" ]]; then
+              echo "Cleaning up stale environment for PR #$PR_NUMBER (state: $PR_STATE)"
+              
+              # Trigger destroy workflow
+              gh workflow run staging-environment.yml \
+                -f action=destroy \
+                -f pr_number=$PR_NUMBER
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ github.token }}

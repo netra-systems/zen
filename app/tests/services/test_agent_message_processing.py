@@ -61,11 +61,10 @@ class TestAgentMessageProcessing:
     
     async def test_message_validation(self):
         """Test message validation and error handling"""
-        # Mock dependencies
-        mock_db = AsyncMock()
-        mock_llm = AsyncMock()
+        # Mock supervisor
+        mock_supervisor = AsyncMock()
         
-        agent_service = AgentService(mock_db, mock_llm)
+        agent_service = AgentService(mock_supervisor)
         
         # Test invalid parameters to start_agent_run
         with pytest.raises((ValueError, TypeError, Exception)):

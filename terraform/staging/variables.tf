@@ -1,0 +1,109 @@
+variable "project_id" {
+  description = "GCP Project ID"
+  type        = string
+}
+
+variable "region" {
+  description = "GCP Region"
+  type        = string
+  default     = "us-central1"
+}
+
+variable "pr_number" {
+  description = "Pull Request number"
+  type        = string
+}
+
+variable "pr_branch" {
+  description = "Pull Request branch name"
+  type        = string
+  default     = ""
+}
+
+variable "backend_image" {
+  description = "Backend container image URL"
+  type        = string
+}
+
+variable "frontend_image" {
+  description = "Frontend container image URL"
+  type        = string
+}
+
+variable "domain" {
+  description = "Base domain for staging environments"
+  type        = string
+  default     = "staging.netra-ai.dev"
+}
+
+variable "dns_zone_name" {
+  description = "Cloud DNS zone name"
+  type        = string
+  default     = "staging-netra-ai-dev"
+}
+
+variable "billing_account" {
+  description = "GCP Billing Account ID"
+  type        = string
+  default     = ""
+}
+
+variable "cost_limit_per_pr" {
+  description = "Maximum cost per PR in USD"
+  type        = string
+  default     = "50"
+}
+
+variable "resource_limits" {
+  description = "Resource limits for staging environment"
+  type = object({
+    cpu_limit             = string
+    memory_limit          = string
+    min_instances         = number
+    max_instances         = number
+    database_tier         = string
+    database_storage_gb   = number
+    redis_tier            = string
+    redis_memory_gb       = number
+  })
+  default = {
+    cpu_limit           = "2"
+    memory_limit        = "4Gi"
+    min_instances       = 0
+    max_instances       = 3
+    database_tier       = "db-f1-micro"
+    database_storage_gb = 10
+    redis_tier          = "BASIC"
+    redis_memory_gb     = 1
+  }
+}
+
+variable "environment_variables" {
+  description = "Additional environment variables for the application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "authorized_users" {
+  description = "List of email addresses authorized to access staging"
+  type        = list(string)
+  default     = []
+}
+
+variable "enable_cdn" {
+  description = "Enable Cloud CDN for static assets"
+  type        = bool
+  default     = true
+}
+
+variable "enable_monitoring" {
+  description = "Enable monitoring and alerting"
+  type        = bool
+  default     = true
+}
+
+variable "ttl_hours" {
+  description = "Time to live for staging environment in hours"
+  type        = number
+  default     = 168 # 7 days
+}

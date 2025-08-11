@@ -264,11 +264,16 @@ class TestApexOptimizerToolSelection:
     @pytest.fixture
     def sample_agent_state(self):
         """Create sample agent state"""
-        from app.schemas import Workload
+        from app.schemas import Workload, DataSource, TimeRange
         request = RequestModel(
             user_id="test_user_123",
             query="Optimize our AI workload to reduce costs by 20%",
-            workloads=[Workload(name="main_workload", type="inference")]
+            workloads=[Workload(
+                run_id="run_123",
+                query="optimize costs",
+                data_source=DataSource(source_table="metrics"),
+                time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
+            )]
         )
         state = AgentState(request=request)
         return state
@@ -293,11 +298,16 @@ class TestApexOptimizerToolSelection:
     async def test_tool_selection_latency_optimization(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for latency optimization requests"""
         # Create latency-focused request
-        from app.schemas import Workload
+        from app.schemas import Workload, DataSource, TimeRange
         request = RequestModel(
             user_id="test_user_123",
             query="Improve response time and reduce latency for our AI system",
-            workloads=[Workload(name="latency_workload", type="inference")]
+            workloads=[Workload(
+                run_id="run_456",
+                query="optimize latency",
+                data_source=DataSource(source_table="latency_metrics"),
+                time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
+            )]
         )
         state = AgentState(request=request)
         
@@ -392,11 +402,16 @@ class TestApexOptimizerToolSelection:
     async def test_custom_tool_selection(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test custom tool selection logic"""
         # Create custom tool selection scenario
-        from app.schemas import Workload
+        from app.schemas import Workload, DataSource, TimeRange
         request = RequestModel(
             user_id="test_user_123",
             query="Custom optimization requirements",
-            workloads=[Workload(name="custom_workload", type="training")]
+            workloads=[Workload(
+                run_id="run_789",
+                query="custom optimization",
+                data_source=DataSource(source_table="custom_metrics"),
+                time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
+            )]
         )
         state = AgentState(request=request)
         

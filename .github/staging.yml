@@ -1,0 +1,315 @@
+# Staging Environment Configuration
+# This file controls the behavior of automatic staging environments for pull requests
+
+# Enable/disable automatic staging deployment
+auto_deploy: true
+
+# Labels configuration
+labels:
+  # PRs must have one of these labels to get staging (empty = all PRs get staging)
+  required_labels: []
+  
+  # PRs with any of these labels will skip staging
+  excluded_labels:
+    - no-staging
+    - WIP
+    - draft
+    - skip-ci
+  
+  # Labels automatically added by the staging system
+  auto_labels:
+    deployed: staging-deployed
+    failed: staging-failed
+    testing: staging-testing
+
+# Resource limits and quotas
+resource_limits:
+  # Compute resources
+  compute:
+    cpu_limit: "2"           # CPU cores
+    memory_limit: "4Gi"      # Memory
+    min_instances: 0         # Scale to zero when idle
+    max_instances: 3         # Maximum instances per service
+    scale_to_zero_delay: 15  # Minutes before scaling to zero
+  
+  # Database resources
+  database:
+    tier: "db-f1-micro"      # Cloud SQL tier
+    storage_gb: 10           # Storage in GB
+    backup_enabled: false    # Disable backups for staging
+    high_availability: false # No HA for staging
+    connection_limit: 25     # Max connections
+  
+  # Redis resources
+  redis:
+    tier: "BASIC"            # Memorystore tier
+    memory_gb: 1             # Memory in GB
+    eviction_policy: "allkeys-lru"
+    maxmemory_policy: "noeviction"
+  
+  # ClickHouse resources (if using managed ClickHouse)
+  clickhouse:
+    tier: "development"      # ClickHouse tier
+    storage_gb: 10           # Storage in GB
+    replicas: 1              # Number of replicas
+
+# Cost optimization settings
+cost_optimization:
+  # Maximum cost per PR per month in USD
+  max_cost_per_pr: 50
+  
+  # Alert thresholds (percentage of max_cost_per_pr)
+  alert_thresholds:
+    - 50   # Alert at 50% of budget
+    - 80   # Alert at 80% of budget
+    - 100  # Alert at 100% of budget
+  
+  # Use preemptible/spot instances where possible
+  use_spot_instances: true
+  
+  # Automatically destroy environments after inactivity
+  auto_destroy:
+    enabled: true
+    ttl_hours: 168  # 7 days
+    inactive_hours: 24  # Destroy after 24 hours of inactivity
+
+# Test configuration
+testing:
+  # Default test level for PRs
+  default_test_level: integration
+  
+  # Test level selection based on conditions
+  test_levels:
+    # Small changes (< 3 files)
+    small_change:
+      file_count_max: 3
+      test_level: smoke
+    
+    # Documentation only changes
+    docs_only:
+      path_pattern: "**/*.md"
+      test_level: smoke
+    
+    # Frontend changes
+    frontend:
+      path_pattern: "frontend/**"
+      test_level: integration
+      additional_tests:
+        - cypress
+        - lighthouse
+    
+    # Backend changes
+    backend:
+      path_pattern: "app/**"
+      test_level: integration
+      additional_tests:
+        - api
+        - database
+    
+    # Critical changes (require label)
+    critical:
+      required_label: "critical"
+      test_level: comprehensive
+  
+  # Test runner configuration
+  runner:
+    command: "python test_runner.py"
+    timeout: 1800  # 30 minutes
+    retry_count: 2
+    parallel: true
+    coverage_threshold: 80
+
+# Deployment configuration
+deployment:
+  # Build settings
+  build:
+    cache_enabled: true
+    parallel_builds: true
+    dockerfile_backend: "Dockerfile.backend"
+    dockerfile_frontend: "Dockerfile.frontend"
+  
+  # Health check configuration
+  health_check:
+    initial_delay_seconds: 30
+    timeout_seconds: 10
+    check_interval_seconds: 30
+    max_retries: 10
+    endpoints:
+      backend: "/health"
+      frontend: "/"
+  
+  # Rollback on failure
+  auto_rollback:
+    enabled: true
+    health_check_failures: 3
+    test_failures: true
+
+# Security settings
+security:
+  # Authentication for staging environments
+  authentication:
+    enabled: true
+    provider: github_oauth
+    # Users with access (GitHub usernames)
+    allowed_users:
+      - "*"  # All contributors
+    # Teams with access (GitHub teams)
+    allowed_teams:
+      - maintainers
+      - developers
+  
+  # IP whitelisting (optional)
+  ip_whitelist:
+    enabled: false
+    ips: []
+  
+  # SSL/TLS configuration
+  ssl:
+    provider: "letsencrypt"
+    auto_renew: true
+    force_https: true
+
+# Monitoring and observability
+monitoring:
+  # Enable monitoring
+  enabled: true
+  
+  # Metrics to track
+  metrics:
+    - deployment_time
+    - test_duration
+    - resource_usage
+    - error_rate
+    - response_time
+    - cost_per_day
+  
+  # Log aggregation
+  logging:
+    enabled: true
+    retention_days: 7
+    log_level: INFO
+    structured: true
+  
+  # Performance monitoring
+  performance:
+    enabled: true
+    lighthouse_score_threshold: 80
+    api_response_time_threshold: 500  # milliseconds
+
+# Notification settings
+notifications:
+  # Slack notifications (optional)
+  slack:
+    enabled: false
+    webhook_url: ""
+    channels:
+      deployment: "#staging-deploys"
+      alerts: "#staging-alerts"
+  
+  # GitHub comments
+  github_comments:
+    enabled: true
+    update_on_deploy: true
+    update_on_test: true
+    update_on_destroy: true
+    include_test_results: true
+    include_performance_metrics: true
+    include_cost_estimate: true
+
+# Environment variables
+environment_variables:
+  # Variables available to all staging environments
+  global:
+    NODE_ENV: production
+    PYTHON_ENV: production
+    LOG_LEVEL: INFO
+    ENABLE_PROFILING: false
+    ENABLE_METRICS: true
+  
+  # Backend specific
+  backend:
+    WORKERS: 2
+    THREADS: 4
+    MAX_REQUESTS: 1000
+    MAX_REQUESTS_JITTER: 50
+  
+  # Frontend specific
+  frontend:
+    NEXT_TELEMETRY_DISABLED: 1
+    ANALYZE: false
+
+# Feature flags for staging
+feature_flags:
+  # Enable experimental features in staging
+  enable_experimental: true
+  
+  # Feature flag overrides
+  flags:
+    new_ui: true
+    advanced_analytics: true
+    beta_features: true
+
+# Data seeding configuration
+data_seeding:
+  enabled: true
+  script: "scripts/seed_staging_data.py"
+  
+  # Test data configuration
+  test_data:
+    users:
+      count: 10
+      roles:
+        - admin: 1
+        - manager: 2
+        - user: 7
+    
+    optimization_requests:
+      count: 50
+      types:
+        - "cost_optimization"
+        - "performance_optimization"
+        - "resource_optimization"
+    
+    metrics:
+      count: 1000
+      time_range_days: 30
+    
+    sample_data:
+      - llm_responses: true
+      - api_calls: true
+      - websocket_messages: true
+
+# Staging environment limits
+limits:
+  # Maximum number of concurrent staging environments
+  max_environments: 10
+  
+  # Maximum PRs per user
+  max_per_user: 3
+  
+  # Queue settings when at limit
+  queue:
+    enabled: true
+    max_wait_minutes: 30
+    priority:
+      - label: "critical"
+        weight: 100
+      - label: "high-priority"
+        weight: 50
+      - default: 10
+
+# Schedule for maintenance and cleanup
+schedule:
+  # Cleanup stale environments
+  cleanup:
+    cron: "0 2 * * *"  # Daily at 2 AM
+    max_age_days: 7
+    ignore_labels:
+      - "keep-staging"
+      - "long-running-test"
+  
+  # Cost report generation
+  cost_report:
+    cron: "0 9 * * MON"  # Weekly on Monday at 9 AM
+    recipients:
+      - "platform-team@netra-ai.dev"

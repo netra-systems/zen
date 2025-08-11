@@ -1,0 +1,178 @@
+name: Staging Environment Cleanup
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Perform dry run only'
+        required: false
+        type: boolean
+        default: false
+      max_age_days:
+        description: 'Maximum age in days'
+        required: false
+        type: string
+        default: '7'
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_REGION: us-central1
+
+jobs:
+  cleanup-staging:
+    name: Clean Up Stale Staging Environments
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install requests faker
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ env.GCP_PROJECT_ID }}
+      
+      - name: Run cleanup script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          python scripts/cleanup_staging_environments.py \
+            --project-id "${{ env.GCP_PROJECT_ID }}" \
+            --region "${{ env.GCP_REGION }}" \
+            --max-age-days "${{ github.event.inputs.max_age_days || '7' }}" \
+            --inactive-hours 24 \
+            --max-cost-per-pr 50 \
+            --output cleanup_report.json \
+            ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
+      
+      - name: Upload cleanup report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cleanup-report-${{ github.run_id }}
+          path: cleanup_report.json
+          retention-days: 30
+      
+      - name: Parse cleanup results
+        id: results
+        if: always()
+        run: |
+          if [ -f cleanup_report.json ]; then
+            ENVS_CHECKED=$(jq -r '.environments_checked' cleanup_report.json)
+            ENVS_CLEANED=$(jq -r '.environments_cleaned' cleanup_report.json)
+            ERRORS=$(jq -r '.errors | length' cleanup_report.json)
+            
+            echo "environments_checked=$ENVS_CHECKED" >> $GITHUB_OUTPUT
+            echo "environments_cleaned=$ENVS_CLEANED" >> $GITHUB_OUTPUT
+            echo "error_count=$ERRORS" >> $GITHUB_OUTPUT
+            
+            # Generate summary for GitHub Actions
+            echo "## Staging Cleanup Summary" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- **Environments Checked:** $ENVS_CHECKED" >> $GITHUB_STEP_SUMMARY
+            echo "- **Environments Cleaned:** $ENVS_CLEANED" >> $GITHUB_STEP_SUMMARY
+            echo "- **Errors:** $ERRORS" >> $GITHUB_STEP_SUMMARY
+            
+            if [ "$ERRORS" -gt 0 ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### Errors:" >> $GITHUB_STEP_SUMMARY
+              jq -r '.errors[]' cleanup_report.json | head -5 | while read error; do
+                echo "- $error" >> $GITHUB_STEP_SUMMARY
+              done
+            fi
+          fi
+      
+      - name: Send Slack notification
+        if: always() && vars.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ vars.SLACK_WEBHOOK_URL }}
+        run: |
+          ENVS_CHECKED="${{ steps.results.outputs.environments_checked || '0' }}"
+          ENVS_CLEANED="${{ steps.results.outputs.environments_cleaned || '0' }}"
+          ERRORS="${{ steps.results.outputs.error_count || '0' }}"
+          
+          if [ "$ERRORS" -gt 0 ]; then
+            COLOR="warning"
+            STATUS="completed with errors"
+          else
+            COLOR="good"
+            STATUS="completed successfully"
+          fi
+          
+          curl -X POST $SLACK_WEBHOOK_URL \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "attachments": [{
+                "color": "'$COLOR'",
+                "title": "Staging Environment Cleanup",
+                "text": "Cleanup '$STATUS'",
+                "fields": [
+                  {"title": "Environments Checked", "value": "'$ENVS_CHECKED'", "short": true},
+                  {"title": "Environments Cleaned", "value": "'$ENVS_CLEANED'", "short": true},
+                  {"title": "Errors", "value": "'$ERRORS'", "short": true},
+                  {"title": "Run", "value": "<'$GITHUB_SERVER_URL'/'$GITHUB_REPOSITORY'/actions/runs/'$GITHUB_RUN_ID'|View Details>", "short": true}
+                ]
+              }]
+            }'
+
+  monitor-costs:
+    name: Monitor Staging Costs
+    runs-on: ubuntu-latest
+    needs: cleanup-staging
+    
+    steps:
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ env.GCP_PROJECT_ID }}
+      
+      - name: Get current month costs
+        id: costs
+        run: |
+          # Get current month's staging costs
+          CURRENT_MONTH=$(date +%Y-%m)
+          
+          # Query billing data (simplified - would need actual billing export setup)
+          echo "Querying staging environment costs for $CURRENT_MONTH..."
+          
+          # This is a placeholder - actual implementation would query BigQuery billing export
+          TOTAL_COST="125.50"  # Placeholder value
+          DAILY_AVG="4.18"      # Placeholder value
+          
+          echo "total_cost=$TOTAL_COST" >> $GITHUB_OUTPUT
+          echo "daily_average=$DAILY_AVG" >> $GITHUB_OUTPUT
+          
+          # Add to summary
+          echo "## Staging Environment Costs" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Current Month Total:** \$$TOTAL_COST" >> $GITHUB_STEP_SUMMARY
+          echo "- **Daily Average:** \$$DAILY_AVG" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Check cost alerts
+        if: steps.costs.outputs.total_cost != ''
+        run: |
+          TOTAL_COST="${{ steps.costs.outputs.total_cost }}"
+          MONTHLY_BUDGET=500
+          
+          # Check if we're over budget
+          if (( $(echo "$TOTAL_COST > $MONTHLY_BUDGET" | bc -l) )); then
+            echo "⚠️ **WARNING:** Monthly staging costs (\$$TOTAL_COST) exceed budget (\$$MONTHLY_BUDGET)" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          elif (( $(echo "$TOTAL_COST > $MONTHLY_BUDGET * 0.8" | bc -l) )); then
+            echo "⚠️ **ALERT:** Monthly staging costs (\$$TOTAL_COST) at 80% of budget (\$$MONTHLY_BUDGET)" >> $GITHUB_STEP_SUMMARY
+          fi

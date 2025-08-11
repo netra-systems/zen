@@ -703,6 +703,123 @@ class UnifiedTestRunner:
         else:
             return "[PENDING]"
     
+    def generate_json_report(self, level: str, config: Dict, exit_code: int) -> Dict:
+        """Generate JSON report for CI/CD integration"""
+        timestamp = datetime.now().isoformat()
+        duration = self.results["overall"]["end_time"] - self.results["overall"]["start_time"]
+        
+        # Calculate total test counts
+        backend_counts = self.results["backend"]["test_counts"]
+        frontend_counts = self.results["frontend"]["test_counts"]
+        e2e_counts = self.results.get("e2e", {}).get("test_counts", {"total": 0, "passed": 0, "failed": 0})
+        
+        total_counts = {
+            "total": backend_counts["total"] + frontend_counts["total"] + e2e_counts["total"],
+            "passed": backend_counts["passed"] + frontend_counts["passed"] + e2e_counts["passed"],
+            "failed": backend_counts["failed"] + frontend_counts["failed"] + e2e_counts["failed"],
+            "skipped": backend_counts.get("skipped", 0) + frontend_counts.get("skipped", 0) + e2e_counts.get("skipped", 0),
+            "errors": backend_counts.get("errors", 0) + frontend_counts.get("errors", 0) + e2e_counts.get("errors", 0),
+        }
+        
+        return {
+            "timestamp": timestamp,
+            "level": level,
+            "status": "passed" if exit_code == 0 else "failed",
+            "exit_code": exit_code,
+            "duration": duration,
+            "environment": {
+                "staging": getattr(self, "staging_mode", False),
+                "staging_url": os.getenv("STAGING_URL", ""),
+                "staging_api_url": os.getenv("STAGING_API_URL", ""),
+                "pr_number": os.getenv("PR_NUMBER", ""),
+                "pr_branch": os.getenv("PR_BRANCH", ""),
+            },
+            "summary": {
+                "total": total_counts["total"],
+                "passed": total_counts["passed"],
+                "failed": total_counts["failed"],
+                "skipped": total_counts["skipped"],
+                "errors": total_counts["errors"],
+                "duration": duration,
+            },
+            "components": {
+                "backend": {
+                    "status": self.results["backend"]["status"],
+                    "duration": self.results["backend"]["duration"],
+                    "tests": backend_counts,
+                    "coverage": self.results["backend"]["coverage"],
+                },
+                "frontend": {
+                    "status": self.results["frontend"]["status"],
+                    "duration": self.results["frontend"]["duration"],
+                    "tests": frontend_counts,
+                    "coverage": self.results["frontend"]["coverage"],
+                },
+                "e2e": {
+                    "status": self.results.get("e2e", {}).get("status", "skipped"),
+                    "duration": self.results.get("e2e", {}).get("duration", 0),
+                    "tests": e2e_counts,
+                }
+            },
+            "configuration": {
+                "level": level,
+                "description": config.get("description", ""),
+                "purpose": config.get("purpose", ""),
+                "timeout": config.get("timeout", 300),
+                "coverage_enabled": config.get("run_coverage", False),
+            }
+        }
+    
+    def generate_text_report(self, level: str, config: Dict, exit_code: int) -> str:
+        """Generate plain text report"""
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        duration = self.results["overall"]["end_time"] - self.results["overall"]["start_time"]
+        
+        # Calculate total test counts
+        backend_counts = self.results["backend"]["test_counts"]
+        frontend_counts = self.results["frontend"]["test_counts"]
+        
+        total_counts = {
+            "total": backend_counts["total"] + frontend_counts["total"],
+            "passed": backend_counts["passed"] + frontend_counts["passed"],
+            "failed": backend_counts["failed"] + frontend_counts["failed"],
+        }
+        
+        report = []
+        report.append("=" * 80)
+        report.append("NETRA AI PLATFORM - TEST REPORT")
+        report.append("=" * 80)
+        report.append(f"Timestamp: {timestamp}")
+        report.append(f"Test Level: {level}")
+        report.append(f"Status: {'PASSED' if exit_code == 0 else 'FAILED'}")
+        report.append(f"Duration: {duration:.2f}s")
+        
+        if getattr(self, "staging_mode", False):
+            report.append("\nSTAGING ENVIRONMENT:")
+            report.append(f"  Frontend: {os.getenv('STAGING_URL', 'N/A')}")
+            report.append(f"  API: {os.getenv('STAGING_API_URL', 'N/A')}")
+            report.append(f"  PR Number: {os.getenv('PR_NUMBER', 'N/A')}")
+        
+        report.append("\nTEST SUMMARY:")
+        report.append(f"  Total: {total_counts['total']}")
+        report.append(f"  Passed: {total_counts['passed']}")
+        report.append(f"  Failed: {total_counts['failed']}")
+        
+        report.append("\nCOMPONENT RESULTS:")
+        report.append(f"  Backend: {self.results['backend']['status'].upper()}")
+        report.append(f"    Tests: {backend_counts['total']} total, {backend_counts['passed']} passed, {backend_counts['failed']} failed")
+        if self.results["backend"]["coverage"]:
+            report.append(f"    Coverage: {self.results['backend']['coverage']:.1f}%")
+        
+        report.append(f"  Frontend: {self.results['frontend']['status'].upper()}")
+        report.append(f"    Tests: {frontend_counts['total']} total, {frontend_counts['passed']} passed, {frontend_counts['failed']} failed")
+        if self.results["frontend"]["coverage"]:
+            report.append(f"    Coverage: {self.results['frontend']['coverage']:.1f}%")
+        
+        report.append("=" * 80)
+        
+        return "\n".join(report)
+    
     def print_summary(self):
         """Print final test summary with test counts"""
         print(f"\n{'='*60}")
@@ -881,6 +998,35 @@ Real LLM Testing:
         help="Parallelism for tests: auto, 1 (sequential), or number of workers"
     )
     
+    # Staging environment support
+    parser.add_argument(
+        "--staging",
+        action="store_true",
+        help="Run tests against staging environment (uses STAGING_URL and STAGING_API_URL env vars)"
+    )
+    parser.add_argument(
+        "--staging-url",
+        type=str,
+        help="Override staging frontend URL"
+    )
+    parser.add_argument(
+        "--staging-api-url",
+        type=str,
+        help="Override staging API URL"
+    )
+    parser.add_argument(
+        "--report-format",
+        type=str,
+        choices=["text", "json", "markdown"],
+        default="markdown",
+        help="Format for test report output (default: markdown)"
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        help="Output file for test results (for CI/CD integration)"
+    )
+    
     args = parser.parse_args()
     
     # Print header
@@ -888,9 +1034,36 @@ Real LLM Testing:
     print("NETRA AI PLATFORM - UNIFIED TEST RUNNER")
     print("=" * 80)
     
+    # Configure staging environment if requested
+    if args.staging or args.staging_url or args.staging_api_url:
+        staging_url = args.staging_url or os.getenv("STAGING_URL")
+        staging_api_url = args.staging_api_url or os.getenv("STAGING_API_URL")
+        
+        if not staging_url or not staging_api_url:
+            print("[ERROR] Staging mode requires STAGING_URL and STAGING_API_URL")
+            print("  Set via environment variables or --staging-url and --staging-api-url flags")
+            sys.exit(1)
+        
+        print(f"[STAGING MODE] Testing against staging environment:")
+        print(f"  Frontend: {staging_url}")
+        print(f"  API: {staging_api_url}")
+        
+        # Set environment variables for tests to use
+        os.environ["STAGING_MODE"] = "true"
+        os.environ["STAGING_URL"] = staging_url
+        os.environ["STAGING_API_URL"] = staging_api_url
+        os.environ["BASE_URL"] = staging_url
+        os.environ["API_BASE_URL"] = staging_api_url
+        os.environ["CYPRESS_BASE_URL"] = staging_url
+        os.environ["CYPRESS_API_URL"] = staging_api_url
+    
     # Initialize test runner
     runner = UnifiedTestRunner()
     runner.results["overall"]["start_time"] = time.time()
+    
+    # Add staging flag to runner if needed
+    if args.staging:
+        runner.staging_mode = True
     
     # Determine test configuration
     if args.simple:
@@ -985,6 +1158,21 @@ Real LLM Testing:
     # Generate and save report
     if not args.no_report:
         runner.save_test_report(level, config, "", exit_code)
+        
+        # Save in additional formats if requested
+        if args.output:
+            if args.report_format == "json":
+                # Generate JSON report for CI/CD
+                json_report = runner.generate_json_report(level, config, exit_code)
+                with open(args.output, "w", encoding='utf-8') as f:
+                    json.dump(json_report, f, indent=2)
+                print(f"[REPORT] JSON report saved to: {args.output}")
+            elif args.report_format == "text":
+                # Generate text report
+                text_report = runner.generate_text_report(level, config, exit_code)
+                with open(args.output, "w", encoding='utf-8') as f:
+                    f.write(text_report)
+                print(f"[REPORT] Text report saved to: {args.output}")
     
     # Print summary
     runner.print_summary()
