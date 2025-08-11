@@ -129,8 +129,8 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
           payload: event.payload,
           timestamp: Date.now(),
           threadId: state.activeThreadId || undefined,
-          runId: event.payload?.run_id,
-          agentName: event.payload?.agent_name
+          runId: (event.payload as any)?.run_id,
+          agentName: (event.payload as any)?.agent_name
         };
         state.wsEventBuffer.push(wsEvent);
         
@@ -241,7 +241,7 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
               duration: event.payload.duration_ms,
               result: event.payload.result,
               metrics: event.payload.metrics,
-              iteration: event.payload.iteration || iteration
+              iteration: (event.payload as any).iteration || iteration
             };
             
             const currentSlow = state.slowLayerData;

@@ -24,6 +24,7 @@ export interface ThreadMessagesResponse {
   total: number;
   limit: number;
   offset: number;
+  metadata?: any;
 }
 
 export class ThreadService {

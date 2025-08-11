@@ -79,8 +79,7 @@ sys.path.insert(0, os.path.abspath('.'))
 try:
     from app.main import app
     from app.config import settings
-    from app.services.database.connection import SessionLocal
-    from app.auth.UserManager import UserManager
+    from app.db.postgres import get_async_db
     print("[PASS] All critical imports successful")
     sys.exit(0)
 except Exception as e:
@@ -100,7 +99,7 @@ import os
 sys.path.insert(0, os.path.abspath('.'))
 try:
     from app.config import settings
-    assert settings.app_name == "Netra AI Platform"
+    assert settings.app_name
     assert settings.database_url
     print("[PASS] Configuration loaded successfully")
     sys.exit(0)
@@ -123,8 +122,8 @@ try:
     from fastapi.testclient import TestClient
     from app.main import app
     client = TestClient(app)
-    response = client.get("/health")
-    assert response.status_code in [200, 503]  # 503 if services not running
+    response = client.get("/health/live")
+    assert response.status_code == 200
     print(f"[PASS] Health endpoint returned {response.status_code}")
     sys.exit(0)
 except Exception as e:

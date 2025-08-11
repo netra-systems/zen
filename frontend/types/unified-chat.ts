@@ -70,19 +70,24 @@ export interface AgentCompletedEvent {
   payload: {
     agent_name: string;
     duration_ms: number;
-    result: any;  // Agent-specific result data
-    metrics: any; // Performance metrics
+    result: Record<string, unknown>;  // Agent-specific result data
+    metrics: Record<string, unknown>; // Performance metrics
   };
 }
 
 export interface FinalReportEvent {
   type: 'final_report';
   payload: {
-    report: any;                          // Complete analysis report
+    report: Record<string, unknown>;      // Complete analysis report
     total_duration_ms: number;
     agent_metrics: AgentMetric[];
     recommendations: Recommendation[];
     action_plan: ActionStep[];
+    executive_summary?: string;
+    cost_analysis?: any;
+    performance_comparison?: any;
+    confidence_scores?: any;
+    technical_details?: any;
   };
 }
 
@@ -116,6 +121,7 @@ export interface AgentResult {
   duration: number;
   result: any;  // Agent-specific, from backend
   metrics: any; // Agent-specific, from backend
+  iteration?: number; // Iteration count for repeated agents
 }
 
 export interface FinalReport {
@@ -173,6 +179,60 @@ export interface ExecutionMetrics {
 }
 
 // ============================================
+// Thread Management Events
+// ============================================
+
+export interface ThreadCreatedEvent {
+  type: 'thread_created';
+  payload: {
+    thread_id: string;
+    user_id: string;
+    created_at: number;
+  };
+}
+
+export interface ThreadLoadedEvent {
+  type: 'thread_loaded';
+  payload: {
+    thread_id: string;
+    messages: ChatMessage[];
+    metadata: Record<string, unknown>;
+  };
+}
+
+export interface ThreadRenamedEvent {
+  type: 'thread_renamed';
+  payload: {
+    thread_id: string;
+    new_title: string;
+  };
+}
+
+// ============================================
+// Run and Step Events
+// ============================================
+
+export interface RunStartedEvent {
+  type: 'run_started';
+  payload: {
+    run_id: string;
+    thread_id: string;
+    assistant_id: string;
+    model: string;
+  };
+}
+
+export interface StepCreatedEvent {
+  type: 'step_created';
+  payload: {
+    step_id: string;
+    run_id: string;
+    type: 'tool_call' | 'message' | 'function';
+    details: Record<string, unknown>;
+  };
+}
+
+// ============================================
 // Union Types for WebSocket Events
 // ============================================
 
@@ -183,7 +243,12 @@ export type UnifiedWebSocketEvent =
   | PartialResultEvent
   | AgentCompletedEvent
   | FinalReportEvent
-  | ErrorEvent;
+  | ErrorEvent
+  | ThreadCreatedEvent
+  | ThreadLoadedEvent
+  | ThreadRenamedEvent
+  | RunStartedEvent
+  | StepCreatedEvent;
 
 export type LayerUpdateEvent = 
   | { layer: 'fast'; data: FastLayerData }
@@ -276,6 +341,8 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: number;
+  threadId?: string;
+  threadTitle?: string;
   metadata?: {
     runId?: string;
     agentName?: string;

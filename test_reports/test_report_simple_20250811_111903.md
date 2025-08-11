@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T11:27:56.498009  
+**Generated:** 2025-08-11T11:19:03.524505  
 **Test Level:** simple - Simple test validation  
 **Purpose:** Basic functionality check
 
@@ -8,11 +8,11 @@
 
 | Component | Status | Duration | Exit Code |
 |-----------|--------|----------|-----------|
-| Backend   | [PASSED] | 10.90s | 0 |
-| Frontend  | [PASSED] | 10.90s | 0 |
+| Backend   | [PASSED] | 9.89s | 0 |
+| Frontend  | [PASSED] | 9.89s | 0 |
 
 **Overall Status:** [PASSED]  
-**Total Duration:** 21.80s  
+**Total Duration:** 19.78s  
 **Final Exit Code:** 0
 
 ## Test Level Details

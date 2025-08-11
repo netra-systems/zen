@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec name="build_bot" version="1.0">
+  <metadata>
+    <title>NPM Build Bot Specification</title>
+    <description>Automated build validation and TypeScript error resolution for frontend builds</description>
+    <author>Claude</author>
+    <created>2025-01-11</created>
+    <purpose>Ensure successful npm builds by automatically fixing common TypeScript and ESLint errors</purpose>
+  </metadata>
+
+  <overview>
+    This specification defines the behavior of an automated build bot that can identify and fix
+    common TypeScript, ESLint, and build configuration issues in React/Next.js projects.
+  </overview>
+
+  <common_build_errors>
+    <error type="typescript">
+      <pattern>no-explicit-any</pattern>
+      <description>TypeScript complains about using 'any' type</description>
+      <solutions>
+        <solution priority="1">Create proper interfaces or types for the data</solution>
+        <solution priority="2">Use 'unknown' instead of 'any' when type is truly unknown</solution>
+        <solution priority="3">Use type assertions with 'as' for third-party libraries</solution>
+      </solutions>
+    </error>
+
+    <error type="typescript">
+      <pattern>no-unused-vars</pattern>
+      <description>Variables or imports are defined but never used</description>
+      <solutions>
+        <solution priority="1">Remove the unused variable/import</solution>
+        <solution priority="2">If needed later, prefix with underscore (e.g., _unusedVar)</solution>
+      </solutions>
+    </error>
+
+    <error type="typescript">
+      <pattern>Property 'X' does not exist on type 'Y'</pattern>
+      <description>Accessing properties that aren't defined in the type</description>
+      <solutions>
+        <solution priority="1">Add the property to the interface/type definition</solution>
+        <solution priority="2">Use optional chaining (?.) if property might not exist</solution>
+        <solution priority="3">Check if using wrong property name or type</solution>
+      </solutions>
+    </error>
+
+    <error type="typescript">
+      <pattern>Type 'undefined' is not assignable to type</pattern>
+      <description>Trying to use potentially undefined values where defined values are expected</description>
+      <solutions>
+        <solution priority="1">Add null/undefined checks before usage</solution>
+        <solution priority="2">Use default values or fallbacks</solution>
+        <solution priority="3">Make the receiving type optional with '?'</solution>
+      </solutions>
+    </error>
+
+    <error type="import">
+      <pattern>Cannot find module</pattern>
+      <description>Missing npm packages or incorrect import paths</description>
+      <solutions>
+        <solution priority="1">Check if file path is correct (case-sensitive on Linux/Mac)</solution>
+        <solution priority="2">Install missing package with npm install</solution>
+        <solution priority="3">Check for typos in import statement</solution>
+      </solutions>
+    </error>
+
+    <error type="cypress">
+      <pattern>No overload matches this call</pattern>
+      <description>Cypress API type mismatches</description>
+      <solutions>
+        <solution priority="1">Cast problematic values with 'as any' for Cypress internals</solution>
+        <solution priority="2">Check Cypress documentation for correct API usage</solution>
+      </solutions>
+    </error>
+  </common_build_errors>
+
+  <build_bot_workflow>
+    <step order="1">
+      <name>Initial Build Attempt</name>
+      <action>Run 'npm run build' in the frontend directory</action>
+      <on_success>Build complete - no action needed</on_success>
+      <on_failure>Proceed to error analysis</on_failure>
+    </step>
+
+    <step order="2">
+      <name>Error Analysis</name>
+      <action>Parse build output to identify error types and locations</action>
+      <patterns>
+        <pattern>File path extraction: Extract file path from error message</pattern>
+        <pattern>Line number extraction: Extract line and column numbers</pattern>
+        <pattern>Error type classification: Categorize as TypeScript, ESLint, or other</pattern>
+      </patterns>
+    </step>
+
+    <step order="3">
+      <name>Automated Fixes</name>
+      <priority_order>
+        <fix priority="1">Remove unused variables and imports</fix>
+        <fix priority="2">Add missing type definitions to interfaces</fix>
+        <fix priority="3">Replace 'any' with proper types or 'unknown'</fix>
+        <fix priority="4">Add null/undefined checks</fix>
+        <fix priority="5">Fix import paths</fix>
+        <fix priority="6">Install missing packages</fix>
+      </priority_order>
+    </step>
+
+    <step order="4">
+      <name>Incremental Validation</name>
+      <action>After each fix, optionally run build again to verify progress</action>
+      <optimization>Batch similar fixes together to reduce build attempts</optimization>
+    </step>
+
+    <step order="5">
+      <name>Final Validation</name>
+      <action>Run complete build after all fixes applied</action>
+      <on_success>Report success with summary of fixes</on_success>
+      <on_failure>Report remaining issues that need manual intervention</on_failure>
+    </step>
+  </build_bot_workflow>
+
+  <fix_strategies>
+    <strategy name="type_addition">
+      <when>Property doesn't exist on type</when>
+      <approach>
+        1. Read the file to understand context
+        2. Locate the interface or type definition
+        3. Add the missing property with appropriate type
+        4. If interface is from external library, create extension interface
+      </approach>
+    </strategy>
+
+    <strategy name="any_replacement">
+      <when>ESLint no-explicit-any error</when>
+      <approach>
+        1. Analyze what data is actually being used
+        2. Create specific interface if structure is known
+        3. Use 'unknown' if structure is truly unknown
+        4. Use Record&lt;string, unknown&gt; for object types
+        5. Add 'as any' only for third-party library issues
+      </approach>
+    </strategy>
+
+    <strategy name="undefined_handling">
+      <when>Value possibly undefined</when>
+      <approach>
+        1. Add conditional check: if (value) { ... }
+        2. Use optional chaining: value?.property
+        3. Provide default: value || defaultValue
+        4. Use nullish coalescing: value ?? defaultValue
+      </approach>
+    </strategy>
+
+    <strategy name="import_resolution">
+      <when>Module not found</when>
+      <approach>
+        1. Check if it's a relative import - verify path
+        2. Check if it's npm package - install with --legacy-peer-deps if needed
+        3. Check case sensitivity of file names
+        4. Verify file extension (.ts, .tsx, .js, .jsx)
+      </approach>
+    </strategy>
+  </fix_strategies>
+
+  <edge_cases>
+    <case name="circular_dependencies">
+      <description>Type A depends on Type B which depends on Type A</description>
+      <solution>Create a shared types file or use type-only imports</solution>
+    </case>
+
+    <case name="peer_dependency_conflicts">
+      <description>NPM packages have conflicting peer dependencies</description>
+      <solution>Use --legacy-peer-deps flag when installing</solution>
+    </case>
+
+    <case name="generated_files">
+      <description>Type errors in auto-generated files</description>
+      <solution>Exclude from TypeScript checking or regenerate files</solution>
+    </case>
+
+    <case name="third_party_types">
+      <description>Missing or incorrect types from npm packages</description>
+      <solution>Install @types package or create custom type declarations</solution>
+    </case>
+  </edge_cases>
+
+  <best_practices>
+    <practice>Always read files before editing to understand context</practice>
+    <practice>Fix root causes rather than symptoms when possible</practice>
+    <practice>Batch similar fixes to reduce build iterations</practice>
+    <practice>Preserve code formatting and style conventions</practice>
+    <practice>Don't suppress errors without understanding them</practice>
+    <practice>Run tests after successful build to ensure functionality</practice>
+    <practice>Document any workarounds or temporary fixes</practice>
+  </best_practices>
+
+  <reporting>
+    <summary>
+      <item>Total errors found and fixed</item>
+      <item>Types of errors encountered</item>
+      <item>Files modified</item>
+      <item>Packages installed</item>
+      <item>Build time before and after fixes</item>
+      <item>Any remaining issues requiring manual attention</item>
+    </summary>
+  </reporting>
+</spec>

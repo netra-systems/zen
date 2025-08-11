@@ -6,6 +6,8 @@ import { MessageList } from '@/components/chat/MessageList';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { PersistentResponseCard } from '@/components/chat/PersistentResponseCard';
 import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
+import { ChatSidebar } from '@/components/chat/ChatSidebar';
+import { OverflowPanel } from '@/components/chat/OverflowPanel';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,6 +23,7 @@ const MainChat: React.FC = () => {
   } = useUnifiedChatStore();
   
   const [isCardCollapsed, setIsCardCollapsed] = useState(false);
+  const [isOverflowOpen, setIsOverflowOpen] = useState(false);
   
   // Connect WebSocket messages to unified chat store
   useChatWebSocket();
@@ -46,8 +49,24 @@ const MainChat: React.FC = () => {
     }
   }, [isProcessing]);
 
+  // Keyboard shortcut for overflow panel
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        e.preventDefault();
+        setIsOverflowOpen(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="flex h-full bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      {/* Chat Sidebar */}
+      <ChatSidebar />
+      
       <div className="flex flex-col flex-1 max-w-full">
         {/* Chat Header */}
         <ChatHeader />
@@ -107,6 +126,9 @@ const MainChat: React.FC = () => {
           </div>
         </motion.div>
       </div>
+      
+      {/* Overflow Debug Panel */}
+      <OverflowPanel isOpen={isOverflowOpen} onClose={() => setIsOverflowOpen(false)} />
     </div>
   );
 };

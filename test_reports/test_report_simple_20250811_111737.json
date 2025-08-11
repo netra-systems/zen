@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-08-11T11:17:37.669444",
+  "test_level": "simple",
+  "configuration": {
+    "description": "Simple test validation",
+    "purpose": "Basic functionality check"
+  },
+  "results": {
+    "backend": {
+      "status": "failed",
+      "duration": 8.322336196899414,
+      "exit_code": 1,
+      "output": ""
+    },
+    "frontend": {
+      "status": "failed",
+      "duration": 8.322336196899414,
+      "exit_code": 1,
+      "output": ""
+    },
+    "overall": {
+      "status": "failed",
+      "start_time": 1754936241.0247722,
+      "end_time": 1754936257.6694446
+    }
+  },
+  "summary": {
+    "total_duration": 16.644672393798828,
+    "overall_passed": false,
+    "exit_code": 1
+  }
+}

@@ -80,11 +80,36 @@ export const ChatSidebar: React.FC = () => {
     if (threadId === activeThreadId || isProcessing) return;
     
     try {
+      // Clear current messages to ensure isolation
+      clearMessages?.();
+      
+      // Disconnect from current WebSocket if needed
+      const disconnectEvent = new CustomEvent('disconnectWebSocket', { 
+        detail: { threadId: activeThreadId } 
+      });
+      window.dispatchEvent(disconnectEvent);
+      
+      // Switch to new thread
+      setActiveThread?.(threadId);
+      
+      // Load thread messages
       const response = await ThreadService.getThreadMessages(threadId);
       
-      // Switch to thread and load messages
-      setActiveThread?.(threadId);
-      // Load messages into store (implement loadMessages in store)
+      // Emit thread loaded event
+      const loadedEvent = new CustomEvent('threadLoaded', { 
+        detail: { 
+          threadId,
+          messages: response.messages,
+          metadata: response.metadata 
+        } 
+      });
+      window.dispatchEvent(loadedEvent);
+      
+      // Connect to new thread WebSocket
+      const connectEvent = new CustomEvent('connectWebSocket', { 
+        detail: { threadId } 
+      });
+      window.dispatchEvent(connectEvent);
       
       console.log('Switched to thread:', threadId, 'with', response.messages.length, 'messages');
     } catch (error) {

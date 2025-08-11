@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/authStore';
 import { Send, Paperclip, Mic, Command, ArrowUp, ArrowDown, Loader2 } from 'lucide-react';
 import { Message } from '@/types/chat';
 import { ThreadService } from '@/services/threadService';
+import { ThreadRenameService } from '@/services/threadRenameService';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn, generateUniqueId } from '@/lib/utils';
 
@@ -96,6 +97,13 @@ export const MessageInput: React.FC = () => {
           thread_id: threadId 
         } 
       });
+      
+      // Auto-rename thread after first message (if it's a new thread)
+      const thread = await ThreadService.getThread(threadId);
+      if (thread && (!thread.metadata?.renamed || thread.metadata?.title === 'New Chat')) {
+        ThreadRenameService.autoRenameThread(threadId, trimmedMessage);
+      }
+      
       setProcessing(true);
       setMessage('');
       setRows(1);
