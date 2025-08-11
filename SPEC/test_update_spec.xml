@@ -1621,4 +1621,64 @@
       </benefits>
     </reference>
   </cross_references>
+  
+  <troubleshooting>
+    <backend_issues>
+      <issue name="Missing Dependencies">
+        <solution>pip install sqlalchemy aiosqlite asyncpg psycopg2-binary</solution>
+      </issue>
+      <issue name="Database Test Failures">
+        <check>Ensure TESTING=1 environment variable is set</check>
+        <check>Verify conftest.py fixtures are working</check>
+      </issue>
+    </backend_issues>
+    
+    <frontend_issues>
+      <issue name="WebSocket Hook Tests">
+        <pattern type="correct">
+          <![CDATA[
+          const wrapper = ({ children }: { children: React.ReactNode }) => (
+            <WebSocketProvider>{children}</WebSocketProvider>
+          );
+          const { result } = renderHook(() => useWebSocket(), { wrapper });
+          ]]>
+        </pattern>
+      </issue>
+      
+      <issue name="Fetch Mock Issues">
+        <pattern type="incorrect">
+          <![CDATA[(fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => data });]]>
+        </pattern>
+        <pattern type="correct">
+          <![CDATA[
+          (fetch as jest.Mock).mockImplementationOnce(async () => ({
+            ok: true,
+            json: async () => data,
+          }));
+          ]]>
+        </pattern>
+      </issue>
+      
+      <issue name="Date.now Mock Issues">
+        <note>Already handled in jest.setup.ts - preserves original function</note>
+      </issue>
+      
+      <issue name="Hook API Mismatches">
+        <note>Always check actual hook implementation before testing</note>
+      </issue>
+      
+      <issue name="Test Timeouts">
+        <solution>Increase timeout for complex integration tests (e.g., 10000ms)</solution>
+      </issue>
+    </frontend_issues>
+  </troubleshooting>
+
+  <quick_fix_checklist>
+    <item>All dependencies installed (backend: SQLAlchemy, frontend: npm packages)</item>
+    <item>Mock implementations match actual API signatures</item>
+    <item>React hooks wrapped with appropriate providers</item>
+    <item>Async operations use proper mock implementations</item>
+    <item>Test timeouts adequate for operations being tested</item>
+    <item>Environment variables properly set (TESTING=1, etc.)</item>
+  </quick_fix_checklist>
 </test_update_specification>

@@ -113,4 +113,33 @@
             <description>All auth operations should have proper error handling with user-friendly messages. Failed operations should clean up state appropriately.</description>
         </note>
     </implementation-notes>
+    
+    <security-review-findings>
+        <review-checklist>
+            <item status="complete">Modern OAuth implementation with Google OAuth using OIDC</item>
+            <item status="complete">JWT compliant with proper signing</item>
+            <item status="complete">Consistent authentication across HTTP (Bearer) and WebSocket (query param)</item>
+            <item status="complete">Proper user storage in database with bcrypt hashing</item>
+            <item status="resolved">Token storage consistency - standardized on 'jwt_token' key</item>
+            <item status="resolved">Dev mode logout persistence - implemented with dev_logout_flag</item>
+        </review-checklist>
+        
+        <resolved-issues>
+            <issue priority="high" status="resolved">
+                <title>Token Storage Inconsistency</title>
+                <description>authStore was using 'auth_token' while authService used 'jwt_token' as localStorage key</description>
+                <resolution>Standardized on 'jwt_token' across all components</resolution>
+            </issue>
+            <issue priority="high" status="resolved">
+                <title>Dev Logout Not Persistent</title>
+                <description>Dev mode auto-logins even after explicit logout</description>
+                <resolution>Implemented dev_logout_flag to track explicit logouts</resolution>
+            </issue>
+            <issue priority="medium" status="resolved">
+                <title>Duplicate Auth State Management</title>
+                <description>Both AuthContext and authStore managed auth state</description>
+                <resolution>AuthContext is primary, authStore as optional global state</resolution>
+            </issue>
+        </resolved-issues>
+    </security-review-findings>
 </specification>

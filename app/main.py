@@ -61,7 +61,7 @@ def run_migrations(logger):
             
         # Convert async URL to sync for Alembic
         if database_url.startswith("postgresql+asyncpg://"):
-            sync_database_url = database_url.replace("postgresql+asyncpg://", "postgresql://")
+            sync_database_url = database_url.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
         else:
             sync_database_url = database_url
             

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>ClickHouse Configuration and Troubleshooting</title>
+    <version>1.0.0</version>
+    <description>ClickHouse database configuration, best practices, and troubleshooting guide</description>
+    <created>2025-01-11</created>
+  </metadata>
+
+  <overview>
+    <purpose>Time-series log data storage and analytics</purpose>
+    <use_case>Workload events tracking with structured metrics</use_case>
+    <table>workload_events</table>
+  </overview>
+
+  <nested_types>
+    <concept>
+      <description>ClickHouse Nested types create parallel arrays where indices correspond across fields</description>
+      <example>
+        <![CDATA[
+        metrics Nested(
+            name Array(String),
+            value Array(Float64),
+            unit Array(String)
+        )
+        
+        -- metrics.name[0] corresponds to metrics.value[0] and metrics.unit[0]
+        ]]>
+      </example>
+    </concept>
+  </nested_types>
+
+  <query_best_practices>
+    <practice name="Use proper array functions">
+      <correct>
+        <![CDATA[
+        -- Use arrayFirstIndex for finding position
+        arrayFirstIndex(x -> x = 'latency_ms', metrics.name) as idx
+        
+        -- Use arrayExists for checking existence
+        arrayExists(x -> x = 'latency_ms', metrics.name)
+        ]]>
+      </correct>
+      <incorrect>
+        <![CDATA[
+        -- indexOf might cause type errors
+        indexOf(metrics.name, 'latency_ms') as idx
+        
+        -- has might cause type errors
+        has(metrics.name, 'latency_ms')
+        ]]>
+      </incorrect>
+    </practice>
+    
+    <practice name="Inserting data into Nested types">
+      <example language="python">
+        <![CDATA[
+        # All fields must be arrays of same length
+        data = {
+            'metrics.name': ['latency_ms', 'throughput', 'cost_cents'],
+            'metrics.value': [150.5, 1000.0, 25.0],
+            'metrics.unit': ['ms', 'req/s', 'cents']
+        }
+        ]]>
+      </example>
+    </practice>
+  </query_best_practices>
+
+  <common_errors>
+    <error code="386" name="NO_COMMON_TYPE">
+      <cause>Mixing Array and non-Array types in queries</cause>
+      <solution>Use arrayFirstIndex and arrayExists instead of indexOf and has</solution>
+    </error>
+    
+    <error name="UNKNOWN_TABLE">
+      <cause>Table not created or connection issues</cause>
+      <solution>
+        <![CDATA[
+        Run: await create_workload_events_table_if_missing()
+        From: app/db/clickhouse_init.py
+        ]]>
+      </solution>
+    </error>
+  </common_errors>
+
+  <initialization>
+    <file>app/db/clickhouse_init.py</file>
+    <function>create_workload_events_table_if_missing()</function>
+    <auto_create>Tables are created automatically on server startup</auto_create>
+  </initialization>
+
+  <configuration>
+    <connection>
+      <env_var>CLICKHOUSE_URL</env_var>
+      <format>clickhouse://user:password@host:port/database</format>
+      <default>clickhouse://default:@localhost:9000/default</default>
+    </connection>
+  </configuration>
+
+  <fix_reference>
+    <file>SPEC/clickhouse_nested_arrays_fix.xml</file>
+    <description>Detailed specification for fixing nested array type errors</description>
+  </fix_reference>
+</specification>
