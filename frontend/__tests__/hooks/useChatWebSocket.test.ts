@@ -41,6 +41,7 @@ describe('useChatWebSocket', () => {
     clearMessages: jest.fn(),
     messages: [],
     currentMessage: null,
+    isProcessing: false,
   };
 
   beforeEach(() => {
@@ -80,8 +81,13 @@ describe('useChatWebSocket', () => {
     // Re-render to trigger useEffect
     rerender();
     
-    expect(mockChatStore.setProcessing).toHaveBeenCalledWith(true);
-    expect(mockUnifiedChatStore.setProcessing).toHaveBeenCalledWith(true);
+    // The hook now delegates to unified store's handleWebSocketEvent
+    expect(mockUnifiedChatStore.handleWebSocketEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'agent_started',
+        payload: { total_steps: 5, estimated_duration: 120 }
+      })
+    );
   });
 
   it('should handle sub_agent_update message', () => {
@@ -102,11 +108,15 @@ describe('useChatWebSocket', () => {
     
     rerender();
     
-    expect(mockChatStore.setSubAgentName).toHaveBeenCalledWith('OptimizationAgent');
-    expect(mockChatStore.setSubAgentStatus).toHaveBeenCalledWith({
-      status: 'running',
-      tools: ['analyzer', 'optimizer']
-    });
+    // The hook now delegates to unified store's handleWebSocketEvent
+    expect(mockUnifiedChatStore.handleWebSocketEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'sub_agent_update',
+        payload: expect.objectContaining({
+          sub_agent_name: 'OptimizationAgent'
+        })
+      })
+    );
   });
 
   it('should handle agent_completed message', () => {
@@ -121,12 +131,11 @@ describe('useChatWebSocket', () => {
     
     rerender();
     
-    expect(mockChatStore.setProcessing).toHaveBeenCalledWith(false);
-    expect(mockUnifiedChatStore.setProcessing).toHaveBeenCalledWith(false);
-    expect(mockChatStore.addMessage).toHaveBeenCalledWith(
+    // The hook now delegates to unified store's handleWebSocketEvent
+    expect(mockUnifiedChatStore.handleWebSocketEvent).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'agent',
-        content: 'Task completed successfully.'
+        type: 'agent_completed',
+        payload: {}
       })
     );
   });
@@ -146,11 +155,13 @@ describe('useChatWebSocket', () => {
     
     rerender();
     
-    expect(mockChatStore.setProcessing).toHaveBeenCalledWith(false);
-    expect(mockChatStore.addMessage).toHaveBeenCalledWith(
+    // The hook now delegates to unified store's handleWebSocketEvent
+    expect(mockUnifiedChatStore.handleWebSocketEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'error',
-        content: expect.stringContaining('Connection timeout')
+        payload: expect.objectContaining({
+          error: 'Connection timeout'
+        })
       })
     );
   });
@@ -171,174 +182,172 @@ describe('useChatWebSocket', () => {
     
     rerender();
     
-    expect(mockChatStore.addMessage).toHaveBeenCalledWith(
+    // The hook now delegates to unified store's handleWebSocketEvent
+    expect(mockUnifiedChatStore.handleWebSocketEvent).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'tool',
-        content: expect.stringContaining('cost_analyzer')
+        type: 'tool_call',
+        payload: expect.objectContaining({
+          tool_name: 'cost_analyzer'
+        })
       })
     );
   });
 
-  it('should register and execute tools', async () => {
+  it('should register and execute tools', () => {
     const { result } = renderHook(() => useChatWebSocket());
     
-    // Register a tool
+    // Test tool registration (now a no-op but should not error)
     act(() => {
-      result.current.registerTool({ name: 'test_tool', version: '1.0' });
+      result.current.registerTool({
+        name: 'test_tool',
+        version: '1.0'
+      });
     });
     
-    expect(result.current.registeredTools).toContainEqual({ name: 'test_tool', version: '1.0' });
+    // Since these are now no-ops, just verify they don't throw
+    expect(result.current.registeredTools).toEqual([]);
     
-    // Execute a tool
-    let toolResult;
-    await act(async () => {
-      toolResult = await result.current.executeTool('test_tool', { param: 'value' });
+    // Test tool execution (now a no-op but should not error)
+    act(() => {
+      result.current.executeTool('test_tool', { param: 'value' });
     });
     
-    expect(toolResult).toEqual({ success: true, data: { param: 'value' } });
-    expect(result.current.toolResults['test_tool']).toEqual({ success: true, data: { param: 'value' } });
+    // Since these are now no-ops, just verify they don't throw
+    expect(result.current.toolExecutionStatus).toBe('idle');
   });
 
-  it('should handle workflow_progress message', () => {
-    const { result, rerender } = renderHook(() => useChatWebSocket());
-    
-    act(() => {
-      mockMessages = [{
-        type: 'workflow_progress',
-        payload: {
-          current_step: 3,
-          total_steps: 10
-        }
-      }];
-    });
-    
-    rerender();
-    
-    expect(result.current.workflowProgress).toEqual({
-      current_step: 3,
-      total_steps: 10
-    });
-  });
-
-  it('should handle message_chunk for streaming', () => {
-    const { result, rerender } = renderHook(() => useChatWebSocket());
-    
-    act(() => {
-      mockMessages = [{
-        type: 'message_chunk',
-        payload: {
-          content: 'Partial response...',
-          is_complete: false
-        }
-      }];
-    });
-    
-    rerender();
-    
-    expect(result.current.streamingMessage).toBe('Partial response...');
-    expect(result.current.isStreaming).toBe(true);
-  });
-
-  it('should handle validation_result message', () => {
-    const { result, rerender } = renderHook(() => useChatWebSocket());
-    
-    act(() => {
-      mockMessages = [{
-        type: 'validation_result',
-        payload: {
-          field: 'memory_limit',
-          valid: true
-        }
-      }];
-    });
-    
-    rerender();
-    
-    expect(result.current.validationResults).toEqual({
-      memory_limit: true
-    });
-  });
-
-  it('should handle approval_required message', () => {
-    const { result, rerender } = renderHook(() => useChatWebSocket());
-    
-    act(() => {
-      mockMessages = [{
-        type: 'approval_required',
-        payload: {
-          message: 'Confirm deletion of resources',
-          sub_agent_name: 'ResourceManager'
-        }
-      }];
-    });
-    
-    rerender();
-    
-    expect(result.current.pendingApproval).toEqual({
-      message: 'Confirm deletion of resources',
-      sub_agent_name: 'ResourceManager'
-    });
-    expect(mockChatStore.addMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'system',
-        content: 'Confirm deletion of resources'
-      })
-    );
-  });
-
-  it('should clear errors', () => {
-    const { result, rerender } = renderHook(() => useChatWebSocket());
-    
-    // Add some errors first
-    act(() => {
-      mockMessages = [{
-        type: 'sub_agent_error',
-        payload: {
-          sub_agent_name: 'TestAgent',
-          error: { type: 'TIMEOUT', message: 'Request timeout' },
-          recovery_action: 'RETRY_WITH_FALLBACK'
-        }
-      }];
-    });
-    
-    rerender();
-    
-    expect(result.current.errors).toHaveLength(1);
-    
-    // Clear errors
-    act(() => {
-      result.current.clearErrors();
-    });
-    
-    expect(result.current.errors).toHaveLength(0);
-  });
-
-  it('should not reprocess already processed messages', () => {
+  it('should handle workflow progress update', () => {
     const { rerender } = renderHook(() => useChatWebSocket());
     
-    // First batch of messages
-    act(() => {
-      mockMessages = [{
-        type: 'agent_started',
-        payload: {}
-      }];
-    });
+    // Update unified store to simulate progress
+    mockUnifiedChatStore.currentMessage = {
+      fastLayer: {
+        agentName: 'TestAgent',
+        activeTools: ['tool1']
+      }
+    };
+    
+    (useUnifiedChatStore as unknown as jest.Mock).mockReturnValue(mockUnifiedChatStore);
     
     rerender();
     
-    expect(mockChatStore.setProcessing).toHaveBeenCalledTimes(1);
+    const { result } = renderHook(() => useChatWebSocket());
     
-    // Add another message without clearing
+    expect(result.current.workflowProgress.current_step).toBe(1);
+    expect(result.current.workflowProgress.total_steps).toBe(3);
+  });
+
+  it('should handle streaming updates', () => {
+    const { rerender } = renderHook(() => useChatWebSocket());
+    
+    // Update unified store to simulate streaming
+    mockUnifiedChatStore.currentMessage = {
+      mediumLayer: {
+        partialContent: 'Streaming content...'
+      }
+    };
+    
+    (useUnifiedChatStore as unknown as jest.Mock).mockReturnValue(mockUnifiedChatStore);
+    
+    rerender();
+    
+    const { result } = renderHook(() => useChatWebSocket());
+    
+    expect(result.current.isStreaming).toBe(true);
+    expect(result.current.streamingMessage).toBe('Streaming content...');
+  });
+
+  it('should handle multiple messages in sequence', () => {
+    const { rerender } = renderHook(() => useChatWebSocket());
+    
+    // Add multiple messages
     act(() => {
       mockMessages = [
         { type: 'agent_started', payload: {} },
+        { type: 'sub_agent_update', payload: { sub_agent_name: 'Agent1' } },
         { type: 'agent_completed', payload: {} }
       ];
     });
     
     rerender();
     
-    // Should only process the new message
-    expect(mockChatStore.setProcessing).toHaveBeenCalledTimes(2); // Once for start, once for complete
+    // All messages should be handled
+    expect(mockUnifiedChatStore.handleWebSocketEvent).toHaveBeenCalledTimes(3);
+  });
+
+  it('should not reprocess messages on re-render', () => {
+    const { rerender } = renderHook(() => useChatWebSocket());
+    
+    // Add a message
+    act(() => {
+      mockMessages = [{ type: 'agent_started', payload: {} }];
+    });
+    
+    rerender();
+    
+    // Should be called once
+    expect(mockUnifiedChatStore.handleWebSocketEvent).toHaveBeenCalledTimes(1);
+    
+    // Re-render without new messages
+    rerender();
+    
+    // Should still be called only once
+    expect(mockUnifiedChatStore.handleWebSocketEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('should filter error messages correctly', () => {
+    mockUnifiedChatStore.messages = [
+      { id: '1', type: 'user', content: 'Test' },
+      { id: '2', type: 'error', content: 'Error 1' },
+      { id: '3', type: 'agent', content: 'Response' },
+      { id: '4', type: 'error', content: 'Error 2' }
+    ];
+    
+    (useUnifiedChatStore as unknown as jest.Mock).mockReturnValue(mockUnifiedChatStore);
+    
+    const { result } = renderHook(() => useChatWebSocket());
+    
+    expect(result.current.errors).toHaveLength(2);
+    expect(result.current.errors[0].type).toBe('error');
+    expect(result.current.errors[1].type).toBe('error');
+  });
+
+  it('should derive agent status from processing state', () => {
+    // Test idle state
+    mockUnifiedChatStore.isProcessing = false;
+    (useUnifiedChatStore as unknown as jest.Mock).mockReturnValue(mockUnifiedChatStore);
+    
+    let { result, rerender } = renderHook(() => useChatWebSocket());
+    expect(result.current.agentStatus).toBe('IDLE');
+    
+    // Test running state
+    mockUnifiedChatStore.isProcessing = true;
+    (useUnifiedChatStore as unknown as jest.Mock).mockReturnValue(mockUnifiedChatStore);
+    
+    rerender();
+    expect(result.current.agentStatus).toBe('RUNNING');
+  });
+
+  it('should provide action methods from unified store', () => {
+    const { result } = renderHook(() => useChatWebSocket());
+    
+    // Test addMessage
+    const testMessage = { type: 'user', content: 'Test' };
+    act(() => {
+      result.current.addMessage(testMessage);
+    });
+    expect(mockUnifiedChatStore.addMessage).toHaveBeenCalledWith(testMessage);
+    
+    // Test setProcessing
+    act(() => {
+      result.current.setProcessing(true);
+    });
+    expect(mockUnifiedChatStore.setProcessing).toHaveBeenCalledWith(true);
+    
+    // Test clearMessages
+    act(() => {
+      result.current.clearMessages();
+    });
+    expect(mockUnifiedChatStore.clearMessages).toHaveBeenCalled();
   });
 });

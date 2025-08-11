@@ -29,6 +29,8 @@
         </description>
         <goals>
             <goal>Maintain 97% overall test coverage</goal>
+            <goal>Fixing tests must fix the actual spirit of the test, Fixing the SUT (System under test) and if needed the test iteself.</goal>
+            <goal>Tests that attempt to test SUT that doesn't actually exist must be removed</goal>
             <goal>E2E tests with real LLM calls for validation</goal>
             <goal>Quality gate integration for output validation</goal>
             <goal>Synthetic data generation for consistent testing</goal>

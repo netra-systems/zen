@@ -75,7 +75,7 @@ class TestLatencyAnalyzer:
         ]
         
         # Execute
-        result = await latency_analyzer(mock_context)
+        result = await latency_analyzer.func(mock_context)
         
         # Verify
         expected_avg = (100.0 + 250.0 + 500.0) / 3
@@ -93,7 +93,7 @@ class TestLatencyAnalyzer:
         """Test latency analyzer with empty logs"""
         mock_context.logs = []
         
-        result = await latency_analyzer(mock_context)
+        result = await latency_analyzer.func(mock_context)
         
         assert result == "Analyzed current latency. Average predicted latency: 0.00ms"
         assert mock_context.performance_predictor.execute.call_count == 0
@@ -104,7 +104,7 @@ class TestLatencyAnalyzer:
         mock_context.logs = [mock_context.logs[0]]
         mock_context.performance_predictor.execute.return_value = {"predicted_latency_ms": 123.456}
         
-        result = await latency_analyzer(mock_context)
+        result = await latency_analyzer.func(mock_context)
         
         assert result == "Analyzed current latency. Average predicted latency: 123.46ms"
         assert mock_context.performance_predictor.execute.call_count == 1
@@ -118,7 +118,7 @@ class TestLatencyAnalyzer:
             {"predicted_latency_ms": 15000.0}
         ]
         
-        result = await latency_analyzer(mock_context)
+        result = await latency_analyzer.func(mock_context)
         
         assert result == "Analyzed current latency. Average predicted latency: 10000.00ms"
 
@@ -127,7 +127,7 @@ class TestLatencyAnalyzer:
         """Test latency analyzer when all latencies are zero"""
         mock_context.performance_predictor.execute.return_value = {"predicted_latency_ms": 0.0}
         
-        result = await latency_analyzer(mock_context)
+        result = await latency_analyzer.func(mock_context)
         
         assert result == "Analyzed current latency. Average predicted latency: 0.00ms"
 
@@ -140,7 +140,7 @@ class TestLatencyAnalyzer:
             {"predicted_latency_ms": 0.3}
         ]
         
-        result = await latency_analyzer(mock_context)
+        result = await latency_analyzer.func(mock_context)
         
         assert result == "Analyzed current latency. Average predicted latency: 0.20ms"
 
@@ -166,7 +166,7 @@ class TestLatencyAnalyzer:
         
         mock_context.performance_predictor.execute = mock_execute
         
-        result = await latency_analyzer(mock_context)
+        result = await latency_analyzer.func(mock_context)
         
         assert len(call_order) == 3
         assert "Average predicted latency" in result
@@ -185,7 +185,7 @@ class TestLatencyAnalyzer:
         mock_context.logs = large_logs
         mock_context.performance_predictor.execute.return_value = {"predicted_latency_ms": 100.0}
         
-        result = await latency_analyzer(mock_context)
+        result = await latency_analyzer.func(mock_context)
         
         assert result == "Analyzed current latency. Average predicted latency: 100.00ms"
         assert mock_context.performance_predictor.execute.call_count == 1000
@@ -208,7 +208,7 @@ class TestLatencyAnalyzer:
             {"predicted_latency_ms": float(lat)} for lat in latencies
         ]
         
-        result = await latency_analyzer(mock_context)
+        result = await latency_analyzer.func(mock_context)
         
         expected_avg = sum(latencies) / len(latencies)
         assert result == f"Analyzed current latency. Average predicted latency: {expected_avg:.2f}ms"
@@ -244,7 +244,7 @@ class TestLatencyAnalyzer:
                 {"predicted_latency_ms": lat} for lat in latencies
             ]
             
-            result = await latency_analyzer(mock_context)
+            result = await latency_analyzer.func(mock_context)
             assert f"{expected_avg:.2f}ms" in result, f"Failed for latencies {latencies}"
             mock_context.performance_predictor.execute.reset_mock()
 
@@ -257,7 +257,7 @@ class TestLatencyAnalyzer:
             {"predicted_latency_ms": 200.0}
         ]
         
-        result = await latency_analyzer(mock_context)
+        result = await latency_analyzer.func(mock_context)
         
         # Average should still be calculated: (100 - 50 + 200) / 3 = 83.33
         assert result == "Analyzed current latency. Average predicted latency: 83.33ms"
@@ -285,7 +285,7 @@ class TestLatencyAnalyzer:
             {"predicted_latency_ms": 100.0}         # Normal
         ]
         
-        result = await latency_analyzer(mock_context)
+        result = await latency_analyzer.func(mock_context)
         
         # Should handle extreme values correctly
         expected_avg = (0.00001 + 999999999.99 + 100.0) / 3
@@ -303,7 +303,7 @@ class TestLatencyAnalyzer:
         
         mock_context.performance_predictor.execute = slow_execute
         
-        result = await latency_analyzer(mock_context)
+        result = await latency_analyzer.func(mock_context)
         
         elapsed_time = asyncio.get_event_loop().time() - start_time
         

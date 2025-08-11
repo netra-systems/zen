@@ -39,7 +39,7 @@ TEST_LEVELS = {
     "unit": {
         "description": "Unit tests for isolated components (1-2 minutes)",
         "purpose": "Development validation, component testing",
-        "backend_args": ["--category", "unit", "-v", "--coverage"],
+        "backend_args": ["--category", "unit", "-v", "--coverage", "--fail-fast", "--parallel=4"],
         "frontend_args": ["--category", "unit"],
         "timeout": 120,
         "run_coverage": True,
@@ -48,7 +48,7 @@ TEST_LEVELS = {
     "integration": {
         "description": "Integration tests for component interaction (3-5 minutes)",
         "purpose": "Feature validation, API testing",
-        "backend_args": ["--category", "integration", "-v", "--coverage"],
+        "backend_args": ["--category", "integration", "-v", "--coverage", "--fail-fast", "--parallel=4"],
         "frontend_args": ["--category", "integration"],
         "timeout": 300,
         "run_coverage": True,
@@ -57,7 +57,7 @@ TEST_LEVELS = {
     "comprehensive": {
         "description": "Full test suite with coverage (10-15 minutes)",
         "purpose": "Pre-release validation, full system testing",
-        "backend_args": ["--coverage", "--parallel=auto", "--html-output"],
+        "backend_args": ["--coverage", "--parallel=6", "--html-output", "--fail-fast"],
         "frontend_args": ["--coverage"],
         "timeout": 900,
         "run_coverage": True,
@@ -75,7 +75,7 @@ TEST_LEVELS = {
     "all": {
         "description": "All tests including backend, frontend, e2e, integration (20-30 minutes)",
         "purpose": "Complete system validation including all test types",
-        "backend_args": ["--coverage", "--parallel=auto", "--html-output"],
+        "backend_args": ["--coverage", "--parallel=8", "--html-output", "--fail-fast"],
         "frontend_args": ["--coverage", "--e2e"],
         "timeout": 1800,
         "run_coverage": True,
