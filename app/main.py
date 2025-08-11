@@ -36,6 +36,7 @@ from app.ws_manager import manager as websocket_manager
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.services.tool_registry import ToolRegistry
 from app.redis_manager import redis_manager
+from app.db.clickhouse_init import initialize_clickhouse_tables
 
 # Import new error handling components
 from app.core.exceptions import NetraException
