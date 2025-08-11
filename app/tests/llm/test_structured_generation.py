@@ -32,12 +32,33 @@ class SampleComplexModel(BaseModel):
 @pytest.fixture
 def test_config():
     """Create test configuration."""
+    import os
+    
+    # Use real API key if available, otherwise use test key
+    api_key = os.environ.get("OPENAI_API_KEY", "test-key")
+    
+    # If we have a Gemini API key but testing with OpenAI, skip real testing
+    if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true" and api_key == "test-key":
+        # Try using Gemini instead if available
+        gemini_key = os.environ.get("GEMINI_API_KEY")
+        if gemini_key:
+            return AppConfig(
+                llm_configs={
+                    "test": LLMConfig(
+                        provider="google",
+                        model_name="gemini-1.5-flash",
+                        api_key=gemini_key,
+                        generation_config={"temperature": 0.7}
+                    )
+                }
+            )
+    
     return AppConfig(
         llm_configs={
             "test": LLMConfig(
                 provider="openai",
                 model_name="gpt-3.5-turbo",
-                api_key="test-key",
+                api_key=api_key,
                 generation_config={"temperature": 0.7}
             )
         }

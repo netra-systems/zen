@@ -29,6 +29,20 @@ else:
     # Disable ClickHouse for tests
     os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
     os.environ["CLICKHOUSE_ENABLED"] = "false"
+    
+    # Handle real LLM testing configuration
+    if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
+        # When real LLM testing is enabled, use actual API keys
+        # These should be passed from the test runner
+        # Ensure GOOGLE_API_KEY mirrors GEMINI_API_KEY for compatibility
+        if os.environ.get("GEMINI_API_KEY") and not os.environ.get("GOOGLE_API_KEY"):
+            os.environ["GOOGLE_API_KEY"] = os.environ["GEMINI_API_KEY"]
+    else:
+        # Use mock keys for regular testing
+        os.environ.setdefault("GEMINI_API_KEY", "test-gemini-api-key")
+        os.environ.setdefault("GOOGLE_API_KEY", "test-gemini-api-key")  # Same as GEMINI
+        os.environ.setdefault("OPENAI_API_KEY", "test-openai-api-key")
+        os.environ.setdefault("ANTHROPIC_API_KEY", "test-anthropic-api-key")
 
 import pytest
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession

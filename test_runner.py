@@ -16,10 +16,14 @@ import subprocess
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional, Tuple
+from dotenv import load_dotenv
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Define test levels with clear purposes
 TEST_LEVELS = {
@@ -128,10 +132,25 @@ class UnifiedTestRunner:
         env = os.environ.copy()
         if real_llm_config:
             env["TEST_USE_REAL_LLM"] = "true"
-            env["TEST_LLM_MODEL"] = real_llm_config.get("model", "gemini-2.5-flash")
+            env["ENABLE_REAL_LLM_TESTING"] = "true"
             env["TEST_LLM_TIMEOUT"] = str(real_llm_config.get("timeout", 45))
             if real_llm_config.get("parallel"):
                 env["TEST_PARALLEL"] = str(real_llm_config["parallel"])
+            
+            # Load .env file to get API keys
+            load_dotenv()
+            
+            # Pass through API keys from environment - Use GEMINI_API_KEY for Google services
+            api_keys = ["GEMINI_API_KEY", "ANTHROPIC_API_KEY", "OPENAI_API_KEY"]
+            for key in api_keys:
+                value = os.environ.get(key)
+                if value:
+                    env[key] = value
+                    # Also set GOOGLE_API_KEY to GEMINI_API_KEY value for compatibility
+                    if key == "GEMINI_API_KEY":
+                        env["GOOGLE_API_KEY"] = value
+                    print(f"[INFO] Found {key} in environment")
+            
             print(f"[INFO] Real LLM testing enabled with {env['TEST_LLM_MODEL']} (timeout: {env['TEST_LLM_TIMEOUT']}s)")
         
         try:

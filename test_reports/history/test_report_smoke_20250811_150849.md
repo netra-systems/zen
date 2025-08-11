@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T15:13:07.578515  
+**Generated:** 2025-08-11T15:08:49.606159  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 2 | 2 | 0 | 0 | 0 | 6.62s | [PASSED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 46.79s | [TIMEOUT] |
+| Backend   | 2 | 2 | 0 | 0 | 0 | 6.63s | [PASSED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 46.95s | [TIMEOUT] |
 
 ## Environment and Configuration
 
@@ -27,7 +27,7 @@
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
 - **Coverage Enabled:** No
-- **Total Duration:** 53.41s
+- **Total Duration:** 53.58s
 - **Exit Code:** 0
 
 ### Backend Configuration
@@ -52,7 +52,7 @@ Test Configuration:
   Parallel: disabled
   Coverage: disabled
   Fail Fast: enabled
-  Environment: development
+  Environment: testing
 
 Running command:
   pytest app/tests/routes/test_health_route.py -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
@@ -70,9 +70,9 @@ asyncio: mode=Mode.AUTO
 app\tests\routes\test_health_route.py::test_basic_import [32mPASSED[0m[32m          [ 50%][0m
 app\tests\routes\test_health_route.py::test_health_endpoint_direct [32mPASSED[0m[32m [100%][0m
 
-[32m============================== [32m[1m2 passed[0m[32m in 0.07s[0m[32m ==============================[0m
+[32m============================== [32m[1m2 passed[0m[32m in 0.06s[0m[32m ==============================[0m
 ================================================================================
-[PASS] ALL TESTS PASSED in 5.85s
+[PASS] ALL TESTS PASSED in 5.82s
 ================================================================================
 
 
