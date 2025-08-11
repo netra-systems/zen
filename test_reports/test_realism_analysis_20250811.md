@@ -75,9 +75,10 @@ mock.ask_llm.return_value = '{"status": "success", "analysis": "test analysis"}'
 #### Production Reality Gap
 ```python
 # What's Needed for Production
-- 10GB+ log files with mixed formats
-- Real-time streaming log ingestion
-- Pattern recognition across 1M+ log lines
+- 10x deeper Clickhouse supports
+- Clickhousetables with mixed formats
+- Real-time Clickhouse streaming log ingestion
+- Pattern recognition across 1M+ log lines (the existing clustering classic code is not well used or tested)
 - Metric extraction (latency, errors, throughput)
 - Correlation between logs and performance
 - Multi-source log aggregation
@@ -86,7 +87,7 @@ mock.ask_llm.return_value = '{"status": "success", "analysis": "test analysis"}'
 
 #### Missing Test Scenarios
 1. **Log Pattern Recognition**
-   - GPU utilization patterns
+   - LLM specific optimization and config utilization patterns
    - Memory leak detection
    - Error cascade identification
    - Performance degradation trends

@@ -24,18 +24,18 @@ def run_frontend_tests(test_level="smoke", args=None):
     # Check if node_modules exists
     if not (FRONTEND_DIR / "node_modules").exists():
         print("[INFO] Installing frontend dependencies...")
-        result = subprocess.run(["npm", "install"], capture_output=True, text=True)
+        result = subprocess.run(["npm", "install"], capture_output=True, text=True, shell=True)
         if result.returncode != 0:
             print(f"[ERROR] Failed to install dependencies: {result.stderr}")
             return False
     
     # Map test levels to Jest commands
     test_commands = {
-        "smoke": ["npm", "run", "test:smoke", "--", "--passWithNoTests"],
-        "unit": ["npm", "run", "test:unit", "--", "--passWithNoTests"],
+        "smoke": ["npm", "run", "test", "--", "--passWithNoTests"],
+        "unit": ["npm", "run", "test", "--", "--passWithNoTests"],
         "integration": ["npm", "run", "test", "--", "--passWithNoTests"],
-        "comprehensive": ["npm", "run", "test:coverage", "--", "--passWithNoTests"],
-        "critical": ["npm", "run", "test:critical", "--", "--passWithNoTests"],
+        "comprehensive": ["npm", "run", "test", "--", "--coverage", "--passWithNoTests"],
+        "critical": ["npm", "run", "test", "--", "--passWithNoTests"],
     }
     
     # Get the appropriate command
@@ -48,7 +48,7 @@ def run_frontend_tests(test_level="smoke", args=None):
     print(f"[INFO] Running frontend tests: {' '.join(cmd)}")
     
     # Run the tests
-    result = subprocess.run(cmd, capture_output=False, text=True)
+    result = subprocess.run(cmd, capture_output=False, text=True, shell=True)
     
     return result.returncode == 0
 

@@ -9,6 +9,8 @@ import os
 import sys
 import json
 import time
+import re
+import shutil
 import argparse
 import subprocess
 from pathlib import Path
@@ -33,19 +35,19 @@ TEST_LEVELS = {
     "unit": {
         "description": "Unit tests for isolated components (1-2 minutes)",
         "purpose": "Development validation, component testing",
-        "backend_args": ["--category", "unit", "-v"],
+        "backend_args": ["--category", "unit", "-v", "--coverage"],
         "frontend_args": ["--category", "unit"],
         "timeout": 120,
-        "run_coverage": False,
+        "run_coverage": True,
         "run_both": True
     },
     "integration": {
         "description": "Integration tests for component interaction (3-5 minutes)",
         "purpose": "Feature validation, API testing",
-        "backend_args": ["--category", "integration", "-v"],
+        "backend_args": ["--category", "integration", "-v", "--coverage"],
         "frontend_args": ["--category", "integration"],
         "timeout": 300,
-        "run_coverage": False,
+        "run_coverage": True,
         "run_both": True
     },
     "comprehensive": {
@@ -60,10 +62,10 @@ TEST_LEVELS = {
     "critical": {
         "description": "Critical path tests only (1-2 minutes)",
         "purpose": "Essential functionality verification",
-        "backend_args": ["--category", "critical", "--fail-fast"],
+        "backend_args": ["--category", "critical", "--fail-fast", "--coverage"],
         "frontend_args": ["--category", "smoke"],
         "timeout": 120,
-        "run_coverage": False,
+        "run_coverage": True,
         "run_both": False  # Backend only for critical paths
     }
 }
@@ -80,14 +82,30 @@ class UnifiedTestRunner:
     
     def __init__(self):
         self.results = {
-            "backend": {"status": "pending", "duration": 0, "exit_code": None, "output": ""},
-            "frontend": {"status": "pending", "duration": 0, "exit_code": None, "output": ""},
+            "backend": {
+                "status": "pending", 
+                "duration": 0, 
+                "exit_code": None, 
+                "output": "",
+                "test_counts": {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0},
+                "coverage": None
+            },
+            "frontend": {
+                "status": "pending", 
+                "duration": 0, 
+                "exit_code": None, 
+                "output": "",
+                "test_counts": {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0},
+                "coverage": None
+            },
             "overall": {"status": "pending", "start_time": None, "end_time": None}
         }
         
-        # Ensure test_reports directory exists
+        # Ensure test_reports directory and history subdirectory exist
         self.reports_dir = PROJECT_ROOT / "test_reports"
         self.reports_dir.mkdir(exist_ok=True)
+        self.history_dir = self.reports_dir / "history"
+        self.history_dir.mkdir(exist_ok=True)
         
     def run_backend_tests(self, args: List[str], timeout: int = 300, real_llm_config: Optional[Dict] = None) -> Tuple[int, str]:
         """Run backend tests with specified arguments"""
@@ -133,6 +151,9 @@ class UnifiedTestRunner:
             self.results["backend"]["exit_code"] = result.returncode
             self.results["backend"]["output"] = result.stdout + "\n" + result.stderr
             self.results["backend"]["status"] = "passed" if result.returncode == 0 else "failed"
+            
+            # Parse test counts from output
+            self._parse_test_counts(result.stdout + result.stderr, "backend")
             
             # Print output with proper encoding handling
             try:
@@ -203,6 +224,9 @@ class UnifiedTestRunner:
             self.results["frontend"]["output"] = result.stdout + "\n" + result.stderr
             self.results["frontend"]["status"] = "passed" if result.returncode == 0 else "failed"
             
+            # Parse test counts from output
+            self._parse_test_counts(result.stdout + result.stderr, "frontend")
+            
             # Print output with proper encoding handling
             try:
                 print(result.stdout)
@@ -266,9 +290,14 @@ class UnifiedTestRunner:
             self.results["backend"]["duration"] = duration / 2
             self.results["backend"]["exit_code"] = result.returncode
             self.results["backend"]["status"] = "passed" if result.returncode == 0 else "failed"
+            self.results["backend"]["output"] = result.stdout + "\n" + result.stderr
             self.results["frontend"]["duration"] = duration / 2  
             self.results["frontend"]["exit_code"] = result.returncode
             self.results["frontend"]["status"] = "passed" if result.returncode == 0 else "failed"
+            self.results["frontend"]["output"] = ""
+            
+            # Parse test counts from output
+            self._parse_test_counts(result.stdout + result.stderr, "backend")
             
             # Print output with proper encoding handling
             try:
@@ -294,11 +323,81 @@ class UnifiedTestRunner:
             print(f"[TIMEOUT] Simple tests timed out after 60s")
             return -1, "Tests timed out after 60s"
     
+    def _parse_test_counts(self, output: str, component: str):
+        """Parse test counts from pytest/jest output"""
+        counts = {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0}
+        
+        # Common pytest patterns
+        patterns = [
+            (r"(\d+) passed", "passed"),
+            (r"(\d+) failed", "failed"),
+            (r"(\d+) skipped", "skipped"),
+            (r"(\d+) error", "errors"),
+            (r"(\d+) deselected", "skipped"),
+            (r"(\d+) xfailed", "skipped"),
+            (r"(\d+) xpassed", "passed"),
+        ]
+        
+        # Jest patterns for frontend
+        if component == "frontend":
+            patterns.extend([
+                (r"Tests:\s+(\d+) passed", "passed"),
+                (r"Tests:\s+(\d+) failed", "failed"),
+                (r"Tests:\s+(\d+) skipped", "skipped"),
+                (r"Tests:\s+(\d+) total", "total"),
+            ])
+        
+        for pattern, key in patterns:
+            match = re.search(pattern, output, re.IGNORECASE)
+            if match:
+                value = int(match.group(1))
+                if key == "total":
+                    counts["total"] = value
+                else:
+                    counts[key] += value
+        
+        # Calculate total if not explicitly found
+        if counts["total"] == 0:
+            counts["total"] = counts["passed"] + counts["failed"] + counts["skipped"] + counts["errors"]
+        
+        # Parse coverage if present
+        coverage_match = re.search(r"TOTAL\s+\d+\s+\d+\s+([\d.]+)%", output)
+        if not coverage_match:
+            coverage_match = re.search(r"Overall coverage:\s*([\d.]+)%", output)
+        if not coverage_match:
+            coverage_match = re.search(r"Statements\s*:\s*([\d.]+)%", output)
+        
+        if coverage_match:
+            self.results[component]["coverage"] = float(coverage_match.group(1))
+        
+        self.results[component]["test_counts"] = counts
+    
     def save_test_report(self, level: str, config: Dict, output: str, exit_code: int):
-        """Save test report to test_reports directory"""
+        """Save test report to test_reports directory with latest/history structure"""
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         
-        # Generate comprehensive report
+        # Calculate total test counts
+        backend_counts = self.results["backend"]["test_counts"]
+        frontend_counts = self.results["frontend"]["test_counts"]
+        total_counts = {
+            "total": backend_counts["total"] + frontend_counts["total"],
+            "passed": backend_counts["passed"] + frontend_counts["passed"],
+            "failed": backend_counts["failed"] + frontend_counts["failed"],
+            "skipped": backend_counts["skipped"] + frontend_counts["skipped"],
+            "errors": backend_counts["errors"] + frontend_counts["errors"]
+        }
+        
+        # Calculate overall coverage if available
+        overall_coverage = None
+        if self.results["backend"]["coverage"] is not None:
+            overall_coverage = self.results["backend"]["coverage"]
+            if self.results["frontend"]["coverage"] is not None:
+                # Average of backend and frontend coverage
+                overall_coverage = (self.results["backend"]["coverage"] + self.results["frontend"]["coverage"]) / 2
+        elif self.results["frontend"]["coverage"] is not None:
+            overall_coverage = self.results["frontend"]["coverage"]
+        
+        # Generate comprehensive report data
         report_data = {
             "timestamp": datetime.now().isoformat(),
             "test_level": level,
@@ -310,48 +409,65 @@ class UnifiedTestRunner:
                     self.results["backend"]["status"] in ["passed", "skipped"] and 
                     self.results["frontend"]["status"] in ["passed", "skipped"]
                 ),
-                "exit_code": exit_code
+                "exit_code": exit_code,
+                "test_counts": total_counts,
+                "overall_coverage": overall_coverage
             }
         }
         
-        # Save JSON report
-        json_path = self.reports_dir / f"test_report_{level}_{timestamp}.json"
-        with open(json_path, "w", encoding='utf-8') as f:
-            json.dump(report_data, f, indent=2)
-        
-        # Generate markdown report
+        # Generate markdown report following spec structure
         md_content = f"""# Netra AI Platform - Test Report
 
 **Generated:** {report_data['timestamp']}  
 **Test Level:** {level} - {config['description']}  
 **Purpose:** {config['purpose']}
 
-## Summary
+## Test Summary
 
-| Component | Status | Duration | Exit Code |
-|-----------|--------|----------|-----------|
-| Backend   | {self._status_badge(self.results['backend']['status'])} | {self.results['backend']['duration']:.2f}s | {self.results['backend']['exit_code']} |
-| Frontend  | {self._status_badge(self.results['frontend']['status'])} | {self.results['frontend']['duration']:.2f}s | {self.results['frontend']['exit_code']} |
+**Total Tests:** {total_counts['total']}  
+**Passed:** {total_counts['passed']}  
+**Failed:** {total_counts['failed']}  
+**Skipped:** {total_counts['skipped']}  
+**Errors:** {total_counts['errors']}  
+**Overall Status:** {self._status_badge(report_data['summary']['overall_passed'])}
 
-**Overall Status:** {self._status_badge(report_data['summary']['overall_passed'])}  
-**Total Duration:** {report_data['summary']['total_duration']:.2f}s  
-**Final Exit Code:** {exit_code}
+### Component Breakdown
 
-## Test Level Details
+| Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
+|-----------|-------|--------|--------|---------|--------|----------|--------|
+| Backend   | {backend_counts['total']} | {backend_counts['passed']} | {backend_counts['failed']} | {backend_counts['skipped']} | {backend_counts['errors']} | {self.results['backend']['duration']:.2f}s | {self._status_badge(self.results['backend']['status'])} |
+| Frontend  | {frontend_counts['total']} | {frontend_counts['passed']} | {frontend_counts['failed']} | {frontend_counts['skipped']} | {frontend_counts['errors']} | {self.results['frontend']['duration']:.2f}s | {self._status_badge(self.results['frontend']['status'])} |
+"""
+        
+        # Add coverage summary if applicable
+        if config.get('run_coverage', False) and overall_coverage is not None:
+            md_content += f"""
+## Coverage Summary
 
+**Overall Coverage:** {overall_coverage:.1f}%
+"""
+            if self.results["backend"]["coverage"] is not None:
+                md_content += f"**Backend Coverage:** {self.results['backend']['coverage']:.1f}%  \n"
+            if self.results["frontend"]["coverage"] is not None:
+                md_content += f"**Frontend Coverage:** {self.results['frontend']['coverage']:.1f}%  \n"
+        
+        md_content += f"""
+## Environment and Configuration
+
+- **Test Level:** {level}
 - **Description:** {config['description']}
 - **Purpose:** {config['purpose']}
 - **Timeout:** {config.get('timeout', 300)}s
 - **Coverage Enabled:** {'Yes' if config.get('run_coverage', False) else 'No'}
+- **Total Duration:** {report_data['summary']['total_duration']:.2f}s
+- **Exit Code:** {exit_code}
 
-## Configuration
-
-### Backend Args
+### Backend Configuration
 ```
 {' '.join(config.get('backend_args', []))}
 ```
 
-### Frontend Args  
+### Frontend Configuration
 ```
 {' '.join(config.get('frontend_args', []))}
 ```
@@ -360,32 +476,59 @@ class UnifiedTestRunner:
 
 ### Backend Output
 ```
-{self.results['backend']['output'][:5000]}{'...(truncated)' if len(self.results['backend']['output']) > 5000 else ''}
+{self.results['backend']['output'][:10000]}{'...(truncated)' if len(self.results['backend']['output']) > 10000 else ''}
 ```
 
 ### Frontend Output
 ```
-{self.results['frontend']['output'][:5000]}{'...(truncated)' if len(self.results['frontend']['output']) > 5000 else ''}
+{self.results['frontend']['output'][:10000]}{'...(truncated)' if len(self.results['frontend']['output']) > 10000 else ''}
 ```
-
----
-*Generated by Netra AI Unified Test Runner*
 """
         
-        # Save markdown report
-        md_path = self.reports_dir / f"test_report_{level}_{timestamp}.md"
-        with open(md_path, "w", encoding='utf-8') as f:
-            f.write(md_content)
+        # Add error summary if there were failures
+        if total_counts['failed'] > 0 or total_counts['errors'] > 0:
+            md_content += """
+## Error Summary
+
+"""
+            # Extract error details from output
+            if backend_counts['failed'] > 0 or backend_counts['errors'] > 0:
+                md_content += "### Backend Errors\n"
+                # Extract FAILED lines from output
+                for line in self.results['backend']['output'].split('\n'):
+                    if 'FAILED' in line or 'ERROR' in line:
+                        md_content += f"- {line.strip()}\n"
+                md_content += "\n"
+            
+            if frontend_counts['failed'] > 0 or frontend_counts['errors'] > 0:
+                md_content += "### Frontend Errors\n"
+                for line in self.results['frontend']['output'].split('\n'):
+                    if 'FAILED' in line or 'ERROR' in line or 'FAIL' in line:
+                        md_content += f"- {line.strip()}\n"
+                md_content += "\n"
         
-        # Save latest report (overwrites previous)
+        md_content += """
+---
+*Generated by Netra AI Unified Test Runner v3.0*
+"""
+        
+        # Check if latest report exists and move to history
         latest_path = self.reports_dir / f"latest_{level}_report.md"
+        if latest_path.exists():
+            # Move existing latest to history with timestamp from file modification time
+            mod_time = datetime.fromtimestamp(latest_path.stat().st_mtime)
+            history_timestamp = mod_time.strftime('%Y%m%d_%H%M%S')
+            history_path = self.history_dir / f"test_report_{level}_{history_timestamp}.md"
+            shutil.move(str(latest_path), str(history_path))
+            print(f"[ARCHIVE] Previous report moved to history: {history_path.name}")
+        
+        # Save new latest report (no more per-run files)
         with open(latest_path, "w", encoding='utf-8') as f:
             f.write(md_content)
         
         print(f"\n[REPORT] Test report saved:")
-        print(f"  - JSON: {json_path}")
-        print(f"  - Markdown: {md_path}")
         print(f"  - Latest: {latest_path}")
+        print(f"  - History folder: {self.history_dir}")
     
     def _status_badge(self, status) -> str:
         """Convert status to markdown badge"""
@@ -401,10 +544,21 @@ class UnifiedTestRunner:
             return "[PENDING]"
     
     def print_summary(self):
-        """Print final test summary"""
+        """Print final test summary with test counts"""
         print(f"\n{'='*60}")
         print("TEST SUMMARY")
         print(f"{'='*60}")
+        
+        # Calculate totals
+        backend_counts = self.results["backend"]["test_counts"]
+        frontend_counts = self.results["frontend"]["test_counts"]
+        total_counts = {
+            "total": backend_counts["total"] + frontend_counts["total"],
+            "passed": backend_counts["passed"] + frontend_counts["passed"],
+            "failed": backend_counts["failed"] + frontend_counts["failed"],
+            "skipped": backend_counts["skipped"] + frontend_counts["skipped"],
+            "errors": backend_counts["errors"] + frontend_counts["errors"]
+        }
         
         total_duration = self.results["backend"]["duration"] + self.results["frontend"]["duration"]
         overall_passed = (
@@ -412,9 +566,28 @@ class UnifiedTestRunner:
             self.results["frontend"]["status"] in ["passed", "skipped"]
         )
         
-        print(f"Backend:  {self._status_badge(self.results['backend']['status'])} ({self.results['backend']['duration']:.2f}s)")
-        print(f"Frontend: {self._status_badge(self.results['frontend']['status'])} ({self.results['frontend']['duration']:.2f}s)")
+        # Print test counts
+        print(f"Total Tests: {total_counts['total']}")
+        print(f"  Passed:    {total_counts['passed']}")
+        print(f"  Failed:    {total_counts['failed']}")
+        print(f"  Skipped:   {total_counts['skipped']}")
+        print(f"  Errors:    {total_counts['errors']}")
+        print(f"{'='*60}")
+        
+        # Print component status
+        print(f"Backend:  {self._status_badge(self.results['backend']['status'])} ({backend_counts['total']} tests, {self.results['backend']['duration']:.2f}s)")
+        print(f"Frontend: {self._status_badge(self.results['frontend']['status'])} ({frontend_counts['total']} tests, {self.results['frontend']['duration']:.2f}s)")
         print(f"Overall:  {self._status_badge(overall_passed)} ({total_duration:.2f}s)")
+        
+        # Print coverage if available
+        if self.results["backend"]["coverage"] is not None or self.results["frontend"]["coverage"] is not None:
+            print(f"{'='*60}")
+            print("COVERAGE:")
+            if self.results["backend"]["coverage"] is not None:
+                print(f"  Backend:  {self.results['backend']['coverage']:.1f}%")
+            if self.results["frontend"]["coverage"] is not None:
+                print(f"  Frontend: {self.results['frontend']['coverage']:.1f}%")
+        
         print(f"{'='*60}")
 
 def main():

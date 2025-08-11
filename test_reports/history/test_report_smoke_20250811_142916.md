@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T14:35:49.515729  
+**Generated:** 2025-08-11T14:29:16.521923  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 2 | 2 | 0 | 0 | 0 | 8.47s | [PASSED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 44.50s | [TIMEOUT] |
+| Backend   | 2 | 2 | 0 | 0 | 0 | 6.46s | [PASSED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.33s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,8 +27,8 @@
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
 - **Coverage Enabled:** No
-- **Total Duration:** 52.97s
-- **Exit Code:** 0
+- **Total Duration:** 6.78s
+- **Exit Code:** 1
 
 ### Backend Configuration
 ```
@@ -70,9 +70,9 @@ asyncio: mode=Mode.AUTO
 app\tests\routes\test_health_route.py::test_basic_import [32mPASSED[0m[32m          [ 50%][0m
 app\tests\routes\test_health_route.py::test_health_endpoint_direct [32mPASSED[0m[32m [100%][0m
 
-[32m============================== [32m[1m2 passed[0m[32m in 0.07s[0m[32m ==============================[0m
+[32m============================== [32m[1m2 passed[0m[32m in 0.06s[0m[32m ==============================[0m
 ================================================================================
-[PASS] ALL TESTS PASSED in 7.44s
+[PASS] ALL TESTS PASSED in 5.67s
 ================================================================================
 
 
@@ -80,7 +80,14 @@ app\tests\routes\test_health_route.py::test_health_endpoint_direct [32mPASSED[
 
 ### Frontend Output
 ```
-Tests timed out after 30s
+[INFO] Running frontend tests: npm run test:unit -- --passWithNoTests
+
+npm error Missing script: "test:unit"
+npm error
+npm error To see a list of scripts, run:
+npm error   npm run
+npm error A complete log of this run can be found in: C:\Users\antho\AppData\Local\npm-cache\_logs\2025-08-11T21_29_16_454Z-debug-0.log
+
 ```
 
 ---

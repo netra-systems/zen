@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T14:35:49.515729  
+**Generated:** 2025-08-11T14:26:48.749969  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 2 | 2 | 0 | 0 | 0 | 8.47s | [PASSED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 44.50s | [TIMEOUT] |
+| Backend   | 2 | 2 | 0 | 0 | 0 | 6.69s | [PASSED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.08s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,8 +27,8 @@
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
 - **Coverage Enabled:** No
-- **Total Duration:** 52.97s
-- **Exit Code:** 0
+- **Total Duration:** 6.78s
+- **Exit Code:** 1
 
 ### Backend Configuration
 ```
@@ -70,9 +70,9 @@ asyncio: mode=Mode.AUTO
 app\tests\routes\test_health_route.py::test_basic_import [32mPASSED[0m[32m          [ 50%][0m
 app\tests\routes\test_health_route.py::test_health_endpoint_direct [32mPASSED[0m[32m [100%][0m
 
-[32m============================== [32m[1m2 passed[0m[32m in 0.07s[0m[32m ==============================[0m
+[32m============================== [32m[1m2 passed[0m[32m in 0.08s[0m[32m ==============================[0m
 ================================================================================
-[PASS] ALL TESTS PASSED in 7.44s
+[PASS] ALL TESTS PASSED in 5.85s
 ================================================================================
 
 
@@ -80,7 +80,27 @@ app\tests\routes\test_health_route.py::test_health_endpoint_direct [32mPASSED[
 
 ### Frontend Output
 ```
-Tests timed out after 30s
+[INFO] Running frontend tests: npm run test:unit -- --passWithNoTests
+
+Traceback (most recent call last):
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\scripts\test_frontend_simple.py", line 73, in <module>
+    main()
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\scripts\test_frontend_simple.py", line 68, in main
+    success = run_frontend_tests(args.level, args.args)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\scripts\test_frontend_simple.py", line 51, in run_frontend_tests
+    result = subprocess.run(cmd, capture_output=False, text=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\miniconda3\Lib\subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\miniconda3\Lib\subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "C:\Users\antho\miniconda3\Lib\subprocess.py", line 1538, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [WinError 2] The system cannot find the file specified
+
 ```
 
 ---
