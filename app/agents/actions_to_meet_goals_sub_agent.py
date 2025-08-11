@@ -60,7 +60,7 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
         
         # If full extraction fails, try partial extraction of critical fields
         if not action_plan_result:
-            logger.warning(
+            logger.debug(
                 f"Full JSON extraction failed for run_id: {run_id}. "
                 f"Response length: {len(llm_response_str) if llm_response_str else 0} chars. "
                 f"Attempting partial extraction..."
@@ -71,7 +71,12 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
             partial_result = extract_partial_json(llm_response_str, required_fields=None)  # Get whatever we can
             
             if partial_result:
-                logger.info(f"Partial extraction succeeded with {len(partial_result)} fields for run_id: {run_id}")
+                # If we got substantial data, this is actually a success
+                if len(partial_result) > 10:
+                    logger.info(f"Successfully recovered {len(partial_result)} fields via partial extraction for run_id: {run_id}")
+                else:
+                    logger.warning(f"Partial extraction recovered only {len(partial_result)} fields for run_id: {run_id}")
+                
                 # Build a complete structure with extracted partial data
                 action_plan_result = self._build_action_plan_from_partial(partial_result)
             else:

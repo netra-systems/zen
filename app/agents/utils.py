@@ -18,6 +18,60 @@ from typing import Any, Dict, Optional, Union
 logger = logging.getLogger(__name__)
 
 
+def preprocess_llm_response(response: str) -> str:
+    """
+    Preprocess LLM response to improve JSON extraction success rate.
+    
+    Args:
+        response: Raw LLM response
+        
+    Returns:
+        Preprocessed response
+    """
+    if not response:
+        return response
+    
+    # Remove common LLM artifacts that break JSON parsing
+    processed = response
+    
+    # Remove any text before the first { or [
+    json_start = -1
+    brace_pos = processed.find('{')
+    bracket_pos = processed.find('[')
+    
+    if brace_pos >= 0 and bracket_pos >= 0:
+        json_start = min(brace_pos, bracket_pos)
+    elif brace_pos >= 0:
+        json_start = brace_pos
+    elif bracket_pos >= 0:
+        json_start = bracket_pos
+    
+    if json_start > 0:
+        # Check if there's explanatory text before the JSON
+        before_json = processed[:json_start]
+        if not '```' in before_json:  # Don't remove markdown markers
+            processed = processed[json_start:]
+    
+    # Remove any text after the last } or ]
+    json_end = -1
+    brace_pos = processed.rfind('}')
+    bracket_pos = processed.rfind(']')
+    
+    if brace_pos >= 0 and bracket_pos >= 0:
+        json_end = max(brace_pos, bracket_pos)
+    elif brace_pos >= 0:
+        json_end = brace_pos
+    elif bracket_pos >= 0:
+        json_end = bracket_pos
+    
+    if json_end >= 0 and json_end < len(processed) - 1:
+        # Check if there's explanatory text after the JSON
+        after_json = processed[json_end + 1:]
+        if not '```' in after_json:  # Don't remove markdown markers
+            processed = processed[:json_end + 1]
+    
+    return processed
+
 def extract_json_from_response(response: str, max_retries: int = 3) -> Optional[Dict[str, Any]]:
     """
     Extract JSON from LLM response, handling markdown code blocks, truncation, and various formatting issues.
@@ -31,6 +85,9 @@ def extract_json_from_response(response: str, max_retries: int = 3) -> Optional[
     """
     if not response:
         return None
+    
+    # Preprocess the response first
+    response = preprocess_llm_response(response)
     
     # Log large responses for debugging
     if len(response) > 15000:
