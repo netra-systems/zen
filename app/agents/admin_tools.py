@@ -7,7 +7,7 @@ from app.services import corpus_service, clickhouse_service
 from app.services.permission_service import PermissionService
 from app.services.synthetic_data_service import SyntheticDataService
 from app.db.models_postgres import User
-from app.core.logging_config import central_logger
+from app.logging_config import central_logger
 from app import schemas
 import json
 

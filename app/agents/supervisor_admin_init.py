@@ -9,7 +9,7 @@ from app.agents.admin_tool_dispatcher import AdminToolDispatcher
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.llm.llm_manager import LLMManager
 from app.services.permission_service import PermissionService
-from app.core.logging_config import central_logger
+from app.logging_config import central_logger
 from langchain_core.tools import BaseTool
 from typing import List
 

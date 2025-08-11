@@ -9,7 +9,7 @@ from app.agents.tool_dispatcher import ToolDispatcher
 from app.agents.admin_tools import AdminToolRegistry
 from app.db.models_postgres import User
 from app.services.permission_service import PermissionService
-from app.core.logging_config import central_logger
+from app.logging_config import central_logger
 import asyncio
 
 logger = central_logger
