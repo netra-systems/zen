@@ -542,7 +542,8 @@ class DevLauncher:
                 cmd,
                 env=env,
                 capture_output=True,
-                text=True
+                text=True,
+                timeout=30  # Add timeout to prevent hanging
             )
             
             if result.returncode == 0:
@@ -557,11 +558,22 @@ class DevLauncher:
                             if line and not line.startswith('#') and '=' in line:
                                 key, value = line.split('=', 1)
                                 os.environ[key] = value.strip('"\'')
+                    print(f"   Loaded {len([k for k in os.environ if k in ['GEMINI_API_KEY', 'GOOGLE_CLIENT_ID', 'JWT_SECRET_KEY']])} key secrets into environment")
                 return True
             else:
-                self._print("❌", "ERROR", f"Failed to load secrets: {result.stderr}")
+                self._print("❌", "ERROR", f"Failed to load secrets")
+                if result.stdout:
+                    print(f"   Output: {result.stdout}")
+                if result.stderr:
+                    print(f"   Error: {result.stderr}")
                 return False
             
+        except subprocess.TimeoutExpired:
+            self._print("❌", "ERROR", "Secret loading timed out after 30 seconds")
+            print("   This usually means Google Cloud authentication is not configured")
+            print("   Try running: gcloud auth application-default login")
+            print("   Or set GOOGLE_APPLICATION_CREDENTIALS to point to a service account key")
+            return False
         except Exception as e:
             self._print("❌", "ERROR", f"Failed to load secrets: {e}")
             print("   Continuing without secrets (some features may not work)")

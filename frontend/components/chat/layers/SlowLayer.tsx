@@ -147,7 +147,7 @@ export const SlowLayer: React.FC<SlowLayerProps> = ({ data, isCollapsed }) => {
                           )}
                         </div>
                       )}
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </div>

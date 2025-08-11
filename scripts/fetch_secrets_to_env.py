@@ -16,15 +16,21 @@ def fetch_secret(client, project_id, secret_name, version="latest"):
 
 def main():
     """Main function to fetch secrets and create .env file."""
+    # Get project ID from environment or use default
+    project_id = os.environ.get('GOOGLE_CLOUD_PROJECT', "304612253870")
+    print(f"Using project ID: {project_id}")
+    
     # Initialize the Secret Manager client
     try:
+        # Set a timeout for client creation to avoid hanging
+        import socket
+        socket.setdefaulttimeout(10)
         client = secretmanager.SecretManagerServiceClient()
     except Exception as e:
         print(f"Error: Failed to create Secret Manager client: {e}")
         print("Make sure GOOGLE_APPLICATION_CREDENTIALS is set and valid.")
+        print("Or use 'gcloud auth application-default login' to authenticate.")
         sys.exit(1)
-    
-    project_id = "304612253870"
     
     # Define the secrets to fetch and their env variable names
     secret_mappings = {
