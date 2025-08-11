@@ -6,13 +6,7 @@ import { useChatStore } from '@/store/chat';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { Message } from '@/types/chat';
 import type { UnifiedWebSocketEvent } from '@/types/unified-chat';
-
-// Counter to ensure unique message IDs
-let messageIdCounter = 0;
-
-const generateMessageId = () => {
-  return `msg_${Date.now()}_${++messageIdCounter}`;
-};
+import { generateUniqueId } from '@/lib/utils';
 
 export const useChatWebSocket = (runId?: string) => {
   const { messages } = useWebSocket();
@@ -93,7 +87,7 @@ export const useChatWebSocket = (runId?: string) => {
         if (payload?.state?.messages && payload.state.messages.length > 0) {
           const message = payload.state.messages[0];
           const agentMessage: Message = {
-            id: generateMessageId(),
+            id: generateUniqueId('msg'),
             type: 'agent',
             content: message.content || '',
             created_at: new Date().toISOString(),
@@ -120,7 +114,7 @@ export const useChatWebSocket = (runId?: string) => {
         setAgentStatus('COMPLETED');
         // Add a completion message
         const completionMessage: Message = {
-          id: generateMessageId(),
+          id: generateUniqueId('msg'),
           type: 'agent',
           content: 'Task completed successfully.',
           created_at: new Date().toISOString(),
@@ -136,7 +130,7 @@ export const useChatWebSocket = (runId?: string) => {
         // Also handle error in unified chat
         handleWebSocketEvent(wsMessage as UnifiedWebSocketEvent);
         const errorMessage: Message = {
-          id: generateMessageId(),
+          id: generateUniqueId('msg'),
           type: 'error',
           content: `❌ Error: ${payload?.error || 'An error occurred'}`,
           created_at: new Date().toISOString(),
@@ -150,7 +144,7 @@ export const useChatWebSocket = (runId?: string) => {
         const logPrefix = payload.level === 'error' ? '❌' : 
                          payload.level === 'warning' ? '⚠️' : 'ℹ️';
         const logMessage: Message = {
-          id: generateMessageId(),
+          id: generateUniqueId('msg'),
           type: 'system',
           content: `${logPrefix} ${payload.message}`,
           created_at: new Date().toISOString(),
@@ -161,7 +155,7 @@ export const useChatWebSocket = (runId?: string) => {
       } else if (wsMessage.type === 'tool_call') {
         const payload = wsMessage.payload as any;
         const toolMessage: Message = {
-          id: generateMessageId(),
+          id: generateUniqueId('msg'),
           type: 'tool',
           content: `🔧 Calling tool: ${payload.tool_name}`,
           created_at: new Date().toISOString(),
@@ -173,7 +167,7 @@ export const useChatWebSocket = (runId?: string) => {
       } else if (wsMessage.type === 'tool_result') {
         const payload = wsMessage.payload as any;
         const resultMessage: Message = {
-          id: generateMessageId(),
+          id: generateUniqueId('msg'),
           type: 'tool',
           content: `✅ Tool result from ${payload.tool_name}: ${JSON.stringify(payload.result).substring(0, 200)}...`,
           created_at: new Date().toISOString(),
@@ -279,7 +273,7 @@ export const useChatWebSocket = (runId?: string) => {
         setProcessing(false);
         setAgentStatus('STOPPED');
         const stoppedMessage: Message = {
-          id: generateMessageId(),
+          id: generateUniqueId('msg'),
           type: 'system',
           content: 'Processing stopped.',
           created_at: new Date().toISOString(),
@@ -292,7 +286,7 @@ export const useChatWebSocket = (runId?: string) => {
         setPendingApproval(payload);
         // Add approval message to chat
         const approvalMessage: Message = {
-          id: generateMessageId(),
+          id: generateUniqueId('msg'),
           type: 'system',
           content: payload.message || 'Approval required for this operation',
           created_at: new Date().toISOString(),
@@ -306,7 +300,7 @@ export const useChatWebSocket = (runId?: string) => {
       // Handle any message with displayed_to_user flag
       if ((wsMessage as any).displayed_to_user) {
         const chatMessage: Message = {
-          id: `msg_${Date.now()}`,
+          id: generateUniqueId('msg'),
           type: (wsMessage as any).type || 'agent',
           content: (wsMessage as any).content || JSON.stringify(wsMessage.payload),
           created_at: new Date().toISOString(),

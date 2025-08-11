@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { generateUniqueId } from '@/lib/utils';
 import { useWebSocketContext } from './WebSocketProvider';
 import { useChatStore } from '@/store/chatStore';
 
@@ -62,7 +63,7 @@ export const AgentProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setIsProcessing(false);
         if (lastMessage.data?.report) {
           chatStore.addMessage({
-            id: Date.now().toString(),
+            id: generateUniqueId('msg'),
             content: lastMessage.data.report,
             role: 'assistant',
             thread_id: lastMessage.data.thread_id || null,
@@ -97,7 +98,7 @@ export const AgentProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // Add user message to chat
     chatStore.addMessage({
-      id: Date.now().toString(),
+      id: generateUniqueId('msg'),
       content: message,
       role: 'user',
       thread_id: null,

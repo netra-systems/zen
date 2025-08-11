@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { examplePrompts } from '@/lib/examplePrompts';
+import { generateUniqueId } from '@/lib/utils';
 import { useChatStore } from '@/store/chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useAuthStore } from '@/store/authStore';
@@ -24,7 +25,7 @@ export const ExamplePrompts: React.FC = () => {
     }
     // Add user message to chat immediately
     const userMessage: Message = {
-      id: `msg_${Date.now()}`,
+      id: generateUniqueId('msg'),
       type: 'user',
       content: prompt,
       created_at: new Date().toISOString(),

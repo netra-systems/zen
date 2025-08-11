@@ -8,7 +8,7 @@ import { Send, Paperclip, Mic, Command, ArrowUp, ArrowDown, Loader2 } from 'luci
 import { Message } from '@/types/chat';
 import { ThreadService } from '@/services/threadService';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { cn, generateUniqueId } from '@/lib/utils';
 
 export const MessageInput: React.FC = () => {
   const [message, setMessage] = useState('');
@@ -79,7 +79,7 @@ export const MessageInput: React.FC = () => {
       
       // Add user message to chat immediately
       const userMessage: Message = {
-        id: `msg_${Date.now()}`,
+        id: generateUniqueId('msg'),
         type: 'user',
         content: trimmedMessage,
         created_at: new Date().toISOString(),

@@ -3,12 +3,13 @@
     <metadata>
         <name>Unified Chat UI/UX Specification</name>
         <type>unified_chat_ui_ux</type>
-        <version>4.0</version>
+        <version>5.0</version>
         <created>2025-08-11</created>
-        <description>Unified chat interface specification with strict backend-frontend data coherence and real-time data flow</description>
+        <updated>2025-08-11</updated>
+        <description>Unified chat interface with isolated chat sessions, deduplication, backend schema alignment, and developer overflow</description>
     </metadata>
     
-    <primary-goal>World-class chat interface with REAL backend data, intelligent response streaming, and zero duplicate information</primary-goal>
+    <primary-goal>World-class chat interface with isolated chat sessions, REAL backend data, intelligent response streaming, zero duplicate information, and developer-friendly debugging</primary-goal>
     
     <core-principles>
         <principle id="real-data-only">
@@ -28,7 +29,44 @@
             <name>Backend-Driven UI State</name>
             <description>UI state transitions based on WebSocket events, not timers or fake data</description>
         </principle>
+        <principle id="chat-isolation">
+            <name>Chat Session Isolation</name>
+            <description>Only one chat thread is active at a time. Switching chats loads complete thread history and context</description>
+        </principle>
+        <principle id="agent-deduplication">
+            <name>Agent Display Deduplication</name>
+            <description>Each sub-agent appears exactly once in the UI, even if called multiple times. Show latest status only</description>
+        </principle>
     </core-principles>
+    
+    <chat-session-management>
+        <thread-model>
+            <description>Each chat corresponds to one Thread in backend with unique thread_id</description>
+            <states>
+                <state name="active">Currently visible chat with WebSocket connection</state>
+                <state name="inactive">Previously created chats shown in sidebar</state>
+                <state name="new">Fresh chat with no messages yet</state>
+            </states>
+        </thread-model>
+        
+        <navigation-behavior>
+            <rule id="new-chat">
+                <trigger>Click "New Chat" button or press Ctrl+N</trigger>
+                <action>Create new Thread via API, clear message area, reset state</action>
+                <websocket>Disconnect from old thread, connect to new thread_id</websocket>
+            </rule>
+            <rule id="switch-chat">
+                <trigger>Click existing chat in sidebar</trigger>
+                <action>Load thread messages via API, populate message history</action>
+                <websocket>Disconnect current, connect to selected thread_id</websocket>
+            </rule>
+            <rule id="example-click">
+                <trigger>Click any example prompt</trigger>
+                <action>Create new Thread, send example as first message</action>
+                <note>Examples ALWAYS start new chats, never append to existing</note>
+            </rule>
+        </navigation-behavior>
+    </chat-session-management>
     
     <backend-frontend-contract>
         <websocket-events>
@@ -78,8 +116,9 @@
                     <field name="duration_ms" type="number">Execution duration</field>
                     <field name="result" type="object">Agent-specific result data</field>
                     <field name="metrics" type="object">Performance metrics</field>
+                    <field name="iteration" type="number">Which iteration if agent called multiple times</field>
                 </payload>
-                <ui-update>Move agent data to slow layer, update metrics</ui-update>
+                <ui-update>Move agent data to slow layer, deduplicate if same agent</ui-update>
             </event>
             
             <event type="final_report">
@@ -99,8 +138,49 @@
                     <field name="error_code" type="string">Error identifier</field>
                     <field name="agent_name" type="string">Agent where error occurred</field>
                     <field name="recoverable" type="boolean">Whether processing can continue</field>
+                    <field name="stack_trace" type="string">Full stack trace for debugging</field>
                 </payload>
-                <ui-update>Show error in appropriate layer based on severity</ui-update>
+                <ui-update>Show error in appropriate layer, full trace in overflow</ui-update>
+            </event>
+            
+            <!-- Thread Management Events -->
+            <event type="thread_created">
+                <payload>
+                    <field name="thread_id" type="string">New thread identifier</field>
+                    <field name="user_id" type="string">User who created thread</field>
+                    <field name="created_at" type="number">Creation timestamp</field>
+                </payload>
+                <ui-update>Add to chat sidebar, mark as active</ui-update>
+            </event>
+            
+            <event type="thread_loaded">
+                <payload>
+                    <field name="thread_id" type="string">Loaded thread ID</field>
+                    <field name="messages" type="array">Historical messages</field>
+                    <field name="metadata" type="object">Thread metadata</field>
+                </payload>
+                <ui-update>Populate message history, update sidebar selection</ui-update>
+            </event>
+            
+            <!-- Run and Step Events -->
+            <event type="run_started">
+                <payload>
+                    <field name="run_id" type="string">Unique run identifier</field>
+                    <field name="thread_id" type="string">Associated thread</field>
+                    <field name="assistant_id" type="string">Assistant being used</field>
+                    <field name="model" type="string">Model name</field>
+                </payload>
+                <ui-update>Show in overflow debug panel</ui-update>
+            </event>
+            
+            <event type="step_created">
+                <payload>
+                    <field name="step_id" type="string">Step identifier</field>
+                    <field name="run_id" type="string">Parent run</field>
+                    <field name="type" type="string">Step type (tool_call, message, etc)</field>
+                    <field name="details" type="object">Step-specific details</field>
+                </payload>
+                <ui-update>Add to overflow timeline view</ui-update>
             </event>
         </websocket-events>
         
@@ -162,6 +242,22 @@
             </layer>
         </structure>
         
+        <agent-deduplication>
+            <rule>Track unique agent names in Set to prevent duplicates</rule>
+            <rule>If agent re-runs, update existing card section rather than add new</rule>
+            <rule>Show iteration count if agent runs multiple times (e.g., "Triage (2nd run)")</rule>
+            <rule>Latest agent status always overwrites previous in same layer</rule>
+            <known-agents>
+                <agent>TriageSubAgent</agent>
+                <agent>DataSubAgent</agent>
+                <agent>OptimizationsCoreSubAgent</agent>
+                <agent>ActionsToMeetGoalsSubAgent</agent>
+                <agent>ReportingSubAgent</agent>
+                <agent>CorpusAdminSubAgent</agent>
+                <agent>SyntheticDataSubAgent</agent>
+            </known-agents>
+        </agent-deduplication>
+        
         <behavior>
             <rule>Card persists throughout entire conversation</rule>
             <rule>Layers build up progressively - fast appears first, then medium, then slow</rule>
@@ -185,7 +281,64 @@
                 <child>MessageList</child>
                 <child>PersistentResponseCard</child>
                 <child>ChatInput</child>
+                <child>ChatSidebar</child>
+                <child>OverflowPanel</child>
             </children>
+        </component>
+        
+        <component id="ChatSidebar">
+            <description>Thread navigation sidebar with chat history</description>
+            <location>components/chat/ChatSidebar.tsx</location>
+            <responsibilities>
+                <item>Display all user threads from database</item>
+                <item>Show active thread highlight</item>
+                <item>New chat button at top</item>
+                <item>Thread preview with last message</item>
+                <item>Timestamp and message count</item>
+            </responsibilities>
+            <data-source>GET /api/threads endpoint</data-source>
+            <behavior>
+                <rule>Load threads on mount and after new chat creation</rule>
+                <rule>Show max 50 threads, paginate rest</rule>
+                <rule>Sort by last_updated descending</rule>
+            </behavior>
+        </component>
+        
+        <component id="OverflowPanel">
+            <description>Developer/curious user debug panel (collapsible)</description>
+            <location>components/chat/OverflowPanel.tsx</location>
+            <trigger>Keyboard shortcut (Ctrl+Shift+D) or settings toggle</trigger>
+            <sections>
+                <section name="WebSocket Events">
+                    <content>Raw WebSocket event stream with timestamps</content>
+                    <filter>Filter by event type, agent name</filter>
+                </section>
+                <section name="Run Timeline">
+                    <content>Visual timeline of runs, steps, and agent executions</content>
+                    <features>Gantt-style view with durations</features>
+                </section>
+                <section name="Backend State">
+                    <content>Current thread, run, assistant IDs and metadata</content>
+                    <content>User secrets status (not values)</content>
+                    <content>Active supply options and models</content>
+                </section>
+                <section name="Performance Metrics">
+                    <content>Token usage, latency by agent, cache hits</content>
+                    <content>WebSocket reconnection count</content>
+                    <content>Memory usage and component render counts</content>
+                </section>
+                <section name="Error Details">
+                    <content>Full stack traces for errors</content>
+                    <content>Failed API calls with request/response</content>
+                    <content>Agent retry attempts</content>
+                </section>
+            </sections>
+            <styling>
+                <position>Bottom drawer or right sidebar</position>
+                <height>Resizable, default 300px, max 50% viewport</height>
+                <theme>Dark theme for contrast with main UI</theme>
+                <font>Monospace for logs and data</font>
+            </styling>
         </component>
         
         <component id="PersistentResponseCard">
@@ -290,6 +443,71 @@
                 actionPlan: ActionStep[];           // From backend
                 agentMetrics: AgentMetric[];       // From backend
             }
+            
+            // Thread and Session Types (aligned with backend models)
+            interface Thread {
+                id: string;                         // Thread UUID
+                object: 'thread';
+                created_at: number;                 // Unix timestamp
+                metadata: Record<string, any>;
+                messages?: Message[];               // Loaded on demand
+                last_message?: string;              // For sidebar preview
+                message_count?: number;
+                updated_at?: number;
+            }
+            
+            interface Run {
+                id: string;                         // Run UUID
+                object: 'thread.run';
+                thread_id: string;
+                assistant_id: string;
+                status: 'queued' | 'in_progress' | 'completed' | 'failed' | 'cancelled';
+                created_at: number;
+                started_at?: number;
+                completed_at?: number;
+                model?: string;
+                tools: any[];
+                metadata: Record<string, any>;
+            }
+            
+            interface Step {
+                id: string;                         // Step UUID
+                object: 'thread.run.step';
+                run_id: string;
+                type: 'message_creation' | 'tool_calls';
+                status: string;
+                step_details: any;
+                created_at: number;
+                completed_at?: number;
+            }
+            
+            interface Assistant {
+                id: string;
+                object: 'assistant';
+                name?: string;
+                description?: string;
+                model: string;
+                instructions?: string;
+                tools: any[];
+            }
+            
+            // Agent Deduplication Tracking
+            interface AgentExecution {
+                name: string;                       // Agent name
+                iteration: number;                  // 1 for first run, 2+ for reruns
+                status: 'running' | 'completed' | 'failed';
+                start_time: number;
+                end_time?: number;
+                result?: any;
+            }
+            
+            interface ChatSession {
+                activeThreadId: string | null;
+                threads: Thread[];                  // All user threads
+                currentRun?: Run;
+                executedAgents: Map<string, AgentExecution>;  // Dedup tracking
+                isProcessing: boolean;
+            }
             ```
         </typescript-types>
     </type-definitions>
@@ -381,6 +599,69 @@
         </requirement>
     </performance-requirements>
     
+    <example-behaviors>
+        <example id="new-chat-flow">
+            <scenario>User clicks "New Chat" button</scenario>
+            <steps>
+                <step>Frontend calls POST /api/threads to create new thread</step>
+                <step>Backend returns thread_id</step>
+                <step>Frontend clears message area</step>
+                <step>WebSocket disconnects from old thread_id</step>
+                <step>WebSocket connects with new thread_id</step>
+                <step>Sidebar updates to show new thread at top</step>
+                <step>Input field gets focus</step>
+            </steps>
+        </example>
+        
+        <example id="example-prompt-flow">
+            <scenario>User clicks "Optimize my LLM costs" example</scenario>
+            <steps>
+                <step>Frontend creates new thread (same as new-chat-flow)</step>
+                <step>Example text auto-populates in input</step>
+                <step>Message sends automatically</step>
+                <step>New thread appears in sidebar with example as first message</step>
+                <step>Previous chat remains in sidebar but inactive</step>
+            </steps>
+        </example>
+        
+        <example id="switch-chat-flow">
+            <scenario>User clicks different chat in sidebar</scenario>
+            <steps>
+                <step>Frontend calls GET /api/threads/{thread_id}/messages</step>
+                <step>Message history loads and displays</step>
+                <step>WebSocket switches to new thread_id</step>
+                <step>Sidebar highlights selected thread</step>
+                <step>Scroll to bottom of message history</step>
+                <step>Any in-progress responses in old thread continue in background</step>
+            </steps>
+        </example>
+        
+        <example id="agent-deduplication-flow">
+            <scenario>TriageSubAgent runs twice in same request</scenario>
+            <steps>
+                <step>First agent_started event for TriageSubAgent</step>
+                <step>Fast layer shows "TriageSubAgent" badge</step>
+                <step>Agent completes, moves to slow layer</step>
+                <step>Second agent_started event for TriageSubAgent</step>
+                <step>Fast layer shows "TriageSubAgent (2)" badge</step>
+                <step>On completion, slow layer updates existing section</step>
+                <step>Only one TriageSubAgent section visible in final view</step>
+            </steps>
+        </example>
+        
+        <example id="overflow-debug-flow">
+            <scenario>Developer presses Ctrl+Shift+D</scenario>
+            <steps>
+                <step>Overflow panel slides up from bottom</step>
+                <step>Shows last 100 WebSocket events in scrollable list</step>
+                <step>Timeline view shows current run with agent durations</step>
+                <step>Click event to see full JSON payload</step>
+                <step>Filter events by type or search by content</step>
+                <step>Export debug data as JSON for issue reporting</step>
+            </steps>
+        </example>
+    </example-behaviors>
+    
     <testing-requirements>
         <unit-tests>
             <test>PersistentResponseCard renders correct layers based on props</test>
@@ -406,37 +687,73 @@
     
     <implementation-checklist>
         <phase number="1" name="Type Alignment">
-            <task>Create TypeScript interfaces matching backend WebSocket events exactly</task>
+            <task priority="critical">Create TypeScript interfaces for Thread, Run, Step, Assistant models</task>
+            <task priority="critical">Add WebSocket event types for thread management</task>
             <task>Generate types from backend Pydantic schemas</task>
             <task>Validate no type mismatches between frontend and backend</task>
+            <task>Add ChatSession state interface with deduplication tracking</task>
         </phase>
         
-        <phase number="2" name="Persistent Card Implementation">
+        <phase number="2" name="Chat Session Management">
+            <task priority="critical">Implement ChatSidebar component with thread list</task>
+            <task priority="critical">Add thread switching logic with WebSocket reconnection</task>
+            <task priority="critical">Implement "New Chat" button creating fresh threads</task>
+            <task>Add example prompts that auto-create new chats</task>
+            <task>Store active thread_id in localStorage for persistence</task>
+            <task>Implement thread pagination for users with many chats</task>
+        </phase>
+        
+        <phase number="3" name="Agent Deduplication">
+            <task priority="critical">Create Map to track executed agents per thread</task>
+            <task priority="critical">Implement deduplication logic in PersistentResponseCard</task>
+            <task>Show iteration count for re-executed agents</task>
+            <task>Update only latest agent status in UI layers</task>
+            <task>Add visual indicator for agent reruns</task>
+        </phase>
+        
+        <phase number="4" name="Persistent Card Implementation">
             <task>Build PersistentResponseCard component with three layers</task>
-            <task>Implement FastLayer with real agent_started data</task>
+            <task>Implement FastLayer with agent deduplication</task>
             <task>Implement MediumLayer with streaming from agent_thinking</task>
-            <task>Implement SlowLayer with agent_completed and final_report</task>
+            <task>Implement SlowLayer with deduplicated agent results</task>
+            <task>Add collapse/expand behavior after completion</task>
         </phase>
         
-        <phase number="3" name="WebSocket Integration">
-            <task>Update WebSocketProvider to handle all defined events</task>
-            <task>Create event-to-layer mapping logic</task>
-            <task>Implement message store with proper typing</task>
-            <task>Add event debouncing for medium layer</task>
+        <phase number="5" name="Overflow Debug Panel">
+            <task priority="high">Create OverflowPanel component with drawer animation</task>
+            <task priority="high">Implement WebSocket event stream viewer</task>
+            <task>Add Run timeline with Gantt visualization</task>
+            <task>Display backend state (thread, run, assistant IDs)</task>
+            <task>Add performance metrics dashboard</task>
+            <task>Implement error detail viewer with stack traces</task>
+            <task>Add export functionality for debug data</task>
+            <task>Create keyboard shortcut (Ctrl+Shift+D) trigger</task>
         </phase>
         
-        <phase number="4" name="Information Hierarchy">
-            <task>Audit all components for duplicate information</task>
-            <task>Remove any frontend-generated status messages</task>
-            <task>Ensure each data point has single display location</task>
-            <task>Validate all displayed data traces to backend event</task>
+        <phase number="6" name="WebSocket Integration">
+            <task>Update WebSocketProvider for thread-specific connections</task>
+            <task>Handle thread_created and thread_loaded events</task>
+            <task>Implement run_started and step_created events</task>
+            <task>Add reconnection logic when switching threads</task>
+            <task>Create event buffer for overflow panel</task>
         </phase>
         
-        <phase number="5" name="Testing and Validation">
-            <task>Write unit tests for each layer component</task>
-            <task>Create integration tests for WebSocket flow</task>
-            <task>Add E2E tests for complete conversation</task>
-            <task>Performance testing with high message volume</task>
+        <phase number="7" name="Backend Integration">
+            <task priority="critical">Implement POST /api/threads for new chats</task>
+            <task priority="critical">Implement GET /api/threads for sidebar list</task>
+            <task priority="critical">Implement GET /api/threads/{id}/messages</task>
+            <task>Add thread metadata updates</task>
+            <task>Ensure user_id association for all threads</task>
+        </phase>
+        
+        <phase number="8" name="Testing and Validation">
+            <task>Test chat isolation - only one active at a time</task>
+            <task>Test example prompts create new chats</task>
+            <task>Test agent deduplication across multiple runs</task>
+            <task>Test overflow panel data accuracy</task>
+            <task>Test thread switching preserves message history</task>
+            <task>Performance test with 100+ threads in sidebar</task>
+            <task>E2E test complete user journey with multiple chats</task>
         </phase>
     </implementation-checklist>
 </specification>

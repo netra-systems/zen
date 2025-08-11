@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { generateUniqueId } from '@/lib/utils';
 import type {
   UnifiedChatState,
   UnifiedWebSocketEvent,
@@ -205,7 +206,7 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
             
             // Add final message to history
             const finalMessage: ChatMessage = {
-              id: `msg_${Date.now()}`,
+              id: generateUniqueId('msg'),
               role: 'assistant',
               content: 'Analysis complete. View the results above.',
               timestamp: Date.now(),
@@ -224,7 +225,7 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
             
             // Add error message
             const errorMessage: ChatMessage = {
-              id: `error_${Date.now()}`,
+              id: generateUniqueId('error'),
               role: 'system',
               content: event.payload.error_message,
               timestamp: Date.now(),

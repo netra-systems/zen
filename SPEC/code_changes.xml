@@ -138,7 +138,21 @@
         <action>Update tool dispatcher if new tools added</action>
         <action>Add agent tests in app/tests/agents/</action>
         <action>Update import tests with new agent modules</action>
+        <action critical="true">If agent stores results in DeepAgentState, add the field to app/agents/state.py</action>
       </actions>
+      <validation>
+        Verify agent state fields exist before using them:
+        - Check DeepAgentState class definition in app/agents/state.py
+        - Add new Optional[Dict[str, Any]] fields for agent-specific results
+        - Example: synthetic_data_result, custom_agent_result, etc.
+      </validation>
+      <common-errors>
+        <error>
+          <symptom>"DeepAgentState" object has no field "field_name"</symptom>
+          <cause>Agent tries to set a field that doesn't exist in DeepAgentState</cause>
+          <fix>Add the field to DeepAgentState class in app/agents/state.py</fix>
+        </error>
+      </common-errors>
     </checklist-item>
     
     <checklist-item id="database-changes">

@@ -18,4 +18,5 @@ class DeepAgentState(BaseModel):
     optimizations_result: Optional[Dict[str, Any]] = None
     action_plan_result: Optional[Dict[str, Any]] = None
     report_result: Optional[Dict[str, Any]] = None
+    synthetic_data_result: Optional[Dict[str, Any]] = None
     final_report: Optional[str] = None

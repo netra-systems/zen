@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+import { generateUniqueId } from '@/lib/utils';
 import { useChatStore } from '@/store/chatStore';
 import { useAuthStore } from '@/store/authStore';
 import { Message } from '@/types/chat';
@@ -31,7 +32,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     if (!inputValue.trim() || isProcessing) return;
 
     const message: Message = {
-      id: `msg-${Date.now()}`,
+      id: generateUniqueId('msg'),
       type: 'user',
       content: inputValue,
       created_at: new Date().toISOString(),
