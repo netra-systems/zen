@@ -78,6 +78,24 @@ class UnitOfWork:
             raise RuntimeError("UnitOfWork must be used within async context")
         return self._session
     
+    async def initialize(self):
+        """Initialize the UnitOfWork - for backward compatibility with tests"""
+        if not self._external_session:
+            self._session = async_session_factory()
+        
+        self.threads = ThreadRepository()
+        self.messages = MessageRepository()
+        self.runs = RunRepository()
+        self.references = ReferenceRepository()
+        
+        logger.debug("UnitOfWork initialized")
+    
+    async def close(self):
+        """Close the UnitOfWork - for backward compatibility with tests"""
+        if not self._external_session and self._session:
+            await self._session.close()
+            logger.debug("UnitOfWork closed")
+    
     async def execute_in_transaction(self, func, *args, **kwargs):
         """Execute a function within a transaction"""
         try:
