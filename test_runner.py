@@ -25,7 +25,7 @@ TEST_LEVELS = {
         "description": "Quick smoke tests for basic functionality (< 30 seconds)",
         "purpose": "Pre-commit validation, basic health checks",
         "backend_args": ["--category", "smoke", "--fail-fast", "-x"],
-        "frontend_args": ["--passWithNoTests", "--watchAll=false"],
+        "frontend_args": [],
         "timeout": 30,
         "run_coverage": False,
         "run_both": True
@@ -51,8 +51,8 @@ TEST_LEVELS = {
     "comprehensive": {
         "description": "Full test suite with coverage (10-15 minutes)",
         "purpose": "Pre-release validation, full system testing",
-        "backend_args": ["--coverage", "--parallel", "auto", "--html-output"],
-        "frontend_args": ["--coverage", "--watchAll=false"],
+        "backend_args": ["--coverage", "--parallel=auto", "--html-output"],
+        "frontend_args": ["--coverage"],
         "timeout": 900,
         "run_coverage": True,
         "run_both": True
@@ -335,15 +335,15 @@ class UnifiedTestRunner:
     def _status_badge(self, status) -> str:
         """Convert status to markdown badge"""
         if status == "passed" or status is True:
-            return "✅ PASSED"
+            return "[PASSED]"
         elif status == "failed" or status is False:
-            return "❌ FAILED"
+            return "[FAILED]"
         elif status == "timeout":
-            return "⏰ TIMEOUT"
+            return "[TIMEOUT]"
         elif status == "skipped":
-            return "⏭️ SKIPPED"
+            return "[SKIPPED]"
         else:
-            return "⏳ PENDING"
+            return "[PENDING]"
     
     def print_summary(self):
         """Print final test summary"""
