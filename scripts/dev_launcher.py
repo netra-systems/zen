@@ -300,19 +300,19 @@ class DevLauncher:
         if self.verbose:
             print(f"   Command: {' '.join(cmd)}")
         
-        # Set environment
-        env = os.environ.copy()
-        env["BACKEND_PORT"] = str(port)
-        
-        # Add project root to PYTHONPATH to ensure app module can be imported
-        python_path = env.get("PYTHONPATH", "")
-        if python_path:
-            env["PYTHONPATH"] = f"{PROJECT_ROOT}{os.pathsep}{python_path}"
-        else:
-            env["PYTHONPATH"] = str(PROJECT_ROOT)
-        
         # Start process
         try:
+            # Set environment - do this right before starting the process to ensure
+            # we get any secrets that were loaded
+            env = os.environ.copy()
+            env["BACKEND_PORT"] = str(port)
+            
+            # Add project root to PYTHONPATH to ensure app module can be imported
+            python_path = env.get("PYTHONPATH", "")
+            if python_path:
+                env["PYTHONPATH"] = f"{PROJECT_ROOT}{os.pathsep}{python_path}"
+            else:
+                env["PYTHONPATH"] = str(PROJECT_ROOT)
             if sys.platform == "win32":
                 # Windows: create new process group
                 process = subprocess.Popen(
