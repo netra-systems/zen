@@ -119,8 +119,12 @@ const wrapper = ({ children }) => (
 ```
 
 ### ClickHouse Nested Array Errors
-**Problem**: NO_COMMON_TYPE error (Code 386)
-**Solution**: Use `arrayFirstIndex` instead of `indexOf`
+**Problem**: NO_COMMON_TYPE error (Code 386) - "There is no supertype for types Array(Float64), Float64"
+**Root Cause**: Using direct array indexing `metrics.value[idx]` instead of proper array functions
+**Solution**: 
+1. Always use `arrayElement(metrics.value, idx)` instead of `metrics.value[idx]`
+2. Use `arrayFirstIndex` instead of `indexOf` for finding positions
+3. Query interceptor automatically fixes incorrect syntax (see `app/db/clickhouse_query_fixer.py`)
 See `SPEC/clickhouse.xml` for details
 
 ### Import Test Failures
@@ -277,6 +281,16 @@ response = await llm_manager.ask_llm(prompt, "gpt4")
 - **Columns Added to userbase**: `tool_permissions`, `plan_expires_at`, `feature_flags`, `payment_status`, `auto_renew`, `plan_tier`, `plan_started_at`, `trial_period`
 - **Migration Created**: `bb39e1c49e2d_add_missing_tables_and_columns.py`
 - **Note**: Some column mismatches remain but app starts successfully
+
+### 2025-08-11: Thread Creation 500 Error Fix
+- **Problem**: Thread creation failing with 500 error - `'_AsyncGeneratorContextManager' object has no attribute 'execute'`
+- **Root Cause**: Parameter order mismatch in `base_repository.get_by_id()` - was `(entity_id, db)` but called as `(db, entity_id)`
+- **Solution**: Fixed parameter order to `get_by_id(self, db, entity_id)` in base_repository.py
+- **Files Changed**: 
+  - `app/services/database/base_repository.py:55-72` - Fixed parameter order
+  - `app/routes/threads_route.py:81-123` - Removed manual commit/rollback (handled by repository)
+- **Prevention**: Added regression test in `app/tests/test_thread_repository.py`
+- **Note**: FastAPI's Depends automatically handles async context managers, no manual rollback needed
 
 ### 2025-08-11: Critical E2E Test Coverage Enhancement
 - **Problem**: Demo brittleness despite 60%+ test coverage - tests focused on happy paths, missing real-world scenarios

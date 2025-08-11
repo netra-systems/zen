@@ -52,7 +52,7 @@ class BaseRepository(Generic[T], ABC):
             logger.error(f"Unexpected error creating {self.model.__name__}: {e}")
             return None
     
-    async def get_by_id(self, entity_id: str, db: Optional[AsyncSession] = None) -> Optional[T]:
+    async def get_by_id(self, db: Optional[AsyncSession], entity_id: str) -> Optional[T]:
         """Get entity by ID"""
         session = db or self._session
         if not session:
@@ -67,9 +67,9 @@ class BaseRepository(Generic[T], ABC):
             logger.error(f"Error fetching {self.model.__name__} by id {entity_id}: {e}")
             return None
     
-    async def get(self, entity_id: str, db: Optional[AsyncSession] = None) -> Optional[T]:
+    async def get(self, db: Optional[AsyncSession], entity_id: str) -> Optional[T]:
         """Alias for get_by_id for backward compatibility"""
-        return await self.get_by_id(entity_id, db)
+        return await self.get_by_id(db, entity_id)
     
     async def get_all(self, db: AsyncSession, 
                       filters: Optional[Dict[str, Any]] = None,

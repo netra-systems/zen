@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from app.db.clickhouse_base import ClickHouseDatabase
+from app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 from app.config import settings
 import logging
 
@@ -67,7 +68,7 @@ async def get_clickhouse_client():
         else:
             config = settings.clickhouse_https
 
-        client = ClickHouseDatabase(
+        base_client = ClickHouseDatabase(
             host=config.host,
             port=config.port,
             user=config.user,
@@ -75,6 +76,8 @@ async def get_clickhouse_client():
             database=config.database,
             secure=True
         )
+        # Wrap with query interceptor to fix array syntax issues
+        client = ClickHouseQueryInterceptor(base_client)
         yield client
     finally:
         if client:
