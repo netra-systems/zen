@@ -363,7 +363,7 @@ class SchemaValidator:
         if '$ref' in field_schema:
             ref = field_schema['$ref']
             if ref.startswith('#/definitions/'):
-                return ref[13:]  # Remove '#/definitions/'
+                return ref[14:]  # Remove '#/definitions/'
         
         # Handle arrays
         if 'items' in field_schema:

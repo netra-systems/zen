@@ -469,9 +469,12 @@ class TestStartupChecker:
         mock_context.__aenter__.return_value = mock_client
         mock_context.__aexit__.return_value = None
         
-        with patch.dict('sys.modules', {'app.db.clickhouse': MagicMock()}):
-            with patch('app.startup_checks.get_clickhouse_client', return_value=mock_context):
-                await checker.check_clickhouse()
+        # Mock the module and the function
+        mock_clickhouse_module = MagicMock()
+        mock_clickhouse_module.get_clickhouse_client = MagicMock(return_value=mock_context)
+        
+        with patch.dict('sys.modules', {'app.db.clickhouse': mock_clickhouse_module}):
+            await checker.check_clickhouse()
         
         assert len(checker.results) == 1
         result = checker.results[0]
@@ -493,9 +496,12 @@ class TestStartupChecker:
         mock_context.__aenter__.return_value = mock_client
         mock_context.__aexit__.return_value = None
         
-        with patch.dict('sys.modules', {'app.db.clickhouse': MagicMock()}):
-            with patch('app.startup_checks.get_clickhouse_client', return_value=mock_context):
-                await checker.check_clickhouse()
+        # Mock the module and the function
+        mock_clickhouse_module = MagicMock()
+        mock_clickhouse_module.get_clickhouse_client = MagicMock(return_value=mock_context)
+        
+        with patch.dict('sys.modules', {'app.db.clickhouse': mock_clickhouse_module}):
+            await checker.check_clickhouse()
         
         assert len(checker.results) == 1
         result = checker.results[0]
@@ -506,11 +512,14 @@ class TestStartupChecker:
     @pytest.mark.asyncio
     async def test_check_clickhouse_failure(self, checker):
         """Test ClickHouse check failure"""
-        with patch.dict('sys.modules', {'app.db.clickhouse': MagicMock()}):
-            with patch('app.startup_checks.get_clickhouse_client', side_effect=Exception("Connection failed")):
-                with patch('app.startup_checks.settings') as mock_settings:
-                    mock_settings.environment = "development"
-                    await checker.check_clickhouse()
+        # Mock the module to raise an exception
+        mock_clickhouse_module = MagicMock()
+        mock_clickhouse_module.get_clickhouse_client = MagicMock(side_effect=Exception("Connection failed"))
+        
+        with patch.dict('sys.modules', {'app.db.clickhouse': mock_clickhouse_module}):
+            with patch('app.startup_checks.settings') as mock_settings:
+                mock_settings.environment = "development"
+                await checker.check_clickhouse()
         
         assert len(checker.results) == 1
         result = checker.results[0]
@@ -561,6 +570,32 @@ class TestStartupChecker:
         result = checker.results[0]
         assert result.name == "llm_providers"
         assert result.success is True  # Still succeeds with some providers
+        assert "1 available, 1 failed" in result.message
+    
+    @pytest.mark.asyncio
+    async def test_check_llm_providers_none_initialized(self, checker, mock_app):
+        """Test LLM providers check when provider returns None"""
+        mock_llm_manager = mock_app.state.llm_manager
+        
+        def mock_get_llm(name):
+            if name == 'anthropic-claude-3-sonnet':
+                return None  # Returns None instead of object
+            else:
+                return MagicMock()
+        
+        mock_llm_manager.get_llm.side_effect = mock_get_llm
+        
+        with patch('app.startup_checks.settings') as mock_settings:
+            mock_settings.llm_configs = {
+                'anthropic-claude-3-sonnet': {},  # Critical provider
+                'other-provider': {}
+            }
+            await checker.check_llm_providers()
+        
+        assert len(checker.results) == 1
+        result = checker.results[0]
+        assert result.name == "llm_providers"
+        # Should have 1 available (other-provider) and 1 failed (not initialized)
         assert "1 available, 1 failed" in result.message
     
     @pytest.mark.asyncio
@@ -886,6 +921,114 @@ class TestRunStartupChecks:
             # Should not raise an exception for non-critical failures
 
 
+# Test the logging and reporting aspects  
+class TestLoggingAndReporting:
+    """Test that logging is called correctly"""
+    
+    @pytest.mark.asyncio
+    async def test_run_startup_checks_logs_results(self):
+        """Test that run_startup_checks logs results correctly"""
+        mock_app = MagicMock()
+        
+        with patch('app.startup_checks.StartupChecker') as MockChecker:
+            mock_checker = AsyncMock()
+            MockChecker.return_value = mock_checker
+            mock_checker.run_all_checks.return_value = {
+                'success': True,
+                'total_checks': 10,
+                'passed': 10,
+                'failed_critical': 0,
+                'failed_non_critical': 0,
+                'duration_ms': 123.45,
+                'results': [],
+                'failures': []
+            }
+            
+            with patch('app.startup_checks.logger') as mock_logger:
+                results = await run_startup_checks(mock_app)
+                
+                # Verify logging calls
+                assert mock_logger.info.call_count >= 2
+                # Check that duration and results are logged
+                calls = [str(call) for call in mock_logger.info.call_args_list]
+                assert any('123' in str(call) for call in calls)  # Duration logged
+                assert any('10/10' in str(call) for call in calls)  # Results logged
+    
+    @pytest.mark.asyncio
+    async def test_run_startup_checks_logs_warnings(self):
+        """Test that run_startup_checks logs warnings for non-critical failures"""
+        mock_app = MagicMock()
+        
+        with patch('app.startup_checks.StartupChecker') as MockChecker:
+            mock_checker = AsyncMock()
+            MockChecker.return_value = mock_checker
+            
+            mock_failure = StartupCheckResult(
+                name="non_critical_check",
+                success=False,
+                message="Non-critical warning",
+                critical=False
+            )
+            
+            mock_checker.run_all_checks.return_value = {
+                'success': True,
+                'total_checks': 10,
+                'passed': 9,
+                'failed_critical': 0,
+                'failed_non_critical': 1,
+                'duration_ms': 100.0,
+                'results': [mock_failure],
+                'failures': [mock_failure]
+            }
+            
+            with patch('app.startup_checks.logger') as mock_logger:
+                results = await run_startup_checks(mock_app)
+                
+                # Verify warning was logged
+                assert mock_logger.warning.call_count >= 2
+                warning_calls = [str(call) for call in mock_logger.warning.call_args_list]
+                assert any('Non-critical' in str(call) for call in warning_calls)
+                assert any('non_critical_check' in str(call) for call in warning_calls)
+    
+    @pytest.mark.asyncio
+    async def test_run_startup_checks_logs_errors(self):
+        """Test that run_startup_checks logs errors for critical failures"""
+        mock_app = MagicMock()
+        
+        with patch('app.startup_checks.StartupChecker') as MockChecker:
+            mock_checker = AsyncMock()
+            MockChecker.return_value = mock_checker
+            
+            mock_failure = StartupCheckResult(
+                name="critical_check",
+                success=False,
+                message="Critical error",
+                critical=True
+            )
+            
+            mock_checker.run_all_checks.return_value = {
+                'success': False,
+                'total_checks': 10,
+                'passed': 9,
+                'failed_critical': 1,
+                'failed_non_critical': 0,
+                'duration_ms': 100.0,
+                'results': [mock_failure],
+                'failures': [mock_failure]
+            }
+            
+            with patch('app.startup_checks.logger') as mock_logger:
+                try:
+                    await run_startup_checks(mock_app)
+                except RuntimeError:
+                    pass  # Expected
+                
+                # Verify error was logged
+                assert mock_logger.error.call_count >= 2
+                error_calls = [str(call) for call in mock_logger.error.call_args_list]
+                assert any('Critical' in str(call) for call in error_calls)
+                assert any('critical_check' in str(call) for call in error_calls)
+
 # Additional edge case tests
 class TestEdgeCases:
     """Test edge cases and boundary conditions"""
@@ -933,12 +1076,15 @@ class TestEdgeCases:
             mock_context.__aenter__.return_value = mock_client
             mock_context.__aexit__.return_value = None
             
-            with patch.dict('sys.modules', {'app.db.clickhouse': MagicMock()}):
-                with patch('app.startup_checks.get_clickhouse_client', return_value=mock_context):
-                    checker.results = []  # Reset results
-                    await checker.check_clickhouse()
-                    
-                    assert checker.results[0].success is True
+            # Mock the module and the function
+            mock_clickhouse_module = MagicMock()
+            mock_clickhouse_module.get_clickhouse_client = MagicMock(return_value=mock_context)
+            
+            with patch.dict('sys.modules', {'app.db.clickhouse': mock_clickhouse_module}):
+                checker.results = []  # Reset results
+                await checker.check_clickhouse()
+                
+                assert checker.results[0].success is True
     
     @pytest.mark.asyncio
     async def test_concurrent_check_timing(self):

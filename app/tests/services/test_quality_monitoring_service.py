@@ -6,6 +6,11 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch, PropertyMock
 import pytest
 from collections import deque, defaultdict
+import sys
+
+# Mock ClickHouseManager before importing the service
+sys.modules['app.db.clickhouse'] = MagicMock()
+sys.modules['app.db.clickhouse'].ClickHouseManager = MagicMock
 
 from app.services.quality_monitoring_service import (
     QualityMonitoringService,

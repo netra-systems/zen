@@ -236,6 +236,14 @@ class TestTypeCompatibilityChecker:
         assert result.frontend_type == 'number'
         assert result.severity == TypeMismatchSeverity.CRITICAL
     
+    def test_check_field_compatibility_compatible_types(self):
+        """Test field compatibility with compatible but not exact types."""
+        checker = TypeCompatibilityChecker()
+        
+        # Test array compatibility (covers line 137)
+        result = checker.check_field_compatibility('List[str]', 'string[]', 'items')
+        assert result is None  # Compatible array types
+    
     def test_normalize_backend_type_optional(self):
         """Test normalizing Optional backend types."""
         checker = TypeCompatibilityChecker()
@@ -479,6 +487,50 @@ class TestSchemaValidator:
             assert email_mismatch is not None
             assert email_mismatch.backend_type == 'missing'
             assert email_mismatch.severity == TypeMismatchSeverity.INFO
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_validate_schemas_with_type_mismatch(self):
+        """Test validation with type mismatches (covers line 328)."""
+        typescript_content = """
+        export interface User {
+            id: string;
+            name: number;
+            active: string;
+        }
+        """
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.ts', delete=False) as f:
+            f.write(typescript_content)
+            temp_path = f.name
+        
+        try:
+            backend_schemas = {
+                'User': {
+                    'properties': {
+                        'id': {'type': 'int'},
+                        'name': {'type': 'str'},
+                        'active': {'type': 'bool'}
+                    }
+                }
+            }
+            
+            validator = SchemaValidator()
+            mismatches = validator.validate_schemas(backend_schemas, temp_path)
+            
+            # Should find type mismatches for all fields
+            assert len(mismatches) >= 3  # At least 3 mismatches
+            
+            # Check specific mismatches
+            id_mismatch = next((m for m in mismatches if m.field_path == 'User.id'), None)
+            assert id_mismatch is not None
+            assert id_mismatch.backend_type == 'int'
+            assert id_mismatch.frontend_type == 'string'
+            
+            name_mismatch = next((m for m in mismatches if m.field_path == 'User.name'), None)
+            assert name_mismatch is not None
+            assert name_mismatch.backend_type == 'str'
+            assert name_mismatch.frontend_type == 'number'
         finally:
             Path(temp_path).unlink()
     

@@ -347,46 +347,48 @@ class TestUpdateThread:
             mock_db.commit.assert_called_once()
     
     @pytest.mark.asyncio
-    async def test_update_thread_empty_metadata(self, mock_db, mock_user):
+    @patch('app.routes.threads_route.time.time')
+    async def test_update_thread_empty_metadata(self, mock_time, mock_db, mock_user):
         """Test updating thread with empty initial metadata"""
-        # Create a mock thread with None metadata and correct user_id
+        mock_time.return_value = 1234567900
+        
+        # Create a thread that has user_id but otherwise empty metadata 
         mock_thread = Mock()
         mock_thread.id = "thread_abc123"
         mock_thread.object = "thread"
         mock_thread.created_at = 1234567890
-        mock_thread.metadata_ = {"user_id": "test_user_123"}  # Has user_id but will be updated to None
+        
+        # Use a special dict that returns user_id on first get but then becomes None
+        class SpecialDict:
+            def __init__(self):
+                self.call_count = 0
+                self.data = {"user_id": "test_user_123"}
+                
+            def get(self, key, default=None):
+                self.call_count += 1
+                if self.call_count == 1 and key == "user_id":
+                    return "test_user_123"  # For access check
+                return default
+        
+        mock_thread.metadata_ = SpecialDict()
         
         with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo, \
              patch('app.routes.threads_route.MessageRepository') as MockMessageRepo:
             
             thread_repo = MockThreadRepo.return_value
-            thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
             
-            # After getting the thread, simulate it having None metadata to test line 186
-            def side_effect(db, thread_id):
-                mock_thread.metadata_ = {"user_id": "test_user_123"}  # For access check
+            def get_thread(db, thread_id):
+                # Reset metadata to None after access check
+                if hasattr(mock_thread.metadata_, 'call_count') and mock_thread.metadata_.call_count > 0:
+                    mock_thread.metadata_ = None
                 return mock_thread
-            
-            thread_repo.get_by_id = AsyncMock(side_effect=side_effect)
+                
+            thread_repo.get_by_id = AsyncMock(side_effect=get_thread)
             
             message_repo = MockMessageRepo.return_value
             message_repo.count_by_thread = AsyncMock(return_value=0)
             
             thread_update = ThreadUpdate(title="New Title")
-            
-            # Mock the metadata_ being None after access check but before update
-            original_get = mock_thread.metadata_.get
-            call_count = [0]
-            def mock_get(key, default=None):
-                call_count[0] += 1
-                if call_count[0] == 1 and key == "user_id":  # First call for access check
-                    return "test_user_123"
-                # After access check, set metadata to None to trigger line 186
-                if call_count[0] == 2:
-                    mock_thread.metadata_ = None
-                return default
-            
-            mock_thread.metadata_.get = mock_get
             
             result = await update_thread(
                 thread_id="thread_abc123",
@@ -395,8 +397,10 @@ class TestUpdateThread:
                 current_user=mock_user
             )
             
+            # Verify metadata was created and title was set
             assert mock_thread.metadata_ is not None
             assert mock_thread.metadata_["title"] == "New Title"
+            assert mock_thread.metadata_["updated_at"] == 1234567900
     
     @pytest.mark.asyncio
     async def test_update_thread_not_found(self, mock_db, mock_user):
@@ -796,14 +800,29 @@ class TestAutoRenameThread:
             assert exc_info.value.detail == "Access denied"
     
     @pytest.mark.asyncio
-    async def test_auto_rename_empty_metadata(self, mock_db, mock_user, mock_message):
+    @patch('app.routes.threads_route.time.time')
+    async def test_auto_rename_empty_metadata(self, mock_time, mock_db, mock_user, mock_message):
         """Test auto-rename when thread has no metadata"""
-        # Create a mock thread with proper user_id for access check
+        mock_time.return_value = 1234567900
+        
+        # Create a mock thread
         mock_thread = Mock()
         mock_thread.id = "thread_abc123"
         mock_thread.object = "thread"
         mock_thread.created_at = 1234567890
-        mock_thread.metadata_ = {"user_id": "test_user_123"}  # Has user_id for access check
+        
+        # Use a special dict that returns user_id on first get but then becomes None
+        class SpecialDict:
+            def __init__(self):
+                self.call_count = 0
+                
+            def get(self, key, default=None):
+                self.call_count += 1
+                if self.call_count == 1 and key == "user_id":
+                    return "test_user_123"  # For access check
+                return default
+        
+        mock_thread.metadata_ = SpecialDict()
         
         with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo, \
              patch('app.routes.threads_route.MessageRepository') as MockMessageRepo, \
@@ -811,7 +830,14 @@ class TestAutoRenameThread:
              patch('app.routes.threads_route.ws_manager') as mock_ws:
             
             thread_repo = MockThreadRepo.return_value
-            thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
+            
+            def get_thread(db, thread_id):
+                # Reset metadata to None after access check  
+                if hasattr(mock_thread.metadata_, 'call_count') and mock_thread.metadata_.call_count > 0:
+                    mock_thread.metadata_ = None
+                return mock_thread
+                
+            thread_repo.get_by_id = AsyncMock(side_effect=get_thread)
             
             message_repo = MockMessageRepo.return_value
             message_repo.find_by_thread = AsyncMock(return_value=[mock_message])
@@ -822,28 +848,17 @@ class TestAutoRenameThread:
             
             mock_ws.send_to_user = AsyncMock()
             
-            # Mock the metadata_ being None after access check but before update
-            original_get = mock_thread.metadata_.get
-            call_count = [0]
-            def mock_get(key, default=None):
-                call_count[0] += 1
-                if call_count[0] == 1 and key == "user_id":  # First call for access check
-                    return "test_user_123"
-                # After access check, set metadata to None to trigger line 348
-                if call_count[0] == 2:
-                    mock_thread.metadata_ = None
-                return default
-            
-            mock_thread.metadata_.get = mock_get
-            
             result = await auto_rename_thread(
                 thread_id="thread_abc123",
                 db=mock_db,
                 current_user=mock_user
             )
             
+            # Verify metadata was created and title was set
             assert mock_thread.metadata_ is not None
             assert mock_thread.metadata_["title"] == "New Title"
+            assert mock_thread.metadata_["auto_renamed"] is True
+            assert mock_thread.metadata_["updated_at"] == 1234567900
     
     @pytest.mark.asyncio
     async def test_auto_rename_title_cleanup(self, mock_db, mock_user, mock_thread, mock_message):

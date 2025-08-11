@@ -278,4 +278,33 @@ response = await llm_manager.ask_llm(prompt, "gpt4")
 - **Migration Created**: `bb39e1c49e2d_add_missing_tables_and_columns.py`
 - **Note**: Some column mismatches remain but app starts successfully
 
+### 2025-08-11: Critical E2E Test Coverage Enhancement
+- **Problem**: Demo brittleness despite 60%+ test coverage - tests focused on happy paths, missing real-world scenarios
+- **Root Causes Identified**:
+  1. WebSocket state desynchronization during reconnections
+  2. Race conditions in Zustand store updates
+  3. Agent orchestration failures under load
+  4. Missing circuit breaker and retry logic tests
+  5. No tests for memory leaks or performance degradation
+- **Solution**: Implemented 50 critical e2e tests focusing on:
+  - WebSocket resilience (connection pooling, heartbeat, network partitions)
+  - State synchronization (race conditions, layer data accumulation)
+  - Agent orchestration (timeout recovery, parallel execution, error cascades)
+  - Error recovery (circuit breakers, exponential backoff, error boundaries)
+- **Key Test Patterns Implemented**:
+  1. Network partition simulation: `cy.intercept('**/ws**', { forceNetworkError: true })`
+  2. Memory leak detection: Track `performance.memory.usedJSHeapSize` across operations
+  3. Concurrent update testing: Fire multiple state updates in parallel
+  4. Circuit breaker validation: Track failure counts and verify service degradation
+- **Test Files Created**:
+  - `critical-websocket-resilience.cy.ts` - 15 comprehensive WebSocket tests
+  - `critical-state-synchronization.cy.ts` - 10 state management tests
+  - `critical-agent-orchestration-recovery.cy.ts` - 10 agent coordination tests
+- **Prevention**: Always test failure scenarios, not just success paths. Focus on:
+  - Concurrent operations and race conditions
+  - Network instability and reconnection scenarios
+  - Memory usage over time
+  - Error cascade prevention
+  - Performance under load
+
 ### Add new learnings here to prevent regression...

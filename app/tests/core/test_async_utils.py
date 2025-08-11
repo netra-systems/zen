@@ -168,7 +168,11 @@ class TestAsyncTaskPool:
         task_pool._shutting_down = True
         
         with pytest.raises(ServiceError, match="Task pool is shutting down"):
-            await task_pool.submit_task(asyncio.sleep(0.01))
+            async def sample_task():
+                await asyncio.sleep(0.01)
+                return "result"
+            
+            await task_pool.submit_task(sample_task())
     
     @pytest.mark.asyncio
     async def test_submit_background_task(self, task_pool):
@@ -188,6 +192,16 @@ class TestAsyncTaskPool:
         # Allow cleanup to happen
         await asyncio.sleep(0.01)
         assert task not in task_pool._active_tasks
+    
+    def test_submit_background_task_during_shutdown(self, task_pool):
+        """Test background task submission during shutdown"""
+        task_pool._shutting_down = True
+        
+        with pytest.raises(ServiceError, match="Task pool is shutting down"):
+            async def background_task():
+                return "should_not_run"
+            
+            task_pool.submit_background_task(background_task())
     
     def test_active_task_count(self, task_pool):
         """Test active task count property"""
@@ -250,6 +264,23 @@ class TestAsyncTaskPool:
         # Task should be cancelled
         with pytest.raises(asyncio.CancelledError):
             await task
+    
+    @pytest.mark.asyncio
+    async def test_shutdown_idempotent(self, task_pool):
+        """Test that shutdown is idempotent"""
+        await task_pool.shutdown()
+        assert task_pool._shutting_down is True
+        
+        # Second shutdown should be no-op
+        await task_pool.shutdown()
+        assert task_pool._shutting_down is True
+    
+    @pytest.mark.asyncio
+    async def test_shutdown_no_tasks(self, task_pool):
+        """Test shutdown with no active tasks"""
+        await task_pool.shutdown()
+        assert task_pool._shutting_down is True
+        assert len(task_pool._active_tasks) == 0
 
 
 class TestAsyncRateLimiter:
@@ -742,6 +773,80 @@ class TestAsyncConnectionPool:
         with pytest.raises(ServiceError, match="Connection pool is closed"):
             async with connection_pool.acquire():
                 pass
+    
+    @pytest.mark.asyncio
+    async def test_acquire_timeout_when_no_connections(self):
+        """Test acquire timeout when pool is empty"""
+        async def create_connection():
+            await asyncio.sleep(10)  # Very slow creation
+            return "connection"
+        
+        async def close_connection(conn):
+            pass
+        
+        pool = AsyncConnectionPool(
+            create_connection=create_connection,
+            close_connection=close_connection,
+            max_size=1,
+            min_size=0
+        )
+        
+        with pytest.raises(asyncio.TimeoutError):
+            async with asyncio.timeout(0.1):
+                async with pool.acquire() as conn:
+                    pass
+    
+    @pytest.mark.asyncio
+    async def test_connection_pool_queue_full(self):
+        """Test handling when connection pool queue is full"""
+        connections_closed = []
+        
+        async def create_connection():
+            return f"conn_{len(connections_closed)}"
+        
+        async def close_connection(conn):
+            connections_closed.append(conn)
+        
+        pool = AsyncConnectionPool(
+            create_connection=create_connection,
+            close_connection=close_connection,
+            max_size=1,
+            min_size=1
+        )
+        
+        await pool.initialize()
+        
+        # Manually fill the queue
+        for i in range(pool._available_connections.maxsize):
+            try:
+                await pool._available_connections.put(f"extra_conn_{i}")
+            except asyncio.QueueFull:
+                break
+        
+        # Acquire and release should handle full queue
+        async with pool.acquire() as conn:
+            pass  # Connection acquired
+        
+        # The extra connection should have been closed
+        # since the queue was full
+    
+    @pytest.mark.asyncio
+    async def test_close_pool_with_timeout_on_empty(self):
+        """Test closing pool when getting connection times out"""
+        async def create_connection():
+            return "connection"
+        
+        async def close_connection(conn):
+            pass
+        
+        pool = AsyncConnectionPool(
+            create_connection=create_connection,
+            close_connection=close_connection
+        )
+        
+        # Don't initialize, so queue is empty
+        await pool.close()
+        assert pool._closed is True
 
 
 class TestGlobalInstances:
@@ -830,6 +935,23 @@ class TestShutdownAsyncUtils:
         
         assert resource_manager._shutting_down is True
         assert task_pool._shutting_down is True
+    
+    @pytest.mark.asyncio
+    async def test_shutdown_with_thread_pool_executor(self):
+        """Test shutdown including thread pool executor"""
+        # First use run_in_threadpool to create the executor
+        def sync_func():
+            return "result"
+        
+        result = await run_in_threadpool(sync_func)
+        assert result == "result"
+        assert hasattr(run_in_threadpool, '_executor')
+        
+        # Now shutdown should also clean up the executor
+        await shutdown_async_utils()
+        
+        # The executor should be shut down (we can't easily verify this,
+        # but at least ensure no errors occurred)
 
 
 class TestIntegrationScenarios:
