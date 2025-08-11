@@ -20,6 +20,7 @@ from app.config import settings
 from app.schemas import ContentGenParams, LogGenParams, SyntheticDataGenParams, ContentCorpus
 from app.data.synthetic.content_generator import META_PROMPTS
 from app.db.clickhouse_base import ClickHouseDatabase
+from app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 from app.db.models_clickhouse import get_content_corpus_schema, get_llm_events_table_schema
 from app.data.ingestion import ingest_records
 from app.data.content_corpus import DEFAULT_CONTENT_CORPUS
@@ -37,13 +38,14 @@ async def get_corpus_from_clickhouse(table_name: str) -> dict:
     """Fetches the content corpus from a specified ClickHouse table."""
     db = None
     try:
-        db = ClickHouseDatabase(
+        base_db = ClickHouseDatabase(
             host=settings.clickhouse_https.host,
             port=settings.clickhouse_https.port,
             user=settings.clickhouse_https.user,
             password=settings.clickhouse_https.password,
             database=settings.clickhouse_https.database
         )
+        db = ClickHouseQueryInterceptor(base_db)
         
         query = f"SELECT workload_type, prompt, response FROM {table_name}"
         results = await db.execute_query(query)
@@ -73,13 +75,14 @@ async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str =
 
     db = None
     try:
-        db = ClickHouseDatabase(
+        base_db = ClickHouseDatabase(
             host=settings.clickhouse_https.host,
             port=settings.clickhouse_https.port,
             user=settings.clickhouse_https.user,
             password=settings.clickhouse_https.password,
             database=settings.clickhouse_https.database
         )
+        db = ClickHouseQueryInterceptor(base_db)
         
         table_schema = get_content_corpus_schema(table_name)
         await db.command(table_schema)
@@ -323,11 +326,12 @@ async def run_synthetic_data_generation_job(job_id: str, params: SyntheticDataGe
     
     await update_job_status(job_id, "running", progress=0, total_tasks=total_logs_to_gen, records_ingested=0)
 
-    client = ClickHouseDatabase(
+    base_client = ClickHouseDatabase(
         host=settings.clickhouse_https.host, port=settings.clickhouse_https.port,
         user=settings.clickhouse_https.user, password=settings.clickhouse_https.password,
         database=settings.clickhouse_https.database
     )
+    client = ClickHouseQueryInterceptor(base_client)
     
     try:
         # Create the destination table

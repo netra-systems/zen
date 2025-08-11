@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>WebSocket Communication System Specification</title>
+    <version>1.0</version>
+    <created>2025-08-11</created>
+    <author>Claude</author>
+    <purpose>Define the complete WebSocket event flow between agents and frontend</purpose>
+  </metadata>
+
+  <overview>
+    <description>
+      The Netra AI platform uses WebSocket communication for real-time updates from agents to the frontend.
+      This specification documents the current state, identifies issues, and provides requirements for coherent system operation.
+    </description>
+    <architecture>
+      Agent System → Supervisor → WebSocket Manager → Frontend → UI Layers
+    </architecture>
+  </overview>
+
+  <current_issues>
+    <issue priority="critical">
+      <title>Event Structure Mismatch</title>
+      <description>Backend uses inconsistent message structures ({type, payload} vs {event, data})</description>
+      <files>
+        <file>app/ws_manager.py:266-274</file>
+        <file>app/services/websocket/message_handler.py:86-92</file>
+      </files>
+    </issue>
+    
+    <issue priority="critical">
+      <title>Missing Unified Events</title>
+      <description>Frontend expects events that backend never sends</description>
+      <missing_events>
+        <event>agent_thinking - Shows intermediate reasoning</event>
+        <event>partial_result - Streaming content updates</event>
+        <event>tool_executing - Tool execution notifications</event>
+        <event>final_report - Complete analysis results</event>
+      </missing_events>
+      <files>
+        <file>frontend/store/unified-chat.ts:145-351</file>
+        <file>app/agents/supervisor_consolidated.py:170-175</file>
+      </files>
+    </issue>
+    
+    <issue priority="high">
+      <title>AgentStarted Payload Incomplete</title>
+      <description>Backend sends only run_id, frontend expects agent_name and timestamp</description>
+      <backend_payload>{"run_id": "string"}</backend_payload>
+      <frontend_expects>{"run_id": "string", "agent_name": "string", "timestamp": "number"}</frontend_expects>
+      <files>
+        <file>app/agents/supervisor_consolidated.py:174</file>
+        <file>frontend/store/unified-chat.ts:147-183</file>
+      </files>
+    </issue>
+    
+    <issue priority="medium">
+      <title>Duplicate WebSocket Systems</title>
+      <description>Frontend has both legacy and unified WebSocket handlers competing</description>
+      <files>
+        <file>frontend/hooks/useChatWebSocket.ts - Legacy system</file>
+        <file>frontend/store/unified-chat.ts - Unified system</file>
+      </files>
+    </issue>
+  </current_issues>
+
+  <event_catalog>
+    <section name="Agent Lifecycle Events">
+      <event name="agent_started" status="partial">
+        <description>Signals the beginning of agent execution</description>
+        <current_backend>
+          <payload>
+            <field name="run_id" type="string" required="true"/>
+          </payload>
+        </current_backend>
+        <required_payload>
+          <field name="run_id" type="string" required="true"/>
+          <field name="agent_name" type="string" required="true"/>
+          <field name="timestamp" type="number" required="true"/>
+        </required_payload>
+        <frontend_handler>frontend/store/unified-chat.ts:145-183</frontend_handler>
+      </event>
+      
+      <event name="agent_completed" status="implemented">
+        <description>Signals agent execution completion</description>
+        <payload>
+          <field name="agent_name" type="string" required="true"/>
+          <field name="duration_ms" type="number" required="true"/>
+          <field name="result" type="object" required="true"/>
+          <field name="metrics" type="object" required="false"/>
+        </payload>
+        <frontend_handler>frontend/store/unified-chat.ts:230-291</frontend_handler>
+      </event>
+      
+      <event name="sub_agent_update" status="implemented">
+        <description>Real-time status updates from individual agents</description>
+        <payload>
+          <field name="sub_agent_name" type="string" required="true"/>
+          <field name="state" type="SubAgentState" required="true"/>
+        </payload>
+        <frontend_handler>Legacy handler in useChatWebSocket.ts</frontend_handler>
+      </event>
+    </section>
+    
+    <section name="Progress Events" status="not_implemented">
+      <event name="agent_thinking">
+        <description>Intermediate reasoning updates from agents</description>
+        <required_payload>
+          <field name="thought" type="string" required="true"/>
+          <field name="agent_name" type="string" required="true"/>
+          <field name="step_number" type="number" required="false"/>
+          <field name="total_steps" type="number" required="false"/>
+        </required_payload>
+        <frontend_handler>frontend/store/unified-chat.ts:203-213</frontend_handler>
+      </event>
+      
+      <event name="partial_result">
+        <description>Streaming content updates as agent generates output</description>
+        <required_payload>
+          <field name="content" type="string" required="true"/>
+          <field name="agent_name" type="string" required="true"/>
+          <field name="is_complete" type="boolean" required="true"/>
+        </required_payload>
+        <frontend_handler>frontend/store/unified-chat.ts:215-228</frontend_handler>
+      </event>
+    </section>
+    
+    <section name="Tool Events" status="misaligned">
+      <event name="tool_executing">
+        <description>Tool execution start notification</description>
+        <required_payload>
+          <field name="tool_name" type="string" required="true"/>
+          <field name="agent_name" type="string" required="true"/>
+          <field name="timestamp" type="number" required="true"/>
+        </required_payload>
+        <frontend_handler>frontend/store/unified-chat.ts:186-201</frontend_handler>
+      </event>
+      
+      <event name="tool_call" status="backend_only">
+        <description>Current backend tool call event (needs alignment)</description>
+        <current_payload>
+          <field name="tool_name" type="string"/>
+          <field name="tool_args" type="object"/>
+          <field name="sub_agent_name" type="string"/>
+        </current_payload>
+      </event>
+    </section>
+    
+    <section name="Final Results">
+      <event name="final_report" status="not_implemented">
+        <description>Complete analysis results from agent pipeline</description>
+        <required_payload>
+          <field name="report" type="object" required="true"/>
+          <field name="total_duration_ms" type="number" required="true"/>
+          <field name="agent_metrics" type="array" required="false"/>
+          <field name="recommendations" type="array" required="false"/>
+          <field name="action_plan" type="array" required="false"/>
+        </required_payload>
+        <frontend_handler>frontend/store/unified-chat.ts:311-350</frontend_handler>
+      </event>
+    </section>
+  </event_catalog>
+
+  <ui_layer_requirements>
+    <layer name="Fast Layer" timing="0-100ms">
+      <purpose>Immediate visual feedback for user actions</purpose>
+      <displays>
+        <item>Agent name with iteration count</item>
+        <item>Active tools being executed</item>
+        <item>Connection status indicator</item>
+        <item>Run ID tracking</item>
+      </displays>
+      <events_consumed>
+        <event>agent_started</event>
+        <event>tool_executing</event>
+      </events_consumed>
+    </layer>
+    
+    <layer name="Medium Layer" timing="100ms-1s">
+      <purpose>Progressive updates during processing</purpose>
+      <displays>
+        <item>Agent thoughts and reasoning</item>
+        <item>Partial content accumulation</item>
+        <item>Step progress indicators</item>
+      </displays>
+      <events_consumed>
+        <event>agent_thinking</event>
+        <event>partial_result</event>
+      </events_consumed>
+    </layer>
+    
+    <layer name="Slow Layer" timing="1s+">
+      <purpose>Final results and comprehensive reports</purpose>
+      <displays>
+        <item>Completed agent results</item>
+        <item>Final reports with recommendations</item>
+        <item>Execution metrics and duration</item>
+        <item>Action plans</item>
+      </displays>
+      <events_consumed>
+        <event>agent_completed</event>
+        <event>final_report</event>
+      </events_consumed>
+    </layer>
+  </ui_layer_requirements>
+
+  <implementation_requirements>
+    <requirement priority="critical">
+      <title>Standardize Message Structure</title>
+      <description>All WebSocket messages MUST use consistent {type, payload} structure</description>
+      <implementation>
+        1. Update message_handler.py to use {type, payload}
+        2. Remove all {event, data} structures
+        3. Update WebSocketMessage model in schemas/Agent.py
+      </implementation>
+    </requirement>
+    
+    <requirement priority="critical">
+      <title>Implement Missing Events</title>
+      <description>Backend MUST send all events expected by frontend unified system</description>
+      <implementation>
+        1. Add agent_thinking event when LLM generates intermediate thoughts
+        2. Add partial_result event for streaming content
+        3. Add tool_executing event when tools start
+        4. Add final_report event with comprehensive results
+      </implementation>
+    </requirement>
+    
+    <requirement priority="high">
+      <title>Fix AgentStarted Payload</title>
+      <description>Include agent_name and timestamp in agent_started event</description>
+      <implementation>
+        Update supervisor_consolidated.py:174 to include:
+        - agent_name from the executing sub-agent
+        - timestamp from current time
+      </implementation>
+    </requirement>
+    
+    <requirement priority="medium">
+      <title>Consolidate WebSocket Handlers</title>
+      <description>Remove legacy WebSocket system, use only unified system</description>
+      <implementation>
+        1. Migrate all legacy handlers to unified system
+        2. Remove legacy message conversion code
+        3. Update all components to use unified store
+      </implementation>
+    </requirement>
+  </implementation_requirements>
+
+  <testing_requirements>
+    <test name="Event Flow Integration">
+      <description>Verify all events flow correctly from agents to UI layers</description>
+      <scenarios>
+        <scenario>Agent starts and all layers update appropriately</scenario>
+        <scenario>Tools execute and appear in fast layer</scenario>
+        <scenario>Partial results accumulate in medium layer</scenario>
+        <scenario>Final report displays in slow layer</scenario>
+      </scenarios>
+    </test>
+    
+    <test name="Event Payload Validation">
+      <description>Ensure all event payloads match expected structure</description>
+      <validations>
+        <validation>Schema validation for each event type</validation>
+        <validation>Required fields presence check</validation>
+        <validation>Type checking for all fields</validation>
+      </validations>
+    </test>
+    
+    <test name="Layer Update Timing">
+      <description>Verify layers update within expected time windows</description>
+      <timing_requirements>
+        <fast_layer max_latency="100ms"/>
+        <medium_layer max_latency="1000ms"/>
+        <slow_layer min_delay="1000ms"/>
+      </timing_requirements>
+    </test>
+  </testing_requirements>
+
+  <migration_plan>
+    <phase number="1" name="Event Structure Standardization">
+      <tasks>
+        <task>Update all backend WebSocket sends to use {type, payload}</task>
+        <task>Update WebSocketMessage schema</task>
+        <task>Test existing functionality still works</task>
+      </tasks>
+    </phase>
+    
+    <phase number="2" name="Add Missing Events">
+      <tasks>
+        <task>Implement agent_thinking in supervisor</task>
+        <task>Add partial_result streaming from LLM responses</task>
+        <task>Convert tool_call to tool_executing</task>
+        <task>Generate final_report at pipeline completion</task>
+      </tasks>
+    </phase>
+    
+    <phase number="3" name="Frontend Consolidation">
+      <tasks>
+        <task>Remove legacy WebSocket handlers</task>
+        <task>Update all components to use unified store</task>
+        <task>Remove duplicate event processing logic</task>
+      </tasks>
+    </phase>
+    
+    <phase number="4" name="Testing and Validation">
+      <tasks>
+        <task>Run comprehensive e2e tests</task>
+        <task>Validate all UI layers update correctly</task>
+        <task>Performance testing for event latency</task>
+      </tasks>
+    </phase>
+  </migration_plan>
+</specification>
