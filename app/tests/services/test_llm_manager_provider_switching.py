@@ -787,7 +787,7 @@ class TestLLMManagerLoadBalancing:
 class TestLLMManagerStructuredOutput:
     """Test LLM manager with structured output and provider switching"""
     
-    class TestSchema(BaseModel):
+    class OutputSchema(BaseModel):
         """Test schema for structured output"""
         summary: str
         confidence: float
