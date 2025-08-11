@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Sidebar } from '@/components/Sidebar';
+import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { Header } from '@/components/Header';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store';
@@ -24,10 +24,10 @@ export function AppWithLayout({ children }: AppWithLayoutProps) {
     <div
       className={cn(
         'grid min-h-screen w-full',
-        showSidebar && 'md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr]'
+        showSidebar && 'md:grid-cols-[320px_1fr]'
       )}
     >
-      {showSidebar && <Sidebar />}
+      {showSidebar && <ChatSidebar />}
       <div className="flex flex-col">
         <Header toggleSidebar={toggleSidebar} />
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">

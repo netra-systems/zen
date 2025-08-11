@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>UI/UX Swimlane 4: Visual Design & User Experience</name>
+        <type>ui_ux_visual_design</type>
+        <version>1.0</version>
+        <created>2025-08-11</created>
+        <parent>ui_ux_master.xml</parent>
+        <description>Defines the visual design system, glassmorphic styling, animations, and user experience patterns</description>
+    </metadata>
+    
+    <swimlane-context>
+        <position>Swimlane 4 of 5</position>
+        <responsibility>Consistent visual language, modern design patterns, and delightful user experience</responsibility>
+        <interfaces>
+            <provides to="all-swimlanes">Design tokens and styling</provides>
+            <enforces>Visual consistency across entire application</enforces>
+            <maintains>Accessibility and performance standards</maintains>
+        </interfaces>
+    </swimlane-context>
+    
+    <core-principles>
+        <principle id="glassmorphism">
+            <name>Glassmorphic Design Language</name>
+            <description>Modern glass-like UI with transparency, blur, and subtle borders</description>
+            <enforcement>All cards and panels use glassmorphic properties</enforcement>
+            <critical>NO BLUE GRADIENT BARS - use glassmorphism instead</critical>
+        </principle>
+        <principle id="motion-design">
+            <name>Purposeful Motion</name>
+            <description>Animations enhance understanding and delight, never distract</description>
+            <enforcement>All animations under 400ms, use ease-out curves</enforcement>
+        </principle>
+        <principle id="visual-hierarchy">
+            <name>Clear Visual Hierarchy</name>
+            <description>Information importance reflected through size, color, and spacing</description>
+            <enforcement>Consistent typography scale and spacing system</enforcement>
+        </principle>
+        <principle id="accessibility">
+            <name>Accessibility First</name>
+            <description>WCAG 2.1 AA compliance for all interactive elements</description>
+            <enforcement>Minimum contrast ratios, keyboard navigation, screen reader support</enforcement>
+        </principle>
+    </core-principles>
+    
+    <design-system>
+        <color-palette>
+            <primary>
+                <name>Emerald</name>
+                <base>#10B981</base>
+                <scale>
+                    <shade name="50">#ECFDF5</shade>
+                    <shade name="100">#D1FAE5</shade>
+                    <shade name="200">#A7F3D0</shade>
+                    <shade name="300">#6EE7B7</shade>
+                    <shade name="400">#34D399</shade>
+                    <shade name="500">#10B981</shade>
+                    <shade name="600">#059669</shade>
+                    <shade name="700">#047857</shade>
+                    <shade name="800">#065F46</shade>
+                    <shade name="900">#064E3B</shade>
+                </scale>
+                <usage>Primary actions, success states, active elements</usage>
+            </primary>
+            
+            <neutral>
+                <name>Zinc</name>
+                <base>#71717A</base>
+                <scale>
+                    <shade name="50">#FAFAFA</shade>
+                    <shade name="100">#F4F4F5</shade>
+                    <shade name="200">#E4E4E7</shade>
+                    <shade name="300">#D4D4D8</shade>
+                    <shade name="400">#A1A1AA</shade>
+                    <shade name="500">#71717A</shade>
+                    <shade name="600">#52525B</shade>
+                    <shade name="700">#3F3F46</shade>
+                    <shade name="800">#27272A</shade>
+                    <shade name="900">#18181B</shade>
+                </scale>
+                <usage>Text, borders, backgrounds</usage>
+            </neutral>
+            
+            <accent>
+                <name>Purple</name>
+                <base>#8B5CF6</base>
+                <usage>AI/agent indicators, special highlights</usage>
+            </accent>
+            
+            <semantic>
+                <error>#EF4444</error>
+                <warning>#F59E0B</warning>
+                <info>#3B82F6</info>
+                <success>#10B981</success>
+            </semantic>
+            
+            <backgrounds>
+                <main>rgba(255, 255, 255, 0.95)</main>
+                <card>rgba(255, 255, 255, 0.85)</card>
+                <overlay>rgba(0, 0, 0, 0.5)</overlay>
+                <glass>rgba(255, 255, 255, 0.7)</glass>
+            </backgrounds>
+        </color-palette>
+        
+        <typography>
+            <font-family>
+                <primary>Inter, system-ui, -apple-system, sans-serif</primary>
+                <monospace>JetBrains Mono, Monaco, Consolas, monospace</monospace>
+            </font-family>
+            
+            <scale>
+                <size name="xs">12px / 16px line-height</size>
+                <size name="sm">14px / 20px line-height</size>
+                <size name="base">16px / 24px line-height</size>
+                <size name="lg">18px / 28px line-height</size>
+                <size name="xl">20px / 32px line-height</size>
+                <size name="2xl">24px / 36px line-height</size>
+                <size name="3xl">30px / 40px line-height</size>
+            </scale>
+            
+            <weights>
+                <weight name="normal">400</weight>
+                <weight name="medium">500</weight>
+                <weight name="semibold">600</weight>
+                <weight name="bold">700</weight>
+            </weights>
+            
+            <styles>
+                <style name="heading">
+                    <font-weight>600</font-weight>
+                    <color>zinc-800</color>
+                    <letter-spacing>-0.025em</letter-spacing>
+                </style>
+                <style name="body">
+                    <font-weight>400</font-weight>
+                    <color>zinc-700</color>
+                    <line-height>1.6</line-height>
+                </style>
+                <style name="code">
+                    <font-family>monospace</font-family>
+                    <font-size>0.875em</font-size>
+                    <background>zinc-100</background>
+                    <padding>0.125em 0.25em</padding>
+                    <border-radius>0.25em</border-radius>
+                </style>
+            </styles>
+        </typography>
+        
+        <spacing>
+            <scale>
+                <space name="0">0px</space>
+                <space name="1">4px</space>
+                <space name="2">8px</space>
+                <space name="3">12px</space>
+                <space name="4">16px</space>
+                <space name="5">20px</space>
+                <space name="6">24px</space>
+                <space name="8">32px</space>
+                <space name="10">40px</space>
+                <space name="12">48px</space>
+                <space name="16">64px</space>
+                <space name="20">80px</space>
+            </scale>
+            
+            <usage>
+                <component-padding>16px (space-4)</component-padding>
+                <section-margin>32px (space-8)</section-margin>
+                <card-gap>12px (space-3)</card-gap>
+            </usage>
+        </spacing>
+    </design-system>
+    
+    <glassmorphic-patterns>
+        <base-properties>
+            ```css
+            .glassmorphic {
+                background: rgba(255, 255, 255, 0.85);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.18);
+                box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            }
+            ```
+        </base-properties>
+        
+        <variants>
+            <variant name="card">
+                <background>rgba(255, 255, 255, 0.85)</background>
+                <blur>12px</blur>
+                <border>1px solid rgba(255, 255, 255, 0.18)</border>
+                <shadow>0 8px 32px 0 rgba(31, 38, 135, 0.07)</shadow>
+            </variant>
+            
+            <variant name="modal">
+                <background>rgba(255, 255, 255, 0.95)</background>
+                <blur>20px</blur>
+                <border>1px solid rgba(255, 255, 255, 0.25)</border>
+                <shadow>0 20px 60px 0 rgba(31, 38, 135, 0.15)</shadow>
+            </variant>
+            
+            <variant name="sidebar">
+                <background>rgba(248, 248, 248, 0.9)</background>
+                <blur>16px</blur>
+                <border-right>1px solid rgba(0, 0, 0, 0.08)</border-right>
+                <shadow>4px 0 24px 0 rgba(0, 0, 0, 0.05)</shadow>
+            </variant>
+            
+            <variant name="button">
+                <background>rgba(255, 255, 255, 0.9)</background>
+                <blur>8px</blur>
+                <border>1px solid rgba(255, 255, 255, 0.3)</border>
+                <shadow>0 4px 12px 0 rgba(31, 38, 135, 0.05)</shadow>
+            </variant>
+        </variants>
+        
+        <dark-mode-adjustments>
+            <background>rgba(20, 20, 20, 0.85)</background>
+            <border>rgba(255, 255, 255, 0.1)</border>
+            <shadow>0 8px 32px 0 rgba(0, 0, 0, 0.3)</shadow>
+        </dark-mode-adjustments>
+    </glassmorphic-patterns>
+    
+    <animations>
+        <timing-functions>
+            <function name="ease-out-cubic">cubic-bezier(0.33, 1, 0.68, 1)</function>
+            <function name="ease-in-out-cubic">cubic-bezier(0.65, 0, 0.35, 1)</function>
+            <function name="spring">cubic-bezier(0.34, 1.56, 0.64, 1)</function>
+        </timing-functions>
+        
+        <durations>
+            <duration name="instant">0ms</duration>
+            <duration name="fast">150ms</duration>
+            <duration name="normal">300ms</duration>
+            <duration name="slow">400ms</duration>
+            <duration name="very-slow">600ms</duration>
+        </durations>
+        
+        <patterns>
+            <pattern name="fade-in">
+                <properties>opacity: 0 → 1</properties>
+                <duration>300ms</duration>
+                <easing>ease-out</easing>
+            </pattern>
+            
+            <pattern name="slide-up">
+                <properties>translateY: 20px → 0, opacity: 0 → 1</properties>
+                <duration>400ms</duration>
+                <easing>ease-out-cubic</easing>
+            </pattern>
+            
+            <pattern name="scale-in">
+                <properties>scale: 0.95 → 1, opacity: 0 → 1</properties>
+                <duration>300ms</duration>
+                <easing>ease-out-cubic</easing>
+            </pattern>
+            
+            <pattern name="expand">
+                <properties>height: 0 → auto</properties>
+                <duration>400ms</duration>
+                <easing>ease-in-out-cubic</easing>
+            </pattern>
+        </patterns>
+        
+        <micro-interactions>
+            <interaction name="hover">
+                <trigger>Mouse enter</trigger>
+                <effect>scale(1.02), shadow increase</effect>
+                <duration>200ms</duration>
+            </interaction>
+            
+            <interaction name="click">
+                <trigger>Mouse down</trigger>
+                <effect>scale(0.98)</effect>
+                <duration>100ms</duration>
+            </interaction>
+            
+            <interaction name="focus">
+                <trigger>Keyboard focus</trigger>
+                <effect>2px offset outline in primary color</effect>
+                <duration>150ms</duration>
+            </interaction>
+        </micro-interactions>
+    </animations>
+    
+    <component-styling>
+        <chat-sidebar>
+            <width>280px</width>
+            <background>glassmorphic sidebar variant</background>
+            <item-hover>background: rgba(0, 0, 0, 0.02)</item-hover>
+            <active-indicator>3px left border in emerald-500</active-indicator>
+            <scroll>Custom scrollbar with 8px width</scroll>
+        </chat-sidebar>
+        
+        <message-bubble>
+            <user>
+                <background>emerald-500</background>
+                <text-color>white</text-color>
+                <alignment>right</alignment>
+                <border-radius>18px 18px 4px 18px</border-radius>
+            </user>
+            <assistant>
+                <background>glassmorphic card variant</background>
+                <text-color>zinc-800</text-color>
+                <alignment>left</alignment>
+                <border-radius>18px 18px 18px 4px</border-radius>
+            </assistant>
+        </message-bubble>
+        
+        <response-card-layers>
+            <fast>
+                <height>48px</height>
+                <background>glassmorphic with higher opacity</background>
+                <border-bottom>1px solid rgba(0, 0, 0, 0.05)</border-bottom>
+            </fast>
+            <medium>
+                <min-height>100px</min-height>
+                <background>white with inset shadow</background>
+                <padding>16px</padding>
+            </medium>
+            <slow>
+                <background>gradient from white to zinc-50</background>
+                <section-spacing>20px</section-spacing>
+                <border-top>1px solid zinc-200</border-top>
+            </slow>
+        </response-card-layers>
+        
+        <input-area>
+            <background>glassmorphic card variant</background>
+            <border>1px solid zinc-200 focus:emerald-500</border>
+            <shadow>0 -4px 12px 0 rgba(0, 0, 0, 0.03)</shadow>
+            <textarea-resize>vertical only, max 200px</textarea-resize>
+        </input-area>
+    </component-styling>
+    
+    <responsive-design>
+        <breakpoints>
+            <breakpoint name="mobile">0-640px</breakpoint>
+            <breakpoint name="tablet">641-1024px</breakpoint>
+            <breakpoint name="desktop">1025-1536px</breakpoint>
+            <breakpoint name="wide">1537px+</breakpoint>
+        </breakpoints>
+        
+        <mobile-adaptations>
+            <sidebar>Full screen overlay with slide animation</sidebar>
+            <chat-input>Fixed bottom with safe area insets</chat-input>
+            <response-card>Stack layers vertically</response-card>
+            <font-size>Base 14px instead of 16px</font-size>
+        </mobile-adaptations>
+        
+        <tablet-adaptations>
+            <sidebar>Collapsible with hamburger menu</sidebar>
+            <content-width>Max 768px centered</content-width>
+        </tablet-adaptations>
+    </responsive-design>
+    
+    <accessibility>
+        <contrast-ratios>
+            <normal-text>4.5:1 minimum</normal-text>
+            <large-text>3:1 minimum</large-text>
+            <interactive>3:1 minimum</interactive>
+        </contrast-ratios>
+        
+        <keyboard-navigation>
+            <tab-order>Logical flow through interface</tab-order>
+            <focus-indicators>Visible outline on all interactive elements</focus-indicators>
+            <shortcuts>
+                <shortcut keys="Ctrl+N">New chat</shortcut>
+                <shortcut keys="Ctrl+K">Search chats</shortcut>
+                <shortcut keys="Ctrl+Enter">Send message</shortcut>
+                <shortcut keys="Ctrl+Shift+D">Toggle debug panel</shortcut>
+            </shortcuts>
+        </keyboard-navigation>
+        
+        <screen-readers>
+            <aria-labels>All interactive elements labeled</aria-labels>
+            <live-regions>Status updates announced</live-regions>
+            <semantic-html>Proper heading hierarchy</semantic-html>
+        </screen-readers>
+        
+        <motion-preferences>
+            <reduced-motion>Respect prefers-reduced-motion</reduced-motion>
+            <disable-animations>Option in settings</disable-animations>
+        </motion-preferences>
+    </accessibility>
+    
+    <performance-budgets>
+        <animation-fps>60fps minimum</animation-fps>
+        <interaction-latency>Under 100ms response</interaction-latency>
+        <paint-time>Under 16ms per frame</paint-time>
+        <css-specificity>Maximum 3 levels deep</css-specificity>
+    </performance-budgets>
+    
+    <testing-requirements>
+        <visual-regression>
+            <test>Component appearance across themes</test>
+            <test>Responsive layout at all breakpoints</test>
+            <test>Animation smoothness</test>
+        </visual-regression>
+        
+        <accessibility-testing>
+            <test>WCAG 2.1 AA compliance audit</test>
+            <test>Keyboard navigation flow</test>
+            <test>Screen reader compatibility</test>
+        </accessibility-testing>
+        
+        <performance-testing>
+            <test>Animation frame rate</test>
+            <test>Initial render time</test>
+            <test>Interaction responsiveness</test>
+        </performance-testing>
+    </testing-requirements>
+</specification>
