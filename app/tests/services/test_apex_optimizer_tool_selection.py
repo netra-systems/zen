@@ -264,7 +264,12 @@ class TestApexOptimizerToolSelection:
     @pytest.fixture
     def sample_agent_state(self):
         """Create sample agent state"""
-        request = RequestModel(query="Optimize our AI workload to reduce costs by 20%")
+        from app.schemas import Workload
+        request = RequestModel(
+            user_id="test_user_123",
+            query="Optimize our AI workload to reduce costs by 20%",
+            workloads=[Workload(name="main_workload", type="inference")]
+        )
         state = AgentState(request=request)
         return state
     
@@ -288,7 +293,12 @@ class TestApexOptimizerToolSelection:
     async def test_tool_selection_latency_optimization(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for latency optimization requests"""
         # Create latency-focused request
-        request = RequestModel(query="Improve response time and reduce latency for our AI system")
+        from app.schemas import Workload
+        request = RequestModel(
+            user_id="test_user_123",
+            query="Improve response time and reduce latency for our AI system",
+            workloads=[Workload(name="latency_workload", type="inference")]
+        )
         state = AgentState(request=request)
         
         # Execute tool selection
@@ -382,7 +392,12 @@ class TestApexOptimizerToolSelection:
     async def test_custom_tool_selection(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test custom tool selection logic"""
         # Create custom tool selection scenario
-        request = RequestModel(query="Custom optimization requirements")
+        from app.schemas import Workload
+        request = RequestModel(
+            user_id="test_user_123",
+            query="Custom optimization requirements",
+            workloads=[Workload(name="custom_workload", type="training")]
+        )
         state = AgentState(request=request)
         
         # Set custom LLM response

@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <title>Automatic Staging Environment System</title>
+  <version>1.0.0</version>
+  <created>2025-08-11</created>
+  <purpose>
+    Define comprehensive automatic staging environment creation for pull requests,
+    providing isolated testing environments with cost optimization and resource management.
+  </purpose>
+
+  <overview>
+    <description>
+      Automatic staging environments provide isolated, production-like environments
+      for every pull request, enabling thorough testing before merging to main.
+    </description>
+    <key_features>
+      - Automatic provisioning on PR creation
+      - Automatic teardown on PR close/merge
+      - Resource limiting and cost optimization
+      - Integration with existing test runner
+      - SSL/TLS with automatic certificates
+      - Database isolation with seeded test data
+      - WebSocket support for real-time features
+      - Preview URL generation with GitHub integration
+    </key_features>
+  </overview>
+
+  <architecture>
+    <components>
+      <component name="GitHub Actions">
+        <responsibility>Orchestrate staging lifecycle</responsibility>
+        <triggers>
+          - pull_request.opened
+          - pull_request.synchronize
+          - pull_request.closed
+          - pull_request.merged
+        </triggers>
+      </component>
+      
+      <component name="Terraform">
+        <responsibility>Infrastructure as Code management</responsibility>
+        <modules>
+          - gcp-staging-core: Core GCP resources
+          - gcp-networking: VPC, subnets, load balancers
+          - gcp-compute: Cloud Run, GKE autopilot
+          - gcp-data: Cloud SQL, Redis, ClickHouse
+          - gcp-security: IAM, secrets, certificates
+        </modules>
+      </component>
+      
+      <component name="Google Cloud Platform">
+        <services>
+          - Cloud Run: Application hosting (auto-scaling)
+          - Cloud SQL: PostgreSQL database
+          - Memorystore: Redis caching
+          - Cloud Storage: Static assets
+          - Cloud Load Balancing: HTTPS termination
+          - Cloud DNS: Dynamic subdomain management
+          - Secret Manager: Environment variables
+          - Cloud Build: Container builds
+          - Artifact Registry: Container storage
+        </services>
+      </component>
+    </components>
+
+    <workflow>
+      <step order="1">PR opened/updated trigger</step>
+      <step order="2">GitHub Action validates PR metadata</step>
+      <step order="3">Build containers (backend + frontend)</step>
+      <step order="4">Terraform plan staging infrastructure</step>
+      <step order="5">Apply Terraform with PR-specific namespace</step>
+      <step order="6">Deploy containers to Cloud Run</step>
+      <step order="7">Run database migrations</step>
+      <step order="8">Seed test data</step>
+      <step order="9">Execute test runner suite</step>
+      <step order="10">Update PR with staging URL and test results</step>
+      <step order="11">Monitor for PR close/merge</step>
+      <step order="12">Destroy infrastructure on PR close</step>
+    </workflow>
+  </architecture>
+
+  <configuration>
+    <file path=".github/staging.yml">
+      <setting name="auto_deploy" default="true">
+        Enable automatic staging for all PRs
+      </setting>
+      <setting name="required_labels" default="[]">
+        List of labels required for staging deployment
+      </setting>
+      <setting name="excluded_labels" default="['no-staging', 'WIP']">
+        PRs with these labels skip staging
+      </setting>
+      <setting name="max_staging_envs" default="10">
+        Maximum concurrent staging environments
+      </setting>
+      <setting name="default_test_level" default="integration">
+        Test level to run: smoke|unit|integration|comprehensive
+      </setting>
+      <setting name="staging_ttl_hours" default="168">
+        Auto-destroy staging after 7 days of inactivity
+      </setting>
+    </file>
+
+    <resource_limits>
+      <compute>
+        <cpu_limit>2</cpu_limit>
+        <memory_limit>4Gi</memory_limit>
+        <min_instances>0</min_instances>
+        <max_instances>3</max_instances>
+        <scale_to_zero_delay>15m</scale_to_zero_delay>
+      </compute>
+      
+      <database>
+        <tier>db-f1-micro</tier>
+        <storage_gb>10</storage_gb>
+        <backup_enabled>false</backup_enabled>
+        <high_availability>false</high_availability>
+      </database>
+      
+      <redis>
+        <tier>basic</tier>
+        <memory_gb>1</memory_gb>
+      </redis>
+    </resource_limits>
+
+    <cost_optimization>
+      <strategy name="scale-to-zero">
+        Cloud Run scales to 0 after 15 minutes of inactivity
+      </strategy>
+      <strategy name="spot-instances">
+        Use spot/preemptible instances where possible
+      </strategy>
+      <strategy name="resource-quotas">
+        Enforce project-wide quotas to prevent runaway costs
+      </strategy>
+      <strategy name="auto-cleanup">
+        Destroy environments after PR close or TTL expiry
+      </strategy>
+      <strategy name="shared-resources">
+        Share non-sensitive resources across staging envs (e.g., build cache)
+      </strategy>
+    </cost_optimization>
+  </configuration>
+
+  <environment_variables>
+    <variable name="STAGING_ENV" value="true" />
+    <variable name="PR_NUMBER" value="${github.event.pull_request.number}" />
+    <variable name="PR_BRANCH" value="${github.head_ref}" />
+    <variable name="STAGING_URL" value="https://pr-${PR_NUMBER}.staging.netra-ai.dev" />
+    <variable name="DATABASE_URL" value="postgresql://staging:${SECRET}@${DB_HOST}/netra_pr_${PR_NUMBER}" />
+    <variable name="REDIS_URL" value="redis://${REDIS_HOST}:6379/${PR_NUMBER}" />
+    <variable name="CLICKHOUSE_URL" value="clickhouse://${CLICKHOUSE_HOST}/staging_pr_${PR_NUMBER}" />
+    <variable name="DISABLE_AUTH" value="false" />
+    <variable name="TEST_MODE" value="true" />
+  </environment_variables>
+
+  <testing_integration>
+    <test_runner>
+      <command>python test_runner.py --level ${TEST_LEVEL} --staging</command>
+      <environment>STAGING_URL=${STAGING_URL}</environment>
+      <timeout>1800</timeout>
+      <retry_count>2</retry_count>
+    </test_runner>
+
+    <test_levels>
+      <level name="smoke" condition="commits < 3">
+        Quick validation for small changes
+      </level>
+      <level name="integration" condition="default">
+        Standard testing for most PRs
+      </level>
+      <level name="comprehensive" condition="label:requires-full-test">
+        Full test suite for critical changes
+      </level>
+    </test_levels>
+
+    <test_data>
+      <seed_script>scripts/seed_staging_data.py</seed_script>
+      <fixtures>
+        - 10 test users with various roles
+        - 50 optimization requests
+        - 100 metric data points
+        - Sample LLM responses
+      </fixtures>
+    </test_data>
+  </testing_integration>
+
+  <security>
+    <access_control>
+      <authentication>OAuth with GitHub</authentication>
+      <authorized_users>PR author + reviewers + maintainers</authorized_users>
+      <ip_whitelist>Optional IP restrictions</ip_whitelist>
+    </access_control>
+
+    <secrets_management>
+      <source>Google Secret Manager</source>
+      <rotation>Automatic for staging environments</rotation>
+      <isolation>Per-PR secret namespaces</isolation>
+    </secrets_management>
+
+    <network_security>
+      <ssl>Automatic Let's Encrypt certificates</ssl>
+      <firewall>Restrictive ingress rules</firewall>
+      <vpc>Isolated VPC per staging environment</vpc>
+    </network_security>
+  </security>
+
+  <monitoring>
+    <metrics>
+      <metric name="deployment_time">Time to create staging env</metric>
+      <metric name="test_duration">Time to run test suite</metric>
+      <metric name="resource_usage">CPU, memory, storage usage</metric>
+      <metric name="cost_per_pr">Estimated cost per staging env</metric>
+      <metric name="error_rate">Deployment failure rate</metric>
+    </metrics>
+
+    <alerts>
+      <alert condition="deployment_time > 10m">Slow deployment warning</alert>
+      <alert condition="cost_per_pr > $5">High cost warning</alert>
+      <alert condition="error_rate > 0.1">High failure rate alert</alert>
+    </alerts>
+
+    <logging>
+      <destination>Cloud Logging</destination>
+      <retention>7 days for staging logs</retention>
+      <structured>JSON formatted with PR metadata</structured>
+    </logging>
+  </monitoring>
+
+  <github_integration>
+    <status_checks>
+      <check name="staging/deploy">Deployment status</check>
+      <check name="staging/tests">Test execution status</check>
+      <check name="staging/health">Application health check</check>
+    </status_checks>
+
+    <pr_comments>
+      <deployment_comment>
+        🚀 **Staging Environment Ready**
+        
+        URL: ${STAGING_URL}
+        Status: ✅ Deployed
+        Test Results: ${TEST_RESULTS_URL}
+        
+        **Quick Links:**
+        - [Frontend](${STAGING_URL})
+        - [API Docs](${STAGING_URL}/docs)
+        - [Logs](${LOGS_URL})
+        
+        _Environment will be destroyed when PR is closed._
+      </deployment_comment>
+    </pr_comments>
+
+    <labels>
+      <label name="staging-deployed">Added when staging is ready</label>
+      <label name="staging-failed">Added on deployment failure</label>
+      <label name="no-staging">Skip staging deployment</label>
+    </labels>
+  </github_integration>
+
+  <cleanup>
+    <triggers>
+      - PR closed
+      - PR merged
+      - TTL expired
+      - Manual trigger
+    </triggers>
+
+    <process>
+      <step>Backup logs and test results</step>
+      <step>Terraform destroy infrastructure</step>
+      <step>Delete container images</step>
+      <step>Clean up DNS records</step>
+      <step>Remove secrets</step>
+      <step>Update PR with cleanup status</step>
+    </process>
+
+    <retention>
+      <logs>7 days after cleanup</logs>
+      <test_results>30 days after cleanup</test_results>
+      <metrics>90 days after cleanup</metrics>
+    </retention>
+  </cleanup>
+
+  <implementation_checklist>
+    <task status="pending">Create GitHub Actions workflows</task>
+    <task status="pending">Set up Terraform modules</task>
+    <task status="pending">Configure GCP project and APIs</task>
+    <task status="pending">Create staging configuration file</task>
+    <task status="pending">Implement test runner integration</task>
+    <task status="pending">Set up DNS wildcard for *.staging.netra-ai.dev</task>
+    <task status="pending">Create seed data scripts</task>
+    <task status="pending">Implement cost monitoring</task>
+    <task status="pending">Create cleanup automation</task>
+    <task status="pending">Write staging environment documentation</task>
+  </implementation_checklist>
+</specification>

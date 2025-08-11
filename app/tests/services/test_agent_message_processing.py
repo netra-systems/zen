@@ -11,11 +11,11 @@ class TestAgentMessageProcessing:
         """Test processing of user messages through agent service"""
         from unittest.mock import Mock
         
-        # Mock dependencies properly
-        mock_db = AsyncMock()
-        mock_llm = AsyncMock()
+        # Mock supervisor properly
+        mock_supervisor = AsyncMock()
+        mock_supervisor.run = AsyncMock(return_value={"status": "completed"})
         
-        agent_service = AgentService(mock_db, mock_llm)
+        agent_service = AgentService(mock_supervisor)
         
         # Mock the start_agent_run method
         agent_service.start_agent_run = AsyncMock(return_value="test_run_id_123")
@@ -36,11 +36,10 @@ class TestAgentMessageProcessing:
     
     async def test_handle_tool_execution(self):
         """Test handling of tool execution during message processing"""
-        # Mock dependencies
-        mock_db = AsyncMock()
-        mock_llm = AsyncMock()
+        # Mock supervisor
+        mock_supervisor = AsyncMock()
         
-        agent_service = AgentService(mock_db, mock_llm)
+        agent_service = AgentService(mock_supervisor)
         
         # Since AgentService might not have execute_tool method, we'll mock it
         if not hasattr(agent_service, 'execute_tool'):
