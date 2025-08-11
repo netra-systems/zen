@@ -70,9 +70,9 @@ class QueryBuilder:
                 arrayFirstIndex(x -> x = 'latency_ms', metrics.name) as idx,
                 arrayFirstIndex(x -> x = 'throughput', metrics.name) as idx2,
                 arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as idx3,
-                if(idx > 0, arrayElement(metrics.value, idx), 0) as metric_value,
-                if(idx2 > 0, arrayElement(metrics.value, idx2), 0) as throughput_value,
-                if(idx3 > 0, arrayElement(metrics.value, idx3), 0) as cost_value,
+                if(idx > 0, arrayElement(metrics.value, idx), 0.0) as metric_value,
+                if(idx2 > 0, arrayElement(metrics.value, idx2), 0.0) as throughput_value,
+                if(idx3 > 0, arrayElement(metrics.value, idx3), 0.0) as cost_value,
                 idx > 0 as has_latency,
                 idx2 > 0 as has_throughput,
                 idx3 > 0 as has_cost
@@ -101,8 +101,8 @@ class QueryBuilder:
         WITH baseline AS (
             SELECT
                 arrayFirstIndex(x -> x = '{metric_name}', metrics.name) as idx,
-                avg(if(idx > 0, arrayElement(metrics.value, idx), 0)) as mean_val,
-                stddevPop(if(idx > 0, arrayElement(metrics.value, idx), 0)) as std_val
+                avg(if(idx > 0, arrayElement(metrics.value, idx), 0.0)) as mean_val,
+                stddevPop(if(idx > 0, arrayElement(metrics.value, idx), 0.0)) as std_val
             FROM workload_events
             WHERE user_id = {user_id}
                 AND timestamp >= '{(start_time - timedelta(days=7)).isoformat()}'
@@ -111,7 +111,7 @@ class QueryBuilder:
         SELECT
             timestamp,
             arrayFirstIndex(x -> x = '{metric_name}', metrics.name) as idx,
-            if(idx > 0, arrayElement(metrics.value, idx), 0) as metric_value,
+            if(idx > 0, arrayElement(metrics.value, idx), 0.0) as metric_value,
             (metric_value - baseline.mean_val) / baseline.std_val as z_score,
             abs(z_score) > {z_score_threshold} as is_anomaly
         FROM workload_events, baseline
@@ -145,8 +145,8 @@ class QueryBuilder:
             SELECT
                 arrayFirstIndex(x -> x = '{metric1}', metrics.name) as idx1,
                 arrayFirstIndex(x -> x = '{metric2}', metrics.name) as idx2,
-                if(idx1 > 0, arrayElement(metrics.value, idx1), 0) as m1_value,
-                if(idx2 > 0, arrayElement(metrics.value, idx2), 0) as m2_value
+                if(idx1 > 0, arrayElement(metrics.value, idx1), 0.0) as m1_value,
+                if(idx2 > 0, arrayElement(metrics.value, idx2), 0.0) as m2_value
             FROM workload_events
             WHERE user_id = {user_id}
                 AND timestamp >= '{start_time.isoformat()}'
@@ -174,7 +174,7 @@ class QueryBuilder:
             SELECT
                 *,
                 arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as idx,
-                if(idx > 0, arrayElement(metrics.value, idx), 0) as cost_value,
+                if(idx > 0, arrayElement(metrics.value, idx), 0.0) as cost_value,
                 idx > 0 as has_cost
             FROM workload_events
             WHERE user_id = {user_id}
@@ -360,7 +360,7 @@ class DataSubAgent(BaseSubAgent):
         """Get cached schema information for a table"""
         try:
             async with get_clickhouse_client() as client:
-                result = await client.execute(f"DESCRIBE TABLE {table_name}")
+                result = await client.execute_query(f"DESCRIBE TABLE {table_name}")
                 return {
                     "columns": [{"name": row[0], "type": row[1]} for row in result],
                     "table": table_name
@@ -391,7 +391,7 @@ class DataSubAgent(BaseSubAgent):
             
             # Execute query
             async with get_clickhouse_client() as client:
-                result = await client.execute(query)
+                result = await client.execute_query(query)
             
                 # Convert to list of dicts
                 if result:

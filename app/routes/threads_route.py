@@ -298,3 +298,86 @@ async def get_thread_messages(
     except Exception as e:
         logger.error(f"Error getting messages for thread {thread_id}: {e}")
         raise HTTPException(status_code=500, detail="Failed to get thread messages")
+
+@router.post("/{thread_id}/auto-rename")
+async def auto_rename_thread(
+    thread_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_active_user)
+):
+    """Automatically generate a title for thread based on first message"""
+    try:
+        thread_repo = ThreadRepository()
+        message_repo = MessageRepository()
+        
+        thread = await thread_repo.get_by_id(db, thread_id)
+        
+        if not thread:
+            raise HTTPException(status_code=404, detail="Thread not found")
+        
+        # Verify user owns thread
+        if thread.metadata_.get("user_id") != current_user.id:
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        # Get first user message
+        messages = await message_repo.find_by_thread(db, thread_id, limit=5)
+        first_user_message = next((msg for msg in messages if msg.role == "user"), None)
+        
+        if not first_user_message:
+            raise HTTPException(status_code=400, detail="No user message found to generate title from")
+        
+        # Generate title using LLM
+        llm_manager = LLMManager()
+        prompt = f"""Generate a concise 3-5 word title for a conversation that starts with this message:
+        
+        "{first_user_message.content[:500]}"
+        
+        Return ONLY the title, no explanation or quotes."""
+        
+        try:
+            generated_title = await llm_manager.ask_llm(prompt, "triage")
+            # Clean up the title
+            generated_title = generated_title.strip().strip('"').strip("'")[:50]  # Max 50 chars
+        except Exception as llm_error:
+            logger.warning(f"LLM title generation failed: {llm_error}")
+            # Fallback to timestamp-based title
+            generated_title = f"Chat {int(time.time())}"
+        
+        # Update thread metadata
+        if not thread.metadata_:
+            thread.metadata_ = {}
+        
+        thread.metadata_["title"] = generated_title
+        thread.metadata_["auto_renamed"] = True
+        thread.metadata_["updated_at"] = int(time.time())
+        
+        await db.commit()
+        
+        # Send WebSocket event for UI update
+        await ws_manager.send_to_user(
+            current_user.id,
+            {
+                "type": "thread_renamed",
+                "thread_id": thread_id,
+                "new_title": generated_title,
+                "timestamp": int(time.time())
+            }
+        )
+        
+        message_count = await message_repo.count_by_thread(db, thread_id)
+        
+        return ThreadResponse(
+            id=thread.id,
+            object=thread.object,
+            title=generated_title,
+            created_at=thread.created_at,
+            updated_at=thread.metadata_.get("updated_at"),
+            metadata=thread.metadata_,
+            message_count=message_count
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error auto-renaming thread {thread_id}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to auto-rename thread")
