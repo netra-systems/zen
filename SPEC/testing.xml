@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>Testing Specification</title>
+    <version>1.0.0</version>
+    <description>Comprehensive testing guidelines, troubleshooting, and strategies for the Netra platform</description>
+    <created>2025-01-11</created>
+  </metadata>
+
+  <testing_strategy>
+    <principle>97% test coverage target with automated improvement via ultra-thinking</principle>
+    <principle>Test-first development for critical features</principle>
+    <principle>Continuous test improvement and self-healing capabilities</principle>
+    <principle>Import validation for all new dependencies</principle>
+  </testing_strategy>
+
+  <quick_reference>
+    <command_group name="Essential Testing Commands">
+      <command purpose="Quick validation before commit">python test_runner.py --mode quick</command>
+      <command purpose="Comprehensive with coverage">python test_runner.py --mode comprehensive</command>
+      <command purpose="Auto-improve to 97% coverage">python scripts/test_updater.py --execute-spec</command>
+      <command purpose="Autonomous test review">python scripts/test_autonomous_review.py --auto</command>
+    </command_group>
+  </quick_reference>
+
+  <test_categories>
+    <backend>
+      <category name="smoke" description="Quick health checks"/>
+      <category name="unit" description="Unit tests for services and utilities"/>
+      <category name="integration" description="API endpoint tests"/>
+      <category name="agent" description="Agent system tests"/>
+      <category name="websocket" description="WebSocket connection tests"/>
+      <category name="auth" description="Authentication tests"/>
+      <category name="database" description="Database repository tests"/>
+      <category name="critical" description="Critical path tests"/>
+    </backend>
+    <frontend>
+      <category name="smoke" description="Quick critical tests"/>
+      <category name="unit" description="Unit tests"/>
+      <category name="components" description="Component tests"/>
+      <category name="hooks" description="React hooks tests"/>
+      <category name="store" description="State management tests"/>
+      <category name="websocket" description="WebSocket provider tests"/>
+      <category name="auth" description="Authentication flow tests"/>
+      <category name="e2e" description="End-to-end Cypress tests"/>
+    </frontend>
+  </test_categories>
+
+  <coverage_requirements>
+    <target overall="97" backend="70" frontend="60"/>
+    <reports>
+      <report path="reports/coverage/html/index.html" type="backend"/>
+      <report path="reports/frontend-coverage/" type="frontend"/>
+      <report path="reports/test_report.json" type="json"/>
+      <report path="reports/test_report.md" type="markdown"/>
+    </reports>
+  </coverage_requirements>
+
+  <environment_configuration>
+    <variable name="TESTING" value="1"/>
+    <variable name="DATABASE_URL" value="sqlite+aiosqlite:///:memory:"/>
+    <variable name="REDIS_URL" value="redis://localhost:6379/1"/>
+    <variable name="SECRET_KEY" value="test-secret-key-for-testing-only"/>
+  </environment_configuration>
+
+  <troubleshooting>
+    <backend_issues>
+      <issue name="Missing Dependencies">
+        <solution>pip install sqlalchemy aiosqlite asyncpg psycopg2-binary</solution>
+      </issue>
+      <issue name="Database Test Failures">
+        <check>Ensure TESTING=1 environment variable is set</check>
+        <check>Verify conftest.py fixtures are working</check>
+      </issue>
+    </backend_issues>
+    
+    <frontend_issues>
+      <issue name="WebSocket Hook Tests">
+        <pattern type="correct">
+          <![CDATA[
+          const wrapper = ({ children }: { children: React.ReactNode }) => (
+            <WebSocketProvider>{children}</WebSocketProvider>
+          );
+          const { result } = renderHook(() => useWebSocket(), { wrapper });
+          ]]>
+        </pattern>
+      </issue>
+      
+      <issue name="Fetch Mock Issues">
+        <pattern type="incorrect">
+          <![CDATA[(fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => data });]]>
+        </pattern>
+        <pattern type="correct">
+          <![CDATA[
+          (fetch as jest.Mock).mockImplementationOnce(async () => ({
+            ok: true,
+            json: async () => data,
+          }));
+          ]]>
+        </pattern>
+      </issue>
+      
+      <issue name="Date.now Mock Issues">
+        <note>Already handled in jest.setup.ts - preserves original function</note>
+      </issue>
+      
+      <issue name="Hook API Mismatches">
+        <note>Always check actual hook implementation before testing</note>
+      </issue>
+      
+      <issue name="Test Timeouts">
+        <solution>Increase timeout for complex integration tests (e.g., 10000ms)</solution>
+      </issue>
+    </frontend_issues>
+  </troubleshooting>
+
+  <quick_fix_checklist>
+    <item>All dependencies installed (backend: SQLAlchemy, frontend: npm packages)</item>
+    <item>Mock implementations match actual API signatures</item>
+    <item>React hooks wrapped with appropriate providers</item>
+    <item>Async operations use proper mock implementations</item>
+    <item>Test timeouts adequate for operations being tested</item>
+    <item>Environment variables properly set (TESTING=1, etc.)</item>
+  </quick_fix_checklist>
+
+  <automated_improvement>
+    <ultra_thinking>
+      <command>python scripts/test_updater.py --ultra-think</command>
+      <description>Enable ultra-thinking deep analysis for intelligent test generation</description>
+    </ultra_thinking>
+    <continuous_review>
+      <command>python scripts/test_autonomous_review.py --continuous</command>
+      <description>Run continuous background review with self-healing capabilities</description>
+    </continuous_review>
+    <cycles>
+      <cycle type="daily" command="python scripts/test_updater.py --daily-cycle"/>
+      <cycle type="weekly" command="python scripts/test_updater.py --weekly-optimization"/>
+      <cycle type="monthly" command="python scripts/test_updater.py --monthly-comprehensive"/>
+    </cycles>
+  </automated_improvement>
+
+  <import_validation>
+    <backend>
+      <file>app/tests/test_internal_imports.py</file>
+      <file>app/tests/test_external_imports.py</file>
+    </backend>
+    <frontend>
+      <directory>frontend/__tests__/imports/</directory>
+    </frontend>
+    <requirement>Always update import tests when adding new modules or dependencies</requirement>
+  </import_validation>
+</specification>

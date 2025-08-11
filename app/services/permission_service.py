@@ -5,7 +5,7 @@ import os
 from typing import Dict, List, Optional, Set
 from sqlalchemy.orm import Session
 from app.db.models_postgres import User
-from app.core.logging_config import central_logger
+from app.logging_config import central_logger
 
 logger = central_logger
 

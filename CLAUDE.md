@@ -44,6 +44,12 @@ XML specifications are in `SPEC/*.xml`
 - `SPEC/conventions.xml` - Project conventions and coding standards
 - `SPEC/instructions.xml` - General development instructions
 - `SPEC/LEGACY_CODE_CLEANUP.xml` - Legacy code identification and cleanup procedures
+- `SPEC/unified_chat_ui_ux.xml` - **V5 OVERHAUL**: Modern glassmorphic chat UI without blue bars, proper thread management, overflow debugging panel
+  - Removes ALL legacy blue gradient bars
+  - Implements proper thread sidebar with chat isolation
+  - Adds developer overflow panel (Ctrl+Shift+D)
+  - Agent deduplication tracking
+  - Modern glassmorphic design system
 
 ### Unified Development Environment (NEW - RECOMMENDED)
 
@@ -497,6 +503,11 @@ python scripts/test_frontend.py --watch
    - Combines timestamp, counter, and random string for guaranteed uniqueness
    - Example: `generateUniqueId('msg')` for message IDs, `generateUniqueId('error')` for error IDs
    - Never use `Date.now()` alone as it can create duplicates in rapid succession
+10. **UI Design System**: Use modern glassmorphic design, NO blue gradient bars
+   - Background: `bg-white/95 backdrop-blur-md` instead of blue gradients
+   - Text: Use zinc color palette `text-zinc-800` for dark text
+   - Accents: Emerald-500 for primary, purple for AI agents
+   - NEVER use `bg-gradient-to-r from-blue-500` patterns
 
 ## Common Tasks
 
@@ -638,9 +649,14 @@ This means `metrics.name[0]` corresponds to `metrics.value[0]` and `metrics.unit
 
 ### Frontend Core
 - `frontend/hooks/useAgent.ts` - React hook for agent interactions
-- `frontend/store/` - Zustand stores
+- `frontend/store/unified-chat.ts` - Unified chat store with thread management and deduplication
 - `frontend/services/` - API client services
-- `frontend/types/` - TypeScript type definitions
+- `frontend/types/unified-chat.ts` - TypeScript type definitions for unified chat
+- `frontend/components/chat/ChatSidebar.tsx` - Thread navigation sidebar (NEW in v5)
+- `frontend/components/chat/OverflowPanel.tsx` - Developer debugging panel (Ctrl+Shift+D) (NEW in v5)
+- `frontend/components/chat/PersistentResponseCard.tsx` - Three-layer response card (NO BLUE BARS)
+- `frontend/components/chat/layers/FastLayer.tsx` - Modern glassmorphic fast layer (UPDATED in v5)
+- `frontend/components/chat/MainChat.tsx` - Main unified chat component (single version)
 
 ## Environment Variables
 
