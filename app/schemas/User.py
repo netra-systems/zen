@@ -24,3 +24,6 @@ class User(UserBase):
     class Config:
         from_attributes = True
         extra = "allow"
+
+# Alias for backward compatibility
+UserInDB = User

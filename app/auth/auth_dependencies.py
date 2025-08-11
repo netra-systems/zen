@@ -119,6 +119,20 @@ def require_admin():
         return user
     return admin_checker
 
+async def get_current_user_optional(
+    token: Optional[str] = Depends(oauth2_scheme),
+    db_session: AsyncSession = Depends(get_db_session),
+    security_service: SecurityService = Depends(get_security_service),
+) -> Optional[User]:
+    """Get current user without raising exceptions if authentication fails"""
+    if not token:
+        return None
+    try:
+        return await get_current_user(token, db_session, security_service)
+    except Exception as e:
+        logger.warning(f"Optional user authentication failed: {e}")
+        return None
+
 ActiveUserDep = Depends(get_current_active_user)
 ActiveUserWsDep = Depends(get_current_user_ws)
 DeveloperDep = Depends(require_developer())

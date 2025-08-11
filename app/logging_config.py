@@ -16,7 +16,11 @@ from app.core.unified_logging import (
     request_id_context,
     user_id_context,
     trace_id_context,
+    UnifiedLogger,
 )
+
+# Create alias for backward compatibility
+CentralLogger = UnifiedLogger
 
 # Re-export for backward compatibility
 __all__ = [
@@ -26,4 +30,6 @@ __all__ = [
     'request_id_context',
     'user_id_context',
     'trace_id_context',
+    'CentralLogger',
+    'UnifiedLogger',
 ]

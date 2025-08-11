@@ -13,9 +13,9 @@ from app.background import BackgroundTaskManager
 from app.agents.supply_researcher_sub_agent import SupplyResearcherAgent, ResearchType
 from app.services.supply_research_service import SupplyResearchService
 from app.llm.llm_manager import LLMManager
-from app.db.session import get_db
 from app.redis_manager import RedisManager
 from app.core.exceptions import NetraException
+from app.db.postgres import Database
 
 logger = logging.getLogger(__name__)
 
@@ -237,47 +237,43 @@ class SupplyResearchScheduler:
         
         try:
             # Get database session
-            db = next(get_db())
-            
-            # Create agent and service
-            supply_service = SupplyResearchService(db)
-            agent = SupplyResearcherAgent(self.llm_manager, db, supply_service)
-            
-            # Process research for each provider
-            research_result = await agent.process_scheduled_research(
-                schedule.research_type,
-                schedule.providers
-            )
-            
-            result["results"] = research_result.get("results", [])
-            result["status"] = "completed"
-            result["completed_at"] = datetime.utcnow().isoformat()
-            
-            # Cache result if Redis available
-            if self.redis_manager:
-                cache_key = f"schedule_result:{schedule.name}:{datetime.utcnow().date()}"
-                await self.redis_manager.set(
-                    cache_key,
-                    json.dumps(result, default=str),
-                    ex=86400  # Cache for 24 hours
+            db_manager = Database()
+            with db_manager.get_db() as db:
+                # Create agent and service
+                supply_service = SupplyResearchService(db)
+                agent = SupplyResearcherAgent(self.llm_manager, db, supply_service)
+                
+                # Process research for each provider
+                research_result = await agent.process_scheduled_research(
+                    schedule.research_type,
+                    schedule.providers
                 )
-            
-            # Check for significant changes and send notifications
-            await self._check_and_notify_changes(result, supply_service)
-            
-            # Update schedule
-            schedule.update_after_run()
-            
-            logger.info(f"Completed scheduled research: {schedule.name}")
+                
+                result["results"] = research_result.get("results", [])
+                result["status"] = "completed"
+                result["completed_at"] = datetime.utcnow().isoformat()
+                
+                # Cache result if Redis available
+                if self.redis_manager:
+                    cache_key = f"schedule_result:{schedule.name}:{datetime.utcnow().date()}"
+                    await self.redis_manager.set(
+                        cache_key,
+                        json.dumps(result, default=str),
+                        ex=86400  # Cache for 24 hours
+                    )
+                
+                # Check for significant changes and send notifications
+                await self._check_and_notify_changes(result, supply_service)
+                
+                # Update schedule
+                schedule.update_after_run()
+                
+                logger.info(f"Completed scheduled research: {schedule.name}")
             
         except Exception as e:
             logger.error(f"Failed to execute scheduled research {schedule.name}: {e}")
             result["status"] = "failed"
             result["error"] = str(e)
-        
-        finally:
-            if 'db' in locals():
-                db.close()
         
         return result
     
