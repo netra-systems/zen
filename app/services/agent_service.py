@@ -18,6 +18,7 @@ from app import schemas
 from app.ws_manager import manager
 from app.llm.llm_manager import LLMManager
 from app.db.postgres import get_async_db
+from app.dependencies import get_llm_manager
 from app.services.thread_service import ThreadService
 from app.services.message_handlers import MessageHandlerService
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -102,7 +103,7 @@ class AgentService:
             return data
         return message
 
-def get_agent_service(db_session = Depends(get_async_db), llm_manager: LLMManager = Depends(LLMManager)) -> AgentService:
+def get_agent_service(db_session = Depends(get_async_db), llm_manager: LLMManager = Depends(get_llm_manager)) -> AgentService:
     from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
     from app.agents.tool_dispatcher import ToolDispatcher
     tool_dispatcher = ToolDispatcher(db_session)

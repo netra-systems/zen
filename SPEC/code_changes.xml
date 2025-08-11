@@ -174,6 +174,36 @@
         <action>Update Docker images if needed</action>
       </actions>
     </checklist-item>
+    
+    <checklist-item id="dependency-injection" critical="true">
+      <title>Using Dependency Injection</title>
+      <description>
+        CRITICAL: Singleton services MUST be injected correctly to avoid missing configuration/secrets
+      </description>
+      <actions>
+        <action>Use dependency provider functions from app/dependencies.py</action>
+        <action>NEVER use Depends(ServiceClass) for singleton services</action>
+        <action>ALWAYS use Depends(get_service_name) for LLMManager, SecurityService, etc.</action>
+        <action>Verify API keys and configuration are loaded in injected services</action>
+      </actions>
+      <common-errors>
+        <error>
+          <incorrect>llm_manager: LLMManager = Depends(LLMManager)</incorrect>
+          <correct>llm_manager: LLMManager = Depends(get_llm_manager)</correct>
+          <symptom>Missing API keys, "API key for provider 'google' is missing" error</symptom>
+        </error>
+        <error>
+          <incorrect>security_service: SecurityService = Depends(SecurityService)</incorrect>
+          <correct>security_service: SecurityService = Depends(get_security_service)</correct>
+          <symptom>Missing key manager, encryption failures</symptom>
+        </error>
+      </common-errors>
+      <validation>
+        Test that injected services have proper configuration:
+        - Check llm_manager.settings has API keys populated
+        - Verify services are retrieved from app.state, not instantiated
+      </validation>
+    </checklist-item>
   </section>
   
   <section name="frontend-specific">
