@@ -66,8 +66,9 @@
                 <purpose>Development validation, component testing</purpose>
                 <command>python test_runner.py --level unit</command>
                 <timeout>120</timeout>
-                <coverage>false</coverage>
+                <coverage>true</coverage>
                 <components>backend+frontend</components>
+                <note>Coverage summary generated for unit level and above</note>
             </level>
             
             <level name="integration">
@@ -75,8 +76,9 @@
                 <purpose>Feature validation, API testing</purpose>
                 <command>python test_runner.py --level integration</command>
                 <timeout>300</timeout>
-                <coverage>false</coverage>
+                <coverage>true</coverage>
                 <components>backend+frontend</components>
+                <note>Coverage summary generated for unit level and above</note>
             </level>
             
             <level name="comprehensive">
@@ -93,8 +95,9 @@
                 <purpose>Essential functionality verification</purpose>
                 <command>python test_runner.py --level critical</command>
                 <timeout>120</timeout>
-                <coverage>false</coverage>
+                <coverage>true</coverage>
                 <components>backend_only</components>
+                <note>Coverage summary generated for unit level and above</note>
             </level>
         </test_levels>
         
@@ -113,14 +116,50 @@
         </fallback_runners>
         
         <report_generation>
-            <description>All tests automatically save reports to test_reports/ folder</description>
-            <formats>
-                <format>JSON (machine readable)</format>
-                <format>Markdown (human readable)</format>
-                <format>Latest report (overwrites for quick access)</format>
-            </formats>
-            <location>test_reports/</location>
-            <naming_convention>test_report_{level}_{timestamp}.{format}</naming_convention>
+            <description>Unified test report generation with history tracking</description>
+            
+            <latest_report>
+                <description>Always-current report that overwrites on each run</description>
+                <location>test_reports/latest_{level}_report.md</location>
+                <structure>
+                    <section order="1">Test Summary (total/passed/failed/skipped counts)</section>
+                    <section order="2">Coverage Summary (if level >= unit)</section>
+                    <section order="3">Environment Variables and Configuration</section>
+                    <section order="4">Test Output Details</section>
+                    <section order="5">Error Summary (if any failures)</section>
+                </structure>
+                <required_metrics>
+                    <metric>Total test count</metric>
+                    <metric>Passed test count</metric>
+                    <metric>Failed test count</metric>
+                    <metric>Skipped test count</metric>
+                    <metric>Test duration</metric>
+                    <metric>Coverage percentage (if applicable)</metric>
+                </required_metrics>
+            </latest_report>
+            
+            <history_tracking>
+                <description>Previous test reports archived for trend analysis</description>
+                <location>test_reports/history/</location>
+                <naming>test_report_{level}_{timestamp}.md</naming>
+                <process>
+                    <step>When running tests, check if latest report exists</step>
+                    <step>If exists, move to history folder with timestamp</step>
+                    <step>Generate new latest report in main folder</step>
+                </process>
+            </history_tracking>
+            
+            <deprecated_formats>
+                <format status="removed">Per-run JSON reports (test_report_{level}_{timestamp}.json)</format>
+                <format status="removed">Per-run MD reports (test_report_{level}_{timestamp}.md)</format>
+                <reason>Eliminated redundancy - history folder serves archival needs</reason>
+            </deprecated_formats>
+            
+            <coverage_requirements>
+                <requirement>Coverage summary MUST be generated for unit level and above</requirement>
+                <requirement>Coverage data included in report header for visibility</requirement>
+                <requirement>Branch coverage and line coverage both reported</requirement>
+            </coverage_requirements>
         </report_generation>
     </unified_test_runner>
     

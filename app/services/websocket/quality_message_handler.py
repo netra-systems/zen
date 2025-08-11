@@ -43,8 +43,8 @@ class QualityMetricsHandler(BaseMessageHandler):
             await manager.send_message(
                 user_id,
                 {
-                    "event": "quality_metrics",
-                    "data": report
+                    "type": "quality_metrics",
+                    "payload": report
                 }
             )
             
@@ -72,8 +72,8 @@ class QualityAlertHandler(BaseMessageHandler):
                 await manager.send_message(
                     user_id,
                     {
-                        "event": "quality_alerts_subscribed",
-                        "data": {"status": "subscribed"}
+                        "type": "quality_alerts_subscribed",
+                        "payload": {"status": "subscribed"}
                     }
                 )
             elif action == "unsubscribe":
@@ -81,8 +81,8 @@ class QualityAlertHandler(BaseMessageHandler):
                 await manager.send_message(
                     user_id,
                     {
-                        "event": "quality_alerts_unsubscribed",
-                        "data": {"status": "unsubscribed"}
+                        "type": "quality_alerts_unsubscribed",
+                        "payload": {"status": "unsubscribed"}
                     }
                 )
             
@@ -118,8 +118,8 @@ class QualityEnhancedStartAgentHandler(StartAgentHandler):
                 await manager.send_message(
                     user_id,
                     {
-                        "event": "quality_update",
-                        "data": quality_data
+                        "type": "quality_update",
+                        "payload": quality_data
                     }
                 )
             
@@ -168,8 +168,8 @@ class QualityValidationHandler(BaseMessageHandler):
             await manager.send_message(
                 user_id,
                 {
-                    "event": "content_validated",
-                    "data": {
+                    "type": "content_validated",
+                    "payload": {
                         "passed": result.passed,
                         "metrics": {
                             "overall_score": result.metrics.overall_score,
@@ -230,8 +230,8 @@ class QualityReportHandler(BaseMessageHandler):
             await manager.send_message(
                 user_id,
                 {
-                    "event": "quality_report_generated",
-                    "data": {
+                    "type": "quality_report_generated",
+                    "payload": {
                         "report": markdown_report,
                         "raw_data": report_data,
                         "timestamp": datetime.utcnow().isoformat()
@@ -326,8 +326,8 @@ class WebSocketQualityManager:
                 await manager.send_message(
                     user_id,
                     {
-                        "event": "quality_update",
-                        "data": update
+                        "type": "quality_update",
+                        "payload": update
                     }
                 )
             except Exception as e:
@@ -342,9 +342,11 @@ class WebSocketQualityManager:
                 await manager.send_message(
                     user_id,
                     {
-                        "event": "quality_alert",
-                        "data": alert,
-                        "severity": alert.get("severity", "info")
+                        "type": "quality_alert",
+                        "payload": {
+                            **alert,
+                            "severity": alert.get("severity", "info")
+                        }
                     }
                 )
             except Exception as e:

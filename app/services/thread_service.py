@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from app.db.models_postgres import Thread, Message, Assistant, Run
 from app.logging_config import central_logger
+from app.ws_manager import manager
 import uuid
 import time
 import json
@@ -36,6 +37,18 @@ class ThreadService:
                 await db.commit()
                 await db.refresh(thread)
                 logger.info(f"Created new thread for user {user_id}")
+                
+                # Send thread_created event
+                await manager.send_message(
+                    user_id,
+                    {
+                        "type": "thread_created",
+                        "payload": {
+                            "thread_id": thread_id,
+                            "timestamp": time.time()
+                        }
+                    }
+                )
             
             return thread
             
@@ -124,8 +137,9 @@ class ThreadService:
         instructions: Optional[str] = None
     ) -> Run:
         """Create a new run for a thread"""
+        run_id = f"run_{uuid.uuid4()}"
         run = Run(
-            id=f"run_{uuid.uuid4()}",
+            id=run_id,
             object="thread.run",
             created_at=int(time.time()),
             thread_id=thread_id,
@@ -142,7 +156,28 @@ class ThreadService:
         await db.commit()
         await db.refresh(run)
         
-        logger.info(f"Created run {run.id} for thread {thread_id}")
+        # Send run_started event
+        # Extract user_id from thread metadata
+        thread_result = await db.execute(
+            select(Thread).where(Thread.id == thread_id)
+        )
+        thread = thread_result.scalar_one_or_none()
+        if thread and thread.metadata_:
+            user_id = thread.metadata_.get("user_id")
+            if user_id:
+                await manager.send_message(
+                    user_id,
+                    {
+                        "type": "run_started",
+                        "payload": {
+                            "run_id": run_id,
+                            "thread_id": thread_id,
+                            "timestamp": time.time()
+                        }
+                    }
+                )
+        
+        logger.info(f"Created run {run_id} for thread {thread_id}")
         return run
     
     async def update_run_status(

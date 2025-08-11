@@ -50,6 +50,8 @@ class SubAgentState(BaseModel):
 
 class AgentStarted(BaseModel):
     run_id: str
+    agent_name: str = "Supervisor"
+    timestamp: float = Field(default_factory=lambda: datetime.now().timestamp())
 
 class AgentCompleted(BaseModel):
     run_id: str

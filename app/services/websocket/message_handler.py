@@ -86,7 +86,7 @@ class StartAgentHandler(BaseMessageHandler):
                 await manager.send_message(
                     user_id,
                     {
-                        "type": "agent_finished",
+                        "type": "agent_completed",
                         "payload": response
                     }
                 )
@@ -157,7 +157,7 @@ class UserMessageHandler(BaseMessageHandler):
                 await manager.send_message(
                     user_id,
                     {
-                        "type": "agent_finished",
+                        "type": "agent_completed",
                         "payload": response
                     }
                 )
@@ -167,8 +167,8 @@ class UserMessageHandler(BaseMessageHandler):
             await manager.send_message(
                 user_id,
                 {
-                    "event": "error",
-                    "data": {"error": str(e)}
+                    "type": "error",
+                    "payload": {"error": str(e)}
                 }
             )
 
@@ -209,9 +209,11 @@ class ThreadHistoryHandler(BaseMessageHandler):
                 await manager.send_message(
                     user_id,
                     {
-                        "event": "thread_history",
-                        "thread_id": thread.id,
-                        "messages": history
+                        "type": "thread_history",
+                        "payload": {
+                            "thread_id": thread.id,
+                            "messages": history
+                        }
                     }
                 )
         except Exception as e:
@@ -234,8 +236,8 @@ class StopAgentHandler(BaseMessageHandler):
         await manager.send_message(
             user_id,
             {
-                "event": "agent_stopped",
-                "data": {"status": "stopped"}
+                "type": "agent_stopped",
+                "payload": {"status": "stopped"}
             }
         )
 

@@ -45,25 +45,34 @@ class MockStructuredLLM:
         for field_name, field_info in self.schema.model_fields.items():
             if field_info.is_required():
                 # Provide mock values based on field type
-                if field_info.annotation == str:
+                annotation = field_info.annotation
+                
+                # Handle basic types
+                if annotation == str:
                     mock_data[field_name] = f"[Mock {field_name}]"
-                elif field_info.annotation == float:
+                elif annotation == float:
                     mock_data[field_name] = 0.5
-                elif field_info.annotation == int:
+                elif annotation == int:
                     mock_data[field_name] = 1
-                elif field_info.annotation == bool:
+                elif annotation == bool:
                     mock_data[field_name] = False
-                elif hasattr(field_info.annotation, '__origin__'):
-                    # Handle generic types like List, Dict
-                    origin = field_info.annotation.__origin__
+                elif annotation == dict:
+                    mock_data[field_name] = {}
+                elif annotation == list:
+                    mock_data[field_name] = []
+                elif hasattr(annotation, '__origin__'):
+                    # Handle generic types like List, Dict, Optional
+                    origin = annotation.__origin__
                     if origin == list:
                         mock_data[field_name] = []
                     elif origin == dict:
                         mock_data[field_name] = {}
                     else:
+                        # For Optional and other types, try to get first arg
                         mock_data[field_name] = None
                 else:
-                    mock_data[field_name] = None
+                    # For other types, provide empty dict for dict-like types
+                    mock_data[field_name] = {}
         
         return self.schema(**mock_data)
 

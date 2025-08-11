@@ -19,6 +19,7 @@ from enum import Enum
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import asyncio
+import time
 from app.logging_config import central_logger
 from app.agents.base import BaseSubAgent
 from app.schemas import (
@@ -171,7 +172,11 @@ class SupervisorAgent(BaseSubAgent):
                 await self._send_websocket_update(
                     context.user_id,
                     "agent_started",
-                    AgentStarted(run_id=run_id)
+                    AgentStarted(
+                        run_id=run_id,
+                        agent_name="Supervisor",
+                        timestamp=time.time()
+                    )
                 )
             
             # Initialize or load state
@@ -193,6 +198,14 @@ class SupervisorAgent(BaseSubAgent):
                         result=state.final_report or "Workflow completed successfully"
                     )
                 )
+                # Send final report event with full analysis
+                if state.final_report:
+                    await self._send_final_report(
+                        context.user_id,
+                        state.final_report,
+                        metrics=state.metrics if hasattr(state, 'metrics') else None,
+                        recommendations=state.recommendations if hasattr(state, 'recommendations') else None
+                    )
             
             # Record successful execution
             result = AgentExecutionResult(
@@ -346,6 +359,14 @@ class SupervisorAgent(BaseSubAgent):
                             state=state_obj
                         )
                     )
+                    # Send agent thinking event
+                    await self._send_agent_thinking(
+                        context.user_id,
+                        agent.name,
+                        f"Analyzing request and preparing to execute {agent.name}",
+                        step_number=state.step_count,
+                        total_steps=len(context.pipeline)
+                    )
                 
                 # Execute the agent (modifies state in place)
                 if context.timeout:
@@ -490,6 +511,59 @@ class SupervisorAgent(BaseSubAgent):
     async def _send_error(self, user_id: str, error_message: str) -> None:
         """Send error message via WebSocket"""
         await self.websocket_manager.send_error(user_id, error_message, "Supervisor")
+    
+    async def _send_agent_thinking(self, user_id: str, agent_name: str, thought: str, step_number: int = None, total_steps: int = None) -> None:
+        """Send agent thinking event for intermediate reasoning"""
+        await self._send_websocket_update(
+            user_id,
+            "agent_thinking",
+            {
+                "agent_name": agent_name,
+                "thought": thought,
+                "step_number": step_number,
+                "total_steps": total_steps,
+                "timestamp": time.time()
+            }
+        )
+    
+    async def _send_partial_result(self, user_id: str, agent_name: str, partial_content: str, progress: float = None) -> None:
+        """Send partial result for streaming content updates"""
+        await self._send_websocket_update(
+            user_id,
+            "partial_result",
+            {
+                "agent_name": agent_name,
+                "content": partial_content,
+                "progress": progress,
+                "timestamp": time.time()
+            }
+        )
+    
+    async def _send_tool_executing(self, user_id: str, agent_name: str, tool_name: str, tool_args: dict = None) -> None:
+        """Send tool execution notification"""
+        await self._send_websocket_update(
+            user_id,
+            "tool_executing",
+            {
+                "agent_name": agent_name,
+                "tool_name": tool_name,
+                "tool_args": tool_args or {},
+                "timestamp": time.time()
+            }
+        )
+    
+    async def _send_final_report(self, user_id: str, report: str, metrics: dict = None, recommendations: list = None) -> None:
+        """Send final report with complete analysis results"""
+        await self._send_websocket_update(
+            user_id,
+            "final_report",
+            {
+                "report": report,
+                "metrics": metrics or {},
+                "recommendations": recommendations or [],
+                "timestamp": time.time()
+            }
+        )
     
     async def _execute_hooks(self, event: str, *args, **kwargs) -> None:
         """Execute registered hooks for an event"""

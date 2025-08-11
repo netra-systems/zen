@@ -12,16 +12,16 @@ from app.llm.llm_manager import LLMManager, MockLLM, MockStructuredLLM
 from app.schemas import AppConfig, LLMConfig
 
 
-class TestResponseModel(BaseModel):
-    """Test model for structured generation."""
+class SampleResponseModel(BaseModel):
+    """Sample model for structured generation testing."""
     message: str
     confidence: float = Field(ge=0.0, le=1.0)
     tags: List[str] = Field(default_factory=list)
     metadata: Optional[dict] = None
 
 
-class TestComplexModel(BaseModel):
-    """Complex model with nested structures."""
+class SampleComplexModel(BaseModel):
+    """Complex model with nested structures for testing."""
     id: int
     name: str
     details: dict
@@ -56,21 +56,21 @@ class TestMockStructuredLLM:
     def test_mock_structured_llm_creation(self):
         """Test creating a mock structured LLM."""
         mock_llm = MockLLM("test-model")
-        structured_llm = mock_llm.with_structured_output(TestResponseModel)
+        structured_llm = mock_llm.with_structured_output(SampleResponseModel)
         
         assert isinstance(structured_llm, MockStructuredLLM)
         assert structured_llm.model_name == "test-model"
-        assert structured_llm.schema == TestResponseModel
+        assert structured_llm.schema == SampleResponseModel
     
     @pytest.mark.asyncio
     async def test_mock_structured_llm_invoke(self):
         """Test invoking mock structured LLM returns valid schema instance."""
         mock_llm = MockLLM("test-model")
-        structured_llm = mock_llm.with_structured_output(TestResponseModel)
+        structured_llm = mock_llm.with_structured_output(SampleResponseModel)
         
         result = await structured_llm.ainvoke("test prompt")
         
-        assert isinstance(result, TestResponseModel)
+        assert isinstance(result, SampleResponseModel)
         assert isinstance(result.message, str)
         assert 0.0 <= result.confidence <= 1.0
         assert isinstance(result.tags, list)
@@ -79,11 +79,11 @@ class TestMockStructuredLLM:
     async def test_mock_structured_llm_complex_model(self):
         """Test mock structured LLM with complex model."""
         mock_llm = MockLLM("test-model")
-        structured_llm = mock_llm.with_structured_output(TestComplexModel)
+        structured_llm = mock_llm.with_structured_output(SampleComplexModel)
         
         result = await structured_llm.ainvoke("test prompt")
         
-        assert isinstance(result, TestComplexModel)
+        assert isinstance(result, SampleComplexModel)
         assert isinstance(result.id, int)
         assert isinstance(result.name, str)
         assert isinstance(result.details, dict)
@@ -99,7 +99,7 @@ class TestLLMManagerStructuredGeneration:
         
         structured_llm = llm_manager.get_structured_llm(
             "test",
-            TestResponseModel
+            SampleResponseModel
         )
         
         assert isinstance(structured_llm, MockStructuredLLM)
@@ -114,7 +114,7 @@ class TestLLMManagerStructuredGeneration:
         
         structured_llm = llm_manager.get_structured_llm(
             "test",
-            TestResponseModel
+            SampleResponseModel
         )
         
         mock_llm_instance.with_structured_output.assert_called_once()
@@ -124,7 +124,7 @@ class TestLLMManagerStructuredGeneration:
     async def test_ask_structured_llm_success(self, llm_manager):
         """Test successful structured LLM call."""
         # Create a mock structured LLM that returns a valid response
-        mock_response = TestResponseModel(
+        mock_response = SampleResponseModel(
             message="Test response",
             confidence=0.95,
             tags=["test", "success"]
@@ -138,11 +138,11 @@ class TestLLMManagerStructuredGeneration:
             result = await llm_manager.ask_structured_llm(
                 "test prompt",
                 "test",
-                TestResponseModel,
+                SampleResponseModel,
                 use_cache=False
             )
             
-            assert isinstance(result, TestResponseModel)
+            assert isinstance(result, SampleResponseModel)
             assert result.message == "Test response"
             assert result.confidence == 0.95
             assert result.tags == ["test", "success"]
@@ -150,7 +150,7 @@ class TestLLMManagerStructuredGeneration:
     @pytest.mark.asyncio
     async def test_ask_structured_llm_with_cache(self, llm_manager):
         """Test structured LLM with caching."""
-        cached_data = TestResponseModel(
+        cached_data = SampleResponseModel(
             message="Cached response",
             confidence=0.85,
             tags=["cached"]
@@ -164,11 +164,11 @@ class TestLLMManagerStructuredGeneration:
             result = await llm_manager.ask_structured_llm(
                 "test prompt",
                 "test",
-                TestResponseModel,
+                SampleResponseModel,
                 use_cache=True
             )
             
-            assert isinstance(result, TestResponseModel)
+            assert isinstance(result, SampleResponseModel)
             assert result.message == "Cached response"
             assert result.confidence == 0.85
     
@@ -196,11 +196,11 @@ class TestLLMManagerStructuredGeneration:
                 result = await llm_manager.ask_structured_llm(
                     "test prompt",
                     "test",
-                    TestResponseModel,
+                    SampleResponseModel,
                     use_cache=False
                 )
                 
-                assert isinstance(result, TestResponseModel)
+                assert isinstance(result, SampleResponseModel)
                 assert result.message == "JSON fallback"
                 assert result.confidence == 0.75
     
@@ -223,7 +223,7 @@ class TestLLMManagerStructuredGeneration:
                     await llm_manager.ask_structured_llm(
                         "test prompt",
                         "test",
-                        TestResponseModel,
+                        SampleResponseModel,
                         use_cache=False
                     )
                 

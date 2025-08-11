@@ -81,8 +81,8 @@ class MessageHandlerService:
         await manager.send_message(
             user_id,
             {
-                "event": "agent_finished",
-                "data": response
+                "type": "agent_completed",
+                "payload": response
             }
         )
     
@@ -178,8 +178,8 @@ class MessageHandlerService:
                 await manager.send_message(
                     user_id,
                     {
-                        "event": "agent_finished",
-                        "data": response_data
+                        "type": "agent_completed",
+                        "payload": response_data
                     }
                 )
             except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
@@ -234,9 +234,11 @@ class MessageHandlerService:
         await manager.send_message(
             user_id,
             {
-                "event": "thread_history",
-                "thread_id": thread.id,
-                "messages": history
+                "type": "thread_history",
+                "payload": {
+                    "thread_id": thread.id,
+                    "messages": history
+                }
             }
         )
     
@@ -246,7 +248,7 @@ class MessageHandlerService:
         await manager.send_message(
             user_id,
             {
-                "event": "agent_stopped",
-                "data": {"status": "stopped"}
+                "type": "agent_stopped",
+                "payload": {"status": "stopped"}
             }
         )
