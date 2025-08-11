@@ -86,8 +86,8 @@ class StartAgentHandler(BaseMessageHandler):
                 await manager.send_message(
                     user_id,
                     {
-                        "event": "agent_finished",
-                        "data": response
+                        "type": "agent_finished",
+                        "payload": response
                     }
                 )
         except Exception as e:
@@ -157,8 +157,8 @@ class UserMessageHandler(BaseMessageHandler):
                 await manager.send_message(
                     user_id,
                     {
-                        "event": "agent_finished",
-                        "data": response
+                        "type": "agent_finished",
+                        "payload": response
                     }
                 )
                 
