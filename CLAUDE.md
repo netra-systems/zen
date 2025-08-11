@@ -229,6 +229,12 @@ response = await llm_manager.ask_llm(prompt, "gpt4")
 
 ## Recent Learnings (Update This Section!)
 
+### 2025-08-11: Running Tests from Subdirectories
+- **Problem**: When working in subdirectories (e.g., `alembic/`), test runner path needs adjustment
+- **Solution**: Use relative path `../test_runner.py` to run tests from subdirectories
+- **Important**: Comprehensive tests may timeout with default 2-minute limit, use higher timeout or run in background
+- **Command from alembic/**: `python ../test_runner.py --level comprehensive`
+
 ### 2025-08-11: Documentation Refresh Insights
 - **Multi-Agent Architecture**: 7 specialized sub-agents (Triage, Data, OptimizationsCore, ActionsToMeetGoals, Reporting, SyntheticData, CorpusAdmin)
 - **Apex Optimizer**: 30+ specialized optimization tools with dynamic routing

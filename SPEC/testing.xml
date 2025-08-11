@@ -3,8 +3,23 @@
     <metadata>
         <name>Testing Specification</name>
         <type>testing</type>
-        <version>2.1</version>
+        <version>3.1</version>
         <last_updated>2025-08-11</last_updated>
+        <changes>
+            <change version="3.0" date="2025-08-11">
+                - Coverage generation for unit level and above
+                - Restructured report format with test counts at top
+                - Removed per-run .md/.json files
+                - Added history folder for archiving
+                - Enhanced latest report structure
+            </change>
+            <change version="3.1" date="2025-08-11">
+                - Added real LLM testing capabilities
+                - Introduced --real-llm option for test runner
+                - Added dedicated test environments configuration
+                - Defined seed data management for real LLM tests
+            </change>
+        </changes>
     </metadata>
     
     <overview>
@@ -295,6 +310,267 @@
         </quality_validation>
     </e2e_real_llm_tests>
     
+    <real_llm_testing>
+        <description>
+            Comprehensive testing with actual LLM API calls for critical validation of agent behaviors,
+            response quality, and end-to-end workflows. Essential for validating real-world performance.
+        </description>
+        
+        <configuration>
+            <option name="--real-llm">
+                <description>Enable real LLM calls instead of mocks for test execution</description>
+                <command>python test_runner.py --level integration --real-llm</command>
+                <applicable_levels>unit, integration, comprehensive, critical</applicable_levels>
+                <note>Smoke tests always use mocks for speed</note>
+            </option>
+            
+            <option name="--llm-model">
+                <description>Specify which LLM model to use for testing</description>
+                <command>python test_runner.py --level integration --real-llm --llm-model gemini-1.5-flash</command>
+                <default>gemini-1.5-flash</default>
+                <alternatives>
+                    <model>gemini-1.5-pro</model>
+                    <model>gpt-4</model>
+                    <model>gpt-3.5-turbo</model>
+                    <model>claude-3-sonnet</model>
+                </alternatives>
+                <considerations>
+                    <consideration>Cost implications - Flash models are cheaper</consideration>
+                    <consideration>Rate limits vary by model</consideration>
+                    <consideration>Response quality differences</consideration>
+                </considerations>
+            </option>
+            
+            <option name="--llm-timeout">
+                <description>Timeout for individual LLM calls during testing</description>
+                <command>python test_runner.py --real-llm --llm-timeout 60</command>
+                <default>30</default>
+                <unit>seconds</unit>
+                <recommended_range>30-120</recommended_range>
+            </option>
+        </configuration>
+        
+        <test_environments>
+            <environment name="test_dedicated">
+                <description>Dedicated testing environment with isolated resources</description>
+                <database>
+                    <connection>TEST_DATABASE_URL</connection>
+                    <schema>netra_test</schema>
+                    <isolation_level>READ_COMMITTED</isolation_level>
+                    <setup_script>scripts/setup_test_db.sql</setup_script>
+                    <teardown_script>scripts/teardown_test_db.sql</teardown_script>
+                </database>
+                <redis>
+                    <connection>TEST_REDIS_URL</connection>
+                    <database_index>1</database_index>
+                    <namespace_prefix>test:</namespace_prefix>
+                </redis>
+                <clickhouse>
+                    <connection>TEST_CLICKHOUSE_URL</connection>
+                    <database>netra_test</database>
+                    <tables_prefix>test_</tables_prefix>
+                </clickhouse>
+                <llm_keys>
+                    <key_env>TEST_ANTHROPIC_API_KEY</key_env>
+                    <key_env>TEST_GOOGLE_API_KEY</key_env>
+                    <key_env>TEST_OPENAI_API_KEY</key_env>
+                    <note>Separate keys with lower rate limits for testing</note>
+                </llm_keys>
+            </environment>
+            
+            <environment name="staging_shared">
+                <description>Shared staging environment for pre-production validation</description>
+                <database>
+                    <connection>STAGING_DATABASE_URL</connection>
+                    <schema>netra_staging</schema>
+                    <note>Shared with staging deployments</note>
+                </database>
+                <caution>May have side effects on staging data</caution>
+            </environment>
+        </test_environments>
+        
+        <seed_data_management>
+            <description>Consistent seed data for reproducible real LLM tests</description>
+            
+            <data_sets>
+                <set name="basic_optimization">
+                    <path>test_data/seed/basic_optimization.json</path>
+                    <description>Basic cost and latency optimization scenarios</description>
+                    <records>
+                        <record type="user">5 test users with different permissions</record>
+                        <record type="thread">10 conversation threads</record>
+                        <record type="metrics">1000 sample metrics over 7 days</record>
+                        <record type="models">3 different model configurations</record>
+                    </records>
+                </set>
+                
+                <set name="complex_workflows">
+                    <path>test_data/seed/complex_workflows.json</path>
+                    <description>Multi-agent coordination and complex optimizations</description>
+                    <records>
+                        <record type="corpus">Pre-generated corpus entries</record>
+                        <record type="supply_chain">AI supply chain configurations</record>
+                        <record type="kv_cache">50 KV cache instances</record>
+                        <record type="benchmarks">Performance benchmark data</record>
+                    </records>
+                </set>
+                
+                <set name="edge_cases">
+                    <path>test_data/seed/edge_cases.json</path>
+                    <description>Boundary conditions and error scenarios</description>
+                    <records>
+                        <record type="malformed">Intentionally malformed requests</record>
+                        <record type="rate_limited">Rate limit simulation data</record>
+                        <record type="timeout">Long-running query scenarios</record>
+                        <record type="memory">High memory usage patterns</record>
+                    </records>
+                </set>
+            </data_sets>
+            
+            <loading_strategy>
+                <step>1. Check if test database exists, create if not</step>
+                <step>2. Clear existing test data with teardown script</step>
+                <step>3. Load seed data based on test requirements</step>
+                <step>4. Verify data integrity with checksums</step>
+                <step>5. Create snapshot for potential rollback</step>
+            </loading_strategy>
+            
+            <data_isolation>
+                <method>Transaction-based isolation per test</method>
+                <rollback>Automatic rollback after each test</rollback>
+                <parallel_support>Database-level isolation for parallel tests</parallel_support>
+            </data_isolation>
+        </seed_data_management>
+        
+        <execution_patterns>
+            <pattern name="sequential_critical">
+                <description>Run critical real LLM tests sequentially to avoid rate limits</description>
+                <command>python test_runner.py --level critical --real-llm --parallel 1</command>
+                <use_case>When testing with production API keys</use_case>
+            </pattern>
+            
+            <pattern name="parallel_development">
+                <description>Run with test API keys in parallel for speed</description>
+                <command>python test_runner.py --level unit --real-llm --parallel auto</command>
+                <use_case>Development testing with dedicated test keys</use_case>
+            </pattern>
+            
+            <pattern name="cost_controlled">
+                <description>Run subset of tests to control API costs</description>
+                <command>python test_runner.py --real-llm -k "test_critical" --llm-model gemini-1.5-flash</command>
+                <use_case>Regular CI/CD runs with cost constraints</use_case>
+            </pattern>
+            
+            <pattern name="comprehensive_validation">
+                <description>Full validation before major releases</description>
+                <command>python test_runner.py --level comprehensive --real-llm --llm-timeout 120</command>
+                <use_case>Pre-release validation</use_case>
+                <expected_duration>30-45 minutes</expected_duration>
+                <estimated_cost>$5-10 depending on model</estimated_cost>
+            </pattern>
+        </execution_patterns>
+        
+        <performance_expectations>
+            <metric name="response_time">
+                <flash_models>1-3 seconds per call</flash_models>
+                <pro_models>3-8 seconds per call</pro_models>
+                <timeout_threshold>30 seconds default, 120 for complex</timeout_threshold>
+            </metric>
+            
+            <metric name="test_duration">
+                <level name="unit_real">3-5 minutes (vs 1-2 with mocks)</level>
+                <level name="integration_real">10-15 minutes (vs 3-5 with mocks)</level>
+                <level name="comprehensive_real">30-45 minutes (vs 10-15 with mocks)</level>
+            </metric>
+            
+            <metric name="api_costs">
+                <model name="gemini-1.5-flash">~$0.50 per 100 tests</model>
+                <model name="gemini-1.5-pro">~$2.00 per 100 tests</model>
+                <model name="gpt-3.5-turbo">~$1.00 per 100 tests</model>
+                <model name="gpt-4">~$5.00 per 100 tests</model>
+            </metric>
+        </performance_expectations>
+        
+        <validation_criteria>
+            <criterion name="response_structure">
+                <check>Valid JSON/structured output</check>
+                <check>Required fields present</check>
+                <check>Appropriate response length</check>
+            </criterion>
+            
+            <criterion name="content_quality">
+                <check>Specificity score >= 0.6</check>
+                <check>Actionability score >= 0.6</check>
+                <check>No hallucinations in metrics</check>
+                <check>Consistent with seed data context</check>
+            </criterion>
+            
+            <criterion name="agent_coordination">
+                <check>Correct agent routing</check>
+                <check>Proper sub-agent invocation</check>
+                <check>Response layer accumulation</check>
+                <check>Error propagation handling</check>
+            </criterion>
+        </validation_criteria>
+        
+        <monitoring_and_reporting>
+            <metrics_collection>
+                <metric>Total LLM calls made</metric>
+                <metric>Average response time per model</metric>
+                <metric>Token usage statistics</metric>
+                <metric>API error rates</metric>
+                <metric>Cost estimation per run</metric>
+            </metrics_collection>
+            
+            <report_enhancement>
+                <section>Real LLM Test Summary</section>
+                <includes>
+                    <field>LLM model used</field>
+                    <field>Total API calls</field>
+                    <field>Average response time</field>
+                    <field>Estimated cost</field>
+                    <field>Quality gate pass rate</field>
+                </includes>
+            </report_enhancement>
+        </monitoring_and_reporting>
+        
+        <best_practices>
+            <practice>Use test API keys with lower rate limits to avoid production impact</practice>
+            <practice>Run real LLM tests selectively - not every commit needs them</practice>
+            <practice>Cache successful LLM responses for retry scenarios</practice>
+            <practice>Monitor API costs and set budget alerts</practice>
+            <practice>Use flash/cheaper models for most tests, pro models for critical validation</practice>
+            <practice>Implement exponential backoff for rate limit handling</practice>
+            <practice>Log all LLM interactions for debugging failed tests</practice>
+            <practice>Set up dedicated test data that doesn't change between runs</practice>
+            <practice>Use deterministic prompts to reduce response variability</practice>
+            <practice>Validate both successful responses and error handling paths</practice>
+        </best_practices>
+        
+        <troubleshooting>
+            <issue>
+                <problem>Rate limit errors during test execution</problem>
+                <solution>Add delays between tests or reduce parallelism with --parallel 1</solution>
+            </issue>
+            <issue>
+                <problem>Inconsistent test results between runs</problem>
+                <solution>Use temperature=0 for deterministic responses, ensure seed data consistency</solution>
+            </issue>
+            <issue>
+                <problem>High API costs from test runs</problem>
+                <solution>Use gemini-1.5-flash for most tests, limit comprehensive real LLM runs</solution>
+            </issue>
+            <issue>
+                <problem>Timeout errors with complex prompts</problem>
+                <solution>Increase --llm-timeout to 120 seconds for comprehensive tests</solution>
+            </issue>
+            <issue>
+                <problem>Database conflicts with parallel tests</problem>
+                <solution>Use transaction isolation or separate test databases per worker</solution>
+            </issue>
+        </troubleshooting>
+    </real_llm_testing>
+    
     <unified_commands>
         <command name="pre_commit" description="Quick pre-commit validation">
             python test_runner.py --level smoke
@@ -322,6 +598,21 @@
         </command>
         <command name="e2e_real" description="Real LLM E2E tests (direct pytest)">
             pytest app/tests/agents/test_example_prompts_e2e_real.py -v -s
+        </command>
+        <command name="real_llm_unit" description="Unit tests with real LLM calls">
+            python test_runner.py --level unit --real-llm
+        </command>
+        <command name="real_llm_integration" description="Integration tests with real LLM calls">
+            python test_runner.py --level integration --real-llm
+        </command>
+        <command name="real_llm_critical" description="Critical tests with real LLM (sequential)">
+            python test_runner.py --level critical --real-llm --parallel 1
+        </command>
+        <command name="real_llm_comprehensive" description="Full suite with real LLM (30-45 min)">
+            python test_runner.py --level comprehensive --real-llm --llm-timeout 120
+        </command>
+        <command name="real_llm_cheap" description="Cost-optimized real LLM testing">
+            python test_runner.py --real-llm --llm-model gemini-1.5-flash -k "test_critical"
         </command>
     </unified_commands>
     
@@ -481,4 +772,63 @@
             <includes>all routes/*</includes>
         </requirement>
     </coverage_requirements>
+    
+    <test_runner_implementation_requirements>
+        <description>Critical implementation requirements for test_runner.py</description>
+        
+        <coverage_generation>
+            <requirement priority="HIGH">
+                Coverage summary MUST be generated for unit level and above (not just comprehensive)
+            </requirement>
+            <implementation>
+                Modify TEST_LEVELS configuration to set run_coverage=True for unit, integration, critical, and comprehensive levels
+            </implementation>
+        </coverage_generation>
+        
+        <report_structure>
+            <requirement priority="HIGH">
+                Latest report MUST have test counts at the top (total, passed, failed, skipped)
+            </requirement>
+            <requirement priority="HIGH">
+                Coverage summary and environment info should be near the top of report
+            </requirement>
+            <implementation>
+                Restructure markdown report generation to follow this order:
+                1. Test Summary with counts
+                2. Coverage Summary (if applicable)
+                3. Environment/Configuration
+                4. Test Output
+                5. Error Details (if any)
+            </implementation>
+        </report_structure>
+        
+        <file_management>
+            <requirement priority="HIGH">
+                Delete per-run .md and .json files - only keep latest report
+            </requirement>
+            <requirement priority="HIGH">
+                Create history/ folder for archiving previous reports
+            </requirement>
+            <implementation>
+                1. Remove json_path and md_path generation in save_test_report()
+                2. Check if latest report exists before overwriting
+                3. If exists, move to history/ folder with timestamp
+                4. Write new latest report
+            </implementation>
+        </file_management>
+        
+        <test_counting>
+            <requirement priority="HIGH">
+                Parse pytest output to extract exact test counts
+            </requirement>
+            <implementation>
+                Use regex patterns to extract from pytest output:
+                - "X passed" pattern for passed count
+                - "X failed" pattern for failed count  
+                - "X skipped" pattern for skipped count
+                - "X errors" pattern for error count
+                - Calculate total from sum of all counts
+            </implementation>
+        </test_counting>
+    </test_runner_implementation_requirements>
 </specification>

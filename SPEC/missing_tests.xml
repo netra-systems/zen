@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>Missing Tests Specification</title>
+    <version>1.0.0</version>
+    <last_updated>2025-08-11</last_updated>
+    <description>
+      Comprehensive specification for identifying, prioritizing, and addressing missing test coverage
+      in the Netra AI Optimization Platform. This document serves as the authoritative guide for
+      systematic test coverage improvement.
+    </description>
+  </metadata>
+
+  <purpose>
+    <goal>Achieve 97% test coverage across all critical business logic and infrastructure</goal>
+    <objectives>
+      <objective>Identify untested and under-tested modules systematically</objective>
+      <objective>Prioritize test creation based on business risk and complexity</objective>
+      <objective>Track progress towards coverage goals</objective>
+      <objective>Prevent regression in test coverage</objective>
+    </objectives>
+  </purpose>
+
+  <test_coverage_criteria>
+    <critical_paths>
+      <path priority="P0" category="Agent Orchestration">
+        <description>Core agent orchestration and supervisor logic</description>
+        <risk_level>CRITICAL</risk_level>
+        <coverage_target>95%</coverage_target>
+        <key_files>
+          <file>app/agents/supervisor_consolidated.py</file>
+          <file>app/agents/supervisor.py</file>
+          <file>app/services/agent_service.py</file>
+        </key_files>
+      </path>
+      
+      <path priority="P0" category="WebSocket Communication">
+        <description>Real-time communication infrastructure</description>
+        <risk_level>CRITICAL</risk_level>
+        <coverage_target>95%</coverage_target>
+        <key_files>
+          <file>app/ws_manager.py</file>
+          <file>app/services/websocket/message_handler.py</file>
+          <file>frontend/services/webSocketService.ts</file>
+        </key_files>
+      </path>
+      
+      <path priority="P0" category="Authentication & Security">
+        <description>Authentication, authorization, and security services</description>
+        <risk_level>CRITICAL</risk_level>
+        <coverage_target>98%</coverage_target>
+        <key_files>
+          <file>app/auth/*.py</file>
+          <file>app/services/security_service.py</file>
+          <file>app/core/secret_manager.py</file>
+        </key_files>
+      </path>
+      
+      <path priority="P1" category="Database Operations">
+        <description>Repository pattern and database interactions</description>
+        <risk_level>HIGH</risk_level>
+        <coverage_target>90%</coverage_target>
+        <key_files>
+          <file>app/services/database/*.py</file>
+          <file>app/db/clickhouse.py</file>
+          <file>app/db/redis_manager.py</file>
+        </key_files>
+      </path>
+      
+      <path priority="P1" category="API Routes">
+        <description>REST API endpoints and route handlers</description>
+        <risk_level>HIGH</risk_level>
+        <coverage_target>90%</coverage_target>
+        <key_files>
+          <file>app/routes/*.py</file>
+        </key_files>
+      </path>
+      
+      <path priority="P2" category="Frontend State Management">
+        <description>Zustand stores and state synchronization</description>
+        <risk_level>MEDIUM</risk_level>
+        <coverage_target>85%</coverage_target>
+        <key_files>
+          <file>frontend/store/*.ts</file>
+          <file>frontend/hooks/*.ts</file>
+        </key_files>
+      </path>
+    </critical_paths>
+  </test_coverage_criteria>
+
+  <test_prioritization_matrix>
+    <priority_levels>
+      <level name="P0-Critical" criteria="Business critical + No tests">
+        <description>Components that can cause system-wide failure with zero test coverage</description>
+        <sla>Must be addressed within 1 sprint</sla>
+      </level>
+      
+      <level name="P1-High" criteria="High complexity + Limited tests">
+        <description>Complex components with insufficient test coverage</description>
+        <sla>Must be addressed within 2 sprints</sla>
+      </level>
+      
+      <level name="P2-Medium" criteria="User-facing + Some tests">
+        <description>UI components and user experience features</description>
+        <sla>Must be addressed within 1 month</sla>
+      </level>
+      
+      <level name="P3-Low" criteria="Utility functions + Basic coverage">
+        <description>Helper functions and utilities with basic test needs</description>
+        <sla>Best effort basis</sla>
+      </level>
+    </priority_levels>
+  </test_prioritization_matrix>
+
+  <test_types_required>
+    <test_type name="Unit Tests">
+      <description>Isolated component testing</description>
+      <focus_areas>
+        <area>Individual functions and methods</area>
+        <area>Class behavior</area>
+        <area>Edge cases and boundary conditions</area>
+      </focus_areas>
+    </test_type>
+    
+    <test_type name="Integration Tests">
+      <description>Component interaction testing</description>
+      <focus_areas>
+        <area>Service to repository interactions</area>
+        <area>API endpoint to service layer</area>
+        <area>Frontend to backend communication</area>
+      </focus_areas>
+    </test_type>
+    
+    <test_type name="E2E Tests">
+      <description>Complete user journey testing</description>
+      <focus_areas>
+        <area>Critical user workflows</area>
+        <area>Multi-agent orchestration flows</area>
+        <area>WebSocket connection lifecycle</area>
+      </focus_areas>
+    </test_type>
+    
+    <test_type name="Performance Tests">
+      <description>Load and stress testing</description>
+      <focus_areas>
+        <area>Concurrent user handling</area>
+        <area>Memory leak detection</area>
+        <area>Response time under load</area>
+      </focus_areas>
+    </test_type>
+    
+    <test_type name="Failure Scenario Tests">
+      <description>Error handling and recovery testing</description>
+      <focus_areas>
+        <area>Network failures and reconnection</area>
+        <area>Service unavailability handling</area>
+        <area>Error cascade prevention</area>
+        <area>Circuit breaker behavior</area>
+      </focus_areas>
+    </test_type>
+  </test_types_required>
+
+  <testing_patterns>
+    <pattern name="AAA Pattern">
+      <description>Arrange-Act-Assert pattern for unit tests</description>
+      <example>
+        def test_agent_routing():
+            # Arrange
+            agent = create_test_agent()
+            message = create_test_message()
+            
+            # Act
+            result = agent.route_message(message)
+            
+            # Assert
+            assert result.agent_type == "data"
+            assert result.confidence > 0.8
+      </example>
+    </pattern>
+    
+    <pattern name="Given-When-Then">
+      <description>BDD-style testing for integration tests</description>
+      <example>
+        def test_user_creates_thread():
+            # Given a logged-in user
+            user = create_authenticated_user()
+            
+            # When they create a new thread
+            thread = create_thread(user, "Test thread")
+            
+            # Then the thread should be persisted
+            assert thread.id is not None
+            assert thread.user_id == user.id
+      </example>
+    </pattern>
+    
+    <pattern name="Test Fixtures">
+      <description>Reusable test data and setup</description>
+      <example>
+        @pytest.fixture
+        def websocket_client():
+            client = TestWebSocketClient()
+            yield client
+            client.close()
+      </example>
+    </pattern>
+  </testing_patterns>
+
+  <coverage_tracking>
+    <metrics>
+      <metric name="Line Coverage" target="97%" current="~45%"/>
+      <metric name="Branch Coverage" target="90%" current="Unknown"/>
+      <metric name="Function Coverage" target="95%" current="Unknown"/>
+    </metrics>
+    
+    <reporting>
+      <report frequency="Weekly" format="JSON">
+        <location>test_reports/coverage_summary.json</location>
+      </report>
+      <report frequency="Per-Sprint" format="Markdown">
+        <location>test_reports/sprint_coverage_report.md</location>
+      </report>
+    </reporting>
+  </coverage_tracking>
+
+  <anti_patterns>
+    <anti_pattern name="Testing Implementation Details">
+      <description>Avoid testing private methods directly</description>
+      <solution>Test through public interfaces</solution>
+    </anti_pattern>
+    
+    <anti_pattern name="Brittle Tests">
+      <description>Tests that break with minor refactoring</description>
+      <solution>Focus on behavior, not structure</solution>
+    </anti_pattern>
+    
+    <anti_pattern name="Test Interdependence">
+      <description>Tests that depend on execution order</description>
+      <solution>Each test should be independent and isolated</solution>
+    </anti_pattern>
+    
+    <anti_pattern name="Ignoring Async Complexity">
+      <description>Not properly testing async/await code</description>
+      <solution>Use proper async test patterns and await assertions</solution>
+    </anti_pattern>
+  </anti_patterns>
+
+  <automation>
+    <pre_commit_hooks>
+      <hook>Run smoke tests before commit</hook>
+      <hook>Check test coverage delta</hook>
+      <hook>Verify no tests are skipped without justification</hook>
+    </pre_commit_hooks>
+    
+    <ci_pipeline>
+      <stage name="Unit Tests" timeout="5m"/>
+      <stage name="Integration Tests" timeout="10m"/>
+      <stage name="Coverage Report" threshold="97%"/>
+      <stage name="Performance Tests" frequency="nightly"/>
+    </ci_pipeline>
+  </automation>
+
+  <test_creation_guidelines>
+    <guideline priority="1">
+      <title>Start with the riskiest code</title>
+      <description>Focus on business-critical paths that have no tests</description>
+    </guideline>
+    
+    <guideline priority="2">
+      <title>Test the unhappy paths</title>
+      <description>Error scenarios often reveal more bugs than success paths</description>
+    </guideline>
+    
+    <guideline priority="3">
+      <title>Write tests before fixing bugs</title>
+      <description>Reproduce the bug in a test, then fix it</description>
+    </guideline>
+    
+    <guideline priority="4">
+      <title>Keep tests fast and focused</title>
+      <description>Each test should verify one specific behavior</description>
+    </guideline>
+    
+    <guideline priority="5">
+      <title>Use meaningful test names</title>
+      <description>Test names should describe what is being tested and expected outcome</description>
+    </guideline>
+  </test_creation_guidelines>
+
+  <continuous_improvement>
+    <process>
+      <step>Weekly coverage analysis using test_runner.py</step>
+      <step>Identify top 10 missing tests each sprint</step>
+      <step>Assign test creation tasks to team members</step>
+      <step>Review and merge test PRs with priority</step>
+      <step>Update this specification with learnings</step>
+    </process>
+    
+    <success_criteria>
+      <criterion>Coverage increases by at least 5% per sprint</criterion>
+      <criterion>No new code merged without tests</criterion>
+      <criterion>All P0 items addressed within SLA</criterion>
+      <criterion>Test execution time remains under 15 minutes</criterion>
+    </success_criteria>
+  </continuous_improvement>
+</specification>
