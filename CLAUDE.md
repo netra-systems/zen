@@ -134,6 +134,16 @@ See `SPEC/clickhouse.xml` for details
 - Frontend test args should avoid Jest-specific options in the unified runner
 **Solution**: Fix test_runner.py issues immediately, then run real tests
 
+### Test Focus Strategy
+**Avoid**: Testing basic Python functions, simple getters/setters, trivial utilities
+**Focus On**: 
+- Netra-specific business logic and integrations
+- Complex dependency interactions (database, Redis, ClickHouse, LLM providers)
+- Agent orchestration and WebSocket communication
+- API endpoints with authentication and authorization
+- Critical data flows and error handling scenarios
+- Performance and concurrency edge cases
+
 ## Quick Reference Paths
 
 ### When Working On:
