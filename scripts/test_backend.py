@@ -33,8 +33,8 @@ TEST_CATEGORIES = {
     "websocket": ["app/tests/test_websocket.py", "app/tests/routes/test_websocket_*.py"],
     "auth": ["app/tests/test_auth*.py", "app/tests/routes/test_*auth*.py"],
     "database": ["app/tests/services/database", "app/tests/test_database*.py"],
-    "critical": ["app/tests/test_main.py", "app/tests/test_agent_flow.py"],
-    "smoke": ["app/tests/routes/test_health_route.py", "app/tests/routes/test_health_endpoints.py", "app/tests/test_main.py"],
+    "critical": ["app/tests/test_api_endpoints_critical.py", "app/tests/test_agent_service_critical.py"],
+    "smoke": ["app/tests/routes/test_health_route.py", "app/tests/routes/test_health_endpoints.py", "app/tests/test_working_health.py"],
 }
 
 

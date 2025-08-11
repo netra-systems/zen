@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T10:31:08.538550  
+**Generated:** 2025-08-11T10:26:36.585845  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -8,12 +8,12 @@
 
 | Component | Status | Duration | Exit Code |
 |-----------|--------|----------|-----------|
-| Backend   | [FAILED] | 11.10s | 1 |
-| Frontend  | [TIMEOUT] | 61.55s | -1 |
+| Backend   | [FAILED] | 9.31s | 4 |
+| Frontend  | [TIMEOUT] | 58.10s | -1 |
 
 **Overall Status:** [FAILED]  
-**Total Duration:** 72.65s  
-**Final Exit Code:** 1
+**Total Duration:** 67.42s  
+**Final Exit Code:** 4
 
 ## Test Level Details
 
@@ -49,7 +49,7 @@ Test Configuration:
   Environment: testing
 
 Running command:
-  pytest app/tests/routes/test_health_route.py app/tests/routes/test_health_endpoints.py app/tests/test_working_health.py -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
+  pytest app/tests/routes/test_health_route.py app/tests/routes/test_health_endpoints.py app/tests/test_main.py -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
 ================================================================================
 [1m============================= test session starts =============================[0m
 platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
@@ -59,9 +59,15 @@ rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
 configfile: pytest.ini
 plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
 asyncio: mode=Mode.AUTO
-[1mcollecting ... [0mcollected 13 items
+[1mcollecting ... [0mcollected 0 items
 
-app\tests\routes\test_health_route.py::test_live_endpoint 
+[33m============================ [33mno tests ran[0m[33m in 0.03s[0m[33m ============================[0m
+================================================================================
+[FAIL] TESTS FAILED with exit code 4 after 8.11s
+================================================================================
+
+ERROR: file or directory not found: app/tests/test_main.py
+
 
 ```
 

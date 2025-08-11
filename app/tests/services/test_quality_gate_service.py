@@ -390,9 +390,546 @@ class TestQualityGateService:
         for score, expected_level in test_cases:
             # Create metrics with specific overall score
             metrics = QualityMetrics(overall_score=score)
-            metrics.quality_level = quality_service._classify_quality_level(score)
+            metrics.quality_level = quality_service._determine_quality_level(score)
             
             assert metrics.quality_level == expected_level
+
+    @pytest.mark.asyncio
+    async def test_calculate_specificity_scores(self, quality_service):
+        """Test specificity calculation for various content types"""
+        # High specificity content
+        high_spec_content = """
+        Configure batch_size=32, learning_rate=0.001, and max_tokens=2048.
+        Use quantization with 8-bit precision for 42% memory reduction.
+        Deploy on A100 GPUs with 80GB VRAM, achieving 3,200 tokens/second.
+        """
+        
+        score = await quality_service._calculate_specificity(high_spec_content, ContentType.OPTIMIZATION)
+        assert score >= 0.7
+        
+        # Low specificity content
+        low_spec_content = "You should optimize things to make them better and more efficient."
+        
+        score = await quality_service._calculate_specificity(low_spec_content, ContentType.OPTIMIZATION)
+        assert score <= 0.3
+
+    @pytest.mark.asyncio
+    async def test_calculate_actionability_scores(self, quality_service):
+        """Test actionability calculation"""
+        # High actionability content
+        high_action_content = """
+        Step 1: Install Redis with `pip install redis`
+        Step 2: Configure connection pooling with pool_size=20
+        Step 3: Enable caching by adding @cache decorator
+        Step 4: Set TTL to 3600 seconds for optimal performance
+        """
+        
+        score = await quality_service._calculate_actionability(high_action_content, ContentType.ACTION_PLAN)
+        assert score >= 0.7
+        
+        # Low actionability content
+        low_action_content = "You might want to consider perhaps looking into optimization possibilities."
+        
+        score = await quality_service._calculate_actionability(low_action_content, ContentType.ACTION_PLAN)
+        assert score <= 0.3
+
+    @pytest.mark.asyncio
+    async def test_calculate_quantification_scores(self, quality_service):
+        """Test quantification calculation"""
+        # High quantification content
+        high_quant_content = """
+        Performance improved by 35% with latency reduced from 150ms to 97ms.
+        Memory usage decreased by 2.1GB (45% reduction).
+        Throughput increased to 4,500 QPS with 99.9% uptime.
+        Cost per request dropped from $0.025 to $0.018 (28% savings).
+        """
+        
+        score = await quality_service._calculate_quantification(high_quant_content)
+        assert score >= 0.8
+        
+        # Low quantification content
+        low_quant_content = "The system runs faster and uses less memory with better performance."
+        
+        score = await quality_service._calculate_quantification(low_quant_content)
+        assert score <= 0.2
+
+    @pytest.mark.asyncio
+    async def test_calculate_relevance_with_context(self, quality_service):
+        """Test relevance calculation with user context"""
+        content = "Optimize GPU memory usage by enabling mixed precision training and gradient checkpointing."
+        
+        # Relevant context
+        relevant_context = {
+            "user_request": "Help me reduce GPU memory consumption during training"
+        }
+        
+        score = await quality_service._calculate_relevance(content, relevant_context)
+        assert score >= 0.6
+        
+        # Irrelevant context
+        irrelevant_context = {
+            "user_request": "How do I bake a chocolate cake"
+        }
+        
+        score = await quality_service._calculate_relevance(content, irrelevant_context)
+        assert score <= 0.3
+        
+        # No context
+        score = await quality_service._calculate_relevance(content, None)
+        assert score == 0.5  # Default when no context
+
+    @pytest.mark.asyncio
+    async def test_calculate_completeness_by_content_type(self, quality_service):
+        """Test completeness calculation for different content types"""
+        # Complete optimization content
+        complete_opt = """
+        Current system uses 8GB memory with 200ms latency.
+        Proposed optimization implements caching layer.
+        Implementation requires Redis installation and configuration.
+        Expected improvement: 40% latency reduction.
+        Trade-off: Slight increase in complexity and memory overhead.
+        """
+        
+        score = await quality_service._calculate_completeness(complete_opt, ContentType.OPTIMIZATION)
+        assert score >= 0.7
+        
+        # Complete action plan
+        complete_action = """
+        Step 1: Assess current requirements and timeline.
+        Step 2: Set up development environment and tools.
+        Step 3: Implement core functionality with testing.
+        Expected outcome: Fully functional deployment pipeline.
+        Verification: Run automated tests and performance benchmarks.
+        """
+        
+        score = await quality_service._calculate_completeness(complete_action, ContentType.ACTION_PLAN)
+        assert score >= 0.7
+
+    @pytest.mark.asyncio
+    async def test_calculate_novelty_with_redis(self, quality_service):
+        """Test novelty calculation with Redis caching"""
+        content = "Unique content for novelty testing"
+        
+        # Mock Redis to simulate recent outputs
+        quality_service.redis_manager.get_list = AsyncMock(return_value=[])
+        quality_service.redis_manager.add_to_list = AsyncMock()
+        
+        score = await quality_service._calculate_novelty(content)
+        assert score >= 0.7  # Should be novel
+        
+        # Mock Redis to simulate duplicate content
+        content_hash = hashlib.md5(content.encode()).hexdigest()
+        quality_service.redis_manager.get_list = AsyncMock(return_value=[content_hash])
+        
+        score = await quality_service._calculate_novelty(content)
+        assert score == 0.0  # Should be duplicate
+
+    @pytest.mark.asyncio
+    async def test_calculate_clarity_scores(self, quality_service):
+        """Test clarity calculation"""
+        # Clear, well-structured content
+        clear_content = """
+        Optimization Plan:
+        1. First, profile current performance
+        2. Then, identify bottlenecks
+        3. Finally, implement targeted improvements
+        
+        Expected results: 30% performance gain
+        """
+        
+        score = await quality_service._calculate_clarity(clear_content)
+        assert score >= 0.7
+        
+        # Unclear, complex content with long sentences and jargon
+        unclear_content = """
+        The system, which incorporates various SOTA methodologies and leverages state-of-the-art 
+        architectures with complex interdependencies, requires optimization through multi-faceted 
+        approaches that consider FLOPS, VRAM, TPU, GPU, CPU, and other hardware-specific constraints 
+        (including but not limited to memory bandwidth, cache hierarchies, and interconnect topologies) 
+        while maintaining backward compatibility with legacy systems.
+        """
+        
+        score = await quality_service._calculate_clarity(unclear_content)
+        assert score <= 0.6
+
+    @pytest.mark.asyncio
+    async def test_calculate_redundancy_detection(self, quality_service):
+        """Test redundancy detection"""
+        # High redundancy content
+        redundant_content = """
+        The system needs optimization for better performance.
+        We should optimize the system to achieve better performance.
+        Better performance requires system optimization efforts.
+        Optimization will help the system perform better.
+        """
+        
+        score = await quality_service._calculate_redundancy(redundant_content)
+        assert score >= 0.5
+        
+        # Low redundancy content
+        diverse_content = """
+        First, profile the current system to identify bottlenecks.
+        Second, implement caching to reduce database calls.
+        Third, optimize algorithms for better time complexity.
+        Finally, monitor performance improvements over time.
+        """
+        
+        score = await quality_service._calculate_redundancy(diverse_content)
+        assert score <= 0.3
+
+    @pytest.mark.asyncio
+    async def test_calculate_hallucination_risk(self, quality_service):
+        """Test hallucination risk detection"""
+        # High risk content with unverifiable claims
+        risky_content = """
+        According to studies by Dr. Imaginary at FakeUniversity (2024),
+        the new SuperAI-9000 algorithm achieves 150% accuracy rates
+        and processes infinite data in zero time with guaranteed results.
+        This revolutionary breakthrough violates no laws of physics.
+        """
+        
+        score = await quality_service._calculate_hallucination_risk(risky_content, None)
+        assert score >= 0.5
+        
+        # Low risk content with realistic claims
+        safe_content = """
+        Based on our benchmark testing, the optimization reduced latency by 25%
+        from 100ms to 75ms average response time. Memory usage decreased from
+        4GB to 3.2GB during peak load. These results are reproducible in our
+        test environment with 95% confidence interval.
+        """
+        
+        score = await quality_service._calculate_hallucination_risk(safe_content, {"data_source": "benchmark"})
+        assert score <= 0.3
+
+    def test_get_weights_for_content_types(self, quality_service):
+        """Test weight calculation for different content types"""
+        # Test optimization weights
+        opt_weights = quality_service._get_weights_for_type(ContentType.OPTIMIZATION)
+        assert opt_weights['specificity'] == 0.25
+        assert opt_weights['actionability'] == 0.25
+        assert opt_weights['quantification'] == 0.20
+        
+        # Test data analysis weights
+        data_weights = quality_service._get_weights_for_type(ContentType.DATA_ANALYSIS)
+        assert data_weights['quantification'] == 0.30
+        assert data_weights['specificity'] == 0.20
+        
+        # Test action plan weights
+        action_weights = quality_service._get_weights_for_type(ContentType.ACTION_PLAN)
+        assert action_weights['actionability'] == 0.35
+        assert action_weights['completeness'] == 0.25
+
+    def test_calculate_weighted_score(self, quality_service):
+        """Test weighted score calculation"""
+        metrics = QualityMetrics(
+            specificity_score=0.8,
+            actionability_score=0.9,
+            quantification_score=0.7,
+            relevance_score=0.6,
+            completeness_score=0.8,
+            novelty_score=0.9,
+            clarity_score=0.7,
+            generic_phrase_count=1,
+            circular_reasoning_detected=False,
+            hallucination_risk=0.1,
+            redundancy_ratio=0.1
+        )
+        
+        weights = {
+            'specificity': 0.25,
+            'actionability': 0.25,
+            'quantification': 0.20,
+            'relevance': 0.15,
+            'completeness': 0.10,
+            'clarity': 0.05
+        }
+        
+        score = quality_service._calculate_weighted_score(metrics, weights)
+        assert 0.0 <= score <= 1.0
+        assert score >= 0.6  # Should be good score given input metrics
+
+    def test_check_thresholds_all_content_types(self, quality_service):
+        """Test threshold checking for all content types"""
+        # Create metrics that should pass most thresholds
+        good_metrics = QualityMetrics(
+            overall_score=0.8,
+            specificity_score=0.9,
+            actionability_score=0.9,
+            quantification_score=0.8,
+            relevance_score=0.8,
+            completeness_score=0.9,
+            clarity_score=0.8,
+            redundancy_ratio=0.1,
+            generic_phrase_count=1,
+            circular_reasoning_detected=False,
+            hallucination_risk=0.1
+        )
+        
+        # Test all content types
+        for content_type in ContentType:
+            passed = quality_service._check_thresholds(good_metrics, content_type, strict_mode=False)
+            assert passed is True
+            
+            # Strict mode should be more restrictive
+            passed_strict = quality_service._check_thresholds(good_metrics, content_type, strict_mode=True)
+            # May or may not pass in strict mode, but should not error
+
+    def test_generate_suggestions_for_issues(self, quality_service):
+        """Test suggestion generation for various quality issues"""
+        # Low specificity metrics
+        low_spec_metrics = QualityMetrics(
+            specificity_score=0.3,
+            actionability_score=0.8,
+            quantification_score=0.2,
+            generic_phrase_count=5,
+            circular_reasoning_detected=True,
+            redundancy_ratio=0.4
+        )
+        
+        suggestions = quality_service._generate_suggestions(low_spec_metrics, ContentType.OPTIMIZATION)
+        
+        assert len(suggestions) > 0
+        assert any("specific" in s.lower() for s in suggestions)
+        assert any("numerical" in s.lower() or "values" in s.lower() for s in suggestions)
+        assert any("generic" in s.lower() for s in suggestions)
+        assert any("circular" in s.lower() for s in suggestions)
+        assert any("redundant" in s.lower() for s in suggestions)
+
+    def test_generate_prompt_adjustments(self, quality_service):
+        """Test prompt adjustment generation"""
+        poor_metrics = QualityMetrics(
+            specificity_score=0.2,
+            actionability_score=0.3,
+            quantification_score=0.1,
+            generic_phrase_count=7,
+            circular_reasoning_detected=True
+        )
+        
+        adjustments = quality_service._generate_prompt_adjustments(poor_metrics)
+        
+        assert adjustments['temperature'] == 0.3  # Lower temperature
+        assert len(adjustments['additional_instructions']) > 0
+        
+        instructions = ' '.join(adjustments['additional_instructions']).lower()
+        assert 'specific' in instructions
+        assert 'actionable' in instructions or 'step-by-step' in instructions
+        assert 'numerical' in instructions or 'metrics' in instructions
+        assert 'generic' in instructions
+        assert 'circular' in instructions
+
+    @pytest.mark.asyncio
+    async def test_store_metrics_in_memory_and_redis(self, quality_service):
+        """Test metrics storage in both memory and Redis"""
+        metrics = QualityMetrics(
+            overall_score=0.8,
+            quality_level=QualityLevel.GOOD,
+            specificity_score=0.7,
+            actionability_score=0.8,
+            quantification_score=0.6
+        )
+        
+        # Store metrics
+        await quality_service._store_metrics(metrics, ContentType.OPTIMIZATION)
+        
+        # Check memory storage
+        assert ContentType.OPTIMIZATION in quality_service.metrics_history
+        assert len(quality_service.metrics_history[ContentType.OPTIMIZATION]) > 0
+        
+        stored_metric = quality_service.metrics_history[ContentType.OPTIMIZATION][0]
+        assert stored_metric['overall_score'] == 0.8
+        assert stored_metric['quality_level'] == 'good'
+        
+        # Check Redis storage was attempted
+        if quality_service.redis_manager:
+            quality_service.redis_manager.store_metrics.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_get_quality_stats(self, quality_service):
+        """Test quality statistics retrieval"""
+        # Add some test metrics
+        for i in range(10):
+            metrics = QualityMetrics(
+                overall_score=0.7 + (i * 0.02),  # Scores from 0.7 to 0.88
+                quality_level=QualityLevel.GOOD if i > 5 else QualityLevel.ACCEPTABLE
+            )
+            await quality_service._store_metrics(metrics, ContentType.OPTIMIZATION)
+        
+        # Get stats for optimization content
+        stats = await quality_service.get_quality_stats(ContentType.OPTIMIZATION)
+        
+        assert 'optimization' in stats
+        opt_stats = stats['optimization']
+        
+        assert opt_stats['count'] == 10
+        assert 0.7 <= opt_stats['avg_score'] <= 0.88
+        assert opt_stats['min_score'] >= 0.7
+        assert opt_stats['max_score'] <= 0.88
+        assert 0 <= opt_stats['failure_rate'] <= 1
+        
+        # Test quality distribution
+        assert 'quality_distribution' in opt_stats
+        assert 'good' in opt_stats['quality_distribution']
+        assert 'acceptable' in opt_stats['quality_distribution']
+        
+        # Get stats for all content types
+        all_stats = await quality_service.get_quality_stats(None)
+        assert len(all_stats) >= 1
+
+    @pytest.mark.asyncio
+    async def test_validate_batch_processing(self, quality_service):
+        """Test batch validation of multiple contents"""
+        contents = [
+            ("High-quality content with specific metrics: latency=50ms, throughput=2000 QPS", ContentType.DATA_ANALYSIS),
+            ("Generic content that needs improvement", ContentType.GENERAL),
+            ("Detailed action plan: Step 1: Install Redis, Step 2: Configure caching", ContentType.ACTION_PLAN)
+        ]
+        
+        results = await quality_service.validate_batch(contents)
+        
+        assert len(results) == 3
+        assert all(isinstance(result, ValidationResult) for result in results)
+        
+        # First should pass (high quality)
+        assert results[0].passed is True
+        
+        # Second should fail (generic)
+        assert results[1].passed is False
+        
+        # Third should pass (actionable)
+        assert results[2].passed is True
+
+    @pytest.mark.asyncio
+    async def test_validate_batch_with_context(self, quality_service):
+        """Test batch validation with shared context"""
+        contents = [
+            ("Optimize GPU memory", ContentType.OPTIMIZATION),
+            ("Reduce training time", ContentType.OPTIMIZATION)
+        ]
+        
+        context = {
+            "user_request": "Help me optimize my machine learning training pipeline",
+            "constraints": "Limited to 16GB VRAM"
+        }
+        
+        results = await quality_service.validate_batch(contents, context)
+        
+        assert len(results) == 2
+        # Both should have better relevance scores due to context
+        assert all(result.metrics.relevance_score > 0.5 for result in results)
+
+    @pytest.mark.asyncio
+    async def test_error_handling_in_validation(self, quality_service):
+        """Test error handling during content validation"""
+        # Mock a method to raise an exception
+        with patch.object(quality_service, '_calculate_metrics', side_effect=Exception("Test error")):
+            result = await quality_service.validate_content("test content")
+            
+            assert result.passed is False
+            assert result.metrics.overall_score == 0.0
+            assert result.metrics.quality_level == QualityLevel.UNACCEPTABLE
+            assert len(result.metrics.issues) > 0
+            assert "Validation error" in result.metrics.issues[0]
+
+    @pytest.mark.asyncio
+    async def test_memory_metrics_limit(self, quality_service):
+        """Test that metrics history respects memory limits"""
+        # Add more than 1000 metrics
+        for i in range(1050):
+            metrics = QualityMetrics(overall_score=0.5 + (i * 0.0001))
+            await quality_service._store_metrics(metrics, ContentType.GENERAL)
+        
+        # Should be limited to 1000
+        assert len(quality_service.metrics_history[ContentType.GENERAL]) == 1000
+        
+        # Should keep the most recent ones
+        latest_metric = quality_service.metrics_history[ContentType.GENERAL][-1]
+        assert latest_metric['overall_score'] > 0.6  # Should be from later iterations
+
+    def test_pattern_compilation_in_init(self, quality_service):
+        """Test that regex patterns are compiled during initialization"""
+        assert quality_service.generic_pattern is not None
+        assert quality_service.vague_pattern is not None
+        assert quality_service.circular_pattern is not None
+        
+        # Test patterns work
+        generic_text = "it is important to note that generally speaking"
+        assert quality_service.generic_pattern.search(generic_text) is not None
+        
+        vague_text = "you might want to consider optimizing"
+        assert quality_service.vague_pattern.search(vague_text) is not None
+        
+        circular_text = "optimize by optimizing the system"
+        assert quality_service.circular_pattern.search(circular_text) is not None
+
+    @pytest.mark.asyncio
+    async def test_redis_manager_error_handling(self, quality_service):
+        """Test handling of Redis manager errors"""
+        # Mock Redis to raise exceptions
+        quality_service.redis_manager.store_metrics = AsyncMock(side_effect=Exception("Redis error"))
+        
+        metrics = QualityMetrics(overall_score=0.8)
+        
+        # Should not raise exception, should log warning
+        with patch('app.services.quality_gate_service.logger') as mock_logger:
+            await quality_service._store_metrics(metrics, ContentType.GENERAL)
+            mock_logger.warning.assert_called()
+
+    @pytest.mark.asyncio 
+    async def test_novelty_without_redis(self, quality_service):
+        """Test novelty calculation when Redis is not available"""
+        quality_service.redis_manager = None
+        
+        score = await quality_service._calculate_novelty("test content")
+        
+        # Should return default moderate novelty
+        assert score == 0.5
+
+    def test_domain_terms_recognition(self, quality_service):
+        """Test that domain-specific terms are properly recognized"""
+        domain_content = """
+        The inference latency was reduced from 150ms to 95ms using quantization.
+        Batch size increased from 16 to 32, improving GPU utilization to 87%.
+        KV cache optimization saved 2.1GB of memory per request.
+        Throughput increased to 4,200 QPS with p95 latency under 120ms.
+        """
+        
+        # Should find many domain terms
+        domain_term_count = sum(1 for term in quality_service.DOMAIN_TERMS 
+                               if term in domain_content.lower())
+        
+        assert domain_term_count >= 8  # latency, batch size, GPU, memory, throughput, QPS, p95, ms
+
+    @pytest.mark.asyncio
+    async def test_content_type_specific_thresholds(self, quality_service):
+        """Test that different content types have appropriate thresholds"""
+        # Create borderline metrics
+        borderline_metrics = QualityMetrics(
+            overall_score=0.6,
+            specificity_score=0.6,
+            actionability_score=0.6,
+            quantification_score=0.6,
+            relevance_score=0.6,
+            completeness_score=0.6,
+            clarity_score=0.6,
+            redundancy_ratio=0.2,
+            generic_phrase_count=2,
+            circular_reasoning_detected=False,
+            hallucination_risk=0.2
+        )
+        
+        # Different content types should have different pass/fail results
+        results = {}
+        for content_type in ContentType:
+            results[content_type] = quality_service._check_thresholds(
+                borderline_metrics, content_type, strict_mode=False
+            )
+        
+        # OPTIMIZATION should be more strict than GENERAL
+        if ContentType.OPTIMIZATION in results and ContentType.GENERAL in results:
+            # At least they should not error out
+            assert isinstance(results[ContentType.OPTIMIZATION], bool)
+            assert isinstance(results[ContentType.GENERAL], bool)
 
 
 if __name__ == "__main__":

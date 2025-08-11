@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T10:31:08.538550  
+**Generated:** 2025-08-11T10:28:21.929258  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -8,11 +8,11 @@
 
 | Component | Status | Duration | Exit Code |
 |-----------|--------|----------|-----------|
-| Backend   | [FAILED] | 11.10s | 1 |
-| Frontend  | [TIMEOUT] | 61.55s | -1 |
+| Backend   | [FAILED] | 9.01s | 1 |
+| Frontend  | [TIMEOUT] | 50.35s | -1 |
 
 **Overall Status:** [FAILED]  
-**Total Duration:** 72.65s  
+**Total Duration:** 59.36s  
 **Final Exit Code:** 1
 
 ## Test Level Details

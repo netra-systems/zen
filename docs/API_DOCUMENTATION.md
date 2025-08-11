@@ -1,0 +1,862 @@
+# Netra AI Optimization Platform - API Documentation
+
+## Table of Contents
+- [Overview](#overview)
+- [Authentication](#authentication)
+- [REST API Endpoints](#rest-api-endpoints)
+- [WebSocket API](#websocket-api)
+- [Error Handling](#error-handling)
+- [Rate Limiting](#rate-limiting)
+- [API Versioning](#api-versioning)
+
+## Overview
+
+The Netra API provides programmatic access to the AI optimization platform's capabilities. All API endpoints are RESTful and return JSON responses. Real-time communication is handled through WebSockets.
+
+**Base URL**: `https://api.netrasystems.ai` (production) or `http://localhost:8000` (development)
+
+## Authentication
+
+### JWT Authentication
+
+The API uses JWT (JSON Web Tokens) for authentication. Tokens are obtained through the login endpoint and must be included in the Authorization header for protected endpoints.
+
+```http
+Authorization: Bearer <your-jwt-token>
+```
+
+### OAuth 2.0 (Google)
+
+Google OAuth 2.0 is supported for user authentication:
+
+1. Redirect user to `/api/auth/google/authorize`
+2. Handle callback at `/api/auth/google/callback`
+3. Receive JWT token in response
+
+## REST API Endpoints
+
+### Authentication Endpoints
+
+#### Login
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "your-password"
+}
+
+Response:
+{
+  "access_token": "eyJ...",
+  "token_type": "bearer",
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "full_name": "John Doe",
+    "plan_tier": "pro"
+  }
+}
+```
+
+#### Logout
+```http
+POST /api/auth/logout
+Authorization: Bearer <token>
+
+Response:
+{
+  "message": "Successfully logged out"
+}
+```
+
+#### Get Current User
+```http
+GET /api/auth/me
+Authorization: Bearer <token>
+
+Response:
+{
+  "id": "uuid",
+  "email": "user@example.com",
+  "full_name": "John Doe",
+  "plan_tier": "pro",
+  "tool_permissions": {},
+  "feature_flags": {}
+}
+```
+
+#### Google OAuth
+```http
+GET /api/auth/google/authorize
+Redirects to Google OAuth consent page
+
+GET /api/auth/google/callback?code=<auth-code>
+Handles OAuth callback and returns JWT
+```
+
+### Thread Management
+
+#### Create Thread
+```http
+POST /api/threads
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "My Optimization Thread",
+  "metadata": {
+    "project": "AI Workload Optimization"
+  }
+}
+
+Response:
+{
+  "id": "thread-uuid",
+  "user_id": "user-uuid",
+  "name": "My Optimization Thread",
+  "created_at": "2024-01-15T10:00:00Z",
+  "updated_at": "2024-01-15T10:00:00Z",
+  "metadata": {}
+}
+```
+
+#### List Threads
+```http
+GET /api/threads
+Authorization: Bearer <token>
+
+Query Parameters:
+- limit: Number of threads to return (default: 20, max: 100)
+- offset: Pagination offset (default: 0)
+- order_by: Sort field (created_at, updated_at, name)
+- order_dir: Sort direction (asc, desc)
+
+Response:
+{
+  "threads": [
+    {
+      "id": "thread-uuid",
+      "name": "Thread Name",
+      "created_at": "2024-01-15T10:00:00Z",
+      "updated_at": "2024-01-15T10:00:00Z",
+      "message_count": 10
+    }
+  ],
+  "total": 50,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+#### Get Thread
+```http
+GET /api/threads/{thread_id}
+Authorization: Bearer <token>
+
+Response:
+{
+  "id": "thread-uuid",
+  "user_id": "user-uuid",
+  "name": "Thread Name",
+  "created_at": "2024-01-15T10:00:00Z",
+  "updated_at": "2024-01-15T10:00:00Z",
+  "messages": [
+    {
+      "id": "message-uuid",
+      "role": "user",
+      "content": "Optimize my AI workload",
+      "created_at": "2024-01-15T10:01:00Z"
+    }
+  ]
+}
+```
+
+#### Delete Thread
+```http
+DELETE /api/threads/{thread_id}
+Authorization: Bearer <token>
+
+Response:
+{
+  "message": "Thread deleted successfully"
+}
+```
+
+#### Switch Active Thread
+```http
+PUT /api/threads/{thread_id}/switch
+Authorization: Bearer <token>
+
+Response:
+{
+  "id": "thread-uuid",
+  "active": true
+}
+```
+
+### Agent Operations
+
+#### Get Agent Status
+```http
+GET /api/agent/status/{run_id}
+Authorization: Bearer <token>
+
+Response:
+{
+  "run_id": "run-uuid",
+  "status": "completed",
+  "thread_id": "thread-uuid",
+  "created_at": "2024-01-15T10:00:00Z",
+  "completed_at": "2024-01-15T10:05:00Z",
+  "steps": [
+    {
+      "agent_name": "TriageSubAgent",
+      "status": "completed",
+      "duration_ms": 1200
+    }
+  ]
+}
+```
+
+#### Get Agent History
+```http
+GET /api/agent/history
+Authorization: Bearer <token>
+
+Query Parameters:
+- thread_id: Filter by thread (optional)
+- limit: Number of runs to return (default: 10)
+- offset: Pagination offset (default: 0)
+
+Response:
+{
+  "runs": [
+    {
+      "run_id": "run-uuid",
+      "thread_id": "thread-uuid",
+      "status": "completed",
+      "created_at": "2024-01-15T10:00:00Z",
+      "duration_ms": 5000
+    }
+  ],
+  "total": 25
+}
+```
+
+### Supply Catalog
+
+#### Get Supply Catalog
+```http
+GET /api/supply/catalog
+Authorization: Bearer <token>
+
+Query Parameters:
+- category: Filter by category (models, providers, tools)
+- search: Search term
+
+Response:
+{
+  "items": [
+    {
+      "id": "item-uuid",
+      "name": "GPT-4",
+      "category": "models",
+      "provider": "OpenAI",
+      "capabilities": ["text", "code", "analysis"],
+      "pricing": {
+        "input": 0.03,
+        "output": 0.06,
+        "unit": "per_1k_tokens"
+      }
+    }
+  ],
+  "total": 150
+}
+```
+
+#### Estimate Optimization
+```http
+POST /api/supply/estimate
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "current_setup": {
+    "model": "gpt-4",
+    "provider": "openai",
+    "monthly_tokens": 1000000
+  },
+  "optimization_goals": ["cost", "latency"]
+}
+
+Response:
+{
+  "recommendations": [
+    {
+      "model": "claude-3-sonnet",
+      "provider": "anthropic",
+      "estimated_savings": 45.5,
+      "latency_improvement": 15.2,
+      "confidence": 0.92
+    }
+  ]
+}
+```
+
+### Content Generation
+
+#### Start Generation
+```http
+POST /api/generation/start
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "prompt": "Generate optimization report",
+  "type": "report",
+  "parameters": {
+    "format": "markdown",
+    "include_charts": true
+  }
+}
+
+Response:
+{
+  "job_id": "gen-uuid",
+  "status": "processing",
+  "estimated_time": 30
+}
+```
+
+#### Check Generation Status
+```http
+GET /api/generation/status/{job_id}
+Authorization: Bearer <token>
+
+Response:
+{
+  "job_id": "gen-uuid",
+  "status": "completed",
+  "result": {
+    "content": "# Optimization Report\n...",
+    "metadata": {
+      "word_count": 500,
+      "charts": 3
+    }
+  }
+}
+```
+
+### LLM Cache Operations
+
+#### Get Cache Stats
+```http
+GET /api/llm-cache/stats
+Authorization: Bearer <token>
+
+Response:
+{
+  "total_entries": 1250,
+  "hit_rate": 0.73,
+  "total_size_mb": 45.2,
+  "savings_usd": 127.50
+}
+```
+
+#### Clear Cache
+```http
+DELETE /api/llm-cache/clear
+Authorization: Bearer <token>
+
+Query Parameters:
+- context: Specific context to clear (optional)
+
+Response:
+{
+  "message": "Cache cleared successfully",
+  "entries_removed": 250
+}
+```
+
+### Corpus Management
+
+#### List Corpus Items
+```http
+GET /api/corpus
+Authorization: Bearer <token>
+
+Query Parameters:
+- category: Filter by category
+- search: Search term
+- limit: Results per page
+- offset: Pagination offset
+
+Response:
+{
+  "items": [
+    {
+      "id": "corpus-uuid",
+      "title": "AI Optimization Best Practices",
+      "category": "documentation",
+      "tags": ["optimization", "best-practices"],
+      "created_at": "2024-01-15T10:00:00Z"
+    }
+  ],
+  "total": 500
+}
+```
+
+#### Add Corpus Item
+```http
+POST /api/corpus
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "title": "New Best Practice",
+  "content": "Content here...",
+  "category": "documentation",
+  "tags": ["optimization"]
+}
+
+Response:
+{
+  "id": "corpus-uuid",
+  "message": "Corpus item added successfully"
+}
+```
+
+### Health & Monitoring
+
+#### Basic Health Check
+```http
+GET /health
+
+Response:
+{
+  "status": "healthy",
+  "timestamp": "2024-01-15T10:00:00Z",
+  "version": "1.0.0"
+}
+```
+
+#### Readiness Check
+```http
+GET /health/ready
+
+Response:
+{
+  "status": "ready",
+  "checks": {
+    "database": "healthy",
+    "redis": "healthy",
+    "clickhouse": "healthy"
+  }
+}
+```
+
+#### Dependency Status
+```http
+GET /health/dependencies
+
+Response:
+{
+  "dependencies": {
+    "postgresql": {
+      "status": "connected",
+      "latency_ms": 2.5,
+      "version": "14.5"
+    },
+    "redis": {
+      "status": "connected",
+      "latency_ms": 0.8,
+      "version": "7.0"
+    },
+    "clickhouse": {
+      "status": "connected",
+      "latency_ms": 3.2,
+      "version": "23.8"
+    },
+    "llm_providers": {
+      "gemini": "available",
+      "openai": "available"
+    }
+  }
+}
+```
+
+## WebSocket API
+
+### Connection
+
+Connect to the WebSocket endpoint with JWT authentication:
+
+```javascript
+const ws = new WebSocket('ws://localhost:8000/ws?token=<jwt-token>');
+```
+
+### Message Format
+
+All WebSocket messages follow this structure:
+
+```typescript
+interface WebSocketMessage {
+  type: string;
+  data: any;
+  metadata?: {
+    thread_id?: string;
+    run_id?: string;
+    agent_name?: string;
+    timestamp: string;
+  };
+}
+```
+
+### Message Types
+
+#### Client to Server
+
+##### Start Agent Execution
+```json
+{
+  "action": "start_agent",
+  "data": {
+    "message": "Optimize my AI workload for cost",
+    "thread_id": "thread-uuid",
+    "context": {
+      "current_setup": {...}
+    }
+  }
+}
+```
+
+##### Send Message
+```json
+{
+  "action": "send_message",
+  "data": {
+    "content": "What are the optimization options?",
+    "thread_id": "thread-uuid"
+  }
+}
+```
+
+##### Heartbeat
+```json
+{
+  "action": "heartbeat"
+}
+```
+
+#### Server to Client
+
+##### Connection Established
+```json
+{
+  "type": "connection_established",
+  "data": {
+    "session_id": "session-uuid",
+    "user_id": "user-uuid"
+  }
+}
+```
+
+##### Agent Started
+```json
+{
+  "type": "agent_started",
+  "data": {
+    "run_id": "run-uuid",
+    "thread_id": "thread-uuid"
+  }
+}
+```
+
+##### Sub-Agent Update
+```json
+{
+  "type": "sub_agent_update",
+  "data": {
+    "agent_name": "TriageSubAgent",
+    "status": "thinking",
+    "message": "Analyzing request..."
+  },
+  "metadata": {
+    "thread_id": "thread-uuid",
+    "run_id": "run-uuid",
+    "timestamp": "2024-01-15T10:00:00Z"
+  }
+}
+```
+
+##### Tool Call
+```json
+{
+  "type": "tool_call",
+  "data": {
+    "tool_name": "cost_analyzer",
+    "parameters": {
+      "model": "gpt-4",
+      "usage": 1000000
+    }
+  }
+}
+```
+
+##### Tool Result
+```json
+{
+  "type": "tool_result",
+  "data": {
+    "tool_name": "cost_analyzer",
+    "result": {
+      "current_cost": 30.00,
+      "optimized_cost": 16.50,
+      "savings": 45.0
+    }
+  }
+}
+```
+
+##### Agent Log
+```json
+{
+  "type": "agent_log",
+  "data": {
+    "level": "info",
+    "message": "Processing optimization request",
+    "agent_name": "OptimizationsCoreSubAgent"
+  }
+}
+```
+
+##### Agent Completed
+```json
+{
+  "type": "agent_completed",
+  "data": {
+    "run_id": "run-uuid",
+    "result": {
+      "recommendations": [...],
+      "summary": "...",
+      "savings": 45.5
+    }
+  }
+}
+```
+
+##### Error
+```json
+{
+  "type": "error",
+  "data": {
+    "code": "AGENT_ERROR",
+    "message": "Failed to process request",
+    "details": {...}
+  }
+}
+```
+
+##### Heartbeat
+```json
+{
+  "type": "heartbeat",
+  "data": {
+    "timestamp": "2024-01-15T10:00:00Z"
+  }
+}
+```
+
+## Error Handling
+
+### Error Response Format
+
+All error responses follow this structure:
+
+```json
+{
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable error message",
+    "details": {
+      "field": "Additional context"
+    },
+    "trace_id": "trace-uuid"
+  }
+}
+```
+
+### Common Error Codes
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `UNAUTHORIZED` | 401 | Missing or invalid authentication |
+| `FORBIDDEN` | 403 | Insufficient permissions |
+| `NOT_FOUND` | 404 | Resource not found |
+| `VALIDATION_ERROR` | 400 | Invalid request data |
+| `RATE_LIMITED` | 429 | Too many requests |
+| `INTERNAL_ERROR` | 500 | Server error |
+| `SERVICE_UNAVAILABLE` | 503 | Service temporarily unavailable |
+
+### Error Examples
+
+#### Validation Error
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid request data",
+    "details": {
+      "email": "Invalid email format",
+      "password": "Password must be at least 8 characters"
+    },
+    "trace_id": "trace-123"
+  }
+}
+```
+
+#### Rate Limit Error
+```json
+{
+  "error": {
+    "code": "RATE_LIMITED",
+    "message": "Too many requests",
+    "details": {
+      "limit": 100,
+      "window": "1h",
+      "retry_after": 3600
+    },
+    "trace_id": "trace-456"
+  }
+}
+```
+
+## Rate Limiting
+
+API requests are rate-limited based on plan tier:
+
+| Plan Tier | Requests/Hour | Concurrent WebSocket | Cache Size |
+|-----------|---------------|---------------------|------------|
+| Free | 100 | 1 | 10 MB |
+| Pro | 1,000 | 5 | 100 MB |
+| Enterprise | 10,000 | 50 | 1 GB |
+| Developer | Unlimited | Unlimited | Unlimited |
+
+Rate limit information is included in response headers:
+
+```http
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 950
+X-RateLimit-Reset: 1705318800
+```
+
+## API Versioning
+
+The API version is included in the URL path. The current version is `v1`.
+
+```http
+https://api.netrasystems.ai/v1/threads
+```
+
+### Version Support Policy
+
+- Current version: Full support
+- Previous version: 6 months deprecation notice
+- Older versions: Best effort support
+
+### Breaking Changes
+
+Breaking changes will be introduced in new major versions only. Minor versions may include:
+- New endpoints
+- New optional parameters
+- New response fields
+- Performance improvements
+
+## SDK Examples
+
+### Python
+```python
+import requests
+import json
+
+# Authentication
+response = requests.post(
+    "http://localhost:8000/api/auth/login",
+    json={"email": "user@example.com", "password": "password"}
+)
+token = response.json()["access_token"]
+
+# Create thread
+headers = {"Authorization": f"Bearer {token}"}
+thread_response = requests.post(
+    "http://localhost:8000/api/threads",
+    headers=headers,
+    json={"name": "My Thread"}
+)
+thread_id = thread_response.json()["id"]
+
+# WebSocket connection
+import websocket
+
+ws = websocket.WebSocket()
+ws.connect(f"ws://localhost:8000/ws?token={token}")
+ws.send(json.dumps({
+    "action": "start_agent",
+    "data": {
+        "message": "Optimize my AI costs",
+        "thread_id": thread_id
+    }
+}))
+```
+
+### JavaScript/TypeScript
+```typescript
+// Authentication
+const loginResponse = await fetch('http://localhost:8000/api/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    email: 'user@example.com',
+    password: 'password'
+  })
+});
+const { access_token } = await loginResponse.json();
+
+// Create thread
+const threadResponse = await fetch('http://localhost:8000/api/threads', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${access_token}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ name: 'My Thread' })
+});
+const { id: threadId } = await threadResponse.json();
+
+// WebSocket connection
+const ws = new WebSocket(`ws://localhost:8000/ws?token=${access_token}`);
+
+ws.onopen = () => {
+  ws.send(JSON.stringify({
+    action: 'start_agent',
+    data: {
+      message: 'Optimize my AI costs',
+      thread_id: threadId
+    }
+  }));
+};
+
+ws.onmessage = (event) => {
+  const message = JSON.parse(event.data);
+  console.log('Received:', message);
+};
+```
+
+## Support
+
+For API support and questions:
+- Documentation: https://docs.netrasystems.ai
+- GitHub Issues: https://github.com/netrasystems/netra-core/issues
+- Email: api-support@netrasystems.ai

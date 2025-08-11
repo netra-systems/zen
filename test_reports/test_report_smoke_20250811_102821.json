@@ -1,0 +1,42 @@
+{
+  "timestamp": "2025-08-11T10:28:21.929258",
+  "test_level": "smoke",
+  "configuration": {
+    "description": "Quick smoke tests for basic functionality (< 30 seconds)",
+    "purpose": "Pre-commit validation, basic health checks",
+    "backend_args": [
+      "--category",
+      "smoke",
+      "--fail-fast",
+      "-x"
+    ],
+    "frontend_args": [],
+    "timeout": 30,
+    "run_coverage": false,
+    "run_both": true
+  },
+  "results": {
+    "backend": {
+      "status": "failed",
+      "duration": 9.005927324295044,
+      "exit_code": 1,
+      "output": "================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: smoke\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/routes/test_health_route.py app/tests/routes/test_health_endpoints.py app/tests/test_working_health.py -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\n\u001b[1mcollecting ... \u001b[0mcollected 13 items\n\napp\\tests\\routes\\test_health_route.py::test_live_endpoint \n"
+    },
+    "frontend": {
+      "status": "timeout",
+      "duration": 50.34956336021423,
+      "exit_code": -1,
+      "output": "Tests timed out after 30s"
+    },
+    "overall": {
+      "status": "failed",
+      "start_time": 1754933242.5722587,
+      "end_time": 1754933301.9277494
+    }
+  },
+  "summary": {
+    "total_duration": 59.35549068450928,
+    "overall_passed": false,
+    "exit_code": 1
+  }
+}
