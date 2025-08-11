@@ -372,7 +372,7 @@ describe('CRITICAL: State Management & Synchronization', () => {
   describe('Thread Management State', () => {
     it('CRITICAL: Should handle concurrent thread creation without conflicts', () => {
       const threadCount = 10;
-      const threads = [];
+      const threads: any[] = [];
       
       // Create multiple threads rapidly
       for (let i = 0; i < threadCount; i++) {

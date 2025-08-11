@@ -25,19 +25,25 @@ interface OverflowPanelProps {
 type TabType = 'events' | 'timeline' | 'state' | 'metrics' | 'errors';
 
 export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose }) => {
-  const { currentRunId, messages } = useUnifiedChatStore();
+  const { 
+    currentRunId, 
+    messages, 
+    wsEventBuffer,
+    executedAgents,
+    performanceMetrics,
+    activeThreadId
+  } = useUnifiedChatStore();
   const [activeTab, setActiveTab] = useState<TabType>('events');
   const [eventFilter, setEventFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isMaximized, setIsMaximized] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Mock events for now - replace with actual event buffer when available
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const events: any[] = [];
+  // Get events from WebSocket buffer
+  const events = wsEventBuffer?.getAll?.() || [];
   
   // Filter events based on search and filter
-  const filteredEvents = events.filter(event => {
+  const filteredEvents = events.filter((event: any) => {
     if (eventFilter && event.type !== eventFilter) return false;
     if (searchQuery) {
       const eventString = JSON.stringify(event).toLowerCase();
@@ -47,16 +53,20 @@ export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose })
   });
 
   // Get unique event types for filter dropdown
-  const eventTypes = [...new Set(events.map(e => e.type))];
+  const eventTypes = [...new Set(events.map((e: any) => e.type))];
 
   // Export debug data
   const exportDebugData = () => {
     const debugData = {
       timestamp: new Date().toISOString(),
       currentRunId,
-      events: events.slice(-100), // Last 100 events
+      activeThreadId,
+      events: wsEventBuffer.exportAsJSON(),
+      executedAgents: Array.from(executedAgents.entries()),
+      performanceMetrics,
       messages: messages.slice(-20), // Last 20 messages
       userAgent: navigator.userAgent,
+      bufferStats: wsEventBuffer.getStats()
     };
 
     const blob = new Blob([JSON.stringify(debugData, null, 2)], { type: 'application/json' });

@@ -369,12 +369,12 @@ describe('Critical Test #7: Memory Leak Detection', () => {
       const originalAdd = win.addEventListener;
       const originalRemove = win.removeEventListener;
       
-      win.addEventListener = function(...args) {
+      win.addEventListener = function(...args: any[]) {
         listenerCount++;
         return originalAdd.apply(this, args);
       };
       
-      win.removeEventListener = function(...args) {
+      win.removeEventListener = function(...args: any[]) {
         listenerCount--;
         return originalRemove.apply(this, args);
       };

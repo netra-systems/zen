@@ -126,6 +126,12 @@ export const useKeyboardShortcuts = () => {
       const event = new CustomEvent('deleteCurrentThread');
       window.dispatchEvent(event);
     }, description: 'Delete current thread' },
+    
+    // Debug panel
+    { key: 'd', ctrl: true, shift: true, handler: () => {
+      const event = new CustomEvent('toggleDebugPanel');
+      window.dispatchEvent(event);
+    }, description: 'Toggle debug panel' },
   ];
 
   useEffect(() => {
@@ -186,6 +192,7 @@ export const getShortcutDescriptions = (): Record<string, string> => ({
   'Cmd/Ctrl + N': 'New thread',
   'Cmd/Ctrl + D': 'Delete current thread',
   'Cmd/Ctrl + Shift + C': 'Copy last message',
+  'Cmd/Ctrl + Shift + D': 'Toggle debug panel',
   'Cmd/Ctrl + Shift + M': 'Toggle compact mode',
   'Alt + ←': 'Previous thread',
   'Alt + →': 'Next thread',

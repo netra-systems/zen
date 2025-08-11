@@ -242,6 +242,21 @@ export interface UnifiedChatState {
   isConnected: boolean;
   connectionError: string | null;
   
+  // Agent deduplication
+  executedAgents: Map<string, any>;
+  agentIterations: Map<string, number>;
+  
+  // WebSocket event debugging
+  wsEventBuffer: any;
+  
+  // Performance metrics
+  performanceMetrics: {
+    renderCount: number;
+    lastRenderTime: number;
+    averageResponseTime: number;
+    memoryUsage: number;
+  };
+  
   // Actions
   updateFastLayer: (data: Partial<FastLayerData>) => void;
   updateMediumLayer: (data: Partial<MediumLayerData>) => void;

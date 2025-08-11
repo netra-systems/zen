@@ -318,6 +318,8 @@
         <practice>Use fixtures for common test setup</practice>
         <practice>Validate both success and failure paths</practice>
         <practice>Test edge cases and boundary conditions</practice>
+        <practice>Always implement actual test logic that validates functionality - tests must contain meaningful assertions and verification</practice>
+        <practice>When creating test files, ensure they contain real test functions with proper assertions rather than placeholder print statements</practice>
     </best_practices>
     
     <fake_test_detection>
