@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, MessageSquare, Clock, ChevronRight, Search } from 'lucide-react';
+import { Plus, MessageSquare, Clock, ChevronRight, Search, Shield, Database, Sparkles, Users, Filter } from 'lucide-react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import { useAuthStore } from '@/store/authStore';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +16,9 @@ interface Thread {
   last_message?: string;
   message_count?: number;
   updated_at?: number;
+  user_id?: string;
+  user_email?: string;
+  admin_type?: 'corpus' | 'synthetic' | 'config' | 'users';
 }
 
 export const ChatSidebar: React.FC = () => {
@@ -26,8 +30,13 @@ export const ChatSidebar: React.FC = () => {
     isProcessing 
   } = useUnifiedChatStore();
   
+  const { isDeveloperOrHigher } = useAuthStore();
+  const isAdmin = isDeveloperOrHigher();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreatingThread, setIsCreatingThread] = useState(false);
+  const [showAllThreads, setShowAllThreads] = useState(false);
+  const [filterType, setFilterType] = useState<'all' | 'corpus' | 'synthetic' | 'config' | 'users'>('all');
 
   // Filter threads based on search
   const filteredThreads = Array.from(threads.values()).filter(thread => {
@@ -86,6 +95,55 @@ export const ChatSidebar: React.FC = () => {
         </button>
       </div>
 
+      {/* Admin Toggle for All Threads */}
+      {isAdmin && (
+        <div className="px-4 pt-2 pb-0">
+          <div className="flex items-center justify-between p-2 bg-purple-50 rounded-lg border border-purple-200">
+            <div className="flex items-center space-x-2">
+              <Shield className="w-4 h-4 text-purple-600" />
+              <span className="text-sm font-medium text-purple-900">Admin View</span>
+            </div>
+            <button
+              onClick={() => setShowAllThreads(!showAllThreads)}
+              className={cn(
+                "px-3 py-1 text-xs font-medium rounded-md transition-colors",
+                showAllThreads 
+                  ? "bg-purple-600 text-white" 
+                  : "bg-white text-purple-600 border border-purple-300"
+              )}
+            >
+              {showAllThreads ? 'All System Chats' : 'My Chats'}
+            </button>
+          </div>
+          
+          {/* Admin Filter Buttons */}
+          {showAllThreads && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {[
+                { key: 'all', icon: Filter, label: 'All' },
+                { key: 'corpus', icon: Database, label: 'Corpus' },
+                { key: 'synthetic', icon: Sparkles, label: 'Synthetic' },
+                { key: 'users', icon: Users, label: 'Users' },
+              ].map(({ key, icon: Icon, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setFilterType(key as any)}
+                  className={cn(
+                    "flex items-center space-x-1 px-2 py-1 text-xs rounded-md transition-colors",
+                    filterType === key
+                      ? "bg-purple-100 text-purple-700 border border-purple-300"
+                      : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                  )}
+                >
+                  <Icon className="w-3 h-3" />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Search Bar */}
       <div className="p-4 border-b border-gray-100">
         <div className="relative">
@@ -94,7 +152,7 @@ export const ChatSidebar: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search conversations..."
+            placeholder={showAllThreads ? "Search all system chats..." : "Search conversations..."}
             className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-200"
           />
         </div>
@@ -138,10 +196,28 @@ export const ChatSidebar: React.FC = () => {
                   )}
 
                   <div className="flex items-start space-x-3 pl-2">
-                    <MessageSquare className={cn(
-                      "w-5 h-5 mt-0.5 flex-shrink-0",
-                      activeThreadId === thread.id ? "text-emerald-600" : "text-gray-400"
-                    )} />
+                    {/* Icon based on thread type */}
+                    {thread.admin_type === 'corpus' ? (
+                      <Database className={cn(
+                        "w-5 h-5 mt-0.5 flex-shrink-0",
+                        activeThreadId === thread.id ? "text-purple-600" : "text-purple-400"
+                      )} />
+                    ) : thread.admin_type === 'synthetic' ? (
+                      <Sparkles className={cn(
+                        "w-5 h-5 mt-0.5 flex-shrink-0",
+                        activeThreadId === thread.id ? "text-purple-600" : "text-purple-400"
+                      )} />
+                    ) : thread.admin_type === 'users' ? (
+                      <Users className={cn(
+                        "w-5 h-5 mt-0.5 flex-shrink-0",
+                        activeThreadId === thread.id ? "text-purple-600" : "text-purple-400"
+                      )} />
+                    ) : (
+                      <MessageSquare className={cn(
+                        "w-5 h-5 mt-0.5 flex-shrink-0",
+                        activeThreadId === thread.id ? "text-emerald-600" : "text-gray-400"
+                      )} />
+                    )}
                     
                     <div className="flex-1 min-w-0">
                       {/* Thread Title / Last Message */}
@@ -151,6 +227,13 @@ export const ChatSidebar: React.FC = () => {
                       )}>
                         {thread.last_message || `Thread ${thread.id.slice(0, 8)}`}
                       </p>
+                      
+                      {/* Show user email for admin view */}
+                      {showAllThreads && thread.user_email && (
+                        <p className="text-xs text-purple-600 truncate mt-0.5">
+                          {thread.user_email}
+                        </p>
+                      )}
                       
                       {/* Metadata */}
                       <div className="flex items-center space-x-3 mt-1">
@@ -186,11 +269,25 @@ export const ChatSidebar: React.FC = () => {
         </AnimatePresence>
       </div>
 
-      {/* Footer with Thread Count */}
+      {/* Footer with Thread Count and Quick Actions */}
       <div className="p-4 border-t border-gray-200 bg-gray-50">
-        <p className="text-xs text-gray-500 text-center">
+        <p className="text-xs text-gray-500 text-center mb-2">
           {threads.size} conversation{threads.size !== 1 ? 's' : ''}
         </p>
+        
+        {/* Admin Quick Actions */}
+        {isAdmin && (
+          <div className="flex flex-col space-y-1 mt-2">
+            <button className="flex items-center justify-center space-x-2 p-2 text-xs bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 transition-colors">
+              <Database className="w-3 h-3" />
+              <span>Quick Create Corpus</span>
+            </button>
+            <button className="flex items-center justify-center space-x-2 p-2 text-xs bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 transition-colors">
+              <Sparkles className="w-3 h-3" />
+              <span>Generate Test Data</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

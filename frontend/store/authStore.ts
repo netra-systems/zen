@@ -94,5 +94,38 @@ export const useAuthStore = create<AuthState>()(
           localStorage.removeItem('jwt_token');
         }
       }),
+
+    hasPermission: (permission) => {
+      const state = useAuthStore.getState();
+      if (!state.user) return false;
+      return state.user.permissions?.includes(permission) || false;
+    },
+
+    hasAnyPermission: (permissions) => {
+      const state = useAuthStore.getState();
+      if (!state.user) return false;
+      return permissions.some(p => state.user?.permissions?.includes(p)) || false;
+    },
+
+    hasAllPermissions: (permissions) => {
+      const state = useAuthStore.getState();
+      if (!state.user) return false;
+      return permissions.every(p => state.user?.permissions?.includes(p)) || false;
+    },
+
+    isAdminOrHigher: () => {
+      const state = useAuthStore.getState();
+      if (!state.user) return false;
+      return ['admin', 'super_admin'].includes(state.user.role || '') || 
+             state.user.is_superuser || false;
+    },
+
+    isDeveloperOrHigher: () => {
+      const state = useAuthStore.getState();
+      if (!state.user) return false;
+      return ['developer', 'admin', 'super_admin'].includes(state.user.role || '') || 
+             state.user.is_developer || 
+             state.user.is_superuser || false;
+    },
   }))
 );

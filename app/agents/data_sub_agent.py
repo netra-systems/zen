@@ -70,9 +70,9 @@ class QueryBuilder:
                 arrayFirstIndex(x -> x = 'latency_ms', metrics.name) as idx,
                 arrayFirstIndex(x -> x = 'throughput', metrics.name) as idx2,
                 arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as idx3,
-                if(idx > 0, metrics.value[idx], NULL) as metric_value,
-                if(idx2 > 0, metrics.value[idx2], NULL) as throughput_value,
-                if(idx3 > 0, metrics.value[idx3], NULL) as cost_value,
+                if(idx > 0, metrics.value[idx], 0) as metric_value,
+                if(idx2 > 0, metrics.value[idx2], 0) as throughput_value,
+                if(idx3 > 0, metrics.value[idx3], 0) as cost_value,
                 idx > 0 as has_latency,
                 idx2 > 0 as has_throughput,
                 idx3 > 0 as has_cost
@@ -105,7 +105,7 @@ class QueryBuilder:
             FROM (
                 SELECT
                     arrayFirstIndex(x -> x = '{metric_name}', metrics.name) as idx,
-                    if(idx > 0, metrics.value[idx], NULL) as metric_value
+                    if(idx > 0, metrics.value[idx], 0) as metric_value
                 FROM workload_events
                 WHERE user_id = {user_id}
                     AND timestamp >= '{(start_time - timedelta(days=7)).isoformat()}'
@@ -165,8 +165,8 @@ class QueryBuilder:
                 *,
                 arrayFirstIndex(x -> x = 'latency_ms', metrics.name) as idx,
                 arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as idx2,
-                if(idx > 0, metrics.value[idx], NULL) as latency_value,
-                if(idx2 > 0, metrics.value[idx2], NULL) as cost_value,
+                if(idx > 0, metrics.value[idx], 0) as latency_value,
+                if(idx2 > 0, metrics.value[idx2], 0) as cost_value,
                 idx > 0 as has_latency,
                 idx2 > 0 as has_cost
             FROM workload_events
