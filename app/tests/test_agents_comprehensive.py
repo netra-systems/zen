@@ -39,12 +39,16 @@ class TestSupervisorAgent:
         supervisor = Supervisor(mock_db, mock_llm, mock_ws, mock_dispatcher)
         
         assert supervisor.name == "Supervisor"
-        assert len(supervisor.sub_agents) == 5
-        assert isinstance(supervisor.sub_agents[0], TriageSubAgent)
-        assert isinstance(supervisor.sub_agents[1], DataSubAgent)
-        assert isinstance(supervisor.sub_agents[2], OptimizationsCoreSubAgent)
-        assert isinstance(supervisor.sub_agents[3], ActionsToMeetGoalsSubAgent)
-        assert isinstance(supervisor.sub_agents[4], ReportingSubAgent)
+        assert len(supervisor.sub_agents) == 7  # Now includes admin agents
+        # Check that the core agents are present (order may vary)
+        agent_types = [type(agent).__name__ for agent in supervisor.sub_agents]
+        assert "TriageSubAgent" in agent_types
+        assert "DataSubAgent" in agent_types
+        assert "OptimizationsCoreSubAgent" in agent_types
+        assert "ActionsToMeetGoalsSubAgent" in agent_types
+        assert "ReportingSubAgent" in agent_types
+        assert "SyntheticDataSubAgent" in agent_types
+        assert "CorpusAdminSubAgent" in agent_types
     
     @pytest.mark.asyncio
     async def test_supervisor_run_workflow(self):

@@ -9,6 +9,8 @@ if os.environ.get("TEST_ISOLATION") == "1":
     os.environ.setdefault("TESTING", "1")
     os.environ.setdefault("ENVIRONMENT", "testing")
     os.environ.setdefault("LOG_LEVEL", "ERROR")
+    os.environ.setdefault("DEV_MODE_DISABLE_CLICKHOUSE", "true")
+    os.environ.setdefault("CLICKHOUSE_ENABLED", "false")
 else:
     # Standard test environment setup
     os.environ["TESTING"] = "1"
@@ -24,6 +26,9 @@ else:
     os.environ["FERNET_KEY"] = "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw="
     os.environ["ENVIRONMENT"] = "testing"
     os.environ["LOG_LEVEL"] = "ERROR"
+    # Disable ClickHouse for tests
+    os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
+    os.environ["CLICKHOUSE_ENABLED"] = "false"
 
 import pytest
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession

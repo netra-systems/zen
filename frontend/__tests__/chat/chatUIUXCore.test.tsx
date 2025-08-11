@@ -13,6 +13,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { WebSocketProvider } from '../providers/WebSocketProvider';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 import '@testing-library/jest-dom';

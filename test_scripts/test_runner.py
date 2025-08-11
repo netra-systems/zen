@@ -19,7 +19,7 @@ from typing import List, Dict, Tuple, Optional
 from datetime import datetime
 
 # Add project root to path
-PROJECT_ROOT = Path(__file__).parent
+PROJECT_ROOT = Path(__file__).parent.parent  # Go up one level to actual project root
 sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import test isolation utilities

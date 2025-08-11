@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { WebSocketProvider } from '../providers/WebSocketProvider';
 import userEvent from '@testing-library/user-event';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { ImprovedMessageItem } from '@/components/chat/ImprovedMessageItem';

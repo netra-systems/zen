@@ -128,11 +128,11 @@ class TestAgentE2ECritical:
         if hasattr(supervisor, '_impl') and supervisor._impl:
             # Consolidated supervisor uses agents dict
             if hasattr(supervisor._impl, 'agents'):
-                assert len(supervisor._impl.agents) == 5  # Triage, Data, Optimizations, Actions, Reporting
+                assert len(supervisor._impl.agents) == 7  # Triage, Data, Optimizations, Actions, Reporting, SyntheticData, CorpusAdmin
             else:
-                assert len(supervisor._impl.sub_agents) == 5
+                assert len(supervisor._impl.sub_agents) == 7
         else:
-            assert len(supervisor.sub_agents) == 5  # Legacy implementation
+            assert len(supervisor.sub_agents) == 7  # Legacy implementation (now includes admin agents)
 
     @pytest.mark.asyncio
     async def test_2_websocket_real_time_streaming(self, setup_agent_infrastructure):

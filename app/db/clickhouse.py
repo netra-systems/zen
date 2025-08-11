@@ -12,10 +12,17 @@ class MockClickHouseDatabase:
         logger.debug(f"ClickHouse disabled - Mock execute: {query}")
         return []
     
+    async def execute_query(self, query, params=None):
+        logger.debug(f"ClickHouse disabled - Mock execute_query: {query}")
+        return []
+    
     async def disconnect(self):
         pass
     
     async def test_connection(self):
+        return True
+    
+    def ping(self):
         return True
 
 @asynccontextmanager
@@ -25,9 +32,9 @@ async def get_clickhouse_client():
     Instantiates the client with settings and attempts to connect.
     This function will be called by FastAPI for routes that need a ClickHouse connection.
     """
-    # Check if ClickHouse is disabled in development mode
-    if settings.environment == "development" and not settings.dev_mode_clickhouse_enabled:
-        logger.info("ClickHouse is disabled in development mode - using mock client")
+    # Check if ClickHouse is disabled in development/testing mode
+    if (settings.environment == "development" and not settings.dev_mode_clickhouse_enabled) or settings.environment == "testing":
+        logger.info(f"ClickHouse is disabled in {settings.environment} mode - using mock client")
         client = MockClickHouseDatabase()
         try:
             yield client
