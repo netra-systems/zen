@@ -193,9 +193,11 @@ class TestUserService:
         # Arrange
         crud_user = CRUDUser(User)
         
-        # Mock the database query
+        # Mock the database query - need to mock scalars().first() not scalar_one_or_none()
         mock_result = Mock()
-        mock_result.scalar_one_or_none.return_value = sample_user
+        mock_scalars = Mock()
+        mock_scalars.first.return_value = sample_user
+        mock_result.scalars.return_value = mock_scalars
         mock_db_session.execute.return_value = mock_result
         
         # Act
