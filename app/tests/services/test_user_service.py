@@ -100,7 +100,7 @@ class TestUserService:
         # Assert
         assert found_user is not None
         assert found_user.email == sample_user.email
-        assert found_user.username == sample_user.username
+        # Removed username assertion as User model doesn't have username field
         assert found_user.id == sample_user.id
         
         # Verify the query was executed
@@ -137,8 +137,8 @@ class TestUserService:
         # Arrange
         crud_user = CRUDUser(User)
         update_data = UserUpdate(
-            full_name="Updated Name",
-            username="updateduser"
+            email=sample_user.email,  # Required field for UserUpdate
+            full_name="Updated Name"
         )
         
         # Mock get method to return the sample user
@@ -146,7 +146,6 @@ class TestUserService:
             # Mock the database refresh
             async def mock_refresh(obj):
                 obj.full_name = update_data.full_name
-                obj.username = update_data.username
             
             mock_db_session.refresh.side_effect = mock_refresh
             
@@ -160,7 +159,7 @@ class TestUserService:
             # Assert
             assert updated_user is not None
             assert updated_user.full_name == "Updated Name"
-            assert updated_user.username == "updateduser"
+            # Removed username assertion as User model doesn't have username field
             assert updated_user.email == sample_user.email  # Email should remain unchanged
             
             # Verify database operations
@@ -173,18 +172,20 @@ class TestUserService:
         # Arrange
         crud_user = CRUDUser(User)
         
-        # Mock the database delete operation
-        mock_db_session.delete = Mock()
-        
-        # Act
-        deleted_user = await crud_user.remove(db=mock_db_session, id=sample_user.id)
-        
-        # Assert
-        assert deleted_user == sample_user
-        
-        # Verify database operations
-        mock_db_session.delete.assert_called_once_with(sample_user)
-        mock_db_session.commit.assert_called_once()
+        # Mock the get method to return the sample user
+        with patch.object(crud_user, 'get', AsyncMock(return_value=sample_user)):
+            # Mock the database delete operation
+            mock_db_session.delete = Mock()
+            
+            # Act
+            deleted_user = await crud_user.remove(db=mock_db_session, id=sample_user.id)
+            
+            # Assert
+            assert deleted_user == sample_user
+            
+            # Verify database operations
+            mock_db_session.delete.assert_called_once_with(sample_user)
+            mock_db_session.commit.assert_called_once()
     
     @pytest.mark.asyncio
     async def test_get_user_by_id(self, mock_db_session, sample_user):
@@ -219,7 +220,6 @@ class TestUserService:
             User(
                 id=str(uuid.uuid4()),
                 email=f"user{i}@example.com",
-                username=f"user{i}",
                 full_name=f"User {i}",
                 hashed_password="hashed",
                 is_active=True,
