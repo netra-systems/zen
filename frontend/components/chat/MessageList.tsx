@@ -73,7 +73,7 @@ export const MessageList: React.FC = () => {
                 animate={{ y: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-purple-600 bg-clip-text text-transparent">
                   Welcome to Netra AI
                 </h2>
               </motion.div>

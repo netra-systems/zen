@@ -570,34 +570,7 @@ class TestSystemE2E:
             print("Frontend stopped successfully")
 
 
-class TestIntegrationScenarios:
-    """Additional integration test scenarios"""
-    
-    def test_data_persistence(self):
-        """Test that data persists across restarts"""
-        # This would test database persistence
-        # Implementation depends on actual database setup
-        pass
-    
-    def test_cache_functionality(self):
-        """Test Redis caching functionality"""
-        # Test cache hits, misses, expiration
-        pass
-    
-    def test_authentication_expiry(self):
-        """Test JWT token expiration and refresh"""
-        # Test token expiry and refresh flow
-        pass
-    
-    def test_rate_limiting(self):
-        """Test API rate limiting"""
-        # Test rate limiting on API endpoints
-        pass
-    
-    def test_file_upload(self):
-        """Test file upload functionality"""
-        # Test uploading files for analysis
-        pass
+# Removed fake test class with empty test methods
 
 
 if __name__ == "__main__":

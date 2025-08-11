@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T11:07:04.435519  
+**Generated:** 2025-08-11T11:05:33.290976  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -8,11 +8,11 @@
 
 | Component | Status | Duration | Exit Code |
 |-----------|--------|----------|-----------|
-| Backend   | [FAILED] | 8.11s | 4 |
-| Frontend  | [TIMEOUT] | 51.86s | -1 |
+| Backend   | [FAILED] | 8.23s | 4 |
+| Frontend  | [TIMEOUT] | 56.75s | -1 |
 
 **Overall Status:** [FAILED]  
-**Total Duration:** 59.97s  
+**Total Duration:** 64.98s  
 **Final Exit Code:** 4
 
 ## Test Level Details
@@ -49,7 +49,7 @@ Test Configuration:
   Environment: testing
 
 Running command:
-  pytest app/tests/routes/test_health_route.py app/tests/routes/test_health_endpoints.py -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
+  pytest app/tests/routes/test_health_route.py app/tests/routes/test_health_endpoints.py app/tests/test_working_health.py -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
 ================================================================================
 [1m============================= test session starts =============================[0m
 platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
@@ -63,10 +63,10 @@ asyncio: mode=Mode.AUTO
 
 [33m============================ [33mno tests ran[0m[33m in 0.04s[0m[33m ============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 7.16s
+[FAIL] TESTS FAILED with exit code 4 after 7.20s
 ================================================================================
 
-ERROR: file or directory not found: app/tests/routes/test_health_endpoints.py
+ERROR: file or directory not found: app/tests/test_working_health.py
 
 
 ```

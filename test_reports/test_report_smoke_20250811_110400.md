@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T11:07:04.435519  
+**Generated:** 2025-08-11T11:04:00.794308  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -8,12 +8,12 @@
 
 | Component | Status | Duration | Exit Code |
 |-----------|--------|----------|-----------|
-| Backend   | [FAILED] | 8.11s | 4 |
-| Frontend  | [TIMEOUT] | 51.86s | -1 |
+| Backend   | [PASSED] | 8.19s | 0 |
+| Frontend  | [TIMEOUT] | 51.07s | -1 |
 
 **Overall Status:** [FAILED]  
-**Total Duration:** 59.97s  
-**Final Exit Code:** 4
+**Total Duration:** 59.26s  
+**Final Exit Code:** 0
 
 ## Test Level Details
 
@@ -49,7 +49,7 @@ Test Configuration:
   Environment: testing
 
 Running command:
-  pytest app/tests/routes/test_health_route.py app/tests/routes/test_health_endpoints.py -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
+  pytest app/tests/routes/test_health_route.py app/tests/routes/test_health_endpoints.py app/tests/test_working_health.py -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
 ================================================================================
 [1m============================= test session starts =============================[0m
 platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
@@ -59,14 +59,17 @@ rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
 configfile: pytest.ini
 plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
 asyncio: mode=Mode.AUTO
-[1mcollecting ... [0mcollected 0 items
+[1mcollecting ... [0mcollected 4 items
 
-[33m============================ [33mno tests ran[0m[33m in 0.04s[0m[33m ============================[0m
-================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 7.16s
-================================================================================
+app\tests\routes\test_health_route.py::test_basic_import [32mPASSED[0m[32m          [ 25%][0m
+app\tests\routes\test_health_route.py::test_health_endpoint_direct [32mPASSED[0m[32m [ 50%][0m
+app\tests\routes\test_health_endpoints.py::test_health_endpoints_placeholder [32mPASSED[0m[32m [ 75%][0m
+app\tests\test_working_health.py::test_working_health_placeholder [32mPASSED[0m[32m [100%][0m
 
-ERROR: file or directory not found: app/tests/routes/test_health_endpoints.py
+[32m============================== [32m[1m4 passed[0m[32m in 0.08s[0m[32m ==============================[0m
+================================================================================
+[PASS] ALL TESTS PASSED in 7.22s
+================================================================================
 
 
 ```

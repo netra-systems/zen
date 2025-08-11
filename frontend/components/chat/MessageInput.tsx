@@ -234,7 +234,7 @@ export const MessageInput: React.FC = () => {
               disabled={isDisabled || !message.trim() || message.length > CHAR_LIMIT}
               className={cn(
                 "rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200",
-                "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700",
+                "bg-emerald-500 hover:bg-emerald-600",
                 "text-white shadow-lg hover:shadow-xl",
                 "disabled:from-gray-300 disabled:to-gray-400 disabled:shadow-none"
               )}

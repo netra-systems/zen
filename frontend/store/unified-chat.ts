@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { generateUniqueId } from '@/lib/utils';
+import { WebSocketEventBuffer, WSEvent } from '@/lib/circular-buffer';
 import type {
   UnifiedChatState,
   UnifiedWebSocketEvent,
@@ -11,6 +12,16 @@ import type {
   AgentResult,
   FinalReport,
 } from '@/types/unified-chat';
+
+// Agent execution tracking for deduplication
+interface AgentExecution {
+  name: string;
+  iteration: number;
+  status: 'running' | 'completed' | 'failed';
+  startTime: number;
+  endTime?: number;
+  result?: any;
+}
 
 const initialState = {
   // Layer data
@@ -32,6 +43,21 @@ const initialState = {
   // WebSocket connection
   isConnected: false,
   connectionError: null,
+  
+  // Agent deduplication
+  executedAgents: new Map<string, AgentExecution>(),
+  agentIterations: new Map<string, number>(),
+  
+  // WebSocket event debugging
+  wsEventBuffer: new WebSocketEventBuffer(1000),
+  
+  // Performance metrics
+  performanceMetrics: {
+    renderCount: 0,
+    lastRenderTime: 0,
+    averageResponseTime: 0,
+    memoryUsage: 0
+  }
 };
 
 export const useUnifiedChatStore = create<UnifiedChatState>()(
@@ -97,22 +123,57 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
       handleWebSocketEvent: (event: UnifiedWebSocketEvent) => {
         const state = get();
         
+        // Buffer event for debugging
+        const wsEvent: WSEvent = {
+          type: event.type,
+          payload: event.payload,
+          timestamp: Date.now(),
+          threadId: state.activeThreadId || undefined,
+          runId: event.payload?.run_id,
+          agentName: event.payload?.agent_name
+        };
+        state.wsEventBuffer.push(wsEvent);
+        
         switch (event.type) {
-          case 'agent_started':
+          case 'agent_started': {
+            const agentName = event.payload.agent_name;
+            const executedAgents = new Map(state.executedAgents);
+            const agentIterations = new Map(state.agentIterations);
+            
+            // Track agent iteration
+            const currentIteration = (agentIterations.get(agentName) || 0) + 1;
+            agentIterations.set(agentName, currentIteration);
+            
+            // Track execution
+            executedAgents.set(agentName, {
+              name: agentName,
+              iteration: currentIteration,
+              status: 'running',
+              startTime: Date.now()
+            });
+            
+            // Display agent name with iteration if > 1
+            const displayName = currentIteration > 1 
+              ? `${agentName} (${currentIteration})` 
+              : agentName;
+            
             set({
               isProcessing: true,
               currentRunId: event.payload.run_id,
               fastLayerData: {
-                agentName: event.payload.agent_name,
+                agentName: displayName,
                 timestamp: event.payload.timestamp,
                 runId: event.payload.run_id,
                 activeTools: []
               },
-              // Reset medium and slow layers for new run
-              mediumLayerData: null,
-              slowLayerData: null
+              // Don't reset layers if same agent reruns
+              mediumLayerData: currentIteration > 1 ? state.mediumLayerData : null,
+              slowLayerData: currentIteration > 1 ? state.slowLayerData : null,
+              executedAgents,
+              agentIterations
             }, false, 'agent_started');
             break;
+          }
             
           case 'tool_executing':
             if (state.fastLayerData) {
@@ -158,20 +219,53 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
             }, false, 'partial_result');
             break;
             
-          case 'agent_completed':
+          case 'agent_completed': {
+            const agentName = event.payload.agent_name;
+            const executedAgents = new Map(state.executedAgents);
+            const execution = executedAgents.get(agentName);
+            
+            // Update execution status
+            if (execution) {
+              execution.status = 'completed';
+              execution.endTime = Date.now();
+              execution.result = event.payload.result;
+              executedAgents.set(agentName, execution);
+            }
+            
+            // Include iteration in display name
+            const iteration = state.agentIterations.get(agentName) || 1;
+            const displayName = iteration > 1 ? `${agentName} (iteration ${iteration})` : agentName;
+            
             const newAgentResult: AgentResult = {
-              agentName: event.payload.agent_name,
+              agentName: displayName,
               duration: event.payload.duration_ms,
               result: event.payload.result,
-              metrics: event.payload.metrics
+              metrics: event.payload.metrics,
+              iteration: event.payload.iteration || iteration
             };
             
             const currentSlow = state.slowLayerData;
+            
+            // Check if this agent already exists in completed agents (deduplication)
+            const existingAgentIndex = currentSlow?.completedAgents?.findIndex(
+              agent => agent.agentName.startsWith(agentName)
+            ) ?? -1;
+            
+            let updatedCompletedAgents;
+            if (existingAgentIndex >= 0 && currentSlow?.completedAgents) {
+              // Update existing agent result
+              updatedCompletedAgents = [...currentSlow.completedAgents];
+              updatedCompletedAgents[existingAgentIndex] = newAgentResult;
+            } else {
+              // Add new agent result
+              updatedCompletedAgents = currentSlow?.completedAgents
+                ? [...currentSlow.completedAgents, newAgentResult]
+                : [newAgentResult];
+            }
+            
             set({
               slowLayerData: {
-                completedAgents: currentSlow?.completedAgents
-                  ? [...currentSlow.completedAgents, newAgentResult]
-                  : [newAgentResult],
+                completedAgents: updatedCompletedAgents,
                 finalReport: currentSlow?.finalReport || null,
                 totalDuration: currentSlow?.totalDuration || 0,
                 metrics: currentSlow?.metrics || {
@@ -182,9 +276,11 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
               // Remove completed tool from active tools
               fastLayerData: state.fastLayerData
                 ? { ...state.fastLayerData, activeTools: [] }
-                : null
+                : null,
+              executedAgents
             }, false, 'agent_completed');
             break;
+          }
             
           case 'thread_renamed':
             // Handle thread renaming event

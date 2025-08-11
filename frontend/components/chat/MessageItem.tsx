@@ -114,7 +114,7 @@ export const MessageItem: React.FC<MessageProps> = ({ message }) => {
       className={`mb-4 flex ${type === 'user' ? 'justify-end' : 'justify-start'}`}>
       <Card className={`w-full max-w-3xl shadow-sm hover:shadow-md transition-shadow duration-200 ${
         type === 'user' 
-          ? 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200' 
+          ? 'bg-white/95 backdrop-blur-sm border-emerald-200' 
           : type === 'error'
           ? 'bg-red-50 border-red-200'
           : 'bg-white border-gray-200'
@@ -124,7 +124,7 @@ export const MessageItem: React.FC<MessageProps> = ({ message }) => {
             <div className="flex items-center space-x-3">
               <Avatar className="w-9 h-9 border-2 border-white shadow-sm">
                 <AvatarFallback className={`font-bold text-sm ${
-                  type === 'user' ? 'bg-blue-500 text-white' : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                  type === 'user' ? 'bg-emerald-500 text-white' : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
                 }`}>
                   {type === 'user' ? 'U' : 'AI'}
                 </AvatarFallback>

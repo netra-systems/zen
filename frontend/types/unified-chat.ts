@@ -123,6 +123,11 @@ export interface FinalReport {
   recommendations: Recommendation[];   // From backend
   actionPlan: ActionStep[];           // From backend
   agentMetrics: AgentMetric[];       // From backend
+  executive_summary?: string;
+  cost_analysis?: any;
+  performance_comparison?: any;
+  confidence_scores?: any;
+  technical_details?: any;
 }
 
 export interface Recommendation {

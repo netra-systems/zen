@@ -421,7 +421,7 @@ const EnhancedRecommendations: React.FC<{ recommendations: RecommendationItem[] 
               </div>
 
               <AnimatePresence>
-                {expandedCards.has(rec.id) && (
+                {rec.id && expandedCards.has(rec.id) && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
@@ -466,10 +466,12 @@ interface ActionPlanItem {
   id?: string;
   step_number?: number;
   description?: string;
+  title?: string;
   command?: string;
   expected_outcome?: string;
   dependencies?: string[];
   estimated_duration?: string;
+  effort_estimate?: string;
 }
 
 const ActionPlanStepper: React.FC<{ actionPlan: ActionPlanItem[] }> = ({ actionPlan }) => {
@@ -555,14 +557,14 @@ const AgentTimeline: React.FC<{ agents: AgentTimelineItem[] }> = ({ agents }) =>
               <div className="bg-gray-200 rounded-full h-4 relative overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${(agent.duration / maxDuration) * 100}%` }}
+                  animate={{ width: `${((agent.duration || 0) / maxDuration) * 100}%` }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="absolute left-0 top-0 h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
                 />
               </div>
             </div>
             <span className="text-xs font-mono text-gray-700 w-16 text-right">
-              {agent.duration < 1000 ? `${agent.duration}ms` : `${(agent.duration / 1000).toFixed(1)}s`}
+              {(agent.duration || 0) < 1000 ? `${agent.duration || 0}ms` : `${((agent.duration || 0) / 1000).toFixed(1)}s`}
             </span>
           </div>
         ))}
@@ -596,17 +598,22 @@ export const SlowLayerEnhanced: React.FC<SlowLayerProps> = ({ data, isCollapsed 
   if (!data) return null;
   if (isCollapsed) return null;
 
+  // Convert SlowLayerData to ReportData format
+  const reportData: ReportData = {
+    finalReport: data.finalReport?.report || data.finalReport
+  };
+
   return (
     <div className="bg-gradient-to-b from-gray-50 to-white">
       <div className="p-6 space-y-6">
         {/* Executive Summary */}
-        <ExecutiveSummary data={data} />
+        <ExecutiveSummary data={reportData} />
 
         {/* Cost Analysis */}
-        <CostAnalysis data={data} />
+        <CostAnalysis data={reportData} />
 
         {/* Performance Metrics */}
-        <PerformanceMetrics data={data} />
+        <PerformanceMetrics data={reportData} />
 
         {/* Enhanced Recommendations */}
         {data.finalReport?.recommendations && (

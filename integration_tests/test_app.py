@@ -20,14 +20,6 @@ def test_read_main(test_client: TestClient):
     assert response.status_code == 200
     assert response.json() == {"message": "Welcome to Netra API"}
 
-def test_analysis_runner():
-    # Placeholder
-    assert True
-
-def test_supply_catalog_service():
-    # Placeholder
-    assert True
-
 async def poll_job_status(client, job_id):
     # Mocked poll_job_status to avoid sleep
     return {"status": "completed", "result_path": "mocked/path"}
@@ -79,7 +71,3 @@ async def test_generation_api(mock_generative_model, test_client: TestClient):
 def test_analysis_api(test_client: TestClient):
     response = test_client.post("/api/analysis/runs", json={"source_table": "test"})
     assert response.status_code == 404
-
-def test_multi_objective_controller():
-    # Placeholder
-    assert True
