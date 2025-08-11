@@ -14,13 +14,16 @@ def run_frontend_tests():
     os.chdir(FRONTEND_DIR)
     
     # Run tests with passWithNoTests flag
-    cmd = ["npm", "test", "--", "--passWithNoTests", "--ci", "--silent"]
+    cmd = "npm test -- --passWithNoTests --ci --silent"
     
     try:
         result = subprocess.run(
             cmd,
+            shell=True,
             capture_output=True,
             text=True,
+            encoding='utf-8',
+            errors='replace',
             timeout=30
         )
         

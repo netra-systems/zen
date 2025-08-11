@@ -15,9 +15,25 @@ interface ReportData {
     executive_summary?: string;
     cost_analysis?: {
       total_savings?: number;
+      current_costs?: Record<string, number>;
+      projected_costs?: Record<string, number>;
+      monthly_savings?: number;
+      total_current?: number;
+      total_projected?: number;
     };
     performance_comparison?: {
       improvement_percentage?: number;
+      response_time_current?: string | number;
+      response_time_projected?: string | number;
+      response_time_improvement?: string | number;
+      throughput_current?: string | number;
+      throughput_projected?: string | number;
+      throughput_improvement?: string | number;
+      quality_score_current?: number;
+      quality_score_projected?: number;
+      quality_improvement?: number;
+      quality_current?: string | number;
+      quality_projected?: string | number;
     };
     confidence_scores?: {
       overall?: number;
@@ -364,7 +380,7 @@ const EnhancedRecommendations: React.FC<{ recommendations: RecommendationItem[] 
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
                   <h4 className="font-semibold text-gray-900 flex items-center">
-                    {getImpactIcon(rec.impact)}
+                    {rec.impact && getImpactIcon(rec.impact)}
                     <span className="ml-2">{rec.title}</span>
                   </h4>
                   {rec.confidence_score && (
