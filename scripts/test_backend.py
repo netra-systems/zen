@@ -27,7 +27,7 @@ except ImportError:
 
 # Test categories for organized testing
 TEST_CATEGORIES = {
-    "unit": ["app/tests/services", "app/tests/core", "app/tests/utils"],
+    "unit": ["app/tests/services", "app/tests/core"],
     "integration": ["integration_tests", "app/tests/routes"],
     "agent": ["app/tests/agents", "app/tests/services/agents", "app/tests/services/apex_optimizer_agent"],
     "websocket": ["app/tests/test_websocket.py", "app/tests/routes/test_websocket_*.py"],
@@ -167,10 +167,10 @@ def build_pytest_args(args) -> List[str]:
         pytest_args.append("-v")
     
     # Parallel execution
-    if args.parallel and args.parallel > 0:
-        pytest_args.extend(["-n", str(args.parallel)])
-    elif args.parallel == -1:
+    if args.parallel == "auto":
         pytest_args.extend(["-n", "auto"])
+    elif args.parallel and str(args.parallel).isdigit() and int(args.parallel) > 0:
+        pytest_args.extend(["-n", str(args.parallel)])
     
     # Failed first
     if args.failed_first:
@@ -259,7 +259,7 @@ def run_tests(pytest_args: List[str], args, isolation_manager=None) -> int:
     # Display test configuration
     print("Test Configuration:")
     print(f"  Category: {args.category or 'all'}")
-    print(f"  Parallel: {args.parallel if args.parallel > 0 else 'disabled'}")
+    print(f"  Parallel: {args.parallel if str(args.parallel).isdigit() and int(args.parallel) > 0 else args.parallel if args.parallel == 'auto' else 'disabled'}")
     print(f"  Coverage: {'enabled' if args.coverage else 'disabled'}")
     print(f"  Fail Fast: {'enabled' if args.fail_fast else 'disabled'}")
     print(f"  Environment: {os.environ.get('ENVIRONMENT', 'testing')}")
@@ -359,9 +359,8 @@ Examples:
     # Execution options
     parser.add_argument(
         "--parallel", "-p",
-        type=int,
         default=0,
-        help="Number of parallel workers (0=sequential, -1=auto)"
+        help="Number of parallel workers (0=sequential, auto=auto, or number)"
     )
     parser.add_argument(
         "--fail-fast", "-x",

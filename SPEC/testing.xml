@@ -256,23 +256,35 @@
         </quality_validation>
     </e2e_real_llm_tests>
     
-    <test_commands>
-        <command name="quick" description="Fast validation tests">
-            python test_runner.py --mode quick
+    <unified_commands>
+        <command name="pre_commit" description="Quick pre-commit validation">
+            python test_runner.py --level smoke
         </command>
-        <command name="full" description="Complete test suite">
-            python test_runner.py --mode full
+        <command name="development" description="Unit tests during development">
+            python test_runner.py --level unit
         </command>
-        <command name="coverage" description="With coverage report">
-            python test_runner.py --mode coverage
+        <command name="feature_validation" description="Integration testing">
+            python test_runner.py --level integration
         </command>
-        <command name="e2e_real" description="Run real LLM E2E tests">
+        <command name="pre_release" description="Full comprehensive testing">
+            python test_runner.py --level comprehensive
+        </command>
+        <command name="critical_only" description="Essential functionality only">
+            python test_runner.py --level critical
+        </command>
+        <command name="backend_only" description="Backend tests only">
+            python test_runner.py --level unit --backend-only
+        </command>
+        <command name="frontend_only" description="Frontend tests only">
+            python test_runner.py --level unit --frontend-only
+        </command>
+        <command name="simple_fallback" description="When main runner has issues">
+            python test_runner.py --simple
+        </command>
+        <command name="e2e_real" description="Real LLM E2E tests (direct pytest)">
             pytest app/tests/agents/test_example_prompts_e2e_real.py -v -s
         </command>
-        <command name="e2e_real_single" description="Run single prompt E2E tests">
-            pytest app/tests/agents/test_example_prompts_e2e_real.py::TestExamplePromptsE2ERealLLM::test_prompt_1_variation_0 -v -s
-        </command>
-    </test_commands>
+    </unified_commands>
     
     <troubleshooting>
         <issue>

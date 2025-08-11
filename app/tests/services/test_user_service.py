@@ -32,7 +32,6 @@ class TestUserService:
         """Sample user data for testing"""
         return {
             "email": "test@example.com",
-            "username": "testuser",
             "full_name": "Test User",
             "password": "SecurePassword123!"
         }
@@ -43,7 +42,6 @@ class TestUserService:
         user = User(
             id=str(uuid.uuid4()),
             email=sample_user_data["email"],
-            username=sample_user_data["username"],
             full_name=sample_user_data["full_name"],
             hashed_password=pwd_context.hash(sample_user_data["password"]),
             is_active=True,
@@ -72,7 +70,7 @@ class TestUserService:
         # Assert
         assert created_user is not None
         assert created_user.email == sample_user_data["email"]
-        assert created_user.username == sample_user_data["username"]
+        # Removed username assertion as the User model doesn't have username field
         assert created_user.full_name == sample_user_data["full_name"]
         assert hasattr(created_user, 'hashed_password')
         assert created_user.hashed_password != sample_user_data["password"]  # Password should be hashed
