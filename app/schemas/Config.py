@@ -211,7 +211,18 @@ class DevelopmentConfig(AppConfig):
         client_secret="",  # Populated by SecretReference: google-client-secret
         authorized_redirect_uris=[
             "http://localhost:8000/api/auth/callback",
-            "http://localhost:3000/auth/callback"
+            "http://localhost:8001/api/auth/callback",
+            "http://localhost:8002/api/auth/callback",
+            "http://localhost:8003/api/auth/callback",
+            "http://localhost:8080/api/auth/callback",
+            "http://127.0.0.1:8000/api/auth/callback",
+            "http://127.0.0.1:8001/api/auth/callback",
+            "http://127.0.0.1:8002/api/auth/callback",
+            "http://127.0.0.1:8003/api/auth/callback",
+            "http://127.0.0.1:8080/api/auth/callback",
+            "http://localhost:3000/auth/callback",
+            "http://localhost:3001/auth/callback",
+            "http://localhost:3002/auth/callback"
         ]
     )
     

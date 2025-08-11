@@ -63,7 +63,10 @@ class AuthRoutes:
 
     @router.get("/login")
     async def login(request: Request):
-        redirect_uri = f"{settings.api_base_url}/api/auth/callback"
+        # Use the actual request URL to build the callback URL dynamically
+        base_url = str(request.base_url).rstrip('/')
+        redirect_uri = f"{base_url}/api/auth/callback"
+        logger.info(f"OAuth login initiated with redirect URI: {redirect_uri}")
         return await oauth_client.google.authorize_redirect(request, redirect_uri)
 
 

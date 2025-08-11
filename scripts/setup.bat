@@ -13,10 +13,10 @@ echo   - Node.js 18 or higher
 echo   - Git
 echo.
 echo Press any key to start setup, or Ctrl+C to cancel...
-pause >nul
+pause >NUL
 
 REM Check if Python is installed
-python --version >nul 2>&1
+python --version >NUL 2>&1
 if %errorlevel% neq 0 (
     echo.
     echo ERROR: Python is not installed or not in PATH

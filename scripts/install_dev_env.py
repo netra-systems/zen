@@ -546,7 +546,7 @@ echo Backend: http://localhost:8000
 echo Frontend: http://localhost:3000
 echo.
 echo Press any key to stop all services...
-pause >nul
+pause >NUL
 
 REM Kill processes
 taskkill /FI "WindowTitle eq Netra Backend" /T /F

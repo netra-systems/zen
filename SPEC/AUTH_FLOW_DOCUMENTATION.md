@@ -144,6 +144,35 @@ Netra uses JWT-based authentication with Google OAuth for production and auto-lo
 ### Issue: WebSocket Authentication Failure
 **Solution**: Token passed as query parameter, validated on connection
 
+### Issue: Database Session in WebSocket Endpoints
+**Problem**: `Depends(get_async_db)` doesn't work properly in WebSocket endpoints. The dependency injection returns the context manager itself, not the database session.
+
+**Solution**: 
+- DO NOT use `Depends(get_async_db)` in WebSocket endpoint parameters
+- Instead, manually create database sessions using `async with get_async_db() as db_session:`
+- Create separate sessions for authentication and message handling to avoid long-running sessions
+
+**Correct Pattern**:
+```python
+@router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):  # No Depends() here!
+    # Authentication phase
+    async with get_async_db() as db_session:
+        user = await security_service.get_user_by_id(db_session, user_id)
+    
+    # Message handling phase - create new session for each message
+    while True:
+        data = await websocket.receive_text()
+        async with get_async_db() as db_session:
+            await handle_message(data, db_session)
+```
+
+**Common Error Messages**:
+- `'_AsyncGeneratorContextManager' object has no attribute 'execute'`
+- `'_AsyncGeneratorContextManager' object has no attribute 'rollback'`
+
+These errors indicate incorrect use of database session in WebSocket endpoints.
+
 ### Issue: OAuth Redirect Loop
 **Solution**: Ensure redirect URIs match configuration exactly
 

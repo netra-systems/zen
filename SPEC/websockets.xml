@@ -44,6 +44,26 @@
         <requirement id="authorization">
             <title>Authorization</title>
             <description>Think carefully dev auth, regular user auth, etc. all well typed</description>
+            <critical-implementation-note>
+                <warning>Database Session Handling in WebSocket Endpoints</warning>
+                <issue>FastAPI's Depends() injection does NOT work properly with WebSocket endpoints for database sessions</issue>
+                <incorrect-pattern>
+                    async def websocket_endpoint(websocket: WebSocket, db_session = Depends(get_async_db)):
+                        # This will FAIL - db_session is the context manager, not a session
+                        await db_session.execute(...)  # ERROR: '_AsyncGeneratorContextManager' object has no attribute 'execute'
+                </incorrect-pattern>
+                <correct-pattern>
+                    async def websocket_endpoint(websocket: WebSocket):
+                        # Manually create database sessions where needed
+                        async with get_async_db() as db_session:
+                            user = await security_service.get_user_by_id(db_session, user_id)
+                </correct-pattern>
+                <best-practices>
+                    <practice>Create separate database sessions for authentication and message handling</practice>
+                    <practice>Use short-lived sessions - create new session for each message</practice>
+                    <practice>Always use async context manager: async with get_async_db() as db_session</practice>
+                </best-practices>
+            </critical-implementation-note>
         </requirement>
         
         <requirement id="persistence">
