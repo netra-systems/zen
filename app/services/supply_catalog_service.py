@@ -1,4 +1,4 @@
-# /v2/app/services/supply_catalog_service.py
+# app/services/supply_catalog_service.py
 from app.logging_config import central_logger
 from typing import List, Optional
 from sqlalchemy.orm import Session

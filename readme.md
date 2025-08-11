@@ -1,4 +1,4 @@
-# Netra AI Optimization Platform v2
+# Netra AI Optimization Platform apex-v1
 
 **The world's best, highest quality, most intelligent system for optimizing AI workloads including AI tools and Agents.**
 
@@ -53,7 +53,7 @@ Netra is a sophisticated AI optimization platform that leverages a multi-agent s
 ```bash
 # Clone the repository
 git clone https://github.com/netrasystems/netra-core-generation-1.git
-cd netra-core-generation-1/v2
+cd netra-core-generation-1
 
 # Run the automated installer
 scripts\setup.bat
@@ -63,7 +63,7 @@ scripts\setup.bat
 ```bash
 # Clone the repository
 git clone https://github.com/netrasystems/netra-core-generation-1.git
-cd netra-core-generation-1/v2
+cd netra-core-generation-1
 
 # Run the automated installer
 chmod +x scripts/setup.sh
@@ -285,7 +285,6 @@ ORDER BY timestamp;
 ### Project Structure
 
 ```
-v2/
 ├── app/                      # Backend application
 │   ├── agents/              # Multi-agent system
 │   │   ├── supervisor.py    # Legacy supervisor

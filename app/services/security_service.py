@@ -1,4 +1,4 @@
-# /v2/app/services/security_service.py
+# app/services/security_service.py
 
 from typing import Optional
 from passlib.context import CryptContext

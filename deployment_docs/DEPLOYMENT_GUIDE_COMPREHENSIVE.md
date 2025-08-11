@@ -213,7 +213,7 @@ NEXT_PUBLIC_ENABLE_ANALYTICS # Enable analytics (true/false)
 
 ```bash
 git clone https://github.com/your-org/netra-core-generation-1.git
-cd netra-core-generation-1/v2
+cd netra-core-generation-1
 ```
 
 ### Step 2: Backend Setup

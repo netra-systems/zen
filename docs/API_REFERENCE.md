@@ -1,6 +1,6 @@
 # Netra API Reference
 
-Complete API documentation for the Netra AI Optimization Platform v2.
+Complete API documentation for the Netra AI Optimization Platform apex-v1.
 
 ## Base URL
 
@@ -1736,10 +1736,10 @@ Paginated responses include metadata:
 
 ## Versioning
 
-The API uses URL versioning. The current version is v2:
+The API uses URL versioning. The current version is apex-v1:
 
 ```
-https://api.netrasystems.ai/v2/...
+https://api.netrasystems.ai/apex-v1/...
 ```
 
 Version information is also available in response headers:

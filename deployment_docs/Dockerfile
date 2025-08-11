@@ -1,4 +1,4 @@
-# /v2/Dockerfile
+# Dockerfile
 # Use an official Python runtime as a parent image
 FROM python:3.10-slim
 
@@ -17,18 +17,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install Python dependencies
 # Copy only the requirements file first to leverage Docker layer caching
-COPY ./v2/requirements.txt .
+COPY ./requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code into the container
 # The source path is relative to the build context (the root of the repo)
-COPY ./v2 /app/v2
+COPY . /app
 
 # Expose the port the app runs on
 EXPOSE 8000
 
 # Run the application using Uvicorn
-# The entry point is now the 'app' object in /app/v2/main.py
+# The entry point is now the 'app' object in /app/main.py
 # --reload is added for easier development; consider removing for production.
-CMD ["uvicorn", "v2.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

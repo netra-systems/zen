@@ -156,7 +156,7 @@ This creates an audit trail of AI decisions, enabling:
 ### Understanding the Structure
 
 ```
-netra-core-generation-1/v2/
+netra-core-generation-1/
 ├── SPEC/                    # Source of Truth - Start Here
 │   └── *.xml               # Specifications drive everything
 │

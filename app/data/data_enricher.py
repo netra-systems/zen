@@ -1,4 +1,4 @@
-# /v2/app/data/data_enricher.py
+# app/data/data_enricher.py
 import logging
 from typing import Dict, Tuple
 from clickhouse_driver import Client

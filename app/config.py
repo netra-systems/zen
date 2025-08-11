@@ -73,7 +73,15 @@ class ConfigManager:
         }
         
         config_class = config_classes.get(environment, DevelopmentConfig)
-        return config_class()
+        config = config_class()
+        
+        # Update WebSocket URL with actual server port if available
+        server_port = os.environ.get('SERVER_PORT')
+        if server_port:
+            config.ws_config.ws_url = f"ws://localhost:{server_port}/ws"
+            self._logger.info(f"Updated WebSocket URL to use port {server_port}")
+        
+        return config
     
     def _load_secrets_into_config(self, config: AppConfig):
         """Load secrets into the configuration object."""

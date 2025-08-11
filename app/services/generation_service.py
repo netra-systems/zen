@@ -311,7 +311,7 @@ async def run_data_ingestion_job(job_id: str, params: dict):
         central_logger.get_logger(__name__).exception("Error during data ingestion job")
         await update_job_status(job_id, "failed", error=str(e))
 
-from app.data.synthetic.synthetic_data_v2 import main as synthetic_data_main
+from app.data.synthetic.synthetic_data import main as synthetic_data_main
 
 async def run_synthetic_data_generation_job(job_id: str, params: SyntheticDataGenParams):
     """Generates and ingests synthetic logs in batches from a ClickHouse corpus."""

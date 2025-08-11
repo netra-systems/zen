@@ -3,7 +3,7 @@
 # USAGE:
 # 1. A default `config.yaml` will be created on first run. Customize it as needed.
 # 2. Run the script from your terminal:
-#    python synthetic_data_v2.py --num-traces 10000 --output-file generated_logs_v2.json
+#    python synthetic_data.py --num-traces 10000 --output-file generated_logs.json
 
 import json
 import random
@@ -322,7 +322,7 @@ def generate_multi_turn_tool_trace(config, content_corpus) -> list:
 # --- 4. ORCHESTRATION ---
 async def main(args):
     """Main function to generate synthetic logs. Can be called from other modules."""
-    console.print("[bold cyan]Starting High-Performance Synthetic Log Generation (v2)...[/bold cyan]")
+    console.print("[bold cyan]Starting High-Performance Synthetic Log Generation...[/bold cyan]")
     start_time = time.time()
 
     # Determine if running as a standalone script or called from another module
@@ -393,10 +393,10 @@ async def main(args):
     return all_logs
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="High-Performance Synthetic Log Generator v2")
+    parser = argparse.ArgumentParser(description="High-Performance Synthetic Log Generator")
     parser.add_argument("--config", default="config.yaml", help="Path to the configuration YAML file.")
     parser.add_argument("--num-traces", type=int, default=1000, help="Total number of traces to generate.")
-    parser.add_argument("--output-file", default="generated_logs_v2.json", help="Path to the output JSON file.")
+    parser.add_argument("--output-file", default="generated_logs.json", help="Path to the output JSON file.")
     parser.add_argument("--max-cores", type=int, default=cpu_count(), help="Maximum number of CPU cores to use.")
     parser.add_argument("--corpus-file", default="content_corpus.json", help="Path to the AI-generated content corpus file.")
 

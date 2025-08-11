@@ -1,12 +1,12 @@
 import sys
 import os
 
-# Change CWD to v2 directory
-v2_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-os.chdir(v2_path)
-# Add v2 path to the beginning of sys.path
-if v2_path not in sys.path:
-    sys.path.insert(0, v2_path)
+# Change CWD to project root directory
+project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(project_path)
+# Add project path to the beginning of sys.path
+if project_path not in sys.path:
+    sys.path.insert(0, project_path)
 
 print(f"sys.executable: {sys.executable}")
 print(f"sys.path: {sys.path}")

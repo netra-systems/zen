@@ -1,6 +1,6 @@
 # Database Schema Documentation
 
-Comprehensive database schema documentation for the Netra AI Optimization Platform v2.
+Comprehensive database schema documentation for the Netra AI Optimization Platform apex-v1.
 
 ## Overview
 

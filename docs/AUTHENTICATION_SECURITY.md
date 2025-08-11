@@ -1,6 +1,6 @@
 # Authentication & Security Documentation
 
-Comprehensive security documentation for the Netra AI Optimization Platform v2.
+Comprehensive security documentation for the Netra AI Optimization Platform apex-v1.
 
 ## Table of Contents
 
