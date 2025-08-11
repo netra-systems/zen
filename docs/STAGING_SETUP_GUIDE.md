@@ -84,6 +84,16 @@ OR Click each link and press the big "ENABLE" button:
 
 ### 2.2 Add Permissions
 
+run this command 
+windows PS
+```
+"run.admin","cloudsql.admin","compute.admin","iam.serviceAccountUser","secretmanager.admin","dns.admin","artifactregistry.admin","cloudbuild.builds.editor","redis.admin","monitoring.viewer" | ForEach-Object { gcloud projects add-iam-policy-binding netra-staging --member="serviceAccount:github-staging-deployer@netra-staging.iam.gserviceaccount.com" --role="roles/$_" }
+```
+bash
+```
+for role in run.admin cloudsql.admin compute.admin iam.serviceAccountUser secretmanager.admin dns.admin artifactregistry.admin cloudbuild.builds.editor redis.admin monitoring.viewer; do gcloud projects add-iam-policy-binding netra-staging --member="serviceAccount:github-staging-deployer@netra-staging.iam.gserviceaccount.com" --role="roles/$role"; done
+```
+OR
 Click "ADD ROLE" and add each of these roles (one at a time):
 
 1. `Cloud Run Admin`
@@ -156,10 +166,16 @@ Add another record for wildcard subdomains:
 1. Go to: https://console.cloud.google.com/net-services/dns
 2. Click "CREATE ZONE"
 3. Fill in:
-   - Zone name: `staging-zone`
-   - DNS name: `staging.yourdomain.com`
+   - Zone name: `staging`
+   - DNS name: `staging.netrasystems.ai`
 4. Click "CREATE"
 5. **IMPORTANT**: Copy the nameservers shown (you might need these)
+
+	staging.netrasystems.ai.	SOA	21600	
+ns-cloud-b1.googledomains.com. cloud-dns-hostmaster.google.com. 1 21600 3600 259200 300
+
+staging.netrasystems.ai.	NS	21600	
+ns-cloud-b1.googledomains.com.
 
 ---
 
@@ -175,14 +191,14 @@ Add another record for wildcard subdomains:
 
 Click "New repository secret" for each:
 
-#### Secret 1: GCP_SA_KEY
-1. Name: `GCP_SA_KEY`
+#### Secret 1: GCP_STAGING_SA_KEY
+1. Name: `GCP_STAGING_SA_KEY`
 2. Value: Open `gcp-key.json` in Notepad, copy EVERYTHING, paste it here
 3. Click "Add secret"
 
 #### Secret 2: GCP_PROJECT_ID
 1. Name: `GCP_PROJECT_ID`  
-2. Value: Your project ID from Step 1.1 (like `netra-staging-123456`)
+2. Value: Your project ID from Step 1.1 (like `netra-staging`)
 3. Click "Add secret"
 
 #### Secret 3: STAGING_DB_PASSWORD
@@ -212,7 +228,7 @@ Click "New repository secret" for each:
 
 1. Go to: https://console.cloud.google.com/storage
 2. Click "CREATE BUCKET"
-3. Name: `[your-project-id]-terraform-state` (like `netra-staging-123456-terraform-state`)
+3. Name: `netra-staging-terraform-state`
 4. Location: `us-central1`
 5. Click "CREATE"
 
@@ -280,7 +296,7 @@ Edit `.github/staging.yml` and update this section:
 
 ```yaml
 # Change this line:
-domain: staging.yourdomain.com  # PUT YOUR ACTUAL DOMAIN HERE!
+domain: staging.netrasystems.ai  # PUT YOUR ACTUAL DOMAIN HERE!
 
 # Example:
 # domain: staging.netra-ai.dev
@@ -308,7 +324,7 @@ cd terraform/staging
 gcloud auth application-default login
 
 # Set your project
-gcloud config set project YOUR_PROJECT_ID_HERE
+gcloud config set project netra-staging
 
 # Initialize Terraform
 terraform init
