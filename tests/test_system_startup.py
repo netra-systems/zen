@@ -200,18 +200,20 @@ sqlalchemy.url = sqlite:///:memory:
     @pytest.mark.asyncio
     async def test_authentication_system_startup(self, startup_env):
         """Test authentication system initialization"""
-        from app.auth.auth import AuthManager
+        from app.services.security_service import SecurityService
         
-        auth_manager = AuthManager(secret_key=startup_env["SECRET_KEY"])
+        security_service = SecurityService()
         
         # Test JWT token creation
         test_payload = {"user_id": "test_user", "email": "test@example.com"}
-        token = auth_manager.create_access_token(test_payload)
+        from app.schemas import TokenPayload
+        token_data = TokenPayload(sub="test_user", email="test@example.com")
+        token = security_service.create_access_token(token_data)
         assert token is not None
         
         # Test token verification
-        decoded = auth_manager.verify_token(token)
-        assert decoded["user_id"] == test_payload["user_id"]
+        decoded = security_service.verify_token(token)
+        assert decoded["sub"] == "test_user"
     
     @pytest.mark.asyncio
     async def test_health_check_endpoint(self, startup_env):

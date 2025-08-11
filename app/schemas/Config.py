@@ -244,7 +244,7 @@ class ProductionConfig(AppConfig):
     debug: bool = False
     log_level: str = "INFO"
 
-class TestingConfig(AppConfig):
+class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""
     environment: str = "testing"
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"

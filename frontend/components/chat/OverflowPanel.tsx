@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
-  ChevronUp, 
   Terminal, 
   Clock, 
   Database, 
@@ -13,7 +12,6 @@ import {
   Download,
   Filter,
   Search,
-  Code,
   Maximize2,
   Minimize2
 } from 'lucide-react';

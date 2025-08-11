@@ -56,7 +56,10 @@ def test_imports():
         import app
         import app.config
         import app.schemas
-        assert True  # If we get here, imports worked
+        # Verify modules have expected attributes
+        assert hasattr(app, '__version__') or hasattr(app, '__name__')
+        assert hasattr(app.config, 'settings')
+        assert hasattr(app.schemas, 'Config')
     except ImportError as e:
         pytest.fail(f"Failed to import core modules: {e}")
 
@@ -74,35 +77,3 @@ def test_config_in_test_mode():
         pytest.fail(f"Config failed in test mode: {e}")
 
 
-# Additional tests from simple_health.py merged in
-def test_basic_math():
-    """Test basic math operation - should always pass"""
-    assert 1 + 1 == 2
-
-
-def test_string_operations():
-    """Test basic string operations - should always pass"""
-    assert "hello" + "world" == "helloworld"
-
-
-@pytest.mark.asyncio
-async def test_async_basic():
-    """Test basic async functionality - should always pass"""
-    await asyncio.sleep(0.01)  # Small delay
-    assert True
-
-
-def test_list_operations():
-    """Test basic list operations"""
-    test_list = [1, 2, 3]
-    test_list.append(4)
-    assert len(test_list) == 4
-    assert test_list[-1] == 4
-
-
-def test_dict_operations():
-    """Test basic dict operations"""
-    test_dict = {"a": 1, "b": 2}
-    test_dict["c"] = 3
-    assert len(test_dict) == 3
-    assert test_dict.get("c") == 3

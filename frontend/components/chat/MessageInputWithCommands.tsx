@@ -4,7 +4,7 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { useChatStore } from '@/store/chat';
 import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
-import { Send, Paperclip, Mic, Command, ArrowUp, ArrowDown, Loader2, Database, Sparkles, Users, Settings, FileText, Shield } from 'lucide-react';
+import { Send, Paperclip, Mic, Command, Loader2, Database, Sparkles, Users, Settings, FileText, Shield } from 'lucide-react';
 import { Message } from '@/types/chat';
 import { ThreadService } from '@/services/threadService';
 import { motion, AnimatePresence } from 'framer-motion';

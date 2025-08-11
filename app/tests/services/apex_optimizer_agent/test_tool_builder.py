@@ -4,7 +4,7 @@ from app.services.apex_optimizer_agent.tool_builder import ToolBuilder
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.services.context import ToolContext
 from langchain_core.tools import StructuredTool
-from app.services.apex_optimizer_agent.models import ToolStatus
+from app.schemas import ToolStatus
 
 @pytest.mark.asyncio
 async def test_tool_builder_and_dispatcher():

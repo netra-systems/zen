@@ -62,10 +62,18 @@ class RedisManager:
             return await self.redis_client.get(key)
         return None
     
-    async def set(self, key: str, value: str, ex: int = None):
+    async def set(self, key: str, value: str, ex: int = None, expire: int = None):
         """Set a value in Redis with optional expiration"""
         if self.redis_client:
-            return await self.redis_client.set(key, value, ex=ex)
+            # Support both 'ex' and 'expire' for backward compatibility
+            expiration = ex or expire
+            return await self.redis_client.set(key, value, ex=expiration)
+        return None
+    
+    async def delete(self, key: str):
+        """Delete a key from Redis"""
+        if self.redis_client:
+            return await self.redis_client.delete(key)
         return None
 
 redis_manager = RedisManager()

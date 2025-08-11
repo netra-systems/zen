@@ -86,10 +86,17 @@ class StartupChecker:
     
     async def check_environment_variables(self):
         """Check required environment variables are set"""
-        required_vars = [
-            "DATABASE_URL",
-            "SECRET_KEY",
-        ]
+        # In development mode, DATABASE_URL and SECRET_KEY have defaults in DevelopmentConfig
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        is_dev_mode = environment == "development"
+        
+        required_vars = []
+        # Only require these in production/staging
+        if not is_dev_mode:
+            required_vars = [
+                "DATABASE_URL",
+                "SECRET_KEY",
+            ]
         
         optional_vars = [
             "REDIS_URL",
@@ -119,6 +126,8 @@ class StartupChecker:
             ))
         else:
             msg = "All required environment variables are set"
+            if is_dev_mode:
+                msg = "Development mode - using default configs"
             if missing_optional:
                 msg += f" (Optional missing: {', '.join(missing_optional)})"
             self.results.append(StartupCheckResult(
@@ -136,8 +145,10 @@ class StartupChecker:
             if not settings.database_url:
                 raise ValueError("DATABASE_URL is not configured")
             
-            if not settings.secret_key or len(settings.secret_key) < 32:
-                raise ValueError("SECRET_KEY must be at least 32 characters")
+            # In dev mode, allow the default secret key
+            if settings.environment not in ["development", "testing"]:
+                if not settings.secret_key or len(settings.secret_key) < 32:
+                    raise ValueError("SECRET_KEY must be at least 32 characters")
             
             # Check if we're in the right environment
             if settings.environment not in ["development", "testing", "staging", "production"]:
@@ -273,10 +284,10 @@ class StartupChecker:
                 client.ping()
                 
                 # Verify tables exist
-                result = client.execute(
+                result = await client.execute_query(
                     "SELECT name FROM system.tables WHERE database = currentDatabase()"
                 )
-                tables = [row[0] for row in result]
+                tables = [row.get('name', row) if isinstance(row, dict) else row[0] for row in result]
                 
                 required_tables = ['workload_events']
                 missing_tables = [t for t in required_tables if t not in tables]

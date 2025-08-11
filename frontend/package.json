@@ -39,6 +39,7 @@
     "ai": "^5.0.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.23.12",
     "immer": "^10.1.1",
     "jest-websocket-mock": "^2.5.0",

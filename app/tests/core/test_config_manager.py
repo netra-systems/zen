@@ -156,7 +156,7 @@ class TestConfigValidator:
         with pytest.raises(ConfigurationValidationError) as exc_info:
             validator.validate_config(config)
         
-        assert "Development JWT secret key cannot be used in production" in str(exc_info.value)
+        assert "JWT secret key appears to be a development/test key" in str(exc_info.value)
     
     def test_get_validation_report_success(self):
         """Test getting validation report for successful validation."""

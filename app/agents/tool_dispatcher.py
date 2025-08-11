@@ -23,7 +23,8 @@ class ToolDispatcher:
         
         tool = self.tools[tool_name]
         try:
-            result = await tool.arun(**kwargs)
+            # Tools expect the kwargs as a single dict argument
+            result = await tool.arun(kwargs)
             return ToolResult(tool_input=tool_input, status=ToolStatus.SUCCESS, payload=result)
         except Exception as e:
             return ToolResult(tool_input=tool_input, status=ToolStatus.ERROR, message=str(e))

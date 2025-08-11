@@ -73,7 +73,7 @@ def run_migrations(logger):
             logger.info(f"Current database revision: {current_rev}")
         
         # Run migrations
-        alembic_cfg = alembic.config.Config("alembic.ini")
+        alembic_cfg = alembic.config.Config("config/alembic.ini")
         alembic_cfg.set_main_option("sqlalchemy.url", sync_database_url)
         
         # Check if we need to upgrade

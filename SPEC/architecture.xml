@@ -44,7 +44,65 @@
       <service name="core/" description="Core service containers"/>
       <service name="cache/" description="LLM caching services"/>
       <service name="state/" description="State management and persistence"/>
+      <service name="llm_manager.py" description="Central LLM management and configuration"/>
     </services>
+    
+    <llm_configuration>
+      <manager location="app/llm/llm_manager.py">
+        <features>
+          <feature>Centralized LLM instance management</feature>
+          <feature>Provider abstraction (Google, OpenAI)</feature>
+          <feature>Response caching with TTL</feature>
+          <feature>Dev mode mocking</feature>
+          <feature>Streaming support</feature>
+        </features>
+        <supported_providers>
+          <provider name="google" library="langchain_google_genai" models="gemini-*"/>
+          <provider name="openai" library="langchain_openai" models="gpt-3.5-turbo, gpt-4, gpt-4-turbo"/>
+        </supported_providers>
+      </manager>
+      
+      <configuration location="app/schemas/Config.py:167-197">
+        <structure>
+          <field name="provider" type="str" description="LLM provider (google, openai)"/>
+          <field name="model_name" type="str" description="Model identifier"/>
+          <field name="api_key" type="Optional[str]" description="API key (populated via SecretReference)"/>
+          <field name="generation_config" type="Dict[str, Any]" description="Model parameters (temperature, max_tokens, etc.)"/>
+        </structure>
+        <contexts>
+          <context name="default" description="General purpose LLM"/>
+          <context name="triage" description="Message classification and routing"/>
+          <context name="data" description="Data analysis and processing"/>
+          <context name="optimizations_core" description="AI workload optimization"/>
+          <context name="actions_to_meet_goals" description="Goal-driven task execution"/>
+          <context name="reporting" description="Report generation"/>
+          <context name="analysis" description="General analysis tasks"/>
+        </contexts>
+      </configuration>
+      
+      <secret_management>
+        <description>API keys managed via SecretReference system</description>
+        <location>app/schemas/Config.py:21-32</location>
+        <example>
+          SecretReference(name="openai-api-key", target_models=["llm_configs.gpt4"], target_field="api_key")
+        </example>
+      </secret_management>
+      
+      <usage_example>
+        <code>
+          from app.llm.llm_manager import LLMManager
+          
+          llm_manager = LLMManager(settings)
+          # Synchronous
+          llm = llm_manager.get_llm("triage")
+          # Async with caching
+          response = await llm_manager.ask_llm(prompt, "triage", use_cache=True)
+          # Streaming
+          async for chunk in llm_manager.stream_llm(prompt, "analysis"):
+              yield chunk
+        </code>
+      </usage_example>
+    </llm_configuration>
     
     <databases>
       <database type="PostgreSQL">

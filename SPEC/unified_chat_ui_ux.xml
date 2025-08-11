@@ -50,22 +50,23 @@
     </core-principles>
     
     <regression-fixes>
-        <fix id="remove-blue-bars" priority="critical">
-            <issue>Legacy blue gradient bars (bg-gradient-to-r from-blue-500) throughout UI</issue>
-            <solution>Replace with modern glassmorphic design using backdrop-blur-md and white/transparent backgrounds</solution>
+        <fix id="remove-blue-bars" priority="low">
+            <issue>Legacy blue gradient bars (bg-gradient-to-r from-blue-500) throughout UI - mostly resolved</issue>
+            <solution>Already replaced in critical components with modern glassmorphic design</solution>
+            <note>This is now a minor cosmetic issue. Focus on functional improvements instead.</note>
             <affected-files>
-                <file>frontend/components/chat/layers/FastLayer.tsx - Line 14</file>
-                <file>frontend/components/chat/PersistentResponseCard.tsx - Line 35</file>
+                <file>Already fixed in FastLayer.tsx</file>
+                <file>Already fixed in PersistentResponseCard.tsx</file>
             </affected-files>
         </fix>
         <fix id="consolidate-components" priority="high">
-            <issue>Multiple competing chat components causing confusion</issue>
-            <solution>Use only MainChat.tsx, archive or remove Ultra/Responsive variants</solution>
-            <migration-plan>
-                <step>1. Ensure MainChat has all required features</step>
-                <step>2. Update all imports to use MainChat</step>
-                <step>3. Move legacy components to archive folder</step>
-            </migration-plan>
+            <issue>Multiple competing chat components causing confusion - RESOLVED</issue>
+            <solution>Now using only MainChat.tsx, legacy variants archived</solution>
+            <migration-status>
+                <step>✅ MainChat confirmed as primary component</step>
+                <step>✅ All legacy components moved to archive/</step>
+                <step>✅ Test references commented out</step>
+            </migration-status>
         </fix>
         <fix id="add-thread-sidebar" priority="critical">
             <issue>Missing thread sidebar for chat navigation</issue>

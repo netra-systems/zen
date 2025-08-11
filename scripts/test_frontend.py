@@ -169,12 +169,12 @@ def run_cypress_tests(args, isolation_manager=None) -> int:
     frontend_running = check_frontend_running(isolation_manager)
     
     if not backend_running:
-        print("⚠️  Backend server is not running. Starting it...")
+        print("[WARNING] Backend server is not running. Starting it...")
         start_backend()
         # Removed unnecessary sleep  # Give backend time to start
     
     if not frontend_running:
-        print("⚠️  Frontend dev server is not running. Starting it...")
+        print("[WARNING] Frontend dev server is not running. Starting it...")
         start_frontend()
         # Removed unnecessary sleep  # Give frontend time to start
     
@@ -446,7 +446,7 @@ Examples:
         print("\nChecking dependencies...")
         deps = check_dependencies()
         for dep, available in deps.items():
-            status = "✅" if available else "❌"
+            status = "[OK]" if available else "[MISSING]"
             print(f"  {status} {dep}")
         print()
     
@@ -465,7 +465,7 @@ Examples:
         if lint_result != 0:
             exit_code = lint_result
             if not args.fix:
-                print("❌ Linting failed. Use --fix to auto-fix issues.")
+                print("[FAIL] Linting failed. Use --fix to auto-fix issues.")
     
     # Run type checking if requested
     if args.type_check:
@@ -473,7 +473,7 @@ Examples:
         type_result = run_type_check(args)
         if type_result != 0:
             exit_code = type_result
-            print("❌ Type checking failed.")
+            print("[FAIL] Type checking failed.")
     
     # Run tests
     if args.e2e or args.cypress_open:
@@ -496,14 +496,14 @@ Examples:
         build_result = build_frontend(args)
         if build_result != 0:
             exit_code = build_result
-            print("❌ Build failed.")
+            print("[FAIL] Build failed.")
     
     # Final results
     print("\n" + "=" * 80)
     if exit_code == 0:
-        print("✅ ALL CHECKS PASSED")
+        print("[SUCCESS] ALL CHECKS PASSED")
     else:
-        print(f"❌ CHECKS FAILED with exit code {exit_code}")
+        print(f"[FAIL] CHECKS FAILED with exit code {exit_code}")
     print("=" * 80)
     
     sys.exit(exit_code)

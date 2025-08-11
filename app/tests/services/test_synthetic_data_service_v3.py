@@ -24,6 +24,7 @@ from app import schemas
 class GenerationConfig:
     def __init__(self, **kwargs):
         self.num_traces = kwargs.get('num_traces', 1000)
+        self.num_logs = kwargs.get('num_logs', kwargs.get('num_traces', 1000))  # Support both names
         self.workload_distribution = kwargs.get('workload_distribution', {})
         self.time_window_hours = kwargs.get('time_window_hours', 24)
         self.domain_focus = kwargs.get('domain_focus', 'general')
@@ -57,27 +58,100 @@ class ClickHouseService:
 
 # ==================== Test Suite 1: Corpus Management (10 tests) ====================
 
+# ==================== Fixtures ====================
+
+@pytest.fixture
+def corpus_service():
+    return CorpusService()
+
+@pytest.fixture
+def mock_db():
+    db = MagicMock()
+    db.add = MagicMock()
+    db.commit = MagicMock()
+    db.refresh = MagicMock()
+    return db
+
+@pytest.fixture
+def mock_clickhouse_client():
+    client = AsyncMock()
+    client.execute = AsyncMock(return_value=None)
+    client.query = AsyncMock(return_value=[])
+    return client
+
+@pytest.fixture
+def generation_service():
+    return SyntheticDataService()
+
+@pytest.fixture
+def generation_config():
+    return GenerationConfig(
+        num_traces=1000,
+        workload_distribution={
+            "simple_chat": 0.3,
+            "tool_use": 0.3,
+            "rag_pipeline": 0.2,
+            "failed_request": 0.2
+        },
+        time_window_hours=24,
+        domain_focus="e-commerce"
+    )
+
+@pytest.fixture
+def ingestion_service():
+    return SyntheticDataService()
+
+@pytest.fixture
+def mock_clickhouse():
+    client = AsyncMock()
+    client.execute = AsyncMock()
+    client.query = AsyncMock()
+    return client
+
+@pytest.fixture
+def ws_service():
+    return ws_manager
+
+@pytest.fixture
+def mock_websocket():
+    ws = AsyncMock()
+    ws.send_json = AsyncMock()
+    ws.receive_json = AsyncMock()
+    return ws
+
+@pytest.fixture
+def validation_service():
+    return SyntheticDataService()
+
+@pytest.fixture
+def perf_service():
+    return SyntheticDataService()
+
+@pytest.fixture
+def recovery_service():
+    return SyntheticDataService()
+
+@pytest.fixture
+def admin_service():
+    return SyntheticDataService()
+
+@pytest.fixture
+def full_stack():
+    """Setup full stack for integration testing"""
+    services = {
+        "corpus": CorpusService(),
+        "generation": SyntheticDataService(),
+        "clickhouse": ClickHouseService(),
+        "websocket": ws_manager
+    }
+    return services
+
+@pytest.fixture
+def advanced_service():
+    return SyntheticDataService()
+
 class TestCorpusManagement:
     """Test corpus lifecycle management and integration"""
-
-    @pytest.fixture
-    def corpus_service(self):
-        return CorpusService()
-
-    @pytest.fixture
-    def mock_db(self):
-        db = MagicMock()
-        db.add = MagicMock()
-        db.commit = MagicMock()
-        db.refresh = MagicMock()
-        return db
-
-    @pytest.fixture
-    def mock_clickhouse_client(self):
-        client = AsyncMock()
-        client.execute = AsyncMock(return_value=None)
-        client.query = AsyncMock(return_value=[])
-        return client
 
     @pytest.mark.asyncio
     async def test_corpus_creation_with_clickhouse_table(self, corpus_service, mock_db, mock_clickhouse_client):
@@ -251,24 +325,6 @@ class TestCorpusManagement:
 
 class TestDataGenerationEngine:
     """Test synthetic data generation core functionality"""
-
-    @pytest.fixture
-    def generation_service(self):
-        return SyntheticDataService()
-
-    @pytest.fixture
-    def generation_config(self):
-        return GenerationConfig(
-            num_traces=1000,
-            workload_distribution={
-                "simple_chat": 0.3,
-                "tool_use": 0.3,
-                "rag_pipeline": 0.2,
-                "failed_request": 0.2
-            },
-            time_window_hours=24,
-            domain_focus="e-commerce"
-        )
 
     @pytest.mark.asyncio
     async def test_workload_distribution_generation(self, generation_service, generation_config):
@@ -480,17 +536,6 @@ class TestDataGenerationEngine:
 class TestRealTimeIngestion:
     """Test real-time data ingestion to ClickHouse"""
 
-    @pytest.fixture
-    def ingestion_service(self):
-        return SyntheticDataService()
-
-    @pytest.fixture
-    def mock_clickhouse(self):
-        client = AsyncMock()
-        client.execute = AsyncMock()
-        client.query = AsyncMock()
-        return client
-
     @pytest.mark.asyncio
     async def test_batch_ingestion_to_clickhouse(self, ingestion_service, mock_clickhouse):
         """Test batch ingestion of generated data to ClickHouse"""
@@ -692,17 +737,6 @@ class TestRealTimeIngestion:
 
 class TestWebSocketUpdates:
     """Test WebSocket real-time updates during generation"""
-
-    @pytest.fixture
-    def ws_service(self):
-        return ws_manager
-
-    @pytest.fixture
-    def mock_websocket(self):
-        ws = AsyncMock()
-        ws.send_json = AsyncMock()
-        ws.receive_json = AsyncMock()
-        return ws
 
     @pytest.mark.asyncio
     async def test_websocket_connection_management(self, ws_service, mock_websocket):
@@ -912,10 +946,6 @@ class TestWebSocketUpdates:
 class TestDataQualityValidation:
     """Test data quality and validation mechanisms"""
 
-    @pytest.fixture
-    def validation_service(self):
-        return SyntheticDataService()
-
     @pytest.mark.asyncio
     async def test_schema_validation(self, validation_service):
         """Test schema validation of generated records"""
@@ -1076,10 +1106,6 @@ class TestDataQualityValidation:
 
 class TestPerformanceScalability:
     """Test performance optimization and scalability"""
-
-    @pytest.fixture
-    def perf_service(self):
-        return SyntheticDataService()
 
     @pytest.mark.asyncio
     async def test_high_throughput_generation(self, perf_service):
@@ -1294,10 +1320,6 @@ class TestPerformanceScalability:
 class TestErrorRecovery:
     """Test error handling and recovery mechanisms"""
 
-    @pytest.fixture
-    def recovery_service(self):
-        return SyntheticDataService()
-
     @pytest.mark.asyncio
     async def test_corpus_unavailable_fallback(self, recovery_service):
         """Test fallback when corpus is unavailable"""
@@ -1502,10 +1524,6 @@ class TestErrorRecovery:
 class TestAdminVisibility:
     """Test admin monitoring and visibility features"""
 
-    @pytest.fixture
-    def admin_service(self):
-        return SyntheticDataService()
-
     @pytest.mark.asyncio
     async def test_generation_job_monitoring(self, admin_service):
         """Test real-time job monitoring for admins"""
@@ -1677,17 +1695,6 @@ class TestAdminVisibility:
 
 class TestIntegration:
     """Test end-to-end integration scenarios"""
-
-    @pytest.fixture
-    async def full_stack(self):
-        """Setup full stack for integration testing"""
-        services = {
-            "corpus": CorpusService(),
-            "generation": SyntheticDataService(),
-            "clickhouse": ClickHouseService(),
-            "websocket": ws_manager
-        }
-        return services
 
     @pytest.mark.asyncio
     async def test_complete_generation_workflow(self, full_stack):
@@ -1932,10 +1939,6 @@ class TestIntegration:
 
 class TestAdvancedFeatures:
     """Test advanced and specialized features"""
-
-    @pytest.fixture
-    def advanced_service(self):
-        return SyntheticDataService()
 
     @pytest.mark.asyncio
     async def test_ml_driven_pattern_generation(self, advanced_service):

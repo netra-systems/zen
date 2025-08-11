@@ -1,436 +1,341 @@
 /**
- * AI AGENT MODIFICATION METADATA
- * ================================
- * Timestamp: 2025-08-10T14:33:00Z
- * Agent: Claude Opus 4.1 (claude-opus-4-1-20250805) via claude-code
- * Context: Create comprehensive test suite for useChatWebSocket hook
- * Git: v6 | 88345b5 | dirty
- * Change: Test | Scope: Component | Risk: Low
- * Session: test-improvement | Seq: 4
- * Review: Pending | Score: 85/100
- * ================================
+ * Test suite for useChatWebSocket hook
+ * This hook processes WebSocket messages and updates various states
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { useChatStore } from '@/store/chat';
-import { useThreadStore } from '@/store/threadStore';
-import { useAuthStore } from '@/store/authStore';
-import WS from 'jest-websocket-mock';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 
 // Mock stores
 jest.mock('@/store/chat');
-jest.mock('@/store/threadStore');
-jest.mock('@/store/authStore');
+jest.mock('@/store/unified-chat');
+
+// Mock useWebSocket hook to return controllable messages
+let mockMessages: any[] = [];
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: () => ({
+    messages: mockMessages,
+    sendMessage: jest.fn(),
+    isConnected: true,
+    connect: jest.fn(),
+    disconnect: jest.fn(),
+    error: null
+  })
+}));
 
 describe('useChatWebSocket', () => {
-  let server: WS;
-  const mockUrl = 'ws://localhost:8000/ws';
-  
   const mockChatStore = {
     addMessage: jest.fn(),
     setProcessing: jest.fn(),
     setSubAgentStatus: jest.fn(),
-    setToolOutput: jest.fn(),
-    setFinalReport: jest.fn(),
-    clearMessages: jest.fn(),
-    updateLastMessage: jest.fn(),
+    setSubAgentName: jest.fn(),
+    subAgentName: 'TestAgent',
   };
   
-  const mockThreadStore = {
-    currentThread: { id: 'thread_123' },
-    setCurrentThread: jest.fn(),
-    updateThread: jest.fn(),
-  };
-  
-  const mockAuthStore = {
-    isAuthenticated: true,
-    token: 'test_token_123',
-    user: { id: 'user_123' },
+  const mockUnifiedChatStore = {
+    handleWebSocketEvent: jest.fn(),
+    setProcessing: jest.fn(),
+    addMessage: jest.fn(),
   };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.clearAllMocks();
+    mockMessages = [];
     
     // Setup mock returns
     (useChatStore as unknown as jest.Mock).mockReturnValue(mockChatStore);
-    (useThreadStore as unknown as jest.Mock).mockReturnValue(mockThreadStore);
-    (useAuthStore as unknown as jest.Mock).mockReturnValue(mockAuthStore);
+    (useUnifiedChatStore as unknown as jest.Mock).mockReturnValue(mockUnifiedChatStore);
     
-    // Create WebSocket server
-    server = new WS(mockUrl);
-  });
-
-  afterEach(() => {
-    WS.clean();
+    // Mock getState for chat store
+    (useChatStore as any).getState = jest.fn().mockReturnValue(mockChatStore);
   });
 
   it('should initialize with default state', () => {
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
+    const { result } = renderHook(() => useChatWebSocket());
     
-    expect(result.current.isConnected).toBe(false);
-    expect(result.current.error).toBeNull();
-    expect(result.current.reconnectAttempts).toBe(0);
-    expect(typeof result.current.sendMessage).toBe('function');
-    expect(typeof result.current.connect).toBe('function');
-    expect(typeof result.current.disconnect).toBe('function');
+    expect(result.current.isConnected).toBe(true);
+    expect(result.current.agentStatus).toBe('IDLE');
+    expect(result.current.errors).toEqual([]);
+    expect(result.current.workflowProgress.current_step).toBe(0);
+    expect(typeof result.current.registerTool).toBe('function');
+    expect(typeof result.current.executeTool).toBe('function');
   });
 
-  it('should connect to WebSocket when authenticated', async () => {
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
+  it('should handle agent_started message', () => {
+    const { rerender } = renderHook(() => useChatWebSocket());
     
+    // Add a message to trigger processing
     act(() => {
-      result.current.connect();
+      mockMessages = [{
+        type: 'agent_started',
+        payload: { total_steps: 5, estimated_duration: 120 }
+      }];
     });
     
-    await server.connected;
+    // Re-render to trigger useEffect
+    rerender();
     
-    await waitFor(() => {
-      expect(result.current.isConnected).toBe(true);
-    });
+    expect(mockChatStore.setProcessing).toHaveBeenCalledWith(true);
+    expect(mockUnifiedChatStore.setProcessing).toHaveBeenCalledWith(true);
   });
 
-  it('should not connect when not authenticated', () => {
-    (useAuthStore as unknown as jest.Mock).mockReturnValue({
-      ...mockAuthStore,
-      isAuthenticated: false,
-    });
-    
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
+  it('should handle sub_agent_update message', () => {
+    const { rerender } = renderHook(() => useChatWebSocket());
     
     act(() => {
-      result.current.connect();
+      mockMessages = [{
+        type: 'sub_agent_update',
+        payload: {
+          sub_agent_name: 'OptimizationAgent',
+          state: {
+            lifecycle: 'running',
+            tools: ['analyzer', 'optimizer']
+          }
+        }
+      }];
     });
     
-    expect(result.current.isConnected).toBe(false);
-    expect(result.current.error).toBe('User not authenticated');
-  });
-
-  it('should send messages when connected', async () => {
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
+    rerender();
     
-    act(() => {
-      result.current.connect();
-    });
-    
-    await server.connected;
-    
-    const message = {
-      type: 'user_message',
-      payload: { text: 'Hello', threadId: 'thread_123' },
-    };
-    
-    act(() => {
-      result.current.sendMessage(message);
-    });
-    
-    await expect(server).toReceiveMessage(JSON.stringify(message));
-  });
-
-  it('should handle incoming messages', async () => {
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
-    
-    act(() => {
-      result.current.connect();
-    });
-    
-    await server.connected;
-    
-    const chatMessage = {
-      type: 'chat_message',
-      message: {
-        id: 'msg_123',
-        content: 'Response from agent',
-        role: 'assistant',
-      },
-    };
-    
-    act(() => {
-      server.send(JSON.stringify(chatMessage));
-    });
-    
-    await waitFor(() => {
-      expect(mockChatStore.addMessage).toHaveBeenCalledWith(chatMessage.message);
+    expect(mockChatStore.setSubAgentName).toHaveBeenCalledWith('OptimizationAgent');
+    expect(mockChatStore.setSubAgentStatus).toHaveBeenCalledWith({
+      status: 'running',
+      tools: ['analyzer', 'optimizer']
     });
   });
 
-  it('should handle agent status updates', async () => {
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
+  it('should handle agent_completed message', () => {
+    const { rerender } = renderHook(() => useChatWebSocket());
     
     act(() => {
-      result.current.connect();
+      mockMessages = [{
+        type: 'agent_completed',
+        payload: {}
+      }];
     });
     
-    await server.connected;
+    rerender();
     
-    const statusUpdate = {
-      type: 'agent_status',
-      data: {
-        name: 'TestAgent',
-        status: 'processing',
-        lifecycle: 'running',
-      },
-    };
+    expect(mockChatStore.setProcessing).toHaveBeenCalledWith(false);
+    expect(mockUnifiedChatStore.setProcessing).toHaveBeenCalledWith(false);
+    expect(mockChatStore.addMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'agent',
+        content: 'Task completed successfully.'
+      })
+    );
+  });
+
+  it('should handle error message', () => {
+    const { rerender } = renderHook(() => useChatWebSocket());
     
     act(() => {
-      server.send(JSON.stringify(statusUpdate));
+      mockMessages = [{
+        type: 'error',
+        payload: {
+          error: 'Connection timeout',
+          sub_agent_name: 'NetworkAgent'
+        }
+      }];
     });
     
-    await waitFor(() => {
-      expect(mockChatStore.setSubAgentStatus).toHaveBeenCalledWith(statusUpdate.data);
+    rerender();
+    
+    expect(mockChatStore.setProcessing).toHaveBeenCalledWith(false);
+    expect(mockChatStore.addMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'error',
+        content: expect.stringContaining('Connection timeout')
+      })
+    );
+  });
+
+  it('should handle tool_call message', () => {
+    const { rerender } = renderHook(() => useChatWebSocket());
+    
+    act(() => {
+      mockMessages = [{
+        type: 'tool_call',
+        payload: {
+          tool_name: 'cost_analyzer',
+          tool_args: { region: 'us-east-1' },
+          sub_agent_name: 'AnalysisAgent'
+        }
+      }];
+    });
+    
+    rerender();
+    
+    expect(mockChatStore.addMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'tool',
+        content: expect.stringContaining('cost_analyzer')
+      })
+    );
+  });
+
+  it('should register and execute tools', async () => {
+    const { result } = renderHook(() => useChatWebSocket());
+    
+    // Register a tool
+    act(() => {
+      result.current.registerTool({ name: 'test_tool', version: '1.0' });
+    });
+    
+    expect(result.current.registeredTools).toContainEqual({ name: 'test_tool', version: '1.0' });
+    
+    // Execute a tool
+    let toolResult;
+    await act(async () => {
+      toolResult = await result.current.executeTool('test_tool', { param: 'value' });
+    });
+    
+    expect(toolResult).toEqual({ success: true, data: { param: 'value' } });
+    expect(result.current.toolResults['test_tool']).toEqual({ success: true, data: { param: 'value' } });
+  });
+
+  it('should handle workflow_progress message', () => {
+    const { result, rerender } = renderHook(() => useChatWebSocket());
+    
+    act(() => {
+      mockMessages = [{
+        type: 'workflow_progress',
+        payload: {
+          current_step: 3,
+          total_steps: 10
+        }
+      }];
+    });
+    
+    rerender();
+    
+    expect(result.current.workflowProgress).toEqual({
+      current_step: 3,
+      total_steps: 10
     });
   });
 
-  it('should handle tool output messages', async () => {
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
+  it('should handle message_chunk for streaming', () => {
+    const { result, rerender } = renderHook(() => useChatWebSocket());
     
     act(() => {
-      result.current.connect();
+      mockMessages = [{
+        type: 'message_chunk',
+        payload: {
+          content: 'Partial response...',
+          is_complete: false
+        }
+      }];
     });
     
-    await server.connected;
+    rerender();
     
-    const toolOutput = {
-      type: 'tool_output',
-      data: {
-        tool: 'analyzer',
-        output: 'Analysis complete',
-      },
-    };
+    expect(result.current.streamingMessage).toBe('Partial response...');
+    expect(result.current.isStreaming).toBe(true);
+  });
+
+  it('should handle validation_result message', () => {
+    const { result, rerender } = renderHook(() => useChatWebSocket());
     
     act(() => {
-      server.send(JSON.stringify(toolOutput));
+      mockMessages = [{
+        type: 'validation_result',
+        payload: {
+          field: 'memory_limit',
+          valid: true
+        }
+      }];
     });
     
-    await waitFor(() => {
-      expect(mockChatStore.setToolOutput).toHaveBeenCalledWith(toolOutput.data);
+    rerender();
+    
+    expect(result.current.validationResults).toEqual({
+      memory_limit: true
     });
   });
 
-  it('should handle final report messages', async () => {
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
+  it('should handle approval_required message', () => {
+    const { result, rerender } = renderHook(() => useChatWebSocket());
     
     act(() => {
-      result.current.connect();
+      mockMessages = [{
+        type: 'approval_required',
+        payload: {
+          message: 'Confirm deletion of resources',
+          sub_agent_name: 'ResourceManager'
+        }
+      }];
     });
     
-    await server.connected;
+    rerender();
     
-    const finalReport = {
-      type: 'final_report',
-      report: {
-        summary: 'Task completed successfully',
-        details: 'All optimizations applied',
-      },
-    };
-    
-    act(() => {
-      server.send(JSON.stringify(finalReport));
+    expect(result.current.pendingApproval).toEqual({
+      message: 'Confirm deletion of resources',
+      sub_agent_name: 'ResourceManager'
     });
-    
-    await waitFor(() => {
-      expect(mockChatStore.setFinalReport).toHaveBeenCalledWith(finalReport.report);
-      expect(mockChatStore.setProcessing).toHaveBeenCalledWith(false);
-    });
+    expect(mockChatStore.addMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'system',
+        content: 'Confirm deletion of resources'
+      })
+    );
   });
 
-  it('should handle connection errors', async () => {
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
+  it('should clear errors', () => {
+    const { result, rerender } = renderHook(() => useChatWebSocket());
     
+    // Add some errors first
     act(() => {
-      result.current.connect();
+      mockMessages = [{
+        type: 'sub_agent_error',
+        payload: {
+          sub_agent_name: 'TestAgent',
+          error: { type: 'TIMEOUT', message: 'Request timeout' },
+          recovery_action: 'RETRY_WITH_FALLBACK'
+        }
+      }];
     });
     
-    await server.connected;
+    rerender();
     
+    expect(result.current.errors).toHaveLength(1);
+    
+    // Clear errors
     act(() => {
-      server.error();
+      result.current.clearErrors();
     });
     
-    await waitFor(() => {
-      expect(result.current.isConnected).toBe(false);
-      expect(result.current.error).toBeTruthy();
-    });
+    expect(result.current.errors).toHaveLength(0);
   });
 
-  it('should handle disconnection', async () => {
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
+  it('should not reprocess already processed messages', () => {
+    const { rerender } = renderHook(() => useChatWebSocket());
     
+    // First batch of messages
     act(() => {
-      result.current.connect();
+      mockMessages = [{
+        type: 'agent_started',
+        payload: {}
+      }];
     });
     
-    await server.connected;
+    rerender();
     
+    expect(mockChatStore.setProcessing).toHaveBeenCalledTimes(1);
+    
+    // Add another message without clearing
     act(() => {
-      result.current.disconnect();
+      mockMessages = [
+        { type: 'agent_started', payload: {} },
+        { type: 'agent_completed', payload: {} }
+      ];
     });
     
-    await waitFor(() => {
-      expect(result.current.isConnected).toBe(false);
-    });
-  });
-
-  it('should attempt reconnection on disconnect', async () => {
-    jest.useFakeTimers();
+    rerender();
     
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
-    
-    act(() => {
-      result.current.connect();
-    });
-    
-    await server.connected;
-    
-    // Simulate unexpected disconnect
-    act(() => {
-      server.close();
-    });
-    
-    await waitFor(() => {
-      expect(result.current.isConnected).toBe(false);
-    });
-    
-    // Fast-forward time to trigger reconnection
-    act(() => {
-      jest.advanceTimersByTime(5000);
-    });
-    
-    await waitFor(() => {
-      expect(result.current.reconnectAttempts).toBeGreaterThan(0);
-    });
-    
-    jest.useRealTimers();
-  });
-
-  it('should queue messages when disconnected', () => {
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
-    
-    const message = {
-      type: 'user_message',
-      payload: { text: 'Queued message' },
-    };
-    
-    // Try to send without connecting
-    act(() => {
-      result.current.sendMessage(message);
-    });
-    
-    // Message should be queued
-    expect(result.current.messageQueue).toContainEqual(message);
-  });
-
-  it('should send queued messages on reconnection', async () => {
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
-    
-    const message = {
-      type: 'user_message',
-      payload: { text: 'Queued message' },
-    };
-    
-    // Queue a message
-    act(() => {
-      result.current.sendMessage(message);
-    });
-    
-    expect(result.current.messageQueue).toHaveLength(1);
-    
-    // Connect
-    act(() => {
-      result.current.connect();
-    });
-    
-    await server.connected;
-    
-    // Queued message should be sent
-    await expect(server).toReceiveMessage(JSON.stringify(message));
-    
-    await waitFor(() => {
-      expect(result.current.messageQueue).toHaveLength(0);
-    });
-  });
-
-  it('should handle heartbeat messages', async () => {
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
-    
-    act(() => {
-      result.current.connect();
-    });
-    
-    await server.connected;
-    
-    // Send heartbeat
-    act(() => {
-      server.send(JSON.stringify({ type: 'heartbeat' }));
-    });
-    
-    // Should respond with heartbeat
-    await expect(server).toReceiveMessage(JSON.stringify({ type: 'heartbeat' }));
-  });
-
-  it('should update thread on thread update message', async () => {
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
-    
-    act(() => {
-      result.current.connect();
-    });
-    
-    await server.connected;
-    
-    const threadUpdate = {
-      type: 'thread_update',
-      thread: {
-        id: 'thread_123',
-        title: 'Updated Thread',
-        updated_at: new Date().toISOString(),
-      },
-    };
-    
-    act(() => {
-      server.send(JSON.stringify(threadUpdate));
-    });
-    
-    await waitFor(() => {
-      expect(mockThreadStore.updateThread).toHaveBeenCalledWith(threadUpdate.thread);
-    });
-  });
-
-  it('should handle error messages', async () => {
-    const { result } = renderHook(() => useChatWebSocket(mockUrl));
-    
-    act(() => {
-      result.current.connect();
-    });
-    
-    await server.connected;
-    
-    const errorMessage = {
-      type: 'error',
-      error: 'Something went wrong',
-      details: 'Connection timeout',
-    };
-    
-    act(() => {
-      server.send(JSON.stringify(errorMessage));
-    });
-    
-    await waitFor(() => {
-      expect(result.current.error).toBe('Something went wrong: Connection timeout');
-    });
-  });
-
-  it('should clean up on unmount', async () => {
-    const { result, unmount } = renderHook(() => useChatWebSocket(mockUrl));
-    
-    act(() => {
-      result.current.connect();
-    });
-    
-    await server.connected;
-    
-    unmount();
-    
-    // WebSocket should be closed
-    expect(server.readyState).toBe(WebSocket.CLOSED);
+    // Should only process the new message
+    expect(mockChatStore.setProcessing).toHaveBeenCalledTimes(2); // Once for start, once for complete
   });
 });

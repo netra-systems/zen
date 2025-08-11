@@ -18,13 +18,13 @@ from app.services.database.reference_repository import ReferenceRepository
 
 
 @pytest.fixture
-async def unit_of_work(mock_session, mock_models):
+def unit_of_work(mock_session, mock_models):
     """Create a test unit of work instance with mocked session."""
     # Mock the session factory to return our mock session
     with patch('app.services.database.unit_of_work.async_session_factory') as mock_factory:
         mock_factory.return_value = mock_session
         uow = UnitOfWork()
-        yield uow
+        return uow
 
 
 @pytest.fixture
@@ -61,20 +61,16 @@ def mock_models():
             self.source = kwargs.get('source')
             self.content = kwargs.get('content')
     
-    # Patch all model imports from app.db.models_postgres
-    with patch('app.db.models_postgres.Thread', MockThread), \
-         patch('app.db.models_postgres.Message', MockMessage), \
-         patch('app.db.models_postgres.Run', MockRun), \
-         patch('app.db.models_postgres.Reference', MockReference):
-        yield {
-            'Thread': MockThread,
-            'Message': MockMessage,
-            'Run': MockRun,
-            'Reference': MockReference
-        }
+    # Return the mock classes directly instead of using context manager
+    return {
+        'Thread': MockThread,
+        'Message': MockMessage,
+        'Run': MockRun,
+        'Reference': MockReference
+    }
 
 @pytest.fixture
-async def mock_session():
+def mock_session():
     """Create a mock database session."""
     session = AsyncMock(spec=AsyncSession)
     session.commit = AsyncMock()

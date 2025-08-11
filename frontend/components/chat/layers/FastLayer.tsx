@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Activity, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import type { FastLayerProps } from '@/types/unified-chat';
 
 export const FastLayer: React.FC<FastLayerProps> = ({ data, isProcessing }) => {

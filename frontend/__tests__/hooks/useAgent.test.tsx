@@ -15,6 +15,7 @@ import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { useAgent } from '@/hooks/useAgent';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
+import { AuthContext } from '@/auth/context';
 
 // Mock WebSocket
 let mockWebSocketInstance: any;
@@ -42,8 +43,19 @@ class MockWebSocket {
 global.WebSocket = MockWebSocket as any;
 
 describe('useAgent', () => {
+  const mockAuthValue = {
+    token: 'test-token',
+    user: null,
+    loading: false,
+    login: jest.fn(),
+    logout: jest.fn(),
+    refreshToken: jest.fn(),
+  };
+
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <WebSocketProvider>{children}</WebSocketProvider>
+    <AuthContext.Provider value={mockAuthValue}>
+      <WebSocketProvider>{children}</WebSocketProvider>
+    </AuthContext.Provider>
   );
 
   beforeEach(() => {

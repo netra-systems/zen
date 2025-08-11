@@ -3,8 +3,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { WebSocketProvider } from '../providers/WebSocketProvider';
 import userEvent from '@testing-library/user-event';
 import { MessageInput } from '@/components/chat/MessageInput';
-import { ImprovedMessageItem } from '@/components/chat/ImprovedMessageItem';
-import { ResponsiveMainChat } from '@/components/chat/ResponsiveMainChat';
+// Legacy components removed - using unified MainChat and MessageItem
+// import { ImprovedMessageItem } from '@/components/chat/ImprovedMessageItem';
+// import { ResponsiveMainChat } from '@/components/chat/ResponsiveMainChat';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { renderHook, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -131,87 +132,88 @@ describe('Chat UI Improvements', () => {
     });
   });
 
-  describe('ImprovedMessageItem Component', () => {
-    const mockMessage = {
-      id: 'msg-1',
-      type: 'assistant' as const,
-      content: '```javascript\nconst hello = "world";\n```',
-      sub_agent_name: 'OptimizationAgent',
-      created_at: new Date().toISOString(),
-      displayed_to_user: true,
-    };
+  // Tests for ImprovedMessageItem removed - component archived
+  // describe('ImprovedMessageItem Component', () => {
+  //   const mockMessage = {
+  //     id: 'msg-1',
+  //     type: 'assistant' as const,
+  //     content: '```javascript\nconst hello = "world";\n```',
+  //     sub_agent_name: 'OptimizationAgent',
+  //     created_at: new Date().toISOString(),
+  //     displayed_to_user: true,
+  //   };
 
-    it('should render message with syntax highlighting', () => {
-      render(<ImprovedMessageItem message={mockMessage} />);
+  //   it('should render message with syntax highlighting', () => {
+  //     render(<ImprovedMessageItem message={mockMessage} />);
       
-      // Check for code block rendering
-      const codeBlock = screen.getByText('const');
-      expect(codeBlock).toBeInTheDocument();
-    });
+  //     // Check for code block rendering
+  //     const codeBlock = screen.getByText('const');
+  //     expect(codeBlock).toBeInTheDocument();
+  //   });
 
-    it('should show copy button for code blocks', async () => {
-      render(<ImprovedMessageItem message={mockMessage} />);
+  //   it('should show copy button for code blocks', async () => {
+  //     render(<ImprovedMessageItem message={mockMessage} />);
       
-      // Hover over code block to show copy button
-      const codeContainer = screen.getByText('const').closest('.relative');
-      if (codeContainer) {
-        fireEvent.mouseEnter(codeContainer);
+  //     // Hover over code block to show copy button
+  //     const codeContainer = screen.getByText('const').closest('.relative');
+  //     if (codeContainer) {
+  //       fireEvent.mouseEnter(codeContainer);
         
-        // Check for copy button
-        await waitFor(() => {
-          const copyButtons = screen.getAllByRole('button', { name: /copy/i });
-          expect(copyButtons.length).toBeGreaterThan(0);
-        });
-      }
-    });
+  //       // Check for copy button
+  //       await waitFor(() => {
+  //         const copyButtons = screen.getAllByRole('button', { name: /copy/i });
+  //         expect(copyButtons.length).toBeGreaterThan(0);
+  //       });
+  //     }
+  //   });
 
-    it('should support feedback buttons', () => {
-      const onFeedback = jest.fn();
-      render(
-        <ImprovedMessageItem 
-          message={mockMessage} 
-          onFeedback={onFeedback}
-        />
-      );
+    // it('should support feedback buttons', () => {
+    //   const onFeedback = jest.fn();
+    //   render(
+    //     <ImprovedMessageItem 
+    //       message={mockMessage} 
+    //       onFeedback={onFeedback}
+    //     />
+    //   );
       
-      // Check for feedback buttons
-      const helpfulButton = screen.getByLabelText('Mark as helpful');
-      const notHelpfulButton = screen.getByLabelText('Mark as not helpful');
+    //   // Check for feedback buttons
+    //   const helpfulButton = screen.getByLabelText('Mark as helpful');
+    //   const notHelpfulButton = screen.getByLabelText('Mark as not helpful');
       
-      expect(helpfulButton).toBeInTheDocument();
-      expect(notHelpfulButton).toBeInTheDocument();
+    //   expect(helpfulButton).toBeInTheDocument();
+    //   expect(notHelpfulButton).toBeInTheDocument();
       
-      // Test feedback interaction
-      fireEvent.click(helpfulButton);
-      expect(onFeedback).toHaveBeenCalledWith('msg-1', 'helpful');
-    });
+    //   // Test feedback interaction
+    //   fireEvent.click(helpfulButton);
+    //   expect(onFeedback).toHaveBeenCalledWith('msg-1', 'helpful');
+    // });
 
-    it('should support compact mode display', () => {
-      render(
-        <ImprovedMessageItem 
-          message={mockMessage} 
-          isCompact={true}
-        />
-      );
+    // it('should support compact mode display', () => {
+    //   render(
+    //     <ImprovedMessageItem 
+    //       message={mockMessage} 
+    //       isCompact={true}
+    //     />
+    //   );
       
-      // In compact mode, should have simpler layout
-      const compactContainer = screen.getByText('const hello = "world";').closest('div');
-      expect(compactContainer?.className).toContain('flex gap-3');
-    });
+    //   // In compact mode, should have simpler layout
+    //   const compactContainer = screen.getByText('const hello = "world";').closest('div');
+    //   expect(compactContainer?.className).toContain('flex gap-3');
+    // });
 
-    it('should format timestamps correctly', () => {
-      const oldMessage = {
-        ...mockMessage,
-        created_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-      };
+    // it('should format timestamps correctly', () => {
+    //   const oldMessage = {
+    //     ...mockMessage,
+    //     created_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+    //   };
       
-      render(<ImprovedMessageItem message={oldMessage} />);
+    //   render(<ImprovedMessageItem message={oldMessage} />);
       
-      // Should show relative time
-      const timestamp = screen.getByText(/ago/);
-      expect(timestamp).toBeInTheDocument();
-    });
-  });
+    //   // Should show relative time
+    //   const timestamp = screen.getByText(/ago/);
+    //   expect(timestamp).toBeInTheDocument();
+    // });
+  // });
 
   describe('Keyboard Shortcuts', () => {
     it('should register keyboard shortcuts correctly', () => {

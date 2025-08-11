@@ -30,12 +30,14 @@ class TestDemoService:
         return redis
     
     @pytest.fixture
-    async def demo_service(self, mock_agent_service, mock_redis_client):
+    def demo_service(self, mock_agent_service, mock_redis_client):
         """Create a DemoService instance with mocks."""
         service = DemoService(agent_service=mock_agent_service)
-        # Mock the Redis client getter
-        with patch.object(service, '_get_redis', return_value=mock_redis_client):
-            yield service
+        # Patch the Redis client getter method - it needs to be async
+        async def async_get_redis():
+            return mock_redis_client
+        service._get_redis = async_get_redis
+        return service
     
     @pytest.mark.asyncio
     async def test_process_demo_chat_new_session(self, demo_service, mock_redis_client):

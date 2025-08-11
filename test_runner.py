@@ -34,7 +34,7 @@ TEST_LEVELS = {
         "description": "Unit tests for isolated components (1-2 minutes)",
         "purpose": "Development validation, component testing",
         "backend_args": ["--category", "unit", "-v"],
-        "frontend_args": ["--testPathPattern=unit"],
+        "frontend_args": ["--category", "unit"],
         "timeout": 120,
         "run_coverage": False,
         "run_both": True
@@ -43,7 +43,7 @@ TEST_LEVELS = {
         "description": "Integration tests for component interaction (3-5 minutes)",
         "purpose": "Feature validation, API testing",
         "backend_args": ["--category", "integration", "-v"],
-        "frontend_args": ["--testPathPattern=integration"],
+        "frontend_args": ["--category", "integration"],
         "timeout": 300,
         "run_coverage": False,
         "run_both": True
@@ -61,7 +61,7 @@ TEST_LEVELS = {
         "description": "Critical path tests only (1-2 minutes)",
         "purpose": "Essential functionality verification",
         "backend_args": ["--category", "critical", "--fail-fast"],
-        "frontend_args": ["--testPathPattern=critical"],
+        "frontend_args": ["--category", "smoke"],
         "timeout": 120,
         "run_coverage": False,
         "run_both": False  # Backend only for critical paths
@@ -123,10 +123,21 @@ class UnifiedTestRunner:
             self.results["backend"]["output"] = result.stdout + "\n" + result.stderr
             self.results["backend"]["status"] = "passed" if result.returncode == 0 else "failed"
             
-            # Print output
-            print(result.stdout)
+            # Print output with proper encoding handling
+            try:
+                print(result.stdout)
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                # Force ASCII output for Windows terminals with encoding issues
+                cleaned_output = result.stdout.encode('ascii', errors='replace').decode('ascii')
+                print(cleaned_output)
+            
             if result.stderr:
-                print(result.stderr, file=sys.stderr)
+                try:
+                    print(result.stderr, file=sys.stderr)
+                except (UnicodeEncodeError, UnicodeDecodeError):
+                    # Force ASCII output for Windows terminals with encoding issues
+                    cleaned_error = result.stderr.encode('ascii', errors='replace').decode('ascii')
+                    print(cleaned_error, file=sys.stderr)
             
             print(f"[{'PASS' if result.returncode == 0 else 'FAIL'}] Backend tests completed in {duration:.2f}s")
             
@@ -176,10 +187,21 @@ class UnifiedTestRunner:
             self.results["frontend"]["output"] = result.stdout + "\n" + result.stderr
             self.results["frontend"]["status"] = "passed" if result.returncode == 0 else "failed"
             
-            # Print output
-            print(result.stdout)
+            # Print output with proper encoding handling
+            try:
+                print(result.stdout)
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                # Force ASCII output for Windows terminals with encoding issues
+                cleaned_output = result.stdout.encode('ascii', errors='replace').decode('ascii')
+                print(cleaned_output)
+            
             if result.stderr:
-                print(result.stderr, file=sys.stderr)
+                try:
+                    print(result.stderr, file=sys.stderr)
+                except (UnicodeEncodeError, UnicodeDecodeError):
+                    # Force ASCII output for Windows terminals with encoding issues
+                    cleaned_error = result.stderr.encode('ascii', errors='replace').decode('ascii')
+                    print(cleaned_error, file=sys.stderr)
             
             print(f"[{'PASS' if result.returncode == 0 else 'FAIL'}] Frontend tests completed in {duration:.2f}s")
             
@@ -232,10 +254,21 @@ class UnifiedTestRunner:
             self.results["frontend"]["exit_code"] = result.returncode
             self.results["frontend"]["status"] = "passed" if result.returncode == 0 else "failed"
             
-            # Print output
-            print(result.stdout)
+            # Print output with proper encoding handling
+            try:
+                print(result.stdout)
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                # Force ASCII output for Windows terminals with encoding issues
+                cleaned_output = result.stdout.encode('ascii', errors='replace').decode('ascii')
+                print(cleaned_output)
+            
             if result.stderr:
-                print(result.stderr, file=sys.stderr)
+                try:
+                    print(result.stderr, file=sys.stderr)
+                except (UnicodeEncodeError, UnicodeDecodeError):
+                    # Force ASCII output for Windows terminals with encoding issues
+                    cleaned_error = result.stderr.encode('ascii', errors='replace').decode('ascii')
+                    print(cleaned_error, file=sys.stderr)
             
             print(f"[{'PASS' if result.returncode == 0 else 'FAIL'}] Simple tests completed in {duration:.2f}s")
             

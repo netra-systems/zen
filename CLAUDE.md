@@ -65,6 +65,7 @@ python test_runner.py --simple
 
 ### Primary Specs (Consult for Every Change)
 - `SPEC/code_changes.xml` - **MANDATORY** checklist for any code modification
+- `SPEC/anti_regression.xml` - **CRITICAL** patterns to prevent common regressions
 - `SPEC/conventions.xml` - Coding standards and patterns
 - `SPEC/instructions.xml` - General development guidelines
 
@@ -169,6 +170,59 @@ ANTHROPIC_API_KEY=your-anthropic-key
 See `.env.example` for complete list
 
 
+## LLM Configuration and Usage
+
+### Where LLMs are Used
+1. **Central LLM Manager** (`app/llm/llm_manager.py`):
+   - Manages all LLM instances and configurations
+   - Supports Google (Gemini) and OpenAI providers
+   - Handles caching, mocking for dev mode, and streaming
+
+2. **Configuration** (`app/schemas/Config.py:167-197`):
+   - LLM configs in `AppConfig.llm_configs` dictionary
+   - Each config has: provider, model_name, api_key, generation_config
+
+3. **Agent Contexts**:
+   - `triage`: Message classification and routing
+   - `data`: Data analysis and processing
+   - `optimizations_core`: AI workload optimization
+   - `actions_to_meet_goals`: Goal-driven task execution
+   - `reporting`: Report generation
+   - `analysis`: General analysis tasks
+
+### Adding New LLM Providers (e.g., GPT-4)
+
+1. **Add to Config** (`app/schemas/Config.py`):
+```python
+llm_configs: Dict[str, LLMConfig] = {
+    # Existing configs...
+    "gpt4": LLMConfig(
+        provider="openai",
+        model_name="gpt-4",
+        generation_config={"temperature": 0.7, "max_tokens": 4096}
+    ),
+}
+```
+
+2. **Add Secret Reference** (`app/schemas/Config.py:21-32`):
+```python
+SecretReference(
+    name="openai-api-key",
+    target_models=["llm_configs.gpt4"],
+    target_field="api_key"
+)
+```
+
+3. **Set Environment Variable**:
+```bash
+OPENAI_API_KEY=your-api-key
+```
+
+4. **Use in Code**:
+```python
+response = await llm_manager.ask_llm(prompt, "gpt4")
+```
+
 ## Recent Learnings (Update This Section!)
 
 ### 2025-01-11: Spec Organization
@@ -176,5 +230,34 @@ See `.env.example` for complete list
 - Moved architecture details to `SPEC/architecture.xml`
 - Moved ClickHouse troubleshooting to `SPEC/clickhouse.xml`
 - Keep CLAUDE.md focused on principles and quick reference
+
+### 2025-01-11: LLM Configuration
+- LLM manager supports Google and OpenAI providers out of the box
+- All LLM configs centralized in `app/schemas/Config.py`
+- Secrets managed via SecretReference system
+- Dev mode can disable LLMs with `DEV_MODE_DISABLE_LLM=true`
+
+### 2025-01-11: Startup Check False Warnings Fix
+- **Problem**: Services showing as unavailable despite successful connections
+- **Root Causes**:
+  1. Redis `set()` method parameter mismatch (`expire` vs `ex`)
+  2. Missing Redis `delete()` method in RedisManager
+  3. Missing `await` for async ClickHouse `execute_query()` method
+- **Solution**: Added backward compatibility for both parameters, implemented delete method, added await
+- **Prevention**: Always verify method signatures match between caller and implementation
+- **Note**: ClickHouse client uses `execute_query()` not `execute()` for async operations
+
+### 2025-08-11: ClickHouse Startup Check Fix
+- **Problem**: `'ClickHouseDatabase' object has no attribute 'execute'` error during startup checks
+- **Root Cause**: Using wrong method name - should be `execute_query()` not `execute()`
+- **Solution**: Updated `app/startup_checks.py` line 287 to use `client.execute_query()`
+- **Files Changed**: `app/startup_checks.py:287-290`
+
+### 2025-08-11: Database Schema Migration
+- **Problem**: Missing tables and columns causing schema validation errors
+- **Tables Added**: `tool_usage_logs`, `ai_supply_items`, `research_sessions`, `supply_update_logs`
+- **Columns Added to userbase**: `tool_permissions`, `plan_expires_at`, `feature_flags`, `payment_status`, `auto_renew`, `plan_tier`, `plan_started_at`, `trial_period`
+- **Migration Created**: `bb39e1c49e2d_add_missing_tables_and_columns.py`
+- **Note**: Some column mismatches remain but app starts successfully
 
 ### Add new learnings here to prevent regression...

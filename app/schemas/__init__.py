@@ -34,7 +34,7 @@ from .Config import (
     AppConfig,
     DevelopmentConfig,
     ProductionConfig,
-    TestingConfig,
+    NetraTestingConfig,
     WebSocketConfig,
 )
 from .Corpus import (
@@ -156,7 +156,7 @@ __all__ = [
     "AppConfig",
     "DevelopmentConfig",
     "ProductionConfig",
-    "TestingConfig",
+    "NetraTestingConfig",
     "WebSocketConfig",
     "CorpusBase",
     "CorpusCreate",

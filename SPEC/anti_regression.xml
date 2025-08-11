@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<anti_regression_spec>
+  <metadata>
+    <title>Anti-Regression Specification for Claude Code</title>
+    <description>
+      Comprehensive guide to prevent common regressions and maintain code quality when working with Claude Code,
+      especially when handling ambiguous or loose user prompts.
+    </description>
+    <version>1.0.0</version>
+    <last_updated>2025-01-11</last_updated>
+  </metadata>
+
+  <core_principles>
+    <principle id="1">
+      <name>Explicit Over Implicit</name>
+      <description>
+        When user intent is unclear, always ask for clarification rather than making assumptions.
+        Assumptions lead to regressions.
+      </description>
+    </principle>
+    <principle id="2">
+      <name>Test Before Commit</name>
+      <description>
+        NEVER skip tests, even for "simple" changes. Most regressions come from untested "trivial" fixes.
+      </description>
+    </principle>
+    <principle id="3">
+      <name>Preserve Working Code</name>
+      <description>
+        If something works, don't change it unless specifically asked. Refactoring without request causes regressions.
+      </description>
+    </principle>
+  </core_principles>
+
+  <common_regression_patterns>
+    <pattern id="file_creation">
+      <name>Unnecessary File Creation</name>
+      <triggers>
+        - User asks to "organize" or "improve" code
+        - User mentions documentation in passing
+        - User asks for examples or demonstrations
+      </triggers>
+      <regression>
+        Creating new files when editing existing ones would suffice, leading to:
+        - Duplicate code
+        - Inconsistent implementations
+        - Broken imports
+      </regression>
+      <prevention>
+        - ALWAYS prefer editing existing files
+        - NEVER create documentation files unless explicitly requested
+        - NEVER create example/demo files unless specifically asked
+        - Check if similar functionality already exists before creating new files
+      </prevention>
+    </pattern>
+
+    <pattern id="import_changes">
+      <name>Import Path Modifications</name>
+      <triggers>
+        - Moving files between directories
+        - Creating new modules
+        - "Cleaning up" imports
+      </triggers>
+      <regression>
+        Breaking existing imports causing:
+        - Runtime errors
+        - Test failures
+        - Build failures
+      </regression>
+      <prevention>
+        - Always update ALL import paths when moving files
+        - Run import tests after any module changes
+        - Use grep/search to find all usages before moving files
+        - Update both code imports AND test imports
+      </prevention>
+    </pattern>
+
+    <pattern id="test_modifications">
+      <name>Test Suite Corruption</name>
+      <triggers>
+        - "Fixing" failing tests by changing assertions
+        - Removing "unnecessary" test cases
+        - Modifying test data without understanding context
+      </triggers>
+      <regression>
+        - Tests pass but actual functionality is broken
+        - Coverage drops below requirements
+        - Critical paths no longer tested
+      </regression>
+      <prevention>
+        - NEVER modify test assertions to make them pass
+        - Fix the code, not the test
+        - Understand WHY a test is failing before changing it
+        - Maintain or increase coverage, never decrease
+      </prevention>
+    </pattern>
+
+    <pattern id="config_changes">
+      <name>Configuration Drift</name>
+      <triggers>
+        - Adding new features
+        - "Simplifying" configuration
+        - Changing default values
+      </triggers>
+      <regression>
+        - Breaking existing deployments
+        - Incompatible with existing .env files
+        - Lost backward compatibility
+      </regression>
+      <prevention>
+        - ALWAYS maintain backward compatibility for configs
+        - Use sensible defaults for new config values
+        - Document config changes in CLAUDE.md
+        - Test with both old and new config formats
+      </prevention>
+    </pattern>
+
+    <pattern id="ui_style_regression">
+      <name>UI/UX Design Violations</name>
+      <triggers>
+        - Adding new UI components
+        - "Improving" visual design
+        - Fixing layout issues
+      </triggers>
+      <regression>
+        - Blue gradient bars reappearing (violates glassmorphic design)
+        - Inconsistent styling across components
+        - Breaking responsive layouts
+      </regression>
+      <prevention>
+        - ALWAYS check unified_chat_ui_ux.xml for design requirements
+        - NO blue gradient bars - use glassmorphic design
+        - Test on multiple screen sizes
+        - Maintain consistent design language
+      </prevention>
+    </pattern>
+
+    <pattern id="async_regression">
+      <name>Async/Await Misuse</name>
+      <triggers>
+        - Converting sync code to async
+        - Adding new API endpoints
+        - Modifying database operations
+      </triggers>
+      <regression>
+        - Deadlocks and race conditions
+        - Unhandled promise rejections
+        - Performance degradation
+      </regression>
+      <prevention>
+        - Use async/await consistently, not callbacks
+        - Always await async operations
+        - Handle errors with try/catch
+        - Test concurrent operations
+      </prevention>
+    </pattern>
+
+    <pattern id="database_migration">
+      <name>Database Schema Conflicts</name>
+      <triggers>
+        - Adding new tables or columns
+        - Modifying existing schemas
+        - "Optimizing" database structure
+      </triggers>
+      <regression>
+        - Migration failures
+        - Data loss
+        - Incompatible with existing data
+      </regression>
+      <prevention>
+        - ALWAYS create proper migrations
+        - Test migrations up AND down
+        - Preserve existing data
+        - Use repository pattern for access
+      </prevention>
+    </pattern>
+
+    <pattern id="dependency_hell">
+      <name>Dependency Version Conflicts</name>
+      <triggers>
+        - Adding new packages
+        - Updating existing packages
+        - "Cleaning up" unused dependencies
+      </triggers>
+      <regression>
+        - Build failures
+        - Runtime errors
+        - Security vulnerabilities
+      </regression>
+      <prevention>
+        - Check compatibility before updating
+        - Update import tests when adding dependencies
+        - Test full build after dependency changes
+        - Keep package-lock.json/poetry.lock in sync
+      </prevention>
+    </pattern>
+
+    <pattern id="websocket_stability">
+      <name>WebSocket Connection Issues</name>
+      <triggers>
+        - Modifying WebSocket handlers
+        - Changing message formats
+        - Adding new WebSocket events
+      </triggers>
+      <regression>
+        - Connection drops
+        - Message loss
+        - State synchronization issues
+      </regression>
+      <prevention>
+        - Maintain backward compatibility for message formats
+        - Test reconnection scenarios
+        - Ensure proper cleanup on disconnect
+        - Test with WebSocketProvider in React tests
+      </prevention>
+    </pattern>
+
+    <pattern id="key_generation">
+      <name>React Key Duplication</name>
+      <triggers>
+        - Creating new list components
+        - Rendering dynamic content
+        - Using Date.now() for keys
+      </triggers>
+      <regression>
+        - React warnings about duplicate keys
+        - Incorrect component updates
+        - Performance issues
+      </regression>
+      <prevention>
+        - ALWAYS use generateUniqueId() from @/lib/utils
+        - NEVER use Date.now() or Math.random() for keys
+        - Use stable, unique identifiers when available
+      </prevention>
+    </pattern>
+  </common_regression_patterns>
+
+  <ambiguous_prompt_handling>
+    <scenario id="improve_code">
+      <prompt_pattern>"improve", "optimize", "clean up", "refactor"</prompt_pattern>
+      <clarifications_needed>
+        - What specific aspect needs improvement?
+        - Are there performance metrics to meet?
+        - Should existing functionality be preserved exactly?
+        - Are there specific code patterns to follow?
+      </clarifications_needed>
+      <safe_defaults>
+        - Don't change working code without specific issues
+        - Focus on actual bugs and performance problems
+        - Maintain all existing functionality
+        - Keep changes minimal and targeted
+      </safe_defaults>
+    </scenario>
+
+    <scenario id="add_feature">
+      <prompt_pattern>"add", "implement", "create feature"</prompt_pattern>
+      <clarifications_needed>
+        - Where should this feature live in the codebase?
+        - Should it integrate with existing features?
+        - What are the acceptance criteria?
+        - Are there UI/UX requirements?
+      </clarifications_needed>
+      <safe_defaults>
+        - Check for existing similar functionality first
+        - Follow existing patterns in the codebase
+        - Add tests for new features
+        - Update relevant documentation
+      </safe_defaults>
+    </scenario>
+
+    <scenario id="fix_tests">
+      <prompt_pattern>"fix tests", "make tests pass", "update tests"</prompt_pattern>
+      <clarifications_needed>
+        - Should the code be fixed or the tests?
+        - Is the current behavior correct?
+        - Are the test assertions valid?
+      </clarifications_needed>
+      <safe_defaults>
+        - Assume tests are correct unless proven otherwise
+        - Fix the code, not the test assertions
+        - Maintain or increase coverage
+        - Understand root cause before making changes
+      </safe_defaults>
+    </scenario>
+
+    <scenario id="documentation">
+      <prompt_pattern>"document", "add comments", "explain"</prompt_pattern>
+      <clarifications_needed>
+        - Should documentation be in-code or separate files?
+        - What level of detail is needed?
+        - Who is the target audience?
+      </clarifications_needed>
+      <safe_defaults>
+        - DON'T create new .md files unless explicitly asked
+        - Prefer updating existing documentation
+        - Keep comments concise and meaningful
+        - Update specs rather than creating new docs
+      </safe_defaults>
+    </scenario>
+  </ambiguous_prompt_handling>
+
+  <testing_requirements>
+    <requirement id="pre_commit">
+      <name>Pre-Commit Validation</name>
+      <mandatory_checks>
+        - Run smoke tests: python test_runner.py --level smoke
+        - Check for import errors
+        - Verify no syntax errors
+        - Ensure no hardcoded secrets
+      </mandatory_checks>
+    </requirement>
+
+    <requirement id="post_change">
+      <name>Post-Change Validation</name>
+      <mandatory_checks>
+        - Run unit tests for changed modules
+        - Verify no coverage decrease
+        - Check for TypeScript/ESLint errors in frontend
+        - Test critical user paths
+      </mandatory_checks>
+    </requirement>
+
+    <requirement id="integration">
+      <name>Integration Testing</name>
+      <when>After significant changes</when>
+      <mandatory_checks>
+        - Full test suite: python test_runner.py --level comprehensive
+        - WebSocket connectivity tests
+        - Database migration tests
+        - UI responsiveness tests
+      </mandatory_checks>
+    </requirement>
+  </testing_requirements>
+
+  <rollback_procedures>
+    <procedure id="immediate_rollback">
+      <when>Critical regression detected</when>
+      <steps>
+        1. Git stash or commit current changes
+        2. Git checkout to last known good commit
+        3. Run smoke tests to verify stability
+        4. Analyze what went wrong
+        5. Create more specific tests for the failure case
+      </steps>
+    </procedure>
+
+    <procedure id="partial_rollback">
+      <when>Isolated regression in new feature</when>
+      <steps>
+        1. Identify specific files affected
+        2. Git checkout those files from last good commit
+        3. Re-run tests for affected areas
+        4. Document the issue in CLAUDE.md learnings
+      </steps>
+    </procedure>
+  </rollback_procedures>
+
+  <continuous_improvement>
+    <practice id="document_failures">
+      <name>Learn from Regressions</name>
+      <action>
+        When a regression occurs:
+        1. Add it to this spec as a new pattern
+        2. Create a test to prevent recurrence
+        3. Update CLAUDE.md with the learning
+        4. Consider adding automated checks
+      </action>
+    </practice>
+
+    <practice id="regular_validation">
+      <name>Proactive Testing</name>
+      <action>
+        - Run comprehensive tests weekly
+        - Monitor test coverage trends
+        - Review and update regression patterns
+        - Audit dependencies for vulnerabilities
+      </action>
+    </practice>
+  </continuous_improvement>
+
+  <critical_rules>
+    <rule>NEVER assume user intent - ask for clarification when ambiguous</rule>
+    <rule>NEVER skip tests to save time - they prevent costly regressions</rule>
+    <rule>NEVER create files unless explicitly needed</rule>
+    <rule>NEVER modify test assertions to make them pass - fix the code instead</rule>
+    <rule>NEVER change working code without a clear requirement</rule>
+    <rule>ALWAYS preserve backward compatibility</rule>
+    <rule>ALWAYS test after any change, no matter how small</rule>
+    <rule>ALWAYS check existing specs before making architectural changes</rule>
+    <rule>ALWAYS use established patterns in the codebase</rule>
+    <rule>ALWAYS document learnings to prevent future regressions</rule>
+  </critical_rules>
+</anti_regression_spec>

@@ -41,15 +41,19 @@ describe('FastLayer', () => {
   });
 
   it('shows presence indicator when processing without data', () => {
-    render(<FastLayer data={null} isProcessing={true} />);
+    const { container } = render(<FastLayer data={null} isProcessing={true} />);
     
-    expect(screen.getByTestId('activity-icon')).toBeInTheDocument();
+    // Check for the presence indicator divs (green dots)
+    const presenceIndicator = container.querySelector('.bg-emerald-500.rounded-full');
+    expect(presenceIndicator).toBeInTheDocument();
   });
 
   it('does not show presence indicator when data is available', () => {
-    render(<FastLayer data={mockData} isProcessing={true} />);
+    const { container } = render(<FastLayer data={mockData} isProcessing={true} />);
     
-    expect(screen.queryByTestId('activity-icon')).not.toBeInTheDocument();
+    // Should not have presence indicator when data is available
+    const presenceIndicator = container.querySelector('.bg-emerald-500.rounded-full');
+    expect(presenceIndicator).not.toBeInTheDocument();
   });
 
   it('renders empty tools list when activeTools is empty', () => {
@@ -73,10 +77,12 @@ describe('FastLayer', () => {
   });
 
   it('handles null data gracefully', () => {
-    render(<FastLayer data={null} isProcessing={false} />);
+    const { container } = render(<FastLayer data={null} isProcessing={false} />);
     
     expect(screen.queryByText('Optimization Agent')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('activity-icon')).not.toBeInTheDocument();
+    // No presence indicator when not processing
+    const presenceIndicator = container.querySelector('.bg-emerald-500.rounded-full');
+    expect(presenceIndicator).not.toBeInTheDocument();
   });
 
   it('renders multiple tools correctly', () => {

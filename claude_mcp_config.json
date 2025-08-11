@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "netra-apex": {
+      "serverUrl": "https://docs.netrasystems.ai/mcp"
+    }
+  }
+}

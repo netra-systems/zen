@@ -320,6 +320,109 @@
         <practice>Test edge cases and boundary conditions</practice>
     </best_practices>
     
+    <fake_test_detection>
+        <description>
+            Criteria and patterns for identifying "fake tests" that provide no real value.
+            Fake tests inflate coverage metrics without actually testing functionality.
+        </description>
+        
+        <fake_test_types>
+            <type name="auto_pass_flags">
+                <description>Tests with flags or conditions that force them to always pass</description>
+                <patterns>
+                    <pattern>@pytest.mark.skip without justification</pattern>
+                    <pattern>if False: pytest.fail()</pattern>
+                    <pattern>assert True with no actual testing</pattern>
+                    <pattern>try/except blocks that catch all failures silently</pattern>
+                </patterns>
+            </type>
+            
+            <type name="runner_bypass">
+                <description>Tests that appear valid locally but are bypassed by test runners</description>
+                <patterns>
+                    <pattern>Tests excluded in pytest.ini or test configurations</pattern>
+                    <pattern>Tests with custom markers that are never executed</pattern>
+                    <pattern>Tests in files not included in test discovery patterns</pattern>
+                </patterns>
+            </type>
+            
+            <type name="trivial_assertions">
+                <description>Tests that don't test anything significant</description>
+                <patterns>
+                    <pattern>Testing constants: assert MY_CONSTANT == "value"</pattern>
+                    <pattern>Testing language features: assert 1 + 1 == 2</pattern>
+                    <pattern>Testing third-party library behavior without app context</pattern>
+                    <pattern>Simple type checks: assert isinstance(x, str)</pattern>
+                    <pattern>Testing getters/setters with no logic</pattern>
+                </patterns>
+            </type>
+            
+            <type name="mock_only_tests">
+                <description>Tests that only test mocks, not actual functionality</description>
+                <patterns>
+                    <pattern>Mocking the system under test itself</pattern>
+                    <pattern>Testing mock.called without verifying behavior</pattern>
+                    <pattern>Asserting mock configuration instead of outcomes</pattern>
+                    <pattern>Tests where everything is mocked including the tested logic</pattern>
+                </patterns>
+            </type>
+            
+            <type name="tautological_tests">
+                <description>Tests that test their own test setup</description>
+                <patterns>
+                    <pattern>Setting a value then immediately asserting it</pattern>
+                    <pattern>Testing test fixtures instead of application code</pattern>
+                    <pattern>Circular logic: x = func(); assert func() == x</pattern>
+                </patterns>
+            </type>
+            
+            <type name="empty_tests">
+                <description>Tests with no assertions or meaningful verification</description>
+                <patterns>
+                    <pattern>Test functions with only pass statement</pattern>
+                    <pattern>Tests that only print/log without assertions</pattern>
+                    <pattern>Tests with commented-out assertions</pattern>
+                    <pattern>Tests that only check for no exceptions without validating output</pattern>
+                </patterns>
+            </type>
+            
+            <type name="duplicate_tests">
+                <description>Tests that duplicate other tests without adding value</description>
+                <patterns>
+                    <pattern>Copy-pasted tests with minor variations that don't affect coverage</pattern>
+                    <pattern>Multiple tests for the same code path</pattern>
+                    <pattern>Tests that are subsets of more comprehensive tests</pattern>
+                </patterns>
+            </type>
+        </fake_test_types>
+        
+        <detection_strategy>
+            <step>1. Scan for auto-pass patterns and skip decorators</step>
+            <step>2. Check test runner configurations for exclusions</step>
+            <step>3. Analyze assertion quality and depth</step>
+            <step>4. Review mock usage for over-mocking</step>
+            <step>5. Identify tautological and circular patterns</step>
+            <step>6. Find empty or assertion-less tests</step>
+            <step>7. Detect duplicate test logic</step>
+        </detection_strategy>
+        
+        <remediation>
+            <action>Remove tests that provide no value</action>
+            <action>Replace trivial tests with meaningful ones</action>
+            <action>Reduce mocking to test actual behavior</action>
+            <action>Consolidate duplicate tests</action>
+            <action>Add proper assertions to empty tests or remove them</action>
+            <action>Document why tests are skipped if truly necessary</action>
+        </remediation>
+        
+        <exceptions>
+            <exception>Smoke tests deliberately testing basic imports</exception>
+            <exception>Contract tests verifying interface compliance</exception>
+            <exception>Tests temporarily skipped with clear fix timeline</exception>
+            <exception>Performance benchmark tests without functional assertions</exception>
+        </exceptions>
+    </fake_test_detection>
+    
     <coverage_requirements>
         <requirement>
             <target>97%</target>
