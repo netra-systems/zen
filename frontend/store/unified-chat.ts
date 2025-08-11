@@ -134,6 +134,14 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
         };
         state.wsEventBuffer.push(wsEvent);
         
+        // Debug logging to track layer updates
+        console.log('[UnifiedChat] WebSocket Event:', event.type, {
+          payload: event.payload,
+          currentFastLayer: state.fastLayerData,
+          currentMediumLayer: state.mediumLayerData,
+          currentSlowLayer: state.slowLayerData
+        });
+        
         switch (event.type) {
           case 'agent_started': {
             const agentName = event.payload.agent_name;

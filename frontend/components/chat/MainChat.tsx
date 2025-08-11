@@ -6,7 +6,6 @@ import { MessageList } from '@/components/chat/MessageList';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { PersistentResponseCard } from '@/components/chat/PersistentResponseCard';
 import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
-import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { OverflowPanel } from '@/components/chat/OverflowPanel';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
@@ -64,8 +63,7 @@ const MainChat: React.FC = () => {
 
   return (
     <div className="flex h-full bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      {/* Chat Sidebar */}
-      <ChatSidebar />
+      {/* Sidebar removed - handled by AppWithLayout */}
       
       <div className="flex flex-col flex-1 max-w-full">
         {/* Chat Header */}

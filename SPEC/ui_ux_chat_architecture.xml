@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>UI/UX Swimlane 1: Core Chat Architecture & Session Management</name>
+        <type>ui_ux_chat_architecture</type>
+        <version>1.0</version>
+        <created>2025-08-11</created>
+        <parent>ui_ux_master.xml</parent>
+        <description>Defines core chat architecture, thread management, state management, and component hierarchy</description>
+    </metadata>
+    
+    <swimlane-context>
+        <position>Swimlane 1 of 5</position>
+        <responsibility>Central orchestration of chat sessions, state management, and component routing</responsibility>
+        <interfaces>
+            <consumes from="websocket">Validated WebSocket events</consumes>
+            <provides to="response-card">Layer data and agent execution state</provides>
+            <provides to="visual-design">Component structure for styling</provides>
+            <observed-by>developer-tools</observed-by>
+        </interfaces>
+    </swimlane-context>
+    
+    <core-principles>
+        <principle id="single-active-thread">
+            <name>Single Active Thread</name>
+            <description>Only one chat thread is active at any time. Switching threads loads complete history.</description>
+            <enforcement>activeThreadId in store enforces single selection</enforcement>
+        </principle>
+        <principle id="component-consolidation">
+            <name>Single Component Architecture</name>
+            <description>One MainChat component, not multiple versions</description>
+            <enforcement>All chat routes use unified MainChat component</enforcement>
+        </principle>
+        <principle id="state-centralization">
+            <name>Centralized State Management</name>
+            <description>All chat state managed in single Zustand store</description>
+            <enforcement>No component-local state for chat data</enforcement>
+        </principle>
+    </core-principles>
+    
+    <thread-model>
+        <description>Each chat corresponds to one Thread with unique thread_id</description>
+        <states>
+            <state name="active">Currently visible chat with WebSocket connection</state>
+            <state name="inactive">Previously created chats shown in sidebar</state>
+            <state name="new">Fresh chat with no messages yet</state>
+            <state name="loading">Thread being loaded from backend</state>
+            <state name="error">Thread failed to load or connect</state>
+        </states>
+        
+        <lifecycle>
+            <transition from="none" to="new">User clicks "New Chat" or example prompt</transition>
+            <transition from="new" to="active">Thread created and WebSocket connected</transition>
+            <transition from="active" to="inactive">User switches to different thread</transition>
+            <transition from="inactive" to="loading">User selects thread from sidebar</transition>
+            <transition from="loading" to="active">Thread history loaded and displayed</transition>
+            <transition from="any" to="error">Network failure or backend error</transition>
+        </lifecycle>
+        
+        <automatic-renaming>
+            <trigger>After first user message sent</trigger>
+            <process>Backend analyzes content and generates 3-5 word title</process>
+            <fallback>Use "Chat {timestamp}" if generation fails</fallback>
+            <update>Sidebar reflects new title immediately</update>
+        </automatic-renaming>
+    </thread-model>
+    
+    <store-architecture>
+        <store name="UnifiedChatStore">
+            <location>store/unified-chat.ts</location>
+            <technology>Zustand with TypeScript</technology>
+            
+            <state-schema>
+                ```typescript
+                interface UnifiedChatStore {
+                    // Thread Management
+                    activeThreadId: string | null;
+                    threads: Map<string, Thread>;
+                    messages: Map<string, Message[]>;
+                    threadLoadingStates: Map<string, LoadingState>;
+                    
+                    // Current Session
+                    currentRun: Run | null;
+                    currentSteps: Step[];
+                    
+                    // Layer Data (from WebSocket)
+                    fastLayerData: FastLayerData | null;
+                    mediumLayerData: MediumLayerData | null;
+                    slowLayerData: SlowLayerData | null;
+                    
+                    // Agent Tracking
+                    executedAgents: Map<string, AgentExecution>;
+                    agentIterations: Map<string, number>;
+                    
+                    // UI State
+                    isProcessing: boolean;
+                    isSidebarOpen: boolean;
+                    selectedMessageId: string | null;
+                    
+                    // Actions
+                    switchThread: (threadId: string) => Promise<void>;
+                    createThread: () => Promise<string>;
+                    deleteThread: (threadId: string) => Promise<void>;
+                    loadThreadHistory: (threadId: string) => Promise<void>;
+                    handleWSMessage: (event: WSEvent) => void;
+                    trackAgentExecution: (agent: string, status: string) => void;
+                    resetResponseCard: () => void;
+                    updateLayerData: (layer: Layer, data: any) => void;
+                }
+                ```
+            </state-schema>
+            
+            <state-management-rules>
+                <rule>All state updates through Zustand actions only</rule>
+                <rule>Immutable updates using immer middleware</rule>
+                <rule>Async actions return promises for loading states</rule>
+                <rule>WebSocket events trigger state updates atomically</rule>
+            </state-management-rules>
+            
+            <persistence>
+                <item>activeThreadId saved to localStorage</item>
+                <item>Thread list cached for offline viewing</item>
+                <item>User preferences (sidebar state, theme)</item>
+            </persistence>
+        </store>
+    </store-architecture>
+    
+    <component-hierarchy>
+        <component name="MainChat" type="container">
+            <location>components/chat/MainChat.tsx</location>
+            <responsibilities>
+                <item>Root chat container</item>
+                <item>WebSocket provider wrapper</item>
+                <item>Layout orchestration</item>
+            </responsibilities>
+            <children>
+                <child name="ChatHeader" />
+                <child name="ChatSidebar" />
+                <child name="MessageArea" />
+                <child name="ChatInput" />
+            </children>
+        </component>
+        
+        <component name="ChatSidebar" type="navigation">
+            <location>components/chat/ChatSidebar.tsx</location>
+            <responsibilities>
+                <item>Display all user threads</item>
+                <item>Handle thread switching</item>
+                <item>Show thread metadata</item>
+                <item>New chat button</item>
+            </responsibilities>
+            <data-source>
+                <api>GET /api/threads</api>
+                <store>threads Map from UnifiedChatStore</store>
+            </data-source>
+            <behavior>
+                <item>Load threads on mount</item>
+                <item>Paginate after 50 threads</item>
+                <item>Sort by last_updated DESC</item>
+                <item>Highlight active thread</item>
+                <item>Show unread indicator for background updates</item>
+            </behavior>
+        </component>
+        
+        <component name="MessageArea" type="display">
+            <location>components/chat/MessageArea.tsx</location>
+            <responsibilities>
+                <item>Display message history</item>
+                <item>Contain PersistentResponseCard</item>
+                <item>Handle scroll behavior</item>
+            </responsibilities>
+            <children>
+                <child name="MessageList" />
+                <child name="PersistentResponseCard" condition="when processing" />
+            </children>
+            <features>
+                <item>Virtual scrolling for performance</item>
+                <item>Auto-scroll on new messages</item>
+                <item>Lazy load older messages</item>
+            </features>
+        </component>
+        
+        <component name="ChatInput" type="input">
+            <location>components/chat/ChatInput.tsx</location>
+            <responsibilities>
+                <item>Message composition</item>
+                <item>File attachments</item>
+                <item>Send message via WebSocket</item>
+            </responsibilities>
+            <features>
+                <item>Auto-resize textarea</item>
+                <item>Markdown preview toggle</item>
+                <item>Keyboard shortcuts (Enter to send)</item>
+                <item>Disabled while processing</item>
+            </features>
+        </component>
+    </component-hierarchy>
+    
+    <navigation-flows>
+        <flow name="new-chat">
+            <trigger>Click "New Chat" or Ctrl+N</trigger>
+            <steps>
+                <step>Call store.createThread()</step>
+                <step>Backend creates thread via POST /api/threads</step>
+                <step>Store updates activeThreadId</step>
+                <step>Clear message area</step>
+                <step>WebSocket connects to new thread_id</step>
+                <step>Update sidebar with new thread</step>
+                <step>Focus input field</step>
+            </steps>
+        </flow>
+        
+        <flow name="switch-thread">
+            <trigger>Click thread in sidebar</trigger>
+            <steps>
+                <step>Call store.switchThread(threadId)</step>
+                <step>Set loading state for thread</step>
+                <step>Load messages via GET /api/threads/{id}/messages</step>
+                <step>Update messages Map in store</step>
+                <step>WebSocket disconnect from old thread</step>
+                <step>WebSocket connect to new thread</step>
+                <step>Update activeThreadId</step>
+                <step>Scroll to bottom of messages</step>
+            </steps>
+        </flow>
+        
+        <flow name="example-prompt">
+            <trigger>Click any example prompt card</trigger>
+            <steps>
+                <step>Create new thread (same as new-chat flow)</step>
+                <step>Auto-populate input with example text</step>
+                <step>Auto-send message</step>
+                <step>Thread renamed based on example content</step>
+            </steps>
+            <note>Examples ALWAYS create new threads</note>
+        </flow>
+    </navigation-flows>
+    
+    <api-contracts>
+        <endpoint method="POST" path="/api/threads">
+            <description>Create new thread</description>
+            <request>
+                ```json
+                {
+                    "metadata": {
+                        "source": "ui",
+                        "client_version": "5.0"
+                    }
+                }
+                ```
+            </request>
+            <response>
+                ```json
+                {
+                    "thread_id": "uuid",
+                    "created_at": 1234567890,
+                    "metadata": {}
+                }
+                ```
+            </response>
+        </endpoint>
+        
+        <endpoint method="GET" path="/api/threads">
+            <description>List user threads</description>
+            <params>
+                <param name="limit" default="50">Max threads to return</param>
+                <param name="offset" default="0">Pagination offset</param>
+                <param name="sort" default="updated_at_desc">Sort order</param>
+            </params>
+            <response>
+                ```json
+                {
+                    "threads": [...],
+                    "total": 100,
+                    "has_more": true
+                }
+                ```
+            </response>
+        </endpoint>
+        
+        <endpoint method="GET" path="/api/threads/{thread_id}/messages">
+            <description>Get thread message history</description>
+            <params>
+                <param name="limit" default="100">Max messages</param>
+                <param name="before" optional="true">Load before message_id</param>
+            </params>
+            <response>
+                ```json
+                {
+                    "messages": [...],
+                    "has_more": false
+                }
+                ```
+            </response>
+        </endpoint>
+    </api-contracts>
+    
+    <testing-requirements>
+        <unit-tests>
+            <test>Store actions update state correctly</test>
+            <test>Thread switching preserves message history</test>
+            <test>Component renders with correct props from store</test>
+            <test>Navigation flows trigger correct actions</test>
+        </unit-tests>
+        
+        <integration-tests>
+            <test>New chat creates thread and connects WebSocket</test>
+            <test>Thread switching loads history and reconnects</test>
+            <test>Example prompts create new threads</test>
+            <test>Sidebar updates on thread changes</test>
+        </integration-tests>
+        
+        <e2e-tests>
+            <test>Complete multi-thread conversation flow</test>
+            <test>Thread persistence across page refreshes</test>
+            <test>Concurrent thread updates handled correctly</test>
+        </e2e-tests>
+    </testing-requirements>
+</specification>

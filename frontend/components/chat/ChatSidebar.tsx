@@ -14,7 +14,8 @@ export const ChatSidebar: React.FC = () => {
     isProcessing,
     activeThreadId,
     setActiveThread,
-    clearMessages 
+    clearMessages,
+    resetLayers 
   } = useUnifiedChatStore();
   
   const { isDeveloperOrHigher } = useAuthStore();
@@ -70,9 +71,12 @@ export const ChatSidebar: React.FC = () => {
     try {
       const newThread = await ThreadService.createThread();
       
+      // Clear all state for new chat
+      clearMessages?.();
+      resetLayers?.();
+      
       // Set as active thread
       setActiveThread?.(newThread.id);
-      clearMessages?.();
       
       // Reload threads list
       await loadThreads();
@@ -89,8 +93,9 @@ export const ChatSidebar: React.FC = () => {
     if (threadId === activeThreadId || isProcessing) return;
     
     try {
-      // Clear current messages to ensure isolation
+      // Clear current state to ensure isolation
       clearMessages?.();
+      resetLayers?.();
       
       // Disconnect from current WebSocket if needed
       const disconnectEvent = new CustomEvent('disconnectWebSocket', { 

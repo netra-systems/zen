@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>UI/UX Swimlane 3: Three-Layer Response Card & Agent Deduplication</name>
+        <type>ui_ux_response_card</type>
+        <version>1.0</version>
+        <created>2025-08-11</created>
+        <parent>ui_ux_master.xml</parent>
+        <description>Defines the three-layer response card architecture, agent deduplication logic, and progressive content disclosure</description>
+    </metadata>
+    
+    <swimlane-context>
+        <position>Swimlane 3 of 5</position>
+        <responsibility>Intelligent display of agent execution results with deduplication and progressive disclosure</responsibility>
+        <interfaces>
+            <consumes from="chat-architecture">Layer data from store</consumes>
+            <consumes from="websocket">Typed event payloads</consumes>
+            <uses from="visual-design">Design tokens and animations</uses>
+            <provides to="developer-tools">Agent execution metrics</provides>
+        </interfaces>
+    </swimlane-context>
+    
+    <core-principles>
+        <principle id="persistent-card">
+            <name>Persistent Response Card</name>
+            <description>Single evolving response card that updates with fast/medium/slow data as it arrives</description>
+            <enforcement>One card instance per response, layers build progressively</enforcement>
+        </principle>
+        <principle id="no-duplicates">
+            <name>Agent Deduplication</name>
+            <description>Each sub-agent appears exactly once in UI, even if called multiple times</description>
+            <enforcement>Track executions in Map, show iteration count for reruns</enforcement>
+        </principle>
+        <principle id="progressive-disclosure">
+            <name>Progressive Information Disclosure</name>
+            <description>Information revealed as it becomes available from backend</description>
+            <enforcement>Fast → Medium → Slow layer progression</enforcement>
+        </principle>
+        <principle id="real-data-only">
+            <name>Real Data Only</name>
+            <description>ALL displayed data must come from backend WebSocket messages</description>
+            <enforcement>No placeholder content except presence indicator</enforcement>
+        </principle>
+    </core-principles>
+    
+    <three-layer-architecture>
+        <layer name="fast" id="1">
+            <update-frequency>0-100ms</update-frequency>
+            <position>Top of card</position>
+            <height>48px fixed</height>
+            
+            <data-sources>
+                <event>agent_started</event>
+                <event>tool_executing</event>
+                <event>status_update</event>
+            </data-sources>
+            
+            <elements>
+                <element name="agent-name">
+                    <source>agent_started.payload.agent_name</source>
+                    <display>Text with agent icon</display>
+                    <update-strategy>Immediate replacement</update-strategy>
+                </element>
+                <element name="tool-badges">
+                    <source>tool_executing.payload.tool_name</source>
+                    <display>Pill badges with tool names</display>
+                    <update-strategy>Add/remove immediately</update-strategy>
+                </element>
+                <element name="presence-indicator">
+                    <source>Frontend-generated based on isProcessing</source>
+                    <display>Pulsing dot animation</display>
+                    <note>ONLY non-data element allowed</note>
+                </element>
+            </elements>
+            
+            <behavior>
+                <rule>Instant updates with no animation</rule>
+                <rule>Tool badges stack horizontally</rule>
+                <rule>Maximum 5 tools shown, rest in overflow</rule>
+                <rule>Agent name updates replace previous</rule>
+            </behavior>
+        </layer>
+        
+        <layer name="medium" id="2">
+            <update-frequency>100ms-1s</update-frequency>
+            <position>Middle of card</position>
+            <height>Dynamic (min 100px, max 400px)</height>
+            
+            <data-sources>
+                <event>agent_thinking</event>
+                <event>partial_result</event>
+                <event>progress_update</event>
+            </data-sources>
+            
+            <elements>
+                <element name="thinking-text">
+                    <source>agent_thinking.payload.thought</source>
+                    <display>Streaming text with cursor</display>
+                    <update-strategy>Append with debounce</update-strategy>
+                </element>
+                <element name="partial-content">
+                    <source>partial_result.payload.content</source>
+                    <display>Markdown-rendered content</display>
+                    <update-strategy>Stream character by character</update-strategy>
+                </element>
+                <element name="progress-indicator">
+                    <source>agent_thinking.payload.step_number/total_steps</source>
+                    <display>Step counter or progress bar</display>
+                    <update-strategy>Update on each step</update-strategy>
+                </element>
+            </elements>
+            
+            <streaming-behavior>
+                <speed>30 characters per second</speed>
+                <smoothing>RequestAnimationFrame for 60fps</smoothing>
+                <cursor>Blinking cursor during streaming</cursor>
+                <completion>Cursor disappears when is_complete=true</completion>
+            </streaming-behavior>
+        </layer>
+        
+        <layer name="slow" id="3">
+            <update-frequency>1s+</update-frequency>
+            <position>Bottom of card</position>
+            <height>Dynamic (expands as needed)</height>
+            
+            <data-sources>
+                <event>agent_completed</event>
+                <event>final_report</event>
+                <event>analysis_complete</event>
+            </data-sources>
+            
+            <elements>
+                <element name="agent-results">
+                    <source>agent_completed.payload</source>
+                    <display>Structured result cards per agent</display>
+                    <update-strategy>Append or update if duplicate</update-strategy>
+                </element>
+                <element name="final-report">
+                    <source>final_report.payload.report</source>
+                    <display>Rich interactive report sections</display>
+                    <update-strategy>Replace entire slow layer</update-strategy>
+                </element>
+                <element name="metrics">
+                    <source>agent_completed.payload.metrics</source>
+                    <display>Performance metrics table</display>
+                    <update-strategy>Aggregate across agents</update-strategy>
+                </element>
+            </elements>
+            
+            <report-sections>
+                <section name="executive-summary">Always visible at top</section>
+                <section name="cost-analysis">Interactive cost breakdown</section>
+                <section name="recommendations">Prioritized action items</section>
+                <section name="action-plan">Step-by-step guide</section>
+                <section name="technical-details">Collapsible deep dive</section>
+            </report-sections>
+        </layer>
+    </three-layer-architecture>
+    
+    <agent-deduplication>
+        <tracking-mechanism>
+            ```typescript
+            interface AgentTracker {
+                // Map of agent_name -> execution details
+                executedAgents: Map<string, AgentExecution>;
+                
+                // Track iteration count per agent
+                agentIterations: Map<string, number>;
+                
+                // Methods
+                trackExecution(agentName: string, runId: string): void;
+                getIterationCount(agentName: string): number;
+                isRerun(agentName: string): boolean;
+                getDisplayName(agentName: string): string;
+            }
+            
+            interface AgentExecution {
+                name: string;
+                firstRunId: string;
+                lastRunId: string;
+                iterationCount: number;
+                status: 'running' | 'completed' | 'failed';
+                startTime: number;
+                endTime?: number;
+                results: any[];  // Keep all iteration results
+            }
+            ```
+        </tracking-mechanism>
+        
+        <display-rules>
+            <rule id="single-display">
+                Each agent appears once in the slow layer, regardless of execution count
+            </rule>
+            <rule id="iteration-indicator">
+                Show "(2)" or "(3rd run)" suffix for reruns in fast layer
+            </rule>
+            <rule id="latest-status">
+                Always show the most recent status for each agent
+            </rule>
+            <rule id="aggregate-results">
+                Combine results from multiple runs in slow layer
+            </rule>
+            <rule id="preserve-history">
+                Keep execution history in developer tools
+            </rule>
+        </display-rules>
+        
+        <known-agents>
+            <agent id="triage">TriageSubAgent</agent>
+            <agent id="data">DataSubAgent</agent>
+            <agent id="optimizations">OptimizationsCoreSubAgent</agent>
+            <agent id="actions">ActionsToMeetGoalsSubAgent</agent>
+            <agent id="reporting">ReportingSubAgent</agent>
+            <agent id="corpus">CorpusAdminSubAgent</agent>
+            <agent id="synthetic">SyntheticDataSubAgent</agent>
+        </known-agents>
+        
+        <deduplication-flow>
+            <step>Receive agent_started event</step>
+            <step>Check if agent exists in executedAgents Map</step>
+            <step>If exists, increment iteration count</step>
+            <step>Update display name with iteration</step>
+            <step>On agent_completed, update existing section</step>
+            <step>Aggregate metrics across all iterations</step>
+        </deduplication-flow>
+    </agent-deduplication>
+    
+    <component-structure>
+        <component name="PersistentResponseCard">
+            <location>components/chat/PersistentResponseCard.tsx</location>
+            <props>
+                ```typescript
+                interface PersistentResponseCardProps {
+                    fastLayerData: FastLayerData | null;
+                    mediumLayerData: MediumLayerData | null;
+                    slowLayerData: SlowLayerData | null;
+                    isProcessing: boolean;
+                    agentTracker: AgentTracker;
+                }
+                ```
+            </props>
+            <state>
+                ```typescript
+                interface CardState {
+                    isExpanded: boolean;
+                    isCollapsed: boolean;
+                    selectedSection: string | null;
+                    animationPhase: 'entering' | 'active' | 'collapsing' | 'collapsed';
+                }
+                ```
+            </state>
+            <children>
+                <child>FastLayer</child>
+                <child>MediumLayer</child>
+                <child>SlowLayer</child>
+            </children>
+        </component>
+        
+        <component name="FastLayer">
+            <location>components/chat/layers/FastLayer.tsx</location>
+            <responsibilities>
+                <item>Display current agent name</item>
+                <item>Show active tool badges</item>
+                <item>Presence indicator animation</item>
+            </responsibilities>
+            <update-strategy>Immediate, no buffering</update-strategy>
+        </component>
+        
+        <component name="MediumLayer">
+            <location>components/chat/layers/MediumLayer.tsx</location>
+            <responsibilities>
+                <item>Stream thinking text</item>
+                <item>Display partial results</item>
+                <item>Show progress indicators</item>
+            </responsibilities>
+            <update-strategy>Debounced at 100ms</update-strategy>
+        </component>
+        
+        <component name="SlowLayer">
+            <location>components/chat/layers/SlowLayer.tsx</location>
+            <responsibilities>
+                <item>Display completed agent results</item>
+                <item>Render final report sections</item>
+                <item>Show aggregated metrics</item>
+            </responsibilities>
+            <update-strategy>Append only, never update existing</update-strategy>
+        </component>
+    </component-structure>
+    
+    <information-hierarchy>
+        <rule id="layer-exclusivity">
+            Each piece of information appears in exactly one layer
+        </rule>
+        <rule id="no-repetition">
+            Information shown once, not repeated across layers
+        </rule>
+        <rule id="context-appropriate">
+            Information placed in layer matching its update frequency
+        </rule>
+        
+        <information-placement>
+            <fast-layer>
+                <info>Current agent name</info>
+                <info>Active tools</info>
+                <info>Processing status</info>
+            </fast-layer>
+            <medium-layer>
+                <info>Thinking process</info>
+                <info>Partial results</info>
+                <info>Progress steps</info>
+            </medium-layer>
+            <slow-layer>
+                <info>Complete results</info>
+                <info>Final reports</info>
+                <info>Metrics and timings</info>
+                <info>Recommendations</info>
+            </slow-layer>
+        </information-placement>
+    </information-hierarchy>
+    
+    <animations-transitions>
+        <animation name="layer-appearance">
+            <trigger>Layer receives first data</trigger>
+            <duration>300ms</duration>
+            <easing>ease-out</easing>
+            <effect>Height expansion with fade-in</effect>
+        </animation>
+        
+        <animation name="content-streaming">
+            <applies-to>Medium layer text</applies-to>
+            <speed>30 chars/second</speed>
+            <smoothing>RAF for 60fps</smoothing>
+            <cursor>Blinking at 530ms interval</cursor>
+        </animation>
+        
+        <animation name="card-collapse">
+            <trigger>2s after final_report received</trigger>
+            <duration>400ms</duration>
+            <effect>Collapse to summary view</effect>
+            <preserves>Expandable state for full view</preserves>
+        </animation>
+        
+        <animation name="agent-update">
+            <trigger>Agent rerun detected</trigger>
+            <duration>200ms</duration>
+            <effect>Pulse highlight on updated section</effect>
+        </animation>
+    </animations-transitions>
+    
+    <report-visualization>
+        <interactive-elements>
+            <element name="cost-calculator">
+                <type>Interactive sliders</type>
+                <updates>Real-time projection updates</updates>
+            </element>
+            <element name="recommendation-cards">
+                <type>Expandable cards</type>
+                <features>Priority sorting, impact scores</features>
+            </element>
+            <element name="metrics-charts">
+                <type>Various chart types</type>
+                <library>Recharts or D3.js</library>
+            </element>
+        </interactive-elements>
+        
+        <export-capabilities>
+            <format>PDF</format>
+            <format>JSON</format>
+            <format>CSV</format>
+            <format>PowerPoint</format>
+        </export-capabilities>
+    </report-visualization>
+    
+    <testing-requirements>
+        <unit-tests>
+            <test>Layer components render with correct data</test>
+            <test>Agent deduplication tracks correctly</test>
+            <test>Information appears in only one layer</test>
+            <test>Streaming text animates smoothly</test>
+        </unit-tests>
+        
+        <integration-tests>
+            <test>WebSocket events update correct layers</test>
+            <test>Agent reruns deduplicate properly</test>
+            <test>Card collapse/expand behavior</test>
+            <test>Report sections render interactively</test>
+        </integration-tests>
+        
+        <e2e-tests>
+            <test>Complete response flow through all layers</test>
+            <test>Multiple agent execution deduplication</test>
+            <test>Performance with large reports</test>
+            <test>Export functionality for reports</test>
+        </e2e-tests>
+    </testing-requirements>
+</specification>

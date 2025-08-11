@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>UI/UX Master Orchestration Specification</name>
+        <type>ui_ux_master</type>
+        <version>1.0</version>
+        <created>2025-08-11</created>
+        <description>Master orchestration spec that defines the coherence between all UI/UX swimlanes and ensures proper integration</description>
+    </metadata>
+    
+    <primary-goal>Define clear boundaries and integration points between five UI/UX swimlanes, ensuring seamless data flow and preventing duplicate functionality</primary-goal>
+    
+    <swimlane-coherence>
+        <overview>
+            The UI/UX system is divided into 5 logical swimlanes, each owning specific responsibilities.
+            Data flows unidirectionally from backend through WebSocket to frontend components.
+            Each swimlane must respect boundaries and communicate through well-defined interfaces.
+        </overview>
+        
+        <data-flow-sequence>
+            <step number="1">Backend generates events and data</step>
+            <step number="2">WebSocket layer (Swimlane 2) receives and validates events</step>
+            <step number="3">Core Architecture (Swimlane 1) manages state and routing</step>
+            <step number="4">Response Card (Swimlane 3) processes agent-specific display logic</step>
+            <step number="5">Visual Design (Swimlane 4) applies consistent styling</step>
+            <step number="6">Developer Tools (Swimlane 5) observes all layers for debugging</step>
+        </data-flow-sequence>
+        
+        <integration-points>
+            <point from="websocket" to="core-architecture">
+                <interface>WebSocket events → Store actions</interface>
+                <data>Thread events, messages, agent status</data>
+                <contract>Events must match TypeScript interfaces exactly</contract>
+            </point>
+            
+            <point from="core-architecture" to="response-card">
+                <interface>Store state → Component props</interface>
+                <data>Layer data (fast/medium/slow), agent executions</data>
+                <contract>Props derived from store, no local state for data</contract>
+            </point>
+            
+            <point from="response-card" to="visual-design">
+                <interface>Component structure → CSS classes</interface>
+                <data>Layout requirements, animation triggers</data>
+                <contract>Components use design system tokens only</contract>
+            </point>
+            
+            <point from="all" to="developer-tools">
+                <interface>Event emission → Debug panel</interface>
+                <data>WebSocket events, performance metrics, errors</data>
+                <contract>Read-only observation, no state modification</contract>
+            </point>
+        </integration-points>
+        
+        <boundary-rules>
+            <rule id="no-cross-swimlane-state">
+                Each swimlane manages only its designated state. No swimlane can directly modify another's state.
+            </rule>
+            <rule id="single-source-truth">
+                Each piece of data has exactly one authoritative source swimlane.
+            </rule>
+            <rule id="interface-only-communication">
+                Swimlanes communicate only through documented interfaces, never through side channels.
+            </rule>
+            <rule id="no-duplicate-logic">
+                Business logic must exist in exactly one swimlane, not duplicated across multiple.
+            </rule>
+        </boundary-rules>
+    </swimlane-coherence>
+    
+    <swimlane-definitions>
+        <swimlane id="1" name="Core Chat Architecture">
+            <reference>SPEC/ui_ux_chat_architecture.xml</reference>
+            <ownership>
+                <owns>Thread management and lifecycle</owns>
+                <owns>Message history and storage</owns>
+                <owns>Navigation between chats</owns>
+                <owns>State management (Zustand store)</owns>
+                <owns>Component hierarchy and routing</owns>
+            </ownership>
+            <dependencies>
+                <depends-on>WebSocket for real-time events</depends-on>
+                <provides-to>Response Card with state data</provides-to>
+                <provides-to>Visual Design with component structure</provides-to>
+            </dependencies>
+        </swimlane>
+        
+        <swimlane id="2" name="WebSocket & Real-time">
+            <reference>SPEC/ui_ux_websocket.xml</reference>
+            <ownership>
+                <owns>WebSocket connection management</owns>
+                <owns>Event validation and typing</owns>
+                <owns>Reconnection and error recovery</owns>
+                <owns>Event buffering and queuing</owns>
+                <owns>Backend-frontend contract</owns>
+            </ownership>
+            <dependencies>
+                <provides-to>Core Architecture with validated events</provides-to>
+                <provides-to>Developer Tools with event stream</provides-to>
+            </dependencies>
+        </swimlane>
+        
+        <swimlane id="3" name="Response Card & Agents">
+            <reference>SPEC/ui_ux_response_card.xml</reference>
+            <ownership>
+                <owns>Three-layer response card logic</owns>
+                <owns>Agent deduplication and tracking</owns>
+                <owns>Layer update strategies</owns>
+                <owns>Progressive content disclosure</owns>
+                <owns>Report visualization components</owns>
+            </ownership>
+            <dependencies>
+                <depends-on>Core Architecture for state</depends-on>
+                <depends-on>Visual Design for styling</depends-on>
+                <provides-to>Developer Tools with agent metrics</provides-to>
+            </dependencies>
+        </swimlane>
+        
+        <swimlane id="4" name="Visual Design & UX">
+            <reference>SPEC/ui_ux_visual_design.xml</reference>
+            <ownership>
+                <owns>Glassmorphic design system</owns>
+                <owns>Color palette and typography</owns>
+                <owns>Animation and transitions</owns>
+                <owns>Responsive layouts</owns>
+                <owns>Accessibility standards</owns>
+            </ownership>
+            <dependencies>
+                <provides-to>All swimlanes with design tokens</provides-to>
+                <enforces>Consistent visual language across system</enforces>
+            </dependencies>
+        </swimlane>
+        
+        <swimlane id="5" name="Developer Tools">
+            <reference>SPEC/ui_ux_developer_tools.xml</reference>
+            <ownership>
+                <owns>Overflow debug panel</owns>
+                <owns>Performance monitoring</owns>
+                <owns>Event inspection and filtering</owns>
+                <owns>Error tracking and reporting</owns>
+                <owns>Export and diagnostic tools</owns>
+            </ownership>
+            <dependencies>
+                <observes>All swimlanes for debugging data</observes>
+                <depends-on>WebSocket for event stream</depends-on>
+                <depends-on>Core Architecture for state inspection</depends-on>
+            </dependencies>
+        </swimlane>
+    </swimlane-definitions>
+    
+    <cross-cutting-concerns>
+        <concern name="Type Safety">
+            <owner>WebSocket swimlane defines types</owner>
+            <consumers>All other swimlanes consume types</consumers>
+            <enforcement>TypeScript strict mode, no any types</enforcement>
+        </concern>
+        
+        <concern name="Performance">
+            <owner>Each swimlane owns its performance budget</owner>
+            <monitoring>Developer Tools aggregates metrics</monitoring>
+            <targets>60fps animations, <100ms response time</targets>
+        </concern>
+        
+        <concern name="Error Handling">
+            <owner>Each swimlane handles its own errors</owner>
+            <reporting>Developer Tools collects all errors</reporting>
+            <recovery>WebSocket defines reconnection strategy</recovery>
+        </concern>
+        
+        <concern name="Testing">
+            <unit>Each swimlane tests its own logic</unit>
+            <integration>Test interfaces between swimlanes</integration>
+            <e2e>Test complete user flows across all swimlanes</e2e>
+        </concern>
+    </cross-cutting-concerns>
+    
+    <implementation-order>
+        <phase number="1">WebSocket & Real-time (foundation layer)</phase>
+        <phase number="2">Core Chat Architecture (state management)</phase>
+        <phase number="3">Response Card & Agents (display logic)</phase>
+        <phase number="4">Visual Design & UX (polish layer)</phase>
+        <phase number="5">Developer Tools (observability layer)</phase>
+    </implementation-order>
+    
+    <validation-criteria>
+        <criterion>No circular dependencies between swimlanes</criterion>
+        <criterion>Each data element has single authoritative source</criterion>
+        <criterion>All interfaces documented with TypeScript types</criterion>
+        <criterion>Performance budgets met for each swimlane</criterion>
+        <criterion>Complete e2e flows work across all swimlanes</criterion>
+    </validation-criteria>
+</specification>

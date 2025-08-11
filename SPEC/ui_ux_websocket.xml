@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>UI/UX Swimlane 2: WebSocket & Real-time Communication</name>
+        <type>ui_ux_websocket</type>
+        <version>1.0</version>
+        <created>2025-08-11</created>
+        <parent>ui_ux_master.xml</parent>
+        <description>Defines WebSocket communication layer, event contracts, connection management, and real-time data flow</description>
+    </metadata>
+    
+    <swimlane-context>
+        <position>Swimlane 2 of 5</position>
+        <responsibility>Gateway between backend and frontend, ensuring type-safe real-time communication</responsibility>
+        <interfaces>
+            <receives from="backend">Raw WebSocket events</receives>
+            <provides to="chat-architecture">Validated, typed events</provides>
+            <provides to="developer-tools">Event stream for debugging</provides>
+        </interfaces>
+    </swimlane-context>
+    
+    <core-principles>
+        <principle id="backend-driven">
+            <name>Backend-Driven UI State</name>
+            <description>UI state transitions based on WebSocket events, not timers or fake data</description>
+            <enforcement>No frontend-generated status messages except presence indicator</enforcement>
+        </principle>
+        <principle id="type-safety">
+            <name>End-to-End Type Safety</name>
+            <description>WebSocket event types match backend Pydantic schemas exactly</description>
+            <enforcement>Code generation from backend schemas, strict TypeScript</enforcement>
+        </principle>
+        <principle id="resilient-connection">
+            <name>Resilient Connection Management</name>
+            <description>Automatic reconnection with exponential backoff and message queuing</description>
+            <enforcement>Connection state machine with defined transitions</enforcement>
+        </principle>
+    </core-principles>
+    
+    <connection-management>
+        <states>
+            <state name="disconnected">No active connection</state>
+            <state name="connecting">Attempting to establish connection</state>
+            <state name="connected">Active WebSocket connection</state>
+            <state name="reconnecting">Connection lost, attempting to reconnect</state>
+            <state name="error">Connection failed after max retries</state>
+        </states>
+        
+        <transitions>
+            <transition from="disconnected" to="connecting">Initial connection or manual reconnect</transition>
+            <transition from="connecting" to="connected">WebSocket open event</transition>
+            <transition from="connected" to="reconnecting">Connection lost or error</transition>
+            <transition from="reconnecting" to="connected">Successful reconnection</transition>
+            <transition from="reconnecting" to="error">Max retries exceeded</transition>
+        </transitions>
+        
+        <reconnection-strategy>
+            <initial-delay>1000ms</initial-delay>
+            <max-delay>30000ms</max-delay>
+            <backoff-factor>1.5</backoff-factor>
+            <max-attempts>10</max-attempts>
+            <jitter>Random 0-1000ms to prevent thundering herd</jitter>
+        </reconnection-strategy>
+        
+        <message-queuing>
+            <description>Queue messages during disconnection</description>
+            <max-queue-size>100 messages</max-queue-size>
+            <overflow-strategy>Drop oldest messages</overflow-strategy>
+            <flush-on-reconnect>Send queued messages in order</flush-on-reconnect>
+        </message-queuing>
+    </connection-management>
+    
+    <event-contracts>
+        <event-categories>
+            <category name="fast" latency="0-100ms">
+                <event>agent_started</event>
+                <event>tool_executing</event>
+                <event>status_update</event>
+            </category>
+            <category name="medium" latency="100ms-1s">
+                <event>agent_thinking</event>
+                <event>partial_result</event>
+                <event>progress_update</event>
+            </category>
+            <category name="slow" latency="1s+">
+                <event>agent_completed</event>
+                <event>final_report</event>
+                <event>analysis_complete</event>
+            </category>
+            <category name="system" latency="immediate">
+                <event>thread_created</event>
+                <event>thread_loaded</event>
+                <event>thread_renamed</event>
+                <event>connection_status</event>
+                <event>error</event>
+            </category>
+        </event-categories>
+        
+        <event-definitions>
+            ```typescript
+            // Base event structure
+            interface WSEvent {
+                type: string;
+                timestamp: number;
+                thread_id: string;
+                payload: any;
+            }
+            
+            // Fast Layer Events
+            interface AgentStartedEvent extends WSEvent {
+                type: 'agent_started';
+                payload: {
+                    agent_name: string;
+                    run_id: string;
+                    parent_agent?: string;
+                };
+            }
+            
+            interface ToolExecutingEvent extends WSEvent {
+                type: 'tool_executing';
+                payload: {
+                    tool_name: string;
+                    agent_name: string;
+                    parameters?: Record<string, any>;
+                };
+            }
+            
+            // Medium Layer Events
+            interface AgentThinkingEvent extends WSEvent {
+                type: 'agent_thinking';
+                payload: {
+                    thought: string;
+                    agent_name: string;
+                    step_number: number;
+                    total_steps: number;
+                };
+            }
+            
+            interface PartialResultEvent extends WSEvent {
+                type: 'partial_result';
+                payload: {
+                    content: string;
+                    agent_name: string;
+                    is_complete: boolean;
+                    format: 'markdown' | 'json' | 'text';
+                };
+            }
+            
+            // Slow Layer Events
+            interface AgentCompletedEvent extends WSEvent {
+                type: 'agent_completed';
+                payload: {
+                    agent_name: string;
+                    duration_ms: number;
+                    result: any;
+                    metrics: AgentMetrics;
+                    iteration: number;
+                };
+            }
+            
+            interface FinalReportEvent extends WSEvent {
+                type: 'final_report';
+                payload: {
+                    report: ComprehensiveReport;
+                    total_duration_ms: number;
+                    agent_metrics: AgentMetrics[];
+                    recommendations: Recommendation[];
+                };
+            }
+            
+            // System Events
+            interface ThreadCreatedEvent extends WSEvent {
+                type: 'thread_created';
+                payload: {
+                    thread_id: string;
+                    user_id: string;
+                    created_at: number;
+                };
+            }
+            
+            interface ErrorEvent extends WSEvent {
+                type: 'error';
+                payload: {
+                    error_message: string;
+                    error_code: string;
+                    agent_name?: string;
+                    recoverable: boolean;
+                    stack_trace?: string;
+                };
+            }
+            ```
+        </event-definitions>
+        
+        <validation-rules>
+            <rule>All events must have required base fields</rule>
+            <rule>Timestamps must be Unix milliseconds</rule>
+            <rule>Thread ID must match active connection</rule>
+            <rule>Payload must match TypeScript interface</rule>
+            <rule>Unknown event types logged but not processed</rule>
+        </validation-rules>
+    </event-contracts>
+    
+    <websocket-provider>
+        <location>providers/WebSocketProvider.tsx</location>
+        <architecture>
+            ```typescript
+            interface WebSocketContextValue {
+                // Connection state
+                status: ConnectionStatus;
+                isConnected: boolean;
+                
+                // Thread management
+                activeThreadId: string | null;
+                connectToThread: (threadId: string) => Promise<void>;
+                disconnectFromThread: () => void;
+                
+                // Message handling
+                sendMessage: (message: any) => void;
+                addEventListener: (type: string, handler: Function) => void;
+                removeEventListener: (type: string, handler: Function) => void;
+                
+                // Debugging
+                eventBuffer: CircularBuffer<WSEvent>;
+                metrics: ConnectionMetrics;
+            }
+            
+            interface ConnectionMetrics {
+                connectedAt?: number;
+                disconnectedAt?: number;
+                reconnectCount: number;
+                messagesReceived: number;
+                messagesSent: number;
+                averageLatency: number;
+                errors: ErrorRecord[];
+            }
+            ```
+        </architecture>
+        
+        <features>
+            <feature name="Event Emitter Pattern">
+                <description>Subscribe to specific event types</description>
+                <implementation>EventEmitter with typed events</implementation>
+            </feature>
+            <feature name="Heartbeat">
+                <interval>30000ms</interval>
+                <timeout>5000ms</timeout>
+                <action>Reconnect if no pong received</action>
+            </feature>
+            <feature name="Compression">
+                <algorithm>permessage-deflate</algorithm>
+                <threshold>1024 bytes</threshold>
+            </feature>
+        </features>
+    </websocket-provider>
+    
+    <event-processing>
+        <pipeline>
+            <stage name="receive">
+                <action>Parse JSON message</action>
+                <error-handling>Log malformed messages, continue</error-handling>
+            </stage>
+            <stage name="validate">
+                <action>Check required fields and types</action>
+                <error-handling>Reject invalid events with warning</error-handling>
+            </stage>
+            <stage name="buffer">
+                <action>Add to circular buffer for debugging</action>
+                <buffer-size>1000 events</buffer-size>
+            </stage>
+            <stage name="dispatch">
+                <action>Emit to registered event handlers</action>
+                <strategy>Synchronous for critical, async for others</strategy>
+            </stage>
+            <stage name="update-store">
+                <action>Trigger store actions based on event type</action>
+                <batching>Batch updates within 50ms window</batching>
+            </stage>
+        </pipeline>
+        
+        <performance-optimizations>
+            <optimization name="Debouncing">
+                <description>Debounce rapid status updates</description>
+                <delay>100ms for medium layer, 50ms for fast layer</delay>
+            </optimization>
+            <optimization name="Batching">
+                <description>Batch multiple events in single render</description>
+                <window>50ms batching window</window>
+            </optimization>
+            <optimization name="Selective Updates">
+                <description>Update only affected components</description>
+                <strategy>Event type to component mapping</strategy>
+            </optimization>
+        </performance-optimizations>
+    </event-processing>
+    
+    <data-flow-rules>
+        <rule id="no-fake-data">
+            Frontend NEVER generates status messages - only displays what backend sends
+        </rule>
+        <rule id="backend-timing">
+            Timing data comes from backend timestamps, not frontend timers
+        </rule>
+        <rule id="backend-strings">
+            Agent names, tool names, and status messages are backend-provided strings
+        </rule>
+        <rule id="backend-progress">
+            Progress percentages calculated by backend based on actual work done
+        </rule>
+        <rule id="presence-only">
+            Presence indicator is the ONLY frontend-generated visual element
+        </rule>
+    </data-flow-rules>
+    
+    <error-handling>
+        <connection-errors>
+            <error type="CONNECTION_REFUSED">
+                <retry>Yes, with exponential backoff</retry>
+                <user-notification>Show connection banner</user-notification>
+            </error>
+            <error type="TIMEOUT">
+                <retry>Yes, immediate retry</retry>
+                <user-notification>None unless repeated</user-notification>
+            </error>
+            <error type="INVALID_THREAD">
+                <retry>No</retry>
+                <user-notification>Thread not found message</user-notification>
+            </error>
+        </connection-errors>
+        
+        <message-errors>
+            <error type="PARSE_ERROR">
+                <action>Log to console, skip message</action>
+                <recovery>Continue processing other messages</recovery>
+            </error>
+            <error type="VALIDATION_ERROR">
+                <action>Log warning, skip message</action>
+                <recovery>Report to developer tools</recovery>
+            </error>
+            <error type="HANDLER_ERROR">
+                <action>Catch and log, prevent cascade</action>
+                <recovery>Isolate error to single handler</recovery>
+            </error>
+        </message-errors>
+    </error-handling>
+    
+    <testing-requirements>
+        <unit-tests>
+            <test>Event validation accepts valid events</test>
+            <test>Event validation rejects invalid events</test>
+            <test>Connection state machine transitions correctly</test>
+            <test>Message queue handles overflow properly</test>
+            <test>Reconnection backoff calculates correctly</test>
+        </unit-tests>
+        
+        <integration-tests>
+            <test>WebSocket connects to backend successfully</test>
+            <test>Events trigger correct store updates</test>
+            <test>Reconnection recovers from network failure</test>
+            <test>Message queuing during disconnection</test>
+            <test>Event buffer maintains correct size</test>
+        </integration-tests>
+        
+        <e2e-tests>
+            <test>Complete event flow from backend to UI</test>
+            <test>Network interruption recovery</test>
+            <test>High-frequency event handling performance</test>
+            <test>Multiple thread switching stability</test>
+        </e2e-tests>
+    </testing-requirements>
+</specification>
