@@ -9,11 +9,6 @@ import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { 
-  FastLayerData, 
-  MediumLayerData, 
-  SlowLayerData 
-} from '@/types/unified-chat';
 
 const MainChat: React.FC = () => {
   const { 
