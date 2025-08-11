@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T11:09:18.302415  
+**Generated:** 2025-08-11T11:08:33.271663  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -8,11 +8,11 @@
 
 | Component | Status | Duration | Exit Code |
 |-----------|--------|----------|-----------|
-| Backend   | [PASSED] | 7.49s | 0 |
-| Frontend  | [PASSED] | 0.06s | 0 |
+| Backend   | [PASSED] | 7.83s | 0 |
+| Frontend  | [TIMEOUT] | 52.27s | -1 |
 
-**Overall Status:** [PASSED]  
-**Total Duration:** 7.55s  
+**Overall Status:** [FAILED]  
+**Total Duration:** 60.11s  
 **Final Exit Code:** 0
 
 ## Test Level Details
@@ -64,9 +64,9 @@ asyncio: mode=Mode.AUTO
 app\tests\routes\test_health_route.py::test_basic_import [32mPASSED[0m[32m          [ 50%][0m
 app\tests\routes\test_health_route.py::test_health_endpoint_direct [32mPASSED[0m[32m [100%][0m
 
-[32m============================== [32m[1m2 passed[0m[32m in 0.07s[0m[32m ==============================[0m
+[32m============================== [32m[1m2 passed[0m[32m in 0.06s[0m[32m ==============================[0m
 ================================================================================
-[PASS] ALL TESTS PASSED in 6.60s
+[PASS] ALL TESTS PASSED in 7.00s
 ================================================================================
 
 
@@ -74,9 +74,7 @@ app\tests\routes\test_health_route.py::test_health_endpoint_direct [32mPASSED[
 
 ### Frontend Output
 ```
-[INFO] Frontend smoke tests - No tests to run (passing)
-
-
+Tests timed out after 30s
 ```
 
 ---

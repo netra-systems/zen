@@ -76,9 +76,12 @@ export const MediumLayer: React.FC<MediumLayerProps> = ({ data }) => {
   if (!data) return null;
 
   return (
-    <div 
-      className="bg-white border-t border-gray-100"
+    <motion.div 
+      className="bg-white/95 backdrop-blur-sm border-t border-gray-100 shadow-inner"
       style={{ minHeight: '100px', maxHeight: '400px' }}
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
     >
       <div className="p-4 overflow-y-auto" style={{ maxHeight: '400px' }}>
         {/* Step Progress */}
@@ -88,10 +91,10 @@ export const MediumLayer: React.FC<MediumLayerProps> = ({ data }) => {
               <span className="font-medium">Step {data.stepNumber} of {data.totalSteps}</span>
               <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
                 <motion.div
-                  className="h-full bg-blue-500"
+                  className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
                   initial={{ width: 0 }}
                   animate={{ width: `${(data.stepNumber / data.totalSteps) * 100}%` }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
                 />
               </div>
             </div>
@@ -120,6 +123,6 @@ export const MediumLayer: React.FC<MediumLayerProps> = ({ data }) => {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };

@@ -34,7 +34,7 @@ describe('CRITICAL: State Management & Synchronization', () => {
   describe('Zustand Store Race Conditions', () => {
     it('CRITICAL: Should handle concurrent state updates without data loss', () => {
       // Generate concurrent update events
-      const updates = [];
+      const updates: any[] = [];
       for (let i = 0; i < MAX_CONCURRENT_UPDATES; i++) {
         updates.push({
           type: 'message',

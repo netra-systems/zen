@@ -42,21 +42,28 @@ export const FastLayer: React.FC<FastLayerProps> = ({ data, isProcessing }) => {
           )}
         </div>
 
-        {/* Right side - Active Tools */}
+        {/* Right side - Active Tools with Deduplication */}
         <div className="flex items-center space-x-2">
           {data?.activeTools && data.activeTools.length > 0 && (
             <>
-              {data.activeTools.map((tool, index) => (
+              {/* Deduplicate tools and show unique ones */}
+              {Array.from(new Set(data.activeTools)).map((tool) => (
                 <motion.div
-                  key={`${tool}-${index}`}
+                  key={tool}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ duration: 0 }}
-                  className="flex items-center space-x-1 bg-white border border-emerald-500/30 rounded-full px-3 py-1 shadow-sm hover:shadow-md transition-shadow duration-200"
+                  className="flex items-center space-x-1 bg-white/90 backdrop-blur-sm border border-purple-500/30 rounded-full px-3 py-1 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
                 >
-                  <Zap className="w-3 h-3 text-emerald-600" />
-                  <span className="text-xs font-medium">{tool}</span>
+                  <Zap className="w-3 h-3 text-purple-600" />
+                  <span className="text-xs font-medium text-zinc-700">{tool}</span>
+                  {/* Show count if tool appears multiple times */}
+                  {data.activeTools.filter(t => t === tool).length > 1 && (
+                    <span className="text-xs text-purple-500 font-bold ml-1">
+                      ×{data.activeTools.filter(t => t === tool).length}
+                    </span>
+                  )}
                 </motion.div>
               ))}
             </>

@@ -27,7 +27,7 @@ describe('Critical Test #2: Agent Orchestration Failure Recovery', () => {
     it('should handle triage agent timeout gracefully', () => {
       // Intercept triage agent calls and delay response
       cy.intercept('POST', '**/api/agents/triage**', (req) => {
-        req.reply((res) => {
+        req.reply((res: any) => {
           res.delay(15000); // 15 second delay to trigger timeout
           res.send({ status: 'timeout' });
         });
@@ -334,7 +334,7 @@ describe('Critical Test #2: Agent Orchestration Failure Recovery', () => {
         cy.wait(2000);
         
         // Should show specific error message
-        cy.contains(agentErrors[agent]).should('be.visible');
+        cy.contains(agentErrors[agent as keyof typeof agentErrors]).should('be.visible');
       });
     });
 
@@ -364,15 +364,15 @@ describe('Critical Test #2: Agent Orchestration Failure Recovery', () => {
       // Intercept with varying delays
       cy.intercept('POST', '**/api/agents/triage**', (req) => {
         req.reply((res) => {
-          res.delay(500);
-          res.send({ status: 'success' });
+          (res as any).delay(500);
+          (res as any).send({ status: 'success' });
         });
       }).as('triageDelay');
       
       cy.intercept('POST', '**/api/agents/optimization**', (req) => {
         req.reply((res) => {
-          res.delay(2000);
-          res.send({ status: 'success' });
+          (res as any).delay(2000);
+          (res as any).send({ status: 'success' });
         });
       }).as('optimizationDelay');
       
