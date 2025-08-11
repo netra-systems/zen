@@ -68,3 +68,4 @@ temp/
 /venv_test
 /ccusage
 /frontend/.jest-cache
+/terraform/staging/.terraform
