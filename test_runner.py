@@ -440,13 +440,32 @@ Usage Examples:
   
   # Use simple test runner
   python test_runner.py --simple
+  
+  # Real LLM testing examples:
+  # Unit tests with real LLM calls
+  python test_runner.py --level unit --real-llm
+  
+  # Integration tests with specific model
+  python test_runner.py --level integration --real-llm --llm-model gemini-1.5-pro
+  
+  # Critical tests sequentially to avoid rate limits
+  python test_runner.py --level critical --real-llm --parallel 1
+  
+  # Comprehensive with extended timeout
+  python test_runner.py --level comprehensive --real-llm --llm-timeout 120
 
 Purpose Guide:
-  - smoke:         Use before committing code, quick validation
+  - smoke:         Use before committing code, quick validation (never uses real LLM)
   - unit:          Use during development, test individual components  
   - integration:   Use when testing feature interactions
   - comprehensive: Use before releases, full system validation
   - critical:      Use to verify essential functionality only
+  
+Real LLM Testing:
+  - Adds --real-llm flag to use actual API calls instead of mocks
+  - Increases test duration 3-5x and incurs API costs
+  - Use gemini-1.5-flash (default) for cost efficiency
+  - Run sequentially (--parallel 1) with production keys to avoid rate limits
         """
     )
     
