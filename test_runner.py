@@ -71,6 +71,16 @@ TEST_LEVELS = {
         "timeout": 120,
         "run_coverage": True,
         "run_both": False  # Backend only for critical paths
+    },
+    "all": {
+        "description": "All tests including backend, frontend, e2e, integration (20-30 minutes)",
+        "purpose": "Complete system validation including all test types",
+        "backend_args": ["--coverage", "--parallel=auto", "--html-output"],
+        "frontend_args": ["--coverage", "--e2e"],
+        "timeout": 1800,
+        "run_coverage": True,
+        "run_both": True,
+        "run_e2e": True
     }
 }
 
@@ -98,6 +108,14 @@ class UnifiedTestRunner:
                 "status": "pending", 
                 "duration": 0, 
                 "exit_code": None, 
+                "output": "",
+                "test_counts": {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0},
+                "coverage": None
+            },
+            "e2e": {
+                "status": "pending",
+                "duration": 0,
+                "exit_code": None,
                 "output": "",
                 "test_counts": {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0},
                 "coverage": None
@@ -151,7 +169,8 @@ class UnifiedTestRunner:
                         env["GOOGLE_API_KEY"] = value
                     print(f"[INFO] Found {key} in environment")
             
-            print(f"[INFO] Real LLM testing enabled with {env['TEST_LLM_MODEL']} (timeout: {env['TEST_LLM_TIMEOUT']}s)")
+            model_name = real_llm_config.get("model", "gemini-2.5-flash")
+            print(f"[INFO] Real LLM testing enabled with {model_name} (timeout: {env['TEST_LLM_TIMEOUT']}s)")
         
         try:
             result = subprocess.run(
@@ -276,6 +295,109 @@ class UnifiedTestRunner:
             print(f"[TIMEOUT] Frontend tests timed out after {timeout}s")
             return -1, f"Tests timed out after {timeout}s"
     
+    def run_e2e_tests(self, args: List[str], timeout: int = 600) -> Tuple[int, str]:
+        """Run end-to-end Cypress tests"""
+        print(f"\n{'='*60}")
+        print("RUNNING E2E TESTS")
+        print(f"{'='*60}")
+        
+        start_time = time.time()
+        self.results["e2e"]["status"] = "running"
+        
+        # Change to frontend directory for Cypress
+        frontend_dir = PROJECT_ROOT / "frontend"
+        
+        # Check if npm and cypress are available
+        check_cmd = ["npm", "list", "cypress", "--depth=0"]
+        try:
+            subprocess.run(check_cmd, cwd=frontend_dir, capture_output=True, timeout=10)
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            print("[ERROR] Cypress not found. Please run 'npm install' in frontend directory")
+            self.results["e2e"]["status"] = "failed"
+            self.results["e2e"]["exit_code"] = 1
+            return 1, "Cypress not installed"
+        
+        # Run Cypress tests
+        cmd = ["npm", "run", "cy:run", "--", "--reporter", "json"]
+        
+        try:
+            result = subprocess.run(
+                cmd,
+                cwd=frontend_dir,
+                capture_output=True,
+                text=True,
+                encoding='utf-8',
+                errors='replace',
+                timeout=timeout
+            )
+            
+            duration = time.time() - start_time
+            self.results["e2e"]["duration"] = duration
+            self.results["e2e"]["exit_code"] = result.returncode
+            self.results["e2e"]["output"] = result.stdout + "\n" + result.stderr
+            self.results["e2e"]["status"] = "passed" if result.returncode == 0 else "failed"
+            
+            # Parse test counts from Cypress output
+            self._parse_cypress_counts(result.stdout + result.stderr)
+            
+            # Print output with proper encoding handling
+            try:
+                print(result.stdout)
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                cleaned_output = result.stdout.encode('ascii', errors='replace').decode('ascii')
+                print(cleaned_output)
+            
+            if result.stderr:
+                try:
+                    print(result.stderr, file=sys.stderr)
+                except (UnicodeEncodeError, UnicodeDecodeError):
+                    cleaned_error = result.stderr.encode('ascii', errors='replace').decode('ascii')
+                    print(cleaned_error, file=sys.stderr)
+            
+            print(f"[{'PASS' if result.returncode == 0 else 'FAIL'}] E2E tests completed in {duration:.2f}s")
+            
+            return result.returncode, result.stdout + result.stderr
+            
+        except subprocess.TimeoutExpired:
+            duration = time.time() - start_time
+            self.results["e2e"]["duration"] = duration
+            self.results["e2e"]["exit_code"] = -1
+            self.results["e2e"]["status"] = "timeout"
+            self.results["e2e"]["output"] = f"Tests timed out after {timeout}s"
+            
+            print(f"[TIMEOUT] E2E tests timed out after {timeout}s")
+            return -1, f"Tests timed out after {timeout}s"
+    
+    def _parse_cypress_counts(self, output: str):
+        """Parse test counts from Cypress output"""
+        counts = {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0}
+        
+        # Cypress output patterns
+        patterns = [
+            (r"(\d+) passing", "passed"),
+            (r"(\d+) failing", "failed"),
+            (r"(\d+) pending", "skipped"),
+            (r"Tests:\s+(\d+)", "total"),
+            (r"Passing:\s+(\d+)", "passed"),
+            (r"Failing:\s+(\d+)", "failed"),
+            (r"Pending:\s+(\d+)", "skipped"),
+        ]
+        
+        for pattern, key in patterns:
+            match = re.search(pattern, output, re.IGNORECASE)
+            if match:
+                value = int(match.group(1))
+                if key == "total":
+                    counts["total"] = value
+                else:
+                    counts[key] = max(counts[key], value)  # Take the max to avoid double counting
+        
+        # Calculate total if not explicitly found
+        if counts["total"] == 0:
+            counts["total"] = counts["passed"] + counts["failed"] + counts["skipped"]
+        
+        self.results["e2e"]["test_counts"] = counts
+    
     def run_simple_tests(self) -> Tuple[int, str]:
         """Run simple test runner for basic validation"""
         print(f"\n{'='*60}")
@@ -398,12 +520,13 @@ class UnifiedTestRunner:
         # Calculate total test counts
         backend_counts = self.results["backend"]["test_counts"]
         frontend_counts = self.results["frontend"]["test_counts"]
+        e2e_counts = self.results.get("e2e", {}).get("test_counts", {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0})
         total_counts = {
-            "total": backend_counts["total"] + frontend_counts["total"],
-            "passed": backend_counts["passed"] + frontend_counts["passed"],
-            "failed": backend_counts["failed"] + frontend_counts["failed"],
-            "skipped": backend_counts["skipped"] + frontend_counts["skipped"],
-            "errors": backend_counts["errors"] + frontend_counts["errors"]
+            "total": backend_counts["total"] + frontend_counts["total"] + e2e_counts["total"],
+            "passed": backend_counts["passed"] + frontend_counts["passed"] + e2e_counts["passed"],
+            "failed": backend_counts["failed"] + frontend_counts["failed"] + e2e_counts["failed"],
+            "skipped": backend_counts["skipped"] + frontend_counts["skipped"] + e2e_counts["skipped"],
+            "errors": backend_counts["errors"] + frontend_counts["errors"] + e2e_counts["errors"]
         }
         
         # Calculate overall coverage if available
@@ -455,7 +578,14 @@ class UnifiedTestRunner:
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
 | Backend   | {backend_counts['total']} | {backend_counts['passed']} | {backend_counts['failed']} | {backend_counts['skipped']} | {backend_counts['errors']} | {self.results['backend']['duration']:.2f}s | {self._status_badge(self.results['backend']['status'])} |
-| Frontend  | {frontend_counts['total']} | {frontend_counts['passed']} | {frontend_counts['failed']} | {frontend_counts['skipped']} | {frontend_counts['errors']} | {self.results['frontend']['duration']:.2f}s | {self._status_badge(self.results['frontend']['status'])} |
+| Frontend  | {frontend_counts['total']} | {frontend_counts['passed']} | {frontend_counts['failed']} | {frontend_counts['skipped']} | {frontend_counts['errors']} | {self.results['frontend']['duration']:.2f}s | {self._status_badge(self.results['frontend']['status'])} |"""
+        
+        # Add E2E row if E2E tests were run
+        if self.results.get("e2e", {}).get("status") != "pending":
+            md_content += f"""
+| E2E       | {e2e_counts['total']} | {e2e_counts['passed']} | {e2e_counts['failed']} | {e2e_counts['skipped']} | {e2e_counts['errors']} | {self.results['e2e']['duration']:.2f}s | {self._status_badge(self.results['e2e']['status'])} |"""
+        
+        md_content += """
 """
         
         # Add coverage summary if applicable
@@ -501,7 +631,18 @@ class UnifiedTestRunner:
 ### Frontend Output
 ```
 {self.results['frontend']['output'][:10000]}{'...(truncated)' if len(self.results['frontend']['output']) > 10000 else ''}
+```"""
+        
+        # Add E2E output if E2E tests were run
+        if self.results.get("e2e", {}).get("status") != "pending":
+            md_content += f"""
+
+### E2E Output
 ```
+{self.results['e2e']['output'][:10000]}{'...(truncated)' if len(self.results['e2e']['output']) > 10000 else ''}
+```"""
+        
+        md_content += """
 """
         
         # Add error summary if there were failures
@@ -638,7 +779,7 @@ Usage Examples:
   python test_runner.py --level unit --real-llm
   
   # Integration tests with specific model
-  python test_runner.py --level integration --real-llm --llm-model gemini-1.5-pro
+  python test_runner.py --level integration --real-llm --llm-model gemini-2.5-pro
   
   # Critical tests sequentially to avoid rate limits
   python test_runner.py --level critical --real-llm --parallel 1
@@ -656,7 +797,7 @@ Purpose Guide:
 Real LLM Testing:
   - Adds --real-llm flag to use actual API calls instead of mocks
   - Increases test duration 3-5x and incurs API costs
-  - Use gemini-1.5-flash (default) for cost efficiency
+  - Use gemini-2.5-flash (default) for cost efficiency
   - Run sequentially (--parallel 1) with production keys to avoid rate limits
         """
     )
@@ -714,9 +855,9 @@ Real LLM Testing:
     parser.add_argument(
         "--llm-model",
         type=str,
-        default="gemini-1.5-flash",
-        choices=["gemini-1.5-flash", "gemini-1.5-pro", "gpt-4", "gpt-3.5-turbo", "claude-3-sonnet"],
-        help="LLM model to use for real tests (default: gemini-1.5-flash for cost efficiency)"
+        default="gemini-2.5-flash",
+        choices=["gemini-2.5-flash", "gemini-2.5-pro", "gpt-4", "gpt-3.5-turbo", "claude-3-sonnet"],
+        help="LLM model to use for real tests (default: gemini-2.5-flash for cost efficiency)"
     )
     parser.add_argument(
         "--llm-timeout",

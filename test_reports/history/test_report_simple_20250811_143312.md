@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T15:14:29.956571  
+**Generated:** 2025-08-11T14:33:12.257625  
 **Test Level:** simple - Simple test validation  
 **Purpose:** Basic functionality check
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 9.78s | [PASSED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 9.78s | [PASSED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 9.02s | [PASSED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 9.02s | [PASSED] |
 
 ## Environment and Configuration
 
@@ -27,7 +27,7 @@
 - **Purpose:** Basic functionality check
 - **Timeout:** 300s
 - **Coverage Enabled:** No
-- **Total Duration:** 19.56s
+- **Total Duration:** 18.04s
 - **Exit Code:** 0
 
 ### Backend Configuration
@@ -47,7 +47,7 @@
 ================================================================================
 NETRA AI PLATFORM - SIMPLE TEST RUNNER
 ================================================================================
-[INFO] Starting simple smoke tests at 2025-08-11 15:14:10
+[INFO] Starting simple smoke tests at 2025-08-11 14:32:54
 
 ============================================================
 BACKEND SMOKE TESTS
@@ -83,7 +83,7 @@ TEST SUMMARY
 ============================================================
 Backend:  [PASSED]
 Frontend: [PASSED]
-Duration: 19.49 seconds
+Duration: 17.96 seconds
 ============================================================
 
 [SUCCESS] All simple tests passed!

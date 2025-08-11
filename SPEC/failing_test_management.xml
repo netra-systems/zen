@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <metadata>
+    <name>Failing Test Management Specification</name>
+    <version>1.0.0</version>
+    <created>2025-08-11</created>
+    <purpose>Define automated workflow for tracking, fixing, and validating failing tests</purpose>
+  </metadata>
+
+  <overview>
+    <description>
+      This specification defines the workflow for automatically tracking failing tests,
+      fixing them systematically, and maintaining a log of test failures for continuous improvement.
+    </description>
+    <goals>
+      <goal>Track all failing tests in a centralized location</goal>
+      <goal>Provide clear workflow for fixing failing tests</goal>
+      <goal>Maintain historical data on test failures</goal>
+      <goal>Enable targeted test runs for efficiency</goal>
+    </goals>
+  </overview>
+
+  <failing_test_log_structure>
+    <file_location>test_reports/failing_tests.json</file_location>
+    <format>
+      <field name="last_updated" type="datetime" description="ISO 8601 timestamp of last update"/>
+      <field name="backend" type="object">
+        <field name="count" type="integer" description="Number of failing backend tests"/>
+        <field name="failures" type="array">
+          <item type="object">
+            <field name="test_path" type="string" description="Full path to test file"/>
+            <field name="test_name" type="string" description="Test function or class name"/>
+            <field name="error_type" type="string" description="Type of error (AssertionError, ImportError, etc.)"/>
+            <field name="error_message" type="string" description="Error message"/>
+            <field name="traceback" type="string" description="Last 5 lines of traceback"/>
+            <field name="first_failed" type="datetime" description="When test first started failing"/>
+            <field name="consecutive_failures" type="integer" description="Number of consecutive failures"/>
+          </item>
+        </field>
+      </field>
+      <field name="frontend" type="object">
+        <field name="count" type="integer" description="Number of failing frontend tests"/>
+        <field name="failures" type="array">
+          <item type="object">
+            <field name="test_path" type="string" description="Full path to test file"/>
+            <field name="test_name" type="string" description="Test name or describe block"/>
+            <field name="error_type" type="string" description="Type of error"/>
+            <field name="error_message" type="string" description="Error message"/>
+            <field name="first_failed" type="datetime" description="When test first started failing"/>
+            <field name="consecutive_failures" type="integer" description="Number of consecutive failures"/>
+          </item>
+        </field>
+      </field>
+    </format>
+  </failing_test_log_structure>
+
+  <workflow>
+    <step number="1" name="Load Failing Tests">
+      <action>Read test_reports/failing_tests.json</action>
+      <validation>Check file exists and is valid JSON</validation>
+      <fallback>Create empty structure if file doesn't exist</fallback>
+    </step>
+
+    <step number="2" name="Prioritize Tests">
+      <criteria>
+        <criterion priority="1">Tests with highest consecutive_failures</criterion>
+        <criterion priority="2">Critical path tests (if marked)</criterion>
+        <criterion priority="3">Tests that block other tests</criterion>
+        <criterion priority="4">Oldest failing tests (first_failed)</criterion>
+      </criteria>
+    </step>
+
+    <step number="3" name="Run Specific Test">
+      <backend>
+        <command>python -m pytest {test_path}::{test_name} -xvs</command>
+        <options>
+          <option>--tb=short for concise output</option>
+          <option>--capture=no for debugging</option>
+        </options>
+      </backend>
+      <frontend>
+        <command>npm test -- {test_path} --testNamePattern="{test_name}"</command>
+        <cypress>npx cypress run --spec {test_path}</cypress>
+      </frontend>
+    </step>
+
+    <step number="4" name="Analyze Failure">
+      <actions>
+        <action>Parse error message and traceback</action>
+        <action>Identify root cause category:
+          - Import/dependency issue
+          - Assertion failure
+          - Mock/fixture issue
+          - Async/timing issue
+          - Environment issue
+        </action>
+        <action>Check related code changes in git history</action>
+      </actions>
+    </step>
+
+    <step number="5" name="Fix Test">
+      <strategies>
+        <strategy type="import_error">
+          <action>Check if module exists</action>
+          <action>Verify import paths</action>
+          <action>Update test_internal_imports.py if needed</action>
+        </strategy>
+        <strategy type="assertion_failure">
+          <action>Verify expected vs actual values</action>
+          <action>Check if business logic changed</action>
+          <action>Update test expectations if valid</action>
+        </strategy>
+        <strategy type="mock_issue">
+          <action>Verify mock setup</action>
+          <action>Check if mocked interface changed</action>
+          <action>Update mock to match current implementation</action>
+        </strategy>
+        <strategy type="async_timing">
+          <action>Add proper await statements</action>
+          <action>Increase timeouts if needed</action>
+          <action>Add proper synchronization</action>
+        </strategy>
+      </strategies>
+    </step>
+
+    <step number="6" name="Verify Fix">
+      <action>Run the specific test again</action>
+      <action>Run related tests in same file</action>
+      <action>Run smoke tests to ensure no regression</action>
+    </step>
+
+    <step number="7" name="Update Log">
+      <success>
+        <action>Remove test from failing_tests.json</action>
+        <action>Add to fixed_tests_history.json with fix details</action>
+      </success>
+      <failure>
+        <action>Update consecutive_failures count</action>
+        <action>Update error_message if changed</action>
+        <action>Add attempted fix to history</action>
+      </failure>
+    </step>
+
+    <step number="8" name="Run Full Suite">
+      <condition>After fixing all tests or batch of tests</condition>
+      <action>Run appropriate test level (unit, integration, etc.)</action>
+      <action>Update failing_tests.json with any new failures</action>
+    </step>
+  </workflow>
+
+  <automation_commands>
+    <command name="fix-failing-tests">
+      <description>Automatically fix all failing tests</description>
+      <usage>python test_runner.py --fix-failing</usage>
+      <options>
+        <option>--max-fixes=N: Limit number of tests to fix</option>
+        <option>--backend-only: Only fix backend tests</option>
+        <option>--frontend-only: Only fix frontend tests</option>
+      </options>
+    </command>
+
+    <command name="show-failing">
+      <description>Display current failing tests</description>
+      <usage>python test_runner.py --show-failing</usage>
+    </command>
+
+    <command name="run-failing">
+      <description>Run only currently failing tests</description>
+      <usage>python test_runner.py --run-failing</usage>
+    </command>
+  </automation_commands>
+
+  <test_runner_integration>
+    <hook name="on_test_failure">
+      <action>Extract test information</action>
+      <action>Update failing_tests.json</action>
+      <action>Increment consecutive_failures if already failing</action>
+    </hook>
+
+    <hook name="on_test_success">
+      <action>Check if test was in failing_tests.json</action>
+      <action>Remove from failing tests if present</action>
+      <action>Log recovery in fixed_tests_history.json</action>
+    </hook>
+
+    <hook name="on_suite_complete">
+      <action>Generate summary of failing tests</action>
+      <action>Save to test_reports/failing_tests.json</action>
+      <action>Display fix command if failures exist</action>
+    </hook>
+  </test_runner_integration>
+
+  <best_practices>
+    <practice>Always fix root cause, not symptoms</practice>
+    <practice>Document non-obvious fixes in test comments</practice>
+    <practice>Group related test fixes together</practice>
+    <practice>Run smoke tests after each fix to catch regressions</practice>
+    <practice>Update test documentation when changing test behavior</practice>
+  </best_practices>
+
+  <monitoring>
+    <metric name="mean_time_to_fix">Average time from first failure to fix</metric>
+    <metric name="failure_rate">Percentage of tests failing over time</metric>
+    <metric name="regression_rate">Tests that fail again after being fixed</metric>
+    <metric name="flaky_tests">Tests with intermittent failures</metric>
+  </monitoring>
+</spec>
