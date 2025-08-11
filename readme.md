@@ -52,7 +52,7 @@ Netra is a sophisticated AI optimization platform that leverages a multi-agent s
 #### Windows
 ```bash
 # Clone the repository
-git clone https://github.com/netrasystems/netra-core-generation-1.git
+git clone https://github.com/netra-systems/netra-apex.git
 cd netra-core-generation-1
 
 # Run the automated installer
@@ -62,7 +62,7 @@ scripts\setup.bat
 #### macOS/Linux
 ```bash
 # Clone the repository
-git clone https://github.com/netrasystems/netra-core-generation-1.git
+git clone https://github.com/netra-systems/netra-apex.git
 cd netra-core-generation-1
 
 # Run the automated installer
