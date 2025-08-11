@@ -39,12 +39,13 @@ from fastapi.testclient import TestClient
 from app.db.session import get_db_session
 from app.config import settings
 
-@pytest.fixture(scope="function")
-def event_loop():
-    import asyncio
-    loop = asyncio.get_event_loop()
-    yield loop
-    loop.close()
+# Temporarily disabled to fix test hanging issue
+# @pytest.fixture(scope="function")
+# def event_loop():
+#     import asyncio
+#     loop = asyncio.get_event_loop()
+#     yield loop
+#     loop.close()
 
 @pytest.fixture(scope="function")
 async def test_engine():

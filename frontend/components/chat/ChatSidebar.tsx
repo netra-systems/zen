@@ -7,25 +7,7 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useAuthStore } from '@/store/authStore';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { ThreadService } from '@/services/thread-service';
-
-interface ThreadMetadata {
-  isProcessing?: boolean;
-  [key: string]: unknown;
-}
-
-interface Thread {
-  id: string;
-  object: 'thread';
-  created_at: number;
-  metadata: ThreadMetadata;
-  last_message?: string;
-  message_count?: number;
-  updated_at?: number;
-  user_id?: string;
-  user_email?: string;
-  admin_type?: 'corpus' | 'synthetic' | 'config' | 'users';
-}
+import { ThreadService, Thread } from '@/services/threadService';
 
 export const ChatSidebar: React.FC = () => {
   const { 
@@ -43,7 +25,6 @@ export const ChatSidebar: React.FC = () => {
   const [showAllThreads, setShowAllThreads] = useState(false);
   const [filterType, setFilterType] = useState<'all' | 'corpus' | 'synthetic' | 'config' | 'users'>('all');
   const [threads, setThreads] = useState<Thread[]>([]);
-  const [isLoadingThreads, setIsLoadingThreads] = useState(true);
 
   // Load threads on mount and when filters change
   useEffect(() => {
@@ -51,24 +32,21 @@ export const ChatSidebar: React.FC = () => {
   }, [showAllThreads, filterType]);
 
   const loadThreads = async () => {
-    setIsLoadingThreads(true);
     try {
-      const threadService = new ThreadService();
-      const fetchedThreads = await threadService.listThreads();
+      const fetchedThreads = await ThreadService.listThreads();
       setThreads(fetchedThreads);
     } catch (error) {
       console.error('Failed to load threads:', error);
-    } finally {
-      setIsLoadingThreads(false);
     }
   };
 
   // Filter threads based on search
   const filteredThreads = threads.filter(thread => {
     if (!searchQuery) return true;
-    const title = thread.metadata?.title || `Chat ${thread.created_at}`;
+    const title = thread.metadata?.title || thread.title || `Chat ${thread.created_at}`;
+    const lastMessage = thread.metadata?.last_message as string | undefined;
     return title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           thread.last_message?.toLowerCase().includes(searchQuery.toLowerCase());
+           lastMessage?.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   // Sort threads by last update
@@ -81,8 +59,7 @@ export const ChatSidebar: React.FC = () => {
   const handleNewChat = async () => {
     setIsCreatingThread(true);
     try {
-      const threadService = new ThreadService();
-      const newThread = await threadService.createThread();
+      const newThread = await ThreadService.createThread();
       
       // Set as active thread
       setActiveThread?.(newThread.id);
@@ -103,14 +80,13 @@ export const ChatSidebar: React.FC = () => {
     if (threadId === activeThreadId || isProcessing) return;
     
     try {
-      const threadService = new ThreadService();
-      const messages = await threadService.getThreadMessages(threadId);
+      const response = await ThreadService.getThreadMessages(threadId);
       
       // Switch to thread and load messages
       setActiveThread?.(threadId);
       // Load messages into store (implement loadMessages in store)
       
-      console.log('Switched to thread:', threadId, 'with', messages.length, 'messages');
+      console.log('Switched to thread:', threadId, 'with', response.messages.length, 'messages');
     } catch (error) {
       console.error('Failed to switch thread:', error);
     }
@@ -247,17 +223,17 @@ export const ChatSidebar: React.FC = () => {
 
                   <div className="flex items-start space-x-3 pl-2">
                     {/* Icon based on thread type */}
-                    {thread.admin_type === 'corpus' ? (
+                    {thread.metadata?.admin_type === 'corpus' ? (
                       <Database className={cn(
                         "w-5 h-5 mt-0.5 flex-shrink-0",
                         activeThreadId === thread.id ? "text-purple-600" : "text-purple-400"
                       )} />
-                    ) : thread.admin_type === 'synthetic' ? (
+                    ) : thread.metadata?.admin_type === 'synthetic' ? (
                       <Sparkles className={cn(
                         "w-5 h-5 mt-0.5 flex-shrink-0",
                         activeThreadId === thread.id ? "text-purple-600" : "text-purple-400"
                       )} />
-                    ) : thread.admin_type === 'users' ? (
+                    ) : thread.metadata?.admin_type === 'users' ? (
                       <Users className={cn(
                         "w-5 h-5 mt-0.5 flex-shrink-0",
                         activeThreadId === thread.id ? "text-purple-600" : "text-purple-400"
@@ -275,13 +251,13 @@ export const ChatSidebar: React.FC = () => {
                         "text-sm font-medium truncate",
                         activeThreadId === thread.id ? "text-emerald-900" : "text-gray-900"
                       )}>
-                        {thread.metadata?.title || thread.last_message || `Chat ${new Date(thread.created_at * 1000).toLocaleDateString()}`}
+                        {thread.metadata?.title || thread.title || thread.metadata?.last_message || `Chat ${new Date(thread.created_at * 1000).toLocaleDateString()}`}
                       </p>
                       
                       {/* Show user email for admin view */}
-                      {showAllThreads && thread.user_email && (
+                      {showAllThreads && thread.metadata?.user_email && (
                         <p className="text-xs text-purple-600 truncate mt-0.5">
-                          {thread.user_email}
+                          {thread.metadata?.user_email as string}
                         </p>
                       )}
                       

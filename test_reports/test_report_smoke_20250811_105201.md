@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T11:00:02.590360  
+**Generated:** 2025-08-11T10:52:01.927661  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -8,12 +8,12 @@
 
 | Component | Status | Duration | Exit Code |
 |-----------|--------|----------|-----------|
-| Backend   | [PASSED] | 8.36s | 0 |
-| Frontend  | [TIMEOUT] | 50.82s | -1 |
+| Backend   | [FAILED] | 8.46s | 1 |
+| Frontend  | [TIMEOUT] | 50.61s | -1 |
 
 **Overall Status:** [FAILED]  
-**Total Duration:** 59.19s  
-**Final Exit Code:** 0
+**Total Duration:** 59.08s  
+**Final Exit Code:** 1
 
 ## Test Level Details
 
@@ -59,18 +59,9 @@ rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
 configfile: pytest.ini
 plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
 asyncio: mode=Mode.AUTO
-[1mcollecting ... [0mcollected 4 items
+[1mcollecting ... [0mcollected 13 items
 
-app\tests\routes\test_health_route.py::test_basic_import [32mPASSED[0m[32m          [ 25%][0m
-app\tests\routes\test_health_route.py::test_health_endpoint_direct [32mPASSED[0m[32m [ 50%][0m
-app\tests\routes\test_health_endpoints.py::test_health_endpoints_placeholder [32mPASSED[0m[32m [ 75%][0m
-app\tests\test_working_health.py::test_working_health_placeholder [32mPASSED[0m[32m [100%][0m
-
-[32m============================== [32m[1m4 passed[0m[32m in 0.10s[0m[32m ==============================[0m
-================================================================================
-[PASS] ALL TESTS PASSED in 7.49s
-================================================================================
-
+app\tests\routes\test_health_route.py::test_live_endpoint 
 
 ```
 

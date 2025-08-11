@@ -3,15 +3,30 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  CheckCircle, Clock, Cpu, TrendingUp, AlertCircle, DollarSign,
-  BarChart3, Zap, Target, ChevronDown, ChevronRight, Download,
-  Share2, Info, Shield, ArrowUpRight, ArrowDownRight, Gauge,
+  TrendingUp, DollarSign,
+  Zap, Target, ChevronDown, ChevronRight, Download,
+  Share2, Shield, ArrowUpRight, ArrowDownRight, Gauge,
   Package, Brain, Layers, Activity, FileText, Send
 } from 'lucide-react';
 import type { SlowLayerProps } from '@/types/unified-chat';
 
+interface ReportData {
+  finalReport?: {
+    executive_summary?: string;
+    cost_analysis?: {
+      total_savings?: number;
+    };
+    performance_comparison?: {
+      improvement_percentage?: number;
+    };
+    confidence_scores?: {
+      overall?: number;
+    };
+  };
+}
+
 // Executive Summary Card
-const ExecutiveSummary: React.FC<{ data: any }> = ({ data }) => {
+const ExecutiveSummary: React.FC<{ data: ReportData }> = ({ data }) => {
   if (!data.finalReport?.executive_summary) return null;
 
   const savingsAmount = data.finalReport.cost_analysis?.total_savings || 0;
@@ -68,7 +83,7 @@ const ExecutiveSummary: React.FC<{ data: any }> = ({ data }) => {
 };
 
 // Cost Analysis Section
-const CostAnalysis: React.FC<{ data: any }> = ({ data }) => {
+const CostAnalysis: React.FC<{ data: ReportData }> = ({ data }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   
   if (!data.finalReport?.cost_analysis) return null;
@@ -169,7 +184,7 @@ const CostAnalysis: React.FC<{ data: any }> = ({ data }) => {
 };
 
 // Performance Metrics Section
-const PerformanceMetrics: React.FC<{ data: any }> = ({ data }) => {
+const PerformanceMetrics: React.FC<{ data: ReportData }> = ({ data }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   
   if (!data.finalReport?.performance_comparison) return null;
@@ -288,7 +303,21 @@ const PerformanceMetrics: React.FC<{ data: any }> = ({ data }) => {
 };
 
 // Enhanced Recommendations with Cards
-const EnhancedRecommendations: React.FC<{ recommendations: any[] }> = ({ recommendations }) => {
+interface RecommendationItem {
+  id?: string;
+  title?: string;
+  description?: string;
+  impact?: 'high' | 'medium' | 'low';
+  effort?: 'high' | 'medium' | 'low';
+  category?: string;
+  metrics?: {
+    potential_savings?: number;
+    latency_reduction?: number;
+    throughput_increase?: number;
+  };
+}
+
+const EnhancedRecommendations: React.FC<{ recommendations: RecommendationItem[] }> = ({ recommendations }) => {
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
   const toggleCard = (id: string) => {
@@ -415,7 +444,17 @@ const EnhancedRecommendations: React.FC<{ recommendations: any[] }> = ({ recomme
 };
 
 // Action Plan Stepper
-const ActionPlanStepper: React.FC<{ actionPlan: any[] }> = ({ actionPlan }) => {
+interface ActionPlanItem {
+  id?: string;
+  step_number?: number;
+  description?: string;
+  command?: string;
+  expected_outcome?: string;
+  dependencies?: string[];
+  estimated_duration?: string;
+}
+
+const ActionPlanStepper: React.FC<{ actionPlan: ActionPlanItem[] }> = ({ actionPlan }) => {
   const [currentStep, setCurrentStep] = useState(0);
 
   return (
@@ -471,7 +510,18 @@ const ActionPlanStepper: React.FC<{ actionPlan: any[] }> = ({ actionPlan }) => {
 };
 
 // Agent Timeline Visualization
-const AgentTimeline: React.FC<{ agents: any[] }> = ({ agents }) => {
+interface AgentTimelineItem {
+  agentName?: string;
+  duration?: number;
+  metrics?: {
+    tokens_used?: number;
+    tools_executed?: number;
+    cache_hits?: number;
+    cache_misses?: number;
+  };
+}
+
+const AgentTimeline: React.FC<{ agents: AgentTimelineItem[] }> = ({ agents }) => {
   if (!agents || agents.length === 0) return null;
 
   const maxDuration = Math.max(...agents.map(a => a.duration || 0));

@@ -226,6 +226,10 @@ export interface UnifiedChatState {
   isProcessing: boolean;
   currentRunId: string | null;
   
+  // Thread management
+  activeThreadId: string | null;
+  threads: Map<string, unknown>;
+  
   // Message history
   messages: ChatMessage[];
   
@@ -242,6 +246,9 @@ export interface UnifiedChatState {
   addMessage: (message: ChatMessage) => void;
   setProcessing: (isProcessing: boolean) => void;
   setConnectionStatus: (isConnected: boolean, error?: string) => void;
+  setActiveThread: (threadId: string | null) => void;
+  clearMessages: () => void;
+  loadMessages: (messages: ChatMessage[]) => void;
 }
 
 export interface ChatMessage {
