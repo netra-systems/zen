@@ -162,9 +162,9 @@ class UnifiedTestRunner:
         start_time = time.time()
         self.results["frontend"]["status"] = "running"
         
-        # Use quick frontend test runner for smoke tests
+        # Use simple frontend test runner for smoke tests
         if "--category" in args and "smoke" in str(args):
-            frontend_script = PROJECT_ROOT / "scripts" / "test_frontend_quick.py"
+            frontend_script = PROJECT_ROOT / "scripts" / "test_frontend_simple.py"
         else:
             frontend_script = PROJECT_ROOT / RUNNERS["frontend"]
             

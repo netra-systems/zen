@@ -326,6 +326,8 @@ interface RecommendationItem {
   impact?: 'high' | 'medium' | 'low';
   effort?: 'high' | 'medium' | 'low';
   category?: string;
+  confidence_score?: number;
+  implementation_steps?: string[];
   metrics?: {
     potential_savings?: number;
     latency_reduction?: number;
@@ -390,10 +392,10 @@ const EnhancedRecommendations: React.FC<{ recommendations: RecommendationItem[] 
                   )}
                 </div>
                 <button
-                  onClick={() => toggleCard(rec.id)}
+                  onClick={() => rec.id && toggleCard(rec.id)}
                   className="ml-2 p-1 hover:bg-gray-100 rounded"
                 >
-                  {expandedCards.has(rec.id) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                  {rec.id && expandedCards.has(rec.id) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                 </button>
               </div>
 
