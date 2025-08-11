@@ -126,6 +126,14 @@ See `SPEC/clickhouse.xml` for details
 **Problem**: New dependencies not in import tests
 **Solution**: Update `app/tests/test_internal_imports.py` and `app/tests/test_external_imports.py`
 
+### Test Runner Reliability Issues
+**Problem**: Test runner may fail due to argument parsing or Unicode encoding issues
+**Critical Rule**: If test runner fails, fix the runner FIRST before running actual tests
+- Unicode emojis cause Windows terminal encoding errors
+- Parallel arguments must be properly formatted (--parallel=auto not --parallel auto)
+- Frontend test args should avoid Jest-specific options in the unified runner
+**Solution**: Fix test_runner.py issues immediately, then run real tests
+
 ## Quick Reference Paths
 
 ### When Working On:
