@@ -77,35 +77,54 @@ export const MediumLayer: React.FC<MediumLayerProps> = ({ data }) => {
 
   return (
     <motion.div 
-      className="bg-white/95 backdrop-blur-sm border-t border-gray-100 shadow-inner"
-      style={{ minHeight: '100px', maxHeight: '400px' }}
+      className="shadow-inner"
+      style={{ 
+        minHeight: '100px', 
+        maxHeight: '400px',
+        background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 250, 250, 0.95) 100%)',
+        backdropFilter: 'blur(8px)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.18)',
+        boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)'
+      }}
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: 'auto' }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
       <div className="p-4 overflow-y-auto" style={{ maxHeight: '400px' }}>
-        {/* Step Progress */}
+        {/* Step Progress with micro-interactions */}
         {data.stepNumber > 0 && data.totalSteps > 0 && (
-          <div className="mb-3 flex items-center space-x-3">
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
-              <span className="font-medium">Step {data.stepNumber} of {data.totalSteps}</span>
-              <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+          <motion.div 
+            className="mb-3 flex items-center space-x-3"
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="flex items-center space-x-2 text-sm">
+              <span className="font-medium text-zinc-700">Step {data.stepNumber} of {data.totalSteps}</span>
+              <div className="w-32 h-2 bg-gray-200/50 rounded-full overflow-hidden backdrop-blur-sm">
                 <motion.div
-                  className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+                  className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600"
                   initial={{ width: 0 }}
                   animate={{ width: `${(data.stepNumber / data.totalSteps) * 100}%` }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
                 />
               </div>
+              <span className="text-xs font-medium text-emerald-600">
+                {Math.round((data.stepNumber / data.totalSteps) * 100)}%
+              </span>
             </div>
-          </div>
+          </motion.div>
         )}
 
-        {/* Thinking/Status Text */}
+        {/* Thinking/Status Text with fade animation */}
         {data.thought && (
-          <div className="mb-3 text-sm text-gray-700 italic">
+          <motion.div 
+            className="mb-3 text-sm text-zinc-600 italic"
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
             {data.thought}
-          </div>
+          </motion.div>
         )}
 
         {/* Partial Content with Streaming */}
@@ -114,9 +133,9 @@ export const MediumLayer: React.FC<MediumLayerProps> = ({ data }) => {
             <ReactMarkdown>{displayedContent}</ReactMarkdown>
             {isStreaming && (
               <motion.span
-                className="inline-block w-1 h-4 bg-gray-800 ml-0.5"
-                animate={{ opacity: [1, 0] }}
-                transition={{ duration: 0.5, repeat: Infinity }}
+                className="inline-block w-2 h-4 bg-emerald-500 ml-0.5 rounded-sm"
+                animate={{ opacity: [1, 0, 1] }}
+                transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
                 style={{ verticalAlign: 'text-bottom' }}
               />
             )}

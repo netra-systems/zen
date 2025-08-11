@@ -11,8 +11,14 @@ export const FastLayer: React.FC<FastLayerProps> = ({ data, isProcessing }) => {
   
   return (
     <div 
-      className="h-12 flex items-center px-4 bg-white/95 backdrop-blur-md border-b border-gray-200 text-zinc-800"
-      style={{ height: '48px' }}
+      className="h-12 flex items-center px-4 text-zinc-800"
+      style={{ 
+        height: '48px',
+        background: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.18)',
+        boxShadow: '0 2px 8px 0 rgba(31, 38, 135, 0.07)'
+      }}
     >
       <div className="flex items-center justify-between w-full">
         {/* Left side - Agent name and presence indicator */}
