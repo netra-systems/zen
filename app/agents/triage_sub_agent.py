@@ -431,7 +431,7 @@ class TriageSubAgent(BaseSubAgent):
         return True
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Execute the enhanced triage logic."""
+        """Execute the enhanced triage logic with structured generation."""
         start_time = time.time()
         
         # Update status via WebSocket
@@ -451,7 +451,7 @@ class TriageSubAgent(BaseSubAgent):
             triage_result["metadata"]["cache_hit"] = True
             triage_result["metadata"]["triage_duration_ms"] = int((time.time() - start_time) * 1000)
         else:
-            # Process with LLM
+            # Process with LLM using structured generation
             retry_count = 0
             triage_result = None
             
@@ -461,68 +461,53 @@ class TriageSubAgent(BaseSubAgent):
                     enhanced_prompt = f"""
 {triage_prompt_template.format(user_request=state.user_request)}
 
-IMPORTANT: Return a properly formatted JSON object with all required fields.
 Consider the following in your analysis:
 1. Extract all mentioned models, metrics, and time ranges
 2. Determine the urgency and complexity of the request
 3. Suggest specific tools that would be helpful
 4. Identify any constraints or requirements mentioned
 
-Example output structure:
-{{
-    "category": "Cost Optimization",
-    "secondary_categories": ["Performance Optimization", "Model Selection"],
-    "priority": "high",
-    "complexity": "moderate",
-    "confidence_score": 0.85,
-    "key_parameters": {{
-        "workload_type": "inference",
-        "optimization_focus": "cost",
-        "time_sensitivity": "immediate",
-        "scope": "system-wide",
-        "constraints": ["maintain p95 latency under 100ms", "budget limit $10000/month"]
-    }},
-    "extracted_entities": {{
-        "models_mentioned": ["gpt-4", "claude-2"],
-        "metrics_mentioned": ["latency", "cost", "throughput"],
-        "time_ranges": [{{"start": "2024-01-01", "end": "2024-01-31"}}],
-        "thresholds": [{{"type": "latency", "value": "100ms"}}],
-        "targets": [{{"type": "cost_reduction", "value": "30%"}}]
-    }},
-    "user_intent": {{
-        "primary_intent": "optimize",
-        "secondary_intents": ["analyze", "compare"],
-        "action_required": true
-    }},
-    "suggested_workflow": {{
-        "next_agent": "DataSubAgent",
-        "required_data_sources": ["clickhouse", "supply_catalog"],
-        "estimated_duration_ms": 5000
-    }},
-    "tool_recommendations": [
-        {{"tool_name": "calculate_cost_savings", "relevance_score": 0.9}},
-        {{"tool_name": "compare_models", "relevance_score": 0.8}}
-    ]
-}}
+Categorize into one of these main categories:
+- Cost Optimization
+- Performance Optimization
+- Workload Analysis
+- Configuration & Settings
+- Monitoring & Reporting
+- Model Selection
+- Supply Catalog Management
+- Quality Optimization
 """
                     
-                    llm_response_str = await self.llm_manager.ask_llm(
-                        enhanced_prompt, 
-                        llm_config_name='triage'
-                    )
-                    
-                    # Extract and validate JSON
-                    extracted_json = self._extract_and_validate_json(llm_response_str)
-                    
-                    if extracted_json:
-                        # Validate with Pydantic
-                        try:
-                            validated_result = TriageResult(**extracted_json)
-                            triage_result = validated_result.model_dump()
-                        except ValidationError as e:
-                            self.logger.warning(f"Validation error for run_id {run_id}: {e}")
-                            # Use extracted JSON with defaults
-                            triage_result = extracted_json
+                    # Use structured generation to get a validated TriageResult
+                    try:
+                        validated_result = await self.llm_manager.ask_structured_llm(
+                            enhanced_prompt,
+                            llm_config_name='triage',
+                            schema=TriageResult,
+                            use_cache=False  # We handle our own caching
+                        )
+                        triage_result = validated_result.model_dump()
+                    except Exception as struct_error:
+                        # Fallback to regular LLM with JSON extraction
+                        self.logger.warning(f"Structured generation failed, falling back to JSON extraction: {struct_error}")
+                        
+                        llm_response_str = await self.llm_manager.ask_llm(
+                            enhanced_prompt + "\n\nIMPORTANT: Return a properly formatted JSON object with all required fields.",
+                            llm_config_name='triage'
+                        )
+                        
+                        # Extract and validate JSON
+                        extracted_json = self._extract_and_validate_json(llm_response_str)
+                        
+                        if extracted_json:
+                            # Validate with Pydantic
+                            try:
+                                validated_result = TriageResult(**extracted_json)
+                                triage_result = validated_result.model_dump()
+                            except ValidationError as e:
+                                self.logger.warning(f"Validation error for run_id {run_id}: {e}")
+                                # Use extracted JSON with defaults
+                                triage_result = extracted_json
                     
                 except Exception as e:
                     self.logger.warning(f"Triage attempt {retry_count + 1} failed for run_id {run_id}: {e}")

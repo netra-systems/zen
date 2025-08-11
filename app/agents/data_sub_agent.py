@@ -1,11 +1,11 @@
 # AI AGENT MODIFICATION METADATA
 # ================================
-# Timestamp: 2025-08-10T18:47:58.912941+00:00
+# Timestamp: 2025-08-11T00:00:00.000000+00:00
 # Agent: Claude Opus 4.1 claude-opus-4-1-20250805
-# Context: Enhanced DataSubAgent with real ClickHouse integration
-# Git: v6 | Enhanced-Data-Agent | dirty
+# Context: Enhanced DataSubAgent with structured generation support
+# Git: v7 | Structured-Generation | dirty
 # Change: Major Enhancement | Scope: Core | Risk: Medium
-# Session: data-enhancement-session | Seq: 1
+# Session: structured-generation-session | Seq: 1
 # Review: Pending | Score: 95
 # ================================
 
@@ -16,6 +16,7 @@ from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timedelta
 import numpy as np
 from functools import lru_cache
+from pydantic import BaseModel, Field
 
 from app.llm.llm_manager import LLMManager
 from app.agents.base import BaseSubAgent
@@ -29,6 +30,28 @@ from app.core.exceptions import NetraException
 from app.db.clickhouse_init import create_workload_events_table_if_missing
 
 logger = logging.getLogger(__name__)
+
+
+class DataAnalysisResponse(BaseModel):
+    """Structured response for data analysis operations."""
+    query: str = Field(description="The analysis query performed")
+    results: List[Dict[str, Any]] = Field(default_factory=list, description="Query results")
+    insights: Dict[str, Any] = Field(default_factory=dict, description="Key insights from analysis")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Metadata about the analysis")
+    recommendations: List[str] = Field(default_factory=list, description="Recommended actions")
+    error: Optional[str] = Field(default=None, description="Error message if any")
+    execution_time_ms: float = Field(default=0.0, description="Query execution time")
+    affected_rows: int = Field(default=0, description="Number of rows processed")
+
+
+class AnomalyDetectionResponse(BaseModel):
+    """Structured response for anomaly detection."""
+    anomalies_detected: bool = Field(default=False)
+    anomaly_count: int = Field(default=0)
+    anomaly_details: List[Dict[str, Any]] = Field(default_factory=list)
+    confidence_score: float = Field(ge=0.0, le=1.0, default=0.0)
+    severity: str = Field(default="low", description="Severity level: low, medium, high, critical")
+    recommended_actions: List[str] = Field(default_factory=list)
 
 class QueryBuilder:
     """Build optimized ClickHouse queries"""

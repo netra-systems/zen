@@ -3,14 +3,16 @@
     <metadata>
         <name>LLM</name>
         <type>llm</type>
-        <version>1.0</version>
+        <version>2.0</version>
+        <last_updated>2025-08-11</last_updated>
     </metadata>
     
     <primary-spec>
-        <description>LLM Specification</description>
+        <description>LLM Specification with Structured Generation Support</description>
         <goals>
-            <goal priority="high">LLM working as a complete end to end system</goal>
+            <goal priority="critical">LLM working as a complete end to end system with structured outputs</goal>
             <goal priority="critical">The Coherence of the system working in harmony with the application</goal>
+            <goal priority="high">Type-safe structured generation for reliable agent interactions</goal>
         </goals>
     </primary-spec>
     
@@ -21,6 +23,7 @@
                 <requirement>The system uses multiple LLM models</requirement>
                 <requirement>Models are accessed through a unified interface</requirement>
                 <requirement>Model selection is configurable</requirement>
+                <requirement>Support for Google (Gemini) and OpenAI providers</requirement>
             </requirements>
         </section>
         
@@ -30,6 +33,7 @@
                 <requirement>Prompts are templated and reusable</requirement>
                 <requirement>Prompts are versioned and managed</requirement>
                 <requirement>Prompt engineering is a key focus</requirement>
+                <requirement>Support for system, user, and assistant message roles</requirement>
             </requirements>
         </section>
         
@@ -39,7 +43,91 @@
                 <requirement>LLM responses are parsed and validated</requirement>
                 <requirement>Responses are cached to reduce latency and cost</requirement>
                 <requirement>Fallbacks are in place for failed LLM requests</requirement>
+                <requirement>Support for streaming responses via astream</requirement>
+            </requirements>
+        </section>
+        
+        <section id="structured-generation" order="4">
+            <title>Structured Generation</title>
+            <description>Support for type-safe structured outputs from LLMs using Pydantic models</description>
+            <requirements>
+                <requirement priority="critical">LLM manager must support structured output via with_structured_output method</requirement>
+                <requirement priority="critical">All agent responses should use Pydantic models for type safety</requirement>
+                <requirement priority="high">Support JSON schema validation for outputs</requirement>
+                <requirement priority="high">Graceful fallback to text parsing when structured output fails</requirement>
+            </requirements>
+            <implementation>
+                <step>Add with_structured_output support to LLM manager</step>
+                <step>Define Pydantic response models for each agent type</step>
+                <step>Update agents to use structured generation</step>
+                <step>Add validation and error handling</step>
+            </implementation>
+            <usage-examples>
+                <example name="triage-agent">
+                    <description>Triage agent using structured output for classification</description>
+                    <code><![CDATA[
+from pydantic import BaseModel, Field
+from typing import Literal, Optional, List
+
+class TriageResponse(BaseModel):
+    category: Literal["data", "optimization", "reporting", "general"]
+    confidence: float = Field(ge=0.0, le=1.0)
+    reasoning: str
+    suggested_actions: List[str]
+    requires_human: bool = False
+
+# In triage_sub_agent.py
+llm = self.llm_manager.get_llm("triage")
+structured_llm = llm.with_structured_output(TriageResponse)
+response = await structured_llm.ainvoke(prompt)
+# response is now a TriageResponse instance with validated fields
+                    ]]></code>
+                </example>
+                <example name="data-agent">
+                    <description>Data agent using structured output for analysis results</description>
+                    <code><![CDATA[
+class DataAnalysisResponse(BaseModel):
+    query: str
+    results: List[Dict[str, Any]]
+    metadata: Dict[str, Any]
+    error: Optional[str] = None
+    execution_time_ms: float
+    
+# In data_sub_agent.py
+structured_llm = llm.with_structured_output(DataAnalysisResponse)
+response = await structured_llm.ainvoke(analysis_prompt)
+                    ]]></code>
+                </example>
+            </usage-examples>
+        </section>
+        
+        <section id="configuration" order="5">
+            <title>Configuration</title>
+            <requirements>
+                <requirement>LLM configurations stored in AppConfig.llm_configs</requirement>
+                <requirement>Support for environment-specific settings</requirement>
+                <requirement>Mock LLM support for development mode</requirement>
+                <requirement>Configurable generation parameters (temperature, max_tokens, etc.)</requirement>
+            </requirements>
+        </section>
+        
+        <section id="caching" order="6">
+            <title>Caching</title>
+            <requirements>
+                <requirement>Response caching via llm_cache_service</requirement>
+                <requirement>Cache key generation based on prompt and model</requirement>
+                <requirement>Configurable cache TTL and size limits</requirement>
+                <requirement>Cache invalidation on model updates</requirement>
             </requirements>
         </section>
     </sections>
+    
+    <best-practices>
+        <practice>Always use structured generation for agent responses to ensure type safety</practice>
+        <practice>Define clear Pydantic models for each response type</practice>
+        <practice>Include validation constraints in field definitions</practice>
+        <practice>Provide fallback behavior when structured output fails</practice>
+        <practice>Use appropriate generation config for each use case</practice>
+        <practice>Cache structured responses to reduce costs</practice>
+    </best-practices>
 </specification>

@@ -1,11 +1,15 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Type, TypeVar
 from app.schemas import AppConfig
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 from app.services.llm_cache_service import llm_cache_service
 from app.logging_config import central_logger
+from pydantic import BaseModel
+import json
 
 logger = central_logger.get_logger(__name__)
+
+T = TypeVar('T', bound=BaseModel)
 
 class MockLLM:
     """Mock LLM for when LLMs are disabled in dev mode."""
@@ -21,6 +25,47 @@ class MockLLM:
     async def astream(self, prompt: str):
         for word in f"[Dev Mode - LLM Disabled] Mock streaming response for: {prompt[:50]}...".split():
             yield type('obj', (object,), {'content': word + ' '})()
+    
+    def with_structured_output(self, schema: Type[T], **kwargs) -> 'MockStructuredLLM':
+        """Return a mock structured LLM for dev mode."""
+        return MockStructuredLLM(self.model_name, schema)
+
+
+class MockStructuredLLM:
+    """Mock structured LLM for when LLMs are disabled in dev mode."""
+    
+    def __init__(self, model_name: str, schema: Type[T]):
+        self.model_name = model_name
+        self.schema = schema
+    
+    async def ainvoke(self, prompt: str) -> T:
+        """Return a mock instance of the schema with default values."""
+        # Create a mock instance with minimal required fields
+        mock_data = {}
+        for field_name, field_info in self.schema.model_fields.items():
+            if field_info.is_required():
+                # Provide mock values based on field type
+                if field_info.annotation == str:
+                    mock_data[field_name] = f"[Mock {field_name}]"
+                elif field_info.annotation == float:
+                    mock_data[field_name] = 0.5
+                elif field_info.annotation == int:
+                    mock_data[field_name] = 1
+                elif field_info.annotation == bool:
+                    mock_data[field_name] = False
+                elif hasattr(field_info.annotation, '__origin__'):
+                    # Handle generic types like List, Dict
+                    origin = field_info.annotation.__origin__
+                    if origin == list:
+                        mock_data[field_name] = []
+                    elif origin == dict:
+                        mock_data[field_name] = {}
+                    else:
+                        mock_data[field_name] = None
+                else:
+                    mock_data[field_name] = None
+        
+        return self.schema(**mock_data)
 
 class LLMManager:
     def __init__(self, settings: AppConfig):
@@ -105,3 +150,84 @@ class LLMManager:
         llm = self.get_llm(llm_config_name)
         async for chunk in llm.astream(prompt):
             yield chunk.content
+    
+    def get_structured_llm(self, name: str, schema: Type[T], 
+                          generation_config: Optional[Dict[str, Any]] = None,
+                          **kwargs) -> Any:
+        """Get an LLM configured for structured output with a Pydantic schema.
+        
+        Args:
+            name: The LLM configuration name
+            schema: The Pydantic model class for structured output
+            generation_config: Optional generation config overrides
+            **kwargs: Additional parameters for with_structured_output
+            
+        Returns:
+            An LLM instance configured for structured output
+        """
+        llm = self.get_llm(name, generation_config)
+        
+        # Mock LLMs already have with_structured_output
+        if isinstance(llm, MockLLM):
+            return llm.with_structured_output(schema, **kwargs)
+        
+        # For LangChain models, use with_structured_output
+        return llm.with_structured_output(schema, **kwargs)
+    
+    async def ask_structured_llm(self, prompt: str, llm_config_name: str, 
+                                 schema: Type[T], use_cache: bool = True,
+                                 **kwargs) -> T:
+        """Ask an LLM and get a structured response as a Pydantic model instance.
+        
+        Args:
+            prompt: The prompt to send to the LLM
+            llm_config_name: The LLM configuration to use
+            schema: The Pydantic model class for the response
+            use_cache: Whether to use response caching
+            **kwargs: Additional parameters for with_structured_output
+            
+        Returns:
+            An instance of the schema with the LLM's response
+        """
+        # Check cache first if enabled
+        cache_key = f"{prompt}_{llm_config_name}_{schema.__name__}"
+        if use_cache:
+            cached_response = await llm_cache_service.get_cached_response(cache_key, llm_config_name)
+            if cached_response:
+                try:
+                    # Parse cached JSON back to Pydantic model
+                    return schema.model_validate_json(cached_response)
+                except Exception as e:
+                    logger.warning(f"Failed to parse cached structured response: {e}")
+        
+        # Get structured LLM and make the call
+        structured_llm = self.get_structured_llm(llm_config_name, schema, **kwargs)
+        
+        try:
+            response = await structured_llm.ainvoke(prompt)
+            
+            # Cache the response if appropriate
+            if use_cache and llm_cache_service.should_cache_response(prompt, response.model_dump_json()):
+                await llm_cache_service.cache_response(
+                    cache_key, 
+                    response.model_dump_json(), 
+                    llm_config_name
+                )
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Structured generation failed: {e}")
+            # Try fallback to regular text generation and parse
+            try:
+                text_response = await self.ask_llm(prompt, llm_config_name, use_cache)
+                # Attempt to parse as JSON
+                if text_response.strip().startswith('{'):
+                    data = json.loads(text_response)
+                    return schema(**data)
+                else:
+                    # If not JSON, raise the original error
+                    raise e
+            except Exception as parse_error:
+                logger.error(f"Fallback parsing also failed: {parse_error}")
+                raise e
