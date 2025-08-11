@@ -371,12 +371,12 @@ describe('Critical Test #7: Memory Leak Detection', () => {
       
       win.addEventListener = function(...args: any[]) {
         listenerCount++;
-        return originalAdd.apply(this, args);
+        return (originalAdd as any).apply(this, args);
       };
       
       win.removeEventListener = function(...args: any[]) {
         listenerCount--;
-        return originalRemove.apply(this, args);
+        return (originalRemove as any).apply(this, args);
       };
       
       // Perform actions that add/remove listeners
@@ -437,7 +437,7 @@ describe('Critical Test #8: Cross-Browser Compatibility', () => {
     // Test Edge smooth scrolling
     cy.contains('Technology').click();
     cy.contains('Next Steps').click();
-    cy.window().scrollTo('top', { behavior: 'smooth' });
+    cy.window().scrollTo('top');
   });
 });
 

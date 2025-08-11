@@ -78,7 +78,7 @@ import os
 sys.path.insert(0, os.path.abspath('.'))
 try:
     from app.main import app
-    from app.schemas.Config import get_app_config
+    from app.config import settings
     from app.services.database.connection import SessionLocal
     from app.auth.UserManager import UserManager
     print("[PASS] All critical imports successful")
@@ -99,10 +99,9 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath('.'))
 try:
-    from app.schemas.Config import get_app_config
-    config = get_app_config()
-    assert config.app_name == "Netra AI Platform"
-    assert config.database_url
+    from app.config import settings
+    assert settings.app_name == "Netra AI Platform"
+    assert settings.database_url
     print("[PASS] Configuration loaded successfully")
     sys.exit(0)
 except Exception as e:

@@ -40,10 +40,17 @@ export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose })
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Get events from WebSocket buffer
-  const events = wsEventBuffer?.getAll?.() || [];
+  interface WSEventData {
+    type: string;
+    payload?: unknown;
+    timestamp?: number;
+    [key: string]: unknown;
+  }
+  
+  const events: WSEventData[] = wsEventBuffer?.getAll?.() || [];
   
   // Filter events based on search and filter
-  const filteredEvents = events.filter((event: any) => {
+  const filteredEvents = events.filter((event: WSEventData) => {
     if (eventFilter && event.type !== eventFilter) return false;
     if (searchQuery) {
       const eventString = JSON.stringify(event).toLowerCase();
@@ -53,7 +60,7 @@ export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose })
   });
 
   // Get unique event types for filter dropdown
-  const eventTypes = [...new Set(events.map((e: any) => e.type))];
+  const eventTypes = [...new Set(events.map((e: WSEventData) => e.type))];
 
   // Export debug data
   const exportDebugData = () => {
@@ -222,7 +229,7 @@ export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose })
                                 {event.type}
                               </span>
                               <span className="text-xs text-gray-500">
-                                {new Date(event.timestamp).toLocaleTimeString()}
+                                {event.timestamp ? new Date(event.timestamp).toLocaleTimeString() : 'N/A'}
                               </span>
                             </div>
                             <pre className="mt-2 text-xs text-gray-700 overflow-x-auto">
