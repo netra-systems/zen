@@ -11,7 +11,7 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from background import *
+from app.background import start_background_tasks
 
 
 class TestBackground:

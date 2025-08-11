@@ -2,15 +2,27 @@
 <specification>
   <metadata>
     <title>ClickHouse Configuration and Troubleshooting</title>
-    <version>1.0.0</version>
-    <description>ClickHouse database configuration, best practices, and troubleshooting guide</description>
+    <version>2.0.0</version>
+    <description>Comprehensive ClickHouse configuration, query patterns, best practices, and troubleshooting guide</description>
     <created>2025-01-11</created>
+    <updated>2025-01-12</updated>
   </metadata>
 
   <overview>
-    <purpose>Time-series log data storage and analytics</purpose>
-    <use_case>Workload events tracking with structured metrics</use_case>
-    <table>workload_events</table>
+    <purpose>Time-series log data storage, corpus management, and analytics</purpose>
+    <use_cases>
+      <use_case>Workload events tracking with structured metrics</use_case>
+      <use_case>Content corpus storage and retrieval</use_case>
+      <use_case>Synthetic data generation and ingestion</use_case>
+      <use_case>Performance metrics aggregation</use_case>
+      <use_case>Anomaly detection and pattern analysis</use_case>
+    </use_cases>
+    <tables>
+      <table>workload_events</table>
+      <table>netra_content_corpus_*</table>
+      <table>netra_app_internal_logs</table>
+      <table>netra_global_supply_catalog</table>
+    </tables>
   </overview>
 
   <nested_types>
@@ -101,4 +113,226 @@
     <file>SPEC/clickhouse_nested_arrays_fix.xml</file>
     <description>Detailed specification for fixing nested array type errors</description>
   </fix_reference>
+
+  <query_patterns>
+    <pattern name="Performance Metrics Aggregation">
+      <description>Pattern for aggregating performance metrics with time bucketing</description>
+      <example>
+        <![CDATA[
+        SELECT
+            toStartOfHour(timestamp) as time_bucket,
+            quantileIf(0.95, metric_value, has_metric) as p95,
+            avgIf(metric_value, has_metric) as avg_value
+        FROM (
+            SELECT *,
+                arrayFirstIndex(x -> x = 'metric_name', metrics.name) as idx,
+                if(idx > 0, arrayElement(metrics.value, idx), 0) as metric_value,
+                idx > 0 as has_metric
+            FROM workload_events
+            WHERE timestamp >= start_time AND timestamp <= end_time
+        )
+        GROUP BY time_bucket
+        ORDER BY time_bucket DESC
+        LIMIT 10000
+        ]]>
+      </example>
+    </pattern>
+
+    <pattern name="Anomaly Detection with CTE">
+      <description>Pattern for anomaly detection using Common Table Expressions</description>
+      <example>
+        <![CDATA[
+        WITH baseline_stats AS (
+            SELECT 
+                avg(metric_value) as mean_value,
+                stddevPop(metric_value) as std_value
+            FROM (/* subquery */)
+        )
+        SELECT *,
+            (metric_value - baseline_stats.mean_value) / nullIf(baseline_stats.std_value, 0) as z_score
+        FROM current_data
+        CROSS JOIN baseline_stats
+        WHERE abs(z_score) > threshold
+        ]]>
+      </example>
+    </pattern>
+
+    <pattern name="Corpus Table Management">
+      <description>Dynamic corpus table creation and management</description>
+      <example>
+        <![CDATA[
+        CREATE TABLE IF NOT EXISTS netra_content_corpus_UUID (
+            record_id UUID,
+            workload_type String,
+            prompt String,
+            response String,
+            metadata String,
+            domain String,
+            created_at DateTime64(3) DEFAULT now(),
+            version UInt32 DEFAULT 1
+        ) ENGINE = MergeTree()
+        PARTITION BY toYYYYMM(created_at)
+        ORDER BY (workload_type, created_at, record_id)
+        ]]>
+      </example>
+    </pattern>
+
+    <pattern name="Batch Insert">
+      <description>Efficient batch insertion pattern</description>
+      <example>
+        <![CDATA[
+        INSERT INTO table_name (col1, col2, col3)
+        VALUES (?, ?, ?), (?, ?, ?), ...
+        -- Use parameterized queries with batched values
+        ]]>
+      </example>
+    </pattern>
+  </query_patterns>
+
+  <robustness_improvements>
+    <improvement name="Null Safety">
+      <description>Always use nullIf for division operations to prevent errors</description>
+      <example>value / nullIf(divisor, 0)</example>
+    </improvement>
+
+    <improvement name="Array Bounds Checking">
+      <description>Check array bounds before accessing elements</description>
+      <example>if(idx > 0, arrayElement(array, idx), default_value)</example>
+    </improvement>
+
+    <improvement name="Query Limits">
+      <description>Always include LIMIT clause to prevent memory issues</description>
+      <recommendation>Use LIMIT 10000 or appropriate value for large queries</recommendation>
+    </improvement>
+
+    <improvement name="Time Window Optimization">
+      <description>Use partition pruning with time-based filters</description>
+      <example>WHERE timestamp >= start AND timestamp <= end</example>
+    </improvement>
+
+    <improvement name="Connection Cleanup">
+      <description>Always ensure connections are closed in finally blocks</description>
+      <code_pattern>
+        <![CDATA[
+        try:
+            client = ClickHouseDatabase(...)
+            # operations
+        finally:
+            if client:
+                client.disconnect()
+        ]]>
+      </code_pattern>
+    </improvement>
+  </robustness_improvements>
+
+  <modularity_improvements>
+    <improvement name="Query Builder Pattern">
+      <description>Use dedicated QueryBuilder classes for complex queries</description>
+      <benefits>
+        <benefit>Reusable query components</benefit>
+        <benefit>Type-safe parameter passing</benefit>
+        <benefit>Easier testing and mocking</benefit>
+      </benefits>
+    </improvement>
+
+    <improvement name="Service Layer Abstraction">
+      <description>Abstract ClickHouse operations into service classes</description>
+      <example>CorpusService, GenerationService, MetricsService</example>
+    </improvement>
+
+    <improvement name="Schema Management">
+      <description>Centralize table schemas in models_clickhouse.py</description>
+      <benefits>
+        <benefit>Single source of truth for schemas</benefit>
+        <benefit>Dynamic table name generation</benefit>
+        <benefit>Version control for schema changes</benefit>
+      </benefits>
+    </improvement>
+  </modularity_improvements>
+
+  <testing_strategy>
+    <test_suite name="Query Correctness">
+      <description>Tests for SQL query structure and results</description>
+      <coverage>
+        <area>Table schema generation</area>
+        <area>Query parameter binding</area>
+        <area>Result parsing</area>
+      </coverage>
+    </test_suite>
+
+    <test_suite name="Performance and Edge Cases">
+      <description>Tests for performance characteristics and edge cases</description>
+      <coverage>
+        <area>Large dataset handling</area>
+        <area>Null value handling</area>
+        <area>Connection management</area>
+        <area>Concurrent operations</area>
+      </coverage>
+    </test_suite>
+
+    <test_suite name="Corpus Generation Coverage">
+      <description>Tests for corpus lifecycle and generation workflows</description>
+      <coverage>
+        <area>Corpus creation and deletion</area>
+        <area>Content upload and retrieval</area>
+        <area>Batch processing</area>
+        <area>Error recovery</area>
+      </coverage>
+    </test_suite>
+  </testing_strategy>
+
+  <workload_types>
+    <type name="simple_chat">Basic chat interactions</type>
+    <type name="rag_pipeline">Retrieval-augmented generation</type>
+    <type name="tool_use">Single tool invocation</type>
+    <type name="multi_turn_tool_use">Multiple tool invocations</type>
+    <type name="failed_request">Failed or error responses</type>
+    <type name="custom_domain">Domain-specific workloads</type>
+  </workload_types>
+
+  <performance_guidelines>
+    <guideline name="Batch Size">
+      <recommendation>Use batch sizes of 1000-5000 records for inserts</recommendation>
+      <rationale>Balances memory usage with network overhead</rationale>
+    </guideline>
+
+    <guideline name="Query Timeout">
+      <recommendation>Set query timeout to 30 seconds for analytical queries</recommendation>
+      <rationale>Prevents runaway queries from impacting system</rationale>
+    </guideline>
+
+    <guideline name="Partition Strategy">
+      <recommendation>Partition by month for time-series data</recommendation>
+      <example>PARTITION BY toYYYYMM(timestamp)</example>
+    </guideline>
+
+    <guideline name="Index Granularity">
+      <recommendation>Use index_granularity = 8192 for most tables</recommendation>
+      <rationale>Good balance between index size and query performance</rationale>
+    </guideline>
+  </performance_guidelines>
+
+  <corpus_management>
+    <lifecycle>
+      <state name="CREATING">Table being created</state>
+      <state name="AVAILABLE">Ready for operations</state>
+      <state name="UPDATING">Being modified</state>
+      <state name="DELETING">Being removed</state>
+      <state name="FAILED">Operation failed</state>
+    </lifecycle>
+
+    <validation_rules>
+      <rule>Prompt length <= 100,000 characters</rule>
+      <rule>Response length <= 100,000 characters</rule>
+      <rule>Workload type must be valid enum value</rule>
+      <rule>All required fields must be present</rule>
+    </validation_rules>
+
+    <metadata_tracking>
+      <field name="content_source">upload, generate, or import</field>
+      <field name="version">Incremental version number</field>
+      <field name="created_at">ISO timestamp of creation</field>
+      <field name="updated_at">ISO timestamp of last update</field>
+    </metadata_tracking>
+  </corpus_management>
 </specification>

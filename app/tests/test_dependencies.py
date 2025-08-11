@@ -11,7 +11,7 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from dependencies import *
+from app.dependencies import get_llm_manager, get_db_session
 
 
 class TestDependencies:

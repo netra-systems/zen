@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Testing Specification</name>
+        <type>testing</type>
+        <version>2.0</version>
+        <last_updated>2025-01-11</last_updated>
+    </metadata>
+    
+    <overview>
+        <description>
+            Comprehensive testing strategy for the Netra AI Optimization Platform.
+            Targets 97% code coverage with focus on E2E tests, quality gates, and real LLM validation.
+        </description>
+        <goals>
+            <goal>Maintain 97% overall test coverage</goal>
+            <goal>E2E tests with real LLM calls for validation</goal>
+            <goal>Quality gate integration for output validation</goal>
+            <goal>Synthetic data generation for consistent testing</goal>
+            <goal>Fast feedback loops with quick test mode</goal>
+        </goals>
+    </overview>
+    
+    <test_categories>
+        <category name="unit">
+            <description>Fast, isolated tests for individual components</description>
+            <location>app/tests/services/*, app/tests/core/*</location>
+            <coverage_target>98%</coverage_target>
+        </category>
+        
+        <category name="integration">
+            <description>Tests for component interactions</description>
+            <location>app/tests/integration/*</location>
+            <coverage_target>95%</coverage_target>
+        </category>
+        
+        <category name="e2e">
+            <description>End-to-end tests with real services</description>
+            <location>app/tests/agents/test_*_e2e_*.py</location>
+            <coverage_target>90%</coverage_target>
+        </category>
+        
+        <category name="critical">
+            <description>Business-critical path tests</description>
+            <location>app/tests/*_critical.py</location>
+            <coverage_target>100%</coverage_target>
+        </category>
+    </test_categories>
+    
+    <e2e_real_llm_tests>
+        <description>
+            Comprehensive E2E tests making real LLM calls for the 9 example prompts.
+            Each prompt tested with 10 unique variations for total of 90 tests.
+        </description>
+        
+        <test_file>app/tests/agents/test_example_prompts_e2e_real.py</test_file>
+        
+        <features>
+            <feature>Real LLM calls through complete agent workflow</feature>
+            <feature>Synthetic data generation for consistent context</feature>
+            <feature>Quality gate validation for all responses</feature>
+            <feature>10 unique variations per example prompt</feature>
+            <feature>Full sub-agent orchestration testing</feature>
+            <feature>Corpus generation when needed</feature>
+            <feature>Performance metrics collection</feature>
+        </features>
+        
+        <example_prompts_tested>
+            <prompt id="1" category="cost_optimization">Cost reduction with quality preservation</prompt>
+            <prompt id="2" category="latency_optimization">3x latency improvement without cost increase</prompt>
+            <prompt id="3" category="capacity_planning">50% usage increase impact analysis</prompt>
+            <prompt id="4" category="function_optimization">Advanced function optimization methods</prompt>
+            <prompt id="5" category="model_selection">New model effectiveness evaluation</prompt>
+            <prompt id="6" category="audit">KV cache audit for optimizations</prompt>
+            <prompt id="7" category="multi_objective">20% cost reduction + 2x latency improvement</prompt>
+            <prompt id="8" category="tool_migration">GPT-5 migration recommendations</prompt>
+            <prompt id="9" category="rollback_analysis">Upgrade worth analysis and rollback</prompt>
+        </example_prompts_tested>
+        
+        <variation_types>
+            <variation num="0">Original prompt unchanged</variation>
+            <variation num="1">Add budget context</variation>
+            <variation num="2">Mark as urgent (24 hour deadline)</variation>
+            <variation num="3">Include GPU infrastructure details</variation>
+            <variation num="4">Change to team perspective (I -> our)</variation>
+            <variation num="5">Add regional context</variation>
+            <variation num="6">Include error rate constraints</variation>
+            <variation num="7">Use CAPS for urgency</variation>
+            <variation num="8">Frame as follow-up</variation>
+            <variation num="9">Include GPU count information</variation>
+        </variation_types>
+        
+        <synthetic_data_contexts>
+            <context type="cost_optimization">
+                <field>current_costs (daily/monthly/per_request)</field>
+                <field>feature latencies and requirements</field>
+                <field>models in use</field>
+                <field>daily request volume</field>
+            </context>
+            <context type="latency_optimization">
+                <field>current latency percentiles (p50/p95/p99)</field>
+                <field>target improvement factor</field>
+                <field>infrastructure specs (GPU type/count/memory)</field>
+            </context>
+            <context type="capacity_planning">
+                <field>current usage metrics (RPS/daily requests)</field>
+                <field>expected growth percentage</field>
+                <field>rate limits per model</field>
+                <field>cost per token metrics</field>
+            </context>
+            <context type="function_optimization">
+                <field>function performance metrics</field>
+                <field>identified bottlenecks</field>
+                <field>available optimization methods</field>
+            </context>
+            <context type="model_selection">
+                <field>current model configuration</field>
+                <field>candidate models for evaluation</field>
+                <field>evaluation criteria and thresholds</field>
+                <field>workload characteristics</field>
+            </context>
+            <context type="audit">
+                <field>KV cache instance count</field>
+                <field>cache configurations (size/hit rate/TTL)</field>
+                <field>optimization opportunities</field>
+            </context>
+            <context type="multi_objective">
+                <field>multiple optimization objectives</field>
+                <field>constraints (quality/error rate/budget)</field>
+                <field>current system state</field>
+            </context>
+            <context type="tool_migration">
+                <field>agent tool inventory</field>
+                <field>migration criteria</field>
+                <field>verbosity options</field>
+            </context>
+            <context type="rollback_analysis">
+                <field>upgrade timestamp</field>
+                <field>before/after metrics comparison</field>
+                <field>affected endpoint count</field>
+            </context>
+        </synthetic_data_contexts>
+        
+        <quality_validation>
+            <description>All responses validated through QualityGateService</description>
+            <acceptance_levels>
+                <level>EXCELLENT</level>
+                <level>GOOD</level>
+                <level>ACCEPTABLE</level>
+            </acceptance_levels>
+            <content_types>
+                <type>OPTIMIZATION</type>
+                <type>DATA_ANALYSIS</type>
+                <type>ACTION_PLAN</type>
+            </content_types>
+            <validation_criteria>
+                <criterion>Specificity score >= 0.6</criterion>
+                <criterion>Actionability score >= 0.6</criterion>
+                <criterion>No circular reasoning</criterion>
+                <criterion>Minimal generic phrases</criterion>
+                <criterion>Quantification where appropriate</criterion>
+            </validation_criteria>
+        </quality_validation>
+    </e2e_real_llm_tests>
+    
+    <test_commands>
+        <command name="quick" description="Fast validation tests">
+            python test_runner.py --mode quick
+        </command>
+        <command name="full" description="Complete test suite">
+            python test_runner.py --mode full
+        </command>
+        <command name="coverage" description="With coverage report">
+            python test_runner.py --mode coverage
+        </command>
+        <command name="e2e_real" description="Run real LLM E2E tests">
+            pytest app/tests/agents/test_example_prompts_e2e_real.py -v -s
+        </command>
+        <command name="e2e_real_single" description="Run single prompt E2E tests">
+            pytest app/tests/agents/test_example_prompts_e2e_real.py::TestExamplePromptsE2ERealLLM::test_prompt_1_variation_0 -v -s
+        </command>
+    </test_commands>
+    
+    <troubleshooting>
+        <issue>
+            <problem>Import test failures</problem>
+            <solution>Update app/tests/test_internal_imports.py and test_external_imports.py</solution>
+        </issue>
+        <issue>
+            <problem>WebSocket test failures</problem>
+            <solution>Ensure WebSocketProvider wraps test components</solution>
+        </issue>
+        <issue>
+            <problem>ClickHouse test errors</problem>
+            <solution>Check SPEC/clickhouse.xml for array handling patterns</solution>
+        </issue>
+        <issue>
+            <problem>E2E tests timeout</problem>
+            <solution>Increase pytest timeout: pytest --timeout=300</solution>
+        </issue>
+        <issue>
+            <problem>LLM API rate limits</problem>
+            <solution>Add delays between tests or use retry logic</solution>
+        </issue>
+    </troubleshooting>
+    
+    <best_practices>
+        <practice>Always run quick tests before commits</practice>
+        <practice>Use mocks for unit tests, real services for E2E</practice>
+        <practice>Maintain test isolation - no shared state</practice>
+        <practice>Update tests when modifying functionality</practice>
+        <practice>Document non-obvious test behaviors</practice>
+        <practice>Use fixtures for common test setup</practice>
+        <practice>Validate both success and failure paths</practice>
+        <practice>Test edge cases and boundary conditions</practice>
+    </best_practices>
+    
+    <coverage_requirements>
+        <requirement>
+            <target>97%</target>
+            <scope>Overall codebase</scope>
+            <excludes>__pycache__, migrations, test files</excludes>
+        </requirement>
+        <requirement>
+            <target>100%</target>
+            <scope>Critical business logic</scope>
+            <includes>supervisor agent, auth, websocket handlers</includes>
+        </requirement>
+        <requirement>
+            <target>90%</target>
+            <scope>API endpoints</scope>
+            <includes>all routes/*</includes>
+        </requirement>
+    </coverage_requirements>
+</specification>

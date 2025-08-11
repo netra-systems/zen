@@ -65,3 +65,4 @@ temp/
 *.tmp
 /.venv
 /venv_test
+/ccusage

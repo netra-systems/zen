@@ -34,6 +34,26 @@
                 <description>First-time run must include database initialization and migrations</description>
                 <priority>CRITICAL</priority>
             </requirement>
+            <requirement id="REQ-STARTUP-005">
+                <description>Startup checks must distinguish between critical and non-critical failures</description>
+                <priority>HIGH</priority>
+            </requirement>
+            <requirement id="REQ-STARTUP-006">
+                <description>Each startup check must track execution time for performance monitoring</description>
+                <priority>MEDIUM</priority>
+            </requirement>
+            <requirement id="REQ-STARTUP-007">
+                <description>System must check file permissions for required directories</description>
+                <priority>HIGH</priority>
+            </requirement>
+            <requirement id="REQ-STARTUP-008">
+                <description>System must monitor resource availability (memory, disk, CPU)</description>
+                <priority>MEDIUM</priority>
+            </requirement>
+            <requirement id="REQ-STARTUP-009">
+                <description>Network connectivity to critical services must be verified</description>
+                <priority>HIGH</priority>
+            </requirement>
         </requirements>
     </section>
 
@@ -371,6 +391,133 @@
         </procedures>
     </section>
 
+    <section id="startup-check-system">
+        <title>Startup Check System</title>
+        <description>Comprehensive startup validation system with improved error handling</description>
+        
+        <architecture>
+            <component name="StartupCheckResult">
+                <description>Data class representing the result of a single startup check</description>
+                <attributes>
+                    <attribute name="name">Unique identifier for the check</attribute>
+                    <attribute name="success">Boolean indicating if check passed</attribute>
+                    <attribute name="message">Detailed message about the check result</attribute>
+                    <attribute name="critical">Whether failure should prevent startup</attribute>
+                    <attribute name="duration_ms">Time taken to execute the check</attribute>
+                </attributes>
+            </component>
+            
+            <component name="StartupChecker">
+                <description>Orchestrator class that runs all startup checks</description>
+                <methods>
+                    <method name="run_all_checks">Execute all checks and return comprehensive results</method>
+                    <method name="check_environment_variables">Verify required and optional env vars</method>
+                    <method name="check_configuration">Validate application configuration</method>
+                    <method name="check_file_permissions">Ensure required directories are writable</method>
+                    <method name="check_database_connection">Test PostgreSQL connectivity and schema</method>
+                    <method name="check_redis">Verify Redis connection and operations</method>
+                    <method name="check_clickhouse">Test ClickHouse analytics database</method>
+                    <method name="check_llm_providers">Validate LLM configurations</method>
+                    <method name="check_memory_and_resources">Monitor system resources</method>
+                    <method name="check_network_connectivity">Test network access to services</method>
+                    <method name="check_or_create_assistant">Ensure Netra assistant exists</method>
+                </methods>
+            </component>
+        </architecture>
+        
+        <checks>
+            <check name="environment_variables" critical="true">
+                <description>Validates presence of required environment variables</description>
+                <required>DATABASE_URL, SECRET_KEY</required>
+                <optional>REDIS_URL, CLICKHOUSE_URL, ANTHROPIC_API_KEY, OAuth credentials</optional>
+            </check>
+            
+            <check name="configuration" critical="true">
+                <description>Validates application configuration via Pydantic</description>
+                <validations>
+                    <validation>Database URL format and accessibility</validation>
+                    <validation>Secret key length (minimum 32 characters)</validation>
+                    <validation>Environment setting (development/testing/staging/production)</validation>
+                </validations>
+            </check>
+            
+            <check name="file_permissions" critical="false">
+                <description>Ensures required directories exist and are writable</description>
+                <directories>logs, uploads, temp</directories>
+                <action>Creates directories if missing, tests write permissions</action>
+            </check>
+            
+            <check name="database_connection" critical="true">
+                <description>Validates PostgreSQL connectivity and schema integrity</description>
+                <validations>
+                    <validation>Connection establishment</validation>
+                    <validation>Critical tables existence (assistants, threads, messages, userbase)</validation>
+                    <validation>Schema version compatibility</validation>
+                </validations>
+            </check>
+            
+            <check name="redis_connection" critical="varies">
+                <description>Tests Redis connectivity and operations</description>
+                <critical_in>production</critical_in>
+                <non_critical_in>development, testing</non_critical_in>
+                <operations>connect, set, get, delete</operations>
+            </check>
+            
+            <check name="clickhouse_connection" critical="false">
+                <description>Validates ClickHouse analytics database</description>
+                <validations>
+                    <validation>Server connectivity</validation>
+                    <validation>Required tables existence</validation>
+                    <validation>Write permissions</validation>
+                </validations>
+            </check>
+            
+            <check name="llm_providers" critical="varies">
+                <description>Validates LLM provider configurations</description>
+                <critical_in>production (at least one provider required)</critical_in>
+                <providers>anthropic-claude, openai-gpt, google-gemini</providers>
+            </check>
+            
+            <check name="system_resources" critical="false">
+                <description>Monitors system resource availability</description>
+                <thresholds>
+                    <memory_warning>Less than 1GB available RAM</memory_warning>
+                    <disk_warning>Less than 5GB free disk space</disk_warning>
+                    <cpu_warning>Less than 2 CPU cores</cpu_warning>
+                </thresholds>
+            </check>
+            
+            <check name="network_connectivity" critical="false">
+                <description>Tests network access to critical services</description>
+                <endpoints>PostgreSQL, Redis, ClickHouse, external APIs</endpoints>
+                <timeout>2 seconds per endpoint</timeout>
+            </check>
+            
+            <check name="netra_assistant" critical="false">
+                <description>Ensures Netra assistant record exists in database</description>
+                <action>Creates assistant if missing</action>
+            </check>
+        </checks>
+        
+        <failure_handling>
+            <critical_failure>
+                <description>When any critical check fails</description>
+                <action>Log detailed error, raise RuntimeError, exit with code 1</action>
+            </critical_failure>
+            
+            <non_critical_failure>
+                <description>When non-critical checks fail</description>
+                <action>Log warning, continue startup with degraded functionality</action>
+            </non_critical_failure>
+            
+            <reporting>
+                <summary>Total checks, passed, failed (critical/non-critical), duration</summary>
+                <details>Individual check results with timing and messages</details>
+                <logging>INFO for success, ERROR for critical failures, WARNING for non-critical</logging>
+            </reporting>
+        </failure_handling>
+    </section>
+    
     <section id="health-checks">
         <title>Health Check Endpoints</title>
         <description>System health monitoring endpoints</description>
