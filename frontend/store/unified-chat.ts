@@ -22,6 +22,10 @@ const initialState = {
   isProcessing: false,
   currentRunId: null,
   
+  // Thread management
+  activeThreadId: null,
+  threads: new Map(),
+  
   // Message history
   messages: [],
   
@@ -182,12 +186,36 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
             }, false, 'agent_completed');
             break;
             
+          case 'thread_renamed':
+            // Handle thread renaming event
+            set((state) => {
+              // Update messages if they contain thread info
+              const updatedMessages = state.messages.map(msg => {
+                if (msg.threadId === event.payload.thread_id) {
+                  return { 
+                    ...msg, 
+                    threadTitle: event.payload.new_title 
+                  };
+                }
+                return msg;
+              });
+              
+              return { messages: updatedMessages };
+            }, false, 'thread_renamed');
+            break;
+            
           case 'final_report':
             const finalReport: FinalReport = {
               report: event.payload.report,
               recommendations: event.payload.recommendations,
               actionPlan: event.payload.action_plan,
-              agentMetrics: event.payload.agent_metrics
+              agentMetrics: event.payload.agent_metrics,
+              // Add new comprehensive reporting fields
+              executive_summary: event.payload.executive_summary,
+              cost_analysis: event.payload.cost_analysis,
+              performance_comparison: event.payload.performance_comparison,
+              confidence_scores: event.payload.confidence_scores,
+              technical_details: event.payload.technical_details
             };
             
             set({
@@ -260,6 +288,19 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
         isConnected,
         connectionError: error || null
       }, false, 'setConnectionStatus'),
+      
+      // Thread management
+      setActiveThread: (threadId) => set({ 
+        activeThreadId: threadId 
+      }, false, 'setActiveThread'),
+      
+      clearMessages: () => set({ 
+        messages: [] 
+      }, false, 'clearMessages'),
+      
+      loadMessages: (messages) => set({ 
+        messages 
+      }, false, 'loadMessages'),
     }),
     {
       name: 'unified-chat-store',

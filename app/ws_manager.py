@@ -428,3 +428,4 @@ class WebSocketManager:
         ]
 
 manager = WebSocketManager()
+ws_manager = manager  # Alias for compatibility

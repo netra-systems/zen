@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T10:18:30.098571  
+**Generated:** 2025-08-11T10:16:47.723119  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -8,11 +8,11 @@
 
 | Component | Status | Duration | Exit Code |
 |-----------|--------|----------|-----------|
-| Backend   | [FAILED] | 7.83s | 4 |
-| Frontend  | [TIMEOUT] | 54.38s | -1 |
+| Backend   | [FAILED] | 7.16s | 4 |
+| Frontend  | [TIMEOUT] | 51.53s | -1 |
 
 **Overall Status:** [FAILED]  
-**Total Duration:** 62.21s  
+**Total Duration:** 58.69s  
 **Final Exit Code:** 4
 
 ## Test Level Details
@@ -51,23 +51,18 @@ Test Configuration:
 Running command:
   pytest app/tests/routes/test_health_route.py app/tests/routes/test_health_endpoints.py app/tests/test_main.py -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
 ================================================================================
-[1m============================= test session starts =============================[0m
-platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
-cachedir: .pytest_cache
-metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}
-rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
-configfile: pytest.ini
-plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
-asyncio: mode=Mode.AUTO
-[1mcollecting ... [0mcollected 0 items
-
-[33m============================ [33mno tests ran[0m[33m in 0.02s[0m[33m ============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 6.78s
+[FAIL] TESTS FAILED with exit code 4 after 6.33s
 ================================================================================
 
-ERROR: file or directory not found: app/tests/test_main.py
-
+ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\conftest.py'.
+app\tests\conftest.py:37: in <module>
+    from app.main import app
+app\main.py:300: in <module>
+    from app.routes.threads_route import router as threads_router
+app\routes\threads_route.py:15: in <module>
+    from app.ws_manager import ws_manager
+E   ImportError: cannot import name 'ws_manager' from 'app.ws_manager' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\ws_manager.py). Did you mean: 'redis_manager'?
 
 ```
 

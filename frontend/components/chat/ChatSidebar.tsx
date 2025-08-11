@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, MessageSquare, Clock, ChevronRight, Search, Shield, Database, Sparkles, Users, Filter } from 'lucide-react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useAuthStore } from '@/store/authStore';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { ThreadService } from '@/services/thread-service';
 
 interface ThreadMetadata {
   isProcessing?: boolean;
@@ -28,7 +29,10 @@ interface Thread {
 
 export const ChatSidebar: React.FC = () => {
   const { 
-    isProcessing 
+    isProcessing,
+    activeThreadId,
+    setActiveThread,
+    clearMessages 
   } = useUnifiedChatStore();
   
   const { isDeveloperOrHigher } = useAuthStore();
@@ -38,15 +42,33 @@ export const ChatSidebar: React.FC = () => {
   const [isCreatingThread, setIsCreatingThread] = useState(false);
   const [showAllThreads, setShowAllThreads] = useState(false);
   const [filterType, setFilterType] = useState<'all' | 'corpus' | 'synthetic' | 'config' | 'users'>('all');
+  const [threads, setThreads] = useState<Thread[]>([]);
+  const [isLoadingThreads, setIsLoadingThreads] = useState(true);
 
-  // Temporary mock data - replace with actual thread management
-  const threads = new Map<string, Thread>();
-  const activeThreadId = 'default';
+  // Load threads on mount and when filters change
+  useEffect(() => {
+    loadThreads();
+  }, [showAllThreads, filterType]);
+
+  const loadThreads = async () => {
+    setIsLoadingThreads(true);
+    try {
+      const threadService = new ThreadService();
+      const fetchedThreads = await threadService.listThreads();
+      setThreads(fetchedThreads);
+    } catch (error) {
+      console.error('Failed to load threads:', error);
+    } finally {
+      setIsLoadingThreads(false);
+    }
+  };
 
   // Filter threads based on search
-  const filteredThreads = Array.from(threads.values()).filter(thread => {
+  const filteredThreads = threads.filter(thread => {
     if (!searchQuery) return true;
-    return thread.last_message?.toLowerCase().includes(searchQuery.toLowerCase());
+    const title = thread.metadata?.title || `Chat ${thread.created_at}`;
+    return title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           thread.last_message?.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   // Sort threads by last update
@@ -59,8 +81,19 @@ export const ChatSidebar: React.FC = () => {
   const handleNewChat = async () => {
     setIsCreatingThread(true);
     try {
-      // TODO: Implement thread creation
-      console.log('Creating new thread...');
+      const threadService = new ThreadService();
+      const newThread = await threadService.createThread();
+      
+      // Set as active thread
+      setActiveThread?.(newThread.id);
+      clearMessages?.();
+      
+      // Reload threads list
+      await loadThreads();
+      
+      // Auto-rename after first message (will be triggered by message send)
+    } catch (error) {
+      console.error('Failed to create thread:', error);
     } finally {
       setIsCreatingThread(false);
     }
@@ -68,8 +101,19 @@ export const ChatSidebar: React.FC = () => {
 
   const handleThreadClick = async (threadId: string) => {
     if (threadId === activeThreadId || isProcessing) return;
-    // TODO: Implement thread switching
-    console.log('Switching to thread:', threadId);
+    
+    try {
+      const threadService = new ThreadService();
+      const messages = await threadService.getThreadMessages(threadId);
+      
+      // Switch to thread and load messages
+      setActiveThread?.(threadId);
+      // Load messages into store (implement loadMessages in store)
+      
+      console.log('Switched to thread:', threadId, 'with', messages.length, 'messages');
+    } catch (error) {
+      console.error('Failed to switch thread:', error);
+    }
   };
 
   return (
@@ -231,7 +275,7 @@ export const ChatSidebar: React.FC = () => {
                         "text-sm font-medium truncate",
                         activeThreadId === thread.id ? "text-emerald-900" : "text-gray-900"
                       )}>
-                        {thread.last_message || `Thread ${thread.id.slice(0, 8)}`}
+                        {thread.metadata?.title || thread.last_message || `Chat ${new Date(thread.created_at * 1000).toLocaleDateString()}`}
                       </p>
                       
                       {/* Show user email for admin view */}
@@ -278,7 +322,7 @@ export const ChatSidebar: React.FC = () => {
       {/* Footer with Thread Count and Quick Actions */}
       <div className="p-4 border-t border-gray-200 bg-gray-50">
         <p className="text-xs text-gray-500 text-center mb-2">
-          {threads.size} conversation{threads.size !== 1 ? 's' : ''}
+          {threads.length} conversation{threads.length !== 1 ? 's' : ''}
         </p>
         
         {/* Admin Quick Actions */}
