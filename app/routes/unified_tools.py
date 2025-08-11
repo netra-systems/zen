@@ -3,8 +3,8 @@ Unified Tools API - New unified API for all tool operations
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Dict, Any, Optional
-from sqlalchemy.orm import Session
-from app.db.postgres import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.dependencies import DbDep
 from app.db.models_postgres import User
 from app.auth.auth_dependencies import get_current_user
 from app.services.unified_tool_registry import UnifiedToolRegistry, ToolExecutionResult
@@ -57,9 +57,9 @@ class UserPlanResponse(BaseModel):
 
 @router.get("/", summary="List available tools")
 async def list_tools(
+    db: DbDep,
     category: Optional[str] = Query(None, description="Filter by category"),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_user)
 ) -> ToolAvailabilityResponse:
     """
     Get list of all tools available to the current user
@@ -107,8 +107,8 @@ async def list_tools(
 @router.post("/execute", summary="Execute a tool")
 async def execute_tool(
     request: ToolExecutionRequest,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: DbDep,
+    current_user: User = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """
     Execute a tool with permission checking and usage tracking
@@ -213,8 +213,8 @@ async def check_tool_permissions(
 
 @router.get("/user/plan", summary="Get user plan information")
 async def get_user_plan(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: DbDep,
+    current_user: User = Depends(get_current_user)
 ) -> UserPlanResponse:
     """
     Get current user's plan information and upgrade options
@@ -252,8 +252,8 @@ async def get_user_plan(
 
 @router.post("/migrate-legacy", summary="Migrate from legacy admin system")
 async def migrate_legacy_admin(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: DbDep,
+    current_user: User = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """
     Migrate user from legacy admin system to new tool-based system
@@ -305,7 +305,7 @@ async def migrate_legacy_admin(
 
 # Helper functions
 
-async def _log_tool_execution_to_db(result: ToolExecutionResult, db: Session):
+async def _log_tool_execution_to_db(result: ToolExecutionResult, db: AsyncSession):
     """Log tool execution to database for analytics"""
     try:
         from app.db.models_postgres import ToolUsageLog
@@ -324,13 +324,13 @@ async def _log_tool_execution_to_db(result: ToolExecutionResult, db: Session):
         )
         
         db.add(log_entry)
-        db.commit()
+        await db.commit()
         
     except Exception as e:
         logger.error(f"Error logging tool execution to DB: {e}")
 
 
-async def _get_daily_usage_count(user_id: str, db: Session) -> int:
+async def _get_daily_usage_count(user_id: str, db: AsyncSession) -> int:
     """Get daily tool usage count for user"""
     try:
         from app.db.models_postgres import ToolUsageLog
@@ -338,10 +338,13 @@ async def _get_daily_usage_count(user_id: str, db: Session) -> int:
         from datetime import date
         
         today = date.today()
-        count = db.query(func.count(ToolUsageLog.id)).filter(
+        from sqlalchemy import select
+        stmt = select(func.count(ToolUsageLog.id)).filter(
             ToolUsageLog.user_id == user_id,
             func.date(ToolUsageLog.created_at) == today
-        ).scalar()
+        )
+        result = await db.execute(stmt)
+        count = result.scalar()
         
         return count or 0
         

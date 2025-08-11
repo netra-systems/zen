@@ -15,7 +15,7 @@ from app.services.quality_gate_service import QualityGateService, ContentType
 from app.services.quality_monitoring_service import QualityMonitoringService, AlertSeverity
 from app.services.fallback_response_service import FallbackResponseService
 from app.redis_manager import get_redis_manager, RedisManager
-from app.db.postgres import get_db
+from app.dependencies import DbDep
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = central_logger.get_logger(__name__)
