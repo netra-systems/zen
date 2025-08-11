@@ -1,36 +1,66 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChatHeader } from '@/components/chat/ChatHeader';
 import { MessageList } from '@/components/chat/MessageList';
 import { MessageInput } from '@/components/chat/MessageInput';
-import { StopButton } from '@/components/chat/StopButton';
+import { PersistentResponseCard } from '@/components/chat/PersistentResponseCard';
 import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
-import AgentStatusPanel from '@/components/chat/AgentStatusPanel';
-import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { 
+  FastLayerData, 
+  MediumLayerData, 
+  SlowLayerData 
+} from '@/types/unified-chat';
 
 const MainChat: React.FC = () => {
-  const { isProcessing, messages } = useChatStore();
+  const { 
+    isProcessing, 
+    messages,
+    fastLayerData,
+    mediumLayerData,
+    slowLayerData,
+    currentRunId
+  } = useUnifiedChatStore();
   
-  // Connect WebSocket messages to chat store
+  const [isCardCollapsed, setIsCardCollapsed] = useState(false);
+  
+  // Connect WebSocket messages to unified chat store
   useChatWebSocket();
 
-  const hasMessages = messages.filter(m => m.displayed_to_user).length > 0;
+  const hasMessages = messages.length > 0;
+  const showResponseCard = currentRunId !== null || isProcessing;
+
+  // Auto-collapse card after completion
+  useEffect(() => {
+    if (slowLayerData?.finalReport && !isProcessing) {
+      const timer = setTimeout(() => {
+        setIsCardCollapsed(true);
+      }, 2000); // 2 seconds after completion
+      
+      return () => clearTimeout(timer);
+    }
+  }, [slowLayerData?.finalReport, isProcessing]);
+
+  // Reset collapse state when new processing starts
+  useEffect(() => {
+    if (isProcessing) {
+      setIsCardCollapsed(false);
+    }
+  }, [isProcessing]);
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <div className="flex flex-col flex-1 max-w-full">
-        <AnimatePresence>
-          {isProcessing && <AgentStatusPanel />}
-        </AnimatePresence>
+        {/* Chat Header */}
         <ChatHeader />
         
+        {/* Main Content Area */}
         <div className="flex-grow overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/50 pointer-events-none z-10" />
-          
           <div className="h-full overflow-y-auto">
+            {/* Example Prompts - shown when no messages */}
             <AnimatePresence mode="wait">
               {!hasMessages && (
                 <motion.div
@@ -43,10 +73,34 @@ const MainChat: React.FC = () => {
               )}
             </AnimatePresence>
             
+            {/* Message History */}
             <MessageList />
+            
+            {/* Persistent Response Card - Shows current processing */}
+            <AnimatePresence>
+              {showResponseCard && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="px-6 py-4 max-w-5xl mx-auto"
+                >
+                  <PersistentResponseCard
+                    fastLayerData={fastLayerData}
+                    mediumLayerData={mediumLayerData}
+                    slowLayerData={slowLayerData}
+                    isProcessing={isProcessing}
+                    isCollapsed={isCardCollapsed}
+                    onToggleCollapse={() => setIsCardCollapsed(!isCardCollapsed)}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
         
+        {/* Chat Input */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -54,21 +108,7 @@ const MainChat: React.FC = () => {
           className="border-t bg-white/95 backdrop-blur-sm shadow-lg"
         >
           <div className="px-6 py-4 max-w-5xl mx-auto w-full">
-            <div className="space-y-3">
-              <MessageInput />
-              
-              {isProcessing && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex justify-center"
-                >
-                  <StopButton />
-                </motion.div>
-              )}
-            </div>
+            <MessageInput />
           </div>
         </motion.div>
       </div>

@@ -365,6 +365,101 @@
     </checklist-item>
   </section>
   
+  <section name="cors-configuration">
+    <title>CORS Configuration and Cross-Origin Requests</title>
+    <description>
+      CRITICAL: CORS configuration is essential for frontend-backend communication.
+      Improper CORS setup leads to blocked requests and authentication failures.
+    </description>
+    
+    <checklist-item id="cors-development">
+      <title>Development CORS Configuration</title>
+      <description>
+        In development, CORS must allow dynamic ports for the dev launcher.
+        The backend should accept requests from any localhost port.
+      </description>
+      <configuration>
+        <code language="python">
+          # In app/main.py
+          if settings.environment != "production":
+              # Allow all localhost ports and configured origins
+              cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+              configured_origins = cors_origins_env.split(",") if cors_origins_env else []
+              allowed_origins = ["*"]  # Allow all in development
+        </code>
+      </configuration>
+      <validation>
+        Test with dynamic ports: python scripts/dev_launcher.py --dynamic
+      </validation>
+    </checklist-item>
+    
+    <checklist-item id="cors-redirects">
+      <title>Handle CORS for Redirects</title>
+      <description>
+        FastAPI's trailing slash redirects don't include CORS headers by default.
+        This causes CORS errors when frontend requests are redirected.
+      </description>
+      <solution>
+        <action>Add cors_redirect_middleware to handle CORS headers on redirects</action>
+        <action>Disable redirect_slashes on APIRouter for affected routes</action>
+        <code language="python">
+          # Middleware to add CORS headers to redirects
+          @app.middleware("http")
+          async def cors_redirect_middleware(request: Request, call_next):
+              response = await call_next(request)
+              if isinstance(response, RedirectResponse) and settings.environment != "production":
+                  origin = request.headers.get("origin")
+                  if origin:
+                      response.headers["Access-Control-Allow-Origin"] = origin
+                      response.headers["Access-Control-Allow-Credentials"] = "true"
+              return response
+          
+          # Disable automatic trailing slash redirects on routers
+          router = APIRouter(
+              prefix="/api/threads",
+              tags=["threads"],
+              redirect_slashes=False
+          )
+        </code>
+      </solution>
+    </checklist-item>
+    
+    <checklist-item id="cors-configuration-attributes">
+      <title>Configuration Attributes</title>
+      <description>
+        CORS origins should be read from environment variables, not from config objects.
+        The AppConfig schema may not have a cors_origins attribute.
+      </description>
+      <pattern>
+        <code language="python">
+          # CORRECT: Read from environment
+          cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+          
+          # INCORRECT: May cause AttributeError
+          cors_origins = settings.cors_origins  # AppConfig may not have this attribute
+        </code>
+      </pattern>
+    </checklist-item>
+    
+    <checklist-item id="cors-testing">
+      <title>Testing CORS Configuration</title>
+      <description>
+        Test CORS setup with different scenarios to ensure proper functionality
+      </description>
+      <test-scenarios>
+        <scenario>Frontend and backend on different ports (dev launcher)</scenario>
+        <scenario>API requests with and without trailing slashes</scenario>
+        <scenario>Preflight OPTIONS requests</scenario>
+        <scenario>Authenticated requests with credentials</scenario>
+      </test-scenarios>
+      <commands>
+        <command>python scripts/dev_launcher.py --dynamic --no-backend-reload</command>
+        <command>Check browser console for CORS errors</command>
+        <command>Test API endpoints from frontend application</command>
+      </commands>
+    </checklist-item>
+  </section>
+  
   <section name="common-pitfalls">
     <title>Common Pitfalls to Avoid</title>
     
@@ -396,6 +491,23 @@
       <prevention>
         Always wrap WebSocket-dependent components/hooks with WebSocketProvider in tests
       </prevention>
+    </pitfall>
+    
+    <pitfall id="cors-errors">
+      <title>CORS Configuration Errors</title>
+      <description>
+        Common CORS issues that block frontend-backend communication:
+        - FastAPI trailing slash redirects without CORS headers
+        - Accessing non-existent cors_origins attribute from settings
+        - Not allowing dynamic ports in development
+      </description>
+      <prevention>
+        - Add cors_redirect_middleware to handle redirects
+        - Read CORS origins from environment variables, not config objects
+        - Use redirect_slashes=False on APIRouter for affected routes
+        - Allow all origins ("*") in development environment
+      </prevention>
+      <reference>See cors-configuration section for detailed solutions</reference>
     </pitfall>
     
     <pitfall id="async-mocks">
