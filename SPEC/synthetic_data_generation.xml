@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE synthetic_data_generation_spec SYSTEM "spec.dtd">
-<synthetic_data_generation_spec version="2.0">
+<synthetic_data_generation_spec version="3.0">
     <metadata>
         <title>Synthetic Data Generation Specification</title>
         <description>
             Comprehensive specification for generating synthetic AI agent workload data with
             real-time ClickHouse ingestion, WebSocket updates, and CORPUS-based content generation.
         </description>
-        <last_updated>2025-01-09</last_updated>
+        <last_updated>2025-01-11</last_updated>
         <primary_focus>Real-time AI Agent Tool Use Creation with Live Data Ingestion</primary_focus>
     </metadata>
 
@@ -1349,6 +1349,517 @@
             </analytics_dashboard>
         </dashboards>
     </monitoring_and_observability>
+
+    <enhanced_admin_visibility>
+        <description>
+            Enhanced admin visibility and monitoring capabilities for complete transparency
+            into synthetic data generation processes, corpus management, and system health.
+        </description>
+        
+        <admin_dashboard_components>
+            <real_time_monitoring>
+                <job_tracker>
+                    <description>Live view of all generation jobs with detailed status</description>
+                    <features>
+                        <feature>Real-time progress bars with ETA</feature>
+                        <feature>Resource utilization graphs</feature>
+                        <feature>Error rate monitoring</feature>
+                        <feature>Throughput metrics (records/second)</feature>
+                        <feature>Queue depth visualization</feature>
+                    </features>
+                    <update_frequency>1 second via WebSocket</update_frequency>
+                </job_tracker>
+                
+                <corpus_health_monitor>
+                    <description>Monitor corpus availability and usage</description>
+                    <metrics>
+                        <metric>Corpus table status in ClickHouse</metric>
+                        <metric>Record count and growth rate</metric>
+                        <metric>Content distribution analysis</metric>
+                        <metric>Access patterns and hot spots</metric>
+                        <metric>Cache hit rates</metric>
+                    </metrics>
+                </corpus_health_monitor>
+                
+                <clickhouse_ingestion_monitor>
+                    <description>Track data flow into ClickHouse</description>
+                    <visualizations>
+                        <chart>Ingestion rate over time</chart>
+                        <chart>Batch processing latency</chart>
+                        <chart>Failed batch recovery status</chart>
+                        <chart>Table growth and partitioning</chart>
+                    </visualizations>
+                </clickhouse_ingestion_monitor>
+            </real_time_monitoring>
+            
+            <admin_prompts_system>
+                <description>
+                    Intelligent prompt system for admin operations with context-aware suggestions
+                </description>
+                
+                <prompt_categories>
+                    <category name="corpus_management">
+                        <prompt>Create new corpus for {domain} with {size} initial records</prompt>
+                        <prompt>Validate corpus {corpus_id} for completeness and quality</prompt>
+                        <prompt>Merge corpora {list} into unified corpus</prompt>
+                        <prompt>Archive corpus {corpus_id} with retention policy</prompt>
+                    </category>
+                    
+                    <category name="generation_control">
+                        <prompt>Generate {num_traces} traces using {corpus} with {distribution}</prompt>
+                        <prompt>Resume failed job {job_id} from checkpoint</prompt>
+                        <prompt>Cancel job {job_id} and cleanup resources</prompt>
+                        <prompt>Schedule batch generation for {time} with {config}</prompt>
+                    </category>
+                    
+                    <category name="quality_assurance">
+                        <prompt>Run quality validation on {table_name}</prompt>
+                        <prompt>Compare generated data with production patterns</prompt>
+                        <prompt>Analyze distribution drift in recent generations</prompt>
+                        <prompt>Generate quality report for job {job_id}</prompt>
+                    </category>
+                    
+                    <category name="troubleshooting">
+                        <prompt>Diagnose slow generation for job {job_id}</prompt>
+                        <prompt>Analyze ClickHouse connection failures</prompt>
+                        <prompt>Debug corpus access errors</prompt>
+                        <prompt>Investigate memory usage spikes</prompt>
+                    </category>
+                </prompt_categories>
+                
+                <context_enrichment>
+                    <description>Prompts are enriched with relevant context</description>
+                    <context_sources>
+                        <source>Current system state and resource usage</source>
+                        <source>Recent error logs and patterns</source>
+                        <source>Historical performance metrics</source>
+                        <source>User's previous actions and preferences</source>
+                    </context_sources>
+                </context_enrichment>
+            </admin_prompts_system>
+            
+            <audit_and_compliance>
+                <audit_logging>
+                    <description>Comprehensive audit trail for all operations</description>
+                    <logged_events>
+                        <event>Corpus creation/modification/deletion</event>
+                        <event>Generation job lifecycle events</event>
+                        <event>Configuration changes</event>
+                        <event>Data access and exports</event>
+                        <event>Admin actions and commands</event>
+                    </logged_events>
+                    <retention>90 days minimum, configurable by policy</retention>
+                </audit_logging>
+                
+                <compliance_dashboard>
+                    <description>Track compliance with data policies</description>
+                    <features>
+                        <feature>PII detection and masking status</feature>
+                        <feature>Data residency compliance</feature>
+                        <feature>Access control violations</feature>
+                        <feature>Retention policy adherence</feature>
+                    </features>
+                </compliance_dashboard>
+            </audit_and_compliance>
+        </admin_dashboard_components>
+        
+        <process_inspectability>
+            <description>
+                All generation processes are fully inspectable with drill-down capabilities
+            </description>
+            
+            <inspection_levels>
+                <level name="overview">
+                    <description>High-level job status and metrics</description>
+                    <data>Job state, progress percentage, ETA</data>
+                </level>
+                
+                <level name="detailed">
+                    <description>Detailed view of generation process</description>
+                    <data>Batch-by-batch progress, resource usage, queue states</data>
+                </level>
+                
+                <level name="debug">
+                    <description>Debug-level information for troubleshooting</description>
+                    <data>Stack traces, query logs, memory dumps, profiling data</data>
+                </level>
+            </inspection_levels>
+            
+            <inspection_tools>
+                <tool name="job_inspector">
+                    <description>Inspect running or completed jobs</description>
+                    <capabilities>
+                        <capability>View generation configuration</capability>
+                        <capability>Track record-by-record progress</capability>
+                        <capability>Analyze performance bottlenecks</capability>
+                        <capability>Export job metadata</capability>
+                    </capabilities>
+                </tool>
+                
+                <tool name="corpus_explorer">
+                    <description>Explore corpus content and usage</description>
+                    <capabilities>
+                        <capability>Browse corpus records</capability>
+                        <capability>Search and filter content</capability>
+                        <capability>Analyze usage patterns</capability>
+                        <capability>Validate content quality</capability>
+                    </capabilities>
+                </tool>
+                
+                <tool name="trace_analyzer">
+                    <description>Analyze generated trace hierarchies</description>
+                    <capabilities>
+                        <capability>Visualize trace trees</capability>
+                        <capability>Validate parent-child relationships</capability>
+                        <capability>Calculate span metrics</capability>
+                        <capability>Detect anomalies</capability>
+                    </capabilities>
+                </tool>
+            </inspection_tools>
+        </process_inspectability>
+        
+        <alerting_and_notifications>
+            <alert_rules>
+                <rule name="generation_slow">
+                    <condition>Generation rate < 100 records/second for 1 minute</condition>
+                    <severity>warning</severity>
+                    <action>Notify admin, suggest scaling</action>
+                </rule>
+                
+                <rule name="corpus_unavailable">
+                    <condition>Corpus table not accessible</condition>
+                    <severity>critical</severity>
+                    <action>Failover to backup, page on-call</action>
+                </rule>
+                
+                <rule name="high_error_rate">
+                    <condition>Error rate > 5% in last 100 records</condition>
+                    <severity>error</severity>
+                    <action>Pause generation, notify admin</action>
+                </rule>
+                
+                <rule name="resource_exhaustion">
+                    <condition>Memory > 90% or Disk < 1GB</condition>
+                    <severity>critical</severity>
+                    <action>Trigger cleanup, scale resources</action>
+                </rule>
+            </alert_rules>
+            
+            <notification_channels>
+                <channel>WebSocket real-time updates</channel>
+                <channel>Email with detailed reports</channel>
+                <channel>Slack/Teams integration</channel>
+                <channel>PagerDuty for critical alerts</channel>
+                <channel>Webhook for custom integrations</channel>
+            </notification_channels>
+        </alerting_and_notifications>
+    </enhanced_admin_visibility>
+
+    <data_agent_integration>
+        <description>
+            Integration with data agents for intelligent data fetching, clustering,
+            and analysis during synthetic data generation.
+        </description>
+        
+        <agent_tools>
+            <tool name="corpus_fetcher">
+                <description>Intelligently fetch relevant corpus content</description>
+                <capabilities>
+                    <capability>Query ClickHouse corpus tables efficiently</capability>
+                    <capability>Apply smart filtering based on workload type</capability>
+                    <capability>Cache frequently accessed content</capability>
+                    <capability>Handle corpus unavailability with fallbacks</capability>
+                </capabilities>
+                <optimization>
+                    <strategy>Projection pushdown for minimal data transfer</strategy>
+                    <strategy>Batch fetching for improved throughput</strategy>
+                    <strategy>Predictive prefetching based on patterns</strategy>
+                </optimization>
+            </tool>
+            
+            <tool name="data_clusterer">
+                <description>Cluster generated data for pattern analysis</description>
+                <clustering_algorithms>
+                    <algorithm name="kmeans">
+                        <use_case>Group similar workload patterns</use_case>
+                        <parameters>Dynamic k based on data volume</parameters>
+                    </algorithm>
+                    <algorithm name="dbscan">
+                        <use_case>Identify outliers and anomalies</use_case>
+                        <parameters>Adaptive epsilon based on density</parameters>
+                    </algorithm>
+                    <algorithm name="hierarchical">
+                        <use_case>Create trace hierarchy clusters</use_case>
+                        <parameters>Linkage based on temporal relationships</parameters>
+                    </algorithm>
+                </clustering_algorithms>
+                <output>
+                    <cluster_labels>Assigned cluster for each record</cluster_labels>
+                    <cluster_centers>Representative patterns for each cluster</cluster_centers>
+                    <cluster_metrics>Silhouette score, inertia, completeness</cluster_metrics>
+                </output>
+            </tool>
+            
+            <tool name="pattern_analyzer">
+                <description>Analyze patterns in generated data</description>
+                <analysis_types>
+                    <type>Temporal pattern detection</type>
+                    <type>Workload distribution analysis</type>
+                    <type>Tool usage patterns</type>
+                    <type>Error clustering and correlation</type>
+                </analysis_types>
+                <insights>
+                    <insight>Peak usage times and patterns</insight>
+                    <insight>Common tool invocation sequences</insight>
+                    <insight>Failure cascade patterns</insight>
+                    <insight>Resource utilization correlations</insight>
+                </insights>
+            </tool>
+            
+            <tool name="quality_validator">
+                <description>Validate quality of generated data</description>
+                <validation_checks>
+                    <check>Schema compliance verification</check>
+                    <check>Statistical distribution validation</check>
+                    <check>Referential integrity checking</check>
+                    <check>Temporal consistency validation</check>
+                </validation_checks>
+                <quality_scores>
+                    <score name="completeness">Percentage of required fields present</score>
+                    <score name="accuracy">Statistical similarity to target distribution</score>
+                    <score name="consistency">Temporal and relational consistency</score>
+                    <score name="diversity">Entropy and uniqueness metrics</score>
+                </quality_scores>
+            </tool>
+        </agent_tools>
+        
+        <agent_orchestration>
+            <description>
+                Coordinated agent actions during generation process
+            </description>
+            
+            <workflow>
+                <step order="1">
+                    <agent>corpus_fetcher</agent>
+                    <action>Retrieve relevant corpus content based on configuration</action>
+                    <output>Corpus samples ready for generation</output>
+                </step>
+                
+                <step order="2">
+                    <agent>generation_engine</agent>
+                    <action>Generate synthetic data using corpus samples</action>
+                    <output>Raw synthetic records</output>
+                </step>
+                
+                <step order="3">
+                    <agent>data_clusterer</agent>
+                    <action>Cluster generated data for pattern analysis</action>
+                    <output>Clustered data with labels</output>
+                </step>
+                
+                <step order="4">
+                    <agent>pattern_analyzer</agent>
+                    <action>Analyze patterns and extract insights</action>
+                    <output>Pattern analysis report</output>
+                </step>
+                
+                <step order="5">
+                    <agent>quality_validator</agent>
+                    <action>Validate data quality and compliance</action>
+                    <output>Quality validation report</output>
+                </step>
+                
+                <step order="6">
+                    <agent>ingestion_agent</agent>
+                    <action>Ingest validated data to ClickHouse</action>
+                    <output>Ingestion confirmation and metrics</output>
+                </step>
+            </workflow>
+        </agent_orchestration>
+    </data_agent_integration>
+
+    <log_structure_coherence>
+        <description>
+            Ensuring generated log structures are coherent with the unified logging schema
+            and properly ingested into ClickHouse for analysis.
+        </description>
+        
+        <unified_log_schema>
+            <core_fields>
+                <field name="event_id" type="UUID" required="true"/>
+                <field name="trace_id" type="UUID" required="true" indexed="true"/>
+                <field name="span_id" type="UUID" required="true"/>
+                <field name="parent_span_id" type="Nullable(UUID)" required="false"/>
+                <field name="timestamp_utc" type="DateTime64(3)" required="true"/>
+                <field name="event_type" type="String" required="true"/>
+                <field name="service_name" type="String" required="true"/>
+                <field name="operation_name" type="String" required="true"/>
+            </core_fields>
+            
+            <workload_fields>
+                <field name="workload_type" type="String" required="true"/>
+                <field name="workload_category" type="String" required="true"/>
+                <field name="domain" type="String" required="true"/>
+                <field name="tenant_id" type="String" required="false"/>
+            </workload_fields>
+            
+            <performance_fields>
+                <field name="latency_ms" type="Float64" required="true"/>
+                <field name="cpu_usage_percent" type="Float32" required="false"/>
+                <field name="memory_usage_mb" type="Float32" required="false"/>
+                <field name="throughput_rps" type="Float64" required="false"/>
+            </performance_fields>
+            
+            <ai_specific_fields>
+                <field name="model_name" type="String" required="false"/>
+                <field name="model_version" type="String" required="false"/>
+                <field name="prompt_tokens" type="UInt32" required="false"/>
+                <field name="completion_tokens" type="UInt32" required="false"/>
+                <field name="total_tokens" type="UInt32" required="false"/>
+                <field name="tool_invocations" type="Array(String)" required="false"/>
+            </ai_specific_fields>
+            
+            <metadata_fields>
+                <field name="user_id" type="String" required="false"/>
+                <field name="session_id" type="String" required="false"/>
+                <field name="request_metadata" type="JSON" required="false"/>
+                <field name="response_metadata" type="JSON" required="false"/>
+                <field name="tags" type="Array(String)" required="false"/>
+            </metadata_fields>
+        </unified_log_schema>
+        
+        <clickhouse_ingestion_details>
+            <table_structure>
+                <engine>MergeTree()</engine>
+                <partition_by>toYYYYMM(timestamp_utc)</partition_by>
+                <order_by>(timestamp_utc, trace_id, span_id)</order_by>
+                <ttl>timestamp_utc + INTERVAL 90 DAY</ttl>
+                <settings>
+                    <setting name="index_granularity">8192</setting>
+                    <setting name="enable_mixed_granularity_parts">1</setting>
+                </settings>
+            </table_structure>
+            
+            <materialized_views>
+                <view name="trace_summary">
+                    <description>Aggregated trace metrics</description>
+                    <query>
+                        SELECT 
+                            trace_id,
+                            min(timestamp_utc) as start_time,
+                            max(timestamp_utc) as end_time,
+                            count() as span_count,
+                            sum(latency_ms) as total_latency,
+                            groupArray(tool_invocations) as all_tools
+                        GROUP BY trace_id
+                    </query>
+                </view>
+                
+                <view name="workload_metrics">
+                    <description>Workload-specific metrics</description>
+                    <query>
+                        SELECT 
+                            toStartOfHour(timestamp_utc) as hour,
+                            workload_type,
+                            count() as request_count,
+                            avg(latency_ms) as avg_latency,
+                            quantile(0.95)(latency_ms) as p95_latency
+                        GROUP BY hour, workload_type
+                    </query>
+                </view>
+            </materialized_views>
+            
+            <ingestion_validation>
+                <pre_ingestion>
+                    <validation>Schema compliance check</validation>
+                    <validation>Data type verification</validation>
+                    <validation>Required fields presence</validation>
+                    <validation>Trace hierarchy validation</validation>
+                </pre_ingestion>
+                
+                <post_ingestion>
+                    <verification>Record count matching</verification>
+                    <verification>Query result validation</verification>
+                    <verification>Materialized view updates</verification>
+                    <verification>Partition creation confirmation</verification>
+                </post_ingestion>
+            </ingestion_validation>
+        </clickhouse_ingestion_details>
+    </log_structure_coherence>
+
+    <comprehensive_testing_framework>
+        <description>
+            Complete testing framework with 10 test suite classes and 100+ tests
+            ensuring robust synthetic data generation capabilities.
+        </description>
+        
+        <test_suites>
+            <suite name="TestCorpusManagement" test_count="10">
+                <focus>Corpus lifecycle, creation, validation, and management</focus>
+                <coverage>ClickHouse table creation, status transitions, caching</coverage>
+            </suite>
+            
+            <suite name="TestDataGenerationEngine" test_count="10">
+                <focus>Core generation logic and patterns</focus>
+                <coverage>Workload distribution, temporal patterns, tool invocations</coverage>
+            </suite>
+            
+            <suite name="TestRealTimeIngestion" test_count="10">
+                <focus>Real-time data ingestion to ClickHouse</focus>
+                <coverage>Batch processing, streaming, error recovery, deduplication</coverage>
+            </suite>
+            
+            <suite name="TestWebSocketUpdates" test_count="10">
+                <focus>WebSocket communication and real-time updates</focus>
+                <coverage>Progress broadcasting, error notifications, reconnection</coverage>
+            </suite>
+            
+            <suite name="TestDataQualityValidation" test_count="10">
+                <focus>Data quality assurance and validation</focus>
+                <coverage>Schema validation, statistical distribution, referential integrity</coverage>
+            </suite>
+            
+            <suite name="TestPerformanceScalability" test_count="10">
+                <focus>Performance optimization and scalability</focus>
+                <coverage>Throughput, memory efficiency, horizontal scaling, caching</coverage>
+            </suite>
+            
+            <suite name="TestErrorRecovery" test_count="10">
+                <focus>Error handling and recovery mechanisms</focus>
+                <coverage>Fallbacks, retries, circuit breakers, checkpointing</coverage>
+            </suite>
+            
+            <suite name="TestAdminVisibility" test_count="10">
+                <focus>Admin monitoring and control features</focus>
+                <coverage>Job monitoring, metrics, audit logging, alerts</coverage>
+            </suite>
+            
+            <suite name="TestIntegration" test_count="10">
+                <focus>End-to-end integration scenarios</focus>
+                <coverage>Full workflow, multi-tenant, streaming pipeline, consistency</coverage>
+            </suite>
+            
+            <suite name="TestAdvancedFeatures" test_count="10">
+                <focus>Advanced and specialized capabilities</focus>
+                <coverage>ML-driven generation, anomaly injection, geo-distribution, compliance</coverage>
+            </suite>
+        </test_suites>
+        
+        <test_execution_strategy>
+            <parallel_execution>Run test suites in parallel for speed</parallel_execution>
+            <isolation>Each test isolated with fresh fixtures</isolation>
+            <cleanup>Automatic cleanup of test data and resources</cleanup>
+            <reporting>Detailed test reports with coverage metrics</reporting>
+            <ci_integration>Automated testing in CI/CD pipeline</ci_integration>
+        </test_execution_strategy>
+        
+        <test_data_management>
+            <fixtures>Reusable test fixtures for common scenarios</fixtures>
+            <mocking>Mock external dependencies (ClickHouse, WebSocket)</mocking>
+            <seeding>Seed data for predictable test conditions</seeding>
+            <validation>Assert on both positive and negative cases</validation>
+        </test_data_management>
+    </comprehensive_testing_framework>
 
     <implementation_notes>
         <corpus_coherence>
