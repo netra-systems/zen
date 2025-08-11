@@ -56,20 +56,26 @@ class QueryBuilder:
         SELECT
             {time_function}(timestamp) as time_bucket,
             count() as event_count,
-            quantileIf(0.5)(arrayElement(metrics.value, idx), idx > 0) as latency_p50,
-            quantileIf(0.95)(arrayElement(metrics.value, idx), idx > 0) as latency_p95,
-            quantileIf(0.99)(arrayElement(metrics.value, idx), idx > 0) as latency_p99,
-            avgIf(arrayElement(metrics.value, idx2), idx2 > 0) as avg_throughput,
-            maxIf(arrayElement(metrics.value, idx2), idx2 > 0) as peak_throughput,
+            quantileIf(0.5, metric_value, has_latency) as latency_p50,
+            quantileIf(0.95, metric_value, has_latency) as latency_p95,
+            quantileIf(0.99, metric_value, has_latency) as latency_p99,
+            avgIf(throughput_value, has_throughput) as avg_throughput,
+            maxIf(throughput_value, has_throughput) as peak_throughput,
             countIf(event_type = 'error') / count() * 100 as error_rate,
-            sumIf(arrayElement(metrics.value, idx3), idx3 > 0) / 100.0 as total_cost,
+            sumIf(cost_value, has_cost) / 100.0 as total_cost,
             uniqExact(workload_id) as unique_workloads
         FROM (
             SELECT
                 *,
                 arrayFirstIndex(x -> x = 'latency_ms', metrics.name) as idx,
                 arrayFirstIndex(x -> x = 'throughput', metrics.name) as idx2,
-                arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as idx3
+                arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as idx3,
+                if(idx > 0, metrics.value[idx], NULL) as metric_value,
+                if(idx2 > 0, metrics.value[idx2], NULL) as throughput_value,
+                if(idx3 > 0, metrics.value[idx3], NULL) as cost_value,
+                idx > 0 as has_latency,
+                idx2 > 0 as has_throughput,
+                idx3 > 0 as has_cost
             FROM workload_events
             WHERE user_id = {user_id}
                 AND timestamp >= '{start_time.isoformat()}'
@@ -94,25 +100,26 @@ class QueryBuilder:
         return f"""
         WITH baseline_stats AS (
             SELECT
-                avgIf(arrayElement(metrics.value, idx), idx > 0) as mean_value,
-                stddevPopIf(arrayElement(metrics.value, idx), idx > 0) as std_value
+                avg(metric_value) as mean_value,
+                stddevPop(metric_value) as std_value
             FROM (
                 SELECT
-                    metrics.value,
-                    arrayFirstIndex(x -> x = '{metric_name}', metrics.name) as idx
+                    arrayFirstIndex(x -> x = '{metric_name}', metrics.name) as idx,
+                    if(idx > 0, metrics.value[idx], NULL) as metric_value
                 FROM workload_events
                 WHERE user_id = {user_id}
                     AND timestamp >= '{(start_time - timedelta(days=7)).isoformat()}'
                     AND timestamp <= '{end_time.isoformat()}'
                     AND arrayExists(x -> x = '{metric_name}', metrics.name)
             )
+            WHERE metric_value IS NOT NULL
         )
         SELECT
-            timestamp,
-            event_id,
-            workload_id,
-            if(idx > 0, arrayElement(metrics.value, idx), 0) as metric_value,
-            (metric_value - baseline_stats.mean_value) / nullIf(baseline_stats.std_value, 0) as z_score,
+            current_data.timestamp,
+            current_data.event_id,
+            current_data.workload_id,
+            current_data.metric_value,
+            (current_data.metric_value - baseline_stats.mean_value) / nullIf(baseline_stats.std_value, 0) as z_score,
             CASE
                 WHEN abs(z_score) > 3 THEN 'critical_anomaly'
                 WHEN abs(z_score) > {z_score_threshold} THEN 'anomaly'
@@ -122,16 +129,20 @@ class QueryBuilder:
             baseline_stats.std_value as baseline_std
         FROM (
             SELECT
-                *,
-                arrayFirstIndex(x -> x = '{metric_name}', metrics.name) as idx
+                timestamp,
+                event_id,
+                workload_id,
+                arrayFirstIndex(x -> x = '{metric_name}', metrics.name) as idx,
+                if(idx > 0, metrics.value[idx], 0) as metric_value
             FROM workload_events
             WHERE user_id = {user_id}
                 AND timestamp >= '{start_time.isoformat()}'
                 AND timestamp <= '{end_time.isoformat()}'
                 AND arrayExists(x -> x = '{metric_name}', metrics.name)
-        ), baseline_stats
-        WHERE abs(z_score) > {z_score_threshold}
-        ORDER BY abs(z_score) DESC
+        ) AS current_data
+        CROSS JOIN baseline_stats
+        WHERE abs((current_data.metric_value - baseline_stats.mean_value) / nullIf(baseline_stats.std_value, 0)) > {z_score_threshold}
+        ORDER BY abs((current_data.metric_value - baseline_stats.mean_value) / nullIf(baseline_stats.std_value, 0)) DESC
         LIMIT 100
         """
     
@@ -144,16 +155,20 @@ class QueryBuilder:
             toHour(timestamp) as hour_of_day,
             toDayOfWeek(timestamp) as day_of_week,
             count() as request_count,
-            avgIf(arrayElement(metrics.value, idx), idx > 0) as avg_latency,
-            quantileIf(0.95)(arrayElement(metrics.value, idx), idx > 0) as p95_latency,
-            sumIf(arrayElement(metrics.value, idx2), idx2 > 0) / 100.0 as total_cost,
+            avgIf(latency_value, has_latency) as avg_latency,
+            quantileIf(0.95, latency_value, has_latency) as p95_latency,
+            sumIf(cost_value, has_cost) / 100.0 as total_cost,
             countIf(event_type = 'error') as error_count,
             uniqExact(workload_id) as unique_workloads
         FROM (
             SELECT
                 *,
                 arrayFirstIndex(x -> x = 'latency_ms', metrics.name) as idx,
-                arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as idx2
+                arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as idx2,
+                if(idx > 0, metrics.value[idx], NULL) as latency_value,
+                if(idx2 > 0, metrics.value[idx2], NULL) as cost_value,
+                idx > 0 as has_latency,
+                idx2 > 0 as has_cost
             FROM workload_events
             WHERE user_id = {user_id}
                 AND timestamp >= now() - INTERVAL {days_back} DAY
