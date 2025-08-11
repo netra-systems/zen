@@ -56,19 +56,26 @@ class QueryBuilder:
         SELECT
             {time_function}(timestamp) as time_bucket,
             count() as event_count,
-            quantile(0.5)(arrayElement(metrics.value, indexOf(metrics.name, 'latency_ms'))) as latency_p50,
-            quantile(0.95)(arrayElement(metrics.value, indexOf(metrics.name, 'latency_ms'))) as latency_p95,
-            quantile(0.99)(arrayElement(metrics.value, indexOf(metrics.name, 'latency_ms'))) as latency_p99,
-            avg(arrayElement(metrics.value, indexOf(metrics.name, 'throughput'))) as avg_throughput,
-            max(arrayElement(metrics.value, indexOf(metrics.name, 'throughput'))) as peak_throughput,
+            quantileIf(0.5)(arrayElement(metrics.value, idx), idx > 0) as latency_p50,
+            quantileIf(0.95)(arrayElement(metrics.value, idx), idx > 0) as latency_p95,
+            quantileIf(0.99)(arrayElement(metrics.value, idx), idx > 0) as latency_p99,
+            avgIf(arrayElement(metrics.value, idx2), idx2 > 0) as avg_throughput,
+            maxIf(arrayElement(metrics.value, idx2), idx2 > 0) as peak_throughput,
             countIf(event_type = 'error') / count() * 100 as error_rate,
-            sum(arrayElement(metrics.value, indexOf(metrics.name, 'cost_cents'))) / 100.0 as total_cost,
+            sumIf(arrayElement(metrics.value, idx3), idx3 > 0) / 100.0 as total_cost,
             uniqExact(workload_id) as unique_workloads
-        FROM workload_events
-        WHERE user_id = {user_id}
-            AND timestamp >= '{start_time.isoformat()}'
-            AND timestamp <= '{end_time.isoformat()}'
-            {workload_filter}
+        FROM (
+            SELECT
+                *,
+                indexOf(metrics.name, 'latency_ms') as idx,
+                indexOf(metrics.name, 'throughput') as idx2,
+                indexOf(metrics.name, 'cost_cents') as idx3
+            FROM workload_events
+            WHERE user_id = {user_id}
+                AND timestamp >= '{start_time.isoformat()}'
+                AND timestamp <= '{end_time.isoformat()}'
+                {workload_filter}
+        )
         GROUP BY time_bucket
         ORDER BY time_bucket DESC
         LIMIT 10000
@@ -87,19 +94,24 @@ class QueryBuilder:
         return f"""
         WITH baseline_stats AS (
             SELECT
-                avg(arrayElement(metrics.value, indexOf(metrics.name, '{metric_name}'))) as mean_value,
-                stddevPop(arrayElement(metrics.value, indexOf(metrics.name, '{metric_name}'))) as std_value
-            FROM workload_events
-            WHERE user_id = {user_id}
-                AND timestamp >= '{(start_time - timedelta(days=7)).isoformat()}'
-                AND timestamp <= '{end_time.isoformat()}'
-                AND has(metrics.name, '{metric_name}')
+                avgIf(arrayElement(metrics.value, idx), idx > 0) as mean_value,
+                stddevPopIf(arrayElement(metrics.value, idx), idx > 0) as std_value
+            FROM (
+                SELECT
+                    metrics.value,
+                    indexOf(metrics.name, '{metric_name}') as idx
+                FROM workload_events
+                WHERE user_id = {user_id}
+                    AND timestamp >= '{(start_time - timedelta(days=7)).isoformat()}'
+                    AND timestamp <= '{end_time.isoformat()}'
+                    AND has(metrics.name, '{metric_name}')
+            )
         )
         SELECT
             timestamp,
             event_id,
             workload_id,
-            arrayElement(metrics.value, indexOf(metrics.name, '{metric_name}')) as metric_value,
+            if(idx > 0, arrayElement(metrics.value, idx), 0) as metric_value,
             (metric_value - baseline_stats.mean_value) / nullIf(baseline_stats.std_value, 0) as z_score,
             CASE
                 WHEN abs(z_score) > 3 THEN 'critical_anomaly'
@@ -108,12 +120,17 @@ class QueryBuilder:
             END as anomaly_status,
             baseline_stats.mean_value as baseline_mean,
             baseline_stats.std_value as baseline_std
-        FROM workload_events, baseline_stats
-        WHERE user_id = {user_id}
-            AND timestamp >= '{start_time.isoformat()}'
-            AND timestamp <= '{end_time.isoformat()}'
-            AND has(metrics.name, '{metric_name}')
-            AND abs(z_score) > {z_score_threshold}
+        FROM (
+            SELECT
+                *,
+                indexOf(metrics.name, '{metric_name}') as idx
+            FROM workload_events
+            WHERE user_id = {user_id}
+                AND timestamp >= '{start_time.isoformat()}'
+                AND timestamp <= '{end_time.isoformat()}'
+                AND has(metrics.name, '{metric_name}')
+        ), baseline_stats
+        WHERE abs(z_score) > {z_score_threshold}
         ORDER BY abs(z_score) DESC
         LIMIT 100
         """
@@ -127,14 +144,20 @@ class QueryBuilder:
             toHour(timestamp) as hour_of_day,
             toDayOfWeek(timestamp) as day_of_week,
             count() as request_count,
-            avg(arrayElement(metrics.value, indexOf(metrics.name, 'latency_ms'))) as avg_latency,
-            quantile(0.95)(arrayElement(metrics.value, indexOf(metrics.name, 'latency_ms'))) as p95_latency,
-            sum(arrayElement(metrics.value, indexOf(metrics.name, 'cost_cents'))) / 100.0 as total_cost,
+            avgIf(arrayElement(metrics.value, idx), idx > 0) as avg_latency,
+            quantileIf(0.95)(arrayElement(metrics.value, idx), idx > 0) as p95_latency,
+            sumIf(arrayElement(metrics.value, idx2), idx2 > 0) / 100.0 as total_cost,
             countIf(event_type = 'error') as error_count,
             uniqExact(workload_id) as unique_workloads
-        FROM workload_events
-        WHERE user_id = {user_id}
-            AND timestamp >= now() - INTERVAL {days_back} DAY
+        FROM (
+            SELECT
+                *,
+                indexOf(metrics.name, 'latency_ms') as idx,
+                indexOf(metrics.name, 'cost_cents') as idx2
+            FROM workload_events
+            WHERE user_id = {user_id}
+                AND timestamp >= now() - INTERVAL {days_back} DAY
+        )
         GROUP BY hour_of_day, day_of_week
         ORDER BY day_of_week, hour_of_day
         """
@@ -149,7 +172,7 @@ class QueryBuilder:
         """Build query for correlation analysis between metrics"""
         
         metric_selects = [
-            f"arrayElement(metrics.value, indexOf(metrics.name, '{metric}')) as {metric}"
+            f"if(indexOf(metrics.name, '{metric}') > 0, arrayElement(metrics.value, indexOf(metrics.name, '{metric}')), 0) as {metric}"
             for metric in metrics
         ]
         
