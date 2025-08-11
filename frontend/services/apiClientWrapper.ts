@@ -44,7 +44,7 @@ class ApiClientWrapper {
 
     // Get token from localStorage or session
     const token = typeof window !== 'undefined' 
-      ? localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token')
+      ? localStorage.getItem('jwt_token') || sessionStorage.getItem('jwt_token')
       : null;
     
     if (token) {

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>Authentication Token Consistency Specification</title>
+    <version>1.0</version>
+    <created>2025-08-11</created>
+    <description>Specification for maintaining consistent authentication token storage and retrieval across the frontend application</description>
+  </metadata>
+
+  <problem_statement>
+    <issue>401 Unauthorized errors occur when making API requests from frontend components</issue>
+    <root_cause>Inconsistent token storage key names across different services</root_cause>
+    <symptoms>
+      <symptom>ThreadSidebar fails to load threads with 401 error</symptom>
+      <symptom>API requests return "Not authenticated" despite user being logged in</symptom>
+      <symptom>Token exists in localStorage but is not included in request headers</symptom>
+    </symptoms>
+  </problem_statement>
+
+  <solution>
+    <standard_token_key>jwt_token</standard_token_key>
+    <description>All services must use 'jwt_token' as the localStorage key for authentication tokens</description>
+    
+    <affected_files>
+      <file path="frontend/services/apiClientWrapper.ts">
+        <change>Update localStorage key from 'auth_token' to 'jwt_token'</change>
+      </file>
+      <file path="frontend/services/messageService.ts">
+        <change>Update localStorage key from 'auth_token' to 'jwt_token'</change>
+      </file>
+    </affected_files>
+
+    <correct_implementations>
+      <file path="frontend/store/authStore.ts">Uses 'jwt_token' correctly</file>
+      <file path="frontend/auth/service.ts">Uses 'jwt_token' correctly</file>
+      <file path="frontend/auth/context.tsx">Uses authService.getToken() which uses 'jwt_token'</file>
+      <file path="frontend/app/auth/callback/page.tsx">Uses 'jwt_token' correctly</file>
+      <file path="frontend/app/auth/logout/page.tsx">Uses 'jwt_token' correctly</file>
+    </correct_implementations>
+  </solution>
+
+  <token_flow>
+    <step number="1">User logs in via OAuth or dev login</step>
+    <step number="2">Backend returns JWT token in response</step>
+    <step number="3">AuthStore saves token to localStorage with key 'jwt_token'</step>
+    <step number="4">AuthProvider on app startup reads token from localStorage using 'jwt_token' key</step>
+    <step number="5">API services (apiClientWrapper, messageService) read token from localStorage using 'jwt_token' key</step>
+    <step number="6">Token is included in Authorization header as 'Bearer {token}'</step>
+    <step number="7">Backend validates token and authorizes request</step>
+  </token_flow>
+
+  <testing_checklist>
+    <test>Verify token is saved to localStorage on login</test>
+    <test>Verify token persists across page refreshes</test>
+    <test>Verify token is included in API request headers</test>
+    <test>Verify ThreadSidebar loads threads without 401 errors</test>
+    <test>Verify all API endpoints receive proper authentication</test>
+  </testing_checklist>
+
+  <prevention>
+    <guideline>Always use authService.getToken() or localStorage.getItem('jwt_token')</guideline>
+    <guideline>Never hardcode alternative token key names</guideline>
+    <guideline>Maintain consistency across all test files</guideline>
+    <guideline>Consider creating a central TOKEN_KEY constant</guideline>
+  </prevention>
+</specification>

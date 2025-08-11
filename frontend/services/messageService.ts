@@ -39,7 +39,7 @@ class MessageService {
   private threadStates: Map<string, ThreadState> = new Map();
 
   private getAuthHeader(): string {
-    const token = localStorage.getItem('auth_token') || '';
+    const token = localStorage.getItem('jwt_token') || '';
     return `Bearer ${token}`;
   }
 

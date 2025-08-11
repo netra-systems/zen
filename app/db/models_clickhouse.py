@@ -57,6 +57,31 @@ def get_content_corpus_schema(table_name: str) -> str:
     ORDER BY (created_at, workload_type)
     """
 
+WORKLOAD_EVENTS_TABLE_NAME = 'workload_events'
+WORKLOAD_EVENTS_TABLE_SCHEMA = f"""
+CREATE TABLE IF NOT EXISTS {WORKLOAD_EVENTS_TABLE_NAME} (
+    event_id UUID DEFAULT generateUUIDv4(),
+    timestamp DateTime64(3) DEFAULT now(),
+    user_id UInt32,
+    workload_id String,
+    event_type String,
+    event_category String,
+    metrics Nested(
+        name Array(String),
+        value Array(Float64),
+        unit Array(String)
+    ),
+    dimensions Map(String, String),
+    metadata String,
+    INDEX idx_user_id user_id TYPE minmax GRANULARITY 8192,
+    INDEX idx_workload_id workload_id TYPE bloom_filter GRANULARITY 1,
+    INDEX idx_event_type event_type TYPE set(100) GRANULARITY 1
+) ENGINE = MergeTree()
+PARTITION BY toYYYYMM(timestamp)
+ORDER BY (user_id, timestamp, event_id)
+TTL timestamp + INTERVAL 90 DAY
+"""
+
 def get_llm_events_table_schema(table_name: str) -> str:
     """Returns the CREATE TABLE statement for the LLM events table with a dynamic name."""
     return f"""

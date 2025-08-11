@@ -2,6 +2,15 @@
 """
 Script to create a test user in the database
 """
+import sys
+import os
+from pathlib import Path
+
+# Add project root to path
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parent
+sys.path.insert(0, str(project_root))
+
 import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
