@@ -84,7 +84,7 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          service_account_key: ${{ secrets.GCP_STAGING_SA_KEY }}
           project_id: ${{ env.GCP_PROJECT_ID }}
 
       - name: Configure Docker for GCP
@@ -237,14 +237,17 @@ jobs:
           echo "test_skipped=$SKIPPED" >> $GITHUB_OUTPUT
           echo "test_duration=$DURATION" >> $GITHUB_OUTPUT
 
+      # UPDATED FOR V4: Use actions/upload-artifact@v4
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: test-results-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          name: test-results-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             test_results.json
             test_reports/
+          retention-days: 7
+          compression-level: 6  # New v4 feature for compression control
 
       - name: Update PR comment
         if: github.event_name == 'pull_request'
@@ -351,7 +354,7 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          service_account_key: ${{ secrets.GCP_STAGING_SA_KEY }}
           project_id: ${{ env.GCP_PROJECT_ID }}
 
       - name: Setup Terraform
@@ -372,12 +375,14 @@ jobs:
           # Upload logs as artifact
           echo "Logs exported for PR ${PR_NUMBER}"
 
+      # UPDATED FOR V4: Use actions/upload-artifact@v4 with unique naming
       - name: Upload logs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: staging-logs-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          name: staging-logs-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-${{ github.run_id }}
           path: staging-logs-*.json
           retention-days: 7
+          compression-level: 9  # Maximum compression for logs
 
       - name: Terraform Destroy
         working-directory: ./terraform/staging
@@ -444,7 +449,7 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          service_account_key: ${{ secrets.GCP_STAGING_SA_KEY }}
           project_id: ${{ env.GCP_PROJECT_ID }}
 
       - name: Find and destroy stale environments
@@ -474,3 +479,27 @@ jobs:
           done
         env:
           GH_TOKEN: ${{ github.token }}
+
+  # NEW JOB FOR V4: Download artifacts from other workflows
+  download-previous-artifacts:
+    name: Download Previous Test Results
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'redeploy'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # UPDATED FOR V4: Download artifacts from previous runs with github-token
+      - name: Download previous test results
+        uses: actions/download-artifact@v4
+        with:
+          name: test-results-pr-${{ github.event.inputs.pr_number }}-*
+          path: ./previous-test-results
+          github-token: ${{ secrets.GITHUB_TOKEN }}  # Required for cross-run downloads in v4
+          
+      - name: Process previous results
+        run: |
+          echo "Processing previous test results..."
+          ls -la ./previous-test-results/
+          # Add processing logic here
