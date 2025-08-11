@@ -22,11 +22,6 @@ const navItems: NavItem[] = [
     icon: <Icons.apexOptimizer className="h-4 w-4" />,
     label: 'Enterprise Demo',
   },
-  {
-    href: '/admin',
-    icon: <Icons.settings className="h-4 w-4" />,
-    label: 'Admin',
-  },
 ];
 
 export function NavLinks() {
