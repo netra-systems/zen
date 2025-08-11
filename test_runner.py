@@ -89,7 +89,7 @@ class UnifiedTestRunner:
         self.reports_dir = PROJECT_ROOT / "test_reports"
         self.reports_dir.mkdir(exist_ok=True)
         
-    def run_backend_tests(self, args: List[str], timeout: int = 300) -> Tuple[int, str]:
+    def run_backend_tests(self, args: List[str], timeout: int = 300, real_llm_config: Optional[Dict] = None) -> Tuple[int, str]:
         """Run backend tests with specified arguments"""
         print(f"\n{'='*60}")
         print("RUNNING BACKEND TESTS")
@@ -106,10 +106,21 @@ class UnifiedTestRunner:
         
         cmd = [sys.executable, str(backend_script)] + args
         
+        # Prepare environment with real LLM configuration if provided
+        env = os.environ.copy()
+        if real_llm_config:
+            env["TEST_USE_REAL_LLM"] = "true"
+            env["TEST_LLM_MODEL"] = real_llm_config.get("model", "gemini-1.5-flash")
+            env["TEST_LLM_TIMEOUT"] = str(real_llm_config.get("timeout", 30))
+            if real_llm_config.get("parallel"):
+                env["TEST_PARALLEL"] = str(real_llm_config["parallel"])
+            print(f"[INFO] Real LLM testing enabled with {env['TEST_LLM_MODEL']} (timeout: {env['TEST_LLM_TIMEOUT']}s)")
+        
         try:
             result = subprocess.run(
                 cmd, 
-                cwd=PROJECT_ROOT, 
+                cwd=PROJECT_ROOT,
+                env=env,
                 capture_output=True, 
                 text=True,
                 encoding='utf-8',
@@ -483,6 +494,32 @@ Purpose Guide:
         help="Skip generating test reports"
     )
     
+    # Real LLM testing options
+    parser.add_argument(
+        "--real-llm",
+        action="store_true",
+        help="Use real LLM API calls instead of mocks (increases test duration and cost)"
+    )
+    parser.add_argument(
+        "--llm-model",
+        type=str,
+        default="gemini-1.5-flash",
+        choices=["gemini-1.5-flash", "gemini-1.5-pro", "gpt-4", "gpt-3.5-turbo", "claude-3-sonnet"],
+        help="LLM model to use for real tests (default: gemini-1.5-flash for cost efficiency)"
+    )
+    parser.add_argument(
+        "--llm-timeout",
+        type=int,
+        default=30,
+        help="Timeout in seconds for individual LLM calls (default: 30, recommended: 30-120)"
+    )
+    parser.add_argument(
+        "--parallel",
+        type=str,
+        default="auto",
+        help="Parallelism for tests: auto, 1 (sequential), or number of workers"
+    )
+    
     args = parser.parse_args()
     
     # Print header
@@ -508,6 +545,28 @@ Purpose Guide:
         print(f"Purpose: {config['purpose']}")
         print(f"Timeout: {config.get('timeout', 300)}s")
         
+        # Prepare real LLM configuration if requested
+        real_llm_config = None
+        if args.real_llm:
+            # Smoke tests should never use real LLM for speed
+            if level == "smoke":
+                print("[WARNING] Real LLM testing disabled for smoke tests (use unit or higher)")
+            else:
+                real_llm_config = {
+                    "model": args.llm_model,
+                    "timeout": args.llm_timeout,
+                    "parallel": args.parallel
+                }
+                print(f"[INFO] Real LLM testing enabled")
+                print(f"  - Model: {args.llm_model}")
+                print(f"  - Timeout: {args.llm_timeout}s per call")
+                print(f"  - Parallelism: {args.parallel}")
+                
+                # Adjust test timeout for real LLM tests
+                adjusted_timeout = config.get('timeout', 300) * 3  # Triple timeout for real LLM
+                config['timeout'] = adjusted_timeout
+                print(f"  - Adjusted test timeout: {adjusted_timeout}s")
+        
         # Run tests based on selection
         backend_exit = 0
         frontend_exit = 0
@@ -515,7 +574,8 @@ Purpose Guide:
         if args.backend_only:
             backend_exit, _ = runner.run_backend_tests(
                 config['backend_args'], 
-                config.get('timeout', 300)
+                config.get('timeout', 300),
+                real_llm_config
             )
             runner.results["frontend"]["status"] = "skipped"
             exit_code = backend_exit
@@ -531,7 +591,8 @@ Purpose Guide:
             if config.get('run_both', True):
                 backend_exit, _ = runner.run_backend_tests(
                     config['backend_args'],
-                    config.get('timeout', 300)
+                    config.get('timeout', 300),
+                    real_llm_config
                 )
                 frontend_exit, _ = runner.run_frontend_tests(
                     config['frontend_args'], 
@@ -542,7 +603,8 @@ Purpose Guide:
                 # Backend only for critical tests
                 backend_exit, _ = runner.run_backend_tests(
                     config['backend_args'],
-                    config.get('timeout', 300)
+                    config.get('timeout', 300),
+                    real_llm_config
                 )
                 runner.results["frontend"]["status"] = "skipped"
                 exit_code = backend_exit
