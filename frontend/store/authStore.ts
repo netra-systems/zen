@@ -5,7 +5,10 @@ interface User {
   id: string;
   email: string;
   name?: string;
-  role?: string;
+  role?: 'standard_user' | 'power_user' | 'developer' | 'admin' | 'super_admin';
+  permissions?: string[];
+  is_developer?: boolean;
+  is_superuser?: boolean;
 }
 
 interface AuthState {
@@ -22,6 +25,13 @@ interface AuthState {
   setError: (error: string | null) => void;
   updateUser: (user: Partial<User>) => void;
   reset: () => void;
+  
+  // Permission helpers
+  hasPermission: (permission: string) => boolean;
+  hasAnyPermission: (permissions: string[]) => boolean;
+  hasAllPermissions: (permissions: string[]) => boolean;
+  isAdminOrHigher: () => boolean;
+  isDeveloperOrHigher: () => boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
