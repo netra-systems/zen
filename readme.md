@@ -19,6 +19,7 @@ Netra is a sophisticated AI optimization platform that leverages a multi-agent s
 
 ## 📋 Table of Contents
 
+- [Developer Welcome Guide](#-developer-welcome-guide) **← Start Here for AI-Native Development**
 - [Quick Start](#-quick-start)
 - [Architecture](#-architecture)
 - [Installation](#-installation)
@@ -27,6 +28,16 @@ Netra is a sophisticated AI optimization platform that leverages a multi-agent s
 - [Testing](#-testing)
 - [Deployment](#-deployment)
 - [Contributing](#-contributing)
+
+## 🚀 Developer Welcome Guide
+
+**New to Netra?** Start with our comprehensive [Developer Welcome Guide](DEVELOPER_WELCOME_GUIDE.md) to understand:
+- **AI-Native Development Philosophy**: How we use AI agents as first-class citizens in development
+- **Specification-Driven Development**: Why specifications, not code, are our source of truth
+- **Ultra-Thinking Capabilities**: Deep AI analysis for intelligent code generation
+- **Autonomous Improvement Cycles**: How the system self-optimizes with 97% test coverage targets
+
+📖 **[Read the Developer Welcome Guide →](DEVELOPER_WELCOME_GUIDE.md)**
 
 ## 🏃 Quick Start
 
@@ -678,6 +689,7 @@ This project is proprietary software owned by Netra Systems.
 
 ## 🔗 Links
 
+- **[Developer Welcome Guide](DEVELOPER_WELCOME_GUIDE.md)** - Essential reading for AI-native development
 - [Documentation](docs/)
 - [Deployment Guides](deployment_docs/)
 - [API Reference](docs/API_REFERENCE.md)
