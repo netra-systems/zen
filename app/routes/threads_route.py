@@ -11,6 +11,8 @@ from app.services.database.thread_repository import ThreadRepository
 from app.services.database.message_repository import MessageRepository
 from app.logging_config import central_logger
 from app.auth.auth_dependencies import get_current_active_user
+from app.llm.llm_manager import LLMManager
+from app.ws_manager import ws_manager
 from pydantic import BaseModel
 import time
 import uuid
