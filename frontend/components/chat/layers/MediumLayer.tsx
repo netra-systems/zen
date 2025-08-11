@@ -9,7 +9,7 @@ export const MediumLayer: React.FC<MediumLayerProps> = ({ data }) => {
   const [displayedContent, setDisplayedContent] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const contentRef = useRef<string>('');
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number>(0);
   const lastUpdateRef = useRef<number>(Date.now());
   
   // Stream content character by character using requestAnimationFrame

@@ -6,10 +6,10 @@
         <version>5.0</version>
         <created>2025-08-11</created>
         <updated>2025-08-11</updated>
-        <description>Unified chat interface with isolated chat sessions, deduplication, backend schema alignment, and developer overflow</description>
+        <description>Complete unified chat interface overhaul - removing legacy blue bars, adding proper thread management, overflow panel, agent deduplication, and modern visual design</description>
     </metadata>
     
-    <primary-goal>World-class chat interface with isolated chat sessions, REAL backend data, intelligent response streaming, zero duplicate information, and developer-friendly debugging</primary-goal>
+    <primary-goal>Enterprise-grade chat interface with isolated thread management, real-time WebSocket streaming, intelligent agent deduplication, modern glassmorphic design (NO BLUE BARS), comprehensive developer debugging panel, and seamless multi-chat navigation</primary-goal>
     
     <core-principles>
         <principle id="real-data-only">
@@ -37,8 +37,50 @@
             <name>Agent Display Deduplication</name>
             <description>Each sub-agent appears exactly once in the UI, even if called multiple times. Show latest status only</description>
         </principle>
+        <principle id="no-legacy-styles">
+            <name>No Legacy Blue Bars</name>
+            <description>Remove ALL blue gradient bars from the interface. Use modern glassmorphic design with subtle shadows and borders instead</description>
+            <enforcement>NO bg-gradient-to-r from-blue-500 patterns. Use backdrop-blur and rgba backgrounds</enforcement>
+        </principle>
+        <principle id="component-consolidation">
+            <name>Single Component Architecture</name>
+            <description>One MainChat component, not multiple versions. Retire legacy components like UltraMainChat, ResponsiveMainChat</description>
+            <enforcement>All chat routes must use the unified MainChat component</enforcement>
+        </principle>
     </core-principles>
     
+    <regression-fixes>
+        <fix id="remove-blue-bars" priority="critical">
+            <issue>Legacy blue gradient bars (bg-gradient-to-r from-blue-500) throughout UI</issue>
+            <solution>Replace with modern glassmorphic design using backdrop-blur-md and white/transparent backgrounds</solution>
+            <affected-files>
+                <file>frontend/components/chat/layers/FastLayer.tsx - Line 14</file>
+                <file>frontend/components/chat/PersistentResponseCard.tsx - Line 35</file>
+            </affected-files>
+        </fix>
+        <fix id="consolidate-components" priority="high">
+            <issue>Multiple competing chat components causing confusion</issue>
+            <solution>Use only MainChat.tsx, archive or remove Ultra/Responsive variants</solution>
+            <migration-plan>
+                <step>1. Ensure MainChat has all required features</step>
+                <step>2. Update all imports to use MainChat</step>
+                <step>3. Move legacy components to archive folder</step>
+            </migration-plan>
+        </fix>
+        <fix id="add-thread-sidebar" priority="critical">
+            <issue>Missing thread sidebar for chat navigation</issue>
+            <solution>Implement ChatSidebar component with thread list, new chat button, and thread switching</solution>
+        </fix>
+        <fix id="implement-overflow-panel" priority="high">
+            <issue>No developer debugging panel for WebSocket events and performance</issue>
+            <solution>Create OverflowPanel with event viewer, timeline, metrics, and error details</solution>
+        </fix>
+        <fix id="proper-deduplication" priority="medium">
+            <issue>Duplicate agent displays when same agent runs multiple times</issue>
+            <solution>Track agent executions in Map, show iteration count for reruns</solution>
+        </fix>
+    </regression-fixes>
+
     <chat-session-management>
         <thread-model>
             <description>Each chat corresponds to one Thread in backend with unique thread_id</description>
@@ -515,28 +557,28 @@
     <visual-design>
         <persistent-card-styling>
             <fast-layer>
-                <background>Linear gradient: #3B82F6 to #2563EB</background>
-                <text-color>White</text-color>
+                <background>Modern glassmorphic: rgba(255, 255, 255, 0.95) with backdrop-blur-md, subtle border</background>
+                <text-color>#27272A (zinc-800)</text-color>
                 <height>48px fixed</height>
                 <padding>12px horizontal</padding>
                 <elements>
-                    <agent-name>Font-weight: 600, font-size: 14px</agent-name>
-                    <tool-badges>Rounded pills, 8px padding, semi-transparent background</tool-badges>
-                    <presence>Animated spin, 16px size, opacity 0.8</presence>
+                    <agent-name>Font-weight: 600, font-size: 14px, text-zinc-800</agent-name>
+                    <tool-badges>Modern pills with colored borders matching agent type, white background with subtle shadow</tool-badges>
+                    <presence>Modern pulse animation with subtle green dot, 8px size</presence>
                 </elements>
             </fast-layer>
             
             <medium-layer>
-                <background>White with subtle top shadow</background>
+                <background>White with soft inset shadow for depth</background>
                 <text-color>#27272A</text-color>
                 <padding>16px</padding>
                 <min-height>100px</min-height>
                 <max-height>400px with internal scroll</max-height>
-                <streaming-cursor>Blinking vertical bar at text end</streaming-cursor>
+                <streaming-cursor>Smooth fade-in-out cursor with 0.5s animation</streaming-cursor>
             </medium-layer>
             
             <slow-layer>
-                <background>#FAFAFA</background>
+                <background>White with subtle gradient to #FAFAFA</background>
                 <border-top>1px solid #E4E4E7</border-top>
                 <padding>20px</padding>
                 <sections>

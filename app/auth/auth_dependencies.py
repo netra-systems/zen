@@ -1,8 +1,10 @@
-from typing import Annotated, Optional
+from typing import Annotated, Optional, List
 from fastapi import Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 from app.dependencies import get_db_session, get_security_service
 from app.services.security_service import SecurityService
+from app.services.permission_service import PermissionService
 from app.db.models_postgres import User
 from app.logging_config import central_logger
 from fastapi.security import OAuth2PasswordBearer
@@ -58,7 +60,66 @@ async def get_current_active_user(
         )
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+    
+    # Auto-detect and update developer status
+    # Note: This is using sync Session, may need adjustment for async
+    # For now, we'll skip auto-update in async context and rely on login-time detection
+    
     return user
+
+def require_permission(permission: str):
+    """Dependency to require a specific permission"""
+    async def permission_checker(
+        user: User = Depends(get_current_active_user)
+    ) -> User:
+        if not PermissionService.has_permission(user, permission):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Permission denied. Required permission: {permission}"
+            )
+        return user
+    return permission_checker
+
+def require_any_permission(permissions: List[str]):
+    """Dependency to require any of the specified permissions"""
+    async def permission_checker(
+        user: User = Depends(get_current_active_user)
+    ) -> User:
+        if not PermissionService.has_any_permission(user, permissions):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Permission denied. Required one of: {', '.join(permissions)}"
+            )
+        return user
+    return permission_checker
+
+def require_developer():
+    """Dependency to require developer role or higher"""
+    async def developer_checker(
+        user: User = Depends(get_current_active_user)
+    ) -> User:
+        if not PermissionService.is_developer_or_higher(user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Developer access required"
+            )
+        return user
+    return developer_checker
+
+def require_admin():
+    """Dependency to require admin role or higher"""
+    async def admin_checker(
+        user: User = Depends(get_current_active_user)
+    ) -> User:
+        if not PermissionService.is_admin_or_higher(user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin access required"
+            )
+        return user
+    return admin_checker
 
 ActiveUserDep = Depends(get_current_active_user)
 ActiveUserWsDep = Depends(get_current_user_ws)
+DeveloperDep = Depends(require_developer())
+AdminDep = Depends(require_admin())

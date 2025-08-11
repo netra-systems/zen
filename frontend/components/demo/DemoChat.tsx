@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { generateUniqueId } from '@/lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -79,7 +80,7 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = false
         setActiveAgent(data.active_agent)
       } else if (data.type === 'chat_response') {
         const responseMessage: Message = {
-          id: Date.now().toString(),
+          id: generateUniqueId('msg'),
           role: 'assistant',
           content: data.response,
           timestamp: new Date(),
@@ -264,7 +265,7 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = false
       await new Promise(resolve => setTimeout(resolve, 1000))
       
       const responseMessage: Message = {
-        id: Date.now().toString(),
+        id: generateUniqueId('msg'),
         role: 'assistant',
         content: data.response,
         timestamp: new Date(),
@@ -297,7 +298,7 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = false
       const costSaved = 15000 + Math.floor(Math.random() * 35000)
       
       const response: Message = {
-        id: Date.now().toString(),
+        id: generateUniqueId('msg'),
         role: 'assistant',
         content: `Based on my analysis of your ${industry.toLowerCase()} workload, I've identified significant optimization opportunities:
 
@@ -348,7 +349,7 @@ Would you like me to generate a detailed implementation roadmap or explore speci
     if (!input.trim() || isProcessing) return
     
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: generateUniqueId('msg'),
       role: 'user',
       content: input,
       timestamp: new Date()

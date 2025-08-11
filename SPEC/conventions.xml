@@ -48,6 +48,21 @@
             <rule>`createContext`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive</rule>
         </convention>
         
+        <convention id="unique-id-generation">
+            <title>Unique ID Generation</title>
+            <description>Prevent React duplicate key warnings by using proper unique ID generation</description>
+            <rules>
+                <rule priority="critical">ALWAYS use generateUniqueId() from @/lib/utils for creating unique IDs in React components</rule>
+                <rule>NEVER use Date.now() alone as it can create duplicates in rapid succession</rule>
+                <rule>The generateUniqueId() function combines timestamp, counter, and random string for guaranteed uniqueness</rule>
+                <rule>Use appropriate prefixes: generateUniqueId('msg') for messages, generateUniqueId('error') for errors, etc.</rule>
+            </rules>
+            <rationale>
+                Using Date.now() alone can create duplicate keys when components are created in rapid succession (same millisecond),
+                causing React warnings and potential rendering issues. The generateUniqueId() utility ensures true uniqueness.
+            </rationale>
+        </convention>
+        
         <convention id="ui-layout-architecture">
             <title>UI Layout Architecture</title>
             <description>Maintain consistent layout architecture across the application</description>

@@ -492,6 +492,11 @@ python scripts/test_frontend.py --watch
 6. **Testing**: Write tests for new functionality, maintain existing test coverage
 7. **Repository Pattern**: Use repositories for database access
 8. **State Management**: Use state persistence service for agent state
+9. **Unique ID Generation**: Always use `generateUniqueId()` from `@/lib/utils` for creating unique IDs in React components
+   - Prevents duplicate key warnings in React
+   - Combines timestamp, counter, and random string for guaranteed uniqueness
+   - Example: `generateUniqueId('msg')` for message IDs, `generateUniqueId('error')` for error IDs
+   - Never use `Date.now()` alone as it can create duplicates in rapid succession
 
 ## Common Tasks
 

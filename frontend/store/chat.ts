@@ -1,5 +1,6 @@
 
 import { create } from 'zustand';
+import { generateUniqueId } from '@/lib/utils';
 import { Message, SubAgentState as SubAgentStatus } from '@/types/chat';
 
 interface SubAgentStatusData {
@@ -62,7 +63,7 @@ export const useChatStore = create<ChatState>((set) => ({
     // Ensure message has a unique ID and it's never an empty string
     const messageWithId = {
       ...message,
-      id: (message.id && message.id.trim() !== '') ? message.id : `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      id: (message.id && message.id.trim() !== '') ? message.id : generateUniqueId('msg')
     };
     return {
       messages: [...state.messages, messageWithId]
@@ -133,7 +134,7 @@ export const useChatStore = create<ChatState>((set) => ({
   loadThreadMessages: (messages) => set({ 
     messages: messages.map((msg, index) => ({
       ...msg,
-      id: (msg.id && msg.id.trim() !== '') ? msg.id : `msg_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`
+      id: (msg.id && msg.id.trim() !== '') ? msg.id : generateUniqueId('msg')
     }))
   }),
 
@@ -142,7 +143,7 @@ export const useChatStore = create<ChatState>((set) => ({
       const { id: msgId, ...restMsg } = msg;
       return {
         ...restMsg,
-        id: (msgId && msgId.trim() !== '') ? msgId : `msg_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
+        id: (msgId && msgId.trim() !== '') ? msgId : generateUniqueId('msg'),
         type: msg.role === 'user' ? 'user' : 'ai',
         content: msg.content,
         created_at: msg.created_at || new Date().toISOString(),
@@ -153,7 +154,7 @@ export const useChatStore = create<ChatState>((set) => ({
   
   addError: (error) => set((state) => ({
     messages: [...state.messages, {
-      id: `error-${Date.now()}`,
+      id: generateUniqueId('error'),
       type: 'error' as const,
       content: error,
       created_at: new Date().toISOString(),
@@ -164,7 +165,7 @@ export const useChatStore = create<ChatState>((set) => ({
   
   addErrorMessage: (error) => set((state) => ({
     messages: [...state.messages, {
-      id: `error-${Date.now()}`,
+      id: generateUniqueId('error'),
       type: 'error' as const,
       content: error,
       created_at: new Date().toISOString(),

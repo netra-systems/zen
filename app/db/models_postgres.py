@@ -34,6 +34,10 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
+    # Admin permission fields
+    role = Column(String, default="standard_user")  # standard_user, power_user, developer, admin, super_admin
+    permissions = Column(JSON, default=dict)  # Additional granular permissions
+    is_developer = Column(Boolean(), default=False)  # Auto-detected developer status
     secrets = relationship("Secret", back_populates="user", cascade="all, delete-orphan")
 
 class Secret(Base):

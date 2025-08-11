@@ -197,7 +197,6 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
                 finalReport,
                 totalDuration: event.payload.total_duration_ms,
                 metrics: {
-                  total_duration_ms: event.payload.total_duration_ms,
                   total_tokens: 0, // Will be populated from agent_metrics
                   ...event.payload
                 }
