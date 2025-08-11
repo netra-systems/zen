@@ -312,7 +312,7 @@ An unexpected issue occurred: {error_message}
         return {
             'data_source': data_source,
             'partial_data_summary': self._summarize_partial_data(metadata.partial_data),
-            'error_details': self._format_error_details(metadata),
+            'error_details': metadata.error_message,
             'alternative_sources': self._suggest_alternative_sources(data_source),
             'alternative_approach': "cached historical data",
             'fallback_data': self._format_fallback_data(metadata.partial_data)

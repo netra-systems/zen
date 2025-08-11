@@ -1,0 +1,51 @@
+# --------------------------------------------------------------------------
+# --- 1. CONFIGURE THE APPLICATION TO TARGET ---
+# --------------------------------------------------------------------------
+# Change "cmd" to the process name of the application you want to arrange.
+# Examples: "notepad", "chrome", "powershell", "explorer"
+$processName = "cmd"
+
+
+# --------------------------------------------------------------------------
+# --- 2. SCRIPT LOGIC (No changes needed below this line) ---
+# --------------------------------------------------------------------------
+Add-Type @"
+    using System;
+    using System.Runtime.InteropServices;
+    public class Win32 {
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+    }
+"@
+
+# Get the working area of the primary screen (excludes the taskbar)
+$screenWidth = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea.Width
+$screenHeight = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea.Height
+$screenX = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea.X
+$screenY = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea.Y
+
+# Find all processes for the target app that have a visible main window
+$windows = Get-Process $processName | Where-Object { $_.MainWindowHandle -ne [System.IntPtr]::Zero }
+
+if ($windows.Count -eq 0) {
+    Write-Host "No open windows found for process name '$processName'."
+    return
+}
+
+# Calculate dimensions for each tile
+$windowHeight = [Math]::Floor($screenHeight / $windows.Count)
+$windowWidth = $screenWidth
+$yPos = $screenY
+
+Write-Host "Arranging $($windows.Count) '$processName' windows..."
+
+# Loop through each window and move it into place
+foreach ($window in $windows) {
+    # Flag to move, resize, and show the window
+    $SWP_SHOWWINDOW = 0x0040
+    [Win32]::SetWindowPos($window.MainWindowHandle, 0, $screenX, $yPos, $windowWidth, $windowHeight, $SWP_SHOWWINDOW) | Out-Null
+    $yPos += $windowHeight
+}
+
+Write-Host "Done!"
