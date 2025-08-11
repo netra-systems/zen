@@ -1,717 +1,140 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code when working with the Netra AI Optimization Platform.
+
+## Core Principles
+
+### 1. Think Deeply by Default
+- **ALWAYS** analyze problems thoroughly before implementing solutions
+- Consider edge cases, performance implications, and system-wide impacts
+- Use ultra-thinking capabilities when available for complex problems
+- Question assumptions and validate understanding
+
+### 2. Document Learnings to Prevent Regression
+- **IMMEDIATELY** update this file or relevant specs when discovering patterns
+- Document gotchas, workarounds, and non-obvious behaviors
+- Add examples of what works and what doesn't
+- Create new specs for complex domains
+
+### 3. Keep Specifications Current
+- Specs in `SPEC/*.xml` are the source of truth
+- Update specs BEFORE implementing changes
+- Reference specs for detailed guidelines
+- Create new specs rather than bloating this file
 
 ## Project Overview
 
-Netra AI Optimization Platform - The world's best, highest quality, most intelligent system for optimizing AI workloads including AI tools and Agents. Used by top startups, F100, OpenAI, and Anthropic.
+Netra AI Optimization Platform - Enterprise-grade system for optimizing AI workloads.
 
-## Essential Commands
+## Quick Start
 
-### Quick Test Commands (Most Commonly Used)
+### Development
 ```bash
-# RECOMMENDED: Run quick tests before any commit (includes import validation)
-python test_runner.py --mode quick
-
-# Run specific category of tests
-python scripts/test_backend.py --category unit    # Backend unit tests
-python scripts/test_frontend.py --category components  # Frontend component tests
-
-# Run with coverage
-python test_runner.py --mode comprehensive
-
-# Run failed tests first (after fixing issues)
-python scripts/test_backend.py --failed-first
-```
-
-### Specifications
-XML specifications are in `SPEC/*.xml`
-
-**Important Specifications:**
-- `SPEC/code_changes.xml` - **CRITICAL**: Required updates when making code changes
-  - Import tests must be updated for new modules/dependencies
-  - Type definitions must stay synchronized
-  - Test coverage requirements must be met
-  - See full checklist in the specification
-- `SPEC/test_update_spec.xml` - **AUTOMATED TEST IMPROVEMENT WITH ULTRA-THINKING**: Achieve 97% coverage
-  - Run `python scripts/test_updater.py --execute-spec` or say "run test_update_spec.xml"
-  - **NEW**: Ultra-thinking capabilities for intelligent test analysis
-  - **NEW**: Autonomous test review with `python scripts/test_autonomous_review.py --auto`
-  - Automatically generates missing tests, updates legacy patterns, optimizes performance
-  - Daily/weekly/monthly automated test improvement cycles
-  - Self-healing test capabilities and coverage tracking
-  - AI agent metadata tracking for all modifications
-- `SPEC/conventions.xml` - Project conventions and coding standards
-- `SPEC/instructions.xml` - General development instructions
-- `SPEC/LEGACY_CODE_CLEANUP.xml` - Legacy code identification and cleanup procedures
-- `SPEC/unified_chat_ui_ux.xml` - **V5 OVERHAUL**: Modern glassmorphic chat UI without blue bars, proper thread management, overflow debugging panel
-  - Removes ALL legacy blue gradient bars
-  - Implements proper thread sidebar with chat isolation
-  - Adds developer overflow panel (Ctrl+Shift+D)
-  - Agent deduplication tracking
-  - Modern glassmorphic design system
-
-### Unified Development Environment (NEW - RECOMMENDED)
-
-#### First-Time Setup (Recommended Configuration)
-```bash
-# RECOMMENDED FOR FIRST-TIME DEVELOPERS
-# This configuration provides the best experience:
-# - Avoids port conflicts with --dynamic
-# - 30-50% faster with --no-backend-reload
-# - Loads secrets securely with --load-secrets
+# Recommended: Start both backend and frontend
 python dev_launcher.py --dynamic --no-backend-reload --load-secrets
 
-# Alternative: Without cloud secrets
-python dev_launcher.py --dynamic --no-backend-reload
-```
-
-#### Standard Commands
-```bash
-# Quick start - launches both backend and frontend with automatic configuration
-python dev_launcher.py
-
-# With dynamic port allocation (avoids conflicts)
-python dev_launcher.py --dynamic
-
-# Maximum performance (no hot reload)
-python dev_launcher.py --dynamic --no-reload
-
-# With custom ports
-python dev_launcher.py --backend-port 8080 --frontend-port 3001
-
-# Check service status
-python scripts/service_discovery.py status
-```
-
-#### Why These Flags?
-- **`--dynamic`**: Automatically finds free ports, prevents "port already in use" errors
-- **`--no-backend-reload`**: Disables file watching for 30-50% performance improvement
-- **`--load-secrets`**: Loads API keys from Google Cloud Secret Manager (if configured)
-- **`--no-reload`**: Disables all hot reload for maximum performance during testing
-
-### Backend Development (Windows)
-
-```bash
-# Setup virtual environment
-python -m venv venv
-venv\Scripts\activate  # Windows activation
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Database setup
-python create_db.py
-python run_migrations.py
-
-# Run backend server (traditional)
-python run_server.py
-
-# Run with dynamic port allocation (NEW)
-python run_server.py --dynamic-port
-
-# Run with specific port
-python run_server.py --port 8080
-```
-
-### Frontend Development
-```bash
-cd frontend
-npm install
-npm run dev      # Development server
-npm run build    # Production build
-npm run test     # Run tests
-npm run lint     # Run linter
-
-# Start with automatic backend discovery (NEW)
-node scripts/start_with_discovery.js
-```
-
-### Testing
-
-#### Quick Start - Unified Test Runner
-```bash
-# Run quick smoke tests (< 1 minute)
+# Quick validation before any changes
 python test_runner.py --mode quick
-
-# Run standard test suite (~ 5 minutes)
-python test_runner.py --mode standard
-
-# Run comprehensive tests with coverage (~ 10 minutes)
-python test_runner.py --mode comprehensive
-
-# Full CI/CD pipeline (~ 15 minutes)
-python test_runner.py --mode ci --parallel
 ```
 
-#### Backend Testing
-```bash
-# Using the comprehensive backend test runner
-python scripts/test_backend.py                  # Run all backend tests
-python scripts/test_backend.py --category unit  # Run unit tests only
-python scripts/test_backend.py --category agent # Run agent tests
-python scripts/test_backend.py --coverage       # Run with coverage reporting
-python scripts/test_backend.py --parallel auto  # Run tests in parallel
-python scripts/test_backend.py --fail-fast      # Stop on first failure
+## Critical Specifications
 
-# Test categories available:
-# - smoke: Quick health checks
-# - unit: Unit tests for services and utilities
-# - integration: API endpoint tests
-# - agent: Agent system tests
-# - websocket: WebSocket connection tests
-# - auth: Authentication tests
-# - database: Database repository tests
-# - critical: Critical path tests
+**ALWAYS CONSULT SPECS FIRST** - They contain the detailed requirements and patterns.
 
-# Direct pytest usage (fallback)
-pytest                                # Run all tests
-pytest app/tests/test_auth.py       # Run specific test file
-pytest -k "test_login"               # Run tests matching pattern
-pytest --cov=app --cov-report=html  # Generate coverage report
-```
+### Primary Specs (Consult for Every Change)
+- `SPEC/code_changes.xml` - **MANDATORY** checklist for any code modification
+- `SPEC/conventions.xml` - Coding standards and patterns
+- `SPEC/instructions.xml` - General development guidelines
 
-#### Frontend Testing
-```bash
-# Using the comprehensive frontend test runner
-python scripts/test_frontend.py                    # Run all Jest tests
-python scripts/test_frontend.py --category components  # Test components only
-python scripts/test_frontend.py --coverage        # Run with coverage
-python scripts/test_frontend.py --lint            # Run ESLint
-python scripts/test_frontend.py --type-check      # TypeScript checking
-python scripts/test_frontend.py --e2e             # Run Cypress E2E tests
-python scripts/test_frontend.py --cypress-open    # Open Cypress GUI
+### Domain-Specific Specs
+- `SPEC/testing.xml` - Testing strategy, troubleshooting, 97% coverage target
+- `SPEC/architecture.xml` - System design, components, workflows
+- `SPEC/clickhouse.xml` - ClickHouse configuration and troubleshooting
+- `SPEC/unified_chat_ui_ux.xml` - V5 UI requirements (glassmorphic, no blue bars)
+- `SPEC/test_update_spec.xml` - Automated test improvement with ultra-thinking
+- `SPEC/LEGACY_CODE_CLEANUP.xml` - Legacy code identification procedures
 
-# Test categories available:
-# - smoke: Quick critical tests
-# - unit: Unit tests
-# - components: Component tests
-# - hooks: React hooks tests
-# - store: State management tests
-# - websocket: WebSocket provider tests
-# - auth: Authentication flow tests
-# - e2e: End-to-end Cypress tests
 
-# Direct npm usage (fallback)
-cd frontend
-npm test                  # Run Jest tests
-npm run lint             # Run ESLint
-npm run cypress:open     # Interactive Cypress
-npm run cy:run          # Headless Cypress tests
-```
 
-#### Test Configurations
 
-##### Coverage Requirements
-- **Target coverage: 97%** (automated improvement via `SPEC/test_update_spec.xml`)
-- Current baseline: Backend 70%, Frontend 60%
-- Coverage reports: `reports/coverage/html/index.html`
-- Automated coverage improvement: `python scripts/test_updater.py --execute-spec`
+## Critical Development Rules
 
-##### Environment Setup
-Tests automatically configure these environment variables:
-- `TESTING=1`
-- `DATABASE_URL=sqlite+aiosqlite:///:memory:`
-- `REDIS_URL=redis://localhost:6379/1`
-- `SECRET_KEY=test-secret-key-for-testing-only`
+### MANDATORY for Every Change
+1. **Consult `SPEC/code_changes.xml`** - Complete checklist for any modification
+2. **Update import tests** when adding new modules/dependencies
+3. **Run quick tests** before any commit: `python test_runner.py --mode quick`
+4. **Update relevant specs** with learnings and patterns discovered
 
-##### Test Reports
-After running tests, find reports in:
-- `reports/test_report.json` - JSON test results
-- `reports/test_report.md` - Markdown summary
-- `reports/coverage/` - Backend coverage reports
-- `reports/frontend-coverage/` - Frontend coverage reports
-- `reports/tests/` - Detailed test reports
-
-#### Common Testing Tasks
-
-```bash
-# Quick validation before commit
-python test_runner.py --mode quick
-
-# Full test suite with coverage
-python test_runner.py --mode comprehensive
-
-# AUTOMATED TEST IMPROVEMENT (achieves 97% coverage goal)
-python scripts/test_updater.py --execute-spec  # Run full test update specification with ultra-thinking
-python scripts/test_updater.py --ultra-think   # Enable ultra-thinking deep analysis
-python scripts/test_updater.py --monitor       # Track progress toward 97% goal
-python scripts/test_updater.py --daily-cycle   # Daily test improvements
-python scripts/test_updater.py --weekly-optimization  # Weekly optimization
-python scripts/test_updater.py --with-metadata # Include AI agent metadata tracking
-
-# AUTONOMOUS TEST REVIEW (ultra-thinking powered)
-python scripts/test_autonomous_review.py --auto           # Fully autonomous test improvement
-python scripts/test_autonomous_review.py --quick          # Quick test refresh (< 5 min)
-python scripts/test_autonomous_review.py --full-analysis  # Complete analysis with ultra-thinking
-python scripts/test_autonomous_review.py --smart-generate # Intelligently generate missing tests
-python scripts/test_autonomous_review.py --continuous     # Run continuous background review
-python scripts/test_autonomous_review.py --ultra-think    # Enable ultra-thinking capabilities
-
-# Test only authentication flows
-python scripts/test_backend.py --category auth
-python scripts/test_frontend.py --category auth
-
-# Test agent system
-python scripts/test_backend.py --category agent
-
-# Run failed tests first
-python scripts/test_backend.py --failed-first
-
-# Debug specific test
-pytest app/tests/test_main.py::test_specific_function -vv
-
-# Update Jest snapshots
-python scripts/test_frontend.py --update-snapshots
-
-# Run tests in watch mode (development)
-python scripts/test_frontend.py --watch
-```
-
-#### Test Troubleshooting & Common Issues
-
-##### Backend Test Issues
-1. **Missing Dependencies**: Ensure all required packages are installed
-   ```bash
-   pip install sqlalchemy aiosqlite asyncpg psycopg2-binary
-   ```
-
-2. **Database Test Failures**: Tests use in-memory SQLite by default
-   - Check `TESTING=1` environment variable is set
-   - Verify `conftest.py` fixtures are working
-
-##### Frontend Test Issues
-1. **WebSocket Hook Tests**: Always wrap `useWebSocket` tests with WebSocketProvider
-   ```typescript
-   const wrapper = ({ children }: { children: React.ReactNode }) => (
-     <WebSocketProvider>{children}</WebSocketProvider>
-   );
-   const { result } = renderHook(() => useWebSocket(), { wrapper });
-   ```
-
-2. **Fetch Mock Issues**: Use `mockImplementationOnce` for async responses
-   ```typescript
-   // ❌ Wrong - may not work correctly
-   (fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => data });
-   
-   // ✅ Correct - reliable async handling
-   (fetch as jest.Mock).mockImplementationOnce(async () => ({
-     ok: true,
-     json: async () => data,
-   }));
-   ```
-
-3. **Date.now Mock Issues**: Already handled in `jest.setup.ts` - preserves original function
-   ```typescript
-   // Automatically restored after each test
-   const originalDateNow = Date.now;
-   beforeEach(() => { Date.now = originalDateNow; });
-   afterEach(() => { Date.now = originalDateNow; });
-   ```
-
-4. **Hook API Mismatches**: Check actual hook implementation before testing
-   ```typescript
-   // Example: useError hook actual API
-   const { error, setError, clearError, isError } = useError();
-   // NOT: addError, validateApplicationState, processStateUpdate, etc.
-   ```
-
-5. **Test Timeouts**: Increase timeout for complex integration tests
-   ```typescript
-   it('should handle complex flow', async () => {
-     // test code
-   }, 10000); // 10 second timeout
-   ```
-
-##### Quick Test Fix Checklist
-- [ ] All dependencies installed (backend: SQLAlchemy, frontend: npm packages)
-- [ ] Mock implementations match actual API signatures
-- [ ] React hooks wrapped with appropriate providers
-- [ ] Async operations use proper mock implementations
-- [ ] Test timeouts adequate for operations being tested
-- [ ] Environment variables properly set (TESTING=1, etc.)
-
-## Architecture Overview
-
-### Core Components
-
-1. **Backend (FastAPI)** - `app/`
-   - **Entry Point**: `app/main.py` - Initializes FastAPI app, middleware, OAuth, and routes
-   - **Routes**: `app/routes/` - API endpoints
-     - `auth/` - Authentication endpoints (login, OAuth)
-     - `websockets.py` - WebSocket connections
-     - `agent_route.py` - Agent interactions
-     - `threads_route.py` - Thread management
-     - `generation.py` - Content generation
-     - `llm_cache.py` - LLM cache management
-     - `synthetic_data.py` - Synthetic data generation
-     - `corpus.py` - Corpus management
-     - `config.py` - Configuration endpoints
-     - `supply.py` - Supply catalog
-     - `references.py` - Reference management
-     - `health.py` - Health checks
-     - `admin.py` - Admin functions
-   - **Services**: `app/services/` - Business logic layer
-     - `agent_service.py` - Main agent service
-     - `apex_optimizer_agent/` - Specialized optimization agent with 30+ tools
-     - `database/` - Repository pattern implementations
-     - `websocket/` - WebSocket message handling
-     - `core/` - Core service containers
-     - `cache/` - LLM caching services
-     - `state/` - State management and persistence
-   - **Agents**: `app/agents/` - Multi-agent system
-     - `supervisor.py` - Main supervisor agent
-     - `supervisor_consolidated.py` - Consolidated supervisor logic
-     - `orchestration/` - Agent orchestration components
-     - `base.py` - Base agent class
-     - Sub-agents:
-       - `triage_sub_agent.py` - Request triage
-       - `data_sub_agent.py` - Data analysis
-       - `optimizations_core_sub_agent.py` - Core optimizations
-       - `reporting_sub_agent.py` - Report generation
-       - `actions_to_meet_goals_sub_agent.py` - Goal-oriented actions
-   - **Database**: Dual database system
-     - PostgreSQL: User data, configurations, persistent state
-     - ClickHouse: Time-series log data and analytics
-   - **Supporting Systems**:
-     - Redis: Caching and session management
-     - Background Task Manager: Async task processing
-
-2. **Frontend (Next.js)** - `frontend/`
-   - **Pages**: `frontend/app/` - Next.js app router pages
-     - `chat/` - Main chat interface
-     - `auth/` - Authentication pages
-     - `corpus/` - Corpus management UI
-     - `synthetic-data-generation/` - Data generation UI
-     - `demo/` - Demo features
-     - `enterprise-demo/` - Enterprise demo
-   - **Components**: `frontend/components/` - React components
-     - `chat/` - Chat-specific components
-     - `ui/` - Reusable UI components
-     - `demo/` - Demo components
-   - **State**: `frontend/store/` - Zustand state management
-   - **Hooks**: `frontend/hooks/` - Custom React hooks
-   - **Services**: `frontend/services/` - API client services
-   - **WebSocket**: Real-time communication with backend
-
-3. **Agent System Architecture**
-   - **Supervisor**: Dual implementation with legacy and consolidated versions
-     - Consolidated supervisor includes hooks, execution strategies, and retry logic
-   - **Sub-agents**: Five specialized agents for triage, data, optimization, actions, and reporting
-   - **Tool Dispatcher**: Dynamic routing with 30+ optimization tools
-   - **Tool Registry**: Service-based dynamic tool registration
-   - **State Management**: Database-backed persistence with recovery
-   - **Apex Optimizer Agent**: Production-ready optimizer with:
-     - Cost analysis and simulation tools
-     - Latency bottleneck identification
-     - KV cache optimization
-     - Performance prediction
-     - Policy simulation and optimization
-
-### Key Design Patterns
-
-1. **WebSocket Communication**: Advanced WebSocket manager with:
-   - Connection pooling and per-user tracking
-   - Heartbeat mechanism (30s intervals, 60s timeout)
-   - Automatic retry with exponential backoff
-   - Comprehensive statistics and monitoring
-2. **Dependency Injection**: Services injected via FastAPI dependency system
-3. **Async/Await**: Pervasive async patterns for scalability
-4. **Type Safety**: Pydantic models with auto-generated TypeScript types
-5. **Multi-Agent Orchestration**: Pipeline-based execution with hooks
-6. **Repository Pattern**: Database access through repositories with unit of work
-7. **Error Context**: Trace IDs with middleware-based tracking
-8. **OAuth Integration**: Complete Google OAuth2 implementation
-
-### Database Schema
-
-- **PostgreSQL Tables**: 
-  - `userbase` - User accounts and authentication (renamed from users)
-  - `threads` - Conversation threads with user association
-  - `messages` - Chat messages with role and metadata
-  - `runs` - Agent execution runs with detailed tracking
-  - `thread_runs` - Association between threads and runs
-  - `agent_runs` - Individual agent execution records
-  - `agent_reports` - Generated reports from agents
-  - `references` - Document references with embedding support
-  - `supply_catalog` - Model and provider catalog
-  - `user_secrets` - Encrypted user API keys
-  - `oauth_secrets` - OAuth provider configurations
-- **ClickHouse Tables**: 
-  - `workload_events` - Time-series log data with structured event tracking
-
-### Authentication Flow
-
-1. **Standard Login**:
-   - Frontend sends login request to `/api/auth/login`
-   - Backend validates credentials using bcrypt hashing
-   - JWT token generated with user context
-   - Frontend stores token in localStorage/cookies
-   - Token included in Authorization header for API calls
-
-2. **Google OAuth Flow**:
-   - User clicks Google login button
-   - Redirected to Google OAuth consent screen
-   - Callback to `/api/auth/google/callback` with authorization code
-   - Backend exchanges code for user info
-   - Creates/updates user in database
-   - JWT token issued and returned to frontend
-   - Session management with secure cookies
-
-3. **WebSocket Authentication**:
-   - JWT token passed as query parameter on connection
-   - Token validated and user context established
-   - Connection tracked in WebSocket manager
-   - Automatic cleanup on disconnection
-
-### Agent Workflow
-
-1. User message received via WebSocket with authentication
-2. Message validated and queued in handler with rate limiting
-3. Thread context loaded or created for conversation
-4. Supervisor agent initialized with state recovery
-5. Sequential execution of sub-agents:
-   - TriageSubAgent analyzes request and determines approach
-   - DataSubAgent collects relevant data and context
-   - OptimizationsCoreSubAgent generates optimization recommendations
-   - ActionsToMeetGoalsSubAgent creates action plans
-   - ReportingSubAgent compiles final report
-6. Each agent streams updates via WebSocket events
-7. State persisted to database after each agent
-8. Final report sent with markdown formatting
-9. Thread and run records updated in database
-
-### Error Handling
-
-- **NetraException**: Custom exception class for application errors
-- **Error Context**: Trace IDs for request tracking
-- **Middleware**: Error context middleware for request tracing
-- **Handlers**: Specific handlers for different exception types
-
-## Development Guidelines
-
+### Key Patterns
 1. **Async First**: Use async/await for all I/O operations
-2. **Type Annotations**: Always include type hints for function parameters and returns
-3. **Pydantic Models**: Define schemas for all API requests/responses
-4. **Error Handling**: Use NetraException and proper error context
-5. **Logging**: Use central_logger for consistent logging across the application
-6. **Testing**: Write tests for new functionality, maintain existing test coverage
-7. **Repository Pattern**: Use repositories for database access
-8. **State Management**: Use state persistence service for agent state
-9. **Unique ID Generation**: Always use `generateUniqueId()` from `@/lib/utils` for creating unique IDs in React components
-   - Prevents duplicate key warnings in React
-   - Combines timestamp, counter, and random string for guaranteed uniqueness
-   - Example: `generateUniqueId('msg')` for message IDs, `generateUniqueId('error')` for error IDs
-   - Never use `Date.now()` alone as it can create duplicates in rapid succession
-10. **UI Design System**: Use modern glassmorphic design, NO blue gradient bars
-   - Background: `bg-white/95 backdrop-blur-md` instead of blue gradients
-   - Text: Use zinc color palette `text-zinc-800` for dark text
-   - Accents: Emerald-500 for primary, purple for AI agents
-   - NEVER use `bg-gradient-to-r from-blue-500` patterns
+2. **Type Safety**: Pydantic models for API, TypeScript types for frontend
+3. **Repository Pattern**: Database access through repositories
+4. **Error Handling**: Use NetraException with proper context
+5. **Unique IDs**: Use `generateUniqueId()` from `@/lib/utils` in React
+6. **UI Design**: Glassmorphic design, NO blue gradient bars
 
-## Common Tasks
+## Common Gotchas and Solutions
 
-### IMPORTANT: When Making Any Code Changes
-**Consult `SPEC/code_changes.xml` for the complete checklist**
-1. Update import tests for new modules:
-   - Backend: `app/tests/test_internal_imports.py` and `app/tests/test_external_imports.py`
-   - Frontend: `frontend/__tests__/imports/*.test.tsx`
-2. Run quick tests to validate: `python test_runner.py --mode quick`
-3. Update type definitions in both frontend and backend
-4. Ensure test coverage meets minimums (backend: 70%, frontend: 60%)
+### React Duplicate Key Warnings
+**Problem**: Using `Date.now()` for keys creates duplicates in rapid renders
+**Solution**: Always use `generateUniqueId()` from `@/lib/utils`
+```typescript
+// ❌ Wrong
+key={Date.now()}
 
-### Adding a New API Endpoint
-1. Create route handler in `app/routes/`
-2. Define Pydantic schemas in `app/schemas/`
-3. Implement business logic in `app/services/`
-4. Add repository if database access needed in `app/services/database/`
-5. Add tests in `tests/routes/`
+// ✅ Correct
+key={generateUniqueId('msg')}
+```
 
-### Creating a New Sub-Agent
-1. Create agent class in `app/agents/` extending BaseAgent
-2. Define agent prompts in `app/agents/prompts.py`
-3. Register agent with supervisor in `app/agents/supervisor.py`
-4. Add agent-specific tools if needed
-5. Update tool dispatcher if new tools added
+### WebSocket Test Failures
+**Problem**: Hook tests fail without provider
+**Solution**: Wrap with WebSocketProvider
+```typescript
+const wrapper = ({ children }) => (
+  <WebSocketProvider>{children}</WebSocketProvider>
+);
+```
 
-### Database Migrations
+### ClickHouse Nested Array Errors
+**Problem**: NO_COMMON_TYPE error (Code 386)
+**Solution**: Use `arrayFirstIndex` instead of `indexOf`
+See `SPEC/clickhouse.xml` for details
+
+### Import Test Failures
+**Problem**: New dependencies not in import tests
+**Solution**: Update `app/tests/test_internal_imports.py` and `app/tests/test_external_imports.py`
+
+## Quick Reference Paths
+
+### When Working On:
+- **New API endpoint**: `app/routes/` → `app/schemas/` → `app/services/`
+- **Agent changes**: `app/agents/supervisor.py`, `app/services/agent_service.py`
+- **WebSocket issues**: `app/ws_manager.py`, `app/services/websocket/message_handler.py`
+- **UI components**: `frontend/components/chat/`, ensure NO blue gradients
+- **State management**: `frontend/store/unified-chat.ts`
+- **Database**: `app/services/database/` for repositories
+- **Authentication**: `app/auth/`, `app/services/security_service.py`
+
+## Environment Setup
+
+### Essential Variables
 ```bash
-# Create new migration
-alembic revision -m "Description of change"
-
-# Apply migrations
-python run_migrations.py
-# or automatically on startup
-python run_server.py  # Migrations run automatically
+DATABASE_URL=postgresql://user:pass@localhost/netra
+CLICKHOUSE_URL=clickhouse://localhost:9000/default
+REDIS_URL=redis://localhost:6379
+SECRET_KEY=your-secret-key
+ANTHROPIC_API_KEY=your-anthropic-key
 ```
 
-### WebSocket Event Handling
-1. Define event type in `app/schemas/WebSocket.py`
-2. Add handler in `app/services/websocket/message_handler.py`
-3. Update `app/routes/websockets.py` if needed
-4. Update frontend WebSocket provider to handle new event type
+See `.env.example` for complete list
 
-### Working with Apex Optimizer Agent
-1. Tools located in `app/services/apex_optimizer_agent/tools/`
-2. Each tool extends base class in `tools/base.py`
-3. Tool builder in `tool_builder.py` manages tool lifecycle
-4. Register new tools in tool dispatcher
 
-### ClickHouse Troubleshooting & Best Practices
+## Recent Learnings (Update This Section!)
 
-#### Working with Nested Types
-ClickHouse `Nested` types create parallel arrays. For the `workload_events` table:
-```sql
--- Schema definition
-metrics Nested(
-    name Array(String),
-    value Array(Float64),
-    unit Array(String)
-)
-```
+### 2025-01-11: Spec Organization
+- Moved testing details to `SPEC/testing.xml`
+- Moved architecture details to `SPEC/architecture.xml`
+- Moved ClickHouse troubleshooting to `SPEC/clickhouse.xml`
+- Keep CLAUDE.md focused on principles and quick reference
 
-This means `metrics.name[0]` corresponds to `metrics.value[0]` and `metrics.unit[0]`.
-
-#### Query Best Practices
-1. **Use proper array functions** for Nested types:
-   ```sql
-   -- ✅ Correct: Use arrayFirstIndex for finding position
-   arrayFirstIndex(x -> x = 'latency_ms', metrics.name) as idx
-   
-   -- ❌ Wrong: indexOf might cause type errors
-   indexOf(metrics.name, 'latency_ms') as idx
-   
-   -- ✅ Correct: Use arrayExists for checking existence
-   arrayExists(x -> x = 'latency_ms', metrics.name)
-   
-   -- ❌ Wrong: has might cause type errors
-   has(metrics.name, 'latency_ms')
-   ```
-
-2. **Inserting data** into Nested types:
-   ```python
-   # Correct: All fields must be arrays of same length
-   data = {
-       'metrics.name': ['latency_ms', 'throughput', 'cost_cents'],
-       'metrics.value': [150.5, 1000.0, 25.0],
-       'metrics.unit': ['ms', 'req/s', 'cents']
-   }
-   ```
-
-#### Common Errors and Solutions
-1. **Error: "NO_COMMON_TYPE" (Code 386)**
-   - Cause: Mixing Array and non-Array types in queries
-   - Solution: Use `arrayFirstIndex` and `arrayExists` instead of `indexOf` and `has`
-
-2. **Error: "UNKNOWN_TABLE"**
-   - Cause: Table not created or connection issues
-   - Solution: Run `await create_workload_events_table_if_missing()` from `app/db/clickhouse_init.py`
-
-## Important Files to Know
-
-### Core Configuration
-- `app/config.py` - Application configuration and settings
-- `app/config.yaml` - YAML configuration file
-- `alembic.ini` - Database migration configuration
-
-### Agent System
-- `app/agents/supervisor.py` - Main agent orchestration logic
-- `app/agents/orchestration/` - Orchestration components
-- `app/services/agent_service.py` - Agent service layer
-- `app/agents/tool_dispatcher.py` - Tool routing logic
-- `app/services/tool_registry.py` - Dynamic tool registration
-
-### WebSocket & Real-time
-- `app/routes/websockets.py` - WebSocket connection handling
-- `app/ws_manager.py` - WebSocket connection manager
-- `app/services/websocket/message_handler.py` - Message processing
-- `frontend/providers/WebSocketProvider.tsx` - Frontend WebSocket management
-- `frontend/hooks/useWebSocket.ts` - WebSocket React hook
-
-### Database & State
-- `app/db/postgres.py` - PostgreSQL configuration
-- `app/db/clickhouse.py` - ClickHouse configuration
-- `app/services/database/` - Repository implementations
-- `app/services/state/` - State management services
-- `app/redis_manager.py` - Redis connection manager
-
-### Authentication & Security
-- `app/auth/auth.py` - Authentication logic
-- `app/auth/auth_dependencies.py` - Auth dependencies
-- `app/services/security_service.py` - Security services
-- `app/services/key_manager.py` - API key management
-
-### Error Handling & Logging
-- `app/core/exceptions.py` - Custom exceptions
-- `app/core/error_handlers.py` - Error handlers
-- `app/core/error_context.py` - Error context management
-- `app/logging_config.py` - Centralized logging configuration
-
-### Frontend Core
-- `frontend/hooks/useAgent.ts` - React hook for agent interactions
-- `frontend/store/unified-chat.ts` - Unified chat store with thread management and deduplication
-- `frontend/services/` - API client services
-- `frontend/types/unified-chat.ts` - TypeScript type definitions for unified chat
-- `frontend/components/chat/ChatSidebar.tsx` - Thread navigation sidebar (NEW in v5)
-- `frontend/components/chat/OverflowPanel.tsx` - Developer debugging panel (Ctrl+Shift+D) (NEW in v5)
-- `frontend/components/chat/PersistentResponseCard.tsx` - Three-layer response card (NO BLUE BARS)
-- `frontend/components/chat/layers/FastLayer.tsx` - Modern glassmorphic fast layer (UPDATED in v5)
-- `frontend/components/chat/MainChat.tsx` - Main unified chat component (single version)
-
-## Environment Variables
-
-Key environment variables to configure:
-- `DATABASE_URL` - PostgreSQL connection string
-- `CLICKHOUSE_URL` - ClickHouse connection string  
-- `REDIS_URL` - Redis connection string
-- `SECRET_KEY` - Application secret key for JWT signing
-- `ANTHROPIC_API_KEY` - Anthropic API key for Claude models
-- `OPENAI_API_KEY` - OpenAI API key (optional)
-- `ENVIRONMENT` - Environment (development/staging/production)
-- `GOOGLE_CLIENT_ID` - Google OAuth client ID
-- `GOOGLE_CLIENT_SECRET` - Google OAuth client secret
-- `FRONTEND_URL` - Frontend URL for OAuth redirects
-- `LOG_LEVEL` - Logging level (DEBUG/INFO/WARNING/ERROR)
-- `MAX_CONNECTIONS` - Database connection pool size
-- `CORS_ORIGINS` - Allowed CORS origins (comma-separated)
-
-## Testing Strategy
-
-### Backend Testing (`app/tests/`)
-- **Agent Tests**: End-to-end agent workflows, supervisor orchestration
-- **Route Tests**: API endpoint validation, authentication flows
-- **Service Tests**: Business logic, agent service, generation service
-- **Core Tests**: Configuration, error handling, service interfaces
-- **WebSocket Tests**: Connection lifecycle, message handling, error recovery
-- **Database Tests**: Repository pattern, unit of work, migrations
-- **Performance Tests**: Load testing, optimization validation
-
-### Frontend Testing (`frontend/__tests__/`)
-- **Component Tests**: React components with React Testing Library
-- **Critical Path Tests**: Authentication, chat, WebSocket resilience
-- **Hook Tests**: Custom React hooks (useWebSocket, useAgent, etc.)
-- **Store Tests**: Zustand state management and updates
-- **Integration Tests**: API client services, WebSocket provider
-- **E2E Tests**: Cypress tests for complete user flows
-- **Accessibility Tests**: WCAG compliance validation
-
-## Deployment
-
-### Docker
-- `Dockerfile` - Multi-stage build for production
-- `Dockerfile.backend` - Backend-only container for microservices
-- Environment-specific configurations
-- Health check endpoints configured
-
-### Terraform (GCP)
-- `terraform-gcp/main.tf` - Infrastructure as code
-- `terraform-gcp/variables.tf` - Configuration variables
-- `terraform-gcp/deploy.sh` - Deployment automation script
-- Includes Cloud Run, Cloud SQL, Redis setup
-
-### Production Deployment
-- See `GCP_DEPLOYMENT_README.md` for GCP deployment
-- Database migrations run automatically on startup
-- WebSocket connections via Cloud Run WebSockets
-- Monitoring via Cloud Logging and Cloud Monitoring
-- Secrets managed via Secret Manager
+### Add new learnings here to prevent regression...
