@@ -1,20 +1,21 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.schemas import AppConfig
-from app.auth.auth_dependencies import ActiveUserDep
+from app.auth.auth_dependencies import ActiveUserDep, DeveloperDep, AdminDep, require_permission
 from app import schemas
 from app.config import settings
+from app.services.permission_service import PermissionService
 from typing import List, Dict
 
 router = APIRouter()
 
 @router.get("/settings", response_model=AppConfig)
-async def get_app_settings(current_user: schemas.User = ActiveUserDep) -> AppConfig:
+async def get_app_settings(
+    current_user: schemas.User = Depends(require_permission("system_config"))
+) -> AppConfig:
     """
     Retrieve the current application settings.
-    Only accessible to authenticated users.
+    Only accessible to users with system_config permission (developers and admins).
     """
-    if not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Not authorized to access settings")
     return settings
 
 @router.post("/settings/log_table")
