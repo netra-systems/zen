@@ -23,6 +23,14 @@ from datetime import datetime, timedelta
 import numpy as np
 
 # Import the module under test
+# Mock the ClickHouseManager import that doesn't exist
+import sys
+from unittest.mock import MagicMock
+
+# Create a mock ClickHouseManager
+sys.modules['app.db.clickhouse'] = MagicMock()
+sys.modules['app.db.clickhouse'].ClickHouseManager = MagicMock
+
 from app.services.quality_monitoring_service import QualityMonitoringService
 
 

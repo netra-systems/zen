@@ -1,0 +1,721 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>Model Context Protocol (MCP) Server Specification</title>
+    <version>1.0.0</version>
+    <description>Comprehensive specification for MCP server implementation in Netra AI Optimization Platform</description>
+    <created>2025-01-11</created>
+    <author>Netra AI Platform Team</author>
+  </metadata>
+
+  <overview>
+    <description>
+      The Model Context Protocol (MCP) is an open protocol that enables seamless integration between AI assistants
+      and external systems. This specification defines the implementation of an MCP server for the Netra platform,
+      enabling integration with Claude Code, Cursor, Gemini CLI, IDEs, and agent-to-agent communication.
+    </description>
+    <goals>
+      <goal priority="critical">Provide universal context access for AI assistants</goal>
+      <goal priority="critical">Enable bi-directional communication between Netra and external AI systems</goal>
+      <goal priority="high">Support multiple transport protocols (stdio, HTTP/SSE, WebSocket)</goal>
+      <goal priority="high">Maintain security and authentication across all integrations</goal>
+      <goal priority="medium">Enable dynamic tool registration and discovery</goal>
+    </goals>
+  </overview>
+
+  <core_concepts>
+    <concept name="Resources">
+      <description>Exposed data and content from Netra platform</description>
+      <types>
+        <type name="threads">Chat conversation threads</type>
+        <type name="agents">Agent configurations and states</type>
+        <type name="corpus">Document corpus and embeddings</type>
+        <type name="metrics">Performance and optimization metrics</type>
+        <type name="synthetic_data">Generated test data</type>
+        <type name="workload_events">ClickHouse time-series data</type>
+      </types>
+    </concept>
+    
+    <concept name="Tools">
+      <description>Executable functions exposed by MCP server</description>
+      <categories>
+        <category name="Agent Operations">
+          <tool name="run_agent">Execute Netra agent with specified configuration</tool>
+          <tool name="get_agent_status">Check agent execution status</tool>
+          <tool name="list_agents">Get available agents and capabilities</tool>
+          <tool name="stream_agent_output">Stream real-time agent execution updates</tool>
+        </category>
+        <category name="Optimization Tools">
+          <tool name="analyze_workload">Analyze AI workload characteristics</tool>
+          <tool name="optimize_prompt">Optimize prompts for cost/performance</tool>
+          <tool name="predict_performance">Predict model performance metrics</tool>
+          <tool name="simulate_policy">Simulate optimization policies</tool>
+          <tool name="calculate_cost">Calculate cost estimates for workloads</tool>
+        </category>
+        <category name="Data Management">
+          <tool name="query_corpus">Search document corpus</tool>
+          <tool name="add_reference">Add document to corpus</tool>
+          <tool name="generate_synthetic_data">Create synthetic test data</tool>
+          <tool name="query_metrics">Query ClickHouse metrics</tool>
+        </category>
+        <category name="Thread Management">
+          <tool name="create_thread">Create new conversation thread</tool>
+          <tool name="get_thread_history">Retrieve thread messages</tool>
+          <tool name="continue_thread">Continue existing conversation</tool>
+          <tool name="search_threads">Search across all threads</tool>
+        </category>
+        <category name="Supply Catalog">
+          <tool name="list_models">Get available LLM models</tool>
+          <tool name="get_model_info">Get detailed model specifications</tool>
+          <tool name="compare_models">Compare model capabilities and costs</tool>
+        </category>
+      </categories>
+    </concept>
+    
+    <concept name="Prompts">
+      <description>Pre-configured prompt templates for common operations</description>
+      <types>
+        <type name="optimization">Workload optimization prompts</type>
+        <type name="analysis">System analysis prompts</type>
+        <type name="generation">Content generation prompts</type>
+        <type name="troubleshooting">Debugging and troubleshooting prompts</type>
+      </types>
+    </concept>
+    
+    <concept name="Sampling">
+      <description>LLM sampling through MCP for text generation</description>
+      <features>
+        <feature>Direct LLM access with Netra's optimizations</feature>
+        <feature>Model routing based on task requirements</feature>
+        <feature>Cost-optimized sampling strategies</feature>
+      </features>
+    </concept>
+  </core_concepts>
+
+  <transport_protocols>
+    <protocol name="stdio">
+      <description>Standard input/output for CLI integrations</description>
+      <use_cases>
+        <use_case>Claude Code desktop app</use_case>
+        <use_case>Cursor IDE integration</use_case>
+        <use_case>Command-line tools</use_case>
+      </use_cases>
+      <implementation>
+        <handler>app/mcp/transports/stdio_transport.py</handler>
+        <features>
+          <feature>JSON-RPC 2.0 over stdin/stdout</feature>
+          <feature>Process lifecycle management</feature>
+          <feature>Buffered I/O for large payloads</feature>
+        </features>
+      </implementation>
+    </protocol>
+    
+    <protocol name="http_sse">
+      <description>HTTP with Server-Sent Events for web integrations</description>
+      <use_cases>
+        <use_case>Web-based AI assistants</use_case>
+        <use_case>Browser extensions</use_case>
+        <use_case>REST API clients</use_case>
+      </use_cases>
+      <implementation>
+        <handler>app/mcp/transports/http_transport.py</handler>
+        <features>
+          <feature>RESTful endpoints for tool invocation</feature>
+          <feature>SSE for streaming responses</feature>
+          <feature>CORS support for browser clients</feature>
+          <feature>OAuth2/JWT authentication</feature>
+        </features>
+      </implementation>
+    </protocol>
+    
+    <protocol name="websocket">
+      <description>WebSocket for real-time bidirectional communication</description>
+      <use_cases>
+        <use_case>Agent-to-agent communication</use_case>
+        <use_case>Real-time collaboration tools</use_case>
+        <use_case>IDE plugins with live updates</use_case>
+      </use_cases>
+      <implementation>
+        <handler>app/mcp/transports/websocket_transport.py</handler>
+        <features>
+          <feature>Full-duplex communication</feature>
+          <feature>Connection pooling</feature>
+          <feature>Automatic reconnection</feature>
+          <feature>Message queuing and delivery guarantees</feature>
+        </features>
+      </implementation>
+    </protocol>
+  </transport_protocols>
+
+  <authentication_authorization>
+    <method name="api_key">
+      <description>API key authentication for programmatic access</description>
+      <implementation>
+        <validation>app/mcp/auth/api_key_validator.py</validation>
+        <storage>Encrypted in PostgreSQL user_secrets table</storage>
+        <rotation>Support for key rotation without downtime</rotation>
+      </implementation>
+    </method>
+    
+    <method name="oauth2">
+      <description>OAuth2 for third-party integrations</description>
+      <providers>
+        <provider>Google</provider>
+        <provider>GitHub</provider>
+        <provider>Microsoft</provider>
+      </providers>
+      <implementation>
+        <handler>app/mcp/auth/oauth2_handler.py</handler>
+        <scopes>
+          <scope name="read:threads">Read thread data</scope>
+          <scope name="write:threads">Create/modify threads</scope>
+          <scope name="execute:agents">Run agents</scope>
+          <scope name="admin:system">System administration</scope>
+        </scopes>
+      </implementation>
+    </method>
+    
+    <method name="jwt">
+      <description>JWT tokens for session-based authentication</description>
+      <implementation>
+        <handler>Reuse app/auth/auth.py JWT implementation</handler>
+        <claims>
+          <claim name="user_id">User identifier</claim>
+          <claim name="permissions">Granted permissions</claim>
+          <claim name="client_type">MCP client type (claude, cursor, etc)</claim>
+        </claims>
+      </implementation>
+    </method>
+    
+    <permissions>
+      <model>Role-Based Access Control (RBAC)</model>
+      <roles>
+        <role name="viewer">Read-only access to resources</role>
+        <role name="user">Execute tools and create resources</role>
+        <role name="developer">Full access plus debugging tools</role>
+        <role name="admin">System administration capabilities</role>
+      </roles>
+      <implementation>
+        <service>app/mcp/services/permission_service.py</service>
+        <integration>Extends existing app/services/permission_service.py</integration>
+      </implementation>
+    </permissions>
+  </authentication_authorization>
+
+  <integration_examples>
+    <integration name="Claude Code">
+      <description>Desktop integration with Claude coding assistant</description>
+      <configuration>
+        <file>claude_mcp_config.json</file>
+        <content>{
+  "mcpServers": {
+    "netra": {
+      "command": "python",
+      "args": ["-m", "app.mcp.server", "--transport", "stdio"],
+      "env": {
+        "NETRA_API_KEY": "${NETRA_API_KEY}",
+        "NETRA_BASE_URL": "http://localhost:8000"
+      }
+    }
+  }
+}</content>
+      </configuration>
+      <features>
+        <feature>Access to all Netra agents and tools</feature>
+        <feature>Thread history and continuation</feature>
+        <feature>Real-time optimization suggestions</feature>
+      </features>
+    </integration>
+    
+    <integration name="Cursor IDE">
+      <description>IDE integration for AI-assisted development</description>
+      <configuration>
+        <file>.cursor/mcp_config.json</file>
+        <transport>stdio</transport>
+      </configuration>
+      <features>
+        <feature>Inline optimization suggestions</feature>
+        <feature>Automated test generation using synthetic data</feature>
+        <feature>Performance profiling integration</feature>
+      </features>
+    </integration>
+    
+    <integration name="Gemini CLI">
+      <description>Command-line integration with Google's Gemini</description>
+      <configuration>
+        <transport>http_sse</transport>
+        <endpoint>http://localhost:8000/mcp</endpoint>
+      </configuration>
+      <features>
+        <feature>Batch processing capabilities</feature>
+        <feature>Pipeline orchestration</feature>
+        <feature>Cost optimization recommendations</feature>
+      </features>
+    </integration>
+    
+    <integration name="Agent-to-Agent">
+      <description>Inter-agent communication protocol</description>
+      <configuration>
+        <transport>websocket</transport>
+        <discovery>mDNS/DNS-SD for local agents</discovery>
+        <registry>Centralized registry for distributed agents</registry>
+      </configuration>
+      <features>
+        <feature>Agent capability discovery</feature>
+        <feature>Task delegation and coordination</feature>
+        <feature>State synchronization</feature>
+        <feature>Distributed execution</feature>
+      </features>
+    </integration>
+    
+    <integration name="VS Code Extension">
+      <description>Visual Studio Code extension</description>
+      <configuration>
+        <transport>websocket</transport>
+        <language_server>MCP Language Server Protocol bridge</language_server>
+      </configuration>
+      <features>
+        <feature>Code completion with optimization hints</feature>
+        <feature>Real-time performance metrics</feature>
+        <feature>Integrated agent execution</feature>
+      </features>
+    </integration>
+  </integration_examples>
+
+  <implementation_architecture>
+    <server_core>
+      <component name="MCP Server">
+        <file>app/mcp/server.py</file>
+        <responsibilities>
+          <responsibility>Request routing and handling</responsibility>
+          <responsibility>Protocol negotiation</responsibility>
+          <responsibility>Session management</responsibility>
+        </responsibilities>
+      </component>
+      
+      <component name="Request Handler">
+        <file>app/mcp/handlers/request_handler.py</file>
+        <responsibilities>
+          <responsibility>JSON-RPC 2.0 processing</responsibility>
+          <responsibility>Method dispatch</responsibility>
+          <responsibility>Error handling</responsibility>
+        </responsibilities>
+      </component>
+      
+      <component name="Resource Manager">
+        <file>app/mcp/resources/resource_manager.py</file>
+        <responsibilities>
+          <responsibility>Resource registration and discovery</responsibility>
+          <responsibility>Access control</responsibility>
+          <responsibility>Caching and optimization</responsibility>
+        </responsibilities>
+      </component>
+      
+      <component name="Tool Registry">
+        <file>app/mcp/tools/tool_registry.py</file>
+        <responsibilities>
+          <responsibility>Tool registration and versioning</responsibility>
+          <responsibility>Input/output schema validation</responsibility>
+          <responsibility>Execution orchestration</responsibility>
+        </responsibilities>
+      </component>
+    </server_core>
+    
+    <service_layer>
+      <service name="MCP Service">
+        <file>app/services/mcp_service.py</file>
+        <dependencies>
+          <dependency>AgentService</dependency>
+          <dependency>ThreadService</dependency>
+          <dependency>CorpusService</dependency>
+          <dependency>SecurityService</dependency>
+        </dependencies>
+        <responsibilities>
+          <responsibility>Business logic coordination</responsibility>
+          <responsibility>Transaction management</responsibility>
+          <responsibility>Event emission</responsibility>
+        </responsibilities>
+      </service>
+      
+      <service name="Integration Service">
+        <file>app/services/mcp_integration_service.py</file>
+        <responsibilities>
+          <responsibility>Client registration</responsibility>
+          <responsibility>Capability negotiation</responsibility>
+          <responsibility>Rate limiting and quotas</responsibility>
+        </responsibilities>
+      </service>
+    </service_layer>
+    
+    <data_models>
+      <model name="MCP Request">
+        <file>app/schemas/mcp_schemas.py</file>
+        <fields>
+          <field name="jsonrpc" type="str">JSON-RPC version (2.0)</field>
+          <field name="method" type="str">Method name</field>
+          <field name="params" type="dict">Method parameters</field>
+          <field name="id" type="str|int">Request identifier</field>
+        </fields>
+      </model>
+      
+      <model name="MCP Response">
+        <fields>
+          <field name="jsonrpc" type="str">JSON-RPC version (2.0)</field>
+          <field name="result" type="Any">Success result</field>
+          <field name="error" type="MCPError">Error details</field>
+          <field name="id" type="str|int">Request identifier</field>
+        </fields>
+      </model>
+      
+      <model name="Tool Definition">
+        <fields>
+          <field name="name" type="str">Tool identifier</field>
+          <field name="description" type="str">Human-readable description</field>
+          <field name="inputSchema" type="dict">JSON Schema for inputs</field>
+          <field name="outputSchema" type="dict">JSON Schema for outputs</field>
+        </fields>
+      </model>
+      
+      <model name="Resource Definition">
+        <fields>
+          <field name="uri" type="str">Resource URI</field>
+          <field name="name" type="str">Display name</field>
+          <field name="description" type="str">Description</field>
+          <field name="mimeType" type="str">Content MIME type</field>
+        </fields>
+      </model>
+    </data_models>
+    
+    <database_schema>
+      <table name="mcp_clients">
+        <description>Registered MCP clients</description>
+        <columns>
+          <column name="id" type="UUID" primary="true"/>
+          <column name="name" type="VARCHAR(255)"/>
+          <column name="client_type" type="VARCHAR(50)">claude, cursor, gemini, etc</column>
+          <column name="api_key_hash" type="VARCHAR(255)"/>
+          <column name="permissions" type="JSONB"/>
+          <column name="metadata" type="JSONB"/>
+          <column name="created_at" type="TIMESTAMP"/>
+          <column name="last_active" type="TIMESTAMP"/>
+        </columns>
+      </table>
+      
+      <table name="mcp_sessions">
+        <description>Active MCP sessions</description>
+        <columns>
+          <column name="id" type="UUID" primary="true"/>
+          <column name="client_id" type="UUID" foreign="mcp_clients.id"/>
+          <column name="transport" type="VARCHAR(20)">stdio, http, websocket</column>
+          <column name="capabilities" type="JSONB"/>
+          <column name="state" type="JSONB"/>
+          <column name="created_at" type="TIMESTAMP"/>
+          <column name="expires_at" type="TIMESTAMP"/>
+        </columns>
+      </table>
+      
+      <table name="mcp_tool_executions">
+        <description>Tool execution history</description>
+        <columns>
+          <column name="id" type="UUID" primary="true"/>
+          <column name="session_id" type="UUID" foreign="mcp_sessions.id"/>
+          <column name="tool_name" type="VARCHAR(255)"/>
+          <column name="input_params" type="JSONB"/>
+          <column name="output_result" type="JSONB"/>
+          <column name="execution_time_ms" type="INTEGER"/>
+          <column name="status" type="VARCHAR(20)">success, error, timeout</column>
+          <column name="created_at" type="TIMESTAMP"/>
+        </columns>
+      </table>
+    </database_schema>
+  </implementation_architecture>
+
+  <api_endpoints>
+    <endpoint method="POST" path="/mcp/initialize">
+      <description>Initialize MCP session</description>
+      <request>
+        <param name="protocolVersion" type="str" required="true">MCP protocol version</param>
+        <param name="capabilities" type="dict" required="true">Client capabilities</param>
+        <param name="clientInfo" type="dict" required="false">Client metadata</param>
+      </request>
+      <response>
+        <field name="protocolVersion" type="str">Negotiated protocol version</field>
+        <field name="capabilities" type="dict">Server capabilities</field>
+        <field name="serverInfo" type="dict">Server metadata</field>
+      </response>
+    </endpoint>
+    
+    <endpoint method="POST" path="/mcp/tools/list">
+      <description>List available tools</description>
+      <response>
+        <field name="tools" type="array">Array of tool definitions</field>
+      </response>
+    </endpoint>
+    
+    <endpoint method="POST" path="/mcp/tools/call">
+      <description>Execute a tool</description>
+      <request>
+        <param name="name" type="str" required="true">Tool name</param>
+        <param name="arguments" type="dict" required="true">Tool arguments</param>
+      </request>
+      <response>
+        <field name="content" type="array">Tool execution results</field>
+        <field name="isError" type="bool">Error indicator</field>
+      </response>
+    </endpoint>
+    
+    <endpoint method="POST" path="/mcp/resources/list">
+      <description>List available resources</description>
+      <response>
+        <field name="resources" type="array">Array of resource definitions</field>
+      </response>
+    </endpoint>
+    
+    <endpoint method="POST" path="/mcp/resources/read">
+      <description>Read resource content</description>
+      <request>
+        <param name="uri" type="str" required="true">Resource URI</param>
+      </request>
+      <response>
+        <field name="contents" type="array">Resource contents</field>
+      </response>
+    </endpoint>
+    
+    <endpoint method="POST" path="/mcp/prompts/list">
+      <description>List available prompts</description>
+      <response>
+        <field name="prompts" type="array">Array of prompt definitions</field>
+      </response>
+    </endpoint>
+    
+    <endpoint method="POST" path="/mcp/prompts/get">
+      <description>Get prompt template</description>
+      <request>
+        <param name="name" type="str" required="true">Prompt name</param>
+        <param name="arguments" type="dict" required="false">Template arguments</param>
+      </request>
+      <response>
+        <field name="messages" type="array">Formatted prompt messages</field>
+      </response>
+    </endpoint>
+    
+    <endpoint method="POST" path="/mcp/sampling/createMessage">
+      <description>Create LLM message</description>
+      <request>
+        <param name="messages" type="array" required="true">Input messages</param>
+        <param name="modelPreferences" type="dict" required="false">Model selection hints</param>
+        <param name="systemPrompt" type="str" required="false">System prompt</param>
+        <param name="includeContext" type="str" required="false">Context inclusion strategy</param>
+        <param name="temperature" type="float" required="false">Sampling temperature</param>
+        <param name="maxTokens" type="int" required="false">Maximum tokens</param>
+        <param name="stopSequences" type="array" required="false">Stop sequences</param>
+        <param name="metadata" type="dict" required="false">Request metadata</param>
+      </request>
+      <response>
+        <field name="model" type="str">Selected model</field>
+        <field name="stopReason" type="str">Completion reason</field>
+        <field name="role" type="str">Message role</field>
+        <field name="content" type="object">Generated content</field>
+      </response>
+    </endpoint>
+  </api_endpoints>
+
+  <error_handling>
+    <error_codes>
+      <code value="-32700">Parse error - Invalid JSON</code>
+      <code value="-32600">Invalid request - Invalid JSON-RPC</code>
+      <code value="-32601">Method not found</code>
+      <code value="-32602">Invalid params</code>
+      <code value="-32603">Internal error</code>
+      <code value="-32000">Server error - Generic</code>
+      <code value="-32001">Resource not found</code>
+      <code value="-32002">Resource access denied</code>
+      <code value="-32003">Tool execution failed</code>
+      <code value="-32004">Rate limit exceeded</code>
+      <code value="-32005">Authentication required</code>
+      <code value="-32006">Invalid authentication</code>
+      <code value="-32007">Quota exceeded</code>
+    </error_codes>
+    
+    <error_response>
+      <format>
+        {
+          "jsonrpc": "2.0",
+          "error": {
+            "code": -32601,
+            "message": "Method not found",
+            "data": {
+              "details": "Additional error information",
+              "trace_id": "Request trace identifier"
+            }
+          },
+          "id": "request_id"
+        }
+      </format>
+    </error_response>
+  </error_handling>
+
+  <monitoring_observability>
+    <metrics>
+      <metric name="mcp_requests_total">Total MCP requests by method</metric>
+      <metric name="mcp_request_duration_seconds">Request processing duration</metric>
+      <metric name="mcp_active_sessions">Number of active MCP sessions</metric>
+      <metric name="mcp_tool_executions_total">Tool executions by tool name</metric>
+      <metric name="mcp_errors_total">Errors by error code</metric>
+      <metric name="mcp_client_connections">Active connections by client type</metric>
+    </metrics>
+    
+    <logging>
+      <logger name="app.mcp">
+        <level>INFO</level>
+        <format>JSON structured logging</format>
+        <fields>
+          <field name="trace_id">Request trace ID</field>
+          <field name="session_id">MCP session ID</field>
+          <field name="client_type">Client type identifier</field>
+          <field name="method">MCP method name</field>
+          <field name="duration_ms">Processing duration</field>
+        </fields>
+      </logger>
+    </logging>
+    
+    <tracing>
+      <provider>OpenTelemetry</provider>
+      <spans>
+        <span name="mcp.request">Top-level request span</span>
+        <span name="mcp.auth">Authentication span</span>
+        <span name="mcp.tool_execution">Tool execution span</span>
+        <span name="mcp.resource_access">Resource access span</span>
+      </spans>
+    </tracing>
+  </monitoring_observability>
+
+  <security_considerations>
+    <consideration name="Input Validation">
+      <description>All inputs must be validated against schemas</description>
+      <implementation>Pydantic models with strict validation</implementation>
+    </consideration>
+    
+    <consideration name="Rate Limiting">
+      <description>Prevent abuse through rate limiting</description>
+      <implementation>
+        <per_client>100 requests per minute default</per_client>
+        <per_tool>Tool-specific limits based on complexity</per_tool>
+      </implementation>
+    </consideration>
+    
+    <consideration name="Resource Isolation">
+      <description>Clients can only access authorized resources</description>
+      <implementation>Row-level security in database</implementation>
+    </consideration>
+    
+    <consideration name="Audit Logging">
+      <description>All operations are logged for audit</description>
+      <implementation>Immutable audit log in separate table</implementation>
+    </consideration>
+    
+    <consideration name="Secret Management">
+      <description>Secure handling of API keys and tokens</description>
+      <implementation>
+        <storage>Encrypted at rest using app/services/key_manager.py</storage>
+        <rotation>Support for key rotation without downtime</rotation>
+      </implementation>
+    </consideration>
+  </security_considerations>
+
+  <testing_strategy>
+    <unit_tests>
+      <coverage_target>97%</coverage_target>
+      <test_files>
+        <file>app/tests/mcp/test_server.py</file>
+        <file>app/tests/mcp/test_request_handler.py</file>
+        <file>app/tests/mcp/test_tool_registry.py</file>
+        <file>app/tests/mcp/test_resource_manager.py</file>
+        <file>app/tests/mcp/test_auth.py</file>
+      </test_files>
+    </unit_tests>
+    
+    <integration_tests>
+      <test_files>
+        <file>app/tests/mcp/test_stdio_transport.py</file>
+        <file>app/tests/mcp/test_http_transport.py</file>
+        <file>app/tests/mcp/test_websocket_transport.py</file>
+        <file>app/tests/mcp/test_claude_integration.py</file>
+        <file>app/tests/mcp/test_cursor_integration.py</file>
+      </test_files>
+    </integration_tests>
+    
+    <e2e_tests>
+      <test_files>
+        <file>app/tests/mcp/test_e2e_claude_workflow.py</file>
+        <file>app/tests/mcp/test_e2e_agent_communication.py</file>
+        <file>app/tests/mcp/test_e2e_tool_execution.py</file>
+      </test_files>
+    </e2e_tests>
+    
+    <performance_tests>
+      <scenarios>
+        <scenario name="High Throughput">1000 requests per second</scenario>
+        <scenario name="Large Payloads">10MB resource transfers</scenario>
+        <scenario name="Concurrent Sessions">100 simultaneous clients</scenario>
+      </scenarios>
+    </performance_tests>
+  </testing_strategy>
+
+  <deployment_configuration>
+    <environment_variables>
+      <variable name="MCP_ENABLED" default="true">Enable MCP server</variable>
+      <variable name="MCP_PORT" default="8001">MCP server port</variable>
+      <variable name="MCP_MAX_SESSIONS" default="1000">Maximum concurrent sessions</variable>
+      <variable name="MCP_SESSION_TIMEOUT" default="3600">Session timeout in seconds</variable>
+      <variable name="MCP_RATE_LIMIT" default="100">Requests per minute per client</variable>
+      <variable name="MCP_LOG_LEVEL" default="INFO">Logging level</variable>
+    </environment_variables>
+    
+    <docker_support>
+      <file>docker/mcp.Dockerfile</file>
+      <compose_service>
+        services:
+          mcp-server:
+            build:
+              context: .
+              dockerfile: docker/mcp.Dockerfile
+            ports:
+              - "8001:8001"
+            environment:
+              - MCP_ENABLED=true
+              - DATABASE_URL=${DATABASE_URL}
+              - REDIS_URL=${REDIS_URL}
+            depends_on:
+              - postgres
+              - redis
+      </compose_service>
+    </docker_support>
+  </deployment_configuration>
+
+  <documentation>
+    <user_guide>docs/mcp/user-guide.md</user_guide>
+    <api_reference>docs/mcp/api-reference.md</api_reference>
+    <integration_guide>docs/mcp/integration-guide.md</integration_guide>
+    <troubleshooting>docs/mcp/troubleshooting.md</troubleshooting>
+  </documentation>
+
+  <future_enhancements>
+    <enhancement priority="medium">
+      <name>Plugin System</name>
+      <description>Allow third-party tool and resource plugins</description>
+    </enhancement>
+    <enhancement priority="low">
+      <name>GraphQL Support</name>
+      <description>GraphQL endpoint for flexible querying</description>
+    </enhancement>
+    <enhancement priority="medium">
+      <name>Federated MCP</name>
+      <description>Connect multiple MCP servers in federation</description>
+    </enhancement>
+    <enhancement priority="high">
+      <name>Streaming Tools</name>
+      <description>Support for long-running streaming tools</description>
+    </enhancement>
+  </future_enhancements>
+</specification>

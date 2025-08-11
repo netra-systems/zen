@@ -7,6 +7,7 @@ import pytest
 import uuid
 import json
 import os
+import asyncio
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from app.services.corpus_service import CorpusService, CorpusStatus, ContentSource

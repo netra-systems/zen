@@ -17,7 +17,7 @@ import asyncio
 from typing import Optional, Dict, Any, List
 from enum import Enum
 
-from pydantic import BaseModel, Field, ValidationError, validator
+from pydantic import BaseModel, Field, ValidationError, field_validator
 from app.llm.llm_manager import LLMManager
 from app.agents.base import BaseSubAgent
 from app.agents.prompts import triage_prompt_template
@@ -99,7 +99,7 @@ class TriageResult(BaseModel):
     is_admin_mode: bool = False  # Flag for admin mode routing
     require_approval: bool = False  # Flag for operations requiring user approval
     
-    @validator('confidence_score')
+    @field_validator('confidence_score')
     def validate_confidence(cls, v):
         if not 0 <= v <= 1:
             raise ValueError('Confidence score must be between 0 and 1')
@@ -400,8 +400,8 @@ class TriageSubAgent(BaseSubAgent):
                         # Try to parse value as JSON
                         try:
                             value = json.loads(value)
-                        except:
-                            pass
+                        except (json.JSONDecodeError, ValueError):
+                            pass  # Keep as string if not valid JSON
                         
                         result[key] = value
             

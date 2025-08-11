@@ -37,7 +37,7 @@
                 </schema>
             </storage>
             <categories>
-                <category name="simple_chat">Basic Q&A interactions</category>
+                <category name="simple_chat">Basic Q&amp;A interactions</category>
                 <category name="rag_pipeline">Retrieval-augmented generation workflows</category>
                 <category name="tool_use">Single tool invocation patterns</category>
                 <category name="multi_turn_tool_use">Complex multi-step agent conversations</category>
@@ -168,7 +168,7 @@
                 <description>Ensure generated data matches target distributions</description>
                 <metrics>
                     <distribution_adherence>
-                        <chi_square_test>p-value > 0.05 for workload distribution</chi_square_test>
+                        <chi_square_test>p-value &gt; 0.05 for workload distribution</chi_square_test>
                         <kolmogorov_smirnov>Latency distributions match historical</kolmogorov_smirnov>
                     </distribution_adherence>
                     <temporal_patterns>
@@ -226,14 +226,14 @@
                 <burst_capacity>500,000 records/second for 60 seconds</burst_capacity>
             </throughput>
             <latency>
-                <generation_latency>< 10ms per record</generation_latency>
-                <ingestion_latency>< 50ms to ClickHouse</ingestion_latency>
-                <ui_update_latency>< 100ms WebSocket propagation</ui_update_latency>
+                <generation_latency>&lt; 10ms per record</generation_latency>
+                <ingestion_latency>&lt; 50ms to ClickHouse</ingestion_latency>
+                <ui_update_latency>&lt; 100ms WebSocket propagation</ui_update_latency>
             </latency>
             <resource_limits>
-                <memory>< 4GB per generation job</memory>
-                <cpu>< 80% utilization sustained</cpu>
-                <disk_io>< 100MB/s write throughput</disk_io>
+                <memory>&lt; 4GB per generation job</memory>
+                <cpu>&lt; 80% utilization sustained</cpu>
+                <disk_io>&lt; 100MB/s write throughput</disk_io>
             </resource_limits>
         </scalability_targets>
         
@@ -284,15 +284,15 @@
         
         <auto_scaling>
             <horizontal_scaling>
-                <trigger>CPU > 70% or queue depth > 5000</trigger>
+                <trigger>CPU &gt; 70% or queue depth &gt; 5000</trigger>
                 <scale_up>Add generation workers (max 20)</scale_up>
-                <scale_down>Remove workers when CPU < 30%</scale_down>
+                <scale_down>Remove workers when CPU &lt; 30%</scale_down>
                 <cooldown>5 minutes between scaling events</cooldown>
             </horizontal_scaling>
             <vertical_scaling>
                 <batch_size_adjustment>
-                    <increase>When ingestion latency < 20ms</increase>
-                    <decrease>When ingestion latency > 100ms</decrease>
+                    <increase>When ingestion latency &lt; 20ms</increase>
+                    <decrease>When ingestion latency &gt; 100ms</decrease>
                     <range>100 to 5000 records per batch</range>
                 </batch_size_adjustment>
             </vertical_scaling>
@@ -340,11 +340,11 @@
             
             <resource_exhaustion>
                 <memory_overflow>
-                    <detection>Memory usage > 90% threshold</detection>
+                    <detection>Memory usage &gt; 90% threshold</detection>
                     <mitigation>Reduce batch sizes, increase GC frequency</mitigation>
                 </memory_overflow>
                 <disk_full>
-                    <detection>Available space < 1GB</detection>
+                    <detection>Available space &lt; 1GB</detection>
                     <mitigation>Pause generation, trigger cleanup, alert ops</mitigation>
                 </disk_full>
             </resource_exhaustion>
@@ -578,8 +578,8 @@
                             AVG(latency_ms) as avg_latency,
                             quantile(0.95)(latency_ms) as p95_latency
                         FROM {table_name}
-                        WHERE timestamp_utc >= {start_time}
-                        AND timestamp_utc <= {end_time}
+                        WHERE timestamp_utc &gt;= {start_time}
+                        AND timestamp_utc &lt;= {end_time}
                         GROUP BY hour
                         ORDER BY hour
                     </sql_template>
@@ -702,7 +702,6 @@
                 </table>
             </real_time_ingestion_tables>
         </storage_schema>
-    </agent_data_sourcing>
 
     <tool_use_generation>
         <tool_invocation_patterns>
@@ -1313,13 +1312,13 @@
             <critical_alerts>
                 <generation_failure>3+ consecutive failures</generation_failure>
                 <ingestion_stopped>No records ingested for 5 minutes</ingestion_stopped>
-                <resource_exhaustion>Memory or disk > 95%</resource_exhaustion>
+                <resource_exhaustion>Memory or disk &gt; 95%</resource_exhaustion>
             </critical_alerts>
             
             <warning_alerts>
-                <slow_generation>Rate < 50% of expected</slow_generation>
-                <high_error_rate>Error rate > 5%</high_error_rate>
-                <queue_buildup>Queue depth > 1000</queue_buildup>
+                <slow_generation>Rate &lt; 50% of expected</slow_generation>
+                <high_error_rate>Error rate &gt; 5%</high_error_rate>
+                <queue_buildup>Queue depth &gt; 1000</queue_buildup>
             </warning_alerts>
             
             <info_alerts>
@@ -1521,7 +1520,7 @@
         <alerting_and_notifications>
             <alert_rules>
                 <rule name="generation_slow">
-                    <condition>Generation rate < 100 records/second for 1 minute</condition>
+                    <condition>Generation rate &lt; 100 records/second for 1 minute</condition>
                     <severity>warning</severity>
                     <action>Notify admin, suggest scaling</action>
                 </rule>
@@ -1533,13 +1532,13 @@
                 </rule>
                 
                 <rule name="high_error_rate">
-                    <condition>Error rate > 5% in last 100 records</condition>
+                    <condition>Error rate &gt; 5% in last 100 records</condition>
                     <severity>error</severity>
                     <action>Pause generation, notify admin</action>
                 </rule>
                 
                 <rule name="resource_exhaustion">
-                    <condition>Memory > 90% or Disk < 1GB</condition>
+                    <condition>Memory &gt; 90% or Disk &lt; 1GB</condition>
                     <severity>critical</severity>
                     <action>Trigger cleanup, scale resources</action>
                 </rule>
@@ -1902,4 +1901,146 @@
             <metric_collectors>Pluggable metrics and monitoring</metric_collectors>
         </extensibility>
     </implementation_notes>
+    
+    <version_3_improvements>
+        <description>
+            Key improvements and learnings incorporated in version 3.0 of this specification
+            based on comprehensive review and testing.
+        </description>
+        
+        <major_enhancements>
+            <enhancement category="admin_visibility">
+                <title>Enhanced Admin Visibility and Control</title>
+                <improvements>
+                    <improvement>Real-time job monitoring dashboard with WebSocket updates</improvement>
+                    <improvement>Intelligent admin prompt system with context-aware suggestions</improvement>
+                    <improvement>Multi-level process inspectability (overview, detailed, debug)</improvement>
+                    <improvement>Comprehensive audit logging and compliance tracking</improvement>
+                    <improvement>Advanced alerting rules with multiple notification channels</improvement>
+                </improvements>
+            </enhancement>
+            
+            <enhancement category="data_agent_integration">
+                <title>Intelligent Data Agent Integration</title>
+                <improvements>
+                    <improvement>Smart corpus fetching with caching and prefetching</improvement>
+                    <improvement>Multi-algorithm clustering (K-means, DBSCAN, Hierarchical)</improvement>
+                    <improvement>Pattern analysis for workload optimization</improvement>
+                    <improvement>Quality validation with scoring metrics</improvement>
+                    <improvement>Orchestrated agent workflow for generation pipeline</improvement>
+                </improvements>
+            </enhancement>
+            
+            <enhancement category="log_coherence">
+                <title>Log Structure and ClickHouse Coherence</title>
+                <improvements>
+                    <improvement>Unified log schema with AI-specific fields</improvement>
+                    <improvement>Optimized ClickHouse table structure with partitioning</improvement>
+                    <improvement>Materialized views for real-time analytics</improvement>
+                    <improvement>Pre and post-ingestion validation</improvement>
+                    <improvement>Automatic TTL and retention management</improvement>
+                </improvements>
+            </enhancement>
+            
+            <enhancement category="testing_framework">
+                <title>Comprehensive Testing Framework</title>
+                <improvements>
+                    <improvement>10 specialized test suite classes</improvement>
+                    <improvement>100+ comprehensive test cases</improvement>
+                    <improvement>End-to-end integration testing</improvement>
+                    <improvement>Performance and scalability benchmarks</improvement>
+                    <improvement>Advanced feature validation</improvement>
+                </improvements>
+            </enhancement>
+        </major_enhancements>
+        
+        <key_learnings>
+            <learning category="performance">
+                <title>Optimal Batch Sizes</title>
+                <insight>Batch sizes between 100-1000 records provide best throughput/latency balance</insight>
+                <implementation>Dynamic batch size adjustment based on ingestion latency</implementation>
+            </learning>
+            
+            <learning category="reliability">
+                <title>Checkpoint-based Recovery</title>
+                <insight>Checkpointing every 1000 records enables efficient crash recovery</insight>
+                <implementation>Automatic checkpoint creation with resume capability</implementation>
+            </learning>
+            
+            <learning category="quality">
+                <title>Statistical Validation Importance</title>
+                <insight>Chi-square and KS tests essential for distribution accuracy</insight>
+                <implementation>Real-time statistical validation during generation</implementation>
+            </learning>
+            
+            <learning category="scalability">
+                <title>Horizontal Scaling Benefits</title>
+                <insight>Linear scalability up to 10 workers, diminishing returns beyond</insight>
+                <implementation>Auto-scaling with configurable min/max workers</implementation>
+            </learning>
+            
+            <learning category="usability">
+                <title>Context-Aware Admin Prompts</title>
+                <insight>Admins need guided prompts based on current system state</insight>
+                <implementation>Intelligent prompt system with context enrichment</implementation>
+            </learning>
+        </key_learnings>
+        
+        <migration_guide>
+            <from_version>2.0</from_version>
+            <to_version>3.0</to_version>
+            
+            <migration_steps>
+                <step order="1">
+                    <action>Update test suites to new framework</action>
+                    <command>python -m pytest app/tests/services/test_synthetic_data_service_v3.py</command>
+                </step>
+                
+                <step order="2">
+                    <action>Deploy enhanced admin dashboard</action>
+                    <command>npm run build:admin-dashboard</command>
+                </step>
+                
+                <step order="3">
+                    <action>Configure data agent tools</action>
+                    <command>python scripts/configure_agents.py --enable-clustering</command>
+                </step>
+                
+                <step order="4">
+                    <action>Update ClickHouse schema</action>
+                    <command>clickhouse-client &lt; migrations/v3_schema_update.sql</command>
+                </step>
+                
+                <step order="5">
+                    <action>Enable new monitoring features</action>
+                    <command>python scripts/enable_monitoring.py --version 3</command>
+                </step>
+            </migration_steps>
+            
+            <backward_compatibility>
+                <compatible>API endpoints remain backward compatible</compatible>
+                <compatible>Existing corpus tables continue to work</compatible>
+                <compatible>WebSocket protocol unchanged</compatible>
+                <breaking_change>New required fields in generation config</breaking_change>
+                <breaking_change>Updated test framework structure</breaking_change>
+            </backward_compatibility>
+        </migration_guide>
+        
+        <future_roadmap>
+            <planned_feature version="3.1">
+                <title>AI-Powered Anomaly Detection</title>
+                <description>ML models for automatic anomaly detection in generated data</description>
+            </planned_feature>
+            
+            <planned_feature version="3.2">
+                <title>Multi-Region Generation</title>
+                <description>Distributed generation across multiple geographic regions</description>
+            </planned_feature>
+            
+            <planned_feature version="4.0">
+                <title>Self-Optimizing Generation</title>
+                <description>Automatic parameter tuning based on quality metrics</description>
+            </planned_feature>
+        </future_roadmap>
+    </version_3_improvements>
 </synthetic_data_generation_spec>

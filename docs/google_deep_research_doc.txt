@@ -1,0 +1,272 @@
+
+Get reports with Deep Research
+
+Deep Research is a Made by Google agent for users who need to gather, analyze, and understand internal and external information.
+
+
+When you enter a prompt to Deep Research, such as "Compare Example Project competitors", Deep Research assesses whether the question is research related, generates a plan outlining the steps it takes to do the research, and streams questions and answers as it progresses in its research. It then generates a report of its findings with citations as well as an audio summary.
+
+For research sources, Deep Research uses data that the app indexes. It can also use web results if web search is enabled for the app.
+
+Here are some example prompts that Deep Research generates reports for:
+
+How can we improve the user experience of our existing mobile banking app to make it more intuitive and user-friendly?
+How can we reduce customer wait times during peak hours without compromising on the quality of support?
+Analyze the economic situation of Central European countries.
+Compare BigQuery with its competitors, and provide the results in table format.
+Use Deep Research
+Your end users can access and use Deep Research through the app. Deep Research has access to data that the app has already indexed and, if enabled, web results.
+
+You can get results from Deep Research from the app or using the API.
+
+Console
+REST
+To use Deep Research using the API, do the following:
+
+Send a request to the streamAssist method.
+
+
+
+curl -X POST \
+-H "Authorization: Bearer $(gcloud auth print-access-token)" \
+-H "Content-Type: application/json" \
+-H "X-Goog-User-Project: PROJECT_ID" \
+"https://discoveryengine.googleapis.com/v1/projects/project_id/locations/global/collections/default_collection/engines/app_id/assistants/default_assistant:streamAssist" \
+-d '{
+     "query": {
+       "text": "QUERY"
+     },
+     "agentsSpec": {
+       "agentSpecs": {
+         "agentId": "deep_research"
+       }
+     },
+     "toolsSpec": {
+       "vertexAiSearchSpec": {
+         "dataStoreSpecs": {
+           "dataStore": "projects/PROJECT_ID/locations/global/collections/default_collection/datastores/DATA_STORE_ID"
+         }
+       },
+       "webGroundingSpec": {}
+     }
+    }'
+Replace the following:
+
+PROJECT_ID: the ID of your Google Cloud project.
+APP_ID: the ID of the app.
+QUERY: the query.
+DATA_STORE_ID: the ID of the data store when an app has multiple data stores. When you specify this, the search is limited to the documents in the specified data store.
+Response
+If your request is successful, you receive a JSON response similar to the following response. Note the SESSION_ID. This is required to initiate the research process in the next step.
+
+
+[{
+ "answer": {
+   "name": "ANSWER_ASSIST_NAME",
+   "state": "SUCCEEDED",
+   "replies": [
+     {
+       "groundedContent": {
+         "content": {
+           "role": "model",
+           "text": "INLINE_TEXT"
+         }
+       },
+       "agent": "deep_research"
+     },
+     {
+       "groundedContent": {
+         "content": {
+           "role": "model",
+           "text": "INLINE_TEXT_WITH_RESEARCH_PLAN"
+         },
+         "contentMetadata": {
+           "contentKind": "RESEARCH_PLAN"
+         }
+       },
+       "agent": "deep_research"
+     }
+   ],
+ },
+ "sessionInfo": {
+   "session": "SESSION_ID",
+   "queryId": "QUERY_ID",
+   "turnId": "TURN_ID"
+ },
+ "assistToken": "ASSIST_TOKEN"
+}
+]
+Initiate the research for the query in the previous step. To do so, send another request to the streamAssist method. In this request, set your query as Start Research and add the session information from the previous step.
+
+
+
+curl -X POST \
+-H "Authorization: Bearer $(gcloud auth print-access-token)" \
+-H "Content-Type: application/json" \
+-H "X-Goog-User-Project: PROJECT_ID" \
+"https://discoveryengine.googleapis.com/v1/projects/project_id/locations/global/collections/default_collection/engines/app_id/assistants/default_assistant:streamAssist" \
+-d '{
+     "query": {
+       "text": "Start Research"
+     },
+     "session": "SESSION_ID",
+     "agentsSpec": {
+       "agentSpecs": {
+         "agentId": "deep_research"
+       }
+     },
+     "toolsSpec": {
+       "vertexAiSearchSpec": {
+         "dataStoreSpecs": {
+           "dataStore": "projects/PROJECT_ID/locations/global/collections/default_collection/datastores/DATA_STORE_ID"
+         }
+       },
+       "webGroundingSpec": {}
+     },
+    }'
+Replace the following:
+
+PROJECT_ID: the ID of your Google Cloud project.
+APP_ID: the ID of the app.
+SESSION_ID: the session ID from the previous step.
+DATA_STORE_ID: the ID of the data store when an app has multiple data stores. When you specify this, the search is limited to the documents in the specified data store.
+Response
+If your request is successful, you receive a JSON response similar to the following truncated response.
+
+The response contains an instance of the AssistAnswer resource.
+
+This is a streaming response and, therefore, depending on the amount of data in the research response, it can take some time to fully stream it.
+
+
+[{
+ "answer": {
+   "state": "IN_PROGRESS",
+   "replies": [
+     {
+       "groundedContent": {
+         "content": {
+           "role": "model",
+           "text": "RESEARCH_QUESTION_1"
+         },
+         "contentMetadata": {
+           "contentKind": "RESEARCH_QUESTION",
+           "contentId": "ID0"
+         }
+       },
+       "agent": "deep_research"
+     }
+   ]
+ },
+ "assistToken": "ASSIST_TOKEN"
+},
+{
+ "answer": {
+   "state": "IN_PROGRESS",
+   "replies": [
+     {
+       "groundedContent": {
+         "content": {
+           "role": "model",
+           "text": "RESEARCH_ANSWER_1_PART_1"
+         },
+         "contentMetadata": {
+           "contentKind": "RESEARCH_ANSWER",
+           "contentId": "ID0"
+         }
+       },
+       "agent": "deep_research"
+     }
+   ]
+ },
+ "assistToken": "ASSIST_TOKEN"
+},
+{
+ "answer": {
+   "state": "IN_PROGRESS",
+   "replies": [
+     {
+       "groundedContent": {
+         "content": {
+           "role": "model",
+           "text": "RESEARCH_ANSWER_1_PART_2"
+         },
+         "contentMetadata": {
+           "contentKind": "RESEARCH_ANSWER",
+           "contentId": "ID0"
+         }
+       },
+       "agent": "deep_research"
+     }
+   ]
+ },
+ "assistToken": "ASSIST_TOKEN"
+},
+{
+ "answer": {
+   "state": "IN_PROGRESS",
+   "replies": [
+     {
+       "groundedContent": {
+         "content": {
+           "role": "model",
+           "text": "INLINE_TEXT"
+         },
+         "textGroundingMetadata": {
+           "references": [
+             {
+               "documentMetadata": {
+                 "document": "DOCUMENT_ID",
+                 "uri": "DOCUMENT_REDIRECT_URI",
+                 "title": "DOCUMENT_TITLE",
+                 "pageIdentifier": "",
+                 "domain": "DOCUMENT_DOMAIN"
+               }
+             }
+           ]
+           "searchEntryPoints": [
+             {
+               "renderedContent": "GROUNDING_SEARCH_ENTRY_POINT"
+             }
+           ]
+          }
+        }
+      }
+    ]
+  }
+},
+{
+ "answer": {
+   "state": "IN_PROGRESS",
+   "replies": [
+     {
+       "groundedContent": {
+         "content": {
+           "role": "model",
+           "file": {
+             "fileId": "AUDIO_FILE_ID"
+           }
+         },
+         "contentMetadata": {
+           "contentKind": "RESEARCH_AUDIO_SUMMARY"
+         }
+       },
+       "agent": "deep_research"
+     }
+   ]
+ },
+ "assistToken": "ASSIST_TOKEN"
+}
+{
+ "answer": {
+   "name": "ANSWER_ASSIST_NAME",
+   "state": "SUCCEEDED"
+   },
+ "sessionInfo": {
+   "session": "SESSION_ID",
+   "queryId": "QUERY_ID",
+   "turnId": "TURN_ID"
+ },
+"assistToken": "ASSIST_TOKEN"
+}]
+Was this helpful?
+

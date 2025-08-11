@@ -1,0 +1,311 @@
+# Netra AI Platform - Customer Getting Started Guide
+
+## Welcome to Netra
+
+Netra is your AI optimization copilot - an intelligent platform that analyzes your AI workloads, identifies optimization opportunities, and provides actionable recommendations to reduce costs and improve performance while maintaining quality.
+
+## Quick Start: Your First Optimization
+
+### Step 1: Access the Platform
+1. Navigate to your Netra instance
+2. Sign in using Google OAuth (SSO)
+3. You'll be greeted with the modern chat interface
+
+### Step 2: Start Your First Conversation
+Simply describe your optimization goal in natural language. Netra understands context and will guide you through the process.
+
+**Example first prompts:**
+- "Help me reduce my AI costs by 30%"
+- "My AI responses are too slow, I need them 2x faster"
+- "Analyze my GPT-4 usage and suggest optimizations"
+
+## Understanding How Netra Works
+
+### The Multi-Agent System
+When you submit a request, Netra orchestrates multiple specialized agents:
+
+1. **Triage Agent** - Understands your request and determines complexity
+2. **Data Agent** - Analyzes your historical usage and performance data
+3. **Optimization Agent** - Applies 30+ specialized optimization techniques
+4. **Action Agent** - Creates your implementation roadmap
+5. **Reporting Agent** - Compiles findings into actionable reports
+
+You'll see real-time updates as each agent works on your request.
+
+## Effective Prompt Patterns
+
+### 1. Cost Optimization Prompts
+
+**Basic Pattern:**
+```
+"I need to reduce [cost metric] by [percentage] for [workload/model]"
+```
+
+**Examples:**
+- "I need to reduce my monthly AI spend by 40%"
+- "Our GPT-4 costs are too high, find optimization opportunities"
+- "Analyze our API usage and identify the most expensive operations"
+
+**Advanced Pattern with Constraints:**
+```
+"Reduce costs by [percentage] while maintaining [quality metric] above [threshold]"
+```
+
+**Examples:**
+- "Reduce costs by 30% while keeping response accuracy above 95%"
+- "Cut API expenses in half but maintain sub-2 second latency"
+
+### 2. Performance Optimization Prompts
+
+**Basic Pattern:**
+```
+"Improve [performance metric] by [factor] for [use case]"
+```
+
+**Examples:**
+- "Make our chatbot responses 3x faster"
+- "Reduce latency for our document processing pipeline by 50%"
+- "Optimize throughput for high-volume API calls"
+
+**Detailed Analysis Pattern:**
+```
+"Analyze [component] for [issue type] and provide [deliverable]"
+```
+
+**Examples:**
+- "Analyze our embedding generation for bottlenecks and provide optimization recommendations"
+- "Review our caching strategy for inefficiencies and suggest improvements"
+
+### 3. Capacity Planning Prompts
+
+**Future Planning Pattern:**
+```
+"We expect [change] in [timeframe]. What's the impact on [metric]?"
+```
+
+**Examples:**
+- "We're expecting 50% more users next month. How will this affect our costs?"
+- "Planning to launch in 3 new regions. What's the infrastructure impact?"
+- "If we double our API calls, where will we hit rate limits?"
+
+### 4. Model Selection & Migration Prompts
+
+**Model Comparison Pattern:**
+```
+"Compare [current model] with [alternative models] for [use case]"
+```
+
+**Examples:**
+- "Should we switch from GPT-4 to Claude-3-Sonnet for customer support?"
+- "Which of our GPT-3.5 calls could use GPT-4o-mini instead?"
+- "Evaluate if upgrading to GPT-5 is worth it for our use case"
+
+**Migration Analysis Pattern:**
+```
+"Analyze the impact of migrating from [current] to [target] for [workload]"
+```
+
+**Examples:**
+- "What's the ROI of moving our summarization tasks to a cheaper model?"
+- "Should we keep using GPT-4 or downgrade some features to GPT-3.5?"
+
+### 5. Comprehensive Audit Prompts
+
+**System-Wide Analysis Pattern:**
+```
+"Audit all [component type] and identify [optimization type] opportunities"
+```
+
+**Examples:**
+- "Audit all API calls and identify caching opportunities"
+- "Review all model usage and suggest optimal configurations"
+- "Analyze our entire AI stack for cost reduction opportunities"
+
+## Advanced Prompt Techniques
+
+### 1. Multi-Objective Optimization
+Combine multiple goals in a single prompt:
+
+**Pattern:**
+```
+"I need to [objective 1] and [objective 2] while [constraint]"
+```
+
+**Example:**
+```
+"I need to reduce costs by 25% and improve latency by 2x while maintaining current accuracy levels"
+```
+
+### 2. Prioritized Optimization
+Specify what matters most:
+
+**Pattern:**
+```
+"Optimize for [primary goal], with [secondary goals] as nice-to-haves"
+```
+
+**Example:**
+```
+"Optimize for maximum cost reduction, with latency improvements as a bonus if possible"
+```
+
+### 3. Scenario-Based Analysis
+Test different scenarios:
+
+**Pattern:**
+```
+"Compare optimization strategies for [scenario A] vs [scenario B]"
+```
+
+**Example:**
+```
+"Compare cost optimization strategies for steady-state traffic vs 10x traffic spikes"
+```
+
+### 4. Time-Boxed Improvements
+Focus on quick wins:
+
+**Pattern:**
+```
+"What optimizations can we implement in [timeframe] for [impact]?"
+```
+
+**Example:**
+```
+"What can we do this week to reduce costs by at least 15%?"
+```
+
+## Best Practices for Maximum Value
+
+### 1. Start with High-Level Goals
+Begin with your business objective, not technical details:
+- ✅ "We need to cut our AI budget in half"
+- ❌ "Optimize the temperature parameter on our GPT-4 calls"
+
+### 2. Provide Context When Available
+The more context you provide, the better the recommendations:
+```
+"We're a customer support platform handling 10k tickets daily using GPT-4. 
+Our average response time is 5 seconds and costs are $3k/month. 
+We need to reduce costs by 40% without hurting customer satisfaction."
+```
+
+### 3. Ask for Specific Deliverables
+Be clear about what you need:
+- "Provide a step-by-step implementation plan"
+- "Generate a cost comparison table"
+- "Create a migration roadmap with timelines"
+- "Calculate ROI for each optimization"
+
+### 4. Iterate and Refine
+Start broad, then drill down:
+1. First: "Analyze our AI costs"
+2. Then: "Focus on the document processing costs"
+3. Finally: "Show me how to optimize the embedding generation"
+
+### 5. Use Follow-Up Questions
+Netra maintains conversation context:
+- Initial: "What are our biggest cost drivers?"
+- Follow-up: "How much would we save by optimizing the top 3?"
+- Next: "Create an implementation plan for the first one"
+
+## Common Use Cases and Templates
+
+### Use Case 1: Monthly Cost Review
+```
+"Perform a monthly cost analysis for [Month]. 
+Identify the top 5 cost drivers and provide optimization recommendations for each. 
+Calculate potential savings and implementation effort."
+```
+
+### Use Case 2: New Feature Impact Assessment
+```
+"We're launching [feature] expecting [usage pattern]. 
+Analyze the cost and performance impact. 
+Recommend the optimal model and configuration."
+```
+
+### Use Case 3: Emergency Cost Reduction
+```
+"Our AI costs exceeded budget by [amount]. 
+Need immediate actions to reduce spend by [percentage] this month. 
+Prioritize by ease of implementation and impact."
+```
+
+### Use Case 4: Performance SLA Compliance
+```
+"Our SLA requires [latency requirement]. 
+Current p99 latency is [current latency]. 
+Find all optimization opportunities to meet SLA at minimum cost."
+```
+
+### Use Case 5: Model Upgrade Decision
+```
+"[New model] was just released. 
+Compare it with our current [existing model] setup. 
+Should we upgrade? What's the ROI? What are the risks?"
+```
+
+## Interpreting Results
+
+### Understanding Agent Responses
+
+Each agent provides specific insights:
+
+- **Triage Results**: Problem classification and priority
+- **Data Analysis**: Metrics, trends, and patterns from your usage
+- **Optimization Recommendations**: Ranked by impact and effort
+- **Action Plans**: Step-by-step implementation guides
+- **Reports**: Executive summaries with ROI calculations
+
+### Key Metrics to Watch
+
+- **Cost Reduction**: Actual dollar amounts saved
+- **Performance Gains**: Latency reduction percentages
+- **Quality Scores**: Accuracy/effectiveness maintenance
+- **Implementation Effort**: Hours or days required
+- **Risk Level**: Potential impact on operations
+
+## Tips for Success
+
+### DO:
+- Start with clear business objectives
+- Provide usage context and constraints
+- Ask for specific metrics and ROI calculations
+- Request implementation roadmaps
+- Iterate based on findings
+
+### DON'T:
+- Jump straight to technical implementations
+- Ignore quality impacts of cost optimizations
+- Optimize in isolation without considering system-wide effects
+- Implement all recommendations at once
+- Forget to measure results after implementation
+
+## Getting Help
+
+### For Technical Questions:
+Ask Netra directly:
+- "How do I implement caching for my use case?"
+- "Explain the trade-offs between different optimization strategies"
+- "What metrics should I track after optimization?"
+
+### For Business Cases:
+Request specific deliverables:
+- "Generate an executive summary of optimization opportunities"
+- "Create a business case for the recommended changes"
+- "Calculate 6-month and 12-month ROI projections"
+
+## Next Steps
+
+1. **Run Your First Analysis**: Start with a high-level cost or performance audit
+2. **Review Recommendations**: Focus on high-impact, low-effort optimizations
+3. **Create Implementation Plan**: Ask Netra for detailed steps
+4. **Track Results**: Monitor metrics before and after changes
+5. **Iterate**: Continue optimizing based on results
+
+Remember: Netra is your optimization copilot. The more you interact with it, the better it understands your specific needs and constraints. Don't hesitate to ask clarifying questions or request different perspectives on your optimization challenges.
+
+---
+
+*Welcome to smarter AI operations with Netra!*

@@ -71,8 +71,12 @@ class ConfigValidator:
         # Check JWT configuration
         if not config.jwt_secret_key:
             errors.append("JWT secret key is not configured")
-        elif config.jwt_secret_key == "development_secret_key_for_jwt_do_not_use_in_production" and config.environment == "production":
-            errors.append("Development JWT secret key cannot be used in production")
+        elif config.environment == "production":
+            # Check for weak or default secrets in production
+            if len(config.jwt_secret_key) < 32:
+                errors.append("JWT secret key must be at least 32 characters in production")
+            if "development" in config.jwt_secret_key.lower() or "test" in config.jwt_secret_key.lower():
+                errors.append("JWT secret key appears to be a development/test key - not suitable for production")
             
         # Check Fernet key
         if not config.fernet_key:

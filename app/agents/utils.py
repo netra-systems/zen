@@ -238,8 +238,9 @@ def extract_partial_json(response: str, required_fields: list = None) -> Optiona
                 else:
                     # Try to parse as JSON (number, boolean, etc.)
                     value = json.loads(value_str)
-            except:
+            except (json.JSONDecodeError, ValueError) as e:
                 # Use as string if parsing fails
+                logger.debug(f"Failed to parse value as JSON: {e}")
                 value = value_str
             
             partial_result[key] = value

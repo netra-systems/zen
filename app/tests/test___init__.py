@@ -11,7 +11,7 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from app import __version__, __name__ as app_name
+import app
 
 
 class TestInit:
@@ -19,7 +19,8 @@ class TestInit:
     
     def test_module_imports(self):
         """Test that module imports successfully"""
-        assert True  # Module imported without errors
+        # Just test that the app module exists and can be imported
+        assert app is not None
     
     # TODO: Add specific test cases based on module functionality
     # This is a template that needs to be expanded

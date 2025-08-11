@@ -9,7 +9,6 @@ import json
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 from app.services.corpus_service import CorpusService
-from app.services.generation_service import QueryBuilder as GenQueryBuilder
 from app.agents.data_sub_agent import QueryBuilder
 from app.db.models_clickhouse import (
     get_content_corpus_schema,
@@ -29,10 +28,10 @@ class TestCorpusQueries:
         
         assert "CREATE TABLE IF NOT EXISTS" in schema
         assert table_name in schema
-        assert "record_id UUID" in schema
-        assert "workload_type String" in schema
-        assert "prompt String" in schema
-        assert "response String" in schema
+        assert "`record_id` UUID" in schema
+        assert "`workload_type` String" in schema
+        assert "`prompt` String" in schema
+        assert "`response` String" in schema
         assert "ENGINE = MergeTree()" in schema
         assert "ORDER BY (created_at, workload_type)" in schema
     

@@ -11,7 +11,7 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from app.background import start_background_tasks
+from app.background import BackgroundTaskManager
 
 
 class TestBackground:
@@ -19,7 +19,13 @@ class TestBackground:
     
     def test_module_imports(self):
         """Test that module imports successfully"""
-        assert True  # Module imported without errors
+        assert BackgroundTaskManager is not None
+        
+    def test_background_task_manager_creation(self):
+        """Test that BackgroundTaskManager can be instantiated"""
+        manager = BackgroundTaskManager()
+        assert manager is not None
+        assert manager.tasks == []
     
     # TODO: Add specific test cases based on module functionality
     # This is a template that needs to be expanded

@@ -1,21 +1,43 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from app.db.session import get_db_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import func
 from app.db.models_postgres import Reference
 from app.schemas import ReferenceGetResponse, ReferenceItem, ReferenceCreateRequest, ReferenceUpdateRequest
+from typing import Optional
 
 router = APIRouter()
 
 @router.get("/references", response_model=ReferenceGetResponse)
-async def get_references(db: AsyncSession = Depends(get_db_session)) -> ReferenceGetResponse:
+async def get_references(
+    offset: int = Query(0, ge=0, description="Number of items to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Number of items to return"),
+    db: AsyncSession = Depends(get_db_session)
+) -> ReferenceGetResponse:
     """
-    Returns a list of available @reference items.
+    Returns a paginated list of available @reference items.
+    
+    Args:
+        offset: Number of items to skip (default: 0)
+        limit: Maximum number of items to return (default: 100, max: 1000)
     """
     async with db as session:
-        result = await session.execute(select(Reference))
+        # Get total count for pagination metadata
+        count_result = await session.execute(select(func.count(Reference.id)))
+        total = count_result.scalar()
+        
+        # Get paginated results
+        query = select(Reference).offset(offset).limit(limit)
+        result = await session.execute(query)
         references = result.scalars().all()
-        return ReferenceGetResponse(references=references)
+        
+        return ReferenceGetResponse(
+            references=references,
+            total=total,
+            offset=offset,
+            limit=limit
+        )
 
 @router.get("/references/{reference_id}", response_model=ReferenceItem)
 async def get_reference(reference_id: int, db: AsyncSession = Depends(get_db_session)) -> ReferenceItem:

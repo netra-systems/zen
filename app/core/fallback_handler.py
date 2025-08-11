@@ -9,6 +9,9 @@ from enum import Enum
 from dataclasses import dataclass
 import json
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class FallbackContext(Enum):
@@ -466,7 +469,8 @@ An unexpected issue occurred: {error_message}
         # Provide a structured view of available data
         try:
             return json.dumps(partial_data, indent=2, default=str)[:500]
-        except:
+        except Exception as e:
+            logger.warning(f"Failed to serialize fallback data: {e}")
             return "Structured data available but cannot be displayed"
     
     def _identify_limitation(self, metadata: FallbackMetadata) -> str:
