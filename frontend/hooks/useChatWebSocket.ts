@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useWebSocket } from './useWebSocket';
 import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 import { Message } from '@/types/chat';
+import type { UnifiedWebSocketEvent } from '@/types/unified-chat';
 
 // Counter to ensure unique message IDs
 let messageIdCounter = 0;
@@ -20,6 +22,13 @@ export const useChatWebSocket = (runId?: string) => {
     setSubAgentStatus, 
     setProcessing 
   } = useChatStore();
+  
+  // Unified chat store for new layer-based UI
+  const { 
+    handleWebSocketEvent,
+    setProcessing: setUnifiedProcessing,
+    addMessage: addUnifiedMessage 
+  } = useUnifiedChatStore();
   
   // Additional state for test compatibility
   const [agentStatus, setAgentStatus] = useState<string>('IDLE');
@@ -51,6 +60,15 @@ export const useChatWebSocket = (runId?: string) => {
     const newMessages = messages.slice(lastProcessedIndex.current);
     
     newMessages.forEach((wsMessage) => {
+      // Handle unified chat events first
+      const unifiedEventTypes = [
+        'agent_started', 'tool_executing', 'agent_thinking', 
+        'partial_result', 'agent_completed', 'final_report'
+      ];
+      
+      if (unifiedEventTypes.includes(wsMessage.type)) {
+        handleWebSocketEvent(wsMessage as UnifiedWebSocketEvent);
+      }
       // Handle different message types
       if (wsMessage.type === 'sub_agent_update') {
         const payload = wsMessage.payload as any;
@@ -86,6 +104,7 @@ export const useChatWebSocket = (runId?: string) => {
         }
       } else if (wsMessage.type === 'agent_started') {
         setProcessing(true);
+        setUnifiedProcessing(true);
         setAgentStatus('RUNNING');
         const payload = wsMessage.payload as any;
         if (payload) {
@@ -97,6 +116,7 @@ export const useChatWebSocket = (runId?: string) => {
         }
       } else if (wsMessage.type === 'agent_finished' || wsMessage.type === 'agent_completed') {
         setProcessing(false);
+        setUnifiedProcessing(false);
         setAgentStatus('COMPLETED');
         // Add a completion message
         const completionMessage: Message = {
@@ -110,7 +130,11 @@ export const useChatWebSocket = (runId?: string) => {
         addMessage(completionMessage);
       } else if (wsMessage.type === 'error') {
         setProcessing(false);
+        setUnifiedProcessing(false);
         const payload = wsMessage.payload as any;
+        
+        // Also handle error in unified chat
+        handleWebSocketEvent(wsMessage as UnifiedWebSocketEvent);
         const errorMessage: Message = {
           id: generateMessageId(),
           type: 'error',
@@ -296,7 +320,8 @@ export const useChatWebSocket = (runId?: string) => {
     
     // Update the last processed index
     lastProcessedIndex.current = messages.length;
-  }, [messages, addMessage, setSubAgentName, setSubAgentStatus, setProcessing]);
+  }, [messages, addMessage, setSubAgentName, setSubAgentStatus, setProcessing, 
+      handleWebSocketEvent, setUnifiedProcessing, addUnifiedMessage]);
   
   // Tool execution functions for tests
   const registerTool = (tool: any) => {
