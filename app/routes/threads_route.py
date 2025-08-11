@@ -107,7 +107,8 @@ async def create_thread(
             metadata_=metadata
         )
         
-        await db.commit()
+        if not thread:
+            raise HTTPException(status_code=500, detail="Failed to create thread in database")
         
         return ThreadResponse(
             id=thread.id,
@@ -118,8 +119,10 @@ async def create_thread(
             message_count=0
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error creating thread: {e}")
+        logger.error(f"Error creating thread: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to create thread")
 
 @router.get("/{thread_id}", response_model=ThreadResponse)

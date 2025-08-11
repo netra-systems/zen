@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>UI/UX Swimlane 5: Developer Tools & Debugging</name>
+        <type>ui_ux_developer_tools</type>
+        <version>1.0</version>
+        <created>2025-08-11</created>
+        <parent>ui_ux_master.xml</parent>
+        <description>Defines developer tools, debugging capabilities, performance monitoring, and diagnostic features</description>
+    </metadata>
+    
+    <swimlane-context>
+        <position>Swimlane 5 of 5</position>
+        <responsibility>Observability layer providing insights into system behavior without modifying state</responsibility>
+        <interfaces>
+            <observes from="websocket">All WebSocket events</observes>
+            <observes from="chat-architecture">State changes and navigation</observes>
+            <observes from="response-card">Agent execution metrics</observes>
+            <provides to="developers">Debugging and diagnostic tools</provides>
+        </interfaces>
+    </swimlane-context>
+    
+    <core-principles>
+        <principle id="read-only">
+            <name>Read-Only Observation</name>
+            <description>Developer tools observe but never modify application state</description>
+            <enforcement>No write access to stores or WebSocket connections</enforcement>
+        </principle>
+        <principle id="comprehensive-visibility">
+            <name>Complete System Visibility</name>
+            <description>Every significant event and state change is observable</description>
+            <enforcement>Event emission from all critical paths</enforcement>
+        </principle>
+        <principle id="performance-neutral">
+            <name>Zero Performance Impact When Closed</name>
+            <description>Developer tools have no performance cost when not active</description>
+            <enforcement>Lazy loading, conditional rendering, event listener cleanup</enforcement>
+        </principle>
+        <principle id="actionable-insights">
+            <name>Actionable Insights</name>
+            <description>Information presented in ways that enable quick debugging</description>
+            <enforcement>Filterable, searchable, exportable data</enforcement>
+        </principle>
+    </core-principles>
+    
+    <overflow-panel>
+        <description>Collapsible debug panel for developers and curious users</description>
+        <location>components/chat/OverflowPanel.tsx</location>
+        
+        <activation>
+            <keyboard-shortcut>Ctrl+Shift+D</keyboard-shortcut>
+            <settings-toggle>Enable in user settings</settings-toggle>
+            <url-parameter>?debug=true</url-parameter>
+        </activation>
+        
+        <layout>
+            <position>Bottom drawer (default) or right sidebar</position>
+            <initial-height>300px</initial-height>
+            <max-height>50% of viewport</max-height>
+            <resizable>Drag handle for height adjustment</resizable>
+            <theme>Dark theme for contrast with main UI</theme>
+        </layout>
+        
+        <sections>
+            <section name="WebSocket Events">
+                <position>Tab 1</position>
+                <content>
+                    <element>Real-time event stream</element>
+                    <element>Event type badges with colors</element>
+                    <element>Timestamp for each event</element>
+                    <element>Expandable JSON payload</element>
+                </content>
+                <features>
+                    <feature>Filter by event type</feature>
+                    <feature>Search event payloads</feature>
+                    <feature>Export last N events</feature>
+                    <feature>Clear event buffer</feature>
+                    <feature>Pause/resume streaming</feature>
+                </features>
+                <implementation>
+                    ```typescript
+                    interface EventViewer {
+                        events: CircularBuffer<WSEvent>;
+                        filters: Set<string>;
+                        searchQuery: string;
+                        isPaused: boolean;
+                        maxEvents: number;  // Default 1000
+                    }
+                    ```
+                </implementation>
+            </section>
+            
+            <section name="Run Timeline">
+                <position>Tab 2</position>
+                <content>
+                    <element>Gantt chart of agent executions</element>
+                    <element>Parallel vs sequential visualization</element>
+                    <element>Duration bars with timing labels</element>
+                    <element>Tool execution markers</element>
+                </content>
+                <features>
+                    <feature>Zoom in/out on timeline</feature>
+                    <feature>Click agent for details</feature>
+                    <feature>Export as SVG/PNG</feature>
+                    <feature>Performance bottleneck highlighting</feature>
+                </features>
+                <visualization>
+                    ```typescript
+                    interface TimelineData {
+                        runs: RunExecution[];
+                        agents: AgentExecution[];
+                        tools: ToolExecution[];
+                        criticalPath: string[];
+                    }
+                    ```
+                </visualization>
+            </section>
+            
+            <section name="State Inspector">
+                <position>Tab 3</position>
+                <content>
+                    <element>Current thread ID and status</element>
+                    <element>Active run and assistant IDs</element>
+                    <element>Store state tree view</element>
+                    <element>WebSocket connection status</element>
+                    <element>User configuration</element>
+                </content>
+                <features>
+                    <feature>Expandable/collapsible tree</feature>
+                    <feature>State diff viewer</feature>
+                    <feature>Copy state to clipboard</feature>
+                    <feature>State history (last 10 changes)</feature>
+                </features>
+                <presentation>
+                    ```typescript
+                    interface StateTree {
+                        threads: ThreadState;
+                        websocket: WebSocketState;
+                        layers: LayerState;
+                        agents: AgentState;
+                        ui: UIState;
+                    }
+                    ```
+                </presentation>
+            </section>
+            
+            <section name="Performance Metrics">
+                <position>Tab 4</position>
+                <content>
+                    <element>Token usage by agent</element>
+                    <element>API latency histogram</element>
+                    <element>Cache hit rates</element>
+                    <element>Memory usage graph</element>
+                    <element>Component render counts</element>
+                    <element>WebSocket message rate</element>
+                </content>
+                <visualizations>
+                    <chart type="line">Memory usage over time</chart>
+                    <chart type="bar">Token usage by agent</chart>
+                    <chart type="histogram">API latency distribution</chart>
+                    <table>Component render frequency</table>
+                </visualizations>
+                <metrics>
+                    ```typescript
+                    interface PerformanceMetrics {
+                        tokenUsage: Map<string, number>;
+                        apiLatency: number[];
+                        cacheHitRate: number;
+                        memoryUsage: number;
+                        renderCounts: Map<string, number>;
+                        wsMessageRate: number;  // messages/second
+                    }
+                    ```
+                </metrics>
+            </section>
+            
+            <section name="Error Log">
+                <position>Tab 5</position>
+                <content>
+                    <element>Error messages with timestamps</element>
+                    <element>Stack traces (expandable)</element>
+                    <element>Error source (agent/component)</element>
+                    <element>Recovery attempts</element>
+                    <element>Related WebSocket events</element>
+                </content>
+                <features>
+                    <feature>Filter by error type</feature>
+                    <feature>Group similar errors</feature>
+                    <feature>Export error report</feature>
+                    <feature>Clear error log</feature>
+                </features>
+                <tracking>
+                    ```typescript
+                    interface ErrorRecord {
+                        id: string;
+                        timestamp: number;
+                        message: string;
+                        stack?: string;
+                        source: string;
+                        context: Record<string, any>;
+                        recoverable: boolean;
+                        retryCount: number;
+                    }
+                    ```
+                </tracking>
+            </section>
+        </sections>
+        
+        <visual-design>
+            <theme>
+                <background>#1A1A1A</background>
+                <text>#E4E4E4</text>
+                <accent>#10B981</accent>
+                <error>#EF4444</error>
+                <warning>#F59E0B</warning>
+                <border>#333333</border>
+            </theme>
+            <typography>
+                <font>JetBrains Mono, monospace</font>
+                <size>12px for logs, 14px for UI</size>
+                <line-height>1.4</line-height>
+            </typography>
+            <layout>
+                <tabs>Horizontal tabs at top</tabs>
+                <content>Scrollable with custom scrollbar</content>
+                <spacing>8px padding, 4px gaps</spacing>
+            </layout>
+        </visual-design>
+    </overflow-panel>
+    
+    <event-buffer>
+        <description>Circular buffer for WebSocket events</description>
+        <implementation>
+            ```typescript
+            class CircularEventBuffer {
+                private buffer: WSEvent[] = [];
+                private maxSize: number = 1000;
+                private pointer: number = 0;
+                
+                push(event: WSEvent): void {
+                    if (this.buffer.length < this.maxSize) {
+                        this.buffer.push(event);
+                    } else {
+                        this.buffer[this.pointer] = event;
+                        this.pointer = (this.pointer + 1) % this.maxSize;
+                    }
+                }
+                
+                getAll(): WSEvent[] {
+                    return [
+                        ...this.buffer.slice(this.pointer),
+                        ...this.buffer.slice(0, this.pointer)
+                    ];
+                }
+                
+                getFiltered(filter: (e: WSEvent) => boolean): WSEvent[] {
+                    return this.getAll().filter(filter);
+                }
+                
+                clear(): void {
+                    this.buffer = [];
+                    this.pointer = 0;
+                }
+            }
+            ```
+        </implementation>
+        <memory-management>
+            <max-events>1000 (configurable)</max-events>
+            <cleanup>Automatic when buffer full</cleanup>
+            <persistence>Optional localStorage for crash recovery</persistence>
+        </memory-management>
+    </event-buffer>
+    
+    <performance-monitoring>
+        <metrics-collection>
+            <metric name="render-performance">
+                <measure>Component render times</measure>
+                <threshold>16ms warning, 33ms error</threshold>
+                <collection>React DevTools integration</collection>
+            </metric>
+            
+            <metric name="websocket-health">
+                <measure>Connection stability</measure>
+                <indicators>
+                    <indicator>Reconnection count</indicator>
+                    <indicator>Average latency</indicator>
+                    <indicator>Message drop rate</indicator>
+                </indicators>
+            </metric>
+            
+            <metric name="memory-usage">
+                <measure>Heap size and growth</measure>
+                <collection>performance.memory API</collection>
+                <warning-threshold>100MB</warning-threshold>
+            </metric>
+            
+            <metric name="api-performance">
+                <measure>Endpoint response times</measure>
+                <percentiles>p50, p95, p99</percentiles>
+                <slow-threshold>1000ms</slow-threshold>
+            </metric>
+        </metrics-collection>
+        
+        <visualization>
+            <real-time-graphs>
+                <update-interval>1000ms</update-interval>
+                <data-points>60 (last minute)</data-points>
+                <smoothing>Moving average over 3 points</smoothing>
+            </real-time-graphs>
+            
+            <performance-badges>
+                <good>Green - within targets</good>
+                <warning>Yellow - approaching limits</warning>
+                <error>Red - exceeding thresholds</error>
+            </performance-badges>
+        </visualization>
+    </performance-monitoring>
+    
+    <export-capabilities>
+        <formats>
+            <format name="JSON">
+                <content>Complete debug state</content>
+                <includes>Events, metrics, errors, state</includes>
+            </format>
+            
+            <format name="HAR">
+                <content>Network activity</content>
+                <includes>WebSocket messages, API calls</includes>
+            </format>
+            
+            <format name="CSV">
+                <content>Metrics and timings</content>
+                <includes>Agent durations, token usage</includes>
+            </format>
+            
+            <format name="Markdown">
+                <content>Error report</content>
+                <includes>Errors, stack traces, context</includes>
+            </format>
+        </formats>
+        
+        <export-options>
+            <time-range>Last N minutes or full session</time-range>
+            <filtering>Include/exclude by type</filtering>
+            <anonymization>Remove sensitive data option</anonymization>
+        </export-options>
+    </export-capabilities>
+    
+    <developer-shortcuts>
+        <shortcut keys="Ctrl+Shift+D">Toggle overflow panel</shortcut>
+        <shortcut keys="Ctrl+Shift+E">Export debug data</shortcut>
+        <shortcut keys="Ctrl+Shift+C">Clear all buffers</shortcut>
+        <shortcut keys="Ctrl+Shift+P">Pause event streaming</shortcut>
+        <shortcut keys="Ctrl+Shift+M">Show performance monitor</shortcut>
+    </developer-shortcuts>
+    
+    <integration-hooks>
+        <hook name="onEventReceived">
+            <trigger>Any WebSocket event received</trigger>
+            <data>Full event object</data>
+        </hook>
+        
+        <hook name="onStateChange">
+            <trigger>Store state mutation</trigger>
+            <data>Previous and current state</data>
+        </hook>
+        
+        <hook name="onError">
+            <trigger>Any error caught</trigger>
+            <data>Error object with context</data>
+        </hook>
+        
+        <hook name="onPerformanceIssue">
+            <trigger>Performance threshold exceeded</trigger>
+            <data>Metric details and recommendations</data>
+        </hook>
+    </integration-hooks>
+    
+    <testing-requirements>
+        <unit-tests>
+            <test>Circular buffer maintains correct size</test>
+            <test>Event filtering works correctly</test>
+            <test>Export generates valid formats</test>
+            <test>Performance metrics calculate accurately</test>
+        </unit-tests>
+        
+        <integration-tests>
+            <test>Panel opens/closes without affecting app</test>
+            <test>Events stream to panel in real-time</test>
+            <test>State inspector reflects actual state</test>
+            <test>Export includes all selected data</test>
+        </integration-tests>
+        
+        <performance-tests>
+            <test>No impact when panel closed</test>
+            <test>Minimal impact when panel open</test>
+            <test>Buffer memory usage stays bounded</test>
+            <test>UI remains responsive with 1000+ events</test>
+        </performance-tests>
+    </testing-requirements>
+</specification>
