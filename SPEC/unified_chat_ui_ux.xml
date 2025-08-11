@@ -610,6 +610,30 @@
                 <maintains>Expandable state for full view</maintains>
             </animation>
         </animations>
+        <modern-ui-patterns>
+            <pattern id="glassmorphism">
+                <description>Consistent glassmorphic design throughout</description>
+                <properties>
+                    <backdrop-filter>blur(12px)</backdrop-filter>
+                    <background>rgba(255, 255, 255, 0.85)</background>
+                    <border>1px solid rgba(255, 255, 255, 0.18)</border>
+                    <box-shadow>0 8px 32px 0 rgba(31, 38, 135, 0.07)</box-shadow>
+                </properties>
+            </pattern>
+            <pattern id="micro-interactions">
+                <hover-effects>Subtle scale(1.02) with 200ms transition</hover-effects>
+                <click-feedback>Scale(0.98) for 100ms on click</click-feedback>
+                <focus-states>2px offset outline in brand color</focus-states>
+            </pattern>
+            <pattern id="color-system">
+                <primary>Emerald-500 (#10B981) for success and primary actions</primary>
+                <secondary>Zinc color palette for text and borders</secondary>
+                <accent>Purple-500 for AI/agent indicators</accent>
+                <error>Red-500 with red-50 background</error>
+                <warning>Amber-500 with amber-50 background</warning>
+                <no-blue-gradients>NEVER use blue gradient bars</no-blue-gradients>
+            </pattern>
+        </modern-ui-patterns>
     </visual-design>
     
     <performance-requirements>
@@ -700,6 +724,41 @@
                 <step>Click event to see full JSON payload</step>
                 <step>Filter events by type or search by content</step>
                 <step>Export debug data as JSON for issue reporting</step>
+            </steps>
+        </example>
+        <example id="modern-ui-interaction">
+            <scenario>User hovers over agent badge in fast layer</scenario>
+            <steps>
+                <step>Badge scales up slightly (1.02) with smooth transition</step>
+                <step>Tooltip appears showing agent description and current task</step>
+                <step>Subtle shadow deepens to indicate interactivity</step>
+                <step>No blue coloring - uses agent-specific color (purple for AI agents)</step>
+            </steps>
+        </example>
+        
+        <example id="overflow-panel-usage">
+            <scenario>Developer presses Ctrl+Shift+D during active chat</scenario>
+            <steps>
+                <step>Overflow panel slides up from bottom with smooth animation</step>
+                <step>Dark theme automatically applied for contrast</step>
+                <step>WebSocket events stream shows last 100 events</step>
+                <step>Timeline shows current run with agent execution times</step>
+                <step>Performance metrics update in real-time</step>
+                <step>Developer can filter events by type or search content</step>
+                <step>Click 'Export Debug Data' to download JSON log</step>
+            </steps>
+        </example>
+        
+        <example id="thread-management-flow">
+            <scenario>User has 5 active chats and switches between them</scenario>
+            <steps>
+                <step>ChatSidebar shows all 5 threads with last message preview</step>
+                <step>Current thread highlighted with emerald-500 accent</step>
+                <step>User clicks different thread in sidebar</step>
+                <step>Smooth fade transition as message history loads</step>
+                <step>WebSocket reconnects to new thread_id</step>
+                <step>Previous thread continues processing in background</step>
+                <step>Notification badge appears when background thread completes</step>
             </steps>
         </example>
     </example-behaviors>
@@ -796,6 +855,42 @@
             <task>Test thread switching preserves message history</task>
             <task>Performance test with 100+ threads in sidebar</task>
             <task>E2E test complete user journey with multiple chats</task>
+        </phase>
+        <phase number="9" name="Remove Legacy Code">
+            <task priority="critical">Remove ALL blue gradient bars from FastLayer</task>
+            <task priority="critical">Remove blue bars from PersistentResponseCard</task>
+            <task priority="critical">Update ChatHeader to remove legacy blue styling</task>
+            <task priority="high">Archive UltraMainChat, ResponsiveMainChat components</task>
+            <task priority="high">Consolidate to single MainChat component</task>
+            <task priority="medium">Remove duplicate chat component imports</task>
+        </phase>
+        
+        <phase number="10" name="Modern UI Implementation">
+            <task priority="critical">Implement glassmorphic design system</task>
+            <task priority="critical">Add proper thread sidebar with smooth animations</task>
+            <task priority="high">Create collapsible overflow panel with dark theme</task>
+            <task priority="high">Add micro-interactions to all interactive elements</task>
+            <task priority="medium">Implement smooth streaming text with modern cursor</task>
+            <task priority="medium">Add haptic feedback indicators for mobile</task>
+        </phase>
+        
+        <phase number="11" name="Enhanced Developer Experience">
+            <task priority="high">Create WebSocket event inspector with filtering</task>
+            <task priority="high">Add performance metrics dashboard in overflow panel</task>
+            <task priority="high">Implement run timeline with Gantt visualization</task>
+            <task priority="medium">Add export functionality for debug logs</task>
+            <task priority="medium">Create keyboard shortcuts for developer tools (Ctrl+Shift+D)</task>
+            <task priority="low">Add theme toggle for overflow panel (dark/light)</task>
+        </phase>
+        
+        <phase number="12" name="Testing and Quality Assurance">
+            <task priority="critical">Test removal of all blue gradient bars</task>
+            <task priority="critical">Verify proper thread isolation and switching</task>
+            <task priority="critical">Test agent deduplication with multiple reruns</task>
+            <task priority="high">Performance test with 100+ messages and threads</task>
+            <task priority="high">Test WebSocket reconnection and error recovery</task>
+            <task priority="medium">Accessibility audit for WCAG 2.1 AA compliance</task>
+            <task priority="medium">Cross-browser testing (Chrome, Firefox, Safari, Edge)</task>
         </phase>
     </implementation-checklist>
 </specification>
