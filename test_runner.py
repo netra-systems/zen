@@ -712,18 +712,21 @@ class UnifiedTestRunner:
         # Calculate totals
         backend_counts = self.results["backend"]["test_counts"]
         frontend_counts = self.results["frontend"]["test_counts"]
+        e2e_counts = self.results.get("e2e", {}).get("test_counts", {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0})
+        
         total_counts = {
-            "total": backend_counts["total"] + frontend_counts["total"],
-            "passed": backend_counts["passed"] + frontend_counts["passed"],
-            "failed": backend_counts["failed"] + frontend_counts["failed"],
-            "skipped": backend_counts["skipped"] + frontend_counts["skipped"],
-            "errors": backend_counts["errors"] + frontend_counts["errors"]
+            "total": backend_counts["total"] + frontend_counts["total"] + e2e_counts["total"],
+            "passed": backend_counts["passed"] + frontend_counts["passed"] + e2e_counts["passed"],
+            "failed": backend_counts["failed"] + frontend_counts["failed"] + e2e_counts["failed"],
+            "skipped": backend_counts["skipped"] + frontend_counts["skipped"] + e2e_counts["skipped"],
+            "errors": backend_counts["errors"] + frontend_counts["errors"] + e2e_counts["errors"]
         }
         
-        total_duration = self.results["backend"]["duration"] + self.results["frontend"]["duration"]
+        total_duration = self.results["backend"]["duration"] + self.results["frontend"]["duration"] + self.results.get("e2e", {}).get("duration", 0)
         overall_passed = (
             self.results["backend"]["status"] in ["passed", "skipped"] and 
-            self.results["frontend"]["status"] in ["passed", "skipped"]
+            self.results["frontend"]["status"] in ["passed", "skipped"] and
+            (self.results.get("e2e", {}).get("status", "skipped") in ["passed", "skipped", "pending"])
         )
         
         # Print test counts
@@ -737,6 +740,8 @@ class UnifiedTestRunner:
         # Print component status
         print(f"Backend:  {self._status_badge(self.results['backend']['status'])} ({backend_counts['total']} tests, {self.results['backend']['duration']:.2f}s)")
         print(f"Frontend: {self._status_badge(self.results['frontend']['status'])} ({frontend_counts['total']} tests, {self.results['frontend']['duration']:.2f}s)")
+        if self.results.get("e2e", {}).get("status") != "pending":
+            print(f"E2E:      {self._status_badge(self.results['e2e']['status'])} ({e2e_counts['total']} tests, {self.results['e2e']['duration']:.2f}s)")
         print(f"Overall:  {self._status_badge(overall_passed)} ({total_duration:.2f}s)")
         
         # Print coverage if available
@@ -774,6 +779,9 @@ Usage Examples:
   # Use simple test runner
   python test_runner.py --simple
   
+  # Run ALL tests (backend, frontend, E2E) - comprehensive validation
+  python test_runner.py --level all
+  
   # Real LLM testing examples:
   # Unit tests with real LLM calls
   python test_runner.py --level unit --real-llm
@@ -793,6 +801,7 @@ Purpose Guide:
   - integration:   Use when testing feature interactions
   - comprehensive: Use before releases, full system validation
   - critical:      Use to verify essential functionality only
+  - all:           Complete validation including backend, frontend, and E2E tests
   
 Real LLM Testing:
   - Adds --real-llm flag to use actual API calls instead of mocks
@@ -951,6 +960,14 @@ Real LLM Testing:
                     config.get('timeout', 300)
                 )
                 exit_code = max(backend_exit, frontend_exit)
+                
+                # Run E2E tests if specified
+                if config.get('run_e2e', False):
+                    e2e_exit, _ = runner.run_e2e_tests(
+                        [],  # E2E tests don't need additional args
+                        config.get('timeout', 600)
+                    )
+                    exit_code = max(exit_code, e2e_exit)
             else:
                 # Backend only for critical tests
                 backend_exit, _ = runner.run_backend_tests(
