@@ -19,14 +19,21 @@ This guide will help you set up automatic staging environments step-by-step. Fol
 2. Click the project dropdown at the top
 3. Click "New Project"
 4. Name it: `netra-staging`
-5. Write down your Project ID (looks like: `netra-staging-123456`)
+5. Write down your Project ID (looks like: `netra-staging-`)
    ```
-   My Project ID: _______________________
+   My Project ID: netra-staging
    ```
 
 ### 1.2 Enable Required APIs
 
-Click each link and press the big "ENABLE" button:
+ 1.gcloud auth login 
+
+ run 
+ ```
+gcloud services enable run.googleapis.com sqladmin.googleapis.com compute.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com dns.googleapis.com redis.googleapis.com secretmanager.googleapis.com cloudresourcemanager.googleapis.com --project=netra-staging
+```
+
+OR Click each link and press the big "ENABLE" button:
 
 1. [Cloud Run API](https://console.cloud.google.com/apis/library/run.googleapis.com)
 2. [Cloud SQL Admin API](https://console.cloud.google.com/apis/library/sqladmin.googleapis.com)
@@ -39,6 +46,7 @@ Click each link and press the big "ENABLE" button:
 9. [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
 
 ✅ Check: All 9 APIs should show "API Enabled" ✅
+
 
 ### 1.3 Create Artifact Registry for Docker Images
 
