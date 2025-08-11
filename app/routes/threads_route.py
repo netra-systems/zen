@@ -6,7 +6,7 @@ Handles thread CRUD operations and thread history.
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
-from app.dependencies import get_db_session as get_db
+from app.db.postgres import get_async_db as get_db
 from app.services.database.thread_repository import ThreadRepository
 from app.services.database.message_repository import MessageRepository
 from app.logging_config import central_logger

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within, renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
 import { ThreadService } from '@/services/threadService';
@@ -695,6 +695,7 @@ describe('ChatHistorySection', () => {
     it('should create new conversation', async () => {
       const newThread = { ...mockThreads[0], id: 'thread-new', title: 'New Conversation' };
       (ThreadService.createThread as jest.Mock).mockResolvedValue(newThread);
+      (ThreadService.getThreadMessages as jest.Mock).mockResolvedValue({ messages: [] });
       
       render(<ChatHistorySection />);
       
@@ -704,6 +705,22 @@ describe('ChatHistorySection', () => {
       await waitFor(() => {
         expect(ThreadService.createThread).toHaveBeenCalledWith('New Conversation');
         expect(mockAddThread).toHaveBeenCalledWith(newThread);
+        expect(mockSetCurrentThread).toHaveBeenCalledWith('thread-new');
+      });
+    });
+
+    it('should handle create thread errors', async () => {
+      const errorMessage = 'Failed to create thread';
+      (ThreadService.createThread as jest.Mock).mockRejectedValue(new Error(errorMessage));
+      
+      render(<ChatHistorySection />);
+      
+      const newChatButton = screen.getByRole('button', { name: /new chat/i });
+      fireEvent.click(newChatButton);
+      
+      await waitFor(() => {
+        expect(mockSetError).toHaveBeenCalledWith(errorMessage);
+        expect(mockAddThread).not.toHaveBeenCalled();
       });
     });
 
@@ -781,6 +798,304 @@ describe('ChatHistorySection', () => {
       await waitFor(() => {
         expect(newChatButton).not.toBeDisabled();
       });
+    });
+
+    it('should update thread title with check button', async () => {
+      const updatedThread = { ...mockThreads[0], title: 'Updated Title' };
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue(updatedThread);
+      
+      render(<ChatHistorySection />);
+      
+      const thread = screen.getByText('First Conversation').closest('.group');
+      const editButton = thread?.querySelector('button.text-gray-600') as HTMLElement;
+      
+      fireEvent.click(editButton);
+      
+      const input = screen.getByDisplayValue('First Conversation');
+      await userEvent.clear(input);
+      await userEvent.type(input, 'Updated Title');
+      
+      const checkButton = thread?.querySelector('button.text-green-600') as HTMLElement;
+      fireEvent.click(checkButton);
+      
+      await waitFor(() => {
+        expect(ThreadService.updateThread).toHaveBeenCalledWith('thread-1', 'Updated Title');
+        expect(mockUpdateThread).toHaveBeenCalledWith('thread-1', { title: 'Updated Title' });
+      });
+    });
+
+    it('should cancel title editing with X button', async () => {
+      render(<ChatHistorySection />);
+      
+      const thread = screen.getByText('First Conversation').closest('.group');
+      const editButton = thread?.querySelector('button.text-gray-600') as HTMLElement;
+      
+      fireEvent.click(editButton);
+      
+      const input = screen.getByDisplayValue('First Conversation');
+      await userEvent.type(input, ' Modified');
+      
+      const cancelButton = screen.getByRole('button', { name: '' }).parentElement?.querySelector('button.text-gray-600') as HTMLElement;
+      fireEvent.click(cancelButton);
+      
+      await waitFor(() => {
+        expect(screen.queryByDisplayValue('First Conversation Modified')).not.toBeInTheDocument();
+        expect(ThreadService.updateThread).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should handle update title errors', async () => {
+      const errorMessage = 'Failed to update title';
+      (ThreadService.updateThread as jest.Mock).mockRejectedValue(new Error(errorMessage));
+      
+      render(<ChatHistorySection />);
+      
+      const thread = screen.getByText('First Conversation').closest('.group');
+      const editButton = thread?.querySelector('button.text-gray-600') as HTMLElement;
+      
+      fireEvent.click(editButton);
+      
+      const input = screen.getByDisplayValue('First Conversation');
+      await userEvent.clear(input);
+      await userEvent.type(input, 'New Title');
+      
+      fireEvent.keyDown(input, { key: 'Enter' });
+      
+      await waitFor(() => {
+        expect(mockSetError).toHaveBeenCalledWith(errorMessage);
+        expect(mockUpdateThread).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should stop propagation on edit button click', async () => {
+      render(<ChatHistorySection />);
+      
+      const thread = screen.getByText('First Conversation').closest('.group');
+      const editButton = thread?.querySelector('button.text-gray-600') as HTMLElement;
+      
+      const clickEvent = new MouseEvent('click', { bubbles: true });
+      const stopPropagationSpy = jest.spyOn(clickEvent, 'stopPropagation');
+      
+      fireEvent(editButton, clickEvent);
+      
+      expect(mockSetCurrentThread).not.toHaveBeenCalled();
+    });
+
+    it('should format dates correctly for different time periods', () => {
+      const now = Date.now();
+      const threadsWithDates = [
+        { ...mockThreads[0], created_at: Math.floor(now / 1000) }, // Today
+        { ...mockThreads[0], id: 'thread-yesterday', created_at: Math.floor((now - 86400000) / 1000) }, // Yesterday
+        { ...mockThreads[0], id: 'thread-3days', created_at: Math.floor((now - 259200000) / 1000) }, // 3 days ago
+        { ...mockThreads[0], id: 'thread-week', created_at: Math.floor((now - 604800000) / 1000) }, // Week ago
+      ];
+      
+      (useThreadStore as unknown as jest.Mock).mockReturnValue({
+        threads: threadsWithDates,
+        currentThreadId: 'thread-1',
+        setThreads: mockSetThreads,
+        setCurrentThread: mockSetCurrentThread,
+        addThread: mockAddThread,
+        updateThread: mockUpdateThread,
+        deleteThread: mockDeleteThread,
+        setLoading: mockSetLoading,
+        setError: mockSetError,
+      });
+      
+      render(<ChatHistorySection />);
+      
+      expect(screen.getByText('Today')).toBeInTheDocument();
+      expect(screen.getByText('Yesterday')).toBeInTheDocument();
+      expect(screen.getByText('3 days ago')).toBeInTheDocument();
+      expect(screen.getByText(/\d{1,2}\/\d{1,2}\/\d{4}/)).toBeInTheDocument();
+    });
+
+    it('should handle non-Error thrown in loadThreads', async () => {
+      const errorString = 'String error';
+      (ThreadService.listThreads as jest.Mock).mockRejectedValue(errorString);
+      
+      render(<ChatHistorySection />);
+      
+      await waitFor(() => {
+        expect(mockSetError).toHaveBeenCalledWith('Failed to load conversation history');
+      });
+    });
+
+    it('should handle non-Error thrown in handleSelectThread', async () => {
+      const errorString = 'String error';
+      (ThreadService.getThreadMessages as jest.Mock).mockRejectedValue(errorString);
+      
+      render(<ChatHistorySection />);
+      
+      const secondThread = screen.getByText('Second Conversation').closest('.group');
+      fireEvent.click(secondThread!);
+      
+      await waitFor(() => {
+        expect(mockSetError).toHaveBeenCalledWith('Failed to load conversation');
+      });
+    });
+
+    it('should handle non-Error thrown in handleDeleteThread', async () => {
+      const errorString = 'String error';
+      (ThreadService.deleteThread as jest.Mock).mockRejectedValue(errorString);
+      
+      render(<ChatHistorySection />);
+      
+      const thread = screen.getByText('First Conversation').closest('.group');
+      const deleteButton = thread?.querySelector('button.text-red-600') as HTMLElement;
+      
+      fireEvent.click(deleteButton);
+      
+      await waitFor(() => {
+        expect(mockSetError).toHaveBeenCalledWith('Failed to delete conversation');
+      });
+    });
+
+    it('should handle non-Error thrown in handleCreateThread', async () => {
+      const errorString = 'String error';
+      (ThreadService.createThread as jest.Mock).mockRejectedValue(errorString);
+      
+      render(<ChatHistorySection />);
+      
+      const newChatButton = screen.getByRole('button', { name: /new chat/i });
+      fireEvent.click(newChatButton);
+      
+      await waitFor(() => {
+        expect(mockSetError).toHaveBeenCalledWith('Failed to create new conversation');
+      });
+    });
+
+    it('should handle non-Error thrown in handleUpdateTitle', async () => {
+      const errorString = 'String error';
+      (ThreadService.updateThread as jest.Mock).mockRejectedValue(errorString);
+      
+      render(<ChatHistorySection />);
+      
+      const thread = screen.getByText('First Conversation').closest('.group');
+      const editButton = thread?.querySelector('button.text-gray-600') as HTMLElement;
+      
+      fireEvent.click(editButton);
+      
+      const input = screen.getByDisplayValue('First Conversation');
+      await userEvent.clear(input);
+      await userEvent.type(input, 'New Title');
+      
+      fireEvent.keyDown(input, { key: 'Enter' });
+      
+      await waitFor(() => {
+        expect(mockSetError).toHaveBeenCalledWith('Failed to update thread title');
+      });
+    });
+
+    it('should disable new chat button when not authenticated', () => {
+      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+        isAuthenticated: false,
+      });
+      
+      render(<ChatHistorySection />);
+      
+      const newChatButton = screen.queryByRole('button', { name: /new chat/i });
+      expect(newChatButton).toBeNull();
+    });
+
+    it('should handle edit input click propagation', async () => {
+      render(<ChatHistorySection />);
+      
+      const thread = screen.getByText('First Conversation').closest('.group');
+      const editButton = thread?.querySelector('button.text-gray-600') as HTMLElement;
+      
+      fireEvent.click(editButton);
+      
+      const input = screen.getByDisplayValue('First Conversation');
+      const inputContainer = input.closest('div');
+      
+      fireEvent.click(inputContainer!);
+      
+      expect(mockSetCurrentThread).not.toHaveBeenCalled();
+    });
+
+    it('should handle whitespace-only title as empty', async () => {
+      render(<ChatHistorySection />);
+      
+      const thread = screen.getByText('First Conversation').closest('.group');
+      const editButton = thread?.querySelector('button.text-gray-600') as HTMLElement;
+      
+      fireEvent.click(editButton);
+      
+      const input = screen.getByDisplayValue('First Conversation');
+      await userEvent.clear(input);
+      await userEvent.type(input, '   ');
+      
+      fireEvent.keyDown(input, { key: 'Enter' });
+      
+      await waitFor(() => {
+        expect(ThreadService.updateThread).not.toHaveBeenCalled();
+        expect(screen.queryByDisplayValue('   ')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should handle empty messages response correctly', async () => {
+      (ThreadService.getThreadMessages as jest.Mock).mockResolvedValue({ messages: [] });
+      
+      render(<ChatHistorySection />);
+      
+      const secondThread = screen.getByText('Second Conversation').closest('.group');
+      fireEvent.click(secondThread!);
+      
+      await waitFor(() => {
+        expect(ThreadService.getThreadMessages).toHaveBeenCalledWith('thread-2');
+        expect(mockLoadMessages).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should render threads with undefined title as Untitled', () => {
+      const threadsWithUndefinedTitle = [
+        { ...mockThreads[0], title: undefined },
+      ];
+      
+      (useThreadStore as unknown as jest.Mock).mockReturnValue({
+        threads: threadsWithUndefinedTitle,
+        currentThreadId: 'thread-1',
+        setThreads: mockSetThreads,
+        setCurrentThread: mockSetCurrentThread,
+        addThread: mockAddThread,
+        updateThread: mockUpdateThread,
+        deleteThread: mockDeleteThread,
+        setLoading: mockSetLoading,
+        setError: mockSetError,
+      });
+
+      render(<ChatHistorySection />);
+      
+      expect(screen.getByText('Untitled')).toBeInTheDocument();
+    });
+
+    it('should set editing title to Untitled for null thread title', () => {
+      const threadsWithNullTitle = [
+        { ...mockThreads[0], title: null },
+      ];
+      
+      (useThreadStore as unknown as jest.Mock).mockReturnValue({
+        threads: threadsWithNullTitle,
+        currentThreadId: 'thread-1',
+        setThreads: mockSetThreads,
+        setCurrentThread: mockSetCurrentThread,
+        addThread: mockAddThread,
+        updateThread: mockUpdateThread,
+        deleteThread: mockDeleteThread,
+        setLoading: mockSetLoading,
+        setError: mockSetError,
+      });
+
+      render(<ChatHistorySection />);
+      
+      const thread = screen.getByText('Untitled').closest('.group');
+      const editButton = thread?.querySelector('button.text-gray-600') as HTMLElement;
+      
+      fireEvent.click(editButton);
+      
+      const input = screen.getByDisplayValue('Untitled');
+      expect(input).toBeInTheDocument();
     });
   });
 });

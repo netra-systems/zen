@@ -356,15 +356,15 @@ class DataSubAgent(BaseSubAgent):
             logger.warning(f"Redis not available for DataSubAgent caching: {e}")
     
     @lru_cache(maxsize=128)
-    def _get_cached_schema(self, table_name: str) -> Optional[Dict[str, Any]]:
+    async def _get_cached_schema(self, table_name: str) -> Optional[Dict[str, Any]]:
         """Get cached schema information for a table"""
         try:
-            client = get_clickhouse_client()
-            result = client.execute(f"DESCRIBE TABLE {table_name}")
-            return {
-                "columns": [{"name": row[0], "type": row[1]} for row in result],
-                "table": table_name
-            }
+            async with get_clickhouse_client() as client:
+                result = await client.execute(f"DESCRIBE TABLE {table_name}")
+                return {
+                    "columns": [{"name": row[0], "type": row[1]} for row in result],
+                    "table": table_name
+                }
         except Exception as e:
             logger.error(f"Failed to get schema for {table_name}: {e}")
             return None
@@ -390,28 +390,28 @@ class DataSubAgent(BaseSubAgent):
             await create_workload_events_table_if_missing()
             
             # Execute query
-            client = get_clickhouse_client()
-            result = client.execute(query)
+            async with get_clickhouse_client() as client:
+                result = await client.execute(query)
             
-            # Convert to list of dicts
-            if result:
-                columns = result[0]._fields if hasattr(result[0], '_fields') else list(range(len(result[0])))
-                data = [dict(zip(columns, row)) for row in result]
+                # Convert to list of dicts
+                if result:
+                    columns = result[0]._fields if hasattr(result[0], '_fields') else list(range(len(result[0])))
+                    data = [dict(zip(columns, row)) for row in result]
+                    
+                    # Cache result if key provided
+                    if cache_key and self.redis_manager:
+                        try:
+                            await self.redis_manager.set(
+                                cache_key,
+                                json.dumps(data, default=str),
+                                ex=self.cache_ttl
+                            )
+                        except Exception as e:
+                            logger.debug(f"Cache storage failed: {e}")
+                    
+                    return data
                 
-                # Cache result if key provided
-                if cache_key and self.redis_manager:
-                    try:
-                        await self.redis_manager.set(
-                            cache_key,
-                            json.dumps(data, default=str),
-                            ex=self.cache_ttl
-                        )
-                    except Exception as e:
-                        logger.debug(f"Cache storage failed: {e}")
-                
-                return data
-            
-            return []
+                return []
             
         except Exception as e:
             logger.error(f"ClickHouse query failed: {e}")
