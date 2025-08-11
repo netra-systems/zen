@@ -70,7 +70,7 @@ async def schema_validation() -> Dict[str, Any]:
     Run and return comprehensive schema validation results.
     """
     try:
-        results = await SchemaValidationService.validate_all_schemas(async_engine)
+        results = await SchemaValidationService.validate_schema(async_engine)
         return results
     except Exception as e:
         logger.error(f"Schema validation check failed: {e}")

@@ -36,6 +36,12 @@ class UnitOfWork:
         self.runs = RunRepository()
         self.references = ReferenceRepository()
         
+        # Inject session into repositories
+        self.threads._session = self._session
+        self.messages._session = self._session
+        self.runs._session = self._session
+        self.references._session = self._session
+        
         logger.debug("UnitOfWork context entered")
         return self
     
@@ -87,6 +93,12 @@ class UnitOfWork:
         self.messages = MessageRepository()
         self.runs = RunRepository()
         self.references = ReferenceRepository()
+        
+        # Inject session into repositories
+        self.threads._session = self._session
+        self.messages._session = self._session
+        self.runs._session = self._session
+        self.references._session = self._session
         
         logger.debug("UnitOfWork initialized")
     

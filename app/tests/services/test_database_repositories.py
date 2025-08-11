@@ -18,14 +18,60 @@ from app.services.database.reference_repository import ReferenceRepository
 
 
 @pytest.fixture
-async def unit_of_work():
-    """Create a test unit of work instance."""
-    uow = UnitOfWork()
-    await uow.initialize()
-    yield uow
-    await uow.rollback()
-    await uow.close()
+async def unit_of_work(mock_session, mock_models):
+    """Create a test unit of work instance with mocked session."""
+    # Mock the session factory to return our mock session
+    with patch('app.services.database.unit_of_work.async_session_factory') as mock_factory:
+        mock_factory.return_value = mock_session
+        uow = UnitOfWork()
+        yield uow
 
+
+@pytest.fixture
+def mock_models():
+    """Mock the database models."""
+    # Create mock model classes
+    class MockThread:
+        def __init__(self, **kwargs):
+            self.id = kwargs.get('id', 'thread_' + str(datetime.now().timestamp()))
+            self.user_id = kwargs.get('user_id')
+            self.title = kwargs.get('title')
+            self.created_at = kwargs.get('created_at', datetime.now())
+            self.updated_at = kwargs.get('updated_at', datetime.now())
+    
+    class MockMessage:
+        def __init__(self, **kwargs):
+            self.id = kwargs.get('id', 'msg_' + str(datetime.now().timestamp()))
+            self.thread_id = kwargs.get('thread_id')
+            self.content = kwargs.get('content')
+            self.role = kwargs.get('role')
+            self.created_at = kwargs.get('created_at', datetime.now())
+    
+    class MockRun:
+        def __init__(self, **kwargs):
+            self.id = kwargs.get('id', 'run_' + str(datetime.now().timestamp()))
+            self.thread_id = kwargs.get('thread_id')
+            self.status = kwargs.get('status', 'completed')
+            self.created_at = kwargs.get('created_at', datetime.now())
+    
+    class MockReference:
+        def __init__(self, **kwargs):
+            self.id = kwargs.get('id', 'ref_' + str(datetime.now().timestamp()))
+            self.message_id = kwargs.get('message_id')
+            self.source = kwargs.get('source')
+            self.content = kwargs.get('content')
+    
+    # Patch all model imports from app.db.models_postgres
+    with patch('app.db.models_postgres.Thread', MockThread), \
+         patch('app.db.models_postgres.Message', MockMessage), \
+         patch('app.db.models_postgres.Run', MockRun), \
+         patch('app.db.models_postgres.Reference', MockReference):
+        yield {
+            'Thread': MockThread,
+            'Message': MockMessage,
+            'Run': MockRun,
+            'Reference': MockReference
+        }
 
 @pytest.fixture
 async def mock_session():
@@ -34,6 +80,17 @@ async def mock_session():
     session.commit = AsyncMock()
     session.rollback = AsyncMock()
     session.close = AsyncMock()
+    session.add = MagicMock()
+    session.refresh = AsyncMock()
+    session.execute = AsyncMock()
+    session.scalar = AsyncMock()
+    
+    # Mock the refresh to update the entity with an ID
+    async def mock_refresh(entity):
+        if hasattr(entity, 'id') and not entity.id:
+            entity.id = "test_id_123"
+    session.refresh.side_effect = mock_refresh
+    
     return session
 
 
@@ -43,12 +100,13 @@ class TestUnitOfWork:
 
     async def test_uow_initialization(self, unit_of_work):
         """Test UoW initialization and repository access."""
-        assert unit_of_work.messages is not None
-        assert unit_of_work.threads is not None
-        assert unit_of_work.runs is not None
-        assert unit_of_work.references is not None
-        assert isinstance(unit_of_work.messages, MessageRepository)
-        assert isinstance(unit_of_work.threads, ThreadRepository)
+        async with unit_of_work as uow:
+            assert uow.messages is not None
+            assert uow.threads is not None
+            assert uow.runs is not None
+            assert uow.references is not None
+            assert isinstance(uow.messages, MessageRepository)
+            assert isinstance(uow.threads, ThreadRepository)
 
     async def test_uow_transaction_commit(self, unit_of_work):
         """Test successful transaction commit."""

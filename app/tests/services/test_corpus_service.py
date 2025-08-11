@@ -26,13 +26,19 @@ class TestCorpusService:
         corpus_data = {
             "id": "test-corpus-123",
             "name": "Test Corpus",
-            "description": "A test corpus for validation"
+            "description": "A test corpus for validation",
+            "status": "available",
+            "created_by_id": "user123",
+            "created_at": datetime.now(),
+            "updated_at": datetime.now()
         }
         
         corpus = Corpus(**corpus_data)
         assert corpus.id == "test-corpus-123"
         assert corpus.name == "Test Corpus"
         assert corpus.description == "A test corpus for validation"
+        assert corpus.status == "available"
+        assert corpus.created_by_id == "user123"
 
     async def test_corpus_create_schema(self):
         """Test corpus creation schema."""

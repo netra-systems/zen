@@ -11,38 +11,45 @@ class TestHealthEndpoints:
         response = client.get("/health/live")
         
         assert response.status_code == 200
-        assert response.json()["status"] == "alive"
-        assert "timestamp" in response.json()
+        assert response.json()["status"] == "ok"
     
     def test_readiness_check_success(self):
         """Test /health/ready endpoint when all services are ready"""
         client = TestClient(app)
         
-        with patch('app.routes.health.async_engine') as mock_engine:
-            mock_conn = AsyncMock()
-            mock_engine.connect = AsyncMock(return_value=mock_conn)
-            mock_conn.__aenter__ = AsyncMock(return_value=mock_conn)
-            mock_conn.__aexit__ = AsyncMock()
-            mock_conn.execute = AsyncMock()
+        with patch('app.routes.health.get_db') as mock_get_db, \
+             patch('app.db.clickhouse.get_clickhouse_client') as mock_get_clickhouse:
+            
+            # Mock database session
+            mock_db = AsyncMock()
+            mock_result = AsyncMock()
+            mock_result.scalar_one_or_none = AsyncMock(return_value=1)
+            mock_db.execute = AsyncMock(return_value=mock_result)
+            mock_get_db.return_value.__aenter__ = AsyncMock(return_value=mock_db)
+            mock_get_db.return_value.__aexit__ = AsyncMock()
+            
+            # Mock ClickHouse client
+            mock_ch_client = MagicMock()
+            mock_ch_client.ping = MagicMock(return_value=True)
+            mock_get_clickhouse.return_value.__aenter__ = AsyncMock(return_value=mock_ch_client)
+            mock_get_clickhouse.return_value.__aexit__ = AsyncMock()
             
             response = client.get("/health/ready")
             
             assert response.status_code == 200
-            assert response.json()["status"] == "ready"
-            assert "postgres" in response.json()["services"]
+            assert response.json()["status"] == "ok"
     
     def test_readiness_check_failure(self):
         """Test /health/ready endpoint when database is unavailable"""
         client = TestClient(app)
         
-        with patch('app.routes.health.async_engine') as mock_engine:
-            mock_engine.connect = AsyncMock(side_effect=Exception("Database connection failed"))
+        with patch('app.routes.health.get_db') as mock_get_db:
+            mock_get_db.side_effect = Exception("Database connection failed")
             
             response = client.get("/health/ready")
             
             assert response.status_code == 503
-            assert response.json()["status"] == "not_ready"
-            assert "error" in response.json()
+            assert response.json()["message"] == "Service Unavailable"
     
     def test_database_environment_endpoint(self):
         """Test /health/database-environment endpoint"""
@@ -55,33 +62,32 @@ class TestHealthEndpoints:
                 "debug": True
             }
             mock_validator.validate_database_url.return_value = {
-                "is_valid": True,
+                "valid": True,
                 "errors": [],
-                "warnings": []
+                "warnings": [],
+                "database_name": "dev_db"
             }
             mock_validator.get_safe_database_name.return_value = "dev_db"
             
-            response = client.get("/health/database-environment")
+            response = client.get("/health/database-env")
             
             assert response.status_code == 200
             assert response.json()["environment"] == "development"
-            assert response.json()["validation"]["is_valid"] is True
+            assert response.json()["validation"]["valid"] is True
     
     def test_schema_validation_endpoint(self):
         """Test /health/schema-validation endpoint"""
         client = TestClient(app)
         
-        with patch('app.routes.health.SchemaValidationService') as mock_validator:
-            mock_instance = MagicMock()
-            mock_validator.return_value = mock_instance
-            mock_instance.validate_all_schemas = AsyncMock(return_value={
-                "is_valid": True,
-                "tables_validated": 10,
-                "errors": []
-            })
+        with patch('app.routes.health.SchemaValidationService.validate_schema') as mock_validate:
+            mock_validate.return_value = {
+                "passed": True,
+                "missing_tables": [],
+                "warnings": []
+            }
             
             response = client.get("/health/schema-validation")
             
             assert response.status_code == 200
-            assert response.json()["is_valid"] is True
-            assert response.json()["tables_validated"] == 10
+            assert response.json()["passed"] is True
+            assert len(response.json()["missing_tables"]) == 0

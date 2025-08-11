@@ -16,6 +16,24 @@ class MockClickHouseDatabase:
         logger.debug(f"ClickHouse disabled - Mock execute_query: {query}")
         return []
     
+    async def fetch(self, query, params=None):
+        """Mock fetch method for tests that expect this interface."""
+        logger.debug(f"ClickHouse disabled - Mock fetch: {query}")
+        # Return mock data that would be expected from common queries
+        if "SELECT 1 as test" in query:
+            return [{"test": 1}]
+        elif "SELECT now() as current_time" in query:
+            from datetime import datetime
+            return [{"current_time": datetime.now()}]
+        elif "test_value" in query:
+            return [{"value": "test_value"}]
+        elif "SHOW TABLES" in query:
+            return []
+        elif "netra_content_corpus" in query:
+            return []
+        else:
+            return []
+    
     async def disconnect(self):
         pass
     

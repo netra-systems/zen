@@ -163,7 +163,7 @@ class TestInternalImports:
             "auth.auth",
             "routes.websockets",
             "services.agent_service",
-            "agents.supervisor",
+            "agents.supervisor_consolidated",
             "db.postgres",
         ]
         

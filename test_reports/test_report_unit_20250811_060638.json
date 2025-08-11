@@ -1,0 +1,43 @@
+{
+  "timestamp": "2025-08-11T06:06:38.450382",
+  "test_level": "unit",
+  "configuration": {
+    "description": "Unit tests for isolated components (1-2 minutes)",
+    "purpose": "Development validation, component testing",
+    "backend_args": [
+      "--category",
+      "unit",
+      "-v"
+    ],
+    "frontend_args": [
+      "--testPathPattern=unit"
+    ],
+    "timeout": 120,
+    "run_coverage": false,
+    "run_both": true
+  },
+  "results": {
+    "backend": {
+      "status": "failed",
+      "duration": 6.033239841461182,
+      "exit_code": 4,
+      "output": "================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: disabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 5.36s\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:37: in <module>\n    from app.main import app\napp\\main.py:296: in <module>\n    from app.routes import supply, generation, admin, references, health, corpus, synthetic_data, config, demo, unified_tools\nE     File \"C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\routes\\unified_tools.py\", line 62\nE       db: DbDep\nE       ^^^^^^^^^\nE   SyntaxError: parameter without a default follows parameter with a default\n"
+    },
+    "frontend": {
+      "status": "failed",
+      "duration": 0.10990548133850098,
+      "exit_code": 2,
+      "output": "\nusage: test_frontend.py [-h]\n                        [--category {unit,integration,components,hooks,store,websocket,auth,e2e,smoke}]\n                        [--keyword KEYWORD] [--e2e] [--cypress-open] [--watch]\n                        [--coverage] [--update-snapshots] [--lint] [--fix]\n                        [--type-check] [--build] [--check-deps]\n                        [--install-deps] [--verbose] [--isolation]\n                        [tests ...]\ntest_frontend.py: error: unrecognized arguments: --testPathPattern=unit\n"
+    },
+    "overall": {
+      "status": "failed",
+      "start_time": 1754917592.307237,
+      "end_time": 1754917598.4503822
+    }
+  },
+  "summary": {
+    "total_duration": 6.143145322799683,
+    "overall_passed": false,
+    "exit_code": 4
+  }
+}

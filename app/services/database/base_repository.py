@@ -20,43 +20,56 @@ class BaseRepository(Generic[T], ABC):
     
     def __init__(self, model: Type[T]):
         self.model = model
+        self._session: Optional[AsyncSession] = None
     
-    async def create(self, db: AsyncSession, **kwargs) -> Optional[T]:
+    async def create(self, db: Optional[AsyncSession] = None, **kwargs) -> Optional[T]:
         """Create a new entity"""
+        session = db or self._session
+        if not session:
+            raise ValueError("No database session available. Pass db parameter or use within UnitOfWork context.")
+        
         try:
             if 'id' not in kwargs and hasattr(self.model, 'id'):
                 kwargs['id'] = str(uuid.uuid4())
             
             entity = self.model(**kwargs)
-            db.add(entity)
-            await db.commit()
-            await db.refresh(entity)
+            session.add(entity)
+            await session.commit()
+            await session.refresh(entity)
             logger.info(f"Created {self.model.__name__} with id: {kwargs.get('id')}")
             return entity
             
         except IntegrityError as e:
-            await db.rollback()
+            await session.rollback()
             logger.error(f"Integrity error creating {self.model.__name__}: {e}")
             return None
         except SQLAlchemyError as e:
-            await db.rollback()
+            await session.rollback()
             logger.error(f"Database error creating {self.model.__name__}: {e}")
             return None
         except Exception as e:
-            await db.rollback()
+            await session.rollback()
             logger.error(f"Unexpected error creating {self.model.__name__}: {e}")
             return None
     
-    async def get_by_id(self, db: AsyncSession, entity_id: str) -> Optional[T]:
+    async def get_by_id(self, entity_id: str, db: Optional[AsyncSession] = None) -> Optional[T]:
         """Get entity by ID"""
+        session = db or self._session
+        if not session:
+            raise ValueError("No database session available. Pass db parameter or use within UnitOfWork context.")
+        
         try:
-            result = await db.execute(
+            result = await session.execute(
                 select(self.model).where(self.model.id == entity_id)
             )
             return result.scalar_one_or_none()
         except SQLAlchemyError as e:
             logger.error(f"Error fetching {self.model.__name__} by id {entity_id}: {e}")
             return None
+    
+    async def get(self, entity_id: str, db: Optional[AsyncSession] = None) -> Optional[T]:
+        """Alias for get_by_id for backward compatibility"""
+        return await self.get_by_id(entity_id, db)
     
     async def get_all(self, db: AsyncSession, 
                       filters: Optional[Dict[str, Any]] = None,

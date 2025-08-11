@@ -53,7 +53,10 @@ def install_dependencies(force: bool = False) -> bool:
             ["npm", "install"],
             cwd=FRONTEND_DIR,
             capture_output=True,
-            text=True
+            text=True,
+            encoding='utf-8',
+            errors='replace',
+            shell=True  # Need shell=True on Windows for npm commands
         )
         if result.returncode != 0:
             print(f"Failed to install dependencies: {result.stderr}")
@@ -75,14 +78,14 @@ def check_dependencies() -> Dict[str, bool]:
     
     # Check Node.js and npm
     try:
-        result = subprocess.run(["node", "--version"], capture_output=True, text=True)
+        result = subprocess.run(["node", "--version"], capture_output=True, text=True, encoding='utf-8', errors='replace', shell=True)
         if result.returncode == 0:
             status["node"] = True
     except:
         pass
     
     try:
-        result = subprocess.run(["npm", "--version"], capture_output=True, text=True)
+        result = subprocess.run(["npm", "--version"], capture_output=True, text=True, encoding='utf-8', errors='replace', shell=True)
         if result.returncode == 0:
             status["npm"] = True
     except:
@@ -150,7 +153,10 @@ def run_jest_tests(args, isolation_manager=None) -> int:
         jest_args,
         cwd=FRONTEND_DIR,
         capture_output=False,
-        text=True
+        text=True,
+        encoding='utf-8',
+        errors='replace',
+        shell=True  # Need shell=True on Windows for npm commands
     )
     
     return result.returncode
@@ -192,7 +198,10 @@ def run_cypress_tests(args, isolation_manager=None) -> int:
         cypress_cmd,
         cwd=FRONTEND_DIR,
         capture_output=False,
-        text=True
+        text=True,
+        encoding='utf-8',
+        errors='replace',
+        shell=True  # Need shell=True on Windows for npm commands
     )
     
     return result.returncode
@@ -253,7 +262,10 @@ def build_frontend(args) -> int:
         ["npm", "run", "build"],
         cwd=FRONTEND_DIR,
         capture_output=False,
-        text=True
+        text=True,
+        encoding='utf-8',
+        errors='replace',
+        shell=True  # Need shell=True on Windows for npm commands
     )
     return result.returncode
 
@@ -270,7 +282,10 @@ def run_lint(args) -> int:
         lint_cmd,
         cwd=FRONTEND_DIR,
         capture_output=False,
-        text=True
+        text=True,
+        encoding='utf-8',
+        errors='replace',
+        shell=True  # Need shell=True on Windows for npm commands
     )
     return result.returncode
 
@@ -282,7 +297,10 @@ def run_type_check(args) -> int:
         ["npx", "tsc", "--noEmit"],
         cwd=FRONTEND_DIR,
         capture_output=False,
-        text=True
+        text=True,
+        encoding='utf-8',
+        errors='replace',
+        shell=True  # Need shell=True on Windows for npm commands
     )
     return result.returncode
 

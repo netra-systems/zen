@@ -23,11 +23,12 @@ async def test_run_agent():
         query="test query",
         workloads=[workload]
     )
-    analysis_request = AnalysisRequest(settings=settings, request=request_model)
+    analysis_request = AnalysisRequest(request_model=request_model)
 
     # Act
-    result = await agent_service.run(analysis_request, "test_client", False)
+    result = await agent_service.run(request_model, "test_run", False)
 
     # Assert
     assert result == {"status": "started"}
-    mock_supervisor.run.assert_called_once_with(analysis_request.model_dump(), "test_client", False)
+    expected_user_request = str(request_model.model_dump())
+    mock_supervisor.run.assert_called_once_with(expected_user_request, "test_run", False)

@@ -42,7 +42,7 @@ class TestFallbackResponseService:
             suggestions=["Add specific metrics", "Provide concrete steps"]
         )
     
-    def test_generate_optimization_fallback_low_quality(self, fallback_service, sample_quality_metrics):
+    async def test_generate_optimization_fallback_low_quality(self, fallback_service, sample_quality_metrics):
         """Test fallback generation for low-quality optimization content"""
         context = FallbackContext(
             agent_name="optimization_agent",
@@ -53,7 +53,7 @@ class TestFallbackResponseService:
             quality_metrics=sample_quality_metrics
         )
         
-        response = fallback_service.generate_fallback(context)
+        response = await fallback_service.generate_fallback(context)
         
         # Verify response quality
         assert response is not None
@@ -64,7 +64,7 @@ class TestFallbackResponseService:
         # Should include actionable requests for information
         assert any(term in response for term in ["metrics", "performance", "constraints"])
     
-    def test_generate_data_analysis_fallback_parsing_error(self, fallback_service):
+    async def test_generate_data_analysis_fallback_parsing_error(self, fallback_service):
         """Test fallback for data analysis parsing errors"""
         context = FallbackContext(
             agent_name="data_agent",
@@ -75,7 +75,7 @@ class TestFallbackResponseService:
             error_details="JSONDecodeError: Expecting value: line 1 column 1"
         )
         
-        response = fallback_service.generate_fallback(context)
+        response = await fallback_service.generate_fallback(context)
         
         # Verify appropriate error guidance
         assert response is not None
@@ -83,7 +83,7 @@ class TestFallbackResponseService:
         assert any(term in response.lower() for term in ["format", "json", "csv", "parsing", "data"])
         assert any(term in response.lower() for term in ["verify", "check", "validate"])
     
-    def test_generate_action_plan_fallback_context_missing(self, fallback_service):
+    async def test_generate_action_plan_fallback_context_missing(self, fallback_service):
         """Test fallback for action plan with missing context"""
         context = FallbackContext(
             agent_name="action_agent",
@@ -93,14 +93,14 @@ class TestFallbackResponseService:
             attempted_action="generate_action_plan"
         )
         
-        response = fallback_service.generate_fallback(context)
+        response = await fallback_service.generate_fallback(context)
         
         # Should ask for specific context
         assert response is not None
         assert "deployment plan" in response
         assert any(term in response.lower() for term in ["objectives", "timeline", "resources", "requirements"])
     
-    def test_generate_report_fallback_validation_failed(self, fallback_service):
+    async def test_generate_report_fallback_validation_failed(self, fallback_service):
         """Test fallback for report with validation failure"""
         context = FallbackContext(
             agent_name="reporting_agent",
@@ -111,14 +111,14 @@ class TestFallbackResponseService:
             error_details="Missing required data fields"
         )
         
-        response = fallback_service.generate_fallback(context)
+        response = await fallback_service.generate_fallback(context)
         
         # Should provide helpful error recovery
         assert response is not None
         assert "performance report" in response
         assert any(term in response.lower() for term in ["data", "missing", "required", "fields"])
     
-    def test_generate_triage_fallback_timeout(self, fallback_service):
+    async def test_generate_triage_fallback_timeout(self, fallback_service):
         """Test fallback for triage timeout scenario"""
         context = FallbackContext(
             agent_name="triage_agent",
@@ -129,7 +129,7 @@ class TestFallbackResponseService:
             retry_count=2
         )
         
-        response = fallback_service.generate_fallback(context)
+        response = await fallback_service.generate_fallback(context)
         
         # Should acknowledge timeout and provide alternatives
         assert response is not None
@@ -137,7 +137,7 @@ class TestFallbackResponseService:
         assert context.retry_count == 2  # Should consider retry count
         assert any(term in response.lower() for term in ["time", "simpler", "break down", "specific"])
     
-    def test_generate_error_message_fallback_llm_error(self, fallback_service):
+    async def test_generate_error_message_fallback_llm_error(self, fallback_service):
         """Test fallback for error message generation with LLM error"""
         context = FallbackContext(
             agent_name="error_handler",
@@ -148,7 +148,7 @@ class TestFallbackResponseService:
             error_details="LLM API connection failed"
         )
         
-        response = fallback_service.generate_fallback(context)
+        response = await fallback_service.generate_fallback(context)
         
         # Should provide helpful error information despite LLM failure
         assert response is not None
@@ -156,7 +156,7 @@ class TestFallbackResponseService:
         # Should acknowledge the limitation
         assert any(term in response.lower() for term in ["technical", "issue", "try"])
     
-    def test_generate_fallback_with_circular_reasoning(self, fallback_service):
+    async def test_generate_fallback_with_circular_reasoning(self, fallback_service):
         """Test fallback specifically for circular reasoning detection"""
         context = FallbackContext(
             agent_name="optimization_agent",
@@ -166,7 +166,7 @@ class TestFallbackResponseService:
             attempted_action="suggest_improvements"
         )
         
-        response = fallback_service.generate_fallback(context)
+        response = await fallback_service.generate_fallback(context)
         
         # Should provide concrete, non-circular suggestions
         assert response is not None
@@ -177,7 +177,7 @@ class TestFallbackResponseService:
         assert "optimize by optimizing" not in response.lower()
         assert "improve by improving" not in response.lower()
     
-    def test_generate_fallback_with_hallucination_risk(self, fallback_service):
+    async def test_generate_fallback_with_hallucination_risk(self, fallback_service):
         """Test fallback for high hallucination risk scenarios"""
         metrics = QualityMetrics(
             hallucination_risk=0.8,
@@ -195,14 +195,14 @@ class TestFallbackResponseService:
             quality_metrics=metrics
         )
         
-        response = fallback_service.generate_fallback(context)
+        response = await fallback_service.generate_fallback(context)
         
         # Should acknowledge uncertainty and provide grounded response
         assert response is not None
         assert "future trends" in response
         assert any(term in response.lower() for term in ["data", "evidence", "based", "verify"])
     
-    def test_generate_fallback_with_rate_limit(self, fallback_service):
+    async def test_generate_fallback_with_rate_limit(self, fallback_service):
         """Test fallback for rate limit scenarios"""
         context = FallbackContext(
             agent_name="generation_agent",
@@ -213,14 +213,14 @@ class TestFallbackResponseService:
             error_details="Rate limit exceeded: 429"
         )
         
-        response = fallback_service.generate_fallback(context)
+        response = await fallback_service.generate_fallback(context)
         
         # Should acknowledge rate limit and provide alternatives
         assert response is not None
         assert any(term in response.lower() for term in ["moment", "shortly", "wait", "try"])
         assert any(term in response.lower() for term in ["alternative", "meanwhile", "instead"])
     
-    def test_generate_fallback_considers_retry_count(self, fallback_service):
+    async def test_generate_fallback_considers_retry_count(self, fallback_service):
         """Test that fallback responses adapt based on retry count"""
         base_context = FallbackContext(
             agent_name="optimization_agent",
@@ -246,7 +246,7 @@ class TestFallbackResponseService:
         if base_context.retry_count > 1:
             assert any(term in response2.lower() for term in ["different", "alternative", "simpler", "break"])
     
-    def test_generate_fallback_includes_diagnostic_tips(self, fallback_service):
+    async def test_generate_fallback_includes_diagnostic_tips(self, fallback_service):
         """Test that fallback includes relevant diagnostic tips"""
         context = FallbackContext(
             agent_name="data_agent",
@@ -257,7 +257,7 @@ class TestFallbackResponseService:
             error_details="ValueError: could not convert string to float"
         )
         
-        response = fallback_service.generate_fallback(context)
+        response = await fallback_service.generate_fallback(context)
         
         # Should include diagnostic tips
         assert response is not None
@@ -265,7 +265,7 @@ class TestFallbackResponseService:
         # Should mention common CSV issues
         assert any(term in response.lower() for term in ["format", "encoding", "delimiter", "types"])
     
-    def test_generate_fallback_with_previous_responses(self, fallback_service):
+    async def test_generate_fallback_with_previous_responses(self, fallback_service):
         """Test fallback that considers previous failed responses"""
         context = FallbackContext(
             agent_name="optimization_agent",
@@ -277,7 +277,7 @@ class TestFallbackResponseService:
             previous_responses=["Use indexes to improve query performance"]
         )
         
-        response = fallback_service.generate_fallback(context)
+        response = await fallback_service.generate_fallback(context)
         
         # Should provide different suggestions than previous attempts
         assert response is not None
@@ -285,7 +285,7 @@ class TestFallbackResponseService:
         # Should not repeat the exact same suggestion
         assert response != context.previous_responses[0]
     
-    def test_format_response_with_placeholders(self, fallback_service):
+    async def test_format_response_with_placeholders(self, fallback_service):
         """Test that response formatting handles placeholders correctly"""
         template = "I need help with {context} to resolve {issue}."
         
@@ -308,7 +308,7 @@ class TestFallbackResponseService:
         assert all(isinstance(tip, str) for tip in tips)
         assert any("format" in tip.lower() or "structure" in tip.lower() for tip in tips)
     
-    def test_get_recovery_suggestions(self, fallback_service):
+    async def test_get_recovery_suggestions(self, fallback_service):
         """Test generation of recovery suggestions"""
         suggestions = fallback_service._get_recovery_suggestions(
             ContentType.OPTIMIZATION,
@@ -320,7 +320,7 @@ class TestFallbackResponseService:
         assert all(isinstance(s, str) for s in suggestions)
         assert any("specific" in s.lower() or "provide" in s.lower() for s in suggestions)
     
-    def test_fallback_response_quality(self, fallback_service):
+    async def test_fallback_response_quality(self, fallback_service):
         """Test that fallback responses meet quality standards"""
         # Test various scenarios
         scenarios = [
@@ -340,7 +340,7 @@ class TestFallbackResponseService:
                 attempted_action="test_action"
             )
             
-            response = fallback_service.generate_fallback(context)
+            response = await fallback_service.generate_fallback(context)
             
             # Quality checks
             assert response is not None
