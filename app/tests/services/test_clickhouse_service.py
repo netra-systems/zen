@@ -23,7 +23,7 @@ class TestClickHouseConnection:
 
     async def test_client_initialization(self, clickhouse_client):
         """Test ClickHouse client initialization."""
-        assert clickhouse_client is not None
+        assert clickhouse_client != None
         # Test a simple query
         result = await clickhouse_client.fetch("SELECT 1 as test")
         assert len(result) == 1

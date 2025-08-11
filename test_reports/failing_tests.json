@@ -1,0 +1,73 @@
+{
+  "last_updated": "2025-08-11T15:45:00Z",
+  "backend": {
+    "count": 4,
+    "failures": [
+      {
+        "test_path": "app/tests/services/test_database_repositories.py",
+        "test_name": "TestBaseRepository::test_repository_bulk_create",
+        "error_type": "AttributeError",
+        "error_message": "'NoneType' object has no attribute 'bulk_create'",
+        "traceback": "AttributeError: 'NoneType' object has no attribute 'bulk_create'",
+        "first_failed": "2025-08-11T15:37:00Z",
+        "consecutive_failures": 1
+      },
+      {
+        "test_path": "app/tests/services/test_llm_cache_service.py",
+        "test_name": "test_llm_cache_service_initialization",
+        "error_type": "TypeError",
+        "error_message": "LLMCacheService.__init__() got an unexpected keyword argument 'ttl'",
+        "traceback": "TypeError: LLMCacheService.__init__() got an unexpected keyword argument 'ttl'",
+        "first_failed": "2025-08-11T15:37:00Z",
+        "consecutive_failures": 1
+      },
+      {
+        "test_path": "app/tests/services/test_agent_message_processing.py",
+        "test_name": "TestAgentMessageProcessing::test_process_user_message",
+        "error_type": "TypeError",
+        "error_message": "AgentService.__init__() takes 2 positional arguments but 3 were given",
+        "traceback": "TypeError: AgentService.__init__() takes 2 positional arguments but 3 were given",
+        "first_failed": "2025-08-11T15:37:00Z",
+        "consecutive_failures": 1
+      },
+      {
+        "test_path": "app/tests/services/test_apex_optimizer_tool_selection.py",
+        "test_name": "TestApexOptimizerToolSelection::test_tool_selection_cost_optimization",
+        "error_type": "ValidationError",
+        "error_message": "2 validation errors for RequestModel: user_id Field required, workloads Field required",
+        "traceback": "pydantic_core._pydantic_core.ValidationError: 2 validation errors",
+        "first_failed": "2025-08-11T15:37:00Z",
+        "consecutive_failures": 1
+      }
+    ]
+  },
+  "frontend": {
+    "count": 240,
+    "failures": [
+      {
+        "test_path": "__tests__/auth/service.test.ts",
+        "test_name": "AuthService - handleLogin",
+        "error_type": "NavigationError",
+        "error_message": "Error: Not implemented: navigation (except hash changes)",
+        "first_failed": "2025-08-11T15:37:00Z",
+        "consecutive_failures": 1
+      },
+      {
+        "test_path": "__tests__/hooks/useKeyboardShortcuts.test.tsx",
+        "test_name": "useKeyboardShortcuts",
+        "error_type": "TestFailure",
+        "error_message": "Various test failures",
+        "first_failed": "2025-08-11T15:37:00Z",
+        "consecutive_failures": 1
+      },
+      {
+        "test_path": "__tests__/components/UIComponents.test.tsx",
+        "test_name": "UIComponents",
+        "error_type": "TestFailure",
+        "error_message": "Component test failures",
+        "first_failed": "2025-08-11T15:37:00Z",
+        "consecutive_failures": 1
+      }
+    ]
+  }
+}

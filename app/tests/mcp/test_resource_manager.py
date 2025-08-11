@@ -33,7 +33,7 @@ class TestResource:
         assert resource.description == "Test description"
         assert resource.mimeType == "application/json"
         assert resource.metadata == {"key": "value"}
-        assert resource.requires_auth is False
+        assert resource.requires_auth == False
         assert resource.permissions == ["read", "write"]
         
     def test_resource_defaults(self):
@@ -43,10 +43,10 @@ class TestResource:
             name="Test"
         )
         
-        assert resource.description is None
+        assert resource.description == None
         assert resource.mimeType == "application/json"
         assert resource.metadata == {}
-        assert resource.requires_auth is True
+        assert resource.requires_auth == True
         assert resource.permissions == []
 
 
@@ -66,7 +66,7 @@ class TestResourceAccess:
         assert access.resource_uri == "netra://test"
         assert access.session_id == "session123"
         assert access.access_type == "write"
-        assert access.success is False
+        assert access.success == False
         assert access.error == "Permission denied"
         assert isinstance(access.accessed_at, datetime)
         
@@ -78,8 +78,8 @@ class TestResourceAccess:
         )
         
         assert access.access_type == "read"
-        assert access.success is True
-        assert access.error is None
+        assert access.success == True
+        assert access.error == None
 
 
 class TestResourceManager:
@@ -333,8 +333,8 @@ class TestResourceManager:
         assert access.resource_uri == "netra://threads"
         assert access.session_id == "session123"
         assert access.access_type == "read"
-        assert access.success is True
-        assert access.error is None
+        assert access.success == True
+        assert access.error == None
         
     @pytest.mark.asyncio
     async def test_access_logging_error(self, manager):
@@ -348,8 +348,8 @@ class TestResourceManager:
         access = manager.access_log[0]
         assert access.resource_uri == "netra://invalid/path"
         assert access.session_id == "session456"
-        assert access.success is False
-        assert access.error is not None
+        assert access.success == False
+        assert access.error != None
         
     @pytest.mark.asyncio
     async def test_shutdown(self, manager):

@@ -397,7 +397,7 @@ class TestTableInitializationQueries:
             
             result = await verify_workload_events_table()
             
-            assert result is True
+            assert result == True
             query = mock_instance.execute_query.call_args[0][0]
             assert "SELECT count() FROM workload_events WHERE 1=0" == query
 

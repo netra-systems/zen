@@ -222,7 +222,7 @@ class TestToolInvocations:
         if invocation["status"] == "failed":
             assert invocation["error"] == "Tool execution failed"
         else:
-            assert invocation["error"] is None
+            assert invocation["error"] == None
 
 
 class TestContentGeneration:
@@ -431,7 +431,7 @@ class TestCorpusLoading:
         
         result = await service._load_corpus("non-existent", mock_db)
         
-        assert result is None
+        assert result == None
     
     async def test_load_corpus_not_completed(self, service, mock_db, mock_corpus):
         """Test loading corpus that's not completed"""
@@ -440,7 +440,7 @@ class TestCorpusLoading:
         
         result = await service._load_corpus("test-corpus", mock_db)
         
-        assert result is None
+        assert result == None
     
     @patch('app.services.synthetic_data_service.get_clickhouse_client')
     async def test_load_corpus_success(self, mock_get_client, service, mock_db, mock_corpus):
@@ -456,7 +456,7 @@ class TestCorpusLoading:
         
         result = await service._load_corpus("test-corpus", mock_db)
         
-        assert result is not None
+        assert result != None
         assert len(result) == 2
         assert result[0]["prompt"] == "prompt1"
         assert result[0]["response"] == "response1"
@@ -472,7 +472,7 @@ class TestCorpusLoading:
         
         result = await service._load_corpus("test-corpus", mock_db)
         
-        assert result is None
+        assert result == None
 
 
 @pytest.mark.asyncio
@@ -658,7 +658,7 @@ class TestJobManagement:
     async def test_get_job_status_not_exists(self, service):
         """Test getting status of non-existent job"""
         status = await service.get_job_status("non-existent")
-        assert status is None
+        assert status == None
     
     async def test_cancel_job_exists(self, service):
         """Test canceling existing job"""
@@ -666,13 +666,13 @@ class TestJobManagement:
         service.active_jobs[job_id] = {"status": "running"}
         
         result = await service.cancel_job(job_id)
-        assert result is True
+        assert result == True
         assert service.active_jobs[job_id]["status"] == GenerationStatus.CANCELLED.value
     
     async def test_cancel_job_not_exists(self, service):
         """Test canceling non-existent job"""
         result = await service.cancel_job("non-existent")
-        assert result is False
+        assert result == False
 
 
 @pytest.mark.asyncio
@@ -837,7 +837,7 @@ class TestIngestionMethods:
         with patch.object(service, 'ingest_batch', return_value={"records_ingested": 1}):
             result = await service.ingest_with_retry(records, max_retries=3)
             
-            assert result["success"] is True
+            assert result["success"] == True
             assert result["retry_count"] == 0
             assert result["records_ingested"] == 1
     
@@ -848,7 +848,7 @@ class TestIngestionMethods:
         with patch.object(service, 'ingest_batch', side_effect=Exception("Ingest failed")):
             result = await service.ingest_with_retry(records, max_retries=2)
             
-            assert result["success"] is False
+            assert result["success"] == False
             assert result["retry_count"] == 2
             assert result["failed_records"] == 1
     
@@ -894,13 +894,13 @@ class TestValidationMethods:
             "latency_ms": 100
         }
         
-        assert service.validate_schema(record) is True
+        assert service.validate_schema(record) == True
     
     def test_validate_schema_missing_fields(self, service):
         """Test schema validation with missing required fields"""
         record = {"data": "incomplete"}
         
-        assert service.validate_schema(record) is False
+        assert service.validate_schema(record) == False
     
     def test_validate_schema_invalid_uuid(self, service):
         """Test schema validation with invalid UUID"""
@@ -910,7 +910,7 @@ class TestValidationMethods:
             "workload_type": "test"
         }
         
-        assert service.validate_schema(record) is False
+        assert service.validate_schema(record) == False
     
     def test_validate_schema_invalid_timestamp(self, service):
         """Test schema validation with invalid timestamp"""
@@ -920,7 +920,7 @@ class TestValidationMethods:
             "workload_type": "test"
         }
         
-        assert service.validate_schema(record) is False
+        assert service.validate_schema(record) == False
     
     async def test_validate_distribution(self, service):
         """Test statistical distribution validation"""
@@ -1105,7 +1105,7 @@ class TestSingletonInstance:
     
     def test_singleton_instance_exists(self):
         """Test that singleton instance is accessible"""
-        assert synthetic_data_service is not None
+        assert synthetic_data_service != None
         assert isinstance(synthetic_data_service, SyntheticDataService)
     
     def test_singleton_instance_consistency(self):

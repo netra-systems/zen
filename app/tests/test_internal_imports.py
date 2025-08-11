@@ -144,7 +144,7 @@ class TestInternalImports:
                 module_path = module_path[4:]  # Remove 'app.' prefix
             
             module = importlib.import_module(module_path)
-            assert module is not None, f"Failed to import {module_path}"
+            assert module != None, f"Failed to import {module_path}"
             
         except ImportError as e:
             # Some modules might be optional or depend on specific configurations

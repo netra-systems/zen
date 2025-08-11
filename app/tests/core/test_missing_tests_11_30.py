@@ -94,7 +94,7 @@ class TestErrorContext:
     def test_trace_id_management(self, error_context):
         """Test trace ID generation and retrieval."""
         trace_id = error_context.generate_trace_id()
-        assert trace_id is not None
+        assert trace_id != None
         assert error_context.get_trace_id() == trace_id
         
         # Set a specific trace ID
@@ -814,7 +814,7 @@ class TestQualityRoute:
             assert response.status_code == 200
             alerts = response.json()
             assert len(alerts) == 1
-            assert alerts[0]["alert"] is True
+            assert alerts[0]["alert"] == True
 
 
 # Test 28: supply_route_research
@@ -877,7 +877,7 @@ class TestSupplyRoute:
             
             response = client.post("/api/supply/validate", json={"chain_id": "456"})
             assert response.status_code == 200
-            assert response.json()["valid"] is True
+            assert response.json()["valid"] == True
 
 
 # Test 29: synthetic_data_route_generation
@@ -926,7 +926,7 @@ class TestSyntheticDataRoute:
             
             response = client.post("/api/synthetic-data/validate", json=validation_request)
             assert response.status_code == 200
-            assert response.json()["valid"] is True
+            assert response.json()["valid"] == True
     
     def test_synthetic_data_templates(self, client):
         """Test synthetic data template retrieval."""

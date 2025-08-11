@@ -68,7 +68,7 @@ class TestUserService:
         created_user = await crud_user.create(db=mock_db_session, obj_in=user_create)
         
         # Assert
-        assert created_user is not None
+        assert created_user != None
         assert created_user.email == sample_user_data["email"]
         # Removed username assertion as the User model doesn't have username field
         assert created_user.full_name == sample_user_data["full_name"]
@@ -98,7 +98,7 @@ class TestUserService:
         found_user = await crud_user.get_by_email(db=mock_db_session, email=sample_user.email)
         
         # Assert
-        assert found_user is not None
+        assert found_user != None
         assert found_user.email == sample_user.email
         # Removed username assertion as User model doesn't have username field
         assert found_user.id == sample_user.id
@@ -126,7 +126,7 @@ class TestUserService:
         found_user = await crud_user.get_by_email(db=mock_db_session, email="nonexistent@example.com")
         
         # Assert
-        assert found_user is None
+        assert found_user == None
         
         # Verify the query was executed
         mock_db_session.execute.assert_called_once()
@@ -157,7 +157,7 @@ class TestUserService:
             )
             
             # Assert
-            assert updated_user is not None
+            assert updated_user != None
             assert updated_user.full_name == "Updated Name"
             # Removed username assertion as User model doesn't have username field
             assert updated_user.email == sample_user.email  # Email should remain unchanged
@@ -204,7 +204,7 @@ class TestUserService:
         found_user = await crud_user.get(db=mock_db_session, id=sample_user.id)
         
         # Assert
-        assert found_user is not None
+        assert found_user != None
         assert found_user.id == sample_user.id
         assert found_user.email == sample_user.email
         
@@ -239,7 +239,7 @@ class TestUserService:
         found_users = await crud_user.get_multi(db=mock_db_session, skip=0, limit=2)
         
         # Assert
-        assert found_users is not None
+        assert found_users != None
         assert len(found_users) == 2
         assert found_users[0].email == "user0@example.com"
         assert found_users[1].email == "user1@example.com"
@@ -291,7 +291,7 @@ class TestUserService:
     def test_user_service_singleton(self):
         """Test that user_service is properly initialized"""
         # Assert
-        assert user_service is not None
+        assert user_service != None
         assert isinstance(user_service, CRUDUser)
         assert user_service.model == User
 

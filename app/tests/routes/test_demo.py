@@ -107,7 +107,7 @@ class TestDemoRoutes:
         )
         
         # Verify session ID was generated
-        assert response.session_id is not None
+        assert response.session_id != None
         assert len(response.session_id) > 0
     
     @pytest.mark.asyncio

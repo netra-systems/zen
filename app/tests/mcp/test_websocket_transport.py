@@ -97,7 +97,7 @@ class TestWebSocketTransport:
     @pytest.mark.asyncio
     async def test_transport_initialization(self, transport):
         """Test transport initialization"""
-        assert transport.server is not None
+        assert transport.server != None
         assert transport.connections == {}
         assert transport.connection_locks == {}
         

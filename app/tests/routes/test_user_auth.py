@@ -29,15 +29,15 @@ def test_get_auth_config_dev_mode(client: TestClient):
     response = client.get("/api/auth/config")
     assert response.status_code == 200
     data = response.json()
-    assert data["development_mode"] is True
-    assert data["endpoints"]["dev_login"] is not None
+    assert data["development_mode"] == True
+    assert data["endpoints"]["dev_login"] != None
 
 def test_get_auth_config_prod_mode(client: TestClient):
     settings.environment = "production"
     response = client.get("/api/auth/config")
     assert response.status_code == 200
     data = response.json()
-    assert data["development_mode"] is False
+    assert data["development_mode"] == False
 
 def test_dev_login_get_not_allowed(client: TestClient):
     settings.environment = "development"

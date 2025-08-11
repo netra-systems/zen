@@ -238,8 +238,8 @@ class TestAgentServiceOrchestration:
         service = AgentService(mock_supervisor)
         
         assert service.supervisor is mock_supervisor
-        assert service.thread_service is not None
-        assert service.message_handler is not None
+        assert service.thread_service != None
+        assert service.message_handler != None
     
     @pytest.mark.asyncio
     async def test_agent_run_execution(self, agent_service, mock_supervisor):
@@ -455,7 +455,7 @@ class TestAgentLifecycleManagement:
         # Get agent for user
         agent = await orchestrator.get_or_create_agent("user1")
         
-        assert agent is not None
+        assert agent != None
         assert agent.user_id == "user1"
         assert orchestrator.active_agents == 1
         assert orchestrator.orchestration_metrics['agents_created'] == 1
@@ -731,7 +731,7 @@ class TestAgentErrorRecovery:
                 await circuit_breaker_execute("user1", f"request_{i}", f"run_{i}")
         
         # Circuit should now be open
-        assert circuit_open is True
+        assert circuit_open == True
         assert failure_count == failure_threshold
         
         # Next call should fail immediately due to circuit breaker

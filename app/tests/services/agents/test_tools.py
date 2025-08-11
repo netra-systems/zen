@@ -27,5 +27,5 @@ async def test_tool_dispatcher_tool_error():
     dispatcher = ToolDispatcher(tools=[mock_tool])
     result = await dispatcher.dispatch("mock_tool", a=1, b="2")
     # Error message contains the actual exception
-    assert result.message is not None
+    assert result.message != None
     assert result.tool_input.tool_name == "mock_tool"

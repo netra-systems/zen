@@ -29,17 +29,17 @@ class TestSpecificationValidation:
     def test_enhanced_admin_visibility_section_exists(self, spec_tree):
         """Verify enhanced admin visibility section is present"""
         admin_visibility = spec_tree.find('.//enhanced_admin_visibility')
-        assert admin_visibility is not None
+        assert admin_visibility != None
         
         # Check key components
-        assert admin_visibility.find('.//real_time_monitoring') is not None
-        assert admin_visibility.find('.//admin_prompts_system') is not None
-        assert admin_visibility.find('.//process_inspectability') is not None
+        assert admin_visibility.find('.//real_time_monitoring') != None
+        assert admin_visibility.find('.//admin_prompts_system') != None
+        assert admin_visibility.find('.//process_inspectability') != None
 
     def test_data_agent_integration_section_exists(self, spec_tree):
         """Verify data agent integration section is present"""
         agent_integration = spec_tree.find('.//data_agent_integration')
-        assert agent_integration is not None
+        assert agent_integration != None
         
         # Check agent tools
         tools = agent_integration.findall('.//agent_tools/tool')
@@ -52,18 +52,18 @@ class TestSpecificationValidation:
     def test_log_structure_coherence_section_exists(self, spec_tree):
         """Verify log structure coherence section is present"""
         log_coherence = spec_tree.find('.//log_structure_coherence')
-        assert log_coherence is not None
+        assert log_coherence != None
         
         # Check unified log schema
         schema = log_coherence.find('.//unified_log_schema')
-        assert schema is not None
-        assert schema.find('.//core_fields') is not None
-        assert schema.find('.//ai_specific_fields') is not None
+        assert schema != None
+        assert schema.find('.//core_fields') != None
+        assert schema.find('.//ai_specific_fields') != None
 
     def test_comprehensive_testing_framework_defined(self, spec_tree):
         """Verify comprehensive testing framework is defined"""
         testing = spec_tree.find('.//comprehensive_testing_framework')
-        assert testing is not None
+        assert testing != None
         
         # Check test suites
         suites = testing.findall('.//test_suites/suite')
@@ -88,7 +88,7 @@ class TestSpecificationValidation:
     def test_version_3_improvements_documented(self, spec_tree):
         """Verify version 3 improvements are documented"""
         improvements = spec_tree.find('.//version_3_improvements')
-        assert improvements is not None
+        assert improvements != None
         
         # Check major enhancements
         enhancements = improvements.findall('.//major_enhancements/enhancement')
@@ -101,7 +101,7 @@ class TestSpecificationValidation:
     def test_admin_prompts_categories_defined(self, spec_tree):
         """Verify admin prompt categories are properly defined"""
         prompts = spec_tree.find('.//admin_prompts_system/prompt_categories')
-        assert prompts is not None
+        assert prompts != None
         
         categories = prompts.findall('category')
         category_names = [cat.get('name') for cat in categories]
@@ -118,7 +118,7 @@ class TestSpecificationValidation:
     def test_clustering_algorithms_defined(self, spec_tree):
         """Verify clustering algorithms are defined"""
         clusterer = spec_tree.find('.//tool[@name="data_clusterer"]')
-        assert clusterer is not None
+        assert clusterer != None
         
         algorithms = clusterer.findall('.//clustering_algorithms/algorithm')
         algo_names = [algo.get('name') for algo in algorithms]
@@ -130,7 +130,7 @@ class TestSpecificationValidation:
     def test_alerting_rules_defined(self, spec_tree):
         """Verify alerting rules are properly defined"""
         alerts = spec_tree.find('.//alerting_and_notifications/alert_rules')
-        assert alerts is not None
+        assert alerts != None
         
         rules = alerts.findall('rule')
         rule_names = [rule.get('name') for rule in rules]
@@ -147,7 +147,7 @@ class TestSpecificationValidation:
     def test_migration_guide_present(self, spec_tree):
         """Verify migration guide from v2 to v3 is present"""
         migration = spec_tree.find('.//migration_guide')
-        assert migration is not None
+        assert migration != None
         
         assert migration.find('from_version').text == '2.0'
         assert migration.find('to_version').text == '3.0'
@@ -196,7 +196,7 @@ class TestImplementationConsistency:
         """Verify corpus service implementation exists"""
         from app.services.corpus_service import CorpusService, CorpusStatus
         
-        assert CorpusService is not None
+        assert CorpusService != None
         
         # Check status enum
         expected_statuses = ['creating', 'available', 'failed', 'updating', 'deleting']
@@ -208,7 +208,7 @@ class TestImplementationConsistency:
         """Verify WebSocket manager exists for real-time updates"""
         from app.ws_manager import manager
         
-        assert manager is not None
+        assert manager != None
         assert hasattr(manager, 'connect')
         assert hasattr(manager, 'disconnect')
         assert hasattr(manager, 'broadcast')
@@ -230,19 +230,19 @@ class TestImplementationConsistency:
         """Verify ClickHouse integration is configured"""
         from app.db.clickhouse import get_clickhouse_client
         
-        assert get_clickhouse_client is not None
+        assert get_clickhouse_client != None
 
     def test_agent_tools_available(self):
         """Verify agent tools are available"""
         from app.agents.admin_tool_dispatcher import AdminToolDispatcher
         
-        assert AdminToolDispatcher is not None
+        assert AdminToolDispatcher != None
 
     def test_data_clustering_tool_exists(self):
         """Verify data clustering tool exists"""
         from app.services.apex_optimizer_agent.tools.log_enricher_and_clusterer import log_enricher_and_clusterer
         
-        assert log_enricher_and_clusterer is not None
+        assert log_enricher_and_clusterer != None
 
     def test_test_file_created(self):
         """Verify comprehensive test file was created"""
@@ -294,7 +294,7 @@ class TestImplementationConsistency:
             
             for section in required_sections:
                 element = root.find(f'.//{section}')
-                assert element is not None, f"Missing required section: {section}"
+                assert element != None, f"Missing required section: {section}"
                 
         except ET.ParseError as e:
             pytest.fail(f"XML parsing error: {e}")

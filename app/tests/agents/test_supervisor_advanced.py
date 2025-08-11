@@ -21,7 +21,7 @@ async def test_supervisor_error_handling():
         # Let's just verify that supervisor handles errors properly
         supervisor = Supervisor(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
         # The test should verify error handling during run, not initialization
-        assert supervisor is not None
+        assert supervisor != None
 
 @pytest.mark.asyncio
 async def test_supervisor_state_management():

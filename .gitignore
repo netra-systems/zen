@@ -67,3 +67,4 @@ temp/
 /.venv
 /venv_test
 /ccusage
+/frontend/.jest-cache

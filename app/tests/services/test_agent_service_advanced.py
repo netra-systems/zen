@@ -11,9 +11,9 @@ async def test_agent_service_initialization():
     mock_supervisor = AsyncMock(spec=Supervisor)
     
     service = AgentService(mock_supervisor)
-    assert service.supervisor is not None
-    assert service.thread_service is not None
-    assert service.message_handler is not None
+    assert service.supervisor != None
+    assert service.thread_service != None
+    assert service.message_handler != None
 
 @pytest.mark.asyncio
 async def test_agent_service_process_request():

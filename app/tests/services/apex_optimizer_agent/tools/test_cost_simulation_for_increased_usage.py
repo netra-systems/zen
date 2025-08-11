@@ -8,6 +8,6 @@ class MockCostSimulationForIncreasedUsageTool(CostSimulationForIncreasedUsageToo
 def test_cost_simulation_for_increased_usage_tool():
     """Tests the CostSimulationForIncreasedUsageTool."""
     tool = MockCostSimulationForIncreasedUsageTool()
-    assert tool is not None
+    assert tool != None
     result = asyncio.run(tool.run())
     assert result == "mocked result"

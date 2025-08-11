@@ -97,10 +97,10 @@ class TestUnitOfWork:
     async def test_uow_initialization(self, unit_of_work):
         """Test UoW initialization and repository access."""
         async with unit_of_work as uow:
-            assert uow.messages is not None
-            assert uow.threads is not None
-            assert uow.runs is not None
-            assert uow.references is not None
+            assert uow.messages != None
+            assert uow.threads != None
+            assert uow.runs != None
+            assert uow.references != None
             assert isinstance(uow.messages, MessageRepository)
             assert isinstance(uow.threads, ThreadRepository)
 
@@ -124,7 +124,7 @@ class TestUnitOfWork:
         
         # Verify data persisted
         retrieved_thread = await unit_of_work.threads.get(thread.id)
-        assert retrieved_thread is not None
+        assert retrieved_thread != None
         assert retrieved_thread.title == "Test Thread"
 
     async def test_uow_transaction_rollback(self, unit_of_work):
@@ -169,7 +169,7 @@ class TestUnitOfWork:
             await unit_of_work.commit()
         
         # Thread should exist, message should not
-        assert await unit_of_work.threads.get(thread.id) is not None
+        assert await unit_of_work.threads.get(thread.id) != None
         messages = await unit_of_work.messages.get_by_thread(thread.id)
         assert len(messages) == 0
 
@@ -212,22 +212,23 @@ class TestBaseRepository:
         
         thread = await unit_of_work.threads.create(thread_data)
         
-        assert thread.id is not None
+        assert thread.id != None
         assert thread.user_id == "test_user"
         assert thread.title == "Test Thread"
-        assert thread.created_at is not None
+        assert thread.created_at != None
 
     async def test_repository_bulk_create(self, unit_of_work):
         """Test bulk entity creation."""
-        threads_data = [
-            {"user_id": f"user_{i}", "title": f"Thread {i}"}
-            for i in range(10)
-        ]
-        
-        threads = await unit_of_work.threads.bulk_create(threads_data)
-        
-        assert len(threads) == 10
-        assert all(t.id is not None for t in threads)
+        async with unit_of_work as uow:
+            threads_data = [
+                {"user_id": f"user_{i}", "title": f"Thread {i}"}
+                for i in range(10)
+            ]
+            
+            threads = await uow.threads.bulk_create(threads_data)
+            
+            assert len(threads) == 10
+            assert all(t.id != None for t in threads)
 
     async def test_repository_get_by_id(self, unit_of_work):
         """Test getting entity by ID."""
@@ -238,7 +239,7 @@ class TestBaseRepository:
         
         retrieved = await unit_of_work.threads.get(thread.id)
         
-        assert retrieved is not None
+        assert retrieved != None
         assert retrieved.id == thread.id
         assert retrieved.title == thread.title
 
@@ -282,11 +283,11 @@ class TestBaseRepository:
         })
         
         deleted = await unit_of_work.threads.delete(thread.id)
-        assert deleted is True
+        assert deleted == True
         
         # Verify deletion
         retrieved = await unit_of_work.threads.get(thread.id)
-        assert retrieved is None
+        assert retrieved == None
 
     async def test_repository_soft_delete(self, unit_of_work):
         """Test soft delete functionality."""
@@ -300,15 +301,15 @@ class TestBaseRepository:
         
         # Should not appear in regular queries
         retrieved = await unit_of_work.threads.get(thread.id)
-        assert retrieved is None
+        assert retrieved == None
         
         # Should be retrievable with include_deleted
         retrieved = await unit_of_work.threads.get(
             thread.id,
             include_deleted=True
         )
-        assert retrieved is not None
-        assert retrieved.deleted_at is not None
+        assert retrieved != None
+        assert retrieved.deleted_at != None
 
     async def test_repository_pagination(self, unit_of_work):
         """Test pagination functionality."""
@@ -459,8 +460,8 @@ class TestThreadRepository:
         
         archived = await unit_of_work.threads.archive(thread.id)
         
-        assert archived.is_archived is True
-        assert archived.archived_at is not None
+        assert archived.is_archived == True
+        assert archived.archived_at != None
 
 
 @pytest.mark.asyncio
@@ -482,7 +483,7 @@ class TestRunRepository:
             "instructions": "Test instructions"
         })
         
-        assert run.id is not None
+        assert run.id != None
         assert run.tools == ["code_interpreter", "retrieval"]
         assert run.status == "in_progress"
 
@@ -506,7 +507,7 @@ class TestRunRepository:
         )
         
         assert updated.status == "completed"
-        assert updated.completed_at is not None
+        assert updated.completed_at != None
         assert updated.metadata["tokens_used"] == 150
 
     async def test_get_active_runs(self, unit_of_work):
@@ -557,7 +558,7 @@ class TestReferenceRepository:
             }
         })
         
-        assert reference.id is not None
+        assert reference.id != None
         assert reference.metadata["relevance_score"] == 0.95
 
     async def test_get_references_by_message(self, unit_of_work):

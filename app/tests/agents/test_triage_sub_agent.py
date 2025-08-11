@@ -78,7 +78,7 @@ class TestTriageSubAgentInitialization:
         """Test initialization without Redis manager."""
         agent = TriageSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
-        assert agent.redis_manager is None
+        assert agent.redis_manager == None
         assert agent.cache_ttl == 3600  # Still set even without Redis
 
 
@@ -89,14 +89,14 @@ class TestRequestValidation:
         """Test validation of a valid request."""
         validation = triage_agent._validate_request("Optimize my AI costs")
         
-        assert validation.is_valid is True
+        assert validation.is_valid == True
         assert len(validation.validation_errors) == 0
     
     def test_request_too_short(self, triage_agent):
         """Test validation of request that's too short."""
         validation = triage_agent._validate_request("ab")
         
-        assert validation.is_valid is False
+        assert validation.is_valid == False
         assert "too short" in validation.validation_errors[0]
     
     def test_request_too_long(self, triage_agent):
@@ -104,14 +104,14 @@ class TestRequestValidation:
         long_request = "a" * 10001
         validation = triage_agent._validate_request(long_request)
         
-        assert validation.is_valid is False
+        assert validation.is_valid == False
         assert "exceeds maximum length" in validation.validation_errors[0]
     
     def test_request_with_injection_pattern(self, triage_agent):
         """Test detection of potential injection patterns."""
         validation = triage_agent._validate_request("DROP TABLE users; SELECT * FROM data")
         
-        assert validation.is_valid is False
+        assert validation.is_valid == False
         assert "malicious pattern" in validation.validation_errors[0]
     
     def test_request_with_warnings(self, triage_agent):
@@ -119,7 +119,7 @@ class TestRequestValidation:
         long_request = "a" * 5001
         validation = triage_agent._validate_request(long_request)
         
-        assert validation.is_valid is True  # Valid but with warnings
+        assert validation.is_valid == True  # Valid but with warnings
         assert len(validation.warnings) > 0
 
 
@@ -174,7 +174,7 @@ class TestIntentDetermination:
         intent = triage_agent._determine_intent(request)
         
         assert intent.primary_intent == "optimize"
-        assert intent.action_required is True
+        assert intent.action_required == True
     
     def test_analyze_intent(self, triage_agent):
         """Test detection of analysis intent."""
@@ -222,7 +222,7 @@ class TestFallbackCategorization:
         
         assert result.category == "Cost Optimization"
         assert result.confidence_score == 0.5  # Lower confidence for fallback
-        assert result.metadata.fallback_used is True
+        assert result.metadata.fallback_used == True
     
     def test_fallback_with_unknown_request(self, triage_agent):
         """Test fallback with request that doesn't match any keywords."""
@@ -240,7 +240,7 @@ class TestJSONExtraction:
         response = '{"category": "Test", "priority": "high"}'
         result = triage_agent._extract_and_validate_json(response)
         
-        assert result is not None
+        assert result != None
         assert result["category"] == "Test"
         assert result["priority"] == "high"
     
@@ -249,7 +249,7 @@ class TestJSONExtraction:
         response = 'Here is the result: {"category": "Test"} and some more text'
         result = triage_agent._extract_and_validate_json(response)
         
-        assert result is not None
+        assert result != None
         assert result["category"] == "Test"
     
     def test_repair_json_with_trailing_comma(self, triage_agent):
@@ -257,7 +257,7 @@ class TestJSONExtraction:
         response = '{"category": "Test", "priority": "high",}'
         result = triage_agent._extract_and_validate_json(response)
         
-        assert result is not None
+        assert result != None
         assert result["category"] == "Test"
     
     def test_extract_json_with_single_quotes(self, triage_agent):
@@ -265,7 +265,7 @@ class TestJSONExtraction:
         response = "{'category': 'Test', 'priority': 'high'}"
         result = triage_agent._extract_and_validate_json(response)
         
-        assert result is not None
+        assert result != None
         assert result["category"] == "Test"
 
 
@@ -294,7 +294,7 @@ class TestCaching:
         
         # Check result uses cached data
         assert sample_state.triage_result["category"] == "Cost Optimization"
-        assert sample_state.triage_result["metadata"]["cache_hit"] is True
+        assert sample_state.triage_result["metadata"]["cache_hit"] == True
     
     @pytest.mark.asyncio
     async def test_cache_miss_and_store(self, triage_agent, sample_state, mock_redis_manager):
@@ -320,7 +320,7 @@ class TestCaching:
         
         # Check result
         assert sample_state.triage_result["category"] == "Cost Optimization"
-        assert sample_state.triage_result["metadata"]["cache_hit"] is False
+        assert sample_state.triage_result["metadata"]["cache_hit"] == False
 
 
 class TestExecuteMethod:
@@ -338,7 +338,7 @@ class TestExecuteMethod:
         
         await triage_agent.execute(sample_state, "test_run", stream_updates=False)
         
-        assert sample_state.triage_result is not None
+        assert sample_state.triage_result != None
         assert sample_state.triage_result["category"] == "Cost Optimization"
         assert sample_state.triage_result["priority"] == "high"
         assert "metadata" in sample_state.triage_result
@@ -374,8 +374,8 @@ class TestExecuteMethod:
         assert triage_agent.llm_manager.ask_llm.call_count == triage_agent.max_retries
         
         # Should use fallback
-        assert sample_state.triage_result is not None
-        assert sample_state.triage_result["metadata"]["fallback_used"] is True
+        assert sample_state.triage_result != None
+        assert sample_state.triage_result["metadata"]["fallback_used"] == True
         assert sample_state.triage_result["confidence_score"] == 0.5
     
     @pytest.mark.asyncio
@@ -399,21 +399,21 @@ class TestEntryConditions:
     async def test_entry_conditions_met(self, triage_agent, sample_state):
         """Test when entry conditions are met."""
         result = await triage_agent.check_entry_conditions(sample_state, "test_run")
-        assert result is True
+        assert result == True
     
     @pytest.mark.asyncio
     async def test_entry_conditions_no_request(self, triage_agent):
         """Test when no user request is provided."""
         empty_state = DeepAgentState(user_request="")
         result = await triage_agent.check_entry_conditions(empty_state, "test_run")
-        assert result is False
+        assert result == False
     
     @pytest.mark.asyncio
     async def test_entry_conditions_invalid_request(self, triage_agent):
         """Test when request is invalid."""
         state = DeepAgentState(user_request="a")  # Too short
         result = await triage_agent.check_entry_conditions(state, "test_run")
-        assert result is False
+        assert result == False
         assert state.triage_result["error"] == "Invalid request"
 
 
@@ -456,7 +456,7 @@ class TestPydanticModels:
         )
         assert intent.primary_intent == "optimize"
         assert len(intent.secondary_intents) == 2
-        assert intent.action_required is True
+        assert intent.action_required == True
 
 
 class TestCleanup:

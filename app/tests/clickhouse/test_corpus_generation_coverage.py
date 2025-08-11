@@ -102,7 +102,7 @@ class TestCorpusLifecycle:
             result = await service.delete_corpus(db, "test_id")
             
             # Verify deletion steps
-            assert result is True
+            assert result == True
             mock_instance.execute.assert_called_with("DROP TABLE IF EXISTS test_table")
             db.delete.assert_called_with(corpus)
             db.commit.assert_called()
@@ -355,7 +355,7 @@ class TestCorpusCloning:
                 db, "source_id", "Cloned Corpus", "new_user"
             )
             
-            assert result is not None
+            assert result != None
             assert result.name == "Cloned Corpus"
             assert result.description == "Clone of Original Corpus"
     
@@ -435,7 +435,7 @@ class TestValidationAndSafety:
         # Verify filter was applied
         db.query().filter.assert_called()
         filter_call = db.query().filter.call_args
-        assert filter_call is not None
+        assert filter_call != None
 
 
 class TestMetadataTracking:
@@ -553,7 +553,7 @@ class TestErrorRecovery:
             
             result = await service.delete_corpus(db, "test_id")
             
-            assert result is False
+            assert result == False
             
             # Should revert status to FAILED
             corpus.status = CorpusStatus.FAILED.value

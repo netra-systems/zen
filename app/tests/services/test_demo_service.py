@@ -52,7 +52,7 @@ class TestDemoService:
         )
         
         # Verify response structure
-        assert result["response"] is not None
+        assert result["response"] != None
         assert "Cost Optimization" in result["response"]
         assert "Performance Improvements" in result["response"]
         assert len(result["agents"]) == 4
@@ -97,9 +97,9 @@ class TestDemoService:
         )
         
         # Verify response
-        assert result["response"] is not None
-        assert result["agents"] is not None
-        assert result["metrics"] is not None
+        assert result["response"] != None
+        assert result["agents"] != None
+        assert result["metrics"] != None
         
         # Verify session was updated with new message
         mock_redis_client.setex.assert_called()
@@ -119,8 +119,8 @@ class TestDemoService:
         for template in templates:
             assert template["industry"] == "financial"
             assert template["name"] in ["Fraud Detection", "Risk Assessment", "Trading Algorithms"]
-            assert template["description"] is not None
-            assert template["prompt_template"] is not None
+            assert template["description"] != None
+            assert template["prompt_template"] != None
             assert len(template["optimization_scenarios"]) == 3
             assert "baseline" in template["typical_metrics"]
             assert "optimized" in template["typical_metrics"]
@@ -283,7 +283,7 @@ class TestDemoService:
         assert status["message_count"] == 3
         assert status["progress_percentage"] == 50.0  # 3 messages / 6 expected steps
         assert status["status"] == "active"
-        assert status["last_interaction"] is not None
+        assert status["last_interaction"] != None
     
     @pytest.mark.asyncio
     async def test_get_session_status_not_found(self, demo_service, mock_redis_client):

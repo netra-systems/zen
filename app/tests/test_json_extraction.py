@@ -46,7 +46,7 @@ class TestJSONExtraction:
         This plan will improve performance by 20%.
         '''
         result = extract_json_from_response(response)
-        assert result is not None
+        assert result != None
         assert result["action_plan_summary"] == "Optimization plan"
         assert len(result["actions"]) == 1
     
@@ -107,14 +107,14 @@ class TestJSONExtraction:
         """Test that completely malformed JSON returns None."""
         response = "This is not JSON at all"
         result = extract_json_from_response(response)
-        assert result is None
+        assert result == None
     
     def test_extract_empty_response_returns_none(self):
         """Test that empty response returns None."""
         result = extract_json_from_response("")
-        assert result is None
+        assert result == None
         result = extract_json_from_response(None)
-        assert result is None
+        assert result == None
     
     def test_fix_common_json_errors(self):
         """Test the fix_common_json_errors helper function."""
@@ -147,7 +147,7 @@ class TestTruncatedJSONRecovery:
         """Test recovery when closing brace is missing."""
         json_str = '{"action_plan_summary": "Test plan", "actions": []'
         result = recover_truncated_json(json_str)
-        assert result is not None
+        assert result != None
         assert result["action_plan_summary"] == "Test plan"
         assert result["actions"] == []
     
@@ -155,14 +155,14 @@ class TestTruncatedJSONRecovery:
         """Test recovery with nested structures missing closing."""
         json_str = '{"outer": {"inner": {"value": "test"'
         result = recover_truncated_json(json_str)
-        assert result is not None
+        assert result != None
         assert result["outer"]["inner"]["value"] == "test"
     
     def test_recover_array_missing_bracket(self):
         """Test recovery when array closing bracket is missing."""
         json_str = '{"items": [{"id": 1}, {"id": 2}'
         result = recover_truncated_json(json_str)
-        assert result is not None
+        assert result != None
         assert len(result["items"]) == 2
         assert result["items"][0]["id"] == 1
     
@@ -170,14 +170,14 @@ class TestTruncatedJSONRecovery:
         """Test recovery when string value is incomplete."""
         json_str = '{"action_plan_summary": "This is an incomplete'
         result = recover_truncated_json(json_str)
-        assert result is not None
+        assert result != None
         assert "action_plan_summary" in result
     
     def test_recover_with_trailing_comma(self):
         """Test recovery with trailing comma and missing closing."""
         json_str = '{"key1": "value1", "key2": "value2",'
         result = recover_truncated_json(json_str)
-        assert result is not None
+        assert result != None
         assert result["key1"] == "value1"
         assert result["key2"] == "value2"
     
@@ -186,16 +186,16 @@ class TestTruncatedJSONRecovery:
         json_str = '{"action_plan_summary": "Test", "total_estimated_time": "2 hours", "actions": [{"id'
         result = recover_truncated_json(json_str, max_retries=5)
         # Should at least recover the complete fields
-        assert result is not None
+        assert result != None
         assert "action_plan_summary" in result
         assert result["action_plan_summary"] == "Test"
     
     def test_recover_empty_string_returns_none(self):
         """Test that empty string returns None."""
         result = recover_truncated_json("")
-        assert result is None
+        assert result == None
         result = recover_truncated_json(None)
-        assert result is None
+        assert result == None
 
 
 class TestPartialJSONExtraction:
@@ -211,7 +211,7 @@ class TestPartialJSONExtraction:
         Some text after
         '''
         result = extract_partial_json(response)
-        assert result is not None
+        assert result != None
         assert result["action_plan_summary"] == "Test plan"
         assert result["total_estimated_time"] == "2 hours"
     
@@ -223,7 +223,7 @@ class TestPartialJSONExtraction:
         "field3": "value3"
         '''
         result = extract_partial_json(response, required_fields=["field1", "field2"])
-        assert result is not None
+        assert result != None
         assert result["field1"] == "value1"
         assert result["field2"] == "value2"
     
@@ -234,7 +234,7 @@ class TestPartialJSONExtraction:
         "field3": "value3"
         '''
         result = extract_partial_json(response, required_fields=["field1", "field2"])
-        assert result is None
+        assert result == None
     
     def test_extract_partial_numeric_values(self):
         """Test extraction of numeric values."""
@@ -244,7 +244,7 @@ class TestPartialJSONExtraction:
         "percentage": 85
         '''
         result = extract_partial_json(response)
-        assert result is not None
+        assert result != None
         assert result["effort_hours"] == 10
         assert result["cost"] == 1500.50
         assert result["percentage"] == 85
@@ -257,9 +257,9 @@ class TestPartialJSONExtraction:
         "completed": true
         '''
         result = extract_partial_json(response)
-        assert result is not None
-        assert result["is_active"] is True
-        assert result["has_errors"] is False
+        assert result != None
+        assert result["is_active"] == True
+        assert result["has_errors"] == False
     
     def test_extract_partial_from_truncated_response(self):
         """Test extraction from a truncated LLM response."""
@@ -273,7 +273,7 @@ class TestPartialJSONExtraction:
         "Security team review for data handling modifications"'''
         
         result = extract_partial_json(response)
-        assert result is not None
+        assert result != None
         assert "action_plan_summary" in result
         assert "total_estimated_time" in result
         assert result["total_estimated_time"] == "13-20 business days"
@@ -281,9 +281,9 @@ class TestPartialJSONExtraction:
     def test_extract_partial_empty_response(self):
         """Test that empty response returns None."""
         result = extract_partial_json("")
-        assert result is None
+        assert result == None
         result = extract_partial_json(None)
-        assert result is None
+        assert result == None
 
 
 class TestLargeResponseHandling:
@@ -294,7 +294,7 @@ class TestLargeResponseHandling:
         # Create a large JSON response that would typically fail
         large_response = '{"action_plan_summary": "' + 'x' * 15000 + '", "actions": []}'
         result = extract_json_from_response(large_response, max_retries=5)
-        assert result is not None
+        assert result != None
         assert len(result["action_plan_summary"]) == 15000
         assert result["actions"] == []
     
@@ -310,10 +310,10 @@ class TestLargeResponseHandling:
         # Should attempt recovery
         result = extract_json_from_response(truncated_response, max_retries=5)
         # If full extraction fails, at least partial should work
-        if result is None:
+        if result == None:
             result = extract_partial_json(truncated_response)
         
-        assert result is not None
+        assert result != None
         assert "action_plan_summary" in result
 
 

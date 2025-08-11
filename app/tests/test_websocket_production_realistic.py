@@ -776,8 +776,8 @@ async def test_connection_pool_exhaustion_recovery():
         results = await asyncio.gather(*acquire_tasks)
         
         # Check pool behavior
-        successful = [r for r in results if r is not None]
-        rejected = [r for r in results if r is None]
+        successful = [r for r in results if r != None]
+        rejected = [r for r in results if r == None]
         
         assert len(successful) == POOL_SIZE, f"Should accept exactly {POOL_SIZE} connections"
         assert len(rejected) == OVERFLOW_CONNECTIONS - POOL_SIZE

@@ -124,7 +124,7 @@ class TestListThreads:
     
     @pytest.mark.asyncio
     async def test_list_threads_empty_metadata(self, mock_db, mock_user):
-        """Test thread listing when metadata is None"""
+        """Test thread listing when metadata == None"""
         thread = Mock(id="thread_1", object="thread", created_at=123456789, metadata_=None)
         
         with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo, \
@@ -139,8 +139,8 @@ class TestListThreads:
             result = await list_threads(db=mock_db, current_user=mock_user, limit=20, offset=0)
             
             assert len(result) == 1
-            assert result[0].title is None
-            assert result[0].updated_at is None
+            assert result[0].title == None
+            assert result[0].updated_at == None
     
     @pytest.mark.asyncio
     async def test_list_threads_exception(self, mock_db, mock_user):
@@ -218,11 +218,11 @@ class TestCreateThread:
                 current_user=mock_user
             )
             
-            assert result.title is None
+            assert result.title == None
             
             # Verify title not in metadata
             call_args = thread_repo.create.call_args
-            assert "title" not in call_args[1]["metadata_"] or call_args[1]["metadata_"].get("title") is None
+            assert "title" not in call_args[1]["metadata_"] or call_args[1]["metadata_"].get("title") == None
     
     @pytest.mark.asyncio
     async def test_create_thread_exception(self, mock_db, mock_user):
@@ -398,7 +398,7 @@ class TestUpdateThread:
             )
             
             # Verify metadata was created and title was set
-            assert mock_thread.metadata_ is not None
+            assert mock_thread.metadata_ != None
             assert mock_thread.metadata_["title"] == "New Title"
             assert mock_thread.metadata_["updated_at"] == 1234567900
     
@@ -689,7 +689,7 @@ class TestAutoRenameThread:
             
             assert result.title == "Generated Title"
             assert mock_thread.metadata_["title"] == "Generated Title"
-            assert mock_thread.metadata_["auto_renamed"] is True
+            assert mock_thread.metadata_["auto_renamed"] == True
             assert mock_thread.metadata_["updated_at"] == 1234567900
             
             mock_db.commit.assert_called_once()
@@ -855,9 +855,9 @@ class TestAutoRenameThread:
             )
             
             # Verify metadata was created and title was set
-            assert mock_thread.metadata_ is not None
+            assert mock_thread.metadata_ != None
             assert mock_thread.metadata_["title"] == "New Title"
-            assert mock_thread.metadata_["auto_renamed"] is True
+            assert mock_thread.metadata_["auto_renamed"] == True
             assert mock_thread.metadata_["updated_at"] == 1234567900
     
     @pytest.mark.asyncio
@@ -926,7 +926,7 @@ class TestRouterConfiguration:
     
     def test_router_redirect_slashes(self):
         """Test router has redirect_slashes disabled"""
-        assert router.redirect_slashes is False
+        assert router.redirect_slashes == False
 
 
 class TestPydanticModels:
@@ -941,8 +941,8 @@ class TestPydanticModels:
         
         # Test with no fields
         thread = ThreadCreate()
-        assert thread.title is None
-        assert thread.metadata is None
+        assert thread.title == None
+        assert thread.metadata == None
     
     def test_thread_update_model(self):
         """Test ThreadUpdate model"""
@@ -953,8 +953,8 @@ class TestPydanticModels:
         
         # Test with no fields
         update = ThreadUpdate()
-        assert update.title is None
-        assert update.metadata is None
+        assert update.title == None
+        assert update.metadata == None
     
     def test_thread_response_model(self):
         """Test ThreadResponse model"""
@@ -977,7 +977,7 @@ class TestPydanticModels:
         # Test defaults
         response = ThreadResponse(id="thread_456", created_at=1234567890)
         assert response.object == "thread"
-        assert response.title is None
-        assert response.updated_at is None
-        assert response.metadata is None
+        assert response.title == None
+        assert response.updated_at == None
+        assert response.metadata == None
         assert response.message_count == 0

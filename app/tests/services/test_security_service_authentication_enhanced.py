@@ -203,10 +203,10 @@ class TestSecurityServiceAuthenticationEnhanced:
         assert len(hashed) > 50  # bcrypt hashes are long
         
         # Verify correct password
-        assert enhanced_security_service.verify_password(password, hashed) is True
+        assert enhanced_security_service.verify_password(password, hashed) == True
         
         # Verify incorrect password
-        assert enhanced_security_service.verify_password("wrong_password", hashed) is False
+        assert enhanced_security_service.verify_password("wrong_password", hashed) == False
     
     def test_access_token_creation_and_validation(self, enhanced_security_service):
         """Test access token creation and validation"""
@@ -214,7 +214,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         
         # Create token
         token = enhanced_security_service.create_access_token(token_payload)
-        assert token is not None
+        assert token != None
         assert isinstance(token, str)
         
         # Validate token
@@ -223,7 +223,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         
         # Decode full token payload
         payload = enhanced_security_service.decode_access_token(token)
-        assert payload is not None
+        assert payload != None
         assert payload["sub"] == "test@example.com"
         assert "exp" in payload
     
@@ -245,28 +245,28 @@ class TestSecurityServiceAuthenticationEnhanced:
         
         # Token should be expired
         expired_email = enhanced_security_service.get_user_email_from_token(token)
-        assert expired_email is None
+        assert expired_email == None
         
         expired_payload = enhanced_security_service.decode_access_token(token)
-        assert expired_payload is None
+        assert expired_payload == None
     
     def test_invalid_token_handling(self, enhanced_security_service):
         """Test handling of various invalid tokens"""
         # Completely invalid token
-        assert enhanced_security_service.get_user_email_from_token("invalid_token") is None
-        assert enhanced_security_service.decode_access_token("invalid_token") is None
+        assert enhanced_security_service.get_user_email_from_token("invalid_token") == None
+        assert enhanced_security_service.decode_access_token("invalid_token") == None
         
         # Empty token
-        assert enhanced_security_service.get_user_email_from_token("") is None
+        assert enhanced_security_service.get_user_email_from_token("") == None
         
         # Malformed JWT
         malformed_jwt = "header.payload"  # Missing signature
-        assert enhanced_security_service.get_user_email_from_token(malformed_jwt) is None
+        assert enhanced_security_service.get_user_email_from_token(malformed_jwt) == None
         
         # JWT with wrong signature
         valid_payload = {"sub": "test@example.com", "exp": datetime.utcnow().timestamp() + 3600}
         wrong_signature_token = jwt.encode(valid_payload, "wrong_secret", algorithm="HS256")
-        assert enhanced_security_service.get_user_email_from_token(wrong_signature_token) is None
+        assert enhanced_security_service.get_user_email_from_token(wrong_signature_token) == None
     
     @pytest.mark.asyncio
     async def test_user_authentication_success(self, enhanced_security_service, mock_db_session, sample_users):
@@ -283,7 +283,7 @@ class TestSecurityServiceAuthenticationEnhanced:
             mock_db_session, "user@test.com", "user_password"
         )
         
-        assert authenticated_user is not None
+        assert authenticated_user != None
         assert authenticated_user.email == "user@test.com"
         assert authenticated_user.failed_login_attempts == 0
     
@@ -302,7 +302,7 @@ class TestSecurityServiceAuthenticationEnhanced:
             mock_db_session, "user@test.com", "wrong_password"
         )
         
-        assert authenticated_user is None
+        assert authenticated_user == None
     
     @pytest.mark.asyncio
     async def test_user_authentication_nonexistent_user(self, enhanced_security_service, mock_db_session):
@@ -317,18 +317,18 @@ class TestSecurityServiceAuthenticationEnhanced:
             mock_db_session, "nonexistent@test.com", "any_password"
         )
         
-        assert authenticated_user is None
+        assert authenticated_user == None
     
     def test_account_lockout_detection(self, enhanced_security_service, sample_users):
         """Test account lockout detection"""
         locked_user = sample_users[2]  # Locked user
         
         # Should detect lockout
-        assert enhanced_security_service.check_account_lockout(locked_user) is True
+        assert enhanced_security_service.check_account_lockout(locked_user) == True
         
         # Regular user should not be locked
         regular_user = sample_users[1]
-        assert enhanced_security_service.check_account_lockout(regular_user) is False
+        assert enhanced_security_service.check_account_lockout(regular_user) == False
     
     def test_failed_login_attempt_tracking(self, enhanced_security_service, sample_users):
         """Test failed login attempt tracking and lockout"""
@@ -336,18 +336,18 @@ class TestSecurityServiceAuthenticationEnhanced:
         
         # Initial state
         assert user.failed_login_attempts == 0
-        assert user.account_locked_until is None
+        assert user.account_locked_until == None
         
         # Increment failed attempts
         for i in range(4):
             enhanced_security_service.increment_failed_attempts(user)
             assert user.failed_login_attempts == i + 1
-            assert user.account_locked_until is None  # Not locked yet
+            assert user.account_locked_until == None  # Not locked yet
         
         # Fifth attempt should lock account
         enhanced_security_service.increment_failed_attempts(user)
         assert user.failed_login_attempts == 5
-        assert user.account_locked_until is not None
+        assert user.account_locked_until != None
         assert user.account_locked_until > datetime.utcnow()
     
     def test_successful_login_resets_attempts(self, enhanced_security_service, sample_users):
@@ -361,8 +361,8 @@ class TestSecurityServiceAuthenticationEnhanced:
         enhanced_security_service.reset_failed_attempts(user)
         
         assert user.failed_login_attempts == 0
-        assert user.account_locked_until is None
-        assert user.last_login is not None
+        assert user.account_locked_until == None
+        assert user.last_login != None
     
     def test_token_blacklisting(self, enhanced_security_service):
         """Test token blacklisting functionality"""
@@ -370,13 +370,13 @@ class TestSecurityServiceAuthenticationEnhanced:
         token = enhanced_security_service.create_access_token(token_payload)
         
         # Initially not blacklisted
-        assert enhanced_security_service.is_token_blacklisted(token) is False
+        assert enhanced_security_service.is_token_blacklisted(token) == False
         
         # Blacklist token
         enhanced_security_service.blacklist_token(token)
         
         # Should now be blacklisted
-        assert enhanced_security_service.is_token_blacklisted(token) is True
+        assert enhanced_security_service.is_token_blacklisted(token) == True
     
     def test_session_management(self, enhanced_security_service):
         """Test session creation and validation"""
@@ -389,13 +389,13 @@ class TestSecurityServiceAuthenticationEnhanced:
         
         # Validate session
         session = enhanced_security_service.validate_session(session_id)
-        assert session is not None
+        assert session != None
         assert session['user_id'] == user_id
         assert session['ip_address'] == "192.168.1.1"
         
         # Invalid session ID
         invalid_session = enhanced_security_service.validate_session("invalid_session_id")
-        assert invalid_session is None
+        assert invalid_session == None
     
     def test_session_expiry(self, enhanced_security_service):
         """Test session expiry handling"""
@@ -412,7 +412,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         
         # Should return None for expired session
         expired_session = enhanced_security_service.validate_session(session_id)
-        assert expired_session is None
+        assert expired_session == None
         
         # Session should be removed from store
         assert session_id not in enhanced_security_service.session_store
@@ -482,31 +482,31 @@ class TestSecurityServicePermissions:
         users = permission_test_users
         
         # Admin permissions
-        assert service.check_permission(users['admin'], 'create') is True
-        assert service.check_permission(users['admin'], 'read') is True
-        assert service.check_permission(users['admin'], 'update') is True
-        assert service.check_permission(users['admin'], 'delete') is True
-        assert service.check_permission(users['admin'], 'manage_users') is True
+        assert service.check_permission(users['admin'], 'create') == True
+        assert service.check_permission(users['admin'], 'read') == True
+        assert service.check_permission(users['admin'], 'update') == True
+        assert service.check_permission(users['admin'], 'delete') == True
+        assert service.check_permission(users['admin'], 'manage_users') == True
         
         # Moderator permissions
-        assert service.check_permission(users['moderator'], 'create') is True
-        assert service.check_permission(users['moderator'], 'read') is True
-        assert service.check_permission(users['moderator'], 'update') is True
-        assert service.check_permission(users['moderator'], 'delete') is False
-        assert service.check_permission(users['moderator'], 'manage_users') is False
+        assert service.check_permission(users['moderator'], 'create') == True
+        assert service.check_permission(users['moderator'], 'read') == True
+        assert service.check_permission(users['moderator'], 'update') == True
+        assert service.check_permission(users['moderator'], 'delete') == False
+        assert service.check_permission(users['moderator'], 'manage_users') == False
         
         # User permissions
-        assert service.check_permission(users['user'], 'read') is True
-        assert service.check_permission(users['user'], 'create_own') is True
-        assert service.check_permission(users['user'], 'update_own') is True
-        assert service.check_permission(users['user'], 'delete') is False
-        assert service.check_permission(users['user'], 'manage_users') is False
+        assert service.check_permission(users['user'], 'read') == True
+        assert service.check_permission(users['user'], 'create_own') == True
+        assert service.check_permission(users['user'], 'update_own') == True
+        assert service.check_permission(users['user'], 'delete') == False
+        assert service.check_permission(users['user'], 'manage_users') == False
         
         # Viewer permissions
-        assert service.check_permission(users['viewer'], 'read') is True
-        assert service.check_permission(users['viewer'], 'create') is False
-        assert service.check_permission(users['viewer'], 'update') is False
-        assert service.check_permission(users['viewer'], 'delete') is False
+        assert service.check_permission(users['viewer'], 'read') == True
+        assert service.check_permission(users['viewer'], 'create') == False
+        assert service.check_permission(users['viewer'], 'update') == False
+        assert service.check_permission(users['viewer'], 'delete') == False
     
     def test_tool_specific_permissions(self, security_service_with_permissions, permission_test_users):
         """Test tool-specific permission checking"""
@@ -514,24 +514,24 @@ class TestSecurityServicePermissions:
         users = permission_test_users
         
         # Admin - should have access to all tools
-        assert service.check_tool_permission(users['admin'], 'data_analyzer') is True
-        assert service.check_tool_permission(users['admin'], 'premium_optimizer') is True
-        assert service.check_tool_permission(users['admin'], 'restricted_tool') is True
+        assert service.check_tool_permission(users['admin'], 'data_analyzer') == True
+        assert service.check_tool_permission(users['admin'], 'premium_optimizer') == True
+        assert service.check_tool_permission(users['admin'], 'restricted_tool') == True
         
         # Moderator - mixed access
-        assert service.check_tool_permission(users['moderator'], 'data_analyzer') is True
-        assert service.check_tool_permission(users['moderator'], 'premium_optimizer') is True
-        assert service.check_tool_permission(users['moderator'], 'restricted_tool') is False
+        assert service.check_tool_permission(users['moderator'], 'data_analyzer') == True
+        assert service.check_tool_permission(users['moderator'], 'premium_optimizer') == True
+        assert service.check_tool_permission(users['moderator'], 'restricted_tool') == False
         
         # User - limited access
-        assert service.check_tool_permission(users['user'], 'data_analyzer') is True
-        assert service.check_tool_permission(users['user'], 'premium_optimizer') is False
-        assert service.check_tool_permission(users['user'], 'restricted_tool') is False
+        assert service.check_tool_permission(users['user'], 'data_analyzer') == True
+        assert service.check_tool_permission(users['user'], 'premium_optimizer') == False
+        assert service.check_tool_permission(users['user'], 'restricted_tool') == False
         
         # Viewer - no tool access
-        assert service.check_tool_permission(users['viewer'], 'data_analyzer') is False
-        assert service.check_tool_permission(users['viewer'], 'premium_optimizer') is False
-        assert service.check_tool_permission(users['viewer'], 'restricted_tool') is False
+        assert service.check_tool_permission(users['viewer'], 'data_analyzer') == False
+        assert service.check_tool_permission(users['viewer'], 'premium_optimizer') == False
+        assert service.check_tool_permission(users['viewer'], 'restricted_tool') == False
     
     def test_feature_flag_checking(self, security_service_with_permissions, permission_test_users):
         """Test feature flag checking"""
@@ -539,17 +539,17 @@ class TestSecurityServicePermissions:
         users = permission_test_users
         
         # Admin - has beta features and advanced analytics
-        assert service.check_feature_flag(users['admin'], 'beta_features') is True
-        assert service.check_feature_flag(users['admin'], 'advanced_analytics') is True
-        assert service.check_feature_flag(users['admin'], 'non_existent_feature') is False
+        assert service.check_feature_flag(users['admin'], 'beta_features') == True
+        assert service.check_feature_flag(users['admin'], 'advanced_analytics') == True
+        assert service.check_feature_flag(users['admin'], 'non_existent_feature') == False
         
         # Moderator - has beta features only
-        assert service.check_feature_flag(users['moderator'], 'beta_features') is True
-        assert service.check_feature_flag(users['moderator'], 'advanced_analytics') is False
+        assert service.check_feature_flag(users['moderator'], 'beta_features') == True
+        assert service.check_feature_flag(users['moderator'], 'advanced_analytics') == False
         
         # User and Viewer - no feature flags
-        assert service.check_feature_flag(users['user'], 'beta_features') is False
-        assert service.check_feature_flag(users['viewer'], 'beta_features') is False
+        assert service.check_feature_flag(users['user'], 'beta_features') == False
+        assert service.check_feature_flag(users['viewer'], 'beta_features') == False
     
     def test_explicit_permissions_override_roles(self, security_service_with_permissions, permission_test_users):
         """Test that explicit permissions override role-based permissions"""
@@ -557,13 +557,13 @@ class TestSecurityServicePermissions:
         user = permission_test_users['user']
         
         # User normally doesn't have manage_users permission through role
-        assert service.check_permission(user, 'manage_users') is False
+        assert service.check_permission(user, 'manage_users') == False
         
         # Add explicit permission
         user.permissions.append('manage_users')
         
         # Should now have permission
-        assert service.check_permission(user, 'manage_users') is True
+        assert service.check_permission(user, 'manage_users') == True
 
 
 class TestSecurityServiceOAuth:
@@ -662,7 +662,7 @@ class TestSecurityServiceConcurrency:
         
         # All validations should succeed
         assert len(results) == 10
-        assert all(result is not None for result in results)
+        assert all(result != None for result in results)
         assert all(f"user_{i}@example.com" in results for i in range(10))
     
     @pytest.mark.asyncio
@@ -675,13 +675,13 @@ class TestSecurityServiceConcurrency:
             
             # Immediately validate
             session = concurrent_security_service.validate_session(session_id)
-            return session is not None
+            return session != None
         
         tasks = [create_and_validate_session(f"user_{i}") for i in range(20)]
         results = await asyncio.gather(*tasks)
         
         # All sessions should be created and validated successfully
-        assert all(result is True for result in results)
+        assert all(result == True for result in results)
         assert len(concurrent_security_service.session_store) == 20
     
     def test_concurrent_failed_login_tracking(self, concurrent_security_service):
@@ -708,4 +708,4 @@ class TestSecurityServiceConcurrency:
         
         # Should have recorded all attempts and locked account
         assert user.failed_login_attempts == 6
-        assert user.account_locked_until is not None
+        assert user.account_locked_until != None

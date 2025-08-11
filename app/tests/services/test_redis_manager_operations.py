@@ -179,7 +179,7 @@ class EnhancedRedisManager(RedisManager):
                 result = await self.get(key)
                 self.operation_metrics['successful_operations'] += 1
                 
-                if result is not None:
+                if result != None:
                     self.operation_metrics['cache_hits'] += 1
                 else:
                     self.operation_metrics['cache_misses'] += 1
@@ -274,7 +274,7 @@ class TestRedisManagerOperations:
         assert hasattr(manager, 'redis_client')
         
         # Initially should not be connected
-        assert manager.redis_client is None
+        assert manager.redis_client == None
     
     @pytest.mark.asyncio
     async def test_redis_connection_success(self, mock_redis_client):
@@ -313,7 +313,7 @@ class TestRedisManagerOperations:
                 await manager.connect()
                 
                 # Should remain None on connection failure
-                assert manager.redis_client is None
+                assert manager.redis_client == None
     
     @pytest.mark.asyncio
     async def test_redis_get_operation(self, redis_manager, mock_redis_client):
@@ -336,7 +336,7 @@ class TestRedisManagerOperations:
         """Test Redis GET operation for nonexistent key"""
         result = await redis_manager.get("nonexistent_key")
         
-        assert result is None
+        assert result == None
         assert mock_redis_client.operation_count == 1
     
     @pytest.mark.asyncio
@@ -349,7 +349,7 @@ class TestRedisManagerOperations:
         result = await redis_manager.set(test_key, test_value)
         
         # Verify operation
-        assert result is True
+        assert result == True
         assert mock_redis_client.data[test_key] == test_value
         assert mock_redis_client.operation_count == 1
         assert ('set', test_key, test_value, None) in mock_redis_client.command_history
@@ -365,7 +365,7 @@ class TestRedisManagerOperations:
         result = await redis_manager.set(test_key, test_value, ex=expiration)
         
         # Verify operation
-        assert result is True
+        assert result == True
         assert mock_redis_client.data[test_key] == test_value
         assert test_key in mock_redis_client.ttls
         
@@ -385,7 +385,7 @@ class TestRedisManagerOperations:
         result = await redis_manager.set(test_key, test_value, expire=expiration)
         
         # Should work the same as 'ex'
-        assert result is True
+        assert result == True
         assert mock_redis_client.data[test_key] == test_value
         assert test_key in mock_redis_client.ttls
     
@@ -422,15 +422,15 @@ class TestRedisManagerOperations:
         manager.redis_client = None
         
         # All operations should return None gracefully
-        assert await manager.get("test_key") is None
-        assert await manager.set("test_key", "test_value") is None
-        assert await manager.delete("test_key") is None
+        assert await manager.get("test_key") == None
+        assert await manager.set("test_key", "test_value") == None
+        assert await manager.delete("test_key") == None
     
     @pytest.mark.asyncio
     async def test_redis_disconnect(self, redis_manager, mock_redis_client):
         """Test Redis disconnection"""
         # Initially connected
-        assert redis_manager.redis_client is not None
+        assert redis_manager.redis_client != None
         
         # Disconnect
         await redis_manager.disconnect()
@@ -467,7 +467,7 @@ class TestRedisManagerConnectionPooling:
         # Get connection
         connection = await connection_pool.get_connection()
         
-        assert connection is not None
+        assert connection != None
         assert isinstance(connection, MockRedisClient)
         assert connection_pool.active_connections == 1
         assert connection_pool.total_connections_created == 1
@@ -644,7 +644,7 @@ class TestRedisManagerRetryAndFailover:
         # Execute set with retry
         result = await enhanced_redis_manager_with_retry.set_with_retry("test_key", "test_value")
         
-        assert result is True
+        assert result == True
         assert attempt_count == 2  # Failed once, succeeded on second attempt
     
     @pytest.mark.asyncio
@@ -657,12 +657,12 @@ class TestRedisManagerRetryAndFailover:
         fallback_cache = {}
         
         async def fallback_get(key):
-            if enhanced_redis_manager_with_retry.redis_client is None:
+            if enhanced_redis_manager_with_retry.redis_client == None:
                 return fallback_cache.get(key)
             return await enhanced_redis_manager_with_retry.get(key)
         
         async def fallback_set(key, value, ex=None):
-            if enhanced_redis_manager_with_retry.redis_client is None:
+            if enhanced_redis_manager_with_retry.redis_client == None:
                 fallback_cache[key] = value
                 return True
             return await enhanced_redis_manager_with_retry.set(key, value, ex=ex)

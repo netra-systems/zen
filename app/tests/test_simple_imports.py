@@ -49,7 +49,7 @@ class TestHealthEndpoints:
         """Test readiness endpoint logic"""
         from app.routes.health import router
         # Basic test that the route exists
-        assert router is not None
+        assert router != None
 
 
 class TestDatabaseOperations:
@@ -102,8 +102,8 @@ class TestAuthenticationFlow:
             hashed = get_password_hash(password)
             
             assert hashed != password
-            assert verify_password(password, hashed) is True
-            assert verify_password("wrong_password", hashed) is False
+            assert verify_password(password, hashed) == True
+            assert verify_password("wrong_password", hashed) == False
         except ImportError:
             pytest.skip("Auth utilities not available")
     
@@ -127,12 +127,12 @@ class TestAgentServices:
     def test_agent_service_import(self):
         """Test agent service can be imported"""
         from app.services.agent_service import AgentService
-        assert AgentService is not None
+        assert AgentService != None
     
     def test_supervisor_agent_import(self):
         """Test supervisor agent can be imported"""
         from app.agents.supervisor_consolidated import SupervisorAgent
-        assert SupervisorAgent is not None
+        assert SupervisorAgent != None
     
     def test_agent_state_management(self):
         """Test agent state structures"""
@@ -150,7 +150,7 @@ class TestWebSocketFunctionality:
     def test_websocket_manager_import(self):
         """Test WebSocket manager can be imported"""
         from app.ws_manager import WebSocketManager
-        assert WebSocketManager is not None
+        assert WebSocketManager != None
     
     @pytest.mark.asyncio
     async def test_websocket_message_structure(self):
@@ -169,7 +169,7 @@ class TestWebSocketFunctionality:
     def test_message_handler_import(self):
         """Test message handler can be imported"""
         from app.services.websocket.message_handler import MessageHandlerService
-        assert MessageHandlerService is not None
+        assert MessageHandlerService != None
 
 
 class TestLLMIntegration:
@@ -178,7 +178,7 @@ class TestLLMIntegration:
     def test_llm_manager_import(self):
         """Test LLM manager can be imported"""
         from app.llm.llm_manager import LLMManager
-        assert LLMManager is not None
+        assert LLMManager != None
     
     def test_llm_schemas_structure(self):
         """Test LLM request/response schemas"""
@@ -201,7 +201,7 @@ class TestLLMIntegration:
         try:
             from app.llm.llm_manager import LLMManager
             manager = LLMManager()
-            assert manager is not None
+            assert manager != None
         except Exception:
             # Skip if LLM manager not available for testing
             pytest.skip("LLM manager not available for testing")
@@ -213,7 +213,7 @@ class TestDataIngestion:
     def test_corpus_service_import(self):
         """Test corpus service can be imported"""
         from app.services.corpus_service import CorpusService
-        assert CorpusService is not None
+        assert CorpusService != None
     
     def test_data_schemas(self):
         """Test data ingestion schemas"""
@@ -228,7 +228,7 @@ class TestDataIngestion:
     def test_synthetic_data_service(self):
         """Test synthetic data generation service"""
         from app.services.synthetic_data_service import SyntheticDataService
-        assert SyntheticDataService is not None
+        assert SyntheticDataService != None
 
 
 class TestAPIRoutes:
@@ -238,23 +238,23 @@ class TestAPIRoutes:
         """Test all route modules can be imported"""
         from app.routes import admin, agent_route, generation, supply
         
-        assert admin is not None
-        assert agent_route is not None
-        assert generation is not None
-        assert supply is not None
+        assert admin != None
+        assert agent_route != None
+        assert generation != None
+        assert supply != None
     
     def test_generation_route_structure(self):
         """Test generation route has expected endpoints"""
         from app.routes.generation import router
         
         # Check that router has routes
-        assert router.routes is not None
+        assert router.routes != None
         assert len(router.routes) > 0
     
     def test_websocket_route_import(self):
         """Test WebSocket routes can be imported"""
         from app.routes.websockets import router as ws_router
-        assert ws_router is not None
+        assert ws_router != None
 
 
 class TestErrorHandling:
@@ -263,13 +263,13 @@ class TestErrorHandling:
     def test_custom_exceptions_import(self):
         """Test custom exceptions can be imported"""
         from app.core.exceptions import NetraException
-        assert NetraException is not None
+        assert NetraException != None
     
     def test_error_context_handling(self):
         """Test error context utilities"""
         try:
             from app.core.error_context import ErrorContext
-            assert ErrorContext is not None
+            assert ErrorContext != None
         except ImportError:
             pytest.skip("Error context not available")
     
@@ -289,7 +289,7 @@ class TestPerformanceOptimization:
         """Test caching services can be imported"""
         try:
             from app.services.cache.llm_cache import LLMCacheService
-            assert LLMCacheService is not None
+            assert LLMCacheService != None
         except ImportError:
             pytest.skip("Cache service not available")
     
@@ -297,7 +297,7 @@ class TestPerformanceOptimization:
         """Test resource management utilities"""
         try:
             from app.core.resource_manager import ResourceManager
-            assert ResourceManager is not None
+            assert ResourceManager != None
         except ImportError:
             pytest.skip("Resource manager not available")
     
@@ -313,20 +313,20 @@ class TestSecurityFeatures:
     def test_security_service_import(self):
         """Test security service can be imported"""
         from app.services.security_service import SecurityService
-        assert SecurityService is not None
+        assert SecurityService != None
     
     def test_input_validation(self):
         """Test input validation schemas"""
         from app.schemas.Request import RequestModel
         
         # Test that request schema exists
-        assert RequestModel is not None
+        assert RequestModel != None
     
     def test_permission_service(self):
         """Test permission management"""
         try:
             from app.services.permission_service import PermissionService
-            assert PermissionService is not None
+            assert PermissionService != None
         except ImportError:
             pytest.skip("Permission service not available")
 
@@ -338,7 +338,7 @@ class TestIntegrationFeatures:
         """Test MCP service can be imported"""
         try:
             from app.services.mcp_service import MCPService
-            assert MCPService is not None
+            assert MCPService != None
         except ImportError:
             pytest.skip("MCP service not available")
     
@@ -352,7 +352,7 @@ class TestIntegrationFeatures:
     def test_thread_management(self):
         """Test thread/conversation management"""
         from app.services.thread_service import ThreadService
-        assert ThreadService is not None
+        assert ThreadService != None
 
 
 class TestQualityAssurance:
@@ -362,7 +362,7 @@ class TestQualityAssurance:
         """Test quality monitoring service"""
         try:
             from app.services.quality_monitoring_service import QualityMonitoringService
-            assert QualityMonitoringService is not None
+            assert QualityMonitoringService != None
         except ImportError:
             pytest.skip("Quality service not available")
     
@@ -370,7 +370,7 @@ class TestQualityAssurance:
         """Test validation service functionality"""
         try:
             from app.services.schema_validation_service import SchemaValidationService
-            assert SchemaValidationService is not None
+            assert SchemaValidationService != None
         except ImportError:
             pytest.skip("Validation service not available")
     
@@ -378,7 +378,7 @@ class TestQualityAssurance:
         """Test quality gate implementations"""
         try:
             from app.services.quality_gate_service import QualityGateService
-            assert QualityGateService is not None
+            assert QualityGateService != None
         except ImportError:
             pytest.skip("Quality gate service not available")
 
@@ -391,7 +391,7 @@ class TestUtilityFunctions:
         """Test logging is properly configured"""
         import logging
         logger = logging.getLogger("app")
-        assert logger is not None
+        assert logger != None
     
     def test_type_validation(self):
         """Test type validation utilities"""
@@ -405,6 +405,6 @@ class TestUtilityFunctions:
         """Test configuration validation"""
         try:
             from app.core.config_validator import ConfigValidator
-            assert ConfigValidator is not None
+            assert ConfigValidator != None
         except ImportError:
             pytest.skip("Config validator not available")

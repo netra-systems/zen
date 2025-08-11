@@ -57,11 +57,11 @@ class TestJobStore:
         """Test getting a job that doesn't exist."""
         store = JobStore()
         result = await store.get("nonexistent_job")
-        assert result is None
+        assert result == None
 
     async def test_global_job_store(self):
         """Test the global job store instance."""
-        assert job_store is not None
+        assert job_store != None
         assert isinstance(job_store, JobStore)
         
         # Test global store works

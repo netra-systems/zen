@@ -30,7 +30,7 @@ class TestStatePersistence:
         
         mock_db.add.assert_called_once()
         mock_db.commit.assert_called_once()
-        assert result is True
+        assert result == True
     
     async def test_restore_agent_state(self):
         """Test restoring agent state from database"""
@@ -54,7 +54,7 @@ class TestStatePersistence:
         
         restored_state = await persistence_service.restore_state("thread-123", "supervisor")
         
-        assert restored_state is not None
+        assert restored_state != None
         assert restored_state["agent_id"] == "supervisor"
         assert "current_step" in json.loads(restored_state["state"])
     
@@ -70,7 +70,7 @@ class TestStatePersistence:
         
         mock_db.execute.assert_called_once()
         mock_db.commit.assert_called_once()
-        assert result is True
+        assert result == True
     
     async def test_state_versioning(self):
         """Test state versioning for rollback capability"""

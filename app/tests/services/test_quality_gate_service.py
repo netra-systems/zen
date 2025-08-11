@@ -55,7 +55,7 @@ class TestQualityGateService:
             content_type=ContentType.OPTIMIZATION
         )
         
-        assert result.passed is True
+        assert result.passed == True
         assert result.metrics.overall_score >= 0.7
         assert result.metrics.specificity_score >= 0.8
         assert result.metrics.actionability_score >= 0.8
@@ -80,7 +80,7 @@ class TestQualityGateService:
             content_type=ContentType.OPTIMIZATION
         )
         
-        assert result.passed is False
+        assert result.passed == False
         assert result.metrics.overall_score < 0.5
         assert result.metrics.generic_phrase_count > 5
         assert result.metrics.specificity_score < 0.3
@@ -103,8 +103,8 @@ class TestQualityGateService:
             content_type=ContentType.ACTION_PLAN
         )
         
-        assert result.passed is False
-        assert result.metrics.circular_reasoning_detected is True
+        assert result.passed == False
+        assert result.metrics.circular_reasoning_detected == True
         assert "circular reasoning" in str(result.metrics.issues).lower()
     
     @pytest.mark.asyncio
@@ -126,7 +126,7 @@ class TestQualityGateService:
             content_type=ContentType.DATA_ANALYSIS
         )
         
-        assert result.passed is True
+        assert result.passed == True
         assert result.metrics.quantification_score >= 0.8
         assert result.metrics.numeric_values_count > 10
         assert result.metrics.specificity_score >= 0.7
@@ -158,7 +158,7 @@ class TestQualityGateService:
             content_type=ContentType.ACTION_PLAN
         )
         
-        assert result.passed is True
+        assert result.passed == True
         assert result.metrics.actionability_score >= 0.8
         assert result.metrics.completeness_score >= 0.7
         assert result.metrics.clarity_score >= 0.7
@@ -187,9 +187,9 @@ class TestQualityGateService:
             strict_mode=True
         )
         
-        assert result_normal.passed is True
-        assert result_strict.passed is False
-        assert result_strict.retry_suggested is True
+        assert result_normal.passed == True
+        assert result_strict.passed == False
+        assert result_strict.retry_suggested == True
     
     @pytest.mark.asyncio
     async def test_validate_error_message_clarity(self, quality_service):
@@ -213,7 +213,7 @@ class TestQualityGateService:
             content_type=ContentType.ERROR_MESSAGE
         )
         
-        assert result.passed is True
+        assert result.passed == True
         assert result.metrics.clarity_score >= 0.8
         assert result.metrics.actionability_score >= 0.7
     
@@ -243,7 +243,7 @@ class TestQualityGateService:
             content_type=ContentType.REPORT
         )
         
-        assert result.passed is False
+        assert result.passed == False
         assert result.metrics.redundancy_ratio > 0.5
         assert "redundant" in str(result.metrics.issues).lower()
     
@@ -262,7 +262,7 @@ class TestQualityGateService:
             content_type=ContentType.OPTIMIZATION
         )
         
-        assert result.passed is True
+        assert result.passed == True
         assert result.metrics.specific_terms_count >= 10
         assert result.metrics.specificity_score >= 0.8
         assert result.metrics.quality_level == QualityLevel.EXCELLENT
@@ -297,9 +297,9 @@ class TestQualityGateService:
             content_type=ContentType.OPTIMIZATION
         )
         
-        assert result.passed is False
-        assert result.retry_suggested is True
-        assert result.retry_prompt_adjustments is not None
+        assert result.passed == False
+        assert result.retry_suggested == True
+        assert result.retry_prompt_adjustments != None
         assert "specific" in str(result.metrics.suggestions).lower()
         assert len(result.metrics.suggestions) > 0
     
@@ -319,7 +319,7 @@ class TestQualityGateService:
             content_type=ContentType.DATA_ANALYSIS
         )
         
-        assert result.passed is False
+        assert result.passed == False
         assert result.metrics.hallucination_risk > 0.5
         assert any("hallucination" in issue.lower() or "unrealistic" in issue.lower() 
                   for issue in result.metrics.issues)
@@ -345,7 +345,7 @@ class TestQualityGateService:
             content_type=ContentType.TRIAGE
         )
         
-        assert result.passed is True
+        assert result.passed == True
         assert result.metrics.relevance_score >= 0.7
         assert result.metrics.specificity_score >= 0.6
     
@@ -669,7 +669,7 @@ class TestQualityGateService:
         # Test all content types
         for content_type in ContentType:
             passed = quality_service._check_thresholds(good_metrics, content_type, strict_mode=False)
-            assert passed is True
+            assert passed == True
             
             # Strict mode should be more restrictive
             passed_strict = quality_service._check_thresholds(good_metrics, content_type, strict_mode=True)
@@ -791,13 +791,13 @@ class TestQualityGateService:
         assert all(isinstance(result, ValidationResult) for result in results)
         
         # First should pass (high quality)
-        assert results[0].passed is True
+        assert results[0].passed == True
         
         # Second should fail (generic)
-        assert results[1].passed is False
+        assert results[1].passed == False
         
         # Third should pass (actionable)
-        assert results[2].passed is True
+        assert results[2].passed == True
 
     @pytest.mark.asyncio
     async def test_validate_batch_with_context(self, quality_service):
@@ -825,7 +825,7 @@ class TestQualityGateService:
         with patch.object(quality_service, '_calculate_metrics', side_effect=Exception("Test error")):
             result = await quality_service.validate_content("test content")
             
-            assert result.passed is False
+            assert result.passed == False
             assert result.metrics.overall_score == 0.0
             assert result.metrics.quality_level == QualityLevel.UNACCEPTABLE
             assert len(result.metrics.issues) > 0
@@ -848,19 +848,19 @@ class TestQualityGateService:
 
     def test_pattern_compilation_in_init(self, quality_service):
         """Test that regex patterns are compiled during initialization"""
-        assert quality_service.generic_pattern is not None
-        assert quality_service.vague_pattern is not None
-        assert quality_service.circular_pattern is not None
+        assert quality_service.generic_pattern != None
+        assert quality_service.vague_pattern != None
+        assert quality_service.circular_pattern != None
         
         # Test patterns work
         generic_text = "it is important to note that generally speaking"
-        assert quality_service.generic_pattern.search(generic_text) is not None
+        assert quality_service.generic_pattern.search(generic_text) != None
         
         vague_text = "you might want to consider optimizing"
-        assert quality_service.vague_pattern.search(vague_text) is not None
+        assert quality_service.vague_pattern.search(vague_text) != None
         
         circular_text = "optimize by optimizing the system"
-        assert quality_service.circular_pattern.search(circular_text) is not None
+        assert quality_service.circular_pattern.search(circular_text) != None
 
     @pytest.mark.asyncio
     async def test_redis_manager_error_handling(self, quality_service):

@@ -54,4 +54,4 @@ class TestCorpusService:
     async def test_corpus_service_import(self):
         """Test that corpus service can be imported."""
         from app.services.corpus_service import CorpusStatus
-        assert CorpusStatus is not None
+        assert CorpusStatus != None

@@ -67,7 +67,7 @@ class TestSupplyResearchSchedulerJobs:
         result = await scheduler.schedule_job(schedule)
         
         # Assert
-        assert result is not None
+        assert result != None
         mock_dependencies['background_manager'].add_task.assert_called_once()
         
     @pytest.mark.asyncio
@@ -94,7 +94,7 @@ class TestSupplyResearchSchedulerJobs:
             result = await scheduler._execute_with_retry(schedule, max_retries=3)
         
         # Assert
-        assert result is True
+        assert result == True
         assert scheduler._execute_research_job.call_count == 2
     
     @pytest.mark.asyncio
@@ -117,7 +117,7 @@ class TestSupplyResearchSchedulerJobs:
             result = await scheduler._execute_with_retry(schedule, max_retries=3)
         
         # Assert
-        assert result is False
+        assert result == False
         assert scheduler._execute_research_job.call_count == 3
     
     @pytest.mark.asyncio
@@ -142,7 +142,7 @@ class TestSupplyResearchSchedulerJobs:
         results = await asyncio.gather(*tasks)
         
         # Assert
-        assert all(result is not None for result in results)
+        assert all(result != None for result in results)
         assert mock_dependencies['background_manager'].add_task.call_count == 5
     
     @pytest.mark.asyncio
@@ -213,7 +213,7 @@ class TestSupplyResearchSchedulerJobs:
             result = await scheduler._execute_with_retry(schedule, max_retries=1)
         
         # Assert
-        assert result is False
+        assert result == False
         mock_logger.error.assert_called()
         
         # Verify error details in log
@@ -243,7 +243,7 @@ class TestSupplyResearchSchedulerJobs:
         call_args = scheduler._record_job_metrics.call_args[0]
         assert call_args[0] == schedule.name
         assert isinstance(call_args[1], timedelta)  # execution_time
-        assert call_args[2] is True  # success
+        assert call_args[2] == True  # success
 
 
 class TestSupplyResearchSchedulerRetryLogic:
@@ -289,7 +289,7 @@ class TestSupplyResearchSchedulerRetryLogic:
         assert sleep_times[0] == 1  # 2^0 = 1
         assert sleep_times[1] == 2  # 2^1 = 2
         assert sleep_times[2] == 4  # 2^2 = 4
-        assert result is False
+        assert result == False
     
     @pytest.mark.asyncio
     async def test_retry_state_persistence(self, scheduler_with_redis):
@@ -342,7 +342,7 @@ class TestSupplyResearchSchedulerRetryLogic:
         result = await scheduler._execute_with_circuit_breaker(schedule)
         
         # Assert circuit breaker prevents execution
-        assert result is False
+        assert result == False
         scheduler._is_circuit_open.assert_called_once_with(schedule.name)
     
     @pytest.mark.asyncio

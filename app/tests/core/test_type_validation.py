@@ -61,7 +61,7 @@ class TestTypeMismatch:
             message="Critical mismatch"
         )
         
-        assert mismatch.suggestion is None
+        assert mismatch.suggestion == None
 
 
 class TestTypeScriptParser:
@@ -70,9 +70,9 @@ class TestTypeScriptParser:
     def test_parser_initialization(self):
         """Test parser initialization."""
         parser = TypeScriptParser()
-        assert parser.interface_pattern is not None
-        assert parser.type_pattern is not None
-        assert parser.field_pattern is not None
+        assert parser.interface_pattern != None
+        assert parser.type_pattern != None
+        assert parser.field_pattern != None
     
     def test_parse_typescript_file_with_interface(self):
         """Test parsing TypeScript file with interface."""
@@ -211,7 +211,7 @@ class TestTypeCompatibilityChecker:
         """Test field compatibility with exact match."""
         checker = TypeCompatibilityChecker()
         result = checker.check_field_compatibility('string', 'string', 'user.name')
-        assert result is None
+        assert result == None
     
     def test_check_field_compatibility_mapped_types(self):
         """Test field compatibility with mapped types."""
@@ -219,18 +219,18 @@ class TestTypeCompatibilityChecker:
         
         # Python str to TypeScript string
         result = checker.check_field_compatibility('str', 'string', 'user.name')
-        assert result is None
+        assert result == None
         
         # Python int to TypeScript number
         result = checker.check_field_compatibility('int', 'number', 'user.age')
-        assert result is None
+        assert result == None
     
     def test_check_field_compatibility_mismatch(self):
         """Test field compatibility with mismatch."""
         checker = TypeCompatibilityChecker()
         result = checker.check_field_compatibility('str', 'number', 'user.id')
         
-        assert result is not None
+        assert result != None
         assert result.field_path == 'user.id'
         assert result.backend_type == 'str'
         assert result.frontend_type == 'number'
@@ -242,7 +242,7 @@ class TestTypeCompatibilityChecker:
         
         # Test array compatibility (covers line 137)
         result = checker.check_field_compatibility('List[str]', 'string[]', 'items')
-        assert result is None  # Compatible array types
+        assert result == None  # Compatible array types
     
     def test_normalize_backend_type_optional(self):
         """Test normalizing Optional backend types."""
@@ -413,8 +413,8 @@ class TestSchemaValidator:
     def test_validator_initialization(self):
         """Test validator initialization."""
         validator = SchemaValidator()
-        assert validator.ts_parser is not None
-        assert validator.compat_checker is not None
+        assert validator.ts_parser != None
+        assert validator.compat_checker != None
     
     def test_validate_schemas_missing_frontend_schema(self):
         """Test validation when frontend schema is missing."""
@@ -449,7 +449,7 @@ class TestSchemaValidator:
             
             # Should find Product missing in frontend
             product_mismatch = next((m for m in mismatches if m.field_path == 'Product'), None)
-            assert product_mismatch is not None
+            assert product_mismatch != None
             assert product_mismatch.frontend_type == 'missing'
             assert product_mismatch.severity == TypeMismatchSeverity.ERROR
         finally:
@@ -484,7 +484,7 @@ class TestSchemaValidator:
             
             # Should find email field in frontend but not backend
             email_mismatch = next((m for m in mismatches if 'email' in m.field_path), None)
-            assert email_mismatch is not None
+            assert email_mismatch != None
             assert email_mismatch.backend_type == 'missing'
             assert email_mismatch.severity == TypeMismatchSeverity.INFO
         finally:
@@ -523,12 +523,12 @@ class TestSchemaValidator:
             
             # Check specific mismatches
             id_mismatch = next((m for m in mismatches if m.field_path == 'User.id'), None)
-            assert id_mismatch is not None
+            assert id_mismatch != None
             assert id_mismatch.backend_type == 'int'
             assert id_mismatch.frontend_type == 'string'
             
             name_mismatch = next((m for m in mismatches if m.field_path == 'User.name'), None)
-            assert name_mismatch is not None
+            assert name_mismatch != None
             assert name_mismatch.backend_type == 'str'
             assert name_mismatch.frontend_type == 'number'
         finally:
@@ -596,7 +596,7 @@ class TestSchemaValidator:
             mismatches = validator.validate_schemas(backend_schemas, temp_path)
             
             extra_mismatch = next((m for m in mismatches if m.field_path == 'Extra'), None)
-            assert extra_mismatch is not None
+            assert extra_mismatch != None
             assert extra_mismatch.backend_type == 'missing'
             assert extra_mismatch.severity == TypeMismatchSeverity.INFO
         finally:

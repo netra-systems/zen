@@ -275,7 +275,7 @@ class TestMetricsCalculation:
         result = engine.calculate_statistics([])
         
         # Empty data should return empty dict or None
-        assert result is None or result == {}
+        assert result == None or result == {}
     
     def test_statistics_with_single_value(self):
         """Test 14: Verify statistics with single data point"""
@@ -304,7 +304,7 @@ class TestMetricsCalculation:
         # correlation = calc.calculate_correlation([1, 2, 3], [5, 5, 5])
         # For now, just test what's available
         result = engine.calculate_statistics([1, 2, 3])
-        assert result is not None and "mean" in result
+        assert result != None and "mean" in result
         
         # Test basic functionality
         assert result["mean"] == 2.0
@@ -323,7 +323,7 @@ class TestPatternDetection:
         result = engine.detect_seasonality(list(map(float, values)), timestamps)
         
         # Adjust assertion based on actual return format
-        assert result is not None
+        assert result != None
     
     def test_outlier_detection_small_dataset(self):
         """Test 18: Verify outlier detection with small dataset"""
@@ -331,11 +331,11 @@ class TestPatternDetection:
         
         # Less than 4 values
         outliers = engine.identify_outliers([1.0, 2.0, 3.0])
-        assert outliers == [] or outliers is None
+        assert outliers == [] or outliers == None
         
         # Exactly 4 values
         outliers = engine.identify_outliers([1.0, 2.0, 3.0, 100.0])
-        assert outliers is not None
+        assert outliers != None
     
     def test_outlier_detection_methods(self):
         """Test 19: Verify different outlier detection methods"""
@@ -345,11 +345,11 @@ class TestPatternDetection:
         
         # IQR method
         iqr_outliers = engine.identify_outliers(values, method="iqr")
-        assert iqr_outliers is not None  # Should detect outliers
+        assert iqr_outliers != None  # Should detect outliers
         
         # Z-score method
         zscore_outliers = engine.identify_outliers(values, method="zscore")
-        assert zscore_outliers is not None  # Should detect outliers
+        assert zscore_outliers != None  # Should detect outliers
 
 
 class TestConnectionHandling:

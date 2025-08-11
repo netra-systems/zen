@@ -28,7 +28,7 @@ async def test_tool_builder_and_dispatcher():
 
     # Get the cost_analyzer tool
     cost_analyzer_tool = bound_tools.get("cost_analyzer")
-    assert cost_analyzer_tool is not None, "cost_analyzer tool not found"
+    assert cost_analyzer_tool != None, "cost_analyzer tool not found"
 
     # Mock the tool's _arun method
     cost_analyzer_tool._arun = AsyncMock(return_value="Success")

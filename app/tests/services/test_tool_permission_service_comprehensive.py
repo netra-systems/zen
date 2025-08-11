@@ -100,7 +100,7 @@ class TestServiceInitialization:
         """Test initialization without Redis client"""
         service = ToolPermissionService()
         
-        assert service.redis is None
+        assert service.redis == None
         assert service.permissions_cache == {}
         assert hasattr(service, '_permission_definitions')
         assert len(service._permission_definitions) > 0
@@ -133,7 +133,7 @@ class TestServiceInitialization:
         assert basic_perm.level == PermissionLevel.READ
         assert "create_thread" in basic_perm.tools
         assert "get_thread_history" in basic_perm.tools
-        assert basic_perm.business_requirements.plan_tiers is None  # No plan restriction
+        assert basic_perm.business_requirements.plan_tiers == None  # No plan restriction
     
     def test_analytics_permission_configuration(self, service):
         """Test analytics permission configuration"""
@@ -192,7 +192,7 @@ class TestServiceInitialization:
         assert dev_perm.level == PermissionLevel.ADMIN
         assert "debug_panel" in dev_perm.tools
         assert "impersonation_tool" in dev_perm.tools
-        assert dev_perm.business_requirements.developer_status is True
+        assert dev_perm.business_requirements.developer_status == True
         assert "development" in dev_perm.business_requirements.environment
         assert "staging" in dev_perm.business_requirements.environment
 
@@ -308,7 +308,7 @@ class TestHasPermission:
         
         result = service._has_permission("analytics", user_permissions, sample_context, user_plan)
         
-        assert result is True
+        assert result == True
     
     def test_has_permission_no_permission(self, service, sample_context):
         """Test has_permission without required permission"""
@@ -321,7 +321,7 @@ class TestHasPermission:
         
         result = service._has_permission("analytics", user_permissions, sample_context, user_plan)
         
-        assert result is False
+        assert result == False
     
     def test_has_permission_with_business_requirements_failed(self, service, sample_context):
         """Test has_permission with failed business requirements"""
@@ -335,7 +335,7 @@ class TestHasPermission:
         
         result = service._has_permission("analytics", user_permissions, sample_context, user_plan)
         
-        assert result is False
+        assert result == False
 
 
 class TestBusinessRequirements:
@@ -353,7 +353,7 @@ class TestBusinessRequirements:
         
         result = service._check_business_requirements(requirements, sample_context, user_plan)
         
-        assert result is True
+        assert result == True
     
     def test_check_business_requirements_plan_tier_fail(self, service, sample_context):
         """Test business requirements check with invalid plan tier"""
@@ -367,7 +367,7 @@ class TestBusinessRequirements:
         
         result = service._check_business_requirements(requirements, sample_context, user_plan)
         
-        assert result is False
+        assert result == False
     
     def test_check_business_requirements_feature_flags_pass(self, service, sample_context):
         """Test business requirements check with valid feature flags"""
@@ -382,7 +382,7 @@ class TestBusinessRequirements:
         
         result = service._check_business_requirements(requirements, sample_context, user_plan)
         
-        assert result is True
+        assert result == True
     
     def test_check_business_requirements_feature_flags_fail(self, service, sample_context):
         """Test business requirements check with missing feature flags"""
@@ -397,7 +397,7 @@ class TestBusinessRequirements:
         
         result = service._check_business_requirements(requirements, sample_context, user_plan)
         
-        assert result is False
+        assert result == False
     
     def test_check_business_requirements_role_pass(self, service, sample_context):
         """Test business requirements check with valid role"""
@@ -412,7 +412,7 @@ class TestBusinessRequirements:
         
         result = service._check_business_requirements(requirements, sample_context, user_plan)
         
-        assert result is True
+        assert result == True
     
     def test_check_business_requirements_role_fail(self, service, sample_context):
         """Test business requirements check with missing role"""
@@ -427,7 +427,7 @@ class TestBusinessRequirements:
         
         result = service._check_business_requirements(requirements, sample_context, user_plan)
         
-        assert result is False
+        assert result == False
     
     def test_check_business_requirements_developer_status_pass(self, service, developer_context):
         """Test business requirements check with valid developer status"""
@@ -441,7 +441,7 @@ class TestBusinessRequirements:
         
         result = service._check_business_requirements(requirements, developer_context, user_plan)
         
-        assert result is True
+        assert result == True
     
     def test_check_business_requirements_developer_status_fail(self, service, sample_context):
         """Test business requirements check with invalid developer status"""
@@ -456,7 +456,7 @@ class TestBusinessRequirements:
         
         result = service._check_business_requirements(requirements, sample_context, user_plan)
         
-        assert result is False
+        assert result == False
     
     def test_check_business_requirements_environment_pass(self, service, developer_context):
         """Test business requirements check with valid environment"""
@@ -470,7 +470,7 @@ class TestBusinessRequirements:
         
         result = service._check_business_requirements(requirements, developer_context, user_plan)
         
-        assert result is True
+        assert result == True
     
     def test_check_business_requirements_environment_fail(self, service, sample_context):
         """Test business requirements check with invalid environment"""
@@ -485,7 +485,7 @@ class TestBusinessRequirements:
         
         result = service._check_business_requirements(requirements, sample_context, user_plan)
         
-        assert result is False
+        assert result == False
     
     def test_check_business_requirements_all_conditions(self, service, developer_context):
         """Test business requirements check with all conditions"""
@@ -507,7 +507,7 @@ class TestBusinessRequirements:
         
         result = service._check_business_requirements(requirements, developer_context, user_plan)
         
-        assert result is True
+        assert result == True
 
 
 @pytest.mark.asyncio
@@ -518,7 +518,7 @@ class TestRateLimiting:
         """Test rate limit check when no limits are defined"""
         result = await service._check_rate_limits(sample_context, [])
         
-        assert result["allowed"] is True
+        assert result["allowed"] == True
         assert result["limits"] == {}
     
     async def test_check_rate_limits_within_limit(self, service_with_redis, sample_context):
@@ -527,7 +527,7 @@ class TestRateLimiting:
         
         result = await service_with_redis._check_rate_limits(sample_context, permissions)
         
-        assert result["allowed"] is True
+        assert result["allowed"] == True
         assert "limits" in result
         assert result["limits"]["per_hour"] == 100
         assert result["limits"]["per_day"] == 1000
@@ -545,7 +545,7 @@ class TestRateLimiting:
         
         result = await service_with_redis._check_rate_limits(sample_context, permissions)
         
-        assert result["allowed"] is False
+        assert result["allowed"] == False
         assert "Exceeded per_hour limit" in result["message"]
         assert result["current_usage"] == 101
         assert result["limit"] == 100
@@ -557,7 +557,7 @@ class TestRateLimiting:
         # Should check both hourly and daily limits
         result = await service_with_redis._check_rate_limits(sample_context, permissions)
         
-        assert result["allowed"] is True
+        assert result["allowed"] == True
         limits = result["limits"]
         assert limits["per_hour"] == 50
         assert limits["per_day"] == 500
@@ -701,7 +701,7 @@ class TestCheckToolPermission:
             
             result = await service.check_tool_permission(context)
         
-        assert result.allowed is True
+        assert result.allowed == True
         assert "basic" in result.required_permissions
     
     async def test_check_tool_permission_denied_missing_permissions(self, service):
@@ -724,10 +724,10 @@ class TestCheckToolPermission:
             
             result = await service.check_tool_permission(context)
         
-        assert result.allowed is False
+        assert result.allowed == False
         assert "Missing permissions" in result.reason
         assert "analytics" in result.missing_permissions
-        assert result.upgrade_path is not None
+        assert result.upgrade_path != None
     
     async def test_check_tool_permission_rate_limit_exceeded(self, service_with_redis):
         """Test tool permission check when rate limit is exceeded"""
@@ -754,9 +754,9 @@ class TestCheckToolPermission:
             
             result = await service_with_redis.check_tool_permission(context)
         
-        assert result.allowed is False
+        assert result.allowed == False
         assert "Rate limit exceeded" in result.reason
-        assert result.rate_limit_status["allowed"] is False
+        assert result.rate_limit_status["allowed"] == False
     
     async def test_check_tool_permission_no_requirements(self, service):
         """Test tool permission check for tool with no requirements"""
@@ -771,7 +771,7 @@ class TestCheckToolPermission:
         
         result = await service.check_tool_permission(context)
         
-        assert result.allowed is True
+        assert result.allowed == True
         assert result.required_permissions == []
     
     async def test_check_tool_permission_error_handling(self, service):
@@ -789,7 +789,7 @@ class TestCheckToolPermission:
         with patch.object(service, '_get_user_plan', side_effect=Exception("Test error")):
             result = await service.check_tool_permission(context)
         
-        assert result.allowed is False
+        assert result.allowed == False
         assert "Permission check failed" in result.reason
 
 
@@ -829,18 +829,18 @@ class TestGetUserToolAvailability:
         
         # Check basic tool (should be available)
         basic_tool = next(tool for tool in availability if tool.tool_name == "create_thread")
-        assert basic_tool.available is True
+        assert basic_tool.available == True
         assert basic_tool.category == "basic"
         
         # Check analytics tool (should be available for PRO user)
         analytics_tool = next(tool for tool in availability if tool.tool_name == "analyze_workload")
-        assert analytics_tool.available is True
+        assert analytics_tool.available == True
         assert analytics_tool.usage_today == 5
         
         # Check debug tool (should not be available for non-developer)
         debug_tool = next(tool for tool in availability if tool.tool_name == "debug_panel")
-        assert debug_tool.available is False
-        assert debug_tool.upgrade_required is None  # No upgrade path for dev tools
+        assert debug_tool.available == False
+        assert debug_tool.upgrade_required == None  # No upgrade path for dev tools
     
     async def test_get_user_tool_availability_with_rate_limits(self, service_with_redis):
         """Test tool availability including rate limit information"""
@@ -864,8 +864,8 @@ class TestGetUserToolAvailability:
         assert len(availability) == 1
         tool = availability[0]
         
-        assert tool.available is True
-        assert tool.rate_limits is not None
+        assert tool.available == True
+        assert tool.rate_limits != None
         assert tool.rate_limits.per_hour == 100
         assert tool.rate_limits.per_day == 1000
     
@@ -921,7 +921,7 @@ class TestUpgradePath:
         
         upgrade_path = service._get_upgrade_path(missing_permissions, user_plan)
         
-        assert upgrade_path is None
+        assert upgrade_path == None
     
     def test_get_upgrade_path_already_highest_tier(self, service):
         """Test upgrade path when user already has highest tier"""
@@ -971,7 +971,7 @@ class TestUpgradePath:
         
         upgrade_path = service._get_upgrade_path_for_rate_limits(user_plan)
         
-        assert upgrade_path is None  # No higher tier available
+        assert upgrade_path == None  # No higher tier available
 
 
 class TestIntegrationScenarios:
@@ -1000,7 +1000,7 @@ class TestIntegrationScenarios:
             result = await service.check_tool_permission(context)
         
         # Should be denied because developer tools only allowed in dev/staging
-        assert result.allowed is False
+        assert result.allowed == False
         assert "developer_tools" in result.missing_permissions
     
     @pytest.mark.asyncio
@@ -1024,7 +1024,7 @@ class TestIntegrationScenarios:
             
             result = await service.check_tool_permission(context)
         
-        assert result.allowed is False
+        assert result.allowed == False
         assert "advanced_optimization" in result.missing_permissions
         assert result.upgrade_path == "Enterprise"
     
@@ -1055,7 +1055,7 @@ class TestIntegrationScenarios:
             result = await service_with_redis.check_tool_permission(context)
         
         # Should be allowed (just under limit)
-        assert result.allowed is True
+        assert result.allowed == True
         assert result.rate_limit_status["current_usage"] == 499
         
         # Record one more usage to exceed limit
@@ -1063,7 +1063,7 @@ class TestIntegrationScenarios:
         
         # Now should be denied
         result2 = await service_with_redis.check_tool_permission(context)
-        assert result2.allowed is False
+        assert result2.allowed == False
         assert "Rate limit exceeded" in result2.reason
 
 
@@ -1109,7 +1109,7 @@ class TestEdgeCases:
         )
         
         result = service._check_business_requirements(empty_req, context, user_plan)
-        assert result is True
+        assert result == True
     
     @pytest.mark.asyncio
     async def test_rate_limit_key_generation_edge_cases(self, service_with_redis):

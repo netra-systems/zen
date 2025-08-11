@@ -28,7 +28,7 @@ class TestDatetimeUtilsTimezone:
         # Test UTC to local
         utc_time = datetime.now(timezone.utc)
         local_time = utils.utc_to_local(utc_time)
-        assert local_time.tzinfo is not None
+        assert local_time.tzinfo != None
         
         # Test local to UTC
         utc_converted = utils.local_to_utc(local_time)
@@ -62,7 +62,7 @@ class TestDatetimeUtilsTimezone:
         # Test ambiguous time handling (fall back)
         ambiguous = datetime(2025, 11, 2, 1, 30)
         resolved = utils.resolve_ambiguous_time(ambiguous, "America/New_York", is_dst=False)
-        assert resolved is not None
+        assert resolved != None
 
 
 # Test 87: String utils sanitization
@@ -102,16 +102,16 @@ class TestStringUtilsSanitization:
         utils = StringUtils()
         
         # Test email validation
-        assert utils.is_valid_email("test@example.com") is True
-        assert utils.is_valid_email("invalid.email") is False
+        assert utils.is_valid_email("test@example.com") == True
+        assert utils.is_valid_email("invalid.email") == False
         
         # Test URL validation
-        assert utils.is_valid_url("https://example.com") is True
-        assert utils.is_valid_url("javascript:alert(1)") is False
+        assert utils.is_valid_url("https://example.com") == True
+        assert utils.is_valid_url("javascript:alert(1)") == False
         
         # Test alphanumeric validation
-        assert utils.is_alphanumeric("Test123") is True
-        assert utils.is_alphanumeric("Test@123") is False
+        assert utils.is_alphanumeric("Test123") == True
+        assert utils.is_alphanumeric("Test@123") == False
         
         # Test length limits
         truncated = utils.truncate("x" * 1000, max_length=100)
@@ -164,7 +164,7 @@ class TestJsonUtilsSerialization:
         
         # Should handle circular reference
         serialized = utils.serialize_safe(obj1)
-        assert serialized is not None
+        assert serialized != None
         assert "[Circular Reference]" in serialized or "..." in serialized
         
         # Test max depth handling
@@ -175,7 +175,7 @@ class TestJsonUtilsSerialization:
             current = current["child"]
         
         serialized = utils.serialize(nested, max_depth=10)
-        assert serialized is not None
+        assert serialized != None
 
 
 # Test 89: File utils operations
@@ -287,8 +287,8 @@ class TestCryptoUtilsHashing:
         
         # Test password verification
         stored_hash = utils.hash_password(password, salt1)
-        assert utils.verify_password(password, stored_hash, salt1) is True
-        assert utils.verify_password("wrong_password", stored_hash, salt1) is False
+        assert utils.verify_password(password, stored_hash, salt1) == True
+        assert utils.verify_password("wrong_password", stored_hash, salt1) == False
 
 
 # Test 91: Validation utils schemas
@@ -314,17 +314,17 @@ class TestValidationUtilsSchemas:
         
         # Test valid data
         valid_data = {"name": "John", "age": 30, "email": "john@example.com"}
-        assert utils.validate_schema(valid_data, schema) is True
+        assert utils.validate_schema(valid_data, schema) == True
         
         # Test missing required field
         invalid_data = {"name": "John"}
         result = utils.validate_schema(invalid_data, schema)
-        assert result is False or "age" in str(result)
+        assert result == False or "age" in str(result)
         
         # Test invalid type
         invalid_data = {"name": "John", "age": "thirty"}
         result = utils.validate_schema(invalid_data, schema)
-        assert result is False or "type" in str(result)
+        assert result == False or "type" in str(result)
     
     async def test_error_messages(self):
         from app.utils.validation_utils import ValidationUtils
@@ -447,21 +447,21 @@ class TestNetworkUtilsRequests:
         utils = NetworkUtils()
         
         # Test URL validation
-        assert utils.is_valid_url("https://example.com") is True
-        assert utils.is_valid_url("not-a-url") is False
+        assert utils.is_valid_url("https://example.com") == True
+        assert utils.is_valid_url("not-a-url") == False
         
         # Test IP validation
-        assert utils.is_valid_ip("192.168.1.1") is True
-        assert utils.is_valid_ip("256.256.256.256") is False
-        assert utils.is_valid_ip("::1") is True  # IPv6
+        assert utils.is_valid_ip("192.168.1.1") == True
+        assert utils.is_valid_ip("256.256.256.256") == False
+        assert utils.is_valid_ip("::1") == True  # IPv6
         
         # Test port checking
         with patch('socket.socket') as mock_socket:
             mock_socket.return_value.connect_ex.return_value = 0
-            assert await utils.is_port_open("localhost", 80) is True
+            assert await utils.is_port_open("localhost", 80) == True
             
             mock_socket.return_value.connect_ex.return_value = 1
-            assert await utils.is_port_open("localhost", 80) is False
+            assert await utils.is_port_open("localhost", 80) == False
     
     async def test_retry_logic(self):
         from app.utils.network_utils import NetworkUtils
@@ -476,7 +476,7 @@ class TestNetworkUtilsRequests:
             mock_get.return_value.__aenter__.return_value = mock_response
             
             result = await utils.http_get_with_retry("https://api.example.com")
-            assert result["success"] is True
+            assert result["success"] == True
         
         # Test retry on failure
         call_count = 0
@@ -527,8 +527,8 @@ class TestPaginationUtilsCursors:
         )
         
         assert metadata["total_pages"] == 10
-        assert metadata["has_next"] is True
-        assert metadata["has_previous"] is True
+        assert metadata["has_next"] == True
+        assert metadata["has_previous"] == True
         assert metadata["start_index"] == 21
         assert metadata["end_index"] == 30
     
@@ -540,17 +540,17 @@ class TestPaginationUtilsCursors:
         # Test empty result set
         metadata = utils.get_pagination_metadata(0, 10, 1)
         assert metadata["total_pages"] == 0
-        assert metadata["has_next"] is False
+        assert metadata["has_next"] == False
         
         # Test last page
         metadata = utils.get_pagination_metadata(95, 10, 10)
-        assert metadata["has_next"] is False
+        assert metadata["has_next"] == False
         assert metadata["end_index"] == 95
         
         # Test invalid cursor
         invalid_cursor = "invalid_base64"
         decoded = utils.decode_cursor(invalid_cursor)
-        assert decoded is None or decoded == {}
+        assert decoded == None or decoded == {}
 
 
 # Test 96: Rate limiter throttling
@@ -566,14 +566,14 @@ class TestRateLimiterThrottling:
         
         # Should allow initial burst
         for _ in range(5):
-            assert await limiter.allow_request() is True
+            assert await limiter.allow_request() == True
         
         # Should block 6th request
-        assert await limiter.allow_request() is False
+        assert await limiter.allow_request() == False
         
         # Wait for token refill
         await asyncio.sleep(0.3)
-        assert await limiter.allow_request() is True
+        assert await limiter.allow_request() == True
     
     async def test_bucket_algorithms(self):
         from app.utils.rate_limiter import RateLimiter
@@ -587,10 +587,10 @@ class TestRateLimiterThrottling:
         
         # Make 10 requests
         for _ in range(10):
-            assert await limiter.allow_request() is True
+            assert await limiter.allow_request() == True
         
         # 11th should fail
-        assert await limiter.allow_request() is False
+        assert await limiter.allow_request() == False
         
         # Test leaky bucket
         limiter = RateLimiter(
@@ -602,7 +602,7 @@ class TestRateLimiterThrottling:
         
         # Should allow burst
         for _ in range(5):
-            assert await limiter.allow_request() is True
+            assert await limiter.allow_request() == True
 
 
 # Test 97: Retry utils backoff
@@ -811,7 +811,7 @@ class TestMigrationUtilsScripts:
         )
         
         assert all("phone" in item for item in migrated_data)
-        assert migrated_data[0]["phone"] is None
+        assert migrated_data[0]["phone"] == None
     
     async def test_data_transformation(self):
         from app.utils.migration_utils import MigrationUtils

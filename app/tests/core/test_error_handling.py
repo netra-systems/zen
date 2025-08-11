@@ -223,7 +223,7 @@ class TestErrorHandler:
         assert isinstance(response, ErrorResponse)
         assert response.error_code == "VALIDATION_ERROR"
         assert "Invalid input" in response.message
-        assert response.error is True
+        assert response.error == True
     
     def test_handle_pydantic_validation_error(self):
         """Test handling Pydantic ValidationError."""
@@ -294,10 +294,10 @@ class TestErrorContext:
     
     def test_trace_id_context(self):
         """Test trace ID context management."""
-        assert ErrorContext.get_trace_id() is None
+        assert ErrorContext.get_trace_id() == None
         
         trace_id = ErrorContext.generate_trace_id()
-        assert trace_id is not None
+        assert trace_id != None
         assert ErrorContext.get_trace_id() == trace_id
         
         new_trace_id = "custom-trace-id"
@@ -344,8 +344,8 @@ class TestErrorContext:
         
         ErrorContext.clear_context()
         
-        assert ErrorContext.get_trace_id() is None
-        assert ErrorContext.get_request_id() is None
+        assert ErrorContext.get_trace_id() == None
+        assert ErrorContext.get_request_id() == None
         assert ErrorContext.get_all_context() == {}
     
     def test_error_context_manager(self):
@@ -459,7 +459,7 @@ class TestErrorResponseModel:
             timestamp=datetime.now(timezone.utc).isoformat()
         )
         
-        assert response.error is True
+        assert response.error == True
         assert response.error_code == "TEST_ERROR"
         assert response.message == "Test message"
         assert response.trace_id == "trace-123"
@@ -487,7 +487,7 @@ class TestErrorResponseModel:
         )
         
         data = response.dict()
-        assert data["error"] is True
+        assert data["error"] == True
         assert data["error_code"] == "TEST_ERROR"
         assert data["trace_id"] == "trace-123"
 

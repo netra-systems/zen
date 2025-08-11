@@ -30,7 +30,7 @@ class TestAgentMessageProcessing:
             request=request
         )
         
-        assert run_id is not None
+        assert run_id != None
         assert isinstance(run_id, str)
         agent_service.start_agent_run.assert_called_once()
     

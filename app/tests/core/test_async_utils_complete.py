@@ -206,7 +206,7 @@ class TestTimeoutFunctionsComplete:
                 await asyncio.sleep(1.0)
         
         assert exc_info.value.timeout_seconds == 0.01
-        assert exc_info.value.context is not None
+        assert exc_info.value.context != None
     
     @pytest.mark.asyncio
     async def test_with_timeout_decorator_complete(self):
@@ -324,8 +324,8 @@ class TestAsyncLockComplete:
         info = lock.lock_info
         assert info["name"] == "test_lock"
         assert not info["locked"]
-        assert info["acquired_at"] is None
-        assert info["held_for_seconds"] is None
+        assert info["acquired_at"] == None
+        assert info["held_for_seconds"] == None
         
         # Test acquire with timeout
         acquired = await lock.acquire_with_timeout(1.0)
@@ -335,7 +335,7 @@ class TestAsyncLockComplete:
         # Test lock info when locked
         info = lock.lock_info
         assert info["locked"]
-        assert info["acquired_at"] is not None
+        assert info["acquired_at"] != None
         assert info["held_for_seconds"] >= 0
         
         # Test timeout on already locked
@@ -656,7 +656,7 @@ class TestWeakRefBehavior:
         gc.collect()
         
         # Weak reference should be dead
-        assert weak_ref() is None
+        assert weak_ref() == None
         
         # Resources should be automatically cleaned from WeakSet
         # This is handled by WeakSet internally

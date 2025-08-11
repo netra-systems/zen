@@ -38,7 +38,7 @@ class TestWebSocketConnection:
                 websocket.send_json(test_message)
                 
                 response = websocket.receive_json()
-                assert response is not None
+                assert response != None
     
     def test_websocket_disconnection_cleanup(self):
         """Test proper cleanup on WebSocket disconnection"""

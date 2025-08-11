@@ -369,7 +369,7 @@ class TestToolRegistryValidation:
         """Test tool interface validation"""
         # Valid tool
         valid_tool = MockTool(name="valid_tool", description="Valid tool description")
-        assert validator_registry.validate_tool_interface(valid_tool) is True
+        assert validator_registry.validate_tool_interface(valid_tool) == True
         
         # Invalid tool - missing required methods
         invalid_tool = MagicMock()
@@ -377,7 +377,7 @@ class TestToolRegistryValidation:
         invalid_tool.description = "Invalid tool"
         del invalid_tool._run  # Remove required method
         
-        assert validator_registry.validate_tool_interface(invalid_tool) is False
+        assert validator_registry.validate_tool_interface(invalid_tool) == False
     
     def test_tool_metadata_validation(self, validator_registry):
         """Test tool metadata validation"""
@@ -390,7 +390,7 @@ class TestToolRegistryValidation:
             "dependencies": ["langchain"]
         }
         
-        assert validator_registry.validate_metadata(valid_metadata) is True
+        assert validator_registry.validate_metadata(valid_metadata) == True
         
         # Invalid metadata - missing required fields
         invalid_metadata = {
@@ -398,13 +398,13 @@ class TestToolRegistryValidation:
             # Missing required fields
         }
         
-        assert validator_registry.validate_metadata(invalid_metadata) is False
+        assert validator_registry.validate_metadata(invalid_metadata) == False
     
     def test_tool_security_validation(self, validator_registry):
         """Test tool security validation"""
         # Safe tool
         safe_tool = MockTool(name="safe_tool", description="Safe tool")
-        assert validator_registry.validate_tool_security(safe_tool) is True
+        assert validator_registry.validate_tool_security(safe_tool) == True
         
         # Potentially unsafe tool
         class UnsafeTool(BaseTool):
@@ -419,7 +419,7 @@ class TestToolRegistryValidation:
         
         # Should fail security validation if strict mode enabled
         validator_registry.strict_security = True
-        assert validator_registry.validate_tool_security(unsafe_tool) is False
+        assert validator_registry.validate_tool_security(unsafe_tool) == False
     
     def test_tool_performance_validation(self, validator_registry):
         """Test tool performance validation"""
@@ -441,7 +441,7 @@ class TestToolRegistryValidation:
                 "cpu_usage": 30
             }
             
-            assert validator_registry.validate_tool_performance(fast_tool) is True
+            assert validator_registry.validate_tool_performance(fast_tool) == True
         
         # Slow tool
         with patch.object(validator_registry, 'measure_tool_performance') as mock_measure:
@@ -451,7 +451,7 @@ class TestToolRegistryValidation:
                 "cpu_usage": 40
             }
             
-            assert validator_registry.validate_tool_performance(fast_tool) is False
+            assert validator_registry.validate_tool_performance(fast_tool) == False
     
     def test_tool_compatibility_validation(self, validator_registry):
         """Test tool compatibility validation"""
@@ -466,11 +466,11 @@ class TestToolRegistryValidation:
         validator_registry.set_compatibility_matrix(compatibility_matrix)
         
         # Compatible tools
-        assert validator_registry.validate_compatibility("triage", "data") is True
-        assert validator_registry.validate_compatibility("triage", "reporting") is True
+        assert validator_registry.validate_compatibility("triage", "data") == True
+        assert validator_registry.validate_compatibility("triage", "reporting") == True
         
         # Incompatible tools
-        assert validator_registry.validate_compatibility("triage", "optimizations_core") is False
+        assert validator_registry.validate_compatibility("triage", "optimizations_core") == False
     
     def test_tool_dependency_validation(self, validator_registry):
         """Test tool dependency validation"""
@@ -484,7 +484,7 @@ class TestToolRegistryValidation:
             
             validation_result = validator_registry.validate_dependencies(tool_with_deps, dependencies)
             
-            assert validation_result["valid"] is False
+            assert validation_result["valid"] == False
             assert "sklearn" in validation_result["missing_dependencies"]
     
     def test_tool_version_compatibility_validation(self, validator_registry):
@@ -501,11 +501,11 @@ class TestToolRegistryValidation:
             with patch.object(validator_registry, 'get_package_version') as mock_version:
                 mock_version.return_value = "0.5.0"  # langchain version
                 
-                assert validator_registry.validate_version_compatibility(version_requirements) is True
+                assert validator_registry.validate_version_compatibility(version_requirements) == True
         
         # Incompatible Python version
         with patch('sys.version_info', (3, 12, 0)):  # Too new
-            assert validator_registry.validate_version_compatibility(version_requirements) is False
+            assert validator_registry.validate_version_compatibility(version_requirements) == False
 
 
 class TestToolRegistryPerformance:

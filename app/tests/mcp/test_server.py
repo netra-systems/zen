@@ -26,10 +26,10 @@ class TestMCPServerConfig:
         assert config.max_sessions == 1000
         assert config.session_timeout == 3600
         assert config.rate_limit == 100
-        assert config.enable_sampling is True
-        assert config.enable_tools is True
-        assert config.enable_resources is True
-        assert config.enable_prompts is True
+        assert config.enable_sampling == True
+        assert config.enable_tools == True
+        assert config.enable_resources == True
+        assert config.enable_prompts == True
         
     def test_custom_config(self):
         """Test custom configuration"""
@@ -42,7 +42,7 @@ class TestMCPServerConfig:
         assert config.max_sessions == 500
         assert config.session_timeout == 7200
         assert config.rate_limit == 50
-        assert config.enable_sampling is False
+        assert config.enable_sampling == False
         
     def test_config_validation(self):
         """Test configuration validation"""
@@ -64,13 +64,13 @@ class TestMCPSession:
             protocol_version="1.0.0",
             capabilities={"tools": True}
         )
-        assert session.id is not None
+        assert session.id != None
         assert session.transport == "websocket"
         assert session.protocol_version == "1.0.0"
         assert session.capabilities == {"tools": True}
         assert session.state == {}
         assert session.request_count == 0
-        assert session.last_request_at is None
+        assert session.last_request_at == None
         
     def test_session_expiry(self):
         """Test session expiry calculation"""
@@ -103,12 +103,12 @@ class TestMCPServer:
         
     def test_server_initialization(self, server):
         """Test server initialization"""
-        assert server.config is not None
+        assert server.config != None
         assert server.sessions == {}
         assert server.request_handlers != {}
-        assert server.tool_registry is not None
-        assert server.resource_manager is not None
-        assert server.prompt_manager is not None
+        assert server.tool_registry != None
+        assert server.resource_manager != None
+        assert server.prompt_manager != None
         
     def test_method_registration(self, server):
         """Test method handler registration"""
@@ -182,7 +182,7 @@ class TestMCPServer:
     async def test_handle_ping(self, server):
         """Test ping handling"""
         result = await server.handle_ping({})
-        assert result["pong"] is True
+        assert result["pong"] == True
         assert "timestamp" in result
         
     @pytest.mark.asyncio
@@ -212,7 +212,7 @@ class TestMCPServer:
         
         assert "content" in result
         assert "isError" in result
-        assert result["isError"] is False
+        assert result["isError"] == False
         server.tool_registry.execute_tool.assert_called_once_with(
             "test_tool", {"arg": "value"}, None
         )
@@ -315,7 +315,7 @@ class TestMCPServer:
         await server.handle_request(request, "test-session")
         
         assert mock_session.request_count == initial_count + 1
-        assert mock_session.last_request_at is not None
+        assert mock_session.last_request_at != None
         
     @pytest.mark.asyncio
     async def test_cleanup_expired_sessions(self, server):

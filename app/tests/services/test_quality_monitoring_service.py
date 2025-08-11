@@ -92,15 +92,15 @@ class TestQualityMonitoringService:
     @pytest.mark.asyncio
     async def test_initialization(self, service):
         """Test service initialization"""
-        assert service.redis_manager is not None
-        assert service.clickhouse_manager is not None
-        assert service.db_session is not None
+        assert service.redis_manager != None
+        assert service.clickhouse_manager != None
+        assert service.db_session != None
         assert isinstance(service.metrics_buffer, defaultdict)
         assert isinstance(service.alert_history, deque)
         assert isinstance(service.active_alerts, dict)
         assert isinstance(service.agent_profiles, dict)
-        assert service.monitoring_active is False
-        assert service.monitoring_task is None
+        assert service.monitoring_active == False
+        assert service.monitoring_task == None
         assert isinstance(service.subscribers, set)
         
     def test_initialization_with_custom_config(self):
@@ -122,7 +122,7 @@ class TestQualityMonitoringService:
         mock_collector.return_value = mock_collector_instance
         
         service = QualityMonitoringService()
-        assert service.metrics_collector is not None
+        assert service.metrics_collector != None
         mock_collector.assert_called_once()
 
 
@@ -143,7 +143,7 @@ class TestMetricsCollection:
         
         metrics = await service.collect_response_metrics(response)
         
-        assert metrics is not None
+        assert metrics != None
         assert metrics["confidence"] == 0.95
         assert metrics["latency"] == 1.2
         assert metrics["tokens"] == 150
@@ -226,11 +226,11 @@ class TestQualityThresholds:
         
         # Test passing validation
         result = service.validate_metric("confidence", 0.9)
-        assert result["passed"] is True
+        assert result["passed"] == True
         
         # Test failing validation
         result = service.validate_metric("confidence", 0.7)
-        assert result["passed"] is False
+        assert result["passed"] == False
         assert "below threshold" in result["message"]
         
     def test_dynamic_threshold_adjustment(self):
@@ -401,7 +401,7 @@ class TestQualityReporting:
         
         data = json.loads(exported)
         assert len(data["metrics"]) == 2
-        assert data["exported_at"] is not None
+        assert data["exported_at"] != None
         
     @pytest.mark.asyncio
     async def test_generate_sla_compliance_report(self):
@@ -422,7 +422,7 @@ class TestQualityReporting:
         
         report = await service.check_sla_compliance(sla_targets, actual_metrics)
         
-        assert report["compliant"] is True
+        assert report["compliant"] == True
         assert report["availability"]["status"] == "met"
         assert report["response_time"]["status"] == "met"
         assert report["error_rate"]["status"] == "met"
@@ -482,7 +482,7 @@ class TestAnomalyDetection:
             if is_anomaly and i == 10:
                 anomaly_detected = True
                 
-        assert anomaly_detected is True
+        assert anomaly_detected == True
 
 
 class TestPerformanceMonitoring:
@@ -554,7 +554,7 @@ class TestIntegration:
             metric = {"confidence": 0.9, "timestamp": datetime.now()}
             result = await service.persist_metric(metric)
             
-        assert result["persisted"] is True
+        assert result["persisted"] == True
         assert result["id"] == "metric_123"
 
 
@@ -593,8 +593,8 @@ class TestQualityMonitoringServiceReal:
         # Start monitoring
         await real_service.start_monitoring(interval_seconds=0.001)
         
-        assert real_service.monitoring_active is True
-        assert real_service.monitoring_task is not None
+        assert real_service.monitoring_active == True
+        assert real_service.monitoring_task != None
         
         # Let it run briefly
         await asyncio.sleep(0.005)
@@ -602,7 +602,7 @@ class TestQualityMonitoringServiceReal:
         # Stop monitoring
         await real_service.stop_monitoring()
         
-        assert real_service.monitoring_active is False
+        assert real_service.monitoring_active == False
     
     @pytest.mark.asyncio
     async def test_get_dashboard_data_real(self, real_service, sample_metrics):
@@ -652,17 +652,17 @@ class TestQualityMonitoringServiceReal:
         
         # Acknowledge
         result = await real_service.acknowledge_alert(alert.id)
-        assert result is True
-        assert real_service.active_alerts[alert.id].acknowledged is True
+        assert result == True
+        assert real_service.active_alerts[alert.id].acknowledged == True
         
         # Resolve
         result = await real_service.resolve_alert(alert.id)
-        assert result is True
-        assert real_service.active_alerts[alert.id].resolved is True
+        assert result == True
+        assert real_service.active_alerts[alert.id].resolved == True
         
         # Test non-existent
         result = await real_service.acknowledge_alert("fake_id")
-        assert result is False
+        assert result == False
     
     @pytest.mark.asyncio
     async def test_subscribe_unsubscribe_real(self, real_service):
@@ -685,7 +685,7 @@ class TestQualityMonitoringServiceReal:
             "Critical quality issue"
         )
         
-        assert alert is not None
+        assert alert != None
         assert alert.severity == AlertSeverity.CRITICAL
         assert alert.current_value == 0.25
         
@@ -697,7 +697,7 @@ class TestQualityMonitoringServiceReal:
             "Good quality"
         )
         
-        assert alert is None
+        assert alert == None
 
 
 class TestQualityMonitoringDataClasses:
@@ -725,8 +725,8 @@ class TestQualityMonitoringDataClasses:
         assert alert.agent == "test_agent"
         assert alert.current_value == 0.3
         assert alert.threshold == 0.5
-        assert alert.acknowledged is True
-        assert alert.resolved is False
+        assert alert.acknowledged == True
+        assert alert.resolved == False
     
     def test_quality_trend_creation(self):
         """Test QualityTrend dataclass"""

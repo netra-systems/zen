@@ -94,7 +94,7 @@ class TestThreadService:
             with patch('time.time', return_value=1234567890):
                 result = await thread_service.get_or_create_thread(mock_db, "user123")
             
-            assert result is not None
+            assert result != None
             assert result.id == "thread_user123"
             assert result.metadata_["user_id"] == "user123"
             mock_db.add.assert_called_once()
@@ -126,7 +126,7 @@ class TestThreadService:
             
             result = await thread_service.get_or_create_thread(mock_db, "user123")
             
-            assert result is None
+            assert result == None
             mock_db.rollback.assert_called_once()
 
         async def test_handle_unexpected_error(self, thread_service, mock_db):
@@ -136,7 +136,7 @@ class TestThreadService:
             
             result = await thread_service.get_or_create_thread(mock_db, "user123")
             
-            assert result is None
+            assert result == None
             mock_db.rollback.assert_called_once()
 
     class TestCreateMessage:
@@ -154,7 +154,7 @@ class TestThreadService:
                     mock_db, "thread_123", "user", "Hello world"
                 )
             
-            assert result is not None
+            assert result != None
             assert result.id == "msg_test-uuid"
             assert result.thread_id == "thread_123"
             assert result.role == "user"
@@ -183,7 +183,7 @@ class TestThreadService:
                     metadata=metadata
                 )
             
-            assert result is not None
+            assert result != None
             assert result.assistant_id == "asst_456"
             assert result.run_id == "run_789"
             assert result.metadata_ == metadata
@@ -198,7 +198,7 @@ class TestThreadService:
                 mock_db, "thread_123", "user", "Test message"
             )
             
-            assert result is None
+            assert result == None
             mock_db.rollback.assert_called_once()
 
         async def test_create_message_unexpected_error(self, thread_service, mock_db):
@@ -210,7 +210,7 @@ class TestThreadService:
                 mock_db, "thread_123", "user", "Test message"
             )
             
-            assert result is None
+            assert result == None
             mock_db.rollback.assert_called_once()
 
     class TestGetThreadMessages:
@@ -275,13 +275,13 @@ class TestThreadService:
                     mock_db, "thread_123", "asst_456"
                 )
             
-            assert result is not None
+            assert result != None
             assert result.id == "run_test-uuid"
             assert result.thread_id == "thread_123"
             assert result.assistant_id == "asst_456"
             assert result.status == "in_progress"
             assert result.model == "gpt-4"
-            assert result.instructions is None
+            assert result.instructions == None
             mock_db.add.assert_called_once()
             mock_db.commit.assert_called_once()
             mock_db.refresh.assert_called_once()
@@ -302,7 +302,7 @@ class TestThreadService:
                     instructions="Custom instructions"
                 )
             
-            assert result is not None
+            assert result != None
             assert result.model == "gpt-3.5-turbo"
             assert result.instructions == "Custom instructions"
 
@@ -360,8 +360,8 @@ class TestThreadService:
             
             assert result.status == "in_progress"
             # Should not set completed_at or failed_at
-            assert not hasattr(result, 'completed_at') or result.completed_at is None
-            assert not hasattr(result, 'failed_at') or result.failed_at is None
+            assert not hasattr(result, 'completed_at') or result.completed_at == None
+            assert not hasattr(result, 'failed_at') or result.failed_at == None
 
         async def test_update_run_status_run_not_found(self, thread_service, mock_db):
             """Test updating status when run doesn't exist"""
@@ -373,7 +373,7 @@ class TestThreadService:
                 mock_db, "nonexistent_run", "completed"
             )
             
-            assert result is None
+            assert result == None
             mock_db.commit.assert_not_called()
             mock_db.refresh.assert_not_called()
 
@@ -448,7 +448,7 @@ class TestThreadService:
             mock_db.rollback = AsyncMock()
             
             thread = await thread_service.get_or_create_thread(mock_db, "user123")
-            assert thread is None
+            assert thread == None
             
             # Test message creation failure
             mock_db.execute = AsyncMock()  # Reset mock
@@ -458,5 +458,5 @@ class TestThreadService:
             message = await thread_service.create_message(
                 mock_db, "thread_123", "user", "Test"
             )
-            assert message is None
+            assert message == None
             mock_db.rollback.assert_called()

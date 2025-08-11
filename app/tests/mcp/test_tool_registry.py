@@ -34,7 +34,7 @@ class TestTool:
         assert tool.description == "Test tool"
         assert tool.inputSchema == {"type": "object"}
         assert tool.outputSchema == {"type": "object"}
-        assert tool.requires_auth is True
+        assert tool.requires_auth == True
         assert tool.permissions == ["read", "write"]
         assert tool.category == "testing"
         assert tool.version == "2.0.0"
@@ -47,10 +47,10 @@ class TestTool:
             inputSchema={}
         )
         
-        assert tool.handler is None
-        assert tool.requires_auth is True
+        assert tool.handler == None
+        assert tool.requires_auth == True
         assert tool.permissions == []
-        assert tool.category is None
+        assert tool.category == None
         assert tool.version == "1.0.0"
 
 
@@ -74,7 +74,7 @@ class TestToolExecution:
         assert execution.output_result == {"result": "success"}
         assert execution.execution_time_ms == 100
         assert execution.status == "success"
-        assert execution.error is None
+        assert execution.error == None
         assert isinstance(execution.created_at, datetime)
 
 
@@ -176,7 +176,7 @@ class TestToolRegistry:
             "session123"
         )
         
-        assert result["isError"] is False
+        assert result["isError"] == False
         assert len(result["content"]) == 1
         assert result["content"][0]["args"]["arg1"] == "value1"
         
@@ -202,15 +202,15 @@ class TestToolRegistry:
         
         result = await registry.execute_tool("sync_tool", {}, None)
         
-        assert result["isError"] is False
-        assert result["content"][0]["sync"] is True
+        assert result["isError"] == False
+        assert result["content"][0]["sync"] == True
         
     @pytest.mark.asyncio
     async def test_execute_tool_not_found(self, registry):
         """Test executing non-existent tool"""
         result = await registry.execute_tool("nonexistent", {}, None)
         
-        assert result["isError"] is True
+        assert result["isError"] == True
         assert "Tool not found" in result["content"][0]["text"]
         
         # Check error was recorded
@@ -229,7 +229,7 @@ class TestToolRegistry:
         
         result = await registry.execute_tool("no_handler", {}, None)
         
-        assert result["isError"] is True
+        assert result["isError"] == True
         assert "has no handler" in result["content"][0]["text"]
         
     @pytest.mark.asyncio
@@ -248,7 +248,7 @@ class TestToolRegistry:
         
         result = await registry.execute_tool("error_tool", {}, None)
         
-        assert result["isError"] is True
+        assert result["isError"] == True
         assert "Handler error" in result["content"][0]["text"]
         
         # Check error was recorded
@@ -275,7 +275,7 @@ class TestToolRegistry:
         
         result = await registry.execute_tool("list_tool", {}, None)
         
-        assert result["isError"] is False
+        assert result["isError"] == False
         assert len(result["content"]) == 2
         assert result["content"][0]["text"] == "Item 1"
         assert result["content"][1]["text"] == "Item 2"
@@ -289,7 +289,7 @@ class TestToolRegistry:
             {"agent_name": "TestAgent", "input_data": {}},
             None
         )
-        assert result["isError"] is False
+        assert result["isError"] == False
         assert "run_id" in result["content"][0]
         
         # Test get_agent_status handler
@@ -298,7 +298,7 @@ class TestToolRegistry:
             {"run_id": "test123"},
             None
         )
-        assert result["isError"] is False
+        assert result["isError"] == False
         
         # Test list_agents handler
         result = await registry.execute_tool(
@@ -306,7 +306,7 @@ class TestToolRegistry:
             {},
             None
         )
-        assert result["isError"] is False
+        assert result["isError"] == False
         agents = json.loads(result["content"][0]["text"])
         assert isinstance(agents, list)
         
@@ -316,7 +316,7 @@ class TestToolRegistry:
             {"workload_data": {}},
             None
         )
-        assert result["isError"] is False
+        assert result["isError"] == False
         
         # Test optimize_prompt handler
         result = await registry.execute_tool(
@@ -324,7 +324,7 @@ class TestToolRegistry:
             {"prompt": "Test prompt"},
             None
         )
-        assert result["isError"] is False
+        assert result["isError"] == False
         
         # Test query_corpus handler
         result = await registry.execute_tool(
@@ -332,7 +332,7 @@ class TestToolRegistry:
             {"query": "test query"},
             None
         )
-        assert result["isError"] is False
+        assert result["isError"] == False
         
         # Test generate_synthetic_data handler
         result = await registry.execute_tool(
@@ -340,7 +340,7 @@ class TestToolRegistry:
             {"schema": {}},
             None
         )
-        assert result["isError"] is False
+        assert result["isError"] == False
         
         # Test create_thread handler
         result = await registry.execute_tool(
@@ -348,7 +348,7 @@ class TestToolRegistry:
             {},
             None
         )
-        assert result["isError"] is False
+        assert result["isError"] == False
         assert "thread_id" in result["content"][0]
         
         # Test get_thread_history handler
@@ -357,7 +357,7 @@ class TestToolRegistry:
             {"thread_id": "test123"},
             None
         )
-        assert result["isError"] is False
+        assert result["isError"] == False
         
     @pytest.mark.asyncio
     async def test_shutdown(self, registry):

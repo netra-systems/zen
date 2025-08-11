@@ -151,12 +151,12 @@ class TestResearchSchedule:
         assert schedule.frequency == ScheduleFrequency.DAILY
         assert schedule.research_type == ResearchType.PRICING
         assert schedule.providers == ["openai", "anthropic", "google", "mistral"]
-        assert schedule.enabled is True
+        assert schedule.enabled == True
         assert schedule.hour == 2  # Default 2 AM
         assert schedule.day_of_week == 1  # Default Monday
         assert schedule.day_of_month == 1  # Default 1st
-        assert schedule.last_run is None
-        assert schedule.next_run is not None
+        assert schedule.last_run == None
+        assert schedule.next_run != None
     
     def test_schedule_initialization_custom_values(self):
         """Test schedule initialization with custom values"""
@@ -174,7 +174,7 @@ class TestResearchSchedule:
         )
         
         assert schedule.providers == custom_providers
-        assert schedule.enabled is False
+        assert schedule.enabled == False
         assert schedule.hour == 10
         assert schedule.day_of_week == 3
         assert schedule.day_of_month == 15
@@ -272,7 +272,7 @@ class TestResearchSchedule:
         # Set next_run to past time
         schedule.next_run = datetime.utcnow() - timedelta(minutes=5)
         
-        assert schedule.should_run() is True
+        assert schedule.should_run() == True
     
     def test_should_run_disabled(self):
         """Test should_run when disabled"""
@@ -286,7 +286,7 @@ class TestResearchSchedule:
         # Even if time has passed, should not run if disabled
         schedule.next_run = datetime.utcnow() - timedelta(minutes=5)
         
-        assert schedule.should_run() is False
+        assert schedule.should_run() == False
     
     def test_should_run_time_not_reached(self):
         """Test should_run when time has not been reached"""
@@ -300,7 +300,7 @@ class TestResearchSchedule:
         # Set next_run to future time
         schedule.next_run = datetime.utcnow() + timedelta(minutes=30)
         
-        assert schedule.should_run() is False
+        assert schedule.should_run() == False
     
     def test_update_after_run(self):
         """Test updating schedule after successful run"""
@@ -317,7 +317,7 @@ class TestResearchSchedule:
         
         # Should update last_run and recalculate next_run
         assert schedule.last_run != original_last_run
-        assert schedule.last_run is not None
+        assert schedule.last_run != None
         assert schedule.next_run != original_next_run
 
 
@@ -335,7 +335,7 @@ class TestSchedulerInitialization:
             assert scheduler.background_manager == mock_background_manager
             assert scheduler.llm_manager == mock_llm_manager
             assert scheduler.redis_manager == mock_redis_instance
-            assert scheduler.running is False
+            assert scheduler.running == False
             assert len(scheduler.schedules) > 0  # Should have default schedules
     
     def test_initialization_without_redis(self, mock_background_manager, mock_llm_manager):
@@ -343,7 +343,7 @@ class TestSchedulerInitialization:
         with patch('app.services.supply_research_scheduler.RedisManager', side_effect=Exception("Redis not available")):
             scheduler = SupplyResearchScheduler(mock_background_manager, mock_llm_manager)
             
-            assert scheduler.redis_manager is None
+            assert scheduler.redis_manager == None
     
     def test_default_schedules_created(self, scheduler):
         """Test that default schedules are created"""
@@ -370,7 +370,7 @@ class TestSchedulerInitialization:
         assert daily_pricing.frequency == ScheduleFrequency.DAILY
         assert daily_pricing.research_type == ResearchType.PRICING
         assert daily_pricing.hour == 2
-        assert daily_pricing.enabled is True
+        assert daily_pricing.enabled == True
         
         # Weekly capability scan
         weekly_cap = schedules_by_name["weekly_capability_scan"]
@@ -443,11 +443,11 @@ class TestScheduleManagement:
         )
         scheduler.add_schedule(disabled_schedule)
         
-        assert disabled_schedule.enabled is False
+        assert disabled_schedule.enabled == False
         
         scheduler.enable_schedule("disabled_test")
         
-        assert disabled_schedule.enabled is True
+        assert disabled_schedule.enabled == True
     
     def test_enable_schedule_not_exists(self, scheduler):
         """Test enabling non-existent schedule"""
@@ -458,11 +458,11 @@ class TestScheduleManagement:
         """Test disabling schedule"""
         # Use existing enabled schedule
         schedule = scheduler.schedules[0]
-        assert schedule.enabled is True
+        assert schedule.enabled == True
         
         scheduler.disable_schedule(schedule.name)
         
-        assert schedule.enabled is False
+        assert schedule.enabled == False
     
     def test_disable_schedule_not_exists(self, scheduler):
         """Test disabling non-existent schedule"""
@@ -494,7 +494,7 @@ class TestScheduleManagement:
         status = scheduler.get_schedule_status()
         schedule_status = next(s for s in status if s["name"] == schedule.name)
         
-        assert schedule_status["last_run"] is not None
+        assert schedule_status["last_run"] != None
 
 
 @pytest.mark.asyncio
@@ -569,7 +569,7 @@ class TestScheduledResearchExecution:
         # Should have cached the result
         cache_key = f"schedule_result:{schedule.name}:{datetime.utcnow().date()}"
         cached_data = await mock_redis.get(cache_key)
-        assert cached_data is not None
+        assert cached_data != None
         
         # Should be valid JSON
         parsed_data = json.loads(cached_data)
@@ -806,11 +806,11 @@ class TestSchedulerStartStop:
     
     def test_start_scheduler(self, scheduler):
         """Test starting the scheduler"""
-        assert scheduler.running is False
+        assert scheduler.running == False
         
         scheduler.start()
         
-        assert scheduler.running is True
+        assert scheduler.running == True
         # Should have added scheduler loop task
         assert len(scheduler.background_manager.tasks) == 1
     
@@ -830,7 +830,7 @@ class TestSchedulerStartStop:
         
         scheduler.stop()
         
-        assert scheduler.running is False
+        assert scheduler.running == False
 
 
 @pytest.mark.asyncio
@@ -998,7 +998,7 @@ class TestIntegrationScenarios:
         # Verify result was cached
         cache_key = f"schedule_result:integration_test:{datetime.utcnow().date()}"
         cached_result = await mock_redis.get(cache_key)
-        assert cached_result is not None
+        assert cached_result != None
         
         # Verify notifications were processed
         notifications = mock_redis.lists.get("supply_notifications", [])

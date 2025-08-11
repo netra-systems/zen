@@ -220,7 +220,7 @@ class TestCriticalIntegration:
                 )
         
         # Verify results
-        assert result is not None
+        assert result != None
         assert "optimization" in str(result).lower()
         
         # Verify state was saved
@@ -435,9 +435,9 @@ class TestCriticalIntegration:
         )
         
         # Verify state was recovered correctly
-        assert recovered_state is not None
+        assert recovered_state != None
         assert recovered_state.triage_result == triage_output
-        assert recovered_state.data_result is None  # Not yet completed
+        assert recovered_state.data_result == None  # Not yet completed
         
         # Create new supervisor with recovered state
         supervisor = Supervisor(
@@ -475,10 +475,10 @@ class TestCriticalIntegration:
             db_session=session
         )
         
-        assert final_recovered is not None
-        assert final_recovered.triage_result is not None
-        assert final_recovered.data_result is not None
-        assert final_recovered.optimizations_result is not None
+        assert final_recovered != None
+        assert final_recovered.triage_result != None
+        assert final_recovered.data_result != None
+        assert final_recovered.optimizations_result != None
         
         # Note: Thread context is stored in Redis which is disabled during testing
         # The main state persistence (to database) has been verified above

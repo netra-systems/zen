@@ -35,7 +35,7 @@ async def test_cache_expiration():
     # Removed unnecessary sleep
     
     retrieved_value = await cache_service.get(key)
-    assert retrieved_value is None
+    assert retrieved_value == None
     assert key not in cache_service.cache
 
 @pytest.mark.asyncio
@@ -47,7 +47,7 @@ async def test_cache_size_limit():
     await cache_service.set("key3", {"data": "value3"})
     
     assert len(cache_service.cache) <= 2
-    assert await cache_service.get("key3") is not None
+    assert await cache_service.get("key3") != None
 
 @pytest.mark.asyncio
 async def test_cache_stats():

@@ -188,7 +188,7 @@ class TestWebSocketManagerConnectionPooling:
         conn_info = await ws_manager.connect(user_id, websocket)
         
         # Verify connection established
-        assert conn_info is not None
+        assert conn_info != None
         assert conn_info.user_id == user_id
         assert conn_info.websocket is websocket
         assert user_id in ws_manager.active_connections

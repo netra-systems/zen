@@ -69,7 +69,7 @@ class TestErrorContext:
     def test_trace_id_management(self, error_context):
         """Test trace ID generation and retrieval."""
         trace_id = error_context.generate_trace_id()
-        assert trace_id is not None
+        assert trace_id != None
         assert error_context.get_trace_id() == trace_id
     
     def test_context_preservation_across_calls(self, error_context):
@@ -98,7 +98,7 @@ class TestErrorHandlers:
             timestamp=datetime.now().isoformat()
         )
         
-        assert response.error is True
+        assert response.error == True
         assert response.error_code == "TEST_ERROR"
         assert response.trace_id == "trace-123"
     
@@ -109,13 +109,16 @@ class TestErrorHandlers:
         from fastapi import HTTPException
         
         request = Mock()
+        request.state = Mock()
+        request.state.request_id = "test-request-id"
+        request.state.trace_id = "test-trace-id"
         exc = HTTPException(status_code=404, detail="Not found")
         
         response = await http_exception_handler(request, exc)
         assert response.status_code == 404
         
         body = json.loads(response.body)
-        assert body["error"] is True
+        assert body["error"] == True
         assert "Not found" in body["message"]
 
 
@@ -157,7 +160,7 @@ class TestLoggingManager:
         setup_logging(log_level="DEBUG")
         logger = get_logger(__name__)
         
-        assert logger is not None
+        assert logger != None
         assert logger.level <= logging.DEBUG
     
     def test_structured_logging(self):
@@ -277,7 +280,7 @@ class TestUnifiedLogging:
             
             # Check that correlation ID is included
             call_args = mock_info.call_args
-            assert call_args is not None
+            assert call_args != None
     
     def test_log_aggregation(self):
         """Test aggregating logs from multiple sources."""
@@ -307,7 +310,7 @@ class TestStartupChecks:
         mock_engine.connect.return_value.__aenter__.return_value.execute.return_value.scalar.return_value = 1
         
         result = await check_database(mock_engine)
-        assert result is True
+        assert result == True
     
     @pytest.mark.asyncio
     async def test_service_health_checks(self):
@@ -318,13 +321,13 @@ class TestStartupChecks:
         with patch('app.startup_checks.RedisManager') as mock_redis:
             mock_redis.return_value.ping.return_value = True
             result = await check_redis()
-            assert result is True
+            assert result == True
         
         # Mock ClickHouse check
         with patch('app.startup_checks.ClickHouseDatabase') as mock_ch:
             mock_ch.return_value.execute_query.return_value = [(1,)]
             result = await check_clickhouse()
-            assert result is True
+            assert result == True
     
     @pytest.mark.asyncio
     async def test_graceful_degradation(self):
@@ -339,4 +342,4 @@ class TestStartupChecks:
                 
                 # Should still return True (can start)
                 result = await run_startup_checks(fail_on_optional=False)
-                assert result is True
+                assert result == True

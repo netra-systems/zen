@@ -200,7 +200,7 @@ class TestDatabaseRepositoryCritical:
         
         # Simulate acquiring a connection
         conn = await mock_pool.acquire()
-        assert conn is not None
+        assert conn != None
         mock_pool.acquire.assert_called_once()
         
         # Test pool statistics
@@ -313,7 +313,7 @@ class TestDatabaseRepositoryCritical:
         
         # Simulate cache miss
         cached = await mock_cache.get("user:2")
-        if cached is None:
+        if cached == None:
             db_result = await mock_db.fetch_one("SELECT * FROM users WHERE id = ?", [2])
             await mock_cache.set("user:2", db_result, ttl=300)
         

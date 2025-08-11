@@ -171,7 +171,7 @@ class TestBaseTool:
         tool = ConcreteTool(sample_metadata)
         
         assert tool.metadata == sample_metadata
-        assert tool.llm_name is None
+        assert tool.llm_name == None
     
     def test_base_tool_get_metadata(self, sample_metadata):
         """Test get_metadata method"""

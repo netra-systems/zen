@@ -319,10 +319,10 @@ class TestUnifiedToolRegistryManagement:
         assert 'secondary' in unified_registry.registries
         assert 'specialized' in unified_registry.registries
         
-        assert unified_registry.tool_orchestrator is not None
-        assert unified_registry.lifecycle_manager is not None
-        assert unified_registry.health_monitor is not None
-        assert unified_registry.metrics_collector is not None
+        assert unified_registry.tool_orchestrator != None
+        assert unified_registry.lifecycle_manager != None
+        assert unified_registry.health_monitor != None
+        assert unified_registry.metrics_collector != None
     
     def test_registry_addition_and_management(self, unified_registry):
         """Test adding and managing multiple registries"""
@@ -437,31 +437,31 @@ class TestUnifiedToolRegistryManagement:
         lifecycle_manager = unified_registry.lifecycle_manager
         
         # Initial state should be inactive
-        assert lifecycle_manager.tool_states.get(tool.name) is None
+        assert lifecycle_manager.tool_states.get(tool.name) == None
         
         # Activate tool
         result = lifecycle_manager.manage_tool(tool.name, 'activate')
-        assert result is True
+        assert result == True
         assert lifecycle_manager.tool_states[tool.name] == ToolStatus.ACTIVE
         
         # Put tool in maintenance
         result = lifecycle_manager.manage_tool(tool.name, 'maintain')
-        assert result is True
+        assert result == True
         assert lifecycle_manager.tool_states[tool.name] == ToolStatus.MAINTENANCE
         
         # Reactivate tool
         result = lifecycle_manager.manage_tool(tool.name, 'activate')
-        assert result is True
+        assert result == True
         assert lifecycle_manager.tool_states[tool.name] == ToolStatus.ACTIVE
         
         # Deprecate tool
         result = lifecycle_manager.manage_tool(tool.name, 'deprecate')
-        assert result is True
+        assert result == True
         assert lifecycle_manager.tool_states[tool.name] == ToolStatus.DEPRECATED
         
         # Try to activate deprecated tool (should fail)
         result = lifecycle_manager.manage_tool(tool.name, 'activate')
-        assert result is False
+        assert result == False
         assert lifecycle_manager.tool_states[tool.name] == ToolStatus.DEPRECATED
     
     def test_tool_lifecycle_history_tracking(self, unified_registry, sample_tools):
@@ -501,7 +501,7 @@ class TestUnifiedToolRegistryManagement:
         
         assert health_status['tool_name'] == tool.name
         assert health_status['status'] == 'healthy'
-        assert health_status['responding'] is True
+        assert health_status['responding'] == True
         assert 'last_check' in health_status
         
         # Simulate unhealthy tool
@@ -509,7 +509,7 @@ class TestUnifiedToolRegistryManagement:
         health_status = health_monitor.check_tool_health(tool)
         
         assert health_status['status'] == 'unhealthy'
-        assert health_status['responding'] is False
+        assert health_status['responding'] == False
         assert 'error' in health_status
     
     def test_tool_health_monitoring_overall(self, unified_registry, sample_tools):
@@ -549,8 +549,8 @@ class TestUnifiedToolRegistryManagement:
         
         assert metrics['tool_name'] == tool.name
         assert metrics['call_count'] == 2
-        assert metrics['last_called'] is not None
-        assert metrics['initialization_time'] is not None
+        assert metrics['last_called'] != None
+        assert metrics['initialization_time'] != None
     
     def test_tool_metrics_aggregation(self, unified_registry, sample_tools):
         """Test tool metrics aggregation"""

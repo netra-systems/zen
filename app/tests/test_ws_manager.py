@@ -163,7 +163,7 @@ class TestWebSocketManager:
         message = {"type": "test", "data": "hello"}
         result = await ws_manager_instance.send_message(user_id, message)
         
-        assert result is True
+        assert result == True
         assert mock_websocket.send_json.call_count >= 2  # Initial + our message
         
         # Verify stats updated
@@ -172,7 +172,7 @@ class TestWebSocketManager:
     async def test_send_message_no_connections(self, ws_manager_instance):
         """Test sending message when user has no connections."""
         result = await ws_manager_instance.send_message("no_connections", {"test": "data"})
-        assert result is False
+        assert result == False
     
     async def test_send_message_invalid_type(self, ws_manager_instance, mock_websocket):
         """Test sending invalid message type."""
@@ -181,7 +181,7 @@ class TestWebSocketManager:
         
         with patch('app.ws_manager.logger') as mock_logger:
             result = await ws_manager_instance.send_message(user_id, "not a dict")
-            assert result is False
+            assert result == False
             mock_logger.error.assert_called()
     
     async def test_send_message_adds_timestamp(self, ws_manager_instance, mock_websocket):
@@ -200,7 +200,7 @@ class TestWebSocketManager:
                 sent_message = call[0][0]
                 break
         
-        assert sent_message is not None
+        assert sent_message != None
         assert "timestamp" in sent_message
     
     async def test_send_to_connection_retry_logic(self, ws_manager_instance):
@@ -222,7 +222,7 @@ class TestWebSocketManager:
                 conn_info, {"test": "data"}, retry=True
             )
         
-        assert result is True
+        assert result == True
         assert conn_info.websocket.send_json.call_count == 3
         assert conn_info.error_count == 2
     
@@ -241,7 +241,7 @@ class TestWebSocketManager:
                 conn_info, {"test": "data"}, retry=True
             )
         
-        assert result is False
+        assert result == False
         assert conn_info.websocket.send_json.call_count == WebSocketManager.MAX_RETRY_ATTEMPTS
         mock_logger.error.assert_called()
     
@@ -258,7 +258,7 @@ class TestWebSocketManager:
             conn_info, {"test": "data"}, retry=False
         )
         
-        assert result is False
+        assert result == False
         conn_info.websocket.send_json.assert_not_called()
     
     async def test_send_to_connection_runtime_error_with_close(self, ws_manager_instance):
@@ -278,7 +278,7 @@ class TestWebSocketManager:
                 conn_info, {"test": "data"}, retry=False
             )
         
-        assert result is False
+        assert result == False
     
     async def test_send_to_connection_unexpected_error(self, ws_manager_instance):
         """Test handling unexpected errors."""
@@ -297,7 +297,7 @@ class TestWebSocketManager:
                 conn_info, {"test": "data"}, retry=False
             )
         
-        assert result is False
+        assert result == False
         mock_logger.error.assert_called()
     
     async def test_send_system_message(self, ws_manager_instance):
@@ -314,7 +314,7 @@ class TestWebSocketManager:
         
         conn_info.websocket.send_json.assert_called_once()
         sent_message = conn_info.websocket.send_json.call_args[0][0]
-        assert sent_message["system"] is True
+        assert sent_message["system"] == True
         assert sent_message["type"] == "system_test"
     
     async def test_is_connection_alive_connected(self, ws_manager_instance):
@@ -327,7 +327,7 @@ class TestWebSocketManager:
         conn_info.websocket.client_state = WebSocketState.CONNECTED
         conn_info.last_ping = datetime.now(timezone.utc)
         
-        assert ws_manager_instance._is_connection_alive(conn_info) is True
+        assert ws_manager_instance._is_connection_alive(conn_info) == True
     
     async def test_is_connection_alive_disconnected(self, ws_manager_instance):
         """Test checking if connection is alive when disconnected."""
@@ -338,7 +338,7 @@ class TestWebSocketManager:
         )
         conn_info.websocket.client_state = WebSocketState.DISCONNECTED
         
-        assert ws_manager_instance._is_connection_alive(conn_info) is False
+        assert ws_manager_instance._is_connection_alive(conn_info) == False
     
     async def test_is_connection_alive_timeout(self, ws_manager_instance):
         """Test checking if connection is alive with heartbeat timeout."""
@@ -354,7 +354,7 @@ class TestWebSocketManager:
         )
         
         with patch('app.ws_manager.logger'):
-            assert ws_manager_instance._is_connection_alive(conn_info) is False
+            assert ws_manager_instance._is_connection_alive(conn_info) == False
     
     async def test_heartbeat_loop_normal(self, ws_manager_instance):
         """Test heartbeat loop normal operation."""
@@ -438,7 +438,7 @@ class TestWebSocketManager:
         await ws_manager_instance.handle_pong(user_id, mock_websocket)
         
         # Verify pong was recorded
-        assert conn_info.last_pong is not None
+        assert conn_info.last_pong != None
     
     async def test_handle_pong_no_connection(self, ws_manager_instance, mock_websocket):
         """Test handling pong for non-existent connection."""
@@ -460,7 +460,7 @@ class TestWebSocketManager:
             if msg.get("type") == "error":
                 assert msg["payload"]["error"] == "Test error"
                 assert msg["payload"]["sub_agent_name"] == "TestAgent"
-                assert msg["displayed_to_user"] is True
+                assert msg["displayed_to_user"] == True
                 error_sent = True
                 break
         assert error_sent
@@ -482,7 +482,7 @@ class TestWebSocketManager:
                 assert msg["payload"]["message"] == "Test log"
                 assert msg["payload"]["sub_agent_name"] == "TestAgent"
                 assert "timestamp" in msg["payload"]
-                assert msg["displayed_to_user"] is True
+                assert msg["displayed_to_user"] == True
                 log_sent = True
                 break
         assert log_sent
@@ -505,7 +505,7 @@ class TestWebSocketManager:
                 assert msg["payload"]["tool_args"] == tool_args
                 assert msg["payload"]["sub_agent_name"] == "TestAgent"
                 assert "timestamp" in msg["payload"]
-                assert msg["displayed_to_user"] is True
+                assert msg["displayed_to_user"] == True
                 tool_sent = True
                 break
         assert tool_sent
@@ -528,7 +528,7 @@ class TestWebSocketManager:
                 assert msg["payload"]["result"] == result
                 assert msg["payload"]["sub_agent_name"] == "TestAgent"
                 assert "timestamp" in msg["payload"]
-                assert msg["displayed_to_user"] is True
+                assert msg["displayed_to_user"] == True
                 result_sent = True
                 break
         assert result_sent
@@ -667,7 +667,7 @@ class TestWebSocketManager:
         assert "last_pong" in info[0]
         assert info[0]["message_count"] == 0
         assert info[0]["error_count"] == 0
-        assert info[0]["is_alive"] is True
+        assert info[0]["is_alive"] == True
     
     async def test_get_connection_info_no_user(self, ws_manager_instance):
         """Test getting connection info for non-existent user."""
@@ -683,7 +683,7 @@ class TestWebSocketManager:
         assert conn_info.user_id == "test_user"
         assert conn_info.message_count == 0
         assert conn_info.error_count == 0
-        assert conn_info.last_pong is None
+        assert conn_info.last_pong == None
         assert isinstance(conn_info.connected_at, datetime)
         assert isinstance(conn_info.last_ping, datetime)
         assert conn_info.connection_id.startswith("conn_")
@@ -712,7 +712,7 @@ class TestWebSocketManager:
         result = await ws_manager_instance.send_message(user_id, {"type": "test"})
         
         # Verify message was sent successfully to alive connection
-        assert result is True
+        assert result == True
         
         # Verify dead connection was removed
         assert len(ws_manager_instance.active_connections[user_id]) == 1
@@ -758,7 +758,7 @@ class TestWebSocketManager:
                 result = await ws_manager_instance.send_message(user_id, {"type": "test"})
         
         # Should have succeeded overall (first connection worked)
-        assert result is True
+        assert result == True
         
         # Second connection should have been removed
         assert len(ws_manager_instance.active_connections[user_id]) == 1
@@ -785,7 +785,7 @@ class TestWebSocketManager:
                 )
         
         # Should return False after all retries fail
-        assert result is False
+        assert result == False
         assert conn_info.websocket.send_json.call_count == WebSocketManager.MAX_RETRY_ATTEMPTS
     
     async def test_send_to_connection_no_retry_false(self, ws_manager_instance):
@@ -803,7 +803,7 @@ class TestWebSocketManager:
             conn_info, {"test": "data"}, retry=False
         )
         
-        assert result is False
+        assert result == False
         conn_info.websocket.send_json.assert_not_called()
     
     async def test_threading_lock(self):

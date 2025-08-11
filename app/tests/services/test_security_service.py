@@ -25,7 +25,7 @@ def test_create_and_validate_access_token(security_service: SecurityService):
     """
     email = "test@example.com"
     token = security_service.create_access_token(data=TokenPayload(sub=email))
-    assert token is not None
+    assert token != None
 
     decoded_email = security_service.get_user_email_from_token(token)
     assert decoded_email == email
@@ -36,4 +36,4 @@ def test_invalid_token(security_service: SecurityService):
     Tests that an invalid token returns None.
     """
     decoded_email = security_service.get_user_email_from_token("invalid_token")
-    assert decoded_email is None
+    assert decoded_email == None

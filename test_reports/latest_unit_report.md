@@ -1,24 +1,24 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T15:26:20.707410  
+**Generated:** 2025-08-11T15:37:24.820601  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 **Purpose:** Development validation, component testing
 
 ## Test Summary
 
-**Total Tests:** 261  
-**Passed:** 14  
-**Failed:** 247  
+**Total Tests:** 331  
+**Passed:** 87  
+**Failed:** 243  
 **Skipped:** 0  
-**Errors:** 0  
+**Errors:** 1  
 **Overall Status:** [FAILED]
 
 ### Component Breakdown
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 120.03s | [TIMEOUT] |
-| Frontend  | 261 | 14 | 247 | 0 | 0 | 47.96s | [FAILED] |
+| Backend   | 76 | 72 | 3 | 0 | 1 | 38.46s | [FAILED] |
+| Frontend  | 255 | 15 | 240 | 0 | 0 | 64.88s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,12 +27,12 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 167.99s
-- **Exit Code:** 1
+- **Total Duration:** 103.34s
+- **Exit Code:** 2
 
 ### Backend Configuration
 ```
---category unit -v --coverage
+--category unit -v --coverage --fail-fast --parallel=4
 ```
 
 ### Frontend Configuration
@@ -44,7 +44,99 @@
 
 ### Backend Output
 ```
-Tests timed out after 120s
+================================================================================
+NETRA AI PLATFORM - BACKEND TEST RUNNER
+================================================================================
+Test Configuration:
+  Category: unit
+  Parallel: 4
+  Coverage: enabled
+  Fail Fast: enabled
+  Environment: development
+
+Running command:
+  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
+================================================================================
+[1m============================= test session starts =============================[0m
+platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
+configfile: pytest.ini
+plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO
+created: 4/4 workers
+4 workers [1438 items]
+
+scheduling tests via LoadScheduling
+
+app\tests\services\agents\test_supervisor_service.py::test_supervisor_end_to_end 
+app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_failure_recovery 
+app\tests\services\test_generation_service_fixed.py::TestClickHouseOperationsMocked::test_save_corpus_to_clickhouse_mocked 
+app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_bulk_create 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_generation_service_fixed.py::TestClickHouseOperationsMocked::test_save_corpus_to_clickhouse_mocked 
+app\tests\services\test_job_store_service.py::TestJobStore::test_job_store_initialization 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_supervisor_service.py::test_supervisor_end_to_end 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_job_store_initialization 
+app\tests\services\agents\test_tools.py::test_tool_dispatcher 
+app\tests\services\test_job_store_service.py::TestJobStore::test_set_and_get_job 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_set_and_get_job 
+app\tests\services\test_job_store_service.py::TestJobStore::test_update_job_status 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_update_job_status 
+app\tests\services\test_job_store_service.py::TestJobStore::test_nonexistent_job 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_nonexistent_job 
+app\tests\services\test_job_store_service.py::TestJobStore::test_global_job_store 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_global_job_store 
+app\tests\services\test_key_manager.py::test_load_from_settings_success <- ..\v2\app\tests\services\test_key_manager.py 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_key_manager.py::test_load_from_settings_success <- ..\v2\app\tests\services\test_key_manager.py 
+app\tests\services\test_key_manager.py::test_load_from_settings_jwt_key_too_short <- ..\v2\app\tests\services\test_key_manager.py 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_key_manager.py::test_load_from_settings_jwt_key_too_short <- ..\v2\app\tests\services\test_key_manager.py 
+app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
+app\tests\services\test_llm_cache_service.py::test_llm_cache_service_initialization 
+[gw2][36m [  0%] [0m[31mFAILED[0m app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_bulk_create 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
+app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
+app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
+app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool <- ..\v2\app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py 
+[gw3][36m [  1%] [0m[31mFAILED[0m app\tests\services\test_llm_cache_service.py::test_llm_cache_service_initialization 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool <- ..\v2\app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_full 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_full 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_validation_missing_required 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_validation_missing_required 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_dict_conversion 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_dict_conversion 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_json_serialization 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_json_serialization 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_instantiation 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_failure_recovery 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_instantiation 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_get_metadata 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_get_metadata 
+app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_timeout_handling 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_failure 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_failure 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_concrete_tool_run_method 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_concrete_tool_run_method 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_with_llm_name 
+[gw1][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_with_llm_name 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_multiple_executions 
+[gw1][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_multiple_executions 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_concurrent_execution 
+[gw1][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_concurrent_execution 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_without_metadata_attribute 
+[gw1][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_without_metadata_attribute 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_inheritance_chain 
+[gw1][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimize...(truncated)
 ```
 
 ### Frontend Output
@@ -69,283 +161,255 @@ Running: npm run test -- __tests__/unit components/**/*.test.tsx hooks/**/*.test
 [FAIL] CHECKS FAILED with exit code 1
 ================================================================================
 
-FAIL __tests__/hooks/useChatWebSocket.test.ts
-  ● useChatWebSocket › should handle agent_started message
+FAIL __tests__/auth/service.test.ts
+  ● Console
 
-    expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-    Expected: true
-
-    Number of calls: 0
-
-    [0m [90m 81 |[39m     rerender()[33m;[39m
-     [90m 82 |[39m     
-    [31m[1m>[22m[39m[90m 83 |[39m     expect(mockChatStore[33m.[39msetProcessing)[33m.[39mtoHaveBeenCalledWith([36mtrue[39m)[33m;[39m
-     [90m    |[39m                                         [31m[1m^[22m[39m
-     [90m 84 |[39m     expect(mockUnifiedChatStore[33m.[39msetProcessing)[33m.[39mtoHaveBeenCalledWith([36mtrue[39m)[33m;[39m
-     [90m 85 |[39m   })[33m;[39m
-     [90m 86 |[39m[0m
-
-      at Object.toHaveBeenCalledWith (__tests__/hooks/useChatWebSocket.test.ts:83:41)
-
-  ● useChatWebSocket › should handle sub_agent_update message
-
-    expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-    Expected: "OptimizationAgent"
-
-    Number of calls: 0
-
-    [0m [90m 103 |[39m     rerender()[33m;[39m
-     [90m 104 |[39m     
-    [31m[1m>[22m[39m[90m 105 |[39m     expect(mockChatStore[33m.[39msetSubAgentName)[33m.[39mtoHaveBeenCalledWith([32m'OptimizationAgent'[39m)[33m;[39m
-     [90m     |[39m                                           [31m[1m^[22m[39m
-     [90m 106 |[39m     expect(mockChatStore[33m.[39msetSubAgentStatus)[33m.[39mtoHaveBeenCalledWith({
-     [90m 107 |[39m       status[33m:[39m [32m'running'[39m[33m,[39m
-     [90m 108 |[39m       tools[33m:[39m [[32m'analyzer'[39m[33m,[39m [32m'optimizer'[39m][0m
-
-      at Object.toHaveBeenCalledWith (__tests__/hooks/useChatWebSocket.test.ts:105:43)
-
-  ● useChatWebSocket › should handle agent_completed message
-
-    expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-    Expected: false
-
-    Number of calls: 0
-
-    [0m [90m 122 |[39m     rerender()[33m;[39m
-     [90m 123 |[39m     
-    [31m[1m>[22m[39m[90m 124 |[39m     expect(mockChatStore[33m.[39msetProcessing)[33m.[39mtoHaveBeenCalledWith([36mfalse[39m)[33m;[39m
-     [90m     |[39m                                         [31m[1m^[22m[39m
-     [90m 125 |[39m     expect(mockUnifiedChatStore[33m.[39msetProcessing)[33m.[39mtoHaveBeenCalledWith([36mfalse[39m)[33m;[39m
-     [90m 126 |[39m     expect(mockChatStore[33m.[39maddMessage)[33m.[39mtoHaveBeenCalledWith(
-     [90m 127 |[39m       expect[33m.[39mobjectContaining({[0m
-
-      at Object.toHaveBeenCalledWith (__tests__/hooks/useChatWebSocket.test.ts:124:41)
-
-  ● useChatWebSocket › should handle error message
-
-    expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-    Expected: false
-
-    Number of calls: 0
-
-    [0m [90m 147 |[39m     rerender()[33m;[39m
-     [90m 148 |[39m     
-    [31m[1m>[22m[39m[90m 149 |[39m     expect(mockChatStore[33m.[39msetProcessing)[33m.[39mtoHaveBeenCalledWith([36mfalse[39m)[33m;[39m
-     [90m     |[39m                                         [31m[1m^[22m[39m
-     [90m 150 |[39m     expect(mockChatStore[33m.[39maddMessage)[33m.[39mtoHaveBeenCalledWith(
-     [90m 151 |[39m       expect[33m.[39mobjectContaining({
-     [90m 152 |[39m         type[33m:[39m [32m'error'[39m[33m,[39m[0m
-
-      at Object.toHaveBeenCalledWith (__tests__/hooks/useChatWebSocket.test.ts:149:41)
-
-  ● useChatWebSocket › should handle tool_call message
-
-    expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-    Expected: ObjectContaining {"content": StringContaining "cost_analyzer", "type": "tool"}
-
-    Number of calls: 0
-
-    [0m [90m 172 |[39m     rerender()[33m;[39m
-     [90m 173 |[39m     
-    [31m[1m>[22m[39m[90m 174 |[39m     expect(mockChatStore[33m.[39maddMessage)[33m.[39mtoHaveBeenCalledWith(
-     [90m     |[39m                                      [31m[1m^[22m[39m
-     [90m 175 |[39m       expect[33m.[39mobjectContaining({
-     [90m 176 |[39m         type[33m:[39m [32m'tool'[39m[33m,[39m
-     [90m 177 |[39m         content[33m:[39m expect[33m.[39mstringContaining([32m'cost_analyzer'[39m)[0m
-
-      at Object.toHaveBeenCalledWith (__tests__/hooks/useChatWebSocket.test.ts:174:38)
-
-  ● useChatWebSocket › should register and execute tools
-
-    expect(received).toContainEqual(expected) // deep equality
-
-    Expected value: {"name": "test_tool", "version": "1.0"}
-    Received array: []
-
-    [0m [90m 188 |[39m     })[33m;[39m
-     [90m 189 |[39m     
-    [31m[1m>[22m[39m[90m 190 |[39m     expect(result[33m.[39mcurrent[33m.[39mregisteredTools)[33m.[39mtoContainEqual({ name[33m:[39m [32m'test_tool'[39m[33m,[39m version[33m:[39m [32m'1.0'[39m })[33m;[39m
-     [90m     |[39m                                            [31m[1m^[22m[39m
-     [90m 191 |[39m     
-     [90m 192 |[39m     [90m// Execute a tool[39m
-     [90m 193 |[39m     [36mlet[39m toolResult[33m;[39m[0m
-
-      at Object.toContainEqual (__tests__/hooks/useChatWebSocket.test.ts:190:44)
-
-  ● useChatWebSocket › should handle workflow_progress message
-
-    expect(received).toEqual(expected) // deep equality
-
-    - Expected  - 2
-    + Received  + 2
-
-      Object {
-    -   "current_step": 3,
-    -   "total_steps": 10,
-    +   "current_step": 0,
-    +   "total_steps": 3,
+    console.error
+      Error: Not implemented: navigation (except hash changes)
+          at Reflect.set (<anonymous>)
+          at Object.<anonymous> (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\__tests__\auth\service.test.ts:46:25) {
+        type: 'not implemented'
       }
 
-    [0m [90m 215 |[39m     rerender()[33m;[39m
-     [90m 216 |[39m     
-    [31m[1m>[22m[39m[90m 217 |[39m     expect(result[33m.[39mcurrent[33m.[39mworkflowProgress)[33m.[39mtoEqual({
-     [90m     |[39m                                             [31m[1m^[22m[39m
-     [90m 218 |[39m       current_step[33m:[39m [35m3[39m[33m,[39m
-     [90m 219 |[39m       total_steps[33m:[39m [35m10[39m
-     [90m 220 |[39m     })[33m;[39m[0m
+    [0m [90m 44 |[39m
+     [90m 45 |[39m [36mdelete[39m (window [36mas[39m any)[33m.[39mlocation[33m;[39m
+    [31m[1m>[22m[39m[90m 46 |[39m (window [36mas[39m any)[33m.[39mlocation [33m=[39m {
+     [90m    |[39m                         [31m[1m^[22m[39m
+     [90m 47 |[39m   href[33m:[39m [32m''[39m[33m,[39m
+     [90m 48 |[39m   assign[33m:[39m mockAssign[33m,[39m
+     [90m 49 |[39m   replace[33m:[39m mockReplace[33m,[39m[0m
 
-      at Object.toEqual (__tests__/hooks/useChatWebSocket.test.ts:217:45)
+      at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:78:23)
+      at module.exports (node_modules/jsdom/lib/jsdom/browser/not-implemented.js:12:26)
+      at navigateFetch (node_modules/jsdom/lib/jsdom/living/window/navigation.js:77:3)
+      at exports.navigate (node_modules/jsdom/lib/jsdom/living/window/navigation.js:55:3)
+      at LocationImpl._locationObjectNavigate (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:30:5)
+      at LocationImpl._locationObjectSetterNavigate (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:24:17)
+      at LocationImpl.set href [as href] (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:46:10)
+      at Location.set href [as href] (node_modules/jsdom/lib/jsdom/living/generated/Location.js:125:37)
+          at Reflect.set (<anonymous>)
+      at Window.set location [as location] (node_modules/jsdom/lib/jsdom/browser/Window.js:424:15)
+      at Object.<anonymous> (__tests__/auth/service.test.ts:46:25)
 
-  ● useChatWebSocket › should handle message_chunk for streaming
+    console.log
+      Attempting dev login...
+
+      at AuthService.log [as handleDevLogin] (auth/service.ts:19:13)
+
+    console.log
+      Attempting dev login...
+
+      at AuthService.log [as handleDevLogin] (auth/service.ts:19:13)
+
+    console.error
+      Error: Not implemented: navigation (except hash changes)
+          at AuthService.handleLogin (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\auth\service.ts:73:25)
+          at Object.handleLogin (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\__tests__\auth\service.test.ts:263:19)
+          at new Promise (<anonymous>) {
+        type: 'not implemented'
+      }
+
+    [0m [90m 74 |[39m       [36mreturn[39m[33m;[39m
+     [90m 75 |[39m     }
+    [31m[1m>[22m[39m[90m 76 |[39m     originalError[33m.[39mcall(console[33m,[39m [33m...[39margs)[33m;[39m
+     [90m    |[39m                   [31m[1m^[22m[39m
+     [90m 77 |[39m   }[33m;[39m
+     [90m 78 |[39m   
+     [90m 79 |[39m   console[33m.[39mwarn [33m=[39m ([33m...[39margs[33m:[39m any[]) [33m=>[39m {[0m
+
+      at console.call [as error] (jest.setup.ts:76:19)
+      at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:78:23)
+      at module.exports (node_modules/jsdom/lib/jsdom/browser/not-implemented.js:12:26)
+      at navigateFetch (node_modules/jsdom/lib/jsdom/living/window/navigation.js:77:3)
+      at exports.navigate (node_modules/jsdom/lib/jsdom/living/window/navigation.js:55:3)
+      at LocationImpl._locationObjectNavigate (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:30:5)
+      at LocationImpl._locationObjectSetterNavigate (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:24:17)
+      at LocationImpl.set href [as href] (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:46:10)
+      at Location.set href [as href] (node_modules/jsdom/lib/jsdom/living/generated/Location.js:125:37)
+      at AuthService.handleLogin (auth/service.ts:73:25)
+      at Object.handleLogin (__tests__/auth/service.test.ts:263:19)
+
+    console.error
+      Error: Not implemented: navigation (except hash changes)
+          at AuthService.handleLogin (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\auth\service.ts:73:25)
+          at Object.handleLogin (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\__tests__\auth\service.test.ts:271:19)
+          at new Promise (<anonymous>) {
+        type: 'not implemented'
+      }
+
+    [0m [90m 74 |[39m       [36mreturn[39m[33m;[39m
+     [90m 75 |[39m     }
+    [31m[1m>[22m[39m[90m 76 |[39m     originalError[33m.[39mcall(console[33m,[39m [33m...[39margs)[33m;[39m
+     [90m    |[39m                   [31m[1m^[22m[39m
+     [90m 77 |[39m   }[33m;[39m
+     [90m 78 |[39m   
+     [90m 79 |[39m   console[33m.[39mwarn [33m=[39m ([33m...[39margs[33m:[39m any[]) [33m=>[39m {[0m
+
+      at console.call [as error] (jest.setup.ts:76:19)
+      at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:78:23)
+      at module.exports (node_modules/jsdom/lib/jsdom/browser/not-implemented.js:12:26)
+      at navigateFetch (node_modules/jsdom/lib/jsdom/living/window/navigation.js:77:3)
+      at exports.navigate (node_modules/jsdom/lib/jsdom/living/window/navigation.js:55:3)
+      at LocationImpl._locationObjectNavigate (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:30:5)
+      at LocationImpl._locationObjectSetterNavigate (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:24:17)
+      at LocationImpl.set href [as href] (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:46:10)
+      at Location.set href [as href] (node_modules/jsdom/lib/jsdom/living/generated/Location.js:125:37)
+      at AuthService.handleLogin (auth/service.ts:73:25)
+      at Object.handleLogin (__tests__/auth/service.test.ts:271:19)
+
+    console.log
+      Attempting dev login...
+
+      at AuthService.log [as handleDevLogin] (auth/service.ts:19:13)
+
+    console.log
+      Attempting dev login...
+
+      at AuthService.log [as handleDevLogin] (auth/service.ts:19:13)
+
+    console.log
+      Dev login successful
+
+      at AuthService.log [as handleDevLogin] (auth/service.ts:30:17)
+
+  ● AuthService › handleLogin › should redirect to login endpoint
 
     expect(received).toBe(expected) // Object.is equality
 
-    Expected: "Partial response..."
-    Received: ""
+    Expected: "http://localhost:8000/auth/login"
+    Received: "http://localhost/"
 
-    [0m [90m 236 |[39m     rerender()[33m;[39m
-     [90m 237 |[39m     
-    [31m[1m>[22m[39m[90m 238 |[39m     expect(result[33m.[39mcurrent[33m.[39mstreamingMessage)[33m.[39mtoBe([32m'Partial response...'[39m)[33m;[39m
-     [90m     |[39m                                             [31m[1m^[22m[39m
-     [90m 239 |[39m     expect(result[33m.[39mcurrent[33m.[39misStreaming)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
-     [90m 240 |[39m   })[33m;[39m
-     [90m 241 |[39m[0m
+    [0m [90m 263 |[39m       authService[33m.[39mhandleLogin(mockAuthConfig)[33m;[39m
+     [90m 264 |[39m
+    [31m[1m>[22m[39m[90m 265 |[39m       expect(window[33m.[39mlocation[33m.[39mhref)[33m.[39mtoBe(mockAuthConfig[33m.[39mendpoints[33m.[39mlogin)[33m;[39m
+     [90m     |[39m                                    [31m[1m^[22m[39m
+     [90m 266 |[39m     })[33m;[39m
+     [90m 267 |[39m
+     [90m 268 |[39m     it([32m'should handle login with development mode config'[39m[33m,[39m () [33m=>[39m {[0m
 
-      at Object.toBe (__tests__/hooks/useChatWebSocket.test.ts:238:45)
+      at Object.toBe (__tests__/auth/service.test.ts:265:36)
 
-  ● useChatWebSocket › should handle validation_result message
+  ● AuthService › handleLogin › should handle login with development mode config
 
-    expect(received).toEqual(expected) // deep equality
+    expect(received).toBe(expected) // Object.is equality
 
-    - Expected  - 3
-    + Received  + 1
+    Expected: "http://localhost:8000/auth/login"
+    Received: "http://localhost/"
 
-    - Object {
-    -   "memory_limit": true,
-    - }
-    + Object {}
+    [0m [90m 271 |[39m       authService[33m.[39mhandleLogin(devConfig)[33m;[39m
+     [90m 272 |[39m
+    [31m[1m>[22m[39m[90m 273 |[39m       expect(window[33m.[39mlocation[33m.[39mhref)[33m.[39mtoBe(devConfig[33m.[39mendpoints[33m.[39mlogin)[33m;[39m
+     [90m     |[39m                                    [31m[1m^[22m[39m
+     [90m 274 |[39m     })[33m;[39m
+     [90m 275 |[39m   })[33m;[39m
+     [90m 276 |[39m[0m
 
-    [0m [90m 255 |[39m     rerender()[33m;[39m
-     [90m 256 |[39m     
-    [31m[1m>[22m[39m[90m 257 |[39m     expect(result[33m.[39mcurrent[33m.[39mvalidationResults)[33m.[39mtoEqual({
-     [90m     |[39m                                              [31m[1m^[22m[39m
-     [90m 258 |[39m       memory_limit[33m:[39m [36mtrue[39m
-     [90m 259 |[39m     })[33m;[39m
-     [90m 260 |[39m   })[33m;[39m[0m
+      at Object.toBe (__tests__/auth/service.test.ts:273:36)
 
-      at Object.toEqual (__tests__/hooks/useChatWebSocket.test.ts:257:46)
+  ● AuthService › handleLogout › should perform logout successfully and redirect
 
-  ● useChatWebSocket › should handle approval_required message
+    expect(received).toBe(expected) // Object.is equality
 
-    expect(received).toEqual(expected) // deep equality
+    Expected: "/"
+    Received: "http://localhost/"
 
-    Expected: {"message": "Confirm deletion of resources", "sub_agent_name": "ResourceManager"}
-    Received: null
+    [0m [90m 293 |[39m       )[33m;[39m
+     [90m 294 |[39m       expect(localStorageMock[33m.[39mremoveItem)[33m.[39mtoHaveBeenCalledWith([32m'jwt_token'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 295 |[39m       expect(window[33m.[39mlocation[33m.[39mhref)[33m.[39mtoBe([32m'/'[39m)[33m;[39m
+     [90m     |[39m                                    [31m[1m^[22m[39m
+     [90m 296 |[39m     })[33m;[39m
+     [90m 297 |[39m
+     [90m 298 |[39m     it([32m'should handle logout failure and still redirect'[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
 
-    [0m [90m 275 |[39m     rerender()[33m;[39m
-     [90m 276 |[39m     
-    [31m[1m>[22m[39m[90m 277 |[39m     expect(result[33m.[39mcurrent[33m.[39mpendingApproval)[33m.[39mtoEqual({
-     [90m     |[39m                                            [31m[1m^[22m[39m
-     [90m 278 |[39m       message[33m:[39m [32m'Confirm deletion of resources'[39m[33m,[39m
-     [90m 279 |[39m       sub_agent_name[33m:[39m [32m'ResourceManager'[39m
-     [90m 280 |[39m     })[33m;[39m[0m
+      at Object.toBe (__tests__/auth/service.test.ts:295:36)
 
-      at Object.toEqual (__tests__/hooks/useChatWebSocket.test.ts:277:44)
+  ● AuthService › handleLogout › should handle logout failure and still redirect
 
-  ● useChatWebSocket › should clear errors
+    expect(received).toBe(expected) // Object.is equality
 
-    expect(received).toHaveLength(expected)
+    Expected: "/"
+    Received: "http://localhost/"
 
-    Expected length: 1
-    Received length: 0
-    Received array:  []
-
-    [0m [90m 304 |[39m     rerender()[33m;[39m
-     [90m 305 |[39m     
-    [31m[1m>[22m[39m[90m 306 |[39m     expect(result[33m.[39mcurrent[33m.[39merrors)[33m.[39mtoHaveLength([35m1[39m)[33m;[39m
-     [90m     |[39m                                   [31m[1m^[22m[39m
-     [90m 307 |[39m     
-     [90m 308 |[39m     [90m// Clear errors[39m
-     [90m 309 |[39m     act(() [33m=>[39m {[0m
-
-      at Object.toHaveLength (__tests__/hooks/useChatWebSocket.test.ts:306:35)
-
-  ● useChatWebS...(truncated)
+    [0m [90m 305 |[39m       expect(consoleErrorSpy)[33m.[39mtoHaveBeenCalledWith([3...(truncated)
 ```
 
 ## Error Summary
 
+### Backend Errors
+- [gw2][36m [  0%] [0m[31mFAILED[0m app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_bulk_create
+- [gw3][36m [  1%] [0m[31mFAILED[0m app\tests\services\test_llm_cache_service.py::test_llm_cache_service_initialization
+- [gw0][36m [  3%] [0m[31mERROR[0m app\tests\services\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_cost_optimization
+- [gw1][36m [  5%] [0m[31mFAILED[0m app\tests\services\test_agent_message_processing.py::TestAgentMessageProcessing::test_process_user_message
+- =================================== ERRORS ====================================
+- [31m[1m_ ERROR at setup of TestApexOptimizerToolSelection.test_tool_selection_cost_optimization _[0m
+- [31mFAILED[0m app\tests\services\test_database_repositories.py::[1mTestBaseRepository::test_repository_bulk_create[0m - AttributeError: 'NoneType' object has no attribute 'bulk_create'
+- [31mFAILED[0m app\tests\services\test_llm_cache_service.py::[1mtest_llm_cache_service_initialization[0m - TypeError: LLMCacheService.__init__() got an unexpected keyword argument 'ttl'
+- [31mFAILED[0m app\tests\services\test_agent_message_processing.py::[1mTestAgentMessageProcessing::test_process_user_message[0m - TypeError: AgentService.__init__() takes 2 positional arguments but 3 were given
+- [31mERROR[0m app\tests\services\test_apex_optimizer_tool_selection.py::[1mTestApexOptimizerToolSelection::test_tool_selection_cost_optimization[0m - pydantic_core._pydantic_core.ValidationError: 2 validation errors for RequestModel
+- [FAIL] TESTS FAILED with exit code 2 after 37.39s
+
 ### Frontend Errors
 - [FAIL] CHECKS FAILED with exit code 1
-- FAIL __tests__/hooks/useChatWebSocket.test.ts
 - FAIL __tests__/auth/service.test.ts
+- FAIL __tests__/hooks/useKeyboardShortcuts.test.tsx
 - FAIL __tests__/components/UIComponents.test.tsx
 - FAIL __tests__/hooks/useAgent.test.tsx
-- FAIL __tests__/hooks/useKeyboardShortcuts.test.tsx
-- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
-- FAIL __tests__/hooks/additionalHooks.test.tsx
-- FAIL __tests__/integration/critical-integration.test.tsx
-- FAIL __tests__/components/ChatWindow.test.tsx
-- FAIL __tests__/components/FinalReportView.test.tsx
-- FAIL __tests__/components/AppWithLayout.test.tsx
-- FAIL __tests__/components/ChatHistory.test.tsx
-- FAIL __tests__/components/ChatSidebar.test.tsx
-- FAIL __tests__/components/AdminChat.test.tsx
-- FAIL __tests__/services/webSocketService.test.ts
-- FAIL __tests__/unified-chat-v5.test.tsx
 - FAIL __tests__/components/ThinkingIndicator.test.tsx
-- FAIL __tests__/components/AgentStatusPanel.test.tsx
-- FAIL __tests__/components/ChatComponents.test.tsx
+- FAIL __tests__/integration/critical-integration.test.tsx
+- FAIL __tests__/services/webSocketService.test.ts
+- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
+- FAIL __tests__/components/ChatComponents.test.tsx (5.518 s)
+- FAIL __tests__/hooks/additionalHooks.test.tsx
+- FAIL __tests__/components/CorpusAdmin.test.tsx (5.531 s)
+- FAIL __tests__/components/FinalReportView.test.tsx
+- FAIL __tests__/components/ChatHistory.test.tsx
+- FAIL __tests__/components/ChatWindow.test.tsx
+- FAIL __tests__/components/ChatSidebar.test.tsx
+- FAIL __tests__/components/AppWithLayout.test.tsx
 - FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
-- FAIL __tests__/imports/external-imports.test.tsx
-- FAIL __tests__/components/CorpusAdmin.test.tsx
-- FAIL __tests__/integration/advanced-integration.test.tsx
-- FAIL __tests__/auth/context.test.tsx
-- FAIL __tests__/imports/internal-imports.test.tsx
-- FAIL __tests__/components/ChatHistorySection.test.tsx (7.925 s)
+- FAIL __tests__/unified-chat-v5.test.tsx
+- FAIL __tests__/components/AgentStatusPanel.test.tsx
+- FAIL __tests__/integration/advanced-integration.test.tsx (5.898 s)
+- FAIL __tests__/auth/context.test.tsx (6.499 s)
+- FAIL __tests__/imports/external-imports.test.tsx (6.145 s)
+- FAIL __tests__/imports/internal-imports.test.tsx (7.744 s)
+- FAIL __tests__/components/ChatHistorySection.test.tsx (12.689 s)
+- FAIL __tests__/components/chat/MainChat.test.tsx (14.044 s)
+- FAIL __tests__/system/startup.test.tsx (13.826 s)
 - FAIL __tests__/chat/chatUIUXCore.test.tsx
-- FAIL __tests__/components/chat/MainChat.test.tsx (12.235 s)
-- FAIL __tests__/system/startup.test.tsx (12.182 s)
 - FAIL __tests__/chat/ui-improvements.test.tsx
-- FAIL __tests__/integration/comprehensive-integration.test.tsx (25.473 s)
-- FAIL __tests__/components/chat/MessageInput.test.tsx (42.567 s)
-- FAIL __tests__/hooks/useChatWebSocket.test.ts
+- FAIL __tests__/integration/comprehensive-integration.test.tsx (27.573 s)
+- FAIL __tests__/components/chat/MessageInput.test.tsx (47.727 s)
 - FAIL __tests__/auth/service.test.ts
+- FAIL __tests__/hooks/useKeyboardShortcuts.test.tsx
 - FAIL __tests__/components/UIComponents.test.tsx
 - FAIL __tests__/hooks/useAgent.test.tsx
-- FAIL __tests__/hooks/useKeyboardShortcuts.test.tsx
-- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
-- FAIL __tests__/hooks/additionalHooks.test.tsx
-- FAIL __tests__/integration/critical-integration.test.tsx
-- FAIL __tests__/components/ChatWindow.test.tsx
-- FAIL __tests__/components/FinalReportView.test.tsx
-- FAIL __tests__/components/AppWithLayout.test.tsx
-- FAIL __tests__/components/ChatHistory.test.tsx
-- FAIL __tests__/components/ChatSidebar.test.tsx
-- FAIL __tests__/components/AdminChat.test.tsx
-- FAIL __tests__/services/webSocketService.test.ts
-- FAIL __tests__/unified-chat-v5.test.tsx
 - FAIL __tests__/components/ThinkingIndicator.test.tsx
-- FAIL __tests__/components/AgentStatusPanel.test.tsx
-- FAIL __tests__/components/ChatComponents.test.tsx
+- FAIL __tests__/integration/critical-integration.test.tsx
+- FAIL __tests__/services/webSocketService.test.ts
+- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
+- FAIL __tests__/components/ChatComponents.test.tsx (5.518 s)
+- FAIL __tests__/hooks/additionalHooks.test.tsx
+- FAIL __tests__/components/CorpusAdmin.test.tsx (5.531 s)
+- FAIL __tests__/components/FinalReportView.test.tsx
+- FAIL __tests__/components/ChatHistory.test.tsx
+- FAIL __tests__/components/ChatWindow.test.tsx
+- FAIL __tests__/components/ChatSidebar.test.tsx
+- FAIL __tests__/components/AppWithLayout.test.tsx
 - FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
-- FAIL __tests__/imports/external-imports.test.tsx
-- FAIL __tests__/components/CorpusAdmin.test.tsx
-- FAIL __tests__/integration/advanced-integration.test.tsx
-- FAIL __tests__/auth/context.test.tsx
-- FAIL __tests__/imports/internal-imports.test.tsx
-- FAIL __tests__/components/ChatHistorySection.test.tsx (7.925 s)
+- FAIL __tests__/unified-chat-v5.test.tsx
+- FAIL __tests__/components/AgentStatusPanel.test.tsx
+- FAIL __tests__/integration/advanced-integration.test.tsx (5.898 s)
+- FAIL __tests__/auth/context.test.tsx (6.499 s)
+- FAIL __tests__/imports/external-imports.test.tsx (6.145 s)
+- FAIL __tests__/imports/internal-imports.test.tsx (7.744 s)
+- FAIL __tests__/components/ChatHistorySection.test.tsx (12.689 s)
+- FAIL __tests__/components/chat/MainChat.test.tsx (14.044 s)
+- FAIL __tests__/system/startup.test.tsx (13.826 s)
 - FAIL __tests__/chat/chatUIUXCore.test.tsx
-- FAIL __tests__/components/chat/MainChat.test.tsx (12.235 s)
-- FAIL __tests__/system/startup.test.tsx (12.182 s)
 - FAIL __tests__/chat/ui-improvements.test.tsx
-- FAIL __tests__/integration/comprehensive-integration.test.tsx (25.473 s)
-- FAIL __tests__/components/chat/MessageInput.test.tsx (42.567 s)
+- FAIL __tests__/integration/comprehensive-integration.test.tsx (27.573 s)
+- FAIL __tests__/components/chat/MessageInput.test.tsx (47.727 s)
 
 
 ---

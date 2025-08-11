@@ -141,7 +141,7 @@ class TestDatabaseRepositoryTransactions:
         result = await mock_repository.create(mock_session, **create_data)
         
         # Assert
-        assert result is not None
+        assert result != None
         mock_session.add.assert_called_once()
         mock_session.commit.assert_called_once()
         mock_session.refresh.assert_called_once()
@@ -161,7 +161,7 @@ class TestDatabaseRepositoryTransactions:
         result = await mock_repository.create(mock_session, name='Duplicate Entity')
         
         # Assert
-        assert result is None
+        assert result == None
         mock_session.add.assert_called_once()
         mock_session.commit.assert_called_once()
         mock_session.rollback.assert_called_once()
@@ -177,7 +177,7 @@ class TestDatabaseRepositoryTransactions:
         result = await mock_repository.create(mock_session, name='Failed Entity')
         
         # Assert
-        assert result is None
+        assert result == None
         mock_session.rollback.assert_called_once()
     
     @pytest.mark.asyncio
@@ -190,7 +190,7 @@ class TestDatabaseRepositoryTransactions:
         result = await mock_repository.create(mock_session, name='Error Entity')
         
         # Assert
-        assert result is None
+        assert result == None
         mock_session.rollback.assert_called_once()
     
     @pytest.mark.asyncio
@@ -304,8 +304,8 @@ class TestDatabaseRepositoryTransactions:
             results.append(result)
         
         # Assert partial success with rollbacks
-        successful_results = [r for r in results if r is not None]
-        failed_results = [r for r in results if r is None]
+        successful_results = [r for r in results if r != None]
+        failed_results = [r for r in results if r == None]
         
         assert len(successful_results) == 2  # First two succeed
         assert len(failed_results) == 3   # Third and remaining fail
@@ -405,10 +405,10 @@ class TestUnitOfWorkTransactions:
         with patch('app.services.database.unit_of_work.async_session_factory', factory):
             async with UnitOfWork() as uow:
                 # Verify repositories are initialized
-                assert uow.threads is not None
-                assert uow.messages is not None
-                assert uow.runs is not None
-                assert uow.references is not None
+                assert uow.threads != None
+                assert uow.messages != None
+                assert uow.runs != None
+                assert uow.references != None
                 
                 # Verify session is injected
                 assert uow.threads._session is mock_session
@@ -442,7 +442,7 @@ class TestUnitOfWorkTransactions:
         
         async with UnitOfWork(external_session) as uow:
             assert uow._session is external_session
-            assert uow._external_session is True
+            assert uow._external_session == True
         
         # External session should not be closed
         external_session.close.assert_not_called()

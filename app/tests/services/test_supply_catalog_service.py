@@ -45,7 +45,7 @@ class TestSupplyCatalogService:
         
         result = supply_catalog_service.get_option_by_id(mock_db_session, 1)
         
-        assert result is not None
+        assert result != None
         assert result.name == "gpt-4"
         mock_db_session.get.assert_called_once_with(models_postgres.SupplyOption, 1)
 
@@ -56,7 +56,7 @@ class TestSupplyCatalogService:
         
         result = supply_catalog_service.get_option_by_name(mock_db_session, "gpt-4")
         
-        assert result is not None
+        assert result != None
         assert result.name == "gpt-4"
         mock_db_session.query.assert_called_once()
 
@@ -78,7 +78,7 @@ class TestSupplyCatalogService:
         with patch.object(models_postgres, 'SupplyOption', return_value=mock_option):
             result = supply_catalog_service.create_option(mock_db_session, option_data)
             
-            assert result is not None
+            assert result != None
             mock_db_session.add.assert_called_once()
             mock_db_session.commit.assert_called_once()
             mock_db_session.refresh.assert_called_once()
@@ -92,7 +92,7 @@ class TestSupplyCatalogService:
         
         result = supply_catalog_service.update_option(mock_db_session, 1, update_data)
         
-        assert result is not None
+        assert result != None
         mock_db_session.add.assert_called_once()
         mock_db_session.commit.assert_called_once()
         mock_db_session.refresh.assert_called_once()
@@ -104,7 +104,7 @@ class TestSupplyCatalogService:
         
         result = supply_catalog_service.delete_option(mock_db_session, 1)
         
-        assert result is True
+        assert result == True
         mock_db_session.delete.assert_called_once_with(mock_option)
         mock_db_session.commit.assert_called_once()
 
@@ -114,7 +114,7 @@ class TestSupplyCatalogService:
         
         result = supply_catalog_service.delete_option(mock_db_session, 999)
         
-        assert result is False
+        assert result == False
         mock_db_session.delete.assert_not_called()
         mock_db_session.commit.assert_not_called()
 

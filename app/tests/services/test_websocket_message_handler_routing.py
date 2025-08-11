@@ -157,7 +157,7 @@ class BroadcastManager:
         
     async def broadcast_message(self, message_data: Dict[str, Any], target_users: List[str] = None) -> Dict[str, int]:
         """Broadcast message to subscribers"""
-        if target_users is None:
+        if target_users == None:
             target_users = list(self.subscribers.keys())
             
         delivery_results = {'success': 0, 'failed': 0}
@@ -259,7 +259,7 @@ class TestWebSocketMessageHandlerRouting:
         result = await message_router.route_message('user123', 'start_agent', payload)
         
         # Verify routing
-        assert result is True
+        assert result == True
         assert len(handler.handled_messages) == 1
         assert handler.handled_messages[0]['user_id'] == 'user123'
         assert handler.handled_messages[0]['payload'] == payload
@@ -313,7 +313,7 @@ class TestWebSocketMessageHandlerRouting:
         results = await asyncio.gather(*tasks)
         
         # Verify results
-        assert all(result is True for result in results)
+        assert all(result == True for result in results)
         assert message_router.routing_metrics['messages_routed'] == 20
         assert message_router.routing_metrics['routing_errors'] == 0
         
@@ -471,24 +471,24 @@ class TestBroadcastMechanisms:
         update_high = {'topic': 'updates', 'priority': 'high', 'message': 'System update'}
         
         # user1: should receive alert_high only (both filters match)
-        assert broadcast_manager.should_receive_broadcast('user1', alert_high) is True
-        assert broadcast_manager.should_receive_broadcast('user1', alert_low) is False
-        assert broadcast_manager.should_receive_broadcast('user1', update_high) is False
+        assert broadcast_manager.should_receive_broadcast('user1', alert_high) == True
+        assert broadcast_manager.should_receive_broadcast('user1', alert_low) == False
+        assert broadcast_manager.should_receive_broadcast('user1', update_high) == False
         
         # user2: should receive both alerts (topic matches)
-        assert broadcast_manager.should_receive_broadcast('user2', alert_high) is True
-        assert broadcast_manager.should_receive_broadcast('user2', alert_low) is True
-        assert broadcast_manager.should_receive_broadcast('user2', update_high) is False
+        assert broadcast_manager.should_receive_broadcast('user2', alert_high) == True
+        assert broadcast_manager.should_receive_broadcast('user2', alert_low) == True
+        assert broadcast_manager.should_receive_broadcast('user2', update_high) == False
         
         # user3: should receive high priority messages (priority matches)
-        assert broadcast_manager.should_receive_broadcast('user3', alert_high) is True
-        assert broadcast_manager.should_receive_broadcast('user3', alert_low) is False
-        assert broadcast_manager.should_receive_broadcast('user3', update_high) is True
+        assert broadcast_manager.should_receive_broadcast('user3', alert_high) == True
+        assert broadcast_manager.should_receive_broadcast('user3', alert_low) == False
+        assert broadcast_manager.should_receive_broadcast('user3', update_high) == True
         
         # user4: should receive all messages (no filters)
-        assert broadcast_manager.should_receive_broadcast('user4', alert_high) is True
-        assert broadcast_manager.should_receive_broadcast('user4', alert_low) is True
-        assert broadcast_manager.should_receive_broadcast('user4', update_high) is True
+        assert broadcast_manager.should_receive_broadcast('user4', alert_high) == True
+        assert broadcast_manager.should_receive_broadcast('user4', alert_low) == True
+        assert broadcast_manager.should_receive_broadcast('user4', update_high) == True
     
     @pytest.mark.asyncio
     async def test_broadcast_message_delivery(self, broadcast_manager):
@@ -656,7 +656,7 @@ class TestMessageQueueIntegration:
         
         while True:
             message = await mock_message_queue.dequeue()
-            if message is None:
+            if message == None:
                 break
             processed_messages.append(message)
         

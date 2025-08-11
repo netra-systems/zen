@@ -171,7 +171,7 @@ class TestServiceInitialization:
             service = SupplyResearchService(mock_db)
             
             assert service.db == mock_db
-            assert service.redis_manager is None
+            assert service.redis_manager == None
             assert service.cache_ttl == 3600
 
 
@@ -264,7 +264,7 @@ class TestSupplyItemRetrieval:
         
         result = service.get_supply_item_by_id("non-existent-id")
         
-        assert result is None
+        assert result == None
 
 
 class TestSupplyItemCreateUpdate:
@@ -344,7 +344,7 @@ class TestSupplyItemCreateUpdate:
         
         assert result == sample_supply_item
         assert sample_supply_item.pricing_input == new_pricing
-        assert sample_supply_item.last_updated is not None
+        assert sample_supply_item.last_updated != None
         assert service.db.committed
         # Should add update log
         assert len(service.db.added_objects) >= 1
@@ -430,7 +430,7 @@ class TestResearchSessionOperations:
         
         result = service.get_research_session_by_id("non-existent")
         
-        assert result is None
+        assert result == None
 
 
 class TestUpdateLogOperations:
@@ -991,7 +991,7 @@ class TestDataValidation:
         
         is_valid, errors = service.validate_supply_data(valid_data)
         
-        assert is_valid is True
+        assert is_valid == True
         assert len(errors) == 0
     
     def test_validate_supply_data_missing_required(self, service):
@@ -1002,7 +1002,7 @@ class TestDataValidation:
         
         is_valid, errors = service.validate_supply_data(invalid_data)
         
-        assert is_valid is False
+        assert is_valid == False
         assert len(errors) >= 1
         assert any("Missing required field: provider" in error for error in errors)
         assert any("Missing required field: model_name" in error for error in errors)
@@ -1018,7 +1018,7 @@ class TestDataValidation:
         
         is_valid, errors = service.validate_supply_data(invalid_data)
         
-        assert is_valid is False
+        assert is_valid == False
         assert any("Input pricing cannot be negative" in error for error in errors)
         assert any("Output pricing cannot be negative" in error for error in errors)
     
@@ -1033,7 +1033,7 @@ class TestDataValidation:
         
         is_valid, errors = service.validate_supply_data(invalid_data)
         
-        assert is_valid is False
+        assert is_valid == False
         assert any("pricing seems unrealistically high" in error for error in errors)
     
     def test_validate_supply_data_invalid_pricing_format(self, service):
@@ -1047,7 +1047,7 @@ class TestDataValidation:
         
         is_valid, errors = service.validate_supply_data(invalid_data)
         
-        assert is_valid is False
+        assert is_valid == False
         assert any("Invalid input pricing format" in error for error in errors)
         assert any("Invalid output pricing format" in error for error in errors)
     
@@ -1061,7 +1061,7 @@ class TestDataValidation:
         
         is_valid, errors = service.validate_supply_data(invalid_data)
         
-        assert is_valid is False
+        assert is_valid == False
         assert any("Invalid context window format" in error for error in errors)
     
     def test_validate_supply_data_negative_context_window(self, service):
@@ -1074,7 +1074,7 @@ class TestDataValidation:
         
         is_valid, errors = service.validate_supply_data(invalid_data)
         
-        assert is_valid is False
+        assert is_valid == False
         assert any("Context window cannot be negative" in error for error in errors)
     
     def test_validate_supply_data_unrealistic_context_window(self, service):
@@ -1087,7 +1087,7 @@ class TestDataValidation:
         
         is_valid, errors = service.validate_supply_data(invalid_data)
         
-        assert is_valid is False
+        assert is_valid == False
         assert any("Context window seems unrealistically large" in error for error in errors)
     
     def test_validate_supply_data_invalid_confidence_score(self, service):
@@ -1100,7 +1100,7 @@ class TestDataValidation:
         
         is_valid, errors = service.validate_supply_data(invalid_data)
         
-        assert is_valid is False
+        assert is_valid == False
         assert any("Confidence score must be between 0 and 1" in error for error in errors)
     
     def test_validate_supply_data_invalid_confidence_format(self, service):
@@ -1113,7 +1113,7 @@ class TestDataValidation:
         
         is_valid, errors = service.validate_supply_data(invalid_data)
         
-        assert is_valid is False
+        assert is_valid == False
         assert any("Invalid confidence score format" in error for error in errors)
     
     def test_validate_supply_data_invalid_availability_status(self, service):
@@ -1126,7 +1126,7 @@ class TestDataValidation:
         
         is_valid, errors = service.validate_supply_data(invalid_data)
         
-        assert is_valid is False
+        assert is_valid == False
         assert any("Invalid availability status" in error for error in errors)
     
     def test_validate_supply_data_valid_availability_statuses(self, service):
@@ -1141,7 +1141,7 @@ class TestDataValidation:
             }
             
             is_valid, errors = service.validate_supply_data(data)
-            assert is_valid is True, f"Status '{status}' should be valid"
+            assert is_valid == True, f"Status '{status}' should be valid"
 
 
 class TestDatabaseIntegration:
@@ -1179,7 +1179,7 @@ class TestDatabaseIntegration:
                 result = service.create_or_update_supply_item("openai", "gpt-4", data)
         
         # Should have committed transaction
-        assert service.db.committed is True
+        assert service.db.committed == True
         assert len(service.db.added_objects) >= 2  # Item + log
     
     def test_error_handling_database_errors(self, service):
@@ -1203,7 +1203,7 @@ class TestCaching:
         with patch('app.services.supply_research_service.RedisManager', side_effect=Exception("Redis unavailable")):
             service = SupplyResearchService(mock_db)
             
-            assert service.redis_manager is None
+            assert service.redis_manager == None
             
             # Service should still function normally
             service.db.query_results[AISupplyItem] = []

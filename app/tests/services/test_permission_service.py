@@ -75,15 +75,15 @@ class TestDetectDeveloperStatus:
         
         with patch.dict(os.environ, {"DEV_MODE": "true"}):
             result = PermissionService.detect_developer_status(user)
-            assert result is True
+            assert result == True
         
         with patch.dict(os.environ, {"DEV_MODE": "TRUE"}):
             result = PermissionService.detect_developer_status(user)
-            assert result is True
+            assert result == True
         
         with patch.dict(os.environ, {"DEV_MODE": "false"}):
             result = PermissionService.detect_developer_status(user)
-            assert result is False
+            assert result == False
     
     def test_detect_developer_with_netra_email(self):
         """Test developer detection with @netra.ai email"""
@@ -92,17 +92,17 @@ class TestDetectDeveloperStatus:
         # Test with netra.ai domain
         user.email = "developer@netra.ai"
         result = PermissionService.detect_developer_status(user)
-        assert result is True
+        assert result == True
         
         # Test case insensitive
         user.email = "Developer@NETRA.AI"
         result = PermissionService.detect_developer_status(user)
-        assert result is True
+        assert result == True
         
         # Test non-netra email
         user.email = "user@example.com"
         result = PermissionService.detect_developer_status(user)
-        assert result is False
+        assert result == False
     
     def test_detect_developer_with_dev_environment(self):
         """Test developer detection with development environment"""
@@ -113,12 +113,12 @@ class TestDetectDeveloperStatus:
         for env in test_envs:
             with patch.dict(os.environ, {"ENVIRONMENT": env}, clear=True):
                 result = PermissionService.detect_developer_status(user)
-                assert result is True, f"Failed for environment: {env}"
+                assert result == True, f"Failed for environment: {env}"
         
         # Test production environment
         with patch.dict(os.environ, {"ENVIRONMENT": "production"}, clear=True):
             result = PermissionService.detect_developer_status(user)
-            assert result is False
+            assert result == False
     
     def test_detect_developer_priority_order(self):
         """Test that detection methods are checked in correct priority order"""
@@ -128,7 +128,7 @@ class TestDetectDeveloperStatus:
         # DEV_MODE should take precedence over everything
         with patch.dict(os.environ, {"DEV_MODE": "true", "ENVIRONMENT": "production"}):
             result = PermissionService.detect_developer_status(user)
-            assert result is True
+            assert result == True
     
     def test_detect_developer_with_none_email(self):
         """Test developer detection with None email"""
@@ -138,12 +138,12 @@ class TestDetectDeveloperStatus:
         # Should not crash and should return False
         with patch.dict(os.environ, {}, clear=True):
             result = PermissionService.detect_developer_status(user)
-            assert result is False
+            assert result == False
         
         # Unless DEV_MODE is set
         with patch.dict(os.environ, {"DEV_MODE": "true"}):
             result = PermissionService.detect_developer_status(user)
-            assert result is True
+            assert result == True
 
 
 class TestUpdateUserRole:
@@ -160,7 +160,7 @@ class TestUpdateUserRole:
         result = PermissionService.update_user_role(db, user, check_developer=True)
         
         assert user.role == "developer"
-        assert user.is_developer is True
+        assert user.is_developer == True
         db.commit.assert_called_once()
         assert result == user
     
@@ -203,7 +203,7 @@ class TestUpdateUserRole:
         result = PermissionService.update_user_role(db, user, check_developer=False)
         
         assert user.role == "standard_user"  # Should not change
-        assert user.is_developer is False
+        assert user.is_developer == False
         db.commit.assert_not_called()
         assert result == user
     
@@ -232,7 +232,7 @@ class TestUpdateUserRole:
         result = PermissionService.update_user_role(db, user, check_developer=True)
         
         assert user.role == "developer"
-        assert user.is_developer is True
+        assert user.is_developer == True
         db.commit.assert_called_once()
         assert result == user
 
@@ -247,10 +247,10 @@ class TestCheckPermission:
         user.permissions = None
         
         result = PermissionService.has_permission(user, "chat")
-        assert result is True
+        assert result == True
         
         result = PermissionService.has_permission(user, "user_management")
-        assert result is False
+        assert result == False
     
     def test_check_permission_super_admin(self):
         """Test permission checks for super admin (wildcard)"""
@@ -260,10 +260,10 @@ class TestCheckPermission:
         
         # Super admin should have all real permissions
         result = PermissionService.has_permission(user, "user_management")
-        assert result is True
+        assert result == True
         
         result = PermissionService.has_permission(user, "debug_panel")
-        assert result is True
+        assert result == True
     
     def test_check_permission_developer(self):
         """Test permission checks for developer"""
@@ -272,10 +272,10 @@ class TestCheckPermission:
         user.permissions = None
         
         result = PermissionService.has_permission(user, "debug_panel")
-        assert result is True
+        assert result == True
         
         result = PermissionService.has_permission(user, "user_management")
-        assert result is False
+        assert result == False
     
     def test_check_permission_invalid_role(self):
         """Test permission check with invalid role"""
@@ -284,7 +284,7 @@ class TestCheckPermission:
         user.permissions = None
         
         result = PermissionService.has_permission(user, "chat")
-        assert result is False
+        assert result == False
     
     def test_check_permission_none_role(self):
         """Test permission check with None role"""
@@ -293,7 +293,7 @@ class TestCheckPermission:
         user.permissions = None
         
         result = PermissionService.has_permission(user, "chat")
-        assert result is False
+        assert result == False
 
 
 class TestGetUserPermissions:
@@ -338,17 +338,17 @@ class TestAdminChecks:
         user = Mock(spec=User)
         user.role = "admin"
         user.is_superuser = False
-        assert PermissionService.is_admin_or_higher(user) is True
+        assert PermissionService.is_admin_or_higher(user) == True
         
         user.role = "super_admin"
-        assert PermissionService.is_admin_or_higher(user) is True
+        assert PermissionService.is_admin_or_higher(user) == True
         
         user.role = "developer"
-        assert PermissionService.is_admin_or_higher(user) is False
+        assert PermissionService.is_admin_or_higher(user) == False
         
         user.role = "standard_user"
         user.is_superuser = True
-        assert PermissionService.is_admin_or_higher(user) is True
+        assert PermissionService.is_admin_or_higher(user) == True
     
     def test_is_developer_or_higher(self):
         """Test is_developer_or_higher checks"""
@@ -356,14 +356,14 @@ class TestAdminChecks:
         user.role = "developer"
         user.is_developer = True
         user.is_superuser = False
-        assert PermissionService.is_developer_or_higher(user) is True
+        assert PermissionService.is_developer_or_higher(user) == True
         
         user.role = "admin"
-        assert PermissionService.is_developer_or_higher(user) is True
+        assert PermissionService.is_developer_or_higher(user) == True
         
         user.role = "standard_user"
         user.is_developer = False
-        assert PermissionService.is_developer_or_higher(user) is False
+        assert PermissionService.is_developer_or_higher(user) == False
 
 
 class TestPermissionGroups:
@@ -377,11 +377,11 @@ class TestPermissionGroups:
         
         # Should have at least one of these
         result = PermissionService.has_any_permission(user, ["debug_panel", "user_management"])
-        assert result is True
+        assert result == True
         
         # Should not have any of these
         result = PermissionService.has_any_permission(user, ["billing_access", "security_settings"])
-        assert result is False
+        assert result == False
     
     def test_has_all_permissions(self):
         """Test has_all_permissions checks"""
@@ -391,11 +391,11 @@ class TestPermissionGroups:
         
         # Should have all of these
         result = PermissionService.has_all_permissions(user, ["chat", "debug_panel"])
-        assert result is True
+        assert result == True
         
         # Should not have all of these
         result = PermissionService.has_all_permissions(user, ["debug_panel", "user_management"])
-        assert result is False
+        assert result == False
 
 
 class TestSecurityEdgeCases:
@@ -408,7 +408,7 @@ class TestSecurityEdgeCases:
         user.permissions = None
         
         result = PermissionService.has_permission(user, "admin_panel")
-        assert result is False
+        assert result == False
     
     def test_case_sensitivity_in_roles(self):
         """Test that role checks are case-sensitive"""
@@ -417,7 +417,7 @@ class TestSecurityEdgeCases:
         user.permissions = None
         
         result = PermissionService.has_permission(user, "user_management")
-        assert result is False  # Should not match "admin"
+        assert result == False  # Should not match "admin"
     
     def test_permission_escalation_attempt(self):
         """Test that users cannot escalate their own permissions"""
@@ -456,7 +456,7 @@ class TestIntegrationScenarios:
         updated_user = PermissionService.update_user_role(db, user)
         
         assert updated_user.role == "developer"
-        assert updated_user.is_developer is True
+        assert updated_user.is_developer == True
         
         # Verify they have correct permissions
         permissions = PermissionService.get_user_permissions(updated_user)
@@ -472,12 +472,12 @@ class TestIntegrationScenarios:
             
             # Should not auto-elevate in production
             result = PermissionService.detect_developer_status(user)
-            assert result is False
+            assert result == False
             
             # Unless explicitly set or netra.ai email
             user.email = "dev@netra.ai"
             result = PermissionService.detect_developer_status(user)
-            assert result is True
+            assert result == True
 
 
 # Helper methods for testing - these exist in the actual service

@@ -31,11 +31,11 @@ class TestAdminRoute:
         
         # Mock user with admin role
         admin_user = {"id": "admin1", "role": "admin"}
-        assert verify_admin_role(admin_user) is True
+        assert verify_admin_role(admin_user) == True
         
         # Mock user without admin role
         regular_user = {"id": "user1", "role": "user"}
-        assert verify_admin_role(regular_user) is False
+        assert verify_admin_role(regular_user) == False
     
     @pytest.mark.asyncio
     async def test_admin_user_management(self):
@@ -158,7 +158,7 @@ class TestConfigRoute:
             mock_save.return_value = True
             
             result = await update_config(new_config)
-            assert result["success"] is True
+            assert result["success"] == True
 
 
 # Test 24: corpus_route_operations
@@ -454,7 +454,7 @@ class TestSupplyRoute:
             }
             
             result = await validate_supply_chain(chain_data)
-            assert result["valid"] is True
+            assert result["valid"] == True
 
 
 # Test 29: synthetic_data_route_generation
@@ -593,4 +593,4 @@ class TestThreadsRoute:
             }
             
             result = await archive_thread("thread123")
-            assert result["success"] is True
+            assert result["success"] == True

@@ -215,7 +215,7 @@ class TestDatabaseService:
         service = DatabaseService("db-service")
         
         assert service.service_name == "db-service"
-        assert service._session_factory is None
+        assert service._session_factory == None
     
     def test_set_session_factory(self):
         """Test setting session factory."""
@@ -378,7 +378,7 @@ class TestCRUDService:
             
             result = await crud_service.get_by_id(entity_id)
             
-            assert result is None
+            assert result == None
     
     @pytest.mark.asyncio
     async def test_update_entity_success(self, crud_service):
@@ -435,7 +435,7 @@ class TestCRUDService:
             
             result = await crud_service.delete(entity_id)
             
-            assert result is True
+            assert result == True
             mock_session.delete.assert_called_once_with(mock_entity)
             mock_session.commit.assert_called_once()
     
@@ -453,7 +453,7 @@ class TestCRUDService:
             
             result = await crud_service.delete(entity_id)
             
-            assert result is False
+            assert result == False
     
     @pytest.mark.asyncio
     async def test_exists_true(self, crud_service):
@@ -470,7 +470,7 @@ class TestCRUDService:
             
             result = await crud_service.exists(entity_id)
             
-            assert result is True
+            assert result == True
     
     @pytest.mark.asyncio
     async def test_exists_false(self, crud_service):
@@ -486,7 +486,7 @@ class TestCRUDService:
             
             result = await crud_service.exists(entity_id)
             
-            assert result is False
+            assert result == False
 
 
 class TestAsyncTaskService:
@@ -501,7 +501,7 @@ class TestAsyncTaskService:
         if hasattr(service, '_background_running'):
             assert not service._background_running
         if hasattr(service, '_monitor_task'):
-            assert service._monitor_task is None
+            assert service._monitor_task == None
     
     @pytest.mark.asyncio
     async def test_start_background_tasks(self):
@@ -570,7 +570,7 @@ class TestServiceRegistry:
         
         result = registry.get_service("non-existent")
         
-        assert result is None
+        assert result == None
     
     def test_get_all_services(self):
         """Test getting all services."""
@@ -690,7 +690,7 @@ class TestGlobalServiceRegistry:
     
     def test_global_registry_exists(self):
         """Test that global service registry exists."""
-        assert service_registry is not None
+        assert service_registry != None
         assert isinstance(service_registry, ServiceRegistry)
     
     def test_global_registry_operations(self):

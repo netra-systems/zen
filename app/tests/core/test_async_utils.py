@@ -38,9 +38,9 @@ class TestAsyncResourceManager:
     
     def test_initialization(self, resource_manager):
         """Test resource manager initialization"""
-        assert resource_manager._resources is not None
+        assert resource_manager._resources != None
         assert resource_manager._cleanup_callbacks == []
-        assert resource_manager._shutting_down is False
+        assert resource_manager._shutting_down == False
     
     def test_register_resource_without_callback(self, resource_manager):
         """Test registering resource without cleanup callback"""
@@ -90,7 +90,7 @@ class TestAsyncResourceManager:
         callback2.assert_called_once()
         
         # State should be updated
-        assert resource_manager._shutting_down is True
+        assert resource_manager._shutting_down == True
         assert len(resource_manager._cleanup_callbacks) == 0
     
     @pytest.mark.asyncio
@@ -136,7 +136,7 @@ class TestAsyncTaskPool:
         """Test task pool initialization"""
         assert task_pool._max_concurrent == 3
         assert task_pool._semaphore._value == 3
-        assert task_pool._shutting_down is False
+        assert task_pool._shutting_down == False
         assert len(task_pool._active_tasks) == 0
     
     @pytest.mark.asyncio
@@ -258,7 +258,7 @@ class TestAsyncTaskPool:
         # Shutdown with short timeout
         await task_pool.shutdown(timeout=0.1)
         
-        assert task_pool._shutting_down is True
+        assert task_pool._shutting_down == True
         assert len(task_pool._active_tasks) == 0
         
         # Task should be cancelled
@@ -269,17 +269,17 @@ class TestAsyncTaskPool:
     async def test_shutdown_idempotent(self, task_pool):
         """Test that shutdown is idempotent"""
         await task_pool.shutdown()
-        assert task_pool._shutting_down is True
+        assert task_pool._shutting_down == True
         
         # Second shutdown should be no-op
         await task_pool.shutdown()
-        assert task_pool._shutting_down is True
+        assert task_pool._shutting_down == True
     
     @pytest.mark.asyncio
     async def test_shutdown_no_tasks(self, task_pool):
         """Test shutdown with no active tasks"""
         await task_pool.shutdown()
-        assert task_pool._shutting_down is True
+        assert task_pool._shutting_down == True
         assert len(task_pool._active_tasks) == 0
 
 
@@ -560,13 +560,13 @@ class TestAsyncLock:
         """Test successful lock acquisition with timeout"""
         acquired = await async_lock.acquire_with_timeout(1.0)
         
-        assert acquired is True
-        assert async_lock.is_locked is True
-        assert async_lock.lock_info["locked"] is True
+        assert acquired == True
+        assert async_lock.is_locked == True
+        assert async_lock.lock_info["locked"] == True
         assert async_lock.lock_info["name"] == "test_lock"
         
         async_lock.release()
-        assert async_lock.is_locked is False
+        assert async_lock.is_locked == False
     
     @pytest.mark.asyncio
     async def test_acquire_with_timeout_failure(self, async_lock):
@@ -577,16 +577,16 @@ class TestAsyncLock:
         # Try to acquire again with short timeout
         acquired = await async_lock.acquire_with_timeout(0.01)
         
-        assert acquired is False
-        assert async_lock.is_locked is True
+        assert acquired == False
+        assert async_lock.is_locked == True
     
     @pytest.mark.asyncio
     async def test_acquire_context_manager_success(self, async_lock):
         """Test lock context manager"""
         async with async_lock.acquire(timeout=1.0):
-            assert async_lock.is_locked is True
+            assert async_lock.is_locked == True
         
-        assert async_lock.is_locked is False
+        assert async_lock.is_locked == False
     
     @pytest.mark.asyncio
     async def test_acquire_context_manager_timeout(self, async_lock):
@@ -603,10 +603,10 @@ class TestAsyncLock:
         info = async_lock.lock_info
         
         assert info["name"] == "test_lock"
-        assert info["locked"] is False
-        assert info["acquired_at"] is None
-        assert info["acquired_by"] is None
-        assert info["held_for_seconds"] is None
+        assert info["locked"] == False
+        assert info["acquired_at"] == None
+        assert info["acquired_by"] == None
+        assert info["held_for_seconds"] == None
 
 
 class TestAsyncCircuitBreaker:
@@ -707,7 +707,7 @@ class TestAsyncConnectionPool:
     async def test_acquire_and_release_connection(self, connection_pool):
         """Test acquiring and releasing connections"""
         async with connection_pool.acquire() as conn:
-            assert conn is not None
+            assert conn != None
             assert hasattr(conn, 'id')
             assert conn.id > 0
         
@@ -762,7 +762,7 @@ class TestAsyncConnectionPool:
         
         await connection_pool.close()
         
-        assert connection_pool._closed is True
+        assert connection_pool._closed == True
         assert hasattr(original_conn, 'closed') or True  # Mock might have been closed
     
     @pytest.mark.asyncio
@@ -846,7 +846,7 @@ class TestAsyncConnectionPool:
         
         # Don't initialize, so queue is empty
         await pool.close()
-        assert pool._closed is True
+        assert pool._closed == True
 
 
 class TestGlobalInstances:
@@ -910,8 +910,8 @@ class TestRunInThreadpool:
         # Second call should reuse executor
         thread_id2 = await run_in_threadpool(get_thread_id)
         
-        assert thread_id1 is not None
-        assert thread_id2 is not None
+        assert thread_id1 != None
+        assert thread_id2 != None
         # May or may not be same thread, but executor should exist
         assert hasattr(run_in_threadpool, '_executor')
 
@@ -933,8 +933,8 @@ class TestShutdownAsyncUtils:
         # Shutdown should complete without errors
         await shutdown_async_utils()
         
-        assert resource_manager._shutting_down is True
-        assert task_pool._shutting_down is True
+        assert resource_manager._shutting_down == True
+        assert task_pool._shutting_down == True
     
     @pytest.mark.asyncio
     async def test_shutdown_with_thread_pool_executor(self):

@@ -41,7 +41,7 @@ class TestRequestHandler:
         
         assert isinstance(response, str)
         response_dict = json.loads(response)
-        assert response_dict["result"]["success"] is True
+        assert response_dict["result"]["success"] == True
         
     @pytest.mark.asyncio
     async def test_process_request_dict(self, handler, mock_server):
@@ -56,7 +56,7 @@ class TestRequestHandler:
         response = await handler.process_request(request_dict)
         
         assert isinstance(response, dict)
-        assert response["result"]["success"] is True
+        assert response["result"]["success"] == True
         
     @pytest.mark.asyncio
     async def test_process_invalid_json(self, handler):
@@ -97,7 +97,7 @@ class TestRequestHandler:
         request = {"jsonrpc": "2.0", "method": "notify"}
         response = await handler.process_request(request)
         
-        assert response is None
+        assert response == None
         
     @pytest.mark.asyncio
     async def test_process_single_request_invalid_type(self, handler):
@@ -179,7 +179,7 @@ class TestRequestHandler:
         }
         
         result = handler.validate_request(request)
-        assert result is None
+        assert result == None
         
     def test_validate_request_missing_jsonrpc(self, handler):
         """Test validating request without jsonrpc"""

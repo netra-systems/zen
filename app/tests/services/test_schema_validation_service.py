@@ -38,7 +38,7 @@ class TestSchemaValidationService:
 
     async def test_schema_service_import(self):
         """Test that the schema validation service can be imported."""
-        assert SchemaValidationService is not None
+        assert SchemaValidationService != None
         
         # Test that the class method exists
         assert hasattr(SchemaValidationService, 'validate_schema')

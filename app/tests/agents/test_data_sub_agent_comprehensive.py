@@ -45,7 +45,7 @@ class TestQueryBuilder:
             aggregation_level="hour"
         )
         assert "toStartOfHour" in query
-        # When workload_id is None, the filter string is empty but workload_id column still appears in SELECT
+        # When workload_id == None, the filter string is empty but workload_id column still appears in SELECT
         assert "AND workload_id" not in query  # Check no filter is applied
         assert "user_id = 2" in query
         
@@ -170,7 +170,7 @@ class TestAnalysisEngine:
         values = [1.0, 2.0]
         timestamps = [datetime(2024, 1, 1, 12, 0), datetime(2024, 1, 1, 12, 1)]
         trend = AnalysisEngine.detect_trend(values, timestamps)
-        assert trend["has_trend"] is False
+        assert trend["has_trend"] == False
         assert trend["reason"] == "insufficient_data"
         
     def test_detect_trend_no_time_variation(self):
@@ -178,7 +178,7 @@ class TestAnalysisEngine:
         values = [1.0, 2.0, 3.0]
         timestamps = [datetime(2024, 1, 1, 12, 0)] * 3  # Same timestamp
         trend = AnalysisEngine.detect_trend(values, timestamps)
-        assert trend["has_trend"] is False
+        assert trend["has_trend"] == False
         assert trend["reason"] == "no_time_variation"
         
     def test_detect_trend_increasing(self):
@@ -192,7 +192,7 @@ class TestAnalysisEngine:
             datetime(2024, 1, 1, 13, 0)
         ]
         trend = AnalysisEngine.detect_trend(values, timestamps)
-        assert trend["has_trend"] is True
+        assert trend["has_trend"] == True
         assert trend["direction"] == "increasing"
         assert trend["slope"] > 0
         
@@ -207,7 +207,7 @@ class TestAnalysisEngine:
             datetime(2024, 1, 1, 13, 0)
         ]
         trend = AnalysisEngine.detect_trend(values, timestamps)
-        assert trend["has_trend"] is True
+        assert trend["has_trend"] == True
         assert trend["direction"] == "decreasing"
         assert trend["slope"] < 0
         
@@ -230,7 +230,7 @@ class TestAnalysisEngine:
         values = [1.0] * 10  # Less than 24 points
         timestamps = [datetime(2024, 1, 1, i, 0) for i in range(10)]
         seasonality = AnalysisEngine.detect_seasonality(values, timestamps)
-        assert seasonality["has_seasonality"] is False
+        assert seasonality["has_seasonality"] == False
         assert seasonality["reason"] == "insufficient_data"
         
     def test_detect_seasonality_insufficient_hourly_coverage(self):
@@ -244,7 +244,7 @@ class TestAnalysisEngine:
                 timestamps.append(datetime(2024, 1, 1, hour, 0))
         
         seasonality = AnalysisEngine.detect_seasonality(values, timestamps)
-        assert seasonality["has_seasonality"] is False
+        assert seasonality["has_seasonality"] == False
         assert seasonality["reason"] == "insufficient_hourly_coverage"
         
     def test_detect_seasonality_with_pattern(self):
@@ -260,7 +260,7 @@ class TestAnalysisEngine:
                 timestamps.append(datetime(2024, 1, day + 1, hour, 0))
                 
         seasonality = AnalysisEngine.detect_seasonality(values, timestamps)
-        assert seasonality["has_seasonality"] is True
+        assert seasonality["has_seasonality"] == True
         assert "daily_pattern" in seasonality
         assert "peak_hour" in seasonality["daily_pattern"]
         assert "low_hour" in seasonality["daily_pattern"]
@@ -278,7 +278,7 @@ class TestAnalysisEngine:
                 
         seasonality = AnalysisEngine.detect_seasonality(values, timestamps)
         # With small random variation, should not detect seasonality
-        assert seasonality["has_seasonality"] is False
+        assert seasonality["has_seasonality"] == False
         
     def test_identify_outliers_insufficient_data(self):
         """Test outlier identification with insufficient data"""
@@ -339,8 +339,8 @@ class TestDataSubAgent:
         assert agent.name == "DataSubAgent"
         assert agent.description == "Advanced data gathering and analysis agent with ClickHouse integration."
         assert agent.tool_dispatcher == mock_tool_dispatcher
-        assert agent.query_builder is not None
-        assert agent.analysis_engine is not None
+        assert agent.query_builder != None
+        assert agent.analysis_engine != None
         assert agent.cache_ttl == 300
         
     def test_initialization_redis_failure(self, mock_dependencies):
@@ -351,7 +351,7 @@ class TestDataSubAgent:
             mock_redis.side_effect = Exception("Redis connection failed")
             agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
             
-        assert agent.redis_manager is None
+        assert agent.redis_manager == None
         
     @pytest.mark.asyncio
     async def test_get_cached_schema_success(self, agent):
@@ -369,7 +369,7 @@ class TestDataSubAgent:
             
             result = await agent._get_cached_schema("test_table")
             
-        assert result is not None
+        assert result != None
         assert result["table"] == "test_table"
         assert len(result["columns"]) == 2
         assert result["columns"][0]["name"] == "column1"
@@ -388,7 +388,7 @@ class TestDataSubAgent:
             
             result = await agent._get_cached_schema("test_table")
             
-        assert result is None
+        assert result == None
         
     @pytest.mark.asyncio
     async def test_fetch_clickhouse_data_with_cache_hit(self, agent):
@@ -452,7 +452,7 @@ class TestDataSubAgent:
                 
                 result = await agent._fetch_clickhouse_data("SELECT * FROM test")
                 
-        assert result is None
+        assert result == None
         
     @pytest.mark.asyncio
     async def test_analyze_performance_metrics_no_data(self, agent):
@@ -814,7 +814,7 @@ class TestDataSubAgent:
                 
                 await agent.execute(state, "run_123", stream_updates=False)
                 
-        assert state.data_result is not None
+        assert state.data_result != None
         assert state.data_result["analysis_type"] == "optimize"
         assert "performance" in state.data_result["results"]
         
@@ -914,8 +914,8 @@ class TestDataSubAgent:
             
             await agent.execute(state, "run_123", stream_updates=True)
             
-        assert state.data_result is not None
-        assert state.data_result.get("fallback") is True
+        assert state.data_result != None
+        assert state.data_result.get("fallback") == True
         
     @pytest.mark.asyncio
     async def test_execute_with_invalid_llm_response(self, agent):
@@ -932,7 +932,7 @@ class TestDataSubAgent:
             
             await agent.execute(state, "run_123", stream_updates=False)
             
-        assert state.data_result is not None
+        assert state.data_result != None
         assert state.data_result["collection_status"] == "fallback"
         assert "error" in state.data_result
         
@@ -942,7 +942,7 @@ class TestDataSubAgent:
         data = {"test": "data", "value": 123}
         result = await agent.process_data(data)
         
-        assert result["processed"] is True
+        assert result["processed"] == True
         assert result["data"] == data
         
     @pytest.mark.asyncio
@@ -960,25 +960,25 @@ class TestDataSubAgent:
     def test_validate_data_valid(self, agent):
         """Test _validate_data with valid data"""
         data = {"input": "test", "type": "text"}
-        assert agent._validate_data(data) is True
+        assert agent._validate_data(data) == True
         
     def test_validate_data_missing_input(self, agent):
         """Test _validate_data with missing input field"""
         data = {"type": "text"}
-        assert agent._validate_data(data) is False
+        assert agent._validate_data(data) == False
         
     def test_validate_data_missing_type(self, agent):
         """Test _validate_data with missing type field"""
         data = {"input": "test"}
-        assert agent._validate_data(data) is False
+        assert agent._validate_data(data) == False
         
     def test_validate_data_empty(self, agent):
         """Test _validate_data with empty data"""
-        assert agent._validate_data({}) is False
+        assert agent._validate_data({}) == False
         
     def test_validate_data_none(self, agent):
         """Test _validate_data with None"""
-        assert agent._validate_data(None) is False
+        assert agent._validate_data(None) == False
         
     @pytest.mark.asyncio
     async def test_transform_data_json(self, agent):
@@ -986,7 +986,7 @@ class TestDataSubAgent:
         data = {"type": "json", "content": '{"key": "value"}'}
         result = await agent._transform_data(data)
         
-        assert result["transformed"] is True
+        assert result["transformed"] == True
         assert result["type"] == "json"
         assert result["parsed"] == {"key": "value"}
         
@@ -996,7 +996,7 @@ class TestDataSubAgent:
         data = {"type": "json", "content": 'invalid json'}
         result = await agent._transform_data(data)
         
-        assert result["transformed"] is True
+        assert result["transformed"] == True
         assert result["type"] == "json"
         assert "parsed" not in result
         
@@ -1006,7 +1006,7 @@ class TestDataSubAgent:
         data = {"type": "text", "content": "plain text"}
         result = await agent._transform_data(data)
         
-        assert result["transformed"] is True
+        assert result["transformed"] == True
         assert result["type"] == "text"
         assert "parsed" not in result
         
@@ -1050,7 +1050,7 @@ class TestDataSubAgent:
         
         assert len(results) == 3
         for result in results:
-            assert result["processed"] is True
+            assert result["processed"] == True
             
     @pytest.mark.asyncio
     async def test_process_batch_empty(self, agent):
@@ -1066,7 +1066,7 @@ class TestDataSubAgent:
         
         result = await agent._apply_operation(data, operation)
         
-        assert result["processed"] is True
+        assert result["processed"] == True
         assert result["operation"] == "normalize"
         assert result["data"] == data
         
@@ -1082,7 +1082,7 @@ class TestDataSubAgent:
         
         result = await agent._transform_with_pipeline(data, pipeline)
         
-        assert result["processed"] is True
+        assert result["processed"] == True
         assert result["operation"] == "enrich"  # Last operation
         
     @pytest.mark.asyncio
@@ -1099,7 +1099,7 @@ class TestDataSubAgent:
         data = {"content": "test"}
         result = await agent._process_internal(data)
         
-        assert result["success"] is True
+        assert result["success"] == True
         assert result["data"] == data
         
     @pytest.mark.asyncio
@@ -1108,7 +1108,7 @@ class TestDataSubAgent:
         data = {"content": "test"}
         result = await agent.process_with_retry(data)
         
-        assert result["success"] is True
+        assert result["success"] == True
         
     @pytest.mark.asyncio
     async def test_process_with_retry_success_after_failures(self, agent):
@@ -1125,7 +1125,7 @@ class TestDataSubAgent:
             
             result = await agent.process_with_retry(data)
             
-        assert result["success"] is True
+        assert result["success"] == True
         assert mock_process.call_count == 3
         
     @pytest.mark.asyncio
@@ -1211,7 +1211,7 @@ class TestDataSubAgent:
         mock_ws.send.assert_called_once()
         sent_data = mock_ws.send.call_args[0][0]
         parsed = json.loads(sent_data)
-        assert parsed["processed"] is True
+        assert parsed["processed"] == True
         
     @pytest.mark.asyncio
     async def test_process_and_persist(self, agent):
@@ -1220,8 +1220,8 @@ class TestDataSubAgent:
         
         result = await agent.process_and_persist(data)
         
-        assert result["processed"] is True
-        assert result["persisted"] is True
+        assert result["processed"] == True
+        assert result["persisted"] == True
         assert result["id"] == "saved_123"
         
     @pytest.mark.asyncio

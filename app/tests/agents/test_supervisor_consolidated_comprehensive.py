@@ -1017,7 +1017,7 @@ class AgentUtils:
             val1 = getattr(state1, attr, None)
             val2 = getattr(state2, attr, None)
             
-            if val1 is not None and val2 is not None:
+            if val1 != None and val2 != None:
                 if isinstance(val1, dict) and isinstance(val2, dict):
                     # Deep merge dictionaries
                     merged_dict = val1.copy()
@@ -1031,9 +1031,9 @@ class AgentUtils:
                     setattr(merged, attr, val1 + val2)
                 else:
                     setattr(merged, attr, val1)
-            elif val1 is not None:
+            elif val1 != None:
                 setattr(merged, attr, val1)
-            elif val2 is not None:
+            elif val2 != None:
                 setattr(merged, attr, val2)
         
         return merged

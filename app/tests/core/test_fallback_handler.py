@@ -42,9 +42,9 @@ class TestFallbackHandler:
     
     def test_initialization(self, fallback_handler):
         """Test fallback handler initialization"""
-        assert fallback_handler.templates is not None
+        assert fallback_handler.templates != None
         assert len(fallback_handler.templates) == 8  # 8 FallbackContext types including GENERAL_FAILURE
-        assert fallback_handler.domain_detection_keywords is not None
+        assert fallback_handler.domain_detection_keywords != None
         assert len(fallback_handler.domain_detection_keywords) > 0
         
         # Verify all required context types have templates
@@ -77,8 +77,8 @@ class TestFallbackHandler:
         # Check metadata
         assert result["metadata"]["error_type"] == "ValidationError"
         assert result["metadata"]["agent"] == "optimization_agent"
-        assert result["metadata"]["has_partial_data"] is True
-        assert result["metadata"]["recovery_available"] is True
+        assert result["metadata"]["has_partial_data"] == True
+        assert result["metadata"]["recovery_available"] == True
         
         # Check partial data is included
         assert "partial_data" in result
@@ -711,7 +711,7 @@ class TestFallbackHandler:
             # Verify metadata
             assert result["metadata"]["error_type"] == "TestError"
             assert result["metadata"]["agent"] == "test_agent"
-            assert result["metadata"]["has_partial_data"] is True
+            assert result["metadata"]["has_partial_data"] == True
             
             # Verify partial data and actions
             assert "partial_data" in result
@@ -750,11 +750,11 @@ class TestFallbackMetadata:
         metadata = FallbackMetadata("Error", "Message")
         assert metadata.error_type == "Error"
         assert metadata.error_message == "Message"
-        assert metadata.agent_name is None
-        assert metadata.user_input is None
-        assert metadata.partial_data is None
-        assert metadata.attempted_operations is None
-        assert metadata.stacktrace is None
+        assert metadata.agent_name == None
+        assert metadata.user_input == None
+        assert metadata.partial_data == None
+        assert metadata.attempted_operations == None
+        assert metadata.stacktrace == None
         
         # Full metadata
         full_metadata = FallbackMetadata(

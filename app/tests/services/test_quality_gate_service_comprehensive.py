@@ -37,7 +37,7 @@ class TestQualityMetricsDataclass:
         assert metrics.novelty_score == 0.0
         assert metrics.clarity_score == 0.0
         assert metrics.generic_phrase_count == 0
-        assert metrics.circular_reasoning_detected is False
+        assert metrics.circular_reasoning_detected == False
         assert metrics.hallucination_risk == 0.0
         assert metrics.redundancy_ratio == 0.0
         assert metrics.word_count == 0
@@ -66,7 +66,7 @@ class TestQualityMetricsDataclass:
         assert metrics.specificity_score == 0.8
         assert metrics.actionability_score == 0.9
         assert metrics.generic_phrase_count == 3
-        assert metrics.circular_reasoning_detected is True
+        assert metrics.circular_reasoning_detected == True
         assert metrics.issues == issues
         assert metrics.suggestions == suggestions
 
@@ -86,9 +86,9 @@ class TestValidationResultDataclass:
             fallback_response="Fallback content"
         )
         
-        assert result.passed is True
+        assert result.passed == True
         assert result.metrics == metrics
-        assert result.retry_suggested is False
+        assert result.retry_suggested == False
         assert result.retry_prompt_adjustments == {"temperature": 0.5}
         assert result.fallback_response == "Fallback content"
         
@@ -97,11 +97,11 @@ class TestValidationResultDataclass:
         metrics = QualityMetrics()
         result = ValidationResult(passed=False, metrics=metrics)
         
-        assert result.passed is False
+        assert result.passed == False
         assert result.metrics == metrics
-        assert result.retry_suggested is False
-        assert result.retry_prompt_adjustments is None
-        assert result.fallback_response is None
+        assert result.retry_suggested == False
+        assert result.retry_prompt_adjustments == None
+        assert result.fallback_response == None
 
 
 class TestCompleteMetricsCalculation:
@@ -156,7 +156,7 @@ class TestCompleteMetricsCalculation:
         assert metrics.word_count > 100
         assert metrics.sentence_count > 5
         assert metrics.generic_phrase_count == 0
-        assert metrics.circular_reasoning_detected is False
+        assert metrics.circular_reasoning_detected == False
         assert metrics.specificity_score > 0.7
         assert metrics.actionability_score > 0.6
         assert metrics.quantification_score > 0.8
@@ -597,7 +597,7 @@ class TestThresholdChecking:
             ContentType.OPTIMIZATION,
             strict_mode=False
         )
-        assert passed is False
+        assert passed == False
         
     def test_threshold_hallucination_critical_failure(self, quality_service):
         """Test critical failure due to high hallucination risk"""
@@ -611,7 +611,7 @@ class TestThresholdChecking:
             ContentType.GENERAL,
             strict_mode=False
         )
-        assert passed is False
+        assert passed == False
 
 
 class TestSuggestionGeneration:
@@ -935,7 +935,7 @@ class TestErrorHandling:
         ):
             result = await quality_service.validate_content("Test")
             
-            assert result.passed is False
+            assert result.passed == False
             assert "Validation error" in result.metrics.issues[0]
             
     @pytest.mark.asyncio
@@ -948,7 +948,7 @@ class TestErrorHandling:
         ):
             result = await quality_service.validate_content("Test")
             
-            assert result.passed is False
+            assert result.passed == False
             
     @pytest.mark.asyncio
     async def test_store_metrics_error_handling(self, quality_service):
@@ -1056,7 +1056,7 @@ class TestIntegrationScenarios:
         )
         
         # Should pass with high scores
-        assert result.passed is True
+        assert result.passed == True
         assert result.metrics.overall_score > 0.8
         assert result.metrics.quality_level in [QualityLevel.EXCELLENT, QualityLevel.GOOD]
         
@@ -1069,13 +1069,13 @@ class TestIntegrationScenarios:
         
         # Should have no major issues
         assert result.metrics.generic_phrase_count < 2
-        assert result.metrics.circular_reasoning_detected is False
+        assert result.metrics.circular_reasoning_detected == False
         assert result.metrics.hallucination_risk < 0.3
         assert result.metrics.redundancy_ratio < 0.2
         
         # No retry needed
-        assert result.retry_suggested is False
-        assert result.retry_prompt_adjustments is None
+        assert result.retry_suggested == False
+        assert result.retry_prompt_adjustments == None
         
     @pytest.mark.asyncio
     async def test_poor_content_improvement_cycle(self, quality_service):
@@ -1094,9 +1094,9 @@ class TestIntegrationScenarios:
         )
         
         # Should fail and suggest retry
-        assert result1.passed is False
-        assert result1.retry_suggested is True
-        assert result1.retry_prompt_adjustments is not None
+        assert result1.passed == False
+        assert result1.retry_suggested == True
+        assert result1.retry_prompt_adjustments != None
         
         # Simulate improved content based on adjustments
         improved_content = """
@@ -1114,7 +1114,7 @@ class TestIntegrationScenarios:
         )
         
         # Should now pass
-        assert result2.passed is True
+        assert result2.passed == True
         assert result2.metrics.overall_score > result1.metrics.overall_score
         assert result2.metrics.generic_phrase_count < result1.metrics.generic_phrase_count
 

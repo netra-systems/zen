@@ -135,7 +135,7 @@ class TestExternalImports:
                 # Check if the attribute exists
                 assert hasattr(module, attr_name), f"Module {module_path} does not have attribute {attr_name}"
             
-            assert module is not None, f"Failed to import {import_path}"
+            assert module != None, f"Failed to import {import_path}"
             
         except ImportError as e:
             pytest.fail(f"Failed to import {import_path}: {e}")

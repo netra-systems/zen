@@ -31,7 +31,7 @@ async def test_supervisor_end_to_end(supervisor, monkeypatch):
     final_state = await supervisor.run(analysis_request.request_model.query, run_id, False)
 
     # Assert that the supervisor completed successfully without crashing
-    assert final_state is not None
+    assert final_state != None
     # Verify it's a DeepAgentState object with user_request
     assert hasattr(final_state, 'user_request')
     assert final_state.user_request == "Test request"

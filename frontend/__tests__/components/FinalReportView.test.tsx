@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { FinalReportView } from '@/components/reports/FinalReportView';
+import { FinalReportView } from '@/components/chat/FinalReportView';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useReportData } from '@/hooks/useReportData';
 

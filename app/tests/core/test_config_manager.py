@@ -18,7 +18,7 @@ class TestSecretManager:
         """Test SecretManager initialization."""
         manager = SecretManager()
         assert manager._project_id == "304612253870"
-        assert manager._client is None
+        assert manager._client == None
     
     @patch.dict(os.environ, {
         'GEMINI_API_KEY': 'test-gemini-key',
@@ -94,7 +94,7 @@ class TestConfigValidator:
     def test_initialization(self):
         """Test ConfigValidator initialization."""
         validator = ConfigValidator()
-        assert validator._logger is not None
+        assert validator._logger != None
     
     def test_validate_valid_config(self):
         """Test validation of a valid configuration."""
@@ -188,9 +188,9 @@ class TestConfigManager:
     def test_initialization(self):
         """Test ConfigManager initialization."""
         manager = ConfigManager()
-        assert manager._config is None
-        assert manager._secret_manager is not None
-        assert manager._validator is not None
+        assert manager._config == None
+        assert manager._secret_manager != None
+        assert manager._validator != None
     
     @patch.dict(os.environ, {'ENVIRONMENT': 'development'}, clear=False)
     def test_get_environment_development(self):
@@ -282,7 +282,7 @@ class TestConfigManager:
         
         # Cache should be cleared
         manager.reload_config()
-        assert manager._config is None
+        assert manager._config == None
 
 
 class TestConfigurationFunctions:

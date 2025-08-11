@@ -139,7 +139,7 @@ class TestRealisticDataIntegration:
         
         # Check entry conditions
         can_execute = await synthetic_agent.check_entry_conditions(state, "test_run_001")
-        assert can_execute is True
+        assert can_execute == True
         
         # Mock the _send_update method
         synthetic_agent._send_update = AsyncMock()
@@ -148,7 +148,7 @@ class TestRealisticDataIntegration:
         await synthetic_agent.execute(state, "test_run_001", stream_updates=False)
         
         # Verify result stored in state
-        assert state.synthetic_data_result is not None
+        assert state.synthetic_data_result != None
         result = state.synthetic_data_result
         
         # Should have workload profile
@@ -166,7 +166,7 @@ class TestRealisticDataIntegration:
         
         # Check entry conditions
         can_execute = await corpus_agent.check_entry_conditions(state, "test_run_002")
-        assert can_execute is True
+        assert can_execute == True
         
         # Mock the _send_update method
         corpus_agent._send_update = AsyncMock()
@@ -175,7 +175,7 @@ class TestRealisticDataIntegration:
         await corpus_agent.execute(state, "test_run_002", stream_updates=False)
         
         # Verify result stored in state
-        assert state.corpus_admin_result is not None
+        assert state.corpus_admin_result != None
         result = state.corpus_admin_result
         
         # Should have operation result

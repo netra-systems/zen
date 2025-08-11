@@ -18,15 +18,15 @@ class TestDatabaseConnectionPooling:
 
     async def test_connection_pool_initialization(self):
         """Test that connection pool is properly initialized."""
-        if async_engine is not None:
-            assert async_engine.pool is not None
+        if async_engine != None:
+            assert async_engine.pool != None
             assert isinstance(async_engine.pool, (QueuePool, NullPool))
         else:
             pytest.skip("Async engine not initialized")
 
     async def test_connection_pool_limits(self):
         """Test connection pool respects max connections."""
-        if async_session_factory is None:
+        if async_session_factory == None:
             pytest.skip("Async session factory not available")
         
         max_connections = 5
@@ -54,7 +54,7 @@ class TestDatabaseConnectionPooling:
 
     async def test_session_context_manager(self):
         """Test session context manager functionality."""
-        if get_db_session is None:
+        if get_db_session == None:
             pytest.skip("Database session not available")
         
         try:
@@ -67,7 +67,7 @@ class TestDatabaseConnectionPooling:
 
     async def test_session_factory_creation(self):
         """Test that session factory creates sessions."""
-        if async_session_factory is None:
+        if async_session_factory == None:
             pytest.skip("Async session factory not available")
         
         try:
@@ -79,7 +79,7 @@ class TestDatabaseConnectionPooling:
 
     async def test_concurrent_sessions(self):
         """Test handling of concurrent database sessions."""
-        if async_session_factory is None:
+        if async_session_factory == None:
             pytest.skip("Async session factory not available")
             
         async def execute_query(query_id: int):
@@ -97,7 +97,7 @@ class TestDatabaseConnectionPooling:
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
         # Some queries may succeed
-        successful_results = [r for r in results if r is not None and not isinstance(r, Exception)]
+        successful_results = [r for r in results if r != None and not isinstance(r, Exception)]
         assert len(successful_results) >= 0  # At least allow for database not being available
 
 
@@ -142,8 +142,8 @@ class TestSessionManagement:
         """Test the Database class functionality."""
         try:
             db = Database("sqlite:///:memory:")
-            assert db.engine is not None
-            assert db.SessionLocal is not None
+            assert db.engine != None
+            assert db.SessionLocal != None
         except Exception as e:
             pytest.skip(f"Cannot create database instance: {e}")
 
@@ -156,7 +156,7 @@ class TestClickHouseConnection:
         """Test ClickHouse client can be initialized."""
         try:
             client = await get_clickhouse_client()
-            assert client is not None
+            assert client != None
         except Exception as e:
             pytest.skip(f"ClickHouse not available: {e}")
 
@@ -165,7 +165,7 @@ class TestClickHouseConnection:
         try:
             client = await get_clickhouse_client()
             result = await client.execute("SELECT 1")
-            assert result is not None
+            assert result != None
         except Exception as e:
             pytest.skip(f"ClickHouse not available: {e}")
 

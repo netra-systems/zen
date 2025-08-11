@@ -277,7 +277,7 @@ class TestApexOptimizerToolSelection:
         # Verify tool selection
         assert "Successfully dispatched tool" in result
         assert sample_agent_state.current_tool_name == "cost_reduction_quality_preservation"
-        assert sample_agent_state.current_tool_args is not None
+        assert sample_agent_state.current_tool_args != None
         
         # Verify LLM was called
         assert len(mock_llm_connector.get_request_history()) == 1
@@ -356,7 +356,7 @@ class TestApexOptimizerToolSelection:
         
         # Should handle empty query gracefully
         assert "No query found" in result
-        assert state.current_tool_name is None
+        assert state.current_tool_name == None
     
     @pytest.mark.asyncio
     async def test_tool_selection_llm_failure(self, apex_tool_selector, sample_agent_state, mock_llm_connector):
@@ -469,7 +469,7 @@ class TestApexOptimizerToolChaining:
         
         # Verify execution history
         assert len(tool_chain.execution_history) >= 2
-        assert tool_chain.execution_history[0]['success'] is True
+        assert tool_chain.execution_history[0]['success'] == True
     
     @pytest.mark.asyncio
     async def test_conditional_tool_chaining(self, tool_chain, mock_tool_context, optimization_tools):
@@ -528,8 +528,8 @@ class TestApexOptimizerToolChaining:
         
         # Check execution history for failure
         assert len(tool_chain.execution_history) == 2
-        assert tool_chain.execution_history[0]['success'] is True
-        assert tool_chain.execution_history[1]['success'] is False
+        assert tool_chain.execution_history[0]['success'] == True
+        assert tool_chain.execution_history[1]['success'] == False
     
     @pytest.mark.asyncio
     async def test_tool_chain_cycle_prevention(self, tool_chain, mock_tool_context):

@@ -8,6 +8,6 @@ class MockNewModelEffectivenessAnalysisTool(NewModelEffectivenessAnalysisTool):
 def test_new_model_effectiveness_analysis_tool():
     """Tests the NewModelEffectivenessAnalysisTool."""
     tool = MockNewModelEffectivenessAnalysisTool()
-    assert tool is not None
+    assert tool != None
     result = asyncio.run(tool.run())
     assert result == "mocked result"

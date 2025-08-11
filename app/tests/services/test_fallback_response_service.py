@@ -56,7 +56,7 @@ class TestFallbackResponseService:
         response = await fallback_service.generate_fallback(context)
         
         # Verify response quality
-        assert response is not None
+        assert response != None
         assert len(response) > 100  # Should be substantial
         assert "specific" in response.lower() or "information" in response.lower()
         assert "GPU workload" in response  # Should reference the context
@@ -78,7 +78,7 @@ class TestFallbackResponseService:
         response = await fallback_service.generate_fallback(context)
         
         # Verify appropriate error guidance
-        assert response is not None
+        assert response != None
         assert "system logs" in response
         assert any(term in response.lower() for term in ["format", "json", "csv", "parsing", "data"])
         assert any(term in response.lower() for term in ["verify", "check", "validate"])
@@ -96,7 +96,7 @@ class TestFallbackResponseService:
         response = await fallback_service.generate_fallback(context)
         
         # Should ask for specific context
-        assert response is not None
+        assert response != None
         assert "deployment plan" in response
         assert any(term in response.lower() for term in ["objectives", "timeline", "resources", "requirements"])
     
@@ -114,7 +114,7 @@ class TestFallbackResponseService:
         response = await fallback_service.generate_fallback(context)
         
         # Should provide helpful error recovery
-        assert response is not None
+        assert response != None
         assert "performance report" in response
         assert any(term in response.lower() for term in ["data", "missing", "required", "fields"])
     
@@ -132,7 +132,7 @@ class TestFallbackResponseService:
         response = await fallback_service.generate_fallback(context)
         
         # Should acknowledge timeout and provide alternatives
-        assert response is not None
+        assert response != None
         assert "system issue" in response
         assert context.retry_count == 2  # Should consider retry count
         assert any(term in response.lower() for term in ["time", "simpler", "break down", "specific"])
@@ -151,7 +151,7 @@ class TestFallbackResponseService:
         response = await fallback_service.generate_fallback(context)
         
         # Should provide helpful error information despite LLM failure
-        assert response is not None
+        assert response != None
         assert "error" in response.lower()
         # Should acknowledge the limitation
         assert any(term in response.lower() for term in ["technical", "issue", "try"])
@@ -169,7 +169,7 @@ class TestFallbackResponseService:
         response = await fallback_service.generate_fallback(context)
         
         # Should provide concrete, non-circular suggestions
-        assert response is not None
+        assert response != None
         assert "model performance" in response
         # Should include specific steps or techniques
         assert any(term in response.lower() for term in ["measure", "identify", "apply", "specific", "concrete"])
@@ -198,7 +198,7 @@ class TestFallbackResponseService:
         response = await fallback_service.generate_fallback(context)
         
         # Should acknowledge uncertainty and provide grounded response
-        assert response is not None
+        assert response != None
         assert "future trends" in response
         assert any(term in response.lower() for term in ["data", "evidence", "based", "verify"])
     
@@ -216,7 +216,7 @@ class TestFallbackResponseService:
         response = await fallback_service.generate_fallback(context)
         
         # Should acknowledge rate limit and provide alternatives
-        assert response is not None
+        assert response != None
         assert any(term in response.lower() for term in ["moment", "shortly", "wait", "try"])
         assert any(term in response.lower() for term in ["alternative", "meanwhile", "instead"])
     
@@ -260,7 +260,7 @@ class TestFallbackResponseService:
         response = await fallback_service.generate_fallback(context)
         
         # Should include diagnostic tips
-        assert response is not None
+        assert response != None
         assert "CSV data" in response
         # Should mention common CSV issues
         assert any(term in response.lower() for term in ["format", "encoding", "delimiter", "types"])
@@ -280,7 +280,7 @@ class TestFallbackResponseService:
         response = await fallback_service.generate_fallback(context)
         
         # Should provide different suggestions than previous attempts
-        assert response is not None
+        assert response != None
         assert "database queries" in response
         # Should not repeat the exact same suggestion
         assert response != context.previous_responses[0]
@@ -303,7 +303,7 @@ class TestFallbackResponseService:
         """Test retrieval of diagnostic tips based on failure reason"""
         tips = fallback_service._get_diagnostic_tips(FailureReason.PARSING_ERROR)
         
-        assert tips is not None
+        assert tips != None
         assert len(tips) > 0
         assert all(isinstance(tip, str) for tip in tips)
         assert any("format" in tip.lower() or "structure" in tip.lower() for tip in tips)
@@ -315,7 +315,7 @@ class TestFallbackResponseService:
             FailureReason.LOW_QUALITY
         )
         
-        assert suggestions is not None
+        assert suggestions != None
         assert len(suggestions) > 0
         assert all(isinstance(s, str) for s in suggestions)
         assert any("specific" in s.lower() or "provide" in s.lower() for s in suggestions)
@@ -343,7 +343,7 @@ class TestFallbackResponseService:
             response = await fallback_service.generate_fallback(context)
             
             # Quality checks
-            assert response is not None
+            assert response != None
             assert len(response) >= 50  # Minimum length
             assert response.strip() == response  # No extra whitespace
             assert not response.startswith("I apologize")  # No unnecessary apologies
@@ -360,13 +360,13 @@ class TestFallbackResponseService:
     
     def test_fallback_service_initialization(self, fallback_service):
         """Test that service initializes with proper templates"""
-        assert fallback_service.response_templates is not None
+        assert fallback_service.response_templates != None
         assert len(fallback_service.response_templates) > 0
         
-        assert fallback_service.diagnostic_tips is not None
+        assert fallback_service.diagnostic_tips != None
         assert len(fallback_service.diagnostic_tips) > 0
         
-        assert fallback_service.recovery_suggestions is not None
+        assert fallback_service.recovery_suggestions != None
         assert len(fallback_service.recovery_suggestions) > 0
         
         # Verify template structure

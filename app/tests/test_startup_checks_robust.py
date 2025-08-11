@@ -27,9 +27,9 @@ class TestStartupCheckResult:
         )
         
         assert result.name == "test_check"
-        assert result.success is True
+        assert result.success == True
         assert result.message == "Test passed"
-        assert result.critical is True
+        assert result.critical == True
         assert result.duration_ms == 100.5
     
     def test_startup_check_result_defaults(self):
@@ -40,7 +40,7 @@ class TestStartupCheckResult:
             message="Failed"
         )
         
-        assert result.critical is True
+        assert result.critical == True
         assert result.duration_ms == 0
 
 
@@ -74,7 +74,7 @@ class TestStartupChecker:
         assert len(checker.results) == 1
         result = checker.results[0]
         assert result.name == "environment_variables"
-        assert result.success is True
+        assert result.success == True
         assert "All required environment variables are set" in result.message
     
     @pytest.mark.asyncio
@@ -88,9 +88,9 @@ class TestStartupChecker:
         assert len(checker.results) == 1
         result = checker.results[0]
         assert result.name == "environment_variables"
-        assert result.success is False
+        assert result.success == False
         assert "DATABASE_URL" in result.message
-        assert result.critical is True
+        assert result.critical == True
     
     @pytest.mark.asyncio
     async def test_check_configuration_valid(self, checker):
@@ -105,7 +105,7 @@ class TestStartupChecker:
             assert len(checker.results) == 1
             result = checker.results[0]
             assert result.name == "configuration"
-            assert result.success is True
+            assert result.success == True
     
     @pytest.mark.asyncio
     async def test_check_configuration_invalid_secret(self, checker):
@@ -120,7 +120,7 @@ class TestStartupChecker:
             assert len(checker.results) == 1
             result = checker.results[0]
             assert result.name == "configuration"
-            assert result.success is False
+            assert result.success == False
             assert "SECRET_KEY" in result.message
     
     @pytest.mark.asyncio
@@ -137,7 +137,7 @@ class TestStartupChecker:
                 assert len(checker.results) == 1
                 result = checker.results[0]
                 assert result.name == "file_permissions"
-                assert result.success is True
+                assert result.success == True
                 
                 # Verify directories were created
                 assert Path("logs").exists()
@@ -179,7 +179,7 @@ class TestStartupChecker:
         assert len(checker.results) == 1
         result = checker.results[0]
         assert result.name == "database_connection"
-        assert result.success is True
+        assert result.success == True
         assert "PostgreSQL connected" in result.message
     
     @pytest.mark.asyncio
@@ -192,8 +192,8 @@ class TestStartupChecker:
         assert len(checker.results) == 1
         result = checker.results[0]
         assert result.name == "database_connection"
-        assert result.success is False
-        assert result.critical is True
+        assert result.success == False
+        assert result.critical == True
     
     @pytest.mark.asyncio
     async def test_check_redis_success(self, checker):
@@ -210,7 +210,7 @@ class TestStartupChecker:
         assert len(checker.results) == 1
         result = checker.results[0]
         assert result.name == "redis_connection"
-        assert result.success is True
+        assert result.success == True
     
     @pytest.mark.asyncio
     async def test_check_redis_failure_non_production(self, checker):
@@ -225,8 +225,8 @@ class TestStartupChecker:
             assert len(checker.results) == 1
             result = checker.results[0]
             assert result.name == "redis_connection"
-            assert result.success is False
-            assert result.critical is False  # Not critical in development
+            assert result.success == False
+            assert result.critical == False  # Not critical in development
     
     @pytest.mark.asyncio
     async def test_check_clickhouse_success(self, checker):
@@ -243,7 +243,7 @@ class TestStartupChecker:
         assert len(checker.results) == 1
         result = checker.results[0]
         assert result.name == "clickhouse_connection"
-        assert result.success is True
+        assert result.success == True
         assert "2 tables" in result.message
     
     @pytest.mark.asyncio
@@ -260,7 +260,7 @@ class TestStartupChecker:
         assert len(checker.results) == 1
         result = checker.results[0]
         assert result.name == "llm_providers"
-        assert result.success is True
+        assert result.success == True
         assert "2 LLM providers configured" in result.message
     
     @pytest.mark.asyncio
@@ -277,7 +277,7 @@ class TestStartupChecker:
         assert len(checker.results) == 1
         result = checker.results[0]
         assert result.name == "llm_providers"
-        assert result.success is True  # Partial success
+        assert result.success == True  # Partial success
         assert "1 available, 1 failed" in result.message
     
     @pytest.mark.asyncio
@@ -301,7 +301,7 @@ class TestStartupChecker:
             assert len(checker.results) == 1
             result = checker.results[0]
             assert result.name == "system_resources"
-            assert result.success is True
+            assert result.success == True
             assert "Resources OK" in result.message
     
     @pytest.mark.asyncio
@@ -325,7 +325,7 @@ class TestStartupChecker:
             assert len(checker.results) == 1
             result = checker.results[0]
             assert result.name == "system_resources"
-            assert result.success is True  # Still succeeds but with warnings
+            assert result.success == True  # Still succeeds but with warnings
             assert "Resource warnings" in result.message
             assert "Low memory" in result.message
             assert "Low disk space" in result.message
@@ -350,7 +350,7 @@ class TestStartupChecker:
         assert len(checker.results) == 1
         result = checker.results[0]
         assert result.name == "netra_assistant"
-        assert result.success is True
+        assert result.success == True
         assert "already exists" in result.message
     
     @pytest.mark.asyncio
@@ -374,7 +374,7 @@ class TestStartupChecker:
         assert len(checker.results) == 1
         result = checker.results[0]
         assert result.name == "netra_assistant"
-        assert result.success is True
+        assert result.success == True
         assert "created successfully" in result.message
         mock_db.add.assert_called_once()
         mock_db.commit.assert_called_once()
@@ -416,7 +416,7 @@ class TestStartupChecker:
         
         results = await checker.run_all_checks()
         
-        assert results["success"] is True
+        assert results["success"] == True
         assert results["total_checks"] == 10
         assert results["passed"] == 10
         assert results["failed_critical"] == 0
@@ -450,7 +450,7 @@ class TestStartupChecker:
         
         results = await checker.run_all_checks()
         
-        assert results["success"] is False
+        assert results["success"] == False
         assert results["failed_critical"] == 1
         assert len(results["failures"]) == 1
 
@@ -479,7 +479,7 @@ class TestRunStartupChecks:
             
             results = await run_startup_checks(mock_app)
             
-            assert results["success"] is True
+            assert results["success"] == True
             mock_checker.run_all_checks.assert_called_once()
     
     @pytest.mark.asyncio
@@ -544,7 +544,7 @@ class TestRunStartupChecks:
             
             results = await run_startup_checks(mock_app)
             
-            assert results["success"] is True
+            assert results["success"] == True
             assert results["failed_non_critical"] == 1
 
 

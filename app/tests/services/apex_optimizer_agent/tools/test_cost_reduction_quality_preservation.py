@@ -8,6 +8,6 @@ class MockCostReductionQualityPreservationTool(CostReductionQualityPreservationT
 def test_cost_reduction_quality_preservation_tool():
     """Tests the CostReductionQualityPreservationTool."""
     tool = MockCostReductionQualityPreservationTool()
-    assert tool is not None
+    assert tool != None
     result = asyncio.run(tool.run())
     assert result == "mocked result"

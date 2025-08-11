@@ -181,7 +181,7 @@ class TestValidationPatterns:
         
         for request in malicious_requests:
             validation = triage_agent._validate_request(request)
-            assert validation.is_valid is False
+            assert validation.is_valid == False
             assert any("malicious pattern" in error.lower() for error in validation.validation_errors)
     
     def test_script_injection_patterns(self, triage_agent):
@@ -196,7 +196,7 @@ class TestValidationPatterns:
         
         for request in malicious_requests:
             validation = triage_agent._validate_request(request)
-            assert validation.is_valid is False
+            assert validation.is_valid == False
             assert any("malicious pattern" in error.lower() for error in validation.validation_errors)
     
     def test_command_injection_patterns(self, triage_agent):
@@ -211,7 +211,7 @@ class TestValidationPatterns:
         
         for request in malicious_requests:
             validation = triage_agent._validate_request(request)
-            assert validation.is_valid is False
+            assert validation.is_valid == False
             assert any("malicious pattern" in error.lower() for error in validation.validation_errors)
     
     def test_benign_technical_content(self, triage_agent):
@@ -225,7 +225,7 @@ class TestValidationPatterns:
         
         for request in benign_requests:
             validation = triage_agent._validate_request(request)
-            assert validation.is_valid is True
+            assert validation.is_valid == True
             assert len(validation.validation_errors) == 0
 
 
@@ -300,7 +300,7 @@ class TestAdvancedIntentDetermination:
         # Primary intent should be the most actionable one
         assert intent.primary_intent in ["analyze", "optimize", "generate"]
         assert len(intent.secondary_intents) >= 1
-        assert intent.action_required is True
+        assert intent.action_required == True
     
     def test_intent_confidence_scoring(self, triage_agent):
         """Test intent confidence scoring"""
@@ -433,7 +433,7 @@ class TestCachingMechanisms:
         # Should have retrieved from cache
         assert len(mock_redis_manager.get_calls) > 0
         # Should have marked as cache hit
-        assert complex_state.triage_result["metadata"]["cache_hit"] is True
+        assert complex_state.triage_result["metadata"]["cache_hit"] == True
     
     @pytest.mark.asyncio
     async def test_cache_invalidation_scenarios(self, triage_agent, complex_state, mock_redis_manager):
@@ -451,7 +451,7 @@ class TestCachingMechanisms:
         
         # Should fall back to LLM when cache data is corrupted
         assert complex_state.triage_result["category"] == "Cost Optimization"
-        assert complex_state.triage_result["metadata"]["cache_hit"] is False
+        assert complex_state.triage_result["metadata"]["cache_hit"] == False
     
     @pytest.mark.asyncio
     async def test_cache_warming_strategy(self, triage_agent, mock_redis_manager):
@@ -483,7 +483,7 @@ class TestCachingMechanisms:
         state = DeepAgentState(user_request=common_requests[0])
         await triage_agent.execute(state, "cache_test", stream_updates=False)
         
-        assert state.triage_result["metadata"]["cache_hit"] is True
+        assert state.triage_result["metadata"]["cache_hit"] == True
 
 
 @pytest.mark.asyncio
@@ -502,8 +502,8 @@ class TestErrorHandlingAndRecovery:
         await triage_agent.execute(complex_state, "timeout_test", stream_updates=False)
         
         # Should fall back to basic categorization
-        assert complex_state.triage_result is not None
-        assert complex_state.triage_result["metadata"]["fallback_used"] is True
+        assert complex_state.triage_result != None
+        assert complex_state.triage_result["metadata"]["fallback_used"] == True
         assert "timeout" in complex_state.triage_result["metadata"]["error_details"].lower()
     
     async def test_llm_rate_limit_handling(self, triage_agent, complex_state):
@@ -517,8 +517,8 @@ class TestErrorHandlingAndRecovery:
         await triage_agent.execute(complex_state, "rate_limit_test", stream_updates=False)
         
         # Should handle gracefully and fall back
-        assert complex_state.triage_result is not None
-        assert complex_state.triage_result["metadata"]["fallback_used"] is True
+        assert complex_state.triage_result != None
+        assert complex_state.triage_result["metadata"]["fallback_used"] == True
         assert "rate limit" in complex_state.triage_result["metadata"]["error_details"].lower()
     
     async def test_redis_connection_failures(self, mock_llm_manager, mock_tool_dispatcher, mock_redis_unavailable):
@@ -534,10 +534,10 @@ class TestErrorHandlingAndRecovery:
         await agent.execute(state, "redis_fail_test", stream_updates=False)
         
         # Should complete successfully despite Redis failure
-        assert state.triage_result is not None
+        assert state.triage_result != None
         assert state.triage_result["category"] == "General Inquiry"
         # Should not have cache hit since Redis failed
-        assert state.triage_result["metadata"]["cache_hit"] is False
+        assert state.triage_result["metadata"]["cache_hit"] == False
     
     async def test_partial_llm_response_handling(self, triage_agent, complex_state):
         """Test handling of partial or incomplete LLM responses"""
@@ -555,10 +555,10 @@ class TestErrorHandlingAndRecovery:
             await triage_agent.execute(state, "incomplete_test", stream_updates=False)
             
             # Should handle incomplete responses gracefully
-            assert state.triage_result is not None
+            assert state.triage_result != None
             assert "category" in state.triage_result
             # Should use fallback for incomplete responses
-            assert state.triage_result["metadata"]["fallback_used"] is True
+            assert state.triage_result["metadata"]["fallback_used"] == True
     
     async def test_json_parsing_edge_cases(self, triage_agent):
         """Test JSON parsing with edge cases"""
@@ -571,7 +571,7 @@ class TestErrorHandlingAndRecovery:
         
         for response in edge_case_responses:
             result = triage_agent._extract_and_validate_json(response)
-            assert result is not None
+            assert result != None
             assert result["category"] == "Test"
     
     async def test_memory_pressure_handling(self, triage_agent):
@@ -589,7 +589,7 @@ class TestErrorHandlingAndRecovery:
         await triage_agent.execute(state, "memory_test", stream_updates=False)
         
         # Should handle large requests without crashing
-        assert state.triage_result is not None
+        assert state.triage_result != None
         assert state.triage_result["category"] == "Cost Optimization"
 
 
@@ -625,7 +625,7 @@ class TestAsyncOperations:
         
         # All should complete successfully
         for state in states:
-            assert state.triage_result is not None
+            assert state.triage_result != None
             assert "category" in state.triage_result
     
     @pytest.mark.asyncio
@@ -708,7 +708,7 @@ class TestPydanticModelValidation:
         )
         
         assert minimal_result.confidence_score == 0.0
-        assert minimal_result.estimated_execution_time is None
+        assert minimal_result.estimated_execution_time == None
         
         # Test maximum confidence
         max_confidence_result = TriageResult(
@@ -790,7 +790,7 @@ class TestPerformanceOptimization:
             
             # Should complete within reasonable time (adjust threshold as needed)
             assert execution_time < 5000  # 5 seconds max
-            assert state.triage_result is not None
+            assert state.triage_result != None
     
     @pytest.mark.asyncio
     async def test_memory_efficiency(self, triage_agent):
@@ -806,7 +806,7 @@ class TestPerformanceOptimization:
         await triage_agent.execute(state, "memory_test", stream_updates=False)
         
         # Should handle large requests efficiently
-        assert state.triage_result is not None
+        assert state.triage_result != None
         assert state.triage_result["category"] == "Performance Optimization"
     
     def test_hash_generation_performance(self, triage_agent):
@@ -850,7 +850,7 @@ class TestEdgeCasesAndBoundaryConditions:
             result = await triage_agent.check_entry_conditions(state, "edge_test")
             
             # Should reject very short/empty requests
-            assert result is False
+            assert result == False
             if state.triage_result:
                 assert "error" in state.triage_result
     
@@ -876,7 +876,7 @@ class TestEdgeCasesAndBoundaryConditions:
             await triage_agent.execute(state, "unicode_test", stream_updates=False)
             
             # Should handle Unicode without crashing
-            assert state.triage_result is not None
+            assert state.triage_result != None
             assert "category" in state.triage_result
     
     @pytest.mark.asyncio
@@ -889,11 +889,11 @@ class TestEdgeCasesAndBoundaryConditions:
         # Boundary case should pass validation
         boundary_state = DeepAgentState(user_request=boundary_request)
         boundary_validation = triage_agent._validate_request(boundary_request)
-        assert boundary_validation.is_valid is True
+        assert boundary_validation.is_valid == True
         
         # Very long request should be rejected
         very_long_validation = triage_agent._validate_request(very_long_request)
-        assert very_long_validation.is_valid is False
+        assert very_long_validation.is_valid == False
         assert any("exceeds maximum length" in error for error in very_long_validation.validation_errors)
     
     @pytest.mark.asyncio
@@ -915,8 +915,8 @@ class TestEdgeCasesAndBoundaryConditions:
             await triage_agent.execute(state, "malformed_test", stream_updates=False)
             
             # Should handle malformed JSON gracefully
-            assert state.triage_result is not None
-            assert state.triage_result["metadata"]["fallback_used"] is True
+            assert state.triage_result != None
+            assert state.triage_result["metadata"]["fallback_used"] == True
 
 
 class TestSecurityAndValidation:
@@ -936,7 +936,7 @@ class TestSecurityAndValidation:
             
             # Should detect and reject harmful patterns
             if any("malicious pattern" in error.lower() for error in validation.validation_errors):
-                assert validation.is_valid is False
+                assert validation.is_valid == False
     
     def test_request_normalization(self, triage_agent):
         """Test request normalization for consistent processing"""
@@ -963,10 +963,10 @@ class TestSecurityAndValidation:
         over_validation = triage_agent._validate_request(over_limit_request)
         
         # At limit should pass (with possible warning)
-        assert max_validation.is_valid is True
+        assert max_validation.is_valid == True
         
         # Over limit should fail
-        assert over_validation.is_valid is False
+        assert over_validation.is_valid == False
         assert any("exceeds maximum length" in error for error in over_validation.validation_errors)
 
 

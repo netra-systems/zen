@@ -11,8 +11,8 @@ async def test_message_handler_service_initialization():
     mock_thread_service = Mock()
     
     handler_service = MessageHandlerService(mock_supervisor, mock_thread_service)
-    assert handler_service.supervisor is not None
-    assert handler_service.thread_service is not None
+    assert handler_service.supervisor != None
+    assert handler_service.thread_service != None
 
 @pytest.mark.asyncio
 async def test_handle_start_agent():
@@ -36,7 +36,7 @@ async def test_handle_start_agent():
         mock_manager.send_error = AsyncMock()
         
         # Verify the handler accepts valid payload structure
-        assert handler_service is not None
+        assert handler_service != None
         assert callable(handler_service.handle_start_agent)
         
         # Test with invalid payload should raise or handle error

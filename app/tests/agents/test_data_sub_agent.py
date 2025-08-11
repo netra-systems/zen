@@ -53,7 +53,7 @@ class TestDataSubAgentInitialization:
         mock_tool_dispatcher = Mock()
         
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
-        assert agent is not None
+        assert agent != None
         assert agent.name == "DataSubAgent"
         assert agent.description == "Advanced data gathering and analysis agent with ClickHouse integration"
         
@@ -76,7 +76,7 @@ class TestDataSubAgentInitialization:
         mock_redis.return_value = mock_redis_instance
         
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
-        assert agent.query_builder is not None
+        assert agent.query_builder != None
 
 
 class TestDataProcessing:
@@ -99,8 +99,8 @@ class TestDataProcessing:
         agent.execute = AsyncMock(return_value={"processed": True})
         result = await agent.execute(test_data)
                 
-        assert result is not None
-        assert result["processed"] is True
+        assert result != None
+        assert result["processed"] == True
         
     @pytest.mark.asyncio
     async def test_process_data_validation_failure(self):
@@ -152,7 +152,7 @@ class TestDataValidation:
             "timestamp": datetime.now().isoformat()
         }
         
-        assert agent._validate_data(valid_data) is True
+        assert agent._validate_data(valid_data) == True
         
     def test_validate_missing_fields(self):
         """Test validation with missing required fields"""
@@ -163,7 +163,7 @@ class TestDataValidation:
             # Missing 'type' field
         }
         
-        assert agent._validate_data(invalid_data) is False
+        assert agent._validate_data(invalid_data) == False
         
     def test_validate_data_types(self):
         """Test validation of data types"""
@@ -175,7 +175,7 @@ class TestDataValidation:
             "type": "text",
             "size": 100
         }
-        assert agent._validate_data(valid_data) is True
+        assert agent._validate_data(valid_data) == True
         
         # Test with incorrect types
         invalid_data = {
@@ -183,7 +183,7 @@ class TestDataValidation:
             "type": ["invalid"],  # Should be string
             "size": "not a number"  # Should be int
         }
-        assert agent._validate_data(invalid_data) is False
+        assert agent._validate_data(invalid_data) == False
 
 
 class TestDataTransformation:
@@ -202,7 +202,7 @@ class TestDataTransformation:
         
         result = await agent._transform_data(input_data)
         
-        assert result is not None
+        assert result != None
         assert "transformed" in result
         assert result["type"] == "text"
         
@@ -219,7 +219,7 @@ class TestDataTransformation:
         
         result = await agent._transform_data(input_data)
         
-        assert result is not None
+        assert result != None
         assert "parsed" in result
         assert result["parsed"]["key"] == "value"
         
@@ -301,7 +301,7 @@ class TestErrorHandling:
             
             result = await agent.process_with_retry({"data": "test"})
             
-        assert result["success"] is True
+        assert result["success"] == True
         assert mock_process.call_count == 3
         
     @pytest.mark.asyncio
@@ -404,7 +404,7 @@ class TestIntegration:
             data = {"content": "persist this"}
             result = await agent.process_and_persist(data)
             
-        assert result["persisted"] is True
+        assert result["persisted"] == True
         assert result["id"] == "saved_123"
         
     @pytest.mark.asyncio

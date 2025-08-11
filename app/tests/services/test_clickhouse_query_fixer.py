@@ -367,7 +367,7 @@ class TestClickHouseQueryValidator:
         
         for query in valid_queries:
             is_valid, error_message = validate_clickhouse_query(query)
-            assert is_valid is True
+            assert is_valid == True
             assert error_message == ""
     
     def test_invalid_array_syntax_detection(self):
@@ -380,7 +380,7 @@ class TestClickHouseQueryValidator:
         
         for query in invalid_queries:
             is_valid, error_message = validate_clickhouse_query(query)
-            assert is_valid is False
+            assert is_valid == False
             assert "incorrect array syntax" in error_message.lower()
             assert "arrayElement()" in error_message
     
@@ -400,7 +400,7 @@ class TestClickHouseQueryValidator:
             for query in warning_queries:
                 is_valid, error_message = validate_clickhouse_query(query)
                 # Should be technically valid but generate warning
-                assert is_valid is True
+                assert is_valid == True
                 mock_logger.warning.assert_called()
     
     def test_complex_query_validation(self):
@@ -428,7 +428,7 @@ class TestClickHouseQueryValidator:
         """
         
         is_valid, error_message = validate_clickhouse_query(complex_valid)
-        assert is_valid is True
+        assert is_valid == True
         assert error_message == ""
         
         # Same query but with incorrect array syntax
@@ -438,7 +438,7 @@ class TestClickHouseQueryValidator:
         )
         
         is_valid, error_message = validate_clickhouse_query(complex_invalid)
-        assert is_valid is False
+        assert is_valid == False
         assert "incorrect array syntax" in error_message.lower()
 
 

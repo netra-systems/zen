@@ -416,7 +416,7 @@ class TestDataGenerationEngine:
             for span in spans:
                 if span["parent_span_id"]:
                     parent = span_map.get(span["parent_span_id"])
-                    assert parent is not None
+                    assert parent != None
                     # Child span must be within parent time bounds
                     assert span["start_time"] >= parent["start_time"]
                     assert span["end_time"] <= parent["end_time"]

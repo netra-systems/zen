@@ -143,7 +143,7 @@ class TestConnectionManagement:
         connected_websocket.send_json.assert_called()
         calls = connected_websocket.send_json.call_args_list
         initial_msg = next((call[0][0] for call in calls if call[0][0].get("type") == "connection_established"), None)
-        assert initial_msg is not None
+        assert initial_msg != None
         assert initial_msg["connection_id"] == conn_info.connection_id
     
     async def test_connect_multiple_users(self, fresh_manager):
@@ -291,7 +291,7 @@ class TestConnectionInfo:
         assert conn_info.user_id == "test_user"
         assert conn_info.message_count == 0
         assert conn_info.error_count == 0
-        assert conn_info.last_pong is None
+        assert conn_info.last_pong == None
         assert isinstance(conn_info.connected_at, datetime)
         assert isinstance(conn_info.last_ping, datetime)
         assert conn_info.connection_id.startswith("conn_")
@@ -333,7 +333,7 @@ class TestMessageSending:
         message = {"type": "test", "data": "hello world"}
         result = await fresh_manager.send_message(user_id, message)
         
-        assert result is True
+        assert result == True
         
         # Verify message was sent (including initial connection message)
         assert connected_websocket.send_json.call_count >= 2
@@ -341,7 +341,7 @@ class TestMessageSending:
         # Check that timestamp was added
         sent_calls = connected_websocket.send_json.call_args_list
         test_msg = next((call[0][0] for call in sent_calls if call[0][0].get("type") == "test"), None)
-        assert test_msg is not None
+        assert test_msg != None
         assert "timestamp" in test_msg
         assert test_msg["data"] == "hello world"
         
@@ -351,7 +351,7 @@ class TestMessageSending:
     async def test_send_message_no_connections(self, fresh_manager):
         """Test sending message to user with no connections"""
         result = await fresh_manager.send_message("no_connections", {"test": "data"})
-        assert result is False
+        assert result == False
     
     async def test_send_message_invalid_message_type(self, fresh_manager, connected_websocket):
         """Test sending invalid message type"""
@@ -361,7 +361,7 @@ class TestMessageSending:
         with patch('app.ws_manager.logger') as mock_logger:
             result = await fresh_manager.send_message(user_id, "not a dict")
             
-            assert result is False
+            assert result == False
             mock_logger.error.assert_called()
     
     async def test_send_message_preserves_timestamp(self, fresh_manager, connected_websocket):
@@ -402,7 +402,7 @@ class TestMessageSending:
         result = await fresh_manager.send_message(user_id, {"type": "test"})
         
         # Should succeed (alive connection worked)
-        assert result is True
+        assert result == True
         
         # Dead connection should be removed
         remaining_connections = fresh_manager.active_connections.get(user_id, [])
@@ -428,7 +428,7 @@ class TestMessageSending:
         message = {"type": "broadcast_test"}
         result = await fresh_manager.send_message(user_id, message)
         
-        assert result is True
+        assert result == True
         
         # All websockets should have received the message
         for ws in websockets:
@@ -438,7 +438,7 @@ class TestMessageSending:
             # Verify our test message was sent
             sent_calls = ws.send_json.call_args_list
             test_msg = next((call[0][0] for call in sent_calls if call[0][0].get("type") == "broadcast_test"), None)
-            assert test_msg is not None
+            assert test_msg != None
 
 
 @pytest.mark.asyncio
@@ -455,7 +455,7 @@ class TestConnectionSending:
         
         result = await fresh_manager._send_to_connection(conn_info, {"test": "data"})
         
-        assert result is True
+        assert result == True
         conn_info.websocket.send_json.assert_called_once_with({"test": "data"})
     
     async def test_send_to_connection_disconnected(self, fresh_manager):
@@ -467,7 +467,7 @@ class TestConnectionSending:
         
         result = await fresh_manager._send_to_connection(conn_info, {"test": "data"})
         
-        assert result is False
+        assert result == False
         conn_info.websocket.send_json.assert_not_called()
     
     async def test_send_to_connection_retry_success(self, fresh_manager):
@@ -485,7 +485,7 @@ class TestConnectionSending:
         with patch('app.ws_manager.logger'):
             result = await fresh_manager._send_to_connection(conn_info, {"test": "data"}, retry=True)
         
-        assert result is True
+        assert result == True
         assert conn_info.websocket.send_json.call_count == 3
         assert conn_info.error_count == 2
     
@@ -500,7 +500,7 @@ class TestConnectionSending:
         with patch('app.ws_manager.logger') as mock_logger:
             result = await fresh_manager._send_to_connection(conn_info, {"test": "data"}, retry=True)
         
-        assert result is False
+        assert result == False
         assert conn_info.websocket.send_json.call_count == WebSocketManager.MAX_RETRY_ATTEMPTS
         mock_logger.error.assert_called()
     
@@ -515,7 +515,7 @@ class TestConnectionSending:
         with patch('app.ws_manager.logger'):
             result = await fresh_manager._send_to_connection(conn_info, {"test": "data"}, retry=False)
         
-        assert result is False
+        assert result == False
         assert conn_info.websocket.send_json.call_count == 1
     
     async def test_send_to_connection_runtime_error_with_close(self, fresh_manager):
@@ -529,7 +529,7 @@ class TestConnectionSending:
         with patch('app.ws_manager.logger'):
             result = await fresh_manager._send_to_connection(conn_info, {"test": "data"})
         
-        assert result is False
+        assert result == False
     
     async def test_send_to_connection_unexpected_error(self, fresh_manager):
         """Test handling unexpected errors"""
@@ -542,7 +542,7 @@ class TestConnectionSending:
         with patch('app.ws_manager.logger') as mock_logger:
             result = await fresh_manager._send_to_connection(conn_info, {"test": "data"})
         
-        assert result is False
+        assert result == False
         assert conn_info.error_count == 1
         mock_logger.error.assert_called()
     
@@ -559,7 +559,7 @@ class TestConnectionSending:
         
         conn_info.websocket.send_json.assert_called_once()
         sent_message = conn_info.websocket.send_json.call_args[0][0]
-        assert sent_message["system"] is True
+        assert sent_message["system"] == True
         assert sent_message["type"] == "system_test"
         assert sent_message["data"] == "system data"
 
@@ -576,7 +576,7 @@ class TestHeartbeat:
         )
         conn_info.last_ping = datetime.now(timezone.utc)
         
-        assert fresh_manager._is_connection_alive(conn_info) is True
+        assert fresh_manager._is_connection_alive(conn_info) == True
     
     def test_is_connection_alive_disconnected(self, fresh_manager):
         """Test alive check for disconnected connection"""
@@ -585,7 +585,7 @@ class TestHeartbeat:
             user_id="test_user"
         )
         
-        assert fresh_manager._is_connection_alive(conn_info) is False
+        assert fresh_manager._is_connection_alive(conn_info) == False
     
     def test_is_connection_alive_timeout(self, fresh_manager):
         """Test alive check with heartbeat timeout"""
@@ -599,7 +599,7 @@ class TestHeartbeat:
         )
         
         with patch('app.ws_manager.logger'):
-            assert fresh_manager._is_connection_alive(conn_info) is False
+            assert fresh_manager._is_connection_alive(conn_info) == False
     
     async def test_handle_pong(self, fresh_manager, connected_websocket):
         """Test handling pong response"""
@@ -614,7 +614,7 @@ class TestHeartbeat:
         
         # Verify pong timestamp updated
         assert conn_info.last_pong != original_pong
-        assert conn_info.last_pong is not None
+        assert conn_info.last_pong != None
     
     async def test_handle_pong_no_connection(self, fresh_manager, connected_websocket):
         """Test handling pong for non-existent connection"""
@@ -740,10 +740,10 @@ class TestSpecializedMessages:
         sent_calls = connected_websocket.send_json.call_args_list
         error_msg = next((call[0][0] for call in sent_calls if call[0][0].get("type") == "error"), None)
         
-        assert error_msg is not None
+        assert error_msg != None
         assert error_msg["payload"]["error"] == "Test error message"
         assert error_msg["payload"]["sub_agent_name"] == "TestAgent"
-        assert error_msg["displayed_to_user"] is True
+        assert error_msg["displayed_to_user"] == True
     
     async def test_send_error_default_agent(self, fresh_manager, connected_websocket):
         """Test sending error with default agent name"""
@@ -767,12 +767,12 @@ class TestSpecializedMessages:
         sent_calls = connected_websocket.send_json.call_args_list
         log_msg = next((call[0][0] for call in sent_calls if call[0][0].get("type") == "agent_log"), None)
         
-        assert log_msg is not None
+        assert log_msg != None
         assert log_msg["payload"]["level"] == "INFO"
         assert log_msg["payload"]["message"] == "Test log message"
         assert log_msg["payload"]["sub_agent_name"] == "TestAgent"
         assert "timestamp" in log_msg["payload"]
-        assert log_msg["displayed_to_user"] is True
+        assert log_msg["displayed_to_user"] == True
     
     async def test_send_tool_call(self, fresh_manager, connected_websocket):
         """Test sending tool call message"""
@@ -785,12 +785,12 @@ class TestSpecializedMessages:
         sent_calls = connected_websocket.send_json.call_args_list
         tool_msg = next((call[0][0] for call in sent_calls if call[0][0].get("type") == "tool_call"), None)
         
-        assert tool_msg is not None
+        assert tool_msg != None
         assert tool_msg["payload"]["tool_name"] == "TestTool"
         assert tool_msg["payload"]["tool_args"] == tool_args
         assert tool_msg["payload"]["sub_agent_name"] == "TestAgent"
         assert "timestamp" in tool_msg["payload"]
-        assert tool_msg["displayed_to_user"] is True
+        assert tool_msg["displayed_to_user"] == True
     
     async def test_send_tool_result(self, fresh_manager, connected_websocket):
         """Test sending tool result message"""
@@ -803,12 +803,12 @@ class TestSpecializedMessages:
         sent_calls = connected_websocket.send_json.call_args_list
         result_msg = next((call[0][0] for call in sent_calls if call[0][0].get("type") == "tool_result"), None)
         
-        assert result_msg is not None
+        assert result_msg != None
         assert result_msg["payload"]["tool_name"] == "TestTool"
         assert result_msg["payload"]["result"] == result_data
         assert result_msg["payload"]["sub_agent_name"] == "TestAgent"
         assert "timestamp" in result_msg["payload"]
-        assert result_msg["displayed_to_user"] is True
+        assert result_msg["displayed_to_user"] == True
 
 
 @pytest.mark.asyncio
@@ -838,7 +838,7 @@ class TestBroadcasting:
         for ws in websockets:
             sent_calls = ws.send_json.call_args_list
             broadcast_msg = next((call[0][0] for call in sent_calls if call[0][0].get("type") == "broadcast"), None)
-            assert broadcast_msg is not None
+            assert broadcast_msg != None
             assert broadcast_msg["data"] == "Hello everyone"
     
     async def test_broadcast_adds_timestamp(self, fresh_manager, connected_websocket):
@@ -962,7 +962,7 @@ class TestBroadcasting:
         for ws in websockets:
             sent_calls = ws.send_json.call_args_list
             broadcast_msg = next((call[0][0] for call in sent_calls if call[0][0].get("type") == "multi_test"), None)
-            assert broadcast_msg is not None
+            assert broadcast_msg != None
 
 
 @pytest.mark.asyncio
@@ -1119,7 +1119,7 @@ class TestStatistics:
         assert "last_pong" in conn
         assert conn["message_count"] == 5
         assert conn["error_count"] == 1
-        assert conn["is_alive"] is True
+        assert conn["is_alive"] == True
     
     def test_get_connection_info_not_exists(self, fresh_manager):
         """Test getting connection info for non-existent user"""
@@ -1257,7 +1257,7 @@ class TestEdgeCases:
         for ws in websockets[:10]:  # Check first 10 to avoid excessive verification
             sent_calls = ws.send_json.call_args_list
             stress_msg = next((call[0][0] for call in sent_calls if call[0][0].get("type") == "stress_test"), None)
-            assert stress_msg is not None
+            assert stress_msg != None
     
     async def test_connection_id_uniqueness(self, fresh_manager):
         """Test that connection IDs are unique even under rapid connections"""
@@ -1287,19 +1287,19 @@ class TestEdgeCases:
         
         # Should be able to send messages
         result = await fresh_manager.send_message("state_test", {"type": "test"})
-        assert result is True
+        assert result == True
         
         # Change to disconnecting
         ws.client_state = WebSocketState.DISCONNECTING
         result = await fresh_manager.send_message("state_test", {"type": "test2"})
         # Should fail due to non-connected state
-        assert result is False or True  # May succeed or fail depending on timing
+        assert result == False or True  # May succeed or fail depending on timing
         
         # Finally disconnected
         ws.client_state = WebSocketState.DISCONNECTED
         result = await fresh_manager.send_message("state_test", {"type": "test3"})
         # Should clean up dead connections
-        assert result is False
+        assert result == False
 
 
 @pytest.mark.asyncio
@@ -1336,7 +1336,7 @@ class TestErrorRecovery:
             result = await fresh_manager._send_to_connection(conn_info, {"test": "data"})
             # May succeed or fail, but should not crash
         except AttributeError:
-            # Expected if websocket is None
+            # Expected if websocket == None
             pass
     
     async def test_cleanup_orphaned_tasks(self, fresh_manager):

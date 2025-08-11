@@ -393,7 +393,7 @@ class TestLLMManagerProviderSwitching:
         
         # All providers should be healthy initially
         for provider_key in enhanced_llm_manager.provider_health:
-            assert enhanced_llm_manager.provider_health[provider_key]['healthy'] is True
+            assert enhanced_llm_manager.provider_health[provider_key]['healthy'] == True
     
     @pytest.mark.asyncio
     async def test_provider_health_check_success(self, enhanced_llm_manager, mock_providers):
@@ -403,9 +403,9 @@ class TestLLMManagerProviderSwitching:
         # Health check should succeed
         is_healthy = await enhanced_llm_manager.check_provider_health(provider_key)
         
-        assert is_healthy is True
+        assert is_healthy == True
         health_info = enhanced_llm_manager.provider_health[provider_key]
-        assert health_info['healthy'] is True
+        assert health_info['healthy'] == True
         assert health_info['failure_count'] == 0
     
     @pytest.mark.asyncio
@@ -419,11 +419,11 @@ class TestLLMManagerProviderSwitching:
         # Health check should fail
         is_healthy = await enhanced_llm_manager.check_provider_health(provider_key)
         
-        assert is_healthy is False
+        assert is_healthy == False
         health_info = enhanced_llm_manager.provider_health[provider_key]
-        assert health_info['healthy'] is False
+        assert health_info['healthy'] == False
         assert health_info['failure_count'] == 1
-        assert health_info['last_failure'] is not None
+        assert health_info['last_failure'] != None
     
     @pytest.mark.asyncio
     async def test_round_robin_provider_selection(self, enhanced_llm_manager, mock_providers):
@@ -477,7 +477,7 @@ class TestLLMManagerProviderSwitching:
         # Should succeed with first available provider
         result = await enhanced_llm_manager.invoke_with_failover(prompt)
         
-        assert result is not None
+        assert result != None
         assert "Response to: Test prompt" in result.content
     
     @pytest.mark.asyncio
@@ -489,7 +489,7 @@ class TestLLMManagerProviderSwitching:
         # Should use preferred provider
         result = await enhanced_llm_manager.invoke_with_failover(prompt, preferred_provider)
         
-        assert result is not None
+        assert result != None
         assert "[google]" in result.content.lower()
     
     @pytest.mark.asyncio
@@ -504,7 +504,7 @@ class TestLLMManagerProviderSwitching:
         # Should failover to another provider
         result = await enhanced_llm_manager.invoke_with_failover(prompt, preferred_provider)
         
-        assert result is not None
+        assert result != None
         # Should not be from OpenAI (which is failing)
         assert "[openai]" not in result.content.lower()
         
@@ -547,11 +547,11 @@ class TestLLMManagerProviderSwitching:
         
         # Provider should be unhealthy
         health_info = enhanced_llm_manager.provider_health[provider_key]
-        assert health_info['healthy'] is False
+        assert health_info['healthy'] == False
         
         # Should not be available during cooldown
         is_healthy = await enhanced_llm_manager.check_provider_health(provider_key)
-        assert is_healthy is False
+        assert is_healthy == False
         
         # Wait for cooldown period
         await asyncio.sleep(1.1)
@@ -561,7 +561,7 @@ class TestLLMManagerProviderSwitching:
         
         # Should be healthy again after cooldown
         is_healthy = await enhanced_llm_manager.check_provider_health(provider_key)
-        assert is_healthy is True
+        assert is_healthy == True
     
     @pytest.mark.asyncio
     async def test_concurrent_provider_switching(self, enhanced_llm_manager, mock_providers):
@@ -825,7 +825,7 @@ class TestLLMManagerStructuredOutput:
         # For testing, we simulate the concept
         result = await structured_llm_manager.invoke_with_failover(prompt)
         
-        assert result is not None
+        assert result != None
         assert isinstance(result.content, str)
         
         # Test that different providers can be used for structured output

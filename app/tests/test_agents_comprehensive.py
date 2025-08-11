@@ -135,7 +135,7 @@ class TestTriageSubAgent:
         
         await triage_agent.execute(state, "test_run_id", False)
         
-        assert state.triage_result is not None
+        assert state.triage_result != None
         assert state.triage_result["category"] == "cost_optimization"
         assert state.triage_result["priority"] == "high"
     
@@ -151,7 +151,7 @@ class TestTriageSubAgent:
         
         await triage_agent.execute(state, "test_run_id", False)
         
-        assert state.triage_result is not None
+        assert state.triage_result != None
         assert state.triage_result["category"] == "General Inquiry"
     
     @pytest.mark.asyncio
@@ -188,7 +188,7 @@ class TestDataSubAgent:
         
         await data_agent.execute(state, "test_run_id", False)
         
-        assert state.data_result is not None
+        assert state.data_result != None
         assert "metrics" in state.data_result
     
     @pytest.mark.asyncio
@@ -207,7 +207,7 @@ class TestDataSubAgent:
         await data_agent.execute(state, "test_run_id", False)
         
         # Verify data_result was set
-        assert state.data_result is not None
+        assert state.data_result != None
 
 
 class TestOptimizationSubAgent:
@@ -233,7 +233,7 @@ class TestOptimizationSubAgent:
         
         await opt_agent.execute(state, "test_run_id", False)
         
-        assert state.optimizations_result is not None
+        assert state.optimizations_result != None
         assert "optimizations" in state.optimizations_result
         assert len(state.optimizations_result["optimizations"]) == 2
     
@@ -279,7 +279,7 @@ class TestActionsSubAgent:
         
         await actions_agent.execute(state, "test_run_id", False)
         
-        assert state.action_plan_result is not None
+        assert state.action_plan_result != None
         assert len(state.action_plan_result["action_plan"]) == 3
     
     @pytest.mark.asyncio
@@ -323,7 +323,7 @@ class TestReportingSubAgent:
         
         await reporting_agent.execute(state, "test_run_id", False)
         
-        assert state.report_result is not None or state.final_report is not None
+        assert state.report_result != None or state.final_report != None
     
     @pytest.mark.asyncio
     async def test_report_formatting(self):
@@ -340,7 +340,7 @@ class TestReportingSubAgent:
         await reporting_agent.execute(state, "test_run_id", False)
         
         # Check either report_result or final_report was set
-        assert state.report_result is not None or state.final_report is not None
+        assert state.report_result != None or state.final_report != None
 
 
 class TestToolDispatcher:
@@ -353,7 +353,7 @@ class TestToolDispatcher:
         dispatcher = ToolDispatcher(mock_db)
         
         # Test that dispatcher can be initialized
-        assert dispatcher is not None
+        assert dispatcher != None
     
     @pytest.mark.asyncio
     async def test_tool_error_handling(self):
@@ -362,7 +362,7 @@ class TestToolDispatcher:
         dispatcher = ToolDispatcher(mock_db)
         
         # Test error handling by checking dispatcher exists
-        assert dispatcher is not None
+        assert dispatcher != None
     
     @pytest.mark.asyncio
     async def test_tool_parameter_validation(self):
@@ -371,7 +371,7 @@ class TestToolDispatcher:
         dispatcher = ToolDispatcher(mock_db)
         
         # Basic validation test
-        assert dispatcher is not None
+        assert dispatcher != None
 
 
 class TestStateManagement:
@@ -383,12 +383,12 @@ class TestStateManagement:
         state = DeepAgentState(user_request="Test request")
         
         assert state.user_request == "Test request"
-        assert state.triage_result is None
-        assert state.data_result is None
-        assert state.optimizations_result is None
-        assert state.action_plan_result is None
-        assert state.report_result is None
-        assert state.final_report is None
+        assert state.triage_result == None
+        assert state.data_result == None
+        assert state.optimizations_result == None
+        assert state.action_plan_result == None
+        assert state.report_result == None
+        assert state.final_report == None
     
     @pytest.mark.asyncio
     async def test_state_persistence_save(self):
@@ -428,8 +428,8 @@ class TestStateManagement:
         assert state.triage_result["category"] == "test"
         
         state.data_result = {"data": "value"}
-        assert state.triage_result is not None
-        assert state.data_result is not None
+        assert state.triage_result != None
+        assert state.data_result != None
 
 
 class TestAgentLifecycle:
@@ -464,8 +464,8 @@ class TestAgentLifecycle:
         
         await agent.run(state, "test_run_id", False)
         
-        assert agent.start_time is not None
-        assert agent.end_time is not None
+        assert agent.start_time != None
+        assert agent.end_time != None
         assert agent.end_time >= agent.start_time
 
 

@@ -26,7 +26,7 @@ class TestMCPClient:
             metadata={"version": "1.0"}
         )
         
-        assert client.id is not None
+        assert client.id != None
         assert client.name == "Test Client"
         assert client.client_type == "claude"
         assert client.api_key_hash == "hashed_key"
@@ -42,7 +42,7 @@ class TestMCPClient:
             client_type="cursor"
         )
         
-        assert client.api_key_hash is None
+        assert client.api_key_hash == None
         assert client.permissions == []
         assert client.metadata == {}
 
@@ -61,14 +61,14 @@ class TestMCPToolExecution:
             status="success"
         )
         
-        assert execution.id is not None
+        assert execution.id != None
         assert execution.session_id == "session123"
         assert execution.tool_name == "test_tool"
         assert execution.input_params == {"arg": "value"}
         assert execution.output_result == {"result": "success"}
         assert execution.execution_time_ms == 150
         assert execution.status == "success"
-        assert execution.error is None
+        assert execution.error == None
         assert isinstance(execution.created_at, datetime)
 
 
@@ -94,13 +94,13 @@ class TestMCPService:
         
     def test_service_initialization(self, mcp_service):
         """Test service initialization"""
-        assert mcp_service.agent_service is not None
-        assert mcp_service.thread_service is not None
-        assert mcp_service.corpus_service is not None
-        assert mcp_service.synthetic_data_service is not None
-        assert mcp_service.security_service is not None
-        assert mcp_service.supply_catalog_service is not None
-        assert mcp_service.mcp_server is not None
+        assert mcp_service.agent_service != None
+        assert mcp_service.thread_service != None
+        assert mcp_service.corpus_service != None
+        assert mcp_service.synthetic_data_service != None
+        assert mcp_service.security_service != None
+        assert mcp_service.supply_catalog_service != None
+        assert mcp_service.mcp_server != None
         
     def test_tool_registration(self, mcp_service):
         """Test that Netra tools are registered"""
@@ -294,7 +294,7 @@ class TestMCPService:
         response = json.loads(result["text"])
         assert response["thread_id"] == "thread123"
         assert response["title"] == "Test Thread"
-        assert response["created"] is True
+        assert response["created"] == True
         
         # Check metadata includes session
         call_args = mock_services["thread_service"].create_thread.call_args
@@ -359,7 +359,7 @@ class TestMCPService:
         mock_services["agent_service"].execute_agent.assert_called_once()
         call_args = mock_services["agent_service"].execute_agent.call_args
         assert call_args[1]["agent_name"] == "SupervisorAgent"
-        assert call_args[1]["config"]["pipeline_mode"] is True
+        assert call_args[1]["config"]["pipeline_mode"] == True
         
     @pytest.mark.asyncio
     async def test_register_client(self, mcp_service, mock_services):
@@ -412,7 +412,7 @@ class TestMCPService:
             required_permission="read"
         )
         
-        assert result is True
+        assert result == True
         
     @pytest.mark.asyncio
     async def test_record_tool_execution(self, mcp_service):
@@ -433,5 +433,5 @@ class TestMCPService:
         """Test getting MCP server instance"""
         server = mcp_service.get_mcp_server()
         
-        assert server is not None
+        assert server != None
         assert server == mcp_service.mcp_server

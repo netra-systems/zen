@@ -268,7 +268,7 @@ class TestBusinessValueCritical:
                     result_state = await supervisor.run(user_request, run_id, stream_updates=True)
         
         # Business value assertions
-        assert result_state is not None
+        assert result_state != None
         assert result_state.user_request == user_request
         
         # Verify cost optimization recommendations were generated
@@ -305,7 +305,7 @@ class TestBusinessValueCritical:
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
                     result_state = await supervisor.run(user_request, run_id, stream_updates=True)
         
-        assert result_state is not None
+        assert result_state != None
         
         # Verify performance analysis was conducted
         tool_dispatcher = infra["tool_dispatcher"]
@@ -332,7 +332,7 @@ class TestBusinessValueCritical:
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
                     result_state = await supervisor.run(user_request, run_id, stream_updates=False)
         
-        assert result_state is not None
+        assert result_state != None
         
         # Verify comparison analysis was performed
         llm_manager = infra["llm_manager"]
@@ -383,7 +383,7 @@ class TestBusinessValueCritical:
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
                     result_state = await supervisor.run(user_request, run_id, stream_updates=False)
         
-        assert result_state is not None
+        assert result_state != None
         
         # Verify batch optimization was considered
         llm_manager = infra["llm_manager"]
@@ -479,7 +479,7 @@ class TestBusinessValueCritical:
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
                     result_state = await supervisor.run(user_request, run_id, stream_updates=False)
         
-        assert result_state is not None
+        assert result_state != None
         
         # Verify reporting agent was involved
         llm_manager = infra["llm_manager"]
@@ -562,7 +562,7 @@ class TestBusinessValueCritical:
                     result_state = await supervisor.run(user_request, run_id, stream_updates=True)
         
         # Verify complete workflow execution
-        assert result_state is not None
+        assert result_state != None
         assert result_state.user_request == user_request
         
         # Verify all critical agents participated

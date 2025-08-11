@@ -49,7 +49,7 @@ async def test_create_thread_success(mock_db, thread_repo):
     result = await thread_repo.create(mock_db, **test_thread_data)
     
     # Verify
-    assert result is not None
+    assert result != None
     assert result.id == 'thread_test123'
     assert result.metadata_['title'] == 'Test Thread'
     mock_db.add.assert_called_once()
@@ -76,7 +76,7 @@ async def test_get_by_id_with_correct_parameter_order(mock_db, thread_repo):
     result = await thread_repo.get_by_id(mock_db, 'thread_test123')
     
     # Verify
-    assert result is not None
+    assert result != None
     assert result.id == 'thread_test123'
     mock_db.execute.assert_called_once()
 
@@ -128,7 +128,7 @@ async def test_archive_thread(mock_db, thread_repo):
     result = await thread_repo.archive_thread(mock_db, 'thread_test123')
     
     # Verify
-    assert result is True
+    assert result == True
     assert mock_thread.metadata_['status'] == 'archived'
     assert 'archived_at' in mock_thread.metadata_
     mock_db.commit.assert_called_once()

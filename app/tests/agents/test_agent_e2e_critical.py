@@ -112,7 +112,7 @@ class TestAgentE2ECritical:
                     result_state = await supervisor.run(user_request, run_id, stream_updates=True)
         
         # Assertions
-        assert result_state is not None
+        assert result_state != None
         assert result_state.user_request == user_request
         
         # Verify WebSocket messages were sent
@@ -229,7 +229,7 @@ class TestAgentE2ECritical:
         assert len(execution_order) > 0
         
         # Verify state was created and has expected attributes
-        assert state is not None
+        assert state != None
         assert state.user_request == "Optimize my GPU utilization"
 
     @pytest.mark.asyncio
@@ -281,7 +281,7 @@ class TestAgentE2ECritical:
         assert tool_dispatcher.dispatch_tool.call_count >= 2
         
         # Verify tool results were integrated into state
-        assert state.data_result is not None
+        assert state.data_result != None
         assert "tool_outputs" in state.data_result
         assert len(state.data_result["tool_outputs"]) == 2
 
@@ -434,7 +434,7 @@ class TestAgentE2ECritical:
         
         # Mock start_agent_run to simulate authorization check
         async def mock_start_agent_run(user_id=None, thread_id=None, request=None):
-            if user_id is None:
+            if user_id == None:
                 raise Exception("Unauthorized: No user ID provided")
             return str(uuid.uuid4())
         
@@ -458,7 +458,7 @@ class TestAgentE2ECritical:
             thread_id=str(uuid.uuid4()),
             request="Authorized request"
         )
-        assert run_id is not None
+        assert run_id != None
         
         # Test role-based access to specific sub-agents
         restricted_user = {"user_id": "restricted", "role": "viewer"}
@@ -578,7 +578,7 @@ class TestAgentE2ECritical:
         final_state = await parallel_run(parallel_agents, state, run_id, False) if parallel_agents else state
         
         # Verify collaboration - check that state was modified
-        assert final_state is not None
+        assert final_state != None
         # Check that the final state has the expected modifications
         # The state should have been modified by the agents
         assert hasattr(final_state, 'data_result') or hasattr(final_state, 'optimizations_result')

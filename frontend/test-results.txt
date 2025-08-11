@@ -1,0 +1,8 @@
+No tests found, exiting with code 1
+Run with `--passWithNoTests` to exit with code 0
+In C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend
+  547 files checked.
+  testMatch: **/__tests__/**/*.test.[jt]s?(x) - 44 matches
+  testPathIgnorePatterns: \\node_modules\\, \\.next\\ - 271 matches
+  testRegex:  - 0 matches
+Pattern: 2 - 0 matches

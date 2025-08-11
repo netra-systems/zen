@@ -157,6 +157,83 @@ class BaseRepository(Generic[T], ABC):
             logger.error(f"Error checking existence of {self.model.__name__} {entity_id}: {e}")
             return False
     
+    async def bulk_create(self, data: List[Dict[str, Any]], db: Optional[AsyncSession] = None) -> List[T]:
+        """Create multiple entities in bulk"""
+        session = db or self._session
+        if not session:
+            raise ValueError("No database session available. Pass db parameter or use within UnitOfWork context.")
+        
+        entities = []
+        try:
+            for item in data:
+                if 'id' not in item and hasattr(self.model, 'id'):
+                    item['id'] = str(uuid.uuid4())
+                entity = self.model(**item)
+                session.add(entity)
+                entities.append(entity)
+            
+            await session.commit()
+            for entity in entities:
+                await session.refresh(entity)
+            
+            logger.info(f"Bulk created {len(entities)} {self.model.__name__} entities")
+            return entities
+            
+        except IntegrityError as e:
+            await session.rollback()
+            logger.error(f"Integrity error bulk creating {self.model.__name__}: {e}")
+            return []
+        except SQLAlchemyError as e:
+            await session.rollback()
+            logger.error(f"Database error bulk creating {self.model.__name__}: {e}")
+            return []
+        except Exception as e:
+            await session.rollback()
+            logger.error(f"Unexpected error bulk creating {self.model.__name__}: {e}")
+            return []
+    
+    async def get_many(self, ids: List[str], db: Optional[AsyncSession] = None) -> List[T]:
+        """Get multiple entities by their IDs"""
+        session = db or self._session
+        if not session:
+            raise ValueError("No database session available. Pass db parameter or use within UnitOfWork context.")
+        
+        try:
+            result = await session.execute(
+                select(self.model).where(self.model.id.in_(ids))
+            )
+            return list(result.scalars().all())
+        except SQLAlchemyError as e:
+            logger.error(f"Error fetching multiple {self.model.__name__}: {e}")
+            return []
+    
+    async def soft_delete(self, entity_id: str, db: Optional[AsyncSession] = None) -> bool:
+        """Soft delete an entity (if model supports it)"""
+        session = db or self._session
+        if not session:
+            raise ValueError("No database session available. Pass db parameter or use within UnitOfWork context.")
+        
+        try:
+            entity = await self.get_by_id(session, entity_id)
+            if not entity:
+                return False
+            
+            # Check if model supports soft delete
+            if hasattr(entity, 'deleted_at'):
+                from datetime import datetime
+                setattr(entity, 'deleted_at', datetime.utcnow())
+                await session.commit()
+                logger.info(f"Soft deleted {self.model.__name__} with id: {entity_id}")
+                return True
+            else:
+                logger.warning(f"{self.model.__name__} does not support soft delete")
+                return False
+                
+        except SQLAlchemyError as e:
+            await session.rollback()
+            logger.error(f"Error soft deleting {self.model.__name__} {entity_id}: {e}")
+            return False
+    
     @abstractmethod
     async def find_by_user(self, db: AsyncSession, user_id: str) -> List[T]:
         """Find entities by user - must be implemented by subclasses"""

@@ -24,7 +24,7 @@ class TestConfigEndpoint:
             config = response.json()
             assert config["environment"] == "development"
             assert config["app_name"] == "Netra AI"
-            assert config["features"]["websocket"] is True
+            assert config["features"]["websocket"] == True
     
     def test_get_frontend_config(self):
         """Test retrieving frontend-specific configuration"""
@@ -50,7 +50,7 @@ class TestConfigEndpoint:
             assert response.status_code == 200
             config = response.json()
             assert config["api_url"] == "http://localhost:8000"
-            assert config["features"]["chat"] is True
+            assert config["features"]["chat"] == True
     
     def test_update_config_authorized(self):
         """Test updating configuration with proper authorization"""
@@ -73,7 +73,7 @@ class TestConfigEndpoint:
                 )
                 
                 assert response.status_code == 200
-                assert response.json()["success"] is True
+                assert response.json()["success"] == True
     
     def test_update_config_unauthorized(self):
         """Test config update rejection without authorization"""
