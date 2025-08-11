@@ -53,18 +53,21 @@ export const ExamplePrompts: React.FC = () => {
 
   const getCardGradient = (index: number) => {
     const gradients = [
-      'from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100',
-      'from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100',
-      'from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100',
-      'from-orange-50 to-red-50 hover:from-orange-100 hover:to-red-100',
-      'from-cyan-50 to-blue-50 hover:from-cyan-100 hover:to-blue-100',
-      'from-yellow-50 to-amber-50 hover:from-yellow-100 hover:to-amber-100'
+      'from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200',
+      'from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200',
+      'from-zinc-50 to-zinc-100 hover:from-zinc-100 hover:to-zinc-200',
+      'from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200',
+      'from-emerald-50 to-teal-100 hover:from-emerald-100 hover:to-teal-200',
+      'from-purple-50 to-pink-100 hover:from-purple-100 hover:to-pink-200'
     ];
     return gradients[index % gradients.length];
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full bg-gradient-to-b from-gray-50 to-white px-6 py-6">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full px-6 py-6" style={{
+      background: 'linear-gradient(180deg, rgba(250, 250, 250, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%)',
+      backdropFilter: 'blur(8px)'
+    }}>
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -72,8 +75,8 @@ export const ExamplePrompts: React.FC = () => {
         className="flex items-center justify-between mb-4"
       >
         <div className="flex items-center space-x-2">
-          <Sparkles className="w-5 h-5 text-purple-500" />
-          <h2 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <Sparkles className="w-5 h-5 text-emerald-500" />
+          <h2 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
             Quick Start Examples
           </h2>
         </div>
@@ -106,7 +109,8 @@ export const ExamplePrompts: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  whileHover={{ y: -4, scale: 1.02, transition: { duration: 0.2 } }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   <Card
                     className={`cursor-pointer h-full group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-gradient-to-br ${getCardGradient(index)}`}

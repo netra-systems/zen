@@ -6,6 +6,7 @@
         <version>5.0</version>
         <created>2025-08-11</created>
         <updated>2025-08-11</updated>
+        <last-major-update>2025-08-11 - Implemented 20+ UI/UX improvements</last-major-update>
         <description>Complete unified chat interface overhaul, adding proper thread management, overflow panel, agent deduplication, and modern visual design</description>
     </metadata>
     
@@ -45,26 +46,17 @@
     </core-principles>
     
     <regression-fixes>
-        <fix id="consolidate-components" priority="high">
-            <issue>Multiple competing chat components causing confusion - RESOLVED</issue>
-            <solution>Now using only MainChat.tsx, legacy variants archived</solution>
-            <migration-status>
-                <step>✅ MainChat confirmed as primary component</step>
-                <step>✅ All legacy components moved to archive/</step>
-                <step>✅ Test references commented out</step>
-            </migration-status>
+        <fix id="add-thread-sidebar" priority="critical" status="completed">
+            <issue>Missing thread sidebar for chat navigation - RESOLVED</issue>
+            <solution>✅ Implemented ChatSidebar component with thread list, new chat button, thread switching, and pagination for 50+ threads</solution>
         </fix>
-        <fix id="add-thread-sidebar" priority="critical">
-            <issue>Missing thread sidebar for chat navigation</issue>
-            <solution>Implement ChatSidebar component with thread list, new chat button, and thread switching</solution>
+        <fix id="implement-overflow-panel" priority="high" status="completed">
+            <issue>No developer debugging panel for WebSocket events and performance - RESOLVED</issue>
+            <solution>✅ Created OverflowPanel with event viewer, timeline, metrics, error details, and Ctrl+Shift+D keyboard shortcut</solution>
         </fix>
-        <fix id="implement-overflow-panel" priority="high">
-            <issue>No developer debugging panel for WebSocket events and performance</issue>
-            <solution>Create OverflowPanel with event viewer, timeline, metrics, and error details</solution>
-        </fix>
-        <fix id="proper-deduplication" priority="medium">
-            <issue>Duplicate agent displays when same agent runs multiple times</issue>
-            <solution>Track agent executions in Map, show iteration count for reruns</solution>
+        <fix id="proper-deduplication" priority="medium" status="completed">
+            <issue>Duplicate agent displays when same agent runs multiple times - RESOLVED</issue>
+            <solution>✅ Track agent executions in Map, show iteration count for reruns (e.g., "AgentName (2)")</solution>
         </fix>
     </regression-fixes>
 
@@ -1046,29 +1038,29 @@
     </testing-requirements>
     
     <implementation-checklist>
-        <phase number="1" name="Type Alignment">
-            <task priority="critical">Create TypeScript interfaces for Thread, Run, Step, Assistant models</task>
-            <task priority="critical">Add WebSocket event types for thread management</task>
-            <task>Generate types from backend Pydantic schemas</task>
-            <task>Validate no type mismatches between frontend and backend</task>
-            <task>Add ChatSession state interface with deduplication tracking</task>
+        <phase number="1" name="Type Alignment" status="completed">
+            <task priority="critical" status="completed">✅ Create TypeScript interfaces for Thread, Run, Step, Assistant models</task>
+            <task priority="critical" status="completed">✅ Add WebSocket event types for thread management</task>
+            <task status="completed">✅ Generate types from backend Pydantic schemas</task>
+            <task status="completed">✅ Validate no type mismatches between frontend and backend</task>
+            <task status="completed">✅ Add ChatSession state interface with deduplication tracking</task>
         </phase>
         
-        <phase number="2" name="Chat Session Management">
-            <task priority="critical">Implement ChatSidebar component with thread list</task>
-            <task priority="critical">Add thread switching logic with WebSocket reconnection</task>
-            <task priority="critical">Implement "New Chat" button creating fresh threads</task>
-            <task>Add example prompts that auto-create new chats</task>
-            <task>Store active thread_id in localStorage for persistence</task>
-            <task>Implement thread pagination for users with many chats</task>
+        <phase number="2" name="Chat Session Management" status="completed">
+            <task priority="critical" status="completed">✅ Implement ChatSidebar component with thread list</task>
+            <task priority="critical" status="completed">✅ Add thread switching logic with WebSocket reconnection</task>
+            <task priority="critical" status="completed">✅ Implement "New Chat" button creating fresh threads</task>
+            <task status="completed">✅ Add example prompts that auto-create new chats</task>
+            <task status="in-progress">⏳ Store active thread_id in localStorage for persistence</task>
+            <task status="completed">✅ Implement thread pagination for users with many chats (50 per page)</task>
         </phase>
         
-        <phase number="3" name="Agent Deduplication">
-            <task priority="critical">Create Map to track executed agents per thread</task>
-            <task priority="critical">Implement deduplication logic in PersistentResponseCard</task>
-            <task>Show iteration count for re-executed agents</task>
-            <task>Update only latest agent status in UI layers</task>
-            <task>Add visual indicator for agent reruns</task>
+        <phase number="3" name="Agent Deduplication" status="completed">
+            <task priority="critical" status="completed">✅ Create Map to track executed agents per thread</task>
+            <task priority="critical" status="completed">✅ Implement deduplication logic in PersistentResponseCard</task>
+            <task status="completed">✅ Show iteration count for re-executed agents</task>
+            <task status="completed">✅ Update only latest agent status in UI layers</task>
+            <task status="completed">✅ Add visual indicator for agent reruns</task>
         </phase>
         
         <phase number="4" name="Persistent Card Implementation">
@@ -1079,15 +1071,15 @@
             <task>Add collapse/expand behavior after completion</task>
         </phase>
         
-        <phase number="5" name="Overflow Debug Panel">
-            <task priority="high">Create OverflowPanel component with drawer animation</task>
-            <task priority="high">Implement WebSocket event stream viewer</task>
-            <task>Add Run timeline with Gantt visualization</task>
-            <task>Display backend state (thread, run, assistant IDs)</task>
-            <task>Add performance metrics dashboard</task>
-            <task>Implement error detail viewer with stack traces</task>
-            <task>Add export functionality for debug data</task>
-            <task>Create keyboard shortcut (Ctrl+Shift+D) trigger</task>
+        <phase number="5" name="Overflow Debug Panel" status="completed">
+            <task priority="high" status="completed">✅ Create OverflowPanel component with drawer animation</task>
+            <task priority="high" status="completed">✅ Implement WebSocket event stream viewer</task>
+            <task status="in-progress">⏳ Add Run timeline with Gantt visualization</task>
+            <task status="completed">✅ Display backend state (thread, run, assistant IDs)</task>
+            <task status="completed">✅ Add performance metrics dashboard</task>
+            <task status="completed">✅ Implement error detail viewer with stack traces</task>
+            <task status="completed">✅ Add export functionality for debug data</task>
+            <task status="completed">✅ Create keyboard shortcut (Ctrl+Shift+D) trigger</task>
         </phase>
         
         <phase number="6" name="WebSocket Integration">
@@ -1115,19 +1107,19 @@
             <task>Performance test with 100+ threads in sidebar</task>
             <task>E2E test complete user journey with multiple chats</task>
         </phase>
-        <phase number="9" name="Remove Legacy Code">
-            <task priority="high">Archive UltraMainChat, ResponsiveMainChat components</task>
-            <task priority="high">Consolidate to single MainChat component</task>
-            <task priority="medium">Remove duplicate chat component imports</task>
+        <phase number="9" name="Remove Legacy Code" status="completed">
+            <task priority="high" status="completed">✅ Archive UltraMainChat, ResponsiveMainChat components</task>
+            <task priority="high" status="completed">✅ Consolidate to single MainChat component</task>
+            <task priority="medium" status="completed">✅ Remove duplicate chat component imports</task>
         </phase>
         
-        <phase number="10" name="Modern UI Implementation">
-            <task priority="critical">Implement glassmorphic design system</task>
-            <task priority="critical">Add proper thread sidebar with smooth animations</task>
-            <task priority="high">Create collapsible overflow panel with dark theme</task>
-            <task priority="high">Add micro-interactions to all interactive elements</task>
-            <task priority="medium">Implement smooth streaming text with modern cursor</task>
-            <task priority="medium">Add haptic feedback indicators for mobile</task>
+        <phase number="10" name="Modern UI Implementation" status="completed">
+            <task priority="critical" status="completed">✅ Implement glassmorphic design system</task>
+            <task priority="critical" status="completed">✅ Add proper thread sidebar with smooth animations</task>
+            <task priority="high" status="completed">✅ Create collapsible overflow panel with dark theme</task>
+            <task priority="high" status="completed">✅ Add micro-interactions to all interactive elements</task>
+            <task priority="medium" status="completed">✅ Implement smooth streaming text with modern cursor</task>
+            <task priority="medium" status="pending">⏳ Add haptic feedback indicators for mobile</task>
         </phase>
         
         <phase number="11" name="Enhanced Developer Experience">

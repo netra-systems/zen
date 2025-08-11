@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, MessageSquare, Clock, ChevronRight, Search, Shield, Database, Sparkles, Users, Filter } from 'lucide-react';
+import { Plus, MessageSquare, Clock, ChevronLeft, ChevronRight, Search, Shield, Database, Sparkles, Users, Filter } from 'lucide-react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useAuthStore } from '@/store/authStore';
 import { formatDistanceToNow } from 'date-fns';
@@ -25,6 +25,8 @@ export const ChatSidebar: React.FC = () => {
   const [showAllThreads, setShowAllThreads] = useState(false);
   const [filterType, setFilterType] = useState<'all' | 'corpus' | 'synthetic' | 'config' | 'users'>('all');
   const [threads, setThreads] = useState<Thread[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const threadsPerPage = 50;
 
   // Load threads on mount and when filters change
   useEffect(() => {
@@ -55,6 +57,13 @@ export const ChatSidebar: React.FC = () => {
     const bTime = b.updated_at || b.created_at;
     return bTime - aTime;
   });
+
+  // Paginate threads
+  const totalPages = Math.ceil(sortedThreads.length / threadsPerPage);
+  const paginatedThreads = sortedThreads.slice(
+    (currentPage - 1) * threadsPerPage,
+    currentPage * threadsPerPage
+  );
 
   const handleNewChat = async () => {
     setIsCreatingThread(true);
@@ -219,7 +228,7 @@ export const ChatSidebar: React.FC = () => {
               <p className="text-xs mt-1">Start a new chat to begin</p>
             </div>
           ) : (
-            sortedThreads.map((thread) => (
+            paginatedThreads.map((thread) => (
               <motion.div
                 key={thread.id}
                 initial={{ opacity: 0, x: -20 }}
@@ -320,10 +329,36 @@ export const ChatSidebar: React.FC = () => {
         </AnimatePresence>
       </div>
 
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="p-3 border-t border-gray-200 bg-white flex items-center justify-between">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          
+          <span className="text-xs text-gray-600">
+            Page {currentPage} of {totalPages}
+          </span>
+          
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Footer with Thread Count and Quick Actions */}
       <div className="p-4 border-t border-gray-200 bg-gray-50">
         <p className="text-xs text-gray-500 text-center mb-2">
           {threads.length} conversation{threads.length !== 1 ? 's' : ''}
+          {sortedThreads.length > threadsPerPage && ` (showing ${paginatedThreads.length})`}
         </p>
         
         {/* Admin Quick Actions */}

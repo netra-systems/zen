@@ -27,7 +27,14 @@ export const SlowLayer: React.FC<SlowLayerProps> = ({ data, isCollapsed }) => {
   if (isCollapsed) return null;
 
   return (
-    <div className="bg-gray-50 border-t border-gray-200">
+    <div 
+      className="border-t"
+      style={{
+        background: 'linear-gradient(180deg, rgba(250, 250, 250, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%)',
+        borderTop: '1px solid rgba(228, 228, 231, 0.5)',
+        backdropFilter: 'blur(4px)'
+      }}
+    >
       <div className="p-5 space-y-6">
         {/* Completed Agents Section */}
         {data.completedAgents && data.completedAgents.length > 0 && (
@@ -42,9 +49,17 @@ export const SlowLayer: React.FC<SlowLayerProps> = ({ data, isCollapsed }) => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {data.completedAgents.map((agent, index) => (
-                <div
+                <motion.div
                   key={`${agent.agentName}-${index}`}
-                  className="bg-white rounded-lg p-3 border border-gray-200"
+                  className="rounded-lg p-3 border hover:shadow-md transition-all duration-200"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(255, 255, 255, 0.18)',
+                    boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.05)'
+                  }}
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.2 }}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium text-sm text-gray-800">
@@ -65,7 +80,7 @@ export const SlowLayer: React.FC<SlowLayerProps> = ({ data, isCollapsed }) => {
                       ))}
                     </div>
                   )}
-                </div>
+                </motion.div>
               ))}
             </div>
           </motion.div>
@@ -88,9 +103,18 @@ export const SlowLayer: React.FC<SlowLayerProps> = ({ data, isCollapsed }) => {
                 </h3>
                 <div className="space-y-3">
                   {data.finalReport.recommendations.map((rec) => (
-                    <div
+                    <motion.div
                       key={rec.id}
-                      className="bg-white rounded-lg p-4 border border-gray-200"
+                      className="rounded-lg p-4 border hover:shadow-md transition-all duration-200"
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(8px)',
+                        border: '1px solid rgba(255, 255, 255, 0.18)',
+                        boxShadow: '0 2px 6px 0 rgba(0, 0, 0, 0.05)'
+                      }}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      transition={{ duration: 0.2 }}
                     >
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="font-medium text-gray-800">{rec.title}</h4>
