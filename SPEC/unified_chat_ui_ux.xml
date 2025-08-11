@@ -92,6 +92,20 @@
             </states>
         </thread-model>
         
+        <automatic-renaming>
+            <description>Conversations automatically get renamed based on first user message</description>
+            <trigger>After first user message is sent</trigger>
+            <implementation>
+                <step>User sends first message in new thread</step>
+                <step>Backend analyzes message content using LLM</step>
+                <step>Generate concise 3-5 word title summarizing topic</step>
+                <step>Update thread metadata with generated title</step>
+                <step>Send thread_renamed WebSocket event to update UI</step>
+            </implementation>
+            <fallback>If title generation fails, use "Chat {timestamp}" format</fallback>
+            <ui-update>Sidebar immediately reflects new title with smooth animation</ui-update>
+        </automatic-renaming>
+        
         <navigation-behavior>
             <rule id="new-chat">
                 <trigger>Click "New Chat" button or press Ctrl+N</trigger>
@@ -166,13 +180,18 @@
             
             <event type="final_report">
                 <payload>
-                    <field name="report" type="object">Complete analysis report</field>
+                    <field name="report" type="object">Complete analysis report with rich visualizations</field>
                     <field name="total_duration_ms" type="number">Total execution time</field>
-                    <field name="agent_metrics" type="array">Per-agent metrics</field>
-                    <field name="recommendations" type="array">Optimization recommendations</field>
-                    <field name="action_plan" type="array">Implementation steps</field>
+                    <field name="agent_metrics" type="array">Per-agent metrics with timing breakdowns</field>
+                    <field name="recommendations" type="array">Prioritized optimization recommendations with impact scores</field>
+                    <field name="action_plan" type="array">Step-by-step implementation guide with effort estimates</field>
+                    <field name="cost_analysis" type="object">Current vs projected costs with savings calculations</field>
+                    <field name="performance_comparison" type="object">Before/after metrics with improvement percentages</field>
+                    <field name="confidence_scores" type="object">Confidence levels for each recommendation</field>
+                    <field name="executive_summary" type="string">High-level summary for stakeholders</field>
+                    <field name="technical_details" type="object">Deep dive analysis for engineers</field>
                 </payload>
-                <ui-update>Populate slow layer with complete report</ui-update>
+                <ui-update>Populate slow layer with comprehensive, interactive report</ui-update>
             </event>
             
             <event type="error">
@@ -257,6 +276,147 @@
             </performance-optimizations>
         </enhanced-websocket-handling>
     </backend-frontend-contract>
+    
+    <comprehensive-reporting>
+        <description>Rich, interactive reporting interface that transforms raw data into actionable insights</description>
+        
+        <report-sections>
+            <section id="executive-summary">
+                <position>Top of report, always visible</position>
+                <content>
+                    <item>One-paragraph executive summary</item>
+                    <item>Key metrics dashboard with KPIs</item>
+                    <item>Overall optimization potential percentage</item>
+                    <item>Estimated monthly/annual savings</item>
+                </content>
+                <visualization>Card layout with metric tiles and trend indicators</visualization>
+            </section>
+            
+            <section id="cost-analysis">
+                <position>Below executive summary</position>
+                <content>
+                    <item>Current cost breakdown by service/model</item>
+                    <item>Projected costs after optimizations</item>
+                    <item>Interactive cost calculator</item>
+                    <item>Historical cost trends chart</item>
+                </content>
+                <visualization>
+                    <chart type="bar">Cost comparison chart</chart>
+                    <chart type="pie">Cost distribution by component</chart>
+                    <chart type="line">Cost trends over time</chart>
+                    <calculator>Interactive sliders to adjust parameters</calculator>
+                </visualization>
+            </section>
+            
+            <section id="performance-metrics">
+                <position>Major section after cost analysis</position>
+                <content>
+                    <item>Response time improvements</item>
+                    <item>Throughput increases</item>
+                    <item>Quality metrics (accuracy, relevance)</item>
+                    <item>Resource utilization efficiency</item>
+                </content>
+                <visualization>
+                    <chart type="radar">Multi-dimensional performance comparison</chart>
+                    <chart type="gauge">Performance score indicators</chart>
+                    <table>Detailed metrics breakdown with sparklines</table>
+                </visualization>
+            </section>
+            
+            <section id="recommendations">
+                <position>Central section with high prominence</position>
+                <content>
+                    <item>Prioritized list of optimizations</item>
+                    <item>Impact score for each recommendation</item>
+                    <item>Implementation complexity rating</item>
+                    <item>Quick win vs strategic initiative categorization</item>
+                </content>
+                <visualization>
+                    <cards>Individual recommendation cards with expand/collapse</cards>
+                    <matrix>Impact vs Effort matrix plot</matrix>
+                    <timeline>Implementation roadmap visualization</timeline>
+                </visualization>
+                <interactivity>
+                    <action>Click to see detailed implementation steps</action>
+                    <action>Hover for impact preview</action>
+                    <action>Drag to reorder priorities</action>
+                </interactivity>
+            </section>
+            
+            <section id="action-plan">
+                <position>Following recommendations</position>
+                <content>
+                    <item>Step-by-step implementation guide</item>
+                    <item>Dependencies and prerequisites</item>
+                    <item>Effort estimates (hours/days)</item>
+                    <item>Risk assessment and mitigation</item>
+                </content>
+                <visualization>
+                    <stepper>Interactive step-by-step wizard</stepper>
+                    <gantt>Project timeline with dependencies</gantt>
+                    <checklist>Actionable checklist with progress tracking</checklist>
+                </visualization>
+            </section>
+            
+            <section id="agent-timeline">
+                <position>Technical details section</position>
+                <content>
+                    <item>Complete agent execution timeline</item>
+                    <item>Parallel vs sequential execution paths</item>
+                    <item>Bottleneck identification</item>
+                    <item>Agent performance metrics</item>
+                </content>
+                <visualization>
+                    <timeline>Interactive Gantt chart of agent executions</timeline>
+                    <flowchart>Agent dependency graph</flowchart>
+                    <heatmap>Performance bottleneck heatmap</heatmap>
+                </visualization>
+            </section>
+            
+            <section id="technical-deep-dive">
+                <position>Expandable section at bottom</position>
+                <content>
+                    <item>Detailed technical analysis</item>
+                    <item>Code snippets and examples</item>
+                    <item>API response samples</item>
+                    <item>Configuration recommendations</item>
+                </content>
+                <format>Collapsible accordion with syntax-highlighted code</format>
+            </section>
+        </report-sections>
+        
+        <interactive-features>
+            <feature id="export">
+                <formats>PDF, JSON, CSV, PowerPoint</formats>
+                <customization>Select sections to include</customization>
+                <branding>Company logo and colors support</branding>
+            </feature>
+            
+            <feature id="share">
+                <options>Generate shareable link, email report</options>
+                <permissions>View-only or interactive modes</permissions>
+            </feature>
+            
+            <feature id="compare">
+                <capability>Compare multiple optimization runs</capability>
+                <visualization>Side-by-side comparison view</visualization>
+            </feature>
+            
+            <feature id="simulate">
+                <capability>What-if analysis with parameter adjustment</capability>
+                <realtime>Live update of projections as parameters change</realtime>
+            </feature>
+        </interactive-features>
+        
+        <visual-enhancements>
+            <enhancement>Smooth animations for data transitions</enhancement>
+            <enhancement>Loading skeletons for progressive rendering</enhancement>
+            <enhancement>Interactive tooltips with additional context</enhancement>
+            <enhancement>Confidence indicators (high/medium/low) with visual cues</enhancement>
+            <enhancement>Print-friendly layout option</enhancement>
+            <enhancement>Dark mode support for reports</enhancement>
+        </visual-enhancements>
+    </comprehensive-reporting>
     
     <persistent-response-card>
         <structure>
