@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Unified Chat UI/UX Specification</name>
+        <type>unified_chat_ui_ux</type>
+        <version>4.0</version>
+        <created>2025-08-11</created>
+        <description>Unified chat interface specification with strict backend-frontend data coherence and real-time data flow</description>
+    </metadata>
+    
+    <primary-goal>World-class chat interface with REAL backend data, intelligent response streaming, and zero duplicate information</primary-goal>
+    
+    <core-principles>
+        <principle id="real-data-only">
+            <name>Real Data Only</name>
+            <description>ALL displayed data must come from backend WebSocket messages. No fake or placeholder data except single presence indicator</description>
+            <enforcement>TypeScript types must match backend schemas exactly</enforcement>
+        </principle>
+        <principle id="single-source-truth">
+            <name>Single Source of Truth</name>
+            <description>Each piece of information appears exactly once in its relevant context. No duplicates across UI</description>
+        </principle>
+        <principle id="persistent-response">
+            <name>Persistent Response Card</name>
+            <description>Single evolving response card that updates with fast/medium/slow data as it arrives</description>
+        </principle>
+        <principle id="backend-driven">
+            <name>Backend-Driven UI State</name>
+            <description>UI state transitions based on WebSocket events, not timers or fake data</description>
+        </principle>
+    </core-principles>
+    
+    <backend-frontend-contract>
+        <websocket-events>
+            <!-- Fast Layer Events (0-100ms) -->
+            <event type="agent_started">
+                <payload>
+                    <field name="agent_name" type="string">Current agent name</field>
+                    <field name="timestamp" type="number">Unix timestamp</field>
+                    <field name="run_id" type="string">Unique run identifier</field>
+                </payload>
+                <ui-update>Show agent name in response card header</ui-update>
+            </event>
+            
+            <event type="tool_executing">
+                <payload>
+                    <field name="tool_name" type="string">Tool being executed</field>
+                    <field name="agent_name" type="string">Agent using the tool</field>
+                    <field name="timestamp" type="number">Start timestamp</field>
+                </payload>
+                <ui-update>Add tool badge to fast layer</ui-update>
+            </event>
+            
+            <!-- Medium Layer Events (100ms-1s) -->
+            <event type="agent_thinking">
+                <payload>
+                    <field name="thought" type="string">Current thinking/status</field>
+                    <field name="agent_name" type="string">Agent name</field>
+                    <field name="step_number" type="number">Current step</field>
+                    <field name="total_steps" type="number">Estimated total steps</field>
+                </payload>
+                <ui-update>Update medium layer with thought text</ui-update>
+            </event>
+            
+            <event type="partial_result">
+                <payload>
+                    <field name="content" type="string">Partial markdown content</field>
+                    <field name="agent_name" type="string">Source agent</field>
+                    <field name="is_complete" type="boolean">Whether this completes the section</field>
+                </payload>
+                <ui-update>Stream content to medium layer</ui-update>
+            </event>
+            
+            <!-- Slow Layer Events (1s+) -->
+            <event type="agent_completed">
+                <payload>
+                    <field name="agent_name" type="string">Completed agent</field>
+                    <field name="duration_ms" type="number">Execution duration</field>
+                    <field name="result" type="object">Agent-specific result data</field>
+                    <field name="metrics" type="object">Performance metrics</field>
+                </payload>
+                <ui-update>Move agent data to slow layer, update metrics</ui-update>
+            </event>
+            
+            <event type="final_report">
+                <payload>
+                    <field name="report" type="object">Complete analysis report</field>
+                    <field name="total_duration_ms" type="number">Total execution time</field>
+                    <field name="agent_metrics" type="array">Per-agent metrics</field>
+                    <field name="recommendations" type="array">Optimization recommendations</field>
+                    <field name="action_plan" type="array">Implementation steps</field>
+                </payload>
+                <ui-update>Populate slow layer with complete report</ui-update>
+            </event>
+            
+            <event type="error">
+                <payload>
+                    <field name="error_message" type="string">Error description</field>
+                    <field name="error_code" type="string">Error identifier</field>
+                    <field name="agent_name" type="string">Agent where error occurred</field>
+                    <field name="recoverable" type="boolean">Whether processing can continue</field>
+                </payload>
+                <ui-update>Show error in appropriate layer based on severity</ui-update>
+            </event>
+        </websocket-events>
+        
+        <data-flow>
+            <rule>Frontend NEVER generates status messages - only displays what backend sends</rule>
+            <rule>Timing data comes from backend timestamps, not frontend timers</rule>
+            <rule>Agent names, tool names, and status messages are backend-provided strings</rule>
+            <rule>Progress percentages calculated by backend based on actual work done</rule>
+            <rule>Presence indicator is the ONLY frontend-generated visual (simple spinner)</rule>
+        </data-flow>
+    </backend-frontend-contract>
+    
+    <persistent-response-card>
+        <structure>
+            <layer id="fast" update-frequency="0-100ms">
+                <name>Fast Layer - Immediate Feedback</name>
+                <position>Top of card</position>
+                <height>48px</height>
+                <elements>
+                    <element>Current agent name (from agent_started event)</element>
+                    <element>Active tool badges (from tool_executing events)</element>
+                    <element>Presence indicator (spinning icon, only non-data element)</element>
+                </elements>
+                <transitions>
+                    <transition>Instant updates, no animation</transition>
+                    <transition>Tool badges appear/disappear immediately</transition>
+                </transitions>
+            </layer>
+            
+            <layer id="medium" update-frequency="100ms-1s">
+                <name>Medium Layer - Progressive Updates</name>
+                <position>Middle of card</position>
+                <height>Dynamic (min 100px, max 400px)</height>
+                <elements>
+                    <element>Streaming thought text (from agent_thinking events)</element>
+                    <element>Partial results markdown (from partial_result events)</element>
+                    <element>Step progress (X of Y steps from backend)</element>
+                </elements>
+                <transitions>
+                    <transition>Smooth text streaming with cursor</transition>
+                    <transition>Fade in for new content blocks</transition>
+                </transitions>
+            </layer>
+            
+            <layer id="slow" update-frequency="1s+">
+                <name>Slow Layer - Complete Results</name>
+                <position>Bottom of card</position>
+                <height>Dynamic (expands as needed)</height>
+                <elements>
+                    <element>Completed agent results (from agent_completed events)</element>
+                    <element>Final report sections (from final_report event)</element>
+                    <element>Metrics and timings (from backend calculations)</element>
+                    <element>Recommendations and action plans (from backend analysis)</element>
+                </elements>
+                <transitions>
+                    <transition>Slide down animation when section completes</transition>
+                    <transition>Smooth height expansion</transition>
+                </transitions>
+            </layer>
+        </structure>
+        
+        <behavior>
+            <rule>Card persists throughout entire conversation</rule>
+            <rule>Layers build up progressively - fast appears first, then medium, then slow</rule>
+            <rule>Previous layer content moves down as new layers populate</rule>
+            <rule>Completed content in slow layer becomes static and scrollable</rule>
+            <rule>Card collapses to summary view after completion (expandable)</rule>
+        </behavior>
+    </persistent-response-card>
+    
+    <component-architecture>
+        <component id="MainChat">
+            <description>Root chat component - single import in app/chat</description>
+            <location>components/chat/MainChat.tsx</location>
+            <responsibilities>
+                <item>WebSocket connection management</item>
+                <item>Message history rendering</item>
+                <item>Response card container</item>
+            </responsibilities>
+            <children>
+                <child>ChatHeader</child>
+                <child>MessageList</child>
+                <child>PersistentResponseCard</child>
+                <child>ChatInput</child>
+            </children>
+        </component>
+        
+        <component id="PersistentResponseCard">
+            <description>Three-layer response card that evolves with real data</description>
+            <location>components/chat/PersistentResponseCard.tsx</location>
+            <props>
+                <prop name="fastLayerData" type="FastLayerData | null">From agent_started, tool_executing</prop>
+                <prop name="mediumLayerData" type="MediumLayerData | null">From agent_thinking, partial_result</prop>
+                <prop name="slowLayerData" type="SlowLayerData | null">From agent_completed, final_report</prop>
+                <prop name="isProcessing" type="boolean">Show presence indicator</prop>
+            </props>
+            <state-management>
+                <rule>Props are derived from WebSocket message store</rule>
+                <rule>No local state except UI-only concerns (expand/collapse)</rule>
+            </state-management>
+        </component>
+        
+        <component id="FastLayer">
+            <location>components/chat/layers/FastLayer.tsx</location>
+            <data-source>WebSocket events: agent_started, tool_executing</data-source>
+            <update-strategy>Immediate replacement, no buffering</update-strategy>
+        </component>
+        
+        <component id="MediumLayer">
+            <location>components/chat/layers/MediumLayer.tsx</location>
+            <data-source>WebSocket events: agent_thinking, partial_result</data-source>
+            <update-strategy>Stream with 100ms debounce for smooth text flow</update-strategy>
+        </component>
+        
+        <component id="SlowLayer">
+            <location>components/chat/layers/SlowLayer.tsx</location>
+            <data-source>WebSocket events: agent_completed, final_report</data-source>
+            <update-strategy>Append completed sections, never update existing</update-strategy>
+        </component>
+    </component-architecture>
+    
+    <information-hierarchy>
+        <rule id="no-duplicates">
+            <description>Each piece of information appears exactly once</description>
+            <examples>
+                <example>Agent name: Only in FastLayer header, not repeated elsewhere</example>
+                <example>Execution time: Only in SlowLayer metrics, not in header</example>
+                <example>Error messages: Only in relevant layer, not duplicated</example>
+            </examples>
+        </rule>
+        
+        <rule id="progressive-disclosure">
+            <description>Information revealed as it becomes available from backend</description>
+            <flow>
+                <step>Fast: Agent name and current tool</step>
+                <step>Medium: Thinking process and partial results</step>
+                <step>Slow: Complete results and metrics</step>
+            </flow>
+        </rule>
+        
+        <rule id="context-relevance">
+            <description>Information shown only where contextually relevant</description>
+            <placement>
+                <item>Tools: Fast layer (immediate feedback needed)</item>
+                <item>Thoughts: Medium layer (progressive understanding)</item>
+                <item>Reports: Slow layer (complete analysis)</item>
+            </placement>
+        </rule>
+    </information-hierarchy>
+    
+    <type-definitions>
+        <typescript-types>
+            ```typescript
+            // Exact match with backend WebSocket event payloads
+            interface FastLayerData {
+                agentName: string;        // From agent_started event
+                activeTools: string[];    // From tool_executing events
+                timestamp: number;        // From backend
+                runId: string;           // From backend
+            }
+            
+            interface MediumLayerData {
+                thought: string;          // From agent_thinking event
+                partialContent: string;   // From partial_result events
+                stepNumber: number;       // From backend
+                totalSteps: number;       // From backend
+                agentName: string;        // From backend
+            }
+            
+            interface SlowLayerData {
+                completedAgents: AgentResult[];     // From agent_completed events
+                finalReport: FinalReport | null;    // From final_report event
+                totalDuration: number;               // From backend
+                metrics: ExecutionMetrics;          // From backend
+            }
+            
+            interface AgentResult {
+                agentName: string;
+                duration: number;
+                result: any;  // Agent-specific, from backend
+                metrics: any; // Agent-specific, from backend
+            }
+            
+            interface FinalReport {
+                report: any;                        // Complete report object
+                recommendations: Recommendation[];   // From backend
+                actionPlan: ActionStep[];           // From backend
+                agentMetrics: AgentMetric[];       // From backend
+            }
+            ```
+        </typescript-types>
+    </type-definitions>
+    
+    <visual-design>
+        <persistent-card-styling>
+            <fast-layer>
+                <background>Linear gradient: #3B82F6 to #2563EB</background>
+                <text-color>White</text-color>
+                <height>48px fixed</height>
+                <padding>12px horizontal</padding>
+                <elements>
+                    <agent-name>Font-weight: 600, font-size: 14px</agent-name>
+                    <tool-badges>Rounded pills, 8px padding, semi-transparent background</tool-badges>
+                    <presence>Animated spin, 16px size, opacity 0.8</presence>
+                </elements>
+            </fast-layer>
+            
+            <medium-layer>
+                <background>White with subtle top shadow</background>
+                <text-color>#27272A</text-color>
+                <padding>16px</padding>
+                <min-height>100px</min-height>
+                <max-height>400px with internal scroll</max-height>
+                <streaming-cursor>Blinking vertical bar at text end</streaming-cursor>
+            </medium-layer>
+            
+            <slow-layer>
+                <background>#FAFAFA</background>
+                <border-top>1px solid #E4E4E7</border-top>
+                <padding>20px</padding>
+                <sections>
+                    <section-header>Font-weight: 600, font-size: 16px, margin-bottom: 12px</section-header>
+                    <content>Font-size: 14px, line-height: 1.6</content>
+                    <metrics>Monospace font, background: white, border: 1px solid #E4E4E7</metrics>
+                </sections>
+            </slow-layer>
+        </persistent-card-styling>
+        
+        <animations>
+            <animation id="layer-transition">
+                <description>Smooth transition as layers populate</description>
+                <duration>300ms</duration>
+                <easing>ease-out</easing>
+                <effect>Height expansion with opacity fade-in</effect>
+            </animation>
+            
+            <animation id="content-streaming">
+                <description>Text appears character by character in medium layer</description>
+                <speed>30 characters per second</speed>
+                <smooth>RequestAnimationFrame for 60fps</smooth>
+            </animation>
+            
+            <animation id="completion-collapse">
+                <description>Card collapses to summary after completion</description>
+                <delay>2000ms after final_report</delay>
+                <duration>400ms</duration>
+                <maintains>Expandable state for full view</maintains>
+            </animation>
+        </animations>
+    </visual-design>
+    
+    <performance-requirements>
+        <requirement id="websocket-efficiency">
+            <description>Efficient WebSocket message handling</description>
+            <strategies>
+                <strategy>Message batching with 50ms window</strategy>
+                <strategy>Selective component updates using React.memo</strategy>
+                <strategy>Virtual scrolling for message history</strategy>
+            </strategies>
+        </requirement>
+        
+        <requirement id="render-performance">
+            <description>60fps during all interactions</description>
+            <strategies>
+                <strategy>CSS transforms for animations (GPU accelerated)</strategy>
+                <strategy>RequestAnimationFrame for content streaming</strategy>
+                <strategy>Debounced updates for rapid events</strategy>
+            </strategies>
+        </requirement>
+        
+        <requirement id="memory-management">
+            <description>Efficient memory usage for long conversations</description>
+            <strategies>
+                <strategy>Message pagination (load 50 at a time)</strategy>
+                <strategy>Clear old WebSocket event data after processing</strategy>
+                <strategy>Lazy load historical messages</strategy>
+            </strategies>
+        </requirement>
+    </performance-requirements>
+    
+    <testing-requirements>
+        <unit-tests>
+            <test>PersistentResponseCard renders correct layers based on props</test>
+            <test>Layers update only with matching WebSocket events</test>
+            <test>No duplicate information across layers</test>
+            <test>Type safety between backend events and frontend types</test>
+        </unit-tests>
+        
+        <integration-tests>
+            <test>WebSocket events trigger correct UI updates</test>
+            <test>Fast/medium/slow layers populate in correct order</test>
+            <test>Error events handled appropriately per layer</test>
+            <test>Complete flow from agent_started to final_report</test>
+        </integration-tests>
+        
+        <e2e-tests>
+            <test>Full conversation with real backend data</test>
+            <test>Response card persists across component re-renders</test>
+            <test>Performance remains smooth with 100+ messages</test>
+            <test>Graceful handling of WebSocket disconnection/reconnection</test>
+        </e2e-tests>
+    </testing-requirements>
+    
+    <implementation-checklist>
+        <phase number="1" name="Type Alignment">
+            <task>Create TypeScript interfaces matching backend WebSocket events exactly</task>
+            <task>Generate types from backend Pydantic schemas</task>
+            <task>Validate no type mismatches between frontend and backend</task>
+        </phase>
+        
+        <phase number="2" name="Persistent Card Implementation">
+            <task>Build PersistentResponseCard component with three layers</task>
+            <task>Implement FastLayer with real agent_started data</task>
+            <task>Implement MediumLayer with streaming from agent_thinking</task>
+            <task>Implement SlowLayer with agent_completed and final_report</task>
+        </phase>
+        
+        <phase number="3" name="WebSocket Integration">
+            <task>Update WebSocketProvider to handle all defined events</task>
+            <task>Create event-to-layer mapping logic</task>
+            <task>Implement message store with proper typing</task>
+            <task>Add event debouncing for medium layer</task>
+        </phase>
+        
+        <phase number="4" name="Information Hierarchy">
+            <task>Audit all components for duplicate information</task>
+            <task>Remove any frontend-generated status messages</task>
+            <task>Ensure each data point has single display location</task>
+            <task>Validate all displayed data traces to backend event</task>
+        </phase>
+        
+        <phase number="5" name="Testing and Validation">
+            <task>Write unit tests for each layer component</task>
+            <task>Create integration tests for WebSocket flow</task>
+            <task>Add E2E tests for complete conversation</task>
+            <task>Performance testing with high message volume</task>
+        </phase>
+    </implementation-checklist>
+</specification>
