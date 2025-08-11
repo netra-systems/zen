@@ -400,33 +400,33 @@ class DevLauncher:
             print(f"   Command: {' '.join(cmd)}")
             print(f"   Working directory: {cwd_path}")
         
-        # Set environment with backend URLs
-        env = os.environ.copy()
-        env["NEXT_PUBLIC_API_URL"] = backend_info["api_url"]
-        env["NEXT_PUBLIC_WS_URL"] = backend_info["ws_url"]
-        env["PORT"] = str(port)
-        
-        # Also ensure PYTHONPATH is set for any Python scripts
-        python_path = env.get("PYTHONPATH", "")
-        if python_path:
-            env["PYTHONPATH"] = f"{PROJECT_ROOT}{os.pathsep}{python_path}"
-        else:
-            env["PYTHONPATH"] = str(PROJECT_ROOT)
-        
-        # Disable hot reload if requested
-        # Next.js respects WATCHPACK_POLLING environment variable
-        # Setting it to a very high value effectively disables file watching
-        if not self.frontend_reload:
-            # Disable file watching by setting a very high polling interval
-            env["WATCHPACK_POLLING"] = "false"
-            # Also disable Fast Refresh
-            env["NEXT_DISABLE_FAST_REFRESH"] = "true"
-            print("   Hot reload: DISABLED (dev server without file watching)")
-        else:
-            print("   Hot reload: ENABLED")
-        
         # Start process
         try:
+            # Set environment with backend URLs - do this right before starting the process
+            # to ensure we get any secrets that were loaded
+            env = os.environ.copy()
+            env["NEXT_PUBLIC_API_URL"] = backend_info["api_url"]
+            env["NEXT_PUBLIC_WS_URL"] = backend_info["ws_url"]
+            env["PORT"] = str(port)
+            
+            # Also ensure PYTHONPATH is set for any Python scripts
+            python_path = env.get("PYTHONPATH", "")
+            if python_path:
+                env["PYTHONPATH"] = f"{PROJECT_ROOT}{os.pathsep}{python_path}"
+            else:
+                env["PYTHONPATH"] = str(PROJECT_ROOT)
+            
+            # Disable hot reload if requested
+            # Next.js respects WATCHPACK_POLLING environment variable
+            # Setting it to a very high value effectively disables file watching
+            if not self.frontend_reload:
+                # Disable file watching by setting a very high polling interval
+                env["WATCHPACK_POLLING"] = "false"
+                # Also disable Fast Refresh
+                env["NEXT_DISABLE_FAST_REFRESH"] = "true"
+                print("   Hot reload: DISABLED (dev server without file watching)")
+            else:
+                print("   Hot reload: ENABLED")
             if sys.platform == "win32":
                 # Windows: create new process group
                 process = subprocess.Popen(
