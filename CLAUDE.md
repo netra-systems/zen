@@ -33,8 +33,30 @@ Netra AI Optimization Platform - Enterprise-grade system for optimizing AI workl
 # Recommended: Start both backend and frontend
 python dev_launcher.py --dynamic --no-backend-reload --load-secrets
 
-# Quick validation before any changes
-python test_runner.py --mode quick
+# Quick validation before any changes (RECOMMENDED)
+python test_runner.py --level smoke
+```
+
+### Testing
+```bash
+# UNIFIED TEST RUNNER - Single entry point for all testing
+# Quick smoke tests (< 30 seconds) - Use for pre-commit validation
+python test_runner.py --level smoke
+
+# Unit tests during development (1-2 minutes)
+python test_runner.py --level unit
+
+# Integration tests for feature validation (3-5 minutes)
+python test_runner.py --level integration
+
+# Full comprehensive testing with coverage (10-15 minutes)
+python test_runner.py --level comprehensive
+
+# Critical path tests only (1-2 minutes)
+python test_runner.py --level critical
+
+# Simple fallback runner (if main runner has issues)
+python test_runner.py --simple
 ```
 
 ## Critical Specifications
@@ -62,7 +84,7 @@ python test_runner.py --mode quick
 ### MANDATORY for Every Change
 1. **Consult `SPEC/code_changes.xml`** - Complete checklist for any modification
 2. **Update import tests** when adding new modules/dependencies
-3. **Run quick tests** before any commit: `python test_runner.py --mode quick`
+3. **Run quick tests** before any commit: `python test_runner.py --level smoke`
 4. **Update relevant specs** with learnings and patterns discovered
 
 ### Key Patterns

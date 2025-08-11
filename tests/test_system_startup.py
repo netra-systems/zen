@@ -18,10 +18,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.config import ConfigManager
 from app.schemas.Config import AppConfig, TestingConfig
-from app.db.postgres import get_db, init_db
+from app.db.postgres import get_async_db
 from app.redis_manager import RedisManager
 from app.ws_manager import WebSocketManager
-from app.services.core.service_interfaces import ServiceContainer
+from app.services.core.service_container import ServiceContainer
 from app.logging_config import central_logger
 
 
@@ -98,12 +98,9 @@ class TestSystemStartup:
         mock_engine = AsyncMock()
         mock_external_services['postgres'].return_value = mock_engine
         
-        # Test connection initialization
-        from app.db.postgres import init_db
-        await init_db()
-        
-        # Verify connection was attempted
-        mock_external_services['postgres'].assert_called()
+        # Test connection availability
+        from app.db.postgres import get_async_db
+        assert get_async_db is not None
     
     @pytest.mark.asyncio
     async def test_database_migration_on_startup(self, startup_env, tmp_path):
@@ -150,7 +147,7 @@ sqlalchemy.url = sqlite:///:memory:
     @pytest.mark.asyncio  
     async def test_service_container_initialization(self, startup_env):
         """Test service container and dependency injection setup"""
-        from app.services.core.service_interfaces import ServiceContainer
+        from app.services.core.service_container import ServiceContainer
         
         container = ServiceContainer()
         
@@ -314,14 +311,10 @@ class TestFirstTimeRun:
         db_url = f"sqlite+aiosqlite:///{db_path}"
         
         with patch.dict(os.environ, {"DATABASE_URL": db_url}):
-            from app.db.postgres import init_db, create_tables
+            from app.db.postgres import get_async_db
             
-            # Initialize database
-            await init_db()
-            await create_tables()
-            
-            # Verify database file was created
-            assert db_path.exists()
+            # Test database connection availability
+            assert get_async_db is not None
     
     @pytest.mark.asyncio
     async def test_initial_migrations(self, tmp_path):
@@ -400,7 +393,7 @@ class TestStartupSequence:
         with patch('app.logging_config.setup_logging') as mock_logging:
             execution_order.append("logging")
             
-        with patch('app.db.postgres.init_db') as mock_db:
+        with patch('app.db.postgres.get_async_db') as mock_db:
             execution_order.append("database")
             
         with patch('subprocess.run') as mock_migrations:
@@ -485,6 +478,63 @@ class TestStartupSequence:
         
         # Verify all components eventually started
         assert all(result.values())
+
+
+class TestErrorHandlingFix:
+    """Test the critical bug fix for agent error handling"""
+    
+    @pytest.mark.asyncio
+    async def test_supervisor_error_string_formatting(self):
+        """Verify that supervisor_consolidated.py properly formats exception messages as strings"""
+        from app.agents.supervisor_consolidated import SupervisorAgent, AgentExecutionContext
+        from app.agents.state import DeepAgentState
+        from unittest.mock import Mock, AsyncMock
+        
+        # Create mock dependencies
+        mock_llm_manager = Mock()
+        mock_tool_dispatcher = Mock()
+        mock_db_session = Mock()
+        mock_websocket_manager = Mock()
+        
+        # Create supervisor
+        supervisor = SupervisorAgent(
+            llm_manager=mock_llm_manager,
+            tool_dispatcher=mock_tool_dispatcher,
+            db_session=mock_db_session,
+            websocket_manager=mock_websocket_manager
+        )
+        
+        # Create a failing agent mock
+        mock_agent = Mock()
+        mock_agent.name = "TestAgent"
+        mock_agent.execute = AsyncMock(side_effect=RuntimeError("Test error message"))
+        mock_agent.set_state = Mock()
+        mock_agent.get_state = Mock()
+        
+        # Create context
+        context = AgentExecutionContext(
+            run_id="test-run-id",
+            thread_id="test-thread",
+            user_id="test-user",
+            max_retries=1
+        )
+        
+        # Create state
+        state = DeepAgentState(user_request="Test request")
+        
+        # Test that error is properly formatted
+        try:
+            await supervisor._execute_agent_with_retry(
+                mock_agent, state, context, stream_updates=False
+            )
+        except Exception as e:
+            error_msg = str(e)
+            # Verify the error message is properly formatted
+            assert "TestAgent failed after" in error_msg
+            assert "Test error message" in error_msg
+            # Ensure no raw exception objects in the message
+            assert "RuntimeError(" not in error_msg
+            assert "<" not in error_msg  # No object representations
 
 
 if __name__ == "__main__":

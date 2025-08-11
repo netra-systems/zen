@@ -3,8 +3,8 @@
     <metadata>
         <name>Testing Specification</name>
         <type>testing</type>
-        <version>2.0</version>
-        <last_updated>2025-01-11</last_updated>
+        <version>2.1</version>
+        <last_updated>2025-08-11</last_updated>
     </metadata>
     
     <overview>
@@ -46,6 +46,99 @@
             <coverage_target>100%</coverage_target>
         </category>
     </test_categories>
+    
+    <unified_test_runner>
+        <description>Single entry point for all Netra AI Platform testing with automatic report generation</description>
+        <path>test_runner.py</path>
+        
+        <test_levels>
+            <level name="smoke" recommended="pre_commit">
+                <description>Quick smoke tests for basic functionality (< 30 seconds)</description>
+                <purpose>Pre-commit validation, basic health checks</purpose>
+                <command>python test_runner.py --level smoke</command>
+                <timeout>30</timeout>
+                <coverage>false</coverage>
+                <components>backend+frontend</components>
+            </level>
+            
+            <level name="unit">
+                <description>Unit tests for isolated components (1-2 minutes)</description>
+                <purpose>Development validation, component testing</purpose>
+                <command>python test_runner.py --level unit</command>
+                <timeout>120</timeout>
+                <coverage>false</coverage>
+                <components>backend+frontend</components>
+            </level>
+            
+            <level name="integration">
+                <description>Integration tests for component interaction (3-5 minutes)</description>
+                <purpose>Feature validation, API testing</purpose>
+                <command>python test_runner.py --level integration</command>
+                <timeout>300</timeout>
+                <coverage>false</coverage>
+                <components>backend+frontend</components>
+            </level>
+            
+            <level name="comprehensive">
+                <description>Full test suite with coverage (10-15 minutes)</description>
+                <purpose>Pre-release validation, full system testing</purpose>
+                <command>python test_runner.py --level comprehensive</command>
+                <timeout>900</timeout>
+                <coverage>true</coverage>
+                <components>backend+frontend</components>
+            </level>
+            
+            <level name="critical">
+                <description>Critical path tests only (1-2 minutes)</description>
+                <purpose>Essential functionality verification</purpose>
+                <command>python test_runner.py --level critical</command>
+                <timeout>120</timeout>
+                <coverage>false</coverage>
+                <components>backend_only</components>
+            </level>
+        </test_levels>
+        
+        <fallback_runners>
+            <runner name="simple_fallback">
+                <description>Simple fallback for when main runner has issues</description>
+                <command>python test_runner.py --simple</command>
+                <recommended_for>Troubleshooting test infrastructure issues</recommended_for>
+            </runner>
+            
+            <runner name="direct_pytest">
+                <description>Direct pytest for specific test debugging</description>
+                <command>python -m pytest app/tests/test_simple_health.py -v</command>
+                <recommended_for>Individual test file debugging</recommended_for>
+            </runner>
+        </fallback_runners>
+        
+        <report_generation>
+            <description>All tests automatically save reports to test_reports/ folder</description>
+            <formats>
+                <format>JSON (machine readable)</format>
+                <format>Markdown (human readable)</format>
+                <format>Latest report (overwrites for quick access)</format>
+            </formats>
+            <location>test_reports/</location>
+            <naming_convention>test_report_{level}_{timestamp}.{format}</naming_convention>
+        </report_generation>
+    </unified_test_runner>
+    
+    <working_test_files>
+        <test_file name="test_simple_health.py">
+            <path>app/tests/test_simple_health.py</path>
+            <description>Basic tests that always pass, good for validation</description>
+            <test_count>5</test_count>
+            <reliability>100%</reliability>
+        </test_file>
+        
+        <test_file name="test_working_health.py">
+            <path>app/tests/test_working_health.py</path>
+            <description>Tests app imports and configuration without hanging</description>
+            <test_count>5</test_count>
+            <reliability>100%</reliability>
+        </test_file>
+    </working_test_files>
     
     <e2e_real_llm_tests>
         <description>

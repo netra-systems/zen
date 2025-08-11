@@ -55,14 +55,15 @@ Comprehensive test suite for validating system startup, initialization, and end-
   12. Concurrent users
   13. Graceful shutdown
 
-### 5. Basic Startup Tests
-- **File**: `tests/test_system_startup_basic.py`
-- **Purpose**: Simplified tests that work with current codebase
+### 5. Basic Startup Tests (merged into comprehensive tests)
+- **File**: `tests/test_system_startup.py`
+- **Purpose**: Comprehensive startup tests including basic functionality
 - **Coverage**:
   - Import validation
   - Directory structure
   - Critical files
   - Basic performance
+  - Error handling fix validation
 
 ## Running Tests
 
@@ -87,7 +88,7 @@ python scripts/test_system_startup.py --mode full --coverage
 ### Individual Test Files
 ```bash
 # Backend startup tests
-pytest tests/test_system_startup_basic.py -v
+pytest tests/test_system_startup.py -v
 
 # Frontend startup tests (from frontend directory)
 cd frontend
@@ -183,7 +184,7 @@ Reports are generated in `reports/system-startup/`:
 python scripts/test_system_startup.py --verbose
 
 # Run specific test with debugging
-pytest tests/test_system_startup_basic.py::TestBasicStartup::test_config_manager_import -vv
+pytest tests/test_system_startup.py::TestBasicStartup::test_config_manager_import -vv
 
 # Check environment
 python -c "import sys; print(sys.path)"
