@@ -194,9 +194,7 @@ export const MessageInputWithCommands: React.FC = () => {
         type: 'user',
         content: trimmedMessage,
         created_at: new Date().toISOString(),
-        displayed_to_user: true,
-        // Mark as admin message if it's an admin command
-        metadata: isAdmin && trimmedMessage.startsWith('/') ? { admin_action: true } : undefined
+        displayed_to_user: true
       };
       addMessage(userMessage);
       

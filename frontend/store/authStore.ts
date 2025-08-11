@@ -35,7 +35,7 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>()(
-  immer((set) => ({
+  immer((set, get) => ({
     isAuthenticated: false,
     user: null,
     token: null,
@@ -60,7 +60,7 @@ export const useAuthStore = create<AuthState>()(
         state.user = null;
         state.token = null;
         state.error = null;
-        // Clear token from localStorage
+        // Remove token from localStorage
         if (typeof window !== 'undefined') {
           localStorage.removeItem('jwt_token');
         }
@@ -76,10 +76,10 @@ export const useAuthStore = create<AuthState>()(
         state.error = error;
       }),
 
-    updateUser: (userData) =>
+    updateUser: (userUpdate) =>
       set((state) => {
         if (state.user) {
-          state.user = { ...state.user, ...userData };
+          state.user = { ...state.user, ...userUpdate };
         }
       }),
 
@@ -96,32 +96,32 @@ export const useAuthStore = create<AuthState>()(
       }),
 
     hasPermission: (permission) => {
-      const state = useAuthStore.getState();
+      const state = get();
       if (!state.user) return false;
       return state.user.permissions?.includes(permission) || false;
     },
 
     hasAnyPermission: (permissions) => {
-      const state = useAuthStore.getState();
+      const state = get();
       if (!state.user) return false;
       return permissions.some(p => state.user?.permissions?.includes(p)) || false;
     },
 
     hasAllPermissions: (permissions) => {
-      const state = useAuthStore.getState();
+      const state = get();
       if (!state.user) return false;
       return permissions.every(p => state.user?.permissions?.includes(p)) || false;
     },
 
     isAdminOrHigher: () => {
-      const state = useAuthStore.getState();
+      const state = get();
       if (!state.user) return false;
       return ['admin', 'super_admin'].includes(state.user.role || '') || 
              state.user.is_superuser || false;
     },
 
     isDeveloperOrHigher: () => {
-      const state = useAuthStore.getState();
+      const state = get();
       if (!state.user) return false;
       return ['developer', 'admin', 'super_admin'].includes(state.user.role || '') || 
              state.user.is_developer || 

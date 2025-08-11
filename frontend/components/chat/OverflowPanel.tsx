@@ -10,7 +10,6 @@ import {
   Activity,
   AlertCircle,
   Download,
-  Filter,
   Search,
   Maximize2,
   Minimize2
@@ -26,15 +25,16 @@ interface OverflowPanelProps {
 type TabType = 'events' | 'timeline' | 'state' | 'metrics' | 'errors';
 
 export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose }) => {
-  const { wsEventBuffer, performanceMetrics, activeThreadId, currentRunId } = useUnifiedChatStore();
+  const { currentRunId, messages } = useUnifiedChatStore();
   const [activeTab, setActiveTab] = useState<TabType>('events');
   const [eventFilter, setEventFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isMaximized, setIsMaximized] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Get events from circular buffer
-  const events = wsEventBuffer?.getAll() || [];
+  // Mock events for now - replace with actual event buffer when available
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const events: any[] = [];
   
   // Filter events based on search and filter
   const filteredEvents = events.filter(event => {
@@ -53,10 +53,9 @@ export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose })
   const exportDebugData = () => {
     const debugData = {
       timestamp: new Date().toISOString(),
-      activeThreadId,
       currentRunId,
       events: events.slice(-100), // Last 100 events
-      performanceMetrics,
+      messages: messages.slice(-20), // Last 20 messages
       userAgent: navigator.userAgent,
     };
 
@@ -75,9 +74,9 @@ export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose })
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-        e.preventDefault();
-        if (isOpen) onClose();
-        else setIsMaximized(false);
+        if (isOpen) {
+          onClose();
+        }
       }
     };
 
@@ -86,10 +85,10 @@ export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose })
   }, [isOpen, onClose]);
 
   const tabs = [
-    { id: 'events' as TabType, label: 'WebSocket Events', icon: Terminal },
-    { id: 'timeline' as TabType, label: 'Run Timeline', icon: Clock },
-    { id: 'state' as TabType, label: 'Backend State', icon: Database },
-    { id: 'metrics' as TabType, label: 'Performance', icon: Activity },
+    { id: 'events' as TabType, label: 'Events', icon: Terminal },
+    { id: 'timeline' as TabType, label: 'Timeline', icon: Clock },
+    { id: 'state' as TabType, label: 'State', icon: Database },
+    { id: 'metrics' as TabType, label: 'Metrics', icon: Activity },
     { id: 'errors' as TabType, label: 'Errors', icon: AlertCircle },
   ];
 
@@ -97,62 +96,89 @@ export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose })
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ y: '100%' }}
-          animate={{ y: 0 }}
-          exit={{ y: '100%' }}
-          transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 100 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className={cn(
-            "fixed bottom-0 left-0 right-0 bg-gray-900 text-gray-100 shadow-2xl z-50",
-            "border-t border-gray-700",
-            isMaximized ? "h-full" : "h-96"
+            "fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-2xl z-50",
+            isMaximized ? "h-[80vh]" : "h-[400px]",
+            "transition-[height] duration-300"
           )}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700">
+          <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-gray-50/50">
             <div className="flex items-center space-x-4">
-              <Terminal className="w-5 h-5 text-emerald-400" />
-              <h3 className="font-mono text-sm font-semibold">Developer Console</h3>
-              
-              {/* Tabs */}
+              <h3 className="text-sm font-semibold text-gray-900">Debug Panel</h3>
               <div className="flex space-x-1">
                 {tabs.map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      "px-3 py-1 text-xs font-mono rounded transition-colors duration-200",
-                      activeTab === tab.id 
-                        ? "bg-gray-700 text-emerald-400" 
-                        : "hover:bg-gray-700/50 text-gray-400"
+                      "px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200",
+                      activeTab === tab.id
+                        ? "bg-emerald-100 text-emerald-700 shadow-sm"
+                        : "text-gray-600 hover:bg-gray-100"
                     )}
                   >
-                    <tab.icon className="w-3 h-3 inline-block mr-1" />
-                    {tab.label}
+                    <div className="flex items-center space-x-1.5">
+                      <tab.icon className="w-3.5 h-3.5" />
+                      <span>{tab.label}</span>
+                    </div>
                   </button>
                 ))}
               </div>
             </div>
-
-            {/* Actions */}
+            
             <div className="flex items-center space-x-2">
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search..."
+                  className="pl-8 pr-3 py-1.5 text-xs bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                />
+              </div>
+              
+              {/* Event Filter */}
+              {activeTab === 'events' && eventTypes.length > 0 && (
+                <select
+                  value={eventFilter}
+                  onChange={(e) => setEventFilter(e.target.value)}
+                  className="px-3 py-1.5 text-xs bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                >
+                  <option value="">All Events</option>
+                  {eventTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              )}
+              
+              {/* Export Button */}
               <button
                 onClick={exportDebugData}
-                className="p-1.5 hover:bg-gray-700 rounded transition-colors duration-200"
+                className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
                 title="Export Debug Data"
               >
                 <Download className="w-4 h-4" />
               </button>
+              
+              {/* Maximize/Minimize */}
               <button
                 onClick={() => setIsMaximized(!isMaximized)}
-                className="p-1.5 hover:bg-gray-700 rounded transition-colors duration-200"
-                title={isMaximized ? "Minimize" : "Maximize"}
+                className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
               >
                 {isMaximized ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </button>
+              
+              {/* Close */}
               <button
                 onClick={onClose}
-                className="p-1.5 hover:bg-gray-700 rounded transition-colors duration-200"
-                title="Close (Ctrl+Shift+D)"
+                className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -160,127 +186,79 @@ export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose })
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-hidden flex flex-col">
-            {/* Tab Content */}
+          <div className="flex-1 overflow-hidden">
             {activeTab === 'events' && (
-              <>
-                {/* Filters */}
-                <div className="px-4 py-2 bg-gray-800/50 border-b border-gray-700 flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <Filter className="w-4 h-4 text-gray-400" />
-                    <select
-                      value={eventFilter}
-                      onChange={(e) => setEventFilter(e.target.value)}
-                      className="bg-gray-700 text-gray-100 text-xs px-2 py-1 rounded border border-gray-600 focus:border-emerald-500 focus:outline-none"
-                    >
-                      <option value="">All Events</option>
-                      {eventTypes.map(type => (
-                        <option key={type} value={type}>{type}</option>
-                      ))}
-                    </select>
+              <div className="h-full overflow-y-auto p-4" ref={scrollAreaRef}>
+                {filteredEvents.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                    <Terminal className="w-12 h-12 mb-2 opacity-50" />
+                    <p className="text-sm">No events captured</p>
+                    <p className="text-xs mt-1">Events will appear here as they occur</p>
                   </div>
-                  
-                  <div className="flex items-center space-x-2 flex-1">
-                    <Search className="w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search events..."
-                      className="flex-1 bg-gray-700 text-gray-100 text-xs px-2 py-1 rounded border border-gray-600 focus:border-emerald-500 focus:outline-none"
-                    />
-                  </div>
-                  
-                  <div className="text-xs text-gray-400">
-                    {filteredEvents.length} / {events.length} events
-                  </div>
-                </div>
-
-                {/* Event List */}
-                <div className="flex-1 overflow-y-auto font-mono text-xs" ref={scrollAreaRef}>
-                  {filteredEvents.map((event, index) => (
-                    <div
-                      key={`${event.timestamp}-${index}`}
-                      className="px-4 py-2 border-b border-gray-800 hover:bg-gray-800/50 group"
-                    >
-                      <div className="flex items-start space-x-2">
-                        <span className="text-gray-500 min-w-[140px]">
-                          {new Date(event.timestamp).toLocaleTimeString('en-US', { 
-                            hour12: false, 
-                            hour: '2-digit', 
-                            minute: '2-digit', 
-                            second: '2-digit',
-                            fractionalSecondDigits: 3 
-                          })}
-                        </span>
-                        <span className={cn(
-                          "px-2 py-0.5 rounded text-xs font-semibold min-w-[100px] text-center",
-                          event.type.includes('error') ? "bg-red-900/50 text-red-400" :
-                          event.type.includes('agent') ? "bg-purple-900/50 text-purple-400" :
-                          event.type.includes('tool') ? "bg-blue-900/50 text-blue-400" :
-                          "bg-gray-700 text-gray-300"
-                        )}>
-                          {event.type}
-                        </span>
-                        <div className="flex-1">
-                          <pre className="text-gray-300 whitespace-pre-wrap break-all">
-                            {JSON.stringify(event.payload, null, 2)}
-                          </pre>
+                ) : (
+                  <div className="space-y-2">
+                    {filteredEvents.map((event, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.01 }}
+                        className="p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <span className="px-2 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-700 rounded">
+                                {event.type}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {new Date(event.timestamp).toLocaleTimeString()}
+                              </span>
+                            </div>
+                            <pre className="mt-2 text-xs text-gray-700 overflow-x-auto">
+                              {JSON.stringify(event.payload, null, 2)}
+                            </pre>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
 
             {activeTab === 'timeline' && (
-              <div className="flex-1 p-4">
+              <div className="p-4">
                 <div className="text-center text-gray-400 mt-8">
                   <Clock className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>Run Timeline Visualization</p>
-                  <p className="text-xs mt-2">Gantt chart of agent executions coming soon</p>
+                  <p className="text-sm">Timeline view coming soon</p>
                 </div>
               </div>
             )}
 
             {activeTab === 'state' && (
-              <div className="flex-1 p-4 overflow-y-auto">
-                <div className="space-y-4 font-mono text-xs">
-                  <div>
-                    <h4 className="text-emerald-400 mb-2">Active Thread</h4>
-                    <div className="bg-gray-800 p-2 rounded">
-                      <code>{activeThreadId || 'None'}</code>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-emerald-400 mb-2">Current Run</h4>
-                    <div className="bg-gray-800 p-2 rounded">
-                      <code>{currentRunId || 'None'}</code>
-                    </div>
-                  </div>
+              <div className="p-4">
+                <div className="text-center text-gray-400 mt-8">
+                  <Database className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">State inspector coming soon</p>
                 </div>
               </div>
             )}
 
             {activeTab === 'metrics' && (
-              <div className="flex-1 p-4 overflow-y-auto">
-                <div className="grid grid-cols-2 gap-4">
-                  {performanceMetrics && Object.entries(performanceMetrics).map(([key, value]) => (
-                    <div key={key} className="bg-gray-800 p-3 rounded">
-                      <div className="text-xs text-gray-400 mb-1">{key}</div>
-                      <div className="text-lg font-mono text-emerald-400">{value}</div>
-                    </div>
-                  ))}
+              <div className="p-4">
+                <div className="text-center text-gray-400 mt-8">
+                  <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Performance metrics coming soon</p>
                 </div>
               </div>
             )}
 
             {activeTab === 'errors' && (
-              <div className="flex-1 p-4">
+              <div className="p-4">
                 <div className="text-center text-gray-400 mt-8">
                   <AlertCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>No errors detected</p>
+                  <p className="text-sm">No errors detected</p>
                 </div>
               </div>
             )}
