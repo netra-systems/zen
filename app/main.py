@@ -190,11 +190,28 @@ async def lifespan(app: FastAPI):
 
 from fastapi.middleware.cors import CORSMiddleware
 from app.auth.auth import oauth_client
+from starlette.responses import RedirectResponse
 
 app = FastAPI(lifespan=lifespan)
 
 # Initialize OAuth
 oauth_client.init_app(app)
+
+@app.middleware("http")
+async def cors_redirect_middleware(request: Request, call_next):
+    """Handle CORS for redirects (e.g., trailing slash redirects)."""
+    response = await call_next(request)
+    
+    # If it's a redirect and we're in development, add CORS headers
+    if isinstance(response, RedirectResponse) and settings.environment != "production":
+        origin = request.headers.get("origin")
+        if origin:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+            response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID"
+    
+    return response
 
 @app.middleware("http")
 async def error_context_middleware(request: Request, call_next):
@@ -238,11 +255,21 @@ async def log_requests(request: Request, call_next):
 # Configure CORS based on environment
 allowed_origins = []
 if settings.environment == "production":
-    # In production, only allow specific origins
-    allowed_origins = settings.cors_origins.split(",") if settings.cors_origins else ["https://netra.ai"]
+    # In production, only allow specific origins from env or default
+    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+    allowed_origins = cors_origins_env.split(",") if cors_origins_env else ["https://netra.ai"]
 else:
-    # In development, allow all origins (supports dynamic ports from dev launcher)
-    allowed_origins = ["*"]
+    # In development, allow localhost with any port and configured origins
+    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+    configured_origins = cors_origins_env.split(",") if cors_origins_env else []
+    # Add common development patterns
+    allowed_origins = [
+        "http://localhost:*",  # Any localhost port
+        "http://127.0.0.1:*",  # Any 127.0.0.1 port
+        "*"  # Fallback to allow all in development
+    ]
+    if configured_origins:
+        allowed_origins = configured_origins + allowed_origins
 
 app.add_middleware(
     CORSMiddleware,
@@ -250,6 +277,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["Authorization", "Content-Type", "X-Request-ID", "X-Trace-ID"],
+    expose_headers=["X-Trace-ID", "X-Request-ID"],  # Expose custom headers to frontend
 )
 
 app.add_middleware(

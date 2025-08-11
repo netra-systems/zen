@@ -6,7 +6,7 @@ Handles thread CRUD operations and thread history.
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
-from app.db.session import get_db_session as get_db
+from app.dependencies import get_db_session as get_db
 from app.services.database.thread_repository import ThreadRepository
 from app.services.database.message_repository import MessageRepository
 from app.logging_config import central_logger
@@ -19,7 +19,8 @@ logger = central_logger.get_logger(__name__)
 
 router = APIRouter(
     prefix="/api/threads",
-    tags=["threads"]
+    tags=["threads"],
+    redirect_slashes=False  # Disable automatic trailing slash redirects
 )
 
 class ThreadCreate(BaseModel):
@@ -116,7 +117,6 @@ async def create_thread(
         )
         
     except Exception as e:
-        await db.rollback()
         logger.error(f"Error creating thread: {e}")
         raise HTTPException(status_code=500, detail="Failed to create thread")
 
@@ -208,7 +208,6 @@ async def update_thread(
     except HTTPException:
         raise
     except Exception as e:
-        await db.rollback()
         logger.error(f"Error updating thread {thread_id}: {e}")
         raise HTTPException(status_code=500, detail="Failed to update thread")
 
