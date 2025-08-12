@@ -1,16 +1,18 @@
 """
 MCP Service
 
-Main service layer for MCP server integration with Netra platform.
+Main service layer for MCP server integration with Netra platform using FastMCP 2.
 """
 
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 import json
 import uuid
+import asyncio
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
+from fastmcp import FastMCP
 
 from app.logging_config import CentralLogger
 from app.core.exceptions import NetraException
@@ -20,10 +22,9 @@ from app.services.corpus_service import CorpusService
 from app.services.synthetic_data_service import SyntheticDataService
 from app.services.security_service import SecurityService
 from app.services.supply_catalog_service import SupplyCatalogService
+from app.services.database.mcp_repository import MCPClientRepository, MCPToolExecutionRepository
 from app.schemas import UserInDB
-from app.mcp.server import MCPServer
-from app.mcp.tools import ToolRegistry, Tool
-from app.mcp.resources import ResourceManager, Resource
+from app.mcp.netra_mcp_server import NetraMCPServer
 
 logger = CentralLogger()
 
@@ -44,6 +45,7 @@ class MCPToolExecution(BaseModel):
     """MCP Tool execution record"""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     session_id: str
+    client_id: Optional[str] = None
     tool_name: str
     input_params: Dict[str, Any]
     output_result: Optional[Dict[str, Any]] = None
@@ -55,7 +57,7 @@ class MCPToolExecution(BaseModel):
 
 class MCPService:
     """
-    Main service for MCP server operations
+    Main service for MCP server operations using FastMCP 2
     
     Integrates MCP functionality with existing Netra services.
     """
@@ -67,7 +69,8 @@ class MCPService:
         corpus_service: CorpusService,
         synthetic_data_service: SyntheticDataService,
         security_service: SecurityService,
-        supply_catalog_service: SupplyCatalogService
+        supply_catalog_service: SupplyCatalogService,
+        llm_manager=None
     ):
         self.agent_service = agent_service
         self.thread_service = thread_service
@@ -75,367 +78,34 @@ class MCPService:
         self.synthetic_data_service = synthetic_data_service
         self.security_service = security_service
         self.supply_catalog_service = supply_catalog_service
+        self.llm_manager = llm_manager
         
-        # Initialize MCP server
-        self.mcp_server = MCPServer()
-        self._register_netra_tools()
-        self._register_netra_resources()
+        # Initialize repositories
+        self.client_repository = MCPClientRepository()
+        self.execution_repository = MCPToolExecutionRepository()
         
-    def _register_netra_tools(self):
-        """Register Netra-specific tools with MCP"""
-        tool_registry = self.mcp_server.tool_registry
+        # Initialize MCP server with FastMCP 2
+        self.mcp_server = NetraMCPServer(
+            name="netra-mcp-server",
+            version="2.0.0"
+        )
         
-        # Override default handlers with actual Netra implementations
-        tool_registry.tools["run_agent"].handler = self.execute_agent
-        tool_registry.tools["get_agent_status"].handler = self.get_agent_status
-        tool_registry.tools["list_agents"].handler = self.list_available_agents
-        tool_registry.tools["analyze_workload"].handler = self.analyze_workload
-        tool_registry.tools["optimize_prompt"].handler = self.optimize_prompt
-        tool_registry.tools["query_corpus"].handler = self.query_corpus
-        tool_registry.tools["generate_synthetic_data"].handler = self.generate_synthetic_data
-        tool_registry.tools["create_thread"].handler = self.create_thread
-        tool_registry.tools["get_thread_history"].handler = self.get_thread_history
+        # Inject services into MCP server
+        self.mcp_server.set_services(
+            agent_service=agent_service,
+            thread_service=thread_service,
+            corpus_service=corpus_service,
+            synthetic_data_service=synthetic_data_service,
+            security_service=security_service,
+            supply_catalog_service=supply_catalog_service,
+            llm_manager=llm_manager
+        )
         
-        # Add additional Netra-specific tools
-        tool_registry.register_tool(Tool(
-            name="get_supply_catalog",
-            description="Get available models and providers",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "filter": {"type": "string", "description": "Filter criteria"}
-                }
-            },
-            handler=self.get_supply_catalog,
-            category="Supply"
-        ))
+        # Store active sessions
+        self.active_sessions: Dict[str, Dict[str, Any]] = {}
         
-        tool_registry.register_tool(Tool(
-            name="execute_optimization_pipeline",
-            description="Execute full optimization pipeline",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "input_data": {"type": "object", "description": "Input data for optimization"},
-                    "optimization_goals": {"type": "array", "items": {"type": "string"}}
-                },
-                "required": ["input_data"]
-            },
-            handler=self.execute_optimization_pipeline,
-            category="Optimization"
-        ))
-        
-    def _register_netra_resources(self):
-        """Register Netra-specific resources with MCP"""
-        resource_manager = self.mcp_server.resource_manager
-        
-        # Add additional Netra resources
-        resource_manager.register_resource(Resource(
-            uri="netra://optimization/history",
-            name="Optimization History",
-            description="Historical optimization results and recommendations",
-            mimeType="application/json"
-        ))
-        
-        resource_manager.register_resource(Resource(
-            uri="netra://config/models",
-            name="Model Configurations",
-            description="Configured model parameters and settings",
-            mimeType="application/json"
-        ))
-        
-    async def execute_agent(self, arguments: Dict[str, Any], session_id: Optional[str]) -> Dict[str, Any]:
-        """Execute a Netra agent"""
-        try:
-            agent_name = arguments["agent_name"]
-            input_data = arguments["input_data"]
-            config = arguments.get("config", {})
-            
-            # Create a thread for this execution
-            thread_id = await self.thread_service.create_thread(
-                title=f"MCP Agent Execution: {agent_name}",
-                metadata={"mcp_session": session_id}
-            )
-            
-            # Execute agent
-            result = await self.agent_service.execute_agent(
-                agent_name=agent_name,
-                thread_id=thread_id,
-                input_data=input_data,
-                config=config
-            )
-            
-            return {
-                "type": "text",
-                "text": json.dumps({
-                    "status": "success",
-                    "thread_id": thread_id,
-                    "run_id": result.get("run_id"),
-                    "initial_response": result.get("response")
-                }, indent=2)
-            }
-            
-        except Exception as e:
-            logger.error(f"Error executing agent: {e}", exc_info=True)
-            return {
-                "type": "text",
-                "text": f"Error executing agent: {str(e)}"
-            }
-            
-    async def get_agent_status(self, arguments: Dict[str, Any], session_id: Optional[str]) -> Dict[str, Any]:
-        """Get status of agent execution"""
-        try:
-            run_id = arguments["run_id"]
-            
-            status = await self.agent_service.get_run_status(run_id)
-            
-            return {
-                "type": "text",
-                "text": json.dumps(status, indent=2)
-            }
-            
-        except Exception as e:
-            logger.error(f"Error getting agent status: {e}", exc_info=True)
-            return {
-                "type": "text",
-                "text": f"Error getting agent status: {str(e)}"
-            }
-            
-    async def list_available_agents(self, arguments: Dict[str, Any], session_id: Optional[str]) -> Dict[str, Any]:
-        """List available agents"""
-        try:
-            category = arguments.get("category")
-            
-            agents = await self.agent_service.list_agents(category=category)
-            
-            return {
-                "type": "text",
-                "text": json.dumps(agents, indent=2)
-            }
-            
-        except Exception as e:
-            logger.error(f"Error listing agents: {e}", exc_info=True)
-            return {
-                "type": "text",
-                "text": f"Error listing agents: {str(e)}"
-            }
-            
-    async def analyze_workload(self, arguments: Dict[str, Any], session_id: Optional[str]) -> Dict[str, Any]:
-        """Analyze AI workload"""
-        try:
-            workload_data = arguments["workload_data"]
-            metrics = arguments.get("metrics", ["cost", "latency", "throughput"])
-            
-            # Use optimization agent for analysis
-            analysis = await self.agent_service.analyze_workload(
-                workload_data=workload_data,
-                metrics=metrics
-            )
-            
-            return {
-                "type": "text",
-                "text": json.dumps(analysis, indent=2)
-            }
-            
-        except Exception as e:
-            logger.error(f"Error analyzing workload: {e}", exc_info=True)
-            return {
-                "type": "text",
-                "text": f"Error analyzing workload: {str(e)}"
-            }
-            
-    async def optimize_prompt(self, arguments: Dict[str, Any], session_id: Optional[str]) -> Dict[str, Any]:
-        """Optimize prompt for cost/performance"""
-        try:
-            prompt = arguments["prompt"]
-            target = arguments.get("target", "balanced")
-            model = arguments.get("model")
-            
-            # Use optimization service
-            optimized = await self.agent_service.optimize_prompt(
-                prompt=prompt,
-                target=target,
-                model=model
-            )
-            
-            return {
-                "type": "text",
-                "text": json.dumps(optimized, indent=2)
-            }
-            
-        except Exception as e:
-            logger.error(f"Error optimizing prompt: {e}", exc_info=True)
-            return {
-                "type": "text",
-                "text": f"Error optimizing prompt: {str(e)}"
-            }
-            
-    async def query_corpus(self, arguments: Dict[str, Any], session_id: Optional[str]) -> Dict[str, Any]:
-        """Query document corpus"""
-        try:
-            query = arguments["query"]
-            limit = arguments.get("limit", 10)
-            filters = arguments.get("filters", {})
-            
-            results = await self.corpus_service.search(
-                query=query,
-                limit=limit,
-                filters=filters
-            )
-            
-            return {
-                "type": "text",
-                "text": json.dumps(results, indent=2)
-            }
-            
-        except Exception as e:
-            logger.error(f"Error querying corpus: {e}", exc_info=True)
-            return {
-                "type": "text",
-                "text": f"Error querying corpus: {str(e)}"
-            }
-            
-    async def generate_synthetic_data(self, arguments: Dict[str, Any], session_id: Optional[str]) -> Dict[str, Any]:
-        """Generate synthetic test data"""
-        try:
-            schema = arguments["schema"]
-            count = arguments.get("count", 10)
-            format_type = arguments.get("format", "json")
-            
-            data = await self.synthetic_data_service.generate(
-                schema=schema,
-                count=count,
-                format_type=format_type
-            )
-            
-            return {
-                "type": "text",
-                "text": f"Generated {count} records in {format_type} format",
-                "data": data if format_type == "json" else None
-            }
-            
-        except Exception as e:
-            logger.error(f"Error generating synthetic data: {e}", exc_info=True)
-            return {
-                "type": "text",
-                "text": f"Error generating synthetic data: {str(e)}"
-            }
-            
-    async def create_thread(self, arguments: Dict[str, Any], session_id: Optional[str]) -> Dict[str, Any]:
-        """Create conversation thread"""
-        try:
-            title = arguments.get("title", "New Thread")
-            metadata = arguments.get("metadata", {})
-            metadata["mcp_session"] = session_id
-            
-            thread_id = await self.thread_service.create_thread(
-                title=title,
-                metadata=metadata
-            )
-            
-            return {
-                "type": "text",
-                "text": json.dumps({
-                    "thread_id": thread_id,
-                    "title": title,
-                    "created": True
-                }, indent=2)
-            }
-            
-        except Exception as e:
-            logger.error(f"Error creating thread: {e}", exc_info=True)
-            return {
-                "type": "text",
-                "text": f"Error creating thread: {str(e)}"
-            }
-            
-    async def get_thread_history(self, arguments: Dict[str, Any], session_id: Optional[str]) -> Dict[str, Any]:
-        """Get thread message history"""
-        try:
-            thread_id = arguments["thread_id"]
-            limit = arguments.get("limit", 50)
-            
-            messages = await self.thread_service.get_thread_messages(
-                thread_id=thread_id,
-                limit=limit
-            )
-            
-            return {
-                "type": "text",
-                "text": json.dumps(messages, indent=2)
-            }
-            
-        except Exception as e:
-            logger.error(f"Error getting thread history: {e}", exc_info=True)
-            return {
-                "type": "text",
-                "text": f"Error getting thread history: {str(e)}"
-            }
-            
-    async def get_supply_catalog(self, arguments: Dict[str, Any], session_id: Optional[str]) -> Dict[str, Any]:
-        """Get supply catalog"""
-        try:
-            filter_criteria = arguments.get("filter")
-            
-            catalog = await self.supply_catalog_service.get_catalog(
-                filter_criteria=filter_criteria
-            )
-            
-            return {
-                "type": "text",
-                "text": json.dumps(catalog, indent=2)
-            }
-            
-        except Exception as e:
-            logger.error(f"Error getting supply catalog: {e}", exc_info=True)
-            return {
-                "type": "text",
-                "text": f"Error getting supply catalog: {str(e)}"
-            }
-            
-    async def execute_optimization_pipeline(self, arguments: Dict[str, Any], session_id: Optional[str]) -> Dict[str, Any]:
-        """Execute full optimization pipeline"""
-        try:
-            input_data = arguments["input_data"]
-            optimization_goals = arguments.get("optimization_goals", ["cost", "performance"])
-            
-            # Create thread for pipeline
-            thread_id = await self.thread_service.create_thread(
-                title="MCP Optimization Pipeline",
-                metadata={
-                    "mcp_session": session_id,
-                    "goals": optimization_goals
-                }
-            )
-            
-            # Execute supervisor agent for full pipeline
-            result = await self.agent_service.execute_agent(
-                agent_name="SupervisorAgent",
-                thread_id=thread_id,
-                input_data={
-                    **input_data,
-                    "optimization_goals": optimization_goals
-                },
-                config={"pipeline_mode": True}
-            )
-            
-            return {
-                "type": "text",
-                "text": json.dumps({
-                    "status": "pipeline_started",
-                    "thread_id": thread_id,
-                    "run_id": result.get("run_id"),
-                    "optimization_goals": optimization_goals
-                }, indent=2)
-            }
-            
-        except Exception as e:
-            logger.error(f"Error executing optimization pipeline: {e}", exc_info=True)
-            return {
-                "type": "text",
-                "text": f"Error executing optimization pipeline: {str(e)}"
-            }
-            
+        logger.info("MCP Service initialized with FastMCP 2")
+    
     async def register_client(
         self,
         db_session: AsyncSession,
@@ -452,15 +122,31 @@ class MCPService:
             if api_key:
                 api_key_hash = self.security_service.hash_password(api_key)
                 
-            client = MCPClient(
+            # Store in database
+            db_client = await self.client_repository.create_client(
+                db=db_session,
                 name=name,
                 client_type=client_type,
-                api_key_hash=api_key_hash,
-                permissions=permissions or [],
-                metadata=metadata or {}
+                api_key=api_key,
+                permissions=permissions,
+                metadata=metadata
             )
             
-            # TODO: Store in database
+            if not db_client:
+                raise NetraException("Failed to create MCP client in database")
+            
+            # Convert to MCPClient model for response
+            client = MCPClient(
+                id=db_client.id,
+                name=db_client.name,
+                client_type=db_client.client_type,
+                api_key_hash=db_client.api_key_hash,
+                permissions=db_client.permissions,
+                metadata=db_client.metadata,
+                created_at=db_client.created_at,
+                last_active=db_client.last_active
+            )
+            
             logger.info(f"Registered MCP client: {client.id} ({client_type})")
             
             return client
@@ -468,7 +154,7 @@ class MCPService:
         except Exception as e:
             logger.error(f"Error registering MCP client: {e}", exc_info=True)
             raise NetraException(f"Failed to register MCP client: {str(e)}")
-            
+    
     async def validate_client_access(
         self,
         db_session: AsyncSession,
@@ -477,13 +163,23 @@ class MCPService:
     ) -> bool:
         """Validate client has required permission"""
         try:
-            # TODO: Implement actual permission check from database
-            return True
+            # Check permission from database
+            has_permission = await self.client_repository.validate_client_permission(
+                db=db_session,
+                client_id=client_id,
+                required_permission=required_permission
+            )
+            
+            # Update last active timestamp
+            if has_permission:
+                await self.client_repository.update_last_active(db_session, client_id)
+            
+            return has_permission
             
         except Exception as e:
             logger.error(f"Error validating client access: {e}", exc_info=True)
             return False
-            
+    
     async def record_tool_execution(
         self,
         db_session: AsyncSession,
@@ -491,12 +187,129 @@ class MCPService:
     ):
         """Record tool execution in database"""
         try:
-            # TODO: Store in database
+            # Store in database
+            db_execution = await self.execution_repository.record_execution(
+                db=db_session,
+                session_id=execution.session_id,
+                client_id=execution.client_id or 'system',
+                tool_name=execution.tool_name,
+                input_params=execution.input_params,
+                execution_time_ms=execution.execution_time_ms,
+                status=execution.status
+            )
+            
+            # Update with result if available
+            if execution.output_result and db_execution:
+                await self.execution_repository.update_execution_result(
+                    db=db_session,
+                    execution_id=db_execution.id,
+                    output_result=execution.output_result,
+                    execution_time_ms=execution.execution_time_ms,
+                    status=execution.status,
+                    error=execution.error
+                )
+            
             logger.info(f"Recorded tool execution: {execution.tool_name} ({execution.status})")
             
         except Exception as e:
             logger.error(f"Error recording tool execution: {e}", exc_info=True)
-            
-    def get_mcp_server(self) -> MCPServer:
+    
+    async def create_session(
+        self,
+        client_id: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """Create a new MCP session"""
+        session_id = str(uuid.uuid4())
+        
+        self.active_sessions[session_id] = {
+            "id": session_id,
+            "client_id": client_id,
+            "created_at": datetime.utcnow(),
+            "last_activity": datetime.utcnow(),
+            "metadata": metadata or {},
+            "request_count": 0
+        }
+        
+        logger.info(f"Created MCP session: {session_id}")
+        return session_id
+    
+    async def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """Get session information"""
+        return self.active_sessions.get(session_id)
+    
+    async def update_session_activity(self, session_id: str):
+        """Update session last activity timestamp"""
+        if session_id in self.active_sessions:
+            self.active_sessions[session_id]["last_activity"] = datetime.utcnow()
+            self.active_sessions[session_id]["request_count"] += 1
+    
+    async def close_session(self, session_id: str):
+        """Close an MCP session"""
+        if session_id in self.active_sessions:
+            del self.active_sessions[session_id]
+            logger.info(f"Closed MCP session: {session_id}")
+    
+    async def cleanup_inactive_sessions(self, timeout_minutes: int = 60):
+        """Clean up inactive sessions"""
+        now = datetime.utcnow()
+        sessions_to_remove = []
+        
+        for session_id, session in self.active_sessions.items():
+            time_since_activity = (now - session["last_activity"]).total_seconds() / 60
+            if time_since_activity > timeout_minutes:
+                sessions_to_remove.append(session_id)
+        
+        for session_id in sessions_to_remove:
+            await self.close_session(session_id)
+        
+        if sessions_to_remove:
+            logger.info(f"Cleaned up {len(sessions_to_remove)} inactive sessions")
+    
+    def get_mcp_server(self) -> NetraMCPServer:
         """Get MCP server instance"""
         return self.mcp_server
+    
+    def get_fastmcp_app(self) -> FastMCP:
+        """Get FastMCP app instance for running"""
+        return self.mcp_server.get_app()
+    
+    async def get_server_info(self) -> Dict[str, Any]:
+        """Get MCP server information"""
+        return {
+            "name": "Netra MCP Server",
+            "version": "2.0.0",
+            "protocol": "MCP",
+            "implementation": "FastMCP 2",
+            "capabilities": {
+                "tools": True,
+                "resources": True,
+                "prompts": True,
+                "sampling": False  # Will be implemented with LLM manager
+            },
+            "active_sessions": len(self.active_sessions),
+            "tools_available": [
+                "run_agent",
+                "get_agent_status",
+                "list_agents",
+                "analyze_workload",
+                "optimize_prompt",
+                "execute_optimization_pipeline",
+                "query_corpus",
+                "generate_synthetic_data",
+                "create_thread",
+                "get_thread_history",
+                "get_supply_catalog"
+            ],
+            "resources_available": [
+                "netra://optimization/history",
+                "netra://config/models",
+                "netra://agents/catalog",
+                "netra://metrics/current"
+            ],
+            "prompts_available": [
+                "optimization_request",
+                "prompt_optimization",
+                "model_selection"
+            ]
+        }

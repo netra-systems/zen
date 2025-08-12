@@ -21,11 +21,14 @@ Every pull request automatically gets a dedicated staging environment deployed t
 
 ### 1. PR Created/Updated
 When you create or update a PR, the staging workflow automatically:
-1. Builds Docker containers for backend and frontend
-2. Deploys infrastructure using Terraform
-3. Seeds test data
-4. Runs integration tests
-5. Posts the staging URL as a PR comment
+1. **Cancels any in-progress deployments** for the same PR (only latest commit runs)
+2. Builds Docker containers for backend and frontend **in parallel**
+3. Deploys infrastructure using Terraform
+4. Seeds test data
+5. Runs integration tests
+6. Posts the staging URL as a PR comment
+
+**Note**: If you push multiple commits in quick succession (within ~3 minutes), only the latest commit's workflow will complete. Previous runs are automatically cancelled to save resources and provide faster feedback.
 
 ### 2. Access Your Staging Environment
 Each staging environment gets unique URLs:
@@ -85,6 +88,23 @@ Cypress tests automatically run against staging:
 CYPRESS_BASE_URL=https://pr-123.staging.netra-ai.dev npm run cypress:run
 ```
 
+## Performance Optimizations
+
+### Workflow Concurrency
+- **Automatic Cancellation**: When you push a new commit, any in-progress workflow for the same PR is cancelled
+- **Benefits**: Faster feedback, reduced resource usage, cleaner workflow history
+- **Exception**: Destroy operations are never cancelled to ensure proper cleanup
+
+### Parallel Builds
+- Backend and frontend containers build simultaneously
+- Saves 5-10 minutes per deployment
+- Independent failure detection
+
+### Build Caching
+- Successful builds are cached in Google Cloud Storage
+- If no code changes detected, cached images are reused
+- Saves 10-15 minutes on unchanged components
+
 ## Cost Management
 
 ### Automatic Cost Controls
@@ -92,6 +112,7 @@ CYPRESS_BASE_URL=https://pr-123.staging.netra-ai.dev npm run cypress:run
 - Automatic cleanup after 7 days
 - Per-PR budget limit of $50/month
 - Daily cleanup job removes stale environments
+- **Workflow cancellation** prevents redundant builds
 
 ### Monitor Costs
 View staging costs in:

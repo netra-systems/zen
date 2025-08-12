@@ -18,6 +18,12 @@ on:
         required: true
         type: string
 
+# Cancel any in-progress runs when a new commit is pushed for the same PR
+# This ensures only the latest commit's workflow runs to completion
+concurrency:
+  group: staging-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+  cancel-in-progress: true
+
 env:
   GCP_PROJECT_ID: netra-staging
   GCP_REGION: us-central1
@@ -66,24 +72,22 @@ jobs:
           
           echo "environment_name=pr-${PR_NUMBER}" >> $GITHUB_OUTPUT
 
-  deploy-staging:
-    name: Deploy Staging Environment
+  # Parallel build jobs for better performance
+  build-backend:
+    name: Build Backend Container
     needs: check-eligibility
     if: needs.check-eligibility.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 45  # Prevent hanging beyond 45 minutes
-    environment:
-      name: staging-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
-      url: https://pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}.${{ env.STAGING_DOMAIN }}
-    
+    timeout-minutes: 15
+    outputs:
+      backend_image: ${{ steps.backend-build.outputs.backend_image }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          fetch-depth: 0  # Fetch all history for proper change detection
+          fetch-depth: 0
 
-      # Cache gcloud SDK installation to save ~20-30 seconds
       - name: Cache gcloud SDK
         uses: actions/cache@v4
         with:
@@ -103,49 +107,11 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ env.GCP_PROJECT_ID }}
-          skip_install: false  # Still install if not cached
+          skip_install: false
 
       - name: Configure Docker for GCP
         run: |
           gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
-
-      - name: Configure OAuth for PR Environment
-        id: oauth
-        run: |
-          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
-          
-          # Set OAuth environment variables for this PR
-          echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
-          echo "GOOGLE_OAUTH_CLIENT_ID_STAGING=${{ secrets.GOOGLE_OAUTH_CLIENT_ID_STAGING }}" >> $GITHUB_ENV
-          echo "GOOGLE_OAUTH_CLIENT_SECRET_STAGING=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET_STAGING }}" >> $GITHUB_ENV
-          echo "USE_OAUTH_PROXY=true" >> $GITHUB_ENV
-          echo "OAUTH_PROXY_URL=https://auth.staging.netrasystems.ai" >> $GITHUB_ENV
-          
-          # Generate URLs for this PR environment
-          echo "frontend_url=https://pr-${PR_NUMBER}.${{ env.STAGING_DOMAIN }}" >> $GITHUB_OUTPUT
-          echo "api_url=https://pr-${PR_NUMBER}-api.${{ env.STAGING_DOMAIN }}" >> $GITHUB_OUTPUT
-          
-          echo "✅ OAuth configured for PR #${PR_NUMBER}"
-
-      - name: Load staging configuration
-        id: config
-        run: |
-          # Get the numerical project ID for Secret Manager
-          PROJECT_ID_NUMERICAL_STAGING=$(gcloud projects describe ${{ env.GCP_PROJECT_ID }} --format="value(projectNumber)")
-          echo "project_id_numerical=$PROJECT_ID_NUMERICAL_STAGING" >> $GITHUB_OUTPUT
-          echo "Using numerical project ID: $PROJECT_ID_NUMERICAL_STAGING"
-          
-          # Load configuration with defaults
-          if [ -f .github/staging.yml ]; then
-            TEST_LEVEL=$(yq e '.default_test_level // "integration"' .github/staging.yml)
-            MAX_INSTANCES=$(yq e '.resource_limits.compute.max_instances // 3' .github/staging.yml)
-          else
-            TEST_LEVEL="integration"
-            MAX_INSTANCES="3"
-          fi
-          
-          echo "test_level=$TEST_LEVEL" >> $GITHUB_OUTPUT
-          echo "max_instances=$MAX_INSTANCES" >> $GITHUB_OUTPUT
 
       - name: Check for backend changes
         id: backend-changes
@@ -246,7 +212,6 @@ jobs:
 
       - name: Build and push backend container
         id: backend-build
-        timeout-minutes: 15  # Docker builds should complete within 15 minutes
         run: |
           PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
           IMAGE_TAG="pr-${PR_NUMBER}-${{ github.sha }}"
@@ -287,6 +252,46 @@ jobs:
           echo '{"sha": "'${{ github.sha }}'", "image": "'$IMAGE_URL'", "timestamp": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"}' | \
             gsutil cp - "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/${CACHE_KEY}.json"
           echo "✅ Build cache updated"
+
+  build-frontend:
+    name: Build Frontend Container
+    needs: check-eligibility
+    if: needs.check-eligibility.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      frontend_image: ${{ steps.frontend-build.outputs.frontend_image }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Cache gcloud SDK
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.config/gcloud
+            ~/google-cloud-sdk
+          key: gcloud-sdk-${{ runner.os }}-${{ hashFiles('.github/workflows/staging-environment.yml') }}
+          restore-keys: |
+            gcloud-sdk-${{ runner.os }}-
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          skip_install: false
+
+      - name: Configure Docker for GCP
+        run: |
+          gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
 
       - name: Check for frontend changes
         id: frontend-changes
@@ -387,7 +392,6 @@ jobs:
 
       - name: Build and push frontend container
         id: frontend-build
-        timeout-minutes: 15  # Frontend builds should complete within 15 minutes
         run: |
           PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
           IMAGE_TAG="pr-${PR_NUMBER}-${{ github.sha }}"
@@ -449,6 +453,83 @@ jobs:
             gsutil cp - "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/${CACHE_KEY}.json"
           echo "✅ Build cache updated"
 
+  deploy-staging:
+    name: Deploy Staging Environment
+    needs: [check-eligibility, build-backend, build-frontend]
+    if: needs.check-eligibility.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30  # Reduced from 45 since builds are now parallel
+    environment:
+      name: staging-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+      url: https://pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}.${{ env.STAGING_DOMAIN }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0  # Fetch all history for proper change detection
+
+      # Cache gcloud SDK installation to save ~20-30 seconds
+      - name: Cache gcloud SDK
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.config/gcloud
+            ~/google-cloud-sdk
+          key: gcloud-sdk-${{ runner.os }}-${{ hashFiles('.github/workflows/staging-environment.yml') }}
+          restore-keys: |
+            gcloud-sdk-${{ runner.os }}-
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          skip_install: false  # Still install if not cached
+
+      - name: Configure OAuth for PR Environment
+        id: oauth
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          
+          # Set OAuth environment variables for this PR
+          echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_ID_STAGING=${{ secrets.GOOGLE_OAUTH_CLIENT_ID_STAGING }}" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_SECRET_STAGING=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET_STAGING }}" >> $GITHUB_ENV
+          echo "USE_OAUTH_PROXY=true" >> $GITHUB_ENV
+          echo "OAUTH_PROXY_URL=https://auth.staging.netrasystems.ai" >> $GITHUB_ENV
+          
+          # Generate URLs for this PR environment
+          echo "frontend_url=https://pr-${PR_NUMBER}.${{ env.STAGING_DOMAIN }}" >> $GITHUB_OUTPUT
+          echo "api_url=https://pr-${PR_NUMBER}-api.${{ env.STAGING_DOMAIN }}" >> $GITHUB_OUTPUT
+          
+          echo "✅ OAuth configured for PR #${PR_NUMBER}"
+
+      - name: Load staging configuration
+        id: config
+        run: |
+          # Get the numerical project ID for Secret Manager
+          PROJECT_ID_NUMERICAL_STAGING=$(gcloud projects describe ${{ env.GCP_PROJECT_ID }} --format="value(projectNumber)")
+          echo "project_id_numerical=$PROJECT_ID_NUMERICAL_STAGING" >> $GITHUB_OUTPUT
+          echo "Using numerical project ID: $PROJECT_ID_NUMERICAL_STAGING"
+          
+          # Load configuration with defaults
+          if [ -f .github/staging.yml ]; then
+            TEST_LEVEL=$(yq e '.default_test_level // "integration"' .github/staging.yml)
+            MAX_INSTANCES=$(yq e '.resource_limits.compute.max_instances // 3' .github/staging.yml)
+          else
+            TEST_LEVEL="integration"
+            MAX_INSTANCES="3"
+          fi
+          
+          echo "test_level=$TEST_LEVEL" >> $GITHUB_OUTPUT
+          echo "max_instances=$MAX_INSTANCES" >> $GITHUB_OUTPUT
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -499,8 +580,8 @@ jobs:
             -var="project_id_numerical=${{ steps.config.outputs.project_id_numerical }}" \
             -var="region=${{ env.GCP_REGION }}" \
             -var="pr_number=${{ github.event.pull_request.number || github.event.inputs.pr_number }}" \
-            -var="backend_image=${{ steps.backend-build.outputs.backend_image }}" \
-            -var="frontend_image=${{ steps.frontend-build.outputs.frontend_image }}" \
+            -var="backend_image=${{ needs.build-backend.outputs.backend_image }}" \
+            -var="frontend_image=${{ needs.build-frontend.outputs.frontend_image }}" \
             -var="max_instances=${{ steps.config.outputs.max_instances }}" \
             -var="domain=${{ env.STAGING_DOMAIN }}" \
             -var="postgres_password=${{ secrets.STAGING_DB_PASSWORD }}" \
@@ -820,6 +901,10 @@ jobs:
       (github.event.action == 'closed' || github.event.inputs.action == 'destroy')
     runs-on: ubuntu-latest
     timeout-minutes: 20  # Destruction should be quick
+    # Don't cancel destroy operations - they must complete to clean up resources
+    concurrency:
+      group: staging-destroy-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+      cancel-in-progress: false
     
     steps:
       - name: Checkout code
@@ -876,8 +961,8 @@ jobs:
             -var="project_id=${{ env.GCP_PROJECT_ID }}" \
             -var="region=${{ env.GCP_REGION }}" \
             -var="pr_number=${{ github.event.pull_request.number || github.event.inputs.pr_number }}" \
-            -var="backend_image=${{ steps.backend-build.outputs.backend_image || 'gcr.io/PROJECT_ID/backend:latest' }}" \
-            -var="frontend_image=${{ steps.frontend-build.outputs.frontend_image || 'gcr.io/PROJECT_ID/frontend:latest' }}" \
+            -var="backend_image=${{ needs.build-backend.outputs.backend_image || 'gcr.io/PROJECT_ID/backend:latest' }}" \
+            -var="frontend_image=${{ needs.build-frontend.outputs.frontend_image || 'gcr.io/PROJECT_ID/frontend:latest' }}" \
             -var="max_instances=1" \
             -var="domain=${{ env.STAGING_DOMAIN }}" \
             -var="postgres_password=${{ secrets.STAGING_DB_PASSWORD }}" \

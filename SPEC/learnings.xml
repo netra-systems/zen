@@ -123,6 +123,32 @@
                 </files-created>
                 <prevention>Always test failure scenarios, concurrent operations, network instability, memory usage, error cascades</prevention>
             </fix>
+            
+            <fix date="2025-08-12">
+                <title>Staging Workflow Concurrency Control</title>
+                <problem>Multiple commits in quick succession cause redundant builds and resource waste</problem>
+                <root-causes>
+                    <cause>No cancellation of in-progress workflows when new commits pushed</cause>
+                    <cause>Parallel workflows consuming resources for outdated commits</cause>
+                    <cause>Developers waiting for outdated workflows to complete</cause>
+                </root-causes>
+                <solution>Added GitHub Actions concurrency groups with cancel-in-progress</solution>
+                <implementation>
+                    <code>
+                        concurrency:
+                          group: staging-pr-${{ github.event.pull_request.number }}
+                          cancel-in-progress: true
+                    </code>
+                    <exception>Destroy operations use separate group with cancel-in-progress: false</exception>
+                </implementation>
+                <benefits>
+                    <benefit>Only latest commit's workflow runs to completion</benefit>
+                    <benefit>Faster feedback on latest changes</benefit>
+                    <benefit>Reduced cloud costs from cancelled builds</benefit>
+                    <benefit>Cleaner workflow history</benefit>
+                </benefits>
+                <prevention>Always use concurrency groups for PR-based workflows to prevent redundant runs</prevention>
+            </fix>
         </section>
 
         <section id="test-focus-strategy" order="3">

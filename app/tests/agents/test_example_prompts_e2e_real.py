@@ -108,7 +108,13 @@ async def setup_real_infrastructure():
     }
 
 
-@pytest.mark.skip(reason="E2E tests with real LLM calls - run manually")
+@pytest.mark.real_llm
+@pytest.mark.real_services
+@pytest.mark.e2e
+@pytest.mark.skipif(
+    os.environ.get("ENABLE_REAL_LLM_TESTING") != "true",
+    reason="Real LLM tests disabled. Set ENABLE_REAL_LLM_TESTING=true to run"
+)
 class TestExamplePromptsE2ERealLLM:
     """
     Comprehensive E2E test class that makes REAL LLM calls

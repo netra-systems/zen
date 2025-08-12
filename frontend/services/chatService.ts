@@ -2,14 +2,14 @@ import { messageService } from './messageService';
 
 export const chatService = {
   // Wrap messageService methods for backward compatibility
-  sendMessage: messageService.sendMessage.bind(messageService),
-  getMessages: messageService.getMessages.bind(messageService),
-  updateMessage: messageService.updateMessage.bind(messageService),
-  deleteMessage: messageService.deleteMessage.bind(messageService),
+  sendMessage: messageService.saveMessage.bind(messageService),
+  getMessages: messageService.getThreadMessages.bind(messageService),
+  saveMessage: messageService.saveMessage.bind(messageService),
+  getThreadMessages: messageService.getThreadMessages.bind(messageService),
   
   // Additional chat-specific methods
   getChatHistory: async (threadId: string) => {
-    return messageService.getMessages(threadId);
+    return messageService.getThreadMessages(threadId);
   },
   
   clearChat: async (threadId: string) => {

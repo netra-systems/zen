@@ -65,7 +65,7 @@ TEST_LEVELS = {
     "smoke": {
         "description": "Quick smoke tests for basic functionality (< 30 seconds)",
         "purpose": "Pre-commit validation, basic health checks",
-        "backend_args": ["--category", "smoke", "--fail-fast", "-x"],
+        "backend_args": ["--category", "smoke", "--fail-fast", "-x", "-m", "not real_services"],
         "frontend_args": [],
         "timeout": 30,
         "run_coverage": False,
@@ -74,7 +74,7 @@ TEST_LEVELS = {
     "unit": {
         "description": "Unit tests for isolated components (1-2 minutes)",
         "purpose": "Development validation, component testing",
-        "backend_args": ["--category", "unit", "-v", "--coverage", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}"],
+        "backend_args": ["--category", "unit", "-v", "--coverage", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}", "-m", "not real_services"],
         "frontend_args": ["--category", "unit"],
         "timeout": 120,
         "run_coverage": True,
@@ -83,7 +83,7 @@ TEST_LEVELS = {
     "integration": {
         "description": "Integration tests for component interaction (3-5 minutes)",
         "purpose": "Feature validation, API testing",
-        "backend_args": ["--category", "integration", "-v", "--coverage", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}"],
+        "backend_args": ["--category", "integration", "-v", "--coverage", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}", "-m", "not real_services"],
         "frontend_args": ["--category", "integration"],
         "timeout": 300,
         "run_coverage": True,
@@ -116,6 +116,25 @@ TEST_LEVELS = {
         "run_coverage": True,
         "run_both": True,
         "run_e2e": True
+    },
+    "real_services": {
+        "description": "Tests requiring real external services (LLM, DB, Redis, ClickHouse)",
+        "purpose": "Validation with actual service dependencies",
+        "backend_args": ["-m", "real_services", "-v", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 1800,  # 30 minutes for real service tests
+        "run_coverage": False,
+        "run_both": False,
+        "requires_env": ["ENABLE_REAL_LLM_TESTING=true"]
+    },
+    "mock_only": {
+        "description": "Tests using only mocks, no external dependencies",
+        "purpose": "Fast CI/CD validation without external dependencies",
+        "backend_args": ["-m", "mock_only", "-v", "--coverage", f"--parallel={OPTIMAL_WORKERS}"],
+        "frontend_args": [],
+        "timeout": 300,
+        "run_coverage": True,
+        "run_both": False
     }
 }
 

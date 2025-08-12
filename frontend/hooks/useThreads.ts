@@ -1,13 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { threadService } from '@/services/threadService';
+import { ThreadService, Thread as ThreadType } from '@/services/threadService';
 
-export interface Thread {
-  id: string;
-  title: string;
-  createdAt: Date;
-  updatedAt: Date;
-  messages: number;
-}
+export type Thread = ThreadType;
 
 export function useThreads() {
   const [threads, setThreads] = useState<Thread[]>([]);
@@ -18,7 +12,7 @@ export function useThreads() {
     setLoading(true);
     setError(null);
     try {
-      const response = await threadService.getThreads();
+      const response = await ThreadService.listThreads();
       setThreads(response);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch threads');
@@ -30,7 +24,7 @@ export function useThreads() {
   const createThread = useCallback(async (title: string) => {
     setError(null);
     try {
-      const newThread = await threadService.createThread(title);
+      const newThread = await ThreadService.createThread(title);
       setThreads(prev => [newThread, ...prev]);
       return newThread;
     } catch (err) {
@@ -42,7 +36,7 @@ export function useThreads() {
   const deleteThread = useCallback(async (threadId: string) => {
     setError(null);
     try {
-      await threadService.deleteThread(threadId);
+      await ThreadService.deleteThread(threadId);
       setThreads(prev => prev.filter(t => t.id !== threadId));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete thread');
@@ -53,8 +47,8 @@ export function useThreads() {
   const renameThread = useCallback(async (threadId: string, newTitle: string) => {
     setError(null);
     try {
-      const updated = await threadService.renameThread(threadId, newTitle);
-      setThreads(prev => prev.map(t => t.id === threadId ? { ...t, title: newTitle } : t));
+      const updated = await ThreadService.updateThread(threadId, newTitle);
+      setThreads(prev => prev.map(t => t.id === threadId ? updated : t));
       return updated;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to rename thread');

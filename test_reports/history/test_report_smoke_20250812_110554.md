@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-12T11:19:36.547367  
+**Generated:** 2025-08-12T11:05:54.285128  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 2 | 2 | 0 | 0 | 0 | 8.76s | [PASSED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 31.40s | [TIMEOUT] |
+| Backend   | 2 | 2 | 0 | 0 | 0 | 7.60s | [PASSED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 33.48s | [TIMEOUT] |
 
 ## Environment and Configuration
 
@@ -27,12 +27,12 @@
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
 - **Coverage Enabled:** No
-- **Total Duration:** 40.16s
+- **Total Duration:** 41.08s
 - **Exit Code:** 0
 
 ### Backend Configuration
 ```
---category smoke --fail-fast -x -m not real_services
+--category smoke --fail-fast -x
 ```
 
 ### Frontend Configuration
@@ -55,7 +55,7 @@ Test Configuration:
   Environment: development
 
 Running command:
-  pytest app/tests/routes/test_health_route.py -v -x --maxfail=1 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
+  pytest app/tests/routes/test_health_route.py -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
 ================================================================================
 [1m============================= test session starts =============================[0m
 platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
@@ -70,9 +70,9 @@ asyncio: mode=Mode.AUTO
 app\tests\routes\test_health_route.py::test_basic_import [32mPASSED[0m[32m          [ 50%][0m
 app\tests\routes\test_health_route.py::test_health_endpoint_direct [32mPASSED[0m[32m [100%][0m
 
-[32m============================== [32m[1m2 passed[0m[32m in 0.10s[0m[32m ==============================[0m
+[32m============================== [32m[1m2 passed[0m[32m in 0.08s[0m[32m ==============================[0m
 ================================================================================
-[PASS] ALL TESTS PASSED in 7.76s
+[PASS] ALL TESTS PASSED in 6.43s
 ================================================================================
 
 

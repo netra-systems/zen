@@ -1,0 +1,2669 @@
+{
+  "timestamp": "1755022154.1624017",
+  "categories": {
+    "real_llm": [
+      "test_categories.py",
+      "test_realistic_data_integration.py",
+      "test_system_startup.py",
+      "agents\\test_example_prompts_e2e_real.py",
+      "clickhouse\\test_realistic_clickhouse_operations.py",
+      "core\\test_config_manager.py",
+      "examples\\test_pattern_examples.py",
+      "llm\\test_structured_generation.py",
+      "services\\test_agent_service_orchestration.py"
+    ],
+    "real_database": [
+      "test_categories.py",
+      "agents\\test_supply_researcher_agent.py",
+      "examples\\test_pattern_examples.py",
+      "integration\\test_critical_integration.py",
+      "services\\test_database_repositories.py",
+      "services\\test_database_repositories_simple.py"
+    ],
+    "real_redis": [
+      "test_categories.py",
+      "examples\\test_pattern_examples.py"
+    ],
+    "real_clickhouse": [
+      "test_categories.py",
+      "clickhouse\\test_realistic_clickhouse_operations.py",
+      "database\\test_repositories_comprehensive.py",
+      "services\\test_clickhouse_query_fixer.py",
+      "services\\test_synthetic_data_service_v3.py"
+    ],
+    "real_services": [
+      "test_categories.py",
+      "test_realistic_data_integration.py",
+      "test_system_startup.py",
+      "agents\\test_example_prompts_e2e_real.py",
+      "agents\\test_supply_researcher_agent.py",
+      "clickhouse\\test_realistic_clickhouse_operations.py",
+      "core\\test_config_manager.py",
+      "database\\test_repositories_comprehensive.py",
+      "examples\\test_pattern_examples.py",
+      "integration\\test_critical_integration.py",
+      "llm\\test_structured_generation.py",
+      "services\\test_agent_service_orchestration.py",
+      "services\\test_clickhouse_query_fixer.py",
+      "services\\test_database_repositories.py",
+      "services\\test_database_repositories_simple.py",
+      "services\\test_synthetic_data_service_v3.py"
+    ],
+    "mock_only": [
+      "test_admin.py",
+      "test_agents_comprehensive.py",
+      "test_agent_service_critical.py",
+      "test_api_endpoints_critical.py",
+      "test_auth_critical.py",
+      "test_business_value_critical.py",
+      "test_database_env_service.py",
+      "test_database_repository_critical.py",
+      "test_startup_checks_robust.py",
+      "test_thread_repository.py",
+      "test_websocket_critical.py",
+      "test_websocket_production_realistic.py",
+      "test_ws_manager.py",
+      "test_ws_manager_comprehensive.py",
+      "agents\\test_agent_e2e_critical.py",
+      "agents\\test_data_sub_agent.py",
+      "agents\\test_data_sub_agent_comprehensive.py",
+      "agents\\test_subagent_workflow.py",
+      "agents\\test_supervisor_advanced.py",
+      "agents\\test_supervisor_agent.py",
+      "agents\\test_supervisor_consolidated_comprehensive.py",
+      "agents\\test_supervisor_orchestration.py",
+      "agents\\test_supply_researcher_agent_v2.py",
+      "agents\\test_triage_sub_agent.py",
+      "agents\\test_triage_sub_agent_comprehensive.py",
+      "clickhouse\\test_corpus_generation_coverage.py",
+      "clickhouse\\test_performance_edge_cases.py",
+      "clickhouse\\test_query_correctness.py",
+      "core\\test_async_utils.py",
+      "core\\test_async_utils_complete.py",
+      "core\\test_core_infrastructure_11_20.py",
+      "core\\test_error_handling.py",
+      "core\\test_missing_tests_11_30.py",
+      "core\\test_service_interfaces.py",
+      "mcp\\test_mcp_service.py",
+      "mcp\\test_request_handler.py",
+      "mcp\\test_server.py",
+      "mcp\\test_websocket_transport.py",
+      "routes\\test_apex_optimizer_agent_route.py",
+      "routes\\test_api_routes_21_30.py",
+      "routes\\test_config_endpoint.py",
+      "routes\\test_demo.py",
+      "routes\\test_google_auth.py",
+      "routes\\test_reference_management.py",
+      "routes\\test_websocket_advanced.py",
+      "routes\\test_websocket_connection.py",
+      "services\\test_agent_message_processing.py",
+      "services\\test_agent_service.py",
+      "services\\test_agent_service_advanced.py",
+      "services\\test_apex_optimizer_tool_selection.py",
+      "services\\test_corpus_service_comprehensive.py",
+      "services\\test_database_repository_transactions.py",
+      "services\\test_demo_service.py",
+      "services\\test_generation_service.py",
+      "services\\test_generation_service_comprehensive.py",
+      "services\\test_generation_service_fixed.py",
+      "services\\test_llm_cache_service.py",
+      "services\\test_llm_manager_provider_switching.py",
+      "services\\test_message_handlers.py",
+      "services\\test_overall_supervisor.py",
+      "services\\test_permission_service.py",
+      "services\\test_quality_gate_service.py",
+      "services\\test_quality_gate_service_comprehensive.py",
+      "services\\test_quality_monitoring_service.py",
+      "services\\test_redis_manager_operations.py",
+      "services\\test_schema_validation_service.py",
+      "services\\test_security_service.py",
+      "services\\test_security_service_authentication_enhanced.py",
+      "services\\test_state_persistence.py",
+      "services\\test_supply_catalog_service.py",
+      "services\\test_supply_research_scheduler_comprehensive.py",
+      "services\\test_supply_research_scheduler_jobs.py",
+      "services\\test_supply_research_service_comprehensive.py",
+      "services\\test_synthetic_data_service_comprehensive.py",
+      "services\\test_thread_service.py",
+      "services\\test_tool_dispatcher.py",
+      "services\\test_tool_permission_service_comprehensive.py",
+      "services\\test_tool_registry_registration.py",
+      "services\\test_unified_tool_registry_management.py",
+      "services\\test_user_service.py",
+      "services\\test_websocket_message_handler_routing.py",
+      "unit\\test_threads_route.py",
+      "utils\\test_utils_comprehensive.py",
+      "services\\agents\\test_supervisor_service.py",
+      "services\\agents\\test_tools.py",
+      "services\\apex_optimizer_agent\\test_tool_builder.py",
+      "services\\apex_optimizer_agent\\tools\\test_base.py",
+      "services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py",
+      "services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py"
+    ],
+    "unit": [
+      "core\\test_core_infrastructure_11_20.py",
+      "routes\\test_api_routes_21_30.py",
+      "services\\test_database_repositories.py",
+      "services\\test_database_repository_transactions.py",
+      "services\\apex_optimizer_agent\\tools\\test_base.py"
+    ],
+    "integration": [
+      "test_agents_comprehensive.py",
+      "test_agent_service_critical.py",
+      "test_business_value_critical.py",
+      "test_categories.py",
+      "test_realistic_data_integration.py",
+      "test_simple_imports.py",
+      "test_ws_manager.py",
+      "test_ws_manager_comprehensive.py",
+      "agents\\test_data_sub_agent.py",
+      "agents\\test_subagent_workflow.py",
+      "agents\\test_supervisor_consolidated_comprehensive.py",
+      "agents\\test_supervisor_orchestration.py",
+      "agents\\test_supply_researcher_agent.py",
+      "agents\\test_supply_researcher_agent_v2.py",
+      "clickhouse\\test_corpus_generation_coverage.py",
+      "core\\test_async_utils.py",
+      "core\\test_async_utils_complete.py",
+      "core\\test_config_manager.py",
+      "examples\\test_pattern_examples.py",
+      "integration\\test_critical_integration.py",
+      "llm\\test_structured_generation.py",
+      "mcp\\test_mcp_service.py",
+      "services\\test_agent_message_processing.py",
+      "services\\test_agent_service.py",
+      "services\\test_agent_service_advanced.py",
+      "services\\test_agent_service_orchestration.py",
+      "services\\test_apex_optimizer_tool_selection.py",
+      "services\\test_clickhouse_query_fixer.py",
+      "services\\test_generation_service_comprehensive.py",
+      "services\\test_overall_supervisor.py",
+      "services\\test_permission_service.py",
+      "services\\test_quality_gate_service_comprehensive.py",
+      "services\\test_quality_monitoring_service.py",
+      "services\\test_security_service_authentication_enhanced.py",
+      "services\\test_supply_research_scheduler_comprehensive.py",
+      "services\\test_supply_research_service_comprehensive.py",
+      "services\\test_synthetic_data_service_comprehensive.py",
+      "services\\test_synthetic_data_service_v3.py",
+      "services\\test_synthetic_data_validation.py",
+      "services\\test_thread_service.py",
+      "services\\test_tool_permission_service_comprehensive.py",
+      "services\\test_unified_tool_registry_management.py",
+      "services\\test_websocket_message_handler_routing.py",
+      "services\\test_ws_manager_connection_pool.py"
+    ],
+    "e2e": [
+      "agents\\test_agent_e2e_critical.py",
+      "agents\\test_example_prompts_e2e_real.py",
+      "e2e\\test_concurrent_user_load.py"
+    ],
+    "uncategorized": [
+      "test_database_session.py",
+      "test_json_extraction.py",
+      "auth\\test_environment_config.py",
+      "core\\test_fallback_handler.py",
+      "core\\test_type_validation.py",
+      "mcp\\test_resource_manager.py",
+      "mcp\\test_tool_registry.py",
+      "routes\\test_auth_flow.py",
+      "routes\\test_health_route.py",
+      "routes\\test_user_auth.py",
+      "services\\test_clickhouse_service.py",
+      "services\\test_corpus_service.py",
+      "services\\test_fallback_response_service.py",
+      "services\\test_job_store_service.py",
+      "services\\test_key_manager.py",
+      "services\\test_synthetic_data_service.py",
+      "services\\apex_optimizer_agent\\tools\\test_advanced_optimization_for_core_function.py",
+      "services\\apex_optimizer_agent\\tools\\test_cost_estimator.py",
+      "services\\apex_optimizer_agent\\tools\\test_cost_reduction_quality_preservation.py",
+      "services\\apex_optimizer_agent\\tools\\test_cost_simulation_for_increased_usage.py",
+      "services\\apex_optimizer_agent\\tools\\test_kv_cache_optimization_audit.py",
+      "services\\apex_optimizer_agent\\tools\\test_log_fetcher.py",
+      "services\\apex_optimizer_agent\\tools\\test_log_pattern_identifier.py",
+      "services\\apex_optimizer_agent\\tools\\test_multi_objective_optimization.py",
+      "services\\apex_optimizer_agent\\tools\\test_new_model_effectiveness_analysis.py",
+      "services\\apex_optimizer_agent\\tools\\test_performance_predictor.py",
+      "services\\apex_optimizer_agent\\tools\\test_policy_proposer.py",
+      "services\\apex_optimizer_agent\\tools\\test_policy_simulator.py",
+      "services\\apex_optimizer_agent\\tools\\test_supply_catalog_search.py",
+      "services\\apex_optimizer_agent\\tools\\test_tool_latency_optimization.py"
+    ]
+  },
+  "test_details": {
+    "test_admin.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_admin.py"
+    },
+    "test_agents_comprehensive.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_agents_comprehensive.py"
+    },
+    "test_agent_service_critical.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_agent_service_critical.py"
+    },
+    "test_api_endpoints_critical.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_api_endpoints_critical.py"
+    },
+    "test_auth_critical.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_auth_critical.py"
+    },
+    "test_business_value_critical.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_business_value_critical.py"
+    },
+    "test_categories.py": {
+      "analysis": {
+        "uses_real_llm": true,
+        "uses_real_database": true,
+        "uses_real_redis": true,
+        "uses_real_clickhouse": true,
+        "uses_mocks": false,
+        "is_integration": true,
+        "is_unit": true,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "real_llm",
+        "real_database",
+        "real_redis",
+        "real_clickhouse",
+        "real_services",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_categories.py"
+    },
+    "test_database_env_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_database_env_service.py"
+    },
+    "test_database_repository_critical.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_database_repository_critical.py"
+    },
+    "test_database_session.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_database_session.py"
+    },
+    "test_json_extraction.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_json_extraction.py"
+    },
+    "test_realistic_data_integration.py": {
+      "analysis": {
+        "uses_real_llm": true,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "real_llm",
+        "real_services",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_realistic_data_integration.py"
+    },
+    "test_simple_imports.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_simple_imports.py"
+    },
+    "test_startup_checks_robust.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_startup_checks_robust.py"
+    },
+    "test_system_startup.py": {
+      "analysis": {
+        "uses_real_llm": true,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "real_llm",
+        "real_services"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_system_startup.py"
+    },
+    "test_thread_repository.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_thread_repository.py"
+    },
+    "test_websocket_critical.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_websocket_critical.py"
+    },
+    "test_websocket_production_realistic.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_websocket_production_realistic.py"
+    },
+    "test_ws_manager.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_ws_manager.py"
+    },
+    "test_ws_manager_comprehensive.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_ws_manager_comprehensive.py"
+    },
+    "agents\\test_agent_e2e_critical.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": true,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "e2e"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_agent_e2e_critical.py"
+    },
+    "agents\\test_data_sub_agent.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": true,
+        "is_e2e": false,
+        "has_skip_marker": true
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_data_sub_agent.py"
+    },
+    "agents\\test_data_sub_agent_comprehensive.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_data_sub_agent_comprehensive.py"
+    },
+    "agents\\test_example_prompts_e2e_real.py": {
+      "analysis": {
+        "uses_real_llm": true,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": true,
+        "has_skip_marker": true
+      },
+      "categories": [
+        "real_llm",
+        "real_services",
+        "e2e"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_example_prompts_e2e_real.py"
+    },
+    "agents\\test_subagent_workflow.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": true
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_subagent_workflow.py"
+    },
+    "agents\\test_supervisor_advanced.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_supervisor_advanced.py"
+    },
+    "agents\\test_supervisor_agent.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_supervisor_agent.py"
+    },
+    "agents\\test_supervisor_consolidated_comprehensive.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_supervisor_consolidated_comprehensive.py"
+    },
+    "agents\\test_supervisor_orchestration.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_supervisor_orchestration.py"
+    },
+    "agents\\test_supply_researcher_agent.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": true,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": true,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "real_database",
+        "real_services",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_supply_researcher_agent.py"
+    },
+    "agents\\test_supply_researcher_agent_v2.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": true,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_supply_researcher_agent_v2.py"
+    },
+    "agents\\test_triage_sub_agent.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_triage_sub_agent.py"
+    },
+    "agents\\test_triage_sub_agent_comprehensive.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_triage_sub_agent_comprehensive.py"
+    },
+    "auth\\test_environment_config.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\auth\\test_environment_config.py"
+    },
+    "clickhouse\\test_corpus_generation_coverage.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\clickhouse\\test_corpus_generation_coverage.py"
+    },
+    "clickhouse\\test_performance_edge_cases.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\clickhouse\\test_performance_edge_cases.py"
+    },
+    "clickhouse\\test_query_correctness.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\clickhouse\\test_query_correctness.py"
+    },
+    "clickhouse\\test_realistic_clickhouse_operations.py": {
+      "analysis": {
+        "uses_real_llm": true,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": true,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "real_llm",
+        "real_clickhouse",
+        "real_services"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\clickhouse\\test_realistic_clickhouse_operations.py"
+    },
+    "core\\test_async_utils.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\core\\test_async_utils.py"
+    },
+    "core\\test_async_utils_complete.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\core\\test_async_utils_complete.py"
+    },
+    "core\\test_config_manager.py": {
+      "analysis": {
+        "uses_real_llm": true,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "real_llm",
+        "real_services",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\core\\test_config_manager.py"
+    },
+    "core\\test_core_infrastructure_11_20.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": true,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "unit"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\core\\test_core_infrastructure_11_20.py"
+    },
+    "core\\test_error_handling.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\core\\test_error_handling.py"
+    },
+    "core\\test_fallback_handler.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\core\\test_fallback_handler.py"
+    },
+    "core\\test_missing_tests_11_30.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\core\\test_missing_tests_11_30.py"
+    },
+    "core\\test_service_interfaces.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\core\\test_service_interfaces.py"
+    },
+    "core\\test_type_validation.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\core\\test_type_validation.py"
+    },
+    "database\\test_repositories_comprehensive.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": true,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "real_clickhouse",
+        "real_services"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\database\\test_repositories_comprehensive.py"
+    },
+    "e2e\\test_concurrent_user_load.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": true,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "e2e"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_concurrent_user_load.py"
+    },
+    "examples\\test_pattern_examples.py": {
+      "analysis": {
+        "uses_real_llm": true,
+        "uses_real_database": true,
+        "uses_real_redis": true,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": true,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "real_llm",
+        "real_database",
+        "real_redis",
+        "real_services",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\examples\\test_pattern_examples.py"
+    },
+    "integration\\test_critical_integration.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": true,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": true,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "real_database",
+        "real_services",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_critical_integration.py"
+    },
+    "llm\\test_structured_generation.py": {
+      "analysis": {
+        "uses_real_llm": true,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "real_llm",
+        "real_services",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\llm\\test_structured_generation.py"
+    },
+    "mcp\\test_mcp_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\mcp\\test_mcp_service.py"
+    },
+    "mcp\\test_request_handler.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\mcp\\test_request_handler.py"
+    },
+    "mcp\\test_resource_manager.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\mcp\\test_resource_manager.py"
+    },
+    "mcp\\test_server.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\mcp\\test_server.py"
+    },
+    "mcp\\test_tool_registry.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\mcp\\test_tool_registry.py"
+    },
+    "mcp\\test_websocket_transport.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\mcp\\test_websocket_transport.py"
+    },
+    "routes\\test_apex_optimizer_agent_route.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\routes\\test_apex_optimizer_agent_route.py"
+    },
+    "routes\\test_api_routes_21_30.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": true,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "unit"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\routes\\test_api_routes_21_30.py"
+    },
+    "routes\\test_auth_flow.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\routes\\test_auth_flow.py"
+    },
+    "routes\\test_config_endpoint.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\routes\\test_config_endpoint.py"
+    },
+    "routes\\test_demo.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\routes\\test_demo.py"
+    },
+    "routes\\test_google_auth.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\routes\\test_google_auth.py"
+    },
+    "routes\\test_health_route.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\routes\\test_health_route.py"
+    },
+    "routes\\test_reference_management.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\routes\\test_reference_management.py"
+    },
+    "routes\\test_user_auth.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\routes\\test_user_auth.py"
+    },
+    "routes\\test_websocket_advanced.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\routes\\test_websocket_advanced.py"
+    },
+    "routes\\test_websocket_connection.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\routes\\test_websocket_connection.py"
+    },
+    "services\\test_agent_message_processing.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_agent_message_processing.py"
+    },
+    "services\\test_agent_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_agent_service.py"
+    },
+    "services\\test_agent_service_advanced.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_agent_service_advanced.py"
+    },
+    "services\\test_agent_service_orchestration.py": {
+      "analysis": {
+        "uses_real_llm": true,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "real_llm",
+        "real_services",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_agent_service_orchestration.py"
+    },
+    "services\\test_apex_optimizer_tool_selection.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_apex_optimizer_tool_selection.py"
+    },
+    "services\\test_clickhouse_query_fixer.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": true,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "real_clickhouse",
+        "real_services",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_clickhouse_query_fixer.py"
+    },
+    "services\\test_clickhouse_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_clickhouse_service.py"
+    },
+    "services\\test_corpus_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_corpus_service.py"
+    },
+    "services\\test_corpus_service_comprehensive.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_corpus_service_comprehensive.py"
+    },
+    "services\\test_database_repositories.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": true,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": true,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "real_database",
+        "real_services",
+        "unit"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_database_repositories.py"
+    },
+    "services\\test_database_repositories_simple.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": true,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "real_database",
+        "real_services"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_database_repositories_simple.py"
+    },
+    "services\\test_database_repository_transactions.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": true,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "unit"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_database_repository_transactions.py"
+    },
+    "services\\test_demo_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_demo_service.py"
+    },
+    "services\\test_fallback_response_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_fallback_response_service.py"
+    },
+    "services\\test_generation_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_generation_service.py"
+    },
+    "services\\test_generation_service_comprehensive.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_generation_service_comprehensive.py"
+    },
+    "services\\test_generation_service_fixed.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_generation_service_fixed.py"
+    },
+    "services\\test_job_store_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_job_store_service.py"
+    },
+    "services\\test_key_manager.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_key_manager.py"
+    },
+    "services\\test_llm_cache_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_llm_cache_service.py"
+    },
+    "services\\test_llm_manager_provider_switching.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_llm_manager_provider_switching.py"
+    },
+    "services\\test_message_handlers.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_message_handlers.py"
+    },
+    "services\\test_overall_supervisor.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_overall_supervisor.py"
+    },
+    "services\\test_permission_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_permission_service.py"
+    },
+    "services\\test_quality_gate_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_quality_gate_service.py"
+    },
+    "services\\test_quality_gate_service_comprehensive.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": true,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_quality_gate_service_comprehensive.py"
+    },
+    "services\\test_quality_monitoring_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_quality_monitoring_service.py"
+    },
+    "services\\test_redis_manager_operations.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_redis_manager_operations.py"
+    },
+    "services\\test_schema_validation_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_schema_validation_service.py"
+    },
+    "services\\test_security_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_security_service.py"
+    },
+    "services\\test_security_service_authentication_enhanced.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_security_service_authentication_enhanced.py"
+    },
+    "services\\test_state_persistence.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_state_persistence.py"
+    },
+    "services\\test_supply_catalog_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_supply_catalog_service.py"
+    },
+    "services\\test_supply_research_scheduler_comprehensive.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_supply_research_scheduler_comprehensive.py"
+    },
+    "services\\test_supply_research_scheduler_jobs.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_supply_research_scheduler_jobs.py"
+    },
+    "services\\test_supply_research_service_comprehensive.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_supply_research_service_comprehensive.py"
+    },
+    "services\\test_synthetic_data_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_synthetic_data_service.py"
+    },
+    "services\\test_synthetic_data_service_comprehensive.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_synthetic_data_service_comprehensive.py"
+    },
+    "services\\test_synthetic_data_service_v3.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": true,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": true,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "real_clickhouse",
+        "real_services",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_synthetic_data_service_v3.py"
+    },
+    "services\\test_synthetic_data_validation.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_synthetic_data_validation.py"
+    },
+    "services\\test_thread_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_thread_service.py"
+    },
+    "services\\test_tool_dispatcher.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_tool_dispatcher.py"
+    },
+    "services\\test_tool_permission_service_comprehensive.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_tool_permission_service_comprehensive.py"
+    },
+    "services\\test_tool_registry_registration.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_tool_registry_registration.py"
+    },
+    "services\\test_unified_tool_registry_management.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_unified_tool_registry_management.py"
+    },
+    "services\\test_user_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_user_service.py"
+    },
+    "services\\test_websocket_message_handler_routing.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_websocket_message_handler_routing.py"
+    },
+    "services\\test_ws_manager_connection_pool.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": true,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "integration"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_ws_manager_connection_pool.py"
+    },
+    "unit\\test_threads_route.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unit\\test_threads_route.py"
+    },
+    "utils\\test_utils_comprehensive.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\utils\\test_utils_comprehensive.py"
+    },
+    "services\\agents\\test_supervisor_service.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\agents\\test_supervisor_service.py"
+    },
+    "services\\agents\\test_tools.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\agents\\test_tools.py"
+    },
+    "services\\apex_optimizer_agent\\test_tool_builder.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\test_tool_builder.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_advanced_optimization_for_core_function.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_advanced_optimization_for_core_function.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_base.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": true,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only",
+        "unit"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_cost_estimator.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_estimator.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_cost_reduction_quality_preservation.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_reduction_quality_preservation.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_cost_simulation_for_increased_usage.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_simulation_for_increased_usage.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_kv_cache_optimization_audit.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_kv_cache_optimization_audit.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": true,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "mock_only"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_log_fetcher.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_log_fetcher.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_log_pattern_identifier.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_log_pattern_identifier.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_multi_objective_optimization.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_multi_objective_optimization.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_new_model_effectiveness_analysis.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_new_model_effectiveness_analysis.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_performance_predictor.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_performance_predictor.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_policy_proposer.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_policy_proposer.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_policy_simulator.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_policy_simulator.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_supply_catalog_search.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_supply_catalog_search.py"
+    },
+    "services\\apex_optimizer_agent\\tools\\test_tool_latency_optimization.py": {
+      "analysis": {
+        "uses_real_llm": false,
+        "uses_real_database": false,
+        "uses_real_redis": false,
+        "uses_real_clickhouse": false,
+        "uses_mocks": false,
+        "is_integration": false,
+        "is_unit": false,
+        "is_e2e": false,
+        "has_skip_marker": false
+      },
+      "categories": [
+        "uncategorized"
+      ],
+      "full_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\apex_optimizer_agent\\tools\\test_tool_latency_optimization.py"
+    }
+  }
+}

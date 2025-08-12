@@ -55,19 +55,39 @@ redis_db = pr_number % 16
 redis_url = f"redis://host:port/{redis_db}"
 ```
 
-### 3. Timeout Configuration
+### 3. Workflow Concurrency Control
+
+**NEW**: Automatic cancellation of superseded runs:
+- When a new commit is pushed, in-progress workflows for the same PR are cancelled
+- Only the latest commit's workflow runs to completion
+- Destroy operations use separate concurrency group (never cancelled)
+
+```yaml
+concurrency:
+  group: staging-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+```
+
+### 4. Parallel Build Optimization
+
+Backend and frontend containers now build in parallel:
+- Separate GitHub Actions jobs run simultaneously
+- 5-10 minutes saved per deployment
+- Independent failure detection
+
+### 5. Timeout Configuration
 
 All steps now have explicit timeouts:
 
 | Step | Timeout | Previous |
 |------|---------|----------|
-| Job Level | 45 min | 6 hours (GitHub default) |
-| Docker Build | 15 min | Unlimited |
+| Job Level | 30-45 min | 6 hours (GitHub default) |
+| Docker Build | 10 min | Unlimited |
 | Terraform Apply | 20 min | Unlimited |
 | Database Migration | 5 min | Unlimited |
 | Health Checks | 10 min | Unlimited |
 
-### 4. State Lock Recovery
+### 6. State Lock Recovery
 
 Automatically detect and clear stale locks:
 
