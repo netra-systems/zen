@@ -94,11 +94,6 @@ resource "google_cloud_run_service" "backend" {
         }
         
         env {
-          name  = "K_SERVICE"
-          value = "backend-${local.environment_name}"
-        }
-        
-        env {
           name  = "CLICKHOUSE_URL"
           value = "clickhouse://default:@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=1"
         }
