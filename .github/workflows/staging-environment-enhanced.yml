@@ -255,41 +255,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-  # Helper job to update PR comment
-  update-comment:
-    name: Update PR Comment
-    runs-on: ubuntu-latest
-    needs: initialize-deployment
-    if: always() && github.event_name == 'pull_request' && needs.initialize-deployment.outputs.comment_id
-    strategy:
-      matrix:
-        include:
-          - trigger: backend-build-start
-          - trigger: backend-build-complete
-          - trigger: frontend-build-start
-          - trigger: frontend-build-complete
-          - trigger: deployment-start
-          - trigger: deployment-complete
-          - trigger: database-start
-          - trigger: database-complete
-          - trigger: testing-start
-          - trigger: testing-complete
-    steps:
-      - name: Update comment for ${{ matrix.trigger }}
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            // This is a placeholder for the update logic
-            // Each job will call this with specific update data
-            console.log('Comment update placeholder for: ${{ matrix.trigger }}');
+  
 
   build-backend:
     name: Build Backend Container
     needs: [initialize-deployment, commit-monitor]
     if: |
       needs.initialize-deployment.outputs.should_deploy == 'true' && 
-      needs.commit-monitor.outputs.new_commit_detected != 'true'
+      needs.commit-monitor.outputs.new_commit_detected != 'true' &&
+      (github.event.pull_request.head.sha == env.DEPLOYMENT_SHA || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
@@ -536,7 +510,8 @@ jobs:
     needs: [initialize-deployment, commit-monitor]
     if: |
       needs.initialize-deployment.outputs.should_deploy == 'true' && 
-      needs.commit-monitor.outputs.new_commit_detected != 'true'
+      needs.commit-monitor.outputs.new_commit_detected != 'true' &&
+      (github.event.pull_request.head.sha == env.DEPLOYMENT_SHA || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
@@ -800,7 +775,8 @@ jobs:
     needs: [initialize-deployment, build-backend, build-frontend, commit-monitor]
     if: |
       needs.initialize-deployment.outputs.should_deploy == 'true' && 
-      needs.commit-monitor.outputs.new_commit_detected != 'true'
+      needs.commit-monitor.outputs.new_commit_detected != 'true' &&
+      (github.event.pull_request.head.sha == env.DEPLOYMENT_SHA || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
@@ -1619,8 +1595,8 @@ jobs:
     name: Destroy Staging Environment
     needs: initialize-deployment
     if: |
-      needs.initialize-deployment.outputs.should_deploy == 'false' && 
-      (github.event.action == 'closed' || github.event.inputs.action == 'destroy')
+      (github.event.action == 'closed' && needs.initialize-deployment.outputs.action == 'destroy') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency:
@@ -1773,6 +1749,7 @@ jobs:
           gsutil -m rm -r "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/" 2>/dev/null || true
 
       - name: Clean up container images and build cache
+        continue-on-error: true
         run: |
           PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
           
