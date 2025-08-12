@@ -40,6 +40,7 @@ python test_runner.py --level smoke
 |------|---------|
 | [`code_changes.xml`](SPEC/code_changes.xml) | **MANDATORY** checklist for any code modification |
 | [`anti_regression.xml`](SPEC/anti_regression.xml) | Patterns to prevent common regressions |
+| [`no_test_stubs.xml`](SPEC/no_test_stubs.xml) | **CRITICAL** - Prevents test stubs in production |
 | [`conventions.xml`](SPEC/conventions.xml) | Coding standards and patterns |
 | [`instructions.xml`](SPEC/instructions.xml) | General development guidelines |
 
@@ -69,6 +70,7 @@ python test_runner.py --level smoke
 2. ✅ Run smoke tests: `python test_runner.py --level smoke`
 3. ✅ Update import tests when adding dependencies
 4. ✅ Update relevant specs with learnings
+5. ✅ Check [`SPEC/no_test_stubs.xml`](SPEC/no_test_stubs.xml) - NO test stubs in production
 
 ### Key Development Patterns
 - **Async First**: Use async/await for all I/O operations
@@ -78,6 +80,7 @@ python test_runner.py --level smoke
 - **Unique IDs**: Use `generateUniqueId()` from `@/lib/utils` in React
 - **UI Design**: Glassmorphic design, NO blue gradient bars
 - **File Organization**: ALWAYS create new files in appropriate folders - keep top directory clean
+- **NO Test Stubs**: NEVER add test implementations in production services - real code only
 
 ## Testing Strategy
 
@@ -156,6 +159,7 @@ See `.env.example` for complete list.
 - **ClickHouse array errors**: Use `arrayElement()` not direct indexing - see [`clickhouse.xml`](SPEC/clickhouse.xml)
 - **Import test failures**: Update `app/tests/test_internal_imports.py` and `test_external_imports.py`
 - **Test runner issues**: Fix runner FIRST before running tests (Unicode, parallel args)
+- **Test stubs in services**: Remove immediately - see [`no_test_stubs.xml`](SPEC/no_test_stubs.xml)
 
 For detailed troubleshooting and historical fixes, see [`SPEC/learnings.xml`](SPEC/learnings.xml).
 

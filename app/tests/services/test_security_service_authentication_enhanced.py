@@ -6,7 +6,7 @@ Tests authentication flow, token management, permission validation, and security
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from cryptography.fernet import Fernet
@@ -31,7 +31,7 @@ class MockUser:
         self.picture = None
         self.is_active = True
         self.is_verified = True
-        self.created_at = datetime.utcnow()
+        self.created_at = datetime.now(UTC)
         self.last_login = None
         self.failed_login_attempts = 0
         self.account_locked_until = None
@@ -56,7 +56,7 @@ class EnhancedSecurityService(SecurityService):
         
     def check_account_lockout(self, user: MockUser) -> bool:
         """Check if account is locked due to failed attempts"""
-        if user.account_locked_until and datetime.utcnow() < user.account_locked_until:
+        if user.account_locked_until and datetime.now(UTC) < user.account_locked_until:
             return True
         return False
     
@@ -64,13 +64,13 @@ class EnhancedSecurityService(SecurityService):
         """Increment failed login attempts and lock if necessary"""
         user.failed_login_attempts += 1
         if user.failed_login_attempts >= self.max_login_attempts:
-            user.account_locked_until = datetime.utcnow() + self.lockout_duration
+            user.account_locked_until = datetime.now(UTC) + self.lockout_duration
     
     def reset_failed_attempts(self, user: MockUser):
         """Reset failed login attempts on successful login"""
         user.failed_login_attempts = 0
         user.account_locked_until = None
-        user.last_login = datetime.utcnow()
+        user.last_login = datetime.now(UTC)
     
     def blacklist_token(self, token: str):
         """Add token to blacklist"""
@@ -82,11 +82,11 @@ class EnhancedSecurityService(SecurityService):
     
     def create_session(self, user_id: str, session_data: Dict[str, Any]) -> str:
         """Create user session"""
-        session_id = f"session_{user_id}_{datetime.utcnow().timestamp()}"
+        session_id = f"session_{user_id}_{datetime.now(UTC).timestamp()}"
         self.session_store[session_id] = {
             'user_id': user_id,
-            'created_at': datetime.utcnow(),
-            'last_accessed': datetime.utcnow(),
+            'created_at': datetime.now(UTC),
+            'last_accessed': datetime.now(UTC),
             **session_data
         }
         return session_id
@@ -99,12 +99,12 @@ class EnhancedSecurityService(SecurityService):
         session = self.session_store[session_id]
         
         # Check session expiry (e.g., 24 hours)
-        if datetime.utcnow() - session['created_at'] > timedelta(hours=24):
+        if datetime.now(UTC) - session['created_at'] > timedelta(hours=24):
             del self.session_store[session_id]
             return None
         
         # Update last accessed
-        session['last_accessed'] = datetime.utcnow()
+        session['last_accessed'] = datetime.now(UTC)
         return session
     
     def check_permission(self, user: MockUser, permission: str) -> bool:
@@ -188,7 +188,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         locked = MockUser("locked_789", "locked@test.com", "Locked User")
         locked.hashed_password = enhanced_security_service.get_password_hash("locked_password")
         locked.failed_login_attempts = 5
-        locked.account_locked_until = datetime.utcnow() + timedelta(minutes=15)
+        locked.account_locked_until = datetime.now(UTC) + timedelta(minutes=15)
         users.append(locked)
         
         return users
@@ -264,7 +264,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         assert enhanced_security_service.get_user_email_from_token(malformed_jwt) == None
         
         # JWT with wrong signature
-        valid_payload = {"sub": "test@example.com", "exp": datetime.utcnow().timestamp() + 3600}
+        valid_payload = {"sub": "test@example.com", "exp": datetime.now(UTC).timestamp() + 3600}
         wrong_signature_token = jwt.encode(valid_payload, "wrong_secret", algorithm="HS256")
         assert enhanced_security_service.get_user_email_from_token(wrong_signature_token) == None
     
@@ -348,7 +348,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         enhanced_security_service.increment_failed_attempts(user)
         assert user.failed_login_attempts == 5
         assert user.account_locked_until != None
-        assert user.account_locked_until > datetime.utcnow()
+        assert user.account_locked_until > datetime.now(UTC)
     
     def test_successful_login_resets_attempts(self, enhanced_security_service, sample_users):
         """Test that successful login resets failed attempts"""
@@ -407,7 +407,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         
         # Mock old creation time
         enhanced_security_service.session_store[session_id]['created_at'] = (
-            datetime.utcnow() - timedelta(hours=25)  # Expired
+            datetime.now(UTC) - timedelta(hours=25)  # Expired
         )
         
         # Should return None for expired session

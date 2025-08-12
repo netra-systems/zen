@@ -7,7 +7,7 @@ Comprehensive test suite for the MCP server implementation.
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 import uuid
 
@@ -284,7 +284,7 @@ class TestMCPServer:
         """Test rate limiting functionality"""
         # Add session with high request count
         mock_session.request_count = 200
-        mock_session.last_request_at = datetime.utcnow()
+        mock_session.last_request_at = datetime.now(UTC)
         server.sessions["test-session"] = mock_session
         
         request = {
@@ -327,7 +327,7 @@ class TestMCPServer:
             protocol_version="1.0.0",
             capabilities={}
         )
-        expired_session.expires_at = datetime.utcnow() - timedelta(hours=1)
+        expired_session.expires_at = datetime.now(UTC) - timedelta(hours=1)
         server.sessions["expired"] = expired_session
         
         # Add active session

@@ -6,7 +6,7 @@ Tests transaction handling, rollback scenarios, concurrency, and data consistenc
 import pytest
 import asyncio
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from contextlib import asynccontextmanager
@@ -28,8 +28,8 @@ class MockDatabaseModel:
     def __init__(self, id: str = None, name: str = None, **kwargs):
         self.id = id or str(uuid.uuid4())
         self.name = name
-        self.created_at = datetime.utcnow()
-        self.updated_at = datetime.utcnow()
+        self.created_at = datetime.now(UTC)
+        self.updated_at = datetime.now(UTC)
         
         # Set other attributes
         for key, value in kwargs.items():

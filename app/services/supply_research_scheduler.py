@@ -4,7 +4,7 @@ Supply Research Scheduler - Background task scheduling for periodic supply updat
 
 import asyncio
 from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from enum import Enum
 import json
 
@@ -54,8 +54,8 @@ class ResearchSchedule:
     def _calculate_next_run(self) -> datetime:
         """Calculate next run time based on frequency"""
         # Use last_run as base if available, otherwise use current time
-        base_time = self.last_run if self.last_run else datetime.utcnow()
-        now = datetime.utcnow()
+        base_time = self.last_run if self.last_run else datetime.now(UTC)
+        now = datetime.now(UTC)
         
         if self.frequency == ScheduleFrequency.HOURLY:
             # Next hour from base_time
@@ -106,12 +106,12 @@ class ResearchSchedule:
         if not self.enabled:
             return False
         
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         return now >= self.next_run
     
     def update_after_run(self):
         """Update schedule after successful run"""
-        self.last_run = datetime.utcnow()
+        self.last_run = datetime.now(UTC)
         # When updating after a run, calculate next run from the current last_run
         # This ensures next_run advances properly
         if self.frequency == ScheduleFrequency.HOURLY:
@@ -235,7 +235,7 @@ class SupplyResearchScheduler:
         
         result = {
             "schedule_name": schedule.name,
-            "started_at": datetime.utcnow().isoformat(),
+            "started_at": datetime.now(UTC).isoformat(),
             "research_type": schedule.research_type.value,
             "providers": schedule.providers,
             "results": []
@@ -257,11 +257,11 @@ class SupplyResearchScheduler:
                 
                 result["results"] = research_result.get("results", [])
                 result["status"] = "completed"
-                result["completed_at"] = datetime.utcnow().isoformat()
+                result["completed_at"] = datetime.now(UTC).isoformat()
                 
                 # Cache result if Redis available
                 if self.redis_manager:
-                    cache_key = f"schedule_result:{schedule.name}:{datetime.utcnow().date()}"
+                    cache_key = f"schedule_result:{schedule.name}:{datetime.now(UTC).date()}"
                     await self.redis_manager.set(
                         cache_key,
                         json.dumps(result, default=str),
@@ -323,7 +323,7 @@ class SupplyResearchScheduler:
                     await self.redis_manager.lpush(
                         "supply_notifications",
                         json.dumps({
-                            "timestamp": datetime.utcnow().isoformat(),
+                            "timestamp": datetime.now(UTC).isoformat(),
                             "changes": significant_changes
                         }, default=str)
                     )
@@ -385,7 +385,7 @@ class SupplyResearchScheduler:
             return []
         
         results = []
-        cutoff_date = datetime.utcnow() - timedelta(days=days_back)
+        cutoff_date = datetime.now(UTC) - timedelta(days=days_back)
         
         # Build cache key pattern
         if schedule_name:
@@ -396,7 +396,7 @@ class SupplyResearchScheduler:
         # Get matching keys (simplified - in production use SCAN)
         # For now, check last N days
         for i in range(days_back):
-            date = (datetime.utcnow() - timedelta(days=i)).date()
+            date = (datetime.now(UTC) - timedelta(days=i)).date()
             
             if schedule_name:
                 keys = [f"schedule_result:{schedule_name}:{date}"]

@@ -220,8 +220,8 @@ class BaseRepository(Generic[T], ABC):
             
             # Check if model supports soft delete
             if hasattr(entity, 'deleted_at'):
-                from datetime import datetime
-                setattr(entity, 'deleted_at', datetime.utcnow())
+                from datetime import datetime, UTC
+                setattr(entity, 'deleted_at', datetime.now(UTC))
                 await session.commit()
                 logger.info(f"Soft deleted {self.model.__name__} with id: {entity_id}")
                 return True

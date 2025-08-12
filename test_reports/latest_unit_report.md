@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-12T10:34:03.200474  
+**Generated:** 2025-08-12T10:51:42.270812  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 **Purpose:** Development validation, component testing
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 159 | 155 | 3 | 0 | 1 | 44.35s | [FAILED] |
-| Frontend  | 252 | 18 | 234 | 0 | 0 | 34.64s | [FAILED] |
+| Backend   | 159 | 155 | 3 | 0 | 1 | 44.00s | [FAILED] |
+| Frontend  | 252 | 18 | 234 | 0 | 0 | 30.86s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,7 +27,7 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 78.99s
+- **Total Duration:** 74.86s
 - **Exit Code:** 2
 
 ### Backend Configuration
@@ -74,37 +74,34 @@ app\tests\services\agents\test_supervisor_service.py::test_supervisor_end_to_end
 app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_failure_recovery 
 app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_bulk_create 
 app\tests\services\test_generation_service_fixed.py::TestClickHouseOperationsMocked::test_get_corpus_from_clickhouse_mocked 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_supervisor_service.py::test_supervisor_end_to_end 
+[gw3][36m [  0%] [0m[31mERROR[0m app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_bulk_create 
 [gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_generation_service_fixed.py::TestClickHouseOperationsMocked::test_get_corpus_from_clickhouse_mocked 
 app\tests\services\test_generation_service_fixed.py::TestClickHouseOperationsMocked::test_save_corpus_to_clickhouse_mocked 
-[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_supervisor_service.py::test_supervisor_end_to_end 
 app\tests\services\agents\test_tools.py::test_tool_dispatcher 
 [gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_generation_service_fixed.py::TestClickHouseOperationsMocked::test_save_corpus_to_clickhouse_mocked 
 app\tests\services\test_job_store_service.py::TestJobStore::test_job_store_initialization 
 [gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_job_store_initialization 
-[gw3][36m [  0%] [0m[31mERROR[0m app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_bulk_create 
 app\tests\services\test_job_store_service.py::TestJobStore::test_set_and_get_job 
 [gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_set_and_get_job 
 app\tests\services\test_job_store_service.py::TestJobStore::test_update_job_status 
 [gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_update_job_status 
 app\tests\services\test_job_store_service.py::TestJobStore::test_nonexistent_job 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher 
+app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
+app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
 [gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_nonexistent_job 
 app\tests\services\test_job_store_service.py::TestJobStore::test_global_job_store 
 [gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_global_job_store 
 app\tests\services\test_key_manager.py::test_load_from_settings_success 
-[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher 
 [gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_key_manager.py::test_load_from_settings_success 
-app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
-app\tests\services\test_key_manager.py::test_load_from_settings_jwt_key_too_short 
-[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
-app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
 [gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
+app\tests\services\test_key_manager.py::test_load_from_settings_jwt_key_too_short 
+app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
 [gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_key_manager.py::test_load_from_settings_jwt_key_too_short 
 app\tests\services\test_llm_cache_service.py::test_llm_cache_service_initialization 
-app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
 [gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_llm_cache_service.py::test_llm_cache_service_initialization 
-app\tests\services\test_llm_cache_service.py::test_cache_set_and_get 
-[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_llm_cache_service.py::test_cache_set_and_get 
-app\tests\services\test_llm_cache_service.py::test_cache_expiration 
 [gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
 app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool 
 [gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool 
@@ -120,20 +117,23 @@ app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::te
 [gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_json_serialization 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases 
 [gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases 
+app\tests\services\test_llm_cache_service.py::test_cache_set_and_get 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_instantiation 
 [gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_instantiation 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_get_metadata 
 [gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_get_metadata 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_llm_cache_service.py::test_cache_set_and_get 
+app\tests\services\test_llm_cache_service.py::test_cache_expiration 
 [gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_failure 
 [gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_failure 
+[gw1][36m [  2%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_failure_recovery 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_concrete_tool_run_method 
+app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_timeout_handling 
 [gw0][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_concrete_tool_run_method 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_with_llm_name 
-[gw1][36m [  2%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_failure_recovery 
 [gw0][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_with_llm_name 
-app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_timeout_handling 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_multiple_executions 
 [gw0][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_multiple_executions 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_concurrent_execution 
@@ -165,140 +165,78 @@ Running: npm run test -- __tests__/unit components/**/*.test.tsx hooks/**/*.test
 [FAIL] CHECKS FAILED with exit code 1
 ================================================================================
 
-PASS __tests__/components/chat/MessageItem.test.tsx
+FAIL __tests__/hooks/additionalHooks.test.tsx
+  ● test_useDemoWebSocket_connection › should establish demo WebSocket connection
+
+    ReferenceError: vi is not defined
+
+    [0m [90m 19 |[39m     }[33m;[39m
+     [90m 20 |[39m     
+    [31m[1m>[22m[39m[90m 21 |[39m     global[33m.[39m[33mWebSocket[39m [33m=[39m vi[33m.[39mfn(() [33m=>[39m mockWebSocket) [36mas[39m any[33m;[39m
+     [90m    |[39m                        [31m[1m^[22m[39m
+     [90m 22 |[39m   })[33m;[39m
+     [90m 23 |[39m
+     [90m 24 |[39m   it([32m'should establish demo WebSocket connection'[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
+
+      at Object.vi (__tests__/hooks/additionalHooks.test.tsx:21:24)
+
+  ● test_useDemoWebSocket_connection › should handle message queuing when disconnected
+
+    ReferenceError: vi is not defined
+
+    [0m [90m 19 |[39m     }[33m;[39m
+     [90m 20 |[39m     
+    [31m[1m>[22m[39m[90m 21 |[39m     global[33m.[39m[33mWebSocket[39m [33m=[39m vi[33m.[39mfn(() [33m=>[39m mockWebSocket) [36mas[39m any[33m;[39m
+     [90m    |[39m                        [31m[1m^[22m[39m
+     [90m 22 |[39m   })[33m;[39m
+     [90m 23 |[39m
+     [90m 24 |[39m   it([32m'should establish demo WebSocket connection'[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
+
+      at Object.vi (__tests__/hooks/additionalHooks.test.tsx:21:24)
+
+  ● test_useDemoWebSocket_connection › should handle reconnection on disconnect
+
+    ReferenceError: vi is not defined
+
+    [0m [90m 19 |[39m     }[33m;[39m
+     [90m 20 |[39m     
+    [31m[1m>[22m[39m[90m 21 |[39m     global[33m.[39m[33mWebSocket[39m [33m=[39m vi[33m.[39mfn(() [33m=>[39m mockWebSocket) [36mas[39m any[33m;[39m
+     [90m    |[39m                        [31m[1m^[22m[39m
+     [90m 22 |[39m   })[33m;[39m
+     [90m 23 |[39m
+     [90m 24 |[39m   it([32m'should establish demo WebSocket connection'[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
+
+      at Object.vi (__tests__/hooks/additionalHooks.test.tsx:21:24)
+
+  ● test_useMediaQuery_responsive › should update on media query change
+
+    ReferenceError: vi is not defined
+
+    [0m [90m 124 |[39m   it([32m'should update on media query change'[39m[33m,[39m () [33m=>[39m {
+     [90m 125 |[39m     [36mlet[39m listener[33m:[39m any[33m;[39m
+    [31m[1m>[22m[39m[90m 126 |[39m     [36mconst[39m addEventListenerMock [33m=[39m vi[33m.[39mfn((event[33m:[39m string[33m,[39m handler[33m:[39m any) [33m=>[39m {
+     [90m     |[39m                                  [31m[1m^[22m[39m
+     [90m 127 |[39m       [36mif[39m (event [33m===[39m [32m'change'[39m) listener [33m=[39m handler[33m;[39m
+     [90m 128 |[39m     })[33m;[39m
+     [90m 129 |[39m     [0m
+
+      at Object.vi (__tests__/hooks/additionalHooks.test.tsx:126:34)
+
+  ● test_useMediaQuery_responsive › should handle debouncing for rapid changes
+
+    ReferenceError: vi is not defined
+
+    [0m [90m 150 |[39m   it([32m'should handle debouncing for rapid changes'[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m 151 |[39m     [36mlet[39m listener[33m:[39m any[33m;[39m
+    [31m[1m>[22m[39m[90m 152 |[39m     [36mconst[39m addEventListenerMock [33m=[39m vi[33m.[39mfn((event[33m:[39m string[33m,[39m handler[33m:[39m any) [33m=>[39m {
+     [90m     |[39m                                  [31m[1m^[22m[39m
+     [90m 153 |[39m       [36mif[39m (event [33m===[39m [32m'change'[39m) listener [33m=[39m handler[33m;[39m
+     [90m 154 |[39m     })[33m;[39m
+     [90m 155 |[39m     [0m
+
+      at Object.vi (__tests__/hooks/additionalHooks.test.tsx:152:34)
+
 PASS __tests__/components/chat/ChatHeader.test.tsx
-PASS __tests__/components/chat/PersistentResponseCard.test.tsx
-PASS __tests__/store/unified-chat.test.ts
-  ● Console
-
-    console.log
-      [UnifiedChat] WebSocket Event: agent_started {
-        payload: {
-          agent_name: 'Supervisor Agent',
-          timestamp: 1755020017015,
-          run_id: 'run-456'
-        },
-        currentFastLayer: null,
-        currentMediumLayer: null,
-        currentSlowLayer: null
-      }
-
-      at Object.log [as handleWebSocketEvent] (store/unified-chat.ts:141:17)
-
-    console.log
-      [UnifiedChat] WebSocket Event: tool_executing {
-        payload: {
-          tool_name: 'cost_optimizer',
-          agent_name: 'Test Agent',
-          timestamp: 1755020017029
-        },
-        currentFastLayer: {
-          agentName: 'Test Agent',
-          activeTools: [],
-          timestamp: 1755020017029,
-          runId: 'test-run'
-        },
-        currentMediumLayer: null,
-        currentSlowLayer: null
-      }
-
-      at Object.log [as handleWebSocketEvent] (store/unified-chat.ts:141:17)
-
-    console.log
-      [UnifiedChat] WebSocket Event: agent_thinking {
-        payload: {
-          thought: 'Analyzing workload patterns...',
-          agent_name: 'Analysis Agent',
-          step_number: 2,
-          total_steps: 5
-        },
-        currentFastLayer: null,
-        currentMediumLayer: null,
-        currentSlowLayer: null
-      }
-
-      at Object.log [as handleWebSocketEvent] (store/unified-chat.ts:141:17)
-
-    console.log
-      [UnifiedChat] WebSocket Event: partial_result {
-        payload: {
-          content: 'Initial analysis shows',
-          agent_name: 'Analysis Agent',
-          is_complete: false
-        },
-        currentFastLayer: null,
-        currentMediumLayer: null,
-        currentSlowLayer: null
-      }
-
-      at Object.log [as handleWebSocketEvent] (store/unified-chat.ts:141:17)
-
-    console.log
-      [UnifiedChat] WebSocket Event: partial_result {
-        payload: {
-          content: ' potential optimizations',
-          agent_name: 'Analysis Agent',
-          is_complete: false
-        },
-        currentFastLayer: null,
-        currentMediumLayer: {
-          thought: '',
-          partialContent: 'Initial analysis shows',
-          stepNumber: 0,
-          totalSteps: 0,
-          agentName: 'Analysis Agent'
-        },
-        currentSlowLayer: null
-      }
-
-      at Object.log [as handleWebSocketEvent] (store/unified-chat.ts:141:17)
-
-    console.log
-      [UnifiedChat] WebSocket Event: agent_completed {
-        payload: {
-          agent_name: 'Optimization Agent',
-          duration_ms: 3000,
-          result: { optimizations: [Array] },
-          metrics: { tokens: 500 }
-        },
-        currentFastLayer: null,
-        currentMediumLayer: null,
-        currentSlowLayer: null
-      }
-
-      at Object.log [as handleWebSocketEvent] (store/unified-chat.ts:141:17)
-
-    console.log
-      [UnifiedChat] WebSocket Event: final_report {
-        payload: {
-          report: { summary: 'Complete analysis' },
-          total_duration_ms: 10000,
-          agent_metrics: [],
-          recommendations: [ [Object] ],
-          action_plan: [ [Object] ]
-        },
-        currentFastLayer: null,
-        currentMediumLayer: null,
-        currentSlowLayer: null
-      }
-
-      at Object.log [as handleWebSocketEvent] (store/unified-chat.ts:141:17)
-
-    console.log
-      [UnifiedChat] WebSocket Event: error {
-        payload: {
-          error_message: 'Connection timeout',
-          error_code: 'TIMEOUT',
-          agent_name: 'Network Agent',
-          recoverable: false
-        },
-        currentFastLayer: null,
-        currentMediumLayer: null,
-        currentSlowLayer: null
-      }
-
-      at Object.log [as handleWebSocketEvent] (store/unified-chat.ts:141:17)
-
 FAIL __tests__/hooks/useAgent.test.tsx
   ● Console
 
@@ -390,7 +328,9 @@ FAIL __tests__/hooks/useAgent.test.tsx
       at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:6969:13)
       at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:6927:7)
       at WebSocketService.connect (services/webSocketService.ts:48:24)
-      at con...(truncated)
+      at connect (providers/WebSocketProvider.tsx:44:28)
+
+    console....(truncated)
 ```
 
 ## Error Summary
@@ -406,64 +346,64 @@ FAIL __tests__/hooks/useAgent.test.tsx
 - [31mFAILED[0m app\tests\services\test_agent_service_orchestration.py::[1mTestAgentLifecycleManagement::test_agent_task_failure_handling[0m - assert -100.0 == 0.0
 - [31mFAILED[0m app\tests\services\test_quality_gate_service.py::[1mTestQualityGateService::test_validate_high_quality_optimization_content[0m - AssertionError: assert False == True
 - [31mERROR[0m app\tests\services\test_database_repositories.py::[1mTestBaseRepository::test_repository_bulk_create[0m - AttributeError: 'FixtureDef' object has no attribute 'unittest'
-- [FAIL] TESTS FAILED with exit code 2 after 43.26s
+- [FAIL] TESTS FAILED with exit code 2 after 43.11s
 
 ### Frontend Errors
 - [FAIL] CHECKS FAILED with exit code 1
+- FAIL __tests__/hooks/additionalHooks.test.tsx
 - FAIL __tests__/hooks/useAgent.test.tsx
+- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
+- FAIL __tests__/components/AgentStatusPanel.test.tsx
+- FAIL __tests__/integration/critical-integration.test.tsx
+- FAIL __tests__/components/ThinkingIndicator.test.tsx
 - FAIL __tests__/components/FinalReportView.test.tsx
-- FAIL __tests__/components/ChatSidebar.test.tsx
 - FAIL __tests__/utils/test-utils.tsx
 - FAIL __tests__/components/UIComponents.test.tsx
-- FAIL __tests__/components/ChatHistory.test.tsx
 - FAIL __tests__/services/webSocketService.test.ts
-- FAIL __tests__/auth/service.test.ts
-- FAIL __tests__/components/ThinkingIndicator.test.tsx
-- FAIL __tests__/hooks/additionalHooks.test.tsx
-- FAIL __tests__/integration/critical-integration.test.tsx
-- FAIL __tests__/components/AgentStatusPanel.test.tsx
-- FAIL __tests__/unified-chat-v5.test.tsx
-- FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
-- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
-- FAIL __tests__/integration/advanced-integration.test.tsx
-- FAIL __tests__/imports/internal-imports.test.tsx (5.535 s)
-- FAIL __tests__/auth/context.test.tsx (5.271 s)
-- FAIL __tests__/imports/external-imports.test.tsx (6.349 s)
-- FAIL __tests__/components/ChatHistorySection.test.tsx (9.969 s)
-- FAIL __tests__/chat/chatUIUXCore.test.tsx
-- FAIL __tests__/system/startup.test.tsx (12.857 s)
-- FAIL __tests__/components/chat/MainChat.test.tsx (13.339 s)
-- FAIL __tests__/chat/ui-improvements.test.tsx
-- FAIL __tests__/components/chat/MessageInput.test.tsx (19.934 s)
-- FAIL __tests__/integration/comprehensive-integration.test.tsx (26.514 s)
-- FAIL __tests__/components/ChatComponents.test.tsx (27.439 s)
-- FAIL __tests__/hooks/useAgent.test.tsx
-- FAIL __tests__/components/FinalReportView.test.tsx
 - FAIL __tests__/components/ChatSidebar.test.tsx
+- FAIL __tests__/auth/service.test.ts
+- FAIL __tests__/unified-chat-v5.test.tsx
+- FAIL __tests__/components/ChatHistory.test.tsx
+- FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
+- FAIL __tests__/integration/advanced-integration.test.tsx
+- FAIL __tests__/imports/internal-imports.test.tsx
+- FAIL __tests__/imports/external-imports.test.tsx
+- FAIL __tests__/auth/context.test.tsx
+- FAIL __tests__/components/ChatHistorySection.test.tsx (8.23 s)
+- FAIL __tests__/chat/chatUIUXCore.test.tsx
+- FAIL __tests__/system/startup.test.tsx (11.694 s)
+- FAIL __tests__/components/chat/MainChat.test.tsx (12.155 s)
+- FAIL __tests__/chat/ui-improvements.test.tsx
+- FAIL __tests__/components/chat/MessageInput.test.tsx (17.923 s)
+- FAIL __tests__/components/ChatComponents.test.tsx (23.445 s)
+- FAIL __tests__/integration/comprehensive-integration.test.tsx (25.223 s)
+- FAIL __tests__/hooks/additionalHooks.test.tsx
+- FAIL __tests__/hooks/useAgent.test.tsx
+- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
+- FAIL __tests__/components/AgentStatusPanel.test.tsx
+- FAIL __tests__/integration/critical-integration.test.tsx
+- FAIL __tests__/components/ThinkingIndicator.test.tsx
+- FAIL __tests__/components/FinalReportView.test.tsx
 - FAIL __tests__/utils/test-utils.tsx
 - FAIL __tests__/components/UIComponents.test.tsx
-- FAIL __tests__/components/ChatHistory.test.tsx
 - FAIL __tests__/services/webSocketService.test.ts
+- FAIL __tests__/components/ChatSidebar.test.tsx
 - FAIL __tests__/auth/service.test.ts
-- FAIL __tests__/components/ThinkingIndicator.test.tsx
-- FAIL __tests__/hooks/additionalHooks.test.tsx
-- FAIL __tests__/integration/critical-integration.test.tsx
-- FAIL __tests__/components/AgentStatusPanel.test.tsx
 - FAIL __tests__/unified-chat-v5.test.tsx
+- FAIL __tests__/components/ChatHistory.test.tsx
 - FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
-- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
 - FAIL __tests__/integration/advanced-integration.test.tsx
-- FAIL __tests__/imports/internal-imports.test.tsx (5.535 s)
-- FAIL __tests__/auth/context.test.tsx (5.271 s)
-- FAIL __tests__/imports/external-imports.test.tsx (6.349 s)
-- FAIL __tests__/components/ChatHistorySection.test.tsx (9.969 s)
+- FAIL __tests__/imports/internal-imports.test.tsx
+- FAIL __tests__/imports/external-imports.test.tsx
+- FAIL __tests__/auth/context.test.tsx
+- FAIL __tests__/components/ChatHistorySection.test.tsx (8.23 s)
 - FAIL __tests__/chat/chatUIUXCore.test.tsx
-- FAIL __tests__/system/startup.test.tsx (12.857 s)
-- FAIL __tests__/components/chat/MainChat.test.tsx (13.339 s)
+- FAIL __tests__/system/startup.test.tsx (11.694 s)
+- FAIL __tests__/components/chat/MainChat.test.tsx (12.155 s)
 - FAIL __tests__/chat/ui-improvements.test.tsx
-- FAIL __tests__/components/chat/MessageInput.test.tsx (19.934 s)
-- FAIL __tests__/integration/comprehensive-integration.test.tsx (26.514 s)
-- FAIL __tests__/components/ChatComponents.test.tsx (27.439 s)
+- FAIL __tests__/components/chat/MessageInput.test.tsx (17.923 s)
+- FAIL __tests__/components/ChatComponents.test.tsx (23.445 s)
+- FAIL __tests__/integration/comprehensive-integration.test.tsx (25.223 s)
 
 
 ---

@@ -6,7 +6,7 @@ Tests tool selection logic, chaining mechanisms, optimization routing, and perfo
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from enum import Enum
@@ -120,7 +120,7 @@ class MockLLMConnector:
             'prompt': prompt,
             'model_name': model_name,
             'config_name': config_name,
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now(UTC)
         })
         
         if self.should_fail:
@@ -195,7 +195,7 @@ class ToolChain:
                 
                 self.execution_history.append({
                     'tool_name': current_tool,
-                    'timestamp': datetime.utcnow(),
+                    'timestamp': datetime.now(UTC),
                     'success': True,
                     'result': result
                 })
@@ -208,7 +208,7 @@ class ToolChain:
             except Exception as e:
                 self.execution_history.append({
                     'tool_name': current_tool,
-                    'timestamp': datetime.utcnow(),
+                    'timestamp': datetime.now(UTC),
                     'success': False,
                     'error': str(e)
                 })

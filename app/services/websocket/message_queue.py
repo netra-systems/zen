@@ -5,7 +5,7 @@ Implements a robust message queue with retry logic and error handling.
 
 from typing import Dict, Any, Optional, Callable, List
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import asyncio
 import json
 import uuid
@@ -75,7 +75,7 @@ class QueuedMessage:
         msg.status = MessageStatus(data.get("status", "pending"))
         msg.retry_count = data.get("retry_count", 0)
         msg.max_retries = data.get("max_retries", 3)
-        msg.created_at = datetime.fromisoformat(data["created_at"]) if "created_at" in data else datetime.utcnow()
+        msg.created_at = datetime.fromisoformat(data["created_at"]) if "created_at" in data else datetime.now(UTC)
         msg.processing_started_at = datetime.fromisoformat(data["processing_started_at"]) if data.get("processing_started_at") else None
         msg.completed_at = datetime.fromisoformat(data["completed_at"]) if data.get("completed_at") else None
         msg.error = data.get("error")
@@ -187,7 +187,7 @@ class MessageQueue:
         """Process a single message"""
         try:
             message.status = MessageStatus.PROCESSING
-            message.processing_started_at = datetime.utcnow()
+            message.processing_started_at = datetime.now(UTC)
             await self._update_message_status(message.id, MessageStatus.PROCESSING)
             
             handler = self.handlers.get(message.type)
@@ -200,7 +200,7 @@ class MessageQueue:
             )
             
             message.status = MessageStatus.COMPLETED
-            message.completed_at = datetime.utcnow()
+            message.completed_at = datetime.now(UTC)
             await self._update_message_status(message.id, MessageStatus.COMPLETED)
             
             logger.info(f"Successfully processed message {message.id}")
@@ -227,7 +227,7 @@ class MessageQueue:
     
     async def _schedule_retry(self, message: QueuedMessage) -> None:
         """Schedule a message for retry"""
-        retry_at = datetime.utcnow() + timedelta(seconds=self.retry_delay * message.retry_count)
+        retry_at = datetime.now(UTC) + timedelta(seconds=self.retry_delay * message.retry_count)
         retry_key = f"retry:{message.id}"
         
         await self.redis.set(
@@ -261,7 +261,7 @@ class MessageQueue:
         status_key = f"message_status:{message_id}"
         status_data = {
             "status": status.value,
-            "updated_at": datetime.utcnow().isoformat(),
+            "updated_at": datetime.now(UTC).isoformat(),
             "error": error
         }
         

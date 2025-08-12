@@ -6,7 +6,7 @@ Tests scheduling, execution, background tasks, retry mechanisms, and error handl
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from typing import Dict, List, Any
 
@@ -234,9 +234,9 @@ class TestSupplyResearchSchedulerJobs:
         scheduler._record_job_metrics = AsyncMock()
         
         # Execute
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         await scheduler._execute_job_with_metrics(schedule)
-        end_time = datetime.utcnow()
+        end_time = datetime.now(UTC)
         
         # Assert
         scheduler._record_job_metrics.assert_called_once()
@@ -400,9 +400,9 @@ class TestSupplyResearchSchedulerConcurrency:
         execution_times = []
         
         async def mock_execute(schedule):
-            start = datetime.utcnow()
+            start = datetime.now(UTC)
             await asyncio.sleep(0.1)  # Simulate work
-            end = datetime.utcnow()
+            end = datetime.now(UTC)
             execution_times.append((schedule.name, start, end))
             return True
         
@@ -414,9 +414,9 @@ class TestSupplyResearchSchedulerConcurrency:
             for schedule in schedules
         ]
         
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         await asyncio.gather(*tasks)
-        total_time = datetime.utcnow() - start_time
+        total_time = datetime.now(UTC) - start_time
         
         # Assert concurrency limits enforced
         # With 10 jobs, 3 concurrent, 0.1s each: should take ~0.4s (4 batches)
@@ -542,9 +542,9 @@ class TestSupplyResearchSchedulerPerformance:
         execution_metrics = []
         
         async def mock_execute_with_timing(schedule):
-            start = datetime.utcnow()
+            start = datetime.now(UTC)
             await asyncio.sleep(0.1)  # Simulate work
-            end = datetime.utcnow()
+            end = datetime.now(UTC)
             
             execution_metrics.append({
                 'job_name': schedule.name,

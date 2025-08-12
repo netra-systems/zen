@@ -5,7 +5,7 @@ Tests business logic, database operations, price calculations, validation, and e
 
 import pytest
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from decimal import Decimal
 from unittest.mock import Mock, MagicMock, patch, call
 from typing import List, Dict, Any
@@ -118,7 +118,7 @@ def sample_supply_item():
     item.performance_metrics = {"latency_p50": 100}
     item.confidence_score = 0.9
     item.research_source = "official-api"
-    item.last_updated = datetime.utcnow()
+    item.last_updated = datetime.now(UTC)
     return item
 
 
@@ -130,7 +130,7 @@ def sample_research_session():
     session.query = "Research latest pricing for GPT-4"
     session.status = "completed"
     session.initiated_by = "user-1"
-    session.created_at = datetime.utcnow()
+    session.created_at = datetime.now(UTC)
     return session
 
 
@@ -146,7 +146,7 @@ def sample_update_log():
     log.research_session_id = "session-1"
     log.update_reason = "Price update"
     log.updated_by = "system"
-    log.updated_at = datetime.utcnow()
+    log.updated_at = datetime.now(UTC)
     return log
 
 
@@ -467,8 +467,8 @@ class TestUpdateLogOperations:
         """Test getting update logs filtered by date range"""
         service.db.query_results[SupplyUpdateLog] = [sample_update_log]
         
-        start_date = datetime.utcnow() - timedelta(days=1)
-        end_date = datetime.utcnow() + timedelta(days=1)
+        start_date = datetime.now(UTC) - timedelta(days=1)
+        end_date = datetime.now(UTC) + timedelta(days=1)
         
         result = service.get_update_logs(
             start_date=start_date,
@@ -499,14 +499,14 @@ class TestPriceChangeCalculations:
         log1.field_updated = "pricing_input"
         log1.old_value = '"0.02"'
         log1.new_value = '"0.03"'
-        log1.updated_at = datetime.utcnow()
+        log1.updated_at = datetime.now(UTC)
         
         log2 = MagicMock(spec=SupplyUpdateLog)
         log2.supply_item_id = "item-2"
         log2.field_updated = "pricing_output"
         log2.old_value = '"0.05"'
         log2.new_value = '"0.06"'
-        log2.updated_at = datetime.utcnow()
+        log2.updated_at = datetime.now(UTC)
         
         service.db.query_results[SupplyUpdateLog] = [log1, log2]
         
@@ -563,7 +563,7 @@ class TestPriceChangeCalculations:
         log.field_updated = "pricing_input"
         log.old_value = '"0.02"'
         log.new_value = '"0.03"'
-        log.updated_at = datetime.utcnow()
+        log.updated_at = datetime.now(UTC)
         
         service.db.query_results[SupplyUpdateLog] = [log]
         
@@ -584,7 +584,7 @@ class TestPriceChangeCalculations:
         log.field_updated = "pricing_input"
         log.old_value = '"0.00"'
         log.new_value = '"0.03"'
-        log.updated_at = datetime.utcnow()
+        log.updated_at = datetime.now(UTC)
         
         service.db.query_results[SupplyUpdateLog] = [log]
         
@@ -605,7 +605,7 @@ class TestPriceChangeCalculations:
         log.field_updated = "pricing_input"
         log.old_value = 'invalid-json'
         log.new_value = '"0.03"'
-        log.updated_at = datetime.utcnow()
+        log.updated_at = datetime.now(UTC)
         
         service.db.query_results[SupplyUpdateLog] = [log]
         
@@ -632,14 +632,14 @@ class TestPriceChangeCalculations:
         log1.field_updated = "pricing_input"
         log1.old_value = '"0.02"'  
         log1.new_value = '"0.022"'  # 10% increase
-        log1.updated_at = datetime.utcnow()
+        log1.updated_at = datetime.now(UTC)
         
         log2 = MagicMock(spec=SupplyUpdateLog)
         log2.supply_item_id = "item-2"
         log2.field_updated = "pricing_input"
         log2.old_value = '"0.02"'
         log2.new_value = '"0.03"'  # 50% increase
-        log2.updated_at = datetime.utcnow()
+        log2.updated_at = datetime.now(UTC)
         
         service.db.query_results[SupplyUpdateLog] = [log1, log2]
         
@@ -668,14 +668,14 @@ class TestPriceChangeCalculations:
         log_increase.field_updated = "pricing_input"
         log_increase.old_value = '"0.02"'
         log_increase.new_value = '"0.03"'  # 50% increase
-        log_increase.updated_at = datetime.utcnow()
+        log_increase.updated_at = datetime.now(UTC)
         
         log_decrease = MagicMock(spec=SupplyUpdateLog)
         log_decrease.supply_item_id = "item-2"
         log_decrease.field_updated = "pricing_input"
         log_decrease.old_value = '"0.04"'
         log_decrease.new_value = '"0.03"'  # 25% decrease
-        log_decrease.updated_at = datetime.utcnow()
+        log_decrease.updated_at = datetime.now(UTC)
         
         service.db.query_results[SupplyUpdateLog] = [log_increase, log_decrease]
         
@@ -705,14 +705,14 @@ class TestProviderComparison:
         openai_item.pricing_input = Decimal("0.03")
         openai_item.pricing_output = Decimal("0.06")
         openai_item.context_window = 8192
-        openai_item.last_updated = datetime.utcnow()
+        openai_item.last_updated = datetime.now(UTC)
         
         anthropic_item = MagicMock(spec=AISupplyItem)
         anthropic_item.model_name = "claude-2"
         anthropic_item.pricing_input = Decimal("0.025")
         anthropic_item.pricing_output = Decimal("0.05")
         anthropic_item.context_window = 100000
-        anthropic_item.last_updated = datetime.utcnow()
+        anthropic_item.last_updated = datetime.now(UTC)
         
         def mock_get_supply_items(provider=None):
             if provider == "openai":
@@ -766,7 +766,7 @@ class TestProviderComparison:
             item.pricing_input = None  # No pricing data
             item.pricing_output = None
             item.context_window = 4096
-            item.last_updated = datetime.utcnow()
+            item.last_updated = datetime.now(UTC)
             return [item] if provider in ["openai", "anthropic"] else []
         
         with patch.object(service, 'get_supply_items', side_effect=mock_get_supply_items):
@@ -799,14 +799,14 @@ class TestAnomalyDetection:
                         "model": "gpt-4",
                         "field": "pricing_input",
                         "percent_change": 60.0,  # Significant change
-                        "updated_at": datetime.utcnow().isoformat()
+                        "updated_at": datetime.now(UTC).isoformat()
                     },
                     {
                         "provider": "anthropic",
                         "model": "claude-2",
                         "field": "pricing_output",
                         "percent_change": 15.0,  # Moderate change
-                        "updated_at": datetime.utcnow().isoformat()
+                        "updated_at": datetime.now(UTC).isoformat()
                     }
                 ]
             }
@@ -831,12 +831,12 @@ class TestAnomalyDetection:
         old_item = MagicMock(spec=AISupplyItem)
         old_item.provider = "openai"
         old_item.model_name = "gpt-3.5"
-        old_item.last_updated = datetime.utcnow() - timedelta(days=35)  # Stale
+        old_item.last_updated = datetime.now(UTC) - timedelta(days=35)  # Stale
         
         recent_item = MagicMock(spec=AISupplyItem)
         recent_item.provider = "anthropic"
         recent_item.model_name = "claude-2"
-        recent_item.last_updated = datetime.utcnow() - timedelta(days=5)  # Recent
+        recent_item.last_updated = datetime.now(UTC) - timedelta(days=5)  # Recent
         
         service.db.query_results[AISupplyItem] = [old_item, recent_item]
         
@@ -864,7 +864,7 @@ class TestAnomalyDetection:
                         "model": "gpt-4",
                         "field": "pricing_input",
                         "percent_change": 30.0,
-                        "updated_at": datetime.utcnow().isoformat()
+                        "updated_at": datetime.now(UTC).isoformat()
                     }
                 ]
             }
@@ -918,7 +918,7 @@ class TestMarketReportGeneration:
         research_session.id = "session-1"
         research_session.query = "Research OpenAI pricing updates"
         research_session.status = "completed"
-        research_session.created_at = datetime.utcnow()
+        research_session.created_at = datetime.now(UTC)
         
         with patch.object(service, 'get_provider_comparison', return_value=provider_comparison):
             with patch.object(service, 'calculate_price_changes', return_value=price_changes["weekly"]):
@@ -960,7 +960,7 @@ class TestMarketReportGeneration:
         research_session.id = "session-1"
         research_session.query = long_query
         research_session.status = "completed"
-        research_session.created_at = datetime.utcnow()
+        research_session.created_at = datetime.now(UTC)
         
         with patch.object(service, 'get_provider_comparison', return_value={"providers": {}, "analysis": {}}):
             with patch.object(service, 'calculate_price_changes', return_value={"total_changes": 0}):
@@ -1230,7 +1230,7 @@ class TestEdgeCases:
         log.field_updated = "pricing_input"
         log.old_value = None
         log.new_value = '"0.03"'
-        log.updated_at = datetime.utcnow()
+        log.updated_at = datetime.now(UTC)
         
         service.db.query_results[SupplyUpdateLog] = [log]
         
@@ -1247,7 +1247,7 @@ class TestEdgeCases:
         log.field_updated = "pricing_input"
         log.old_value = '"0.001"'
         log.new_value = '"10.0"'  # 999900% increase
-        log.updated_at = datetime.utcnow()
+        log.updated_at = datetime.now(UTC)
         
         service.db.query_results[SupplyUpdateLog] = [log]
         

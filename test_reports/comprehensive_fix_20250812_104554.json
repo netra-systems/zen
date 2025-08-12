@@ -1,0 +1,451 @@
+{
+  "timestamp": "2025-08-12T10:45:54.257734",
+  "results": {
+    "total": 52,
+    "fixed": 9,
+    "failed": 43,
+    "errors": [
+      {
+        "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestConfigRoute::test_config_retrieval",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestConfigRoute::test_config_retrieval",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestConfigRoute::test_config_update_validation",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestConfigRoute::test_config_update_validation",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestConfigRoute::test_config_persistence",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestConfigRoute::test_config_persistence",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestLLMCacheRoute::test_cache_metrics",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestLLMCacheRoute::test_cache_metrics",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestLLMCacheRoute::test_cache_invalidation",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestLLMCacheRoute::test_cache_invalidation",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestQualityRoute::test_quality_metrics_retrieval",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestQualityRoute::test_quality_metrics_retrieval",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestQualityRoute::test_quality_aggregation",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestQualityRoute::test_quality_aggregation",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestSupplyRoute::test_supply_research",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestSupplyRoute::test_supply_research",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestSupplyRoute::test_supply_data_enrichment",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestSupplyRoute::test_supply_data_enrichment",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestSupplyRoute::test_supply_validation",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestSupplyRoute::test_supply_validation",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestThreadsRoute::test_thread_pagination",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\routes\\test_api_routes_21_30.py::TestThreadsRoute::test_thread_pagination",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_security_service.py::test_encrypt_and_decrypt",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_security_service.py::test_encrypt_and_decrypt",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_agent_service_orchestration.py::TestAgentLifecycleManagement::test_agent_task_failure_handling",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_agent_service_orchestration.py::TestAgentLifecycleManagement::test_agent_task_failure_handling",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_latency_optimization",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_latency_optimization",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_cache_optimization",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_cache_optimization",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_model_analysis",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_model_analysis",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_multi_objective",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_multi_objective",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_empty_query",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_empty_query",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_invalid_json_response",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_invalid_json_response",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseArraySyntaxFixer::test_complex_query_array_fix",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseArraySyntaxFixer::test_complex_query_array_fix",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseArraySyntaxFixer::test_array_access_with_expressions",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseArraySyntaxFixer::test_array_access_with_expressions",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseArraySyntaxFixer::test_edge_case_array_patterns",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseArraySyntaxFixer::test_edge_case_array_patterns",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_fixes_and_executes_query",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_fixes_and_executes_query",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_passes_through_correct_queries",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_passes_through_correct_queries",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_handles_client_errors",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_handles_client_errors",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_statistics_tracking",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_statistics_tracking",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_can_be_disabled",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_can_be_disabled",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_with_query_parameters",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_with_query_parameters",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_concurrent_interceptor_usage",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_concurrent_interceptor_usage",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_statistics_reset",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_statistics_reset",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_get_statistics",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_get_statistics",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryFixerIntegration::test_end_to_end_query_processing",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryFixerIntegration::test_end_to_end_query_processing",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryFixerIntegration::test_batch_query_processing",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryFixerIntegration::test_batch_query_processing",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      },
+      {
+        "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryFixerIntegration::test_regex_pattern_comprehensive_coverage",
+        "error": null,
+        "details": {
+          "test": "app\\tests\\services\\test_clickhouse_query_fixer.py::TestClickHouseQueryFixerIntegration::test_regex_pattern_comprehensive_coverage",
+          "error_type": null,
+          "module": null,
+          "missing_item": null,
+          "fix_needed": null
+        }
+      }
+    ]
+  },
+  "fixes_applied": [
+    {
+      "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\services\\agent_service.py",
+      "function": "process_message",
+      "type": "stub"
+    },
+    {
+      "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\services\\agent_service.py",
+      "function": "generate_stream",
+      "type": "stub"
+    },
+    {
+      "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\services\\corpus_service.py",
+      "function": "create_document",
+      "type": "stub"
+    },
+    {
+      "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\services\\corpus_service.py",
+      "function": "search",
+      "type": "stub"
+    },
+    {
+      "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\services\\corpus_service.py",
+      "function": "bulk_index",
+      "type": "stub"
+    },
+    {
+      "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\services\\llm_cache_service.py",
+      "function": "clear_pattern",
+      "type": "stub"
+    },
+    {
+      "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\services\\mcp_service.py",
+      "function": "handle_request",
+      "type": "stub"
+    },
+    {
+      "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\dependencies.py",
+      "function": "get_agent_service",
+      "type": "stub"
+    },
+    {
+      "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\db\\clickhouse.py",
+      "function": "ClickHouseManager",
+      "type": "stub"
+    },
+    {
+      "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\services\\synthetic_data_service.py",
+      "function": "validate_data",
+      "type": "stub"
+    },
+    {
+      "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\routes\\synthetic_data.py",
+      "function": "get_templates",
+      "type": "stub"
+    },
+    {
+      "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\services\\thread_service.py",
+      "function": "create_thread",
+      "type": "stub"
+    },
+    {
+      "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\routes\\threads_route.py",
+      "function": "archive_thread",
+      "type": "stub"
+    }
+  ]
+}

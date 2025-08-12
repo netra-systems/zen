@@ -1461,6 +1461,24 @@ Real LLM Testing:
         help="Output file for test results (for CI/CD integration)"
     )
     
+    # CI/CD specific arguments for compatibility with GitHub workflows
+    parser.add_argument(
+        "--shard",
+        type=str,
+        choices=["core", "agents", "websocket", "database", "api", "frontend"],
+        help="Run a specific shard of tests for parallel execution"
+    )
+    parser.add_argument(
+        "--json-output",
+        type=str,
+        help="Path to save JSON test results (alias for --output with JSON format)"
+    )
+    parser.add_argument(
+        "--coverage-output", 
+        type=str,
+        help="Path to save coverage XML report"
+    )
+    
     # Failing test management options
     parser.add_argument(
         "--show-failing",
@@ -1490,6 +1508,11 @@ Real LLM Testing:
     )
     
     args = parser.parse_args()
+    
+    # Handle CI/CD specific argument aliases
+    if args.json_output:
+        args.output = args.json_output
+        args.report_format = "json"
     
     # Print header
     print("=" * 80)
@@ -1593,6 +1616,33 @@ Real LLM Testing:
         config = TEST_LEVELS[args.level]
         level = args.level
         
+        # Handle shard filtering if specified
+        if args.shard:
+            print(f"[SHARD] Running only {args.shard} shard for {level} tests")
+            # Map shards to test categories/patterns
+            shard_mappings = {
+                "core": ["app/core", "app/config", "app/dependencies"],
+                "agents": ["app/agents", "app/services/agent"],
+                "websocket": ["app/ws_manager", "app/services/websocket", "test_websocket"],
+                "database": ["app/db", "app/services/database", "test_database"],
+                "api": ["app/routes", "test_api", "test_auth"],
+                "frontend": ["frontend"]
+            }
+            
+            # Modify backend args to include only shard-specific tests
+            if args.shard in shard_mappings and args.shard != "frontend":
+                shard_patterns = shard_mappings[args.shard]
+                # Add pattern matching to backend args
+                pattern_args = []
+                for pattern in shard_patterns:
+                    pattern_args.extend(["-k", pattern])
+                config['backend_args'] = config.get('backend_args', []) + pattern_args
+                print(f"[SHARD] Test patterns: {', '.join(shard_patterns)}")
+            elif args.shard == "frontend":
+                # Frontend shard runs only frontend tests
+                args.frontend_only = True
+                args.backend_only = False
+        
         print(f"Running {level} tests: {config['description']}")
         print(f"Purpose: {config['purpose']}")
         print(f"Timeout: {config.get('timeout', 300)}s")
@@ -1691,6 +1741,19 @@ Real LLM Testing:
                 with open(args.output, "w", encoding='utf-8') as f:
                     f.write(text_report)
                 print(f"[REPORT] Text report saved to: {args.output}")
+        
+        # Generate coverage report if requested
+        if args.coverage_output:
+            try:
+                # Try to generate coverage XML report
+                coverage_cmd = [sys.executable, "-m", "coverage", "xml", "-o", args.coverage_output]
+                subprocess.run(coverage_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
+                if Path(args.coverage_output).exists():
+                    print(f"[COVERAGE] Coverage report saved to: {args.coverage_output}")
+                else:
+                    print(f"[WARNING] Coverage report generation failed - file not created")
+            except Exception as e:
+                print(f"[WARNING] Could not generate coverage report: {e}")
     
     # Print summary
     runner.print_summary()

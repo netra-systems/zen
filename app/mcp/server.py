@@ -8,7 +8,7 @@ import asyncio
 import json
 import logging
 from typing import Dict, Any, Optional, List, Union
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import uuid
 
 from pydantic import BaseModel, Field
@@ -41,7 +41,7 @@ class MCPSession(BaseModel):
     capabilities: Dict[str, Any]
     state: Dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    expires_at: datetime = Field(default_factory=lambda: datetime.utcnow() + timedelta(hours=1))
+    expires_at: datetime = Field(default_factory=lambda: datetime.now(UTC) + timedelta(hours=1))
     request_count: int = 0
     last_request_at: Optional[datetime] = None
 
@@ -120,7 +120,7 @@ class MCPServer:
             if session_id and session_id in self.sessions:
                 session = self.sessions[session_id]
                 session.request_count += 1
-                session.last_request_at = datetime.utcnow()
+                session.last_request_at = datetime.now(UTC)
                 
                 # Check rate limit
                 if not self._check_rate_limit(session):
@@ -181,7 +181,7 @@ class MCPServer:
         
     async def handle_ping(self, params: Dict[str, Any], session_id: Optional[str] = None) -> Dict[str, Any]:
         """Handle ping request"""
-        return {"pong": True, "timestamp": datetime.utcnow().isoformat()}
+        return {"pong": True, "timestamp": datetime.now(UTC).isoformat()}
         
     async def handle_tools_list(self, params: Dict[str, Any], session_id: Optional[str] = None) -> Dict[str, Any]:
         """List available tools"""
@@ -286,7 +286,7 @@ class MCPServer:
             return True
             
         # Simple rate limit check (requests per minute)
-        time_diff = (datetime.utcnow() - session.last_request_at).total_seconds()
+        time_diff = (datetime.now(UTC) - session.last_request_at).total_seconds()
         if time_diff < 60:  # Within the last minute
             requests_per_minute = session.request_count * (60 / time_diff)
             return requests_per_minute <= self.config.rate_limit
@@ -322,7 +322,7 @@ class MCPServer:
         
     async def cleanup_expired_sessions(self):
         """Clean up expired sessions"""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         expired_sessions = [
             session_id for session_id, session in self.sessions.items()
             if session.expires_at < now

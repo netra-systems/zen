@@ -6,7 +6,7 @@ enabling real-time detection of quality degradation and AI slop patterns at scal
 
 import asyncio
 from typing import Dict, List, Optional, Any, Set, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from enum import Enum
 from dataclasses import dataclass, field, asdict
 from collections import defaultdict, deque
@@ -194,7 +194,7 @@ class QualityMonitoringService:
                 await self._broadcast_updates({
                     'trends': trends,
                     'alerts': alerts,
-                    'timestamp': datetime.utcnow().isoformat()
+                    'timestamp': datetime.now(UTC).isoformat()
                 })
                 
                 # Store metrics for historical analysis
@@ -217,7 +217,7 @@ class QualityMonitoringService:
         """Record a quality event for monitoring"""
         try:
             event = {
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'agent': agent_name,
                 'content_type': content_type.value,
                 'quality_score': metrics.overall_score,
@@ -268,7 +268,7 @@ class QualityMonitoringService:
                 # Query recent agent runs for quality metrics
                 from app.db.models import AgentRun
                 stmt = select(AgentRun).where(
-                    AgentRun.created_at > datetime.utcnow() - timedelta(hours=1)
+                    AgentRun.created_at > datetime.now(UTC) - timedelta(hours=1)
                 ).limit(100)
                 result = await self.db_session.execute(stmt)
                 runs = result.scalars().all()
@@ -365,8 +365,8 @@ class QualityMonitoringService:
                 circular_count = sum(1 for e in recent_events if e.get('circular_reasoning', False))
                 if circular_count > 3:
                     alert = QualityAlert(
-                        id=f"circular_{agent_name}_{datetime.utcnow().timestamp()}",
-                        timestamp=datetime.utcnow(),
+                        id=f"circular_{agent_name}_{datetime.now(UTC).timestamp()}",
+                        timestamp=datetime.now(UTC),
                         severity=AlertSeverity.WARNING,
                         metric_type=MetricType.QUALITY_SCORE,
                         agent=agent_name,
@@ -409,8 +409,8 @@ class QualityMonitoringService:
                 if metric_type == MetricType.QUALITY_SCORE:
                     if current_value < threshold:
                         return QualityAlert(
-                            id=f"{metric_type.value}_{agent_name}_{datetime.utcnow().timestamp()}",
-                            timestamp=datetime.utcnow(),
+                            id=f"{metric_type.value}_{agent_name}_{datetime.now(UTC).timestamp()}",
+                            timestamp=datetime.now(UTC),
                             severity=severity,
                             metric_type=metric_type,
                             agent=agent_name,
@@ -421,8 +421,8 @@ class QualityMonitoringService:
                 else:
                     if current_value > threshold:
                         return QualityAlert(
-                            id=f"{metric_type.value}_{agent_name}_{datetime.utcnow().timestamp()}",
-                            timestamp=datetime.utcnow(),
+                            id=f"{metric_type.value}_{agent_name}_{datetime.now(UTC).timestamp()}",
+                            timestamp=datetime.now(UTC),
                             severity=severity,
                             metric_type=metric_type,
                             agent=agent_name,
@@ -438,8 +438,8 @@ class QualityMonitoringService:
         # Critical quality failure
         if metrics.overall_score < 0.3:
             alert = QualityAlert(
-                id=f"critical_quality_{agent_name}_{datetime.utcnow().timestamp()}",
-                timestamp=datetime.utcnow(),
+                id=f"critical_quality_{agent_name}_{datetime.now(UTC).timestamp()}",
+                timestamp=datetime.now(UTC),
                 severity=AlertSeverity.CRITICAL,
                 metric_type=MetricType.QUALITY_SCORE,
                 agent=agent_name,
@@ -504,7 +504,7 @@ class QualityMonitoringService:
                     retry_count=0,  # Would need to track this separately
                     fallback_count=0,  # Would need to track this separately
                     average_response_time=0,  # Would need to track this separately
-                    last_updated=datetime.utcnow(),
+                    last_updated=datetime.now(UTC),
                     issues=issues,
                     recommendations=recommendations
                 )
@@ -660,7 +660,7 @@ class QualityMonitoringService:
                 'agent_profiles': {name: asdict(profile) for name, profile in agent_rankings[:10]},
                 'recent_alerts': [asdict(alert) for alert in recent_alerts],
                 'quality_distribution': dict(quality_distribution),
-                'timestamp': datetime.utcnow().isoformat()
+                'timestamp': datetime.now(UTC).isoformat()
             }
             
         except Exception as e:
@@ -677,7 +677,7 @@ class QualityMonitoringService:
             events = list(self.metrics_buffer[agent_name])
             
             # Time-based analysis
-            cutoff_time = datetime.utcnow() - timedelta(hours=period_hours)
+            cutoff_time = datetime.now(UTC) - timedelta(hours=period_hours)
             recent_events = [e for e in events if datetime.fromisoformat(e['timestamp']) > cutoff_time]
             
             if not recent_events:
@@ -718,7 +718,7 @@ class QualityMonitoringService:
                 'hourly_stats': hourly_stats,
                 'recent_issues': profile.issues,
                 'recommendations': profile.recommendations,
-                'timestamp': datetime.utcnow().isoformat()
+                'timestamp': datetime.now(UTC).isoformat()
             }
             
         except Exception as e:

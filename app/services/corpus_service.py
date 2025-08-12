@@ -6,7 +6,7 @@ Manages corpus lifecycle including creation, content upload, validation, and Cli
 import asyncio
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, List, Optional, Any
 from enum import Enum
 from sqlalchemy.orm import Session
@@ -76,7 +76,7 @@ class CorpusService:
             domain=corpus_data.domain if hasattr(corpus_data, 'domain') else 'general',
             metadata_=json.dumps({
                 "content_source": content_source.value,
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 "version": 1
             })
         )
@@ -287,7 +287,7 @@ class CorpusService:
                     record.get("response", ""),
                     json.dumps(record.get("metadata", {})),
                     record.get("domain", "general"),
-                    datetime.utcnow(),  # created_at
+                    datetime.now(UTC),  # created_at
                     1  # version
                 ])
             
@@ -345,7 +345,7 @@ class CorpusService:
         
         # Update metadata
         metadata = json.loads(db_corpus.metadata_ or "{}")
-        metadata["updated_at"] = datetime.utcnow().isoformat()
+        metadata["updated_at"] = datetime.now(UTC).isoformat()
         metadata["version"] = metadata.get("version", 1) + 1
         db_corpus.metadata_ = json.dumps(metadata)
         
@@ -633,5 +633,3 @@ def get_corpus_status(db: Session, corpus_id: str):
 async def get_corpus_content(db: Session, corpus_id: str):
     """Legacy function to get corpus content"""
     return await corpus_service.get_corpus_content(db, corpus_id)
-
-# Test stub functions removed - use CorpusService methods directly

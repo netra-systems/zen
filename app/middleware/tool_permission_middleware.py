@@ -14,7 +14,7 @@ from app.auth.auth_dependencies import get_current_user
 from app.logging_config import central_logger
 import json
 import time
-from datetime import datetime
+from datetime import datetime, UTC
 
 logger = central_logger
 
@@ -216,7 +216,7 @@ class ToolPermissionMiddleware:
             permission_check = getattr(request.state, 'permission_check', None)
             
             log_entry = {
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "tool_name": tool_info["name"],
                 "user_id": getattr(request.state, 'user_id', 'unknown'),
                 "action": tool_info.get("action", "execute"),

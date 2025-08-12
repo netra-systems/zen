@@ -7,7 +7,7 @@ import pytest
 import asyncio
 import json
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from typing import List, Dict, Any, AsyncGenerator
 from collections import namedtuple
@@ -276,7 +276,7 @@ class TestTimestampGeneration:
         assert len(set(timestamps)) > 1
         
         # Should be within reasonable range (last 24 hours + jitter)
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         yesterday = now - timedelta(hours=25)  # Account for jitter
         tomorrow = now + timedelta(hours=1)    # Account for jitter
         
@@ -323,7 +323,7 @@ class TestGenerationRateCalculation:
         """Test generation rate with zero elapsed time"""
         job_id = "test-job"
         service.active_jobs[job_id] = {
-            "start_time": datetime.utcnow(),
+            "start_time": datetime.now(UTC),
             "records_generated": 100
         }
         
@@ -333,7 +333,7 @@ class TestGenerationRateCalculation:
     def test_calculate_generation_rate_with_time(self, service):
         """Test generation rate calculation with elapsed time"""
         job_id = "test-job"
-        start_time = datetime.utcnow() - timedelta(seconds=10)
+        start_time = datetime.now(UTC) - timedelta(seconds=10)
         service.active_jobs[job_id] = {
             "start_time": start_time,
             "records_generated": 100
@@ -512,7 +512,7 @@ class TestTableOperations:
                 "trace_id": "trace1",
                 "span_id": "span1",
                 "parent_span_id": None,
-                "timestamp_utc": datetime.utcnow(),
+                "timestamp_utc": datetime.now(UTC),
                 "workload_type": "test",
                 "agent_type": "test",
                 "tool_invocations": ["tool1"],
@@ -598,7 +598,7 @@ class TestGenerationWorker:
             "status": GenerationStatus.INITIATED.value,
             "config": sample_config,
             "corpus_id": None,
-            "start_time": datetime.utcnow(),
+            "start_time": datetime.now(UTC),
             "records_generated": 0,
             "records_ingested": 0,
             "errors": [],
@@ -625,7 +625,7 @@ class TestGenerationWorker:
             "status": GenerationStatus.INITIATED.value,
             "config": sample_config,
             "corpus_id": None,
-            "start_time": datetime.utcnow(),
+            "start_time": datetime.now(UTC),
             "records_generated": 0,
             "records_ingested": 0,
             "errors": [],
@@ -889,7 +889,7 @@ class TestValidationMethods:
         """Test schema validation with valid record"""
         record = {
             "trace_id": str(uuid.uuid4()),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "workload_type": "test",
             "latency_ms": 100
         }
@@ -906,7 +906,7 @@ class TestValidationMethods:
         """Test schema validation with invalid UUID"""
         record = {
             "trace_id": "not-a-uuid",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "workload_type": "test"
         }
         
@@ -937,8 +937,8 @@ class TestValidationMethods:
         traces = [
             {
                 "spans": [
-                    {"span_id": "1", "parent_span_id": None, "start_time": datetime.utcnow(), "end_time": datetime.utcnow() + timedelta(seconds=1)},
-                    {"span_id": "2", "parent_span_id": "1", "start_time": datetime.utcnow(), "end_time": datetime.utcnow() + timedelta(seconds=1)}
+                    {"span_id": "1", "parent_span_id": None, "start_time": datetime.now(UTC), "end_time": datetime.now(UTC) + timedelta(seconds=1)},
+                    {"span_id": "2", "parent_span_id": "1", "start_time": datetime.now(UTC), "end_time": datetime.now(UTC) + timedelta(seconds=1)}
                 ]
             }
         ]
@@ -952,8 +952,8 @@ class TestValidationMethods:
     async def test_validate_temporal_consistency(self, service):
         """Test temporal consistency validation"""
         records = [
-            {"timestamp_utc": datetime.utcnow() - timedelta(hours=1)},
-            {"timestamp_utc": datetime.utcnow()}
+            {"timestamp_utc": datetime.now(UTC) - timedelta(hours=1)},
+            {"timestamp_utc": datetime.now(UTC)}
         ]
         
         result = await service.validate_temporal_consistency(records)
@@ -985,7 +985,7 @@ class TestQualityAndDiversityMetrics:
     async def test_calculate_quality_metrics(self, service):
         """Test quality metrics calculation"""
         records = [
-            {"trace_id": str(uuid.uuid4()), "timestamp": datetime.utcnow().isoformat(), "workload_type": "test"},
+            {"trace_id": str(uuid.uuid4()), "timestamp": datetime.now(UTC).isoformat(), "workload_type": "test"},
             {"trace_id": "invalid", "timestamp": "invalid", "workload_type": "test"}  # Invalid record
         ]
         
@@ -1016,7 +1016,7 @@ class TestQualityAndDiversityMetrics:
     async def test_generate_validation_report(self, service):
         """Test comprehensive validation report generation"""
         records = [
-            {"trace_id": str(uuid.uuid4()), "timestamp": datetime.utcnow().isoformat(), "workload_type": "test"}
+            {"trace_id": str(uuid.uuid4()), "timestamp": datetime.now(UTC).isoformat(), "workload_type": "test"}
         ]
         
         report = await service.generate_validation_report(records)

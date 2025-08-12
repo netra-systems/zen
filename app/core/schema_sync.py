@@ -4,7 +4,7 @@ import json
 import os
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Type, get_type_hints
 from dataclasses import dataclass, asdict
@@ -62,7 +62,7 @@ class SchemaExtractor:
             schema['_metadata'] = {
                 'class_name': model_class.__name__,
                 'module': model_class.__module__,
-                'timestamp': datetime.utcnow().isoformat()
+                'timestamp': datetime.now(UTC).isoformat()
             }
             
             return schema
@@ -206,7 +206,7 @@ class TypeScriptGenerator:
             "/* eslint-disable */",
             "/**",
             " * Auto-generated TypeScript definitions from Pydantic models",
-            f" * Generated at: {datetime.utcnow().isoformat()}",
+            f" * Generated at: {datetime.now(UTC).isoformat()}",
             " * Do not modify this file manually - regenerate using schema sync",
             " */",
             ""
@@ -386,7 +386,7 @@ class SchemaSynchronizer:
         """Perform complete schema synchronization."""
         try:
             report = SyncReport(
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 schemas_processed=0,
                 changes_detected=[],
                 validation_errors=[],

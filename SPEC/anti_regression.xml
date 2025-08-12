@@ -233,6 +233,30 @@
         - Use stable, unique identifiers when available
       </prevention>
     </pattern>
+
+    <pattern id="test_stubs_in_production">
+      <name>Test Stubs in Production Code</name>
+      <triggers>
+        - Adding quick test implementations
+        - Creating placeholder functions
+        - Writing mock services
+        - Using *args, **kwargs with static returns
+      </triggers>
+      <regression>
+        - Test stubs leak into production code
+        - Mock implementations replace real functionality
+        - Hardcoded test data in services
+        - Confusion between test and production code
+      </regression>
+      <prevention>
+        - NEVER add test stubs to service files
+        - NEVER return hardcoded test data from services
+        - NEVER create "for testing" implementations in production
+        - Test helpers belong ONLY in app/tests/
+        - Always implement real functionality, even if simple
+        - Check SPEC/no_test_stubs.xml before adding any test-like code
+      </prevention>
+    </pattern>
   </common_regression_patterns>
 
   <ambiguous_prompt_handling>

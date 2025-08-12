@@ -6,7 +6,7 @@ Tests LLM provider management, switching, failover mechanisms, and load balancin
 import pytest
 import asyncio
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any, Optional, Type
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from enum import Enum
@@ -33,7 +33,7 @@ class MockLLMResponse:
     def __init__(self, content: str, provider: str = "mock"):
         self.content = content
         self.provider = provider
-        self.timestamp = datetime.utcnow()
+        self.timestamp = datetime.now(UTC)
 
 
 class MockLLMClient:
@@ -167,7 +167,7 @@ class EnhancedLLMManager(LLMManager):
             'healthy': True,
             'last_failure': None,
             'failure_count': 0,
-            'last_health_check': datetime.utcnow()
+            'last_health_check': datetime.now(UTC)
         }
         self.provider_metrics[key] = client.get_metrics()
     
@@ -181,7 +181,7 @@ class EnhancedLLMManager(LLMManager):
         # Check if provider is in cooldown
         if not health['healthy'] and health['last_failure']:
             cooldown_end = health['last_failure'] + timedelta(seconds=self.failover_config['cooldown_period'])
-            if datetime.utcnow() < cooldown_end:
+            if datetime.now(UTC) < cooldown_end:
                 return False
         
         # Perform health check
@@ -192,15 +192,15 @@ class EnhancedLLMManager(LLMManager):
             # Reset failure count on successful health check
             health['healthy'] = True
             health['failure_count'] = 0
-            health['last_health_check'] = datetime.utcnow()
+            health['last_health_check'] = datetime.now(UTC)
             
             return True
             
         except Exception:
             health['healthy'] = False
             health['failure_count'] += 1
-            health['last_failure'] = datetime.utcnow()
-            health['last_health_check'] = datetime.utcnow()
+            health['last_failure'] = datetime.now(UTC)
+            health['last_health_check'] = datetime.now(UTC)
             
             return False
     
@@ -310,7 +310,7 @@ class EnhancedLLMManager(LLMManager):
         if provider_key in self.provider_health:
             health = self.provider_health[provider_key]
             health['failure_count'] += 1
-            health['last_failure'] = datetime.utcnow()
+            health['last_failure'] = datetime.now(UTC)
             
             # Mark as unhealthy if too many failures
             if health['failure_count'] >= self.failover_config['max_failures']:

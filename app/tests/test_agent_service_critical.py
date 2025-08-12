@@ -4,7 +4,7 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch, Mock
 from typing import Dict, Any, List, Optional
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum
 
 
@@ -250,7 +250,7 @@ class TestAgentServiceCritical:
         mock_context_manager.update_metadata = AsyncMock()
         await mock_context_manager.update_metadata(
             context,
-            {"last_query_time": datetime.utcnow().isoformat()}
+            {"last_query_time": datetime.now(UTC).isoformat()}
         )
         
         # Clear old context (memory management)

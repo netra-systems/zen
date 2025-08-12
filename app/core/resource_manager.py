@@ -6,7 +6,7 @@ import signal
 import sys
 from typing import Any, Callable, Dict, List, Optional, Set
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from .exceptions import ServiceError
 from .error_context import ErrorContext
@@ -302,14 +302,14 @@ class HealthMonitor:
         
         for name, check_func in self._health_checks.items():
             try:
-                start_time = datetime.utcnow()
+                start_time = datetime.now(UTC)
                 
                 if asyncio.iscoroutinefunction(check_func):
                     result = await asyncio.wait_for(check_func(), timeout=10.0)
                 else:
                     result = check_func()
                 
-                end_time = datetime.utcnow()
+                end_time = datetime.now(UTC)
                 duration = (end_time - start_time).total_seconds()
                 
                 results[name] = {
@@ -323,7 +323,7 @@ class HealthMonitor:
                 results[name] = {
                     "status": "unhealthy",
                     "error": str(e),
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
         
         self._last_check_results = results

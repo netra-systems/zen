@@ -7,7 +7,7 @@ Implements JSON-RPC 2.0 over WebSocket for real-time bidirectional communication
 from typing import Optional, Dict, Any, Set
 import json
 import asyncio
-from datetime import datetime
+from datetime import datetime, UTC
 import uuid
 
 from fastapi import WebSocket, WebSocketDisconnect, Query
@@ -26,8 +26,8 @@ class WebSocketConnection:
     def __init__(self, websocket: WebSocket, session_id: str):
         self.websocket = websocket
         self.session_id = session_id
-        self.connected_at = datetime.utcnow()
-        self.last_activity = datetime.utcnow()
+        self.connected_at = datetime.now(UTC)
+        self.last_activity = datetime.now(UTC)
         self.message_count = 0
         
     async def send_json(self, data: Dict[str, Any]):
@@ -36,7 +36,7 @@ class WebSocketConnection:
             if self.websocket.application_state != WebSocketState.CONNECTED:
                 raise ConnectionError("WebSocket is not connected")
             await self.websocket.send_json(data)
-            self.last_activity = datetime.utcnow()
+            self.last_activity = datetime.now(UTC)
             self.message_count += 1
         except Exception as e:
             logger.error(f"Error sending WebSocket message: {e}")
@@ -45,7 +45,7 @@ class WebSocketConnection:
     async def receive_json(self) -> Dict[str, Any]:
         """Receive JSON data from client"""
         data = await self.websocket.receive_json()
-        self.last_activity = datetime.utcnow()
+        self.last_activity = datetime.now(UTC)
         return data
 
 
@@ -91,7 +91,7 @@ class WebSocketTransport:
                     "server": "Netra MCP Server",
                     "version": "1.0.0",
                     "transport": "websocket",
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
             })
             
@@ -208,7 +208,7 @@ class WebSocketTransport:
                         "jsonrpc": "2.0",
                         "method": "heartbeat",
                         "params": {
-                            "timestamp": datetime.utcnow().isoformat(),
+                            "timestamp": datetime.now(UTC).isoformat(),
                             "message_count": connection.message_count
                         }
                     })

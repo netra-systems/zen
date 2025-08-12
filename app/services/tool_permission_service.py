@@ -3,7 +3,7 @@ Tool Permission Service - Handles per-tool authentication and authorization
 """
 import os
 from typing import Dict, List, Optional, Set, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from sqlalchemy.orm import Session
 from app.db.models_postgres import User
 from app.schemas.ToolPermission import (
@@ -400,7 +400,7 @@ class ToolPermissionService:
             return 0
         
         # Create cache key
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         if period == "minute":
             key = f"usage:{user_id}:{tool_name}:{now.strftime('%Y%m%d%H%M')}"
         elif period == "hour":
@@ -429,7 +429,7 @@ class ToolPermissionService:
             return
         
         try:
-            now = datetime.utcnow()
+            now = datetime.now(UTC)
             
             # Update usage counters
             for period in ["minute", "hour", "day"]:

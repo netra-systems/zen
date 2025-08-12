@@ -6,7 +6,7 @@ import pytest
 import asyncio
 import json
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from decimal import Decimal
 
 from app.agents.supply_researcher_sub_agent import (
@@ -266,7 +266,7 @@ class TestSupplyResearcherAgent:
                 old_value='"30"',
                 new_value='"25"',
                 supply_item_id="123",
-                updated_at=datetime.utcnow()
+                updated_at=datetime.now(UTC)
             )
         ]
         mock_item = Mock(provider="openai", model_name="GPT-4")
@@ -290,7 +290,7 @@ class TestSupplyResearcherAgent:
                 pricing_input=Decimal("30"),
                 pricing_output=Decimal("60"),
                 context_window=128000,
-                last_updated=datetime.utcnow()
+                last_updated=datetime.now(UTC)
             )
         ]
         
@@ -314,7 +314,7 @@ class TestSupplyResearcherAgent:
                         "model": "GPT-4",
                         "field": "pricing_input",
                         "percent_change": 50,  # 50% increase - anomaly
-                        "updated_at": datetime.utcnow().isoformat()
+                        "updated_at": datetime.now(UTC).isoformat()
                     }
                 ]
             }
@@ -376,7 +376,7 @@ class TestSupplyResearcherAgent:
         )
         
         next_run = schedule._calculate_next_run()
-        assert next_run > datetime.utcnow()
+        assert next_run > datetime.now(UTC)
         assert next_run.hour == 14
     
     # Test 19: Scheduler - Should run check
@@ -389,11 +389,11 @@ class TestSupplyResearcherAgent:
         )
         
         # Set next run to past
-        schedule.next_run = datetime.utcnow() - timedelta(minutes=1)
+        schedule.next_run = datetime.now(UTC) - timedelta(minutes=1)
         assert schedule.should_run()
         
         # Set next run to future
-        schedule.next_run = datetime.utcnow() + timedelta(hours=1)
+        schedule.next_run = datetime.now(UTC) + timedelta(hours=1)
         assert not schedule.should_run()
     
     # Test 20: Scheduler - Execute scheduled research

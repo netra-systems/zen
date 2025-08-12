@@ -34,7 +34,7 @@ PERFORMANCE REQUIREMENTS:
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from enum import Enum
@@ -109,7 +109,7 @@ class MockSupervisorAgent:
                 'user_request': user_request,
                 'run_id': run_id,
                 'stream_updates': stream_updates,
-                'timestamp': datetime.utcnow(),
+                'timestamp': datetime.now(UTC),
                 'user_id': self.user_id,
                 'thread_id': self.thread_id
             }
@@ -213,9 +213,9 @@ class AgentOrchestrator:
         agent = await self.get_or_create_agent(user_id)
         
         try:
-            start_time = datetime.utcnow()
+            start_time = datetime.now(UTC)
             result = await agent.run(user_request, run_id, stream_updates)
-            execution_time = (datetime.utcnow() - start_time).total_seconds()
+            execution_time = (datetime.now(UTC) - start_time).total_seconds()
             
             # Update metrics
             self.orchestration_metrics['total_executions'] += 1

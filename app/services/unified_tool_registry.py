@@ -2,7 +2,7 @@
 Unified Tool Registry - Central registry for all tools with permission-based access
 """
 from typing import Dict, List, Optional, Any, Callable, Union
-from datetime import datetime
+from datetime import datetime, UTC
 import inspect
 import json
 from sqlalchemy.orm import Session
@@ -369,7 +369,7 @@ class UnifiedToolRegistry:
         user: User
     ) -> ToolExecutionResult:
         """Execute a tool with permission checking"""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         
         # Create execution context
         context = ToolExecutionContext(
@@ -405,7 +405,7 @@ class UnifiedToolRegistry:
                     status="permission_denied",
                     error_message=permission_result.reason,
                     permission_check=permission_result,
-                    execution_time_ms=int((datetime.utcnow() - start_time).total_seconds() * 1000)
+                    execution_time_ms=int((datetime.now(UTC) - start_time).total_seconds() * 1000)
                 )
             
             # Validate input schema (basic validation)
@@ -424,7 +424,7 @@ class UnifiedToolRegistry:
                     user_id=str(user.id),
                     status="error",
                     error_message=f"Tool '{tool_name}' has no handler",
-                    execution_time_ms=int((datetime.utcnow() - start_time).total_seconds() * 1000)
+                    execution_time_ms=int((datetime.now(UTC) - start_time).total_seconds() * 1000)
                 )
             
             # Execute handler (async or sync)
@@ -433,7 +433,7 @@ class UnifiedToolRegistry:
             else:
                 result = tool.handler(arguments, user)
             
-            execution_time_ms = int((datetime.utcnow() - start_time).total_seconds() * 1000)
+            execution_time_ms = int((datetime.now(UTC) - start_time).total_seconds() * 1000)
             
             # Record usage for rate limiting
             await self.permission_service.record_tool_usage(
@@ -456,7 +456,7 @@ class UnifiedToolRegistry:
             return execution_result
             
         except Exception as e:
-            execution_time_ms = int((datetime.utcnow() - start_time).total_seconds() * 1000)
+            execution_time_ms = int((datetime.now(UTC) - start_time).total_seconds() * 1000)
             logger.error(f"Tool execution failed: {tool_name} - {e}", exc_info=True)
             
             # Record usage even for failed executions

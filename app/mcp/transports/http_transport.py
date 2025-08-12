@@ -7,7 +7,7 @@ Implements JSON-RPC 2.0 over HTTP with SSE for streaming responses.
 from typing import Optional, Dict, Any, AsyncGenerator
 import json
 import asyncio
-from datetime import datetime
+from datetime import datetime, UTC
 
 from fastapi import APIRouter, Request, Response, HTTPException, Depends, Query
 from fastapi.responses import StreamingResponse
@@ -116,7 +116,7 @@ class HttpTransport:
                         "event": "connected",
                         "data": json.dumps({
                             "session_id": session_id,
-                            "timestamp": datetime.utcnow().isoformat()
+                            "timestamp": datetime.now(UTC).isoformat()
                         })
                     }
                     
@@ -147,7 +147,7 @@ class HttpTransport:
                                 yield {
                                     "event": "heartbeat",
                                     "data": json.dumps({
-                                        "timestamp": datetime.utcnow().isoformat()
+                                        "timestamp": datetime.now(UTC).isoformat()
                                     })
                                 }
                     finally:
@@ -164,7 +164,7 @@ class HttpTransport:
                         "event": "error",
                         "data": json.dumps({
                             "error": str(e),
-                            "timestamp": datetime.utcnow().isoformat()
+                            "timestamp": datetime.now(UTC).isoformat()
                         })
                     }
                     
@@ -259,7 +259,7 @@ class HttpTransport:
                 "status": "healthy",
                 "server": "Netra MCP Server",
                 "version": "1.0.0",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
     def _get_session_id(self, user: Optional[UserInDB]) -> str:

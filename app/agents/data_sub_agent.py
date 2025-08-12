@@ -12,7 +12,7 @@
 import json
 import asyncio
 from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import numpy as np
 from functools import lru_cache
 from pydantic import BaseModel, Field
@@ -731,7 +731,7 @@ class DataSubAgent(BaseSubAgent):
             time_range_str = key_params.get("time_range", "last_24_hours")
             
             # Parse time range
-            end_time = datetime.utcnow()
+            end_time = datetime.now(UTC)
             if time_range_str == "last_hour":
                 start_time = end_time - timedelta(hours=1)
             elif time_range_str == "last_24_hours":

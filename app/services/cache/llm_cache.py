@@ -5,7 +5,7 @@ Implements intelligent caching with invalidation strategies.
 
 from typing import Optional, Dict, Any, List, Tuple
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 import hashlib
 import json
 import asyncio
@@ -364,8 +364,8 @@ class LLMCacheManager:
     
     def _calculate_eviction_score(self, entry: CacheEntry) -> float:
         """Calculate eviction score for adaptive strategy"""
-        age = (datetime.utcnow() - entry.created_at).total_seconds()
-        recency = (datetime.utcnow() - entry.accessed_at).total_seconds()
+        age = (datetime.now(UTC) - entry.created_at).total_seconds()
+        recency = (datetime.now(UTC) - entry.accessed_at).total_seconds()
         frequency = entry.access_count
         size = entry.metadata.get("response_length", 0)
         

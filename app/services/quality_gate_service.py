@@ -9,7 +9,7 @@ import hashlib
 from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, UTC
 import asyncio
 from collections import defaultdict
 
@@ -847,7 +847,7 @@ class QualityGateService:
         try:
             # Store in memory for immediate access
             self.metrics_history[content_type].append({
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'overall_score': metrics.overall_score,
                 'quality_level': metrics.quality_level.value,
                 'specificity': metrics.specificity_score,

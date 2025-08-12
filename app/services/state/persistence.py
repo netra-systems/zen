@@ -4,7 +4,7 @@ Handles persisting state across different storage backends with proper abstracti
 """
 
 from typing import Optional, Dict, Any, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.logging_config import central_logger
 from app.services.state.state_manager import StateManager, StateStorage
@@ -40,7 +40,7 @@ class StatePersistenceService:
                     "thread_id": thread_id,
                     "user_id": user_id,
                     "state": state.model_dump(),
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 
                 await self.state_manager.set(state_key, state_data, txn_id)
@@ -50,7 +50,7 @@ class StatePersistenceService:
                 thread_context.update({
                     "current_run_id": run_id,
                     "user_id": user_id,
-                    "last_updated": datetime.utcnow().isoformat(),
+                    "last_updated": datetime.now(UTC).isoformat(),
                     "state_summary": self._create_state_summary(state)
                 })
                 
@@ -97,7 +97,7 @@ class StatePersistenceService:
                         "thread_id": run.thread_id,
                         "user_id": run.metadata_.get("user_id"),
                         "state": state_dict,
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     })
                     
                     return DeepAgentState(**state_dict)
@@ -130,7 +130,7 @@ class StatePersistenceService:
                 "run_id": run_id,
                 "agent_name": agent_name,
                 "result": result,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await self.state_manager.set(result_key, result_data)
@@ -145,7 +145,7 @@ class StatePersistenceService:
                     metadata={
                         "run_id": run_id,
                         "agent_name": agent_name,
-                        "created_at": datetime.utcnow().isoformat()
+                        "created_at": datetime.now(UTC).isoformat()
                     }
                 )
                 await uow.commit()
@@ -219,7 +219,7 @@ class StatePersistenceService:
     async def cleanup_old_states(self, days_old: int = 7) -> int:
         """Cleanup old state entries"""
         try:
-            cutoff_date = datetime.utcnow() - timedelta(days=days_old)
+            cutoff_date = datetime.now(UTC) - timedelta(days=days_old)
             all_state = await self.state_manager.get_all()
             
             cleaned_count = 0
@@ -261,7 +261,7 @@ class StatePersistenceService:
             await self.state_manager.set(state_key, {
                 "run_id": run_id,
                 "state": state.model_dump(),
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "imported": True
             })
             

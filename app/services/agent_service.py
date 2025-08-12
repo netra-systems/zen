@@ -109,5 +109,3 @@ def get_agent_service(db_session = Depends(get_async_db), llm_manager: LLMManage
     tool_dispatcher = ToolDispatcher(db_session)
     supervisor = Supervisor(db_session, llm_manager, manager, tool_dispatcher)
     return AgentService(supervisor)
-
-# Test stub functions removed - use AgentService methods directly

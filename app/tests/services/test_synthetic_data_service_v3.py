@@ -7,7 +7,7 @@ import pytest
 import asyncio
 import uuid
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock, patch, Mock
 from typing import Dict, List, Any, Optional
 
@@ -557,7 +557,7 @@ class TestRealTimeIngestion:
         """Test streaming ingestion with backpressure handling"""
         async def generate_stream():
             for i in range(10000):
-                yield {"id": i, "timestamp": datetime.utcnow()}
+                yield {"id": i, "timestamp": datetime.now(UTC)}
                 if i % 100 == 0:
                     await asyncio.sleep(0.01)  # Simulate processing time
         
@@ -637,7 +637,7 @@ class TestRealTimeIngestion:
     @pytest.mark.asyncio
     async def test_ingestion_metrics_tracking(self, ingestion_service):
         """Test tracking ingestion metrics and performance"""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         
         metrics = IngestionMetrics()
         
@@ -676,7 +676,7 @@ class TestRealTimeIngestion:
     async def test_ingestion_with_transformation(self, ingestion_service):
         """Test data transformation during ingestion"""
         def transform_record(record):
-            record["timestamp"] = datetime.utcnow().isoformat()
+            record["timestamp"] = datetime.now(UTC).isoformat()
             record["processed"] = True
             return record
         
@@ -952,7 +952,7 @@ class TestDataQualityValidation:
         valid_record = {
             "trace_id": str(uuid.uuid4()),
             "span_id": str(uuid.uuid4()),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "workload_type": "simple_chat",
             "latency_ms": 150,
             "status": "success"
@@ -1677,7 +1677,7 @@ class TestAdminVisibility:
         for i in range(5):
             job_id = await admin_service.schedule_generation(
                 GenerationConfig(num_traces=1000),
-                scheduled_time=datetime.utcnow() + timedelta(minutes=i)
+                scheduled_time=datetime.now(UTC) + timedelta(minutes=i)
             )
             job_ids.append(job_id)
         

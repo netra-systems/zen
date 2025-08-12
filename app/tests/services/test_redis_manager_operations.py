@@ -6,7 +6,7 @@ Tests Redis operations, connection management, pooling, failover, and performanc
 import pytest
 import asyncio
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, call
 import redis.asyncio as redis
@@ -42,7 +42,7 @@ class MockRedisClient:
             raise redis.RedisError("Mock operation failed")
         
         # Check TTL
-        if key in self.ttls and datetime.utcnow() > self.ttls[key]:
+        if key in self.ttls and datetime.now(UTC) > self.ttls[key]:
             del self.data[key]
             del self.ttls[key]
             return None
@@ -61,7 +61,7 @@ class MockRedisClient:
         
         # Set TTL if provided
         if ex:
-            self.ttls[key] = datetime.utcnow() + timedelta(seconds=ex)
+            self.ttls[key] = datetime.now(UTC) + timedelta(seconds=ex)
         
         return True
     
@@ -372,7 +372,7 @@ class TestRedisManagerOperations:
         
         # Check TTL was set
         ttl = mock_redis_client.ttls[test_key]
-        expected_expiry = datetime.utcnow() + timedelta(seconds=expiration)
+        expected_expiry = datetime.now(UTC) + timedelta(seconds=expiration)
         assert abs((ttl - expected_expiry).total_seconds()) < 1  # Within 1 second
     
     @pytest.mark.asyncio

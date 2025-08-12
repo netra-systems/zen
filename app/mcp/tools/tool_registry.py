@@ -6,7 +6,7 @@ Manages tool registration, discovery, and execution.
 
 import asyncio
 from typing import Dict, Any, List, Optional, Callable, Union
-from datetime import datetime
+from datetime import datetime, UTC
 import json
 import inspect
 
@@ -225,7 +225,7 @@ class ToolRegistry:
         
     async def execute_tool(self, tool_name: str, arguments: Dict[str, Any], session_id: Optional[str] = None) -> Dict[str, Any]:
         """Execute a tool with given arguments"""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         
         # Create execution record
         execution = ToolExecution(
@@ -266,7 +266,7 @@ class ToolRegistry:
             # Record success
             execution.output_result = result
             execution.status = "success"
-            execution.execution_time_ms = int((datetime.utcnow() - start_time).total_seconds() * 1000)
+            execution.execution_time_ms = int((datetime.now(UTC) - start_time).total_seconds() * 1000)
             
             # Format response
             return {
@@ -278,7 +278,7 @@ class ToolRegistry:
             # Record error
             execution.error = str(e)
             execution.status = "error"
-            execution.execution_time_ms = int((datetime.utcnow() - start_time).total_seconds() * 1000)
+            execution.execution_time_ms = int((datetime.now(UTC) - start_time).total_seconds() * 1000)
             
             logger.error(f"Tool execution failed: {tool_name} - {e}", exc_info=True)
             

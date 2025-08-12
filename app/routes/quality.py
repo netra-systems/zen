@@ -5,7 +5,7 @@ This module provides API endpoints for quality monitoring, reporting, and manage
 
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from typing import Dict, Any, Optional, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from pydantic import BaseModel, Field
 from enum import Enum
 
@@ -236,7 +236,7 @@ async def acknowledge_alert(
             "alert_id": request.alert_id,
             "action": request.action,
             "user_id": current_user["id"],
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
     except HTTPException:
@@ -282,8 +282,8 @@ async def generate_quality_report(
             # Analyze trends over time
             trends = []
             for i in range(period_days):
-                day_start = datetime.utcnow() - timedelta(days=i+1)
-                day_end = datetime.utcnow() - timedelta(days=i)
+                day_start = datetime.now(UTC) - timedelta(days=i+1)
+                day_end = datetime.now(UTC) - timedelta(days=i)
                 # Would need to implement time-based filtering in monitoring service
                 # For now, return current data
                 trends.append({
@@ -301,7 +301,7 @@ async def generate_quality_report(
         
         return {
             "report_type": report_type.value,
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
             "generated_by": current_user["id"],
             "period_days": period_days,
             "data": data
@@ -341,7 +341,7 @@ async def get_quality_statistics(
         
         return {
             "statistics": stats,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "content_type_filter": content_type
         }
         
@@ -376,7 +376,7 @@ async def start_quality_monitoring(
             "status": "started",
             "interval_seconds": interval_seconds,
             "started_by": current_user["id"],
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
     except HTTPException:
@@ -406,7 +406,7 @@ async def stop_quality_monitoring(
         return {
             "status": "stopped",
             "stopped_by": current_user["id"],
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
     except HTTPException:
@@ -436,7 +436,7 @@ async def quality_service_health() -> Dict[str, Any]:
                 "active_alerts": len(monitoring_service.active_alerts) if monitoring_service else 0,
                 "monitored_agents": len(monitoring_service.agent_profiles) if monitoring_service else 0
             },
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         return health
@@ -446,7 +446,7 @@ async def quality_service_health() -> Dict[str, Any]:
         return {
             "status": "unhealthy",
             "error": str(e),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
 
 async def check_quality_thresholds(metric: str, value: float) -> Dict[str, Any]:

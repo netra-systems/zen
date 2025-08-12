@@ -1,7 +1,7 @@
 """Enhanced base service classes using the new service interfaces."""
 
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
-from datetime import datetime
+from datetime import datetime, UTC
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -115,7 +115,7 @@ class ServiceHealthChecker:
             return ServiceHealth(
                 service_name=service.service_name,
                 status="unhealthy",
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 dependencies={},
                 metrics={"error": str(e)}
             )
@@ -139,7 +139,7 @@ class ServiceHealthChecker:
                 health_status[service.service_name] = ServiceHealth(
                     service_name=service.service_name,
                     status="unhealthy",
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.now(UTC),
                     dependencies={},
                     metrics={"error": str(result)}
                 )

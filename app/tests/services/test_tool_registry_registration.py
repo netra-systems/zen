@@ -7,7 +7,7 @@ import pytest
 import json
 from typing import Dict, List, Any, Optional
 from unittest.mock import MagicMock, patch, call, AsyncMock
-from datetime import datetime
+from datetime import datetime, UTC
 
 from langchain_core.tools import BaseTool
 from app.services.tool_registry import ToolRegistry
@@ -122,7 +122,7 @@ class TestToolRegistryRegistration:
             "version": "1.0.0",
             "author": "test",
             "tags": ["optimization", "performance"],
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(UTC).isoformat()
         }
         
         # Execute
@@ -386,7 +386,7 @@ class TestToolRegistryValidation:
             "version": "1.0.0",
             "author": "test_author",
             "tags": ["test", "validation"],
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
             "dependencies": ["langchain"]
         }
         

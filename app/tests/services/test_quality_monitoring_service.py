@@ -2,7 +2,7 @@
 
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock, patch, PropertyMock
 import pytest
 from collections import deque, defaultdict
@@ -617,7 +617,7 @@ class TestQualityMonitoringServiceReal:
         # Create test alert
         alert = QualityAlert(
             id="test_alert",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             severity=AlertSeverity.WARNING,
             metric_type=MetricType.QUALITY_SCORE,
             agent="dashboard_agent",
@@ -640,7 +640,7 @@ class TestQualityMonitoringServiceReal:
         """Test alert acknowledgment and resolution"""
         alert = QualityAlert(
             id="ack_alert",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             severity=AlertSeverity.WARNING,
             metric_type=MetricType.QUALITY_SCORE,
             agent="test_agent",
@@ -707,7 +707,7 @@ class TestQualityMonitoringDataClasses:
         """Test QualityAlert dataclass"""
         alert = QualityAlert(
             id="test_alert",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             severity=AlertSeverity.ERROR,
             metric_type=MetricType.QUALITY_SCORE,
             agent="test_agent",
@@ -758,7 +758,7 @@ class TestQualityMonitoringDataClasses:
             retry_count=12,
             fallback_count=3,
             average_response_time=1.25,
-            last_updated=datetime.utcnow(),
+            last_updated=datetime.now(UTC),
             issues=["Low specificity"],
             recommendations=["Add more metrics"]
         )
@@ -902,7 +902,7 @@ class TestQualityMonitoringEdgeCases:
         
         # Add more than max length items
         for i in range(1050):
-            event = {"quality_score": 0.5, "timestamp": datetime.utcnow().isoformat()}
+            event = {"quality_score": 0.5, "timestamp": datetime.now(UTC).isoformat()}
             service_with_mocks.metrics_buffer[agent_name].append(event)
         
         # Should be limited to 1000 (default maxlen)
@@ -914,7 +914,7 @@ class TestQualityMonitoringEdgeCases:
         for i in range(550):
             alert = QualityAlert(
                 id=f"alert_{i}",
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 severity=AlertSeverity.INFO,
                 metric_type=MetricType.QUALITY_SCORE,
                 agent="test_agent",

@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime
+from datetime import datetime, UTC
 import json
 import uuid
 
@@ -218,7 +218,7 @@ class TestDemoRoutes:
             "throughput_increase": 200.0,
             "cost_reduction": 45.0,
             "accuracy_improvement": 8.5,
-            "timestamps": [datetime.utcnow()],
+            "timestamps": [datetime.now(UTC)],
             "values": {
                 "baseline_latency": [250.0],
                 "optimized_latency": [100.0]
@@ -312,11 +312,11 @@ class TestDemoRoutes:
         mock_status = {
             "session_id": "session-123",
             "industry": "healthcare",
-            "started_at": datetime.utcnow().isoformat(),
+            "started_at": datetime.now(UTC).isoformat(),
             "message_count": 5,
             "progress_percentage": 83.3,
             "status": "active",
-            "last_interaction": datetime.utcnow().isoformat()
+            "last_interaction": datetime.now(UTC).isoformat()
         }
         mock_demo_service.get_session_status.return_value = mock_status
         

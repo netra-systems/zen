@@ -2,7 +2,7 @@
 
 import pytest
 import asyncio
-from datetime import datetime
+from datetime import datetime, UTC
 from unittest.mock import Mock, AsyncMock, patch
 from typing import Dict, Any
 
@@ -660,7 +660,7 @@ class TestServiceModels:
         health = ServiceHealth(
             service_name="test-service",
             status="healthy",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             dependencies={"db": "healthy"},
             metrics={"requests": 100}
         )
