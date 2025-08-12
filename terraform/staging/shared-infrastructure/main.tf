@@ -38,6 +38,21 @@ resource "google_compute_subnetwork" "staging" {
   private_ip_google_access = true
 }
 
+# Private service access for Cloud SQL and Redis
+resource "google_compute_global_address" "private_ip_address" {
+  name          = "staging-private-ip-address"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.staging.id
+}
+
+resource "google_service_networking_connection" "private_vpc_connection" {
+  network                 = google_compute_network.staging.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
+}
+
 # Shared Cloud SQL Instance (much faster to create databases than instances)
 resource "google_sql_database_instance" "staging_shared" {
   name             = "staging-shared-postgres"
@@ -69,6 +84,8 @@ resource "google_sql_database_instance" "staging_shared" {
   }
   
   deletion_protection = true  # Protect shared instance
+  
+  depends_on = [google_service_networking_connection.private_vpc_connection]
 }
 
 # Shared Redis Instance
@@ -86,6 +103,8 @@ resource "google_redis_instance" "staging_shared" {
   redis_configs = {
     maxmemory-policy = "allkeys-lru"
   }
+  
+  depends_on = [google_service_networking_connection.private_vpc_connection]
 }
 
 # Pre-provisioned wildcard SSL certificate (instant, no DNS wait)
@@ -93,7 +112,7 @@ resource "google_compute_managed_ssl_certificate" "wildcard" {
   name = "staging-wildcard-cert"
   
   managed {
-    domains = ["*.${var.staging_domain}"]
+    domains = [var.staging_domain, "www.${var.staging_domain}"]
   }
 }
 
