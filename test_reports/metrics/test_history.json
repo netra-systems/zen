@@ -1,0 +1,25 @@
+{
+  "runs": [
+    {
+      "timestamp": "2025-08-12T05:10:01.680006",
+      "level": "comprehensive",
+      "total": 189,
+      "passed": 18,
+      "failed": 171,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T05:11:28.801674",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    }
+  ],
+  "flaky_tests": {},
+  "failure_patterns": {},
+  "performance_trends": []
+}

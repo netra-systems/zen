@@ -1,0 +1,143 @@
+# Docker Compose for Local Staging Environment Testing
+# This mimics the production staging environment locally
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: netra_staging
+      POSTGRES_USER: staging
+      POSTGRES_PASSWORD: staging_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U staging"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ClickHouse Analytics Database
+  clickhouse:
+    image: clickhouse/clickhouse-server:23-alpine
+    ports:
+      - "9000:9000"
+      - "8123:8123"
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API Service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      DATABASE_URL: postgresql://staging:staging_password@postgres:5432/netra_staging
+      REDIS_URL: redis://redis:6379/0
+      CLICKHOUSE_URL: clickhouse://clickhouse:9000/default
+      SECRET_KEY: staging_secret_key_for_testing_only
+      PORT: 8080
+      PYTHONUNBUFFERED: 1
+      # Add any API keys as needed for testing
+      # ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      # Mount app directory for hot reload during development
+      - ./app:/app/app:ro
+    command: >
+      sh -c "
+        echo 'Waiting for database migrations...' &&
+        alembic upgrade head &&
+        echo 'Starting backend server...' &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload --reload-dir /app/app
+      "
+
+  # Frontend Next.js Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8080
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:8080
+      NODE_ENV: production
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      # Mount frontend for hot reload in dev mode
+      - ./frontend:/app:ro
+      - /app/node_modules
+      - /app/.next
+
+  # Nginx Reverse Proxy (mimics Cloud Run load balancer)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./staging/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+  clickhouse_data:
+
+networks:
+  default:
+    name: netra_staging
+    driver: bridge

@@ -56,7 +56,7 @@ resource "google_service_networking_connection" "private_vpc_connection" {
 # Shared Cloud SQL Instance (much faster to create databases than instances)
 resource "google_sql_database_instance" "staging_shared" {
   name             = "staging-shared-postgres"
-  database_version = "POSTGRES_14"
+  database_version = "POSTGRES_17"  # Updated to latest available version
   region           = var.region
   
   settings {

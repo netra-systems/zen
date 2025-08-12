@@ -1,0 +1,60 @@
+{
+  "timestamp": "2025-08-12T05:11:28.801674",
+  "level": "simple",
+  "metrics": {
+    "total_tests": 0,
+    "passed": 0,
+    "failed": 0,
+    "coverage": null
+  },
+  "results": {
+    "backend": {
+      "status": "passed",
+      "duration": 7.325929880142212,
+      "exit_code": 0,
+      "output": "================================================================================\nNETRA AI PLATFORM - SIMPLE TEST RUNNER\n================================================================================\n[INFO] Starting simple smoke tests at 2025-08-12 05:11:14\n\n============================================================\nBACKEND SMOKE TESTS\n============================================================\n\n[INFO] Testing critical imports\n[CMD] python -c <script>\n[SUCCESS] Testing critical imports\n\n[INFO] Testing configuration loading\n[CMD] python -c <script>\n[SUCCESS] Testing configuration loading\n\n[INFO] Testing health endpoint\n[CMD] python -c <script>\n[SUCCESS] Testing health endpoint\n\n============================================================\nFRONTEND SMOKE TESTS\n============================================================\n[PASS] package.json found\n[PASS] node_modules exists\n\n[INFO] Running TypeScript type checking (informational only)...\n\n[INFO] TypeScript type checking sample\n[CMD] npx tsc --noEmit 2>&1 | head -5\n[SUCCESS] TypeScript type checking sample\n[INFO] TypeScript errors are expected during development\n\n============================================================\nTEST SUMMARY\n============================================================\nBackend:  [PASSED]\nFrontend: [PASSED]\nDuration: 14.59 seconds\n============================================================\n\n[SUCCESS] All simple tests passed!\n\n",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0,
+        "test_files": 0
+      },
+      "coverage": null
+    },
+    "frontend": {
+      "status": "passed",
+      "duration": 7.325929880142212,
+      "exit_code": 0,
+      "output": "",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      },
+      "coverage": null
+    },
+    "e2e": {
+      "status": "pending",
+      "duration": 0,
+      "exit_code": null,
+      "output": "",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      },
+      "coverage": null
+    },
+    "overall": {
+      "status": "passed",
+      "start_time": 1755000674.1498148,
+      "end_time": 1755000688.8016746
+    }
+  }
+}

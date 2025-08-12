@@ -69,11 +69,11 @@ TEST_LEVELS = {
         "run_both": True
     },
     "comprehensive": {
-        "description": "Full test suite with coverage (10-15 minutes)",
+        "description": "Full test suite with coverage (30-45 minutes)",
         "purpose": "Pre-release validation, full system testing",
         "backend_args": ["--coverage", f"--parallel={min(6, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast"],
         "frontend_args": ["--coverage"],
-        "timeout": 900,
+        "timeout": 2700,  # 45 minutes to handle real LLM tests
         "run_coverage": True,
         "run_both": True
     },
@@ -87,11 +87,11 @@ TEST_LEVELS = {
         "run_both": False  # Backend only for critical paths
     },
     "all": {
-        "description": "All tests including backend, frontend, e2e, integration (20-30 minutes)",
+        "description": "All tests including backend, frontend, e2e, integration (45-60 minutes)",
         "purpose": "Complete system validation including all test types",
         "backend_args": ["--coverage", f"--parallel={OPTIMAL_WORKERS}", "--html-output", "--fail-fast"],
         "frontend_args": ["--coverage", "--e2e"],
-        "timeout": 1800,
+        "timeout": 3600,  # 60 minutes for complete test suite
         "run_coverage": True,
         "run_both": True,
         "run_e2e": True
