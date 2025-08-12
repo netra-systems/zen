@@ -237,6 +237,7 @@ class EnhancedTestReporter:
         # Parse Jest/frontend output
         elif component == "frontend":
             # Count test files
+            test_files = set()  # Initialize test_files for frontend
             file_pattern = r"(PASS|FAIL)\s+(\S+\.(test|spec)\.(ts|tsx|js|jsx))"
             for match in re.finditer(file_pattern, output):
                 test_files.add(match.group(2))

@@ -33,13 +33,13 @@ variable "frontend_image" {
 variable "domain" {
   description = "Base domain for staging environments"
   type        = string
-  default     = "staging.netra-ai.dev"
+  default     = "staging.netrasystems.ai"
 }
 
 variable "dns_zone_name" {
   description = "Cloud DNS zone name"
   type        = string
-  default     = "staging-netra-ai-dev"
+  default     = "staging-netrasystems-ai"
 }
 
 variable "billing_account" {
@@ -118,4 +118,22 @@ variable "postgres_password" {
   description = "Password for PostgreSQL database"
   type        = string
   sensitive   = true
+}
+
+variable "cpu_limit" {
+  description = "CPU limit for backend service"
+  type        = string
+  default     = "2"
+}
+
+variable "memory_limit" {
+  description = "Memory limit for backend service"
+  type        = string
+  default     = "4Gi"
+}
+
+variable "min_instances" {
+  description = "Minimum number of instances"
+  type        = number
+  default     = 0
 }

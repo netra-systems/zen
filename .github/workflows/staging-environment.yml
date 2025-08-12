@@ -19,7 +19,7 @@ on:
         type: string
 
 env:
-  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_PROJECT_ID: netra-staging
   GCP_REGION: us-central1
   TERRAFORM_VERSION: 1.5.0
   STAGING_DOMAIN: staging.netrasystems.ai
