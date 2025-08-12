@@ -280,9 +280,10 @@ class TestRedisManagerOperations:
     async def test_redis_connection_success(self, mock_redis_client):
         """Test successful Redis connection"""
         manager = RedisManager()
+        manager.enabled = True  # Force enable for testing
         
         with patch('redis.asyncio.Redis', return_value=mock_redis_client):
-            with patch('app.redis_manager.settings') as mock_settings:
+            with patch('app.config.settings') as mock_settings:
                 mock_settings.redis.host = "localhost"
                 mock_settings.redis.port = 6379
                 mock_settings.redis.username = None
@@ -303,7 +304,7 @@ class TestRedisManagerOperations:
             mock_client.set_failure_mode(True, "connection")
             mock_redis_class.return_value = mock_client
             
-            with patch('app.redis_manager.settings') as mock_settings:
+            with patch('app.config.settings') as mock_settings:
                 mock_settings.redis.host = "localhost"
                 mock_settings.redis.port = 6379
                 mock_settings.redis.username = None

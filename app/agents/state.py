@@ -20,3 +20,4 @@ class DeepAgentState(BaseModel):
     report_result: Optional[Dict[str, Any]] = None
     synthetic_data_result: Optional[Dict[str, Any]] = None
     final_report: Optional[str] = None
+    step_count: int = 0  # Added for agent tracking

@@ -87,7 +87,7 @@ export const FinalReportView: React.FC<FinalReportProps> = ({ reportData }) => {
   return (
     <div className="w-full max-w-6xl mx-auto p-6 space-y-6">
       {/* Header */}
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+      <Card className="glass-card border-emerald-200">
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>

@@ -13,12 +13,17 @@ def test_basic_import():
     # Try basic import
     try:
         from app import __version__
-        assert True  # If we get here, import worked
-    except ImportError:
-        assert True  # Import error is OK for this test
+        # Verify that version was imported and has a value
+        assert __version__ is not None
+        assert isinstance(__version__, str)
+        assert len(__version__) > 0
+    except ImportError as e:
+        # ImportError should not be silently ignored - skip the test instead
+        import pytest
+        pytest.skip(f"Unable to import app: {e}")
     except Exception as e:
         print(f"Unexpected error: {e}")
-        assert False
+        assert False, f"Unexpected error during import: {e}"
 
 
 def test_health_endpoint_direct():

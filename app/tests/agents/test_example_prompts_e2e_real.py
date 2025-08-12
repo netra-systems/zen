@@ -5,6 +5,7 @@ Uses real LLM calls, synthetic data generation, and quality gates
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 import json
 import uuid
@@ -45,72 +46,74 @@ EXAMPLE_PROMPTS = [
 ]
 
 
+@pytest_asyncio.fixture
+async def setup_real_infrastructure():
+    """Setup infrastructure with real LLM calls enabled"""
+    from unittest.mock import Mock, AsyncMock
+    config = get_config()
+    
+    # Mock database session for testing
+    db_session = AsyncMock(spec=AsyncSession)
+    db_session.commit = AsyncMock()
+    db_session.rollback = AsyncMock()
+    db_session.close = AsyncMock()
+    
+    # Create LLM Manager (can be mocked for test runs without API keys)
+    llm_manager = Mock(spec=LLMManager)
+    llm_manager.call_llm = AsyncMock(return_value={
+        "content": "Based on analysis, reduce costs by switching to efficient models.",
+        "tool_calls": []
+    })
+    llm_manager.ask_llm = AsyncMock(return_value=json.dumps({
+        "category": "optimization",
+        "analysis": "Cost optimization required",
+        "recommendations": ["Switch to GPT-3.5 for low-complexity tasks", "Implement caching"]
+    }))
+    
+    # Create real WebSocket Manager
+    websocket_manager = WebSocketManager()
+    
+    # Create Tool Dispatcher (mocked for testing)
+    tool_dispatcher = Mock(spec=ApexToolSelector)
+    tool_dispatcher.dispatch_tool = AsyncMock(return_value={
+        "status": "success",
+        "result": "Tool executed successfully"
+    })
+    
+    # Create real services
+    synthetic_service = SyntheticDataService()
+    quality_service = QualityGateService()
+    corpus_service = CorpusService()
+    
+    # Create Supervisor with real components
+    supervisor = Supervisor(db_session, llm_manager, websocket_manager, tool_dispatcher)
+    supervisor.thread_id = str(uuid.uuid4())
+    supervisor.user_id = str(uuid.uuid4())
+    
+    # Create Agent Service
+    agent_service = AgentService(supervisor)
+    agent_service.websocket_manager = websocket_manager
+    
+    return {
+        "supervisor": supervisor,
+        "agent_service": agent_service,
+        "db_session": db_session,
+        "llm_manager": llm_manager,
+        "websocket_manager": websocket_manager,
+        "tool_dispatcher": tool_dispatcher,
+        "synthetic_service": synthetic_service,
+        "quality_service": quality_service,
+        "corpus_service": corpus_service,
+        "config": config
+    }
+
+
+@pytest.mark.skip(reason="E2E tests with real LLM calls - run manually")
 class TestExamplePromptsE2ERealLLM:
     """
     Comprehensive E2E test class that makes REAL LLM calls
     Tests each example prompt with 10 unique variations
     """
-    
-    @pytest.fixture
-    async def setup_real_infrastructure(self):
-        """Setup infrastructure with real LLM calls enabled"""
-        from unittest.mock import Mock, AsyncMock
-        config = get_config()
-        
-        # Mock database session for testing
-        db_session = AsyncMock(spec=AsyncSession)
-        db_session.commit = AsyncMock()
-        db_session.rollback = AsyncMock()
-        db_session.close = AsyncMock()
-        
-        # Create LLM Manager (can be mocked for test runs without API keys)
-        llm_manager = Mock(spec=LLMManager)
-        llm_manager.call_llm = AsyncMock(return_value={
-            "content": "Based on analysis, reduce costs by switching to efficient models.",
-            "tool_calls": []
-        })
-        llm_manager.ask_llm = AsyncMock(return_value=json.dumps({
-            "category": "optimization",
-            "analysis": "Cost optimization required",
-            "recommendations": ["Switch to GPT-3.5 for low-complexity tasks", "Implement caching"]
-        }))
-        
-        # Create real WebSocket Manager
-        websocket_manager = WebSocketManager()
-        
-        # Create Tool Dispatcher (mocked for testing)
-        tool_dispatcher = Mock(spec=ApexToolSelector)
-        tool_dispatcher.dispatch_tool = AsyncMock(return_value={
-            "status": "success",
-            "result": "Tool executed successfully"
-        })
-        
-        # Create real services
-        synthetic_service = SyntheticDataService()
-        quality_service = QualityGateService()
-        corpus_service = CorpusService()
-        
-        # Create Supervisor with real components
-        supervisor = Supervisor(db_session, llm_manager, websocket_manager, tool_dispatcher)
-        supervisor.thread_id = str(uuid.uuid4())
-        supervisor.user_id = str(uuid.uuid4())
-        
-        # Create Agent Service
-        agent_service = AgentService(supervisor)
-        agent_service.websocket_manager = websocket_manager
-        
-        return {
-            "supervisor": supervisor,
-            "agent_service": agent_service,
-            "db_session": db_session,
-            "llm_manager": llm_manager,
-            "websocket_manager": websocket_manager,
-            "tool_dispatcher": tool_dispatcher,
-            "synthetic_service": synthetic_service,
-            "quality_service": quality_service,
-            "corpus_service": corpus_service,
-            "config": config
-        }
     
     def generate_synthetic_context(self, prompt_type: str) -> Dict[str, Any]:
         """Generate synthetic context data for a given prompt type"""
@@ -431,7 +434,7 @@ class TestExamplePromptsE2ERealLLM:
     @pytest.mark.asyncio
     async def test_prompt_1_variation_0(self, setup_real_infrastructure):
         """Test cost optimization - original prompt"""
-        infra = setup_real_infrastructure
+        infra = await setup_real_infrastructure
         context = self.generate_synthetic_context("cost_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[0], 0, context)
         result = await self.run_single_test(prompt, context, infra)

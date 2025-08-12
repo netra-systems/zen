@@ -41,13 +41,13 @@ export const ThinkingIndicator: React.FC<ThinkingIndicatorProps> = ({
   const getColorScheme = () => {
     switch (type) {
       case 'processing':
-        return 'from-blue-400 to-cyan-400';
+        return 'from-emerald-400 to-teal-400';
       case 'analyzing':
         return 'from-purple-400 to-pink-400';
       case 'optimizing':
         return 'from-green-400 to-emerald-400';
       default:
-        return 'from-blue-400 to-indigo-400';
+        return 'from-purple-400 to-indigo-400';
     }
   };
 

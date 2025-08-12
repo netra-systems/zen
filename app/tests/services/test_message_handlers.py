@@ -41,14 +41,19 @@ async def test_handle_start_agent():
         
         # Test with invalid payload should raise or handle error
         invalid_payload = {"request": {}}  # Missing 'query' field
+        error_raised = False
         try:
             await handler_service.handle_start_agent("user_123", invalid_payload, mock_session)
             # If it doesn't raise, check that error handler was called
-            if mock_manager.send_error.called:
-                assert mock_manager.send_error.call_count > 0
+            assert mock_manager.send_error.called, "Error handler should be called for invalid payload"
+            assert mock_manager.send_error.call_count > 0, "Error handler should be called at least once"
         except (KeyError, ValueError, AttributeError) as e:
-            # Expected for invalid payload
-            assert True
+            # Expected for invalid payload - verify we got the right kind of error
+            error_raised = True
+            assert str(e) is not None, "Error message should not be None"
+        
+        # Either an error was raised OR the error handler was called
+        assert error_raised or mock_manager.send_error.called, "Invalid payload should either raise an error or call error handler"
 
 @pytest.mark.asyncio 
 async def test_websocket_schema_imports():

@@ -33,10 +33,11 @@ class WebSocketConnection:
     async def send_json(self, data: Dict[str, Any]):
         """Send JSON data to client"""
         try:
-            if self.websocket.application_state == WebSocketState.CONNECTED:
-                await self.websocket.send_json(data)
-                self.last_activity = datetime.utcnow()
-                self.message_count += 1
+            if self.websocket.application_state != WebSocketState.CONNECTED:
+                raise ConnectionError("WebSocket is not connected")
+            await self.websocket.send_json(data)
+            self.last_activity = datetime.utcnow()
+            self.message_count += 1
         except Exception as e:
             logger.error(f"Error sending WebSocket message: {e}")
             raise

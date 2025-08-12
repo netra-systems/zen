@@ -304,21 +304,30 @@ class TestResearchSchedule:
     
     def test_update_after_run(self):
         """Test updating schedule after successful run"""
-        schedule = ResearchSchedule(
-            name="update_test",
-            frequency=ScheduleFrequency.HOURLY,
-            research_type=ResearchType.PRICING
-        )
-        
-        original_next_run = schedule.next_run
-        original_last_run = schedule.last_run
-        
-        schedule.update_after_run()
-        
-        # Should update last_run and recalculate next_run
-        assert schedule.last_run != original_last_run
-        assert schedule.last_run != None
-        assert schedule.next_run != original_next_run
+        with patch('app.services.supply_research_scheduler.datetime') as mock_datetime:
+            # Mock the initial time to 10:30
+            initial_time = datetime(2024, 1, 1, 10, 30, 0)
+            mock_datetime.utcnow.return_value = initial_time
+            mock_datetime.side_effect = lambda *args, **kw: datetime(*args, **kw)
+            
+            schedule = ResearchSchedule(
+                name="update_test",
+                frequency=ScheduleFrequency.HOURLY,
+                research_type=ResearchType.PRICING
+            )
+            
+            original_next_run = schedule.next_run
+            original_last_run = schedule.last_run
+            
+            # Move time forward by an hour for the update
+            mock_datetime.utcnow.return_value = initial_time + timedelta(hours=1)
+            
+            schedule.update_after_run()
+            
+            # Should update last_run and recalculate next_run
+            assert schedule.last_run != original_last_run
+            assert schedule.last_run != None
+            assert schedule.next_run > original_next_run  # Should be later than original
 
 
 class TestSchedulerInitialization:

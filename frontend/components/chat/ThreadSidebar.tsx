@@ -158,7 +158,7 @@ export const ThreadSidebar: React.FC = () => {
         <button
           onClick={handleCreateThread}
           disabled={isCreatingNew || !isAuthenticated}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 glass-button-primary rounded-lg transition-all disabled:glass-disabled"
         >
           <Plus className="w-5 h-5" />
           <span>New Conversation</span>

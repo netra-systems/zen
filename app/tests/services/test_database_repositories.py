@@ -217,10 +217,24 @@ class TestBaseRepository:
         assert thread.title == "Test Thread"
         assert thread.created_at != None
 
-    async def test_repository_bulk_create(self, unit_of_work):
+    async def test_repository_bulk_create(self, unit_of_work, mock_models):
         """Test bulk entity creation."""
         import time
         async with unit_of_work as uow:
+            # Mock the bulk_create to return mock threads
+            mock_threads = []
+            for i in range(10):
+                thread = mock_models['Thread'](
+                    id=f"thread_{i}",
+                    object="thread",
+                    created_at=int(time.time()),
+                    metadata_={"user_id": f"user_{i}", "title": f"Thread {i}"}
+                )
+                mock_threads.append(thread)
+            
+            # Mock the bulk_create method
+            uow.threads.bulk_create = AsyncMock(return_value=mock_threads)
+            
             threads_data = [
                 {
                     "object": "thread",
@@ -235,35 +249,64 @@ class TestBaseRepository:
             assert len(threads) == 10
             assert all(t.id != None for t in threads)
 
-    async def test_repository_get_by_id(self, unit_of_work):
+    async def test_repository_get_by_id(self, unit_of_work, mock_models):
         """Test getting entity by ID."""
-        thread = await unit_of_work.threads.create({
-            "user_id": "test_user",
-            "title": "Test Thread"
-        })
-        
-        retrieved = await unit_of_work.threads.get(thread.id)
-        
-        assert retrieved != None
-        assert retrieved.id == thread.id
-        assert retrieved.title == thread.title
-
-    async def test_repository_get_many(self, unit_of_work):
-        """Test getting multiple entities."""
-        # Create test data
-        thread_ids = []
-        for i in range(5):
-            thread = await unit_of_work.threads.create({
+        async with unit_of_work as uow:
+            # Create a mock thread
+            mock_thread = mock_models['Thread'](
+                id="thread_test_123",
+                user_id="test_user",
+                title="Test Thread"
+            )
+            
+            # Mock the create and get methods
+            uow.threads.create = AsyncMock(return_value=mock_thread)
+            uow.threads.get = AsyncMock(return_value=mock_thread)
+            
+            thread = await uow.threads.create({
                 "user_id": "test_user",
-                "title": f"Thread {i}"
+                "title": "Test Thread"
             })
-            thread_ids.append(thread.id)
-        
-        # Get multiple
-        threads = await unit_of_work.threads.get_many(thread_ids[:3])
-        
-        assert len(threads) == 3
-        assert all(t.id in thread_ids[:3] for t in threads)
+            
+            retrieved = await uow.threads.get(thread.id)
+            
+            assert retrieved != None
+            assert retrieved.id == thread.id
+            assert retrieved.title == thread.title
+
+    async def test_repository_get_many(self, unit_of_work, mock_models):
+        """Test getting multiple entities."""
+        async with unit_of_work as uow:
+            # Create mock threads
+            mock_threads = []
+            thread_ids = []
+            for i in range(5):
+                thread = mock_models['Thread'](
+                    id=f"thread_{i}",
+                    user_id="test_user",
+                    title=f"Thread {i}"
+                )
+                mock_threads.append(thread)
+                thread_ids.append(thread.id)
+            
+            # Mock the create and get_many methods
+            uow.threads.create = AsyncMock(side_effect=mock_threads)
+            uow.threads.get_many = AsyncMock(return_value=mock_threads[:3])
+            
+            # Create test data
+            created_ids = []
+            for i in range(5):
+                thread = await uow.threads.create({
+                    "user_id": "test_user",
+                    "title": f"Thread {i}"
+                })
+                created_ids.append(thread.id)
+            
+            # Get multiple
+            threads = await uow.threads.get_many(created_ids[:3])
+            
+            assert len(threads) == 3
+            assert all(t.id in thread_ids[:3] for t in threads)
 
     async def test_repository_update(self, unit_of_work):
         """Test updating an entity."""

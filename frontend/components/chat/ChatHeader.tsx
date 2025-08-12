@@ -44,11 +44,11 @@ export const ChatHeader: React.FC = () => {
     } else if (subAgentName?.toLowerCase().includes('optimization')) {
       return <Cpu className="w-6 h-6 text-green-500" />;
     }
-    return <Bot className="w-6 h-6 text-blue-500" />;
+    return <Bot className="w-6 h-6 text-purple-500" />;
   };
 
   return (
-    <div className="border-b bg-gradient-to-r from-gray-50 to-white shadow-sm">
+    <div className="border-b glass-light shadow-sm">
       <div className="px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">

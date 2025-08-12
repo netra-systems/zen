@@ -42,17 +42,26 @@ const mockAssign = jest.fn();
 const mockReplace = jest.fn();
 const mockReload = jest.fn();
 
-delete (window as any).location;
-(window as any).location = {
-  href: '',
-  assign: mockAssign,
-  replace: mockReplace,
-  reload: mockReload,
-  origin: 'http://localhost:3000',
-  pathname: '/',
-  search: '',
-  hash: ''
-};
+// Check if location is already defined (in jsdom) and delete it first
+if (window.location) {
+  delete (window as any).location;
+}
+
+// Use Object.defineProperty to properly mock location in jsdom
+Object.defineProperty(window, 'location', {
+  configurable: true,
+  writable: true,
+  value: {
+    href: '',
+    assign: mockAssign,
+    replace: mockReplace,
+    reload: mockReload,
+    origin: 'http://localhost:3000',
+    pathname: '/',
+    search: '',
+    hash: ''
+  }
+});
 
 // Mock fetch
 global.fetch = jest.fn();
@@ -76,7 +85,7 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    window.location.href = '';
+    (window.location as any).href = '';
     localStorageMock.getItem.mockReturnValue(null);
   });
 

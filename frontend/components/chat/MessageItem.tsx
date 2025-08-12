@@ -87,14 +87,14 @@ export const MessageItem: React.FC<MessageProps> = ({ message }) => {
         <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{content}</p>
         
         {type === 'user' && references && references.length > 0 && (
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="mt-4 p-3 glass-light rounded-lg border border-emerald-200">
             <div className="flex items-center space-x-2 mb-2">
-              <FileText className="w-4 h-4 text-blue-600" />
-              <span className="font-semibold text-sm text-blue-800">References</span>
+              <FileText className="w-4 h-4 text-emerald-600" />
+              <span className="font-semibold text-sm text-emerald-800">References</span>
             </div>
             <ul className="space-y-1">
               {references.map((ref, index) => (
-                <li key={`${id}-ref-${index}-${ref.substring(0, 20)}`} className="text-sm text-blue-700 flex items-start">
+                <li key={`${id}-ref-${index}-${ref.substring(0, 20)}`} className="text-sm text-emerald-700 flex items-start">
                   <span className="mr-2 text-blue-500">•</span>
                   <span>{ref}</span>
                 </li>

@@ -176,7 +176,7 @@ class TestSpecificityCalculationEdgeCases:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     @pytest.mark.asyncio
     async def test_specificity_with_all_indicators(self, quality_service):
@@ -213,7 +213,7 @@ class TestActionabilityEdgeCases:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     @pytest.mark.asyncio
     async def test_actionability_with_file_paths(self, quality_service):
@@ -256,7 +256,7 @@ class TestQuantificationPatterns:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     @pytest.mark.asyncio
     async def test_quantification_all_patterns(self, quality_service):
@@ -296,7 +296,7 @@ class TestRelevanceCalculation:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     @pytest.mark.asyncio
     async def test_relevance_technical_terms_matching(self, quality_service):
@@ -324,7 +324,7 @@ class TestCompletenessCalculation:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     @pytest.mark.asyncio
     async def test_completeness_report_type(self, quality_service):
@@ -406,7 +406,7 @@ class TestClarityCalculation:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     @pytest.mark.asyncio
     async def test_clarity_very_long_sentences(self, quality_service):
@@ -447,7 +447,7 @@ class TestRedundancyCalculation:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     @pytest.mark.asyncio
     async def test_redundancy_single_sentence(self, quality_service):
@@ -483,7 +483,7 @@ class TestHallucinationRisk:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     @pytest.mark.asyncio
     async def test_hallucination_specific_numbers_with_context(self, quality_service):
@@ -520,7 +520,7 @@ class TestWeightedScoring:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     def test_weighted_score_no_penalties(self, quality_service):
         """Test weighted score without penalties"""
@@ -575,7 +575,7 @@ class TestThresholdChecking:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     def test_threshold_all_specific_checks(self, quality_service):
         """Test all specific threshold checks"""
@@ -619,7 +619,7 @@ class TestSuggestionGeneration:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     def test_suggestions_all_issues(self, quality_service):
         """Test suggestions for all possible issues"""
@@ -681,7 +681,7 @@ class TestPromptAdjustments:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     def test_prompt_adjustments_all_issues(self, quality_service):
         """Test prompt adjustments for all issue types"""
@@ -756,7 +756,7 @@ class TestQualityStats:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     @pytest.mark.asyncio
     async def test_get_quality_stats_empty(self, quality_service):
@@ -819,7 +819,7 @@ class TestBatchValidation:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     @pytest.mark.asyncio
     async def test_validate_batch_empty(self, quality_service):
@@ -875,7 +875,7 @@ class TestCachingMechanism:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     @pytest.mark.asyncio
     async def test_cache_key_generation(self, quality_service):
@@ -923,7 +923,7 @@ class TestErrorHandling:
     
     @pytest.fixture
     def quality_service(self):
-        return QualityGateService()
+        return QualityGateService(redis_manager=None)
         
     @pytest.mark.asyncio
     async def test_validate_content_calculation_error(self, quality_service):

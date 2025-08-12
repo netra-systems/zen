@@ -1,14 +1,14 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T20:40:03.438711  
+**Generated:** 2025-08-11T20:27:45.476821  
 **Test Level:** comprehensive - Full test suite with coverage (10-15 minutes)  
 **Purpose:** Pre-release validation, full system testing
 
 ## Test Summary
 
-**Total Tests:** 286  
-**Passed:** 83  
-**Failed:** 203  
+**Total Tests:** 317  
+**Passed:** 103  
+**Failed:** 214  
 **Skipped:** 0  
 **Errors:** 0  
 **Overall Status:** [FAILED]
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 73 | 67 | 6 | 0 | 0 | 53.66s | [FAILED] |
-| Frontend  | 213 | 16 | 197 | 0 | 0 | 61.10s | [FAILED] |
+| Backend   | 93 | 87 | 6 | 0 | 0 | 56.78s | [FAILED] |
+| Frontend  | 224 | 16 | 208 | 0 | 0 | 48.05s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,7 +27,7 @@
 - **Purpose:** Pre-release validation, full system testing
 - **Timeout:** 900s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 114.76s
+- **Total Duration:** 104.83s
 - **Exit Code:** 2
 
 ### Backend Configuration
@@ -66,76 +66,77 @@ configfile: pytest.ini
 plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
 asyncio: mode=Mode.AUTO
 created: 6/6 workers
-6 workers [2716 items]
+6 workers [2870 items]
 
 scheduling tests via LoadScheduling
 
 app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_1_complete_agent_lifecycle_request_to_completion 
-app\tests\agents\test_supervisor_advanced.py::test_supervisor_concurrent_requests 
-app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_register_resource_during_shutdown 
-app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_retry_success_first_try 
-app\tests\agents\test_triage_sub_agent_comprehensive.py::TestAdvancedEntityExtraction::test_extract_time_ranges_complex 
-app\tests\core\test_core_infrastructure_11_20.py::TestLoggingManager::test_logging_configuration 
-[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_register_resource_during_shutdown 
-app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_cleanup_all 
-[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_cleanup_all 
-app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_cleanup_all_idempotent 
-[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_cleanup_all_idempotent 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_advanced.py::test_supervisor_concurrent_requests 
-app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_cleanup_handles_exceptions 
-app\tests\agents\test_supervisor_agent.py::test_supervisor_runs_sub_agents_in_order 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_retry_success_first_try 
-[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_cleanup_handles_exceptions 
-app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_initialization 
-app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_retry_success_after_failures 
-[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_initialization 
-app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_submit_task_success 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_agent.py::test_supervisor_runs_sub_agents_in_order 
-app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_triage_for_classification 
-[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_submit_task_success 
-app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_submit_task_exception 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_triage_for_classification 
-app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_optimization_for_ai_workloads 
-[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_submit_task_exception 
-app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_submit_task_during_shutdown 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_optimization_for_ai_workloads 
-app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_data_for_analysis_queries 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_data_for_analysis_queries 
-app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routing_with_conditional_pipeline 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routing_with_conditional_pipeline 
-app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorErrorCascadePrevention::test_prevents_cascade_on_single_agent_failure 
-[gw5][36m [  0%] [0m[31mFAILED[0m app\tests\core\test_core_infrastructure_11_20.py::TestLoggingManager::test_logging_configuration 
-[gw3][36m [  0%] [0m[31mFAILED[0m app\tests\agents\test_triage_sub_agent_comprehensive.py::TestAdvancedEntityExtraction::test_extract_time_ranges_complex 
-[gw4][36m [  0%] [0m[31mFAILED[0m app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_submit_task_during_shutdown 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_retry_success_after_failures 
-app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_retry_all_failures 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_retry_all_failures 
-app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_batch_safe_mixed_results 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_batch_safe_mixed_results 
-app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_batch_safe_with_exception 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_batch_safe_with_exception 
-app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_cache_hit 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_cache_hit 
 app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_cache_different_keys 
+app\tests\core\test_async_utils.py::TestWithRetry::test_with_retry_success_after_failures 
+app\tests\core\test_error_handling.py::TestNetraExceptions::test_websocket_error 
+app\tests\agents\test_triage_sub_agent_comprehensive.py::TestAsyncOperations::test_concurrent_executions 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAdminToolDispatcherRouting::test_routes_to_correct_admin_tool 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_error_handling.py::TestNetraExceptions::test_websocket_error 
 [gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_cache_different_keys 
+app\tests\core\test_error_handling.py::TestErrorHandler::test_handle_netra_exception 
 app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_and_stream 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAdminToolDispatcherRouting::test_routes_to_correct_admin_tool 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent_comprehensive.py::TestAsyncOperations::test_concurrent_executions 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAdminToolDispatcherRouting::test_validates_admin_permissions 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_error_handling.py::TestErrorHandler::test_handle_netra_exception 
+app\tests\agents\test_triage_sub_agent_comprehensive.py::TestAsyncOperations::test_websocket_streaming_updates 
 [gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_and_stream 
 app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_and_persist 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAdminToolDispatcherRouting::test_validates_admin_permissions 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAdminToolDispatcherRouting::test_admin_tool_audit_logging 
 [gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_and_persist 
 app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_handle_supervisor_request_process_data 
+app\tests\core\test_error_handling.py::TestErrorHandler::test_handle_pydantic_validation_error 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_error_handling.py::TestErrorHandler::test_handle_pydantic_validation_error 
+app\tests\core\test_error_handling.py::TestErrorHandler::test_handle_sqlalchemy_integrity_error 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAdminToolDispatcherRouting::test_admin_tool_audit_logging 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestCorpusAdminDocumentManagement::test_document_indexing_workflow 
 [gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_handle_supervisor_request_process_data 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestCorpusAdminDocumentManagement::test_document_indexing_workflow 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_error_handling.py::TestErrorHandler::test_handle_sqlalchemy_integrity_error 
+app\tests\core\test_error_handling.py::TestErrorHandler::test_handle_http_exception 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_error_handling.py::TestErrorHandler::test_handle_http_exception 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestCorpusAdminDocumentManagement::test_document_retrieval_with_similarity_search 
 app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_handle_supervisor_request_no_callback 
 [gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_handle_supervisor_request_no_callback 
 app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_concurrent 
-[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_concurrent 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_concurrent 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestCorpusAdminDocumentManagement::test_document_retrieval_with_similarity_search 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestCorpusAdminDocumentManagement::test_corpus_update_operations 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestCorpusAdminDocumentManagement::test_corpus_update_operations 
+app\tests\core\test_error_handling.py::TestErrorHandler::test_handle_unknown_exception 
 app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_concurrent_empty 
-[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_concurrent_empty 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupplyResearcherDataCollection::test_supply_chain_data_collection 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_error_handling.py::TestErrorHandler::test_handle_unknown_exception 
+app\tests\core\test_error_handling.py::TestErrorHandler::test_get_http_status_code_mapping 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_error_handling.py::TestErrorHandler::test_get_http_status_code_mapping 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_concurrent_empty 
 app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_stream 
-[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_stream 
+app\tests\core\test_error_handling.py::TestErrorContext::test_trace_id_context 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_error_handling.py::TestErrorContext::test_trace_id_context 
+app\tests\core\test_error_handling.py::TestErrorContext::test_request_id_context 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_error_handling.py::TestErrorContext::test_request_id_context 
+app\tests\core\test_error_handling.py::TestErrorContext::test_user_id_context 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_stream 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupplyResearcherDataCollection::test_supply_chain_data_collection 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_error_handling.py::TestErrorContext::test_user_id_context 
+app\tests\core\test_error_handling.py::TestErrorContext::test_custom_context 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_error_handling.py::TestErrorContext::test_custom_context 
+app\tests\core\test_error_handling.py::TestErrorContext::test_get_all_context 
 app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_stream_exact_chunks 
-[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_stream_exact_chunks 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_stream_exact_chunks 
 app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_save_state 
-[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_save_...(truncated)
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupplyResearcherDataCollection::test_data_validation_and_enrichment 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupplyResearcherDataCollection::test_data_validation_and_enrichment 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestDemoAgentWorkflow::test_demo_scenario_execution 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestDemoAgentWorkflow::test_demo_scenario_execution 
+[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestWithRetry::test_with_retry_success_after_failures 
+[gw5][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_error_handling.py::TestErrorContext::test_get_all_conte...(truncated)
 ```
 
 ### Frontend Output
@@ -147,19 +148,19 @@ app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_sa
 ---------------------------------|---------|----------|---------|---------|---------------------------------------------------------------------------------------------------
 File                             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                                                 
 ---------------------------------|---------|----------|---------|---------|---------------------------------------------------------------------------------------------------
-All files                        |   66.56 |    77.79 |   47.42 |   66.56 |                                                                                                   
+All files                        |   66.11 |    78.93 |   52.09 |   66.11 |                                                                                                   
  frontend                        |     100 |        0 |     100 |     100 |                                                                                                   
   config.ts                      |     100 |        0 |     100 |     100 | 2-3                                                                                               
- frontend/app                    |    45.9 |      100 |       0 |    45.9 |                                                                                                   
-  layout.tsx                     |   58.62 |      100 |       0 |   58.62 | 18-29                                                                                             
+ frontend/app                    |      45 |      100 |       0 |      45 |                                                                                                   
+  layout.tsx                     |   57.14 |      100 |       0 |   57.14 | 17-28                                                                                             
   page.tsx                       |   34.37 |      100 |       0 |   34.37 | 10-30                                                                                             
  frontend/app/chat               |   69.23 |      100 |       0 |   69.23 |                                                                                                   
   page.tsx                       |   69.23 |      100 |       0 |   69.23 | 8-11                                                                                              
- frontend/auth                   |   65.64 |    96.66 |   13.33 |   65.64 |                                                                                                   
+ frontend/auth                   |   92.51 |    98.21 |   86.66 |   92.51 |                                                                                                   
   components.tsx                 |     100 |      100 |     100 |     100 |                                                                                                   
   context.tsx                    |   81.96 |    95.23 |   33.33 |   81.96 | 72-77,94-99,102-111                                                                               
   index.ts                       |     100 |      100 |     100 |     100 |                                                                                                   
-  service.ts                     |   29.46 |      100 |       0 |   29.46 | 11-16,19-43,46-47,50-52,55-56,59-60,63-64,67-68,71-74,77-101,104-109                              
+  service.ts                     |     100 |      100 |     100 |     100 |                                                                                                   
   types.ts                       |     100 |      100 |     100 |     100 |                                                                                                   
  frontend/components             |    88.8 |    98.86 |   86.36 |    88.8 |                                                                                                   
   AppWithLayout.tsx              |     100 |      100 |     100 |     100 |                                                                                                   
@@ -206,84 +207,84 @@ All files                        |   66.56 |    77.79 |   47.42 |   66.56 |
 ## Error Summary
 
 ### Backend Errors
-- [gw5][36m [  0%] [0m[31mFAILED[0m app\tests\core\test_core_infrastructure_11_20.py::TestLoggingManager::test_logging_configuration
-- [gw3][36m [  0%] [0m[31mFAILED[0m app\tests\agents\test_triage_sub_agent_comprehensive.py::TestAdvancedEntityExtraction::test_extract_time_ranges_complex
-- [gw4][36m [  0%] [0m[31mFAILED[0m app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_submit_task_during_shutdown
-- [gw1][36m [  1%] [0m[31mFAILED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_load_state
-- [gw2][36m [  2%] [0m[31mFAILED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_execute_agent
-- [gw0][36m [  2%] [0m[31mFAILED[0m app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_1_complete_agent_lifecycle_request_to_completion
-- 2025-08-11 20:38:41.498 | ERROR    | app.agents.supervisor_consolidated:_execute_agent_with_retry:407 | Agent TriageSubAgent failed (attempt 1): 'AgentExecutionContext' object has no attribute 'pipeline'
-- 2025-08-11 20:38:43.506 | ERROR    | app.agents.supervisor_consolidated:_execute_agent_with_retry:407 | Agent TriageSubAgent failed (attempt 2): 'AgentExecutionContext' object has no attribute 'pipeline'
-- 2025-08-11 20:38:47.518 | ERROR    | app.agents.supervisor_consolidated:_execute_agent_with_retry:407 | Agent TriageSubAgent failed (attempt 3): 'AgentExecutionContext' object has no attribute 'pipeline'
-- 2025-08-11 20:38:55.538 | ERROR    | app.agents.supervisor_consolidated:_execute_agent_with_retry:407 | Agent TriageSubAgent failed (attempt 4): 'AgentExecutionContext' object has no attribute 'pipeline'
-- 2025-08-11 20:38:55.538 | ERROR    | app.agents.supervisor_consolidated:_execute_pipeline:318 | Agent triage failed: Agent TriageSubAgent failed after 4 attempts: 'AgentExecutionContext' object has no attribute 'pipeline'
-- 2025-08-11 20:38:55.539 | ERROR    | app.agents.supervisor_consolidated:run:225 | Supervisor failed for run_id 112601eb-4033-4fe3-88d6-214183357e7c: Agent TriageSubAgent failed after 4 attempts: 'AgentExecutionContext' object has no attribute 'pipeline'
-- [31mFAILED[0m app\tests\core\test_core_infrastructure_11_20.py::[1mTestLoggingManager::test_logging_configuration[0m - ImportError: cannot import name 'setup_logging' from 'app.core.logging_mana...
-- [31mFAILED[0m app\tests\agents\test_triage_sub_agent_comprehensive.py::[1mTestAdvancedEntityExtraction::test_extract_time_ranges_complex[0m - AssertionError: assert 1 >= 2
-- [31mFAILED[0m app\tests\core\test_async_utils.py::[1mTestAsyncTaskPool::test_submit_task_during_shutdown[0m - TypeError: unbound method dict.keys() needs an argument
+- [gw3][36m [  1%] [0m[31mFAILED[0m app\tests\agents\test_triage_sub_agent_comprehensive.py::TestAsyncOperations::test_websocket_streaming_updates
+- [gw1][36m [  2%] [0m[31mFAILED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_load_state
+- [gw5][36m [  2%] [0m[31mFAILED[0m app\tests\core\test_fallback_handler.py::TestFallbackHandler::test_detect_domain_optimization
+- [gw4][36m [  2%] [0m[31mFAILED[0m app\tests\core\test_async_utils.py::TestAsyncLock::test_acquire_context_manager_timeout
+- [gw2][36m [  3%] [0m[31mFAILED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_execute_agent
+- [gw0][36m [  3%] [0m[31mFAILED[0m app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_1_complete_agent_lifecycle_request_to_completion
+- 2025-08-11 20:26:39.662 | ERROR    | app.agents.supervisor_consolidated:_execute_agent_with_retry:407 | Agent TriageSubAgent failed (attempt 1): 'DeepAgentState' object has no attribute 'step_count'
+- 2025-08-11 20:26:41.675 | ERROR    | app.agents.supervisor_consolidated:_execute_agent_with_retry:407 | Agent TriageSubAgent failed (attempt 2): 'DeepAgentState' object has no attribute 'step_count'
+- 2025-08-11 20:26:45.676 | ERROR    | app.agents.supervisor_consolidated:_execute_agent_with_retry:407 | Agent TriageSubAgent failed (attempt 3): 'DeepAgentState' object has no attribute 'step_count'
+- 2025-08-11 20:26:53.691 | ERROR    | app.agents.supervisor_consolidated:_execute_agent_with_retry:407 | Agent TriageSubAgent failed (attempt 4): 'DeepAgentState' object has no attribute 'step_count'
+- 2025-08-11 20:26:53.691 | ERROR    | app.agents.supervisor_consolidated:_execute_pipeline:318 | Agent triage failed: Agent TriageSubAgent failed after 4 attempts: 'DeepAgentState' object has no attribute 'step_count'
+- 2025-08-11 20:26:53.691 | ERROR    | app.agents.supervisor_consolidated:run:225 | Supervisor failed for run_id 4f0f668e-b955-48d9-bb43-4756c0922391: Agent TriageSubAgent failed after 4 attempts: 'DeepAgentState' object has no attribute 'step_count'
+- [31mFAILED[0m app\tests\agents\test_triage_sub_agent_comprehensive.py::[1mTestAsyncOperations::test_websocket_streaming_updates[0m - assert False
 - [31mFAILED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::[1mTestDataSubAgent::test_load_state[0m - AssertionError: assert False
+- [31mFAILED[0m app\tests\core\test_fallback_handler.py::[1mTestFallbackHandler::test_detect_domain_optimization[0m - AssertionError: assert ('training' == 'data'
+- [31mFAILED[0m app\tests\core\test_async_utils.py::[1mTestAsyncLock::test_acquire_context_manager_timeout[0m - TypeError: unbound method dict.keys() needs an argument
 - [31mFAILED[0m app\tests\agents\test_supply_researcher_agent.py::[1mTestSupplyResearcherAgent::test_execute_agent[0m - pydantic_core._pydantic_core.ValidationError: 1 validation error for DeepAg...
-- [31mFAILED[0m app\tests\agents\test_agent_e2e_critical.py::[1mTestAgentE2ECritical::test_1_complete_agent_lifecycle_request_to_completion[0m - Exception: Agent TriageSubAgent failed after 4 attempts: 'AgentExecutionCon...
-- [FAIL] TESTS FAILED with exit code 2 after 52.72s
+- [31mFAILED[0m app\tests\agents\test_agent_e2e_critical.py::[1mTestAgentE2ECritical::test_1_complete_agent_lifecycle_request_to_completion[0m - Exception: Agent TriageSubAgent failed after 4 attempts: 'DeepAgentState' o...
+- [FAIL] TESTS FAILED with exit code 2 after 55.77s
 
 ### Frontend Errors
 - [FAIL] CHECKS FAILED with exit code 1
-- FAIL __tests__/components/UIComponents.test.tsx
-- FAIL __tests__/hooks/useChatWebSocket.test.ts
 - FAIL __tests__/hooks/useKeyboardShortcuts.test.tsx
-- FAIL __tests__/hooks/useAgent.test.tsx
-- FAIL __tests__/components/ThinkingIndicator.test.tsx
-- FAIL __tests__/integration/critical-integration.test.tsx
-- FAIL __tests__/components/ChatComponents.test.tsx
-- FAIL __tests__/services/webSocketService.test.ts
-- FAIL __tests__/components/FinalReportView.test.tsx
-- FAIL __tests__/components/ChatSidebar.test.tsx
-- FAIL __tests__/components/ChatHistory.test.tsx
+- FAIL __tests__/hooks/useChatWebSocket.test.ts
 - FAIL __tests__/auth/service.test.ts
-- FAIL __tests__/components/AgentStatusPanel.test.tsx
+- FAIL __tests__/components/UIComponents.test.tsx
+- FAIL __tests__/hooks/useAgent.test.tsx
+- FAIL __tests__/integration/critical-integration.test.tsx
+- FAIL __tests__/components/ThinkingIndicator.test.tsx
+- FAIL __tests__/services/webSocketService.test.ts
+- FAIL __tests__/components/ChatComponents.test.tsx
+- FAIL __tests__/components/ChatHistory.test.tsx
 - FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
 - FAIL __tests__/hooks/additionalHooks.test.tsx
-- FAIL __tests__/integration/advanced-integration.test.tsx (5.387 s)
+- FAIL __tests__/components/ChatSidebar.test.tsx
+- FAIL __tests__/components/FinalReportView.test.tsx
+- FAIL __tests__/integration/advanced-integration.test.tsx
+- FAIL __tests__/components/AgentStatusPanel.test.tsx
 - FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
 - FAIL __tests__/unified-chat-v5.test.tsx
-- FAIL __tests__/auth/context.test.tsx (5.994 s)
-- FAIL __tests__/imports/external-imports.test.tsx (7.694 s)
-- FAIL __tests__/imports/internal-imports.test.tsx (8.13 s)
-- FAIL __tests__/components/ChatHistorySection.test.tsx (12.566 s)
-- FAIL __tests__/system/startup.test.tsx (12.962 s)
-- FAIL __tests__/components/chat/MainChat.test.tsx (13.575 s)
+- FAIL __tests__/imports/external-imports.test.tsx
+- FAIL __tests__/auth/context.test.tsx
+- FAIL __tests__/imports/internal-imports.test.tsx (5.447 s)
+- FAIL __tests__/components/ChatHistorySection.test.tsx (8.266 s)
 - FAIL __tests__/chat/chatUIUXCore.test.tsx
+- FAIL __tests__/system/startup.test.tsx (12.297 s)
+- FAIL __tests__/components/chat/MainChat.test.tsx (12.617 s)
 - FAIL __tests__/chat/ui-improvements.test.tsx
-- FAIL __tests__/integration/comprehensive-integration.test.tsx (27.79 s)
-- FAIL __tests__/components/chat/MessageInput.test.tsx (53.837 s)
-- FAIL __tests__/components/UIComponents.test.tsx
-- FAIL __tests__/hooks/useChatWebSocket.test.ts
+- FAIL __tests__/integration/comprehensive-integration.test.tsx (25.909 s)
+- FAIL __tests__/components/chat/MessageInput.test.tsx (42.89 s)
 - FAIL __tests__/hooks/useKeyboardShortcuts.test.tsx
-- FAIL __tests__/hooks/useAgent.test.tsx
-- FAIL __tests__/components/ThinkingIndicator.test.tsx
-- FAIL __tests__/integration/critical-integration.test.tsx
-- FAIL __tests__/components/ChatComponents.test.tsx
-- FAIL __tests__/services/webSocketService.test.ts
-- FAIL __tests__/components/FinalReportView.test.tsx
-- FAIL __tests__/components/ChatSidebar.test.tsx
-- FAIL __tests__/components/ChatHistory.test.tsx
+- FAIL __tests__/hooks/useChatWebSocket.test.ts
 - FAIL __tests__/auth/service.test.ts
-- FAIL __tests__/components/AgentStatusPanel.test.tsx
+- FAIL __tests__/components/UIComponents.test.tsx
+- FAIL __tests__/hooks/useAgent.test.tsx
+- FAIL __tests__/integration/critical-integration.test.tsx
+- FAIL __tests__/components/ThinkingIndicator.test.tsx
+- FAIL __tests__/services/webSocketService.test.ts
+- FAIL __tests__/components/ChatComponents.test.tsx
+- FAIL __tests__/components/ChatHistory.test.tsx
 - FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
 - FAIL __tests__/hooks/additionalHooks.test.tsx
-- FAIL __tests__/integration/advanced-integration.test.tsx (5.387 s)
+- FAIL __tests__/components/ChatSidebar.test.tsx
+- FAIL __tests__/components/FinalReportView.test.tsx
+- FAIL __tests__/integration/advanced-integration.test.tsx
+- FAIL __tests__/components/AgentStatusPanel.test.tsx
 - FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
 - FAIL __tests__/unified-chat-v5.test.tsx
-- FAIL __tests__/auth/context.test.tsx (5.994 s)
-- FAIL __tests__/imports/external-imports.test.tsx (7.694 s)
-- FAIL __tests__/imports/internal-imports.test.tsx (8.13 s)
-- FAIL __tests__/components/ChatHistorySection.test.tsx (12.566 s)
-- FAIL __tests__/system/startup.test.tsx (12.962 s)
-- FAIL __tests__/components/chat/MainChat.test.tsx (13.575 s)
+- FAIL __tests__/imports/external-imports.test.tsx
+- FAIL __tests__/auth/context.test.tsx
+- FAIL __tests__/imports/internal-imports.test.tsx (5.447 s)
+- FAIL __tests__/components/ChatHistorySection.test.tsx (8.266 s)
 - FAIL __tests__/chat/chatUIUXCore.test.tsx
+- FAIL __tests__/system/startup.test.tsx (12.297 s)
+- FAIL __tests__/components/chat/MainChat.test.tsx (12.617 s)
 - FAIL __tests__/chat/ui-improvements.test.tsx
-- FAIL __tests__/integration/comprehensive-integration.test.tsx (27.79 s)
-- FAIL __tests__/components/chat/MessageInput.test.tsx (53.837 s)
+- FAIL __tests__/integration/comprehensive-integration.test.tsx (25.909 s)
+- FAIL __tests__/components/chat/MessageInput.test.tsx (42.89 s)
 
 
 ---

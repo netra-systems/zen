@@ -54,11 +54,13 @@ class ResearchSchedule:
     
     def _calculate_next_run(self) -> datetime:
         """Calculate next run time based on frequency"""
+        # Use last_run as base if available, otherwise use current time
+        base_time = self.last_run if self.last_run else datetime.utcnow()
         now = datetime.utcnow()
         
         if self.frequency == ScheduleFrequency.HOURLY:
-            # Next hour
-            next_run = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
+            # Next hour from base_time
+            next_run = base_time.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
         
         elif self.frequency == ScheduleFrequency.DAILY:
             # Next day at specified hour
@@ -111,7 +113,12 @@ class ResearchSchedule:
     def update_after_run(self):
         """Update schedule after successful run"""
         self.last_run = datetime.utcnow()
-        self.next_run = self._calculate_next_run()
+        # When updating after a run, calculate next run from the current last_run
+        # This ensures next_run advances properly
+        if self.frequency == ScheduleFrequency.HOURLY:
+            self.next_run = self.last_run.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
+        else:
+            self.next_run = self._calculate_next_run()
 
 
 class SupplyResearchScheduler:

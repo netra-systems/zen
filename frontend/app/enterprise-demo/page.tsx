@@ -118,7 +118,7 @@ const EnterpriseDemoPage: NextPage = () => {
           <Sparkles className="h-3 w-3 mr-1" />
           Enterprise Platform
         </Badge>
-        <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-600 to-purple-600 bg-clip-text text-transparent">
           Netra AI Optimization Platform
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">

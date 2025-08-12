@@ -5,7 +5,9 @@ import { useChatStore } from '@/store/chat';
 import { useThreadStore } from '@/store/threadStore';
 
 // Mock dependencies
-jest.mock('next/navigation');
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+}));
 jest.mock('@/store/chat');
 jest.mock('@/store/threadStore');
 
@@ -65,7 +67,10 @@ describe('useKeyboardShortcuts', () => {
 
     it('should register keyboard event listeners on mount', () => {
       const addEventListenerSpy = jest.spyOn(document, 'addEventListener');
-      renderHook(() => useKeyboardShortcuts());
+      
+      act(() => {
+        renderHook(() => useKeyboardShortcuts());
+      });
       
       expect(addEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
     });
@@ -122,11 +127,13 @@ describe('useKeyboardShortcuts', () => {
   });
 
   describe('Thread Navigation', () => {
-    it('should navigate to previous thread with Alt+Up', () => {
-      renderHook(() => useKeyboardShortcuts());
+    it('should navigate to previous thread with Alt+Left', () => {
+      act(() => {
+        renderHook(() => useKeyboardShortcuts());
+      });
 
       const event = new KeyboardEvent('keydown', {
-        key: 'ArrowUp',
+        key: 'ArrowLeft',
         altKey: true
       });
 
@@ -137,11 +144,13 @@ describe('useKeyboardShortcuts', () => {
       expect(mockThreadStore.setCurrentThread).toHaveBeenCalledWith('1');
     });
 
-    it('should navigate to next thread with Alt+Down', () => {
-      renderHook(() => useKeyboardShortcuts());
+    it('should navigate to next thread with Alt+Right', () => {
+      act(() => {
+        renderHook(() => useKeyboardShortcuts());
+      });
 
       const event = new KeyboardEvent('keydown', {
-        key: 'ArrowDown',
+        key: 'ArrowRight',
         altKey: true
       });
 
@@ -154,10 +163,13 @@ describe('useKeyboardShortcuts', () => {
 
     it('should wrap around when navigating threads', () => {
       mockThreadStore.currentThreadId = '3';
-      renderHook(() => useKeyboardShortcuts());
+      
+      act(() => {
+        renderHook(() => useKeyboardShortcuts());
+      });
 
       const event = new KeyboardEvent('keydown', {
-        key: 'ArrowDown',
+        key: 'ArrowRight',
         altKey: true
       });
 

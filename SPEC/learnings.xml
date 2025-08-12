@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Learnings and Troubleshooting</name>
+        <type>reference</type>
+        <version>1.0</version>
+        <last_updated>2025-08-12</last_updated>
+        <description>Historical learnings, troubleshooting patterns, and resolved issues</description>
+    </metadata>
+
+    <sections>
+        <section id="common-gotchas" order="1">
+            <title>Common Gotchas and Solutions</title>
+            
+            <item id="react-duplicate-keys">
+                <problem>Using Date.now() for keys creates duplicates in rapid renders</problem>
+                <solution>Always use generateUniqueId() from @/lib/utils</solution>
+                <example>
+                    // ❌ Wrong
+                    key={Date.now()}
+                    
+                    // ✅ Correct
+                    key={generateUniqueId('msg')}
+                </example>
+            </item>
+            
+            <item id="websocket-test-failures">
+                <problem>Hook tests fail without provider</problem>
+                <solution>Wrap with WebSocketProvider in tests</solution>
+                <example>
+                    const wrapper = ({ children }) => (
+                        &lt;WebSocketProvider&gt;{children}&lt;/WebSocketProvider&gt;
+                    );
+                </example>
+            </item>
+            
+            <item id="import-test-failures">
+                <problem>New dependencies not in import tests</problem>
+                <solution>Update app/tests/test_internal_imports.py and app/tests/test_external_imports.py</solution>
+            </item>
+            
+            <item id="test-runner-reliability">
+                <problem>Test runner fails due to argument parsing or Unicode encoding</problem>
+                <critical>Fix test runner FIRST before running actual tests</critical>
+                <issues>
+                    <issue>Unicode emojis cause Windows terminal encoding errors</issue>
+                    <issue>Parallel arguments must be properly formatted (--parallel=auto not --parallel auto)</issue>
+                    <issue>Frontend test args should avoid Jest-specific options in unified runner</issue>
+                </issues>
+            </item>
+        </section>
+
+        <section id="historical-fixes" order="2">
+            <title>Historical Issue Resolutions</title>
+            
+            <fix date="2025-08-11">
+                <title>Running Tests from Subdirectories</title>
+                <problem>Test runner path needs adjustment in subdirectories</problem>
+                <solution>Use relative path ../test_runner.py from subdirectories</solution>
+                <note>Comprehensive tests may timeout with default 2-minute limit</note>
+            </fix>
+            
+            <fix date="2025-01-11">
+                <title>Startup Check False Warnings</title>
+                <problem>Services showing as unavailable despite successful connections</problem>
+                <root-causes>
+                    <cause>Redis set() method parameter mismatch (expire vs ex)</cause>
+                    <cause>Missing Redis delete() method in RedisManager</cause>
+                    <cause>Missing await for async ClickHouse execute_query() method</cause>
+                </root-causes>
+                <solution>Added backward compatibility, implemented delete method, added await</solution>
+                <prevention>Always verify method signatures match between caller and implementation</prevention>
+            </fix>
+            
+            <fix date="2025-01-11">
+                <title>ClickHouse Startup Check</title>
+                <problem>'ClickHouseDatabase' object has no attribute 'execute' error</problem>
+                <root-cause>Using wrong method name - should be execute_query() not execute()</root-cause>
+                <solution>Updated app/startup_checks.py:287 to use client.execute_query()</solution>
+            </fix>
+            
+            <fix date="2025-01-11">
+                <title>Database Schema Migration</title>
+                <problem>Missing tables and columns causing schema validation errors</problem>
+                <tables-added>tool_usage_logs, ai_supply_items, research_sessions, supply_update_logs</tables-added>
+                <columns-added>tool_permissions, plan_expires_at, feature_flags, payment_status, auto_renew, plan_tier, plan_started_at, trial_period</columns-added>
+                <migration>bb39e1c49e2d_add_missing_tables_and_columns.py</migration>
+            </fix>
+            
+            <fix date="2025-08-11">
+                <title>Thread Creation 500 Error</title>
+                <problem>Thread creation failing with '_AsyncGeneratorContextManager' object has no attribute 'execute'</problem>
+                <root-cause>Parameter order mismatch in base_repository.get_by_id()</root-cause>
+                <solution>Fixed parameter order to get_by_id(self, db, entity_id)</solution>
+                <files-changed>
+                    <file>app/services/database/base_repository.py:55-72</file>
+                    <file>app/routes/threads_route.py:81-123</file>
+                </files-changed>
+                <prevention>Added regression test in app/tests/test_thread_repository.py</prevention>
+            </fix>
+            
+            <fix date="2025-08-11">
+                <title>Critical E2E Test Coverage Enhancement</title>
+                <problem>Demo brittleness despite 60%+ coverage - tests focused on happy paths</problem>
+                <root-causes>
+                    <cause>WebSocket state desynchronization during reconnections</cause>
+                    <cause>Race conditions in Zustand store updates</cause>
+                    <cause>Agent orchestration failures under load</cause>
+                    <cause>Missing circuit breaker and retry logic tests</cause>
+                    <cause>No tests for memory leaks or performance degradation</cause>
+                </root-causes>
+                <solution>Implemented 50 critical e2e tests for failure scenarios</solution>
+                <test-patterns>
+                    <pattern>Network partition simulation: cy.intercept('**/ws**', { forceNetworkError: true })</pattern>
+                    <pattern>Memory leak detection: Track performance.memory.usedJSHeapSize</pattern>
+                    <pattern>Concurrent update testing: Fire multiple state updates in parallel</pattern>
+                    <pattern>Circuit breaker validation: Track failure counts and verify degradation</pattern>
+                </test-patterns>
+                <files-created>
+                    <file>critical-websocket-resilience.cy.ts - 15 WebSocket tests</file>
+                    <file>critical-state-synchronization.cy.ts - 10 state tests</file>
+                    <file>critical-agent-orchestration-recovery.cy.ts - 10 agent tests</file>
+                </files-created>
+                <prevention>Always test failure scenarios, concurrent operations, network instability, memory usage, error cascades</prevention>
+            </fix>
+        </section>
+
+        <section id="test-focus-strategy" order="3">
+            <title>Test Focus Strategy</title>
+            <avoid>
+                <item>Testing basic Python functions</item>
+                <item>Simple getters/setters</item>
+                <item>Trivial utilities</item>
+            </avoid>
+            <focus>
+                <item>Netra-specific business logic and integrations</item>
+                <item>Complex dependency interactions (database, Redis, ClickHouse, LLM providers)</item>
+                <item>Agent orchestration and WebSocket communication</item>
+                <item>API endpoints with authentication and authorization</item>
+                <item>Critical data flows and error handling scenarios</item>
+                <item>Performance and concurrency edge cases</item>
+            </focus>
+        </section>
+    </sections>
+</specification>

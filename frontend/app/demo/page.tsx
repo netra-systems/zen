@@ -117,7 +117,7 @@ export default function EnterpriseDemo() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-purple-600 bg-clip-text text-transparent">
                 Enterprise AI Optimization Platform
               </h1>
               <p className="text-lg text-muted-foreground mt-2">
@@ -276,7 +276,7 @@ export default function EnterpriseDemo() {
                     <Button 
                       size="lg" 
                       onClick={() => setActiveTab('roi')}
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      className="glass-button-primary hover:shadow-lg"
                     >
                       <PlayCircle className="w-4 h-4 mr-2" />
                       Start ROI Analysis

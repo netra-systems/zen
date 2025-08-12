@@ -322,7 +322,7 @@ class TestAgentServiceOrchestration:
         
         # Test different thread operations
         operations = [
-            ("get_thread_history", {}),
+            ("thread_history", {}),
             ("create_thread", {"name": "New Thread"}),
             ("switch_thread", {"thread_id": "thread_123"}),
             ("delete_thread", {"thread_id": "thread_456"}),

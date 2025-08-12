@@ -265,6 +265,7 @@ class TestApexOptimizerToolSelection:
     def sample_agent_state(self):
         """Create sample agent state"""
         from app.schemas import Workload, DataSource, TimeRange
+        from app.services.apex_optimizer_agent.models import BaseMessage
         request = RequestModel(
             user_id="test_user_123",
             query="Optimize our AI workload to reduce costs by 20%",
@@ -275,7 +276,18 @@ class TestApexOptimizerToolSelection:
                 time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
             )]
         )
-        state = AgentState(request=request)
+        # Create a message with the request
+        message = BaseMessage(
+            type="human",
+            content=request.query,
+            metadata={"request": request.model_dump()}
+        )
+        state = AgentState(
+            messages=[message],
+            next_node="tool_selection",
+            tool_results=None,
+            request=request
+        )
         return state
     
     @pytest.mark.asyncio
@@ -309,7 +321,19 @@ class TestApexOptimizerToolSelection:
                 time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
             )]
         )
-        state = AgentState(request=request)
+        from app.services.apex_optimizer_agent.models import BaseMessage
+        message = BaseMessage(
+            type="human",
+            content=request.query,
+            metadata={"request": request.model_dump()}
+        )
+        state = AgentState(
+            messages=[message],
+            next_node="tool_selection",
+            tool_results=None,
+            request=request
+        )
+        state.request = request
         
         # Execute tool selection
         result = await apex_tool_selector.run(state)
@@ -324,7 +348,19 @@ class TestApexOptimizerToolSelection:
         """Test tool selection for cache optimization requests"""
         # Create cache-focused request
         request = RequestModel(query="Audit and optimize our KV cache configuration")
-        state = AgentState(request=request)
+        from app.services.apex_optimizer_agent.models import BaseMessage
+        message = BaseMessage(
+            type="human",
+            content=request.query,
+            metadata={"request": request.model_dump()}
+        )
+        state = AgentState(
+            messages=[message],
+            next_node="tool_selection",
+            tool_results=None,
+            request=request
+        )
+        state.request = request
         
         # Execute tool selection
         result = await apex_tool_selector.run(state)
@@ -339,7 +375,19 @@ class TestApexOptimizerToolSelection:
         """Test tool selection for model analysis requests"""
         # Create model analysis request
         request = RequestModel(query="Analyze effectiveness of new models for our use case")
-        state = AgentState(request=request)
+        from app.services.apex_optimizer_agent.models import BaseMessage
+        message = BaseMessage(
+            type="human",
+            content=request.query,
+            metadata={"request": request.model_dump()}
+        )
+        state = AgentState(
+            messages=[message],
+            next_node="tool_selection",
+            tool_results=None,
+            request=request
+        )
+        state.request = request
         
         # Execute tool selection
         result = await apex_tool_selector.run(state)
@@ -354,7 +402,19 @@ class TestApexOptimizerToolSelection:
         """Test tool selection for multi-objective optimization"""
         # Create multi-objective request
         request = RequestModel(query="Optimize for both cost reduction and latency improvement")
-        state = AgentState(request=request)
+        from app.services.apex_optimizer_agent.models import BaseMessage
+        message = BaseMessage(
+            type="human",
+            content=request.query,
+            metadata={"request": request.model_dump()}
+        )
+        state = AgentState(
+            messages=[message],
+            next_node="tool_selection",
+            tool_results=None,
+            request=request
+        )
+        state.request = request
         
         # Execute tool selection
         result = await apex_tool_selector.run(state)
@@ -369,7 +429,19 @@ class TestApexOptimizerToolSelection:
         """Test tool selection with empty query"""
         # Create state with empty query
         request = RequestModel(query="")
-        state = AgentState(request=request)
+        from app.services.apex_optimizer_agent.models import BaseMessage
+        message = BaseMessage(
+            type="human",
+            content=request.query,
+            metadata={"request": request.model_dump()}
+        )
+        state = AgentState(
+            messages=[message],
+            next_node="tool_selection",
+            tool_results=None,
+            request=request
+        )
+        state.request = request
         
         # Execute tool selection
         result = await apex_tool_selector.run(state)
@@ -413,7 +485,19 @@ class TestApexOptimizerToolSelection:
                 time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
             )]
         )
-        state = AgentState(request=request)
+        from app.services.apex_optimizer_agent.models import BaseMessage
+        message = BaseMessage(
+            type="human",
+            content=request.query,
+            metadata={"request": request.model_dump()}
+        )
+        state = AgentState(
+            messages=[message],
+            next_node="tool_selection",
+            tool_results=None,
+            request=request
+        )
+        state.request = request
         
         # Set custom LLM response
         custom_response = {
