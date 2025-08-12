@@ -92,5 +92,11 @@ async def test_cache_stats():
     await cache_service.get_cached_response("nonexistent", "llm1", {})
     
     stats = await cache_service.get_cache_stats()
-    assert stats["total_hits"] >= 0
-    assert stats["total_misses"] >= 0
+    assert isinstance(stats, dict)  # Should return a dict
+    
+    # Get stats for specific LLM config
+    llm_stats = await cache_service.get_cache_stats("llm1")
+    assert "hits" in llm_stats
+    assert "misses" in llm_stats
+    assert llm_stats["hits"] >= 0
+    assert llm_stats["misses"] >= 0
