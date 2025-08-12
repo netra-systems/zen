@@ -11,6 +11,7 @@ from app.db import models_postgres
 from app import schemas
 from app.services.key_manager import KeyManager
 from app.config import settings
+from app.logging_config import central_logger as logger
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -72,10 +73,10 @@ class SecurityService:
             payload = jwt.decode(token, self.key_manager.jwt_secret_key, algorithms=["HS256"])
             return payload
         except jwt.ExpiredSignatureError:
-            print(f"Token expired: {token}")
+            logger.info(f"Token expired: {token}")
             return None
         except JWTError as e:
-            print(f"JWT decode error: {e}, token: {token}")
+            logger.error(f"JWT decode error: {e}, token: {token}")
             return None
 
     async def get_user_by_id(self, db_session: AsyncSession, user_id: str) -> Optional[models_postgres.User]:

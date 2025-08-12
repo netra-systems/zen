@@ -2,9 +2,8 @@ from contextlib import asynccontextmanager
 from app.db.clickhouse_base import ClickHouseDatabase
 from app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 from app.config import settings
-import logging
+from app.logging_config import central_logger as logger
 
-logger = logging.getLogger(__name__)
 
 class MockClickHouseDatabase:
     """Mock ClickHouse client for when ClickHouse is disabled in dev mode."""

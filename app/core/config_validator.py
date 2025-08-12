@@ -1,8 +1,8 @@
 """Configuration validation utilities."""
 
-import logging
 from typing import List, Optional
 from pydantic import ValidationError
+from app.logging_config import central_logger as logger
 
 try:
     from app.schemas.Config import AppConfig
@@ -19,7 +19,7 @@ class ConfigValidator:
     """Validates application configuration for consistency and completeness."""
     
     def __init__(self):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logger
         
     def validate_config(self, config: AppConfig) -> None:
         """Validate the complete configuration object."""

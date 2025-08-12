@@ -2,6 +2,7 @@
 
 import numpy as np
 from typing import List
+from app.logging_config import central_logger as logger
 
 class SemanticVectorizer:
     """
@@ -12,7 +13,7 @@ class SemanticVectorizer:
         # The model name is stored but not used in this mock implementation.
         self._model_name = model_name
         self._dimension = 384  # Matching 'all-MiniLM-L6-v2'
-        print(f"Mock SemanticVectorizer initialized for model: '{self._model_name}'.")
+        logger.info(f"Mock SemanticVectorizer initialized for model: '{self._model_name}'.")
 
     def embed_text(self, text: str) -> List[float]:
         """

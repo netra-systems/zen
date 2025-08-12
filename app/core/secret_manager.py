@@ -1,8 +1,8 @@
 """Secret management utilities for configuration loading."""
 
 import os
-import logging
 from typing import Dict, Any, Optional
+from app.logging_config import central_logger as logger
 from google.cloud import secretmanager
 from tenacity import retry, stop_after_attempt, wait_fixed
 
@@ -16,7 +16,7 @@ class SecretManager:
     """Manages loading secrets from Google Cloud Secret Manager with fallback to environment variables."""
     
     def __init__(self):
-        self._logger = logging.getLogger(__name__)
+        self._logger = logger
         self._client: Optional[secretmanager.SecretManagerServiceClient] = None
         self._project_id = "304612253870"  # Default project ID
         

@@ -1,14 +1,13 @@
 """Simplified configuration management with validation and reduced circular dependencies."""
 
 import os
-import logging
 from functools import lru_cache
 from typing import Optional, Dict, Any
 from pydantic import ValidationError
 
 # Import the schemas without circular dependency
 from app.schemas.Config import AppConfig, DevelopmentConfig, ProductionConfig, NetraTestingConfig
-
+from app.logging_config import central_logger as logger
 from app.core.secret_manager import SecretManager
 from app.core.config_validator import ConfigValidator
 
@@ -25,7 +24,7 @@ class ConfigManager:
         self._config: Optional[AppConfig] = None
         self._secret_manager = SecretManager()
         self._validator = ConfigValidator()
-        self._logger = logging.getLogger(__name__)
+        self._logger = logger
         
     @lru_cache(maxsize=1)
     def get_config(self) -> AppConfig:

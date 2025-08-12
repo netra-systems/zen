@@ -4,7 +4,6 @@ Supply Researcher Agent - Autonomous AI supply information research and updates
 
 import json
 import asyncio
-import logging
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -21,8 +20,8 @@ from app.redis_manager import RedisManager
 from app.db.models_postgres import AISupplyItem, ResearchSession, SupplyUpdateLog
 from app.schemas import SubAgentLifecycle
 from sqlalchemy.orm import Session
+from app.logging_config import central_logger as logger
 
-logger = logging.getLogger(__name__)
 
 
 class ResearchType(Enum):

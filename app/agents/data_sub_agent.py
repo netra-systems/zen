@@ -10,7 +10,6 @@
 # ================================
 
 import json
-import logging
 import asyncio
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timedelta
@@ -28,8 +27,8 @@ from app.db.clickhouse import get_clickhouse_client
 from app.redis_manager import RedisManager
 from app.core.exceptions import NetraException
 from app.db.clickhouse_init import create_workload_events_table_if_missing
+from app.logging_config import central_logger as logger
 
-logger = logging.getLogger(__name__)
 
 
 class DataAnalysisResponse(BaseModel):
@@ -1019,7 +1018,7 @@ class DataSubAgent(BaseSubAgent):
     
     async def save_state(self) -> None:
         """Save agent state for recovery and persistence"""
-        from app.services.redis_manager import RedisManager
+        from app.redis_manager import RedisManager
         import pickle
         
         # Initialize state if needed
@@ -1055,7 +1054,7 @@ class DataSubAgent(BaseSubAgent):
     
     async def load_state(self) -> None:
         """Load agent state from storage"""
-        from app.services.redis_manager import RedisManager
+        from app.redis_manager import RedisManager
         import pickle
         
         try:

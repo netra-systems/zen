@@ -3,7 +3,6 @@ Supply Research Service - Business logic for AI supply research operations
 """
 
 import json
-import logging
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -14,8 +13,8 @@ from app.core.exceptions import NetraException
 from app.redis_manager import RedisManager
 from app.db.models_postgres import AISupplyItem, ResearchSession, SupplyUpdateLog, User
 from app.services.permission_service import PermissionService
+from app.logging_config import central_logger as logger
 
-logger = logging.getLogger(__name__)
 
 
 class SupplyResearchService:

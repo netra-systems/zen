@@ -68,6 +68,15 @@ resource "google_cloud_run_service" "backend" {
       containers {
         image = var.backend_image
         
+        ports {
+          container_port = 8080
+        }
+        
+        env {
+          name  = "PORT"
+          value = "8080"
+        }
+        
         env {
           name  = "DATABASE_URL"
           value = "postgresql://${google_sql_user.pr.name}:${var.postgres_password}@/${google_sql_database.pr.name}?host=/cloudsql/${local.sql_instance_name}"
@@ -89,6 +98,28 @@ resource "google_cloud_run_service" "backend" {
             memory = var.memory_limit
           }
         }
+        
+        startup_probe {
+          http_get {
+            path = "/health"
+            port = 8080
+          }
+          initial_delay_seconds = 10
+          timeout_seconds       = 3
+          period_seconds        = 10
+          failure_threshold     = 10
+        }
+        
+        liveness_probe {
+          http_get {
+            path = "/health"
+            port = 8080
+          }
+          initial_delay_seconds = 30
+          timeout_seconds       = 3
+          period_seconds        = 30
+          failure_threshold     = 3
+        }
       }
     }
     
@@ -98,6 +129,8 @@ resource "google_cloud_run_service" "backend" {
         "autoscaling.knative.dev/maxScale"        = var.max_instances
         "run.googleapis.com/vpc-access-connector" = local.vpc_connector_id
         "run.googleapis.com/vpc-access-egress"    = "all-traffic"
+        "run.googleapis.com/cloudsql-instances"   = local.sql_instance_name
+        "run.googleapis.com/startup-cpu-boost"    = "true"
       }
     }
   }
@@ -127,6 +160,15 @@ resource "google_cloud_run_service" "frontend" {
       containers {
         image = var.frontend_image
         
+        ports {
+          container_port = 8080
+        }
+        
+        env {
+          name  = "PORT"
+          value = "8080"
+        }
+        
         env {
           name  = "NEXT_PUBLIC_API_URL"
           value = google_cloud_run_service.backend.status[0].url
@@ -137,6 +179,17 @@ resource "google_cloud_run_service" "frontend" {
             cpu    = "1"
             memory = "512Mi"
           }
+        }
+        
+        startup_probe {
+          http_get {
+            path = "/"
+            port = 8080
+          }
+          initial_delay_seconds = 10
+          timeout_seconds       = 3
+          period_seconds        = 10
+          failure_threshold     = 10
         }
       }
     }

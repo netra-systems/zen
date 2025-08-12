@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 
 from .exceptions import ServiceError
 from .error_context import ErrorContext
+from app.logging_config import central_logger as logger
 
 
 class ResourceTracker:
@@ -97,7 +98,7 @@ class ResourceTracker:
                         
             except Exception as e:
                 # Log error but continue shutdown
-                print(f"Error shutting down resource {name}: {e}", file=sys.stderr)
+                logger.error(f"Error shutting down resource {name}: {e}", file=sys.stderr)
         
         # Clear all resources
         self._resources.clear()
@@ -147,13 +148,13 @@ class ApplicationLifecycle:
     def _signal_handler(self):
         """Handle shutdown signals."""
         if not self._shutdown_event.is_set():
-            print("Received shutdown signal, initiating graceful shutdown...", file=sys.stderr)
+            logger.info("Received shutdown signal, initiating graceful shutdown...", file=sys.stderr)
             self._shutdown_event.set()
     
     def _atexit_handler(self):
         """Handle atexit cleanup."""
         if not self._shutdown_event.is_set():
-            print("Application exiting, cleaning up resources...", file=sys.stderr)
+            logger.info("Application exiting, cleaning up resources...", file=sys.stderr)
             # Run synchronous cleanup only
             asyncio.run(self._resource_tracker.shutdown_all(timeout=5.0))
     
@@ -193,10 +194,10 @@ class ApplicationLifecycle:
                     callback()
             
             self._started = True
-            print("Application startup completed successfully", file=sys.stderr)
+            logger.info("Application startup completed successfully", file=sys.stderr)
             
         except Exception as e:
-            print(f"Startup failed: {e}", file=sys.stderr)
+            logger.error(f"Startup failed: {e}", file=sys.stderr)
             await self.shutdown()
             raise
     
@@ -208,7 +209,7 @@ class ApplicationLifecycle:
         timeout = timeout or self._shutdown_timeout
         
         try:
-            print("Starting application shutdown...", file=sys.stderr)
+            logger.info("Starting application shutdown...", file=sys.stderr)
             
             # Run shutdown callbacks
             for callback in self._shutdown_callbacks:
@@ -218,16 +219,16 @@ class ApplicationLifecycle:
                     else:
                         callback()
                 except Exception as e:
-                    print(f"Error in shutdown callback: {e}", file=sys.stderr)
+                    logger.error(f"Error in shutdown callback: {e}", file=sys.stderr)
             
             # Shutdown all resources
             await self._resource_tracker.shutdown_all(timeout=timeout)
             
             self._started = False
-            print("Application shutdown completed", file=sys.stderr)
+            logger.info("Application shutdown completed", file=sys.stderr)
             
         except Exception as e:
-            print(f"Error during shutdown: {e}", file=sys.stderr)
+            logger.error(f"Error during shutdown: {e}", file=sys.stderr)
     
     async def wait_for_shutdown(self):
         """Wait for shutdown signal."""
@@ -292,7 +293,7 @@ class HealthMonitor:
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                print(f"Error in health monitoring: {e}", file=sys.stderr)
+                logger.error(f"Error in health monitoring: {e}", file=sys.stderr)
                 await asyncio.sleep(check_interval)
     
     async def perform_health_checks(self) -> Dict[str, Dict[str, Any]]:

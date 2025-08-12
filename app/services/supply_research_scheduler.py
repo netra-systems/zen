@@ -3,7 +3,6 @@ Supply Research Scheduler - Background task scheduling for periodic supply updat
 """
 
 import asyncio
-import logging
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 from enum import Enum
@@ -16,8 +15,8 @@ from app.llm.llm_manager import LLMManager
 from app.redis_manager import RedisManager
 from app.core.exceptions import NetraException
 from app.db.postgres import Database
+from app.logging_config import central_logger as logger
 
-logger = logging.getLogger(__name__)
 
 
 class ScheduleFrequency(Enum):

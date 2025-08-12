@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-12T05:31:16.374670  
+**Generated:** 2025-08-12T04:50:55.553524  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 2 | 1 | 0 | 1 | 0 | 6.59s | [PASSED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 49.29s | [TIMEOUT] |
+| Backend   | 2 | 1 | 0 | 1 | 0 | 6.85s | [PASSED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 48.59s | [TIMEOUT] |
 
 ## Environment and Configuration
 
@@ -27,7 +27,7 @@
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
 - **Coverage Enabled:** No
-- **Total Duration:** 55.88s
+- **Total Duration:** 55.44s
 - **Exit Code:** 0
 
 ### Backend Configuration
@@ -72,7 +72,7 @@ app\tests\routes\test_health_route.py::test_health_endpoint_direct [32mPASSED[
 
 [32m======================== [32m[1m1 passed[0m, [33m1 skipped[0m[32m in 0.06s[0m[32m =========================[0m
 ================================================================================
-[PASS] ALL TESTS PASSED in 5.73s
+[PASS] ALL TESTS PASSED in 6.05s
 ================================================================================
 
 

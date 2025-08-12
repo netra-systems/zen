@@ -12,10 +12,9 @@
 
 import json
 import re
-import logging
 from typing import Any, Dict, Optional, Union
+from app.logging_config import central_logger as logger
 
-logger = logging.getLogger(__name__)
 
 
 def preprocess_llm_response(response: str) -> str:

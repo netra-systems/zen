@@ -1,8 +1,7 @@
 import redis.asyncio as redis
 from app.config import settings
-import logging
+from app.logging_config import central_logger as logger
 
-logger = logging.getLogger(__name__)
 
 class RedisManager:
     def __init__(self):

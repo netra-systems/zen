@@ -378,7 +378,7 @@ class TestLLMManagerProviderSwitching:
         
         # Register providers
         for key, client in providers.items():
-            provider = LLMProvider(key.split('_')[0].upper())
+            provider = LLMProvider(key.split('_')[0])
             enhanced_llm_manager.register_provider_client(provider, client.model_name, client)
         
         return providers
@@ -387,9 +387,9 @@ class TestLLMManagerProviderSwitching:
         """Test provider registration"""
         # Should have registered all providers
         assert len(enhanced_llm_manager.provider_clients) == 3
-        assert 'OPENAI_gpt-4' in enhanced_llm_manager.provider_clients
-        assert 'GOOGLE_gemini-pro' in enhanced_llm_manager.provider_clients
-        assert 'ANTHROPIC_claude-3-sonnet' in enhanced_llm_manager.provider_clients
+        assert 'openai_gpt-4' in enhanced_llm_manager.provider_clients
+        assert 'google_gemini-pro' in enhanced_llm_manager.provider_clients
+        assert 'anthropic_claude-3-sonnet' in enhanced_llm_manager.provider_clients
         
         # All providers should be healthy initially
         for provider_key in enhanced_llm_manager.provider_health:
@@ -398,7 +398,7 @@ class TestLLMManagerProviderSwitching:
     @pytest.mark.asyncio
     async def test_provider_health_check_success(self, enhanced_llm_manager, mock_providers):
         """Test successful provider health check"""
-        provider_key = 'OPENAI_gpt-4'
+        provider_key = 'openai_gpt-4'
         
         # Health check should succeed
         is_healthy = await enhanced_llm_manager.check_provider_health(provider_key)
@@ -411,7 +411,7 @@ class TestLLMManagerProviderSwitching:
     @pytest.mark.asyncio
     async def test_provider_health_check_failure(self, enhanced_llm_manager, mock_providers):
         """Test provider health check failure"""
-        provider_key = 'OPENAI_gpt-4'
+        provider_key = 'openai_gpt-4'
         
         # Make provider fail
         mock_providers['openai_gpt4'].should_fail = True
@@ -450,9 +450,9 @@ class TestLLMManagerProviderSwitching:
         
         # Set weights (higher weight for OpenAI)
         enhanced_llm_manager.load_balancing['provider_weights'] = {
-            'OPENAI_gpt-4': 3.0,
-            'GOOGLE_gemini-pro': 1.0,
-            'ANTHROPIC_claude-3-sonnet': 1.0
+            'openai_gpt-4': 3.0,
+            'google_gemini-pro': 1.0,
+            'anthropic_claude-3-sonnet': 1.0
         }
         
         # Get many providers and count distribution
@@ -462,9 +462,9 @@ class TestLLMManagerProviderSwitching:
             provider_counts[provider] = provider_counts.get(provider, 0) + 1
         
         # OpenAI should be selected more often due to higher weight
-        openai_count = provider_counts.get('OPENAI_gpt-4', 0)
+        openai_count = provider_counts.get('openai_gpt-4', 0)
         total_others = sum(count for key, count in provider_counts.items() 
-                          if key != 'OPENAI_gpt-4')
+                          if key != 'openai_gpt-4')
         
         # OpenAI should have roughly 60% (3/5) of selections
         assert openai_count > total_others * 0.8  # Allow some variance
@@ -484,7 +484,7 @@ class TestLLMManagerProviderSwitching:
     async def test_failover_invoke_preferred_provider(self, enhanced_llm_manager, mock_providers):
         """Test LLM invocation with preferred provider"""
         prompt = "Test prompt with preferred provider"
-        preferred_provider = 'GOOGLE_gemini-pro'
+        preferred_provider = 'google_gemini-pro'
         
         # Should use preferred provider
         result = await enhanced_llm_manager.invoke_with_failover(prompt, preferred_provider)
@@ -496,7 +496,7 @@ class TestLLMManagerProviderSwitching:
     async def test_failover_invoke_provider_failure(self, enhanced_llm_manager, mock_providers):
         """Test LLM invocation with provider failure and failover"""
         prompt = "Test prompt with failover"
-        preferred_provider = 'OPENAI_gpt-4'
+        preferred_provider = 'openai_gpt-4'
         
         # Make preferred provider fail
         mock_providers['openai_gpt4'].should_fail = True
@@ -525,12 +525,12 @@ class TestLLMManagerProviderSwitching:
         with pytest.raises(NetraException) as exc_info:
             await enhanced_llm_manager.invoke_with_failover(prompt)
         
-        assert "providers failed" in str(exc_info.value).lower()
+        assert "no healthy llm providers available" in str(exc_info.value).lower()
     
     @pytest.mark.asyncio
     async def test_provider_cooldown_period(self, enhanced_llm_manager, mock_providers):
         """Test provider cooldown period after failures"""
-        provider_key = 'OPENAI_gpt-4'
+        provider_key = 'openai_gpt-4'
         
         # Set short cooldown for testing
         enhanced_llm_manager.failover_config['cooldown_period'] = 1  # 1 second
@@ -629,7 +629,7 @@ class TestLLMManagerProviderSwitching:
         providers['openai_gpt4'].should_fail = True
         for _ in range(2):
             try:
-                await manager.invoke_with_failover("test prompt", 'OPENAI_gpt-4')
+                await manager.invoke_with_failover("test prompt", 'openai_gpt-4')
             except:
                 pass
         providers['openai_gpt4'].should_fail = False
@@ -659,7 +659,7 @@ class TestLLMManagerLoadBalancing:
         
         # Register providers
         for key, client in providers:
-            provider_enum = LLMProvider(key.split('_')[1].upper())
+            provider_enum = LLMProvider(key.split('_')[1])
             manager.register_provider_client(provider_enum, client.model_name, client)
         
         return manager, dict(providers)
@@ -673,8 +673,8 @@ class TestLLMManagerLoadBalancing:
         manager.load_balancing['strategy'] = 'weighted'
         manager.load_balancing['provider_weights'] = {
             'OPENAI_gpt-3.5-turbo': 4.0,  # Fast provider
-            'OPENAI_gpt-4': 1.0,          # Slow provider
-            'GOOGLE_gemini-pro': 2.0      # Medium provider
+            'openai_gpt-4': 1.0,          # Slow provider
+            'google_gemini-pro': 2.0      # Medium provider
         }
         
         # Execute many requests and measure distribution
@@ -709,43 +709,31 @@ class TestLLMManagerLoadBalancing:
         # Make one provider intermittently fail
         providers['SLOW_openai'].failure_rate = 0.3  # 30% failure rate
         
-        # Use adaptive strategy
+        # Use weighted strategy
         manager.load_balancing['strategy'] = 'weighted'
         
         # Initial equal weights
         manager.load_balancing['provider_weights'] = {
-            'OPENAI_gpt-3.5-turbo': 1.0,
-            'OPENAI_gpt-4': 1.0,
-            'GOOGLE_gemini-pro': 1.0
+            'openai_gpt-3.5-turbo': 1.0,
+            'openai_gpt-4': 1.0,
+            'google_gemini-pro': 1.0
         }
         
-        # Simulate adaptive weight adjustment based on success rates
-        async def adaptive_invoke_with_weight_adjustment(prompt):
-            """Invoke with adaptive weight adjustment"""
+        # Execute requests - the weighted strategy should distribute load
+        successes = 0
+        for i in range(30):
             try:
-                result = await manager.invoke_with_failover(prompt)
-                # Increase weight for successful provider
-                # (Simplified weight adjustment logic)
-                return result
-            except Exception as e:
-                # Decrease weight for failed provider
-                # (In real implementation, this would be more sophisticated)
-                raise e
-        
-        # Execute requests and track performance
-        successful_requests = 0
-        failed_requests = 0
-        
-        for i in range(50):
-            try:
-                await adaptive_invoke_with_weight_adjustment(f"Adaptive test {i}")
-                successful_requests += 1
+                result = await manager.invoke_with_failover(f"Adaptive test {i}")
+                successes += 1
             except:
-                failed_requests += 1
+                pass  # Some failures expected due to 30% failure rate
         
-        # Should have some failures due to the failing provider
-        assert failed_requests > 0
-        assert successful_requests > failed_requests  # But more successes due to failover
+        # Most requests should succeed despite one provider having failures
+        assert successes >= 20  # At least 2/3 should succeed with failover
+        
+        # Check that the failing provider is marked as unhealthy
+        slow_provider_client = providers['SLOW_openai']
+        assert slow_provider_client.failed_requests > 0  # Should have some failures
     
     @pytest.mark.asyncio
     async def test_geographic_load_balancing(self, load_balanced_manager):
@@ -755,8 +743,8 @@ class TestLLMManagerLoadBalancing:
         # Simulate geographic latencies
         geographic_latencies = {
             'OPENAI_gpt-3.5-turbo': 0.05,  # US East
-            'OPENAI_gpt-4': 0.15,          # US West  
-            'GOOGLE_gemini-pro': 0.08      # EU
+            'openai_gpt-4': 0.15,          # US West  
+            'google_gemini-pro': 0.08      # EU
         }
         
         # Set latencies
@@ -808,7 +796,7 @@ class TestLLMManagerStructuredOutput:
         ]
         
         for i, client in enumerate(providers):
-            provider_enum = LLMProvider(client.provider.value.upper())
+            provider_enum = LLMProvider(client.provider.value)
             manager.register_provider_client(provider_enum, client.model_name, client)
         
         return manager

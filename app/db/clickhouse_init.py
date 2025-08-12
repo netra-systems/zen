@@ -3,7 +3,6 @@ ClickHouse database initialization module.
 Creates required tables on application startup.
 """
 
-import logging
 from typing import List, Tuple
 from app.db.clickhouse import get_clickhouse_client
 from app.db.models_clickhouse import (
@@ -12,8 +11,8 @@ from app.db.models_clickhouse import (
     WORKLOAD_EVENTS_TABLE_SCHEMA
 )
 from app.config import settings
+from app.logging_config import central_logger as logger
 
-logger = logging.getLogger(__name__)
 
 # List of table schemas to create on startup
 CLICKHOUSE_TABLES: List[Tuple[str, str]] = [

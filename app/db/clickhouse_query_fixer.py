@@ -4,9 +4,8 @@ Intercepts and fixes ClickHouse queries with incorrect array syntax
 """
 
 import re
-import logging
+from app.logging_config import central_logger as logger
 
-logger = logging.getLogger(__name__)
 
 
 def fix_clickhouse_array_syntax(query: str) -> str:

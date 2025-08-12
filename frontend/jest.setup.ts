@@ -34,13 +34,40 @@ jest.mock('next/navigation', () => ({
 }));
 
 // Mock WebSocket
-global.WebSocket = jest.fn(() => ({
-  send: jest.fn(),
-  close: jest.fn(),
-  addEventListener: jest.fn(),
-  removeEventListener: jest.fn(),
-  readyState: WebSocket.OPEN,
-})) as any;
+class MockWebSocket {
+  url: string;
+  readyState: number = 1; // WebSocket.OPEN
+  onopen: ((event: Event) => void) | null = null;
+  onclose: ((event: CloseEvent) => void) | null = null;
+  onerror: ((event: Event) => void) | null = null;
+  onmessage: ((event: MessageEvent) => void) | null = null;
+  send = jest.fn();
+  close = jest.fn();
+  addEventListener = jest.fn((event: string, handler: Function) => {
+    if (event === 'open') this.onopen = handler as any;
+    if (event === 'close') this.onclose = handler as any;
+    if (event === 'error') this.onerror = handler as any;
+    if (event === 'message') this.onmessage = handler as any;
+  });
+  removeEventListener = jest.fn();
+
+  constructor(url: string) {
+    this.url = url;
+    // Simulate connection opening
+    setTimeout(() => {
+      if (this.onopen) {
+        this.onopen(new Event('open'));
+      }
+    }, 0);
+  }
+}
+
+(global as any).WebSocket = MockWebSocket;
+// Add WebSocket constants
+(global as any).WebSocket.OPEN = 1;
+(global as any).WebSocket.CONNECTING = 0;
+(global as any).WebSocket.CLOSING = 2;
+(global as any).WebSocket.CLOSED = 3;
 
 // Mock localStorage
 const localStorageMock = {
