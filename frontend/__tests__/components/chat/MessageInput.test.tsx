@@ -83,28 +83,36 @@ describe('MessageInput', () => {
 
     it('should enforce character limit', async () => {
       render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i);
+      const textarea = screen.getByPlaceholderText(/Type a message/i) as HTMLTextAreaElement;
       const longMessage = 'a'.repeat(10001);
       
-      await userEvent.type(textarea, longMessage);
+      // Use fireEvent to set value directly instead of typing each character
+      fireEvent.change(textarea, { target: { value: longMessage } });
       
-      // Character count should be displayed
-      expect(screen.getByText(/10001\/10000/)).toBeInTheDocument();
+      // Wait for the component to update
+      await waitFor(() => {
+        // Character count should be displayed
+        expect(screen.getByText(/10001\/10000/)).toBeInTheDocument();
+      });
       
       // Send button should be disabled
       const sendButton = screen.getByLabelText('Send message');
       expect(sendButton).toBeDisabled();
-    });
+    }, 10000);
 
     it('should show character count warning at 80% capacity', async () => {
       render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i);
+      const textarea = screen.getByPlaceholderText(/Type a message/i) as HTMLTextAreaElement;
       const longMessage = 'a'.repeat(8001);
       
-      await userEvent.type(textarea, longMessage);
+      // Use fireEvent to set value directly
+      fireEvent.change(textarea, { target: { value: longMessage } });
       
-      expect(screen.getByText(/8001\/10000/)).toBeInTheDocument();
-    });
+      // Wait for the component to update
+      await waitFor(() => {
+        expect(screen.getByText(/8001\/10000/)).toBeInTheDocument();
+      });
+    }, 10000);
 
     it('should sanitize HTML in messages', async () => {
       render(<MessageInput />);
@@ -753,11 +761,15 @@ describe('MessageInput', () => {
       const textarea = screen.getByPlaceholderText(/Type a message/i) as HTMLTextAreaElement;
       
       const longMessage = 'a'.repeat(9001);
-      await userEvent.type(textarea, longMessage);
+      // Use fireEvent to set value directly
+      fireEvent.change(textarea, { target: { value: longMessage } });
       
-      // Should show remaining characters in placeholder
-      expect(textarea.placeholder).toContain('999 characters remaining');
-    });
+      // Wait for the component to update
+      await waitFor(() => {
+        // Should show remaining characters in placeholder
+        expect(textarea.placeholder).toContain('999 characters remaining');
+      });
+    }, 10000);
   });
 
   describe('Accessibility', () => {
@@ -779,14 +791,17 @@ describe('MessageInput', () => {
 
     it('should have ARIA describedby for character count', async () => {
       render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i);
+      const textarea = screen.getByPlaceholderText(/Type a message/i) as HTMLTextAreaElement;
       
       const longMessage = 'a'.repeat(8001);
-      await userEvent.type(textarea, longMessage);
+      // Use fireEvent to set value directly
+      fireEvent.change(textarea, { target: { value: longMessage } });
       
-      expect(textarea).toHaveAttribute('aria-describedby', 'char-count');
-      expect(screen.getByText(/8001\/10000/)).toHaveAttribute('id', 'char-count');
-    });
+      await waitFor(() => {
+        expect(textarea).toHaveAttribute('aria-describedby', 'char-count');
+        expect(screen.getByText(/8001\/10000/)).toHaveAttribute('id', 'char-count');
+      });
+    }, 10000);
 
     it('should handle keyboard navigation properly', async () => {
       render(<MessageInput />);

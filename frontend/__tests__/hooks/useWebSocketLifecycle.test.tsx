@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { WebSocketProvider } from '@/contexts/WebSocketContext';
+import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import React from 'react';
 
 // Mock WebSocket

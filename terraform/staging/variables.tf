@@ -157,3 +157,17 @@ variable "fernet_key" {
   default     = ""
   sensitive   = true
 }
+
+variable "clickhouse_password" {
+  description = "ClickHouse password for authentication"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "clickhouse_url" {
+  description = "Full ClickHouse URL with credentials (optional, overrides default)"
+  type        = string
+  default     = ""
+  sensitive   = true
+}

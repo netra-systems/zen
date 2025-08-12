@@ -5,7 +5,7 @@ import { ChatHistory } from '@/components/chat/ChatHistory';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { chatService } from '@/services/chatService';
-import { WebSocketProvider } from '@/contexts/WebSocketContext';
+import { WebSocketProvider } from '@/providers/WebSocketProvider';
 
 // Mock dependencies
 jest.mock('@/store/unified-chat');

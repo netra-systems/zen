@@ -5,7 +5,7 @@ import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreads } from '@/hooks/useThreads';
 import { threadService } from '@/services/threadService';
-import { WebSocketProvider } from '@/contexts/WebSocketContext';
+import { WebSocketProvider } from '@/providers/WebSocketProvider';
 
 // Mock dependencies
 jest.mock('@/store/unified-chat');

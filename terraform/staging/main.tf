@@ -57,6 +57,12 @@ resource "google_sql_user" "pr" {
   password = var.postgres_password
 }
 
+# Create PR-specific Redis database index
+locals {
+  # Use PR number mod 16 to get a Redis database index (0-15)
+  redis_db_index = tonumber(var.pr_number) % 16
+}
+
 # Cloud Run service for backend (fast deployment)
 resource "google_cloud_run_service" "backend" {
   name     = "backend-${local.environment_name}"
@@ -75,12 +81,27 @@ resource "google_cloud_run_service" "backend" {
         
         env {
           name  = "DATABASE_URL"
-          value = "postgresql://${google_sql_user.pr.name}:${var.postgres_password}@/${google_sql_database.pr.name}?host=/cloudsql/${local.sql_instance_connection}"
+          value = "postgresql://${google_sql_user.pr.name}:${var.postgres_password}@/${google_sql_database.pr.name}?host=/cloudsql/${local.sql_instance_connection}&sslmode=disable"
         }
         
         env {
           name  = "REDIS_URL"
-          value = "redis://${local.redis_host}:${local.redis_port}/${var.pr_number % 16}"
+          value = "redis://${local.redis_host}:${local.redis_port}/${local.redis_db_index}"
+        }
+        
+        env {
+          name  = "REDIS_HOST"
+          value = local.redis_host
+        }
+        
+        env {
+          name  = "REDIS_PORT"
+          value = tostring(local.redis_port)
+        }
+        
+        env {
+          name  = "REDIS_DB"
+          value = tostring(local.redis_db_index)
         }
         
         env {
@@ -95,7 +116,7 @@ resource "google_cloud_run_service" "backend" {
         
         env {
           name  = "CLICKHOUSE_URL"
-          value = "clickhouse://default:@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=1"
+          value = var.clickhouse_url != "" ? var.clickhouse_url : "clickhouse://default:${var.clickhouse_password}@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=1"
         }
         
         env {
@@ -115,7 +136,22 @@ resource "google_cloud_run_service" "backend" {
         
         env {
           name  = "CLICKHOUSE_TIMEOUT"
-          value = "30"
+          value = "60"
+        }
+        
+        env {
+          name  = "CLICKHOUSE_PASSWORD"
+          value = var.clickhouse_password
+        }
+        
+        env {
+          name  = "CLICKHOUSE_DEFAULT_PASSWORD"
+          value = var.clickhouse_password
+        }
+        
+        env {
+          name  = "CLICKHOUSE_USER"
+          value = "default"
         }
         
         env {
@@ -146,6 +182,27 @@ resource "google_cloud_run_service" "backend" {
         env {
           name  = "GCP_PROJECT_ID_NUMERICAL_STAGING"
           value = var.project_id_numerical  # Numerical project ID for Secret Manager
+        }
+        
+        # Database connection settings for PR isolation
+        env {
+          name  = "POSTGRES_HOST"
+          value = "/cloudsql/${local.sql_instance_connection}"
+        }
+        
+        env {
+          name  = "POSTGRES_DB"
+          value = google_sql_database.pr.name
+        }
+        
+        env {
+          name  = "POSTGRES_USER"
+          value = google_sql_user.pr.name
+        }
+        
+        env {
+          name  = "POSTGRES_PASSWORD"
+          value = var.postgres_password
         }
         
         # Authentication keys for staging - these should be overridden with proper secrets in production
@@ -326,4 +383,24 @@ output "backend_url" {
 
 output "database_name" {
   value = google_sql_database.pr.name
+}
+
+output "database_user" {
+  value = google_sql_user.pr.name
+}
+
+output "sql_instance_connection" {
+  value = local.sql_instance_connection
+}
+
+output "redis_host" {
+  value = local.redis_host
+}
+
+output "redis_port" {
+  value = local.redis_port
+}
+
+output "redis_db_index" {
+  value = local.redis_db_index
 }

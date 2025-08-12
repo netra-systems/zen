@@ -1,0 +1,1750 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <title>Lark-GitHub Two-Way Integration Specification</title>
+  <version>2.0.0</version>
+  <last_updated>2025-08-12</last_updated>
+  
+  <overview>
+    <purpose>
+      Enable comprehensive two-way communication between GitHub Actions and Lark messaging platform,
+      providing real-time workflow monitoring, interactive controls, and detailed error reporting with
+      direct log access links.
+    </purpose>
+    
+    <capabilities>
+      <capability>Stream real-time GitHub workflow status to Lark channels</capability>
+      <capability>Interactive workflow control (start/stop/retry) from Lark</capability>
+      <capability>Automatic error log link extraction and presentation</capability>
+      <capability>Test result streaming with pass/fail statistics</capability>
+      <capability>Staging environment management through Lark commands</capability>
+      <capability>Pull request and issue management integration</capability>
+      <capability>Direct GCP Console log links for Cloud Run failures</capability>
+    </capabilities>
+  </overview>
+
+  <architecture>
+    <components>
+      <component name="lark-bot-server">
+        <description>Node.js/Express server handling Lark callbacks and GitHub API interactions</description>
+        <deployment>Deployed on Vercel/Netlify/Cloud Run for high availability</deployment>
+        <endpoints>
+          <endpoint path="/lark/callback" method="POST">Handles Lark events and button interactions</endpoint>
+          <endpoint path="/github/webhook" method="POST">Receives GitHub webhook events</endpoint>
+          <endpoint path="/health" method="GET">Health check endpoint</endpoint>
+        </endpoints>
+      </component>
+      
+      <component name="github-actions-workflows">
+        <description>Modified workflows that send events to Lark and respond to Lark commands</description>
+        <workflows>
+          <workflow>staging-environment.yml - Enhanced with Lark error reporting</workflow>
+          <workflow>test-smoke.yml - Sends test results to Lark</workflow>
+          <workflow>test-unit.yml - Streams unit test progress</workflow>
+          <workflow>ai-autofix.yml - Interactive fix approval via Lark</workflow>
+          <workflow>lark-controller.yml - Handles Lark-triggered actions</workflow>
+        </workflows>
+      </component>
+      
+      <component name="lark-app">
+        <description>Lark application with bot capabilities and interactive cards</description>
+        <permissions>
+          <permission>im:message - Send messages</permission>
+          <permission>im:message.group_at_msg - Mention users in groups</permission>
+          <permission>im:chat - Access chat information</permission>
+          <permission>contact:user.id - Get user IDs</permission>
+        </permissions>
+      </component>
+    </components>
+    
+    <data_flow>
+      <flow name="workflow_to_lark">
+        <step>GitHub Action executes</step>
+        <step>Action sends status/results to Lark bot server</step>
+        <step>Bot server formats message with interactive elements</step>
+        <step>Message posted to configured Lark channel</step>
+      </flow>
+      
+      <flow name="lark_to_workflow">
+        <step>User clicks button in Lark message</step>
+        <step>Lark sends callback to bot server</step>
+        <step>Bot server triggers GitHub workflow via API</step>
+        <step>Confirmation sent back to Lark user</step>
+      </flow>
+      
+      <flow name="error_reporting">
+        <step>Terraform/test failure detected in workflow</step>
+        <step>Error details and log URLs extracted</step>
+        <step>Rich error card created with direct log links</step>
+        <step>Card sent to Lark alerts channel</step>
+      </flow>
+    </data_flow>
+  </architecture>
+
+  <implementation>
+    <server_code>
+      <file name="lark-bot-server/index.js">
+        <![CDATA[
+const express = require('express');
+const crypto = require('crypto');
+const axios = require('axios');
+
+const app = express();
+app.use(express.json());
+
+// Configuration
+const config = {
+  lark: {
+    appId: process.env.LARK_APP_ID,
+    appSecret: process.env.LARK_APP_SECRET,
+    verificationToken: process.env.LARK_VERIFICATION_TOKEN,
+  },
+  github: {
+    token: process.env.GITHUB_TOKEN,
+    repo: process.env.GITHUB_REPO,
+    webhookSecret: process.env.GITHUB_WEBHOOK_SECRET,
+  },
+  channels: {
+    general: process.env.LARK_CHANNEL_GENERAL,
+    alerts: process.env.LARK_CHANNEL_ALERTS,
+    staging: process.env.LARK_CHANNEL_STAGING,
+  }
+};
+
+// Lark token cache
+let larkTokenCache = { token: null, expiresAt: 0 };
+
+// Get Lark access token with caching
+async function getLarkToken() {
+  if (larkTokenCache.token && Date.now() < larkTokenCache.expiresAt) {
+    return larkTokenCache.token;
+  }
+  
+  const response = await axios.post(
+    'https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal',
+    {
+      app_id: config.lark.appId,
+      app_secret: config.lark.appSecret,
+    }
+  );
+  
+  larkTokenCache = {
+    token: response.data.tenant_access_token,
+    expiresAt: Date.now() + (response.data.expire - 60) * 1000,
+  };
+  
+  return larkTokenCache.token;
+}
+
+// Send message to Lark channel
+async function sendToLark(channelId, card) {
+  const token = await getLarkToken();
+  
+  await axios.post(
+    'https://open.larksuite.com/open-apis/im/v1/messages',
+    {
+      receive_id: channelId,
+      msg_type: 'interactive',
+      card: card,
+    },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { receive_id_type: 'chat_id' },
+    }
+  );
+}
+
+// Format error with log links
+function formatErrorCard(error, metadata) {
+  const elements = [
+    {
+      tag: 'markdown',
+      content: `**Error Type:** ${error.type}\n**Component:** ${error.component}\n**Message:** ${error.message}`,
+    },
+  ];
+  
+  // Add log links if available
+  if (error.logUrl) {
+    elements.push({
+      tag: 'action',
+      actions: [
+        {
+          tag: 'button',
+          text: { tag: 'plain_text', content: 'View Logs' },
+          type: 'primary',
+          url: error.logUrl,
+        },
+      ],
+    });
+  }
+  
+  // Add Cloud Run specific error handling
+  if (error.type === 'cloud_run_startup_failure') {
+    const logUrl = extractCloudRunLogUrl(error.message);
+    if (logUrl) {
+      elements.push({
+        tag: 'markdown',
+        content: `**Direct Log Access:** [Click here to view Cloud Run logs](${logUrl})`,
+      });
+    }
+  }
+  
+  return {
+    config: { wide_screen_mode: true },
+    header: {
+      title: { tag: 'plain_text', content: `🚨 ${error.title || 'Deployment Error'}` },
+      template: 'red',
+    },
+    elements: elements,
+  };
+}
+
+// Extract Cloud Run log URL from error message
+function extractCloudRunLogUrl(message) {
+  const match = message.match(/Logs URL: (https:\/\/console\.cloud\.google\.com\/logs\/viewer[^\s]+)/);
+  return match ? match[1] : null;
+}
+
+// Handle Lark callbacks
+app.post('/lark/callback', async (req, res) => {
+  const { type, challenge, token } = req.body;
+  
+  // URL verification
+  if (type === 'url_verification') {
+    if (token !== config.lark.verificationToken) {
+      return res.status(403).json({ error: 'Invalid token' });
+    }
+    return res.json({ challenge });
+  }
+  
+  // Event callback
+  if (type === 'event_callback') {
+    const { event } = req.body;
+    
+    switch (event.type) {
+      case 'card.action.trigger':
+        await handleCardAction(event);
+        break;
+      case 'message':
+        await handleMessage(event);
+        break;
+    }
+    
+    res.json({ success: true });
+  }
+});
+
+// Handle interactive card actions
+async function handleCardAction(event) {
+  const { action, open_id, user_id } = event;
+  const { action: actionType, ...params } = action.value;
+  
+  try {
+    switch (actionType) {
+      case 'trigger_workflow':
+        await triggerGitHubWorkflow(params.workflow_id, params.inputs);
+        await sendUserNotification(open_id, `✅ Workflow ${params.workflow_id} triggered`);
+        break;
+        
+      case 'cancel_workflow':
+        await cancelGitHubWorkflow(params.run_id);
+        await sendUserNotification(open_id, `⛔ Workflow cancelled`);
+        break;
+        
+      case 'retry_workflow':
+        await retryGitHubWorkflow(params.run_id);
+        await sendUserNotification(open_id, `🔄 Workflow retry initiated`);
+        break;
+        
+      case 'approve_deployment':
+        await approveGitHubDeployment(params.environment_id);
+        await sendUserNotification(open_id, `✅ Deployment approved`);
+        break;
+        
+      case 'view_test_results':
+        const results = await getTestResults(params.run_id);
+        await sendTestResultsCard(open_id, results);
+        break;
+    }
+  } catch (error) {
+    await sendUserNotification(open_id, `❌ Action failed: ${error.message}`);
+  }
+}
+
+// Handle chat messages (commands)
+async function handleMessage(event) {
+  const { text, open_id } = event;
+  const command = text.trim().toLowerCase();
+  
+  // Command parsing
+  if (command.startsWith('/staging')) {
+    const args = command.split(' ');
+    const action = args[1];
+    const prNumber = args[2];
+    
+    if (!action || !prNumber) {
+      await sendUserNotification(open_id, 'Usage: /staging [deploy|destroy|status] [pr-number]');
+      return;
+    }
+    
+    await handleStagingCommand(action, prNumber, open_id);
+  } else if (command.startsWith('/test')) {
+    const args = command.split(' ');
+    const level = args[1] || 'smoke';
+    
+    await triggerTestWorkflow(level, open_id);
+  } else if (command === '/help') {
+    await sendHelpCard(open_id);
+  }
+}
+
+// GitHub webhook handler
+app.post('/github/webhook', async (req, res) => {
+  // Verify GitHub signature
+  const signature = req.headers['x-hub-signature-256'];
+  const body = JSON.stringify(req.body);
+  const expectedSignature = `sha256=${crypto
+    .createHmac('sha256', config.github.webhookSecret)
+    .update(body)
+    .digest('hex')}`;
+  
+  if (signature !== expectedSignature) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+  
+  const event = req.headers['x-github-event'];
+  const payload = req.body;
+  
+  // Process different GitHub events
+  switch (event) {
+    case 'workflow_run':
+      await handleWorkflowRun(payload);
+      break;
+    case 'check_run':
+      await handleCheckRun(payload);
+      break;
+    case 'deployment_status':
+      await handleDeploymentStatus(payload);
+      break;
+  }
+  
+  res.json({ received: true });
+});
+
+// Handle workflow run events
+async function handleWorkflowRun(payload) {
+  const { workflow_run, repository } = payload;
+  const { id, name, status, conclusion, html_url, head_commit } = workflow_run;
+  
+  // Create status card
+  const card = {
+    config: { wide_screen_mode: true },
+    header: {
+      title: { tag: 'plain_text', content: `${getStatusEmoji(conclusion)} ${name}` },
+      template: getTemplateColor(conclusion),
+    },
+    elements: [
+      {
+        tag: 'markdown',
+        content: [
+          `**Repository:** ${repository.full_name}`,
+          `**Status:** ${status === 'completed' ? conclusion : status}`,
+          `**Commit:** ${head_commit.message}`,
+          `**Author:** ${head_commit.author.name}`,
+        ].join('\n'),
+      },
+      {
+        tag: 'action',
+        actions: [
+          {
+            tag: 'button',
+            text: { tag: 'plain_text', content: 'View Run' },
+            type: 'default',
+            url: html_url,
+          },
+        ],
+      },
+    ],
+  };
+  
+  // Add interactive actions for failed runs
+  if (conclusion === 'failure') {
+    card.elements[1].actions.push(
+      {
+        tag: 'button',
+        text: { tag: 'plain_text', content: 'Retry' },
+        type: 'primary',
+        value: { action: 'retry_workflow', run_id: id },
+      },
+      {
+        tag: 'button',
+        text: { tag: 'plain_text', content: 'View Logs' },
+        type: 'danger',
+        value: { action: 'view_test_results', run_id: id },
+      }
+    );
+    
+    // Send to alerts channel for failures
+    await sendToLark(config.channels.alerts, card);
+  } else {
+    // Send to general channel for other statuses
+    await sendToLark(config.channels.general, card);
+  }
+}
+
+// Staging command handler
+async function handleStagingCommand(action, prNumber, userId) {
+  const inputs = {
+    action: action,
+    pr_number: prNumber,
+  };
+  
+  try {
+    const response = await axios.post(
+      `https://api.github.com/repos/${config.github.repo}/actions/workflows/staging-environment.yml/dispatches`,
+      {
+        ref: 'main',
+        inputs: inputs,
+      },
+      {
+        headers: {
+          Authorization: `token ${config.github.token}`,
+          Accept: 'application/vnd.github.v3+json',
+        },
+      }
+    );
+    
+    const card = {
+      config: { wide_screen_mode: true },
+      header: {
+        title: { tag: 'plain_text', content: `🚀 Staging ${action} initiated for PR #${prNumber}` },
+        template: 'blue',
+      },
+      elements: [
+        {
+          tag: 'markdown',
+          content: `Staging environment ${action} has been triggered.\nYou'll receive updates as the process continues.`,
+        },
+        {
+          tag: 'action',
+          actions: [
+            {
+              tag: 'button',
+              text: { tag: 'plain_text', content: 'View Actions' },
+              type: 'primary',
+              url: `https://github.com/${config.github.repo}/actions`,
+            },
+          ],
+        },
+      ],
+    };
+    
+    await sendToLark(config.channels.staging, card);
+  } catch (error) {
+    await sendUserNotification(userId, `❌ Failed to ${action} staging: ${error.message}`);
+  }
+}
+
+// Test workflow trigger
+async function triggerTestWorkflow(level, userId) {
+  try {
+    await axios.post(
+      `https://api.github.com/repos/${config.github.repo}/actions/workflows/test-on-demand.yml/dispatches`,
+      {
+        ref: 'main',
+        inputs: {
+          test_level: level,
+          triggered_by: 'lark',
+        },
+      },
+      {
+        headers: {
+          Authorization: `token ${config.github.token}`,
+          Accept: 'application/vnd.github.v3+json',
+        },
+      }
+    );
+    
+    await sendUserNotification(userId, `✅ ${level} tests triggered`);
+  } catch (error) {
+    await sendUserNotification(userId, `❌ Failed to trigger tests: ${error.message}`);
+  }
+}
+
+// Helper functions
+function getStatusEmoji(conclusion) {
+  const emojis = {
+    success: '✅',
+    failure: '❌',
+    cancelled: '⚠️',
+    skipped: '⏭️',
+    timed_out: '⏱️',
+  };
+  return emojis[conclusion] || '🔄';
+}
+
+function getTemplateColor(conclusion) {
+  const colors = {
+    success: 'green',
+    failure: 'red',
+    cancelled: 'yellow',
+    skipped: 'gray',
+    timed_out: 'orange',
+  };
+  return colors[conclusion] || 'blue';
+}
+
+async function sendUserNotification(userId, message) {
+  const token = await getLarkToken();
+  
+  await axios.post(
+    'https://open.larksuite.com/open-apis/im/v1/messages',
+    {
+      receive_id: userId,
+      msg_type: 'text',
+      content: JSON.stringify({ text: message }),
+    },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { receive_id_type: 'open_id' },
+    }
+  );
+}
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Lark-GitHub bot server running on port ${PORT}`);
+});
+        ]]>
+      </file>
+      
+      <file name="lark-bot-server/package.json">
+        <![CDATA[
+{
+  "name": "lark-github-bot",
+  "version": "2.0.0",
+  "description": "Two-way integration between Lark and GitHub Actions",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+        ]]>
+      </file>
+      
+      <file name="lark-bot-server/vercel.json">
+        <![CDATA[
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.js"
+    }
+  ],
+  "env": {
+    "LARK_APP_ID": "@lark-app-id",
+    "LARK_APP_SECRET": "@lark-app-secret",
+    "LARK_VERIFICATION_TOKEN": "@lark-verification-token",
+    "GITHUB_TOKEN": "@github-token",
+    "GITHUB_REPO": "@github-repo",
+    "GITHUB_WEBHOOK_SECRET": "@github-webhook-secret",
+    "LARK_CHANNEL_GENERAL": "@lark-channel-general",
+    "LARK_CHANNEL_ALERTS": "@lark-channel-alerts",
+    "LARK_CHANNEL_STAGING": "@lark-channel-staging"
+  }
+}
+        ]]>
+      </file>
+      
+      <file name="lark-bot-server/netlify.toml">
+        <![CDATA[
+[build]
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/lark/callback"
+  to = "/.netlify/functions/lark-callback"
+  status = 200
+
+[[redirects]]
+  from = "/github/webhook"
+  to = "/.netlify/functions/github-webhook"
+  status = 200
+
+[[redirects]]
+  from = "/github/error"
+  to = "/.netlify/functions/github-error"
+  status = 200
+
+[[redirects]]
+  from = "/github/success"
+  to = "/.netlify/functions/github-success"
+  status = 200
+
+[[redirects]]
+  from = "/health"
+  to = "/.netlify/functions/health"
+  status = 200
+        ]]>
+      </file>
+      
+      <file name="netlify/functions/lark-callback.js">
+        <![CDATA[
+// Netlify Function for Lark callbacks
+const axios = require('axios');
+
+// Shared config loader
+const getConfig = () => ({
+  lark: {
+    appId: process.env.LARK_APP_ID,
+    appSecret: process.env.LARK_APP_SECRET,
+    verificationToken: process.env.LARK_VERIFICATION_TOKEN,
+  },
+  github: {
+    token: process.env.GITHUB_TOKEN,
+    repo: process.env.GITHUB_REPO,
+  },
+  channels: {
+    general: process.env.LARK_CHANNEL_GENERAL,
+    alerts: process.env.LARK_CHANNEL_ALERTS,
+    staging: process.env.LARK_CHANNEL_STAGING,
+  }
+});
+
+// Lark token cache (Netlify functions are stateless, but this helps within same execution)
+let tokenCache = null;
+
+async function getLarkToken(config) {
+  if (tokenCache && tokenCache.expiresAt > Date.now()) {
+    return tokenCache.token;
+  }
+  
+  const response = await axios.post(
+    'https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal',
+    {
+      app_id: config.lark.appId,
+      app_secret: config.lark.appSecret,
+    }
+  );
+  
+  tokenCache = {
+    token: response.data.tenant_access_token,
+    expiresAt: Date.now() + (response.data.expire - 60) * 1000,
+  };
+  
+  return tokenCache.token;
+}
+
+exports.handler = async (event) => {
+  // Only accept POST requests
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: 'Method not allowed' }),
+    };
+  }
+  
+  const config = getConfig();
+  const body = JSON.parse(event.body);
+  const { type, challenge, token } = body;
+  
+  // URL verification
+  if (type === 'url_verification') {
+    if (token !== config.lark.verificationToken) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({ error: 'Invalid token' }),
+      };
+    }
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ challenge }),
+    };
+  }
+  
+  // Event callback
+  if (type === 'event_callback') {
+    const { event: larkEvent } = body;
+    
+    try {
+      // Process different event types
+      switch (larkEvent.type) {
+        case 'card.action.trigger':
+          await handleCardAction(larkEvent, config);
+          break;
+        case 'message':
+          await handleMessage(larkEvent, config);
+          break;
+      }
+      
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ success: true }),
+      };
+    } catch (error) {
+      console.error('Error processing event:', error);
+      return {
+        statusCode: 200, // Still return 200 to prevent Lark retries
+        body: JSON.stringify({ success: false, error: error.message }),
+      };
+    }
+  }
+  
+  return {
+    statusCode: 400,
+    body: JSON.stringify({ error: 'Unknown event type' }),
+  };
+};
+
+// Handle card button clicks
+async function handleCardAction(event, config) {
+  const { action, open_id } = event;
+  const { action: actionType, ...params } = action.value;
+  
+  try {
+    switch (actionType) {
+      case 'trigger_workflow':
+        await triggerGitHubWorkflow(params.workflow_id, params.inputs, config);
+        await sendUserNotification(open_id, `✅ Workflow ${params.workflow_id} triggered`, config);
+        break;
+        
+      case 'retry_workflow':
+        await retryGitHubWorkflow(params.run_id, config);
+        await sendUserNotification(open_id, `🔄 Workflow retry initiated`, config);
+        break;
+    }
+  } catch (error) {
+    await sendUserNotification(open_id, `❌ Action failed: ${error.message}`, config);
+  }
+}
+
+// Handle chat messages
+async function handleMessage(event, config) {
+  const { text, open_id } = event;
+  const command = text.content.trim().toLowerCase();
+  
+  if (command.startsWith('/staging')) {
+    const args = command.split(' ');
+    const action = args[1];
+    const prNumber = args[2];
+    
+    if (!action || !prNumber) {
+      await sendUserNotification(open_id, 'Usage: /staging [deploy|destroy|status] [pr-number]', config);
+      return;
+    }
+    
+    await handleStagingCommand(action, prNumber, open_id, config);
+  } else if (command === '/help') {
+    await sendHelpMessage(open_id, config);
+  }
+}
+
+// Helper function to trigger GitHub workflow
+async function triggerGitHubWorkflow(workflowId, inputs, config) {
+  await axios.post(
+    `https://api.github.com/repos/${config.github.repo}/actions/workflows/${workflowId}/dispatches`,
+    {
+      ref: 'main',
+      inputs: inputs || {},
+    },
+    {
+      headers: {
+        Authorization: `token ${config.github.token}`,
+        Accept: 'application/vnd.github.v3+json',
+      },
+    }
+  );
+}
+
+// Helper function to send notification to user
+async function sendUserNotification(userId, message, config) {
+  const token = await getLarkToken(config);
+  
+  await axios.post(
+    'https://open.larksuite.com/open-apis/im/v1/messages',
+    {
+      receive_id: userId,
+      msg_type: 'text',
+      content: JSON.stringify({ text: message }),
+    },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { receive_id_type: 'open_id' },
+    }
+  );
+}
+
+// Handle staging commands
+async function handleStagingCommand(action, prNumber, userId, config) {
+  try {
+    await triggerGitHubWorkflow('staging-environment.yml', {
+      action: action,
+      pr_number: prNumber,
+    }, config);
+    
+    await sendUserNotification(
+      userId, 
+      `✅ Staging ${action} initiated for PR #${prNumber}`, 
+      config
+    );
+  } catch (error) {
+    await sendUserNotification(
+      userId, 
+      `❌ Failed to ${action} staging: ${error.message}`, 
+      config
+    );
+  }
+}
+
+// Send help message
+async function sendHelpMessage(userId, config) {
+  const helpText = `Available commands:
+• /staging [deploy|destroy|status] [pr-number] - Manage staging environments
+• /test [level] - Run tests (smoke, unit, integration, comprehensive)
+• /help - Show this help message`;
+  
+  await sendUserNotification(userId, helpText, config);
+}
+        ]]>
+      </file>
+      
+      <file name="netlify/functions/github-webhook.js">
+        <![CDATA[
+// Netlify Function for GitHub webhooks
+const crypto = require('crypto');
+const axios = require('axios');
+
+const getConfig = () => ({
+  lark: {
+    appId: process.env.LARK_APP_ID,
+    appSecret: process.env.LARK_APP_SECRET,
+  },
+  github: {
+    webhookSecret: process.env.GITHUB_WEBHOOK_SECRET,
+  },
+  channels: {
+    general: process.env.LARK_CHANNEL_GENERAL,
+    alerts: process.env.LARK_CHANNEL_ALERTS,
+    staging: process.env.LARK_CHANNEL_STAGING,
+  }
+});
+
+exports.handler = async (event) => {
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: 'Method not allowed' }),
+    };
+  }
+  
+  const config = getConfig();
+  
+  // Verify GitHub signature
+  const signature = event.headers['x-hub-signature-256'];
+  const body = event.body;
+  const expectedSignature = `sha256=${crypto
+    .createHmac('sha256', config.github.webhookSecret)
+    .update(body)
+    .digest('hex')}`;
+  
+  if (signature !== expectedSignature) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({ error: 'Invalid signature' }),
+    };
+  }
+  
+  const githubEvent = event.headers['x-github-event'];
+  const payload = JSON.parse(body);
+  
+  try {
+    // Process different GitHub events
+    switch (githubEvent) {
+      case 'workflow_run':
+        await handleWorkflowRun(payload, config);
+        break;
+      case 'pull_request':
+        await handlePullRequest(payload, config);
+        break;
+      case 'deployment_status':
+        await handleDeploymentStatus(payload, config);
+        break;
+    }
+    
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ received: true }),
+    };
+  } catch (error) {
+    console.error('Error processing webhook:', error);
+    return {
+      statusCode: 200, // Return 200 to prevent GitHub retries
+      body: JSON.stringify({ error: error.message }),
+    };
+  }
+};
+
+async function handleWorkflowRun(payload, config) {
+  const { workflow_run, repository } = payload;
+  const { name, conclusion, html_url, head_commit } = workflow_run;
+  
+  if (!conclusion) return; // Skip if workflow is still running
+  
+  const card = {
+    config: { wide_screen_mode: true },
+    header: {
+      title: { 
+        tag: 'plain_text', 
+        content: `${getStatusEmoji(conclusion)} Workflow: ${name}` 
+      },
+      template: getTemplateColor(conclusion),
+    },
+    elements: [
+      {
+        tag: 'markdown',
+        content: [
+          `**Repository:** ${repository.full_name}`,
+          `**Status:** ${conclusion}`,
+          `**Commit:** ${head_commit.message}`,
+          `**Author:** ${head_commit.author.name}`,
+        ].join('\n'),
+      },
+      {
+        tag: 'action',
+        actions: [
+          {
+            tag: 'button',
+            text: { tag: 'plain_text', content: 'View Run' },
+            type: 'default',
+            url: html_url,
+          },
+        ],
+      },
+    ],
+  };
+  
+  // Send to appropriate channel
+  const channel = conclusion === 'failure' ? config.channels.alerts : config.channels.general;
+  await sendToLark(channel, card, config);
+}
+
+async function sendToLark(channelId, card, config) {
+  // Get Lark token
+  const tokenResponse = await axios.post(
+    'https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal',
+    {
+      app_id: config.lark.appId,
+      app_secret: config.lark.appSecret,
+    }
+  );
+  
+  const token = tokenResponse.data.tenant_access_token;
+  
+  // Send message
+  await axios.post(
+    'https://open.larksuite.com/open-apis/im/v1/messages',
+    {
+      receive_id: channelId,
+      msg_type: 'interactive',
+      card: card,
+    },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { receive_id_type: 'chat_id' },
+    }
+  );
+}
+
+function getStatusEmoji(conclusion) {
+  const emojis = {
+    success: '✅',
+    failure: '❌',
+    cancelled: '⚠️',
+    skipped: '⏭️',
+  };
+  return emojis[conclusion] || '🔄';
+}
+
+function getTemplateColor(conclusion) {
+  const colors = {
+    success: 'green',
+    failure: 'red',
+    cancelled: 'yellow',
+    skipped: 'gray',
+  };
+  return colors[conclusion] || 'blue';
+}
+        ]]>
+      </file>
+      
+      <file name="netlify/functions/github-error.js">
+        <![CDATA[
+// Netlify Function for GitHub error reporting
+const axios = require('axios');
+
+exports.handler = async (event) => {
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: 'Method not allowed' }),
+    };
+  }
+  
+  const config = {
+    lark: {
+      appId: process.env.LARK_APP_ID,
+      appSecret: process.env.LARK_APP_SECRET,
+    },
+    channels: {
+      alerts: process.env.LARK_CHANNEL_ALERTS,
+    }
+  };
+  
+  const payload = JSON.parse(event.body);
+  const { error, metadata } = payload;
+  
+  // Format error card
+  const card = formatErrorCard(error, metadata);
+  
+  try {
+    // Get Lark token
+    const tokenResponse = await axios.post(
+      'https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal',
+      {
+        app_id: config.lark.appId,
+        app_secret: config.lark.appSecret,
+      }
+    );
+    
+    const token = tokenResponse.data.tenant_access_token;
+    
+    // Send to alerts channel
+    await axios.post(
+      'https://open.larksuite.com/open-apis/im/v1/messages',
+      {
+        receive_id: config.channels.alerts,
+        msg_type: 'interactive',
+        card: card,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { receive_id_type: 'chat_id' },
+      }
+    );
+    
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ success: true }),
+    };
+  } catch (error) {
+    console.error('Error sending to Lark:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: error.message }),
+    };
+  }
+};
+
+function formatErrorCard(error, metadata) {
+  const elements = [
+    {
+      tag: 'markdown',
+      content: `**Error Type:** ${error.type}\n**Component:** ${error.component}\n**Message:** ${error.message}`,
+    },
+  ];
+  
+  // Add log links if available
+  if (error.logUrl) {
+    elements.push({
+      tag: 'action',
+      actions: [
+        {
+          tag: 'button',
+          text: { tag: 'plain_text', content: 'View Logs' },
+          type: 'primary',
+          url: error.logUrl,
+        },
+      ],
+    });
+  }
+  
+  // Add metadata
+  if (metadata) {
+    elements.push({
+      tag: 'note',
+      elements: [
+        {
+          tag: 'plain_text',
+          content: `Commit: ${metadata.commit || 'N/A'}\nAuthor: ${metadata.author || 'N/A'}\nTime: ${metadata.timestamp || new Date().toISOString()}`,
+        },
+      ],
+    });
+  }
+  
+  return {
+    config: { wide_screen_mode: true },
+    header: {
+      title: { tag: 'plain_text', content: `🚨 ${error.title || 'Error Detected'}` },
+      template: 'red',
+    },
+    elements: elements,
+  };
+}
+        ]]>
+      </file>
+      
+      <file name="netlify/functions/health.js">
+        <![CDATA[
+// Health check endpoint
+exports.handler = async (event) => {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      service: 'lark-github-bot-netlify',
+    }),
+  };
+};
+        ]]>
+      </file>
+    </server_code>
+    
+    <github_workflows>
+      <workflow name="lark-controller.yml">
+        <![CDATA[
+name: Lark Controller
+on:
+  repository_dispatch:
+    types: [lark-command]
+  
+jobs:
+  process-command:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Process Lark Command
+        env:
+          COMMAND: ${{ github.event.client_payload.command }}
+          PARAMS: ${{ toJson(github.event.client_payload.params) }}
+          USER_ID: ${{ github.event.client_payload.user_id }}
+        run: |
+          echo "Processing command: $COMMAND"
+          echo "Parameters: $PARAMS"
+          
+      - name: Execute Command
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const command = process.env.COMMAND;
+            const params = JSON.parse(process.env.PARAMS);
+            
+            switch(command) {
+              case 'run-tests':
+                await github.rest.actions.createWorkflowDispatch({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: 'test-on-demand.yml',
+                  ref: 'main',
+                  inputs: params
+                });
+                break;
+              case 'deploy-staging':
+                await github.rest.actions.createWorkflowDispatch({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: 'staging-environment.yml',
+                  ref: 'main',
+                  inputs: params
+                });
+                break;
+            }
+            
+      - name: Send Response to Lark
+        if: always()
+        env:
+          LARK_BOT_URL: ${{ secrets.LARK_BOT_URL }}
+          USER_ID: ${{ github.event.client_payload.user_id }}
+        run: |
+          STATUS="success"
+          if [ "${{ job.status }}" != "success" ]; then
+            STATUS="failure"
+          fi
+          
+          curl -X POST "${LARK_BOT_URL}/github/callback" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"type\": \"command_response\",
+              \"user_id\": \"${USER_ID}\",
+              \"command\": \"${COMMAND}\",
+              \"status\": \"${STATUS}\"
+            }"
+        ]]>
+      </workflow>
+      
+      <workflow name="enhanced-staging-environment.yml">
+        <description>Modified staging workflow with Lark error reporting</description>
+        <modifications>
+          <![CDATA[
+# Add to the terraform apply step in staging-environment.yml:
+
+- name: Terraform Apply with Lark Reporting
+  id: terraform-apply
+  timeout-minutes: 20
+  run: |
+    # Capture output and errors
+    APPLY_OUTPUT=""
+    APPLY_ERROR=""
+    APPLY_SUCCESS=true
+    
+    # Run terraform apply and capture output
+    if ! APPLY_OUTPUT=$(timeout 1200 terraform apply -auto-approve tfplan 2>&1); then
+      APPLY_SUCCESS=false
+      APPLY_ERROR="$APPLY_OUTPUT"
+    fi
+    
+    # Extract log URLs from error messages
+    LOG_URL=""
+    if [[ "$APPLY_SUCCESS" == "false" ]]; then
+      # Extract Cloud Run log URL if present
+      LOG_URL=$(echo "$APPLY_ERROR" | grep -oP 'https://console\.cloud\.google\.com/logs/viewer\?[^\s]+' | head -1)
+      
+      # Send error to Lark
+      if [[ -n "${{ secrets.LARK_BOT_URL }}" ]]; then
+        curl -X POST "${{ secrets.LARK_BOT_URL }}/github/error" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"type\": \"terraform_failure\",
+            \"workflow\": \"staging-environment\",
+            \"pr_number\": \"${{ github.event.pull_request.number }}\",
+            \"error\": {
+              \"type\": \"cloud_run_startup_failure\",
+              \"component\": \"terraform\",
+              \"message\": \"$(echo "$APPLY_ERROR" | head -20 | jq -Rs .)\",
+              \"logUrl\": \"$LOG_URL\",
+              \"title\": \"Staging Deployment Failed - PR #${{ github.event.pull_request.number }}\"
+            },
+            \"metadata\": {
+              \"commit\": \"${{ github.sha }}\",
+              \"author\": \"${{ github.actor }}\",
+              \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+            }
+          }"
+      fi
+      
+      echo "Terraform apply failed"
+      echo "$APPLY_ERROR"
+      exit 1
+    fi
+    
+    # Success - send update to Lark
+    if [[ -n "${{ secrets.LARK_BOT_URL }}" ]]; then
+      BACKEND_URL=$(terraform output -raw backend_url)
+      FRONTEND_URL=$(terraform output -raw frontend_url)
+      
+      curl -X POST "${{ secrets.LARK_BOT_URL }}/github/success" \
+        -H "Content-Type: application/json" \
+        -d "{
+          \"type\": \"staging_deployed\",
+          \"pr_number\": \"${{ github.event.pull_request.number }}\",
+          \"urls\": {
+            \"backend\": \"$BACKEND_URL\",
+            \"frontend\": \"$FRONTEND_URL\"
+          }
+        }"
+    fi
+          ]]>
+        </modifications>
+      </workflow>
+    </github_workflows>
+  </implementation>
+
+  <setup_guide>
+    <prerequisites>
+      <item>GitHub repository with admin access</item>
+      <item>Lark account with ability to create apps</item>
+      <item>Vercel/Netlify account or server for bot deployment</item>
+      <item>Basic understanding of copy-paste operations</item>
+    </prerequisites>
+    
+    <steps>
+      <step number="1" title="Create Lark App" estimated_time="5 minutes">
+        <substeps>
+          <substep>Open https://open.larksuite.com/app in your browser</substep>
+          <substep>Click "Create App" button (big blue button)</substep>
+          <substep>Choose "Custom App" (not "Subscribe to Bot")</substep>
+          <substep>Fill in:
+            - App name: "GitHub Bot"
+            - App description: "GitHub Actions Integration"
+            - App icon: Upload any image or use default
+          </substep>
+          <substep>Click "Create" button</substep>
+          <substep>You'll see your app dashboard - keep this tab open</substep>
+        </substeps>
+      </step>
+      
+      <step number="2" title="Get Lark App Credentials" estimated_time="2 minutes">
+        <substeps>
+          <substep>In your Lark app dashboard, click "Credentials & Basic Info" on left menu</substep>
+          <substep>Copy these 3 values to a notepad:
+            - App ID: (looks like: cli_a4d3c2b1a0f9g8h7)
+            - App Secret: (looks like: 1234567890abcdef1234567890abcdef)
+            - Verification Token: (looks like: AbCdEfGhIjKlMnOpQrStUvWxYz123456)
+          </substep>
+          <substep>Keep notepad open - you'll need these soon</substep>
+        </substeps>
+      </step>
+      
+      <step number="3" title="Set Up Bot Permissions" estimated_time="3 minutes">
+        <substeps>
+          <substep>In Lark app dashboard, click "Permissions & Scopes" on left menu</substep>
+          <substep>Click "Add Scopes" button</substep>
+          <substep>Search and add these permissions (click checkbox for each):
+            - "Send messages" (im:message)
+            - "Send messages to groups" (im:message.group_at_msg)
+            - "Access chat information" (im:chat)
+            - "Get user ID" (contact:user.id)
+          </substep>
+          <substep>Click "Confirm" button at bottom</substep>
+        </substeps>
+      </step>
+      
+      <step number="4" title="Deploy Bot Server" estimated_time="5 minutes">
+        <note>Choose either Option A (Vercel) OR Option B (Netlify) - both are free</note>
+        
+        <option name="A" platform="Vercel">
+          <substeps>
+            <substep>Open https://vercel.com and sign in (create free account if needed)</substep>
+            <substep>Click "Add New..." button → Choose "Project"</substep>
+            <substep>Click "Continue with GitHub"</substep>
+            <substep>Create new repository called "lark-github-bot"</substep>
+            <substep>In your computer, create folder "lark-github-bot"</substep>
+            <substep>Create these 3 files in the folder (copy exactly from spec above):
+              - index.js (copy from spec section server_code/index.js)
+              - package.json (copy from spec section server_code/package.json)
+              - vercel.json (copy from spec section server_code/vercel.json)
+            </substep>
+            <substep>Push to GitHub:
+              - Open terminal in folder
+              - Run: git init
+              - Run: git add .
+              - Run: git commit -m "Initial bot"
+              - Run: git remote add origin https://github.com/YOUR_USERNAME/lark-github-bot
+              - Run: git push -u origin main
+            </substep>
+            <substep>Back in Vercel, import the repository</substep>
+            <substep>Before deploying, add environment variables (from your notepad):
+              - LARK_APP_ID = (your App ID)
+              - LARK_APP_SECRET = (your App Secret)
+              - LARK_VERIFICATION_TOKEN = (your Verification Token)
+              - GITHUB_TOKEN = (we'll get this next)
+              - GITHUB_REPO = owner/repo (like: mycompany/netra-core)
+              - GITHUB_WEBHOOK_SECRET = (make up a random string like: my-secret-key-123)
+              - LARK_CHANNEL_GENERAL = (we'll get this later)
+              - LARK_CHANNEL_ALERTS = (we'll get this later)
+              - LARK_CHANNEL_STAGING = (we'll get this later)
+            </substep>
+            <substep>Click "Deploy" button</substep>
+            <substep>Wait for deployment (takes 1-2 minutes)</substep>
+            <substep>Copy your deployment URL (looks like: https://lark-github-bot.vercel.app)</substep>
+          </substeps>
+        </option>
+        
+        <option name="B" platform="Netlify">
+          <substeps>
+            <substep>Open https://netlify.com and sign in (create free account if needed)</substep>
+            <substep>Click "Add new site" → "Import an existing project"</substep>
+            <substep>Choose "Deploy with GitHub"</substep>
+            <substep>Create new repository called "lark-github-bot"</substep>
+            <substep>In your computer, create folder "lark-github-bot"</substep>
+            <substep>Create folder structure:
+              lark-github-bot/
+              ├── netlify.toml (copy from spec section server_code/netlify.toml)
+              ├── package.json (copy from spec section server_code/package.json)
+              └── netlify/
+                  └── functions/
+                      ├── lark-callback.js (copy from spec)
+                      ├── github-webhook.js (copy from spec)
+                      ├── github-error.js (copy from spec)
+                      └── health.js (copy from spec)
+            </substep>
+            <substep>Push to GitHub:
+              - Open terminal in folder
+              - Run: git init
+              - Run: git add .
+              - Run: git commit -m "Initial bot"
+              - Run: git remote add origin https://github.com/YOUR_USERNAME/lark-github-bot
+              - Run: git push -u origin main
+            </substep>
+            <substep>Back in Netlify, select the repository</substep>
+            <substep>Click "Site configuration" → "Environment variables"</substep>
+            <substep>Add environment variables one by one (click "Add a variable" for each):
+              - Key: LARK_APP_ID | Value: (your App ID)
+              - Key: LARK_APP_SECRET | Value: (your App Secret)
+              - Key: LARK_VERIFICATION_TOKEN | Value: (your Verification Token)
+              - Key: GITHUB_TOKEN | Value: (we'll get this next)
+              - Key: GITHUB_REPO | Value: owner/repo (like: mycompany/netra-core)
+              - Key: GITHUB_WEBHOOK_SECRET | Value: (make up a random string)
+              - Key: LARK_CHANNEL_GENERAL | Value: (we'll get this later)
+              - Key: LARK_CHANNEL_ALERTS | Value: (we'll get this later)
+              - Key: LARK_CHANNEL_STAGING | Value: (we'll get this later)
+            </substep>
+            <substep>Click "Deploy site" button</substep>
+            <substep>Wait for deployment (takes 2-3 minutes)</substep>
+            <substep>Copy your deployment URL (looks like: https://amazing-name-123.netlify.app)</substep>
+            <substep>Optional: Go to "Site configuration" → "Site details" → "Change site name" to get a better URL</substep>
+          </substeps>
+        </option>
+      </step>
+      
+      <step number="5" title="Create GitHub Token" estimated_time="2 minutes">
+        <substeps>
+          <substep>Open GitHub → Click your profile picture → Settings</substep>
+          <substep>Scroll down to "Developer settings" at bottom of left menu</substep>
+          <substep>Click "Personal access tokens" → "Tokens (classic)"</substep>
+          <substep>Click "Generate new token" → "Generate new token (classic)"</substep>
+          <substep>Fill in:
+            - Note: "Lark Bot Token"
+            - Expiration: 90 days (or your preference)
+            - Scopes: Check these boxes:
+              ✓ repo (all sub-items)
+              ✓ workflow
+              ✓ write:packages
+              ✓ read:org
+          </substep>
+          <substep>Click "Generate token" button at bottom</substep>
+          <substep>IMPORTANT: Copy the token NOW (starts with ghp_) - you won't see it again!</substep>
+          <substep>Go back to Vercel → Settings → Environment Variables</substep>
+          <substep>Update GITHUB_TOKEN with your copied token</substep>
+          <substep>Click "Save"</substep>
+        </substeps>
+      </step>
+      
+      <step number="6" title="Configure Lark Callback URL" estimated_time="3 minutes">
+        <substeps>
+          <substep>Go back to Lark app dashboard</substep>
+          <substep>Click "Event Subscriptions" on left menu</substep>
+          <substep>Toggle "Enable events" to ON</substep>
+          <substep>In "Request URL" field, enter:
+            - If using Vercel: https://YOUR-URL.vercel.app/lark/callback
+            - If using Netlify: https://YOUR-URL.netlify.app/lark/callback
+            (Replace YOUR-URL with your actual deployment URL from step 4)
+          </substep>
+          <substep>Click "Save" - it should show "Verified" in green</substep>
+          <substep>If it shows error, check your deployment logs:
+            - Vercel: Go to Vercel dashboard → Functions tab → View logs
+            - Netlify: Go to Netlify dashboard → Functions tab → View logs
+          </substep>
+          <substep>Click "Add Events" and add:
+            - "Receive messages" (im.message.receive_v1)
+            - "Message read" (im.message.message_read_v1)
+          </substep>
+          <substep>Click "Save" at bottom</substep>
+        </substeps>
+      </step>
+      
+      <step number="7" title="Create Lark Groups and Get IDs" estimated_time="5 minutes">
+        <substeps>
+          <substep>Open Lark app (desktop or mobile)</substep>
+          <substep>Create 3 group chats:
+            - "GitHub General" (for all notifications)
+            - "GitHub Alerts" (for failures/errors)
+            - "GitHub Staging" (for staging deployments)
+          </substep>
+          <substep>For each group:
+            - Click group name at top
+            - Click "Settings" (gear icon)
+            - Click "Bots"
+            - Click "Add Bot"
+            - Search for your "GitHub Bot" app
+            - Click "Add"
+          </substep>
+          <substep>To get group IDs, in each group:
+            - Type: @GitHub Bot (mention your bot)
+            - Send message: "/info"
+            - Bot will reply with chat ID (looks like: oc_a1b2c3d4e5f6)
+            - Copy each ID to notepad
+          </substep>
+          <substep>Update environment variables:
+            For Vercel:
+            - Go to Vercel dashboard → Settings → Environment Variables
+            - Update: LARK_CHANNEL_GENERAL = (general group chat ID)
+            - Update: LARK_CHANNEL_ALERTS = (alerts group chat ID)
+            - Update: LARK_CHANNEL_STAGING = (staging group chat ID)
+            - Click "Save"
+            
+            For Netlify:
+            - Go to Netlify dashboard → Site configuration → Environment variables
+            - Update each variable with the chat IDs
+            - Click "Save"
+          </substep>
+          <substep>Redeploy the app:
+            - Vercel: Click "Redeploy" button in dashboard
+            - Netlify: Click "Trigger deploy" → "Deploy site"
+          </substep>
+        </substeps>
+      </step>
+      
+      <step number="8" title="Configure GitHub Repository" estimated_time="5 minutes">
+        <substeps>
+          <substep>Open your GitHub repository</substep>
+          <substep>Go to Settings → Secrets and variables → Actions</substep>
+          <substep>Add these repository secrets:
+            - LARK_BOT_URL = Your deployment URL from step 4
+              (Vercel: https://YOUR-URL.vercel.app)
+              (Netlify: https://YOUR-URL.netlify.app)
+            - LARK_WEBHOOK_URL = (we'll get this next for simple notifications)
+          </substep>
+          <substep>Go to Settings → Webhooks</substep>
+          <substep>Click "Add webhook"</substep>
+          <substep>Fill in:
+            - Payload URL: 
+              (Vercel: https://YOUR-URL.vercel.app/github/webhook)
+              (Netlify: https://YOUR-URL.netlify.app/github/webhook)
+            - Content type: application/json
+            - Secret: (same as GITHUB_WEBHOOK_SECRET from step 4)
+            - Events: Choose "Let me select individual events"
+              ✓ Check runs
+              ✓ Deployments
+              ✓ Deployment statuses
+              ✓ Issues
+              ✓ Pull requests
+              ✓ Workflow runs
+          </substep>
+          <substep>Click "Add webhook" button</substep>
+        </substeps>
+      </step>
+      
+      <step number="9" title="Add Simple Webhook for Quick Notifications" estimated_time="2 minutes">
+        <substeps>
+          <substep>In Lark, go to "GitHub General" group</substep>
+          <substep>Click group settings → Bots</substep>
+          <substep>Click "Add Bot" → Choose "Custom Bot" (different from app bot)</substep>
+          <substep>Name it "GitHub Webhook"</substep>
+          <substep>Copy the webhook URL (looks like: https://open.larksuite.com/open-apis/bot/v2/hook/xxx)</substep>
+          <substep>In GitHub repository settings, update secret:
+            - LARK_WEBHOOK_URL = (copied webhook URL)
+          </substep>
+        </substeps>
+      </step>
+      
+      <step number="10" title="Add Workflows to Repository" estimated_time="3 minutes">
+        <substeps>
+          <substep>In your repository, create folder: .github/workflows</substep>
+          <substep>Add these workflow files:
+            - lark-controller.yml (copy from spec)
+            - Copy lark-notifications.yml from lark/ folder
+          </substep>
+          <substep>Update existing workflows to add Lark reporting (see spec modifications)</substep>
+          <substep>Commit and push changes</substep>
+        </substeps>
+      </step>
+      
+      <step number="11" title="Test Everything Works" estimated_time="2 minutes">
+        <substeps>
+          <substep>Create a test pull request in your repository</substep>
+          <substep>You should see notification in "GitHub General" Lark group</substep>
+          <substep>In Lark, type: /staging deploy 1 (where 1 is PR number)</substep>
+          <substep>You should see staging deployment start</substep>
+          <substep>If deployment fails, you'll see error with log links in "GitHub Alerts"</substep>
+          <substep>Click buttons in Lark messages to test interactions</substep>
+        </substeps>
+      </step>
+    </steps>
+    
+    <troubleshooting>
+      <issue problem="Lark bot doesn't respond">
+        <solution>
+          - Vercel: Check Functions tab → View logs for errors
+          - Netlify: Check Functions tab → View function logs
+          - Common cause: Missing or incorrect environment variables
+        </solution>
+      </issue>
+      
+      <issue problem="Can't verify callback URL">
+        <solution>
+          - Make sure LARK_VERIFICATION_TOKEN matches in both places
+          - Vercel: Check environment variables in Settings
+          - Netlify: Check Site configuration → Environment variables
+          - Try redeploying after fixing variables
+        </solution>
+      </issue>
+      
+      <issue problem="No notifications received">
+        <solution>
+          - Check GitHub webhook delivery history in Settings → Webhooks
+          - Look for failed deliveries and click to see error details
+          - Verify webhook URL ends with /github/webhook
+        </solution>
+      </issue>
+      
+      <issue problem="Buttons don't work">
+        <solution>
+          - Ensure bot has correct permissions and is added to the group
+          - Check that all required scopes are enabled in Lark app
+          - Verify GitHub token has workflow permissions
+        </solution>
+      </issue>
+      
+      <issue problem="Can't find chat ID">
+        <solution>
+          - Mention bot with @BotName and type /info
+          - Bot should reply with chat ID
+          - If not, check bot is properly added to the group
+        </solution>
+      </issue>
+      
+      <issue problem="Netlify functions timeout">
+        <solution>
+          - Netlify functions have 10 second timeout by default
+          - For long operations, use background functions
+          - Or switch to Vercel which has longer timeouts
+        </solution>
+      </issue>
+      
+      <issue problem="Environment variables not working">
+        <solution>
+          - Vercel: Must redeploy after changing variables
+          - Netlify: Must trigger new deploy after changes
+          - Check variable names match exactly (case-sensitive)
+        </solution>
+      </issue>
+    </troubleshooting>
+    
+    <total_setup_time>30 minutes</total_setup_time>
+  </setup_guide>
+
+  <commands>
+    <command name="/staging">
+      <syntax>/staging [deploy|destroy|status] [pr-number]</syntax>
+      <description>Manage staging environments</description>
+      <examples>
+        <example>/staging deploy 123</example>
+        <example>/staging destroy 123</example>
+        <example>/staging status 123</example>
+      </examples>
+    </command>
+    
+    <command name="/test">
+      <syntax>/test [smoke|unit|integration|comprehensive|critical]</syntax>
+      <description>Run test suites</description>
+      <examples>
+        <example>/test smoke</example>
+        <example>/test comprehensive</example>
+      </examples>
+    </command>
+    
+    <command name="/workflow">
+      <syntax>/workflow [run|cancel|retry] [workflow-name] [run-id]</syntax>
+      <description>Control GitHub workflows</description>
+      <examples>
+        <example>/workflow run staging-environment</example>
+        <example>/workflow cancel 123456789</example>
+        <example>/workflow retry 123456789</example>
+      </examples>
+    </command>
+    
+    <command name="/help">
+      <syntax>/help</syntax>
+      <description>Show available commands</description>
+    </command>
+    
+    <command name="/info">
+      <syntax>/info</syntax>
+      <description>Get chat/channel ID and bot information</description>
+    </command>
+  </commands>
+
+  <error_handling>
+    <terraform_errors>
+      <error type="cloud_run_startup_failure">
+        <detection>Message contains "Logs URL:" and "console.cloud.google.com"</detection>
+        <extraction>Regex: /Logs URL: (https:\/\/console\.cloud\.google\.com\/logs\/viewer[^\s]+)/</extraction>
+        <presentation>Direct clickable link in Lark card with "View Cloud Run Logs" button</presentation>
+      </error>
+      
+      <error type="terraform_timeout">
+        <detection>Exit code 124 from timeout command</detection>
+        <presentation>Show partial apply results and suggest manual investigation</presentation>
+      </error>
+      
+      <error type="resource_conflict">
+        <detection>Message contains "already exists"</detection>
+        <presentation>Suggest destroy and redeploy with cleanup instructions</presentation>
+      </error>
+    </terraform_errors>
+    
+    <test_failures>
+      <error type="unit_test_failure">
+        <detection>pytest exit code != 0</detection>
+        <extraction>Parse pytest output for failed test names</extraction>
+        <presentation>List failed tests with direct links to code</presentation>
+      </error>
+      
+      <error type="smoke_test_timeout">
+        <detection>Smoke test exceeds 30 second limit</detection>
+        <presentation>Show which test hung and suggest investigation</presentation>
+      </error>
+    </test_failures>
+  </error_handling>
+
+  <monitoring>
+    <metrics>
+      <metric name="workflow_success_rate">Track success/failure ratio per workflow</metric>
+      <metric name="deployment_duration">Monitor staging deployment times</metric>
+      <metric name="test_execution_time">Track test suite performance</metric>
+      <metric name="error_resolution_time">Measure time from error to fix</metric>
+    </metrics>
+    
+    <alerts>
+      <alert trigger="3 consecutive failures">Send urgent alert to leads</alert>
+      <alert trigger="deployment takes > 30 minutes">Notify of potential issue</alert>
+      <alert trigger="test coverage drops below 95%">Warning message</alert>
+    </alerts>
+  </monitoring>
+
+  <security>
+    <authentication>
+      <measure>Verify Lark signatures on all callbacks</measure>
+      <measure>Validate GitHub webhook signatures</measure>
+      <measure>Rotate tokens every 90 days</measure>
+    </authentication>
+    
+    <authorization>
+      <measure>Limit workflow triggers to authorized users</measure>
+      <measure>Implement role-based access for commands</measure>
+      <measure>Audit log all actions</measure>
+    </authorization>
+    
+    <data_protection>
+      <measure>Never log sensitive credentials</measure>
+      <measure>Encrypt environment variables</measure>
+      <measure>Use least privilege for GitHub token</measure>
+    </data_protection>
+  </security>
+</specification>

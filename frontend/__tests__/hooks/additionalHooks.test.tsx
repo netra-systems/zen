@@ -2,7 +2,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 // Using Jest, not vitest
 import { useDemoWebSocket } from '@/hooks/useDemoWebSocket';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { WebSocketProvider } from '@/contexts/WebSocketContext';
+import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import React from 'react';
 
 // Test 65: useDemoWebSocket connection

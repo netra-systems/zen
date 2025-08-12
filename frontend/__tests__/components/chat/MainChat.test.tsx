@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import MainChat from '@/components/chat/MainChat';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
-import { WebSocketProvider } from '@/contexts/WebSocketContext';
+import { WebSocketProvider } from '@/providers/WebSocketProvider';
 
 // Mock dependencies
 jest.mock('@/store/unified-chat');

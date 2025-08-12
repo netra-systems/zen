@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { AgentStatusPanel } from '@/components/chat/AgentStatusPanel';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { WebSocketProvider } from '@/contexts/WebSocketContext';
+import { WebSocketProvider } from '@/providers/WebSocketProvider';
 
 // Mock dependencies
 jest.mock('@/store/unified-chat');
