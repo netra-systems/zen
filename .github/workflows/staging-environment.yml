@@ -360,6 +360,7 @@ jobs:
             -var="frontend_image=${{ steps.frontend-build.outputs.frontend_image }}" \
             -var="max_instances=${{ steps.config.outputs.max_instances }}" \
             -var="domain=${{ env.STAGING_DOMAIN }}" \
+            -var="postgres_password=${{ secrets.STAGING_DB_PASSWORD }}" \
             -out=tfplan
 
       - name: Terraform Apply
@@ -613,7 +614,8 @@ jobs:
             -var="backend_image=placeholder" \
             -var="frontend_image=placeholder" \
             -var="max_instances=1" \
-            -var="domain=${{ env.STAGING_DOMAIN }}"
+            -var="domain=${{ env.STAGING_DOMAIN }}" \
+            -var="postgres_password=${{ secrets.STAGING_DB_PASSWORD }}"
 
       - name: Clean up container images
         run: |
