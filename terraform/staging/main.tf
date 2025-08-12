@@ -73,11 +73,6 @@ resource "google_cloud_run_service" "backend" {
         }
         
         env {
-          name  = "PORT"
-          value = "8080"
-        }
-        
-        env {
           name  = "DATABASE_URL"
           value = "postgresql://${google_sql_user.pr.name}:${var.postgres_password}@/${google_sql_database.pr.name}?host=/cloudsql/${local.sql_instance_name}"
         }
@@ -162,11 +157,6 @@ resource "google_cloud_run_service" "frontend" {
         
         ports {
           container_port = 8080
-        }
-        
-        env {
-          name  = "PORT"
-          value = "8080"
         }
         
         env {
