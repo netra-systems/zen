@@ -1,6 +1,7 @@
 import 'whatwg-fetch';
 import '@testing-library/jest-dom';
 import fetchMock from 'jest-fetch-mock';
+import React from 'react';
 
 fetchMock.enableMocks();
 
@@ -152,3 +153,42 @@ afterEach(() => {
   sessionStorage.clear();
   Date.now = originalDateNow;
 });
+
+// Mock the useWebSocket hook to avoid WebSocket connections in tests
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: () => ({
+    sendMessage: jest.fn(),
+    connect: jest.fn(),
+    disconnect: jest.fn(),
+    isConnected: true,
+    connectionState: 'connected',
+    error: null,
+    lastMessage: null,
+    reconnectAttempts: 0,
+    messageQueue: [],
+    status: 'OPEN',
+    messages: [],
+    ws: null,
+    subscribe: jest.fn(),
+    unsubscribe: jest.fn(),
+  })
+}));
+
+// Mock the WebSocketProvider context
+jest.mock('@/providers/WebSocketProvider', () => ({
+  WebSocketProvider: ({ children }: { children: React.ReactNode }) => children,
+  WebSocketContext: React.createContext(null),
+  useWebSocketContext: () => ({
+    sendMessage: jest.fn(),
+    connect: jest.fn(),
+    disconnect: jest.fn(),
+    isConnected: true,
+    connectionState: 'connected',
+    error: null,
+    lastMessage: null,
+    reconnectAttempts: 0,
+    messageQueue: [],
+    status: 'OPEN',
+    messages: [],
+  })
+}));
