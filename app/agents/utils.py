@@ -114,7 +114,7 @@ def extract_json_from_response(response: str, max_retries: int = 3) -> Optional[
         lambda s: json.loads(s),
         
         # Strategy 2: Try to fix common JSON errors first (moved up in priority)
-        lambda s: json.loads(fix_common_json_errors(s)),
+        lambda s: (lambda fixed: (print(f"DEBUG fix_common_json_errors returned: {repr(fixed[:100])}"), json.loads(fixed))[-1])(fix_common_json_errors(s)),
         
         # Strategy 3: Find content between first { and last }
         lambda s: json.loads(s[s.find('{'):s.rfind('}') + 1]) if '{' in s and '}' in s else None,
@@ -231,40 +231,11 @@ def fix_common_json_errors(json_str: str) -> str:
     # Look for patterns like: "key": "value with "quotes" inside"
     # We need to be careful not to break valid JSON
     
-    # First pass: Handle obvious cases where quotes appear within string values
-    # Pattern: "key": "..."word"..." -> "key": "...\"word\"..."
-    lines = json_str.split('\n')
-    fixed_lines = []
-    
-    for line in lines:
-        # Check if line contains a key-value pair with potential unescaped quotes
-        if ':' in line and line.count('"') > 4:
-            # Try to identify the key and value boundaries
-            colon_idx = line.find(':')
-            if colon_idx > 0:
-                # Find the value part after the colon
-                value_part = line[colon_idx + 1:].strip()
-                if value_part.startswith('"'):
-                    # Find the real end of the value (should be before comma or end of line)
-                    # Count quotes to detect unescaped ones
-                    quote_positions = [i for i, c in enumerate(value_part) if c == '"']
-                    if len(quote_positions) > 2:
-                        # There might be unescaped quotes
-                        # Keep first and last, escape the middle ones
-                        new_value_part = value_part
-                        for i in range(1, len(quote_positions) - 1):
-                            pos = quote_positions[i]
-                            if pos > 0 and new_value_part[pos - 1] != '\\':
-                                # This quote is not escaped, escape it
-                                new_value_part = new_value_part[:pos] + '\\' + new_value_part[pos:]
-                                # Adjust positions for the added backslash
-                                quote_positions = [p + 1 if p > pos else p for p in quote_positions]
-                        
-                        line = line[:colon_idx + 1] + ' ' + new_value_part
-        
-        fixed_lines.append(line)
-    
-    json_str = '\n'.join(fixed_lines)
+    # DISABLED: This logic is breaking valid JSON with multiple key-value pairs
+    # TODO: Improve detection to only fix truly broken JSON
+    # The original code was trying to escape quotes inside string values,
+    # but it was incorrectly triggering on valid JSON with multiple key-value pairs
+    # For now, we skip this entirely
     
     # Ensure property names are quoted (but be careful not to quote already quoted names)
     # Match unquoted property names and quote them

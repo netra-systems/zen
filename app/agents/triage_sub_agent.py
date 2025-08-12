@@ -397,22 +397,26 @@ class TriageSubAgent(BaseSubAgent):
         
         # Strategy 3: Extract key-value pairs manually
         try:
+            # Try to extract individual key-value pairs using regex
+            # This handles both single-line and multi-line JSON
+            pattern = r'"([^"]+)"\s*:\s*"([^"]*)"'
+            matches = re.findall(pattern, response)
+            
+            if matches:
+                result = {key: value for key, value in matches}
+                return result
+                
+            # Fallback to line-by-line extraction for non-standard formats
             lines = response.split('\n')
             result = {}
             
             for line in lines:
                 if ':' in line:
-                    key_match = re.match(r'^\s*"?(\w+)"?\s*:\s*(.+)', line)
+                    # More precise pattern to avoid capturing too much
+                    key_match = re.match(r'^\s*"?(\w+)"?\s*:\s*"([^"]*)"', line)
                     if key_match:
                         key = key_match.group(1)
-                        value = key_match.group(2).strip().strip(',').strip('"')
-                        
-                        # Try to parse value as JSON
-                        try:
-                            value = json.loads(value)
-                        except (json.JSONDecodeError, ValueError):
-                            pass  # Keep as string if not valid JSON
-                        
+                        value = key_match.group(2)
                         result[key] = value
             
             if result:

@@ -318,13 +318,16 @@ class TestDatabaseRepositoryTransactions:
             result = await mock_repository.create(mock_session, **data)
             results.append(result)
         
-        # Assert partial success with rollbacks
-        successful_results = [r for r in results if r != None]
-        failed_results = [r for r in results if r == None]
+        # After the IntegrityError on the third commit, all subsequent creates
+        # will use a session that has already failed, so they will also fail
+        successful_results = [r for r in results if r is not None]
+        failed_results = [r for r in results if r is None]
         
+        # First two succeed, third fails and triggers rollback
+        # BaseRepository.create returns None on IntegrityError
         assert len(successful_results) == 2  # First two succeed
-        assert len(failed_results) == 3   # Third and remaining fail
-        assert mock_session.rollback.call_count >= 1
+        assert len(failed_results) == 3   # Third fails, and subsequent ones also fail
+        assert mock_session.rollback.call_count >= 1  # At least one rollback for the failed transaction
     
     @pytest.mark.asyncio
     async def test_deadlock_detection_and_retry(self, mock_session, mock_repository, transaction_manager):
@@ -337,27 +340,37 @@ class TestDatabaseRepositoryTransactions:
             nonlocal retry_count
             retry_count += 1
             if retry_count <= 2:  # Fail first 2 attempts
-                transaction_manager.simulate_deadlock(mock_session)
+                # Raise SQLAlchemyError to simulate deadlock
+                raise SQLAlchemyError("deadlock detected")
             return None  # Success on third attempt
         
         mock_session.commit.side_effect = deadlock_then_success
         
         # Implement retry logic
         async def create_with_retry(repository, session, **data):
+            successful_result = None
             for attempt in range(max_retries):
                 try:
-                    return await repository.create(session, **data)
-                except SQLAlchemyError:
+                    result = await repository.create(session, **data)
+                    if result is not None:
+                        successful_result = result
+                        break
+                except Exception:
+                    # On SQLAlchemyError, create returns None rather than raising
                     if attempt == max_retries - 1:
-                        raise
+                        break
                     await asyncio.sleep(0.01 * (2 ** attempt))  # Exponential backoff
+            return successful_result
         
         # Execute with retry
         result = await create_with_retry(mock_repository, mock_session, name='Retry Entity')
         
         # Assert success after retries
+        # The first two attempts will fail with SQLAlchemyError (caught in create method)
+        # The third attempt should succeed
         assert retry_count == 3
         assert mock_session.commit.call_count == 3
+        # BaseRepository.create catches SQLAlchemyError and calls rollback internally
         assert mock_session.rollback.call_count >= 2  # Rollback on failed attempts
     
     @pytest.mark.asyncio 
@@ -368,30 +381,43 @@ class TestDatabaseRepositoryTransactions:
         reconnected_session = AsyncMock(spec=AsyncSession)
         
         # Setup disconnection simulation
+        disconnected_session.add = MagicMock()
         disconnected_session.commit.side_effect = DisconnectionError(
             "connection lost", None, None
         )
+        disconnected_session.rollback = AsyncMock()
+        disconnected_session.refresh = AsyncMock()
+        disconnected_session.execute = AsyncMock()
         
         # Setup successful reconnection
         reconnected_session.add = MagicMock()
         reconnected_session.commit = AsyncMock()
         reconnected_session.refresh = AsyncMock()
+        reconnected_session.execute = AsyncMock()
+        
+        # Mock query results
+        for session in [disconnected_session, reconnected_session]:
+            mock_result = MagicMock()
+            mock_result.scalar_one_or_none.return_value = None
+            session.execute.return_value = mock_result
         
         # Simulate connection recovery
-        async def recover_and_retry():
-            try:
-                await mock_repository.create(disconnected_session, name='Disconnected Entity')
-            except DisconnectionError:
-                # Simulate reconnection and retry
-                return await mock_repository.create(reconnected_session, name='Recovered Entity')
+        # First attempt will fail with DisconnectionError, caught by BaseRepository
+        result1 = await mock_repository.create(disconnected_session, name='Disconnected Entity')
+        assert result1 is None  # Should fail and return None
         
-        # Execute recovery
-        result = await recover_and_retry()
+        # Second attempt with reconnected session should succeed
+        result2 = await mock_repository.create(reconnected_session, name='Recovered Entity')
+        assert result2 is not None  # Should succeed
         
-        # Assert recovery was successful
+        # Assert recovery process
+        disconnected_session.add.assert_called_once()
         disconnected_session.commit.assert_called_once()
+        disconnected_session.rollback.assert_called_once()  # Should rollback on DisconnectionError
+        
         reconnected_session.add.assert_called_once()
         reconnected_session.commit.assert_called_once()
+        reconnected_session.rollback.assert_not_called()  # Should not rollback on success
 
 
 class TestUnitOfWorkTransactions:

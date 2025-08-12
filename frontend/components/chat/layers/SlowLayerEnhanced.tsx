@@ -598,22 +598,20 @@ export const SlowLayerEnhanced: React.FC<SlowLayerProps> = ({ data, isCollapsed 
   if (!data) return null;
   if (isCollapsed) return null;
 
-  // Convert SlowLayerData to ReportData format
-  const reportData: ReportData = {
-    finalReport: data.finalReport?.report || data.finalReport
-  };
+  // Use the final report data directly if needed
+  // const finalReport = data.finalReport;
 
   return (
     <div className="bg-gradient-to-b from-gray-50 to-white">
       <div className="p-6 space-y-6">
         {/* Executive Summary */}
-        <ExecutiveSummary data={reportData} />
+        <ExecutiveSummary data={data as any} />
 
         {/* Cost Analysis */}
-        <CostAnalysis data={reportData} />
+        <CostAnalysis data={data as any} />
 
         {/* Performance Metrics */}
-        <PerformanceMetrics data={reportData} />
+        <PerformanceMetrics data={data as any} />
 
         {/* Enhanced Recommendations */}
         {data.finalReport?.recommendations && (

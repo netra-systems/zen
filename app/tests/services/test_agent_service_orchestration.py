@@ -817,3 +817,39 @@ class TestAgentErrorRecovery:
             await circuit_breaker_execute("user1", "circuit_test", "run_circuit")
         
         assert "Circuit breaker open" in str(exc_info.value)
+
+
+class TestAgentServiceBasic:
+    """Basic agent service tests consolidated from other test files"""
+    
+    @pytest.mark.asyncio
+    async def test_run_agent_with_request_model(self):
+        """Test basic run method with RequestModel"""
+        # Arrange
+        mock_supervisor = MagicMock()
+        mock_supervisor.run = AsyncMock(return_value={"status": "started"})
+        agent_service = AgentService(mock_supervisor)
+        
+        from app.schemas import Settings, Workload, DataSource, TimeRange, RequestModel
+        
+        settings = Settings(debug_mode=True)
+        workload = Workload(
+            run_id="test_run",
+            query="test_query",
+            data_source=DataSource(source_table="test_table").model_dump(),
+            time_range=TimeRange(start_time="2024-01-01T00:00:00Z", end_time="2024-01-02T00:00:00Z").model_dump()
+        )
+        request_model = RequestModel(
+            id="test_req",
+            user_id="test_user",
+            query="test query",
+            workloads=[workload]
+        )
+
+        # Act
+        result = await agent_service.run(request_model, "test_run", False)
+
+        # Assert
+        assert result == {"status": "started"}
+        expected_user_request = str(request_model.model_dump())
+        mock_supervisor.run.assert_called_once_with(expected_user_request, "test_run", False)

@@ -7,13 +7,11 @@ import { generateUniqueId } from '@/lib/utils';
 const ChatHistory: React.FC = React.memo(() => {
   const ws = useWebSocketContext();
 
-  if (!ws) {
-    return <div>Loading...</div>;
-  }
-
   // Transform WebSocket messages to Message type (memoized for performance)
-  const transformedMessages: Message[] = useMemo(() => 
-    ws.messages.map((msg, index) => {
+  const transformedMessages: Message[] = useMemo(() => {
+    if (!ws) return [];
+    
+    return ws.messages.map((msg) => {
       const payload = msg.payload as Record<string, unknown>;
       return {
         id: generateUniqueId('msg'),
@@ -28,7 +26,12 @@ const ChatHistory: React.FC = React.memo(() => {
         tool_info: payload?.tool_info,
         raw_data: payload?.raw_data,
       } as Message;
-    }), [ws.messages]);
+    });
+  }, [ws]);
+
+  if (!ws) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex-1 overflow-y-auto p-4">

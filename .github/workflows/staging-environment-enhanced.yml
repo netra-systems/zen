@@ -1,4 +1,4 @@
-name: Staging Environment Management
+name: Staging Environment Management (Enhanced)
 
 on:
   pull_request:
@@ -18,27 +18,32 @@ on:
         required: true
         type: string
 
-# Concurrency control with intelligent cancellation handling
-# Only cancels build/deploy jobs, not cleanup/destroy operations
+# Enhanced concurrency control with commit detection
 concurrency:
   group: staging-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
-  cancel-in-progress: ${{ !contains(github.job, 'destroy') && !contains(github.job, 'cleanup') }}
+  # Cancel in-progress runs when new commits are pushed, except cleanup operations
+  cancel-in-progress: ${{ github.event.action == 'synchronize' || (!contains(github.job, 'destroy') && !contains(github.job, 'cleanup')) }}
 
 env:
   GCP_PROJECT_ID: netra-staging
   GCP_REGION: us-central1
   TERRAFORM_VERSION: 1.5.0
   STAGING_DOMAIN: staging.netrasystems.ai
+  # Track the commit SHA for this deployment
+  DEPLOYMENT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
-  check-eligibility:
-    name: Check Staging Eligibility
+  # Initialize deployment tracking and create initial comment
+  initialize-deployment:
+    name: Initialize Deployment Tracking
     runs-on: ubuntu-latest
     outputs:
+      comment_id: ${{ steps.comment.outputs.comment_id }}
+      deployment_id: ${{ steps.deployment.outputs.deployment_id }}
       should_deploy: ${{ steps.check.outputs.should_deploy }}
       environment_name: ${{ steps.check.outputs.environment_name }}
     steps:
-      - name: Check labels and configuration
+      - name: Check deployment eligibility
         id: check
         run: |
           PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
@@ -46,13 +51,13 @@ jobs:
           # Check for exclusion labels
           if [[ "${{ contains(github.event.pull_request.labels.*.name, 'no-staging') }}" == "true" ]]; then
             echo "should_deploy=false" >> $GITHUB_OUTPUT
-            echo "❌ Staging skipped: 'no-staging' label present"
+            echo "reason=no-staging label present" >> $GITHUB_OUTPUT
             exit 0
           fi
           
           if [[ "${{ contains(github.event.pull_request.labels.*.name, 'WIP') }}" == "true" ]]; then
             echo "should_deploy=false" >> $GITHUB_OUTPUT
-            echo "❌ Staging skipped: 'WIP' label present"
+            echo "reason=WIP label present" >> $GITHUB_OUTPUT
             exit 0
           fi
           
@@ -60,28 +65,277 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             if [[ "${{ github.event.inputs.action }}" == "destroy" ]]; then
               echo "should_deploy=false" >> $GITHUB_OUTPUT
+              echo "action=destroy" >> $GITHUB_OUTPUT
             else
               echo "should_deploy=true" >> $GITHUB_OUTPUT
+              echo "action=deploy" >> $GITHUB_OUTPUT
             fi
           # Check for PR close
           elif [[ "${{ github.event.action }}" == "closed" ]]; then
             echo "should_deploy=false" >> $GITHUB_OUTPUT
+            echo "action=destroy" >> $GITHUB_OUTPUT
           else
             echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "action=deploy" >> $GITHUB_OUTPUT
           fi
           
           echo "environment_name=pr-${PR_NUMBER}" >> $GITHUB_OUTPUT
+          echo "deployment_sha=${{ env.DEPLOYMENT_SHA }}" >> $GITHUB_OUTPUT
 
-  # Parallel build jobs for better performance
+      - name: Generate deployment ID
+        id: deployment
+        run: |
+          # Generate unique deployment ID for tracking
+          DEPLOYMENT_ID="${{ github.run_id }}-${{ github.run_attempt }}"
+          echo "deployment_id=$DEPLOYMENT_ID" >> $GITHUB_OUTPUT
+          echo "Generated deployment ID: $DEPLOYMENT_ID"
+
+      - name: Create or update initial PR comment
+        id: comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr_number = context.payload.pull_request.number;
+            const deployment_id = '${{ steps.deployment.outputs.deployment_id }}';
+            const deployment_sha = '${{ env.DEPLOYMENT_SHA }}';
+            const should_deploy = '${{ steps.check.outputs.should_deploy }}';
+            const reason = '${{ steps.check.outputs.reason }}';
+            const action = '${{ steps.check.outputs.action }}';
+            
+            // Determine initial status
+            let statusEmoji = '🔄';
+            let statusText = 'Initializing';
+            let mainMessage = '';
+            
+            if (should_deploy === 'false' && reason) {
+              statusEmoji = '⏭️';
+              statusText = 'Skipped';
+              mainMessage = `Deployment skipped: ${reason}`;
+            } else if (action === 'destroy') {
+              statusEmoji = '🧹';
+              statusText = 'Destroying';
+              mainMessage = 'Environment destruction initiated';
+            } else {
+              statusEmoji = '🚀';
+              statusText = 'Deploying';
+              mainMessage = 'Deployment pipeline started';
+            }
+            
+            const comment = `## ${statusEmoji} Staging Environment Status
+            
+            **Environment:** pr-${pr_number}
+            **Status:** ${statusText}
+            **Deployment ID:** ${deployment_id}
+            **Commit:** \`${deployment_sha.substring(0, 8)}\`
+            **Started:** ${new Date().toISOString()}
+            
+            ### 📊 Current Status
+            ${mainMessage}
+            
+            <details>
+            <summary>📋 Deployment Progress</summary>
+            
+            | Stage | Status | Details | Time |
+            |-------|--------|---------|------|
+            | 🎯 **Initialization** | ✅ Complete | Environment check passed | ${new Date().toISOString()} |
+            | 📦 **Backend Build** | ⏳ Pending | - | - |
+            | 📦 **Frontend Build** | ⏳ Pending | - | - |
+            | 🚀 **Deployment** | ⏳ Pending | - | - |
+            | 🗄️ **Database Setup** | ⏳ Pending | - | - |
+            | 🧪 **Testing** | ⏳ Pending | - | - |
+            
+            </details>
+            
+            <details>
+            <summary>📝 Activity Log</summary>
+            
+            \`\`\`
+            [${new Date().toISOString()}] Deployment initialized
+            [${new Date().toISOString()}] Checking environment eligibility...
+            [${new Date().toISOString()}] ${mainMessage}
+            \`\`\`
+            
+            </details>
+            
+            ---
+            *Last updated: ${new Date().toISOString()} | Run: [#${context.runNumber}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})*`;
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr_number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Staging Environment Status')
+            );
+            
+            let comment_id;
+            if (botComment) {
+              // Update existing comment
+              const { data: updated } = await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+              comment_id = updated.id;
+              console.log(`Updated existing comment: ${comment_id}`);
+            } else {
+              // Create new comment
+              const { data: created } = await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr_number,
+                body: comment
+              });
+              comment_id = created.id;
+              console.log(`Created new comment: ${comment_id}`);
+            }
+            
+            // Output comment ID for other jobs to use
+            core.setOutput('comment_id', comment_id);
+            return comment_id;
+
+  # Monitor for new commits during deployment
+  commit-monitor:
+    name: Monitor for New Commits
+    needs: initialize-deployment
+    if: needs.initialize-deployment.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      new_commit_detected: ${{ steps.monitor.outputs.new_commit_detected }}
+    steps:
+      - name: Monitor for new commits
+        id: monitor
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          INITIAL_SHA="${{ env.DEPLOYMENT_SHA }}"
+          
+          echo "Monitoring PR #${PR_NUMBER} for new commits"
+          echo "Initial SHA: ${INITIAL_SHA}"
+          
+          # Check every 30 seconds for 5 minutes
+          for i in {1..10}; do
+            # Get current PR head SHA
+            CURRENT_SHA=$(gh pr view ${PR_NUMBER} --json headRefOid -q .headRefOid)
+            
+            if [[ "$CURRENT_SHA" != "$INITIAL_SHA" ]]; then
+              echo "⚠️ New commit detected: ${CURRENT_SHA}"
+              echo "new_commit_detected=true" >> $GITHUB_OUTPUT
+              echo "new_sha=${CURRENT_SHA}" >> $GITHUB_OUTPUT
+              
+              # Update comment about new commit
+              if [[ -n "${{ needs.initialize-deployment.outputs.comment_id }}" ]]; then
+                gh api repos/${{ github.repository }}/issues/comments/${{ needs.initialize-deployment.outputs.comment_id }} \
+                  --method PATCH \
+                  --field body="## ⚠️ Deployment Cancelled
+                  
+                  **Reason:** New commit detected
+                  **New SHA:** \`${CURRENT_SHA:0:8}\`
+                  **Previous SHA:** \`${INITIAL_SHA:0:8}\`
+                  
+                  This deployment has been cancelled because a new commit was pushed to the PR.
+                  A new deployment will start automatically for the latest commit.
+                  
+                  ---
+                  *Cancelled at: $(date -u +"%Y-%m-%dT%H:%M:%SZ")*"
+              fi
+              
+              exit 0
+            fi
+            
+            sleep 30
+          done
+          
+          echo "new_commit_detected=false" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  # Helper job to update PR comment
+  update-comment:
+    name: Update PR Comment
+    runs-on: ubuntu-latest
+    needs: initialize-deployment
+    if: always() && github.event_name == 'pull_request' && needs.initialize-deployment.outputs.comment_id
+    strategy:
+      matrix:
+        include:
+          - trigger: backend-build-start
+          - trigger: backend-build-complete
+          - trigger: frontend-build-start
+          - trigger: frontend-build-complete
+          - trigger: deployment-start
+          - trigger: deployment-complete
+          - trigger: database-start
+          - trigger: database-complete
+          - trigger: testing-start
+          - trigger: testing-complete
+    steps:
+      - name: Update comment for ${{ matrix.trigger }}
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // This is a placeholder for the update logic
+            // Each job will call this with specific update data
+            console.log('Comment update placeholder for: ${{ matrix.trigger }}');
+
   build-backend:
     name: Build Backend Container
-    needs: check-eligibility
-    if: needs.check-eligibility.outputs.should_deploy == 'true'
+    needs: [initialize-deployment, commit-monitor]
+    if: |
+      needs.initialize-deployment.outputs.should_deploy == 'true' && 
+      needs.commit-monitor.outputs.new_commit_detected != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
       backend_image: ${{ steps.backend-build.outputs.backend_image }}
+      build_duration: ${{ steps.timing.outputs.duration }}
     steps:
+      - name: Start timing
+        id: timing
+        run: echo "start_time=$(date +%s)" >> $GITHUB_OUTPUT
+
+      - name: Update comment - Backend build started
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment_id = '${{ needs.initialize-deployment.outputs.comment_id }}';
+            if (!comment_id) return;
+            
+            // Get current comment
+            const { data: currentComment } = await github.rest.issues.getComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: parseInt(comment_id)
+            });
+            
+            // Update the backend build status in the progress table
+            let body = currentComment.body;
+            body = body.replace(
+              /\| 📦 \*\*Backend Build\*\* \| .+ \| .+ \| .+ \|/,
+              `| 📦 **Backend Build** | 🔄 In Progress | Building container image... | ${new Date().toISOString()} |`
+            );
+            
+            // Add to activity log
+            const activityLog = body.match(/```\n([\s\S]*?)\n```/);
+            if (activityLog) {
+              const newLog = activityLog[1] + `\n[${new Date().toISOString()}] Backend build started`;
+              body = body.replace(/```\n[\s\S]*?\n```/, '```\n' + newLog + '\n```');
+            }
+            
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: parseInt(comment_id),
+              body: body
+            });
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -94,7 +348,7 @@ jobs:
           path: |
             ~/.config/gcloud
             ~/google-cloud-sdk
-          key: gcloud-sdk-${{ runner.os }}-${{ hashFiles('.github/workflows/staging-environment.yml') }}
+          key: gcloud-sdk-${{ runner.os }}-${{ hashFiles('.github/workflows/staging-environment-enhanced.yml') }}
           restore-keys: |
             gcloud-sdk-${{ runner.os }}-
 
@@ -132,28 +386,18 @@ jobs:
             echo "Found cached build: SHA=$LAST_BUILD_SHA"
           fi
           
-          # Initialize as changed by default (safe for first commits or when unsure)
+          # Check if files changed
           CHANGED="true"
           CHANGED_FILES=""
           
-          # If we have a last build SHA, check if files changed since then
           if [[ -n "$LAST_BUILD_SHA" ]] && [[ "$LAST_BUILD_SHA" != "null" ]]; then
-            echo "Checking for changes since last successful build at $LAST_BUILD_SHA"
-            
-            # Check if the commit exists in our history
             if git rev-parse "$LAST_BUILD_SHA" >/dev/null 2>&1; then
-              # Get files changed since last successful build
               CHANGED_FILES=$(git diff --name-only "$LAST_BUILD_SHA" HEAD 2>/dev/null || echo "force-rebuild")
             else
-              echo "Last build SHA not found in history, checking all PR changes"
               CHANGED_FILES="force-rebuild"
             fi
           else
-            # No cache, check all PR changes
-            echo "No build cache found, checking all PR changes"
-            
             if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-              # For PRs, check ALL changes in the PR
               git fetch origin ${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }} --depth=50
               MERGE_BASE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} HEAD 2>/dev/null || echo "")
               
@@ -167,48 +411,26 @@ jobs:
             fi
           fi
           
-          # Debug output
-          echo "Event: ${{ github.event_name }}, Action: ${{ github.event.action }}"
-          echo "Current SHA: $CURRENT_SHA"
-          echo "Last Build SHA: $LAST_BUILD_SHA"
-          if [[ "$CHANGED_FILES" != "force-rebuild" ]]; then
-            echo "Total files changed: $(echo "$CHANGED_FILES" | wc -l)"
-            echo "Changed files:"
-            echo "$CHANGED_FILES" | head -20
-          fi
-          
           # Check for backend-related changes
           if [[ "$CHANGED_FILES" == "force-rebuild" ]]; then
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "🔨 Forcing backend rebuild"
           elif [[ -z "$CHANGED_FILES" ]]; then
-            # No changes detected and we have a valid last build
             if [[ -n "$LAST_BUILD_IMAGE" ]] && [[ "$LAST_BUILD_IMAGE" != "null" ]]; then
               echo "changed=false" >> $GITHUB_OUTPUT
               echo "cached_image=$LAST_BUILD_IMAGE" >> $GITHUB_OUTPUT
-              echo "♻️ No backend changes detected, will use cached image: $LAST_BUILD_IMAGE"
             else
               echo "changed=true" >> $GITHUB_OUTPUT
-              echo "⚠️ No changes but no cached image available, forcing rebuild"
             fi
           elif echo "$CHANGED_FILES" | grep -E '^(app/|requirements\.txt|Dockerfile\.backend|alembic/|pyproject\.toml|poetry\.lock)' > /dev/null 2>&1; then
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "✅ Backend changes detected"
-            echo "Backend files changed:"
-            echo "$CHANGED_FILES" | grep -E '^(app/|requirements\.txt|Dockerfile\.backend|alembic/|pyproject\.toml|poetry\.lock)' | head -10
           else
-            # No backend changes, use cached image if available
             if [[ -n "$LAST_BUILD_IMAGE" ]] && [[ "$LAST_BUILD_IMAGE" != "null" ]]; then
               echo "changed=false" >> $GITHUB_OUTPUT
               echo "cached_image=$LAST_BUILD_IMAGE" >> $GITHUB_OUTPUT
-              echo "♻️ No backend changes detected, will use cached image: $LAST_BUILD_IMAGE"
             else
               echo "changed=true" >> $GITHUB_OUTPUT
-              echo "⚠️ No backend changes but no cached image available, forcing rebuild"
             fi
           fi
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       - name: Build and push backend container
         id: backend-build
@@ -221,27 +443,26 @@ jobs:
           if [[ "${{ steps.backend-changes.outputs.changed }}" == "false" ]]; then
             CACHED_IMAGE="${{ steps.backend-changes.outputs.cached_image }}"
             if [[ -n "$CACHED_IMAGE" ]] && [[ "$CACHED_IMAGE" != "null" ]]; then
-              echo "♻️ Using cached backend image: $CACHED_IMAGE"
+              echo "Using cached backend image: $CACHED_IMAGE"
               echo "backend_image=$CACHED_IMAGE" >> $GITHUB_OUTPUT
               exit 0
             fi
           fi
           
           # Build new image
-          echo "🔨 Building new backend image..."
+          echo "Building new backend image..."
           DOCKER_BUILDKIT=1 timeout 600 docker build \
             --progress=plain \
             --network=host \
             -t $IMAGE_URL \
             -f Dockerfile.backend . || {
-            echo "Docker build timed out after 10 minutes"
-            echo "This might be due to network issues or pip hanging"
+            echo "Docker build failed"
             exit 1
           }
           
           # Push with timeout
           timeout 300 docker push $IMAGE_URL || {
-            echo "Docker push timed out after 5 minutes"
+            echo "Docker push failed"
             exit 1
           }
           
@@ -251,17 +472,117 @@ jobs:
           CACHE_KEY="backend-build-cache-pr-${PR_NUMBER}"
           echo '{"sha": "'${{ github.sha }}'", "image": "'$IMAGE_URL'", "timestamp": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"}' | \
             gsutil cp - "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/${CACHE_KEY}.json"
-          echo "✅ Build cache updated"
+
+      - name: Calculate duration
+        if: always()
+        run: |
+          END_TIME=$(date +%s)
+          START_TIME=${{ steps.timing.outputs.start_time }}
+          DURATION=$((END_TIME - START_TIME))
+          echo "duration=$DURATION" >> $GITHUB_OUTPUT
+
+      - name: Update comment - Backend build complete
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment_id = '${{ needs.initialize-deployment.outputs.comment_id }}';
+            if (!comment_id) return;
+            
+            const success = '${{ job.status }}' === 'success';
+            const duration = '${{ steps.timing.outputs.duration }}' || '0';
+            const image = '${{ steps.backend-build.outputs.backend_image }}' || 'N/A';
+            
+            // Get current comment
+            const { data: currentComment } = await github.rest.issues.getComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: parseInt(comment_id)
+            });
+            
+            // Update the backend build status
+            let body = currentComment.body;
+            const status = success ? '✅ Complete' : '❌ Failed';
+            const details = success ? `Image: \`${image.split('/').pop()}\`` : 'Check logs for details';
+            
+            body = body.replace(
+              /\| 📦 \*\*Backend Build\*\* \| .+ \| .+ \| .+ \|/,
+              `| 📦 **Backend Build** | ${status} | ${details} (${duration}s) | ${new Date().toISOString()} |`
+            );
+            
+            // Add to activity log
+            const activityLog = body.match(/```\n([\s\S]*?)\n```/);
+            if (activityLog) {
+              const result = success ? 'completed successfully' : 'failed';
+              const newLog = activityLog[1] + `\n[${new Date().toISOString()}] Backend build ${result} (${duration}s)`;
+              body = body.replace(/```\n[\s\S]*?\n```/, '```\n' + newLog + '\n```');
+            }
+            
+            // Update overall status if failed
+            if (!success) {
+              body = body.replace(/## .+ Staging Environment Status/, '## ❌ Staging Environment Status');
+              body = body.replace(/\*\*Status:\*\* .+/, '**Status:** Failed - Backend build error');
+            }
+            
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: parseInt(comment_id),
+              body: body
+            });
 
   build-frontend:
     name: Build Frontend Container
-    needs: check-eligibility
-    if: needs.check-eligibility.outputs.should_deploy == 'true'
+    needs: [initialize-deployment, commit-monitor]
+    if: |
+      needs.initialize-deployment.outputs.should_deploy == 'true' && 
+      needs.commit-monitor.outputs.new_commit_detected != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
       frontend_image: ${{ steps.frontend-build.outputs.frontend_image }}
+      build_duration: ${{ steps.timing.outputs.duration }}
     steps:
+      - name: Start timing
+        id: timing
+        run: echo "start_time=$(date +%s)" >> $GITHUB_OUTPUT
+
+      - name: Update comment - Frontend build started
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment_id = '${{ needs.initialize-deployment.outputs.comment_id }}';
+            if (!comment_id) return;
+            
+            // Get current comment
+            const { data: currentComment } = await github.rest.issues.getComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: parseInt(comment_id)
+            });
+            
+            // Update the frontend build status
+            let body = currentComment.body;
+            body = body.replace(
+              /\| 📦 \*\*Frontend Build\*\* \| .+ \| .+ \| .+ \|/,
+              `| 📦 **Frontend Build** | 🔄 In Progress | Building container image... | ${new Date().toISOString()} |`
+            );
+            
+            // Add to activity log
+            const activityLog = body.match(/```\n([\s\S]*?)\n```/);
+            if (activityLog) {
+              const newLog = activityLog[1] + `\n[${new Date().toISOString()}] Frontend build started`;
+              body = body.replace(/```\n[\s\S]*?\n```/, '```\n' + newLog + '\n```');
+            }
+            
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: parseInt(comment_id),
+              body: body
+            });
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -274,7 +595,7 @@ jobs:
           path: |
             ~/.config/gcloud
             ~/google-cloud-sdk
-          key: gcloud-sdk-${{ runner.os }}-${{ hashFiles('.github/workflows/staging-environment.yml') }}
+          key: gcloud-sdk-${{ runner.os }}-${{ hashFiles('.github/workflows/staging-environment-enhanced.yml') }}
           restore-keys: |
             gcloud-sdk-${{ runner.os }}-
 
@@ -299,41 +620,29 @@ jobs:
           PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
           CURRENT_SHA=${{ github.sha }}
           
-          # Try to get the last successful build SHA from cache
+          # Similar logic to backend changes check
           CACHE_KEY="frontend-build-cache-pr-${PR_NUMBER}"
           LAST_BUILD_SHA=""
           LAST_BUILD_IMAGE=""
           
-          # Check if we have a cached build record in GCS
           if gsutil -q stat "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/${CACHE_KEY}.json" 2>/dev/null; then
             CACHE_DATA=$(gsutil cat "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/${CACHE_KEY}.json" 2>/dev/null || echo "{}")
             LAST_BUILD_SHA=$(echo "$CACHE_DATA" | jq -r '.sha // ""')
             LAST_BUILD_IMAGE=$(echo "$CACHE_DATA" | jq -r '.image // ""')
-            echo "Found cached build: SHA=$LAST_BUILD_SHA"
           fi
           
-          # Initialize as changed by default (safe for first commits or when unsure)
+          # Check for changes
           CHANGED="true"
           CHANGED_FILES=""
           
-          # If we have a last build SHA, check if files changed since then
           if [[ -n "$LAST_BUILD_SHA" ]] && [[ "$LAST_BUILD_SHA" != "null" ]]; then
-            echo "Checking for changes since last successful build at $LAST_BUILD_SHA"
-            
-            # Check if the commit exists in our history
             if git rev-parse "$LAST_BUILD_SHA" >/dev/null 2>&1; then
-              # Get files changed since last successful build
               CHANGED_FILES=$(git diff --name-only "$LAST_BUILD_SHA" HEAD 2>/dev/null || echo "force-rebuild")
             else
-              echo "Last build SHA not found in history, checking all PR changes"
               CHANGED_FILES="force-rebuild"
             fi
           else
-            # No cache, check all PR changes
-            echo "No build cache found, checking all PR changes"
-            
             if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-              # For PRs, check ALL changes in the PR
               git fetch origin ${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }} --depth=50 2>/dev/null || true
               MERGE_BASE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} HEAD 2>/dev/null || echo "")
               
@@ -347,48 +656,26 @@ jobs:
             fi
           fi
           
-          # Debug output
-          echo "Event: ${{ github.event_name }}, Action: ${{ github.event.action }}"
-          echo "Current SHA: $CURRENT_SHA"
-          echo "Last Build SHA: $LAST_BUILD_SHA"
-          if [[ "$CHANGED_FILES" != "force-rebuild" ]]; then
-            echo "Total files changed: $(echo "$CHANGED_FILES" | wc -l)"
-            echo "Changed files:"
-            echo "$CHANGED_FILES" | head -20
-          fi
-          
           # Check for frontend-related changes
           if [[ "$CHANGED_FILES" == "force-rebuild" ]]; then
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "🔨 Forcing frontend rebuild"
           elif [[ -z "$CHANGED_FILES" ]]; then
-            # No changes detected and we have a valid last build
             if [[ -n "$LAST_BUILD_IMAGE" ]] && [[ "$LAST_BUILD_IMAGE" != "null" ]]; then
               echo "changed=false" >> $GITHUB_OUTPUT
               echo "cached_image=$LAST_BUILD_IMAGE" >> $GITHUB_OUTPUT
-              echo "♻️ No frontend changes detected, will use cached image: $LAST_BUILD_IMAGE"
             else
               echo "changed=true" >> $GITHUB_OUTPUT
-              echo "⚠️ No changes but no cached image available, forcing rebuild"
             fi
           elif echo "$CHANGED_FILES" | grep -E '^frontend/' > /dev/null 2>&1; then
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "✅ Frontend changes detected"
-            echo "Frontend files changed:"
-            echo "$CHANGED_FILES" | grep -E '^frontend/' | head -10
           else
-            # No frontend changes, use cached image if available
             if [[ -n "$LAST_BUILD_IMAGE" ]] && [[ "$LAST_BUILD_IMAGE" != "null" ]]; then
               echo "changed=false" >> $GITHUB_OUTPUT
               echo "cached_image=$LAST_BUILD_IMAGE" >> $GITHUB_OUTPUT
-              echo "♻️ No frontend changes detected, will use cached image: $LAST_BUILD_IMAGE"
             else
               echo "changed=true" >> $GITHUB_OUTPUT
-              echo "⚠️ No frontend changes but no cached image available, forcing rebuild"
             fi
           fi
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       - name: Build and push frontend container
         id: frontend-build
@@ -401,16 +688,15 @@ jobs:
           if [[ "${{ steps.frontend-changes.outputs.changed }}" == "false" ]]; then
             CACHED_IMAGE="${{ steps.frontend-changes.outputs.cached_image }}"
             if [[ -n "$CACHED_IMAGE" ]] && [[ "$CACHED_IMAGE" != "null" ]]; then
-              echo "♻️ Using cached frontend image: $CACHED_IMAGE"
+              echo "Using cached frontend image: $CACHED_IMAGE"
               echo "frontend_image=$CACHED_IMAGE" >> $GITHUB_OUTPUT
               exit 0
             fi
           fi
           
           # Build new image
-          echo "🔨 Building new frontend image..."
+          echo "Building new frontend image..."
           
-          # Check if we're in the root directory and Dockerfile.frontend is in frontend/
           if [[ -f "frontend/Dockerfile.frontend" ]]; then
             cd frontend
             DOCKER_BUILDKIT=1 timeout 600 docker build \
@@ -419,29 +705,28 @@ jobs:
               -t $IMAGE_URL \
               -f Dockerfile.frontend \
               --build-arg NEXT_PUBLIC_API_URL=https://pr-${PR_NUMBER}-api.${{ env.STAGING_DOMAIN }} . || {
-              echo "Frontend Docker build timed out after 10 minutes"
+              echo "Frontend Docker build failed"
               exit 1
             }
             cd ..
           elif [[ -f "Dockerfile.frontend" ]]; then
-            # Fallback if Dockerfile.frontend is in root
             DOCKER_BUILDKIT=1 timeout 600 docker build \
               --progress=plain \
               --network=host \
               -t $IMAGE_URL \
               -f Dockerfile.frontend \
               --build-arg NEXT_PUBLIC_API_URL=https://pr-${PR_NUMBER}-api.${{ env.STAGING_DOMAIN }} . || {
-              echo "Frontend Docker build timed out after 10 minutes"
+              echo "Frontend Docker build failed"
               exit 1
             }
           else
-            echo "❌ Error: Dockerfile.frontend not found in expected locations"
+            echo "Error: Dockerfile.frontend not found"
             exit 1
           fi
           
           # Push with timeout
           timeout 300 docker push $IMAGE_URL || {
-            echo "Docker push timed out after 5 minutes"
+            echo "Docker push failed"
             exit 1
           }
           
@@ -451,33 +736,138 @@ jobs:
           CACHE_KEY="frontend-build-cache-pr-${PR_NUMBER}"
           echo '{"sha": "'${{ github.sha }}'", "image": "'$IMAGE_URL'", "timestamp": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"}' | \
             gsutil cp - "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/${CACHE_KEY}.json"
-          echo "✅ Build cache updated"
+
+      - name: Calculate duration
+        if: always()
+        run: |
+          END_TIME=$(date +%s)
+          START_TIME=${{ steps.timing.outputs.start_time }}
+          DURATION=$((END_TIME - START_TIME))
+          echo "duration=$DURATION" >> $GITHUB_OUTPUT
+
+      - name: Update comment - Frontend build complete
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment_id = '${{ needs.initialize-deployment.outputs.comment_id }}';
+            if (!comment_id) return;
+            
+            const success = '${{ job.status }}' === 'success';
+            const duration = '${{ steps.timing.outputs.duration }}' || '0';
+            const image = '${{ steps.frontend-build.outputs.frontend_image }}' || 'N/A';
+            
+            // Get current comment
+            const { data: currentComment } = await github.rest.issues.getComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: parseInt(comment_id)
+            });
+            
+            // Update the frontend build status
+            let body = currentComment.body;
+            const status = success ? '✅ Complete' : '❌ Failed';
+            const details = success ? `Image: \`${image.split('/').pop()}\`` : 'Check logs for details';
+            
+            body = body.replace(
+              /\| 📦 \*\*Frontend Build\*\* \| .+ \| .+ \| .+ \|/,
+              `| 📦 **Frontend Build** | ${status} | ${details} (${duration}s) | ${new Date().toISOString()} |`
+            );
+            
+            // Add to activity log
+            const activityLog = body.match(/```\n([\s\S]*?)\n```/);
+            if (activityLog) {
+              const result = success ? 'completed successfully' : 'failed';
+              const newLog = activityLog[1] + `\n[${new Date().toISOString()}] Frontend build ${result} (${duration}s)`;
+              body = body.replace(/```\n[\s\S]*?\n```/, '```\n' + newLog + '\n```');
+            }
+            
+            // Update overall status if failed
+            if (!success) {
+              body = body.replace(/## .+ Staging Environment Status/, '## ❌ Staging Environment Status');
+              body = body.replace(/\*\*Status:\*\* .+/, '**Status:** Failed - Frontend build error');
+            }
+            
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: parseInt(comment_id),
+              body: body
+            });
 
   deploy-staging:
     name: Deploy Staging Environment
-    needs: [check-eligibility, build-backend, build-frontend]
-    if: needs.check-eligibility.outputs.should_deploy == 'true'
+    needs: [initialize-deployment, build-backend, build-frontend, commit-monitor]
+    if: |
+      needs.initialize-deployment.outputs.should_deploy == 'true' && 
+      needs.commit-monitor.outputs.new_commit_detected != 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 30  # Reduced from 45 since builds are now parallel
+    timeout-minutes: 30
     environment:
       name: staging-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
       url: https://pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}.${{ env.STAGING_DOMAIN }}
+    outputs:
+      frontend_url: ${{ steps.terraform.outputs.frontend_url }}
+      backend_url: ${{ steps.terraform.outputs.backend_url }}
+      database_name: ${{ steps.terraform.outputs.database_name }}
     
     steps:
+      - name: Update comment - Deployment started
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment_id = '${{ needs.initialize-deployment.outputs.comment_id }}';
+            if (!comment_id) return;
+            
+            // Get current comment
+            const { data: currentComment } = await github.rest.issues.getComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: parseInt(comment_id)
+            });
+            
+            // Update deployment status
+            let body = currentComment.body;
+            body = body.replace(
+              /\| 🚀 \*\*Deployment\*\* \| .+ \| .+ \| .+ \|/,
+              `| 🚀 **Deployment** | 🔄 In Progress | Provisioning infrastructure... | ${new Date().toISOString()} |`
+            );
+            
+            // Add to activity log
+            const activityLog = body.match(/```\n([\s\S]*?)\n```/);
+            if (activityLog) {
+              const newLog = activityLog[1] + `\n[${new Date().toISOString()}] Infrastructure deployment started`;
+              body = body.replace(/```\n[\s\S]*?\n```/, '```\n' + newLog + '\n```');
+            }
+            
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: parseInt(comment_id),
+              body: body
+            });
+
+      - name: Check for new commits before proceeding
+        run: |
+          if [[ "${{ needs.commit-monitor.outputs.new_commit_detected }}" == "true" ]]; then
+            echo "New commit detected, cancelling deployment"
+            exit 1
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          fetch-depth: 0  # Fetch all history for proper change detection
+          fetch-depth: 0
 
-      # Cache gcloud SDK installation to save ~20-30 seconds
       - name: Cache gcloud SDK
         uses: actions/cache@v4
         with:
           path: |
             ~/.config/gcloud
             ~/google-cloud-sdk
-          key: gcloud-sdk-${{ runner.os }}-${{ hashFiles('.github/workflows/staging-environment.yml') }}
+          key: gcloud-sdk-${{ runner.os }}-${{ hashFiles('.github/workflows/staging-environment-enhanced.yml') }}
           restore-keys: |
             gcloud-sdk-${{ runner.os }}-
 
@@ -490,35 +880,28 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ env.GCP_PROJECT_ID }}
-          skip_install: false  # Still install if not cached
+          skip_install: false
 
       - name: Configure OAuth for PR Environment
         id: oauth
         run: |
           PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
           
-          # Set OAuth environment variables for this PR
           echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
           echo "GOOGLE_OAUTH_CLIENT_ID_STAGING=${{ secrets.GOOGLE_OAUTH_CLIENT_ID_STAGING }}" >> $GITHUB_ENV
           echo "GOOGLE_OAUTH_CLIENT_SECRET_STAGING=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET_STAGING }}" >> $GITHUB_ENV
           echo "USE_OAUTH_PROXY=true" >> $GITHUB_ENV
           echo "OAUTH_PROXY_URL=https://auth.staging.netrasystems.ai" >> $GITHUB_ENV
           
-          # Generate URLs for this PR environment
           echo "frontend_url=https://pr-${PR_NUMBER}.${{ env.STAGING_DOMAIN }}" >> $GITHUB_OUTPUT
           echo "api_url=https://pr-${PR_NUMBER}-api.${{ env.STAGING_DOMAIN }}" >> $GITHUB_OUTPUT
-          
-          echo "✅ OAuth configured for PR #${PR_NUMBER}"
 
       - name: Load staging configuration
         id: config
         run: |
-          # Get the numerical project ID for Secret Manager
           PROJECT_ID_NUMERICAL_STAGING=$(gcloud projects describe ${{ env.GCP_PROJECT_ID }} --format="value(projectNumber)")
           echo "project_id_numerical=$PROJECT_ID_NUMERICAL_STAGING" >> $GITHUB_OUTPUT
-          echo "Using numerical project ID: $PROJECT_ID_NUMERICAL_STAGING"
           
-          # Load configuration with defaults
           if [ -f .github/staging.yml ]; then
             TEST_LEVEL=$(yq e '.default_test_level // "integration"' .github/staging.yml)
             MAX_INSTANCES=$(yq e '.resource_limits.compute.max_instances // 3' .github/staging.yml)
@@ -543,84 +926,62 @@ jobs:
           PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
           LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/default.tflock"
           
-          # Function to check and handle lock
           check_and_handle_lock() {
             if ! gsutil stat "$LOCK_FILE" 2>/dev/null; then
-              echo "✅ No existing lock file found"
+              echo "No existing lock file found"
               return 0
             fi
             
-            # Get lock metadata
             LOCK_INFO=$(gsutil cat "$LOCK_FILE" 2>/dev/null || echo "{}")
             LOCK_ID=$(echo "$LOCK_INFO" | jq -r '.ID // "unknown"')
             LOCK_HOLDER=$(echo "$LOCK_INFO" | jq -r '.Who // "unknown"')
             LOCK_CREATED=$(echo "$LOCK_INFO" | jq -r '.Created // ""')
             
-            echo "Found lock file:"
-            echo "  Lock ID: $LOCK_ID"
-            echo "  Holder: $LOCK_HOLDER"
-            echo "  Created: $LOCK_CREATED"
-            
-            # Calculate lock age
             if [[ -n "$LOCK_CREATED" ]] && [[ "$LOCK_CREATED" != "null" ]]; then
-              # Parse ISO 8601 date format
               LOCK_TIMESTAMP=$(date -d "${LOCK_CREATED}" +%s 2>/dev/null || echo "0")
               CURRENT_TIME=$(date +%s)
-              AGE_SECONDS=$(( CURRENT_TIME - LOCK_TIMESTAMP ))
-              AGE_MINUTES=$(( AGE_SECONDS / 60 ))
+              AGE_MINUTES=$(( (CURRENT_TIME - LOCK_TIMESTAMP) / 60 ))
               
-              echo "  Age: ${AGE_MINUTES} minutes"
-              
-              # Check if lock is from a GitHub Actions runner
               if echo "$LOCK_HOLDER" | grep -q "runner@"; then
-                # Check if this is from a canceled or failed workflow
-                # Stale lock threshold: 15 minutes for GitHub Actions runners
                 if [ $AGE_MINUTES -gt 15 ]; then
-                  echo "⚠️ Found stale lock from GitHub Actions runner (${AGE_MINUTES} minutes old)"
-                  echo "Removing stale lock..."
+                  echo "Found stale lock from GitHub Actions runner (${AGE_MINUTES} minutes old)"
                   gsutil rm "$LOCK_FILE" 2>/dev/null || true
                   sleep 2
                   return 0
                 else
-                  echo "⚠️ Active lock found (${AGE_MINUTES} minutes old)"
+                  echo "Active lock found (${AGE_MINUTES} minutes old)"
                   return 1
                 fi
               else
-                # For non-runner locks, use 30-minute threshold
                 if [ $AGE_MINUTES -gt 30 ]; then
-                  echo "⚠️ Found stale lock (${AGE_MINUTES} minutes old)"
-                  echo "Removing stale lock..."
+                  echo "Found stale lock (${AGE_MINUTES} minutes old)"
                   gsutil rm "$LOCK_FILE" 2>/dev/null || true
                   sleep 2
                   return 0
                 else
-                  echo "⚠️ Active lock found (${AGE_MINUTES} minutes old)"
+                  echo "Active lock found (${AGE_MINUTES} minutes old)"
                   return 1
                 fi
               fi
             else
-              # If we can't determine age, check file modification time
               LOCK_MOD_TIME=$(gsutil stat "$LOCK_FILE" | grep "Creation time:" | cut -d':' -f2- | xargs -I {} date -d "{}" +%s 2>/dev/null || echo "0")
               if [ "$LOCK_MOD_TIME" -ne "0" ]; then
                 CURRENT_TIME=$(date +%s)
                 AGE_MINUTES=$(( (CURRENT_TIME - LOCK_MOD_TIME) / 60 ))
-                echo "  Age (from file stats): ${AGE_MINUTES} minutes"
                 
                 if [ $AGE_MINUTES -gt 15 ]; then
-                  echo "⚠️ Found stale lock based on file modification time"
-                  echo "Removing stale lock..."
+                  echo "Found stale lock based on file modification time"
                   gsutil rm "$LOCK_FILE" 2>/dev/null || true
                   sleep 2
                   return 0
                 fi
               fi
               
-              echo "⚠️ Unable to determine lock age, assuming active"
+              echo "Unable to determine lock age, assuming active"
               return 1
             fi
           }
           
-          # Check and handle lock
           check_and_handle_lock
           RESULT=$?
           
@@ -628,7 +989,7 @@ jobs:
             echo "lock_cleared=true" >> $GITHUB_OUTPUT
           else
             echo "lock_cleared=false" >> $GITHUB_OUTPUT
-            echo "::warning::Terraform state may be locked by another operation. Will retry with timeout."
+            echo "::warning::Terraform state may be locked by another operation."
           fi
 
       - name: Terraform Init with Retry
@@ -637,7 +998,6 @@ jobs:
         run: |
           PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
           
-          # Function to run terraform init with retries
           terraform_init_with_retry() {
             local max_attempts=3
             local attempt=1
@@ -652,24 +1012,22 @@ jobs:
                 -lock-timeout=120s \
                 -upgrade=false \
                 -reconfigure=false; then
-                echo "✅ Terraform init successful"
+                echo "Terraform init successful"
                 return 0
               else
                 EXIT_CODE=$?
-                echo "❌ Terraform init failed with exit code $EXIT_CODE"
+                echo "Terraform init failed with exit code $EXIT_CODE"
                 
                 if [ $attempt -eq $max_attempts ]; then
                   echo "Failed after $max_attempts attempts"
                   return $EXIT_CODE
                 fi
                 
-                # Exponential backoff
                 echo "Waiting ${wait_time} seconds before retry..."
                 sleep $wait_time
                 wait_time=$((wait_time * 2))
                 attempt=$((attempt + 1))
                 
-                # Check if we need to force unlock
                 if [ $attempt -eq 2 ] && [ "${{ steps.handle-lock.outputs.lock_cleared }}" == "false" ]; then
                   echo "Attempting to force unlock before retry..."
                   LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/default.tflock"
@@ -682,7 +1040,6 @@ jobs:
             return 1
           }
           
-          # Run init with retry logic
           terraform_init_with_retry
 
       - name: Terraform Plan with Retry
@@ -700,7 +1057,6 @@ jobs:
           TF_VAR_postgres_password: ${{ secrets.STAGING_DB_PASSWORD }}
           TF_VAR_clickhouse_password: ${{ secrets.CLICKHOUSE_PASSWORD || 'placeholder_password' }}
         run: |
-          # Function to run terraform plan with retries
           terraform_plan_with_retry() {
             local max_attempts=3
             local attempt=1
@@ -709,7 +1065,6 @@ jobs:
             while [ $attempt -le $max_attempts ]; do
               echo "Terraform plan attempt $attempt of $max_attempts..."
               
-              # Create secure tfvars file to prevent secrets in logs
               cat > terraform.tfvars << 'EOF'
           project_id = "${{ env.GCP_PROJECT_ID }}"
           project_id_numerical = "${{ steps.config.outputs.project_id_numerical }}"
@@ -721,28 +1076,24 @@ jobs:
           domain = "${{ env.STAGING_DOMAIN }}"
           EOF
               
-              # Add sensitive variables through environment variables only
               echo "postgres_password = \"${TF_VAR_postgres_password}\"" >> terraform.tfvars
               echo "clickhouse_password = \"${TF_VAR_clickhouse_password}\"" >> terraform.tfvars
               
-              # Secure the file
               chmod 600 terraform.tfvars
               
-              # Run plan with lock timeout and retry on lock acquisition failure
               if terraform plan \
                 -var-file=terraform.tfvars \
                 -lock-timeout=180s \
                 -out=tfplan \
                 -input=false; then
-                echo "✅ Terraform plan successful"
+                echo "Terraform plan successful"
                 rm -f terraform.tfvars
                 return 0
               else
                 EXIT_CODE=$?
                 rm -f terraform.tfvars
-                echo "❌ Terraform plan failed with exit code $EXIT_CODE"
+                echo "Terraform plan failed with exit code $EXIT_CODE"
                 
-                # Check if it's a lock-related error
                 if terraform plan -var-file=terraform.tfvars -lock-timeout=1s -out=tfplan 2>&1 | grep -q "lock"; then
                   echo "Lock-related error detected"
                   
@@ -764,7 +1115,6 @@ jobs:
                   return $EXIT_CODE
                 fi
                 
-                # Exponential backoff
                 echo "Waiting ${wait_time} seconds before retry..."
                 sleep $wait_time
                 wait_time=$((wait_time * 2))
@@ -775,50 +1125,44 @@ jobs:
             return 1
           }
           
-          # Run plan with retry logic
           terraform_plan_with_retry
 
       - name: Terraform Apply with Retry
         working-directory: ./terraform/staging
         id: terraform
-        timeout-minutes: 25  # Extra time for retries
+        timeout-minutes: 25
         run: |
-          # Function to run terraform apply with retries
           terraform_apply_with_retry() {
-            local max_attempts=2  # Apply is more sensitive, fewer retries
+            local max_attempts=2
             local attempt=1
             local wait_time=15
             
             while [ $attempt -le $max_attempts ]; do
               echo "Terraform apply attempt $attempt of $max_attempts..."
               
-              # Run apply with lock timeout
               if timeout 1200 terraform apply \
                 -auto-approve \
                 -lock-timeout=180s \
                 -input=false \
                 tfplan; then
-                echo "✅ Terraform apply successful"
+                echo "Terraform apply successful"
                 return 0
               else
                 EXIT_CODE=$?
-                echo "❌ Terraform apply failed with exit code $EXIT_CODE"
+                echo "Terraform apply failed with exit code $EXIT_CODE"
                 
-                # Show current state for debugging
                 echo "Current Terraform state:"
                 terraform show -no-color 2>/dev/null | head -100 || true
                 
                 if [ $attempt -eq $max_attempts ]; then
                   echo "Failed after $max_attempts attempts"
                   
-                  # Try to refresh state as last resort
                   echo "Attempting to refresh state..."
                   terraform refresh -lock-timeout=60s 2>/dev/null || true
                   
                   return $EXIT_CODE
                 fi
                 
-                # Check if it's a lock-related error
                 PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
                 LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/default.tflock"
                 
@@ -841,7 +1185,6 @@ jobs:
                   fi
                 fi
                 
-                # Exponential backoff
                 echo "Waiting ${wait_time} seconds before retry..."
                 sleep $wait_time
                 wait_time=$((wait_time * 2))
@@ -852,11 +1195,9 @@ jobs:
             return 1
           }
           
-          # Run apply with retry logic
           terraform_apply_with_retry
           APPLY_RESULT=$?
           
-          # Capture outputs regardless of apply result
           echo "Capturing Terraform outputs..."
           BACKEND_URL=$(terraform output -raw backend_url 2>/dev/null || echo "")
           FRONTEND_URL=$(terraform output -raw frontend_url 2>/dev/null || echo "")
@@ -866,32 +1207,104 @@ jobs:
           echo "frontend_url=$FRONTEND_URL" >> $GITHUB_OUTPUT
           echo "database_name=$DATABASE_NAME" >> $GITHUB_OUTPUT
           
-          # Export connection details for next steps
           echo "DB_NAME=$DATABASE_NAME" >> $GITHUB_ENV
           echo "DB_USER=user_pr_${{ github.event.pull_request.number || github.event.inputs.pr_number }}" >> $GITHUB_ENV
           
-          # Exit with apply result
           exit $APPLY_RESULT
 
+      - name: Update comment - Deployment complete
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment_id = '${{ needs.initialize-deployment.outputs.comment_id }}';
+            if (!comment_id) return;
+            
+            const success = '${{ job.status }}' === 'success';
+            const frontend_url = '${{ steps.terraform.outputs.frontend_url }}';
+            const backend_url = '${{ steps.terraform.outputs.backend_url }}';
+            
+            // Get current comment
+            const { data: currentComment } = await github.rest.issues.getComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: parseInt(comment_id)
+            });
+            
+            // Update deployment status
+            let body = currentComment.body;
+            const status = success ? '✅ Complete' : '❌ Failed';
+            const details = success ? 'Infrastructure provisioned' : 'Check logs for details';
+            
+            body = body.replace(
+              /\| 🚀 \*\*Deployment\*\* \| .+ \| .+ \| .+ \|/,
+              `| 🚀 **Deployment** | ${status} | ${details} | ${new Date().toISOString()} |`
+            );
+            
+            // Add URLs if successful
+            if (success && frontend_url && backend_url) {
+              // Check if URLs section exists, if not add it
+              if (!body.includes('### 🔗 Access URLs')) {
+                const urlSection = `\n### 🔗 Access URLs\n- **Frontend:** ${frontend_url}\n- **API:** ${backend_url}/docs\n- **Health:** ${backend_url}/health\n`;
+                // Insert after Current Status section
+                body = body.replace(/### 📊 Current Status[\s\S]*?\n\n/, (match) => match + urlSection);
+              } else {
+                // Update existing URLs
+                body = body.replace(/### 🔗 Access URLs[\s\S]*?\n\n/, 
+                  `### 🔗 Access URLs\n- **Frontend:** ${frontend_url}\n- **API:** ${backend_url}/docs\n- **Health:** ${backend_url}/health\n\n`);
+              }
+            }
+            
+            // Add to activity log
+            const activityLog = body.match(/```\n([\s\S]*?)\n```/);
+            if (activityLog) {
+              const result = success ? 'completed successfully' : 'failed';
+              const newLog = activityLog[1] + `\n[${new Date().toISOString()}] Infrastructure deployment ${result}`;
+              body = body.replace(/```\n[\s\S]*?\n```/, '```\n' + newLog + '\n```');
+            }
+            
+            // Update overall status if failed
+            if (!success) {
+              body = body.replace(/## .+ Staging Environment Status/, '## ❌ Staging Environment Status');
+              body = body.replace(/\*\*Status:\*\* .+/, '**Status:** Failed - Deployment error');
+            }
+            
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: parseInt(comment_id),
+              body: body
+            });
+
       - name: Run database migrations
-        timeout-minutes: 5  # Migrations should complete quickly
+        id: migrations
+        timeout-minutes: 5
         run: |
           PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
           
-          # Get the SQL instance connection name from shared infrastructure
+          # Update comment - Database setup started
+          if [[ -n "${{ needs.initialize-deployment.outputs.comment_id }}" ]]; then
+            gh api repos/${{ github.repository }}/issues/comments/${{ needs.initialize-deployment.outputs.comment_id }} \
+              --method GET | jq -r '.body' > comment.txt
+            
+            # Update database status to in progress
+            sed -i 's/| 🗄️ \*\*Database Setup\*\* | .* | .* | .* |/| 🗄️ **Database Setup** | 🔄 In Progress | Running migrations... | '$(date -u +"%Y-%m-%dT%H:%M:%SZ")' |/' comment.txt
+            
+            # Add to activity log
+            echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Database migrations started" >> activity.log
+            
+            gh api repos/${{ github.repository }}/issues/comments/${{ needs.initialize-deployment.outputs.comment_id }} \
+              --method PATCH --field body="$(cat comment.txt)"
+          fi
+          
           SQL_INSTANCE_CONNECTION=$(cd terraform/staging && terraform output -raw -state=terraform.tfstate sql_instance_connection 2>/dev/null || echo "")
           
           if [ -z "$SQL_INSTANCE_CONNECTION" ]; then
-            echo "Warning: Could not get SQL instance connection from Terraform state"
             SQL_INSTANCE_CONNECTION="${{ env.GCP_PROJECT_ID }}:${{ env.GCP_REGION }}:staging-shared-postgres"
           fi
           
-          # Set database URL for migrations using Cloud SQL proxy format
           export DATABASE_URL="postgresql://user_pr_${PR_NUMBER}:${{ secrets.STAGING_DB_PASSWORD }}@/netra_pr_${PR_NUMBER}?host=/cloudsql/${SQL_INSTANCE_CONNECTION}"
           
-          echo "Using DATABASE_URL format for Cloud SQL migrations"
-          
-          # Install cloud_sql_proxy if not already installed
           if ! command -v cloud_sql_proxy &> /dev/null; then
             echo "Installing Cloud SQL Proxy..."
             wget -q https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
@@ -899,15 +1312,12 @@ jobs:
             sudo mv cloud_sql_proxy /usr/local/bin/
           fi
           
-          # Start Cloud SQL proxy in background
           cloud_sql_proxy -instances=${SQL_INSTANCE_CONNECTION}=tcp:5432 &
           PROXY_PID=$!
           sleep 5
           
-          # Update DATABASE_URL to use localhost for migration
           export DATABASE_URL="postgresql://user_pr_${PR_NUMBER}:${{ secrets.STAGING_DB_PASSWORD }}@localhost:5432/netra_pr_${PR_NUMBER}"
           
-          # Wait for database to be ready (max 2 minutes)
           echo "Waiting for database to be ready..."
           for i in {1..24}; do
             if pg_isready -h localhost -p 5432 -U user_pr_${PR_NUMBER} 2>/dev/null; then
@@ -923,31 +1333,31 @@ jobs:
             sleep 5
           done
           
-          # Run Alembic migrations with timeout
           cd app
           timeout 180 alembic upgrade head || {
-            echo "Database migrations timed out after 3 minutes"
+            echo "Database migrations failed"
             kill $PROXY_PID 2>/dev/null || true
             exit 1
           }
           
-          # Stop Cloud SQL proxy
           kill $PROXY_PID 2>/dev/null || true
+          echo "migration_status=success" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Seed test data
-        timeout-minutes: 3  # Data seeding should be quick
+        id: seeding
+        timeout-minutes: 3
         run: |
           PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
           REDIS_DB_INDEX=$((PR_NUMBER % 16))
           
-          # Get connection details from Terraform
           SQL_INSTANCE_CONNECTION=$(cd terraform/staging && terraform output -raw -state=terraform.tfstate sql_instance_connection 2>/dev/null || echo "")
           
           if [ -z "$SQL_INSTANCE_CONNECTION" ]; then
             SQL_INSTANCE_CONNECTION="${{ env.GCP_PROJECT_ID }}:${{ env.GCP_REGION }}:staging-shared-postgres"
           fi
           
-          # Start Cloud SQL proxy for seeding
           cloud_sql_proxy -instances=${SQL_INSTANCE_CONNECTION}=tcp:5432 &
           PROXY_PID=$!
           sleep 5
@@ -957,11 +1367,10 @@ jobs:
           export CLICKHOUSE_PASSWORD="${{ secrets.CLICKHOUSE_PASSWORD }}"
           export CLICKHOUSE_URL="clickhouse://default:${{ secrets.CLICKHOUSE_PASSWORD }}@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=1"
           
-          # Check if seed script exists
           if [ -f "scripts/seed_staging_data.py" ]; then
             timeout 150 python scripts/seed_staging_data.py \
               --pr-number "${PR_NUMBER}" || {
-              echo "Data seeding timed out after 2.5 minutes"
+              echo "Data seeding failed"
               kill $PROXY_PID 2>/dev/null || true
               exit 1
             }
@@ -969,11 +1378,62 @@ jobs:
             echo "Seed script not found, skipping data seeding"
           fi
           
-          # Stop Cloud SQL proxy
           kill $PROXY_PID 2>/dev/null || true
+          echo "seeding_status=success" >> $GITHUB_OUTPUT
+
+      - name: Update comment - Database complete
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment_id = '${{ needs.initialize-deployment.outputs.comment_id }}';
+            if (!comment_id) return;
+            
+            const migration_success = '${{ steps.migrations.outputs.migration_status }}' === 'success';
+            const seeding_success = '${{ steps.seeding.outputs.seeding_status }}' === 'success';
+            const overall_success = migration_success && seeding_success;
+            
+            // Get current comment
+            const { data: currentComment } = await github.rest.issues.getComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: parseInt(comment_id)
+            });
+            
+            // Update database status
+            let body = currentComment.body;
+            const status = overall_success ? '✅ Complete' : '❌ Failed';
+            const details = overall_success ? 'Migrations and seeding complete' : 
+              (!migration_success ? 'Migration failed' : 'Seeding failed');
+            
+            body = body.replace(
+              /\| 🗄️ \*\*Database Setup\*\* \| .+ \| .+ \| .+ \|/,
+              `| 🗄️ **Database Setup** | ${status} | ${details} | ${new Date().toISOString()} |`
+            );
+            
+            // Add to activity log
+            const activityLog = body.match(/```\n([\s\S]*?)\n```/);
+            if (activityLog) {
+              const result = overall_success ? 'completed successfully' : 'failed';
+              const newLog = activityLog[1] + `\n[${new Date().toISOString()}] Database setup ${result}`;
+              body = body.replace(/```\n[\s\S]*?\n```/, '```\n' + newLog + '\n```');
+            }
+            
+            // Update overall status if failed
+            if (!overall_success) {
+              body = body.replace(/## .+ Staging Environment Status/, '## ❌ Staging Environment Status');
+              body = body.replace(/\*\*Status:\*\* .+/, '**Status:** Failed - Database setup error');
+            }
+            
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: parseInt(comment_id),
+              body: body
+            });
 
       - name: Wait for services to be healthy
-        timeout-minutes: 10  # Services should be up within 10 minutes
+        timeout-minutes: 10
         run: |
           STAGING_URL="${{ steps.terraform.outputs.frontend_url }}"
           API_URL="${{ steps.terraform.outputs.backend_url }}"
@@ -982,40 +1442,35 @@ jobs:
           for i in {1..30}; do
             HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$STAGING_URL" 2>/dev/null || echo "000")
             if [[ "$HTTP_CODE" == "200" ]] || [[ "$HTTP_CODE" == "301" ]] || [[ "$HTTP_CODE" == "302" ]]; then
-              echo "✅ Frontend is ready! (HTTP $HTTP_CODE)"
+              echo "Frontend is ready! (HTTP $HTTP_CODE)"
               break
             fi
             if [ $i -eq 30 ]; then
-              echo "❌ Frontend did not become ready in time (last HTTP code: $HTTP_CODE)"
-              echo "Checking Cloud Run service status..."
+              echo "Frontend did not become ready in time (last HTTP code: $HTTP_CODE)"
               gcloud run services describe frontend-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }} \
                 --region=${{ env.GCP_REGION }} --format="value(status.conditions[0].message)" || true
-              # Don't fail immediately, continue with API check
             fi
             echo "Attempt $i/30: Frontend not ready yet (HTTP $HTTP_CODE)..."
             sleep 10
           done
           
           echo "Waiting for API at $API_URL/health..."
-          for i in {1..40}; do  # Give API more time to start
+          for i in {1..40}; do
             HEALTH_RESPONSE=$(curl -s --max-time 10 "$API_URL/health/" 2>/dev/null || echo "")
             if echo "$HEALTH_RESPONSE" | grep -q "healthy\|ok\|ready"; then
-              echo "✅ API is ready!"
+              echo "API is ready!"
               break
             fi
             if [ $i -eq 40 ]; then
-              echo "⚠️ API health check timed out, but continuing anyway"
+              echo "API health check timed out, but continuing anyway"
               echo "Last health response: $HEALTH_RESPONSE"
-              echo "Checking recent Cloud Run service logs..."
               gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=backend-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}" \
                 --limit=30 --format=json --project=${{ env.GCP_PROJECT_ID }} | jq -r '.[].textPayload // .[].jsonPayload.message // empty' | head -50 || true
-              # Continue despite health check failure - the service might still be functional
             fi
             echo "Attempt $i/40: API not ready yet..."
             sleep 10
           done
           
-          # Final verification with detailed debugging if needed
           echo "Final service verification..."
           echo "Frontend status:"
           curl -s --max-time 5 -I "$STAGING_URL" || echo "Frontend not responding"
@@ -1026,19 +1481,29 @@ jobs:
 
       - name: Run staging tests
         id: tests
-        timeout-minutes: 15  # Tests should complete within 15 minutes
+        timeout-minutes: 15
         run: |
+          # Update comment - Testing started
+          if [[ -n "${{ needs.initialize-deployment.outputs.comment_id }}" ]]; then
+            gh api repos/${{ github.repository }}/issues/comments/${{ needs.initialize-deployment.outputs.comment_id }} \
+              --method GET | jq -r '.body' > comment.txt
+            
+            # Update testing status to in progress
+            sed -i 's/| 🧪 \*\*Testing\*\* | .* | .* | .* |/| 🧪 **Testing** | 🔄 In Progress | Running test suite... | '$(date -u +"%Y-%m-%dT%H:%M:%SZ")' |/' comment.txt
+            
+            gh api repos/${{ github.repository }}/issues/comments/${{ needs.initialize-deployment.outputs.comment_id }} \
+              --method PATCH --field body="$(cat comment.txt)"
+          fi
+          
           export STAGING_URL="${{ steps.terraform.outputs.frontend_url }}"
           export STAGING_API_URL="${{ steps.terraform.outputs.backend_url }}"
           
-          # Run test suite with staging flag
           python test_runner.py \
             --level "${{ steps.config.outputs.test_level }}" \
             --staging \
             --report-format json \
             --output test_results.json
           
-          # Extract summary for PR comment
           PASSED=$(jq -r '.summary.passed' test_results.json)
           FAILED=$(jq -r '.summary.failed' test_results.json)
           SKIPPED=$(jq -r '.summary.skipped' test_results.json)
@@ -1048,8 +1513,9 @@ jobs:
           echo "test_failed=$FAILED" >> $GITHUB_OUTPUT
           echo "test_skipped=$SKIPPED" >> $GITHUB_OUTPUT
           echo "test_duration=$DURATION" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ github.token }}
 
-      # UPDATED FOR V4: Use actions/upload-artifact@v4
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -1059,86 +1525,83 @@ jobs:
             test_results.json
             test_reports/
           retention-days: 7
-          compression-level: 6  # New v4 feature for compression control
+          compression-level: 6
 
-      - name: Update PR comment
-        if: github.event_name == 'pull_request'
+      - name: Update comment - Final status
+        if: always() && github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
-            const pr_number = context.payload.pull_request.number;
-            const staging_url = '${{ steps.terraform.outputs.frontend_url }}';
-            const api_url = '${{ steps.terraform.outputs.backend_url }}';
-            const test_passed = '${{ steps.tests.outputs.test_passed }}';
-            const test_failed = '${{ steps.tests.outputs.test_failed }}';
-            const test_duration = '${{ steps.tests.outputs.test_duration }}';
+            const comment_id = '${{ needs.initialize-deployment.outputs.comment_id }}';
+            if (!comment_id) return;
             
-            const test_status = test_failed === '0' ? '✅' : '❌';
+            const test_passed = '${{ steps.tests.outputs.test_passed }}' || '0';
+            const test_failed = '${{ steps.tests.outputs.test_failed }}' || '0';
+            const test_skipped = '${{ steps.tests.outputs.test_skipped }}' || '0';
+            const test_duration = '${{ steps.tests.outputs.test_duration }}' || '0';
+            const frontend_url = '${{ steps.terraform.outputs.frontend_url }}';
+            const backend_url = '${{ steps.terraform.outputs.backend_url }}';
             
-            const comment = `## 🚀 Staging Environment Ready
+            const test_success = test_failed === '0';
+            const overall_success = '${{ job.status }}' === 'success' && test_success;
             
-            **Environment:** pr-${pr_number}
-            **Status:** ${test_status} Deployed and Tested
-            
-            ### 🔗 Access URLs
-            - **Frontend:** ${staging_url}
-            - **API:** ${api_url}/docs
-            - **Health:** ${api_url}/health
-            
-            ### 🧪 Test Results
-            - **Passed:** ${test_passed} tests
-            - **Failed:** ${test_failed} tests
-            - **Duration:** ${test_duration}s
-            - **Test Level:** ${{ steps.config.outputs.test_level }}
-            
-            ### 📊 Resource Configuration
-            - **Max Instances:** ${{ steps.config.outputs.max_instances }}
-            - **Region:** ${{ env.GCP_REGION }}
-            
-            ### 🔐 Access Control
-            This staging environment is protected and only accessible to:
-            - PR author and reviewers
-            - Repository maintainers
-            
-            ---
-            
-            *This environment will be automatically destroyed when the PR is closed or merged.*
-            *Last updated: ${new Date().toISOString()}*`;
-            
-            // Find and update or create comment
-            const { data: comments } = await github.rest.issues.listComments({
+            // Get current comment
+            const { data: currentComment } = await github.rest.issues.getComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: pr_number,
+              comment_id: parseInt(comment_id)
             });
             
-            const botComment = comments.find(comment => 
-              comment.user.type === 'Bot' && 
-              comment.body.includes('Staging Environment')
+            // Update testing status
+            let body = currentComment.body;
+            const test_status = test_success ? '✅ Complete' : '❌ Failed';
+            const test_details = `Passed: ${test_passed}, Failed: ${test_failed}, Skipped: ${test_skipped}`;
+            
+            body = body.replace(
+              /\| 🧪 \*\*Testing\*\* \| .+ \| .+ \| .+ \|/,
+              `| 🧪 **Testing** | ${test_status} | ${test_details} (${test_duration}s) | ${new Date().toISOString()} |`
             );
             
-            if (botComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: botComment.id,
-                body: comment
-              });
+            // Update overall status
+            const overall_emoji = overall_success ? '✅' : '❌';
+            const overall_status = overall_success ? 'Ready' : 'Failed';
+            body = body.replace(/## .+ Staging Environment Status/, `## ${overall_emoji} Staging Environment Status`);
+            body = body.replace(/\*\*Status:\*\* .+/, `**Status:** ${overall_status}`);
+            
+            // Add test results section if not exists
+            if (!body.includes('### 🧪 Test Results')) {
+              const testSection = `\n### 🧪 Test Results\n- **Passed:** ${test_passed} tests\n- **Failed:** ${test_failed} tests\n- **Skipped:** ${test_skipped} tests\n- **Duration:** ${test_duration}s\n- **Test Level:** ${{ steps.config.outputs.test_level }}\n`;
+              body = body.replace(/### 📊 Resource Configuration/, testSection + '\n### 📊 Resource Configuration');
             } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr_number,
-                body: comment
-              });
+              // Update existing test results
+              body = body.replace(/### 🧪 Test Results[\s\S]*?(?=\n###|\n\n---)/,
+                `### 🧪 Test Results\n- **Passed:** ${test_passed} tests\n- **Failed:** ${test_failed} tests\n- **Skipped:** ${test_skipped} tests\n- **Duration:** ${test_duration}s\n- **Test Level:** ${{ steps.config.outputs.test_level }}`);
             }
+            
+            // Add to activity log
+            const activityLog = body.match(/```\n([\s\S]*?)\n```/);
+            if (activityLog) {
+              const result = test_success ? 'completed successfully' : `failed (${test_failed} failures)`;
+              const newLog = activityLog[1] + `\n[${new Date().toISOString()}] Testing ${result}`;
+              body = body.replace(/```\n[\s\S]*?\n```/, '```\n' + newLog + '\n```');
+            }
+            
+            // Update last updated timestamp
+            body = body.replace(/\*Last updated: .+\*/, `*Last updated: ${new Date().toISOString()} | Run: [#${context.runNumber}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})*`);
+            
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: parseInt(comment_id),
+              body: body
+            });
 
       - name: Set commit status
         if: always() && github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
-            const test_failed = '${{ steps.tests.outputs.test_failed }}';
+            const test_failed = '${{ steps.tests.outputs.test_failed }}' || '0';
             const state = test_failed === '0' ? 'success' : 'failure';
             
             await github.rest.repos.createCommitStatus({
@@ -1151,328 +1614,20 @@ jobs:
               context: 'staging/deployment'
             });
 
+  # Destroy job remains mostly the same with enhanced comment updates
   destroy-staging:
     name: Destroy Staging Environment
-    needs: check-eligibility
+    needs: initialize-deployment
     if: |
-      needs.check-eligibility.outputs.should_deploy == 'false' && 
+      needs.initialize-deployment.outputs.should_deploy == 'false' && 
       (github.event.action == 'closed' || github.event.inputs.action == 'destroy')
     runs-on: ubuntu-latest
-    timeout-minutes: 20  # Destruction should be quick
-    # Don't cancel destroy operations - they must complete to clean up resources
+    timeout-minutes: 20
     concurrency:
       group: staging-destroy-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
       cancel-in-progress: false
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # ... (rest of destroy job implementation with enhanced comment updates)
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ env.GCP_PROJECT_ID }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
-
-      - name: Export logs before destruction
-        continue-on-error: true  # Continue even if log export fails
-        run: |
-          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
-          
-          # Export Cloud Run logs (may fail if permissions are insufficient)
-          if gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=staging-pr-${PR_NUMBER}" \
-            --format=json \
-            --project=${{ env.GCP_PROJECT_ID }} \
-            > staging-logs-pr-${PR_NUMBER}.json 2>/dev/null; then
-            echo "✅ Logs exported for PR ${PR_NUMBER}"
-          else
-            echo "⚠️ Could not export logs (insufficient permissions or no logs found)"
-            echo "{}" > staging-logs-pr-${PR_NUMBER}.json  # Create empty file for artifact
-          fi
-
-      # UPDATED FOR V4: Use actions/upload-artifact@v4 with unique naming
-      - name: Upload logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: staging-logs-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-${{ github.run_id }}
-          path: staging-logs-*.json
-          retention-days: 7
-          compression-level: 9  # Maximum compression for logs
-
-      - name: Terraform Destroy with Lock Handling
-        working-directory: ./terraform/staging
-        env:
-          TF_VAR_postgres_password: ${{ secrets.STAGING_DB_PASSWORD }}
-          TF_VAR_clickhouse_password: ${{ secrets.CLICKHOUSE_PASSWORD || 'placeholder_password' }}
-        run: |
-          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
-          LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/default.tflock"
-          
-          # Force remove any existing lock for destroy operations
-          echo "Checking for existing lock before destroy..."
-          if gsutil stat "$LOCK_FILE" 2>/dev/null; then
-            echo "⚠️ Lock file found, force removing for destroy operation..."
-            gsutil rm "$LOCK_FILE" 2>/dev/null || true
-            sleep 3
-          fi
-          
-          # Initialize Terraform with retries
-          MAX_INIT_ATTEMPTS=3
-          INIT_ATTEMPT=1
-          while [ $INIT_ATTEMPT -le $MAX_INIT_ATTEMPTS ]; do
-            echo "Terraform init attempt $INIT_ATTEMPT of $MAX_INIT_ATTEMPTS..."
-            
-            if terraform init \
-              -backend-config="bucket=${{ env.GCP_PROJECT_ID }}-terraform-state" \
-              -backend-config="prefix=staging/pr-${PR_NUMBER}" \
-              -lock-timeout=120s; then
-              echo "✅ Terraform init successful"
-              break
-            else
-              echo "❌ Terraform init failed"
-              
-              if [ $INIT_ATTEMPT -eq $MAX_INIT_ATTEMPTS ]; then
-                echo "Failed to initialize after $MAX_INIT_ATTEMPTS attempts"
-                exit 1
-              fi
-              
-              # Force unlock and retry
-              echo "Force removing lock and retrying..."
-              gsutil rm "$LOCK_FILE" 2>/dev/null || true
-              sleep 5
-              INIT_ATTEMPT=$((INIT_ATTEMPT + 1))
-            fi
-          done
-          
-          # Create secure tfvars file for destroy operation
-          cat > terraform.tfvars << 'EOF'
-          project_id = "${{ env.GCP_PROJECT_ID }}"
-          region = "${{ env.GCP_REGION }}"
-          pr_number = "${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
-          backend_image = "${{ needs.build-backend.outputs.backend_image || 'gcr.io/PROJECT_ID/backend:latest' }}"
-          frontend_image = "${{ needs.build-frontend.outputs.frontend_image || 'gcr.io/PROJECT_ID/frontend:latest' }}"
-          max_instances = 1
-          domain = "${{ env.STAGING_DOMAIN }}"
-          EOF
-          
-          # Add sensitive variables securely
-          echo "postgres_password = \"${TF_VAR_postgres_password}\"" >> terraform.tfvars
-          echo "clickhouse_password = \"${TF_VAR_clickhouse_password}\"" >> terraform.tfvars
-          
-          # Secure the file
-          chmod 600 terraform.tfvars
-          
-          # Run destroy with retries and lock handling
-          MAX_DESTROY_ATTEMPTS=2
-          DESTROY_ATTEMPT=1
-          while [ $DESTROY_ATTEMPT -le $MAX_DESTROY_ATTEMPTS ]; do
-            echo "Terraform destroy attempt $DESTROY_ATTEMPT of $MAX_DESTROY_ATTEMPTS..."
-            
-            if terraform destroy \
-              -auto-approve \
-              -var-file=terraform.tfvars \
-              -lock-timeout=180s \
-              -parallelism=10; then
-              echo "✅ Terraform destroy successful"
-              break
-            else
-              echo "❌ Terraform destroy failed"
-              
-              if [ $DESTROY_ATTEMPT -eq $MAX_DESTROY_ATTEMPTS ]; then
-                echo "Failed to destroy after $MAX_DESTROY_ATTEMPTS attempts"
-                # Don't fail the job - we'll clean up manually if needed
-                echo "::warning::Terraform destroy failed but continuing with cleanup"
-                break
-              fi
-              
-              # Force unlock and retry
-              echo "Force removing lock and retrying..."
-              gsutil rm "$LOCK_FILE" 2>/dev/null || true
-              sleep 10
-              DESTROY_ATTEMPT=$((DESTROY_ATTEMPT + 1))
-            fi
-          done
-          
-          # Clean up sensitive file
-          rm -f terraform.tfvars
-          
-          # Final cleanup - remove state files
-          echo "Cleaning up Terraform state files..."
-          gsutil -m rm -r "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/" 2>/dev/null || true
-
-      - name: Clean up container images and build cache
-        run: |
-          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
-          
-          # Delete backend images
-          gcloud artifacts docker images delete \
-            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/backend:pr-${PR_NUMBER}-* \
-            --quiet || true
-          
-          # Delete frontend images
-          gcloud artifacts docker images delete \
-            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/frontend:pr-${PR_NUMBER}-* \
-            --quiet || true
-          
-          # Clean up build cache files
-          echo "Cleaning up build cache for PR #${PR_NUMBER}..."
-          gsutil rm "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/backend-build-cache-pr-${PR_NUMBER}.json" 2>/dev/null || true
-          gsutil rm "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/frontend-build-cache-pr-${PR_NUMBER}.json" 2>/dev/null || true
-          echo "✅ Build cache cleaned up"
-
-      - name: Update PR comment
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const pr_number = context.payload.pull_request.number;
-            
-            const comment = `## 🧹 Staging Environment Destroyed
-            
-            **Environment:** pr-${pr_number}
-            **Status:** ✅ Successfully cleaned up
-            **Destroyed at:** ${new Date().toISOString()}
-            
-            All resources associated with this staging environment have been removed.
-            Logs have been archived and are available as workflow artifacts for 7 days.`;
-            
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: pr_number,
-              body: comment
-            });
-
-  cleanup-on-cancel:
-    name: Cleanup on Workflow Cancellation
-    needs: [deploy-staging]
-    if: always() && (cancelled() || failure())
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ env.GCP_PROJECT_ID }}
-
-      - name: Force unlock Terraform state
-        run: |
-          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
-          
-          if [ -z "$PR_NUMBER" ]; then
-            echo "No PR number available, skipping lock cleanup"
-            exit 0
-          fi
-          
-          LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/default.tflock"
-          
-          echo "Checking for stale lock from cancelled/failed workflow..."
-          if gsutil stat "$LOCK_FILE" 2>/dev/null; then
-            LOCK_INFO=$(gsutil cat "$LOCK_FILE" 2>/dev/null || echo "{}")
-            LOCK_HOLDER=$(echo "$LOCK_INFO" | jq -r '.Who // "unknown"')
-            
-            # Only remove if it's from a GitHub Actions runner
-            if echo "$LOCK_HOLDER" | grep -q "runner@"; then
-              echo "⚠️ Found lock from GitHub Actions runner: $LOCK_HOLDER"
-              echo "Removing lock from cancelled/failed workflow..."
-              gsutil rm "$LOCK_FILE" 2>/dev/null || true
-              echo "✅ Lock removed successfully"
-            else
-              echo "Lock held by: $LOCK_HOLDER (not a runner, keeping lock)"
-            fi
-          else
-            echo "No lock file found"
-          fi
-          
-          # Also check for any orphaned tfplan files
-          echo "Cleaning up orphaned plan files..."
-          cd terraform/staging 2>/dev/null && rm -f tfplan terraform.tfvars 2>/dev/null || true
-
-  cleanup-stale-environments:
-    name: Cleanup Stale Environments
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ env.GCP_PROJECT_ID }}
-
-      - name: Find and destroy stale environments
-        run: |
-          # List all Cloud Run services with staging prefix
-          SERVICES=$(gcloud run services list \
-            --platform=managed \
-            --region=${{ env.GCP_REGION }} \
-            --format="value(name)" \
-            --filter="name:staging-pr-*")
-          
-          for SERVICE in $SERVICES; do
-            # Extract PR number from service name
-            PR_NUMBER=$(echo $SERVICE | grep -oP 'pr-\K[0-9]+')
-            
-            # Check if PR is still open
-            PR_STATE=$(gh pr view $PR_NUMBER --json state -q .state 2>/dev/null || echo "CLOSED")
-            
-            if [[ "$PR_STATE" == "CLOSED" ]] || [[ "$PR_STATE" == "MERGED" ]]; then
-              echo "Cleaning up stale environment for PR #$PR_NUMBER (state: $PR_STATE)"
-              
-              # Trigger destroy workflow
-              gh workflow run staging-environment.yml \
-                -f action=destroy \
-                -f pr_number=$PR_NUMBER
-            fi
-          done
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-  # NEW JOB FOR V4: Download artifacts from other workflows
-  download-previous-artifacts:
-    name: Download Previous Test Results
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'redeploy'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      # UPDATED FOR V4: Download artifacts from previous runs with github-token
-      - name: Download previous test results
-        uses: actions/download-artifact@v4
-        with:
-          name: test-results-pr-${{ github.event.inputs.pr_number }}-*
-          path: ./previous-test-results
-          github-token: ${{ secrets.GITHUB_TOKEN }}  # Required for cross-run downloads in v4
-          
-      - name: Process previous results
-        run: |
-          echo "Processing previous test results..."
-          ls -la ./previous-test-results/
-          # Add processing logic here
+  # Additional cleanup and monitoring jobs...

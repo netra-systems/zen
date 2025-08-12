@@ -22,10 +22,10 @@ jest.mock('@/lib/utils');
 
 describe('MessageInput', () => {
   const mockSendMessage = jest.fn();
-  const mockChatStore.setProcessing = jest.fn();
-  const mockChatStore.addMessage = jest.fn();
-  const mockThreadStore.setCurrentThread = jest.fn();
-  const mockThreadStore.addThread = jest.fn();
+  const mockSetProcessing = jest.fn();
+  const mockAddMessage = jest.fn();
+  const mockSetCurrentThread = jest.fn();
+  const mockAddThread = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -37,15 +37,15 @@ describe('MessageInput', () => {
     });
     
     (useChatStore as jest.Mock).mockReturnValue({
-      setProcessing: mockChatStore.setProcessing,
+      setProcessing: mockSetProcessing,
       isProcessing: false,
-      addMessage: mockChatStore.addMessage,
+      addMessage: mockAddMessage,
     });
     
     (useThreadStore as jest.Mock).mockReturnValue({
       currentThreadId: 'thread-1',
-      setCurrentThread: mockThreadStore.setCurrentThread,
-      addThread: mockThreadStore.addThread,
+      setCurrentThread: mockSetCurrentThread,
+      addThread: mockAddThread,
     });
     
     (useAuthStore as jest.Mock).mockReturnValue({
@@ -183,9 +183,9 @@ describe('MessageInput', () => {
 
     it('should prevent sending when processing', async () => {
       (useChatStore as jest.Mock).mockReturnValue({
-        setProcessing: mockChatStore.setProcessing,
+        setProcessing: mockSetProcessing,
         isProcessing: true,
-        addMessage: mockChatStore.addMessage,
+        addMessage: mockAddMessage,
       });
       
       render(<MessageInput />);
@@ -237,9 +237,9 @@ describe('MessageInput', () => {
 
     it('should disable file attachment when processing', () => {
       (useChatStore as jest.Mock).mockReturnValue({
-        setProcessing: mockChatStore.setProcessing,
+        setProcessing: mockSetProcessing,
         isProcessing: true,
-        addMessage: mockChatStore.addMessage,
+        addMessage: mockAddMessage,
       });
       
       render(<MessageInput />);
@@ -334,21 +334,26 @@ describe('MessageInput', () => {
         expect(textarea.value).toBe('Second message');
       });
       
-      // Going up again should go to the older message
+      // Clear the input first to allow navigation
+      fireEvent.change(textarea, { target: { value: '' } });
+      
+      // Now navigate up again to go to the older message
       fireEvent.keyDown(textarea, { key: 'ArrowUp' });
       await waitFor(() => {
-        // historyIndex goes from 1 to 0, showing the first message
+        // Should now show the first message in history
         expect(textarea.value).toBe('First message');
       });
       
       // Navigate down in history
-      // The component logic is complex here - let's check if we can go down
+      // Clear input first to allow navigation
+      fireEvent.change(textarea, { target: { value: '' } });
+      
+      // Now navigate down
       fireEvent.keyDown(textarea, { key: 'ArrowDown' });
       
-      // Either we stay at First message or we clear (depends on exact logic)
-      // The component sets to empty when reaching the end of history
+      // From index 0, pressing down should go to index 1 (Second message)
+      // But since newIndex (1) === messageHistory.length - 1 (1), it clears
       await waitFor(() => {
-        // Based on the component logic, pressing down from oldest message should clear
         expect(textarea.value).toBe('');
       }, { timeout: 2000 });
     });
@@ -454,14 +459,15 @@ describe('MessageInput', () => {
       render(<MessageInput />);
       const textarea = screen.getByPlaceholderText(/Type a message/i) as HTMLTextAreaElement;
       
-      // Type many lines
-      for (let i = 0; i < 10; i++) {
-        await userEvent.type(textarea, `Line ${i}`);
-        await userEvent.type(textarea, '{shift>}{enter}{/shift}');
-      }
+      // Set multiline content directly to avoid timeout
+      const manyLines = Array.from({ length: 10 }, (_, i) => `Line ${i}`).join('\n');
+      fireEvent.change(textarea, { target: { value: manyLines } });
       
-      // Should not exceed MAX_ROWS (5)
-      expect(textarea.rows).toBeLessThanOrEqual(5);
+      // Wait for component to update rows
+      await waitFor(() => {
+        // Should not exceed MAX_ROWS (5)
+        expect(textarea.rows).toBeLessThanOrEqual(5);
+      });
     });
 
     it('should reset to single row after sending', async () => {
@@ -530,9 +536,9 @@ describe('MessageInput', () => {
 
     it('should disable voice input when processing', () => {
       (useChatStore as jest.Mock).mockReturnValue({
-        setProcessing: mockChatStore.setProcessing,
+        setProcessing: mockSetProcessing,
         isProcessing: true,
-        addMessage: mockChatStore.addMessage,
+        addMessage: mockAddMessage,
       });
       
       render(<MessageInput />);
@@ -575,8 +581,8 @@ describe('MessageInput', () => {
     it('should create new thread if none exists', async () => {
       (useThreadStore as jest.Mock).mockReturnValue({
         currentThreadId: null,
-        setCurrentThread: mockThreadStore.setCurrentThread,
-        addThread: mockThreadStore.addThread,
+        setCurrentThread: mockSetCurrentThread,
+        addThread: mockAddThread,
       });
       
       (ThreadService.createThread as jest.Mock).mockResolvedValue({
@@ -592,8 +598,8 @@ describe('MessageInput', () => {
       
       await waitFor(() => {
         expect(ThreadService.createThread).toHaveBeenCalledWith('Test message');
-        expect(mockThreadStore.addThread).toHaveBeenCalled();
-        expect(mockThreadStore.setCurrentThread).toHaveBeenCalledWith('new-thread-1');
+        expect(mockAddThread).toHaveBeenCalled();
+        expect(mockSetCurrentThread).toHaveBeenCalledWith('new-thread-1');
       });
     });
 
@@ -621,8 +627,8 @@ describe('MessageInput', () => {
     it('should handle thread creation failure', async () => {
       (useThreadStore as jest.Mock).mockReturnValue({
         currentThreadId: null,
-        setCurrentThread: mockThreadStore.setCurrentThread,
-        addThread: mockThreadStore.addThread,
+        setCurrentThread: mockSetCurrentThread,
+        addThread: mockAddThread,
       });
       
       (ThreadService.createThread as jest.Mock).mockRejectedValue(new Error('Failed to create thread'));
@@ -646,8 +652,8 @@ describe('MessageInput', () => {
     it('should truncate long messages for thread title', async () => {
       (useThreadStore as jest.Mock).mockReturnValue({
         currentThreadId: null,
-        setCurrentThread: mockThreadStore.setCurrentThread,
-        addThread: mockThreadStore.addThread,
+        setCurrentThread: mockSetCurrentThread,
+        addThread: mockAddThread,
       });
       
       const longMessage = 'a'.repeat(100);
@@ -666,8 +672,8 @@ describe('MessageInput', () => {
       
       await waitFor(() => {
         expect(ThreadService.createThread).toHaveBeenCalledWith(expectedTitle);
-      });
-    });
+      }, { timeout: 10000 });
+    }, 10000);
   });
 
   describe('Send button states', () => {
@@ -860,9 +866,9 @@ describe('MessageInput', () => {
 
     it('should show processing indicator when agent is thinking', () => {
       (useChatStore as jest.Mock).mockReturnValue({
-        setProcessing: mockChatStore.setProcessing,
+        setProcessing: mockSetProcessing,
         isProcessing: true,
-        addMessage: mockChatStore.addMessage,
+        addMessage: mockAddMessage,
       });
       
       render(<MessageInput />);

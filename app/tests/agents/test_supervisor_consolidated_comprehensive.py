@@ -1093,3 +1093,108 @@ async def _route_to_agent_with_circuit_breaker(self, state, context, agent_name)
 SupervisorAgent._route_to_agent = _route_to_agent
 SupervisorAgent._route_to_agent_with_retry = _route_to_agent_with_retry
 SupervisorAgent._route_to_agent_with_circuit_breaker = _route_to_agent_with_circuit_breaker
+
+
+class TestSupervisorAdvancedFeatures:
+    """Additional tests for advanced supervisor functionality"""
+    
+    @pytest.mark.asyncio
+    async def test_supervisor_error_handling(self):
+        """Test supervisor handles agent initialization errors gracefully"""
+        # Mock dependencies
+        mock_db = AsyncMock()
+        mock_llm = AsyncMock()
+        mock_websocket = AsyncMock() 
+        mock_tool_dispatcher = AsyncMock()
+        
+        supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
+        
+        # Mock an agent failure
+        state = DeepAgentState(user_request="Test error handling")
+        context = AgentExecutionContext(
+            run_id="error-test",
+            thread_id="thread-1",
+            user_id="user-1",
+            start_time=datetime.now(timezone.utc)
+        )
+        
+        # Make triage agent fail
+        supervisor.agents["triage"].execute = AsyncMock(side_effect=Exception("Agent failed"))
+        
+        # Supervisor should handle the error gracefully
+        result = await supervisor.execute_with_context(state, context)
+        
+        # Verify error was handled
+        assert result.error is not None
+        assert "Agent failed" in str(result.error)
+        assert result.success is False
+    
+    @pytest.mark.asyncio
+    async def test_supervisor_state_management(self):
+        """Test supervisor properly manages agent states"""
+        # Mock dependencies
+        mock_db = AsyncMock()
+        mock_llm = AsyncMock()
+        mock_websocket = AsyncMock()
+        mock_tool_dispatcher = AsyncMock()
+        
+        supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
+        
+        # Test initial state
+        assert supervisor.state == SubAgentLifecycle.PENDING
+        
+        # Test state transitions
+        supervisor.set_state(SubAgentLifecycle.RUNNING)
+        assert supervisor.get_state() == SubAgentLifecycle.RUNNING
+        
+        supervisor.set_state(SubAgentLifecycle.COMPLETED)
+        assert supervisor.get_state() == SubAgentLifecycle.COMPLETED
+        
+        # Test state reset
+        supervisor.set_state(SubAgentLifecycle.PENDING)
+        assert supervisor.get_state() == SubAgentLifecycle.PENDING
+    
+    @pytest.mark.asyncio
+    async def test_supervisor_concurrent_requests(self):
+        """Test supervisor handles multiple concurrent requests"""
+        # Mock dependencies
+        mock_db = AsyncMock()
+        mock_llm = AsyncMock()
+        mock_websocket = AsyncMock()
+        mock_tool_dispatcher = AsyncMock()
+        
+        supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
+        
+        # Mock triage agent for concurrent requests
+        async def mock_execute(state, run_id, stream_updates=True):
+            await asyncio.sleep(0.01)  # Simulate processing time
+            state.triage_result = {"message_type": "query", "confidence": 0.9}
+            return state
+        
+        supervisor.agents["triage"].execute = mock_execute
+        
+        # Create multiple concurrent requests
+        requests = [f"Message {i}" for i in range(5)]
+        run_ids = [f"run_{i}" for i in range(5)]
+        
+        tasks = []
+        for req, run_id in zip(requests, run_ids):
+            state = DeepAgentState(user_request=req)
+            context = AgentExecutionContext(
+                run_id=run_id,
+                thread_id=f"thread_{run_id}",
+                user_id="user-1",
+                start_time=datetime.now(timezone.utc)
+            )
+            tasks.append(supervisor.execute_with_context(state, context))
+        
+        # Execute concurrently
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Verify all requests were processed
+        assert len(results) == 5
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                pytest.fail(f"Request {i} failed with: {result}")
+            assert result.success is True
+            assert result.state.user_request == f"Message {i}"
