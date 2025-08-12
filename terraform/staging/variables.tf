@@ -113,3 +113,9 @@ variable "max_instances" {
   type        = number
   default     = 3
 }
+
+variable "postgres_password" {
+  description = "Password for PostgreSQL database"
+  type        = string
+  sensitive   = true
+}

@@ -80,17 +80,16 @@ module "security" {
 module "database" {
   source = "./modules/database"
   
-  project_id       = var.project_id
-  region           = var.region
-  environment_name = local.environment_name
-  resource_suffix  = local.resource_suffix
-  network_id       = module.networking.network_id
-  labels           = local.common_labels
+  environment_name     = local.environment_name
+  region              = var.region
+  vpc_network_id      = module.networking.vpc_id
+  postgres_password   = var.postgres_password
+  labels              = local.common_labels
   
-  database_tier    = var.resource_limits.database_tier
-  database_storage = var.resource_limits.database_storage_gb
-  redis_tier       = var.resource_limits.redis_tier
-  redis_memory_gb  = var.resource_limits.redis_memory_gb
+  postgres_tier       = var.resource_limits.database_tier
+  postgres_disk_size  = var.resource_limits.database_storage_gb
+  redis_tier          = var.resource_limits.redis_tier
+  redis_memory_size_gb = var.resource_limits.redis_memory_gb
 }
 
 # Compute module - Cloud Run services
