@@ -115,57 +115,52 @@ jobs:
       - name: Check for backend changes
         id: backend-changes
         run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          CURRENT_SHA=${{ github.sha }}
+          
+          # Try to get the last successful build SHA from cache
+          CACHE_KEY="backend-build-cache-pr-${PR_NUMBER}"
+          LAST_BUILD_SHA=""
+          LAST_BUILD_IMAGE=""
+          
+          # Check if we have a cached build record in GCS
+          if gsutil -q stat "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/${CACHE_KEY}.json" 2>/dev/null; then
+            CACHE_DATA=$(gsutil cat "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/${CACHE_KEY}.json" 2>/dev/null || echo "{}")
+            LAST_BUILD_SHA=$(echo "$CACHE_DATA" | jq -r '.sha // ""')
+            LAST_BUILD_IMAGE=$(echo "$CACHE_DATA" | jq -r '.image // ""')
+            echo "Found cached build: SHA=$LAST_BUILD_SHA"
+          fi
+          
           # Initialize as changed by default (safe for first commits or when unsure)
           CHANGED="true"
           CHANGED_FILES=""
           
-          # Try to detect changes based on the context
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # For PRs, always check ALL changes in the PR (not just latest commit)
-            echo "Checking all PR changes against base branch '${{ github.event.pull_request.base.ref }}'..."
+          # If we have a last build SHA, check if files changed since then
+          if [[ -n "$LAST_BUILD_SHA" ]] && [[ "$LAST_BUILD_SHA" != "null" ]]; then
+            echo "Checking for changes since last successful build at $LAST_BUILD_SHA"
             
-            # Ensure we have the latest base branch
-            git fetch origin ${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }} --depth=50
-            
-            # Find the merge base (where this PR branch diverged from base)
-            MERGE_BASE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} HEAD 2>/dev/null || echo "")
-            
-            if [[ -n "$MERGE_BASE" ]]; then
-              echo "Found merge base: $MERGE_BASE"
-              # Get all files changed in this PR (from merge base to current HEAD)
-              CHANGED_FILES=$(git diff --name-only $MERGE_BASE HEAD 2>/dev/null || echo "")
+            # Check if the commit exists in our history
+            if git rev-parse "$LAST_BUILD_SHA" >/dev/null 2>&1; then
+              # Get files changed since last successful build
+              CHANGED_FILES=$(git diff --name-only "$LAST_BUILD_SHA" HEAD 2>/dev/null || echo "force-rebuild")
             else
-              echo "Could not find merge base, comparing directly..."
-              # Fallback: compare against base branch directly
-              CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} HEAD 2>/dev/null || echo "")
+              echo "Last build SHA not found in history, checking all PR changes"
+              CHANGED_FILES="force-rebuild"
             fi
+          else
+            # No cache, check all PR changes
+            echo "No build cache found, checking all PR changes"
             
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            # For manual triggers, try to find the associated PR and check all its changes
-            PR_NUMBER="${{ github.event.inputs.pr_number }}"
-            if [[ -n "$PR_NUMBER" ]]; then
-              echo "Manual trigger for PR #$PR_NUMBER - checking all PR changes..."
-              # Try to get the base branch from GitHub API or default to main
-              BASE_BRANCH=$(gh pr view $PR_NUMBER --json baseRefName -q .baseRefName 2>/dev/null || echo "main")
-              git fetch origin $BASE_BRANCH:refs/remotes/origin/$BASE_BRANCH 2>/dev/null || true
-              MERGE_BASE=$(git merge-base origin/$BASE_BRANCH HEAD 2>/dev/null || echo "")
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              # For PRs, check ALL changes in the PR
+              git fetch origin ${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }} --depth=50
+              MERGE_BASE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} HEAD 2>/dev/null || echo "")
+              
               if [[ -n "$MERGE_BASE" ]]; then
                 CHANGED_FILES=$(git diff --name-only $MERGE_BASE HEAD 2>/dev/null || echo "")
               else
-                CHANGED_FILES="force-rebuild"
+                CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} HEAD 2>/dev/null || echo "")
               fi
-            else
-              # No PR number, check last commit
-              if git rev-parse HEAD^ >/dev/null 2>&1; then
-                CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo "")
-              else
-                CHANGED_FILES="force-rebuild"
-              fi
-            fi
-          else
-            # For other events, check last commit
-            if git rev-parse HEAD^ >/dev/null 2>&1; then
-              CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo "")
             else
               CHANGED_FILES="force-rebuild"
             fi
@@ -173,22 +168,43 @@ jobs:
           
           # Debug output
           echo "Event: ${{ github.event_name }}, Action: ${{ github.event.action }}"
-          echo "Total files changed: $(echo "$CHANGED_FILES" | wc -l)"
-          echo "Changed files detected:"
-          echo "$CHANGED_FILES" | head -20
+          echo "Current SHA: $CURRENT_SHA"
+          echo "Last Build SHA: $LAST_BUILD_SHA"
+          if [[ "$CHANGED_FILES" != "force-rebuild" ]]; then
+            echo "Total files changed: $(echo "$CHANGED_FILES" | wc -l)"
+            echo "Changed files:"
+            echo "$CHANGED_FILES" | head -20
+          fi
           
           # Check for backend-related changes
           if [[ "$CHANGED_FILES" == "force-rebuild" ]]; then
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "🔨 Forcing backend rebuild (unable to determine changes)"
+            echo "🔨 Forcing backend rebuild"
+          elif [[ -z "$CHANGED_FILES" ]]; then
+            # No changes detected and we have a valid last build
+            if [[ -n "$LAST_BUILD_IMAGE" ]] && [[ "$LAST_BUILD_IMAGE" != "null" ]]; then
+              echo "changed=false" >> $GITHUB_OUTPUT
+              echo "cached_image=$LAST_BUILD_IMAGE" >> $GITHUB_OUTPUT
+              echo "♻️ No backend changes detected, will use cached image: $LAST_BUILD_IMAGE"
+            else
+              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "⚠️ No changes but no cached image available, forcing rebuild"
+            fi
           elif echo "$CHANGED_FILES" | grep -E '^(app/|requirements\.txt|Dockerfile\.backend|alembic/|pyproject\.toml|poetry\.lock)' > /dev/null 2>&1; then
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "✅ Backend changes detected"
             echo "Backend files changed:"
             echo "$CHANGED_FILES" | grep -E '^(app/|requirements\.txt|Dockerfile\.backend|alembic/|pyproject\.toml|poetry\.lock)' | head -10
           else
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "ℹ️ No backend changes detected"
+            # No backend changes, use cached image if available
+            if [[ -n "$LAST_BUILD_IMAGE" ]] && [[ "$LAST_BUILD_IMAGE" != "null" ]]; then
+              echo "changed=false" >> $GITHUB_OUTPUT
+              echo "cached_image=$LAST_BUILD_IMAGE" >> $GITHUB_OUTPUT
+              echo "♻️ No backend changes detected, will use cached image: $LAST_BUILD_IMAGE"
+            else
+              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "⚠️ No backend changes but no cached image available, forcing rebuild"
+            fi
           fi
         env:
           GH_TOKEN: ${{ github.token }}
@@ -197,27 +213,22 @@ jobs:
         id: backend-build
         timeout-minutes: 15  # Docker builds should complete within 15 minutes
         run: |
-          IMAGE_TAG="pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-${{ github.sha }}"
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          IMAGE_TAG="pr-${PR_NUMBER}-${{ github.sha }}"
           IMAGE_URL="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/backend:${IMAGE_TAG}"
           
-          # Check if image already exists and no changes detected
+          # Check if we should use cached image
           if [[ "${{ steps.backend-changes.outputs.changed }}" == "false" ]]; then
-            # Try to find the latest existing image for this PR
-            LATEST_IMAGE=$(gcloud artifacts docker images list \
-              ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/backend \
-              --filter="tags:pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-*" \
-              --limit=1 --format="value(IMAGE)" 2>/dev/null || echo "")
-            
-            if [[ -n "$LATEST_IMAGE" ]]; then
-              echo "♻️ Reusing existing backend image: $LATEST_IMAGE"
-              echo "backend_image=$LATEST_IMAGE" >> $GITHUB_OUTPUT
+            CACHED_IMAGE="${{ steps.backend-changes.outputs.cached_image }}"
+            if [[ -n "$CACHED_IMAGE" ]] && [[ "$CACHED_IMAGE" != "null" ]]; then
+              echo "♻️ Using cached backend image: $CACHED_IMAGE"
+              echo "backend_image=$CACHED_IMAGE" >> $GITHUB_OUTPUT
               exit 0
             fi
           fi
           
-          # Build new image if changes detected or no existing image
+          # Build new image
           echo "🔨 Building new backend image..."
-          # Add timeout and progress tracking for docker build
           DOCKER_BUILDKIT=1 timeout 600 docker build \
             --progress=plain \
             --network=host \
@@ -235,61 +246,62 @@ jobs:
           }
           
           echo "backend_image=$IMAGE_URL" >> $GITHUB_OUTPUT
+          
+          # Update build cache
+          CACHE_KEY="backend-build-cache-pr-${PR_NUMBER}"
+          echo '{"sha": "'${{ github.sha }}'", "image": "'$IMAGE_URL'", "timestamp": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"}' | \
+            gsutil cp - "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/${CACHE_KEY}.json"
+          echo "✅ Build cache updated"
 
       - name: Check for frontend changes
         id: frontend-changes
         run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          CURRENT_SHA=${{ github.sha }}
+          
+          # Try to get the last successful build SHA from cache
+          CACHE_KEY="frontend-build-cache-pr-${PR_NUMBER}"
+          LAST_BUILD_SHA=""
+          LAST_BUILD_IMAGE=""
+          
+          # Check if we have a cached build record in GCS
+          if gsutil -q stat "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/${CACHE_KEY}.json" 2>/dev/null; then
+            CACHE_DATA=$(gsutil cat "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/${CACHE_KEY}.json" 2>/dev/null || echo "{}")
+            LAST_BUILD_SHA=$(echo "$CACHE_DATA" | jq -r '.sha // ""')
+            LAST_BUILD_IMAGE=$(echo "$CACHE_DATA" | jq -r '.image // ""')
+            echo "Found cached build: SHA=$LAST_BUILD_SHA"
+          fi
+          
           # Initialize as changed by default (safe for first commits or when unsure)
           CHANGED="true"
           CHANGED_FILES=""
           
-          # Try to detect changes based on the context
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # For PRs, always check ALL changes in the PR (not just latest commit)
-            echo "Checking all PR changes against base branch '${{ github.event.pull_request.base.ref }}'..."
+          # If we have a last build SHA, check if files changed since then
+          if [[ -n "$LAST_BUILD_SHA" ]] && [[ "$LAST_BUILD_SHA" != "null" ]]; then
+            echo "Checking for changes since last successful build at $LAST_BUILD_SHA"
             
-            # Ensure we have the latest base branch (should already be fetched from backend check)
-            git fetch origin ${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }} --depth=50 2>/dev/null || true
-            
-            # Find the merge base (where this PR branch diverged from base)
-            MERGE_BASE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} HEAD 2>/dev/null || echo "")
-            
-            if [[ -n "$MERGE_BASE" ]]; then
-              echo "Found merge base: $MERGE_BASE"
-              # Get all files changed in this PR (from merge base to current HEAD)
-              CHANGED_FILES=$(git diff --name-only $MERGE_BASE HEAD 2>/dev/null || echo "")
+            # Check if the commit exists in our history
+            if git rev-parse "$LAST_BUILD_SHA" >/dev/null 2>&1; then
+              # Get files changed since last successful build
+              CHANGED_FILES=$(git diff --name-only "$LAST_BUILD_SHA" HEAD 2>/dev/null || echo "force-rebuild")
             else
-              echo "Could not find merge base, comparing directly..."
-              # Fallback: compare against base branch directly
-              CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} HEAD 2>/dev/null || echo "")
+              echo "Last build SHA not found in history, checking all PR changes"
+              CHANGED_FILES="force-rebuild"
             fi
+          else
+            # No cache, check all PR changes
+            echo "No build cache found, checking all PR changes"
             
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            # For manual triggers, try to find the associated PR and check all its changes
-            PR_NUMBER="${{ github.event.inputs.pr_number }}"
-            if [[ -n "$PR_NUMBER" ]]; then
-              echo "Manual trigger for PR #$PR_NUMBER - checking all PR changes..."
-              # Try to get the base branch from GitHub API or default to main
-              BASE_BRANCH=$(gh pr view $PR_NUMBER --json baseRefName -q .baseRefName 2>/dev/null || echo "main")
-              git fetch origin $BASE_BRANCH:refs/remotes/origin/$BASE_BRANCH 2>/dev/null || true
-              MERGE_BASE=$(git merge-base origin/$BASE_BRANCH HEAD 2>/dev/null || echo "")
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              # For PRs, check ALL changes in the PR
+              git fetch origin ${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }} --depth=50 2>/dev/null || true
+              MERGE_BASE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} HEAD 2>/dev/null || echo "")
+              
               if [[ -n "$MERGE_BASE" ]]; then
                 CHANGED_FILES=$(git diff --name-only $MERGE_BASE HEAD 2>/dev/null || echo "")
               else
-                CHANGED_FILES="force-rebuild"
+                CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} HEAD 2>/dev/null || echo "")
               fi
-            else
-              # No PR number, check last commit
-              if git rev-parse HEAD^ >/dev/null 2>&1; then
-                CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo "")
-              else
-                CHANGED_FILES="force-rebuild"
-              fi
-            fi
-          else
-            # For other events, check last commit
-            if git rev-parse HEAD^ >/dev/null 2>&1; then
-              CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo "")
             else
               CHANGED_FILES="force-rebuild"
             fi
@@ -297,22 +309,43 @@ jobs:
           
           # Debug output
           echo "Event: ${{ github.event_name }}, Action: ${{ github.event.action }}"
-          echo "Total files changed: $(echo "$CHANGED_FILES" | wc -l)"
-          echo "Changed files detected:"
-          echo "$CHANGED_FILES" | head -20
+          echo "Current SHA: $CURRENT_SHA"
+          echo "Last Build SHA: $LAST_BUILD_SHA"
+          if [[ "$CHANGED_FILES" != "force-rebuild" ]]; then
+            echo "Total files changed: $(echo "$CHANGED_FILES" | wc -l)"
+            echo "Changed files:"
+            echo "$CHANGED_FILES" | head -20
+          fi
           
           # Check for frontend-related changes
           if [[ "$CHANGED_FILES" == "force-rebuild" ]]; then
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "🔨 Forcing frontend rebuild (unable to determine changes)"
+            echo "🔨 Forcing frontend rebuild"
+          elif [[ -z "$CHANGED_FILES" ]]; then
+            # No changes detected and we have a valid last build
+            if [[ -n "$LAST_BUILD_IMAGE" ]] && [[ "$LAST_BUILD_IMAGE" != "null" ]]; then
+              echo "changed=false" >> $GITHUB_OUTPUT
+              echo "cached_image=$LAST_BUILD_IMAGE" >> $GITHUB_OUTPUT
+              echo "♻️ No frontend changes detected, will use cached image: $LAST_BUILD_IMAGE"
+            else
+              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "⚠️ No changes but no cached image available, forcing rebuild"
+            fi
           elif echo "$CHANGED_FILES" | grep -E '^frontend/' > /dev/null 2>&1; then
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "✅ Frontend changes detected"
             echo "Frontend files changed:"
             echo "$CHANGED_FILES" | grep -E '^frontend/' | head -10
           else
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "ℹ️ No frontend changes detected"
+            # No frontend changes, use cached image if available
+            if [[ -n "$LAST_BUILD_IMAGE" ]] && [[ "$LAST_BUILD_IMAGE" != "null" ]]; then
+              echo "changed=false" >> $GITHUB_OUTPUT
+              echo "cached_image=$LAST_BUILD_IMAGE" >> $GITHUB_OUTPUT
+              echo "♻️ No frontend changes detected, will use cached image: $LAST_BUILD_IMAGE"
+            else
+              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "⚠️ No frontend changes but no cached image available, forcing rebuild"
+            fi
           fi
         env:
           GH_TOKEN: ${{ github.token }}
@@ -321,25 +354,21 @@ jobs:
         id: frontend-build
         timeout-minutes: 15  # Frontend builds should complete within 15 minutes
         run: |
-          IMAGE_TAG="pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-${{ github.sha }}"
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          IMAGE_TAG="pr-${PR_NUMBER}-${{ github.sha }}"
           IMAGE_URL="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/frontend:${IMAGE_TAG}"
           
-          # Check if image already exists and no changes detected
+          # Check if we should use cached image
           if [[ "${{ steps.frontend-changes.outputs.changed }}" == "false" ]]; then
-            # Try to find the latest existing image for this PR
-            LATEST_IMAGE=$(gcloud artifacts docker images list \
-              ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/frontend \
-              --filter="tags:pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-*" \
-              --limit=1 --format="value(IMAGE)" 2>/dev/null || echo "")
-            
-            if [[ -n "$LATEST_IMAGE" ]]; then
-              echo "♻️ Reusing existing frontend image: $LATEST_IMAGE"
-              echo "frontend_image=$LATEST_IMAGE" >> $GITHUB_OUTPUT
+            CACHED_IMAGE="${{ steps.frontend-changes.outputs.cached_image }}"
+            if [[ -n "$CACHED_IMAGE" ]] && [[ "$CACHED_IMAGE" != "null" ]]; then
+              echo "♻️ Using cached frontend image: $CACHED_IMAGE"
+              echo "frontend_image=$CACHED_IMAGE" >> $GITHUB_OUTPUT
               exit 0
             fi
           fi
           
-          # Build new image if changes detected or no existing image
+          # Build new image
           echo "🔨 Building new frontend image..."
           
           # Check if we're in the root directory and Dockerfile.frontend is in frontend/
@@ -350,7 +379,7 @@ jobs:
               --network=host \
               -t $IMAGE_URL \
               -f Dockerfile.frontend \
-              --build-arg NEXT_PUBLIC_API_URL=https://pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-api.${{ env.STAGING_DOMAIN }} . || {
+              --build-arg NEXT_PUBLIC_API_URL=https://pr-${PR_NUMBER}-api.${{ env.STAGING_DOMAIN }} . || {
               echo "Frontend Docker build timed out after 10 minutes"
               exit 1
             }
@@ -362,7 +391,7 @@ jobs:
               --network=host \
               -t $IMAGE_URL \
               -f Dockerfile.frontend \
-              --build-arg NEXT_PUBLIC_API_URL=https://pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-api.${{ env.STAGING_DOMAIN }} . || {
+              --build-arg NEXT_PUBLIC_API_URL=https://pr-${PR_NUMBER}-api.${{ env.STAGING_DOMAIN }} . || {
               echo "Frontend Docker build timed out after 10 minutes"
               exit 1
             }
@@ -378,6 +407,12 @@ jobs:
           }
           
           echo "frontend_image=$IMAGE_URL" >> $GITHUB_OUTPUT
+          
+          # Update build cache
+          CACHE_KEY="frontend-build-cache-pr-${PR_NUMBER}"
+          echo '{"sha": "'${{ github.sha }}'", "image": "'$IMAGE_URL'", "timestamp": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"}' | \
+            gsutil cp - "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/${CACHE_KEY}.json"
+          echo "✅ Build cache updated"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -723,7 +758,7 @@ jobs:
             -var="domain=${{ env.STAGING_DOMAIN }}" \
             -var="postgres_password=${{ secrets.STAGING_DB_PASSWORD }}"
 
-      - name: Clean up container images
+      - name: Clean up container images and build cache
         run: |
           PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
           
@@ -736,6 +771,12 @@ jobs:
           gcloud artifacts docker images delete \
             ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/frontend:pr-${PR_NUMBER}-* \
             --quiet || true
+          
+          # Clean up build cache files
+          echo "Cleaning up build cache for PR #${PR_NUMBER}..."
+          gsutil rm "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/backend-build-cache-pr-${PR_NUMBER}.json" 2>/dev/null || true
+          gsutil rm "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/frontend-build-cache-pr-${PR_NUMBER}.json" 2>/dev/null || true
+          echo "✅ Build cache cleaned up"
 
       - name: Update PR comment
         if: github.event_name == 'pull_request'

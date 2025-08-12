@@ -215,6 +215,7 @@ resource "google_cloud_run_service" "backend" {
         "autoscaling.knative.dev/minScale" = "1"
         "autoscaling.knative.dev/maxScale" = "5"
         "run.googleapis.com/cpu-throttling" = "true"  # Only charge when processing
+        "run.googleapis.com/cloudsql-instances" = "${var.project_id}:${var.region}:${google_sql_database_instance.postgres.name}"
       }
     }
   }
