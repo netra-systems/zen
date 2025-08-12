@@ -19,9 +19,7 @@ describe('ChatHeader', () => {
     render(<ChatHeader />);
     expect(screen.getByText('Test Agent')).toBeInTheDocument();
     // Status is displayed with specific casing and formatting
-    expect(screen.getByText((content, element) => {
-      return element?.className?.includes('capitalize') && content === 'running';
-    })).toBeInTheDocument();
+    expect(screen.getByText('running')).toBeInTheDocument();
   });
 
   it('should render default status when no status provided', () => {
@@ -33,9 +31,7 @@ describe('ChatHeader', () => {
     render(<ChatHeader />);
     expect(screen.getByText('Test Agent')).toBeInTheDocument();
     // Status is displayed as 'Ready' when lifecycle is null
-    expect(screen.getByText((content, element) => {
-      return element?.className?.includes('capitalize') && content === 'Ready';
-    })).toBeInTheDocument();
+    expect(screen.getByText('Ready')).toBeInTheDocument();
   });
 
   it('should render default agent name when no name provided', () => {
@@ -57,8 +53,6 @@ describe('ChatHeader', () => {
     render(<ChatHeader />);
     expect(screen.getByText('Test Agent')).toBeInTheDocument();
     // Status is displayed with specific casing and formatting
-    expect(screen.getByText((content, element) => {
-      return element?.className?.includes('capitalize') && content === 'active';
-    })).toBeInTheDocument();
+    expect(screen.getByText('active')).toBeInTheDocument();
   });
 });
