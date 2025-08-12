@@ -150,9 +150,9 @@ class TestAdvancedInitialization:
         assert agent.cache_ttl == 3600
         assert agent.max_retries == 3
         assert agent.name == "TriageSubAgent"
-        assert hasattr(agent, 'validation_patterns')
-        assert hasattr(agent, 'category_keywords')
-        assert hasattr(agent, 'intent_patterns')
+        assert hasattr(agent, 'tool_dispatcher')
+        assert hasattr(agent, 'redis_manager')
+        assert hasattr(agent, 'fallback_categories')
     
     def test_initialization_with_custom_config(self, mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
         """Test initialization with custom configuration"""

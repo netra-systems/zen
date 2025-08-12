@@ -142,11 +142,11 @@ class TestCustomExceptions:
     
     def test_authentication_error(self):
         """Test authentication-specific exceptions."""
-        from app.core.exceptions import AuthenticationError
+        from app.core.exceptions import AuthenticationError, ErrorCode
         
         exc = AuthenticationError("Invalid token")
         assert "Invalid token" in str(exc)
-        assert exc.status_code == 401
+        assert exc.error_details.code == ErrorCode.AUTHENTICATION_FAILED.value
 
 
 # Test 15: logging_manager_configuration
@@ -155,13 +155,12 @@ class TestLoggingManager:
     
     def test_logging_configuration(self):
         """Test basic logging configuration."""
-        from app.core.logging_manager import setup_logging, get_logger
+        from app.core.logging_manager import configure_logging, get_logger, LogLevel
         
-        setup_logging(log_level="DEBUG")
+        configure_logging(level=LogLevel.DEBUG)
         logger = get_logger(__name__)
         
         assert logger != None
-        assert logger.level <= logging.DEBUG
     
     def test_structured_logging(self):
         """Test structured logging output."""

@@ -42,6 +42,14 @@ class MockWebSocket {
 
 global.WebSocket = MockWebSocket as any;
 
+// Mock fetch for WebSocketProvider config
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({ ws_url: 'ws://localhost:8000' }),
+  })
+) as jest.Mock;
+
 describe('useAgent', () => {
   const mockAuthValue = {
     token: 'test-token',

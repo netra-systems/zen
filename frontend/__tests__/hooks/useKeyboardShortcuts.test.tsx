@@ -212,8 +212,9 @@ describe('useKeyboardShortcuts', () => {
         window.dispatchEvent(event);
       });
 
-      // Escape is allowed in input fields according to allowedInInput array
-      expect(mockChatStore.setProcessing).toHaveBeenCalled();
+      // Escape is allowed in input fields but only when processing is true
+      // Since we're not processing in this test, it shouldn't be called
+      expect(mockChatStore.setProcessing).not.toHaveBeenCalled();
     });
   });
 
