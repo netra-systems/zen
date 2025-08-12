@@ -312,6 +312,7 @@ jobs:
 
       - name: Build and push frontend container
         id: frontend-build
+        timeout-minutes: 15  # Frontend builds should complete within 15 minutes
         run: |
           IMAGE_TAG="pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-${{ github.sha }}"
           IMAGE_URL="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/frontend:${IMAGE_TAG}"
@@ -337,19 +338,37 @@ jobs:
           # Check if we're in the root directory and Dockerfile.frontend is in frontend/
           if [[ -f "frontend/Dockerfile.frontend" ]]; then
             cd frontend
-            docker build -t $IMAGE_URL -f Dockerfile.frontend \
-              --build-arg NEXT_PUBLIC_API_URL=https://pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-api.${{ env.STAGING_DOMAIN }} .
+            DOCKER_BUILDKIT=1 timeout 600 docker build \
+              --progress=plain \
+              --network=host \
+              -t $IMAGE_URL \
+              -f Dockerfile.frontend \
+              --build-arg NEXT_PUBLIC_API_URL=https://pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-api.${{ env.STAGING_DOMAIN }} . || {
+              echo "Frontend Docker build timed out after 10 minutes"
+              exit 1
+            }
             cd ..
           elif [[ -f "Dockerfile.frontend" ]]; then
             # Fallback if Dockerfile.frontend is in root
-            docker build -t $IMAGE_URL -f Dockerfile.frontend \
-              --build-arg NEXT_PUBLIC_API_URL=https://pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-api.${{ env.STAGING_DOMAIN }} .
+            DOCKER_BUILDKIT=1 timeout 600 docker build \
+              --progress=plain \
+              --network=host \
+              -t $IMAGE_URL \
+              -f Dockerfile.frontend \
+              --build-arg NEXT_PUBLIC_API_URL=https://pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-api.${{ env.STAGING_DOMAIN }} . || {
+              echo "Frontend Docker build timed out after 10 minutes"
+              exit 1
+            }
           else
             echo "❌ Error: Dockerfile.frontend not found in expected locations"
             exit 1
           fi
           
-          docker push $IMAGE_URL
+          # Push with timeout
+          timeout 300 docker push $IMAGE_URL || {
+            echo "Docker push timed out after 5 minutes"
+            exit 1
+          }
           
           echo "frontend_image=$IMAGE_URL" >> $GITHUB_OUTPUT
 
@@ -360,13 +379,35 @@ jobs:
 
       - name: Terraform Init
         working-directory: ./terraform/staging
+        timeout-minutes: 5
         run: |
+          # Check for state lock and clear if stale
+          LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}/default.tflock"
+          
+          # Check if lock exists and is older than 30 minutes
+          if gsutil stat "$LOCK_FILE" 2>/dev/null; then
+            LOCK_AGE=$(gsutil stat "$LOCK_FILE" | grep "Creation time:" | cut -d':' -f2- | xargs -I {} date -d "{}" +%s)
+            CURRENT_TIME=$(date +%s)
+            AGE_MINUTES=$(( ($CURRENT_TIME - $LOCK_AGE) / 60 ))
+            
+            if [ $AGE_MINUTES -gt 30 ]; then
+              echo "⚠️ Found stale lock file (${AGE_MINUTES} minutes old), removing..."
+              gsutil rm "$LOCK_FILE" || true
+            else
+              echo "⚠️ Active lock file found (${AGE_MINUTES} minutes old)"
+              echo "Another Terraform operation may be in progress"
+            fi
+          fi
+          
+          # Initialize with lock timeout
           terraform init \
             -backend-config="bucket=${{ env.GCP_PROJECT_ID }}-terraform-state" \
-            -backend-config="prefix=staging/pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
+            -backend-config="prefix=staging/pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}" \
+            -lock-timeout=120s
 
       - name: Terraform Plan
         working-directory: ./terraform/staging
+        timeout-minutes: 5
         run: |
           terraform plan \
             -var="project_id=${{ env.GCP_PROJECT_ID }}" \
@@ -377,6 +418,7 @@ jobs:
             -var="max_instances=${{ steps.config.outputs.max_instances }}" \
             -var="domain=${{ env.STAGING_DOMAIN }}" \
             -var="postgres_password=${{ secrets.STAGING_DB_PASSWORD }}" \
+            -lock-timeout=120s \
             -out=tfplan
 
       - name: Terraform Apply
@@ -668,8 +710,8 @@ jobs:
             -var="project_id=${{ env.GCP_PROJECT_ID }}" \
             -var="region=${{ env.GCP_REGION }}" \
             -var="pr_number=${{ github.event.pull_request.number || github.event.inputs.pr_number }}" \
-            -var="backend_image=placeholder" \
-            -var="frontend_image=placeholder" \
+            -var="backend_image=${{ steps.backend-build.outputs.backend_image || 'gcr.io/PROJECT_ID/backend:latest' }}" \
+            -var="frontend_image=${{ steps.frontend-build.outputs.frontend_image || 'gcr.io/PROJECT_ID/frontend:latest' }}" \
             -var="max_instances=1" \
             -var="domain=${{ env.STAGING_DOMAIN }}" \
             -var="postgres_password=${{ secrets.STAGING_DB_PASSWORD }}"
