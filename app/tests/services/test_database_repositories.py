@@ -77,6 +77,7 @@ def unit_of_work(mock_session, mock_models):
             soft_deleted_threads = {}
             created_threads = {}
             deleted_threads = set()  # Track completely deleted threads
+            thread_counter = [0]  # Use list to make it mutable in nested function
             
             # MOCK BEHAVIOR: Thread repository create method
             # This simulates database INSERT operation without actual DB call
@@ -86,8 +87,9 @@ def unit_of_work(mock_session, mock_models):
                     kwargs = data
                 else:
                     kwargs = data
+                thread_counter[0] += 1
                 thread = AsyncMock(
-                    id=kwargs.get('id', f"thread_{time.time()}"),
+                    id=kwargs.get('id', f"thread_{thread_counter[0]}"),
                     user_id=kwargs.get('user_id'),
                     title=kwargs.get('title'),
                     created_at=datetime.now(),
@@ -99,7 +101,6 @@ def unit_of_work(mock_session, mock_models):
                 )
                 # Store the created thread so it can be retrieved later
                 created_threads[thread.id] = thread
-                print(f"DEBUG create_thread: Created thread {thread.id} with last_activity={thread.last_activity}")
                 return thread
             mock_thread_repo.create.side_effect = create_thread
             
@@ -176,24 +177,22 @@ def unit_of_work(mock_session, mock_models):
             async def get_active_threads(user_id, since):
                 # Filter created threads by user_id and last_activity
                 active_threads = []
-                print(f"DEBUG: created_threads keys: {list(created_threads.keys())}")
-                print(f"DEBUG: Looking for user_id={user_id}, since={since}")
                 for thread in created_threads.values():
-                    print(f"DEBUG: Checking thread {thread.id}: user_id={getattr(thread, 'user_id', None)}, last_activity={getattr(thread, 'last_activity', None)}")
                     if hasattr(thread, 'user_id') and thread.user_id == user_id:
                         if hasattr(thread, 'last_activity') and thread.last_activity >= since:
                             active_threads.append(thread)
-                print(f"DEBUG: Found {len(active_threads)} active threads")
                 return active_threads
             mock_thread_repo.get_active.side_effect = get_active_threads
             
             # Setup message repo methods
+            message_counter = [0]
             async def create_message(data=None, **kwargs):
                 # Handle both dict argument and **kwargs
                 if data and isinstance(data, dict):
                     kwargs = data
+                message_counter[0] += 1
                 return AsyncMock(
-                    id=kwargs.get('id', f"msg_{time.time()}"),
+                    id=kwargs.get('id', f"msg_{message_counter[0]}"),
                     thread_id=kwargs.get('thread_id'),
                     content=kwargs.get('content'),
                     role=kwargs.get('role'),
@@ -218,12 +217,14 @@ def unit_of_work(mock_session, mock_models):
             ]
             
             # Setup run repo methods
+            run_counter = [0]
             async def create_run(data=None, **kwargs):
                 # Handle both dict argument and **kwargs
                 if data and isinstance(data, dict):
                     kwargs = data
+                run_counter[0] += 1
                 return AsyncMock(
-                    id=kwargs.get('id', f"run_{time.time()}"),
+                    id=kwargs.get('id', f"run_{run_counter[0]}"),
                     thread_id=kwargs.get('thread_id'),
                     status=kwargs.get('status'),
                     tools=kwargs.get('tools', []),
@@ -246,12 +247,14 @@ def unit_of_work(mock_session, mock_models):
             mock_run_repo.get_active.return_value = [AsyncMock(id="active_run")]
             
             # Setup reference repo methods
+            reference_counter = [0]
             async def create_reference(data=None, **kwargs):
                 # Handle both dict argument and **kwargs
                 if data and isinstance(data, dict):
                     kwargs = data
+                reference_counter[0] += 1
                 return AsyncMock(
-                    id=kwargs.get('id', f"ref_{time.time()}"),
+                    id=kwargs.get('id', f"ref_{reference_counter[0]}"),
                     message_id=kwargs.get('message_id'),
                     type=kwargs.get('type'),
                     source=kwargs.get('source'),

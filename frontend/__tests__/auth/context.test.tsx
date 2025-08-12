@@ -271,6 +271,9 @@ describe('AuthContext', () => {
 
   describe('Login Functionality', () => {
     it('should handle login action', async () => {
+      // Setup auth config to be available
+      (authService.getAuthConfig as jest.Mock).mockResolvedValue(mockAuthConfig);
+      
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <AuthProvider>{children}</AuthProvider>
       );
@@ -282,6 +285,7 @@ describe('AuthContext', () => {
       
       await waitFor(() => {
         expect(result.current).toBeDefined();
+        expect(result.current?.authConfig).toEqual(mockAuthConfig);
       });
       
       act(() => {
@@ -318,6 +322,9 @@ describe('AuthContext', () => {
 
   describe('Logout Functionality', () => {
     it('should handle logout action', async () => {
+      // Setup auth config to be available
+      (authService.getAuthConfig as jest.Mock).mockResolvedValue(mockAuthConfig);
+      
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <AuthProvider>{children}</AuthProvider>
       );
@@ -329,6 +336,7 @@ describe('AuthContext', () => {
       
       await waitFor(() => {
         expect(result.current).toBeDefined();
+        expect(result.current?.authConfig).toEqual(mockAuthConfig);
       });
       
       await act(async () => {
@@ -336,12 +344,16 @@ describe('AuthContext', () => {
       });
       
       expect(authService.handleLogout).toHaveBeenCalledWith(mockAuthConfig);
-      expect(mockAuthStore.logout).toHaveBeenCalled();
+      // The logout is called through syncAuthStore callback
+      await waitFor(() => {
+        expect(mockAuthStore.logout).toHaveBeenCalled();
+      });
     });
 
     it('should set dev logout flag in development mode', async () => {
       const devConfig = { ...mockAuthConfig, development_mode: true };
       (authService.getAuthConfig as jest.Mock).mockResolvedValue(devConfig);
+      (authService.getDevLogoutFlag as jest.Mock).mockReturnValue(false);
       
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <AuthProvider>{children}</AuthProvider>
@@ -354,6 +366,7 @@ describe('AuthContext', () => {
       
       await waitFor(() => {
         expect(result.current).toBeDefined();
+        expect(result.current?.authConfig).toEqual(devConfig);
       });
       
       await act(async () => {
@@ -508,6 +521,9 @@ describe('AuthContext', () => {
     });
 
     it('should sync logout with Zustand store', async () => {
+      // Setup auth config to be available
+      (authService.getAuthConfig as jest.Mock).mockResolvedValue(mockAuthConfig);
+      
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <AuthProvider>{children}</AuthProvider>
       );
@@ -519,13 +535,17 @@ describe('AuthContext', () => {
       
       await waitFor(() => {
         expect(result.current).toBeDefined();
+        expect(result.current?.authConfig).toEqual(mockAuthConfig);
       });
       
       await act(async () => {
         await result.current?.logout();
       });
       
-      expect(mockAuthStore.logout).toHaveBeenCalled();
+      // The logout is called through syncAuthStore callback
+      await waitFor(() => {
+        expect(mockAuthStore.logout).toHaveBeenCalled();
+      });
     });
   });
 

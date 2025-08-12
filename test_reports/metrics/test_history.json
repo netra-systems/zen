@@ -611,6 +611,15 @@
       "failed": 339,
       "coverage": null,
       "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:44:43.849061",
+      "level": "smoke",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
     }
   ],
   "flaky_tests": {},

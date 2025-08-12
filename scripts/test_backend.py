@@ -47,16 +47,28 @@ def setup_test_environment(isolation_manager=None):
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
         return
     
+    # Try to load from .env.test file first
+    env_test_file = PROJECT_ROOT / ".env.test"
+    if env_test_file.exists():
+        try:
+            from dotenv import load_dotenv
+            load_dotenv(env_test_file, override=True)
+            print(f"Loaded test environment from {env_test_file}")
+        except ImportError:
+            print("Warning: python-dotenv not installed, using default test environment")
+    
     # Standard test environment setup (when not using isolation)
     test_env = {
         "TESTING": "1",
         "ENVIRONMENT": "testing",
-        "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
+        "DATABASE_URL": "postgresql://test:test@localhost:5432/netra_test",
         "CLICKHOUSE_URL": "clickhouse://localhost:9000/test",
         "REDIS_URL": "redis://localhost:6379/1",
-        "SECRET_KEY": "test-secret-key-for-testing-only",
+        "JWT_SECRET_KEY": "test-secret-key-for-testing-only-must-be-at-least-32-chars",
+        "FERNET_KEY": "test-fernet-key-for-testing-only-base64encode=",
         "ANTHROPIC_API_KEY": os.getenv("ANTHROPIC_API_KEY", "test-api-key"),
         "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY", "test-api-key"),
+        "GEMINI_API_KEY": os.getenv("GEMINI_API_KEY", "test-api-key"),
         "LOG_LEVEL": "WARNING",
         "GOOGLE_CLIENT_ID": "test-google-client",
         "GOOGLE_CLIENT_SECRET": "test-google-secret",

@@ -226,7 +226,14 @@ resource "google_cloud_run_service" "backend" {
           value = var.fernet_key != "" ? var.fernet_key : "ZmVybmV0LXN0YWdpbmcta2V5LXBsYWNlaG9sZGVyLTEyMw=="  # Base64 encoded staging key
         }
         
-        # Note: All other secrets including Gemini API key will be loaded from Secret Manager at runtime
+        # Gemini API key - required for LLM operations
+        # In production this should come from Secret Manager, but for staging we use a placeholder
+        env {
+          name  = "GEMINI_API_KEY"
+          value = var.gemini_api_key != "" ? var.gemini_api_key : "staging-gemini-api-key-placeholder"
+        }
+        
+        # Note: All other secrets including real Gemini API key should be loaded from Secret Manager at runtime
         # The service account needs access to these secrets in the staging project
         
         resources {

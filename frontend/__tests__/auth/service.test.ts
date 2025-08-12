@@ -37,28 +37,26 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock
 });
 
-// Mock window.location methods without replacing the entire object
-const mockAssign = jest.fn();
-const mockReplace = jest.fn();
-const mockReload = jest.fn();
-
-// Store original location
-const originalLocation = window.location;
-
-// Delete location property if it exists to avoid redefinition error
-delete (window as any).location;
-
-// Mock location with a getter/setter approach
-(window as any).location = {
-  href: '',
-  assign: mockAssign,
-  replace: mockReplace,
-  reload: mockReload,
-  origin: 'http://localhost:3000',
-  pathname: '/',
-  search: '',
-  hash: ''
-};
+// Mock location.href setter using jsdom-compatible approach
+let mockHref = 'http://localhost/';
+Object.defineProperty(window, 'location', {
+  writable: true,
+  value: {
+    get href() {
+      return mockHref;
+    },
+    set href(value: string) {
+      mockHref = value;
+    },
+    assign: jest.fn(),
+    replace: jest.fn(),
+    reload: jest.fn(),
+    origin: 'http://localhost:3000',
+    pathname: '/',
+    search: '',
+    hash: ''
+  }
+});
 
 // Mock fetch
 global.fetch = jest.fn();
@@ -82,18 +80,14 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset location href
-    if (window.location) {
-      (window.location as any).href = '';
-    }
+    // Reset location href using the internal variable
+    mockHref = 'http://localhost/';
     localStorageMock.getItem.mockReturnValue(null);
   });
 
   afterAll(() => {
-    // Restore original location if needed
-    if (originalLocation) {
-      (window as any).location = originalLocation;
-    }
+    // Cleanup
+    jest.restoreAllMocks();
   });
 
   describe('getAuthConfig', () => {
@@ -278,7 +272,7 @@ describe('AuthService', () => {
     it('should redirect to login endpoint', () => {
       authService.handleLogin(mockAuthConfig);
 
-      expect(window.location.href).toBe(mockAuthConfig.endpoints.login);
+      expect(mockHref).toBe(mockAuthConfig.endpoints.login);
     });
 
     it('should handle login with development mode config', () => {
@@ -286,7 +280,7 @@ describe('AuthService', () => {
       
       authService.handleLogin(devConfig);
 
-      expect(window.location.href).toBe(devConfig.endpoints.login);
+      expect(mockHref).toBe(devConfig.endpoints.login);
     });
   });
 
@@ -308,7 +302,7 @@ describe('AuthService', () => {
         })
       );
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(mockLocation._href).toBe('/');
+      expect(mockHref).toBe('/');
     });
 
     it('should handle logout failure and still redirect', async () => {
@@ -320,7 +314,7 @@ describe('AuthService', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith('Logout failed');
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(mockLocation._href).toBe('/');
+      expect(mockHref).toBe('/');
 
       consoleErrorSpy.mockRestore();
     });
@@ -334,7 +328,7 @@ describe('AuthService', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith('Error during logout:', expect.any(Error));
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(mockLocation._href).toBe('/');
+      expect(mockHref).toBe('/');
 
       consoleErrorSpy.mockRestore();
     });
@@ -354,7 +348,7 @@ describe('AuthService', () => {
         })
       );
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(mockLocation._href).toBe('/');
+      expect(mockHref).toBe('/');
     });
   });
 
@@ -447,7 +441,7 @@ describe('AuthService', () => {
       await Promise.all([loginPromise, logoutPromise]);
 
       // Verify operations completed
-      expect(mockLocation._href).toBeDefined();
+      expect(mockHref).toBeDefined();
       expect(localStorageMock.removeItem).toHaveBeenCalled();
     });
 

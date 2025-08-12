@@ -112,6 +112,9 @@ class ConfigManager:
             "CLICKHOUSE_PORT": None,  # Will be handled specially
             "CLICKHOUSE_PASSWORD": None,  # Will be handled specially
             "CLICKHOUSE_USER": None,  # Will be handled specially
+            "JWT_SECRET_KEY": "jwt_secret_key",  # Critical for authentication
+            "FERNET_KEY": "fernet_key",  # Critical for encryption
+            "GEMINI_API_KEY": None,  # Will be handled specially for LLM configs
             "LOG_LEVEL": "log_level",
             "ENVIRONMENT": "environment",
             "PR_NUMBER": None,  # For staging environment tracking
@@ -154,6 +157,15 @@ class ConfigManager:
                     if hasattr(config, 'clickhouse_https'):
                         config.clickhouse_https.user = value
                     self._logger.debug(f"Set ClickHouse user from environment: {value}")
+                    
+                elif env_var == "GEMINI_API_KEY" and hasattr(config, 'llm_configs'):
+                    # Set Gemini API key for all LLM configs that need it
+                    for llm_name in ['default', 'analysis', 'triage', 'data', 
+                                   'optimizations_core', 'actions_to_meet_goals', 
+                                   'reporting', 'google']:
+                        if llm_name in config.llm_configs and hasattr(config.llm_configs[llm_name], 'api_key'):
+                            config.llm_configs[llm_name].api_key = value
+                    self._logger.debug("Set Gemini API key from environment for LLM configs")
         
         # Log summary of critical vars loaded
         loaded_vars = [var for var in critical_vars.keys() if os.environ.get(var)]

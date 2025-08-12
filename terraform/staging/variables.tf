@@ -171,3 +171,10 @@ variable "clickhouse_url" {
   default     = ""
   sensitive   = true
 }
+
+variable "gemini_api_key" {
+  description = "Gemini API key for LLM operations (optional, will use placeholder if not provided)"
+  type        = string
+  default     = ""
+  sensitive   = true
+}

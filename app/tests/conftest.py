@@ -14,7 +14,8 @@ if os.environ.get("TEST_ISOLATION") == "1":
 else:
     # Standard test environment setup
     os.environ["TESTING"] = "1"
-    os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+    # Use PostgreSQL URL format even for tests to satisfy validator
+    os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/netra_test"
     os.environ["REDIS_URL"] = "redis://localhost:6379/1"
     os.environ["REDIS_HOST"] = "localhost"
     os.environ["REDIS_PORT"] = "6379"

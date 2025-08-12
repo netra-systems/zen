@@ -6,12 +6,38 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 import React from 'react';
 
+// Define WebSocket constants if not available  
+if (typeof WebSocket === 'undefined') {
+  (global as any).WebSocket = class MockWebSocket {
+    static CONNECTING = 0;
+    static OPEN = 1;
+    static CLOSING = 2;
+    static CLOSED = 3;
+  };
+} else if (WebSocket.CONNECTING === undefined) {
+  // Add static constants to existing WebSocket
+  (WebSocket as any).CONNECTING = 0;
+  (WebSocket as any).OPEN = 1;
+  (WebSocket as any).CLOSING = 2;
+  (WebSocket as any).CLOSED = 3;
+}
+
 // Test 65: useDemoWebSocket connection
 describe('test_useDemoWebSocket_connection', () => {
   let mockWebSocketInstance: any;
   let mockWebSocketConstructor: jest.Mock;
   
   beforeEach(() => {
+    // Ensure WebSocket constants are available
+    if (!(global as any).WebSocket || !(global as any).WebSocket.OPEN) {
+      (global as any).WebSocket = class MockWebSocket {
+        static CONNECTING = 0;
+        static OPEN = 1;
+        static CLOSING = 2;
+        static CLOSED = 3;
+      };
+    }
+    
     // Mock fetch for config
     global.fetch = jest.fn().mockResolvedValue({
       json: jest.fn().mockResolvedValue({
@@ -25,7 +51,7 @@ describe('test_useDemoWebSocket_connection', () => {
       close: jest.fn(),
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
-      readyState: WebSocket.CONNECTING,
+      readyState: 0, // Start with CONNECTING (0)
       CONNECTING: 0,
       OPEN: 1,
       CLOSING: 2,
@@ -38,16 +64,35 @@ describe('test_useDemoWebSocket_connection', () => {
       onclose: null,
     };
     
+    // Make readyState a getter/setter to ensure it behaves correctly
+    let currentReadyState = 0; // CONNECTING
+    Object.defineProperty(mockWebSocketInstance, 'readyState', {
+      get: () => currentReadyState,
+      set: (value) => { currentReadyState = value; },
+      configurable: true
+    });
+    
     // Create the mock constructor
     mockWebSocketConstructor = jest.fn((url: string) => {
       mockWebSocketInstance.url = url;
-      mockWebSocketInstance.readyState = WebSocket.CONNECTING;
+      currentReadyState = 0; // Ensure CONNECTING state on creation
       return mockWebSocketInstance;
     });
+    
+    // Preserve the static constants while replacing the constructor
+    mockWebSocketConstructor.CONNECTING = 0;
+    mockWebSocketConstructor.OPEN = 1;
+    mockWebSocketConstructor.CLOSING = 2;
+    mockWebSocketConstructor.CLOSED = 3;
     
     // Assign to global
     global.WebSocket = mockWebSocketConstructor as any;
     global.mockWebSocket = mockWebSocketInstance;
+  });
+  
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should establish demo WebSocket connection', async () => {
@@ -60,8 +105,9 @@ describe('test_useDemoWebSocket_connection', () => {
       expect(mockWebSocketInstance.onopen).toBeDefined();
     });
     
-    // Trigger the open event
+    // Trigger the open event  
     act(() => {
+      mockWebSocketInstance.readyState = 1; // OPEN
       if (mockWebSocketInstance.onopen) {
         mockWebSocketInstance.onopen();
       }
@@ -77,47 +123,62 @@ describe('test_useDemoWebSocket_connection', () => {
   });
 
   it('should handle message queuing when disconnected', async () => {
-    // Start with a connecting state
-    mockWebSocketInstance.readyState = WebSocket.CONNECTING;
-    
     const wrapper = TestProviders;
     
     const { result } = renderHook(() => useDemoWebSocket(), { wrapper });
     
-    // Wait for hook to initialize
+    // Wait for hook to initialize with WebSocket in CONNECTING state
     await waitFor(() => {
       expect(mockWebSocketInstance.onopen).toBeDefined();
     });
     
-    // Try to send a message while still connecting
+    // Ensure WebSocket is still connecting (0 = CONNECTING)
+    expect(mockWebSocketInstance.readyState).toBe(0);
+    
+    // Try to send a message while still connecting - should fail
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     act(() => {
       result.current.sendMessage({ type: 'demo', content: 'Test message' });
     });
     
-    // Should not send yet since not connected
+    // Should not send since not connected
     expect(mockWebSocketInstance.send).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalledWith('WebSocket is not connected');
+    expect(result.current.error).toBeTruthy();
     
-    // Now simulate connection established
+    // Clear mocks before continuing
+    consoleErrorSpy.mockClear();
+    mockWebSocketInstance.send.mockClear();
+    
+    // Now simulate connection established - update readyState to OPEN (1)
     act(() => {
-      mockWebSocketInstance.readyState = WebSocket.OPEN;
+      mockWebSocketInstance.readyState = 1; // OPEN
       if (mockWebSocketInstance.onopen) {
         mockWebSocketInstance.onopen();
       }
     });
     
-    // After connection, the message should be sent
+    // After connection, should be connected
     await waitFor(() => {
       expect(result.current.isConnected).toBe(true);
     });
     
-    // Try sending again after connection
+    // The WebSocket instance readyState should be OPEN now
+    expect(mockWebSocketInstance.readyState).toBe(1); // OPEN
+    
+    // Try sending again after connection - should work now
     act(() => {
-      result.current.sendMessage({ type: 'demo', content: 'Test message' });
+      result.current.sendMessage({ type: 'demo', content: 'Test message after connect' });
     });
     
+    // Should be called immediately since WebSocket is open
+    expect(mockWebSocketInstance.send).toHaveBeenCalledTimes(1);
+    
     expect(mockWebSocketInstance.send).toHaveBeenCalledWith(
-      JSON.stringify({ type: 'demo', content: 'Test message' })
+      JSON.stringify({ type: 'demo', content: 'Test message after connect' })
     );
+    
+    consoleErrorSpy.mockRestore();
   });
 
   it('should handle reconnection on disconnect', async () => {
@@ -135,7 +196,7 @@ describe('test_useDemoWebSocket_connection', () => {
     
     // Open the connection first
     act(() => {
-      mockWebSocketInstance.readyState = WebSocket.OPEN;
+      mockWebSocketInstance.readyState = 1; // OPEN
       if (mockWebSocketInstance.onopen) {
         mockWebSocketInstance.onopen();
       }
@@ -147,7 +208,7 @@ describe('test_useDemoWebSocket_connection', () => {
     
     // Now close the connection
     act(() => {
-      mockWebSocketInstance.readyState = WebSocket.CLOSED;
+      mockWebSocketInstance.readyState = 3; // CLOSED
       if (mockWebSocketInstance.onclose) {
         mockWebSocketInstance.onclose();
       }

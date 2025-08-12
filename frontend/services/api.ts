@@ -46,3 +46,6 @@ export async function getEndpoint(endpointName: string, method: string) {
 export function getApiUrl(path: string) {
   return `${config.apiUrl}${path}`;
 }
+
+// Re-export apiClient for backward compatibility
+export { apiClient } from './apiClient';
