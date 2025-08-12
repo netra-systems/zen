@@ -3,7 +3,7 @@ from typing import Optional, Generator, AsyncGenerator
 from sqlalchemy import create_engine, pool, event
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.pool import QueuePool, NullPool
+from sqlalchemy.pool import QueuePool, NullPool, AsyncAdaptedQueuePool
 from app.config import settings
 from app.logging_config import central_logger
 
@@ -110,12 +110,16 @@ async_session_factory: Optional[async_sessionmaker] = None
 try:
     db_url = settings.database_url
     if db_url:
-        # For async engines, we cannot use QueuePool - use NullPool instead
+        # Use AsyncAdaptedQueuePool for proper async connection pooling
+        pool_class = AsyncAdaptedQueuePool if "sqlite" not in db_url else NullPool
         async_engine = create_async_engine(
             db_url,
             echo=DatabaseConfig.ECHO,
             echo_pool=DatabaseConfig.ECHO_POOL,
-            poolclass=NullPool,  # Always use NullPool for async engines
+            poolclass=pool_class,
+            pool_size=DatabaseConfig.POOL_SIZE if pool_class == AsyncAdaptedQueuePool else 0,
+            max_overflow=DatabaseConfig.MAX_OVERFLOW if pool_class == AsyncAdaptedQueuePool else 0,
+            pool_timeout=DatabaseConfig.POOL_TIMEOUT,
             pool_recycle=DatabaseConfig.POOL_RECYCLE,
             pool_pre_ping=DatabaseConfig.POOL_PRE_PING,
         )
@@ -126,7 +130,32 @@ try:
             autocommit=False,
             autoflush=False
         )
-        logger.info("PostgreSQL async engine created with connection pooling")
+        
+        # Setup async connection events
+        @event.listens_for(async_engine.sync_engine, "connect")
+        def receive_async_connect(dbapi_conn, connection_record):
+            connection_record.info['pid'] = dbapi_conn.get_backend_pid() if hasattr(dbapi_conn, 'get_backend_pid') else None
+            
+            # Set statement timeout for all async connections
+            with dbapi_conn.cursor() as cursor:
+                cursor.execute(f"SET statement_timeout = {DatabaseConfig.STATEMENT_TIMEOUT}")
+                cursor.execute("SET idle_in_transaction_session_timeout = 60000")  # 60 seconds
+                cursor.execute("SET lock_timeout = 10000")  # 10 seconds
+            
+            logger.debug(f"Async database connection established with safety limits: {connection_record.info.get('pid')}")
+
+        @event.listens_for(async_engine.sync_engine, "checkout")
+        def receive_async_checkout(dbapi_conn, connection_record, connection_proxy):
+            # Track async pool usage for monitoring
+            pool = async_engine.pool
+            if hasattr(pool, 'size') and hasattr(pool, 'overflow'):
+                active = pool.size() - pool.checkedin() + pool.overflow()
+                if active > (DatabaseConfig.POOL_SIZE + DatabaseConfig.MAX_OVERFLOW) * 0.8:
+                    logger.warning(f"Async connection pool usage high: {active}/{DatabaseConfig.POOL_SIZE + DatabaseConfig.MAX_OVERFLOW}")
+            
+            logger.debug(f"Async connection checked out from pool: {connection_record.info.get('pid')}")
+        
+        logger.info("PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling")
     else:
         logger.warning("Database URL not configured")
 except Exception as e:

@@ -101,7 +101,8 @@ describe('ChatHistorySection', () => {
     // Create fresh mock instances
     mockThreadStore = createMockThreadStore({
       threads: mockThreads,
-      currentThread: mockThreads[0]
+      currentThread: mockThreads[0],
+      currentThreadId: 'thread-1'
     });
     
     mockChatStore = createMockChatStore();
@@ -139,6 +140,12 @@ describe('ChatHistorySection', () => {
     });
 
     it('should highlight the current active thread', () => {
+      // Configure store to have currentThreadId set
+      (useThreadStore as unknown as jest.Mock).mockReturnValue({
+        ...mockThreadStore,
+        currentThreadId: 'thread-1'
+      });
+      
       render(<ChatHistorySection />);
       
       const firstThread = screen.getByText('First Conversation').closest('div[class*="group"]');
@@ -574,15 +581,21 @@ describe('ChatHistorySection', () => {
     });
 
     it('should not reload if clicking current thread', async () => {
+      // Configure store to have currentThreadId set to thread-1
+      (useThreadStore as unknown as jest.Mock).mockReturnValue({
+        ...mockThreadStore,
+        currentThreadId: 'thread-1'
+      });
+      
       render(<ChatHistorySection />);
       
       const firstThread = screen.getByText('First Conversation').closest('.group');
       fireEvent.click(firstThread!);
       
-      await waitFor(() => {
-        expect(mockThreadStore.setCurrentThread).not.toHaveBeenCalled();
-        expect(mockChatStore.clearMessages).not.toHaveBeenCalled();
-      });
+      // Should return early without making any state changes
+      expect(mockThreadStore.setCurrentThread).not.toHaveBeenCalled();
+      expect(mockChatStore.clearMessages).not.toHaveBeenCalled();
+      expect(ThreadService.getThreadMessages).not.toHaveBeenCalled();
     });
 
     it('should navigate to chat page if not already there', async () => {
@@ -700,6 +713,7 @@ describe('ChatHistorySection', () => {
       await waitFor(() => {
         expect(ThreadService.createThread).toHaveBeenCalledWith('New Conversation');
         expect(mockThreadStore.addThread).toHaveBeenCalledWith(newThread);
+        // setCurrentThread is called via handleSelectThread internally
         expect(mockThreadStore.setCurrentThread).toHaveBeenCalledWith('thread-new');
       });
     });
@@ -720,6 +734,8 @@ describe('ChatHistorySection', () => {
     });
 
     it('should edit thread title', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');
@@ -737,10 +753,13 @@ describe('ChatHistorySection', () => {
       
       await waitFor(() => {
         expect(ThreadService.updateThread).toHaveBeenCalledWith('thread-1', 'Updated Title');
+        expect(mockThreadStore.updateThread).toHaveBeenCalledWith('thread-1', { title: 'Updated Title' });
       });
     });
 
     it('should cancel title editing on Escape', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');
@@ -758,6 +777,8 @@ describe('ChatHistorySection', () => {
     });
 
     it('should handle empty title during editing', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Original Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');
@@ -796,8 +817,7 @@ describe('ChatHistorySection', () => {
     });
 
     it('should update thread title with check button', async () => {
-      const updatedThread = { ...mockThreads[0], title: 'Updated Title' };
-      (ThreadService.updateThread as jest.Mock).mockResolvedValue(updatedThread);
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
       
       render(<ChatHistorySection />);
       
@@ -820,6 +840,8 @@ describe('ChatHistorySection', () => {
     });
 
     it('should cancel title editing with X button', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');
@@ -869,6 +891,8 @@ describe('ChatHistorySection', () => {
     });
 
     it('should stop propagation on edit button click', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');
@@ -1021,6 +1045,8 @@ describe('ChatHistorySection', () => {
     });
 
     it('should handle edit input click propagation', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');
@@ -1037,6 +1063,8 @@ describe('ChatHistorySection', () => {
     });
 
     it('should handle whitespace-only title as empty', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Original Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');
@@ -1271,10 +1299,18 @@ describe('ChatHistorySection', () => {
       mockPathname = '/dashboard';
       (ThreadService.getThreadMessages as jest.Mock).mockResolvedValue({ messages: [] });
       
-      render(<ChatHistorySection />);
+      // Mock router.push to reject, but since the component doesn't await it,
+      // we need to handle the promise rejection to prevent test errors
+      const navigationError = new Error('Navigation failed');
+      let rejectPromise: Promise<never>;
+      mockRouter.push.mockImplementation(() => {
+        rejectPromise = Promise.reject(navigationError);
+        // Catch the rejection to prevent unhandled promise rejection
+        rejectPromise.catch(() => {});
+        return rejectPromise;
+      });
       
-      // Set up the rejection after render but before click
-      mockRouter.push.mockRejectedValueOnce(new Error('Navigation failed'));
+      render(<ChatHistorySection />);
       
       const secondThread = screen.getByText('Second Conversation').closest('.group');
       fireEvent.click(secondThread!);
@@ -1285,10 +1321,16 @@ describe('ChatHistorySection', () => {
         expect(mockThreadStore.setCurrentThread).toHaveBeenCalledWith('thread-2');
       });
       
+      // Reset mock
+      mockRouter.push.mockClear();
+      mockRouter.push.mockResolvedValue(undefined);
+      
       consoleErrorSpy.mockRestore();
     });
 
     it('should handle concurrent edit operations', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
+      
       render(<ChatHistorySection />);
       
       const firstThread = screen.getByText('First Conversation').closest('.group');
@@ -1359,8 +1401,7 @@ describe('ChatHistorySection', () => {
     });
 
     it('should handle thread update with same data', async () => {
-      const updatedThread = { ...mockThreads[0] }; // Same data
-      (ThreadService.updateThread as jest.Mock).mockResolvedValue(updatedThread);
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'First Conversation' });
       
       render(<ChatHistorySection />);
       
@@ -1673,6 +1714,8 @@ describe('ChatHistorySection', () => {
     });
 
     it('should have proper focus management during editing', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');

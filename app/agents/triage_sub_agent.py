@@ -374,14 +374,14 @@ class TriageSubAgent(BaseSubAgent):
         """Enhanced JSON extraction with multiple strategies and validation."""
         # Strategy 1: Standard extraction
         result = extract_json_from_response(response)
-        if result:
+        if result and isinstance(result, dict):
             return result
         
         # Strategy 2: Find JSON-like structure with regex
-        json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
-        matches = re.findall(json_pattern, response, re.DOTALL)
-        
-        for match in matches:
+        # Look for content between outermost braces
+        brace_match = re.search(r'\{.*\}', response, re.DOTALL)
+        if brace_match:
+            match = brace_match.group()
             try:
                 # Try to repair common JSON issues
                 repaired = match
@@ -393,7 +393,7 @@ class TriageSubAgent(BaseSubAgent):
                 if isinstance(result, dict):
                     return result
             except json.JSONDecodeError:
-                continue
+                pass
         
         # Strategy 3: Extract key-value pairs manually
         try:

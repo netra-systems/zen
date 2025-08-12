@@ -8,6 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete, func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from app.logging_config import central_logger
+from app.core.exceptions import (
+    DatabaseError, RecordNotFoundError, ConstraintViolationError,
+    NetraException, ErrorCode, ErrorSeverity
+)
 import uuid
 from abc import ABC, abstractmethod
 
@@ -22,11 +26,14 @@ class BaseRepository(Generic[T], ABC):
         self.model = model
         self._session: Optional[AsyncSession] = None
     
-    async def create(self, db: Optional[AsyncSession] = None, **kwargs) -> Optional[T]:
+    async def create(self, db: Optional[AsyncSession] = None, **kwargs) -> T:
         """Create a new entity"""
         session = db or self._session
         if not session:
-            raise ValueError("No database session available. Pass db parameter or use within UnitOfWork context.")
+            raise DatabaseError(
+                message="No database session available",
+                context={"repository": self.model.__name__}
+            )
         
         try:
             if 'id' not in kwargs and hasattr(self.model, 'id'):
@@ -34,29 +41,38 @@ class BaseRepository(Generic[T], ABC):
             
             entity = self.model(**kwargs)
             session.add(entity)
-            await session.commit()
-            await session.refresh(entity)
+            # Don't commit here - let UnitOfWork handle transactions
+            await session.flush()  # Flush to get the ID but don't commit
             logger.info(f"Created {self.model.__name__} with id: {kwargs.get('id')}")
             return entity
             
         except IntegrityError as e:
-            await session.rollback()
-            logger.error(f"Integrity error creating {self.model.__name__}: {e}")
-            return None
+            logger.error(f"Integrity constraint violation creating {self.model.__name__}: {e}")
+            raise ConstraintViolationError(
+                constraint=str(e.orig) if hasattr(e, 'orig') else "unknown",
+                context={"repository": self.model.__name__, "data": kwargs}
+            )
         except SQLAlchemyError as e:
-            await session.rollback()
             logger.error(f"Database error creating {self.model.__name__}: {e}")
-            return None
+            raise DatabaseError(
+                message=f"Failed to create {self.model.__name__}",
+                context={"repository": self.model.__name__, "data": kwargs, "error": str(e)}
+            )
         except Exception as e:
-            await session.rollback()
             logger.error(f"Unexpected error creating {self.model.__name__}: {e}")
-            return None
+            raise DatabaseError(
+                message=f"Unexpected error creating {self.model.__name__}",
+                context={"repository": self.model.__name__, "data": kwargs, "error": str(e)}
+            )
     
     async def get_by_id(self, db: Optional[AsyncSession], entity_id: str) -> Optional[T]:
         """Get entity by ID"""
         session = db or self._session
         if not session:
-            raise ValueError("No database session available. Pass db parameter or use within UnitOfWork context.")
+            raise DatabaseError(
+                message="No database session available",
+                context={"repository": self.model.__name__, "entity_id": entity_id}
+            )
         
         try:
             result = await session.execute(
@@ -65,7 +81,10 @@ class BaseRepository(Generic[T], ABC):
             return result.scalar_one_or_none()
         except SQLAlchemyError as e:
             logger.error(f"Error fetching {self.model.__name__} by id {entity_id}: {e}")
-            return None
+            raise DatabaseError(
+                message=f"Failed to fetch {self.model.__name__} by ID",
+                context={"repository": self.model.__name__, "entity_id": entity_id, "error": str(e)}
+            )
     
     async def get(self, db: Optional[AsyncSession], entity_id: str) -> Optional[T]:
         """Alias for get_by_id for backward compatibility"""
@@ -90,45 +109,57 @@ class BaseRepository(Generic[T], ABC):
             
         except SQLAlchemyError as e:
             logger.error(f"Error fetching {self.model.__name__} list: {e}")
-            return []
+            raise DatabaseError(
+                message=f"Failed to fetch {self.model.__name__} list",
+                context={"repository": self.model.__name__, "filters": filters, "error": str(e)}
+            )
     
     async def update(self, db: AsyncSession, entity_id: str, **kwargs) -> Optional[T]:
         """Update an entity"""
         try:
             entity = await self.get_by_id(db, entity_id)
             if not entity:
-                return None
+                raise RecordNotFoundError(self.model.__name__, entity_id)
             
             for key, value in kwargs.items():
                 if hasattr(entity, key):
                     setattr(entity, key, value)
             
-            await db.commit()
-            await db.refresh(entity)
+            # Don't commit here - let UnitOfWork handle transactions
+            await db.flush()  # Flush changes but don't commit
             logger.info(f"Updated {self.model.__name__} with id: {entity_id}")
             return entity
             
+        except NetraException:
+            raise
         except SQLAlchemyError as e:
-            await db.rollback()
             logger.error(f"Error updating {self.model.__name__} {entity_id}: {e}")
-            return None
+            raise DatabaseError(
+                message=f"Failed to update {self.model.__name__}",
+                context={"repository": self.model.__name__, "entity_id": entity_id, "data": kwargs, "error": str(e)}
+            )
     
     async def delete(self, db: AsyncSession, entity_id: str) -> bool:
         """Delete an entity"""
         try:
             entity = await self.get_by_id(db, entity_id)
             if not entity:
-                return False
+                raise RecordNotFoundError(self.model.__name__, entity_id)
             
             await db.delete(entity)
-            await db.commit()
+            # Don't commit here - let UnitOfWork handle transactions
+            await db.flush()  # Flush changes but don't commit
             logger.info(f"Deleted {self.model.__name__} with id: {entity_id}")
             return True
             
+        except NetraException:
+            raise
         except SQLAlchemyError as e:
-            await db.rollback()
             logger.error(f"Error deleting {self.model.__name__} {entity_id}: {e}")
-            return False
+            raise DatabaseError(
+                message=f"Failed to delete {self.model.__name__}",
+                context={"repository": self.model.__name__, "entity_id": entity_id, "error": str(e)}
+            )
     
     async def count(self, db: AsyncSession, filters: Optional[Dict[str, Any]] = None) -> int:
         """Count entities with optional filtering"""
@@ -145,7 +176,10 @@ class BaseRepository(Generic[T], ABC):
             
         except SQLAlchemyError as e:
             logger.error(f"Error counting {self.model.__name__}: {e}")
-            return 0
+            raise DatabaseError(
+                message=f"Failed to count {self.model.__name__}",
+                context={"repository": self.model.__name__, "filters": filters, "error": str(e)}
+            )
     
     async def exists(self, db: AsyncSession, entity_id: str) -> bool:
         """Check if entity exists"""
@@ -155,7 +189,10 @@ class BaseRepository(Generic[T], ABC):
             return result.scalar() > 0
         except SQLAlchemyError as e:
             logger.error(f"Error checking existence of {self.model.__name__} {entity_id}: {e}")
-            return False
+            raise DatabaseError(
+                message=f"Failed to check existence of {self.model.__name__}",
+                context={"repository": self.model.__name__, "entity_id": entity_id, "error": str(e)}
+            )
     
     async def bulk_create(self, data: List[Dict[str, Any]], db: Optional[AsyncSession] = None) -> List[T]:
         """Create multiple entities in bulk"""

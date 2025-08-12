@@ -58,6 +58,12 @@ class MockRepository(BaseRepository[MockDatabaseModel]):
         self.operation_log.append(('delete', entity_id))
         return await super().delete(db, entity_id)
     
+    async def find_by_user(self, db: AsyncSession, user_id: str) -> List[MockDatabaseModel]:
+        """Implementation of abstract method find_by_user"""
+        self.operation_log.append(('find_by_user', user_id))
+        # Return empty list for testing purposes
+        return []
+    
     def clear_log(self):
         """Clear operation log"""
         self.operation_log.clear()

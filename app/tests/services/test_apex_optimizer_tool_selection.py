@@ -127,6 +127,9 @@ class MockLLMConnector:
             raise NetraException("Mock LLM generation failed")
         
         if self.custom_response:
+            # If custom_response is a string, return it directly (for testing invalid JSON)
+            if isinstance(self.custom_response, str):
+                return self.custom_response
             return json.dumps(self.custom_response)
         
         # Analyze prompt to determine appropriate tool
@@ -159,8 +162,8 @@ class MockLLMConnector:
             # Default to cost optimization
             return json.dumps(self.response_templates['cost'])
     
-    def set_custom_response(self, response: Dict[str, Any]):
-        """Set custom response for testing"""
+    def set_custom_response(self, response):
+        """Set custom response for testing (can be dict or string for invalid JSON testing)"""
         self.custom_response = response
     
     def get_request_history(self) -> List[Dict[str, Any]]:

@@ -110,6 +110,7 @@ export const createMockUnifiedChatStore = (overrides?: Partial<any>) => ({
 export const createMockThreadStore = (overrides?: Partial<any>) => ({
   threads: [],
   currentThread: null,
+  currentThreadId: null,
   loading: false,
   error: null,
   

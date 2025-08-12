@@ -218,24 +218,36 @@ def unit_of_work(mock_session, mock_models):
             
             # Setup run repo methods
             run_counter = [0]
+            created_runs = []  # Track all created runs
+            
             async def create_run(data=None, **kwargs):
                 # Handle both dict argument and **kwargs
                 if data and isinstance(data, dict):
                     kwargs = data
                 run_counter[0] += 1
-                return AsyncMock(
+                run = AsyncMock(
                     id=kwargs.get('id', f"run_{run_counter[0]}"),
                     thread_id=kwargs.get('thread_id'),
-                    status=kwargs.get('status'),
+                    status=kwargs.get('status', 'completed'),
                     tools=kwargs.get('tools', []),
                     model=kwargs.get('model'),
                     instructions=kwargs.get('instructions'),
                     completed_at=None,
                     metadata={}
                 )
+                created_runs.append(run)
+                return run
             mock_run_repo.create.side_effect = create_run
             
             async def update_run_status(run_id, status, metadata=None):
+                # Update the status of an existing run
+                for run in created_runs:
+                    if run.id == run_id:
+                        run.status = status
+                        run.completed_at = datetime.now() if status == "completed" else None
+                        run.metadata = metadata or {}
+                        return run
+                # If run not found, create a new one
                 return AsyncMock(
                     id=run_id,
                     status=status,
@@ -244,7 +256,13 @@ def unit_of_work(mock_session, mock_models):
                 )
             mock_run_repo.update_status.side_effect = update_run_status
             
-            mock_run_repo.get_active.return_value = [AsyncMock(id="active_run")]
+            # Dynamic get_active_runs that filters created runs
+            async def get_active_runs_impl():
+                return [run for run in created_runs if run.status in ["in_progress", "queued", "requires_action"]]
+            
+            mock_run_repo.get_active_runs.side_effect = get_active_runs_impl
+            # Also provide get_active as an alias for backward compatibility
+            mock_run_repo.get_active = mock_run_repo.get_active_runs
             
             # Setup reference repo methods
             reference_counter = [0]
@@ -869,7 +887,7 @@ class TestRunRepository:
                 "status": "completed"
             })
             
-            active = await uow.runs.get_active()
+            active = await uow.runs.get_active_runs()
             
             assert any(r.id == active_run.id for r in active)
             assert not any(r.id == completed_run.id for r in active)

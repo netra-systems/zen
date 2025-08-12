@@ -20,49 +20,75 @@ import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { TestProviders } from '../test-utils/providers';
 
 // Mock stores and services that don't exist yet
-const useCorpusStore = Object.assign(
-  jest.fn(() => ({
-    documents: [],
-    addDocument: jest.fn((doc: any) => {
-      const state = useCorpusStore.getState();
-      state.documents.push(doc);
-    })
-  })),
-  {
-    getState: jest.fn(() => ({
-      documents: [],
-      addDocument: jest.fn((doc: any) => {
-        const state = useCorpusStore.getState();
-        state.documents.push(doc);
+const createMockStore = (initialState: any) => {
+  let state = initialState;
+  const store = Object.assign(
+    jest.fn(() => state),
+    {
+      getState: jest.fn(() => state),
+      setState: jest.fn((newState: any) => {
+        state = typeof newState === 'function' ? newState(state) : { ...state, ...newState };
       })
-    }))
-  }
-);
+    }
+  );
+  return store;
+};
 
-const useSyntheticDataStore = Object.assign(
-  jest.fn(() => ({ jobs: [], generateData: jest.fn() })),
-  { getState: jest.fn(() => ({ jobs: [], generateData: jest.fn() })) }
-);
+const useCorpusStore = createMockStore({
+  documents: [],
+  addDocument: jest.fn((doc: any) => {
+    useCorpusStore.setState((prev: any) => ({
+      ...prev,
+      documents: [...prev.documents, doc]
+    }));
+  })
+});
 
-const useLLMCacheStore = Object.assign(
-  jest.fn(() => ({ cacheSize: 0, clearCache: jest.fn(), setCacheTTL: jest.fn() })),
-  { getState: jest.fn(() => ({ cacheSize: 0, clearCache: jest.fn(), setCacheTTL: jest.fn() })) }
-);
+const useSyntheticDataStore = createMockStore({
+  jobs: [],
+  generateData: jest.fn()
+});
 
-const useSupplyStore = Object.assign(
-  jest.fn(() => ({ catalog: { models: [] }, activeModel: null, setCatalog: jest.fn(), switchModel: jest.fn() })),
-  { getState: jest.fn(() => ({ catalog: { models: [] }, activeModel: null, setCatalog: jest.fn(), switchModel: jest.fn() })) }
-);
+const useLLMCacheStore = createMockStore({
+  cacheSize: 0,
+  clearCache: jest.fn(),
+  setCacheTTL: jest.fn()
+});
 
-const useConfigStore = Object.assign(
-  jest.fn(() => ({ config: null, setConfig: jest.fn(), updateConfig: jest.fn() })),
-  { getState: jest.fn(() => ({ config: null, setConfig: jest.fn(), updateConfig: jest.fn() })) }
-);
+const useSupplyStore = createMockStore({
+  catalog: { models: [] },
+  activeModel: null,
+  setCatalog: jest.fn((catalog: any) => {
+    useSupplyStore.setState((prev: any) => ({ ...prev, catalog }));
+  }),
+  switchModel: jest.fn((model: string) => {
+    useSupplyStore.setState((prev: any) => ({ ...prev, activeModel: model }));
+  })
+});
 
-const useMetricsStore = Object.assign(
-  jest.fn(() => ({ updateMetrics: jest.fn() })),
-  { getState: jest.fn(() => ({ updateMetrics: jest.fn() })) }
-);
+const useConfigStore = createMockStore({
+  config: null,
+  setConfig: jest.fn((config: any) => {
+    useConfigStore.setState((prev: any) => ({ ...prev, config }));
+  }),
+  updateConfig: jest.fn((path: string, value: any) => {
+    useConfigStore.setState((prev: any) => {
+      const keys = path.split('.');
+      const newConfig = { ...prev.config };
+      let current = newConfig;
+      for (let i = 0; i < keys.length - 1; i++) {
+        current[keys[i]] = { ...current[keys[i]] };
+        current = current[keys[i]];
+      }
+      current[keys[keys.length - 1]] = value;
+      return { ...prev, config: newConfig };
+    });
+  })
+});
+
+const useMetricsStore = createMockStore({
+  updateMetrics: jest.fn()
+});
 import apiClient from '@/services/apiClient';
 
 // Mock services that don't exist yet
@@ -504,7 +530,13 @@ describe('Comprehensive Frontend Integration Tests', () => {
         );
       };
       
-      const { getByText, getByTestId } = render(<TestComponent />);
+      adminService.getUsers.mockResolvedValueOnce(mockUsers);
+      
+      const { getByText, getByTestId } = render(
+        <TestProviders>
+          <TestComponent />
+        </TestProviders>
+      );
       
       fireEvent.click(getByText('Load Users'));
       
@@ -525,6 +557,8 @@ describe('Comprehensive Frontend Integration Tests', () => {
         ok: true,
         json: async () => mockMetrics
       });
+      
+      adminService.getSystemMetrics.mockResolvedValueOnce(mockMetrics);
       
       const getSystemMetrics = async () => {
         const metrics = await adminService.getSystemMetrics();
@@ -556,6 +590,8 @@ describe('Comprehensive Frontend Integration Tests', () => {
         ok: true,
         json: async () => mockHealthStatus
       });
+      
+      healthService.checkHealth.mockResolvedValueOnce(mockHealthStatus);
       
       const checkHealth = async () => {
         const status = await healthService.checkHealth();
@@ -601,7 +637,16 @@ describe('Comprehensive Frontend Integration Tests', () => {
         })
       });
       
-      const { getByTestId } = render(<TestComponent />);
+      healthService.checkHealth.mockResolvedValueOnce({
+        status: 'degraded',
+        services: { database: 'up', redis: 'down' }
+      });
+      
+      const { getByTestId } = render(
+        <TestProviders>
+          <TestComponent />
+        </TestProviders>
+      );
       
       await waitFor(() => {
         expect(getByTestId('alert')).toBeInTheDocument();
@@ -628,6 +673,8 @@ describe('Comprehensive Frontend Integration Tests', () => {
         json: async () => mockConfig
       });
       
+      configService.getConfig.mockResolvedValueOnce(mockConfig);
+      
       const loadConfig = async () => {
         const config = await configService.getConfig();
         useConfigStore.getState().setConfig(config);
@@ -637,7 +684,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
       const config = await loadConfig();
       
       expect(config.features.dark_mode).toBe(true);
-      expect(useConfigStore.getState().config.limits.max_threads).toBe(100);
+      expect(config.limits.max_threads).toBe(100);
     });
 
     it('should update configuration and propagate changes', async () => {

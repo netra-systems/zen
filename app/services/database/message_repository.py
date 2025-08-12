@@ -140,3 +140,10 @@ class MessageRepository(BaseRepository[Message]):
         except Exception as e:
             logger.error(f"Error finding messages for thread {thread_id}: {e}")
             return []
+    
+    async def get_by_thread(self, 
+                           db: AsyncSession, 
+                           thread_id: str,
+                           limit: int = 50) -> List[Message]:
+        """Get messages by thread - alias for find_by_thread for consistency"""
+        return await self.get_thread_messages(db, thread_id, limit)

@@ -3,6 +3,7 @@ from app.ws_manager import manager
 from app.logging_config import central_logger
 from app.db.postgres import get_async_db
 import asyncio
+import json
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter()
@@ -113,8 +114,18 @@ async def websocket_endpoint(
                     await manager.handle_pong(user_id_str, websocket)
                     continue
                 
-                # Update connection statistics
-                manager._stats["total_messages_received"] += 1
+                # Parse and validate message
+                try:
+                    message = json.loads(data) if isinstance(data, str) else data
+                except json.JSONDecodeError:
+                    logger.warning(f"Invalid JSON received from user {user_id_str}: {data[:100]}")
+                    await manager.send_error(user_id_str, "Invalid JSON message format")
+                    continue
+                
+                # Use manager's new validation and rate limiting
+                if not await manager.handle_message(user_id_str, websocket, message):
+                    # Message was invalid or rate limited - error already sent
+                    continue
                 
                 # Create a new database session for each message
                 async with get_async_db() as db_session:

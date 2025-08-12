@@ -39,38 +39,24 @@ Object.defineProperty(window, 'localStorage', {
 // Store href values
 let mockHref = 'http://localhost/';
 
-// Mock window.location
-const mockLocationAssign = jest.fn();
-const mockLocationReplace = jest.fn();
-const mockLocationReload = jest.fn();
-
-// Store the original descriptor if it exists
-const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'location');
-
-// Delete and recreate window.location with a proper mock
+// Mock window.location with getters and setters
 delete (window as any).location;
-
-// Use defineProperty to mock location properly
-Object.defineProperty(window, 'location', {
-  value: {
-    get href() {
-      return mockHref;
-    },
-    set href(value: string) {
-      mockHref = value;
-    },
-    assign: mockLocationAssign,
-    replace: mockLocationReplace,
-    reload: mockLocationReload,
-    origin: 'http://localhost:3000',
-    pathname: '/',
-    search: '',
-    hash: '',
-    toString: () => mockHref
+(window as any).location = {
+  get href() {
+    return mockHref;
   },
-  writable: true,
-  configurable: true
-});
+  set href(value: string) {
+    mockHref = value;
+  },
+  assign: jest.fn(),
+  replace: jest.fn(),
+  reload: jest.fn(),
+  origin: 'http://localhost:3000',
+  pathname: '/',
+  search: '',
+  hash: '',
+  toString: () => mockHref
+};
 
 // Mock fetch
 global.fetch = jest.fn();
@@ -83,9 +69,9 @@ describe('AuthService', () => {
       login: 'http://localhost:8000/auth/login',
       logout: 'http://localhost:8000/auth/logout',
       callback: 'http://localhost:8000/auth/callback',
-      dev_login: 'http://localhost:8000/auth/dev-login',
       token: 'http://localhost:8000/auth/token',
-      user: 'http://localhost:8000/auth/user'
+      user: 'http://localhost:8000/auth/user',
+      dev_login: 'http://localhost:8000/auth/dev-login'
     },
     authorized_javascript_origins: ['http://localhost:3000'],
     authorized_redirect_uris: ['http://localhost:3000/callback']
@@ -289,27 +275,36 @@ describe('AuthService', () => {
 
   describe('handleLogin', () => {
     it('should redirect to login endpoint', () => {
-      // Spy on the setter to capture the value
-      const setterSpy = jest.spyOn(window.location, 'href', 'set');
+      // Spy on window.location.href setter
+      const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'location');
+      delete (window as any).location;
+      window.location = { ...window.location, href: '' } as any;
       
       authService.handleLogin(mockAuthConfig);
 
-      expect(setterSpy).toHaveBeenCalledWith(mockAuthConfig.endpoints.login);
-      expect(mockHref).toBe(mockAuthConfig.endpoints.login);
+      expect(window.location.href).toBe(mockAuthConfig.endpoints.login);
       
-      setterSpy.mockRestore();
+      // Restore
+      if (originalDescriptor) {
+        Object.defineProperty(window, 'location', originalDescriptor);
+      }
     });
 
     it('should handle login with development mode config', () => {
       const devConfig = { ...mockAuthConfig, development_mode: true };
-      const setterSpy = jest.spyOn(window.location, 'href', 'set');
+      // Spy on window.location.href setter
+      const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'location');
+      delete (window as any).location;
+      window.location = { ...window.location, href: '' } as any;
       
       authService.handleLogin(devConfig);
 
-      expect(setterSpy).toHaveBeenCalledWith(devConfig.endpoints.login);
-      expect(mockHref).toBe(devConfig.endpoints.login);
+      expect(window.location.href).toBe(devConfig.endpoints.login);
       
-      setterSpy.mockRestore();
+      // Restore
+      if (originalDescriptor) {
+        Object.defineProperty(window, 'location', originalDescriptor);
+      }
     });
   });
 
@@ -317,7 +312,6 @@ describe('AuthService', () => {
     it('should perform logout successfully and redirect', async () => {
       localStorageMock.getItem.mockReturnValue(mockToken);
       (fetch as jest.Mock).mockResolvedValue({ ok: true });
-      const setterSpy = jest.spyOn(window.location, 'href', 'set');
 
       await authService.handleLogout(mockAuthConfig);
 
@@ -332,50 +326,40 @@ describe('AuthService', () => {
         })
       );
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(setterSpy).toHaveBeenCalledWith('/');
       expect(mockHref).toBe('/');
-      
-      setterSpy.mockRestore();
     });
 
     it('should handle logout failure and still redirect', async () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
       localStorageMock.getItem.mockReturnValue(mockToken);
       (fetch as jest.Mock).mockResolvedValue({ ok: false });
-      const setterSpy = jest.spyOn(window.location, 'href', 'set');
 
       await authService.handleLogout(mockAuthConfig);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith('Logout failed');
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(setterSpy).toHaveBeenCalledWith('/');
       expect(mockHref).toBe('/');
 
       consoleErrorSpy.mockRestore();
-      setterSpy.mockRestore();
     });
 
     it('should handle logout network error and still redirect', async () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
       localStorageMock.getItem.mockReturnValue(mockToken);
       (fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
-      const setterSpy = jest.spyOn(window.location, 'href', 'set');
 
       await authService.handleLogout(mockAuthConfig);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith('Error during logout:', expect.any(Error));
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(setterSpy).toHaveBeenCalledWith('/');
       expect(mockHref).toBe('/');
 
       consoleErrorSpy.mockRestore();
-      setterSpy.mockRestore();
     });
 
     it('should handle logout without token', async () => {
       localStorageMock.getItem.mockReturnValue(null);
       (fetch as jest.Mock).mockResolvedValue({ ok: true });
-      const setterSpy = jest.spyOn(window.location, 'href', 'set');
 
       await authService.handleLogout(mockAuthConfig);
 
@@ -388,10 +372,7 @@ describe('AuthService', () => {
         })
       );
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(setterSpy).toHaveBeenCalledWith('/');
       expect(mockHref).toBe('/');
-      
-      setterSpy.mockRestore();
     });
   });
 
