@@ -262,7 +262,7 @@ describe('Core Chat UI/UX Experience - Comprehensive Test Suite', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         ...mockThreadStore,
         threads: mockThreads,
-        setCurrentThread: mockThreadStore.setCurrentThread
+        setCurrentThread: mockSetCurrentThread
       });
       
       // Mock authenticated state

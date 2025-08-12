@@ -198,7 +198,10 @@ class BaseRepository(Generic[T], ABC):
         """Create multiple entities in bulk"""
         session = db or self._session
         if not session:
-            raise ValueError("No database session available. Pass db parameter or use within UnitOfWork context.")
+            raise DatabaseError(
+                message="No database session available",
+                context={"repository": self.model.__name__}
+            )
         
         entities = []
         try:
@@ -209,25 +212,29 @@ class BaseRepository(Generic[T], ABC):
                 session.add(entity)
                 entities.append(entity)
             
-            await session.commit()
-            for entity in entities:
-                await session.refresh(entity)
-            
+            # Don't commit here - let UnitOfWork handle transactions
+            await session.flush()  # Flush to get IDs but don't commit
             logger.info(f"Bulk created {len(entities)} {self.model.__name__} entities")
             return entities
             
         except IntegrityError as e:
-            await session.rollback()
-            logger.error(f"Integrity error bulk creating {self.model.__name__}: {e}")
-            return []
+            logger.error(f"Integrity constraint violation bulk creating {self.model.__name__}: {e}")
+            raise ConstraintViolationError(
+                constraint=str(e.orig) if hasattr(e, 'orig') else "unknown",
+                context={"repository": self.model.__name__, "data_count": len(data)}
+            )
         except SQLAlchemyError as e:
-            await session.rollback()
             logger.error(f"Database error bulk creating {self.model.__name__}: {e}")
-            return []
+            raise DatabaseError(
+                message=f"Failed to bulk create {self.model.__name__}",
+                context={"repository": self.model.__name__, "data_count": len(data), "error": str(e)}
+            )
         except Exception as e:
-            await session.rollback()
             logger.error(f"Unexpected error bulk creating {self.model.__name__}: {e}")
-            return []
+            raise DatabaseError(
+                message=f"Unexpected error bulk creating {self.model.__name__}",
+                context={"repository": self.model.__name__, "data_count": len(data), "error": str(e)}
+            )
     
     async def get_many(self, ids: List[str], db: Optional[AsyncSession] = None) -> List[T]:
         """Get multiple entities by their IDs"""
