@@ -74,7 +74,7 @@ class CorpusService:
             status=CorpusStatus.CREATING.value,
             created_by_id=user_id,
             domain=corpus_data.domain if hasattr(corpus_data, 'domain') else 'general',
-            metadata=json.dumps({
+            metadata_=json.dumps({
                 "content_source": content_source.value,
                 "created_at": datetime.utcnow().isoformat(),
                 "version": 1
@@ -123,14 +123,14 @@ class CorpusService:
                 db.commit()
                 
                 # Send WebSocket notification
-                await manager.broadcast(json.dumps({
+                await manager.broadcast({
                     "type": "corpus:created",
                     "payload": {
                         "corpus_id": corpus_id,
                         "table_name": table_name,
                         "status": CorpusStatus.AVAILABLE.value
                     }
-                }))
+                })
                 
                 central_logger.info(f"Created ClickHouse table {table_name} for corpus {corpus_id}")
                 
@@ -144,13 +144,13 @@ class CorpusService:
             db.commit()
             
             # Send error notification
-            await manager.broadcast(json.dumps({
+            await manager.broadcast({
                 "type": "corpus:error",
                 "payload": {
                     "corpus_id": corpus_id,
                     "error": str(e)
                 }
-            }))
+            })
     
     async def upload_content(
         self,
@@ -215,14 +215,14 @@ class CorpusService:
             await self._insert_corpus_records(db_corpus.table_name, records)
             
             # Send progress notification
-            await manager.broadcast(json.dumps({
+            await manager.broadcast({
                 "type": "corpus:upload_progress",
                 "payload": {
                     "corpus_id": corpus_id,
                     "records_uploaded": len(records),
                     "batch_id": batch_id
                 }
-            }))
+            })
             
             return {
                 "records_uploaded": len(records),
@@ -344,10 +344,10 @@ class CorpusService:
             setattr(db_corpus, key, value)
         
         # Update metadata
-        metadata = json.loads(db_corpus.metadata or "{}")
+        metadata = json.loads(db_corpus.metadata_ or "{}")
         metadata["updated_at"] = datetime.utcnow().isoformat()
         metadata["version"] = metadata.get("version", 1) + 1
-        db_corpus.metadata = json.dumps(metadata)
+        db_corpus.metadata_ = json.dumps(metadata)
         
         db.commit()
         db.refresh(db_corpus)
@@ -379,12 +379,12 @@ class CorpusService:
             db.commit()
             
             # Send deletion notification
-            await manager.broadcast(json.dumps({
+            await manager.broadcast({
                 "type": "corpus:deleted",
                 "payload": {
                     "corpus_id": corpus_id
                 }
-            }))
+            })
             
             return True
             
@@ -567,12 +567,12 @@ class CorpusService:
                 db.commit()
                 
                 # Send notification
-                await manager.broadcast(json.dumps({
+                await manager.broadcast({
                     "type": "corpus:clone_complete",
                     "payload": {
                         "corpus_id": corpus_id
                     }
-                }))
+                })
                 
         except Exception as e:
             central_logger.error(f"Failed to copy corpus content: {str(e)}")

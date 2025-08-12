@@ -101,8 +101,9 @@ class TestLargeDatasetPerformance:
         # Should use time-based filtering efficiently
         assert "timestamp >= now() - INTERVAL 90 DAY" in query
         
-        # Should group efficiently
-        assert "GROUP BY hour_of_day, day_of_week" in query
+        # Should group efficiently (order doesn't matter)
+        assert ("GROUP BY hour_of_day, day_of_week" in query or 
+                "GROUP BY day_of_week, hour_of_day" in query)
 
 
 class TestEdgeCaseHandling:

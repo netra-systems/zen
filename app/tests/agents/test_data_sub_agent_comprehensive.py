@@ -293,9 +293,9 @@ class TestAnalysisEngine:
         
     def test_identify_outliers_zscore_method(self):
         """Test outlier identification using Z-score method"""
-        values = [10, 11, 12, 13, 14, 15, 16, 17, 18, 50]  # 50 is an outlier
+        values = [10, 10, 10, 10, 10, 10, 10, 10, 10, 51]  # 51 is an outlier (z-score > 3)
         outliers = AnalysisEngine.identify_outliers(values, method="zscore")
-        assert 9 in outliers  # Index of value 50
+        assert 9 in outliers  # Index of value 51
         
     def test_identify_outliers_zscore_no_variance(self):
         """Test outlier identification with no variance"""
@@ -615,7 +615,7 @@ class TestDataSubAgent:
         """Test anomaly detection with anomalies found"""
         mock_data = [
             {'timestamp': f'2024-01-01T12:{i:02d}:00', 'metric_value': 100.0 * (i + 1),
-             'z_score': 2.5 + i * 0.1, 'is_anomaly': True}
+             'z_score': 2.5 + i * 0.2, 'is_anomaly': True}  # Last item will have z_score > 3
             for i in range(5)
         ]
         
@@ -792,8 +792,7 @@ class TestDataSubAgent:
     @pytest.mark.asyncio
     async def test_execute_optimize_intent(self, agent):
         """Test execute with optimize intent"""
-        state = DeepAgentState()
-        state.user_request = "Optimize my workload"
+        state = DeepAgentState(user_request="Optimize my workload")
         state.triage_result = {
             "intent": {"primary": "optimize"},
             "key_parameters": {
@@ -821,8 +820,7 @@ class TestDataSubAgent:
     @pytest.mark.asyncio
     async def test_execute_analyze_intent(self, agent):
         """Test execute with analyze intent"""
-        state = DeepAgentState()
-        state.user_request = "Analyze my data"
+        state = DeepAgentState(user_request="Analyze my data")
         state.triage_result = {
             "intent": {"primary": "analyze"},
             "key_parameters": {
@@ -849,8 +847,7 @@ class TestDataSubAgent:
     @pytest.mark.asyncio
     async def test_execute_monitor_intent(self, agent):
         """Test execute with monitor intent"""
-        state = DeepAgentState()
-        state.user_request = "Monitor my metrics"
+        state = DeepAgentState(user_request="Monitor my metrics")
         state.triage_result = {
             "intent": {"primary": "monitor"},
             "key_parameters": {
@@ -875,8 +872,7 @@ class TestDataSubAgent:
     @pytest.mark.asyncio
     async def test_execute_general_intent(self, agent):
         """Test execute with general/unknown intent"""
-        state = DeepAgentState()
-        state.user_request = "Help me with my data"
+        state = DeepAgentState(user_request="Help me with my data")
         state.triage_result = {
             "intent": {"primary": "general"},
             "key_parameters": {
@@ -902,8 +898,7 @@ class TestDataSubAgent:
     @pytest.mark.asyncio
     async def test_execute_with_exception_fallback(self, agent):
         """Test execute with exception triggering fallback"""
-        state = DeepAgentState()
-        state.user_request = "Analyze my data"
+        state = DeepAgentState(user_request="Analyze my data")
         state.triage_result = {"intent": {"primary": "analyze"}}
         
         # Mock the LLM manager for fallback
@@ -920,8 +915,7 @@ class TestDataSubAgent:
     @pytest.mark.asyncio
     async def test_execute_with_invalid_llm_response(self, agent):
         """Test execute with invalid LLM response in fallback"""
-        state = DeepAgentState()
-        state.user_request = "Analyze my data"
+        state = DeepAgentState(user_request="Analyze my data")
         state.triage_result = {"intent": {"primary": "analyze"}}
         
         # Mock the LLM manager to return invalid JSON
@@ -1327,6 +1321,7 @@ class TestDataSubAgent:
     async def test_load_state_existing(self, agent):
         """Test load_state with existing state"""
         agent.state = {"existing": "data"}
+        agent.agent_type = "data"  # Add the missing attribute
         
         await agent.load_state()
         

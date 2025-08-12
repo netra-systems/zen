@@ -51,7 +51,7 @@ class TestCorpusLifecycle:
             assert "netra_content_corpus_" in corpus.table_name
             
             # Verify metadata
-            metadata = json.loads(corpus.metadata)
+            metadata = json.loads(corpus.metadata_)
             assert metadata["content_source"] == ContentSource.GENERATE.value
             assert metadata["version"] == 1
     
@@ -457,7 +457,7 @@ class TestMetadataTracking:
             db, corpus_data, "user1", ContentSource.UPLOAD
         )
         
-        metadata = json.loads(corpus.metadata)
+        metadata = json.loads(corpus.metadata_)
         assert metadata["content_source"] == "upload"
         assert metadata["version"] == 1
         assert "created_at" in metadata
@@ -469,7 +469,7 @@ class TestMetadataTracking:
         
         db = MagicMock()
         corpus = MagicMock()
-        corpus.metadata = json.dumps({"version": 1})
+        corpus.metadata_ = json.dumps({"version": 1})
         
         db.query().filter().first.return_value = corpus
         
@@ -477,7 +477,7 @@ class TestMetadataTracking:
         
         result = await service.update_corpus(db, "test_id", update_data)
         
-        metadata = json.loads(result.metadata)
+        metadata = json.loads(result.metadata_)
         assert metadata["version"] == 2
         assert "updated_at" in metadata
 

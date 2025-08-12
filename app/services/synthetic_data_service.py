@@ -167,14 +167,14 @@ class SyntheticDataService:
             db.commit()
             
             # Send WebSocket update
-            await manager.broadcast(json.dumps({
+            await manager.broadcast({
                 "type": "generation:started",
                 "payload": {
                     "job_id": job_id,
                     "total_records": config.num_logs,
                     "start_time": datetime.utcnow().isoformat()
                 }
-            }))
+            })
             
             # Load corpus if specified
             corpus_content = await self._load_corpus(corpus_id, db) if corpus_id else None
@@ -207,7 +207,7 @@ class SyntheticDataService:
                 
                 # Send progress update via WebSocket
                 if self.active_jobs[job_id]["records_generated"] % 100 == 0:
-                    await manager.broadcast(json.dumps({
+                    await manager.broadcast({
                         "type": "generation:progress",
                         "payload": {
                             "job_id": job_id,
@@ -217,7 +217,7 @@ class SyntheticDataService:
                             "current_batch": batch_num,
                             "generation_rate": self._calculate_generation_rate(job_id)
                         }
-                    }))
+                    })
             
             # Mark job as completed
             self.active_jobs[job_id]["status"] = GenerationStatus.COMPLETED.value
@@ -228,7 +228,7 @@ class SyntheticDataService:
             db.commit()
             
             # Send completion notification
-            await manager.broadcast(json.dumps({
+            await manager.broadcast({
                 "type": "generation:complete",
                 "payload": {
                     "job_id": job_id,
@@ -236,7 +236,7 @@ class SyntheticDataService:
                     "duration_seconds": (self.active_jobs[job_id]["end_time"] - self.active_jobs[job_id]["start_time"]).total_seconds(),
                     "destination_table": table_name
                 }
-            }))
+            })
             
             central_logger.info(f"Generation job {job_id} completed successfully")
             
@@ -250,7 +250,7 @@ class SyntheticDataService:
             db.commit()
             
             # Send error notification
-            await manager.broadcast(json.dumps({
+            await manager.broadcast({
                 "type": "generation:error",
                 "payload": {
                     "job_id": job_id,
@@ -258,7 +258,7 @@ class SyntheticDataService:
                     "error_message": str(e),
                     "recoverable": False
                 }
-            }))
+            })
     
     async def _generate_batches(
         self,

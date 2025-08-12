@@ -88,6 +88,74 @@ resource "google_cloud_run_service" "backend" {
           value = var.pr_number
         }
         
+        env {
+          name  = "ENVIRONMENT"
+          value = "staging"
+        }
+        
+        env {
+          name  = "K_SERVICE"
+          value = "backend-${local.environment_name}"
+        }
+        
+        env {
+          name  = "CLICKHOUSE_URL"
+          value = "clickhouse://default:@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=1"
+        }
+        
+        env {
+          name  = "CLICKHOUSE_HOST"
+          value = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+        }
+        
+        env {
+          name  = "CLICKHOUSE_PORT"
+          value = "8443"
+        }
+        
+        env {
+          name  = "CLICKHOUSE_SECURE"
+          value = "true"
+        }
+        
+        env {
+          name  = "CLICKHOUSE_TIMEOUT"
+          value = "30"
+        }
+        
+        env {
+          name  = "SKIP_MIGRATION_ON_STARTUP"
+          value = "false"
+        }
+        
+        env {
+          name  = "LOG_LEVEL"
+          value = "INFO"
+        }
+        
+        env {
+          name  = "GCP_PROJECT_ID"
+          value = var.project_id
+        }
+        
+        env {
+          name  = "LOAD_SECRETS"
+          value = "true"
+        }
+        
+        env {
+          name  = "SECRET_MANAGER_PROJECT"
+          value = var.project_id
+        }
+        
+        env {
+          name  = "GCP_PROJECT_ID_NUMERICAL_STAGING"
+          value = var.project_id_numerical  # Numerical project ID for Secret Manager
+        }
+        
+        # Note: All secrets including Gemini API key will be loaded from Secret Manager at runtime
+        # The service account needs access to these secrets in the staging project
+        
         resources {
           limits = {
             cpu    = var.cpu_limit

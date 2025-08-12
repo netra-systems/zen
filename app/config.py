@@ -61,12 +61,22 @@ class ConfigManager:
         """Determine the current environment."""
         if os.environ.get("TESTING"):
             return "testing"
+        
+        # Check for Cloud Run deployment indicators
+        if os.environ.get("K_SERVICE") or os.environ.get("K_REVISION"):
+            # We're in Cloud Run - check for staging indicators
+            if "staging" in os.environ.get("K_SERVICE", "").lower():
+                return "staging"
+            if os.environ.get("PR_NUMBER"):
+                return "staging"  # PR deployments are staging
+        
         return os.environ.get("ENVIRONMENT", "development").lower()
     
     def _create_base_config(self, environment: str) -> AppConfig:
         """Create the base configuration object for the environment."""
         config_classes = {
             "production": ProductionConfig,
+            "staging": ProductionConfig,  # Staging uses production config as base
             "testing": NetraTestingConfig,
             "development": DevelopmentConfig
         }
@@ -105,9 +115,34 @@ class ConfigManager:
         """Get the mapping of secrets to configuration fields."""
         return {
             "gemini-api-key": {
-                "targets": ["llm_configs.default", "llm_configs.triage", "llm_configs.data", 
-                          "llm_configs.optimizations_core", "llm_configs.actions_to_meet_goals", 
-                          "llm_configs.reporting", "llm_configs.google", "llm_configs.analysis"],
+                # Gemini API key is used for Google/Gemini models and as default
+                "targets": [
+                    "llm_configs.default", 
+                    "llm_configs.analysis",
+                    "llm_configs.triage", 
+                    "llm_configs.data", 
+                    "llm_configs.optimizations_core", 
+                    "llm_configs.actions_to_meet_goals", 
+                    "llm_configs.reporting", 
+                    "llm_configs.google"
+                ],
+                "field": "api_key"
+            },
+            # Branded LLM API Keys (optional - will skip init if not provided)
+            "anthropic-api-key": {
+                "targets": ["llm_configs.anthropic"],
+                "field": "api_key"
+            },
+            "openai-api-key": {
+                "targets": ["llm_configs.openai"],
+                "field": "api_key"
+            },
+            "cohere-api-key": {
+                "targets": ["llm_configs.cohere"],
+                "field": "api_key"
+            },
+            "mistral-api-key": {
+                "targets": ["llm_configs.mistral"],
                 "field": "api_key"
             },
             "google-client-id": {

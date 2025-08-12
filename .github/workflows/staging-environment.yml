@@ -112,6 +112,11 @@ jobs:
       - name: Load staging configuration
         id: config
         run: |
+          # Get the numerical project ID for Secret Manager
+          PROJECT_ID_NUMERICAL_STAGING=$(gcloud projects describe ${{ env.GCP_PROJECT_ID }} --format="value(projectNumber)")
+          echo "project_id_numerical=$PROJECT_ID_NUMERICAL_STAGING" >> $GITHUB_OUTPUT
+          echo "Using numerical project ID: $PROJECT_ID_NUMERICAL_STAGING"
+          
           # Load configuration with defaults
           if [ -f .github/staging.yml ]; then
             TEST_LEVEL=$(yq e '.default_test_level // "integration"' .github/staging.yml)
@@ -465,6 +470,7 @@ jobs:
         run: |
           terraform plan \
             -var="project_id=${{ env.GCP_PROJECT_ID }}" \
+            -var="project_id_numerical=${{ steps.config.outputs.project_id_numerical }}" \
             -var="region=${{ env.GCP_REGION }}" \
             -var="pr_number=${{ github.event.pull_request.number || github.event.inputs.pr_number }}" \
             -var="backend_image=${{ steps.backend-build.outputs.backend_image }}" \

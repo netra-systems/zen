@@ -110,15 +110,23 @@ class LLMManager:
         if not config:
             raise ValueError(f"LLM configuration for '{name}' not found.")
 
+        # Check if API key is available for branded LLMs
+        # Skip initialization if no key provided for optional providers
+        if not config.api_key:
+            if config.provider == "google":
+                # Gemini/Google is required
+                raise ValueError(f"LLM '{name}': Gemini API key is required for Google provider")
+            else:
+                # Other providers are optional - skip if no key
+                logger.info(f"Skipping LLM '{name}' initialization - no API key provided for {config.provider}")
+                return None
+
         # Merge the default generation config with the override
         final_generation_config = config.generation_config.copy()
         if generation_config:
             final_generation_config.update(generation_config)
 
         if config.provider == "google":
-            if not config.api_key:
-                raise ValueError(f"LLM '{name}': API key for provider 'google' is missing. Check Auth Refresh expires every 16 hours (e.g. gcloud auth application-default login)")
-
             # Defer genai.configure until a Google model is actually used
             llm = ChatGoogleGenerativeAI(
                 model=config.model_name,
@@ -131,8 +139,33 @@ class LLMManager:
                 api_key=config.api_key,
                 **final_generation_config,
             )
+        elif config.provider == "anthropic":
+            # Import only if needed
+            from langchain_anthropic import ChatAnthropic
+            llm = ChatAnthropic(
+                model=config.model_name,
+                api_key=config.api_key,
+                **final_generation_config
+            )
+        elif config.provider == "cohere":
+            # Import only if needed
+            from langchain_cohere import ChatCohere
+            llm = ChatCohere(
+                model=config.model_name,
+                api_key=config.api_key,
+                **final_generation_config
+            )
+        elif config.provider == "mistral":
+            # Import only if needed
+            from langchain_mistralai import ChatMistralAI
+            llm = ChatMistralAI(
+                model=config.model_name,
+                api_key=config.api_key,
+                **final_generation_config
+            )
         else:
-            raise ValueError(f"Unsupported LLM provider: {config.provider}")
+            logger.warning(f"Unsupported LLM provider: {config.provider} - skipping initialization")
+            return None
 
         self._llm_cache[cache_key] = llm
         return llm

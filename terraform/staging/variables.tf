@@ -3,6 +3,12 @@ variable "project_id" {
   type        = string
 }
 
+variable "project_id_numerical" {
+  description = "GCP Project Numerical ID for Secret Manager"
+  type        = string
+  default     = ""  # Will be set in workflow
+}
+
 variable "region" {
   description = "GCP Region"
   type        = string

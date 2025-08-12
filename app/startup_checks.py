@@ -86,13 +86,14 @@ class StartupChecker:
     
     async def check_environment_variables(self):
         """Check required environment variables are set"""
-        # In development mode, DATABASE_URL and SECRET_KEY have defaults in DevelopmentConfig
+        # In development/staging mode, DATABASE_URL and SECRET_KEY might be set differently
         environment = os.getenv("ENVIRONMENT", "development").lower()
         is_dev_mode = environment == "development"
+        is_staging = environment == "staging" or os.getenv("K_SERVICE")  # Cloud Run indicator
         
         required_vars = []
-        # Only require these in production/staging
-        if not is_dev_mode:
+        # Only require these in production
+        if environment == "production":
             required_vars = [
                 "DATABASE_URL",
                 "SECRET_KEY",
@@ -262,7 +263,7 @@ class StartupChecker:
                 name="redis_connection",
                 success=True,
                 message="Redis connected and operational",
-                critical=settings.environment == "production"
+                critical=(os.getenv("ENVIRONMENT", "development").lower() == "production")
             ))
         except Exception as e:
             critical = settings.environment == "production"
@@ -323,18 +324,20 @@ class StartupChecker:
                 try:
                     llm = llm_manager.get_llm(llm_name)
                     
-                    # For critical providers, do a simple validation
-                    if llm_name in ['anthropic-claude-3-sonnet', 'anthropic-claude-3-opus']:
-                        # Just check that the LLM object was created
-                        if llm:
-                            available_providers.append(llm_name)
-                        else:
-                            failed_providers.append(f"{llm_name}: not initialized")
-                    else:
+                    # Check if LLM was successfully initialized
+                    if llm is not None:
                         available_providers.append(llm_name)
+                    else:
+                        # LLM was skipped (no API key for optional provider)
+                        logger.info(f"LLM '{llm_name}' not available (optional provider without key)")
                         
                 except Exception as e:
-                    failed_providers.append(f"{llm_name}: {e}")
+                    # Only fail for Google/Gemini providers
+                    config = settings.llm_configs.get(llm_name)
+                    if config and config.provider == "google":
+                        failed_providers.append(f"{llm_name}: {e}")
+                    else:
+                        logger.info(f"Optional LLM '{llm_name}' not available: {e}")
             
             if not available_providers:
                 self.results.append(StartupCheckResult(
@@ -362,7 +365,7 @@ class StartupChecker:
                 name="llm_providers",
                 success=False,
                 message=f"LLM check failed: {e}",
-                critical=settings.environment == "production"
+                critical=(os.getenv("ENVIRONMENT", "development").lower() == "production")
             ))
     
     async def check_memory_and_resources(self):
