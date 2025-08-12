@@ -32,8 +32,8 @@ When you create or update a PR, the staging workflow automatically:
 
 ### 2. Access Your Staging Environment
 Each staging environment gets unique URLs:
-- Frontend: `https://pr-{number}.staging.netra-ai.dev`
-- API: `https://pr-{number}-api.staging.netra-ai.dev`
+- Frontend: `https://pr-{number}.staging.netrasystems.ai`
+- API: `https://pr-{number}-api.staging.netrasystems.ai`
 
 ### 3. Automatic Cleanup
 Environments are automatically destroyed when:
@@ -79,13 +79,13 @@ python test_runner.py --level integration --staging
 
 With specific URLs:
 ```bash
-python test_runner.py --staging-url https://pr-123.staging.netra-ai.dev --staging-api-url https://pr-123-api.staging.netra-ai.dev
+python test_runner.py --staging-url https://pr-123.staging.netrasystems.ai --staging-api-url https://pr-123-api.staging.netrasystems.ai
 ```
 
 ### E2E Testing
 Cypress tests automatically run against staging:
 ```bash
-CYPRESS_BASE_URL=https://pr-123.staging.netra-ai.dev npm run cypress:run
+CYPRESS_BASE_URL=https://pr-123.staging.netrasystems.ai npm run cypress:run
 ```
 
 ## Performance Optimizations
@@ -136,7 +136,7 @@ Common issues:
 ### Can't Access Staging URL
 1. Check if deployment completed (see PR comment)
 2. Verify you're authorized (GitHub account linked)
-3. Check health endpoint: `https://pr-{number}-api.staging.netra-ai.dev/health`
+3. Check health endpoint: `https://pr-{number}-api.staging.netrasystems.ai/health`
 
 ### Tests Failing in Staging
 1. Check if services are healthy

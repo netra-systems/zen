@@ -182,7 +182,7 @@
     <variable name="STAGING_ENV" value="true" />
     <variable name="PR_NUMBER" value="${github.event.pull_request.number}" />
     <variable name="PR_BRANCH" value="${github.head_ref}" />
-    <variable name="STAGING_URL" value="https://pr-${PR_NUMBER}.staging.netra-ai.dev" />
+    <variable name="STAGING_URL" value="https://pr-${PR_NUMBER}.staging.netrasystems.ai" />
     <variable name="DATABASE_URL" value="postgresql://staging:${SECRET}@${DB_HOST}/netra_pr_${PR_NUMBER}" />
     <variable name="REDIS_URL" value="redis://${REDIS_HOST}:6379/${PR_NUMBER}" />
     <variable name="CLICKHOUSE_URL" value="clickhouse://${CLICKHOUSE_HOST}/staging_pr_${PR_NUMBER}" />
@@ -329,7 +329,7 @@
     <task status="pending">Configure GCP project and APIs</task>
     <task status="pending">Create staging configuration file</task>
     <task status="pending">Implement test runner integration</task>
-    <task status="pending">Set up DNS wildcard for *.staging.netra-ai.dev</task>
+    <task status="pending">Set up DNS wildcard for *.staging.netrasystems.ai</task>
     <task status="pending">Create seed data scripts</task>
     <task status="pending">Implement cost monitoring</task>
     <task status="pending">Write staging environment documentation</task>

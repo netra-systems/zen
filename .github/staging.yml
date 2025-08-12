@@ -312,4 +312,4 @@ schedule:
   cost_report:
     cron: "0 9 * * MON"  # Weekly on Monday at 9 AM
     recipients:
-      - "platform-team@netra-ai.dev"
+      - "platform-team@netrasystems.ai"

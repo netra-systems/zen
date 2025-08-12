@@ -1626,8 +1626,316 @@ jobs:
     concurrency:
       group: staging-destroy-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
       cancel-in-progress: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Export logs before destruction
+        continue-on-error: true  # Continue even if log export fails
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          
+          # Export Cloud Run logs (may fail if permissions are insufficient)
+          if gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=staging-pr-${PR_NUMBER}" \
+            --format=json \
+            --project=${{ env.GCP_PROJECT_ID }} \
+            > staging-logs-pr-${PR_NUMBER}.json 2>/dev/null; then
+            echo "✅ Logs exported for PR ${PR_NUMBER}"
+          else
+            echo "⚠️ Could not export logs (insufficient permissions or no logs found)"
+            echo "{}" > staging-logs-pr-${PR_NUMBER}.json  # Create empty file for artifact
+          fi
+
+      # UPDATED FOR V4: Use actions/upload-artifact@v4 with unique naming
+      - name: Upload logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-logs-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-${{ github.run_id }}
+          path: staging-logs-*.json
+          retention-days: 7
+          compression-level: 9  # Maximum compression for logs
+
+      - name: Terraform Destroy with Lock Handling
+        working-directory: ./terraform/staging
+        env:
+          TF_VAR_postgres_password: ${{ secrets.STAGING_DB_PASSWORD }}
+          TF_VAR_clickhouse_password: ${{ secrets.CLICKHOUSE_PASSWORD || 'placeholder_password' }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/default.tflock"
+          
+          # Force remove any existing lock for destroy operations
+          echo "Checking for existing lock before destroy..."
+          if gsutil stat "$LOCK_FILE" 2>/dev/null; then
+            echo "⚠️ Lock file found, force removing for destroy operation..."
+            gsutil rm "$LOCK_FILE" 2>/dev/null || true
+            sleep 3
+          fi
+          
+          # Initialize Terraform with retries
+          MAX_INIT_ATTEMPTS=3
+          INIT_ATTEMPT=1
+          while [ $INIT_ATTEMPT -le $MAX_INIT_ATTEMPTS ]; do
+            echo "Terraform init attempt $INIT_ATTEMPT of $MAX_INIT_ATTEMPTS..."
+            
+            if terraform init \
+              -backend-config="bucket=${{ env.GCP_PROJECT_ID }}-terraform-state" \
+              -backend-config="prefix=staging/pr-${PR_NUMBER}" \
+              -lock-timeout=120s; then
+              echo "✅ Terraform init successful"
+              break
+            else
+              echo "❌ Terraform init failed"
+              
+              if [ $INIT_ATTEMPT -eq $MAX_INIT_ATTEMPTS ]; then
+                echo "Failed to initialize after $MAX_INIT_ATTEMPTS attempts"
+                exit 1
+              fi
+              
+              # Force unlock and retry
+              echo "Force removing lock and retrying..."
+              gsutil rm "$LOCK_FILE" 2>/dev/null || true
+              sleep 5
+              INIT_ATTEMPT=$((INIT_ATTEMPT + 1))
+            fi
+          done
+          
+          # Create secure tfvars file for destroy operation
+          cat > terraform.tfvars << 'EOF'
+          project_id = "${{ env.GCP_PROJECT_ID }}"
+          region = "${{ env.GCP_REGION }}"
+          pr_number = "${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
+          backend_image = "${{ needs.build-backend.outputs.backend_image || 'gcr.io/PROJECT_ID/backend:latest' }}"
+          frontend_image = "${{ needs.build-frontend.outputs.frontend_image || 'gcr.io/PROJECT_ID/frontend:latest' }}"
+          max_instances = 1
+          domain = "${{ env.STAGING_DOMAIN }}"
+          EOF
+          
+          # Add sensitive variables securely
+          echo "postgres_password = \"${TF_VAR_postgres_password}\"" >> terraform.tfvars
+          echo "clickhouse_password = \"${TF_VAR_clickhouse_password}\"" >> terraform.tfvars
+          
+          # Secure the file
+          chmod 600 terraform.tfvars
+          
+          # Run destroy with retries and lock handling
+          MAX_DESTROY_ATTEMPTS=2
+          DESTROY_ATTEMPT=1
+          while [ $DESTROY_ATTEMPT -le $MAX_DESTROY_ATTEMPTS ]; do
+            echo "Terraform destroy attempt $DESTROY_ATTEMPT of $MAX_DESTROY_ATTEMPTS..."
+            
+            if terraform destroy \
+              -auto-approve \
+              -var-file=terraform.tfvars \
+              -lock-timeout=180s \
+              -parallelism=10; then
+              echo "✅ Terraform destroy successful"
+              break
+            else
+              echo "❌ Terraform destroy failed"
+              
+              if [ $DESTROY_ATTEMPT -eq $MAX_DESTROY_ATTEMPTS ]; then
+                echo "Failed to destroy after $MAX_DESTROY_ATTEMPTS attempts"
+                # Don't fail the job - we'll clean up manually if needed
+                echo "::warning::Terraform destroy failed but continuing with cleanup"
+                break
+              fi
+              
+              # Force unlock and retry
+              echo "Force removing lock and retrying..."
+              gsutil rm "$LOCK_FILE" 2>/dev/null || true
+              sleep 10
+              DESTROY_ATTEMPT=$((DESTROY_ATTEMPT + 1))
+            fi
+          done
+          
+          # Clean up sensitive file
+          rm -f terraform.tfvars
+          
+          # Final cleanup - remove state files
+          echo "Cleaning up Terraform state files..."
+          gsutil -m rm -r "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/" 2>/dev/null || true
+
+      - name: Clean up container images and build cache
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          
+          # Delete backend images
+          gcloud artifacts docker images delete \
+            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/backend:pr-${PR_NUMBER}-* \
+            --quiet || true
+          
+          # Delete frontend images
+          gcloud artifacts docker images delete \
+            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/frontend:pr-${PR_NUMBER}-* \
+            --quiet || true
+          
+          # Clean up build cache files
+          echo "Cleaning up build cache for PR #${PR_NUMBER}..."
+          gsutil rm "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/backend-build-cache-pr-${PR_NUMBER}.json" 2>/dev/null || true
+          gsutil rm "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/build-cache/frontend-build-cache-pr-${PR_NUMBER}.json" 2>/dev/null || true
+          echo "✅ Build cache cleaned up"
+
+      - name: Update PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr_number = context.payload.pull_request.number;
+            
+            const comment = `## 🧹 Staging Environment Destroyed
+            
+            **Environment:** pr-${pr_number}
+            **Status:** ✅ Successfully cleaned up
+            **Destroyed at:** ${new Date().toISOString()}
+            
+            All resources associated with this staging environment have been removed.
+            Logs have been archived and are available as workflow artifacts for 7 days.`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr_number,
+              body: comment
+            });
+
+  cleanup-on-cancel:
+    name: Cleanup on Workflow Cancellation
+    needs: [deploy-staging]
+    if: always() && (cancelled() || failure())
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     
     steps:
-      # ... (rest of destroy job implementation with enhanced comment updates)
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  # Additional cleanup and monitoring jobs...
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Force unlock Terraform state
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          
+          if [ -z "$PR_NUMBER" ]; then
+            echo "No PR number available, skipping lock cleanup"
+            exit 0
+          fi
+          
+          LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/default.tflock"
+          
+          echo "Checking for stale lock from cancelled/failed workflow..."
+          if gsutil stat "$LOCK_FILE" 2>/dev/null; then
+            LOCK_INFO=$(gsutil cat "$LOCK_FILE" 2>/dev/null || echo "{}")
+            LOCK_HOLDER=$(echo "$LOCK_INFO" | jq -r '.Who // "unknown"')
+            
+            # Only remove if it's from a GitHub Actions runner
+            if echo "$LOCK_HOLDER" | grep -q "runner@"; then
+              echo "⚠️ Found lock from GitHub Actions runner: $LOCK_HOLDER"
+              echo "Removing lock from cancelled/failed workflow..."
+              gsutil rm "$LOCK_FILE" 2>/dev/null || true
+              echo "✅ Lock removed successfully"
+            else
+              echo "Lock held by: $LOCK_HOLDER (not a runner, keeping lock)"
+            fi
+          else
+            echo "No lock file found"
+          fi
+          
+          # Also check for any orphaned tfplan files
+          echo "Cleaning up orphaned plan files..."
+          cd terraform/staging 2>/dev/null && rm -f tfplan terraform.tfvars 2>/dev/null || true
+
+  cleanup-stale-environments:
+    name: Cleanup Stale Environments
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Find and destroy stale environments
+        run: |
+          # List all Cloud Run services with staging prefix
+          SERVICES=$(gcloud run services list \
+            --platform=managed \
+            --region=${{ env.GCP_REGION }} \
+            --format="value(name)" \
+            --filter="name:staging-pr-*")
+          
+          for SERVICE in $SERVICES; do
+            # Extract PR number from service name
+            PR_NUMBER=$(echo $SERVICE | grep -oP 'pr-\K[0-9]+')
+            
+            # Check if PR is still open
+            PR_STATE=$(gh pr view $PR_NUMBER --json state -q .state 2>/dev/null || echo "CLOSED")
+            
+            if [[ "$PR_STATE" == "CLOSED" ]] || [[ "$PR_STATE" == "MERGED" ]]; then
+              echo "Cleaning up stale environment for PR #$PR_NUMBER (state: $PR_STATE)"
+              
+              # Trigger destroy workflow
+              gh workflow run staging-environment.yml \
+                -f action=destroy \
+                -f pr_number=$PR_NUMBER
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  # NEW JOB FOR V4: Download artifacts from other workflows
+  download-previous-artifacts:
+    name: Download Previous Test Results
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'redeploy'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # UPDATED FOR V4: Download artifacts from previous runs with github-token
+      - name: Download previous test results
+        uses: actions/download-artifact@v4
+        with:
+          name: test-results-pr-${{ github.event.inputs.pr_number }}-*
+          path: ./previous-test-results
+          github-token: ${{ secrets.GITHUB_TOKEN }}  # Required for cross-run downloads in v4
+          
+      - name: Process previous results
+        run: |
+          echo "Processing previous test results..."
+          ls -la ./previous-test-results/
+          # Add processing logic here

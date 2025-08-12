@@ -6,7 +6,7 @@ This guide will help you set up automatic staging environments step-by-step. Fol
 
 - [ ] A Google Cloud account with billing enabled
 - [ ] A GitHub repository (the Netra project)
-- [ ] A domain name you own (like `netra-ai.dev`)
+- [ ] A domain name you own (like `netrasystems.ai`)
 - [ ] About 2 hours to complete everything
 
 ---
@@ -342,7 +342,7 @@ Edit `.github/staging.yml` and update this section:
 domain: staging.netrasystems.ai  # PUT YOUR ACTUAL DOMAIN HERE!
 
 # Example:
-# domain: staging.netra-ai.dev
+# domain: staging.netrasystems.ai
 ```
 
 ---
