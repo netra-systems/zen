@@ -57,6 +57,7 @@ python test_runner.py --level smoke
 | **Troubleshooting** | [`learnings.xml`](SPEC/learnings.xml) - Historical fixes and common gotchas |
 
 ### 🧹 Maintenance Specs
+- [`documentation_maintenance.xml`](SPEC/documentation_maintenance.xml) - Rules for updating CLAUDE.md and docs
 - [`LEGACY_CODE_CLEANUP.xml`](SPEC/LEGACY_CODE_CLEANUP.xml) - Legacy code identification
 - [`failing_test_management.xml`](SPEC/failing_test_management.xml) - Test failure handling
 - [`missing_tests.xml`](SPEC/missing_tests.xml) - Test coverage gaps
