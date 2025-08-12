@@ -5,6 +5,7 @@
 - [Quick Start](#quick-start)
 - [Detailed Setup](#detailed-setup)
 - [Configuration](#configuration)
+- [Staging Environment](#staging-environment)
 - [Development Workflow](#development-workflow)
 - [Troubleshooting](#troubleshooting)
 - [IDE Setup](#ide-setup)
@@ -232,10 +233,11 @@ GOOGLE_CLIENT_ID=your-google-oauth-client-id
 GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
 FRONTEND_URL=http://localhost:3000
 
-# LLM API Keys
-GEMINI_API_KEY=your-gemini-api-key  # Primary
-OPENAI_API_KEY=your-openai-key      # Optional
-ANTHROPIC_API_KEY=your-anthropic-key # Optional
+# LLM API Keys (for local development only)
+# Note: In staging/production, these are loaded from Google Secret Manager
+GEMINI_API_KEY=your-gemini-api-key  # Required - Primary LLM
+OPENAI_API_KEY=your-openai-key      # Optional - OpenAI models
+ANTHROPIC_API_KEY=your-anthropic-key # Optional - Anthropic models
 
 # Development Options
 DEV_MODE_DISABLE_REDIS=false
@@ -262,6 +264,71 @@ print(Fernet.generate_key().decode())
 import secrets
 print(secrets.token_hex(32))
 ```
+
+## Staging Environment
+
+### Overview
+Every pull request automatically gets its own staging environment with:
+- Isolated database and Redis namespace
+- Unique URLs: `https://pr-{number}.staging.netrasystems.ai`
+- Automatic secret management with `-staging` suffix
+- Complete isolation from production
+
+### Accessing Your Staging Environment
+
+When you create a PR:
+1. **Automatic Deployment**: GitHub Actions deploys your branch
+2. **URLs Posted**: Bot comments with your staging URLs
+3. **Live Updates**: Push commits to update staging automatically
+
+### Staging Secrets
+
+**Important**: Staging uses Google Secret Manager with `-staging` suffix:
+
+| Local Env Var | Staging Secret Name | Required |
+|--------------|---------------------|----------|
+| `GEMINI_API_KEY` | `gemini-api-key-staging` | ✅ Yes |
+| `JWT_SECRET_KEY` | `jwt-secret-key-staging` | ✅ Yes |
+| `FERNET_KEY` | `fernet-key-staging` | ✅ Yes |
+| `OPENAI_API_KEY` | `openai-api-key-staging` | ❌ Optional |
+
+### Testing in Staging
+
+```bash
+# View staging logs
+gcloud run services logs read backend-pr-{number} --project=netra-staging
+
+# Connect to staging database
+gcloud sql connect staging-shared-postgres \
+  --user=user_pr_{number} \
+  --database=netra_pr_{number} \
+  --project=netra-staging
+
+# Test staging API
+curl https://pr-{number}-api.staging.netrasystems.ai/health
+```
+
+### Environment Detection
+
+The app automatically detects staging:
+```python
+# Staging is detected when:
+# 1. ENVIRONMENT=staging
+# 2. K_SERVICE exists (Cloud Run)
+# 3. PR_NUMBER is set
+```
+
+### Staging vs Local Development
+
+| Feature | Local Development | Staging Environment |
+|---------|------------------|--------------------|
+| **Database** | Local PostgreSQL/SQLite | Cloud SQL (isolated) |
+| **Redis** | Local Redis | Shared Redis (isolated DB) |
+| **Secrets** | `.env` file | Google Secret Manager |
+| **LLM Keys** | Environment vars | Secret Manager with `-staging` |
+| **URL** | `localhost:3000` | `pr-{number}.staging.netrasystems.ai` |
+| **Hot Reload** | Yes | No (containerized) |
+| **Persistence** | Until stopped | 7 days (auto-cleanup) |
 
 ## Development Workflow
 
