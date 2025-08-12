@@ -308,7 +308,7 @@ describe('AuthService', () => {
         })
       );
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(window.location.href).toBe('/');
+      expect(mockLocation._href).toBe('/');
     });
 
     it('should handle logout failure and still redirect', async () => {
@@ -320,7 +320,7 @@ describe('AuthService', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith('Logout failed');
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(window.location.href).toBe('/');
+      expect(mockLocation._href).toBe('/');
 
       consoleErrorSpy.mockRestore();
     });
@@ -334,7 +334,7 @@ describe('AuthService', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith('Error during logout:', expect.any(Error));
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(window.location.href).toBe('/');
+      expect(mockLocation._href).toBe('/');
 
       consoleErrorSpy.mockRestore();
     });
@@ -354,7 +354,7 @@ describe('AuthService', () => {
         })
       );
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(window.location.href).toBe('/');
+      expect(mockLocation._href).toBe('/');
     });
   });
 
@@ -447,7 +447,7 @@ describe('AuthService', () => {
       await Promise.all([loginPromise, logoutPromise]);
 
       // Verify operations completed
-      expect(window.location.href).toBeDefined();
+      expect(mockLocation._href).toBeDefined();
       expect(localStorageMock.removeItem).toHaveBeenCalled();
     });
 

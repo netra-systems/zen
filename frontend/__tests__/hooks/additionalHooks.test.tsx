@@ -41,13 +41,7 @@ describe('test_useDemoWebSocket_connection', () => {
     // Create the mock constructor
     mockWebSocketConstructor = jest.fn((url: string) => {
       mockWebSocketInstance.url = url;
-      // Simulate connection opening after a short delay
-      setTimeout(() => {
-        mockWebSocketInstance.readyState = WebSocket.OPEN;
-        if (mockWebSocketInstance.onopen) {
-          mockWebSocketInstance.onopen();
-        }
-      }, 0);
+      mockWebSocketInstance.readyState = WebSocket.CONNECTING;
       return mockWebSocketInstance;
     });
     

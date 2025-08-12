@@ -99,6 +99,7 @@ def unit_of_work(mock_session, mock_models):
                 )
                 # Store the created thread so it can be retrieved later
                 created_threads[thread.id] = thread
+                print(f"DEBUG create_thread: Created thread {thread.id} with last_activity={thread.last_activity}")
                 return thread
             mock_thread_repo.create.side_effect = create_thread
             

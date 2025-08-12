@@ -1,6 +1,5 @@
 import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { AuthProvider } from '@/auth/context';
 
@@ -50,13 +49,11 @@ interface AllTheProvidersProps {
 // All providers wrapper for tests
 export function AllTheProviders({ children }: AllTheProvidersProps) {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <WebSocketProvider url="ws://localhost:8000/ws">
-          {children}
-        </WebSocketProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <AuthProvider>
+      <WebSocketProvider url="ws://localhost:8000/ws">
+        {children}
+      </WebSocketProvider>
+    </AuthProvider>
   );
 }
 
@@ -70,9 +67,15 @@ const customRender = (
 export * from '@testing-library/react';
 export { customRender as render };
 
-// Utility to wrap component with router only
-export function withRouter(component: ReactElement) {
-  return <BrowserRouter>{component}</BrowserRouter>;
+// Utility to wrap component with auth and websocket
+export function withProviders(component: ReactElement) {
+  return (
+    <AuthProvider>
+      <WebSocketProvider url="ws://localhost:8000/ws">
+        {component}
+      </WebSocketProvider>
+    </AuthProvider>
+  );
 }
 
 // Utility to wrap component with WebSocket provider only
