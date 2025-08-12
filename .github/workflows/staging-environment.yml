@@ -82,11 +82,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0  # Fetch all history for proper change detection
-      
-      - name: Fetch base branch for comparison
-        if: github.event_name == 'pull_request'
-        run: |
-          git fetch origin ${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }}
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -126,18 +121,23 @@ jobs:
           
           # Try to detect changes based on the context
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # For PRs, compare against the base branch
-            echo "Checking PR changes against base branch..."
+            # For PRs, always check ALL changes in the PR (not just latest commit)
+            echo "Checking all PR changes against base branch '${{ github.event.pull_request.base.ref }}'..."
             
-            # For synchronize events (new commits pushed to PR), check all changes in the PR
-            if [[ "${{ github.event.action }}" == "synchronize" ]]; then
-              echo "PR synchronized - checking all changes since branch diverged from base..."
-              # Get the merge base and compare all changes
-              MERGE_BASE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} HEAD)
+            # Ensure we have the latest base branch
+            git fetch origin ${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }} --depth=50
+            
+            # Find the merge base (where this PR branch diverged from base)
+            MERGE_BASE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} HEAD 2>/dev/null || echo "")
+            
+            if [[ -n "$MERGE_BASE" ]]; then
+              echo "Found merge base: $MERGE_BASE"
+              # Get all files changed in this PR (from merge base to current HEAD)
               CHANGED_FILES=$(git diff --name-only $MERGE_BASE HEAD 2>/dev/null || echo "")
             else
-              # For initial PR open or other events, check against base
-              CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD 2>/dev/null || echo "")
+              echo "Could not find merge base, comparing directly..."
+              # Fallback: compare against base branch directly
+              CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} HEAD 2>/dev/null || echo "")
             fi
             
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
@@ -173,6 +173,7 @@ jobs:
           
           # Debug output
           echo "Event: ${{ github.event_name }}, Action: ${{ github.event.action }}"
+          echo "Total files changed: $(echo "$CHANGED_FILES" | wc -l)"
           echo "Changed files detected:"
           echo "$CHANGED_FILES" | head -20
           
@@ -244,18 +245,23 @@ jobs:
           
           # Try to detect changes based on the context
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # For PRs, compare against the base branch
-            echo "Checking PR changes against base branch..."
+            # For PRs, always check ALL changes in the PR (not just latest commit)
+            echo "Checking all PR changes against base branch '${{ github.event.pull_request.base.ref }}'..."
             
-            # For synchronize events (new commits pushed to PR), check all changes in the PR
-            if [[ "${{ github.event.action }}" == "synchronize" ]]; then
-              echo "PR synchronized - checking all changes since branch diverged from base..."
-              # Get the merge base and compare all changes
-              MERGE_BASE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} HEAD)
+            # Ensure we have the latest base branch (should already be fetched from backend check)
+            git fetch origin ${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }} --depth=50 2>/dev/null || true
+            
+            # Find the merge base (where this PR branch diverged from base)
+            MERGE_BASE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} HEAD 2>/dev/null || echo "")
+            
+            if [[ -n "$MERGE_BASE" ]]; then
+              echo "Found merge base: $MERGE_BASE"
+              # Get all files changed in this PR (from merge base to current HEAD)
               CHANGED_FILES=$(git diff --name-only $MERGE_BASE HEAD 2>/dev/null || echo "")
             else
-              # For initial PR open or other events, check against base
-              CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD 2>/dev/null || echo "")
+              echo "Could not find merge base, comparing directly..."
+              # Fallback: compare against base branch directly
+              CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} HEAD 2>/dev/null || echo "")
             fi
             
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
@@ -291,6 +297,7 @@ jobs:
           
           # Debug output
           echo "Event: ${{ github.event_name }}, Action: ${{ github.event.action }}"
+          echo "Total files changed: $(echo "$CHANGED_FILES" | wc -l)"
           echo "Changed files detected:"
           echo "$CHANGED_FILES" | head -20
           
