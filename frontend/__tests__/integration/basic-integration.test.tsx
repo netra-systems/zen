@@ -283,7 +283,8 @@ describe('Basic Frontend Integration Tests', () => {
       });
       
       await waitFor(() => {
-        expect(getByTestId('streaming-content')).toHaveTextContent('Hello ');
+        // Use textContent property directly to avoid whitespace issues
+        expect(getByTestId('streaming-content').textContent).toBe('Hello ');
       });
       
       act(() => {
@@ -291,8 +292,8 @@ describe('Basic Frontend Integration Tests', () => {
       });
       
       await waitFor(() => {
-        expect(getByTestId('streaming-content')).toHaveTextContent('Hello World!');
-      });
+        expect(getByTestId('streaming-content').textContent).toBe('Hello World!');
+      }, { timeout: 3000 });
     });
   });
 
@@ -674,7 +675,7 @@ describe('Basic Frontend Integration Tests', () => {
         
         // Debounced search
         React.useEffect(() => {
-          const timer = setTimeout(async () => {
+          const timer = setTimeout(() => {
             if (query) {
               apiCallCount++;
               // Simulate API call
@@ -708,8 +709,10 @@ describe('Basic Frontend Integration Tests', () => {
       fireEvent.change(input, { target: { value: 'te' } });
       fireEvent.change(input, { target: { value: 'test' } });
       
-      // Wait for debounce
-      await new Promise(resolve => setTimeout(resolve, 400));
+      // Wait for debounce - wrap in act to handle state updates
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 400));
+      });
       
       // Should only make one API call despite multiple changes
       expect(apiCallCount).toBe(1);

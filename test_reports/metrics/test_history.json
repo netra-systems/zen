@@ -620,6 +620,15 @@
       "failed": 0,
       "coverage": null,
       "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T14:09:19.463186",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
     }
   ],
   "flaky_tests": {},

@@ -738,7 +738,7 @@ class TestSupplyResearchIntegration:
         scheduler.add_schedule(custom_schedule)
         
         # Mock database and API calls
-        with patch('app.dependencies.get_db') as mock_get_db:
+        with patch('app.db.postgres.get_async_db') as mock_get_db:
             mock_get_db.return_value = iter([mock_db])
             
             with patch.object(SupplyResearcherAgent, '_call_deep_research_api', new_callable=AsyncMock) as mock_api:

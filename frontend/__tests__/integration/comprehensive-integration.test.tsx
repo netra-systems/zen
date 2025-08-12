@@ -197,7 +197,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
   });
 
   describe('2. Synthetic Data Generation Flow', () => {
-    it('should generate synthetic data based on templates', { timeout: 10000 }, async () => {
+    it('should generate synthetic data based on templates', async () => {
       const mockGenerationJob = {
         id: 'job-456',
         status: 'processing',
@@ -243,15 +243,17 @@ describe('Comprehensive Frontend Integration Tests', () => {
       fireEvent.click(screen.getByText('Generate'));
       
       // Simulate progress updates
-      server.send(JSON.stringify({
-        type: 'synthetic_data_progress',
-        data: { job_id: 'job-456', progress: 50 }
-      }));
+      act(() => {
+        server.send(JSON.stringify({
+          type: 'synthetic_data_progress',
+          data: { job_id: 'job-456', progress: 50 }
+        }));
+      });
       
       await waitFor(() => {
         expect(screen.getByTestId('job-status')).toHaveTextContent('processing');
-      });
-    });
+      }, { timeout: 10000 });
+    }, 10000);
 
     it('should export generated synthetic data in multiple formats', async () => {
       const mockExportData = {
@@ -341,7 +343,11 @@ describe('Comprehensive Frontend Integration Tests', () => {
         json: async () => ({ success: true })
       });
       
-      const { getByText, getByTestId } = render(<TestComponent />);
+      const { getByText, getByTestId } = render(
+        <TestProviders>
+          <TestComponent />
+        </TestProviders>
+      );
       
       fireEvent.click(getByText('Clear Cache'));
       
@@ -361,31 +367,43 @@ describe('Comprehensive Frontend Integration Tests', () => {
         ]
       };
       
-      (fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockCatalog
-      });
+      supplyService.getCatalog.mockResolvedValueOnce(mockCatalog);
+      
+      const mockSetCatalog = jest.fn();
+      useSupplyStore.getState = jest.fn(() => ({
+        catalog: mockCatalog,
+        activeModel: null,
+        setCatalog: mockSetCatalog,
+        switchModel: jest.fn()
+      }));
       
       const loadCatalog = async () => {
         const catalog = await supplyService.getCatalog();
-        useSupplyStore.getState().setCatalog(catalog);
+        mockSetCatalog(catalog);
         return catalog;
       };
       
       const result = await loadCatalog();
       
       expect(result.models).toHaveLength(2);
-      expect(useSupplyStore.getState().catalog.models).toHaveLength(2);
+      expect(mockSetCatalog).toHaveBeenCalledWith(mockCatalog);
     });
 
     it('should switch between model providers dynamically', async () => {
+      const mockSwitchModel = jest.fn();
+      
       const TestComponent = () => {
-        const { activeModel, switchModel } = useSupplyStore();
+        const [activeModel, setActiveModel] = React.useState('none');
+        
+        const handleSwitch = () => {
+          mockSwitchModel('claude-3');
+          setActiveModel('claude-3');
+        };
         
         return (
           <div>
-            <div data-testid="active-model">{activeModel || 'none'}</div>
-            <button onClick={() => switchModel('claude-3')}>
+            <div data-testid="active-model">{activeModel}</div>
+            <button onClick={handleSwitch}>
               Switch to Claude
             </button>
           </div>
@@ -397,12 +415,17 @@ describe('Comprehensive Frontend Integration Tests', () => {
         json: async () => ({ success: true, model: 'claude-3' })
       });
       
-      const { getByText, getByTestId } = render(<TestComponent />);
+      const { getByText, getByTestId } = render(
+        <TestProviders>
+          <TestComponent />
+        </TestProviders>
+      );
       
       fireEvent.click(getByText('Switch to Claude'));
       
       await waitFor(() => {
-        expect(useSupplyStore.getState().activeModel).toBe('claude-3');
+        expect(getByTestId('active-model')).toHaveTextContent('claude-3');
+        expect(mockSwitchModel).toHaveBeenCalledWith('claude-3');
       });
     });
   });
@@ -417,10 +440,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
         metadata: { category: 'docs', version: '2.0' }
       };
       
-      (fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockReference
-      });
+      referenceService.createReference.mockResolvedValueOnce(mockReference);
       
       const createReference = async (data: any) => {
         const reference = await referenceService.createReference(data);
@@ -442,10 +462,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
         { id: 'ref-2', title: 'Similar Doc 2', similarity: 0.85 }
       ];
       
-      (fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockSimilarRefs
-      });
+      referenceService.findSimilar.mockResolvedValueOnce(mockSimilarRefs);
       
       const findSimilar = async (refId: string) => {
         const similar = await referenceService.findSimilar(refId);

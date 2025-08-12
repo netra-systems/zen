@@ -1,28 +1,16 @@
 import pytest
-import pytest_asyncio
 from fastapi.testclient import TestClient
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.main import app
 from app.config import settings
-from app.db.base import Base
-from app.db.testing import engine
 from app.dependencies import get_db_session
 from app.db.testing import override_get_db
 
 app.dependency_overrides[get_db_session] = override_get_db
 
 @pytest.fixture(scope="function")
-def client(test_db) -> TestClient:
+def client() -> TestClient:
     with TestClient(app=app, base_url="http://test") as client:
         yield client
-
-@pytest_asyncio.fixture(scope="function")
-async def test_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    yield
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
 
 def test_get_auth_config_dev_mode(client: TestClient):
     settings.environment = "development"

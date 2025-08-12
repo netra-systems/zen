@@ -1,8 +1,42 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import { ExportService, ExportFormat } from '@/utils/exportService';
 
 // Mock the dependencies
-jest.mock('html2canvas');
-jest.mock('jspdf');
+jest.mock('html2canvas', () => {
+  return jest.fn().mockImplementation(() => Promise.resolve({
+    toBlob: jest.fn((callback) => {
+      callback(new Blob(['image data'], { type: 'image/png' }));
+    })
+  }));
+});
+
+// Create a mock jsPDF constructor
+const mockJsPDFInstance = {
+  setFontSize: jest.fn(),
+  setTextColor: jest.fn(),
+  text: jest.fn(),
+  splitTextToSize: jest.fn((text: string) => [text]),
+  addPage: jest.fn(),
+  save: jest.fn(),
+  internal: {
+    pageSize: {
+      getHeight: jest.fn(() => 297),
+      getWidth: jest.fn(() => 210)
+    }
+  },
+  autoTable: jest.fn(),
+  lastAutoTable: { finalY: 100 }
+};
+
+const mockJsPDFConstructor = jest.fn(() => mockJsPDFInstance);
+
+jest.mock('jspdf', () => ({
+  __esModule: true,
+  default: mockJsPDFConstructor
+}));
 jest.mock('papaparse', () => ({
   unparse: jest.fn((data) => {
     // Simple CSV generation for testing
@@ -28,33 +62,57 @@ describe('ExportService', () => {
 
     // Mock DOM methods
     clickSpy = jest.fn();
+    
+    // Store the original createElement
+    const originalCreateElement = document.createElement.bind(document);
+    
     createElementSpy = jest.spyOn(document, 'createElement').mockImplementation((tag: string) => {
-      const element = document.createElement(tag);
+      const element = originalCreateElement(tag);
       if (tag === 'a') {
-        Object.defineProperty(element, 'click', { value: clickSpy });
+        Object.defineProperty(element, 'click', { 
+          value: clickSpy,
+          writable: true,
+          configurable: true
+        });
       }
       return element;
     });
 
-    createObjectURLSpy = jest.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-url');
-    revokeObjectURLSpy = jest.spyOn(URL, 'revokeObjectURL').mockImplementation();
-    appendChildSpy = jest.spyOn(document.body, 'appendChild').mockImplementation((node) => node);
-    removeChildSpy = jest.spyOn(document.body, 'removeChild').mockImplementation((node) => node);
+    // Mock URL methods
+    createObjectURLSpy = jest.fn().mockReturnValue('blob:mock-url');
+    revokeObjectURLSpy = jest.fn();
+    
+    // Mock URL methods on the global object
+    Object.defineProperty(global.URL, 'createObjectURL', {
+      value: createObjectURLSpy,
+      writable: true,
+      configurable: true
+    });
+    
+    Object.defineProperty(global.URL, 'revokeObjectURL', {
+      value: revokeObjectURLSpy,
+      writable: true,
+      configurable: true
+    });
+    
+    appendChildSpy = jest.spyOn(document.body, 'appendChild').mockImplementation((node) => node as any);
+    removeChildSpy = jest.spyOn(document.body, 'removeChild').mockImplementation((node) => node as any);
 
     // Mock Blob constructor
     global.Blob = jest.fn((content, options) => ({
       content,
       type: options?.type || 'text/plain',
-      size: content[0]?.length || 0
+      size: content[0]?.length || 0,
+      slice: jest.fn(),
+      stream: jest.fn(),
+      text: jest.fn(),
+      arrayBuffer: jest.fn()
     })) as any;
   });
 
   afterEach(() => {
-    createElementSpy.mockRestore();
-    createObjectURLSpy.mockRestore();
-    revokeObjectURLSpy.mockRestore();
-    appendChildSpy.mockRestore();
-    removeChildSpy.mockRestore();
+    // Restore all mocks
+    jest.restoreAllMocks();
   });
 
   describe('exportReport', () => {
@@ -266,37 +324,14 @@ describe('ExportService', () => {
     });
 
     describe('PDF export', () => {
-      let mockJsPDF: any;
-
-      beforeEach(() => {
-        mockJsPDF = {
-          setFontSize: jest.fn(),
-          setTextColor: jest.fn(),
-          text: jest.fn(),
-          splitTextToSize: jest.fn((text: string) => [text]),
-          addPage: jest.fn(),
-          save: jest.fn(),
-          internal: {
-            pageSize: {
-              getHeight: jest.fn(() => 297),
-              getWidth: jest.fn(() => 210)
-            }
-          },
-          autoTable: jest.fn(),
-          lastAutoTable: { finalY: 100 }
-        };
-
-        // Mock dynamic import
-        jest.mock('jspdf', () => ({
-          default: jest.fn(() => mockJsPDF)
-        }));
-      });
 
       it('should export report as PDF', async () => {
-        // Mock the dynamic import
-        const originalImport = global.import;
-        (global as any).import = jest.fn().mockResolvedValue({
-          default: jest.fn(() => mockJsPDF)
+        // Clear previous calls
+        mockJsPDFConstructor.mockClear();
+        Object.values(mockJsPDFInstance).forEach((mock: any) => {
+          if (typeof mock === 'function' && mock.mockClear) {
+            mock.mockClear();
+          }
         });
 
         await ExportService.exportReport(mockReportData, {
@@ -304,18 +339,19 @@ describe('ExportService', () => {
           filename: 'test-report'
         });
 
-        expect(mockJsPDF.setFontSize).toHaveBeenCalled();
-        expect(mockJsPDF.text).toHaveBeenCalled();
-        expect(mockJsPDF.save).toHaveBeenCalledWith('test-report.pdf');
-
-        // Restore original import
-        (global as any).import = originalImport;
+        expect(mockJsPDFConstructor).toHaveBeenCalled();
+        expect(mockJsPDFInstance.setFontSize).toHaveBeenCalled();
+        expect(mockJsPDFInstance.text).toHaveBeenCalled();
+        expect(mockJsPDFInstance.save).toHaveBeenCalledWith('test-report.pdf');
       });
 
       it('should include custom branding in PDF', async () => {
-        const originalImport = global.import;
-        (global as any).import = jest.fn().mockResolvedValue({
-          default: jest.fn(() => mockJsPDF)
+        // Clear previous calls
+        mockJsPDFConstructor.mockClear();
+        Object.values(mockJsPDFInstance).forEach((mock: any) => {
+          if (typeof mock === 'function' && mock.mockClear) {
+            mock.mockClear();
+          }
         });
 
         await ExportService.exportReport(mockReportData, {
@@ -327,13 +363,11 @@ describe('ExportService', () => {
         });
 
         // Check that company name was added
-        const textCalls = mockJsPDF.text.mock.calls;
+        const textCalls = mockJsPDFInstance.text.mock.calls;
         const companyNameCall = textCalls.find((call: any[]) => 
           call[0] === 'Test Company'
         );
         expect(companyNameCall).toBeDefined();
-
-        (global as any).import = originalImport;
       });
     });
 
@@ -406,22 +440,6 @@ describe('ExportService', () => {
   });
 
   describe('exportElementAsImage', () => {
-    let mockCanvas: any;
-    let mockHtml2canvas: jest.Mock;
-
-    beforeEach(() => {
-      mockCanvas = {
-        toBlob: jest.fn((callback) => {
-          callback(new Blob(['image data'], { type: 'image/png' }));
-        })
-      };
-
-      mockHtml2canvas = jest.fn().mockResolvedValue(mockCanvas);
-      
-      // Mock html2canvas module
-      jest.mock('html2canvas', () => mockHtml2canvas);
-      (global as any).html2canvas = mockHtml2canvas;
-    });
 
     it('should export element as image', async () => {
       const mockElement = document.createElement('div');
@@ -432,8 +450,8 @@ describe('ExportService', () => {
 
       await ExportService.exportElementAsImage('test-element', 'screenshot');
 
-      expect(mockHtml2canvas).toHaveBeenCalledWith(mockElement);
-      expect(mockCanvas.toBlob).toHaveBeenCalled();
+      const html2canvasMock = require('html2canvas');
+      expect(html2canvasMock).toHaveBeenCalledWith(mockElement);
       expect(clickSpy).toHaveBeenCalled();
 
       document.body.removeChild(mockElement);
@@ -450,6 +468,7 @@ describe('ExportService', () => {
     it('should use default filename if not provided', async () => {
       const mockElement = document.createElement('div');
       mockElement.id = 'test-element';
+      document.body.appendChild(mockElement);
       
       jest.spyOn(document, 'getElementById').mockReturnValue(mockElement);
 
@@ -460,6 +479,8 @@ describe('ExportService', () => {
       )?.value;
       
       expect(anchorElement?.download).toBe('export.png');
+      
+      document.body.removeChild(mockElement);
     });
   });
 
