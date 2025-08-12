@@ -96,6 +96,11 @@ class ConfigValidator:
         """Validate LLM configuration."""
         errors = []
         
+        # Skip LLM validation if LLMs are disabled in dev mode
+        if hasattr(config, 'dev_mode_llm_enabled') and not config.dev_mode_llm_enabled:
+            self._logger.info("LLMs disabled in dev mode - skipping API key validation")
+            return
+        
         if not config.llm_configs:
             errors.append("No LLM configurations defined")
         else:

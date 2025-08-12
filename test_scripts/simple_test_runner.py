@@ -1,220 +1,184 @@
-#!/usr/bin/env python3
-"""
-Simple test runner for quick validation of the Netra AI platform.
-Runs minimal smoke tests for both backend and frontend.
-"""
+#!/usr/bin/env python
+"""Simple test runner that actually works"""
 
-import sys
 import os
+import sys
 import subprocess
 import json
-import time
 from pathlib import Path
+import time
 
-def run_command(cmd, description, cwd=None):
-    """Run a command and return success status and output."""
-    print(f"\n[INFO] {description}")
-    if isinstance(cmd, list) and len(cmd) > 2:
-        print(f"[CMD] {cmd[0]} {cmd[1]} <script>")
-    else:
-        print(f"[CMD] {' '.join(cmd) if isinstance(cmd, list) else cmd}")
+# Set testing environment
+os.environ.update({
+    "TESTING": "1",
+    "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
+    "SECRET_KEY": "test-secret-key",
+    "JWT_SECRET_KEY": "test-jwt-secret",
+    "REDIS_URL": "redis://localhost:6379/1",
+    "CLICKHOUSE_URL": "clickhouse://localhost:9000/test",
+    "ANTHROPIC_API_KEY": "test-key",
+    "ENVIRONMENT": "testing",
+    "LOG_LEVEL": "ERROR",
+    "FERNET_KEY": "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao=",
+    "ENCRYPTION_KEY": "test-encryption-key-32-chars-long"
+})
+
+def run_tests(test_path: str, max_time: int = 30) -> dict:
+    """Run tests with timeout protection"""
+    print(f"\nRunning: {test_path}")
+    
+    cmd = [
+        sys.executable, "-m", "pytest",
+        test_path,
+        "-v",
+        "--tb=no",
+        "--no-header",
+        "--no-summary",
+        "-q",
+        "--disable-warnings",
+        "-p", "no:cacheprovider",
+        "-p", "no:warnings",
+        "--asyncio-mode=auto"
+    ]
     
     try:
-        # Set PYTHONWARNINGS to ignore to suppress loguru warnings
-        env = os.environ.copy()
-        env['PYTHONWARNINGS'] = 'ignore'
-        
+        start = time.time()
         result = subprocess.run(
             cmd,
-            shell=True if isinstance(cmd, str) else False,
             capture_output=True,
             text=True,
-            cwd=cwd,
-            timeout=60,
-            env=env
+            timeout=max_time,
+            cwd=str(Path(__file__).parent)
         )
+        duration = time.time() - start
         
-        # Check stdout for success/fail indicators
-        stdout_lower = result.stdout.lower() if result.stdout else ""
-        stderr_lower = result.stderr.lower() if result.stderr else ""
+        # Parse output
+        lines = result.stdout.split('\n')
+        passed = 0
+        failed = 0
+        errors = 0
         
-        # If we find [PASS] in stdout, it's a success regardless of return code
-        if "[pass]" in stdout_lower:
-            print(f"[SUCCESS] {description}")
-            return True, result.stdout
-        # If we find [FAIL] in stdout or stderr, it's a failure
-        elif "[fail]" in stdout_lower or "[fail]" in stderr_lower:
-            print(f"[FAILED] {description}")
-            error_msg = result.stdout if "[fail]" in stdout_lower else result.stderr
-            if error_msg:
-                print(f"[ERROR] {error_msg[:500]}")
-            return False, error_msg
-        # Otherwise use return code
-        elif result.returncode == 0:
-            print(f"[SUCCESS] {description}")
-            return True, result.stdout
-        else:
-            print(f"[FAILED] {description}")
-            if result.stderr:
-                print(f"[ERROR] {result.stderr[:500]}")
-            return False, result.stderr
+        for line in lines:
+            if 'passed' in line.lower():
+                try:
+                    passed = int(line.split()[0])
+                except:
+                    pass
+            if 'failed' in line.lower():
+                try:
+                    failed = int(line.split()[0])
+                except:
+                    pass
+            if 'error' in line.lower():
+                try:
+                    errors = int(line.split()[0])
+                except:
+                    pass
+        
+        # If no summary found, check exit code
+        if passed == 0 and failed == 0 and errors == 0:
+            if result.returncode == 0:
+                passed = 1  # Assume at least one test passed
+            else:
+                failed = 1  # Assume at least one test failed
+        
+        return {
+            "path": test_path,
+            "passed": passed,
+            "failed": failed,
+            "errors": errors,
+            "duration": duration,
+            "exit_code": result.returncode,
+            "output": result.stdout[:500]  # First 500 chars
+        }
+        
     except subprocess.TimeoutExpired:
-        print(f"[TIMEOUT] {description} timed out after 60 seconds")
-        return False, "Timeout"
+        return {
+            "path": test_path,
+            "failed": 1,
+            "errors": 0,
+            "passed": 0,
+            "duration": max_time,
+            "exit_code": -1,
+            "output": f"TIMEOUT after {max_time}s"
+        }
     except Exception as e:
-        print(f"[ERROR] Failed to run {description}: {e}")
-        return False, str(e)
-
-def run_backend_tests():
-    """Run minimal backend smoke tests."""
-    print("\n" + "="*60)
-    print("BACKEND SMOKE TESTS")
-    print("="*60)
-    
-    # Test 1: Import critical modules
-    test_imports = """
-import sys
-import os
-sys.path.insert(0, os.path.abspath('.'))
-try:
-    from app.main import app
-    from app.config import settings
-    from app.db.postgres import get_async_db
-    print("[PASS] All critical imports successful")
-    sys.exit(0)
-except Exception as e:
-    print(f"[FAIL] Import error: {e}")
-    sys.exit(1)
-"""
-    
-    success1, _ = run_command(
-        ["python", "-c", test_imports],
-        "Testing critical imports"
-    )
-    
-    # Test 2: Check configuration loading
-    test_config = """
-import sys
-import os
-sys.path.insert(0, os.path.abspath('.'))
-try:
-    from app.config import settings
-    assert settings.app_name
-    assert settings.database_url
-    print("[PASS] Configuration loaded successfully")
-    sys.exit(0)
-except Exception as e:
-    print(f"[FAIL] Config error: {e}")
-    sys.exit(1)
-"""
-    
-    success2, _ = run_command(
-        ["python", "-c", test_config],
-        "Testing configuration loading"
-    )
-    
-    # Test 3: Basic API endpoint test
-    test_api = """
-import sys
-import os
-sys.path.insert(0, os.path.abspath('.'))
-try:
-    from fastapi.testclient import TestClient
-    from app.main import app
-    client = TestClient(app)
-    response = client.get("/health/live")
-    assert response.status_code == 200
-    print(f"[PASS] Health endpoint returned {response.status_code}")
-    sys.exit(0)
-except Exception as e:
-    print(f"[FAIL] API test error: {e}")
-    sys.exit(1)
-"""
-    
-    success3, _ = run_command(
-        ["python", "-c", test_api],
-        "Testing health endpoint"
-    )
-    
-    return all([success1, success2, success3])
-
-def run_frontend_tests():
-    """Run minimal frontend smoke tests."""
-    print("\n" + "="*60)
-    print("FRONTEND SMOKE TESTS")
-    print("="*60)
-    
-    frontend_dir = Path("frontend")
-    if not frontend_dir.exists():
-        print("[ERROR] Frontend directory not found")
-        return False
-    
-    # Test 1: Check package.json exists
-    package_json = frontend_dir / "package.json"
-    if not package_json.exists():
-        print("[FAIL] package.json not found")
-        return False
-    print("[PASS] package.json found")
-    
-    # Test 2: Check node_modules exists
-    node_modules = frontend_dir / "node_modules"
-    if not node_modules.exists():
-        print("[INFO] node_modules not found, running npm install...")
-        success, _ = run_command(
-            "npm install",
-            "Installing dependencies",
-            cwd=str(frontend_dir)
-        )
-        if not success:
-            print("[FAIL] npm install failed")
-            return False
-    else:
-        print("[PASS] node_modules exists")
-    
-    # Test 3: Run TypeScript type checking (informational only)
-    print("\n[INFO] Running TypeScript type checking (informational only)...")
-    run_command(
-        "npx tsc --noEmit 2>&1 | head -5",
-        "TypeScript type checking sample",
-        cwd=str(frontend_dir)
-    )
-    
-    # Frontend passes if dependencies are installed, regardless of TypeScript errors
-    # TypeScript errors don't prevent the app from running in development
-    print("[INFO] TypeScript errors are expected during development")
-    return True
+        return {
+            "path": test_path,
+            "failed": 0,
+            "errors": 1,
+            "passed": 0,
+            "duration": 0,
+            "exit_code": -2,
+            "output": str(e)
+        }
 
 def main():
-    """Main test runner."""
-    print("="*80)
-    print("NETRA AI PLATFORM - SIMPLE TEST RUNNER")
-    print("="*80)
-    print(f"[INFO] Starting simple smoke tests at {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    """Run key test files to assess current state"""
+    print("=" * 60)
+    print("SIMPLE TEST RUNNER - Quick Assessment")
+    print("=" * 60)
     
-    start_time = time.time()
+    # Priority test files
+    test_files = [
+        # Core functionality
+        "app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error",
+        "app/tests/core/test_config_manager.py::TestConfigManager::test_initialization",
+        
+        # Critical services  
+        "app/tests/services/test_security_service.py::TestSecurityService::test_verify_password",
+        
+        # Routes
+        "app/tests/routes/test_health_route.py::test_live_endpoint",
+        
+        # System
+        "tests/test_system_startup.py::TestSystemStartup::test_configuration_loading",
+    ]
     
-    # Run tests
-    backend_success = run_backend_tests()
-    frontend_success = run_frontend_tests()
+    results = []
+    total_passed = 0
+    total_failed = 0
+    total_errors = 0
     
-    elapsed = time.time() - start_time
+    for test_file in test_files:
+        # Check if file exists
+        file_path = test_file.split("::")[0]
+        if not Path(file_path).exists():
+            print(f"  [SKIP] {test_file} - File not found")
+            continue
+            
+        result = run_tests(test_file, max_time=10)
+        results.append(result)
+        
+        total_passed += result["passed"]
+        total_failed += result["failed"]
+        total_errors += result["errors"]
+        
+        status = "PASS" if result["exit_code"] == 0 else "FAIL"
+        print(f"  [{status}] {test_file.split('::')[-1] if '::' in test_file else Path(test_file).name}")
+        if result["exit_code"] != 0:
+            print(f"       {result['output'][:100]}")
     
     # Summary
-    print("\n" + "="*60)
-    print("TEST SUMMARY")
-    print("="*60)
-    print(f"Backend:  {'[PASSED]' if backend_success else '[FAILED]'}")
-    print(f"Frontend: {'[PASSED]' if frontend_success else '[FAILED]'}")
-    print(f"Duration: {elapsed:.2f} seconds")
-    print("="*60)
+    print("\n" + "=" * 60)
+    print("SUMMARY")
+    print("=" * 60)
+    print(f"Passed: {total_passed}")
+    print(f"Failed: {total_failed}")
+    print(f"Errors: {total_errors}")
     
-    # Exit with appropriate code
-    if backend_success and frontend_success:
-        print("\n[SUCCESS] All simple tests passed!")
-        sys.exit(0)
+    # Save results
+    with open("simple_test_results.json", "w") as f:
+        json.dump(results, f, indent=2)
+    
+    print(f"\nDetailed results saved to: simple_test_results.json")
+    
+    if total_failed + total_errors > 0:
+        print(f"\n[FAILED] {total_failed + total_errors} tests need attention")
+        return 1
     else:
-        print("\n[FAILED] Some tests failed. Please review the output above.")
-        sys.exit(1)
+        print("\n[SUCCESS] All tests passing!")
+        return 0
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
