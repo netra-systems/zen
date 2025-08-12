@@ -134,6 +134,69 @@
       "failed": 0,
       "coverage": null,
       "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T09:47:04.323858",
+      "level": "unit",
+      "total": 302,
+      "passed": 128,
+      "failed": 174,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T09:54:03.999336",
+      "level": "smoke",
+      "total": 2,
+      "passed": 1,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T10:11:25.792399",
+      "level": "unit",
+      "total": 334,
+      "passed": 172,
+      "failed": 161,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T10:13:08.687052",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T10:28:16.435032",
+      "level": "comprehensive",
+      "total": 182,
+      "passed": 18,
+      "failed": 158,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T10:29:21.594518",
+      "level": "comprehensive",
+      "total": 182,
+      "passed": 18,
+      "failed": 158,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T10:34:03.189068",
+      "level": "unit",
+      "total": 411,
+      "passed": 173,
+      "failed": 237,
+      "coverage": null,
+      "duration": 0
     }
   ],
   "flaky_tests": {},

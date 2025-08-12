@@ -1,23 +1,23 @@
 {
-  "timestamp": "2025-08-12T09:11:22.197283",
+  "timestamp": "2025-08-12T10:33:46.164519",
   "level": "smoke",
   "metrics": {
     "total_tests": 2,
-    "passed": 1,
+    "passed": 2,
     "failed": 0,
     "coverage": null
   },
   "results": {
     "backend": {
       "status": "passed",
-      "duration": 7.229135751724243,
+      "duration": 8.363578081130981,
       "exit_code": 0,
-      "output": "================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: smoke\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: development\n\nRunning command:\n  pytest app/tests/routes/test_health_route.py -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\n\u001b[1mcollecting ... \u001b[0mcollected 2 items\n\napp\\tests\\routes\\test_health_route.py::test_basic_import \u001b[33mSKIPPED\u001b[0m (Un...)\u001b[32m [ 50%]\u001b[0m\napp\\tests\\routes\\test_health_route.py::test_health_endpoint_direct \u001b[32mPASSED\u001b[0m\u001b[32m [100%]\u001b[0m\n\n\u001b[32m======================== \u001b[32m\u001b[1m1 passed\u001b[0m, \u001b[33m1 skipped\u001b[0m\u001b[32m in 0.10s\u001b[0m\u001b[32m =========================\u001b[0m\n================================================================================\n[PASS] ALL TESTS PASSED in 6.22s\n================================================================================\n\n",
+      "output": "================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: smoke\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: development\n\nRunning command:\n  pytest app/tests/routes/test_health_route.py -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\n\u001b[1mcollecting ... \u001b[0mcollected 2 items\n\napp\\tests\\routes\\test_health_route.py::test_basic_import \u001b[32mPASSED\u001b[0m\u001b[32m          [ 50%]\u001b[0m\napp\\tests\\routes\\test_health_route.py::test_health_endpoint_direct \u001b[32mPASSED\u001b[0m\u001b[32m [100%]\u001b[0m\n\n\u001b[32m============================== \u001b[32m\u001b[1m2 passed\u001b[0m\u001b[32m in 0.09s\u001b[0m\u001b[32m ==============================\u001b[0m\n================================================================================\n[PASS] ALL TESTS PASSED in 7.42s\n================================================================================\n\n",
       "test_counts": {
         "total": 2,
-        "passed": 1,
+        "passed": 2,
         "failed": 0,
-        "skipped": 1,
+        "skipped": 0,
         "errors": 0,
         "test_files": 1
       },
@@ -25,7 +25,7 @@
     },
     "frontend": {
       "status": "timeout",
-      "duration": 50.651780128479004,
+      "duration": 35.920971393585205,
       "exit_code": -1,
       "output": "Tests timed out after 30s",
       "test_counts": {
@@ -53,8 +53,8 @@
     },
     "overall": {
       "status": "passed",
-      "start_time": 1755015024.314373,
-      "end_time": 1755015082.1962893
+      "start_time": 1755019981.8780677,
+      "end_time": 1755020026.1635106
     }
   }
 }

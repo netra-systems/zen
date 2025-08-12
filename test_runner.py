@@ -1,8 +1,29 @@
 #!/usr/bin/env python
 """
 UNIFIED TEST RUNNER - Single Entry Point for all Netra AI Platform Testing
-Replaces all individual test runners with a single, consistent interface.
-Automatically saves reports to test_reports/ folder.
+
+PURPOSE:
+Provides a consistent interface for running different levels of tests,
+from quick smoke tests to comprehensive test suites.
+
+TEST LEVELS:
+- smoke: Quick validation (< 30s) - Run before commits
+- unit: Component testing (1-2 min) - Run during development
+- integration: Feature testing (3-5 min) - Run before merges
+- comprehensive: Full coverage (30-45 min) - Run before releases
+- critical: Essential paths (1-2 min) - Run for hotfixes
+
+KEY FEATURES:
+- Automatic test categorization and organization
+- Parallel execution for faster results
+- Detailed HTML and JSON reports
+- Coverage tracking with targets
+- Smart test selection based on changes
+
+USAGE:
+    python test_runner.py --level smoke        # Quick pre-commit check
+    python test_runner.py --level unit         # Development testing
+    python test_runner.py --level comprehensive # Full validation
 """
 
 import os
@@ -106,7 +127,18 @@ RUNNERS = {
 }
 
 class UnifiedTestRunner:
-    """Unified test runner that manages all testing levels and report generation"""
+    """Unified test runner that manages all testing levels and report generation.
+    
+    RESPONSIBILITIES:
+    1. Test Discovery: Find and categorize all tests
+    2. Test Execution: Run tests with appropriate parallelization
+    3. Result Collection: Gather and parse test outputs
+    4. Report Generation: Create HTML, JSON, and markdown reports
+    5. Coverage Analysis: Track code coverage against targets
+    
+    This class orchestrates the entire testing pipeline, making it
+    easy to run appropriate tests for different scenarios.
+    """
     
     def __init__(self):
         self.cpu_count = CPU_COUNT
@@ -157,7 +189,22 @@ class UnifiedTestRunner:
         self.history_dir.mkdir(exist_ok=True)
         
     def categorize_test(self, test_path: str, component: str = "backend") -> str:
-        """Categorize test based on file path and name"""
+        """Categorize test based on file path and name.
+        
+        CATEGORIZATION LOGIC:
+        Tests are categorized to help understand what's being tested:
+        - unit: Isolated component tests with mocked dependencies
+        - integration: Tests that verify component interactions
+        - service: Business logic layer tests
+        - api/route: HTTP endpoint tests
+        - database: Data access layer tests
+        - agent: AI agent orchestration tests
+        - websocket: Real-time communication tests
+        - auth: Security and authentication tests
+        - llm: Language model integration tests
+        
+        This helps identify test purposes and organize test execution.
+        """
         path_lower = test_path.lower()
         
         if component == "backend":

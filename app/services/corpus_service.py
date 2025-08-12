@@ -633,3 +633,5 @@ def get_corpus_status(db: Session, corpus_id: str):
 async def get_corpus_content(db: Session, corpus_id: str):
     """Legacy function to get corpus content"""
     return await corpus_service.get_corpus_content(db, corpus_id)
+
+# Test stub functions removed - use CorpusService methods directly

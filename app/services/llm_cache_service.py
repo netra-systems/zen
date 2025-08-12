@@ -238,3 +238,5 @@ class LLMCacheService:
 
 # Global instance
 llm_cache_service = LLMCacheService()
+
+# Test stub functions removed - use llm_cache_service instance methods directly

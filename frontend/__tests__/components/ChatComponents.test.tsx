@@ -128,7 +128,8 @@ describe('test_MessageInput_validation', () => {
 
   it('should handle text input and sending', async () => {
     const mockSendMessage = jest.fn();
-    jest.mocked(require('@/hooks/useWebSocket').useWebSocket).mockReturnValue({
+    const useWebSocket = require('@/hooks/useWebSocket').useWebSocket as jest.Mock;
+    useWebSocket.mockReturnValue({
       sendMessage: mockSendMessage,
     });
     
@@ -158,7 +159,8 @@ describe('test_MessageInput_validation', () => {
 
   it('should prevent empty message submission', () => {
     const mockSendMessage = jest.fn();
-    jest.mocked(require('@/hooks/useWebSocket').useWebSocket).mockReturnValue({
+    const useWebSocket = require('@/hooks/useWebSocket').useWebSocket as jest.Mock;
+    useWebSocket.mockReturnValue({
       sendMessage: mockSendMessage,
     });
     

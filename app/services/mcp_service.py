@@ -500,3 +500,5 @@ class MCPService:
     def get_mcp_server(self) -> MCPServer:
         """Get MCP server instance"""
         return self.mcp_server
+
+# Test stub functions removed - use MCPService methods directly
