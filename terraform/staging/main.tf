@@ -156,12 +156,22 @@ resource "google_cloud_run_service" "backend" {
         
         env {
           name  = "SKIP_MIGRATION_ON_STARTUP"
-          value = "false"
+          value = "true"  # Migrations are run separately in the workflow
         }
         
         env {
           name  = "LOG_LEVEL"
           value = "INFO"
+        }
+        
+        env {
+          name  = "SKIP_CLICKHOUSE_INIT"
+          value = "false"
+        }
+        
+        env {
+          name  = "CLICKHOUSE_CONNECT_TIMEOUT"
+          value = "30"  # Increase connection timeout
         }
         
         env {
