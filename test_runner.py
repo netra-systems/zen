@@ -21,6 +21,13 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import defaultdict
 from dotenv import load_dotenv
 
+# Import enhanced reporter if available
+try:
+    from scripts.enhanced_test_reporter import EnhancedTestReporter
+    ENHANCED_REPORTER_AVAILABLE = True
+except ImportError:
+    ENHANCED_REPORTER_AVAILABLE = False
+
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -105,6 +112,16 @@ class UnifiedTestRunner:
         self.cpu_count = CPU_COUNT
         self.optimal_workers = OPTIMAL_WORKERS
         self.test_categories = defaultdict(list)  # For organizing tests by category
+        
+        # Initialize enhanced reporter if available
+        self.enhanced_reporter = None
+        if ENHANCED_REPORTER_AVAILABLE:
+            try:
+                self.enhanced_reporter = EnhancedTestReporter()
+                print("[INFO] Enhanced Test Reporter enabled")
+            except Exception as e:
+                print(f"[WARNING] Could not initialize Enhanced Reporter: {e}")
+        
         self.results = {
             "backend": {
                 "status": "pending", 
@@ -781,6 +798,22 @@ class UnifiedTestRunner:
         """Parse test counts from pytest/jest output"""
         counts = {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0}
         
+        # Track test files
+        test_files = set()
+        
+        # Count test files first
+        if component == "backend":
+            # Extract test files from pytest output
+            file_pattern = r"(\S+\.py)::"
+            test_files = set(re.findall(file_pattern, output))
+            counts["test_files"] = len(test_files)
+        elif component == "frontend":
+            # Extract test files from Jest output
+            file_pattern = r"(PASS|FAIL)\s+(\S+\.(test|spec)\.(ts|tsx|js|jsx))"
+            for match in re.finditer(file_pattern, output):
+                test_files.add(match.group(2))
+            counts["test_files"] = len(test_files)
+        
         # Common pytest patterns
         patterns = [
             (r"(\d+) passed", "passed"),
@@ -829,6 +862,46 @@ class UnifiedTestRunner:
     def save_test_report(self, level: str, config: Dict, output: str, exit_code: int):
         """Save test report to test_reports directory with latest/history structure"""
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        # Use enhanced reporter if available
+        if self.enhanced_reporter:
+            try:
+                # Generate comprehensive report
+                report_content = self.enhanced_reporter.generate_comprehensive_report(
+                    level=level,
+                    results=self.results,
+                    config=config,
+                    exit_code=exit_code
+                )
+                
+                # Calculate metrics for enhanced reporter
+                backend_counts = self.results["backend"]["test_counts"]
+                frontend_counts = self.results["frontend"]["test_counts"]
+                
+                metrics = {
+                    "total_tests": backend_counts["total"] + frontend_counts["total"],
+                    "passed": backend_counts["passed"] + frontend_counts["passed"],
+                    "failed": backend_counts["failed"] + frontend_counts["failed"],
+                    "coverage": self.results["backend"].get("coverage") or self.results["frontend"].get("coverage")
+                }
+                
+                # Save using enhanced reporter
+                self.enhanced_reporter.save_report(
+                    level=level,
+                    report_content=report_content,
+                    results=self.results,
+                    metrics=metrics
+                )
+                
+                # Also run cleanup periodically
+                import random
+                if random.random() < 0.1:  # 10% chance to run cleanup
+                    print("[INFO] Running report cleanup...")
+                    self.enhanced_reporter.cleanup_old_reports(keep_days=7)
+                
+                return
+            except Exception as e:
+                print(f"[WARNING] Enhanced reporter failed, using standard: {e}")
         
         # Calculate total test counts
         backend_counts = self.results["backend"]["test_counts"]
@@ -999,9 +1072,10 @@ class UnifiedTestRunner:
         with open(latest_path, "w", encoding='utf-8') as f:
             f.write(md_content)
         
-        print(f"\n[REPORT] Test report saved:")
-        print(f"  - Latest: {latest_path}")
-        print(f"  - History folder: {self.history_dir}")
+        if not self.enhanced_reporter:
+            print(f"\n[REPORT] Test report saved:")
+            print(f"  - Latest: {latest_path}")
+            print(f"  - History folder: {self.history_dir}")
     
     def _status_badge(self, status) -> str:
         """Convert status to markdown badge"""
