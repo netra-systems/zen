@@ -536,8 +536,11 @@ class SupplyResearcherAgent(BaseSubAgent):
         for provider in providers:
             try:
                 # Create a mock state for scheduled research
-                state = DeepAgentState()
-                state.user_request = f"Update {research_type.value} for {provider}"
+                state = DeepAgentState(
+                    user_request=f"Update {research_type.value} for {provider}",
+                    chat_thread_id=f"scheduled_{research_type.value}",
+                    user_id="scheduler"
+                )
                 
                 # Execute research
                 await self.execute(state, f"scheduled_{provider}_{datetime.now().timestamp()}", False)

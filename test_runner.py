@@ -13,9 +13,12 @@ import re
 import shutil
 import argparse
 import subprocess
+import multiprocessing
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional, Tuple
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from collections import defaultdict
 from dotenv import load_dotenv
 
 # Add project root to path
@@ -24,6 +27,10 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 # Load environment variables from .env file
 load_dotenv()
+
+# Determine optimal parallelization
+CPU_COUNT = multiprocessing.cpu_count()
+OPTIMAL_WORKERS = min(CPU_COUNT - 1, 8)  # Leave one CPU free
 
 # Define test levels with clear purposes
 TEST_LEVELS = {
@@ -39,7 +46,7 @@ TEST_LEVELS = {
     "unit": {
         "description": "Unit tests for isolated components (1-2 minutes)",
         "purpose": "Development validation, component testing",
-        "backend_args": ["--category", "unit", "-v", "--coverage", "--fail-fast", "--parallel=4"],
+        "backend_args": ["--category", "unit", "-v", "--coverage", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}"],
         "frontend_args": ["--category", "unit"],
         "timeout": 120,
         "run_coverage": True,
@@ -48,7 +55,7 @@ TEST_LEVELS = {
     "integration": {
         "description": "Integration tests for component interaction (3-5 minutes)",
         "purpose": "Feature validation, API testing",
-        "backend_args": ["--category", "integration", "-v", "--coverage", "--fail-fast", "--parallel=4"],
+        "backend_args": ["--category", "integration", "-v", "--coverage", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}"],
         "frontend_args": ["--category", "integration"],
         "timeout": 300,
         "run_coverage": True,
@@ -57,7 +64,7 @@ TEST_LEVELS = {
     "comprehensive": {
         "description": "Full test suite with coverage (10-15 minutes)",
         "purpose": "Pre-release validation, full system testing",
-        "backend_args": ["--coverage", "--parallel=6", "--html-output", "--fail-fast"],
+        "backend_args": ["--coverage", f"--parallel={min(6, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast"],
         "frontend_args": ["--coverage"],
         "timeout": 900,
         "run_coverage": True,
@@ -75,7 +82,7 @@ TEST_LEVELS = {
     "all": {
         "description": "All tests including backend, frontend, e2e, integration (20-30 minutes)",
         "purpose": "Complete system validation including all test types",
-        "backend_args": ["--coverage", "--parallel=8", "--html-output", "--fail-fast"],
+        "backend_args": ["--coverage", f"--parallel={OPTIMAL_WORKERS}", "--html-output", "--fail-fast"],
         "frontend_args": ["--coverage", "--e2e"],
         "timeout": 1800,
         "run_coverage": True,
@@ -95,6 +102,9 @@ class UnifiedTestRunner:
     """Unified test runner that manages all testing levels and report generation"""
     
     def __init__(self):
+        self.cpu_count = CPU_COUNT
+        self.optimal_workers = OPTIMAL_WORKERS
+        self.test_categories = defaultdict(list)  # For organizing tests by category
         self.results = {
             "backend": {
                 "status": "pending", 
@@ -128,6 +138,57 @@ class UnifiedTestRunner:
         self.reports_dir.mkdir(exist_ok=True)
         self.history_dir = self.reports_dir / "history"
         self.history_dir.mkdir(exist_ok=True)
+        
+    def categorize_test(self, test_path: str, component: str = "backend") -> str:
+        """Categorize test based on file path and name"""
+        path_lower = test_path.lower()
+        
+        if component == "backend":
+            if "unit" in path_lower:
+                return "unit"
+            elif "integration" in path_lower:
+                return "integration"
+            elif "service" in path_lower:
+                return "service"
+            elif "route" in path_lower or "api" in path_lower:
+                return "api"
+            elif "database" in path_lower or "repository" in path_lower:
+                return "database"
+            elif "agent" in path_lower:
+                return "agent"
+            elif "websocket" in path_lower or "ws_" in path_lower:
+                return "websocket"
+            elif "auth" in path_lower or "security" in path_lower:
+                return "auth"
+            elif "llm" in path_lower:
+                return "llm"
+            else:
+                return "other"
+        else:  # frontend
+            if "component" in path_lower:
+                return "component"
+            elif "hook" in path_lower:
+                return "hook"
+            elif "service" in path_lower or "api" in path_lower:
+                return "service"
+            elif "store" in path_lower:
+                return "store"
+            elif "auth" in path_lower:
+                return "auth"
+            elif "websocket" in path_lower or "ws" in path_lower:
+                return "websocket"
+            elif "util" in path_lower or "helper" in path_lower:
+                return "utility"
+            else:
+                return "other"
+    
+    def organize_failures_by_category(self, failures: List[Dict]) -> Dict[str, List[Dict]]:
+        """Organize failures by category for better processing"""
+        organized = defaultdict(list)
+        for failure in failures:
+            category = self.categorize_test(failure.get("test_path", ""), failure.get("component", "backend"))
+            organized[category].append(failure)
+        return dict(organized)
         
     def run_backend_tests(self, args: List[str], timeout: int = 300, real_llm_config: Optional[Dict] = None) -> Tuple[int, str]:
         """Run backend tests with specified arguments"""

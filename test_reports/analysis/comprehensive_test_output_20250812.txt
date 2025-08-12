@@ -1,0 +1,447 @@
+================================================================================
+NETRA AI PLATFORM - UNIFIED TEST RUNNER
+================================================================================
+Running comprehensive tests: Full test suite with coverage (10-15 minutes)
+Purpose: Pre-release validation, full system testing
+Timeout: 900s
+
+============================================================
+RUNNING BACKEND TESTS
+============================================================
+================================================================================
+NETRA AI PLATFORM - BACKEND TEST RUNNER
+================================================================================
+Test Configuration:
+  Category: all
+  Parallel: 6
+  Coverage: enabled
+  Fail Fast: enabled
+  Environment: development
+
+Running command:
+  pytest app/tests tests integration_tests -v -n 6 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 --html=reports/tests/report.html --self-contained-html --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
+================================================================================
+[1m============================= test session starts =============================[0m
+platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
+configfile: pytest.ini
+plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO
+created: 6/6 workers
+6 workers [2733 items]
+
+scheduling tests via LoadScheduling
+
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_1_complete_agent_lifecycle_request_to_completion 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_retry_success_first_try 
+app\tests\agents\test_supervisor_advanced.py::test_supervisor_concurrent_requests 
+app\tests\agents\test_triage_sub_agent.py::TestEntryConditions::test_entry_conditions_invalid_request 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestClickHouseArrayOperations::test_validate_query_catches_errors 
+app\tests\core\test_config_manager.py::TestConfigManager::test_load_configuration_validation_failure 
+[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestClickHouseArrayOperations::test_validate_query_catches_errors 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigManager::test_load_configuration_validation_failure 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestClickHouseArrayOperations::test_query_interceptor_fixes_queries 
+app\tests\core\test_config_manager.py::TestConfigManager::test_get_config_caching 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_advanced.py::test_supervisor_concurrent_requests 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigManager::test_get_config_caching 
+app\tests\core\test_config_manager.py::TestConfigManager::test_reload_config 
+app\tests\agents\test_supervisor_agent.py::test_supervisor_runs_sub_agents_in_order 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestEntryConditions::test_entry_conditions_invalid_request 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_retry_success_first_try 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_retry_success_after_failures 
+app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_triage_result_validation 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_triage_result_validation 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigManager::test_reload_config 
+app\tests\core\test_config_manager.py::TestConfigurationFunctions::test_get_config 
+app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_triage_result_confidence_validation 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_triage_result_confidence_validation 
+[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestClickHouseArrayOperations::test_query_interceptor_fixes_queries 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticLogIngestion::test_streaming_log_ingestion 
+app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_key_parameters_model 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigurationFunctions::test_get_config 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_key_parameters_model 
+app\tests\core\test_config_manager.py::TestConfigurationFunctions::test_reload_config 
+app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_user_intent_model 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigurationFunctions::test_reload_config 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_user_intent_model 
+app\tests\core\test_config_manager.py::TestConfigurationIntegration::test_full_configuration_flow 
+app\tests\agents\test_triage_sub_agent.py::TestCleanup::test_cleanup_with_metrics 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_agent.py::test_supervisor_runs_sub_agents_in_order 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_triage_for_classification 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_1_complete_agent_lifecycle_request_to_completion 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigurationIntegration::test_full_configuration_flow 
+app\tests\core\test_config_manager.py::TestConfigurationIntegration::test_testing_configuration 
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_2_websocket_real_time_streaming 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigurationIntegration::test_testing_configuration 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_triage_for_classification 
+app\tests\core\test_config_manager.py::TestConfigurationIntegration::test_configuration_error_handling 
+[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticLogIngestion::test_streaming_log_ingestion 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticLogIngestion::test_log_pattern_recognition 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_optimization_for_ai_workloads 
+[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticLogIngestion::test_log_pattern_recognition 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigurationIntegration::test_configuration_error_handling 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_optimization_for_ai_workloads 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLLMMetricsAggregation::test_llm_cost_optimization_query 
+app\tests\core\test_core_infrastructure_11_20.py::TestConfigValidator::test_valid_config_passes_validation 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_data_for_analysis_queries 
+[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLLMMetricsAggregation::test_llm_cost_optimization_query 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLLMMetricsAggregation::test_llm_usage_patterns 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_core_infrastructure_11_20.py::TestConfigValidator::test_valid_config_passes_validation 
+app\tests\core\test_core_infrastructure_11_20.py::TestConfigValidator::test_invalid_database_url_rejected 
+[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLLMMetricsAggregation::test_llm_usage_patterns 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_data_for_analysis_queries 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routing_with_conditional_pipeline 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_2_websocket_real_time_streaming 
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_3_supervisor_orchestration_logic 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestPerformanceMetricsWithClickHouse::test_metrics_extraction_with_arrays 
+[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_core_infrastructure_11_20.py::TestConfigValidator::test_invalid_database_url_rejected 
+[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestPerformanceMetricsWithClickHouse::test_metrics_extraction_with_arrays 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestTimeSeriesAnalysis::test_moving_average_calculation 
+app\tests\core\test_core_infrastructure_11_20.py::TestConfigValidator::test_validation_report_generation 
+[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestTimeSeriesAnalysis::test_moving_average_calculation 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routing_with_conditional_pipeline 
+[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_core_infrastructure_11_20.py::TestConfigValidator::test_validation_report_generation 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestTimeSeriesAnalysis::test_anomaly_detection_with_zscore 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorErrorCascadePrevention::test_prevents_cascade_on_single_agent_failure 
+app\tests\core\test_core_infrastructure_11_20.py::TestErrorContext::test_trace_id_management 
+[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestTimeSeriesAnalysis::test_anomaly_detection_with_zscore 
+[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_core_infrastructure_11_20.py::TestErrorContext::test_trace_id_management 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLogClusteringAlgorithms::test_log_clustering_with_similarity 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_3_supervisor_orchestration_logic 
+app\tests\core\test_core_infrastructure_11_20.py::TestErrorContext::test_context_preservation_across_calls 
+[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_core_infrastructure_11_20.py::TestErrorContext::test_context_preservation_across_calls 
+app\tests\core\test_core_infrastructure_11_20.py::TestErrorHandlers::test_error_response_structure 
+[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLogClusteringAlgorithms::test_log_clustering_with_similarity 
+[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_core_infrastructure_11_20.py::TestErrorHandlers::test_error_response_structure 
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_4_tool_dispatcher_integration 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLogClusteringAlgorithms::test_error_cascade_detection 
+[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLogClusteringAlgorithms::test_error_cascade_detection 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestMultiSourceAggregation::test_cross_table_correlation 
+app\tests\core\test_core_infrastructure_11_20.py::TestErrorHandlers::test_http_exception_handler 
+[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestMultiSourceAggregation::test_cross_table_correlation 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticDataVolumes::test_large_scale_aggregation 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_4_tool_dispatcher_integration 
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_5_state_persistence_and_recovery 
+[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticDataVolumes::test_large_scale_aggregation 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticDataVolumes::test_materialized_view_creation 
+[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_core_infrastructure_11_20.py::TestErrorHandlers::test_http_exception_handler 
+[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticDataVolumes::test_materialized_view_creation 
+app\tests\core\test_core_infrastructure_11_20.py::TestCustomExceptions::test_netra_exception_structure 
+app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_initialization 
+[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_core_infrastructure_11_20.py::TestCustomExceptions::test_netra_exception_structure 
+app\tests\core\test_core_infrastructure_11_20.py::TestCustomExceptions::test_authentication_error 
+[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_initialization 
+app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_register_resource_without_callback 
+[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_register_resource_without_callback 
+[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_core_infrastructure_11_20.py::TestCustomExceptions::test_authentication_error 
+app\tests\core\test_core_infrastructure_11_20.py::TestLoggingManager::test_logging_configuration 
+app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_register_resource_with_callback 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_5_state_persistence_and_recovery 
+[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_register_resource_with_callback 
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_6_error_handling_and_recovery 
+app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_register_resource_during_shutdown 
+[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_register_resource_during_shutdown 
+app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_cleanup_all 
+[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_core_infrastructure_11_20.py::TestLoggingManager::test_logging_configuration 
+app\tests\core\test_core_infrastructure_11_20.py::TestLoggingManager::test_structured_logging 
+[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_cleanup_all 
+[gw3][36m [  2%] [0m[32mPASSED[0m app\tests\core\test_core_infrastructure_11_20.py::TestLoggingManager::test_structured_logging 
+app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_cleanup_all_idempotent 
+app\tests\core\test_core_infrastructure_11_20.py::TestResourceManager::test_resource_tracking 
+[gw4][36m [  2%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_cleanup_all_idempotent 
+app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_cleanup_handles_exceptions 
+[gw4][36m [  2%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncResourceManager::test_cleanup_handles_exceptions 
+app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_initialization 
+[gw4][36m [  2%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_initialization 
+app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_submit_task_success 
+[gw4][36m [  2%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_submit_task_success 
+app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_submit_task_exception 
+[gw4][36m [  2%] [0m[32mPASSED[0m app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_submit_task_exception 
+app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_submit_task_during_shutdown 
+[gw5][36m [  2%] [0m[31mFAILED[0m app\tests\agents\test_triage_sub_agent.py::TestCleanup::test_cleanup_with_metrics 
+[gw3][36m [  2%] [0m[31mFAILED[0m app\tests\core\test_core_infrastructure_11_20.py::TestResourceManager::test_resource_tracking 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_retry_success_after_failures 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_retry_all_failures 
+[gw4][36m [  2%] [0m[31mFAILED[0m app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_submit_task_during_shutdown 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_retry_all_failures 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_batch_safe_mixed_results 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_batch_safe_mixed_results 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_batch_safe_with_exception 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_batch_safe_with_exception 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_cache_hit 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_cache_hit 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_cache_different_keys 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_cache_different_keys 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_and_stream 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_and_stream 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_and_persist 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_and_persist 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_handle_supervisor_request_process_data 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_handle_supervisor_request_process_data 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_handle_supervisor_request_no_callback 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_handle_supervisor_request_no_callback 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_concurrent 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_concurrent 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_concurrent_empty 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_concurrent_empty 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_stream 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_stream 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_stream_exact_chunks 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_stream_exact_chunks 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_save_state 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_save_state 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_save_state_no_existing 
+[gw2][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_save_state_no_existing 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_load_state 
+[gw2][36m [  2%] [0m[31mFAILED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_load_state 
+[gw1][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorErrorCascadePrevention::test_prevents_cascade_on_single_agent_failure 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorErrorCascadePrevention::test_retry_mechanism_on_transient_failures 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorErrorCascadePrevention::test_retry_mechanism_on_transient_failures 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorErrorCascadePrevention::test_circuit_breaker_after_multiple_failures 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorErrorCascadePrevention::test_circuit_breaker_after_multiple_failures 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestQualitySupervisorValidation::test_validates_response_quality_score 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestQualitySupervisorValidation::test_validates_response_quality_score 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestQualitySupervisorValidation::test_rejects_low_quality_outputs 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestQualitySupervisorValidation::test_rejects_low_quality_outputs 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestQualitySupervisorValidation::test_quality_check_with_retry_improvement 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestQualitySupervisorValidation::test_quality_check_with_retry_improvement 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAdminToolDispatcherRouting::test_routes_to_correct_admin_tool 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAdminToolDispatcherRouting::test_routes_to_correct_admin_tool 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAdminToolDispatcherRouting::test_validates_admin_permissions 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAdminToolDispatcherRouting::test_validates_admin_permissions 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAdminToolDispatcherRouting::test_admin_tool_audit_logging 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAdminToolDispatcherRouting::test_admin_tool_audit_logging 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestCorpusAdminDocumentManagement::test_document_indexing_workflow 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestCorpusAdminDocumentManagement::test_document_indexing_workflow 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestCorpusAdminDocumentManagement::test_document_retrieval_with_similarity_search 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestCorpusAdminDocumentManagement::test_document_retrieval_with_similarity_search 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestCorpusAdminDocumentManagement::test_corpus_update_operations 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestCorpusAdminDocumentManagement::test_corpus_update_operations 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupplyResearcherDataCollection::test_supply_chain_data_collection 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupplyResearcherDataCollection::test_supply_chain_data_collection 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupplyResearcherDataCollection::test_data_validation_and_enrichment 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupplyResearcherDataCollection::test_data_validation_and_enrichment 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestDemoAgentWorkflow::test_demo_scenario_execution 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestDemoAgentWorkflow::test_demo_scenario_execution 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestDemoAgentWorkflow::test_demo_data_generation_variety 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestDemoAgentWorkflow::test_demo_data_generation_variety 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAgentPromptsTemplateRendering::test_prompt_template_rendering 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAgentPromptsTemplateRendering::test_prompt_template_rendering 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAgentPromptsTemplateRendering::test_prompt_variable_substitution 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAgentPromptsTemplateRendering::test_prompt_variable_substitution 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAgentPromptsTemplateRendering::test_prompt_template_validation 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAgentPromptsTemplateRendering::test_prompt_template_validation 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestEnhancedPromptsContextBuilding::test_enhanced_context_construction 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestEnhancedPromptsContextBuilding::test_enhanced_context_construction 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestEnhancedPromptsContextBuilding::test_prompt_optimization_logic 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestEnhancedPromptsContextBuilding::test_prompt_optimization_logic 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestEnhancedPromptsContextBuilding::test_context_window_management 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestEnhancedPromptsContextBuilding::test_context_window_management 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAgentUtilsHelperFunctions::test_retry_with_backoff 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAgentUtilsHelperFunctions::test_retry_with_backoff 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAgentUtilsHelperFunctions::test_parallel_execution_helper 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAgentUtilsHelperFunctions::test_parallel_execution_helper 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAgentUtilsHelperFunctions::test_timeout_wrapper 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAgentUtilsHelperFunctions::test_timeout_wrapper 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAgentUtilsHelperFunctions::test_state_merging_utility 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestAgentUtilsHelperFunctions::test_state_merging_utility 
+app\tests\agents\test_supervisor_orchestration.py::TestSupervisorOrchestration::test_supervisor_agent_selection 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_orchestration.py::TestSupervisorOrchestration::test_supervisor_agent_selection 
+app\tests\agents\test_supervisor_orchestration.py::TestSupervisorOrchestration::test_multi_agent_coordination 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_orchestration.py::TestSupervisorOrchestration::test_multi_agent_coordination 
+app\tests\agents\test_supervisor_orchestration.py::TestSupervisorOrchestration::test_error_handling_in_orchestration 
+[gw1][36m [  3%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_orchestration.py::TestSupervisorOrchestration::test_error_handling_in_orchestration 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_agent_initialization 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_agent_initialization 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_parse_pricing_request 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_parse_pricing_request 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_parse_capability_request 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_parse_capability_request 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_parse_availability_request 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_parse_availability_request 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_generate_pricing_query 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_generate_pricing_query 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_generate_market_overview_query 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_generate_market_overview_query 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_extract_supply_data 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_extract_supply_data 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_calculate_confidence_score 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_calculate_confidence_score 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_execute_agent 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_execute_agent 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_process_scheduled_research 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_process_scheduled_research 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_service_get_supply_items 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_service_get_supply_items 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_service_create_supply_item 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_service_create_supply_item 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_service_calculate_price_changes 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_service_calculate_price_changes 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_service_provider_comparison 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_service_provider_comparison 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_service_detect_anomalies 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_service_detect_anomalies 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_service_validate_supply_data 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_service_validate_supply_data 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_scheduler_initialization 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_scheduler_initialization 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_schedule_next_run_calculation 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_schedule_next_run_calculation 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_schedule_should_run 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_schedule_should_run 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_scheduler_execute_research 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_scheduler_execute_research 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_scheduler_add_remove_schedules 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_scheduler_add_remove_schedules 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_scheduler_enable_disable 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_scheduler_enable_disable 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_scheduler_get_status 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_scheduler_get_status 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_api_failure_handling 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_api_failure_handling 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_invalid_data_validation 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_invalid_data_validation 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_agent_database_integration 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_agent_database_integration 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_scheduler_agent_integration 
+[gw1][36m [  4%] [0m[32mPASSED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_scheduler_agent_integration 
+app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_concurrent_research_processing 
+[gw1][36m [  5%] [0m[31mFAILED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_concurrent_research_processing 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_6_error_handling_and_recovery 
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_7_authentication_and_authorization 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_7_authentication_and_authorization 
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_8_multi_agent_collaboration 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_8_multi_agent_collaboration 
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_9_concurrent_request_handling 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_9_concurrent_request_handling 
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_10_performance_and_timeout_handling 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_10_performance_and_timeout_handling 
+app\tests\agents\test_data_sub_agent.py::TestDataSubAgentInitialization::test_initialization_with_defaults 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent.py::TestDataSubAgentInitialization::test_initialization_with_defaults 
+app\tests\agents\test_data_sub_agent.py::TestDataSubAgentInitialization::test_initialization_with_custom_config 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent.py::TestDataSubAgentInitialization::test_initialization_with_custom_config 
+app\tests\agents\test_data_sub_agent.py::TestDataSubAgentInitialization::test_initialization_with_redis 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent.py::TestDataSubAgentInitialization::test_initialization_with_redis 
+app\tests\agents\test_data_sub_agent.py::TestDataProcessing::test_process_data_success 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent.py::TestDataProcessing::test_process_data_success 
+app\tests\agents\test_data_sub_agent.py::TestDataProcessing::test_process_data_validation_failure 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent.py::TestDataProcessing::test_process_data_validation_failure 
+app\tests\agents\test_data_sub_agent.py::TestDataProcessing::test_batch_processing 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent.py::TestDataProcessing::test_batch_processing 
+app\tests\agents\test_data_sub_agent.py::TestDataValidation::test_validate_required_fields 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent.py::TestDataValidation::test_validate_required_fields 
+app\tests\agents\test_data_sub_agent.py::TestDataValidation::test_validate_missing_fields 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent.py::TestDataValidation::test_validate_missing_fields 
+app\tests\agents\test_data_sub_agent.py::TestDataValidation::test_validate_data_types 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent.py::TestDataValidation::test_validate_data_types 
+app\tests\agents\test_data_sub_agent.py::TestDataTransformation::test_transform_text_data 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent.py::TestDataTransformation::test_transform_text_data 
+app\tests\agents\test_data_sub_agent.py::TestDataTransformation::test_transform_json_data 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent.py::TestDataTransformation::test_transform_json_data 
+app\tests\agents\test_data_sub_agent.py::TestDataTransformation::test_transform_with_pipeline 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent.py::TestDataTransformation::test_transform_with_pipeline 
+app\tests\agents\test_data_sub_agent.py::TestDataEnrichment::test_enrich_with_metadata 
+[gw0][36m [  5%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent.py::TestDataEnrichment::test_enrich_with_metadata 
+app\tests\agents\test_data_sub_agent.py::TestDataEnrichment::test_enrich_with_external_source 
+[gw0][36m [  5%] [0m[31mFAILED[0m app\tests\agents\test_data_sub_agent.py::TestDataEnrichment::test_enrich_with_external_source 
+
+================================== FAILURES ===================================
+[31m[1m____________________ TestCleanup.test_cleanup_with_metrics ____________________[0m
+[gw5] win32 -- Python 3.12.4 C:\Users\antho\miniconda3\python.exe
+[1m[31m..\..\..\..\miniconda3\Lib\unittest\mock.py[0m:913: in assert_called
+    [0m[94mraise[39;49;00m [96mAssertionError[39;49;00m(msg)[90m[39;49;00m
+[1m[31mE   AssertionError: Expected 'debug' to have been called.[0m
+
+[33mDuring handling of the above exception, another exception occurred:[0m
+[1m[31mapp\tests\agents\test_triage_sub_agent.py[0m:480: in test_cleanup_with_metrics
+    [0mmock_logger.debug.assert_called()[90m[39;49;00m
+[1m[31mE   AssertionError: Expected 'debug' to have been called.[0m
+---------------------------- Captured log teardown ----------------------------
+[35mDEBUG   [0m asyncio:proactor_events.py:634 Using proactor: IocpProactor
+[31m[1m_________________ TestResourceManager.test_resource_tracking __________________[0m
+[gw3] win32 -- Python 3.12.4 C:\Users\antho\miniconda3\python.exe
+[1m[31mapp\tests\core\test_core_infrastructure_11_20.py[0m:186: in test_resource_tracking
+    [0mtracker.track_resource([33m"[39;49;00m[33mconnection[39;49;00m[33m"[39;49;00m, [33m"[39;49;00m[33mconn_1[39;49;00m[33m"[39;49;00m)[90m[39;49;00m
+    ^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mE   AttributeError: 'ResourceTracker' object has no attribute 'track_resource'[0m
+-------------------------- Captured stdout teardown ---------------------------
+[32m2025-08-11 21:03:12.569[0m | <dim white>DEBUG   </dim white> | [36mlogging[0m:[36mcallHandlers[0m:[36m1762[0m - <dim white>Using proactor: IocpProactor</dim white>
+---------------------------- Captured log teardown ----------------------------
+[35mDEBUG   [0m asyncio:proactor_events.py:634 Using proactor: IocpProactor
+[31m[1m_____________ TestAsyncTaskPool.test_submit_task_during_shutdown ______________[0m
+[gw4] win32 -- Python 3.12.4 C:\Users\antho\miniconda3\python.exe
+[1m[31mapp\tests\core\test_async_utils.py[0m:175: in test_submit_task_during_shutdown
+    [0m[94mawait[39;49;00m task_pool.submit_task(sample_task())[90m[39;49;00m
+[1m[31mapp\core\async_utils.py[0m:63: in submit_task
+    [0mcontext=ErrorContext.get_all_context()[90m[39;49;00m
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mapp\core\error_context.py[0m:86: in get_all_context
+    [0mbase_context.update(custom_context)[90m[39;49;00m
+[1m[31mE   TypeError: unbound method dict.keys() needs an argument[0m
+---------------------------- Captured log teardown ----------------------------
+[35mDEBUG   [0m asyncio:proactor_events.py:634 Using proactor: IocpProactor
+[35mDEBUG   [0m asyncio:proactor_events.py:634 Using proactor: IocpProactor
+[31m[1m______________________ TestDataSubAgent.test_load_state _______________________[0m
+[gw2] win32 -- Python 3.12.4 C:\Users\antho\miniconda3\python.exe
+[1m[31mapp\tests\agents\test_data_sub_agent_comprehensive.py[0m:1324: in test_load_state
+    [0m[94massert[39;49;00m [96misinstance[39;49;00m(agent.state, [96mdict[39;49;00m)[90m[39;49;00m
+[1m[31mE   AssertionError: assert False[0m
+[1m[31mE    +  where False = isinstance(<SubAgentLifecycle.PENDING: 'pending'>, dict)[0m
+[1m[31mE    +    where <SubAgentLifecycle.PENDING: 'pending'> = <app.agents.data_sub_agent.DataSubAgent object at 0x000001945D082E10>.state[0m
+---------------------------- Captured log teardown ----------------------------
+[35mDEBUG   [0m asyncio:proactor_events.py:634 Using proactor: IocpProactor
+[31m[1m________ TestSupplyResearcherAgent.test_concurrent_research_processing ________[0m
+[gw1] win32 -- Python 3.12.4 C:\Users\antho\miniconda3\python.exe
+[1m[31mapp\tests\agents\test_supply_researcher_agent.py[0m:584: in test_concurrent_research_processing
+    [0m[94massert[39;49;00m elapsed < [96mlen[39;49;00m(providers) * [94m0.1[39;49;00m * [94m0.8[39;49;00m  [90m# Allow some margin[39;49;00m[90m[39;49;00m
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mE   AssertionError: assert 0.5469999999986612 < ((5 * 0.1) * 0.8)[0m
+[1m[31mE    +  where 5 = len(['openai', 'anthropic', 'google', 'mistral', 'cohere'])[0m
+----------------------------- Captured log setup ------------------------------
+[32mINFO    [0m app.redis_manager:redis_manager.py:18 Redis is disabled for testing
+---------------------------- Captured log teardown ----------------------------
+[35mDEBUG   [0m asyncio:proactor_events.py:634 Using proactor: IocpProactor
+[31m[1m_____________ TestDataEnrichment.test_enrich_with_external_source _____________[0m
+[gw0] win32 -- Python 3.12.4 C:\Users\antho\miniconda3\python.exe
+[1m[31mapp\tests\agents\test_data_sub_agent.py[0m:291: in test_enrich_with_external_source
+    [0m[94mwith[39;49;00m patch([33m'[39;49;00m[33mapp.agents.data_sub_agent.fetch_external_data[39;49;00m[33m'[39;49;00m, new_callable=AsyncMock) [94mas[39;49;00m mock_fetch:[90m[39;49;00m
+[1m[31m..\..\..\..\miniconda3\Lib\unittest\mock.py[0m:1458: in __enter__
+    [0moriginal, local = [96mself[39;49;00m.get_original()[90m[39;49;00m
+                      ^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31m..\..\..\..\miniconda3\Lib\unittest\mock.py[0m:1431: in get_original
+    [0m[94mraise[39;49;00m [96mAttributeError[39;49;00m([90m[39;49;00m
+[1m[31mE   AttributeError: <module 'app.agents.data_sub_agent' from 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\data_sub_agent.py'> does not have the attribute 'fetch_external_data'[0m
+------------------------------ Captured log call ------------------------------
+[32mINFO    [0m app.redis_manager:redis_manager.py:18 Redis is disabled for testing
+---------------------------- Captured log teardown ----------------------------
+[35mDEBUG   [0m asyncio:proactor_events.py:634 Using proactor: IocpProactor
+- Generated html report: file:///C:/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1/reports/tests/report.html -
+[36m[1m=========================== short test summary info ===========================[0m
+[31mFAILED[0m app\tests\agents\test_triage_sub_agent.py::[1mTestCleanup::test_cleanup_with_metrics[0m - AssertionError: Expected 'debug' to have been called.
+[31mFAILED[0m app\tests\core\test_core_infrastructure_11_20.py::[1mTestResourceManager::test_resource_tracking[0m - AttributeError: 'ResourceTracker' object has no attribute 'track_resource'
+[31mFAILED[0m app\tests\core\test_async_utils.py::[1mTestAsyncTaskPool::test_submit_task_during_shutdown[0m - TypeError: unbound method dict.keys() needs an argument
+[31mFAILED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::[1mTestDataSubAgent::test_load_state[0m - AssertionError: assert False
+[31mFAILED[0m app\tests\agents\test_supply_researcher_agent.py::[1mTestSupplyResearcherAgent::test_concurrent_research_processing[0m - AssertionError: assert 0.5469999999986612 < ((5 * 0.1) * 0.8)
+[31mFAILED[0m app\tests\agents\test_data_sub_agent.py::[1mTestDataEnrichment::test_enrich_with_external_source[0m - AttributeError: <module 'app.agents.data_sub_agent' from 'C:\\Users\\antho\...
+[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 6 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
+!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!
+[31m======================= [31m[1m6 failed[0m, [32m150 passed[0m[31m in 52.61s[0m[31m ========================[0m
+================================================================================
+[FAIL] TESTS FAILED with exit code 2 after 61.30s
+
+[Report] HTML Report: reports/tests/report.html
+[Coverage] Coverage Report: reports/coverage/html/index.html
+================================================================================
+Application exiting, cleaning up resources...
+--- Logging error in Loguru Handler #11 ---
+Record was: {'elapsed': datetime.timedelta(seconds=47, microseconds=544841), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'callHandlers', 'level': (name='DEBUG', no=10, icon='\U0001f41e'), 'line': 1762, 'message': 'Using proactor: IocpProactor', 'module': '__init__', 'name': 'logging', 'process': (id=35096, name='MainProcess'), 'thread': (id=32892, name='MainThread'), 'time': datetime(2025, 8, 11, 21, 3, 38, 72162, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
+Traceback (most recent call last):
+  File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_handler.py", line 206, in emit
+    self._sink.write(str_record)
+  File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_simple_sinks.py", line 16, in write
+    self._stream.write(message)
+ValueError: I/O operation on closed file.
+--- End of logging error ---
+

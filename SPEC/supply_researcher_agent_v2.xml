@@ -1,0 +1,862 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <name>Supply Researcher Agent Specification</name>
+    <version>2.0.0</version>
+    <created>2025-01-11</created>
+    <updated>2025-08-12</updated>
+    <author>Netra AI Team</author>
+    <status>Active</status>
+    <category>Agent</category>
+    <priority>High</priority>
+    <compliance>
+      <spec>subagents.xml</spec>
+      <spec>agent_tracking.xml</spec>
+      <spec>websockets.xml</spec>
+      <spec>llm.xml</spec>
+    </compliance>
+  </metadata>
+
+  <overview>
+    <summary>
+      The SupplyResearcherAgent is an intelligent autonomous sub-agent that researches and updates AI supply information,
+      including LLM pricing, model capabilities, API availability, and performance metrics. It leverages Google Deep
+      Research API for comprehensive information gathering, maintains real-time supply data, and provides intelligent
+      recommendations for optimization opportunities based on supply changes.
+    </summary>
+    
+    <objectives>
+      <objective priority="critical">Maintain accurate, real-time AI model pricing and availability data</objective>
+      <objective priority="high">Automate supply information updates through scheduled research cycles</objective>
+      <objective priority="high">Respond to on-demand research requests from administrators via chat</objective>
+      <objective priority="high">Generate supply intelligence reports with citations and confidence scores</objective>
+      <objective priority="medium">Detect and alert on significant market changes and anomalies</objective>
+      <objective priority="medium">Provide optimization recommendations based on supply updates</objective>
+      <objective priority="low">Build predictive models for future pricing trends</objective>
+    </objectives>
+    
+    <key_features>
+      <feature>Natural language query processing for research requests</feature>
+      <feature>Multi-provider parallel research execution</feature>
+      <feature>Automatic data validation and normalization</feature>
+      <feature>Confidence scoring based on source reliability</feature>
+      <feature>Change detection with configurable alert thresholds</feature>
+      <feature>Comprehensive audit trail for all updates</feature>
+      <feature>Redis-based caching for performance optimization</feature>
+      <feature>WebSocket real-time updates to connected clients</feature>
+    </key_features>
+  </overview>
+
+  <architecture>
+    <components>
+      <component name="SupplyResearcherAgent" type="SubAgent">
+        <description>Core sub-agent that orchestrates research tasks and data updates</description>
+        <responsibilities>
+          <responsibility>Implement BaseSubAgent interface for lifecycle management</responsibility>
+          <responsibility>Parse natural language requests into structured queries</responsibility>
+          <responsibility>Interface with Google Deep Research API</responsibility>
+          <responsibility>Process and validate research results</responsibility>
+          <responsibility>Update database with normalized information</responsibility>
+          <responsibility>Generate audit trails and change notifications</responsibility>
+          <responsibility>Manage agent state and context persistence</responsibility>
+        </responsibilities>
+        <interfaces>
+          <interface>BaseSubAgent (inherited)</interface>
+          <interface>WebSocketHandler</interface>
+          <interface>LLMConsumer</interface>
+        </interfaces>
+      </component>
+      
+      <component name="SupplyResearchService" type="Service">
+        <description>Service layer for supply research operations</description>
+        <responsibilities>
+          <responsibility>Manage research sessions and state persistence</responsibility>
+          <responsibility>Handle API rate limiting with exponential backoff</responsibility>
+          <responsibility>Cache research results in Redis with TTL</responsibility>
+          <responsibility>Coordinate database transactions</responsibility>
+          <responsibility>Calculate price changes and detect anomalies</responsibility>
+          <responsibility>Generate provider comparisons and reports</responsibility>
+        </responsibilities>
+        <methods>
+          <method>get_supply_items(provider?, model?, status?)</method>
+          <method>create_or_update_supply_item(provider, model, data, updated_by)</method>
+          <method>calculate_price_changes(days_back)</method>
+          <method>detect_anomalies(threshold)</method>
+          <method>get_provider_comparison()</method>
+          <method>validate_supply_data(data)</method>
+        </methods>
+      </component>
+      
+      <component name="ResearchScheduler" type="Scheduler">
+        <description>Background task scheduler for periodic updates</description>
+        <responsibilities>
+          <responsibility>Execute scheduled research cycles</responsibility>
+          <responsibility>Monitor for critical supply changes</responsibility>
+          <responsibility>Trigger alerts for significant price changes</responsibility>
+          <responsibility>Maintain research history and logs</responsibility>
+          <responsibility>Manage schedule state and next run times</responsibility>
+        </responsibilities>
+        <schedules>
+          <schedule frequency="daily" time="02:00 UTC" type="pricing"/>
+          <schedule frequency="weekly" time="Monday 09:00 UTC" type="capabilities"/>
+          <schedule frequency="monthly" time="1st 00:00 UTC" type="market_overview"/>
+        </schedules>
+      </component>
+      
+      <component name="SupplyDataValidator" type="Validator">
+        <description>Validates and normalizes supply data before storage</description>
+        <responsibilities>
+          <responsibility>Validate pricing formats and ranges</responsibility>
+          <responsibility>Normalize currency and units</responsibility>
+          <responsibility>Cross-reference with existing data</responsibility>
+          <responsibility>Flag anomalies for manual review</responsibility>
+          <responsibility>Ensure data consistency and integrity</responsibility>
+        </responsibilities>
+        <validation_rules>
+          <rule>Pricing must be non-negative decimal values</rule>
+          <rule>Context window must be positive integer</rule>
+          <rule>Provider and model names required</rule>
+          <rule>Confidence score between 0 and 1</rule>
+          <rule>Currency must be valid ISO code</rule>
+        </validation_rules>
+      </component>
+    </components>
+    
+    <data_models>
+      <model name="AISupplyItem" table="ai_supply_items">
+        <fields>
+          <field name="id" type="UUID" required="true" primary_key="true"/>
+          <field name="provider" type="String" required="true" max_length="100"/>
+          <field name="model_name" type="String" required="true" max_length="200"/>
+          <field name="model_version" type="String" max_length="50"/>
+          <field name="pricing_input" type="Decimal(10,4)" description="Cost per 1M input tokens"/>
+          <field name="pricing_output" type="Decimal(10,4)" description="Cost per 1M output tokens"/>
+          <field name="pricing_currency" type="String" default="USD" max_length="3"/>
+          <field name="context_window" type="Integer" min="1"/>
+          <field name="max_output_tokens" type="Integer" min="1"/>
+          <field name="capabilities" type="JSON" description="Array of model capabilities"/>
+          <field name="availability_status" type="Enum" values="available,deprecated,preview,waitlist"/>
+          <field name="api_endpoints" type="JSON" description="List of API endpoints"/>
+          <field name="performance_metrics" type="JSON" description="Benchmarks and metrics"/>
+          <field name="last_updated" type="DateTime" required="true"/>
+          <field name="research_source" type="String" max_length="500"/>
+          <field name="confidence_score" type="Float" min="0" max="1" required="true"/>
+          <field name="created_at" type="DateTime" required="true"/>
+          <field name="updated_by" type="String" required="true" max_length="100"/>
+        </fields>
+        <indices>
+          <index name="idx_provider_model" columns="provider,model_name" unique="true"/>
+          <index name="idx_last_updated" columns="last_updated"/>
+          <index name="idx_status" columns="availability_status"/>
+        </indices>
+      </model>
+      
+      <model name="ResearchSession" table="research_sessions">
+        <fields>
+          <field name="id" type="UUID" required="true" primary_key="true"/>
+          <field name="query" type="String" required="true" max_length="1000"/>
+          <field name="session_id" type="String" description="Google Deep Research session ID"/>
+          <field name="status" type="Enum" values="pending,researching,processing,completed,failed" required="true"/>
+          <field name="research_type" type="Enum" values="pricing,capabilities,availability,market_overview,new_model,deprecation"/>
+          <field name="research_plan" type="JSON" description="Structured research plan"/>
+          <field name="questions_answered" type="JSON" description="Q&A pairs from research"/>
+          <field name="raw_results" type="JSON" description="Raw API response"/>
+          <field name="processed_data" type="JSON" description="Extracted supply items"/>
+          <field name="citations" type="JSON" description="Sources and references"/>
+          <field name="initiated_by" type="String" required="true" description="user_id or scheduler"/>
+          <field name="user_id" type="UUID" foreign_key="users.id"/>
+          <field name="chat_thread_id" type="UUID" foreign_key="chat_threads.id"/>
+          <field name="created_at" type="DateTime" required="true"/>
+          <field name="completed_at" type="DateTime"/>
+          <field name="error_message" type="Text"/>
+          <field name="retry_count" type="Integer" default="0"/>
+        </fields>
+      </model>
+      
+      <model name="SupplyUpdateLog" table="supply_update_logs">
+        <fields>
+          <field name="id" type="UUID" required="true" primary_key="true"/>
+          <field name="supply_item_id" type="UUID" required="true" foreign_key="ai_supply_items.id"/>
+          <field name="field_updated" type="String" required="true" max_length="100"/>
+          <field name="old_value" type="JSON"/>
+          <field name="new_value" type="JSON"/>
+          <field name="research_session_id" type="UUID" foreign_key="research_sessions.id"/>
+          <field name="update_reason" type="String" max_length="500"/>
+          <field name="updated_by" type="String" required="true" max_length="100"/>
+          <field name="updated_at" type="DateTime" required="true"/>
+          <field name="change_percentage" type="Float" description="For numeric fields"/>
+        </fields>
+      </model>
+    </data_models>
+    
+    <state_management>
+      <agent_state extends="DeepAgentState">
+        <fields>
+          <field name="user_request" type="String" required="true"/>
+          <field name="parsed_request" type="Dict" description="Structured query from NL parsing"/>
+          <field name="research_type" type="ResearchType"/>
+          <field name="research_session_id" type="String"/>
+          <field name="research_status" type="String"/>
+          <field name="research_results" type="Dict"/>
+          <field name="extracted_items" type="List[Dict]"/>
+          <field name="confidence_scores" type="List[Float]"/>
+          <field name="validation_errors" type="List[String]"/>
+          <field name="database_updates" type="List[Dict]"/>
+          <field name="supply_research_result" type="Dict" description="Final result"/>
+        </fields>
+      </agent_state>
+      
+      <persistence>
+        <store>Redis</store>
+        <key_pattern>supply_researcher:{chat_thread_id}:{session_id}</key_pattern>
+        <ttl>3600</ttl>
+      </persistence>
+    </state_management>
+  </architecture>
+
+  <llm_integration>
+    <prompt_templates>
+      <template name="parse_request">
+        <system>You are an AI supply research assistant. Parse the user's request to identify:
+1. Research type (pricing, capabilities, availability, etc.)
+2. Specific provider (if mentioned)
+3. Specific model (if mentioned)
+4. Timeframe (if relevant)
+
+Output as JSON with fields: research_type, provider, model_name, timeframe</system>
+        <user>{user_request}</user>
+      </template>
+      
+      <template name="generate_research_query">
+        <system>Generate a comprehensive research query for Google Deep Research based on:
+- Research type: {research_type}
+- Provider: {provider}
+- Model: {model_name}
+
+Include specific questions about pricing, capabilities, and availability.
+Focus on official sources and recent updates.</system>
+      </template>
+      
+      <template name="extract_supply_data">
+        <system>Extract structured supply information from the research results.
+Look for:
+- Pricing per million tokens (input/output)
+- Context window size
+- Maximum output tokens
+- Model capabilities
+- API availability
+- Performance metrics
+
+Output as JSON array of supply items with confidence scores.</system>
+        <user>{research_results}</user>
+      </template>
+      
+      <template name="generate_report">
+        <system>Generate a concise report of supply updates made:
+- Models updated: {models_updated}
+- Price changes: {price_changes}
+- New capabilities: {new_capabilities}
+- Confidence scores: {confidence_scores}
+
+Format for admin notification with key insights and recommendations.</system>
+      </template>
+    </prompt_templates>
+    
+    <llm_config>
+      <model>claude-3-5-sonnet-20241022</model>
+      <temperature>0.1</temperature>
+      <max_tokens>2048</max_tokens>
+      <structured_output>true</structured_output>
+    </llm_config>
+  </llm_integration>
+
+  <workflows>
+    <workflow name="OnDemandResearch">
+      <trigger>Admin chat request</trigger>
+      <steps>
+        <step order="1" name="receive_request">
+          <action>Receive natural language request from admin via WebSocket</action>
+          <validation>Check user has admin role and supply_management permission</validation>
+          <example>"Add GPT-5 pricing information"</example>
+        </step>
+        
+        <step order="2" name="parse_request">
+          <action>Parse request using LLM to extract structured query</action>
+          <llm_call template="parse_request"/>
+          <output>
+            {
+              "research_type": "pricing",
+              "provider": "openai",
+              "model_name": "GPT-5",
+              "timeframe": "current"
+            }
+          </output>
+        </step>
+        
+        <step order="3" name="check_cache">
+          <action>Check Redis cache for recent research results</action>
+          <cache_key>research:pricing:openai:gpt-5</cache_key>
+          <ttl>3600</ttl>
+        </step>
+        
+        <step order="4" name="generate_query">
+          <action>Generate Deep Research query if cache miss</action>
+          <llm_call template="generate_research_query"/>
+        </step>
+        
+        <step order="5" name="init_research">
+          <action>Initialize Google Deep Research session</action>
+          <api_call>
+            POST /streamAssist
+            {
+              "query": "{generated_query}",
+              "session_config": {
+                "max_results": 10,
+                "include_citations": true
+              }
+            }
+          </api_call>
+          <error_handling>Retry with exponential backoff (max 3 attempts)</error_handling>
+        </step>
+        
+        <step order="6" name="start_research">
+          <action>Start research process</action>
+          <api_call>
+            POST /streamAssist
+            {
+              "query": "Start Research",
+              "session": "{session_id}"
+            }
+          </api_call>
+          <timeout>300</timeout>
+        </step>
+        
+        <step order="7" name="stream_results">
+          <action>Stream and process research results</action>
+          <websocket_updates>
+            <event>research_progress</event>
+            <data>questions_answered, progress_percentage</data>
+          </websocket_updates>
+        </step>
+        
+        <step order="8" name="extract_data">
+          <action>Extract supply data from research</action>
+          <llm_call template="extract_supply_data"/>
+          <validation>SupplyDataValidator.validate()</validation>
+        </step>
+        
+        <step order="9" name="calculate_confidence">
+          <action>Calculate confidence score</action>
+          <factors>
+            - Number of citations
+            - Source reliability
+            - Data completeness
+            - Consistency with existing data
+          </factors>
+        </step>
+        
+        <step order="10" name="update_database">
+          <action>Update database with validated data</action>
+          <transaction>
+            - Check for existing entry
+            - Create or update supply item
+            - Log all changes
+            - Update search indices
+          </transaction>
+        </step>
+        
+        <step order="11" name="cache_results">
+          <action>Cache results in Redis</action>
+          <ttl>3600</ttl>
+        </step>
+        
+        <step order="12" name="send_response">
+          <action>Send confirmation via WebSocket</action>
+          <websocket_event>supply_update_complete</websocket_event>
+          <llm_call template="generate_report"/>
+        </step>
+      </steps>
+      
+      <error_handlers>
+        <handler error="RateLimitError">
+          <action>Queue for retry with backoff</action>
+        </handler>
+        <handler error="ValidationError">
+          <action>Log error and request manual review</action>
+        </handler>
+        <handler error="APIError">
+          <action>Fallback to cached data if available</action>
+        </handler>
+      </error_handlers>
+    </workflow>
+    
+    <workflow name="ScheduledResearch">
+      <trigger>Cron schedule or manual trigger</trigger>
+      <concurrency>3</concurrency>
+      
+      <steps>
+        <step order="1" name="load_schedules">
+          <action>Load active schedules from database</action>
+        </step>
+        
+        <step order="2" name="check_due">
+          <action>Check which schedules are due to run</action>
+          <logic>next_run <= now AND enabled = true</logic>
+        </step>
+        
+        <step order="3" name="generate_queries">
+          <action>Generate research queries for all tracked providers</action>
+          <providers>
+            <provider>OpenAI</provider>
+            <provider>Anthropic</provider>
+            <provider>Google</provider>
+            <provider>Mistral</provider>
+            <provider>Cohere</provider>
+            <provider>AI21 Labs</provider>
+          </providers>
+        </step>
+        
+        <step order="4" name="execute_parallel">
+          <action>Execute research sessions in parallel</action>
+          <concurrency_limit>3</concurrency_limit>
+          <batch_size>2</batch_size>
+        </step>
+        
+        <step order="5" name="aggregate_results">
+          <action>Aggregate and reconcile results</action>
+          <deduplication>By provider and model name</deduplication>
+        </step>
+        
+        <step order="6" name="detect_changes">
+          <action>Detect significant changes</action>
+          <thresholds>
+            <price_change>10%</price_change>
+            <new_model>true</new_model>
+            <deprecation>true</deprecation>
+          </thresholds>
+        </step>
+        
+        <step order="7" name="apply_updates">
+          <action>Apply updates to database</action>
+          <batch_mode>true</batch_mode>
+        </step>
+        
+        <step order="8" name="generate_report">
+          <action>Generate change report</action>
+          <sections>
+            - Executive summary
+            - Price changes by provider
+            - New models available
+            - Deprecated models
+            - Market trends
+            - Recommendations
+          </sections>
+        </step>
+        
+        <step order="9" name="send_notifications">
+          <action>Send notifications if significant changes</action>
+          <channels>
+            <channel>Admin WebSocket broadcast</channel>
+            <channel>Email alerts (if configured)</channel>
+            <channel>Slack webhook (if configured)</channel>
+          </channels>
+        </step>
+        
+        <step order="10" name="update_schedule">
+          <action>Update next run time</action>
+          <calculation>Based on frequency and current time</calculation>
+        </step>
+      </steps>
+    </workflow>
+  </workflows>
+
+  <integration_points>
+    <integration name="Google Deep Research API">
+      <endpoint>https://discoveryengine.googleapis.com/v1/projects/{project_id}/locations/global/collections/default_collection/engines/{app_id}/assistants/default_assistant:streamAssist</endpoint>
+      <authentication>
+        <type>Bearer Token</type>
+        <method>gcloud auth application-default</method>
+      </authentication>
+      <rate_limits>
+        <limit type="requests_per_minute">100</limit>
+        <limit type="sessions_per_day">1000</limit>
+        <limit type="concurrent_sessions">5</limit>
+      </rate_limits>
+      <error_handling>
+        <retry_strategy>
+          <type>exponential_backoff</type>
+          <initial_delay>1000</initial_delay>
+          <max_delay>60000</max_delay>
+          <max_retries>3</max_retries>
+        </retry_strategy>
+        <fallback>Queue for later processing</fallback>
+      </error_handling>
+    </integration>
+    
+    <integration name="WebSocket Communication">
+      <events>
+        <event name="supply_research_request" direction="incoming"/>
+        <event name="research_progress" direction="outgoing"/>
+        <event name="supply_update_complete" direction="outgoing"/>
+        <event name="supply_change_alert" direction="outgoing"/>
+      </events>
+      <message_format>
+        {
+          "event": "string",
+          "data": "object",
+          "timestamp": "ISO8601",
+          "correlation_id": "UUID"
+        }
+      </message_format>
+    </integration>
+    
+    <integration name="Redis Cache">
+      <purpose>Performance optimization and state management</purpose>
+      <key_patterns>
+        <pattern>research:{type}:{provider}:{model}</pattern>
+        <pattern>session:{session_id}</pattern>
+        <pattern>schedule_result:{schedule_name}:{date}</pattern>
+        <pattern>supply_researcher:{thread_id}:{state}</pattern>
+      </key_patterns>
+      <ttl_strategy>
+        <research_results>3600</research_results>
+        <session_state>1800</session_state>
+        <schedule_results>86400</schedule_results>
+      </ttl_strategy>
+    </integration>
+    
+    <integration name="Database">
+      <tables>
+        <table>ai_supply_items</table>
+        <table>research_sessions</table>
+        <table>supply_update_logs</table>
+        <table>research_schedules</table>
+      </tables>
+      <transactions>
+        <transaction>Supply item updates with audit logging</transaction>
+        <transaction>Batch updates for scheduled research</transaction>
+      </transactions>
+    </integration>
+    
+    <integration name="Supervisor Agent">
+      <lifecycle>
+        <event>agent_started</event>
+        <event>agent_executing</event>
+        <event>agent_completed</event>
+        <event>agent_failed</event>
+      </lifecycle>
+      <communication>Via agent state and WebSocket events</communication>
+    </integration>
+  </integration_points>
+
+  <security_considerations>
+    <consideration priority="critical">
+      <risk>API key exposure in logs or responses</risk>
+      <mitigation>
+        - Store credentials in secure vault (HashiCorp Vault or AWS Secrets Manager)
+        - Never log sensitive data
+        - Mask credentials in error messages
+        - Use environment variables for local development
+      </mitigation>
+    </consideration>
+    
+    <consideration priority="high">
+      <risk>Data manipulation attacks via malicious input</risk>
+      <mitigation>
+        - Validate all inputs with strict schemas
+        - Sanitize research queries before API calls
+        - Use parameterized database queries
+        - Implement input length limits
+      </mitigation>
+    </consideration>
+    
+    <consideration priority="high">
+      <risk>Unauthorized access to supply data</risk>
+      <mitigation>
+        - Role-based access control (admin only)
+        - Audit all data access and modifications
+        - Implement row-level security in database
+        - Encrypt sensitive data at rest
+      </mitigation>
+    </consideration>
+    
+    <consideration priority="medium">
+      <risk>Research result poisoning</risk>
+      <mitigation>
+        - Cross-reference multiple sources
+        - Implement confidence scoring
+        - Flag anomalous data for review
+        - Maintain source whitelist
+      </mitigation>
+    </consideration>
+    
+    <consideration priority="medium">
+      <risk>DoS via excessive research requests</risk>
+      <mitigation>
+        - Rate limiting per user
+        - Request queuing
+        - Circuit breaker pattern
+        - Cost monitoring and alerts
+      </mitigation>
+    </consideration>
+  </security_considerations>
+
+  <monitoring>
+    <metrics>
+      <metric name="research_sessions_total" type="counter" labels="type,status"/>
+      <metric name="research_session_duration" type="histogram" unit="seconds"/>
+      <metric name="supply_updates_total" type="counter" labels="provider,model,field"/>
+      <metric name="research_errors_total" type="counter" labels="error_type,provider"/>
+      <metric name="cache_hit_rate" type="gauge" labels="cache_type"/>
+      <metric name="confidence_scores" type="histogram" labels="provider"/>
+      <metric name="price_changes_detected" type="counter" labels="provider,direction,magnitude"/>
+      <metric name="api_rate_limit_usage" type="gauge"/>
+      <metric name="database_query_duration" type="histogram" labels="operation"/>
+    </metrics>
+    
+    <alerts>
+      <alert name="research_failure_rate_high" threshold="0.1" window="5m" severity="warning"/>
+      <alert name="api_rate_limit_approaching" threshold="0.8" window="1m" severity="warning"/>
+      <alert name="significant_price_change" threshold="0.2" immediate="true" severity="info"/>
+      <alert name="scheduled_research_missed" window="1h" severity="error"/>
+      <alert name="low_confidence_updates" threshold="0.5" window="10m" severity="warning"/>
+      <alert name="database_connection_pool_exhausted" threshold="0.9" window="30s" severity="critical"/>
+    </alerts>
+    
+    <logging>
+      <log_level>INFO</log_level>
+      <structured_logging>true</structured_logging>
+      <log_fields>
+        <field>timestamp</field>
+        <field>level</field>
+        <field>agent_id</field>
+        <field>session_id</field>
+        <field>user_id</field>
+        <field>action</field>
+        <field>duration</field>
+        <field>error</field>
+      </log_fields>
+    </logging>
+  </monitoring>
+
+  <testing_requirements>
+    <test_categories>
+      <category name="Unit Tests" coverage_target="98%">
+        <test>Query parsing and generation</test>
+        <test>Data extraction from research results</test>
+        <test>Confidence score calculation</test>
+        <test>Data validation and normalization</test>
+        <test>Price change detection</test>
+        <test>Schedule calculation</test>
+        <test>Cache key generation</test>
+        <test>Error handling and retries</test>
+      </category>
+      
+      <category name="Integration Tests" coverage_target="95%">
+        <test>Google Deep Research API integration (mocked)</test>
+        <test>Database transaction handling</test>
+        <test>Redis cache operations</test>
+        <test>WebSocket message handling</test>
+        <test>LLM prompt template execution</test>
+        <test>Admin permission validation</test>
+        <test>Scheduler trigger execution</test>
+        <test>Multi-provider parallel research</test>
+      </category>
+      
+      <category name="E2E Tests" coverage_target="90%">
+        <test>Admin chat request to database update flow</test>
+        <test>Scheduled research execution with notifications</test>
+        <test>Multi-provider research aggregation</test>
+        <test>Change detection and alert generation</test>
+        <test>Audit trail generation and validation</test>
+        <test>Cache hit/miss scenarios</test>
+        <test>Error recovery and retry logic</test>
+        <test>State persistence across agent restarts</test>
+      </category>
+      
+      <category name="Performance Tests">
+        <test>Concurrent research session handling (target: 10 concurrent)</test>
+        <test>Large result set processing (target: 1000 items in 5s)</test>
+        <test>Database query optimization (target: < 100ms p99)</test>
+        <test>Cache hit rate validation (target: > 80%)</test>
+        <test>Memory usage under load (target: < 500MB)</test>
+      </category>
+      
+      <category name="Security Tests">
+        <test>Input validation against injection attacks</test>
+        <test>Permission enforcement</test>
+        <test>Credential masking in logs</test>
+        <test>Rate limiting effectiveness</test>
+      </category>
+    </test_categories>
+    
+    <test_data>
+      <dataset name="mock_research_results">
+        <description>Realistic research results for different scenarios</description>
+      </dataset>
+      <dataset name="provider_responses">
+        <description>Sample API responses from providers</description>
+      </dataset>
+      <dataset name="edge_cases">
+        <description>Malformed data, extreme values, missing fields</description>
+      </dataset>
+    </test_data>
+  </testing_requirements>
+
+  <performance_requirements>
+    <requirement name="response_time">
+      <target>< 2s for cache hits, < 30s for new research</target>
+    </requirement>
+    <requirement name="throughput">
+      <target>100 concurrent research sessions</target>
+    </requirement>
+    <requirement name="availability">
+      <target>99.9% uptime</target>
+    </requirement>
+    <requirement name="data_freshness">
+      <target>Daily updates for all tracked models</target>
+    </requirement>
+  </performance_requirements>
+
+  <examples>
+    <example name="Add New Model Pricing">
+      <scenario>Admin requests to add GPT-5 pricing</scenario>
+      <request>
+        {
+          "event": "supply_research_request",
+          "data": {
+            "message": "Add GPT-5 pricing information to the supply database",
+            "user_id": "admin_123",
+            "chat_thread_id": "thread_456"
+          }
+        }
+      </request>
+      <processing>
+        1. Parse: Extract "GPT-5", "pricing", "openai"
+        2. Check cache: Miss
+        3. Research: "What is the current pricing for OpenAI GPT-5..."
+        4. Extract: Input=$40/1M, Output=$120/1M, Context=256K
+        5. Validate: All fields valid, confidence=0.92
+        6. Update: Create new supply item
+        7. Audit: Log creation with research reference
+        8. Cache: Store for 1 hour
+        9. Respond: Send WebSocket confirmation
+      </processing>
+      <response>
+        {
+          "event": "supply_update_complete",
+          "data": {
+            "status": "success",
+            "summary": "Added GPT-5 pricing: $40/1M input, $120/1M output",
+            "confidence": 0.92,
+            "citations": 2,
+            "changes": [{
+              "action": "created",
+              "model": "GPT-5",
+              "provider": "openai"
+            }]
+          }
+        }
+      </response>
+    </example>
+    
+    <example name="Scheduled Price Check">
+      <scenario>Daily scheduled price update</scenario>
+      <trigger>Cron: 0 2 * * * (02:00 UTC daily)</trigger>
+      <processing>
+        1. Load active models (15 models, 6 providers)
+        2. Generate batch queries
+        3. Execute parallel research (3 concurrent)
+        4. Process results: 2 price changes detected
+        5. Update: Claude-3-Opus $15→$12.50 (-16.7%)
+        6. Update: GPT-4-Turbo $30→$28 (-6.7%)
+        7. Generate report with visualizations
+        8. Send notifications to admin channel
+        9. Update next run: Tomorrow 02:00 UTC
+      </processing>
+      <notifications>
+        - WebSocket broadcast to admin clients
+        - Slack: "🔔 Price Alert: 2 models updated"
+        - Email: Detailed report with charts
+      </notifications>
+    </example>
+    
+    <example name="Error Recovery">
+      <scenario>API rate limit exceeded during research</scenario>
+      <error>429 Too Many Requests</error>
+      <recovery>
+        1. Catch RateLimitError
+        2. Calculate backoff: 2^attempt * 1000ms
+        3. Queue request with delay
+        4. Send WebSocket update: "Research queued, retry in 4s"
+        5. Retry after delay
+        6. Success on retry
+        7. Continue normal flow
+      </recovery>
+    </example>
+  </examples>
+
+  <future_enhancements>
+    <enhancement priority="high">
+      <title>Multi-source verification</title>
+      <description>Cross-reference pricing from multiple sources for higher confidence</description>
+      <implementation>
+        - Add alternative data sources (web scraping, APIs)
+        - Implement consensus algorithm
+        - Weight sources by reliability
+      </implementation>
+    </enhancement>
+    
+    <enhancement priority="high">
+      <title>Predictive pricing models</title>
+      <description>Use historical data to predict future pricing trends</description>
+      <implementation>
+        - Time series analysis with Prophet
+        - Feature engineering from market events
+        - Confidence intervals for predictions
+      </implementation>
+    </enhancement>
+    
+    <enhancement priority="medium">
+      <title>Custom research templates</title>
+      <description>Allow admins to define custom research templates</description>
+      <implementation>
+        - Template builder UI
+        - Variable substitution
+        - Saved template library
+      </implementation>
+    </enhancement>
+    
+    <enhancement priority="medium">
+      <title>Cost optimization recommendations</title>
+      <description>Suggest model switches based on usage patterns</description>
+      <implementation>
+        - Analyze usage history
+        - Compare model capabilities
+        - Calculate potential savings
+      </implementation>
+    </enhancement>
+    
+    <enhancement priority="low">
+      <title>Competitive intelligence</title>
+      <description>Track competitive positioning and market share</description>
+      <implementation>
+        - Market share calculations
+        - Feature comparison matrices
+        - Trend analysis and reporting
+      </implementation>
+    </enhancement>
+  </future_enhancements>
+
+  <migration_notes>
+    <note version="1.0_to_2.0">
+      - Add new database fields: research_type, retry_count, change_percentage
+      - Implement LLM prompt templates
+      - Add WebSocket event handlers
+      - Update state management to use DeepAgentState
+      - Implement proper lifecycle methods
+      - Add comprehensive error handling
+      - Enhance monitoring and alerting
+    </note>
+  </migration_notes>
+</specification>
