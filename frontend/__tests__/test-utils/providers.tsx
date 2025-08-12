@@ -1,19 +1,24 @@
 import React from 'react';
-import { AuthContext } from '@/auth/context';
+import { AuthContext, AuthContextType } from '@/auth/context';
 import { MockWebSocketProvider } from '../../__mocks__/mock-websocket-provider';
+import { User } from '@/types';
 
-// Mock auth context value
-const mockAuthContextValue = {
+// Mock user object
+const mockUser: User = {
+  id: 'test-user',
+  email: 'test@example.com',
+  full_name: 'Test User',
+  name: 'Test User'
+};
+
+// Mock auth context value matching AuthContextType
+const mockAuthContextValue: AuthContextType = {
   token: 'test-token-123',
-  user: {
-    id: 'test-user',
-    email: 'test@example.com',
-    name: 'Test User'
-  },
-  isAuthenticated: true,
+  user: mockUser,
   login: jest.fn(),
   logout: jest.fn(),
-  refreshToken: jest.fn()
+  loading: false,
+  authConfig: null
 };
 
 /**

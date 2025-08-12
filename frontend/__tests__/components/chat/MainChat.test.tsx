@@ -9,7 +9,9 @@ import { TestProviders } from '../../test-utils/providers';
 
 // Mock dependencies
 jest.mock('@/store/unified-chat');
-jest.mock('@/hooks/useChatWebSocket');
+jest.mock('@/hooks/useChatWebSocket', () => ({
+  useChatWebSocket: jest.fn()
+}));
 jest.mock('@/components/chat/ChatHeader', () => ({
   ChatHeader: () => <div data-testid="chat-header">Chat Header</div>
 }));
@@ -56,7 +58,8 @@ describe('MainChat', () => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     (useUnifiedChatStore as jest.Mock).mockReturnValue(mockStore);
-    (useChatWebSocket as jest.Mock).mockReturnValue({
+    const { useChatWebSocket } = require('@/hooks/useChatWebSocket');
+    useChatWebSocket.mockReturnValue({
       connected: true,
       error: null
     });
@@ -70,11 +73,13 @@ describe('MainChat', () => {
     it('should initialize WebSocket connection on mount', () => {
       render(<MainChat />);
       
+      const { useChatWebSocket } = require('@/hooks/useChatWebSocket');
       expect(useChatWebSocket).toHaveBeenCalled();
     });
 
     it('should handle WebSocket connection state', () => {
-      (useChatWebSocket as jest.Mock).mockReturnValue({
+      const { useChatWebSocket } = require('@/hooks/useChatWebSocket');
+      useChatWebSocket.mockReturnValue({
         connected: true,
         error: null
       });
@@ -82,7 +87,7 @@ describe('MainChat', () => {
       const { rerender } = render(<MainChat />);
       
       // Simulate disconnection
-      (useChatWebSocket as jest.Mock).mockReturnValue({
+      useChatWebSocket.mockReturnValue({
         connected: false,
         error: null
       });
@@ -93,7 +98,8 @@ describe('MainChat', () => {
     });
 
     it('should handle WebSocket errors gracefully', () => {
-      (useChatWebSocket as jest.Mock).mockReturnValue({
+      const { useChatWebSocket } = require('@/hooks/useChatWebSocket');
+      useChatWebSocket.mockReturnValue({
         connected: false,
         error: new Error('WebSocket connection failed')
       });

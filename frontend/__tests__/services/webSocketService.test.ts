@@ -1,11 +1,6 @@
 import { webSocketService } from '@/services/webSocketService';
-import { WebSocketManager } from '@/lib/websocket-manager';
-
-// Mock WebSocketManager
-jest.mock('@/lib/websocket-manager');
 
 describe('webSocketService', () => {
-  let mockWebSocketManager: jest.Mocked<WebSocketManager>;
   let mockWebSocket: jest.Mocked<WebSocket>;
 
   beforeEach(() => {
@@ -35,28 +30,14 @@ describe('webSocketService', () => {
       CLOSED: WebSocket.CLOSED
     } as jest.Mocked<WebSocket>;
 
-    // Mock WebSocketManager instance
-    mockWebSocketManager = {
-      connect: jest.fn(),
-      disconnect: jest.fn(),
-      send: jest.fn(),
-      isConnected: jest.fn(),
-      getConnectionState: jest.fn(),
-      setMessageHandler: jest.fn(),
-      setErrorHandler: jest.fn(),
-      setConnectionHandler: jest.fn(),
-      reconnect: jest.fn(),
-      getSocket: jest.fn().mockReturnValue(mockWebSocket),
-      destroy: jest.fn(),
-      getReconnectAttempts: jest.fn().mockReturnValue(0),
-      getLastError: jest.fn().mockReturnValue(null),
-      onOpen: jest.fn(),
-      onClose: jest.fn(),
-      onError: jest.fn(),
-      onMessage: jest.fn()
-    } as jest.Mocked<WebSocketManager>;
-
-    (WebSocketManager as jest.Mock).mockImplementation(() => mockWebSocketManager);
+    // Mock global WebSocket constructor
+    global.WebSocket = jest.fn().mockImplementation(() => mockWebSocket) as any;
+    
+    // Mock localStorage
+    Storage.prototype.getItem = jest.fn((key) => {
+      if (key === 'authToken') return 'test-token-123';
+      return null;
+    });
   });
 
   afterEach(() => {
@@ -65,13 +46,14 @@ describe('webSocketService', () => {
   });
 
   describe('Connection Management', () => {
-    it('should establish WebSocket connection', async () => {
-      mockWebSocketManager.connect.mockResolvedValueOnce(undefined);
-      mockWebSocketManager.isConnected.mockReturnValue(false);
+    it('should establish WebSocket connection', () => {
+      const onStatusChange = jest.fn();
+      webSocketService.onStatusChange = onStatusChange;
+      
+      webSocketService.connect('ws://localhost:8000/ws');
 
-      await webSocketService.connect('ws://localhost:8000/ws');
-
-      expect(mockWebSocketManager.connect).toHaveBeenCalledWith('ws://localhost:8000/ws');
+      expect(global.WebSocket).toHaveBeenCalledWith('ws://localhost:8000/ws');
+      expect(onStatusChange).toHaveBeenCalledWith('CONNECTING');
     });
 
     it('should handle connection success', async () => {

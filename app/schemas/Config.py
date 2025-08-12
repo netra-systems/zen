@@ -140,6 +140,8 @@ class AppConfig(BaseModel):
     jwt_secret_key: str = None
     api_base_url: str = "http://localhost:8000"
     database_url: str = None
+    redis_url: str = None  # Added for staging/production Redis URL
+    clickhouse_url: str = None  # Added for staging/production ClickHouse URL
     log_level: str = "DEBUG"
     log_secrets: bool = False
     frontend_url: str = "http://localhost:3010"
@@ -250,6 +252,14 @@ class StagingConfig(AppConfig):
     debug: bool = False
     log_level: str = "INFO"
     # Staging uses production-like settings but with relaxed validation
+    
+    def __init__(self, **data):
+        """Initialize staging config with environment variables."""
+        import os
+        # Load database URL from environment if not provided
+        if 'database_url' not in data and os.environ.get('DATABASE_URL'):
+            data['database_url'] = os.environ.get('DATABASE_URL')
+        super().__init__(**data)
     
 class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""

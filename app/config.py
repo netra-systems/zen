@@ -42,6 +42,9 @@ class ConfigManager:
             # Create base config
             config = self._create_base_config(environment)
             
+            # Load critical environment variables (non-secrets like DATABASE_URL, REDIS_URL, etc)
+            self._load_critical_env_vars(config)
+            
             # Load secrets
             self._load_secrets_into_config(config)
             
@@ -98,6 +101,64 @@ class ConfigManager:
             self._logger.info(f"Updated WebSocket URL to use port {server_port}")
         
         return config
+    
+    def _load_critical_env_vars(self, config: AppConfig):
+        """Load critical environment variables that are not secrets."""
+        critical_vars = {
+            "DATABASE_URL": "database_url",
+            "REDIS_URL": "redis_url", 
+            "CLICKHOUSE_URL": "clickhouse_url",
+            "CLICKHOUSE_HOST": None,  # Will be handled specially
+            "CLICKHOUSE_PORT": None,  # Will be handled specially
+            "CLICKHOUSE_PASSWORD": None,  # Will be handled specially
+            "CLICKHOUSE_USER": None,  # Will be handled specially
+            "LOG_LEVEL": "log_level",
+            "ENVIRONMENT": "environment",
+            "PR_NUMBER": None,  # For staging environment tracking
+        }
+        
+        for env_var, config_field in critical_vars.items():
+            value = os.environ.get(env_var)
+            if value:
+                if config_field:
+                    # Direct field assignment
+                    if hasattr(config, config_field):
+                        setattr(config, config_field, value)
+                        self._logger.debug(f"Set {config_field} from {env_var}")
+                
+                # Handle special cases
+                if env_var == "CLICKHOUSE_HOST" and hasattr(config, 'clickhouse_native'):
+                    config.clickhouse_native.host = value
+                    if hasattr(config, 'clickhouse_https'):
+                        config.clickhouse_https.host = value
+                    self._logger.debug(f"Set ClickHouse host from environment: {value}")
+                    
+                elif env_var == "CLICKHOUSE_PORT" and hasattr(config, 'clickhouse_native'):
+                    try:
+                        config.clickhouse_native.port = int(value)
+                        if hasattr(config, 'clickhouse_https'):
+                            config.clickhouse_https.port = int(value)
+                        self._logger.debug(f"Set ClickHouse port from environment: {value}")
+                    except ValueError:
+                        self._logger.warning(f"Invalid CLICKHOUSE_PORT value: {value}")
+                        
+                elif env_var == "CLICKHOUSE_PASSWORD":
+                    if hasattr(config, 'clickhouse_native'):
+                        config.clickhouse_native.password = value
+                    if hasattr(config, 'clickhouse_https'):
+                        config.clickhouse_https.password = value
+                    self._logger.debug("Set ClickHouse password from environment")
+                    
+                elif env_var == "CLICKHOUSE_USER" and hasattr(config, 'clickhouse_native'):
+                    config.clickhouse_native.user = value
+                    if hasattr(config, 'clickhouse_https'):
+                        config.clickhouse_https.user = value
+                    self._logger.debug(f"Set ClickHouse user from environment: {value}")
+        
+        # Log summary of critical vars loaded
+        loaded_vars = [var for var in critical_vars.keys() if os.environ.get(var)]
+        if loaded_vars:
+            self._logger.info(f"Loaded {len(loaded_vars)} critical environment variables: {', '.join(loaded_vars)}")
     
     def _load_secrets_into_config(self, config: AppConfig):
         """Load secrets into the configuration object."""

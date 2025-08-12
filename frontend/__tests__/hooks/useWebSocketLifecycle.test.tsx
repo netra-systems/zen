@@ -91,6 +91,8 @@ describe('useWebSocket Hook Lifecycle', () => {
       });
       
       expect(result.current.status).toBe('CLOSED');
+      expect(result.current.messages).toEqual([]);
+      expect(result.current.sendMessage).toBeDefined();
     });
 
     it('should setup connection with token', async () => {
@@ -135,12 +137,14 @@ describe('useWebSocket Hook Lifecycle', () => {
       }, { wrapper });
 
       const initialStatus = result.current.status;
+      const initialMessages = result.current.messages;
 
       // Force re-render
       rerender();
 
       expect(renderCount).toBe(2);
       expect(result.current.status).toBe(initialStatus);
+      expect(result.current.messages).toBe(initialMessages);
       
       await waitFor(() => {
         // Should only connect once
@@ -208,7 +212,9 @@ describe('useWebSocket Hook Lifecycle', () => {
       const testMessage = { type: 'test', payload: { data: 'test' } };
       
       act(() => {
-        result.current.sendMessage(testMessage);
+        if (result.current && result.current.sendMessage) {
+          result.current.sendMessage(testMessage);
+        }
       });
 
       expect(mockWebSocketService.sendMessage).toHaveBeenCalledWith(testMessage);
@@ -264,10 +270,13 @@ describe('useWebSocket Hook Lifecycle', () => {
         </AuthContext.Provider>
       );
 
-      renderHook(() => useWebSocketContext(), { wrapper: noTokenWrapper });
+      const { result } = renderHook(() => useWebSocketContext(), { wrapper: noTokenWrapper });
 
       // Should not attempt to connect without token
       expect(mockWebSocketService.connect).not.toHaveBeenCalled();
+      // But should still provide context
+      expect(result.current.status).toBe('CLOSED');
+      expect(result.current.messages).toEqual([]);
     });
 
     it('should handle config fetch failure', async () => {
@@ -275,7 +284,7 @@ describe('useWebSocket Hook Lifecycle', () => {
 
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      renderHook(() => useWebSocketContext(), { wrapper });
+      const { result } = renderHook(() => useWebSocketContext(), { wrapper });
 
       await waitFor(() => {
         expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -283,6 +292,10 @@ describe('useWebSocket Hook Lifecycle', () => {
           expect.any(Error)
         );
       });
+
+      // Should still provide a valid context even if connection fails
+      expect(result.current.status).toBe('CLOSED');
+      expect(result.current.messages).toEqual([]);
 
       consoleErrorSpy.mockRestore();
     });

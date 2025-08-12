@@ -6,7 +6,9 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreads } from '@/hooks/useThreads';
 import { threadService } from '@/services/threadService';
 
-import { TestProviders } from '../test-utils/providers';// Mock dependencies
+import { TestProviders } from '../test-utils/providers';
+
+// Mock dependencies
 jest.mock('@/store/unified-chat');
 jest.mock('@/hooks/useThreads');
 jest.mock('@/services/threadService');
@@ -76,14 +78,14 @@ describe('ChatSidebar Component', () => {
     jest.clearAllMocks();
     (useUnifiedChatStore as jest.Mock).mockReturnValue(mockChatStore);
     (useThreads as jest.Mock).mockReturnValue(mockThreadsHook);
-    (threadService as any).mockReturnValue(mockThreadService);
+    Object.assign(threadService, mockThreadService);
   });
 
   const renderWithProvider = (component: React.ReactElement) => {
     return render(
-      <WebSocketProvider>
+      <TestProviders>
         {component}
-      </WebSocketProvider>
+      </TestProviders>
     );
   };
 
