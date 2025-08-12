@@ -1654,51 +1654,20 @@ jobs:
           TF_VAR_clickhouse_password: ${{ secrets.CLICKHOUSE_PASSWORD || 'placeholder_password' }}
         run: |
           PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
-          LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/default.tflock"
           
-          # Force remove any existing lock for destroy operations
-          echo "Checking for existing lock before destroy..."
-          if gsutil stat "$LOCK_FILE" 2>/dev/null; then
-            echo "⚠️ Lock file found, force removing for destroy operation..."
-            gsutil rm "$LOCK_FILE" 2>/dev/null || true
-            sleep 3
-          fi
-          
-          # Initialize Terraform with retries
-          MAX_INIT_ATTEMPTS=3
-          INIT_ATTEMPT=1
-          while [ $INIT_ATTEMPT -le $MAX_INIT_ATTEMPTS ]; do
-            echo "Terraform init attempt $INIT_ATTEMPT of $MAX_INIT_ATTEMPTS..."
-            
-            if terraform init \
-              -backend-config="bucket=${{ env.GCP_PROJECT_ID }}-terraform-state" \
-              -backend-config="prefix=staging/pr-${PR_NUMBER}" \
-              -lock-timeout=120s; then
-              echo "✅ Terraform init successful"
-              break
-            else
-              echo "❌ Terraform init failed"
-              
-              if [ $INIT_ATTEMPT -eq $MAX_INIT_ATTEMPTS ]; then
-                echo "Failed to initialize after $MAX_INIT_ATTEMPTS attempts"
-                exit 1
-              fi
-              
-              # Force unlock and retry
-              echo "Force removing lock and retrying..."
-              gsutil rm "$LOCK_FILE" 2>/dev/null || true
-              sleep 5
-              INIT_ATTEMPT=$((INIT_ATTEMPT + 1))
-            fi
-          done
+          # Initialize Terraform
+          terraform init \
+            -backend-config="bucket=${{ env.GCP_PROJECT_ID }}-terraform-state"
+            -backend-config="prefix=staging/pr-${PR_NUMBER}"
+            -lock-timeout=120s
           
           # Create secure tfvars file for destroy operation
           cat > terraform.tfvars << 'EOF'
           project_id = "${{ env.GCP_PROJECT_ID }}"
           region = "${{ env.GCP_REGION }}"
           pr_number = "${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
-          backend_image = "${{ needs.build-backend.outputs.backend_image || 'gcr.io/PROJECT_ID/backend:latest' }}"
-          frontend_image = "${{ needs.build-frontend.outputs.frontend_image || 'gcr.io/PROJECT_ID/frontend:latest' }}"
+          backend_image = "gcr.io/PROJECT_ID/backend:latest"
+          frontend_image = "gcr.io/PROJECT_ID/frontend:latest"
           max_instances = 1
           domain = "${{ env.STAGING_DOMAIN }}"
           EOF
@@ -1710,7 +1679,7 @@ jobs:
           # Secure the file
           chmod 600 terraform.tfvars
           
-          # Run destroy with retries and lock handling
+          # Run destroy with retries
           MAX_DESTROY_ATTEMPTS=2
           DESTROY_ATTEMPT=1
           while [ $DESTROY_ATTEMPT -le $MAX_DESTROY_ATTEMPTS ]; do
@@ -1728,14 +1697,11 @@ jobs:
               
               if [ $DESTROY_ATTEMPT -eq $MAX_DESTROY_ATTEMPTS ]; then
                 echo "Failed to destroy after $MAX_DESTROY_ATTEMPTS attempts"
-                # Don't fail the job - we'll clean up manually if needed
                 echo "::warning::Terraform destroy failed but continuing with cleanup"
                 break
               fi
               
-              # Force unlock and retry
-              echo "Force removing lock and retrying..."
-              gsutil rm "$LOCK_FILE" 2>/dev/null || true
+              echo "Waiting 10 seconds before retry..."
               sleep 10
               DESTROY_ATTEMPT=$((DESTROY_ATTEMPT + 1))
             fi
@@ -1749,6 +1715,7 @@ jobs:
           gsutil -m rm -r "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/" 2>/dev/null || true
 
       - name: Clean up container images and build cache
+        continue-on-error: true
         continue-on-error: true
         run: |
           PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
