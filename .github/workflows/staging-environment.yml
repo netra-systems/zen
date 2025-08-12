@@ -110,16 +110,63 @@ jobs:
           echo "test_level=$TEST_LEVEL" >> $GITHUB_OUTPUT
           echo "max_instances=$MAX_INSTANCES" >> $GITHUB_OUTPUT
 
+      - name: Check for backend changes
+        id: backend-changes
+        run: |
+          # Check if backend files have changed
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || git diff --name-only HEAD~1 HEAD || echo "")
+          
+          # Check for backend-related changes
+          if echo "$CHANGED_FILES" | grep -E '^(app/|requirements\.txt|Dockerfile\.backend|alembic/)' > /dev/null 2>&1; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "✅ Backend changes detected"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No backend changes detected"
+          fi
+
       - name: Build and push backend container
         id: backend-build
         run: |
           IMAGE_TAG="pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-${{ github.sha }}"
           IMAGE_URL="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/backend:${IMAGE_TAG}"
           
+          # Check if image already exists and no changes detected
+          if [[ "${{ steps.backend-changes.outputs.changed }}" == "false" ]]; then
+            # Try to find the latest existing image for this PR
+            LATEST_IMAGE=$(gcloud artifacts docker images list \
+              ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/backend \
+              --filter="tags:pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-*" \
+              --limit=1 --format="value(IMAGE)" 2>/dev/null || echo "")
+            
+            if [[ -n "$LATEST_IMAGE" ]]; then
+              echo "♻️ Reusing existing backend image: $LATEST_IMAGE"
+              echo "backend_image=$LATEST_IMAGE" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          fi
+          
+          # Build new image if changes detected or no existing image
+          echo "🔨 Building new backend image..."
           docker build -t $IMAGE_URL -f Dockerfile.backend .
           docker push $IMAGE_URL
           
           echo "backend_image=$IMAGE_URL" >> $GITHUB_OUTPUT
+
+      - name: Check for frontend changes
+        id: frontend-changes
+        run: |
+          # Check if frontend files have changed
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || git diff --name-only HEAD~1 HEAD || echo "")
+          
+          # Check for frontend-related changes
+          if echo "$CHANGED_FILES" | grep -E '^frontend/' > /dev/null 2>&1; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "✅ Frontend changes detected"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No frontend changes detected"
+          fi
 
       - name: Build and push frontend container
         id: frontend-build
@@ -127,8 +174,39 @@ jobs:
           IMAGE_TAG="pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-${{ github.sha }}"
           IMAGE_URL="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/frontend:${IMAGE_TAG}"
           
-          docker build -t $IMAGE_URL -f Dockerfile.frontend \
-            --build-arg NEXT_PUBLIC_API_URL=https://pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-api.${{ env.STAGING_DOMAIN }} .
+          # Check if image already exists and no changes detected
+          if [[ "${{ steps.frontend-changes.outputs.changed }}" == "false" ]]; then
+            # Try to find the latest existing image for this PR
+            LATEST_IMAGE=$(gcloud artifacts docker images list \
+              ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/frontend \
+              --filter="tags:pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-*" \
+              --limit=1 --format="value(IMAGE)" 2>/dev/null || echo "")
+            
+            if [[ -n "$LATEST_IMAGE" ]]; then
+              echo "♻️ Reusing existing frontend image: $LATEST_IMAGE"
+              echo "frontend_image=$LATEST_IMAGE" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          fi
+          
+          # Build new image if changes detected or no existing image
+          echo "🔨 Building new frontend image..."
+          
+          # Check if we're in the root directory and Dockerfile.frontend is in frontend/
+          if [[ -f "frontend/Dockerfile.frontend" ]]; then
+            cd frontend
+            docker build -t $IMAGE_URL -f Dockerfile.frontend \
+              --build-arg NEXT_PUBLIC_API_URL=https://pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-api.${{ env.STAGING_DOMAIN }} .
+            cd ..
+          elif [[ -f "Dockerfile.frontend" ]]; then
+            # Fallback if Dockerfile.frontend is in root
+            docker build -t $IMAGE_URL -f Dockerfile.frontend \
+              --build-arg NEXT_PUBLIC_API_URL=https://pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-api.${{ env.STAGING_DOMAIN }} .
+          else
+            echo "❌ Error: Dockerfile.frontend not found in expected locations"
+            exit 1
+          fi
+          
           docker push $IMAGE_URL
           
           echo "frontend_image=$IMAGE_URL" >> $GITHUB_OUTPUT
@@ -371,17 +449,20 @@ jobs:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       - name: Export logs before destruction
+        continue-on-error: true  # Continue even if log export fails
         run: |
           PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
           
-          # Export Cloud Run logs
-          gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=staging-pr-${PR_NUMBER}" \
+          # Export Cloud Run logs (may fail if permissions are insufficient)
+          if gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=staging-pr-${PR_NUMBER}" \
             --format=json \
             --project=${{ env.GCP_PROJECT_ID }} \
-            > staging-logs-pr-${PR_NUMBER}.json
-          
-          # Upload logs as artifact
-          echo "Logs exported for PR ${PR_NUMBER}"
+            > staging-logs-pr-${PR_NUMBER}.json 2>/dev/null; then
+            echo "✅ Logs exported for PR ${PR_NUMBER}"
+          else
+            echo "⚠️ Could not export logs (insufficient permissions or no logs found)"
+            echo "{}" > staging-logs-pr-${PR_NUMBER}.json  # Create empty file for artifact
+          fi
 
       # UPDATED FOR V4: Use actions/upload-artifact@v4 with unique naming
       - name: Upload logs
