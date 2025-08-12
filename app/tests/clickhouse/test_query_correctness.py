@@ -271,12 +271,12 @@ class TestUsagePatternQueries:
         
         assert "toHour(timestamp) as hour_of_day" in query
         assert "toDayOfWeek(timestamp) as day_of_week" in query
-        assert "count() as request_count" in query
-        assert "avgIf(latency_value, has_latency)" in query
-        assert "quantileIf(0.95, latency_value, has_latency)" in query
+        assert "count() as event_count" in query
+        assert "uniqExact(workload_id) as unique_workloads" in query
+        assert "uniqExact(model_name) as unique_models" in query
         assert "WHERE user_id = 789" in query
         assert "timestamp >= now() - INTERVAL 30 DAY" in query
-        assert "GROUP BY hour_of_day, day_of_week" in query
+        assert "GROUP BY day_of_week, hour_of_day" in query
         assert "ORDER BY day_of_week, hour_of_day" in query
     
     def test_usage_patterns_custom_days_back(self):

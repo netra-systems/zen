@@ -63,14 +63,21 @@ class ConfigManager:
             return "testing"
         
         # Check for Cloud Run deployment indicators
-        if os.environ.get("K_SERVICE") or os.environ.get("K_REVISION"):
+        k_service = os.environ.get("K_SERVICE")
+        k_revision = os.environ.get("K_REVISION")
+        
+        if k_service or k_revision:
             # We're in Cloud Run - check for staging indicators
-            if "staging" in os.environ.get("K_SERVICE", "").lower():
+            if k_service and "staging" in k_service.lower():
+                self._logger.debug(f"Detected staging environment from K_SERVICE: {k_service}")
                 return "staging"
             if os.environ.get("PR_NUMBER"):
+                self._logger.debug(f"Detected staging environment from PR_NUMBER: {os.environ.get('PR_NUMBER')}")
                 return "staging"  # PR deployments are staging
         
-        return os.environ.get("ENVIRONMENT", "development").lower()
+        env = os.environ.get("ENVIRONMENT", "development").lower()
+        self._logger.debug(f"Environment determined as: {env}")
+        return env
     
     def _create_base_config(self, environment: str) -> AppConfig:
         """Create the base configuration object for the environment."""
@@ -95,21 +102,43 @@ class ConfigManager:
     def _load_secrets_into_config(self, config: AppConfig):
         """Load secrets into the configuration object."""
         try:
+            self._logger.info("Loading secrets into configuration...")
             secrets = self._secret_manager.load_secrets()
-            self._apply_secrets_to_config(config, secrets)
+            
+            if secrets:
+                self._logger.info(f"Applying {len(secrets)} secrets to configuration")
+                self._apply_secrets_to_config(config, secrets)
+                
+                # Log which critical secrets were successfully applied
+                critical_secrets = ['gemini-api-key', 'jwt-secret-key', 'fernet-key']
+                applied_critical = [s for s in critical_secrets if s in secrets]
+                if applied_critical:
+                    self._logger.info(f"Critical secrets applied: {', '.join(applied_critical)}")
+                
+                missing_critical = [s for s in critical_secrets if s not in secrets]
+                if missing_critical:
+                    self._logger.warning(f"Critical secrets missing: {', '.join(missing_critical)}")
+            else:
+                self._logger.warning("No secrets loaded, configuration may be incomplete")
+                
         except Exception as e:
-            self._logger.warning(f"Failed to load secrets: {e}. Using environment variables.")
-            self._load_from_environment_variables(config)
+            self._logger.error(f"Failed to load secrets: {e}")
+            # Don't fallback to environment variables - they should already be loaded in SecretManager
     
     def _apply_secrets_to_config(self, config: AppConfig, secrets: Dict[str, Any]):
         """Apply loaded secrets to configuration object."""
         # Apply secrets based on predefined mapping
         secret_mappings = self._get_secret_mappings()
+        applied_count = 0
         
         for secret_name, secret_value in secrets.items():
             if secret_value and secret_name in secret_mappings:
                 mapping = secret_mappings[secret_name]
                 self._apply_secret_mapping(config, mapping, secret_value)
+                applied_count += 1
+                self._logger.debug(f"Applied secret: {secret_name} to {len(mapping.get('targets', [])) or 1} target(s)")
+        
+        self._logger.info(f"Successfully applied {applied_count} secrets to configuration")
     
     def _get_secret_mappings(self) -> Dict[str, Dict[str, Any]]:
         """Get the mapping of secrets to configuration fields."""

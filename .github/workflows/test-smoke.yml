@@ -1,0 +1,160 @@
+name: Smoke Tests
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Enable debug logging'
+        required: false
+        default: 'false'
+  workflow_call:
+    inputs:
+      caller:
+        description: 'Calling workflow'
+        required: false
+        type: string
+
+concurrency:
+  group: smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke-test:
+    name: Quick Validation (<30s)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    outputs:
+      status: ${{ steps.test.outcome }}
+      duration: ${{ steps.timer.outputs.duration }}
+      
+    steps:
+      - name: Start Timer
+        id: timer
+        run: echo "start=$(date +%s)" >> $GITHUB_OUTPUT
+        
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            venv
+          key: smoke-${{ runner.os }}-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            smoke-${{ runner.os }}-
+            
+      - name: Install Core Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt --no-deps
+          pip install pytest pytest-asyncio pytest-timeout
+          
+      - name: Run Smoke Tests
+        id: test
+        run: |
+          python test_runner.py --level smoke --json-output test-results.json
+        continue-on-error: true
+        
+      - name: Calculate Duration
+        if: always()
+        id: timer-end
+        run: |
+          end=$(date +%s)
+          start=${{ steps.timer.outputs.start }}
+          duration=$((end - start))
+          echo "duration=${duration}s" >> $GITHUB_OUTPUT
+          
+      - name: Process Results
+        if: always()
+        run: |
+          python scripts/ci/process_results.py \
+            --input test-results.json \
+            --format markdown \
+            --output smoke-report.md
+            
+      - name: Upload Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-results-${{ github.sha }}
+          path: |
+            test-results.json
+            smoke-report.md
+          retention-days: 7
+          
+      - name: Comment PR (if applicable)
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('smoke-report.md', 'utf8');
+            
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.data.find(
+              c => c.user.type === 'Bot' && c.body.includes('## Smoke Test Results')
+            );
+            
+            const body = `## 🚬 Smoke Test Results
+            
+            **Status:** ${{ steps.test.outcome == 'success' && '✅ Passed' || '❌ Failed' }}
+            **Duration:** ${{ steps.timer-end.outputs.duration }}
+            
+            ${report}
+            
+            <sub>Run ID: ${{ github.run_id }} | SHA: ${{ github.sha }}</sub>`;
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+            
+      - name: Set Commit Status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: '${{ steps.test.outcome }}' === 'success' ? 'success' : 'failure',
+              context: 'continuous-integration/netra/smoke',
+              description: 'Smoke tests ${{ steps.test.outcome }} in ${{ steps.timer-end.outputs.duration }}',
+              target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            });
+            
+      - name: Fail if Tests Failed
+        if: steps.test.outcome == 'failure'
+        run: exit 1

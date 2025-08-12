@@ -1,0 +1,179 @@
+# Netra CI/CD Configuration
+# Central configuration for all CI/CD workflows
+
+test_mapping:
+  # Map git events to test levels
+  push:
+    feature_branch: smoke
+    main_branch: critical
+    release_tag: comprehensive
+    
+  pull_request:
+    opened: unit
+    ready_for_review: integration
+    pre_merge: comprehensive
+    
+  schedule:
+    nightly: comprehensive
+    weekly: comprehensive
+
+# Test level definitions
+test_levels:
+  smoke:
+    duration: 30s
+    required: true
+    runners: [ubuntu-latest]
+    parallel: false
+    
+  unit:
+    duration: 120s
+    required: true
+    runners: [ubuntu-latest]
+    parallel: true
+    shards: [core, agents, websocket, database, api]
+    
+  integration:
+    duration: 300s
+    required: false
+    runners: [ubuntu-latest]
+    parallel: true
+    shards: [backend, frontend, e2e]
+    
+  comprehensive:
+    duration: 900s
+    required: false
+    runners: [ubuntu-latest]  # Would be GCP runners in production
+    parallel: true
+    shards: [all]
+    
+  critical:
+    duration: 120s
+    required: true
+    runners: [ubuntu-latest]
+    parallel: false
+    
+  performance:
+    duration: 1800s
+    required: false
+    runners: [ubuntu-latest]  # Would be high-mem runners in production
+    parallel: false
+    
+  security:
+    duration: 600s
+    required: false
+    runners: [ubuntu-latest]
+    parallel: false
+
+# Auto-fix configuration
+auto_fix:
+  enabled: true
+  max_attempts: 3
+  max_cost_per_pr: 5.00
+  max_cost_per_day: 50.00
+  
+  providers:
+    - name: claude
+      priority: 1
+      model: claude-3-opus-20240229
+      enabled: true
+      
+    - name: gemini
+      priority: 2
+      model: gemini-1.5-pro
+      enabled: true
+      
+    - name: gpt4
+      priority: 3
+      model: gpt-4-turbo
+      enabled: true
+      
+  fixable_errors:
+    - import_error
+    - syntax_error
+    - type_error
+    - attribute_error
+    - name_error
+    - indentation_error
+    
+  auto_apply:
+    safe_fixes: true
+    semantic_fixes: after_review
+    risky_fixes: false
+
+# Comment commands
+comment_triggers:
+  test:
+    permission: write
+    default_level: integration
+    
+  autofix:
+    permission: write
+    enabled: true
+    
+  retry:
+    permission: write
+    max_retries: 3
+    
+  debug:
+    permission: admin
+    duration: 30m
+
+# Notification settings
+notifications:
+  slack:
+    enabled: false  # Set to true and configure webhook
+    channels:
+      main_failure: "#alerts"
+      release: "#releases"
+      nightly: "#nightly-builds"
+      
+  email:
+    enabled: false
+    recipients: []
+    
+  pr_comments:
+    enabled: true
+    update_strategy: edit  # edit or new
+    
+# Cost optimization
+cost_optimization:
+  enabled: true
+  
+  spot_instances:
+    enabled: true
+    fallback: true
+    
+  test_deduplication:
+    enabled: true
+    cache_duration: 24h
+    
+  scheduling:
+    heavy_tests_window: "02:00-06:00"  # UTC
+    
+  limits:
+    max_runs_per_pr: 10
+    cooldown_minutes: 5
+    monthly_budget: 300
+
+# Monitoring and reporting
+monitoring:
+  dashboard_url: "https://netra-tests.web.app"
+  
+  metrics:
+    - test_execution_time
+    - test_success_rate
+    - flaky_test_count
+    - runner_queue_time
+    - ci_cost
+    
+  retention:
+    test_results: 30d
+    coverage_reports: 90d
+    performance_profiles: 7d
+    
+# Security
+security:
+  secret_rotation: quarterly
+  dependency_scanning: true
+  action_pinning: sha256
+  sbom_generation: on_release
