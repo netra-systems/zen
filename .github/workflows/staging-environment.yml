@@ -81,10 +81,14 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
-          service_account_key: ${{ secrets.GCP_STAGING_SA_KEY }}
           project_id: ${{ env.GCP_PROJECT_ID }}
 
       - name: Configure Docker for GCP
@@ -351,10 +355,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
-          service_account_key: ${{ secrets.GCP_STAGING_SA_KEY }}
           project_id: ${{ env.GCP_PROJECT_ID }}
 
       - name: Setup Terraform
@@ -446,10 +454,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
-          service_account_key: ${{ secrets.GCP_STAGING_SA_KEY }}
           project_id: ${{ env.GCP_PROJECT_ID }}
 
       - name: Find and destroy stale environments
