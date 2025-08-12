@@ -83,6 +83,17 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0  # Fetch all history for proper change detection
 
+      # Cache gcloud SDK installation to save ~20-30 seconds
+      - name: Cache gcloud SDK
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.config/gcloud
+            ~/google-cloud-sdk
+          key: gcloud-sdk-${{ runner.os }}-${{ hashFiles('.github/workflows/staging-environment.yml') }}
+          restore-keys: |
+            gcloud-sdk-${{ runner.os }}-
+
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -92,6 +103,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ env.GCP_PROJECT_ID }}
+          skip_install: false  # Still install if not cached
 
       - name: Configure Docker for GCP
         run: |

@@ -100,10 +100,10 @@ resource "google_cloud_run_service" "backend" {
             path = "/health"
             port = 8080
           }
-          initial_delay_seconds = 10
-          timeout_seconds       = 3
+          initial_delay_seconds = 30
+          timeout_seconds       = 10
           period_seconds        = 10
-          failure_threshold     = 10
+          failure_threshold     = 30
         }
         
         liveness_probe {
@@ -111,10 +111,10 @@ resource "google_cloud_run_service" "backend" {
             path = "/health"
             port = 8080
           }
-          initial_delay_seconds = 30
-          timeout_seconds       = 3
+          initial_delay_seconds = 60
+          timeout_seconds       = 10
           period_seconds        = 30
-          failure_threshold     = 3
+          failure_threshold     = 5
         }
       }
     }
@@ -177,10 +177,10 @@ resource "google_cloud_run_service" "frontend" {
             path = "/"
             port = 8080
           }
-          initial_delay_seconds = 10
-          timeout_seconds       = 3
+          initial_delay_seconds = 30
+          timeout_seconds       = 10
           period_seconds        = 10
-          failure_threshold     = 10
+          failure_threshold     = 30
         }
       }
     }
