@@ -266,7 +266,22 @@ class QualityMonitoringService:
             # Collect from database if available
             if self.db_session:
                 # Query recent agent runs for quality metrics
-                pass  # Implement based on your database schema
+                from app.db.models import AgentRun
+                stmt = select(AgentRun).where(
+                    AgentRun.created_at > datetime.utcnow() - timedelta(hours=1)
+                ).limit(100)
+                result = await self.db_session.execute(stmt)
+                runs = result.scalars().all()
+                
+                for run in runs:
+                    if run.metadata and 'quality_metrics' in run.metadata:
+                        metric = {
+                            'agent': run.agent_name,
+                            'quality_score': run.metadata['quality_metrics'].get('score', 0.5),
+                            'quality_level': run.metadata['quality_metrics'].get('level', 'acceptable'),
+                            'timestamp': run.created_at.isoformat()
+                        }
+                        self.metrics_buffer[run.agent_name].append(metric)
             
         except Exception as e:
             logger.error(f"Error collecting metrics: {str(e)}")

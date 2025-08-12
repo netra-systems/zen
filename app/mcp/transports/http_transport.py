@@ -121,16 +121,39 @@ class HttpTransport:
                     }
                     
                     # Keep connection alive and send events
-                    while True:
-                        # TODO: Implement actual event streaming from server
-                        # This would subscribe to server events for this session
-                        await asyncio.sleep(30)  # Heartbeat every 30 seconds
-                        yield {
-                            "event": "heartbeat",
-                            "data": json.dumps({
-                                "timestamp": datetime.utcnow().isoformat()
-                            })
-                        }
+                    event_queue = asyncio.Queue()
+                    
+                    # Register this session for events
+                    if hasattr(self.server, 'register_event_listener'):
+                        await self.server.register_event_listener(session_id, event_queue)
+                    
+                    try:
+                        while True:
+                            # Check for events with timeout for heartbeat
+                            try:
+                                event = await asyncio.wait_for(
+                                    event_queue.get(), 
+                                    timeout=30.0
+                                )
+                                
+                                # Send the actual event
+                                yield {
+                                    "event": event.get("type", "message"),
+                                    "data": json.dumps(event.get("data", {}))
+                                }
+                                
+                            except asyncio.TimeoutError:
+                                # Send heartbeat if no events
+                                yield {
+                                    "event": "heartbeat",
+                                    "data": json.dumps({
+                                        "timestamp": datetime.utcnow().isoformat()
+                                    })
+                                }
+                    finally:
+                        # Unregister on disconnect
+                        if hasattr(self.server, 'unregister_event_listener'):
+                            await self.server.unregister_event_listener(session_id)
                         
                 except asyncio.CancelledError:
                     logger.info(f"SSE connection closed for session {session_id}")
