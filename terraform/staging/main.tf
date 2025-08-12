@@ -35,13 +35,14 @@ locals {
   environment_name = "pr-${var.pr_number}"
   
   # Use data from shared infrastructure
-  vpc_id             = data.terraform_remote_state.shared.outputs.vpc_id
-  vpc_connector_id   = data.terraform_remote_state.shared.outputs.vpc_connector_id
-  sql_instance_name  = data.terraform_remote_state.shared.outputs.sql_instance_name
-  redis_host         = data.terraform_remote_state.shared.outputs.redis_host
-  redis_port         = data.terraform_remote_state.shared.outputs.redis_port
-  ssl_certificate_id = data.terraform_remote_state.shared.outputs.ssl_certificate_id
-  service_account    = data.terraform_remote_state.shared.outputs.service_account_email
+  vpc_id                  = data.terraform_remote_state.shared.outputs.vpc_id
+  vpc_connector_id        = data.terraform_remote_state.shared.outputs.vpc_connector_id
+  sql_instance_name       = data.terraform_remote_state.shared.outputs.sql_instance_name
+  sql_instance_connection = data.terraform_remote_state.shared.outputs.sql_instance_connection
+  redis_host              = data.terraform_remote_state.shared.outputs.redis_host
+  redis_port              = data.terraform_remote_state.shared.outputs.redis_port
+  ssl_certificate_id      = data.terraform_remote_state.shared.outputs.ssl_certificate_id
+  service_account         = data.terraform_remote_state.shared.outputs.service_account_email
 }
 
 # Only create database and user (seconds vs minutes)
@@ -74,7 +75,7 @@ resource "google_cloud_run_service" "backend" {
         
         env {
           name  = "DATABASE_URL"
-          value = "postgresql://${google_sql_user.pr.name}:${var.postgres_password}@/${google_sql_database.pr.name}?host=/cloudsql/${local.sql_instance_name}"
+          value = "postgresql://${google_sql_user.pr.name}:${var.postgres_password}@/${google_sql_database.pr.name}?host=/cloudsql/${local.sql_instance_connection}"
         }
         
         env {
@@ -124,7 +125,7 @@ resource "google_cloud_run_service" "backend" {
         "autoscaling.knative.dev/maxScale"        = var.max_instances
         "run.googleapis.com/vpc-access-connector" = local.vpc_connector_id
         "run.googleapis.com/vpc-access-egress"    = "all-traffic"
-        "run.googleapis.com/cloudsql-instances"   = local.sql_instance_name
+        "run.googleapis.com/cloudsql-instances"   = local.sql_instance_connection
         "run.googleapis.com/startup-cpu-boost"    = "true"
       }
     }
