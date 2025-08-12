@@ -132,8 +132,9 @@ class MockLLMConnector:
         # Analyze prompt to determine appropriate tool
         prompt_lower = prompt.lower()
         
-        # Check for cost patterns first (should be prioritized over latency when both are present)
-        if 'cost' in prompt_lower and ('reduce' in prompt_lower or 'optimization' in prompt_lower):
+        # Check for specific patterns - more precise matching
+        # Check cost-related patterns first as they are more specific
+        if 'reduce costs' in prompt_lower or 'cost reduction' in prompt_lower or ('cost' in prompt_lower and 'reduce' in prompt_lower):
             return json.dumps(self.response_templates['cost'])
         elif 'latency' in prompt_lower or 'speed' in prompt_lower or 'response time' in prompt_lower:
             return json.dumps(self.response_templates['latency'])

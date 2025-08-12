@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <name>MCP Integration Specification</name>
+    <version>2.0.0</version>
+    <description>Model Context Protocol (MCP) integration with FastMCP 2 library</description>
+    <last_updated>2025-08-12</last_updated>
+  </metadata>
+
+  <overview>
+    <purpose>
+      The MCP integration provides a standardized interface for AI assistants (Claude, Cursor, etc.) 
+      to interact with Netra's optimization capabilities through the Model Context Protocol.
+    </purpose>
+    
+    <implementation>
+      Using FastMCP 2.0 - the official Python framework for building MCP servers.
+      FastMCP handles protocol details, tool registration, and transport management.
+    </implementation>
+  </overview>
+
+  <architecture>
+    <components>
+      <component name="NetraMCPServer">
+        <location>app/mcp/netra_mcp_server.py</location>
+        <description>Main MCP server implementation using FastMCP</description>
+        <responsibilities>
+          <item>Tool registration and execution</item>
+          <item>Resource management</item>
+          <item>Prompt templates</item>
+          <item>Service integration</item>
+        </responsibilities>
+      </component>
+      
+      <component name="MCPService">
+        <location>app/services/mcp_service.py</location>
+        <description>Service layer for MCP operations</description>
+        <responsibilities>
+          <item>Client registration and authentication</item>
+          <item>Session management</item>
+          <item>Execution tracking</item>
+          <item>Service coordination</item>
+        </responsibilities>
+      </component>
+      
+      <component name="MCP Routes">
+        <location>app/routes/mcp.py</location>
+        <description>HTTP API endpoints for MCP access</description>
+        <responsibilities>
+          <item>REST API for MCP operations</item>
+          <item>WebSocket support</item>
+          <item>Client configuration</item>
+        </responsibilities>
+      </component>
+    </components>
+  </architecture>
+
+  <tools>
+    <category name="Agent Operations">
+      <tool name="run_agent">
+        <description>Execute a Netra optimization agent</description>
+        <parameters>
+          <param name="agent_name" type="string" required="true">Agent to execute</param>
+          <param name="input_data" type="object" required="true">Input data for agent</param>
+          <param name="config" type="object" required="false">Configuration overrides</param>
+        </parameters>
+      </tool>
+      
+      <tool name="get_agent_status">
+        <description>Check agent execution status</description>
+        <parameters>
+          <param name="run_id" type="string" required="true">Run ID from run_agent</param>
+        </parameters>
+      </tool>
+      
+      <tool name="list_agents">
+        <description>List available agents</description>
+        <parameters>
+          <param name="category" type="string" required="false">Filter by category</param>
+        </parameters>
+      </tool>
+    </category>
+    
+    <category name="Optimization">
+      <tool name="analyze_workload">
+        <description>Analyze AI workload characteristics</description>
+        <parameters>
+          <param name="workload_data" type="object" required="true">Workload information</param>
+          <param name="metrics" type="array" required="false">Metrics to calculate</param>
+        </parameters>
+      </tool>
+      
+      <tool name="optimize_prompt">
+        <description>Optimize prompts for cost/performance</description>
+        <parameters>
+          <param name="prompt" type="string" required="true">Prompt to optimize</param>
+          <param name="target" type="string" required="false">Optimization goal</param>
+          <param name="model" type="string" required="false">Target model</param>
+        </parameters>
+      </tool>
+      
+      <tool name="execute_optimization_pipeline">
+        <description>Run full optimization pipeline</description>
+        <parameters>
+          <param name="input_data" type="object" required="true">Pipeline input</param>
+          <param name="optimization_goals" type="array" required="false">Goals to optimize</param>
+        </parameters>
+      </tool>
+    </category>
+    
+    <category name="Data Management">
+      <tool name="query_corpus">
+        <description>Search document corpus</description>
+        <parameters>
+          <param name="query" type="string" required="true">Search query</param>
+          <param name="limit" type="integer" required="false">Max results</param>
+          <param name="filters" type="object" required="false">Search filters</param>
+        </parameters>
+      </tool>
+      
+      <tool name="generate_synthetic_data">
+        <description>Generate synthetic test data</description>
+        <parameters>
+          <param name="schema" type="object" required="true">Data schema</param>
+          <param name="count" type="integer" required="false">Number of records</param>
+          <param name="format" type="string" required="false">Output format</param>
+        </parameters>
+      </tool>
+    </category>
+    
+    <category name="Thread Management">
+      <tool name="create_thread">
+        <description>Create conversation thread</description>
+        <parameters>
+          <param name="title" type="string" required="false">Thread title</param>
+          <param name="metadata" type="object" required="false">Thread metadata</param>
+        </parameters>
+      </tool>
+      
+      <tool name="get_thread_history">
+        <description>Get thread message history</description>
+        <parameters>
+          <param name="thread_id" type="string" required="true">Thread ID</param>
+          <param name="limit" type="integer" required="false">Max messages</param>
+        </parameters>
+      </tool>
+    </category>
+    
+    <category name="Supply Catalog">
+      <tool name="get_supply_catalog">
+        <description>Get available models and providers</description>
+        <parameters>
+          <param name="filter" type="string" required="false">Filter criteria</param>
+        </parameters>
+      </tool>
+    </category>
+  </tools>
+
+  <resources>
+    <resource uri="netra://optimization/history">
+      <description>Historical optimization results</description>
+      <returns>JSON with optimization history</returns>
+    </resource>
+    
+    <resource uri="netra://config/models">
+      <description>Model configurations and pricing</description>
+      <returns>JSON with model parameters</returns>
+    </resource>
+    
+    <resource uri="netra://agents/catalog">
+      <description>Detailed agent catalog</description>
+      <returns>JSON with agent capabilities</returns>
+    </resource>
+    
+    <resource uri="netra://metrics/current">
+      <description>Current system metrics</description>
+      <returns>JSON with real-time metrics</returns>
+    </resource>
+  </resources>
+
+  <prompts>
+    <prompt name="optimization_request">
+      <description>Generate optimization request</description>
+      <parameters>
+        <param name="workload_description" type="string">Workload description</param>
+        <param name="monthly_budget" type="float">Budget in USD</param>
+        <param name="quality_requirements" type="string">Quality level</param>
+      </parameters>
+    </prompt>
+    
+    <prompt name="prompt_optimization">
+      <description>Optimize a prompt</description>
+      <parameters>
+        <param name="original_prompt" type="string">Original prompt</param>
+        <param name="target_model" type="string">Target model</param>
+        <param name="optimization_goal" type="string">Optimization goal</param>
+      </parameters>
+    </prompt>
+    
+    <prompt name="model_selection">
+      <description>Select best model for task</description>
+      <parameters>
+        <param name="task_description" type="string">Task description</param>
+        <param name="constraints" type="object">Optional constraints</param>
+      </parameters>
+    </prompt>
+  </prompts>
+
+  <transports>
+    <transport name="stdio">
+      <description>Standard I/O for Claude Desktop and CLI tools</description>
+      <command>python -m app.mcp.run_server</command>
+    </transport>
+    
+    <transport name="http">
+      <description>HTTP REST API</description>
+      <endpoint>/api/mcp</endpoint>
+      <authentication>Bearer token or API key</authentication>
+    </transport>
+    
+    <transport name="websocket">
+      <description>WebSocket for real-time communication</description>
+      <endpoint>/api/mcp/ws</endpoint>
+      <authentication>Query parameter: api_key</authentication>
+    </transport>
+  </transports>
+
+  <client_configuration>
+    <client name="claude">
+      <config_location>claude_desktop_config.json</config_location>
+      <example>
+        {
+          "mcpServers": {
+            "netra": {
+              "command": "python",
+              "args": ["-m", "app.mcp.run_server"],
+              "env": {
+                "NETRA_API_KEY": "${NETRA_API_KEY}",
+                "NETRA_BASE_URL": "http://localhost:8000"
+              }
+            }
+          }
+        }
+      </example>
+    </client>
+    
+    <client name="cursor">
+      <config_location>.cursor/mcp.json</config_location>
+      <example>
+        {
+          "mcp": {
+            "servers": {
+              "netra": {
+                "transport": "stdio",
+                "command": "python -m app.mcp.run_server"
+              }
+            }
+          }
+        }
+      </example>
+    </client>
+  </client_configuration>
+
+  <api_endpoints>
+    <endpoint method="GET" path="/api/mcp/info">
+      <description>Get server information and capabilities</description>
+    </endpoint>
+    
+    <endpoint method="GET" path="/api/mcp/tools">
+      <description>List available tools</description>
+      <params>
+        <param name="category" location="query">Filter by category</param>
+      </params>
+    </endpoint>
+    
+    <endpoint method="POST" path="/api/mcp/tools/call">
+      <description>Execute a tool</description>
+      <body>
+        <field name="tool_name" type="string">Tool to execute</field>
+        <field name="arguments" type="object">Tool arguments</field>
+        <field name="session_id" type="string" optional="true">Session ID</field>
+      </body>
+    </endpoint>
+    
+    <endpoint method="GET" path="/api/mcp/resources">
+      <description>List available resources</description>
+    </endpoint>
+    
+    <endpoint method="POST" path="/api/mcp/resources/read">
+      <description>Read a resource</description>
+      <body>
+        <field name="uri" type="string">Resource URI</field>
+        <field name="session_id" type="string" optional="true">Session ID</field>
+      </body>
+    </endpoint>
+    
+    <endpoint method="GET" path="/api/mcp/prompts">
+      <description>List available prompts</description>
+    </endpoint>
+    
+    <endpoint method="POST" path="/api/mcp/prompts/get">
+      <description>Get a prompt template</description>
+      <body>
+        <field name="prompt_name" type="string">Prompt name</field>
+        <field name="arguments" type="object">Prompt arguments</field>
+      </body>
+    </endpoint>
+    
+    <endpoint method="POST" path="/api/mcp/sessions">
+      <description>Create MCP session</description>
+    </endpoint>
+    
+    <endpoint method="GET" path="/api/mcp/config">
+      <description>Get client configuration</description>
+    </endpoint>
+    
+    <endpoint method="WS" path="/api/mcp/ws">
+      <description>WebSocket connection</description>
+    </endpoint>
+  </api_endpoints>
+
+  <testing>
+    <test_client>app/mcp/test_client.py</test_client>
+    <test_commands>
+      <command>python app/mcp/test_client.py --direct</command>
+      <description>Test direct server access</description>
+    </test_commands>
+    
+    <test_scenarios>
+      <scenario name="Tool Execution">
+        <steps>
+          <step>List available tools</step>
+          <step>Execute list_agents tool</step>
+          <step>Verify response format</step>
+        </steps>
+      </scenario>
+      
+      <scenario name="Resource Access">
+        <steps>
+          <step>List resources</step>
+          <step>Read optimization history</step>
+          <step>Verify JSON response</step>
+        </steps>
+      </scenario>
+      
+      <scenario name="Prompt Generation">
+        <steps>
+          <step>List prompts</step>
+          <step>Get optimization request prompt</step>
+          <step>Verify message format</step>
+        </steps>
+      </scenario>
+    </test_scenarios>
+  </testing>
+
+  <implementation_notes>
+    <note priority="high">
+      FastMCP 2 handles protocol details automatically.
+      We only need to define tools, resources, and prompts using decorators.
+    </note>
+    
+    <note priority="high">
+      Service injection pattern used to connect MCP server with Netra services.
+      Services are set after server creation to avoid circular dependencies.
+    </note>
+    
+    <note priority="medium">
+      WebSocket transport partially implemented.
+      Full MCP protocol over WebSocket requires additional work.
+    </note>
+    
+    <note priority="low">
+      Sampling capability not yet implemented.
+      Will require integration with LLM manager for message generation.
+    </note>
+  </implementation_notes>
+
+  <future_enhancements>
+    <enhancement>
+      <title>Sampling Implementation</title>
+      <description>Add LLM sampling capability for message generation</description>
+    </enhancement>
+    
+    <enhancement>
+      <title>Full WebSocket Support</title>
+      <description>Complete WebSocket transport with proper MCP protocol handling</description>
+    </enhancement>
+    
+    <enhancement>
+      <title>Tool Streaming</title>
+      <description>Support streaming responses for long-running tools</description>
+    </enhancement>
+    
+    <enhancement>
+      <title>Authentication Improvements</title>
+      <description>Add OAuth2 and JWT support for client authentication</description>
+    </enhancement>
+  </future_enhancements>
+</specification>

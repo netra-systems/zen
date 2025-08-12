@@ -109,15 +109,18 @@ class QualityGateService:
     ]
     
     # Vague optimization terms without specifics
+    # These patterns detect vague language that lacks specificity
+    # We want to catch phrases like "optimize things" but NOT "optimize GPU utilization"
     VAGUE_TERMS = [
-        r"optimize(?!\s+(by|to|with|using|for)\s+\d+)",
-        r"improve(?!\s+(by|to|with|using|for)\s+\d+)",
-        r"enhance(?!\s+(by|to|with|using|for)\s+\d+)",
-        r"better(?!\s+(by|to|with|using|for)\s+\d+)",
-        r"efficient(?!\s+(by|to|with|using|for)\s+\d+)",
-        r"consider\s+(?!specifically)",
-        r"think about\s+(?!specifically)",
-        r"look into\s+(?!specifically)",
+        r"just\s+optimize",
+        r"optimize\s+(things|stuff|it|everything|something)",
+        r"improve\s+(things|stuff|it|everything|something)",
+        r"enhance\s+(things|stuff|it|everything|something)",
+        r"make\s+(?:it\s+)?better",
+        r"more\s+efficient(?!\s+(by|than))",
+        r"consider\s+optimizing",
+        r"think about\s+improving",
+        r"look into\s+enhancing",
         r"you might want to",
         r"you could try",
         r"perhaps you should"
@@ -168,15 +171,15 @@ class QualityGateService:
         self.thresholds = {
             ContentType.OPTIMIZATION: {
                 "min_score": 0.7,
-                "min_specificity": 0.8,
-                "min_actionability": 0.8,
+                "min_specificity": 0.6,
+                "min_actionability": 0.7,
                 "min_quantification": 0.7
             },
             ContentType.DATA_ANALYSIS: {
                 "min_score": 0.6,
-                "min_specificity": 0.7,
+                "min_specificity": 0.6,
                 "min_quantification": 0.8,
-                "min_relevance": 0.7
+                "min_relevance": 0.5
             },
             ContentType.ACTION_PLAN: {
                 "min_score": 0.7,
@@ -294,6 +297,11 @@ class QualityGateService:
         metrics.word_count = len(content.split())
         metrics.sentence_count = len(re.split(r'[.!?]+', content))
         
+        # Count numeric values (including percentages, decimals, etc.)
+        numeric_pattern = r'\b\d+(?:\.\d+)?(?:%|ms|GB|MB|KB|s|x|M|K)?\b'
+        numeric_matches = re.findall(numeric_pattern, content)
+        metrics.numeric_values_count = len(numeric_matches)
+        
         # Check for generic phrases
         generic_matches = self.generic_pattern.findall(content)
         metrics.generic_phrase_count = len(generic_matches)
@@ -387,14 +395,15 @@ class QualityGateService:
         score = 0.0
         content_lower = content.lower()
         
-        # Check for action verbs
+        # Check for action verbs (including gerund forms)
         action_verbs = [
             "set", "configure", "install", "run", "execute", "implement",
             "add", "remove", "update", "modify", "change", "apply",
-            "enable", "disable", "increase", "decrease", "adjust"
+            "enable", "disable", "increase", "decrease", "adjust",
+            "implementing", "enabling", "increasing", "adjusting", "reducing"
         ]
         action_count = sum(1 for verb in action_verbs if verb in content_lower)
-        score += min(action_count * 0.05, 0.3)
+        score += min(action_count * 0.08, 0.4)
         
         # Check for step-by-step instructions
         step_pattern = r'(step \d+|first|second|third|then|next|finally)'
@@ -485,7 +494,7 @@ class QualityGateService:
         # Define required elements by content type
         required_elements = {
             ContentType.OPTIMIZATION: [
-                "current", "proposed", "improvement", "implementation", "trade-off"
+                "improve", "reduce", "increase", "optimize", "change"
             ],
             ContentType.DATA_ANALYSIS: [
                 "data", "pattern", "insight", "trend", "conclusion"

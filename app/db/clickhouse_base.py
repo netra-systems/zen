@@ -25,7 +25,9 @@ class ClickHouseDatabase:
                 database=self.database,
                 user=self.user,
                 password=self.password,
-                secure=self.secure
+                secure=self.secure,
+                connect_timeout=10,  # 10 second connection timeout
+                send_receive_timeout=30  # 30 second request timeout
             )
             self.client.ping()
         except Exception as e:

@@ -1,14 +1,11 @@
 """
 Model Context Protocol (MCP) Server Implementation for Netra AI Platform
 
-This module implements the MCP server that enables integration with AI assistants
-like Claude Code, Cursor, Gemini CLI, and other MCP-compatible clients.
+This module implements the MCP server using FastMCP 2 that enables integration 
+with AI assistants like Claude Desktop, Cursor, Gemini CLI, and other MCP-compatible clients.
 """
 
-from .server import MCPServer
-from .handlers.request_handler import RequestHandler
-from .tools.tool_registry import ToolRegistry
-from .resources.resource_manager import ResourceManager
+from .netra_mcp_server import NetraMCPServer
 
-__version__ = "1.0.0"
-__all__ = ["MCPServer", "RequestHandler", "ToolRegistry", "ResourceManager"]
+__version__ = "2.0.0"
+__all__ = ["NetraMCPServer"]

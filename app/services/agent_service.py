@@ -9,12 +9,17 @@
 # Review: Pending | Score: 85
 # ================================
 import json
-from typing import Union, Dict, Any
+from typing import Union, Dict, Any, Optional
 from starlette.websockets import WebSocketDisconnect
 from app.logging_config import central_logger
 from fastapi import Depends
 from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app import schemas
+from app.schemas.websocket_types import (
+    WebSocketMessageIn,
+    ParsedMessage,
+    MessageTypeLiteral
+)
 from app.ws_manager import manager
 from app.llm.llm_manager import LLMManager
 from app.db.postgres import get_async_db
@@ -33,7 +38,7 @@ class AgentService:
         self.thread_service = ThreadService()
         self.message_handler = MessageHandlerService(supervisor, self.thread_service)
 
-    async def run(self, request_model: schemas.RequestModel, run_id: str, stream_updates: bool = False):
+    async def run(self, request_model: schemas.RequestModel, run_id: str, stream_updates: bool = False) -> Any:
         """
         Starts the agent. The supervisor will stream logs back to the websocket if requested.
         """
@@ -41,7 +46,12 @@ class AgentService:
         user_request = request_model.user_request if hasattr(request_model, 'user_request') else str(request_model.model_dump())
         return await self.supervisor.run(user_request, run_id, stream_updates)
 
-    async def handle_websocket_message(self, user_id: str, message: Union[str, Dict], db_session: AsyncSession = None) -> None:
+    async def handle_websocket_message(
+        self, 
+        user_id: str, 
+        message: Union[str, Dict[str, Any]], 
+        db_session: Optional[AsyncSession] = None
+    ) -> None:
         """
         Handles a message from the WebSocket.
         """
@@ -93,7 +103,7 @@ class AgentService:
             except (WebSocketDisconnect, Exception):
                 logger.warning(f"Could not send error to disconnected user {user_id}")
     
-    def _parse_message(self, message: Union[str, Dict]) -> Dict[str, Any]:
+    def _parse_message(self, message: Union[str, Dict[str, Any]]) -> ParsedMessage:
         """Parse incoming message to dictionary"""
         if isinstance(message, str):
             data = json.loads(message)
@@ -103,7 +113,10 @@ class AgentService:
             return data
         return message
 
-def get_agent_service(db_session = Depends(get_async_db), llm_manager: LLMManager = Depends(get_llm_manager)) -> AgentService:
+def get_agent_service(
+    db_session: AsyncSession = Depends(get_async_db), 
+    llm_manager: LLMManager = Depends(get_llm_manager)
+) -> AgentService:
     from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
     from app.agents.tool_dispatcher import ToolDispatcher
     tool_dispatcher = ToolDispatcher(db_session)

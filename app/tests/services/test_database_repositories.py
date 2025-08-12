@@ -41,7 +41,7 @@ from app.services.database.reference_repository import ReferenceRepository
 
 
 @pytest.fixture
-async def unit_of_work(mock_session, mock_models):
+def unit_of_work(mock_session, mock_models):
     """Create a test unit of work instance with mocked session.
     
     This fixture creates a Unit of Work with all repositories mocked.
@@ -86,10 +86,11 @@ async def unit_of_work(mock_session, mock_models):
                 deleted_at=None
             )()
             
-            mock_thread_repo.update.side_effect = lambda id, **kwargs: AsyncMock(
+            mock_thread_repo.update.side_effect = lambda id, updates=None, **kwargs: AsyncMock(
                 id=id,
-                title=kwargs.get('title', 'Updated Title'),
-                updated_at=datetime.now()
+                title=updates.get('title', 'Updated Title') if updates else 'Updated Title',
+                updated_at=datetime.now(),
+                created_at=datetime.now() - timedelta(days=1)
             )()
             
             mock_thread_repo.delete.return_value = True
@@ -248,6 +249,7 @@ def mock_session():
 class TestUnitOfWork:
     """Test Unit of Work pattern implementation."""
 
+    @pytest.mark.asyncio
     async def test_uow_initialization(self, unit_of_work):
         """Test UoW initialization and repository access."""
         async with unit_of_work as uow:
@@ -258,6 +260,7 @@ class TestUnitOfWork:
             assert isinstance(uow.messages, MessageRepository)
             assert isinstance(uow.threads, ThreadRepository)
 
+    @pytest.mark.asyncio
     async def test_uow_transaction_commit(self, unit_of_work):
         """Test successful transaction commit."""
         thread_id = None
@@ -284,6 +287,7 @@ class TestUnitOfWork:
             assert retrieved_thread != None
             assert retrieved_thread.title == "Test Thread"
 
+    @pytest.mark.asyncio
     async def test_uow_transaction_rollback(self, unit_of_work):
         """Test transaction rollback on error."""
         try:
@@ -302,6 +306,7 @@ class TestUnitOfWork:
         # Verify rollback was called
         assert unit_of_work.session.rollback.called
 
+    @pytest.mark.asyncio
     async def test_uow_nested_transactions(self, unit_of_work):
         """Test nested transaction handling."""
         thread_id = None
@@ -333,6 +338,7 @@ class TestUnitOfWork:
             messages = await uow.messages.get_by_thread(thread_id)
             assert len(messages) == 0
 
+    @pytest.mark.asyncio
     async def test_uow_concurrent_access(self, unit_of_work):
         """Test concurrent UoW instances."""
         async def create_thread(uow, thread_id):
@@ -362,6 +368,7 @@ class TestUnitOfWork:
 class TestBaseRepository:
     """Test base repository functionality."""
 
+    @pytest.mark.asyncio
     async def test_repository_create(self, unit_of_work):
         """Test creating an entity."""
         async with unit_of_work as uow:
@@ -378,6 +385,7 @@ class TestBaseRepository:
             assert thread.title == "Test Thread"
             assert thread.created_at != None
 
+    @pytest.mark.asyncio
     async def test_repository_bulk_create(self, unit_of_work, mock_models):
         """Test bulk entity creation."""
         import time
@@ -410,6 +418,7 @@ class TestBaseRepository:
             assert len(threads) == 10
             assert all(t.id != None for t in threads)
 
+    @pytest.mark.asyncio
     async def test_repository_get_by_id(self, unit_of_work, mock_models):
         """Test getting entity by ID."""
         async with unit_of_work as uow:
@@ -435,6 +444,7 @@ class TestBaseRepository:
             assert retrieved.id == thread.id
             assert retrieved.title == thread.title
 
+    @pytest.mark.asyncio
     async def test_repository_get_many(self, unit_of_work, mock_models):
         """Test getting multiple entities."""
         async with unit_of_work as uow:
@@ -469,6 +479,7 @@ class TestBaseRepository:
             assert len(threads) == 3
             assert all(t.id in thread_ids[:3] for t in threads)
 
+    @pytest.mark.asyncio
     async def test_repository_update(self, unit_of_work):
         """Test updating an entity."""
         async with unit_of_work as uow:
@@ -485,6 +496,7 @@ class TestBaseRepository:
             assert updated.title == "Updated Title"
             assert updated.updated_at > thread.created_at
 
+    @pytest.mark.asyncio
     async def test_repository_delete(self, unit_of_work):
         """Test deleting an entity."""
         async with unit_of_work as uow:
@@ -500,6 +512,7 @@ class TestBaseRepository:
             retrieved = await uow.threads.get(thread.id)
             assert retrieved == None
 
+    @pytest.mark.asyncio
     async def test_repository_soft_delete(self, unit_of_work):
         """Test soft delete functionality."""
         async with unit_of_work as uow:
@@ -523,6 +536,7 @@ class TestBaseRepository:
             assert retrieved != None
             assert retrieved.deleted_at != None
 
+    @pytest.mark.asyncio
     async def test_repository_pagination(self, unit_of_work):
         """Test pagination functionality."""
         async with unit_of_work as uow:
@@ -549,6 +563,7 @@ class TestBaseRepository:
 class TestMessageRepository:
     """Test message repository specific functionality."""
 
+    @pytest.mark.asyncio
     async def test_get_messages_by_thread(self, unit_of_work):
         """Test getting messages by thread ID."""
         async with unit_of_work as uow:
@@ -570,6 +585,7 @@ class TestMessageRepository:
             assert len(messages) == 5
             assert all(m.thread_id == thread.id for m in messages)
 
+    @pytest.mark.asyncio
     async def test_get_messages_with_pagination(self, unit_of_work):
         """Test paginated message retrieval."""
         async with unit_of_work as uow:
@@ -596,6 +612,7 @@ class TestMessageRepository:
             assert len(page.items) == 10
             assert page.total == 50
 
+    @pytest.mark.asyncio
     async def test_get_latest_messages(self, unit_of_work):
         """Test getting latest messages."""
         async with unit_of_work as uow:
@@ -626,6 +643,7 @@ class TestMessageRepository:
 class TestThreadRepository:
     """Test thread repository specific functionality."""
 
+    @pytest.mark.asyncio
     async def test_get_threads_by_user(self, unit_of_work):
         """Test getting threads by user ID."""
         async with unit_of_work as uow:
@@ -643,6 +661,7 @@ class TestThreadRepository:
             assert len(threads) == 5
             assert all(t.user_id == user_id for t in threads)
 
+    @pytest.mark.asyncio
     async def test_get_active_threads(self, unit_of_work):
         """Test getting active threads."""
         async with unit_of_work as uow:
@@ -669,6 +688,7 @@ class TestThreadRepository:
             assert len(active) == 1
             assert active[0].id == active_thread.id
 
+    @pytest.mark.asyncio
     async def test_archive_thread(self, unit_of_work):
         """Test thread archival."""
         async with unit_of_work as uow:
@@ -687,6 +707,7 @@ class TestThreadRepository:
 class TestRunRepository:
     """Test run repository specific functionality."""
 
+    @pytest.mark.asyncio
     async def test_create_run_with_tools(self, unit_of_work):
         """Test creating a run with tool configurations."""
         async with unit_of_work as uow:

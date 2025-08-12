@@ -72,6 +72,14 @@ python test_runner.py --level smoke
 4. ✅ Update relevant specs with learnings
 5. ✅ Check [`SPEC/no_test_stubs.xml`](SPEC/no_test_stubs.xml) - NO test stubs in production
 
+### After Any Code Change
+**MANDATORY**: After implementing code changes, automatically:
+1. 🔍 Run the `code-quality-reviewer` agent to check for quality, conventions, and regression risks
+2. 🧪 Run the `test-debug-expert` agent to verify tests pass and coverage is maintained
+3. 📋 Address any issues identified by either agent before considering the task complete
+
+This automated review process ensures all changes meet project standards and don't introduce regressions.
+
 ### Key Development Patterns
 - **Async First**: Use async/await for all I/O operations
 - **Type Safety**: Pydantic models (backend), TypeScript types (frontend)

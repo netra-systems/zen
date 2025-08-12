@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <metadata>
+    <name>Type Safety and Duplicate Prevention</name>
+    <description>
+      Guidelines for maintaining strong type safety and preventing duplicate type definitions
+      across the Netra codebase.
+    </description>
+    <version>1.0.0</version>
+    <created>2025-01-12</created>
+    <updated>2025-01-12</updated>
+    <priority>high</priority>
+    <tags>
+      <tag>type-safety</tag>
+      <tag>typescript</tag>
+      <tag>python</tag>
+      <tag>code-quality</tag>
+    </tags>
+  </metadata>
+
+  <principles>
+    <principle id="P1">
+      <title>Single Source of Truth</title>
+      <description>Each type should be defined in exactly one place</description>
+      <rationale>Prevents inconsistencies and maintenance burden</rationale>
+    </principle>
+    
+    <principle id="P2">
+      <title>Strong Typing Over Any</title>
+      <description>Never use Any/any unless absolutely necessary with justification</description>
+      <rationale>Type safety catches errors at compile time rather than runtime</rationale>
+    </principle>
+    
+    <principle id="P3">
+      <title>Import and Reuse</title>
+      <description>Import existing types rather than redefining them</description>
+      <rationale>Maintains consistency and reduces duplication</rationale>
+    </principle>
+  </principles>
+
+  <rules>
+    <section name="Python Type Safety">
+      <rule id="PY1">
+        <title>Type Annotations Required</title>
+        <description>All function parameters and return types must be annotated</description>
+        <example>
+          <!-- Good -->
+          def process_data(data: Dict[str, Any], user_id: str) -> Optional[ProcessResult]:
+              pass
+          
+          <!-- Bad -->
+          def process_data(data, user_id):
+              pass
+        </example>
+      </rule>
+      
+      <rule id="PY2">
+        <title>Use TypedDict for Complex Dictionaries</title>
+        <description>Replace Dict[str, Any] with TypedDict for known structures</description>
+        <example>
+          from typing import TypedDict
+          
+          class WebSocketPayload(TypedDict):
+              type: str
+              data: Dict[str, Any]
+              timestamp: float
+        </example>
+      </rule>
+      
+      <rule id="PY3">
+        <title>Pydantic Models for API Data</title>
+        <description>Use Pydantic models for all API request/response types</description>
+        <location>app/schemas/</location>
+      </rule>
+      
+      <rule id="PY4">
+        <title>Avoid Duplicate Schema Definitions</title>
+        <description>Check existing schemas before creating new ones</description>
+        <check>
+          - Search app/schemas/ for similar type names
+          - Import from existing schemas
+          - Create in websocket_types.py only if WebSocket-specific
+        </check>
+      </rule>
+    </section>
+
+    <section name="TypeScript Type Safety">
+      <rule id="TS1">
+        <title>Interface Over Type for Objects</title>
+        <description>Use interface for object shapes, type for unions/aliases</description>
+        <example>
+          <!-- Good -->
+          interface UserData {
+            id: string;
+            name: string;
+          }
+          
+          type Status = 'pending' | 'active' | 'completed';
+          
+          <!-- Bad -->
+          type UserData = {
+            id: string;
+            name: string;
+          }
+        </example>
+      </rule>
+      
+      <rule id="TS2">
+        <title>Strict Component Props</title>
+        <description>All React components must have typed props interfaces</description>
+        <example>
+          interface MessageItemProps {
+            message: Message;
+            isHighlighted?: boolean;
+            onDelete?: (id: string) => void;
+          }
+          
+          export const MessageItem: React.FC&lt;MessageItemProps&gt; = ({ message }) => {
+            // ...
+          }
+        </example>
+      </rule>
+      
+      <rule id="TS3">
+        <title>Type Store Actions and State</title>
+        <description>Zustand stores must have fully typed state and actions</description>
+        <location>frontend/store/</location>
+      </rule>
+      
+      <rule id="TS4">
+        <title>Avoid any Type</title>
+        <description>Never use 'any' without explicit justification comment</description>
+        <example>
+          <!-- Acceptable only with justification -->
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // Reason: Third-party library returns untyped response
+          const response: any = await externalApi.call();
+        </example>
+      </rule>
+    </section>
+
+    <section name="Cross-Language Consistency">
+      <rule id="CL1">
+        <title>Backend-Frontend Type Alignment</title>
+        <description>API types must match between Python and TypeScript</description>
+        <check>
+          - Python: app/schemas/
+          - TypeScript: frontend/types/backend_schema_auto_generated.ts
+          - Keep auto-generated types in sync
+        </check>
+      </rule>
+      
+      <rule id="CL2">
+        <title>WebSocket Message Types</title>
+        <description>WebSocket message types must be consistent</description>
+        <locations>
+          <backend>app/schemas/websocket_types.py</backend>
+          <frontend>frontend/types/unified-chat.ts</frontend>
+        </locations>
+      </rule>
+    </section>
+  </rules>
+
+  <duplicate-prevention>
+    <strategy id="S1">
+      <name>Type Location Guidelines</name>
+      <guidelines>
+        <guideline>
+          <type>API Request/Response</type>
+          <location>app/schemas/[domain].py</location>
+        </guideline>
+        <guideline>
+          <type>WebSocket Messages</type>
+          <location>app/schemas/websocket_types.py</location>
+        </guideline>
+        <guideline>
+          <type>Database Models</type>
+          <location>app/db/models_postgres.py</location>
+        </guideline>
+        <guideline>
+          <type>React Props</type>
+          <location>In component file or adjacent types file</location>
+        </guideline>
+        <guideline>
+          <type>Store Types</type>
+          <location>frontend/types/[store-name].ts</location>
+        </guideline>
+      </guidelines>
+    </strategy>
+    
+    <strategy id="S2">
+      <name>Import Hierarchy</name>
+      <order>
+        1. Import from existing schemas
+        2. Import from auto-generated types
+        3. Create new type only if unique
+        4. Document why new type was needed
+      </order>
+    </strategy>
+    
+    <strategy id="S3">
+      <name>Naming Conventions</name>
+      <conventions>
+        <convention>
+          <pattern>*Payload</pattern>
+          <usage>WebSocket message payloads</usage>
+        </convention>
+        <convention>
+          <pattern>*Request/*Response</pattern>
+          <usage>API endpoints</usage>
+        </convention>
+        <convention>
+          <pattern>*Props</pattern>
+          <usage>React component props</usage>
+        </convention>
+        <convention>
+          <pattern>*State</pattern>
+          <usage>Store state types</usage>
+        </convention>
+      </conventions>
+    </strategy>
+  </duplicate-prevention>
+
+  <verification>
+    <check id="V1">
+      <name>Type Coverage Check</name>
+      <command>python -m mypy app/ --ignore-missing-imports</command>
+      <target>95% type coverage</target>
+    </check>
+    
+    <check id="V2">
+      <name>TypeScript Strict Mode</name>
+      <command>npx tsc --noEmit</command>
+      <config>tsconfig.json with strict: true</config>
+    </check>
+    
+    <check id="V3">
+      <name>Duplicate Type Detection</name>
+      <script>
+        # Find duplicate type/interface/class definitions
+        grep -r "^(class|interface|type) " --include="*.py" --include="*.ts" --include="*.tsx" | 
+        awk '{print $2}' | sort | uniq -d
+      </script>
+    </check>
+  </verification>
+
+  <migration>
+    <phase id="M1">
+      <name>Identify Duplicates</name>
+      <steps>
+        1. Run duplicate detection script
+        2. Map all duplicate types to their locations
+        3. Determine canonical location for each
+      </steps>
+    </phase>
+    
+    <phase id="M2">
+      <name>Consolidate Types</name>
+      <steps>
+        1. Move type to canonical location
+        2. Update all imports
+        3. Remove duplicate definitions
+        4. Test affected code
+      </steps>
+    </phase>
+    
+    <phase id="M3">
+      <name>Add Missing Types</name>
+      <steps>
+        1. Find all Dict[str, Any] usage
+        2. Find all 'any' usage in TypeScript
+        3. Create proper types for each
+        4. Update code to use new types
+      </steps>
+    </phase>
+  </migration>
+
+  <examples>
+    <example id="E1">
+      <title>Proper Type Import and Reuse</title>
+      <code language="python">
+# app/services/message_handlers.py
+from app.schemas.websocket_types import (
+    UserMessagePayload,
+    AgentCompletedPayload,
+    ThreadHistoryResponse
+)
+from app.schemas.Request import StartAgentPayload  # Reuse existing
+
+# Don't redefine - import and use
+async def handle_start_agent(
+    self,
+    user_id: str,
+    payload: StartAgentPayload,  # Using imported type
+    db_session: AsyncSession
+) -> None:
+    pass
+      </code>
+    </example>
+    
+    <example id="E2">
+      <title>TypeScript Component with Proper Types</title>
+      <code language="typescript">
+// MessageItem.tsx
+import { Message } from '@/types/chat';  // Import existing type
+
+interface MessageItemProps {
+  message: Message;  // Reuse imported type
+  isHighlighted?: boolean;
+  onDelete?: (id: string) => void;
+}
+
+export const MessageItem: React.FC&lt;MessageItemProps&gt; = ({ 
+  message, 
+  isHighlighted = false 
+}) => {
+  // Component implementation
+};
+      </code>
+    </example>
+  </examples>
+</spec>

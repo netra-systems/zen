@@ -212,13 +212,13 @@ class AgentOrchestrator:
         """Execute task using orchestrated agent"""
         agent = await self.get_or_create_agent(user_id)
         
+        # Increment total executions at the start
+        self.orchestration_metrics['total_executions'] += 1
+        
         try:
             start_time = datetime.now(UTC)
             result = await agent.run(user_request, run_id, stream_updates)
             execution_time = (datetime.now(UTC) - start_time).total_seconds()
-            
-            # Update metrics
-            self.orchestration_metrics['total_executions'] += 1
             
             # Update average execution time
             total_execs = self.orchestration_metrics['total_executions']

@@ -37,6 +37,8 @@ class RedisManager:
                 decode_responses=True,
                 username=settings.redis.username,
                 password=settings.redis.password,
+                socket_connect_timeout=10,  # 10 second connection timeout
+                socket_timeout=5,  # 5 second socket timeout
             )
             await self.redis_client.ping()
             logger.info("Redis connected successfully")

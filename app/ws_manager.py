@@ -1,13 +1,14 @@
 from app.logging_config import central_logger
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
-from typing import List, Dict, Any, Optional, Set
+from typing import List, Dict, Any, Optional, Set, Union
 import time
 import asyncio
 import json
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 import threading
+from app.schemas.websocket_types import WebSocketMessageOut
 
 logger = central_logger.get_logger(__name__)
 
@@ -136,7 +137,7 @@ class WebSocketManager:
                 f"Messages: {conn_info.message_count}, Errors: {conn_info.error_count})"
             )
 
-    async def send_message(self, user_id: str, message: Dict[str, Any], retry: bool = True) -> bool:
+    async def send_message(self, user_id: str, message: Union[WebSocketMessageOut, Dict[str, Any]], retry: bool = True) -> bool:
         """Send a message to all connections for a user with retry logic.
         
         Returns:
@@ -173,7 +174,7 @@ class WebSocketManager:
         
         return successful_sends > 0
     
-    async def _send_to_connection(self, conn_info: ConnectionInfo, message: Dict[str, Any], retry: bool = True) -> bool:
+    async def _send_to_connection(self, conn_info: ConnectionInfo, message: Union[WebSocketMessageOut, Dict[str, Any]], retry: bool = True) -> bool:
         """Send a message to a specific connection with retry logic."""
         attempts = self.MAX_RETRY_ATTEMPTS if retry else 1
         
@@ -262,7 +263,7 @@ class WebSocketManager:
                 conn_info.last_pong = datetime.now(timezone.utc)
                 break
 
-    async def send_error(self, user_id: str, error_message: str, sub_agent_name: str = "System"):
+    async def send_error(self, user_id: str, error_message: str, sub_agent_name: str = "System") -> bool:
         """Send an error message to a specific user"""
         await self.send_message(
             user_id,
@@ -321,7 +322,7 @@ class WebSocketManager:
             }
         )
 
-    async def broadcast(self, message: Dict[str, Any]) -> Dict[str, int]:
+    async def broadcast(self, message: Union[WebSocketMessageOut, Dict[str, Any]]) -> Dict[str, int]:
         """Broadcast a message to all connected users.
         
         Returns:
