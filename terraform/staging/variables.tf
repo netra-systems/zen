@@ -143,3 +143,17 @@ variable "min_instances" {
   type        = number
   default     = 0
 }
+
+variable "jwt_secret_key" {
+  description = "JWT secret key for authentication (optional, will use default if not provided)"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "fernet_key" {
+  description = "Fernet key for encryption (optional, will use default if not provided)"
+  type        = string
+  default     = ""
+  sensitive   = true
+}

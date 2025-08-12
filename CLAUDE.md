@@ -77,6 +77,7 @@ python test_runner.py --level smoke
 - **Error Handling**: Use NetraException with proper context
 - **Unique IDs**: Use `generateUniqueId()` from `@/lib/utils` in React
 - **UI Design**: Glassmorphic design, NO blue gradient bars
+- **File Organization**: ALWAYS create new files in appropriate folders - keep top directory clean
 
 ## Testing Strategy
 

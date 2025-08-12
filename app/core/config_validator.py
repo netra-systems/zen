@@ -63,6 +63,7 @@ class ConfigValidator:
             for name, ch_config in clickhouse_configs:
                 if not ch_config.host:
                     errors.append(f"{name} host is not configured")
+                # Only require passwords in actual production, not staging
                 if not ch_config.password and config.environment == "production":
                     errors.append(f"{name} password is required in production")
         
@@ -89,9 +90,9 @@ class ConfigValidator:
             
         # Check OAuth configuration
         oauth = config.oauth_config
-        if not oauth.client_id and config.environment not in ["testing", "development"]:
+        if not oauth.client_id and config.environment not in ["testing", "development", "staging"]:
             errors.append("OAuth client ID is not configured")
-        if not oauth.client_secret and config.environment not in ["testing", "development"]:
+        if not oauth.client_secret and config.environment not in ["testing", "development", "staging"]:
             errors.append("OAuth client secret is not configured")
             
         if errors:

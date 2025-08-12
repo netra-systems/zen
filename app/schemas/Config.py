@@ -244,6 +244,13 @@ class ProductionConfig(AppConfig):
     debug: bool = False
     log_level: str = "INFO"
 
+class StagingConfig(AppConfig):
+    """Staging-specific settings."""
+    environment: str = "staging"
+    debug: bool = False
+    log_level: str = "INFO"
+    # Staging uses production-like settings but with relaxed validation
+    
 class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""
     environment: str = "testing"

@@ -1,0 +1,690 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <name>CI/CD Testing Pipeline Specification</name>
+    <version>1.0.0</version>
+    <created>2025-08-12</created>
+    <purpose>Define comprehensive testing strategy for Netra's CI/CD pipeline</purpose>
+  </metadata>
+
+  <core_principles>
+    <principle id="P1">
+      <name>Speed-First Testing</name>
+      <description>Fail fast with quick smoke tests, scale up for comprehensive validation</description>
+    </principle>
+    <principle id="P2">
+      <name>Progressive Testing</name>
+      <description>Map git events to appropriate test depth based on risk and scope</description>
+    </principle>
+    <principle id="P3">
+      <name>Transparent Results</name>
+      <description>Surface test results directly in PR comments and commit statuses</description>
+    </principle>
+    <principle id="P4">
+      <name>Cost-Effective Scaling</name>
+      <description>Use GCP runners strategically, parallelize smartly, cache aggressively</description>
+    </principle>
+  </core_principles>
+
+  <test_mapping>
+    <event_triggers>
+      <trigger event="push_to_feature_branch">
+        <test_level>smoke</test_level>
+        <duration>30s</duration>
+        <purpose>Quick validation of basic functionality</purpose>
+      </trigger>
+      
+      <trigger event="push_to_main">
+        <test_level>critical</test_level>
+        <duration>2min</duration>
+        <purpose>Ensure production stability</purpose>
+      </trigger>
+      
+      <trigger event="pull_request_opened">
+        <test_level>unit</test_level>
+        <duration>1-2min</duration>
+        <purpose>Validate component changes</purpose>
+      </trigger>
+      
+      <trigger event="pull_request_ready_for_review">
+        <test_level>integration</test_level>
+        <duration>3-5min</duration>
+        <purpose>Full feature validation</purpose>
+      </trigger>
+      
+      <trigger event="pre_merge">
+        <test_level>comprehensive</test_level>
+        <duration>10-15min</duration>
+        <purpose>Complete coverage validation</purpose>
+      </trigger>
+      
+      <trigger event="nightly">
+        <test_level>comprehensive</test_level>
+        <duration>10-15min</duration>
+        <purpose>Daily health check with full coverage</purpose>
+      </trigger>
+      
+      <trigger event="release_tag">
+        <test_level>comprehensive</test_level>
+        <additional>performance,security</additional>
+        <duration>20-30min</duration>
+        <purpose>Full validation before release</purpose>
+      </trigger>
+    </event_triggers>
+
+    <manual_triggers>
+      <comment_command>
+        <pattern>@test</pattern>
+        <default_level>integration</default_level>
+        <options>
+          <option>@test smoke</option>
+          <option>@test unit</option>
+          <option>@test integration</option>
+          <option>@test comprehensive</option>
+          <option>@test critical</option>
+          <option>@test performance</option>
+          <option>@test security</option>
+        </options>
+      </comment_command>
+      
+      <label_triggers>
+        <label name="needs-smoke-test" level="smoke"/>
+        <label name="needs-full-test" level="comprehensive"/>
+        <label name="needs-perf-test" level="performance"/>
+      </label_triggers>
+    </manual_triggers>
+  </test_mapping>
+
+  <runner_strategy>
+    <runner_types>
+      <runner type="github_hosted">
+        <use_for>smoke,unit</use_for>
+        <specs>ubuntu-latest</specs>
+        <cost>free</cost>
+      </runner>
+      
+      <runner type="gcp_spot">
+        <use_for>integration,comprehensive</use_for>
+        <specs>n2-standard-4</specs>
+        <cost>$0.04/hour</cost>
+        <features>
+          <feature>Auto-scaling</feature>
+          <feature>Preemptible instances</feature>
+          <feature>Docker layer caching</feature>
+        </features>
+      </runner>
+      
+      <runner type="gcp_dedicated">
+        <use_for>release,performance</use_for>
+        <specs>n2-highmem-8</specs>
+        <cost>$0.40/hour</cost>
+        <features>
+          <feature>Consistent performance</feature>
+          <feature>No preemption</feature>
+          <feature>GPU available</feature>
+        </features>
+      </runner>
+    </runner_types>
+
+    <parallelization>
+      <strategy name="test_sharding">
+        <description>Split tests by module/domain</description>
+        <shards>
+          <shard id="core">Core business logic</shard>
+          <shard id="agents">Agent system</shard>
+          <shard id="websocket">WebSocket communication</shard>
+          <shard id="database">Database operations</shard>
+          <shard id="api">API endpoints</shard>
+          <shard id="frontend">Frontend components</shard>
+        </shards>
+      </strategy>
+      
+      <strategy name="time_based">
+        <description>Balance shards by historical execution time</description>
+        <algorithm>Bin packing with 90th percentile times</algorithm>
+      </strategy>
+    </parallelization>
+
+    <caching>
+      <cache type="dependencies">
+        <key>requirements-${{ hashFiles('**/requirements*.txt') }}</key>
+        <restore_keys>requirements-</restore_keys>
+        <paths>~/.cache/pip,venv</paths>
+      </cache>
+      
+      <cache type="node_modules">
+        <key>npm-${{ hashFiles('**/package-lock.json') }}</key>
+        <restore_keys>npm-</restore_keys>
+        <paths>~/.npm,node_modules</paths>
+      </cache>
+      
+      <cache type="docker_layers">
+        <registry>gcr.io/${{ secrets.GCP_PROJECT }}/cache</registry>
+        <mode>max</mode>
+      </cache>
+      
+      <cache type="test_artifacts">
+        <key>test-artifacts-${{ github.sha }}</key>
+        <paths>.coverage,htmlcov,test-results</paths>
+        <retention>7days</retention>
+      </cache>
+    </caching>
+  </runner_strategy>
+
+  <result_reporting>
+    <channels>
+      <channel name="pr_comment">
+        <format>markdown</format>
+        <content>
+          <summary>Collapsible test summary with pass/fail badges</summary>
+          <details>
+            <coverage_delta>Show coverage change</coverage_delta>
+            <failed_tests>List with links to logs</failed_tests>
+            <performance_metrics>If applicable</performance_metrics>
+            <flaky_tests>Identify and track</flaky_tests>
+          </details>
+        </content>
+        <update_strategy>edit_existing</update_strategy>
+      </channel>
+      
+      <channel name="commit_status">
+        <contexts>
+          <context>continuous-integration/netra/smoke</context>
+          <context>continuous-integration/netra/unit</context>
+          <context>continuous-integration/netra/integration</context>
+          <context>continuous-integration/netra/coverage</context>
+        </contexts>
+        <required_for_merge>smoke,unit</required_for_merge>
+      </channel>
+      
+      <channel name="slack">
+        <webhook>${{ secrets.SLACK_WEBHOOK }}</webhook>
+        <notify_on>failure,recovery</notify_on>
+        <channels>
+          <channel trigger="main_failure">#alerts</channel>
+          <channel trigger="release_*">#releases</channel>
+          <channel trigger="nightly_*">#nightly-builds</channel>
+        </channels>
+      </channel>
+      
+      <channel name="test_dashboard">
+        <url>https://netra-tests.web.app</url>
+        <storage>firestore</storage>
+        <retention>90days</retention>
+        <features>
+          <feature>Historical trends</feature>
+          <feature>Flaky test tracking</feature>
+          <feature>Performance regression detection</feature>
+          <feature>Test execution heatmap</feature>
+        </features>
+      </channel>
+    </channels>
+
+    <artifacts>
+      <artifact name="coverage_report">
+        <format>html,xml,json</format>
+        <upload_to>gcs,github</upload_to>
+        <public_url>https://storage.googleapis.com/netra-coverage/${{ github.sha }}/index.html</public_url>
+      </artifact>
+      
+      <artifact name="test_logs">
+        <format>junit,json</format>
+        <upload_to>github</upload_to>
+        <retention>30days</retention>
+      </artifact>
+      
+      <artifact name="performance_profile">
+        <format>json,flamegraph</format>
+        <upload_to>gcs</upload_to>
+        <trigger>performance_tests</trigger>
+      </artifact>
+    </artifacts>
+  </result_reporting>
+
+  <test_optimization>
+    <techniques>
+      <technique name="test_impact_analysis">
+        <description>Run only tests affected by changes</description>
+        <implementation>
+          <step>Analyze git diff for changed files</step>
+          <step>Build dependency graph</step>
+          <step>Identify affected test modules</step>
+          <step>Run targeted subset + smoke tests</step>
+        </implementation>
+        <savings>60-80% reduction in test time for focused changes</savings>
+      </technique>
+      
+      <technique name="predictive_test_selection">
+        <description>ML-based test prioritization</description>
+        <model>XGBoost on historical failure data</model>
+        <features>
+          <feature>File change frequency</feature>
+          <feature>Historical failure rate</feature>
+          <feature>Code complexity metrics</feature>
+          <feature>Author's test failure history</feature>
+        </features>
+      </technique>
+      
+      <technique name="fail_fast">
+        <description>Stop on first failure in CI</description>
+        <exceptions>
+          <exception>Comprehensive tests run all</exception>
+          <exception>Flaky test retries</exception>
+        </exceptions>
+      </technique>
+      
+      <technique name="test_quarantine">
+        <description>Isolate flaky tests</description>
+        <threshold>3 failures in 10 runs</threshold>
+        <action>Move to quarantine suite, create issue</action>
+      </technique>
+    </techniques>
+
+    <performance_targets>
+      <target level="smoke" p50="20s" p95="30s" p99="45s"/>
+      <target level="unit" p50="45s" p95="90s" p99="120s"/>
+      <target level="integration" p50="150s" p95="240s" p99="300s"/>
+      <target level="comprehensive" p50="600s" p95="900s" p99="1200s"/>
+    </performance_targets>
+  </test_optimization>
+
+  <failure_handling>
+    <retry_strategy>
+      <automatic_retry>
+        <conditions>
+          <condition>Network timeout</condition>
+          <condition>Runner preemption</condition>
+          <condition>Known flaky test</condition>
+        </conditions>
+        <max_attempts>3</max_attempts>
+        <backoff>exponential</backoff>
+      </automatic_retry>
+      
+      <manual_retry>
+        <trigger>@retry comment</trigger>
+        <permission>write</permission>
+      </manual_retry>
+    </retry_strategy>
+
+    <ai_auto_fix>
+      <enabled>true</enabled>
+      <providers>
+        <provider name="claude" model="claude-3-opus-20240229" priority="1">
+          <capabilities>
+            <capability>Complex logic fixes</capability>
+            <capability>Type error resolution</capability>
+            <capability>Import fixes</capability>
+            <capability>Test assertion updates</capability>
+          </capabilities>
+          <cost_per_fix>~$0.15</cost_per_fix>
+        </provider>
+        
+        <provider name="gemini" model="gemini-1.5-pro" priority="2">
+          <capabilities>
+            <capability>Quick syntax fixes</capability>
+            <capability>Simple test updates</capability>
+            <capability>Documentation fixes</capability>
+          </capabilities>
+          <cost_per_fix>~$0.05</cost_per_fix>
+        </provider>
+        
+        <provider name="gpt4" model="gpt-4-turbo" priority="3">
+          <capabilities>
+            <capability>General purpose fixes</capability>
+            <capability>Refactoring suggestions</capability>
+          </capabilities>
+          <cost_per_fix>~$0.10</cost_per_fix>
+        </provider>
+      </providers>
+      
+      <workflow>
+        <trigger_conditions>
+          <condition>Test failure in PR</condition>
+          <condition>Non-flaky test failure</condition>
+          <condition>Auto-fix label present OR default enabled</condition>
+        </trigger_conditions>
+        
+        <process>
+          <step id="1" name="analyze_failure">
+            <description>Extract failure context</description>
+            <data_collected>
+              <item>Failed test code</item>
+              <item>Error message and stack trace</item>
+              <item>Related source code</item>
+              <item>Recent changes (git diff)</item>
+              <item>Test history (last 5 runs)</item>
+            </data_collected>
+          </step>
+          
+          <step id="2" name="classify_failure">
+            <description>Determine failure type and fixability</description>
+            <categories>
+              <category name="syntax_error" confidence="high" auto_fix="yes"/>
+              <category name="import_error" confidence="high" auto_fix="yes"/>
+              <category name="type_error" confidence="high" auto_fix="yes"/>
+              <category name="assertion_failure" confidence="medium" auto_fix="yes"/>
+              <category name="timeout" confidence="low" auto_fix="maybe"/>
+              <category name="logic_error" confidence="medium" auto_fix="yes"/>
+              <category name="external_dependency" confidence="low" auto_fix="no"/>
+            </categories>
+          </step>
+          
+          <step id="3" name="generate_fix">
+            <description>AI generates fix proposal</description>
+            <prompt_template>
+              <system>You are an expert test fixer for the Netra AI platform. Fix the failing test by analyzing the error and making minimal necessary changes.</system>
+              <context>
+                Test file: {test_file}
+                Error: {error_message}
+                Stack trace: {stack_trace}
+                Recent changes: {git_diff}
+                Related code: {source_code}
+              </context>
+              <instruction>Generate a fix that:
+                1. Resolves the test failure
+                2. Maintains test intent
+                3. Follows project conventions
+                4. Is minimal and focused
+                Return the fixed code with explanation.
+              </instruction>
+            </prompt_template>
+            <constraints>
+              <max_tokens>4000</max_tokens>
+              <temperature>0.2</temperature>
+              <timeout>30s</timeout>
+            </constraints>
+          </step>
+          
+          <step id="4" name="validate_fix">
+            <description>Test the proposed fix</description>
+            <validation>
+              <check>Syntax validation</check>
+              <check>Type checking</check>
+              <check>Run affected tests</check>
+              <check>Run smoke tests</check>
+              <check>Security scan</check>
+            </validation>
+          </step>
+          
+          <step id="5" name="apply_fix">
+            <description>Commit fix to PR branch</description>
+            <commit_message>fix: Auto-fix test failure - {test_name}
+              
+              Automated fix generated by {ai_provider}
+              Error type: {error_type}
+              Confidence: {confidence_score}
+              
+              Original error: {error_summary}</commit_message>
+            <pr_comment>
+              ### 🤖 Auto-Fix Applied
+              
+              I've automatically fixed the failing test `{test_name}`.
+              
+              **Error Type:** {error_type}
+              **Fix Confidence:** {confidence_score}%
+              **AI Provider:** {ai_provider}
+              
+              <details>
+              <summary>Fix Details</summary>
+              
+              ```diff
+              {code_diff}
+              ```
+              
+              **Explanation:** {fix_explanation}
+              </details>
+              
+              The fix has been validated and committed. Tests are re-running.
+              
+              To disable auto-fix: Remove `auto-fix` label or comment `@disable-autofix`
+            </pr_comment>
+          </step>
+        </process>
+        
+        <retry_logic>
+          <max_attempts>3</max_attempts>
+          <strategies>
+            <attempt number="1" provider="primary" approach="targeted"/>
+            <attempt number="2" provider="secondary" approach="broader_context"/>
+            <attempt number="3" provider="any" approach="comprehensive_analysis"/>
+          </strategies>
+          <backoff>linear</backoff>
+          <delay_seconds>30</delay_seconds>
+        </retry_logic>
+        
+        <failure_fallback>
+          <action>Create detailed issue</action>
+          <issue_template>
+            Title: "Auto-fix failed for {test_name}"
+            Body: |
+              ## Test Failure
+              - **Test:** `{test_path}`
+              - **Error:** `{error_type}`
+              - **First seen:** {timestamp}
+              
+              ## Auto-Fix Attempts
+              {attempts_summary}
+              
+              ## Context
+              ```
+              {error_details}
+              ```
+              
+              ## Suggested Manual Fix
+              {ai_suggestion}
+              
+              cc @{pr_author}
+          </issue_template>
+        </failure_fallback>
+      </workflow>
+      
+      <configuration>
+        <enable_by_default>true</enable_by_default>
+        <opt_out_methods>
+          <method>Add `no-autofix` label to PR</method>
+          <method>Set `auto_fix: false` in .github/netra.yml</method>
+          <method>Comment `@disable-autofix` on PR</method>
+        </opt_out_methods>
+        
+        <fix_types>
+          <type name="safe_fixes" auto_apply="true">
+            <includes>syntax,imports,types,formatting</includes>
+          </type>
+          <type name="semantic_fixes" auto_apply="after_review">
+            <includes>assertions,logic,refactoring</includes>
+            <review_time>5min</review_time>
+          </type>
+          <type name="risky_fixes" auto_apply="false">
+            <includes>api_changes,schema_changes,security</includes>
+          </type>
+        </fix_types>
+        
+        <cost_controls>
+          <max_cost_per_pr>$5.00</max_cost_per_pr>
+          <max_cost_per_day>$50.00</max_cost_per_day>
+          <max_cost_per_month>$500.00</max_cost_per_month>
+          <alert_threshold>80%</alert_threshold>
+        </cost_controls>
+      </configuration>
+      
+      <monitoring>
+        <metrics>
+          <metric name="auto_fix_success_rate"/>
+          <metric name="auto_fix_attempt_count"/>
+          <metric name="auto_fix_cost"/>
+          <metric name="time_to_fix"/>
+          <metric name="fix_revert_rate"/>
+        </metrics>
+        
+        <tracking>
+          <track>Which tests are frequently auto-fixed</track>
+          <track>Common failure patterns</track>
+          <track>AI provider effectiveness</track>
+          <track>Cost per fix type</track>
+        </tracking>
+        
+        <reporting>
+          <weekly_summary>
+            <include>Success rate</include>
+            <include>Cost breakdown</include>
+            <include>Top fixed issues</include>
+            <include>Improvement suggestions</include>
+          </weekly_summary>
+        </reporting>
+      </monitoring>
+      
+      <learning>
+        <feedback_loop>
+          <description>Learn from successful and failed fixes</description>
+          <data_collection>
+            <item>Successful fix patterns</item>
+            <item>Failed fix attempts</item>
+            <item>Manual corrections to auto-fixes</item>
+            <item>Developer feedback</item>
+          </data_collection>
+          <improvements>
+            <item>Fine-tune prompts based on success patterns</item>
+            <item>Update fix confidence scores</item>
+            <item>Identify new fixable patterns</item>
+            <item>Optimize provider selection</item>
+          </improvements>
+        </feedback_loop>
+        
+        <knowledge_base>
+          <location>.github/autofix/patterns.json</location>
+          <contents>
+            <item>Common fixes by error type</item>
+            <item>Project-specific patterns</item>
+            <item>Fix templates</item>
+            <item>Blacklisted changes</item>
+          </contents>
+        </knowledge_base>
+      </learning>
+    </ai_auto_fix>
+
+    <debugging_aids>
+      <feature name="ssh_debug">
+        <trigger>@debug label</trigger>
+        <duration>30min</duration>
+        <permission>admin</permission>
+      </feature>
+      
+      <feature name="artifact_browser">
+        <url>https://netra-tests.web.app/artifacts/${{ github.run_id }}</url>
+        <contents>logs,screenshots,recordings</contents>
+      </feature>
+      
+      <feature name="test_replay">
+        <description>Replay failed test with verbose logging</description>
+        <trigger>@replay comment</trigger>
+      </feature>
+      
+      <feature name="ai_debug_assistant">
+        <description>Interactive AI debugging session</description>
+        <trigger>@ai-debug comment</trigger>
+        <provider>claude</provider>
+        <mode>interactive</mode>
+        <capabilities>
+          <capability>Analyze logs</capability>
+          <capability>Suggest debugging steps</capability>
+          <capability>Generate test scenarios</capability>
+          <capability>Explain complex failures</capability>
+        </capabilities>
+      </feature>
+    </debugging_aids>
+  </failure_handling>
+
+  <security>
+    <secret_management>
+      <provider>GitHub Secrets + GCP Secret Manager</provider>
+      <rotation>quarterly</rotation>
+      <audit>all secret access logged</audit>
+    </secret_management>
+    
+    <permissions>
+      <workflow_permissions>
+        <default>read</default>
+        <elevated_for>
+          <action>write PR comments</action>
+          <action>update commit status</action>
+          <action>upload artifacts</action>
+        </elevated_for>
+      </workflow_permissions>
+      
+      <runner_permissions>
+        <gcp_service_account>ci-runner@netra.iam.gserviceaccount.com</gcp_service_account>
+        <roles>
+          <role>storage.objectCreator</role>
+          <role>cloudrun.developer</role>
+          <role>secretmanager.secretAccessor</role>
+        </roles>
+      </runner_permissions>
+    </permissions>
+
+    <supply_chain>
+      <dependency_scanning>enabled</dependency_scanning>
+      <action_pinning>sha256</action_pinning>
+      <sbom_generation>on_release</sbom_generation>
+    </supply_chain>
+  </security>
+
+  <monitoring>
+    <metrics>
+      <metric name="test_execution_time" type="histogram"/>
+      <metric name="test_success_rate" type="gauge"/>
+      <metric name="flaky_test_count" type="counter"/>
+      <metric name="runner_queue_time" type="histogram"/>
+      <metric name="ci_cost" type="counter" unit="USD"/>
+    </metrics>
+    
+    <dashboards>
+      <dashboard name="CI Health">
+        <panels>
+          <panel>Test success rate over time</panel>
+          <panel>P95 execution time by test level</panel>
+          <panel>Flaky test trends</panel>
+          <panel>Cost per PR</panel>
+        </panels>
+      </dashboard>
+    </dashboards>
+    
+    <alerts>
+      <alert condition="success_rate < 95%" severity="warning"/>
+      <alert condition="p95_time > 2x baseline" severity="warning"/>
+      <alert condition="ci_cost > $500/month" severity="info"/>
+    </alerts>
+  </monitoring>
+
+  <cost_optimization>
+    <strategies>
+      <strategy name="spot_instances">
+        <savings>70% for non-critical workflows</savings>
+      </strategy>
+      
+      <strategy name="test_deduplication">
+        <description>Skip tests if code unchanged</description>
+        <key>git tree hash of relevant files</key>
+      </strategy>
+      
+      <strategy name="schedule_heavy_tests">
+        <description>Run expensive tests during off-peak</description>
+        <schedule>2am-6am UTC</schedule>
+      </strategy>
+      
+      <strategy name="pull_request_limits">
+        <max_runs_per_pr>10</max_runs_per_pr>
+        <cooldown>5min between pushes</cooldown>
+      </strategy>
+    </strategies>
+    
+    <budget>
+      <monthly_target>$300</monthly_target>
+      <allocation>
+        <item name="GCP runners" percentage="60"/>
+        <item name="Storage" percentage="20"/>
+        <item name="Network" percentage="10"/>
+        <item name="Other" percentage="10"/>
+      </allocation>
+    </budget>
+  </cost_optimization>
+</specification>

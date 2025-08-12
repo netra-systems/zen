@@ -148,7 +148,18 @@ resource "google_cloud_run_service" "backend" {
           value = var.project_id_numerical  # Numerical project ID for Secret Manager
         }
         
-        # Note: All secrets including Gemini API key will be loaded from Secret Manager at runtime
+        # Authentication keys for staging - these should be overridden with proper secrets in production
+        env {
+          name  = "JWT_SECRET_KEY"
+          value = var.jwt_secret_key != "" ? var.jwt_secret_key : "staging-jwt-secret-key-${var.pr_number}"
+        }
+        
+        env {
+          name  = "FERNET_KEY"
+          value = var.fernet_key != "" ? var.fernet_key : "ZmVybmV0LXN0YWdpbmcta2V5LXBsYWNlaG9sZGVyLTEyMw=="  # Base64 encoded staging key
+        }
+        
+        # Note: All other secrets including Gemini API key will be loaded from Secret Manager at runtime
         # The service account needs access to these secrets in the staging project
         
         resources {

@@ -116,6 +116,24 @@
       "failed": 0,
       "coverage": null,
       "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T09:09:53.507208",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T09:11:22.197283",
+      "level": "smoke",
+      "total": 2,
+      "passed": 1,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
     }
   ],
   "flaky_tests": {},

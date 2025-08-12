@@ -6,7 +6,7 @@ from typing import Optional, Dict, Any
 from pydantic import ValidationError
 
 # Import the schemas without circular dependency
-from app.schemas.Config import AppConfig, DevelopmentConfig, ProductionConfig, NetraTestingConfig
+from app.schemas.Config import AppConfig, DevelopmentConfig, ProductionConfig, StagingConfig, NetraTestingConfig
 from app.logging_config import central_logger as logger
 from app.core.secret_manager import SecretManager
 from app.core.config_validator import ConfigValidator
@@ -76,7 +76,7 @@ class ConfigManager:
         """Create the base configuration object for the environment."""
         config_classes = {
             "production": ProductionConfig,
-            "staging": ProductionConfig,  # Staging uses production config as base
+            "staging": StagingConfig,  # Staging now uses its own config
             "testing": NetraTestingConfig,
             "development": DevelopmentConfig
         }
