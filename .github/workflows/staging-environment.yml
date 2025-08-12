@@ -71,6 +71,7 @@ jobs:
     needs: check-eligibility
     if: needs.check-eligibility.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 45  # Prevent hanging beyond 45 minutes
     environment:
       name: staging-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
       url: https://pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}.${{ env.STAGING_DOMAIN }}
@@ -193,6 +194,7 @@ jobs:
 
       - name: Build and push backend container
         id: backend-build
+        timeout-minutes: 15  # Docker builds should complete within 15 minutes
         run: |
           IMAGE_TAG="pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}-${{ github.sha }}"
           IMAGE_URL="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/staging/backend:${IMAGE_TAG}"
@@ -214,8 +216,22 @@ jobs:
           
           # Build new image if changes detected or no existing image
           echo "🔨 Building new backend image..."
-          docker build -t $IMAGE_URL -f Dockerfile.backend .
-          docker push $IMAGE_URL
+          # Add timeout and progress tracking for docker build
+          DOCKER_BUILDKIT=1 timeout 600 docker build \
+            --progress=plain \
+            --network=host \
+            -t $IMAGE_URL \
+            -f Dockerfile.backend . || {
+            echo "Docker build timed out after 10 minutes"
+            echo "This might be due to network issues or pip hanging"
+            exit 1
+          }
+          
+          # Push with timeout
+          timeout 300 docker push $IMAGE_URL || {
+            echo "Docker push timed out after 5 minutes"
+            exit 1
+          }
           
           echo "backend_image=$IMAGE_URL" >> $GITHUB_OUTPUT
 
@@ -366,8 +382,15 @@ jobs:
       - name: Terraform Apply
         working-directory: ./terraform/staging
         id: terraform
+        timeout-minutes: 20  # Terraform should complete within 20 minutes
         run: |
-          terraform apply -auto-approve tfplan
+          # Set timeout for terraform apply itself
+          timeout 1200 terraform apply -auto-approve tfplan || {
+            echo "Terraform apply timed out after 20 minutes"
+            echo "Attempting to show current state..."
+            terraform show
+            exit 1
+          }
           
           # Capture outputs
           BACKEND_URL=$(terraform output -raw backend_url)
@@ -381,32 +404,60 @@ jobs:
           echo "redis_host=$REDIS_HOST" >> $GITHUB_OUTPUT
 
       - name: Run database migrations
+        timeout-minutes: 5  # Migrations should complete quickly
         run: |
           # Set database URL for migrations
           export DATABASE_URL="postgresql://staging:${{ secrets.STAGING_DB_PASSWORD }}@${{ steps.terraform.outputs.database_host }}/netra_pr_${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
           
-          # Run Alembic migrations
+          # Wait for database to be ready (max 2 minutes)
+          echo "Waiting for database to be ready..."
+          for i in {1..24}; do
+            if pg_isready -h "${{ steps.terraform.outputs.database_host }}" -p 5432 -U staging 2>/dev/null; then
+              echo "Database is ready!"
+              break
+            fi
+            if [ $i -eq 24 ]; then
+              echo "Database did not become ready in time"
+              exit 1
+            fi
+            echo "Attempt $i/24: Database not ready, waiting 5 seconds..."
+            sleep 5
+          done
+          
+          # Run Alembic migrations with timeout
           cd app
-          alembic upgrade head
+          timeout 180 alembic upgrade head || {
+            echo "Database migrations timed out after 3 minutes"
+            exit 1
+          }
 
       - name: Seed test data
+        timeout-minutes: 3  # Data seeding should be quick
         run: |
           export DATABASE_URL="postgresql://staging:${{ secrets.STAGING_DB_PASSWORD }}@${{ steps.terraform.outputs.database_host }}/netra_pr_${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
           export REDIS_URL="redis://${{ steps.terraform.outputs.redis_host }}:6379/0"
           
-          python scripts/seed_staging_data.py \
-            --pr-number "${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
+          timeout 150 python scripts/seed_staging_data.py \
+            --pr-number "${{ github.event.pull_request.number || github.event.inputs.pr_number }}" || {
+            echo "Data seeding timed out after 2.5 minutes"
+            exit 1
+          }
 
       - name: Wait for services to be healthy
+        timeout-minutes: 10  # Services should be up within 10 minutes
         run: |
           STAGING_URL="${{ steps.terraform.outputs.frontend_url }}"
           API_URL="${{ steps.terraform.outputs.backend_url }}"
           
           echo "Waiting for frontend at $STAGING_URL..."
           for i in {1..30}; do
-            if curl -s -o /dev/null -w "%{http_code}" "$STAGING_URL" | grep -q "200\|301\|302"; then
+            if curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$STAGING_URL" | grep -q "200\|301\|302"; then
               echo "✅ Frontend is ready!"
               break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "❌ Frontend did not become ready in time"
+              exit 1
             fi
             echo "Attempt $i/30: Frontend not ready yet..."
             sleep 10
@@ -414,9 +465,13 @@ jobs:
           
           echo "Waiting for API at $API_URL/health..."
           for i in {1..30}; do
-            if curl -s "$API_URL/health" | grep -q "healthy"; then
+            if curl -s --max-time 10 "$API_URL/health" | grep -q "healthy"; then
               echo "✅ API is ready!"
               break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "❌ API did not become ready in time"
+              exit 1
             fi
             echo "Attempt $i/30: API not ready yet..."
             sleep 10
@@ -424,6 +479,7 @@ jobs:
 
       - name: Run staging tests
         id: tests
+        timeout-minutes: 15  # Tests should complete within 15 minutes
         run: |
           export STAGING_URL="${{ steps.terraform.outputs.frontend_url }}"
           export STAGING_API_URL="${{ steps.terraform.outputs.backend_url }}"
@@ -555,6 +611,7 @@ jobs:
       needs.check-eligibility.outputs.should_deploy == 'false' && 
       (github.event.action == 'closed' || github.event.inputs.action == 'destroy')
     runs-on: ubuntu-latest
+    timeout-minutes: 20  # Destruction should be quick
     
     steps:
       - name: Checkout code
