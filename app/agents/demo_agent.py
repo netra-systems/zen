@@ -14,14 +14,14 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 import json
 
-from app.agents.base import BaseAgent
+from app.agents.base import BaseSubAgent
 from app.llm.llm_manager import LLMManager
 from app.ws_manager import WebSocketManager
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-class DemoAgent(BaseAgent):
+class DemoAgent(BaseSubAgent):
     """
     Specialized agent for handling demo interactions.
     
@@ -140,7 +140,7 @@ Focus on demonstrable value and actionable insights."""
         return response
 
 
-class DemoTriageAgent(BaseAgent):
+class DemoTriageAgent(BaseSubAgent):
     """Specialized triage agent for demo scenarios."""
     
     def __init__(self, llm_manager: LLMManager, websocket_manager: WebSocketManager):
@@ -207,7 +207,7 @@ Format as JSON with keys: category, priority, recommendation"""
             }
 
 
-class DemoOptimizationAgent(BaseAgent):
+class DemoOptimizationAgent(BaseSubAgent):
     """Specialized optimization agent for demo scenarios."""
     
     def __init__(self, llm_manager: LLMManager, websocket_manager: WebSocketManager):
@@ -267,7 +267,7 @@ Use industry-specific terminology and examples."""
             }
 
 
-class DemoReportingAgent(BaseAgent):
+class DemoReportingAgent(BaseSubAgent):
     """Specialized reporting agent for demo scenarios."""
     
     def __init__(self, llm_manager: LLMManager, websocket_manager: WebSocketManager):
