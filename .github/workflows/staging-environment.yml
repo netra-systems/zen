@@ -18,11 +18,11 @@ on:
         required: true
         type: string
 
-# Cancel any in-progress runs when a new commit is pushed for the same PR
-# This ensures only the latest commit's workflow runs to completion
+# Concurrency control with intelligent cancellation handling
+# Only cancels build/deploy jobs, not cleanup/destroy operations
 concurrency:
   group: staging-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ !contains(github.job, 'destroy') && !contains(github.job, 'cleanup') }}
 
 env:
   GCP_PROJECT_ID: netra-staging
@@ -535,37 +535,159 @@ jobs:
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
-      - name: Terraform Init
+      - name: Handle Terraform State Lock
+        id: handle-lock
+        working-directory: ./terraform/staging
+        timeout-minutes: 2
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/default.tflock"
+          
+          # Function to check and handle lock
+          check_and_handle_lock() {
+            if ! gsutil stat "$LOCK_FILE" 2>/dev/null; then
+              echo "✅ No existing lock file found"
+              return 0
+            fi
+            
+            # Get lock metadata
+            LOCK_INFO=$(gsutil cat "$LOCK_FILE" 2>/dev/null || echo "{}")
+            LOCK_ID=$(echo "$LOCK_INFO" | jq -r '.ID // "unknown"')
+            LOCK_HOLDER=$(echo "$LOCK_INFO" | jq -r '.Who // "unknown"')
+            LOCK_CREATED=$(echo "$LOCK_INFO" | jq -r '.Created // ""')
+            
+            echo "Found lock file:"
+            echo "  Lock ID: $LOCK_ID"
+            echo "  Holder: $LOCK_HOLDER"
+            echo "  Created: $LOCK_CREATED"
+            
+            # Calculate lock age
+            if [[ -n "$LOCK_CREATED" ]] && [[ "$LOCK_CREATED" != "null" ]]; then
+              # Parse ISO 8601 date format
+              LOCK_TIMESTAMP=$(date -d "${LOCK_CREATED}" +%s 2>/dev/null || echo "0")
+              CURRENT_TIME=$(date +%s)
+              AGE_SECONDS=$(( CURRENT_TIME - LOCK_TIMESTAMP ))
+              AGE_MINUTES=$(( AGE_SECONDS / 60 ))
+              
+              echo "  Age: ${AGE_MINUTES} minutes"
+              
+              # Check if lock is from a GitHub Actions runner
+              if echo "$LOCK_HOLDER" | grep -q "runner@"; then
+                # Check if this is from a canceled or failed workflow
+                # Stale lock threshold: 15 minutes for GitHub Actions runners
+                if [ $AGE_MINUTES -gt 15 ]; then
+                  echo "⚠️ Found stale lock from GitHub Actions runner (${AGE_MINUTES} minutes old)"
+                  echo "Removing stale lock..."
+                  gsutil rm "$LOCK_FILE" 2>/dev/null || true
+                  sleep 2
+                  return 0
+                else
+                  echo "⚠️ Active lock found (${AGE_MINUTES} minutes old)"
+                  return 1
+                fi
+              else
+                # For non-runner locks, use 30-minute threshold
+                if [ $AGE_MINUTES -gt 30 ]; then
+                  echo "⚠️ Found stale lock (${AGE_MINUTES} minutes old)"
+                  echo "Removing stale lock..."
+                  gsutil rm "$LOCK_FILE" 2>/dev/null || true
+                  sleep 2
+                  return 0
+                else
+                  echo "⚠️ Active lock found (${AGE_MINUTES} minutes old)"
+                  return 1
+                fi
+              fi
+            else
+              # If we can't determine age, check file modification time
+              LOCK_MOD_TIME=$(gsutil stat "$LOCK_FILE" | grep "Creation time:" | cut -d':' -f2- | xargs -I {} date -d "{}" +%s 2>/dev/null || echo "0")
+              if [ "$LOCK_MOD_TIME" -ne "0" ]; then
+                CURRENT_TIME=$(date +%s)
+                AGE_MINUTES=$(( (CURRENT_TIME - LOCK_MOD_TIME) / 60 ))
+                echo "  Age (from file stats): ${AGE_MINUTES} minutes"
+                
+                if [ $AGE_MINUTES -gt 15 ]; then
+                  echo "⚠️ Found stale lock based on file modification time"
+                  echo "Removing stale lock..."
+                  gsutil rm "$LOCK_FILE" 2>/dev/null || true
+                  sleep 2
+                  return 0
+                fi
+              fi
+              
+              echo "⚠️ Unable to determine lock age, assuming active"
+              return 1
+            fi
+          }
+          
+          # Check and handle lock
+          check_and_handle_lock
+          RESULT=$?
+          
+          if [ $RESULT -eq 0 ]; then
+            echo "lock_cleared=true" >> $GITHUB_OUTPUT
+          else
+            echo "lock_cleared=false" >> $GITHUB_OUTPUT
+            echo "::warning::Terraform state may be locked by another operation. Will retry with timeout."
+          fi
+
+      - name: Terraform Init with Retry
         working-directory: ./terraform/staging
         timeout-minutes: 5
         run: |
-          # Check for state lock and clear if stale
-          LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}/default.tflock"
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
           
-          # Check if lock exists and is older than 30 minutes
-          if gsutil stat "$LOCK_FILE" 2>/dev/null; then
-            LOCK_AGE=$(gsutil stat "$LOCK_FILE" | grep "Creation time:" | cut -d':' -f2- | xargs -I {} date -d "{}" +%s)
-            CURRENT_TIME=$(date +%s)
-            AGE_MINUTES=$(( ($CURRENT_TIME - $LOCK_AGE) / 60 ))
+          # Function to run terraform init with retries
+          terraform_init_with_retry() {
+            local max_attempts=3
+            local attempt=1
+            local wait_time=5
             
-            if [ $AGE_MINUTES -gt 30 ]; then
-              echo "⚠️ Found stale lock file (${AGE_MINUTES} minutes old), removing..."
-              gsutil rm "$LOCK_FILE" || true
-            else
-              echo "⚠️ Active lock file found (${AGE_MINUTES} minutes old)"
-              echo "Another Terraform operation may be in progress"
-            fi
-          fi
+            while [ $attempt -le $max_attempts ]; do
+              echo "Terraform init attempt $attempt of $max_attempts..."
+              
+              if terraform init \
+                -backend-config="bucket=${{ env.GCP_PROJECT_ID }}-terraform-state" \
+                -backend-config="prefix=staging/pr-${PR_NUMBER}" \
+                -lock-timeout=120s \
+                -upgrade=false \
+                -reconfigure=false; then
+                echo "✅ Terraform init successful"
+                return 0
+              else
+                EXIT_CODE=$?
+                echo "❌ Terraform init failed with exit code $EXIT_CODE"
+                
+                if [ $attempt -eq $max_attempts ]; then
+                  echo "Failed after $max_attempts attempts"
+                  return $EXIT_CODE
+                fi
+                
+                # Exponential backoff
+                echo "Waiting ${wait_time} seconds before retry..."
+                sleep $wait_time
+                wait_time=$((wait_time * 2))
+                attempt=$((attempt + 1))
+                
+                # Check if we need to force unlock
+                if [ $attempt -eq 2 ] && [ "${{ steps.handle-lock.outputs.lock_cleared }}" == "false" ]; then
+                  echo "Attempting to force unlock before retry..."
+                  LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/default.tflock"
+                  gsutil rm "$LOCK_FILE" 2>/dev/null || true
+                  sleep 3
+                fi
+              fi
+            done
+            
+            return 1
+          }
           
-          # Initialize with lock timeout
-          terraform init \
-            -backend-config="bucket=${{ env.GCP_PROJECT_ID }}-terraform-state" \
-            -backend-config="prefix=staging/pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}" \
-            -lock-timeout=120s
+          # Run init with retry logic
+          terraform_init_with_retry
 
-      - name: Terraform Plan
+      - name: Terraform Plan with Retry
         working-directory: ./terraform/staging
-        timeout-minutes: 5
+        timeout-minutes: 8
         env:
           TF_VAR_project_id: ${{ env.GCP_PROJECT_ID }}
           TF_VAR_project_id_numerical: ${{ steps.config.outputs.project_id_numerical }}
@@ -578,8 +700,17 @@ jobs:
           TF_VAR_postgres_password: ${{ secrets.STAGING_DB_PASSWORD }}
           TF_VAR_clickhouse_password: ${{ secrets.CLICKHOUSE_PASSWORD || 'placeholder_password' }}
         run: |
-          # Create secure tfvars file to prevent secrets in logs
-          cat > terraform.tfvars << 'EOF'
+          # Function to run terraform plan with retries
+          terraform_plan_with_retry() {
+            local max_attempts=3
+            local attempt=1
+            local wait_time=10
+            
+            while [ $attempt -le $max_attempts ]; do
+              echo "Terraform plan attempt $attempt of $max_attempts..."
+              
+              # Create secure tfvars file to prevent secrets in logs
+              cat > terraform.tfvars << 'EOF'
           project_id = "${{ env.GCP_PROJECT_ID }}"
           project_id_numerical = "${{ steps.config.outputs.project_id_numerical }}"
           region = "${{ env.GCP_REGION }}"
@@ -589,34 +720,144 @@ jobs:
           max_instances = ${{ steps.config.outputs.max_instances }}
           domain = "${{ env.STAGING_DOMAIN }}"
           EOF
-          
-          # Add sensitive variables through environment variables only
-          echo "postgres_password = \"${TF_VAR_postgres_password}\"" >> terraform.tfvars
-          echo "clickhouse_password = \"${TF_VAR_clickhouse_password}\"" >> terraform.tfvars
-          
-          # Secure the file
-          chmod 600 terraform.tfvars
-          
-          # Run plan with secure variables file
-          terraform plan -var-file=terraform.tfvars -lock-timeout=120s -out=tfplan
-          
-          # Clean up sensitive file
-          rm -f terraform.tfvars
-
-      - name: Terraform Apply
-        working-directory: ./terraform/staging
-        id: terraform
-        timeout-minutes: 20  # Terraform should complete within 20 minutes
-        run: |
-          # Set timeout for terraform apply itself
-          timeout 1200 terraform apply -auto-approve tfplan || {
-            echo "Terraform apply timed out after 20 minutes"
-            echo "Attempting to show current state..."
-            terraform show
-            exit 1
+              
+              # Add sensitive variables through environment variables only
+              echo "postgres_password = \"${TF_VAR_postgres_password}\"" >> terraform.tfvars
+              echo "clickhouse_password = \"${TF_VAR_clickhouse_password}\"" >> terraform.tfvars
+              
+              # Secure the file
+              chmod 600 terraform.tfvars
+              
+              # Run plan with lock timeout and retry on lock acquisition failure
+              if terraform plan \
+                -var-file=terraform.tfvars \
+                -lock-timeout=180s \
+                -out=tfplan \
+                -input=false; then
+                echo "✅ Terraform plan successful"
+                rm -f terraform.tfvars
+                return 0
+              else
+                EXIT_CODE=$?
+                rm -f terraform.tfvars
+                echo "❌ Terraform plan failed with exit code $EXIT_CODE"
+                
+                # Check if it's a lock-related error
+                if terraform plan -var-file=terraform.tfvars -lock-timeout=1s -out=tfplan 2>&1 | grep -q "lock"; then
+                  echo "Lock-related error detected"
+                  
+                  if [ $attempt -lt $max_attempts ]; then
+                    PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+                    LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/default.tflock"
+                    
+                    echo "Checking lock status..."
+                    if gsutil stat "$LOCK_FILE" 2>/dev/null; then
+                      echo "Lock file exists, attempting to remove..."
+                      gsutil rm "$LOCK_FILE" 2>/dev/null || true
+                      sleep 5
+                    fi
+                  fi
+                fi
+                
+                if [ $attempt -eq $max_attempts ]; then
+                  echo "Failed after $max_attempts attempts"
+                  return $EXIT_CODE
+                fi
+                
+                # Exponential backoff
+                echo "Waiting ${wait_time} seconds before retry..."
+                sleep $wait_time
+                wait_time=$((wait_time * 2))
+                attempt=$((attempt + 1))
+              fi
+            done
+            
+            return 1
           }
           
-          # Capture outputs
+          # Run plan with retry logic
+          terraform_plan_with_retry
+
+      - name: Terraform Apply with Retry
+        working-directory: ./terraform/staging
+        id: terraform
+        timeout-minutes: 25  # Extra time for retries
+        run: |
+          # Function to run terraform apply with retries
+          terraform_apply_with_retry() {
+            local max_attempts=2  # Apply is more sensitive, fewer retries
+            local attempt=1
+            local wait_time=15
+            
+            while [ $attempt -le $max_attempts ]; do
+              echo "Terraform apply attempt $attempt of $max_attempts..."
+              
+              # Run apply with lock timeout
+              if timeout 1200 terraform apply \
+                -auto-approve \
+                -lock-timeout=180s \
+                -input=false \
+                tfplan; then
+                echo "✅ Terraform apply successful"
+                return 0
+              else
+                EXIT_CODE=$?
+                echo "❌ Terraform apply failed with exit code $EXIT_CODE"
+                
+                # Show current state for debugging
+                echo "Current Terraform state:"
+                terraform show -no-color 2>/dev/null | head -100 || true
+                
+                if [ $attempt -eq $max_attempts ]; then
+                  echo "Failed after $max_attempts attempts"
+                  
+                  # Try to refresh state as last resort
+                  echo "Attempting to refresh state..."
+                  terraform refresh -lock-timeout=60s 2>/dev/null || true
+                  
+                  return $EXIT_CODE
+                fi
+                
+                # Check if it's a lock-related error
+                PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+                LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/default.tflock"
+                
+                echo "Checking for stale locks..."
+                if gsutil stat "$LOCK_FILE" 2>/dev/null; then
+                  echo "Lock file found, checking age..."
+                  LOCK_INFO=$(gsutil cat "$LOCK_FILE" 2>/dev/null || echo "{}")
+                  LOCK_CREATED=$(echo "$LOCK_INFO" | jq -r '.Created // ""')
+                  
+                  if [[ -n "$LOCK_CREATED" ]] && [[ "$LOCK_CREATED" != "null" ]]; then
+                    LOCK_TIMESTAMP=$(date -d "${LOCK_CREATED}" +%s 2>/dev/null || echo "0")
+                    CURRENT_TIME=$(date +%s)
+                    AGE_MINUTES=$(( (CURRENT_TIME - LOCK_TIMESTAMP) / 60 ))
+                    
+                    if [ $AGE_MINUTES -gt 10 ]; then
+                      echo "Removing stale lock (${AGE_MINUTES} minutes old)..."
+                      gsutil rm "$LOCK_FILE" 2>/dev/null || true
+                      sleep 5
+                    fi
+                  fi
+                fi
+                
+                # Exponential backoff
+                echo "Waiting ${wait_time} seconds before retry..."
+                sleep $wait_time
+                wait_time=$((wait_time * 2))
+                attempt=$((attempt + 1))
+              fi
+            done
+            
+            return 1
+          }
+          
+          # Run apply with retry logic
+          terraform_apply_with_retry
+          APPLY_RESULT=$?
+          
+          # Capture outputs regardless of apply result
+          echo "Capturing Terraform outputs..."
           BACKEND_URL=$(terraform output -raw backend_url 2>/dev/null || echo "")
           FRONTEND_URL=$(terraform output -raw frontend_url 2>/dev/null || echo "")
           DATABASE_NAME=$(terraform output -raw database_name 2>/dev/null || echo "")
@@ -628,6 +869,9 @@ jobs:
           # Export connection details for next steps
           echo "DB_NAME=$DATABASE_NAME" >> $GITHUB_ENV
           echo "DB_USER=user_pr_${{ github.event.pull_request.number || github.event.inputs.pr_number }}" >> $GITHUB_ENV
+          
+          # Exit with apply result
+          exit $APPLY_RESULT
 
       - name: Run database migrations
         timeout-minutes: 5  # Migrations should complete quickly
@@ -964,15 +1208,50 @@ jobs:
           retention-days: 7
           compression-level: 9  # Maximum compression for logs
 
-      - name: Terraform Destroy
+      - name: Terraform Destroy with Lock Handling
         working-directory: ./terraform/staging
         env:
           TF_VAR_postgres_password: ${{ secrets.STAGING_DB_PASSWORD }}
           TF_VAR_clickhouse_password: ${{ secrets.CLICKHOUSE_PASSWORD || 'placeholder_password' }}
         run: |
-          terraform init \
-            -backend-config="bucket=${{ env.GCP_PROJECT_ID }}-terraform-state" \
-            -backend-config="prefix=staging/pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/default.tflock"
+          
+          # Force remove any existing lock for destroy operations
+          echo "Checking for existing lock before destroy..."
+          if gsutil stat "$LOCK_FILE" 2>/dev/null; then
+            echo "⚠️ Lock file found, force removing for destroy operation..."
+            gsutil rm "$LOCK_FILE" 2>/dev/null || true
+            sleep 3
+          fi
+          
+          # Initialize Terraform with retries
+          MAX_INIT_ATTEMPTS=3
+          INIT_ATTEMPT=1
+          while [ $INIT_ATTEMPT -le $MAX_INIT_ATTEMPTS ]; do
+            echo "Terraform init attempt $INIT_ATTEMPT of $MAX_INIT_ATTEMPTS..."
+            
+            if terraform init \
+              -backend-config="bucket=${{ env.GCP_PROJECT_ID }}-terraform-state" \
+              -backend-config="prefix=staging/pr-${PR_NUMBER}" \
+              -lock-timeout=120s; then
+              echo "✅ Terraform init successful"
+              break
+            else
+              echo "❌ Terraform init failed"
+              
+              if [ $INIT_ATTEMPT -eq $MAX_INIT_ATTEMPTS ]; then
+                echo "Failed to initialize after $MAX_INIT_ATTEMPTS attempts"
+                exit 1
+              fi
+              
+              # Force unlock and retry
+              echo "Force removing lock and retrying..."
+              gsutil rm "$LOCK_FILE" 2>/dev/null || true
+              sleep 5
+              INIT_ATTEMPT=$((INIT_ATTEMPT + 1))
+            fi
+          done
           
           # Create secure tfvars file for destroy operation
           cat > terraform.tfvars << 'EOF'
@@ -992,11 +1271,43 @@ jobs:
           # Secure the file
           chmod 600 terraform.tfvars
           
-          # Run destroy with secure variables
-          terraform destroy -auto-approve -var-file=terraform.tfvars
+          # Run destroy with retries and lock handling
+          MAX_DESTROY_ATTEMPTS=2
+          DESTROY_ATTEMPT=1
+          while [ $DESTROY_ATTEMPT -le $MAX_DESTROY_ATTEMPTS ]; do
+            echo "Terraform destroy attempt $DESTROY_ATTEMPT of $MAX_DESTROY_ATTEMPTS..."
+            
+            if terraform destroy \
+              -auto-approve \
+              -var-file=terraform.tfvars \
+              -lock-timeout=180s \
+              -parallelism=10; then
+              echo "✅ Terraform destroy successful"
+              break
+            else
+              echo "❌ Terraform destroy failed"
+              
+              if [ $DESTROY_ATTEMPT -eq $MAX_DESTROY_ATTEMPTS ]; then
+                echo "Failed to destroy after $MAX_DESTROY_ATTEMPTS attempts"
+                # Don't fail the job - we'll clean up manually if needed
+                echo "::warning::Terraform destroy failed but continuing with cleanup"
+                break
+              fi
+              
+              # Force unlock and retry
+              echo "Force removing lock and retrying..."
+              gsutil rm "$LOCK_FILE" 2>/dev/null || true
+              sleep 10
+              DESTROY_ATTEMPT=$((DESTROY_ATTEMPT + 1))
+            fi
+          done
           
           # Clean up sensitive file
           rm -f terraform.tfvars
+          
+          # Final cleanup - remove state files
+          echo "Cleaning up Terraform state files..."
+          gsutil -m rm -r "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/" 2>/dev/null || true
 
       - name: Clean up container images and build cache
         run: |
@@ -1040,6 +1351,60 @@ jobs:
               issue_number: pr_number,
               body: comment
             });
+
+  cleanup-on-cancel:
+    name: Cleanup on Workflow Cancellation
+    needs: [deploy-staging]
+    if: always() && (cancelled() || failure())
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Force unlock Terraform state
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          
+          if [ -z "$PR_NUMBER" ]; then
+            echo "No PR number available, skipping lock cleanup"
+            exit 0
+          fi
+          
+          LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${PR_NUMBER}/default.tflock"
+          
+          echo "Checking for stale lock from cancelled/failed workflow..."
+          if gsutil stat "$LOCK_FILE" 2>/dev/null; then
+            LOCK_INFO=$(gsutil cat "$LOCK_FILE" 2>/dev/null || echo "{}")
+            LOCK_HOLDER=$(echo "$LOCK_INFO" | jq -r '.Who // "unknown"')
+            
+            # Only remove if it's from a GitHub Actions runner
+            if echo "$LOCK_HOLDER" | grep -q "runner@"; then
+              echo "⚠️ Found lock from GitHub Actions runner: $LOCK_HOLDER"
+              echo "Removing lock from cancelled/failed workflow..."
+              gsutil rm "$LOCK_FILE" 2>/dev/null || true
+              echo "✅ Lock removed successfully"
+            else
+              echo "Lock held by: $LOCK_HOLDER (not a runner, keeping lock)"
+            fi
+          else
+            echo "No lock file found"
+          fi
+          
+          # Also check for any orphaned tfplan files
+          echo "Cleaning up orphaned plan files..."
+          cd terraform/staging 2>/dev/null && rm -f tfplan terraform.tfvars 2>/dev/null || true
 
   cleanup-stale-environments:
     name: Cleanup Stale Environments
