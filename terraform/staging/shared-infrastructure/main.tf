@@ -104,7 +104,7 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_neg" {
   region                = var.region
   
   cloud_run {
-    # This will be populated per-PR
+    url_mask = "pr-<service>-<tag>.a.run.app"
   }
 }
 
