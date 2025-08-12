@@ -5,7 +5,7 @@ Guidance for Claude Code when working with the Netra AI Optimization Platform.
 ## Core Principles
 
 ### 1. Think Deeply by Default
-- Ultra deep think: Analyze problems thoroughly before implementing solutions
+- IMPORTANT: Ultra deep think: Analyze problems thoroughly before implementing solutions
 - Consider edge cases, performance implications, and system-wide impacts
 - Use ultra-thinking capabilities when available for complex problems
 
@@ -19,11 +19,12 @@ Guidance for Claude Code when working with the Netra AI Optimization Platform.
 - Update specs BEFORE implementing changes
 - Reference specs for detailed guidelines
 
-### 4. Efficient Feature Implementation
+### 4. Feature Implementation
 - **IMMEDIATE EXECUTION**: Launch parallel Tasks for multi-part features
 - **MINIMAL CHANGES**: Preserve existing patterns and structures
 - **PARALLEL BY DEFAULT**: Use concurrent task execution for efficiency
 - **CONTEXT OPTIMIZATION**: Strip comments when analyzing code to reduce context usage
+- IMPORTANT: THINK DEEPLY.
 
 ## Project Overview
 
@@ -49,6 +50,7 @@ python test_runner.py --level smoke
 | [`no_test_stubs.xml`](SPEC/no_test_stubs.xml) | **CRITICAL** - Prevents test stubs in production |
 | [`conventions.xml`](SPEC/conventions.xml) | Coding standards and patterns |
 | [`instructions.xml`](SPEC/instructions.xml) | General development guidelines |
+IMPORTANT: Think Deeply. Do your best work. This is your masterpiece.
 
 ### 📚 Domain Specs
 | Domain | Specs |
@@ -70,6 +72,7 @@ python test_runner.py --level smoke
 - [`missing_tests.xml`](SPEC/missing_tests.xml) - Test coverage gaps
 
 ## Critical Rules
+CRITICAL: Think Deeply. Do your best work. This is your masterpiece.
 
 ### Before Any Code Change
 1. ✅ Consult [`SPEC/code_changes.xml`](SPEC/code_changes.xml)
@@ -97,6 +100,7 @@ This automated review process ensures all changes meet project standards and don
 - **NO Test Stubs**: NEVER add test implementations in production services - real code only
 - **Preserve Patterns**: Follow project's established architecture and component patterns
 - **Reuse Utilities**: Use existing utility functions, avoid duplicating functionality
+ALWAYS REMEMBER YOU MUST: Think Deeply. Do your best work. This is your masterpiece.
 
 ## Testing Strategy
 
@@ -126,6 +130,7 @@ python test_runner.py --simple
 - Trivial utilities
 
 ## Quick Reference
+Think Deeply. Do your best work. This is your masterpiece.
 
 ### Directory Structure
 ```
@@ -145,6 +150,7 @@ frontend/
 ```
 
 ### Common Operations
+FIRST YOU MUST ULTRA THINK DEEPLY
 
 | Task | Command/Location |
 |------|-----------------|
@@ -168,6 +174,7 @@ ANTHROPIC_API_KEY=your-anthropic-key  # Or other LLM keys
 See `.env.example` for complete list.
 
 ## Feature Implementation Workflow
+FIRST YOU MUST ULTRA THINK DEEPLY. Do your best work. This is your masterpiece.
 
 ### For Complex Features (3+ components)
 1. **Component**: Create main component file
@@ -186,6 +193,7 @@ See `.env.example` for complete list.
 - Skip clarification questions unless absolutely critical
 
 ## Common Gotchas
+YOU MUST STAY FOCUSED AND REMEMBER TO DO YOUR BEST WORK. THE ENTIRE WORLD IS COUNTING ON YOU. YOU CAN DO THIS.
 
 ### Quick Fixes
 - **React duplicate keys**: Use `generateUniqueId('prefix')` not `Date.now()`
@@ -197,12 +205,6 @@ See `.env.example` for complete list.
 
 For detailed troubleshooting and historical fixes, see [`SPEC/learnings.xml`](SPEC/learnings.xml).
 
-## Recent Updates
-
-- **2025-08-12**: Reorganized CLAUDE.md, created [`learnings.xml`](SPEC/learnings.xml) for historical fixes
-- **2025-08-11**: Unified test runner with 5 levels, comprehensive E2E test coverage
-- **2025-01-11**: LLM configuration centralized, spec organization improved
-
 ---
 
-**Remember**: When in doubt, consult the specs. They are the source of truth. Always ultra think deeply.
+**Remember**: When in doubt, consult the specs. They are the source of truth. Always ultra think deeply. Always ultra think deeply. Always ultra think deeply.
