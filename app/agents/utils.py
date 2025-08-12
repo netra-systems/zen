@@ -449,7 +449,7 @@ def extract_partial_json(response: str, required_fields: list = None) -> Optiona
     # Define patterns for simple key-value pairs
     simple_patterns = [
         # Pattern for quoted keys with string values: "key": "value"
-        r'"([^"]+)"\s*:\s*"([^"]*?)"(?=[,}\]]|\s*")',
+        r'"([^"]+)"\s*:\s*"([^"]*)"(?=[,}\]])',
         # Pattern for quoted keys with numeric/boolean values: "key": 123 or "key": true
         r'"([^"]+)"\s*:\s*(\d+\.?\d*|true|false|null)(?=[,}\]]|\s)',
         # Pattern for unquoted keys (fallback): key: "value" or key: value

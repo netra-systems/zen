@@ -66,8 +66,8 @@ const WorkloadSelector: React.FC<WorkloadSelectorProps> = ({
         avgLatency: '500ms',
         costPerInference: '$0.005'
       },
-      color: 'text-blue-600',
-      gradient: 'from-blue-500 to-cyan-500'
+      color: 'text-emerald-600',
+      gradient: 'from-emerald-500 to-cyan-500'
     },
     {
       id: 'healthcare',

@@ -528,9 +528,13 @@ class TestSupplyResearcherAgentV2:
                 
                 await agent.execute(state, "perf_run", False)
                 
-                # Verify metrics were collected
-                # Note: Actual implementation would need metrics integration
-                assert True  # Placeholder for metrics verification
+                # Verify metrics were collected with proper assertions
+                assert hasattr(state, 'supply_research_result'), "Research result should be set"
+                result = state.supply_research_result
+                assert 'processing_time' in result, "Processing time should be tracked"
+                assert result['processing_time'] > 0, "Processing time should be positive"
+                assert 'confidence_score' in result, "Confidence score should be calculated"
+                assert 0 <= result['confidence_score'] <= 1, "Confidence score should be between 0 and 1"
 
 
 class TestSupplyResearcherIntegrationV2:
@@ -587,10 +591,19 @@ class TestSupplyResearcherIntegrationV2:
             assert hasattr(state, 'supply_research_result')
             assert state.supply_research_result["status"] in ["completed", "success"]
             
-            # Verify notifications would be sent
-            if state.supply_research_result.get("confidence_score", 0) > 0.7:
+            # Verify notifications would be sent for high confidence results
+            confidence_score = state.supply_research_result.get("confidence_score", 0)
+            if confidence_score > 0.7:
                 # High confidence updates should trigger notifications
-                assert True
+                broadcast_calls = agent.websocket_manager.broadcast.call_args_list
+                assert len(broadcast_calls) > 0, "High confidence results should trigger broadcasts"
+                # Verify broadcast contains supply update notification
+                for call in broadcast_calls:
+                    if 'supply_update' in str(call):
+                        assert True, "Found supply update notification"
+                        break
+                else:
+                    assert False, "No supply update notification found in broadcasts"
     
     @pytest.mark.asyncio
     async def test_scheduled_research_with_aggregation(self):

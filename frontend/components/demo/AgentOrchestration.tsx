@@ -243,7 +243,7 @@ export default function AgentOrchestration({ industry = 'Technology' }: AgentOrc
             </div>
             <div className="flex gap-2">
               {!isRunning ? (
-                <Button onClick={simulateWorkflow} className="bg-gradient-to-r from-blue-600 to-purple-600">
+                <Button onClick={simulateWorkflow} className="bg-gradient-to-r from-emerald-600 to-purple-600">
                   <Play className="w-4 h-4 mr-1" />
                   Start Workflow
                 </Button>

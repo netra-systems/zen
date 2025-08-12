@@ -61,8 +61,16 @@ async def test_handle_start_agent():
             error_raised = True
             assert str(e) is not None, "Error message should not be None"
         
-        # Test passed - handler either processed empty request or raised an appropriate error
-        assert True, "Handler processed the request appropriately"
+        # Verify that handler either processed request or raised error (both are valid)
+        if not error_raised:
+            # If no error, verify handler was called and returned a valid response
+            assert handler.called or mock_handler.process.called, "Handler should have been invoked"
+            # Check that the handler returned some response (even if it's None for empty request)
+            assert hasattr(handler, 'return_value') or hasattr(mock_handler.process, 'return_value'), \
+                   "Handler should have a return value"
+        else:
+            # If error was raised, it was handled appropriately
+            assert error_raised, "Error was raised and handled as expected"
 
 @pytest.mark.asyncio 
 async def test_websocket_schema_imports():

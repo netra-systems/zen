@@ -1,6 +1,6 @@
 export interface SubAgentUpdate {
     sub_agent_name: string;
-    state: any; // placeholder
+    state: SubAgentState;
 }
 
 export interface AgentStarted {
@@ -9,7 +9,7 @@ export interface AgentStarted {
 
 export interface AgentCompleted {
     run_id: string;
-    result: any;
+    result: AgentCompletionResult;
 }
 
 export interface AgentErrorMessage {
@@ -25,4 +25,32 @@ export interface SubAgentStatus {
   agent_name: string;
   tools: string[];
   status: string;
+}
+
+export interface SubAgentState {
+  status: 'idle' | 'thinking' | 'executing' | 'completed' | 'error';
+  currentStep?: string;
+  progress?: {
+    current: number;
+    total: number;
+  };
+  tools?: string[];
+  metadata?: {
+    [key: string]: unknown;
+  };
+}
+
+export interface AgentCompletionResult {
+  output: string;
+  data?: {
+    [key: string]: unknown;
+  };
+  metrics?: {
+    executionTime: number;
+    tokensUsed?: number;
+    toolsExecuted?: number;
+  };
+  artifacts?: {
+    [key: string]: unknown;
+  };
 }

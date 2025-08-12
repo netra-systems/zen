@@ -240,7 +240,10 @@ class BaseRepository(Generic[T], ABC):
         """Get multiple entities by their IDs"""
         session = db or self._session
         if not session:
-            raise ValueError("No database session available. Pass db parameter or use within UnitOfWork context.")
+            raise DatabaseError(
+                message="No database session available",
+                context={"repository": self.model.__name__}
+            )
         
         try:
             result = await session.execute(
@@ -249,34 +252,48 @@ class BaseRepository(Generic[T], ABC):
             return list(result.scalars().all())
         except SQLAlchemyError as e:
             logger.error(f"Error fetching multiple {self.model.__name__}: {e}")
-            return []
+            raise DatabaseError(
+                message=f"Failed to fetch multiple {self.model.__name__}",
+                context={"repository": self.model.__name__, "ids": ids, "error": str(e)}
+            )
     
     async def soft_delete(self, entity_id: str, db: Optional[AsyncSession] = None) -> bool:
         """Soft delete an entity (if model supports it)"""
         session = db or self._session
         if not session:
-            raise ValueError("No database session available. Pass db parameter or use within UnitOfWork context.")
+            raise DatabaseError(
+                message="No database session available",
+                context={"repository": self.model.__name__, "entity_id": entity_id}
+            )
         
         try:
             entity = await self.get_by_id(session, entity_id)
             if not entity:
-                return False
+                raise RecordNotFoundError(self.model.__name__, entity_id)
             
             # Check if model supports soft delete
             if hasattr(entity, 'deleted_at'):
                 from datetime import datetime, UTC
                 setattr(entity, 'deleted_at', datetime.now(UTC))
-                await session.commit()
+                # Don't commit here - let UnitOfWork handle transactions
+                await session.flush()  # Flush changes but don't commit
                 logger.info(f"Soft deleted {self.model.__name__} with id: {entity_id}")
                 return True
             else:
                 logger.warning(f"{self.model.__name__} does not support soft delete")
-                return False
+                raise DatabaseError(
+                    message=f"{self.model.__name__} does not support soft delete",
+                    context={"repository": self.model.__name__, "entity_id": entity_id}
+                )
                 
+        except NetraException:
+            raise
         except SQLAlchemyError as e:
-            await session.rollback()
             logger.error(f"Error soft deleting {self.model.__name__} {entity_id}: {e}")
-            return False
+            raise DatabaseError(
+                message=f"Failed to soft delete {self.model.__name__}",
+                context={"repository": self.model.__name__, "entity_id": entity_id, "error": str(e)}
+            )
     
     @abstractmethod
     async def find_by_user(self, db: AsyncSession, user_id: str) -> List[T]:

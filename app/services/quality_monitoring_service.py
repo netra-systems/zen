@@ -17,7 +17,7 @@ from sqlalchemy import select, func, and_, or_
 
 from app.logging_config import central_logger
 from app.redis_manager import RedisManager
-from app.db.clickhouse import ClickHouseManager
+from app.db.clickhouse import ClickHouseDatabase
 from app.services.quality_gate_service import QualityLevel, ContentType, QualityMetrics
 from app.core.exceptions import NetraException
 
@@ -124,7 +124,7 @@ class QualityMonitoringService:
     def __init__(
         self,
         redis_manager: Optional[RedisManager] = None,
-        clickhouse_manager: Optional[ClickHouseManager] = None,
+        clickhouse_manager: Optional[ClickHouseDatabase] = None,
         db_session: Optional[AsyncSession] = None
     ):
         """Initialize the quality monitoring service"""

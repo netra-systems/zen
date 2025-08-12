@@ -194,24 +194,31 @@ async def close_async_db():
 
 def get_pool_status() -> dict:
     """Get current connection pool status for monitoring."""
-    status = {"sync": None, "async": None}
-    
-    if hasattr(Database, 'engine') and Database.engine:
-        pool = Database.engine.pool
-        status["sync"] = {
-            "size": pool.size() if hasattr(pool, 'size') else None,
-            "checked_in": pool.checkedin() if hasattr(pool, 'checkedin') else None,
-            "overflow": pool.overflow() if hasattr(pool, 'overflow') else None,
-            "total": pool.size() + pool.overflow() if hasattr(pool, 'size') and hasattr(pool, 'overflow') else None
-        }
-    
-    if async_engine:
-        pool = async_engine.pool
-        status["async"] = {
-            "size": pool.size() if hasattr(pool, 'size') else None,
-            "checked_in": pool.checkedin() if hasattr(pool, 'checkedin') else None,
-            "overflow": pool.overflow() if hasattr(pool, 'overflow') else None,
-            "total": pool.size() + pool.overflow() if hasattr(pool, 'size') and hasattr(pool, 'overflow') else None
-        }
-    
-    return status
+    # This function is now deprecated in favor of the comprehensive monitoring system
+    # Import and use the new monitoring system
+    try:
+        from app.services.database.connection_monitor import connection_metrics
+        return connection_metrics.get_pool_status()
+    except ImportError:
+        # Fallback to basic status if monitoring not available
+        status = {"sync": None, "async": None}
+        
+        if hasattr(Database, 'engine') and Database.engine:
+            pool = Database.engine.pool
+            status["sync"] = {
+                "size": pool.size() if hasattr(pool, 'size') else None,
+                "checked_in": pool.checkedin() if hasattr(pool, 'checkedin') else None,
+                "overflow": pool.overflow() if hasattr(pool, 'overflow') else None,
+                "total": pool.size() + pool.overflow() if hasattr(pool, 'size') and hasattr(pool, 'overflow') else None
+            }
+        
+        if async_engine:
+            pool = async_engine.pool
+            status["async"] = {
+                "size": pool.size() if hasattr(pool, 'size') else None,
+                "checked_in": pool.checkedin() if hasattr(pool, 'checkedin') else None,
+                "overflow": pool.overflow() if hasattr(pool, 'overflow') else None,
+                "total": pool.size() + pool.overflow() if hasattr(pool, 'size') and hasattr(pool, 'overflow') else None
+            }
+        
+        return status

@@ -9,6 +9,10 @@ jest.mock('@/providers/WebSocketProvider', () => ({
   useWebSocketContext: jest.fn()
 }));
 
+jest.mock('@/lib/utils', () => ({
+  generateUniqueId: jest.fn((prefix) => `${prefix}-test-${Math.random().toString(36).substr(2, 9)}`)
+}));
+
 jest.mock('@/components/chat/MessageItem', () => ({
   MessageItem: ({ message }: any) => (
     <div data-testid={`message-${message.id}`}>
@@ -109,12 +113,12 @@ describe('ChatHistory Component', () => {
       
       renderWithProvider(<ChatHistory />);
       
-      // Check error message transformation - uses first non-null value
-      expect(screen.getByTestId('message-msg-0')).toHaveTextContent('Unable to connect');
+      // Check that messages are rendered with transformed content
+      expect(screen.getByText('Unable to connect')).toBeInTheDocument();
       
-      // Check data message transformation
-      const dataMessage = screen.getByTestId('message-msg-1');
-      expect(dataMessage).toBeInTheDocument();
+      // Check data message transformation - should render as JSON
+      const messages = screen.getAllByTestId(/message-msg-test-/);
+      expect(messages).toHaveLength(2);
     });
 
     it('should handle messages with different payload structures', () => {
@@ -160,10 +164,14 @@ describe('ChatHistory Component', () => {
       
       renderWithProvider(<ChatHistory />);
       
-      // Check that each message has a unique id
-      expect(screen.getByTestId('message-msg-0')).toBeInTheDocument();
-      expect(screen.getByTestId('message-msg-1')).toBeInTheDocument();
-      expect(screen.getByTestId('message-msg-2')).toBeInTheDocument();
+      // Check that each message has a unique id with the prefix
+      const messages = screen.getAllByTestId(/message-msg-test-/);
+      expect(messages).toHaveLength(3);
+      
+      // Verify each message has unique content
+      expect(screen.getByText('First')).toBeInTheDocument();
+      expect(screen.getByText('Second')).toBeInTheDocument();
+      expect(screen.getByText('Third')).toBeInTheDocument();
     });
 
     it('should pass correct props to MessageItem', () => {
@@ -183,9 +191,10 @@ describe('ChatHistory Component', () => {
       
       renderWithProvider(<ChatHistory />);
       
-      // MessageItem should receive transformed message
-      const messageElement = screen.getByTestId('message-msg-0');
-      expect(messageElement).toHaveTextContent('Test message');
+      // MessageItem should receive transformed message with generated id
+      const messageElements = screen.getAllByTestId(/message-msg-test-/);
+      expect(messageElements).toHaveLength(1);
+      expect(messageElements[0]).toHaveTextContent('Test message');
     });
   });
 
