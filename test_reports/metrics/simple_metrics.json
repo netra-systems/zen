@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-12T13:00:53.963926",
+  "timestamp": "2025-08-12T13:35:29.996239",
   "level": "simple",
   "metrics": {
     "total_tests": 0,
@@ -10,7 +10,7 @@
   "results": {
     "backend": {
       "status": "failed",
-      "duration": 4.294755220413208,
+      "duration": 8.584534049034119,
       "exit_code": 1,
       "output": "============================================================\nSIMPLE TEST RUNNER - Quick Assessment\n============================================================\n\nRunning: app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error\n  [FAIL] test_configuration_error\n       ============================= test session starts =============================\ncollected 0 items\n\n=\n\nRunning: app/tests/core/test_config_manager.py::TestConfigManager::test_initialization\n  [FAIL] test_initialization\n       ============================= test session starts =============================\ncollected 0 items\n\n=\n\nRunning: app/tests/services/test_security_service.py::TestSecurityService::test_verify_password\n  [FAIL] test_verify_password\n       ============================= test session starts =============================\ncollected 0 items\n\n=\n\nRunning: app/tests/routes/test_health_route.py::test_live_endpoint\n  [FAIL] test_live_endpoint\n       ============================= test session starts =============================\ncollected 0 items\n\n=\n\nRunning: tests/test_system_startup.py::TestSystemStartup::test_configuration_loading\n  [FAIL] test_configuration_loading\n       ============================= test session starts =============================\ncollected 0 items\n\n=\n\n============================================================\nSUMMARY\n============================================================\nPassed: 0\nFailed: 5\nErrors: 0\n\nDetailed results saved to: simple_test_results.json\n\n[FAILED] 5 tests need attention\n\n",
       "test_counts": {
@@ -25,7 +25,7 @@
     },
     "frontend": {
       "status": "failed",
-      "duration": 4.294755220413208,
+      "duration": 8.584534049034119,
       "exit_code": 1,
       "output": "",
       "test_counts": {
@@ -53,8 +53,8 @@
     },
     "overall": {
       "status": "failed",
-      "start_time": 1755028845.3729064,
-      "end_time": 1755028853.962417
+      "start_time": 1755030912.8271713,
+      "end_time": 1755030929.9962394
     }
   }
 }

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
 
@@ -19,7 +19,9 @@ import { useChatStore } from '@/store/chatStore';
 import { useThreadStore } from '@/store/threadStore';
 import apiClient from '@/services/apiClient';
 
-import { TestProviders } from '../test-utils/providers';// Mock Next.js
+import { TestProviders } from '../test-utils/providers';
+
+// Mock Next.js
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn(),
@@ -610,7 +612,7 @@ describe('Advanced Frontend Integration Tests', () => {
 
     it('should handle protected route redirects', async () => {
       const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-        const { isAuthenticated } = useAuthStore();
+        const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
         const router = require('next/navigation').useRouter();
         
         React.useEffect(() => {
@@ -1417,12 +1419,8 @@ describe('Advanced Frontend Integration Tests', () => {
       
       const MonitoredComponent = () => {
         const handleError = () => {
-          try {
-            throw new Error('Monitored error');
-          } catch (error) {
-            reportError(error);
-            throw error;
-          }
+          const error = new Error('Monitored error');
+          reportError(error);
         };
         
         return (
@@ -1437,11 +1435,7 @@ describe('Advanced Frontend Integration Tests', () => {
       
       const { getByText } = render(<MonitoredComponent />);
       
-      try {
-        fireEvent.click(getByText('Trigger Monitored Error'));
-      } catch {
-        // Expected to throw
-      }
+      fireEvent.click(getByText('Trigger Monitored Error'));
       
       expect(errorReports).toHaveLength(1);
       expect(errorReports[0].message).toBe('Monitored error');
@@ -1606,8 +1600,10 @@ describe('Advanced Frontend Integration Tests', () => {
       // Send message while disconnected
       fireEvent.click(getByText('Send Message'));
       
-      expect(messageBuffer).toHaveLength(1);
-      expect(getByTestId('buffer-size')).toHaveTextContent('1 buffered');
+      await waitFor(() => {
+        expect(messageBuffer).toHaveLength(1);
+        expect(getByTestId('buffer-size')).toHaveTextContent('1 buffered');
+      });
     });
 
     it('should implement exponential backoff for reconnection', async () => {

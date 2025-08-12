@@ -24,7 +24,7 @@ from app.services.security_service import SecurityService
 from app.services.supply_catalog_service import SupplyCatalogService
 from app.services.database.mcp_repository import MCPClientRepository, MCPToolExecutionRepository
 from app.schemas import UserInDB
-from app.mcp.netra_mcp_server import NetraMCPServer
+from app.netra_mcp.netra_mcp_server import NetraMCPServer
 
 logger = CentralLogger()
 

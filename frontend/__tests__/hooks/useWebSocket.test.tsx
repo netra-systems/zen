@@ -24,18 +24,10 @@ jest.mock('@/providers/WebSocketProvider', () => ({
 
 describe('useWebSocket', () => {
   const mockSendMessage = jest.fn();
-  const mockConnect = jest.fn();
-  const mockDisconnect = jest.fn();
   const mockContext = {
-    sendMessage: mockSendMessage,
-    connect: mockConnect,
-    disconnect: mockDisconnect,
-    isConnected: true,
-    connectionState: 'connected' as const,
-    error: null,
-    lastMessage: null,
-    reconnectAttempts: 0,
-    messageQueue: []
+    status: 'OPEN' as const,
+    messages: [],
+    sendMessage: mockSendMessage
   };
 
   beforeEach(() => {
@@ -57,17 +49,21 @@ describe('useWebSocket', () => {
     
     expect(result.current).toEqual(mockContext);
     expect(result.current.sendMessage).toBe(mockSendMessage);
-    expect(result.current.isConnected).toBe(true);
+    expect(result.current.status).toBe('OPEN');
   });
 
-  it('should handle null context gracefully', () => {
-    (useWebSocketContext as jest.Mock).mockReturnValue(null);
+  it('should throw error when used outside of provider', () => {
+    // Mock useWebSocketContext to throw error as per actual implementation
+    (useWebSocketContext as jest.Mock).mockImplementation(() => {
+      throw new Error('useWebSocketContext must be used within a WebSocketProvider');
+    });
     
     const wrapper = TestProviders;
     
-    const { result } = renderHook(() => useWebSocket(), { wrapper });
-    
-    expect(result.current).toBeNull();
+    // Should throw when trying to use outside provider context
+    expect(() => {
+      renderHook(() => useWebSocket(), { wrapper });
+    }).toThrow('useWebSocketContext must be used within a WebSocketProvider');
   });
 
   it('should call sendMessage when invoked', () => {
@@ -87,115 +83,108 @@ describe('useWebSocket', () => {
     
     const { result, rerender } = renderHook(() => useWebSocket(), { wrapper });
     
-    expect(result.current.isConnected).toBe(true);
-    expect(result.current.connectionState).toBe('connected');
+    expect(result.current.status).toBe('OPEN');
     
     // Simulate disconnection
     (useWebSocketContext as jest.Mock).mockReturnValue({
       ...mockContext,
-      isConnected: false,
-      connectionState: 'disconnected'
+      status: 'CLOSED'
     });
     
     rerender();
     
-    expect(result.current.isConnected).toBe(false);
-    expect(result.current.connectionState).toBe('disconnected');
+    expect(result.current.status).toBe('CLOSED');
   });
 
-  it('should handle error states', () => {
-    const errorContext = {
+  it('should handle closing states', () => {
+    const closingContext = {
       ...mockContext,
-      isConnected: false,
-      connectionState: 'error' as const,
-      error: new Error('WebSocket connection failed')
+      status: 'CLOSING' as const
     };
     
-    (useWebSocketContext as jest.Mock).mockReturnValue(errorContext);
+    (useWebSocketContext as jest.Mock).mockReturnValue(closingContext);
     
     const wrapper = TestProviders;
     
     const { result } = renderHook(() => useWebSocket(), { wrapper });
     
-    expect(result.current.error).toEqual(new Error('WebSocket connection failed'));
-    expect(result.current.connectionState).toBe('error');
+    expect(result.current.status).toBe('CLOSING');
   });
 
-  it('should handle reconnection attempts', () => {
-    const reconnectingContext = {
+  it('should handle connecting state', () => {
+    const connectingContext = {
       ...mockContext,
-      isConnected: false,
-      connectionState: 'reconnecting' as const,
-      reconnectAttempts: 3
+      status: 'CONNECTING' as const
     };
     
-    (useWebSocketContext as jest.Mock).mockReturnValue(reconnectingContext);
+    (useWebSocketContext as jest.Mock).mockReturnValue(connectingContext);
     
     const wrapper = TestProviders;
     
     const { result } = renderHook(() => useWebSocket(), { wrapper });
     
-    expect(result.current.reconnectAttempts).toBe(3);
-    expect(result.current.connectionState).toBe('reconnecting');
+    expect(result.current.status).toBe('CONNECTING');
   });
 
-  it('should handle message queue', () => {
-    const queuedContext = {
+  it('should handle messages array', () => {
+    const messagesContext = {
       ...mockContext,
-      messageQueue: [
+      messages: [
         { type: 'message1', payload: {} },
         { type: 'message2', payload: {} }
       ]
     };
     
-    (useWebSocketContext as jest.Mock).mockReturnValue(queuedContext);
+    (useWebSocketContext as jest.Mock).mockReturnValue(messagesContext);
     
     const wrapper = TestProviders;
     
     const { result } = renderHook(() => useWebSocket(), { wrapper });
     
-    expect(result.current.messageQueue).toHaveLength(2);
-    expect(result.current.messageQueue[0].type).toBe('message1');
+    expect(result.current.messages).toHaveLength(2);
+    expect(result.current.messages[0].type).toBe('message1');
   });
 
-  it('should call connect method', () => {
+  it('should handle all WebSocket states', () => {
+    const wrapper = TestProviders;
+    const states = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'] as const;
+    
+    states.forEach(state => {
+      (useWebSocketContext as jest.Mock).mockReturnValue({
+        ...mockContext,
+        status: state
+      });
+      
+      const { result } = renderHook(() => useWebSocket(), { wrapper });
+      expect(result.current.status).toBe(state);
+    });
+  });
+
+  it('should accumulate messages over time', () => {
     const wrapper = TestProviders;
     
-    const { result } = renderHook(() => useWebSocket(), { wrapper });
+    // Start with no messages
+    const { result, rerender } = renderHook(() => useWebSocket(), { wrapper });
+    expect(result.current.messages).toHaveLength(0);
     
-    result.current.connect();
-    
-    expect(mockConnect).toHaveBeenCalledTimes(1);
-  });
-
-  it('should call disconnect method', () => {
-    const wrapper = TestProviders;
-    
-    const { result } = renderHook(() => useWebSocket(), { wrapper });
-    
-    result.current.disconnect();
-    
-    expect(mockDisconnect).toHaveBeenCalledTimes(1);
-  });
-
-  it('should handle last message updates', () => {
-    const messageContext = {
+    // Add first message
+    (useWebSocketContext as jest.Mock).mockReturnValue({
       ...mockContext,
-      lastMessage: {
-        type: 'chat_message',
-        payload: { text: 'Hello' },
-        timestamp: Date.now()
-      }
-    };
+      messages: [{ type: 'chat_message', payload: { text: 'Hello' } }]
+    });
+    rerender();
+    expect(result.current.messages).toHaveLength(1);
     
-    (useWebSocketContext as jest.Mock).mockReturnValue(messageContext);
-    
-    const wrapper = TestProviders;
-    
-    const { result } = renderHook(() => useWebSocket(), { wrapper });
-    
-    expect(result.current.lastMessage).toBeDefined();
-    expect(result.current.lastMessage?.type).toBe('chat_message');
-    expect(result.current.lastMessage?.payload).toEqual({ text: 'Hello' });
+    // Add second message
+    (useWebSocketContext as jest.Mock).mockReturnValue({
+      ...mockContext,
+      messages: [
+        { type: 'chat_message', payload: { text: 'Hello' } },
+        { type: 'status_update', payload: { status: 'processing' } }
+      ]
+    });
+    rerender();
+    expect(result.current.messages).toHaveLength(2);
+    expect(result.current.messages[1].type).toBe('status_update');
   });
 });

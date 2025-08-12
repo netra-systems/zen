@@ -6,9 +6,13 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { chatService } from '@/services/chatService';
 
-import { TestProviders } from '../test-utils/providers';// Mock dependencies
+import { TestProviders } from '../test-utils/providers';
+
+// Mock dependencies
 jest.mock('@/store/unified-chat');
-jest.mock('@/hooks/useWebSocket');
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: jest.fn()
+}));
 jest.mock('@/services/chatService');
 jest.mock('@/components/ui/button', () => ({
   Button: ({ children, onClick, disabled, variant }: any) => (
@@ -71,8 +75,9 @@ describe('ChatHistory Component', () => {
 
     jest.clearAllMocks();
     (useUnifiedChatStore as jest.Mock).mockReturnValue(mockChatStore);
-    (useWebSocket as jest.Mock).mockReturnValue(mockWebSocket);
-    (chatService as any).mockReturnValue(mockChatService);
+    const { useWebSocket } = require('@/hooks/useWebSocket');
+    useWebSocket.mockReturnValue(mockWebSocket);
+    Object.assign(chatService, mockChatService);
   });
 
   const renderWithProvider = (component: React.ReactElement) => {

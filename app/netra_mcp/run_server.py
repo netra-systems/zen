@@ -11,7 +11,7 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from app.mcp.netra_mcp_server import NetraMCPServer
+from app.netra_mcp.netra_mcp_server import NetraMCPServer
 from app.logging_config import CentralLogger
 
 logger = CentralLogger()

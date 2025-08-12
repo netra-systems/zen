@@ -10,11 +10,14 @@ import { ThreadService } from '@/services/threadService';
 import { generateUniqueId } from '@/lib/utils';
 
 // Mock dependencies
-jest.mock('@/hooks/useWebSocket');
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: jest.fn()
+}));
 jest.mock('@/store/chat');
 jest.mock('@/store/threadStore');
 jest.mock('@/store/authStore');
 jest.mock('@/services/threadService');
+jest.mock('@/services/threadRenameService');
 jest.mock('@/lib/utils');
 
 describe('MessageInput', () => {
@@ -28,7 +31,8 @@ describe('MessageInput', () => {
     jest.clearAllMocks();
     
     // Setup default mocks
-    (useWebSocket as jest.Mock).mockReturnValue({
+    const { useWebSocket } = require('@/hooks/useWebSocket');
+    useWebSocket.mockReturnValue({
       sendMessage: mockSendMessage,
     });
     

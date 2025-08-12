@@ -42,26 +42,23 @@ const mockAssign = jest.fn();
 const mockReplace = jest.fn();
 const mockReload = jest.fn();
 
-// Check if location is already defined (in jsdom) and delete it first
-if (window.location) {
-  delete (window as any).location;
-}
+// Store original location
+const originalLocation = window.location;
 
-// Use Object.defineProperty to properly mock location in jsdom
-Object.defineProperty(window, 'location', {
-  configurable: true,
-  writable: true,
-  value: {
-    href: '',
-    assign: mockAssign,
-    replace: mockReplace,
-    reload: mockReload,
-    origin: 'http://localhost:3000',
-    pathname: '/',
-    search: '',
-    hash: ''
-  }
-});
+// Delete location property if it exists to avoid redefinition error
+delete (window as any).location;
+
+// Mock location with a getter/setter approach
+(window as any).location = {
+  href: '',
+  assign: mockAssign,
+  replace: mockReplace,
+  reload: mockReload,
+  origin: 'http://localhost:3000',
+  pathname: '/',
+  search: '',
+  hash: ''
+};
 
 // Mock fetch
 global.fetch = jest.fn();
@@ -85,8 +82,18 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (window.location as any).href = '';
+    // Reset location href
+    if (window.location) {
+      (window.location as any).href = '';
+    }
     localStorageMock.getItem.mockReturnValue(null);
+  });
+
+  afterAll(() => {
+    // Restore original location if needed
+    if (originalLocation) {
+      (window as any).location = originalLocation;
+    }
   });
 
   describe('getAuthConfig', () => {
@@ -333,12 +340,6 @@ describe('AuthService', () => {
     });
 
     it('should handle logout without token', async () => {
-      const hrefSetter = jest.fn();
-      Object.defineProperty(window.location, 'href', {
-        set: hrefSetter,
-        get: () => '/',
-        configurable: true
-      });
       localStorageMock.getItem.mockReturnValue(null);
       (fetch as jest.Mock).mockResolvedValue({ ok: true });
 

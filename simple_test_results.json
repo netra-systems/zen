@@ -4,7 +4,7 @@
     "passed": 0,
     "failed": 1,
     "errors": 0,
-    "duration": 1.734642744064331,
+    "duration": 3.5093929767608643,
     "exit_code": 4,
     "output": "============================= test session starts =============================\ncollected 0 items\n\n============================ no tests ran in 0.00s ============================\n"
   },
@@ -13,7 +13,7 @@
     "passed": 0,
     "failed": 1,
     "errors": 0,
-    "duration": 1.636075496673584,
+    "duration": 3.2446184158325195,
     "exit_code": 4,
     "output": "============================= test session starts =============================\ncollected 0 items\n\n============================ no tests ran in 0.00s ============================\n"
   },
@@ -22,7 +22,7 @@
     "passed": 0,
     "failed": 1,
     "errors": 0,
-    "duration": 1.7982659339904785,
+    "duration": 3.105894088745117,
     "exit_code": 4,
     "output": "============================= test session starts =============================\ncollected 0 items\n\n============================ no tests ran in 0.00s ============================\n"
   },
@@ -31,7 +31,7 @@
     "passed": 0,
     "failed": 1,
     "errors": 0,
-    "duration": 1.6857573986053467,
+    "duration": 3.123272657394409,
     "exit_code": 4,
     "output": "============================= test session starts =============================\ncollected 0 items\n\n============================ no tests ran in 0.00s ============================\n"
   },
@@ -40,7 +40,7 @@
     "passed": 0,
     "failed": 1,
     "errors": 0,
-    "duration": 1.6722080707550049,
+    "duration": 4.0774242877960205,
     "exit_code": 4,
     "output": "============================= test session starts =============================\ncollected 0 items\n\n============================ no tests ran in 0.00s ============================\n"
   }

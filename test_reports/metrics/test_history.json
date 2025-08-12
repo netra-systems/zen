@@ -557,6 +557,60 @@
       "failed": 276,
       "coverage": null,
       "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:27:55.147856",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:30:54.106849",
+      "level": "unit",
+      "total": 518,
+      "passed": 208,
+      "failed": 310,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:32:24.910592",
+      "level": "unit",
+      "total": 518,
+      "passed": 208,
+      "failed": 310,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:33:48.747813",
+      "level": "unit",
+      "total": 192,
+      "passed": 190,
+      "failed": 2,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:36:48.228888",
+      "level": "unit",
+      "total": 546,
+      "passed": 235,
+      "failed": 311,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:40:00.025328",
+      "level": "unit",
+      "total": 577,
+      "passed": 238,
+      "failed": 339,
+      "coverage": null,
+      "duration": 0
     }
   ],
   "flaky_tests": {},

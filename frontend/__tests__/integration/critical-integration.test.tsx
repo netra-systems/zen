@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
 
@@ -116,7 +116,7 @@ describe('Critical Frontend Integration Tests', () => {
     it('should reconnect WebSocket when authentication changes', async () => {
       const TestComponent = () => {
         const { status } = useWebSocket();
-        const { login } = useAuthStore();
+        const login = useAuthStore((state) => state.login);
         
         return (
           <div>
@@ -150,19 +150,12 @@ describe('Critical Frontend Integration Tests', () => {
   describe('2. Agent Provider Integration', () => {
     it('should coordinate agent state with WebSocket messages', async () => {
       const TestComponent = () => {
-        const { sendUserMessage } = useAgent();
-        const [isProcessing, setIsProcessing] = React.useState(false);
-        
-        const handleSend = () => {
-          setIsProcessing(true);
-          sendUserMessage('test message');
-          setTimeout(() => setIsProcessing(false), 1000);
-        };
+        const { sendMessage, isProcessing } = useAgent();
         
         return (
           <div>
             <div data-testid="status">{isProcessing ? 'Processing' : 'Idle'}</div>
-            <button onClick={handleSend}>Send</button>
+            <button onClick={() => sendMessage('test message')}>Send</button>
           </div>
         );
       };
@@ -187,9 +180,7 @@ describe('Critical Frontend Integration Tests', () => {
       }));
       
       await waitFor(() => {
-        await waitFor(() => {
         expect(screen.getByTestId('status')).toHaveTextContent('Processing');
-      });
       });
       
       // Complete processing
@@ -199,18 +190,18 @@ describe('Critical Frontend Integration Tests', () => {
       }));
       
       await waitFor(() => {
-        expect(getByText('Idle')).toBeInTheDocument();
+        expect(screen.getByTestId('status')).toHaveTextContent('Idle');
       });
     });
 
     it('should sync agent reports with chat messages', async () => {
       const TestComponent = () => {
-        const { sendUserMessage } = useAgent();
+        const { sendMessage } = useAgent();
         const messages = useChatStore((state) => state.messages);
         
         return (
           <div>
-            <button onClick={() => sendUserMessage('analyze this')}>Analyze</button>
+            <button onClick={() => sendMessage('analyze this')}>Analyze</button>
             <div data-testid="message-count">Messages: {messages.length}</div>
           </div>
         );
@@ -479,7 +470,8 @@ describe('Critical Frontend Integration Tests', () => {
   describe('6. Error Recovery Integration', () => {
     it('should recover from WebSocket disconnection', async () => {
       const TestComponent = () => {
-        const { isConnected, reconnect } = useWebSocket();
+        const { status, reconnect } = useWebSocket();
+        const isConnected = status === 'OPEN';
         
         return (
           <div>
@@ -554,8 +546,8 @@ describe('Critical Frontend Integration Tests', () => {
 
     it('should handle session expiration gracefully', async () => {
       const TestComponent = () => {
-        const { logout } = useAuthStore();
-        const { isAuthenticated } = useAuthStore();
+        const logout = useAuthStore((state) => state.logout);
+        const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
         
         React.useEffect(() => {
           // Simulate token expiration check

@@ -25,6 +25,7 @@ const config = {
     '^@/(.*)$': '<rootDir>/$1',
     '\\.(css|less|scss|sass)$': '<rootDir>/__mocks__/styleMock.js',
     'react-syntax-highlighter/dist/esm/styles/prism': '<rootDir>/__mocks__/prismStyleMock.js',
+    'react-markdown': '<rootDir>/__mocks__/react-markdown.tsx',
   },
   transformIgnorePatterns: [
     'node_modules/(?!(react-markdown|remark-gfm|remark-math|rehype-katex|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|hast-util-whitespace|space-separated-tokens|comma-separated-tokens|vfile|unist-|unified|bail|is-plain-obj|trough|micromark|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|hast-util-parse-selector|mdast-util-)/)',

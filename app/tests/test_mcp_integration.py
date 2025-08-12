@@ -9,7 +9,7 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
 
-from app.mcp.netra_mcp_server import NetraMCPServer
+from app.netra_mcp.netra_mcp_server import NetraMCPServer
 from app.services.mcp_service import MCPService, MCPClient, MCPToolExecution
 
 

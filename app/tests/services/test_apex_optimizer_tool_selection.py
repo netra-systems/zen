@@ -144,8 +144,10 @@ class MockLLMConnector:
         # print(f"DEBUG: Extracted user query: {user_query}")
         
         # Check for specific patterns in the USER QUERY, not the whole prompt
-        # Check cost patterns first (most specific combinations)
-        if 'reduce costs' in user_query or 'cost reduction' in user_query or ('cost' in user_query and 'reduce' in user_query):
+        # Check multi-objective patterns first (most specific combinations)
+        if 'multi' in user_query or ('both' in user_query and 'cost' in user_query and 'latency' in user_query) or ('cost' in user_query and 'latency' in user_query):
+            return json.dumps(self.response_templates['multi'])
+        elif 'reduce costs' in user_query or 'cost reduction' in user_query or ('cost' in user_query and 'reduce' in user_query):
             return json.dumps(self.response_templates['cost'])
         elif 'latency' in user_query or 'speed' in user_query or 'response time' in user_query:
             return json.dumps(self.response_templates['latency'])
@@ -153,8 +155,6 @@ class MockLLMConnector:
             return json.dumps(self.response_templates['cache'])
         elif 'model' in user_query and ('new' in user_query or 'analysis' in user_query or 'effectiveness' in user_query):
             return json.dumps(self.response_templates['model'])
-        elif 'multi' in user_query or ('cost' in user_query and 'latency' in user_query):
-            return json.dumps(self.response_templates['multi'])
         else:
             # Default to cost optimization
             return json.dumps(self.response_templates['cost'])
@@ -434,7 +434,17 @@ class TestApexOptimizerToolSelection:
     async def test_tool_selection_multi_objective(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for multi-objective optimization"""
         # Create multi-objective request
-        request = RequestModel(query="Optimize for both cost reduction and latency improvement")
+        from app.schemas import Workload, DataSource, TimeRange
+        request = RequestModel(
+            user_id="test_user_multi",
+            query="Optimize for both cost reduction and latency improvement",
+            workloads=[Workload(
+                run_id="run_multi",
+                query="multi-objective optimization",
+                data_source=DataSource(source_table="multi_metrics"),
+                time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
+            )]
+        )
         from app.services.apex_optimizer_agent.models import BaseMessage
         message = BaseMessage(
             type="human",
@@ -461,7 +471,17 @@ class TestApexOptimizerToolSelection:
     async def test_tool_selection_empty_query(self, apex_tool_selector, mock_app_config):
         """Test tool selection with empty query"""
         # Create state with empty query
-        request = RequestModel(query="")
+        from app.schemas import Workload, DataSource, TimeRange
+        request = RequestModel(
+            user_id="test_user_empty",
+            query="",
+            workloads=[Workload(
+                run_id="run_empty",
+                query="",
+                data_source=DataSource(source_table="empty_metrics"),
+                time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
+            )]
+        )
         from app.services.apex_optimizer_agent.models import BaseMessage
         message = BaseMessage(
             type="human",
