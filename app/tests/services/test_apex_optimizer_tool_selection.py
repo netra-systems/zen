@@ -132,8 +132,12 @@ class MockLLMConnector:
         # Analyze prompt to determine appropriate tool
         prompt_lower = prompt.lower()
         
+        # Debug output for troubleshooting (disable in production)
+        print(f"DEBUG: Query in prompt: {request.query if 'request' in locals() else 'N/A'}")
+        print(f"DEBUG: Analyzing prompt snippet: {prompt_lower[50:250]}")
+        
         # Check for specific patterns - more precise matching
-        # Check cost-related patterns first as they are more specific
+        # Check cost patterns first (most specific combinations)
         if 'reduce costs' in prompt_lower or 'cost reduction' in prompt_lower or ('cost' in prompt_lower and 'reduce' in prompt_lower):
             return json.dumps(self.response_templates['cost'])
         elif 'latency' in prompt_lower or 'speed' in prompt_lower or 'response time' in prompt_lower:

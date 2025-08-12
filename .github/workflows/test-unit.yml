@@ -28,6 +28,12 @@ concurrency:
   group: unit-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  statuses: write
+  pull-requests: write
+  issues: write
+
 jobs:
   determine-shards:
     name: Determine Test Shards

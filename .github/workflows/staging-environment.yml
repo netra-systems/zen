@@ -566,28 +566,42 @@ jobs:
       - name: Terraform Plan
         working-directory: ./terraform/staging
         timeout-minutes: 5
+        env:
+          TF_VAR_project_id: ${{ env.GCP_PROJECT_ID }}
+          TF_VAR_project_id_numerical: ${{ steps.config.outputs.project_id_numerical }}
+          TF_VAR_region: ${{ env.GCP_REGION }}
+          TF_VAR_pr_number: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          TF_VAR_backend_image: ${{ needs.build-backend.outputs.backend_image }}
+          TF_VAR_frontend_image: ${{ needs.build-frontend.outputs.frontend_image }}
+          TF_VAR_max_instances: ${{ steps.config.outputs.max_instances }}
+          TF_VAR_domain: ${{ env.STAGING_DOMAIN }}
+          TF_VAR_postgres_password: ${{ secrets.STAGING_DB_PASSWORD }}
+          TF_VAR_clickhouse_password: ${{ secrets.CLICKHOUSE_PASSWORD || 'placeholder_password' }}
         run: |
-          # Ensure ClickHouse password is set
-          if [ -z "${{ secrets.CLICKHOUSE_PASSWORD }}" ]; then
-            echo "Warning: CLICKHOUSE_PASSWORD secret not set, using placeholder"
-            CLICKHOUSE_PASSWORD="placeholder_password"
-          else
-            CLICKHOUSE_PASSWORD="${{ secrets.CLICKHOUSE_PASSWORD }}"
-          fi
+          # Create secure tfvars file to prevent secrets in logs
+          cat > terraform.tfvars << 'EOF'
+          project_id = "${{ env.GCP_PROJECT_ID }}"
+          project_id_numerical = "${{ steps.config.outputs.project_id_numerical }}"
+          region = "${{ env.GCP_REGION }}"
+          pr_number = "${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
+          backend_image = "${{ needs.build-backend.outputs.backend_image }}"
+          frontend_image = "${{ needs.build-frontend.outputs.frontend_image }}"
+          max_instances = ${{ steps.config.outputs.max_instances }}
+          domain = "${{ env.STAGING_DOMAIN }}"
+          EOF
           
-          terraform plan \
-            -var="project_id=${{ env.GCP_PROJECT_ID }}" \
-            -var="project_id_numerical=${{ steps.config.outputs.project_id_numerical }}" \
-            -var="region=${{ env.GCP_REGION }}" \
-            -var="pr_number=${{ github.event.pull_request.number || github.event.inputs.pr_number }}" \
-            -var="backend_image=${{ needs.build-backend.outputs.backend_image }}" \
-            -var="frontend_image=${{ needs.build-frontend.outputs.frontend_image }}" \
-            -var="max_instances=${{ steps.config.outputs.max_instances }}" \
-            -var="domain=${{ env.STAGING_DOMAIN }}" \
-            -var="postgres_password=${{ secrets.STAGING_DB_PASSWORD }}" \
-            -var="clickhouse_password=${CLICKHOUSE_PASSWORD}" \
-            -lock-timeout=120s \
-            -out=tfplan
+          # Add sensitive variables through environment variables only
+          echo "postgres_password = \"${TF_VAR_postgres_password}\"" >> terraform.tfvars
+          echo "clickhouse_password = \"${TF_VAR_clickhouse_password}\"" >> terraform.tfvars
+          
+          # Secure the file
+          chmod 600 terraform.tfvars
+          
+          # Run plan with secure variables file
+          terraform plan -var-file=terraform.tfvars -lock-timeout=120s -out=tfplan
+          
+          # Clean up sensitive file
+          rm -f terraform.tfvars
 
       - name: Terraform Apply
         working-directory: ./terraform/staging
@@ -952,21 +966,37 @@ jobs:
 
       - name: Terraform Destroy
         working-directory: ./terraform/staging
+        env:
+          TF_VAR_postgres_password: ${{ secrets.STAGING_DB_PASSWORD }}
+          TF_VAR_clickhouse_password: ${{ secrets.CLICKHOUSE_PASSWORD || 'placeholder_password' }}
         run: |
           terraform init \
             -backend-config="bucket=${{ env.GCP_PROJECT_ID }}-terraform-state" \
             -backend-config="prefix=staging/pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
           
-          terraform destroy -auto-approve \
-            -var="project_id=${{ env.GCP_PROJECT_ID }}" \
-            -var="region=${{ env.GCP_REGION }}" \
-            -var="pr_number=${{ github.event.pull_request.number || github.event.inputs.pr_number }}" \
-            -var="backend_image=${{ needs.build-backend.outputs.backend_image || 'gcr.io/PROJECT_ID/backend:latest' }}" \
-            -var="frontend_image=${{ needs.build-frontend.outputs.frontend_image || 'gcr.io/PROJECT_ID/frontend:latest' }}" \
-            -var="max_instances=1" \
-            -var="domain=${{ env.STAGING_DOMAIN }}" \
-            -var="postgres_password=${{ secrets.STAGING_DB_PASSWORD }}" \
-            -var="clickhouse_password=${{ secrets.CLICKHOUSE_PASSWORD }}"
+          # Create secure tfvars file for destroy operation
+          cat > terraform.tfvars << 'EOF'
+          project_id = "${{ env.GCP_PROJECT_ID }}"
+          region = "${{ env.GCP_REGION }}"
+          pr_number = "${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
+          backend_image = "${{ needs.build-backend.outputs.backend_image || 'gcr.io/PROJECT_ID/backend:latest' }}"
+          frontend_image = "${{ needs.build-frontend.outputs.frontend_image || 'gcr.io/PROJECT_ID/frontend:latest' }}"
+          max_instances = 1
+          domain = "${{ env.STAGING_DOMAIN }}"
+          EOF
+          
+          # Add sensitive variables securely
+          echo "postgres_password = \"${TF_VAR_postgres_password}\"" >> terraform.tfvars
+          echo "clickhouse_password = \"${TF_VAR_clickhouse_password}\"" >> terraform.tfvars
+          
+          # Secure the file
+          chmod 600 terraform.tfvars
+          
+          # Run destroy with secure variables
+          terraform destroy -auto-approve -var-file=terraform.tfvars
+          
+          # Clean up sensitive file
+          rm -f terraform.tfvars
 
       - name: Clean up container images and build cache
         run: |

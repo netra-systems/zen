@@ -10,14 +10,20 @@ from app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 class DatabaseConfig:
-    """Database configuration with connection pooling settings."""
-    POOL_SIZE = 10
-    MAX_OVERFLOW = 20
-    POOL_TIMEOUT = 30
-    POOL_RECYCLE = 1800  # 30 minutes
-    POOL_PRE_PING = True
+    """Database configuration with enhanced connection pooling settings."""
+    # Production-optimized pool settings
+    POOL_SIZE = 20  # Increased base pool size for production loads
+    MAX_OVERFLOW = 30  # Allow more overflow connections under load
+    POOL_TIMEOUT = 30  # Timeout waiting for connection from pool
+    POOL_RECYCLE = 1800  # Recycle connections every 30 minutes
+    POOL_PRE_PING = True  # Test connections before using
     ECHO = False
     ECHO_POOL = False
+    
+    # Connection limits for protection
+    MAX_CONNECTIONS = 100  # Hard limit on total connections
+    CONNECTION_TIMEOUT = 10  # Timeout for establishing new connections
+    STATEMENT_TIMEOUT = 30000  # 30 seconds max statement execution time (ms)
 
 class Database:
     """Synchronous database connection manager with proper pooling."""
@@ -43,14 +49,28 @@ class Database:
         self._setup_connection_events()
 
     def _setup_connection_events(self):
-        """Setup database connection event listeners for monitoring."""
+        """Setup database connection event listeners for monitoring and configuration."""
         @event.listens_for(self.engine, "connect")
         def receive_connect(dbapi_conn, connection_record):
             connection_record.info['pid'] = dbapi_conn.get_backend_pid() if hasattr(dbapi_conn, 'get_backend_pid') else None
-            logger.debug(f"Database connection established: {connection_record.info.get('pid')}")
+            
+            # Set statement timeout for all connections
+            with dbapi_conn.cursor() as cursor:
+                cursor.execute(f"SET statement_timeout = {DatabaseConfig.STATEMENT_TIMEOUT}")
+                cursor.execute("SET idle_in_transaction_session_timeout = 60000")  # 60 seconds
+                cursor.execute("SET lock_timeout = 10000")  # 10 seconds
+            
+            logger.debug(f"Database connection established with safety limits: {connection_record.info.get('pid')}")
 
         @event.listens_for(self.engine, "checkout")
         def receive_checkout(dbapi_conn, connection_record, connection_proxy):
+            # Track pool usage for monitoring
+            pool = self.engine.pool
+            if hasattr(pool, 'size') and hasattr(pool, 'overflow'):
+                active = pool.size() - pool.checkedin() + pool.overflow()
+                if active > (DatabaseConfig.POOL_SIZE + DatabaseConfig.MAX_OVERFLOW) * 0.8:
+                    logger.warning(f"Connection pool usage high: {active}/{DatabaseConfig.POOL_SIZE + DatabaseConfig.MAX_OVERFLOW}")
+            
             logger.debug(f"Connection checked out from pool: {connection_record.info.get('pid')}")
 
     def connect(self):

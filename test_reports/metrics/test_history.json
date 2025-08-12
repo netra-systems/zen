@@ -413,6 +413,51 @@
       "failed": 279,
       "coverage": null,
       "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:22:12.248767",
+      "level": "unit",
+      "total": 298,
+      "passed": 18,
+      "failed": 276,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:23:46.831725",
+      "level": "integration",
+      "total": 131,
+      "passed": 81,
+      "failed": 49,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:24:37.911368",
+      "level": "comprehensive",
+      "total": 2,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:25:43.563138",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:28:11.990433",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
     }
   ],
   "flaky_tests": {},

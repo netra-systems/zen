@@ -22,6 +22,12 @@ concurrency:
   group: smoke-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  statuses: write
+  pull-requests: write
+  issues: write
+
 jobs:
   smoke-test:
     name: Quick Validation (<30s)

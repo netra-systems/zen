@@ -1,15 +1,15 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-12T12:24:37.914881  
+**Generated:** 2025-08-12T12:01:19.322865  
 **Test Level:** comprehensive - Full test suite with coverage (30-45 minutes)  
 **Purpose:** Pre-release validation, full system testing
 
 ## Test Summary
 
-**Total Tests:** 2  
+**Total Tests:** 1  
 **Passed:** 0  
 **Failed:** 0  
-**Skipped:** 1  
+**Skipped:** 0  
 **Errors:** 1  
 **Overall Status:** [FAILED]
 
@@ -17,7 +17,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 2 | 0 | 0 | 1 | 1 | 23.21s | [FAILED] |
+| Backend   | 1 | 0 | 0 | 0 | 1 | 26.46s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Environment and Configuration
@@ -27,7 +27,7 @@
 - **Purpose:** Pre-release validation, full system testing
 - **Timeout:** 2700s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 23.21s
+- **Total Duration:** 26.46s
 - **Exit Code:** 2
 
 ### Backend Configuration
@@ -68,24 +68,24 @@ asyncio: mode=Mode.AUTO
 created: 6/6 workers
 
 =================================== ERRORS ====================================
-[31m[1m___________ ERROR collecting app/tests/mcp/test_resource_manager.py ___________[0m
-ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\mcp\test_resource_manager.py'.
+[31m[1m___________ ERROR collecting app/tests/mcp/test_request_handler.py ____________[0m
+ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\mcp\test_request_handler.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-app\tests\mcp\test_resource_manager.py:12: in <module>
-    from app.mcp.resources.resource_manager import ResourceManager, Resource, ResourceAccess
-E   ModuleNotFoundError: No module named 'app.mcp.resources'
+app\tests\mcp\test_request_handler.py:11: in <module>
+    from app.mcp.handlers.request_handler import RequestHandler
+E   ModuleNotFoundError: No module named 'app.mcp.handlers'
 - Generated html report: file:///C:/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1/reports/tests/report.html -
 [36m[1m=========================== short test summary info ===========================[0m
-[31mERROR[0m app/tests/mcp/test_resource_manager.py
+[31mERROR[0m app/tests/mcp/test_request_handler.py
 [31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
 !!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!
-[31m======================== [33m1 skipped[0m, [31m[1m1 error[0m[31m in 14.23s[0m[31m =========================[0m
+[31m============================== [31m[1m1 error[0m[31m in 17.17s[0m[31m ==============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 2 after 22.32s
+[FAIL] TESTS FAILED with exit code 2 after 25.71s
 
 [Report] HTML Report: reports/tests/report.html
 [Coverage] Coverage Report: reports/coverage/html/index.html
@@ -103,9 +103,9 @@ E   ModuleNotFoundError: No module named 'app.mcp.resources'
 
 ### Backend Errors
 - =================================== ERRORS ====================================
-- [31m[1m___________ ERROR collecting app/tests/mcp/test_resource_manager.py ___________[0m
-- [31mERROR[0m app/tests/mcp/test_resource_manager.py
-- [FAIL] TESTS FAILED with exit code 2 after 22.32s
+- [31m[1m___________ ERROR collecting app/tests/mcp/test_request_handler.py ____________[0m
+- [31mERROR[0m app/tests/mcp/test_request_handler.py
+- [FAIL] TESTS FAILED with exit code 2 after 25.71s
 
 
 ---

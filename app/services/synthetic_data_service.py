@@ -2251,6 +2251,33 @@ async def generate_synthetic_data_task(synthetic_data_id: str, source_table: str
         synthetic_data_id, config, None, db, synthetic_data_id
     )
 
-def validate_data(*args, **kwargs):
-    """Verify/validate - test stub implementation."""
+def validate_data(data, schema=None, **kwargs):
+    """Validate synthetic data against expected schema and constraints.
+    
+    Args:
+        data: The data to validate
+        schema: Optional schema to validate against
+        **kwargs: Additional validation parameters
+        
+    Returns:
+        bool: True if data is valid, False otherwise
+    """
+    if data is None:
+        return False
+    
+    # Basic validation - ensure data is not empty
+    if hasattr(data, '__len__') and len(data) == 0:
+        return False
+    
+    # If schema provided, validate structure
+    if schema:
+        try:
+            # Simple schema validation - check if required fields exist
+            if isinstance(schema, dict) and isinstance(data, dict):
+                for key in schema.get('required', []):
+                    if key not in data:
+                        return False
+        except (TypeError, AttributeError):
+            return False
+    
     return True

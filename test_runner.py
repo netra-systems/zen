@@ -382,9 +382,9 @@ class UnifiedTestRunner:
         start_time = time.time()
         self.results["frontend"]["status"] = "running"
         
-        # Use simple frontend test runner for smoke tests
-        # Check if this is a smoke test (empty args for frontend in smoke tests)
+        # Adjust timeout for smoke tests - they should be fast
         if len(args) == 0 or ("--category" in args and "smoke" in str(args)):
+            timeout = min(timeout, 60)  # Cap smoke tests at 60 seconds
             frontend_script = PROJECT_ROOT / "scripts" / "test_frontend_simple.py"
         else:
             frontend_script = PROJECT_ROOT / RUNNERS["frontend"]
