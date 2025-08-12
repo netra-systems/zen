@@ -1,0 +1,99 @@
+name: 'Simple Lark Webhook Notifications'
+# This workflow uses Lark webhook bots (no callback URL needed)
+
+on:
+  workflow_run:
+    workflows: ['*']
+    types: [completed]
+  pull_request:
+    types: [opened, closed, merged]
+  push:
+    branches: [main, master]
+
+jobs:
+  notify-lark:
+    runs-on: ubuntu-latest
+    # Only run if webhook is configured
+    if: ${{ vars.LARK_WEBHOOK_URL || secrets.LARK_WEBHOOK_URL }}
+    
+    steps:
+      - name: 'Send to Lark Webhook Bot'
+        env:
+          WEBHOOK_URL: ${{ secrets.LARK_WEBHOOK_URL || vars.LARK_WEBHOOK_URL }}
+        run: |
+          # Determine message based on event
+          case "${{ github.event_name }}" in
+            "workflow_run")
+              if [[ "${{ github.event.workflow_run.conclusion }}" == "success" ]]; then
+                TITLE="✅ Workflow Success"
+                COLOR="green"
+              else
+                TITLE="❌ Workflow Failed"
+                COLOR="red"
+              fi
+              CONTENT="**Workflow:** ${{ github.event.workflow_run.name }}\n**Status:** ${{ github.event.workflow_run.conclusion }}\n**Branch:** ${{ github.event.workflow_run.head_branch }}"
+              ;;
+            
+            "pull_request")
+              TITLE="🔀 Pull Request #${{ github.event.pull_request.number }}"
+              COLOR="blue"
+              CONTENT="**Title:** ${{ github.event.pull_request.title }}\n**Action:** ${{ github.event.action }}\n**Author:** ${{ github.event.pull_request.user.login }}"
+              ;;
+            
+            "push")
+              TITLE="📤 Push to ${{ github.ref_name }}"
+              COLOR="turquoise"
+              CONTENT="**Commit:** ${{ github.event.head_commit.message }}\n**Author:** ${{ github.event.head_commit.author.name }}"
+              ;;
+            
+            *)
+              TITLE="🔔 GitHub Event"
+              COLOR="default"
+              CONTENT="**Event:** ${{ github.event_name }}\n**Repository:** ${{ github.repository }}"
+              ;;
+          esac
+          
+          # Send to Lark webhook bot
+          curl -X POST "${WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            -d @- <<EOF
+          {
+            "msg_type": "interactive",
+            "card": {
+              "config": {
+                "wide_screen_mode": true,
+                "enable_forward": true
+              },
+              "header": {
+                "title": {
+                  "content": "${TITLE}",
+                  "tag": "plain_text"
+                },
+                "template": "${COLOR}"
+              },
+              "elements": [
+                {
+                  "tag": "div",
+                  "text": {
+                    "content": "**Repository:** ${{ github.repository }}\n${CONTENT}\n\n[View on GitHub](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})",
+                    "tag": "lark_md"
+                  }
+                },
+                {
+                  "tag": "hr"
+                },
+                {
+                  "tag": "note",
+                  "elements": [
+                    {
+                      "tag": "plain_text",
+                      "content": "GitHub Actions • $(date -u '+%Y-%m-%d %H:%M UTC')"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          EOF
+          
+          echo "✅ Notification sent to Lark"

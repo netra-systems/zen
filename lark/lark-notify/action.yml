@@ -1,0 +1,135 @@
+name: 'Send Lark Notification'
+description: 'Send a notification to Lark messenger'
+author: 'Netra AI'
+
+inputs:
+  webhook_url:
+    description: 'Lark webhook URL'
+    required: true
+  title:
+    description: 'Notification title'
+    required: true
+  message:
+    description: 'Notification message content'
+    required: true
+  color:
+    description: 'Card header color (blue, green, orange, red, purple, gray, yellow)'
+    required: false
+    default: 'blue'
+  status_emoji:
+    description: 'Status emoji to display'
+    required: false
+    default: 'ℹ️'
+  buttons:
+    description: 'JSON array of buttons [{text: string, url: string, type: primary|default|danger}]'
+    required: false
+    default: '[]'
+  send_as_text:
+    description: 'Send as simple text message instead of card'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Send Lark notification'
+      shell: bash
+      env:
+        WEBHOOK_URL: ${{ inputs.webhook_url }}
+        TITLE: ${{ inputs.title }}
+        MESSAGE: ${{ inputs.message }}
+        COLOR: ${{ inputs.color }}
+        STATUS_EMOJI: ${{ inputs.status_emoji }}
+        BUTTONS: ${{ inputs.buttons }}
+        SEND_AS_TEXT: ${{ inputs.send_as_text }}
+      run: |
+        set -e
+        
+        if [[ "${SEND_AS_TEXT}" == "true" ]]; then
+          # Send as simple text message
+          TEXT_JSON=$(cat <<EOF
+        {
+          "msg_type": "text",
+          "content": {
+            "text": "${STATUS_EMOJI} ${TITLE}\n\n${MESSAGE}"
+          }
+        }
+        EOF
+          )
+          
+          response=$(curl -X POST "${WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            -d "${TEXT_JSON}" \
+            -s -w "\nHTTP_STATUS:%{http_code}")
+        else
+          # Prepare button elements if provided
+          BUTTON_ELEMENTS=""
+          if [[ "${BUTTONS}" != "[]" && -n "${BUTTONS}" ]]; then
+            BUTTON_ELEMENTS=$(echo "${BUTTONS}" | jq -r 'map({
+              tag: "button",
+              text: {
+                tag: "plain_text",
+                content: .text
+              },
+              type: (.type // "default"),
+              url: .url
+            }) | {tag: "action", actions: .} | @json')
+            BUTTON_ELEMENTS=",${BUTTON_ELEMENTS}"
+          fi
+          
+          # Send as interactive card
+          CARD_JSON=$(cat <<EOF
+        {
+          "msg_type": "interactive",
+          "card": {
+            "config": {
+              "wide_screen_mode": true
+            },
+            "header": {
+              "title": {
+                "tag": "plain_text",
+                "content": "${STATUS_EMOJI} ${TITLE}"
+              },
+              "template": "${COLOR}"
+            },
+            "elements": [
+              {
+                "tag": "markdown",
+                "content": "${MESSAGE}"
+              },
+              {
+                "tag": "hr"
+              },
+              {
+                "tag": "note",
+                "elements": [
+                  {
+                    "tag": "plain_text",
+                    "content": "GitHub Actions - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+                  }
+                ]
+              }${BUTTON_ELEMENTS}
+            ]
+          }
+        }
+        EOF
+          )
+          
+          response=$(curl -X POST "${WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            -d "${CARD_JSON}" \
+            -s -w "\nHTTP_STATUS:%{http_code}")
+        fi
+        
+        http_status=$(echo "${response}" | grep "HTTP_STATUS" | cut -d: -f2)
+        body=$(echo "${response}" | sed '/HTTP_STATUS/d')
+        
+        echo "Response body: ${body}"
+        echo "HTTP Status: ${http_status}"
+        
+        if [[ "${http_status}" != "200" ]]; then
+          echo "::error::Failed to send notification to Lark"
+          exit 1
+        fi
+        
+        echo "::notice::Successfully sent notification to Lark"

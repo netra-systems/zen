@@ -1,0 +1,131 @@
+name: 'Example Workflow with Lark Notifications'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 'Checkout code'
+        uses: 'actions/checkout@v4'
+        
+      - name: 'Notify Lark - Build Started'
+        if: ${{ vars.LARK_WEBHOOK_URL || secrets.LARK_WEBHOOK_URL }}
+        uses: './.github/actions/lark-notify'
+        with:
+          webhook_url: ${{ secrets.LARK_WEBHOOK_URL || vars.LARK_WEBHOOK_URL }}
+          title: 'Build Started'
+          message: |
+            **Repository:** ${{ github.repository }}
+            **Branch:** ${{ github.ref_name }}
+            **Commit:** ${{ github.event.head_commit.message || 'Manual trigger' }}
+            **Author:** ${{ github.actor }}
+          color: 'blue'
+          status_emoji: '🔄'
+          
+      - name: 'Set up Python'
+        uses: 'actions/setup-python@v4'
+        with:
+          python-version: '3.11'
+          
+      - name: 'Install dependencies'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: 'Run tests'
+        id: 'test'
+        run: |
+          python test_runner.py --level smoke
+        continue-on-error: true
+        
+      - name: 'Notify Lark - Test Results'
+        if: ${{ always() && (vars.LARK_WEBHOOK_URL || secrets.LARK_WEBHOOK_URL) }}
+        uses: './.github/actions/lark-notify'
+        with:
+          webhook_url: ${{ secrets.LARK_WEBHOOK_URL || vars.LARK_WEBHOOK_URL }}
+          title: ${{ steps.test.outcome == 'success' && 'Tests Passed' || 'Tests Failed' }}
+          message: |
+            **Repository:** ${{ github.repository }}
+            **Branch:** ${{ github.ref_name }}
+            **Test Status:** ${{ steps.test.outcome }}
+            **Run ID:** ${{ github.run_id }}
+            **Run Number:** ${{ github.run_number }}
+          color: ${{ steps.test.outcome == 'success' && 'green' || 'red' }}
+          status_emoji: ${{ steps.test.outcome == 'success' && '✅' || '❌' }}
+          buttons: |
+            [
+              {
+                "text": "View Workflow",
+                "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "type": "${{ steps.test.outcome == 'success' && 'primary' || 'danger' }}"
+              }
+            ]
+            
+      - name: 'Build application'
+        if: ${{ steps.test.outcome == 'success' }}
+        id: 'build'
+        run: |
+          echo "Building application..."
+          # Add your build commands here
+        continue-on-error: true
+        
+      - name: 'Notify Lark - Build Complete'
+        if: ${{ always() && steps.build.outcome != 'skipped' && (vars.LARK_WEBHOOK_URL || secrets.LARK_WEBHOOK_URL) }}
+        uses: './.github/actions/lark-notify'
+        with:
+          webhook_url: ${{ secrets.LARK_WEBHOOK_URL || vars.LARK_WEBHOOK_URL }}
+          title: 'Build ${{ steps.build.outcome }}'
+          message: |
+            **Build Status:** ${{ steps.build.outcome }}
+            **Duration:** ${{ github.run_number }}
+            **Triggered by:** ${{ github.actor }}
+          color: ${{ steps.build.outcome == 'success' && 'green' || 'red' }}
+          status_emoji: ${{ steps.build.outcome == 'success' && '🎉' || '💥' }}
+
+  deploy:
+    needs: build-and-test
+    if: ${{ success() && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 'Deploy to production'
+        id: 'deploy'
+        run: |
+          echo "Deploying to production..."
+          # Add your deployment commands here
+        continue-on-error: true
+        
+      - name: 'Notify Lark - Deployment Status'
+        if: ${{ always() && (vars.LARK_WEBHOOK_URL || secrets.LARK_WEBHOOK_URL) }}
+        uses: './.github/actions/lark-notify'
+        with:
+          webhook_url: ${{ secrets.LARK_WEBHOOK_URL || vars.LARK_WEBHOOK_URL }}
+          title: 'Production Deployment ${{ steps.deploy.outcome }}'
+          message: |
+            **Environment:** Production
+            **Status:** ${{ steps.deploy.outcome }}
+            **Version:** ${{ github.sha }}
+            **Deployed by:** ${{ github.actor }}
+            **Repository:** ${{ github.repository }}
+          color: ${{ steps.deploy.outcome == 'success' && 'purple' || 'red' }}
+          status_emoji: ${{ steps.deploy.outcome == 'success' && '🚀' || '🔥' }}
+          buttons: |
+            [
+              {
+                "text": "View Deployment",
+                "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "type": "primary"
+              },
+              {
+                "text": "View Commit",
+                "url": "${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}",
+                "type": "default"
+              }
+            ]

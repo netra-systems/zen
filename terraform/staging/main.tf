@@ -42,7 +42,7 @@ locals {
   cpu_limit       = var.resource_limits.cpu_limit
   memory_limit    = var.resource_limits.memory_limit
   min_instances   = var.resource_limits.min_instances
-  max_instances   = var.resource_limits.max_instances
+  max_instances   = coalesce(var.max_instances, var.resource_limits.max_instances)
   
   # URLs
   backend_subdomain  = "${local.environment_name}-api"
@@ -232,33 +232,3 @@ resource "google_monitoring_uptime_check_config" "staging" {
   selected_regions = ["USA"]
 }
 
-# Budget alert for this staging environment
-resource "google_billing_budget" "staging" {
-  billing_account = var.billing_account
-  display_name    = "Staging PR-${var.pr_number} Budget"
-  
-  budget_filter {
-    projects               = ["projects/${var.project_id}"]
-    labels                 = local.common_labels
-    calendar_period        = "MONTH"
-  }
-  
-  amount {
-    specified_amount {
-      currency_code = "USD"
-      units         = var.cost_limit_per_pr
-    }
-  }
-  
-  threshold_rules {
-    threshold_percent = 0.5
-  }
-  
-  threshold_rules {
-    threshold_percent = 0.9
-  }
-  
-  threshold_rules {
-    threshold_percent = 1.0
-  }
-}

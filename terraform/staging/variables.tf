@@ -107,3 +107,9 @@ variable "ttl_hours" {
   type        = number
   default     = 168 # 7 days
 }
+
+variable "max_instances" {
+  description = "Maximum number of instances for auto-scaling"
+  type        = number
+  default     = 3
+}

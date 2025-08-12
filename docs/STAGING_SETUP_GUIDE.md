@@ -93,6 +93,10 @@ bash
 ```
 for role in run.admin cloudsql.admin compute.admin iam.serviceAccountUser secretmanager.admin dns.admin artifactregistry.admin cloudbuild.builds.editor redis.admin monitoring.viewer; do gcloud projects add-iam-policy-binding netra-staging --member="serviceAccount:github-staging-deployer@netra-staging.iam.gserviceaccount.com" --role="roles/$role"; done
 ```
+
+*** also needs Storage Admin
+Storage Object Admin
+
 OR
 Click "ADD ROLE" and add each of these roles (one at a time):
 
