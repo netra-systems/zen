@@ -241,12 +241,17 @@ class ToolRegistry:
                 
             tool = self.tools[tool_name]
             
-            # TODO: Check permissions
-            # if tool.requires_auth and not session_id:
-            #     raise NetraException("Authentication required")
+            # Check permissions
+            if tool.requires_auth and not session_id:
+                raise NetraException("Authentication required")
             
             # Validate input against schema
-            # TODO: Implement JSON schema validation
+            if tool.input_schema:
+                from jsonschema import validate, ValidationError
+                try:
+                    validate(instance=arguments, schema=tool.input_schema)
+                except ValidationError as ve:
+                    raise NetraException(f"Invalid input: {ve.message}")
             
             # Execute handler
             if not tool.handler:
@@ -293,17 +298,44 @@ class ToolRegistry:
         """Handler for run_agent tool"""
         from app.services.agent_service import AgentService
         from app.db.postgres import get_async_db
+        from app.agents.supervisor import SupervisorAgent
+        import uuid
         
         agent_name = arguments["agent_name"]
         input_data = arguments["input_data"]
         config = arguments.get("config", {})
         
-        # TODO: Implement actual agent execution
-        return {
-            "type": "text",
-            "text": f"Agent {agent_name} execution initiated",
-            "run_id": "placeholder_run_id"
-        }
+        try:
+            # Initialize supervisor
+            async with get_async_db() as db:
+                supervisor = SupervisorAgent(db)
+                
+                # Generate run ID
+                run_id = str(uuid.uuid4())
+                
+                # Execute agent through supervisor
+                result = await supervisor.handle_request({
+                    "action": "execute_agent",
+                    "agent_name": agent_name,
+                    "input_data": input_data,
+                    "config": config,
+                    "run_id": run_id,
+                    "session_id": session_id
+                })
+                
+                return {
+                    "type": "text",
+                    "text": f"Agent {agent_name} execution completed",
+                    "run_id": run_id,
+                    "result": result
+                }
+        except Exception as e:
+            logger.error(f"Agent execution failed: {e}")
+            return {
+                "type": "text",
+                "text": f"Agent execution failed: {str(e)}",
+                "error": True
+            }
         
     async def _get_agent_status_handler(self, arguments: Dict[str, Any], session_id: Optional[str]) -> Dict[str, Any]:
         """Handler for get_agent_status tool"""

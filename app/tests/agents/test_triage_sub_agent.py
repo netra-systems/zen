@@ -473,7 +473,8 @@ class TestCleanup:
             }
         }
         
-        with patch('app.agents.triage_sub_agent.logger') as mock_logger:
+        # Patch the instance logger, not the module logger
+        with patch.object(triage_agent, 'logger') as mock_logger:
             await triage_agent.cleanup(sample_state, "test_run")
             
             # Should log debug metrics

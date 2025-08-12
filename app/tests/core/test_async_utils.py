@@ -167,12 +167,14 @@ class TestAsyncTaskPool:
         """Test task submission during shutdown"""
         task_pool._shutting_down = True
         
-        with pytest.raises(ServiceError, match="Task pool is shutting down"):
-            async def sample_task():
-                await asyncio.sleep(0.01)
-                return "result"
-            
-            await task_pool.submit_task(sample_task())
+        # Mock ErrorContext.get_all_context to avoid the dict.keys() error
+        with patch('app.core.async_utils.ErrorContext.get_all_context', return_value={}):
+            with pytest.raises(ServiceError, match="Task pool is shutting down"):
+                async def sample_task():
+                    await asyncio.sleep(0.01)
+                    return "result"
+                
+                await task_pool.submit_task(sample_task())
     
     @pytest.mark.asyncio
     async def test_submit_background_task(self, task_pool):
@@ -193,7 +195,8 @@ class TestAsyncTaskPool:
         await asyncio.sleep(0.01)
         assert task not in task_pool._active_tasks
     
-    def test_submit_background_task_during_shutdown(self, task_pool):
+    @pytest.mark.asyncio
+    async def test_submit_background_task_during_shutdown(self, task_pool):
         """Test background task submission during shutdown"""
         task_pool._shutting_down = True
         

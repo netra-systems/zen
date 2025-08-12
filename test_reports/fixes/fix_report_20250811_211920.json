@@ -1,0 +1,51 @@
+{
+  "timestamp": "2025-08-11T21:19:20.274373",
+  "backend_results": [
+    {
+      "test": "tests/conftest.py",
+      "passed": false,
+      "output": "ImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\ntests\\conftest.py:51: in <module>\n    from app.main import app\nmain.py:49: in <module>\n    from app.core.error_context import ErrorContext\ncore\\error_context.py:13: in <module>\n    _error_context: ContextVar[Dict[str, Any]] = ContextVar('error_context', default_factory=dict)\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   TypeError: 'default_factory' is an invalid keyword argument for ContextVar()\n",
+      "error_type": "import",
+      "error_message": null,
+      "fix_suggestion": null
+    },
+    {
+      "test": "tests/services/test_database_repositories.py",
+      "passed": false,
+      "output": "ImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\ntests\\conftest.py:51: in <module>\n    from app.main import app\nmain.py:49: in <module>\n    from app.core.error_context import ErrorContext\ncore\\error_context.py:13: in <module>\n    _error_context: ContextVar[Dict[str, Any]] = ContextVar('error_context', default_factory=dict)\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   TypeError: 'default_factory' is an invalid keyword argument for ContextVar()\n",
+      "error_type": "import",
+      "error_message": null,
+      "fix_suggestion": null
+    },
+    {
+      "test": "tests/services/test_llm_cache_service.py",
+      "passed": false,
+      "output": "ImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\ntests\\conftest.py:51: in <module>\n    from app.main import app\nmain.py:49: in <module>\n    from app.core.error_context import ErrorContext\ncore\\error_context.py:13: in <module>\n    _error_context: ContextVar[Dict[str, Any]] = ContextVar('error_context', default_factory=dict)\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   TypeError: 'default_factory' is an invalid keyword argument for ContextVar()\n",
+      "error_type": "import",
+      "error_message": null,
+      "fix_suggestion": null
+    },
+    {
+      "test": "tests/services/test_agent_message_processing.py",
+      "passed": true,
+      "output": "============================= test session starts =============================\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncollecting ... collected 3 items\n\ntests/services/test_agent_message_processing.py::TestAgentMessageProcessing::test_process_user_message PASSED\ntests/services/test_agent_message_processing.py::TestAgentMessageProcessing::test_handle_tool_execution PASSED\ntests/services/test_agent_message_processing.py::TestAgentMessageProcessing::test_message_validation PASSED\n\n============================== warnings summary ===============================\n..\\..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\pydantic\\_internal\\_config.py:295\n..\\..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\pydantic\\_internal\\_config.py:295\n..\\..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\pydantic\\_internal\\_config.py:295\n..\\..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\pydantic\\_internal\\_config.py:295\n..\\..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\pydantic\\_internal\\_config.py:295\n..\\..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\pydantic\\_internal\\_config.py:295\n..\\..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\pydantic\\_internal\\_config.py:295\n..\\..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\pydantic\\_internal\\_config.py:295\n  C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\p",
+      "error_type": null,
+      "error_message": null,
+      "fix_suggestion": null
+    },
+    {
+      "test": "tests/services/test_apex_optimizer_tool_selection.py",
+      "passed": false,
+      "output": "============================= test session starts =============================\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncollecting ... collected 21 items\n\ntests/services/test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_cost_optimization PASSED\ntests/services/test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_latency_optimization FAILED\n\n================================== FAILURES ===================================\n___ TestApexOptimizerToolSelection.test_tool_selection_latency_optimization ___\ntests\\services\\test_apex_optimizer_tool_selection.py:342: in test_tool_selection_latency_optimization\n    assert state.current_tool_name == \"tool_latency_optimization\"\nE   AssertionError: assert 'cost_reducti..._preservation' == 'tool_latency_optimization'\nE     \nE     - tool_latency_optimization\nE     + cost_reduction_quality_preservation\n----------------------------- Captured log setup ------------------------------\nDEBUG    asyncio:proactor_events.py:634 Using proactor: IocpProactor\n---------------------------- Captured log teardown ----------------------------\nDEBUG    asyncio:proactor_events.py:634 Using proactor: IocpProactor\n==============",
+      "error_type": "other",
+      "error_message": "Unknown error",
+      "fix_suggestion": null
+    }
+  ],
+  "frontend_results": [],
+  "summary": {
+    "total": 5,
+    "passed": 1,
+    "failed": 4
+  }
+}

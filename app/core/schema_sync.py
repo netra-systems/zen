@@ -515,5 +515,74 @@ def create_sync_command():
         return 1
 
 
+async def validate_schema(db, expected_tables: List[str]):
+    """Validate database schema against expected tables."""
+    # This is a simple implementation for testing
+    # In a real scenario, this would check actual database schema
+    try:
+        result = await db.execute("SELECT table_name, column_name, data_type FROM information_schema.columns")
+        
+        # Handle both async and sync fetchall - check if fetchall is awaitable
+        fetchall_result = result.fetchall()
+        if hasattr(fetchall_result, '__await__'):
+            rows = await fetchall_result
+        else:
+            rows = fetchall_result
+        
+        # Check if all expected tables exist
+        existing_tables = {row[0] for row in rows}
+        missing_tables = set(expected_tables) - existing_tables
+        
+        if missing_tables:
+            raise ValidationError(f"Missing tables: {missing_tables}")
+        
+        return True
+    except ValidationError:
+        raise
+    except Exception as e:
+        raise ValidationError(f"Schema validation failed: {e}")
+
+
+def is_migration_safe(sql: str) -> bool:
+    """Check if a SQL migration is safe to run."""
+    # Convert to uppercase for comparison
+    sql_upper = sql.upper()
+    
+    # List of unsafe operations
+    unsafe_patterns = [
+        'DROP TABLE',
+        'DROP DATABASE',
+        'TRUNCATE',
+        'DELETE FROM',  # without WHERE clause check
+    ]
+    
+    # Check for unsafe patterns
+    for pattern in unsafe_patterns:
+        if pattern in sql_upper:
+            # Special case: DELETE FROM with WHERE is safe
+            if pattern == 'DELETE FROM' and 'WHERE' in sql_upper:
+                continue
+            return False
+    
+    # List of safe operations
+    safe_patterns = [
+        'ALTER TABLE',
+        'ADD COLUMN',
+        'CREATE TABLE',
+        'CREATE INDEX',
+        'INSERT INTO',
+        'UPDATE',
+        'SELECT',
+    ]
+    
+    # Check if it's a known safe operation
+    for pattern in safe_patterns:
+        if pattern in sql_upper:
+            return True
+    
+    # Default to unsafe for unknown operations
+    return False
+
+
 if __name__ == "__main__":
     sys.exit(create_sync_command())

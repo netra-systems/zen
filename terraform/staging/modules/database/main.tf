@@ -5,6 +5,13 @@ resource "google_sql_database_instance" "postgres" {
   name             = "staging-postgres-${var.environment_name}"
   database_version = "POSTGRES_14"
   region           = var.region
+  
+  # Add timeouts to prevent hanging
+  timeouts {
+    create = "15m"
+    update = "10m"
+    delete = "10m"
+  }
 
   settings {
     tier = var.postgres_tier
@@ -93,6 +100,13 @@ resource "google_redis_instance" "cache" {
 
   region = var.region
   redis_version = "REDIS_6_X"
+  
+  # Add timeouts to prevent hanging
+  timeouts {
+    create = "10m"
+    update = "10m"
+    delete = "5m"
+  }
 
   authorized_network = var.vpc_network_id
   connect_mode       = "PRIVATE_SERVICE_ACCESS"

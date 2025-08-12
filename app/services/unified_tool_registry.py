@@ -409,7 +409,13 @@ class UnifiedToolRegistry:
                 )
             
             # Validate input schema (basic validation)
-            # TODO: Implement JSON schema validation
+            # Implement JSON schema validation
+            if tool_def.input_schema:
+                from jsonschema import validate, ValidationError
+                try:
+                    validate(instance=arguments, schema=tool_def.input_schema)
+                except ValidationError as ve:
+                    raise NetraException(f"Invalid input: {ve.message}")
             
             # Execute tool handler
             if not tool.handler:
@@ -490,97 +496,325 @@ class UnifiedToolRegistry:
     
     async def _create_thread_handler(self, arguments: Dict[str, Any], user: User):
         """Handler for create_thread tool"""
-        # TODO: Implement actual thread creation
+        from app.services.thread_service import ThreadService
+        
+        thread_service = ThreadService(self.db)
+        
+        thread = await thread_service.create_thread(
+            user_id=user.id,
+            title=arguments.get('title', 'Untitled'),
+            initial_message=arguments.get('initial_message'),
+            metadata=arguments.get('metadata', {})
+        )
+        
         return {
             "type": "text",
-            "text": f"Created thread: {arguments.get('title', 'Untitled')}",
-            "thread_id": "placeholder_thread_id"
+            "text": f"Created thread: {thread.title}",
+            "thread_id": thread.id,
+            "created_at": thread.created_at.isoformat()
         }
     
     async def _get_thread_history_handler(self, arguments: Dict[str, Any], user: User):
         """Handler for get_thread_history tool"""
-        # TODO: Implement actual thread history retrieval
+        from app.services.thread_service import ThreadService
+        
+        thread_service = ThreadService(self.db)
+        
+        history = await thread_service.get_thread_history(
+            thread_id=arguments['thread_id'],
+            user_id=user.id,
+            limit=arguments.get('limit', 50)
+        )
+        
         return {
             "type": "text", 
-            "text": f"Thread history for {arguments['thread_id']}"
+            "text": f"Thread history for {arguments['thread_id']}",
+            "messages": history.get('messages', []),
+            "total_count": history.get('total_count', 0)
         }
     
     async def _list_agents_handler(self, arguments: Dict[str, Any], user: User):
         """Handler for list_agents tool"""
-        # TODO: Get actual agent list
+        from app.agents.supervisor import SupervisorAgent
+        
+        supervisor = SupervisorAgent(self.db)
+        agents = supervisor.get_registered_agents()
+        
+        agent_list = []
+        for name, agent_class in agents.items():
+            agent_list.append({
+                "name": name,
+                "type": agent_class.__name__,
+                "capabilities": getattr(agent_class, 'capabilities', [])
+            })
+        
         return {
             "type": "text",
-            "text": "Available agents: TriageSubAgent, DataSubAgent, OptimizationsCoreSubAgent"
+            "text": f"Available agents ({len(agent_list)}): " + ", ".join([a['name'] for a in agent_list]),
+            "agents": agent_list
         }
     
     async def _analyze_workload_handler(self, arguments: Dict[str, Any], user: User):
         """Handler for analyze_workload tool"""
-        # TODO: Implement actual workload analysis
+        from app.services.apex_optimizer_service import ApexOptimizerService
+        
+        optimizer = ApexOptimizerService(self.db)
+        
+        analysis = await optimizer.analyze_workload({
+            "workload_type": arguments.get('workload_type', 'general'),
+            "metrics": arguments.get('metrics', {}),
+            "user_id": user.id
+        })
+        
+        recommendations = await optimizer.generate_recommendations(analysis)
+        
         return {
             "type": "text",
-            "text": "Workload analysis complete"
+            "text": "Workload analysis complete",
+            "analysis": analysis,
+            "recommendations": recommendations
         }
     
     async def _query_corpus_handler(self, arguments: Dict[str, Any], user: User):
         """Handler for query_corpus tool"""
-        # TODO: Implement actual corpus query
+        from app.services.corpus_service import CorpusService
+        
+        corpus_service = CorpusService(self.db)
+        
+        results = await corpus_service.search(
+            query=arguments['query'],
+            filters=arguments.get('filters', {}),
+            limit=arguments.get('limit', 10),
+            user_id=user.id
+        )
+        
         return {
             "type": "text",
-            "text": f"Corpus search results for: {arguments['query']}"
+            "text": f"Found {len(results)} results for: {arguments['query']}",
+            "results": results
         }
     
     async def _generate_synthetic_data_handler(self, arguments: Dict[str, Any], user: User):
         """Handler for generate_synthetic_data tool"""
-        # TODO: Implement actual synthetic data generation
+        from app.services.synthetic_data_service import SyntheticDataService
+        
+        synthetic_service = SyntheticDataService(self.db)
+        
+        data = await synthetic_service.generate(
+            data_type=arguments.get('data_type', 'generic'),
+            count=arguments.get('count', 10),
+            schema=arguments.get('schema', {}),
+            user_id=user.id
+        )
+        
         return {
             "type": "text",
-            "text": f"Generated {arguments.get('count', 10)} synthetic records"
+            "text": f"Generated {len(data)} synthetic records",
+            "data": data
         }
     
     async def _corpus_manager_handler(self, arguments: Dict[str, Any], user: User):
         """Handler for corpus_manager tool"""
-        # TODO: Implement actual corpus management
-        return {
-            "type": "text",
-            "text": f"Corpus {arguments['action']} completed"
-        }
+        from app.services.corpus_service import CorpusService
+        
+        corpus_service = CorpusService(self.db)
+        action = arguments['action']
+        
+        if action == 'create':
+            corpus = await corpus_service.create_corpus(
+                name=arguments['name'],
+                description=arguments.get('description'),
+                user_id=user.id
+            )
+            return {
+                "type": "text",
+                "text": f"Created corpus: {corpus.name}",
+                "corpus_id": corpus.id
+            }
+        elif action == 'delete':
+            await corpus_service.delete_corpus(
+                corpus_id=arguments['corpus_id'],
+                user_id=user.id
+            )
+            return {
+                "type": "text",
+                "text": f"Deleted corpus: {arguments['corpus_id']}"
+            }
+        elif action == 'list':
+            corpora = await corpus_service.list_corpora(user_id=user.id)
+            return {
+                "type": "text",
+                "text": f"Found {len(corpora)} corpora",
+                "corpora": corpora
+            }
+        else:
+            return {
+                "type": "text",
+                "text": f"Unknown action: {action}"
+            }
     
     async def _generic_optimization_handler(self, arguments: Dict[str, Any], user: User):
         """Generic handler for optimization tools"""
-        # TODO: Implement actual optimization logic
+        from app.services.apex_optimizer_service import ApexOptimizerService
+        
+        optimizer = ApexOptimizerService(self.db)
+        
+        optimization_type = arguments.get('type', 'general')
+        target_metrics = arguments.get('target_metrics', {})
+        
+        result = await optimizer.optimize(
+            optimization_type=optimization_type,
+            target_metrics=target_metrics,
+            constraints=arguments.get('constraints', {}),
+            user_id=user.id
+        )
+        
         return {
             "type": "text",
-            "text": "Optimization analysis completed"
+            "text": f"{optimization_type} optimization completed",
+            "result": result,
+            "improvements": result.get('improvements', {})
         }
     
     async def _system_configurator_handler(self, arguments: Dict[str, Any], user: User):
         """Handler for system_configurator tool"""
-        # TODO: Implement actual system configuration
-        return {
-            "type": "text", 
-            "text": f"System configuration {arguments['action']} completed"
-        }
+        from app.services.configuration_service import ConfigurationService
+        
+        config_service = ConfigurationService(self.db)
+        action = arguments['action']
+        
+        if action == 'get':
+            config = await config_service.get_configuration(
+                key=arguments['key'],
+                user_id=user.id
+            )
+            return {
+                "type": "text", 
+                "text": f"Retrieved configuration: {arguments['key']}",
+                "config": config
+            }
+        elif action == 'set':
+            await config_service.set_configuration(
+                key=arguments['key'],
+                value=arguments['value'],
+                user_id=user.id
+            )
+            return {
+                "type": "text", 
+                "text": f"Updated configuration: {arguments['key']}"
+            }
+        elif action == 'reset':
+            await config_service.reset_configuration(
+                key=arguments.get('key'),
+                user_id=user.id
+            )
+            return {
+                "type": "text", 
+                "text": "Configuration reset completed"
+            }
+        else:
+            return {
+                "type": "text",
+                "text": f"Unknown action: {action}"
+            }
     
     async def _user_admin_handler(self, arguments: Dict[str, Any], user: User):
         """Handler for user_admin tool"""
-        # TODO: Implement actual user administration
-        return {
-            "type": "text",
-            "text": f"User {arguments['action']} completed"
-        }
+        from app.services.user_service import UserService
+        
+        # Check admin permissions
+        if not user.is_admin:
+            return {
+                "type": "text",
+                "text": "Admin privileges required",
+                "error": True
+            }
+        
+        user_service = UserService(self.db)
+        action = arguments['action']
+        
+        if action == 'create':
+            new_user = await user_service.create_user(
+                email=arguments['email'],
+                username=arguments.get('username'),
+                role=arguments.get('role', 'user')
+            )
+            return {
+                "type": "text",
+                "text": f"Created user: {new_user.email}",
+                "user_id": new_user.id
+            }
+        elif action == 'update':
+            await user_service.update_user(
+                user_id=arguments['user_id'],
+                updates=arguments.get('updates', {})
+            )
+            return {
+                "type": "text",
+                "text": f"Updated user: {arguments['user_id']}"
+            }
+        elif action == 'delete':
+            await user_service.delete_user(user_id=arguments['user_id'])
+            return {
+                "type": "text",
+                "text": f"Deleted user: {arguments['user_id']}"
+            }
+        elif action == 'list':
+            users = await user_service.list_users(
+                filters=arguments.get('filters', {})
+            )
+            return {
+                "type": "text",
+                "text": f"Found {len(users)} users",
+                "users": users
+            }
+        else:
+            return {
+                "type": "text",
+                "text": f"Unknown action: {action}"
+            }
     
     async def _log_analyzer_handler(self, arguments: Dict[str, Any], user: User):
         """Handler for log_analyzer tool"""
-        # TODO: Implement actual log analysis
+        from app.services.log_analysis_service import LogAnalysisService
+        
+        log_service = LogAnalysisService(self.db)
+        
+        analysis = await log_service.analyze_logs(
+            query=arguments.get('query', ''),
+            time_range=arguments.get('time_range', '1h'),
+            log_level=arguments.get('log_level'),
+            service=arguments.get('service'),
+            user_id=user.id
+        )
+        
         return {
             "type": "text",
-            "text": f"Log analysis completed for query: {arguments.get('query', '')}"
+            "text": f"Log analysis completed",
+            "analysis": analysis,
+            "total_logs": analysis.get('total_count', 0),
+            "error_count": analysis.get('error_count', 0),
+            "warning_count": analysis.get('warning_count', 0)
         }
     
     async def _debug_panel_handler(self, arguments: Dict[str, Any], user: User):
         """Handler for debug_panel tool"""
-        # TODO: Implement actual debug panel
+        from app.services.debug_service import DebugService
+        
+        debug_service = DebugService(self.db)
+        component = arguments.get('component', 'system')
+        
+        debug_info = await debug_service.get_debug_info(
+            component=component,
+            include_metrics=arguments.get('include_metrics', True),
+            include_logs=arguments.get('include_logs', False),
+            user_id=user.id
+        )
+        
         return {
             "type": "text",
-            "text": f"Debug info for {arguments.get('component', 'system')}"
+            "text": f"Debug info for {component}",
+            "debug_info": debug_info,
+            "timestamp": debug_info.get('timestamp'),
+            "health_status": debug_info.get('health_status', 'unknown')
         }

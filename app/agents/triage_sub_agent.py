@@ -176,7 +176,17 @@ class TriageSubAgent(BaseSubAgent):
             r'javascript:',
             r'DROP\s+TABLE',
             r'DELETE\s+FROM',
-            r'INSERT\s+INTO'
+            r'INSERT\s+INTO',
+            r'UNION\s+SELECT',
+            r"'\s*OR\s*'",
+            r";\s*DELETE",
+            r"--\s*$",
+            r"admin'\s*--",
+            r"eval\s*\(",
+            r"document\.cookie",
+            r"<img.*onerror",
+            r"SELECT.*FROM.*users",
+            r"SELECT.*FROM.*secrets"
         ]
         
         for pattern in injection_patterns:

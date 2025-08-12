@@ -151,7 +151,19 @@ class CorpusManagerTool:
             )
             
             # Generate corpus content in background
-            # Note: In real implementation, this would trigger background task
+            from app.services.task_queue_service import TaskQueueService
+            
+            task_queue = TaskQueueService()
+            await task_queue.enqueue_task(
+                task_type="generate_corpus_content",
+                payload={
+                    "corpus_id": db_corpus.id,
+                    "domain": domain,
+                    "size": size,
+                    "user_id": self.user.id
+                },
+                priority="normal"
+            )
             
             return {
                 "status": "success",
@@ -335,8 +347,24 @@ class SyntheticGeneratorTool:
                     }
             
             # Create generation job
-            # Note: In real implementation, this would trigger background task
-            job_id = f"gen_{self.user.id}_{corpus_id or 'default'}"
+            from app.services.task_queue_service import TaskQueueService
+            import uuid
+            
+            job_id = f"gen_{self.user.id}_{corpus_id or 'default'}_{uuid.uuid4().hex[:8]}"
+            
+            task_queue = TaskQueueService()
+            await task_queue.enqueue_task(
+                task_type="generate_synthetic_data",
+                payload={
+                    "job_id": job_id,
+                    "corpus_id": corpus_id,
+                    "count": count,
+                    "data_type": data_type,
+                    "schema": schema,
+                    "user_id": self.user.id
+                },
+                priority="high" if count > 1000 else "normal"
+            )
             
             return {
                 "status": "success",

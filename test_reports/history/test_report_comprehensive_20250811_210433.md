@@ -1,14 +1,14 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T21:12:10.490865  
+**Generated:** 2025-08-11T21:04:33.869639  
 **Test Level:** comprehensive - Full test suite with coverage (10-15 minutes)  
 **Purpose:** Pre-release validation, full system testing
 
 ## Test Summary
 
-**Total Tests:** 359  
-**Passed:** 175  
-**Failed:** 184  
+**Total Tests:** 350  
+**Passed:** 168  
+**Failed:** 182  
 **Skipped:** 0  
 **Errors:** 0  
 **Overall Status:** [FAILED]
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 163 | 157 | 6 | 0 | 0 | 91.61s | [FAILED] |
-| Frontend  | 196 | 18 | 178 | 0 | 0 | 92.69s | [FAILED] |
+| Backend   | 156 | 150 | 6 | 0 | 0 | 62.14s | [FAILED] |
+| Frontend  | 194 | 18 | 176 | 0 | 0 | 52.29s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,7 +27,7 @@
 - **Purpose:** Pre-release validation, full system testing
 - **Timeout:** 900s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 184.31s
+- **Total Duration:** 114.43s
 - **Exit Code:** 2
 
 ### Backend Configuration
@@ -76,66 +76,66 @@ app\tests\agents\test_supervisor_advanced.py::test_supervisor_concurrent_request
 app\tests\agents\test_triage_sub_agent.py::TestEntryConditions::test_entry_conditions_invalid_request 
 app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestClickHouseArrayOperations::test_validate_query_catches_errors 
 app\tests\core\test_config_manager.py::TestConfigManager::test_load_configuration_validation_failure 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestClickHouseArrayOperations::test_validate_query_catches_errors 
+[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestClickHouseArrayOperations::test_validate_query_catches_errors 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigManager::test_load_configuration_validation_failure 
 app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestClickHouseArrayOperations::test_query_interceptor_fixes_queries 
-[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigManager::test_load_configuration_validation_failure 
 app\tests\core\test_config_manager.py::TestConfigManager::test_get_config_caching 
-[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_advanced.py::test_supervisor_concurrent_requests 
-app\tests\agents\test_supervisor_agent.py::test_supervisor_runs_sub_agents_in_order 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_retry_success_first_try 
-[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigManager::test_get_config_caching 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_advanced.py::test_supervisor_concurrent_requests 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigManager::test_get_config_caching 
 app\tests\core\test_config_manager.py::TestConfigManager::test_reload_config 
+app\tests\agents\test_supervisor_agent.py::test_supervisor_runs_sub_agents_in_order 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestEntryConditions::test_entry_conditions_invalid_request 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_retry_success_first_try 
 app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_process_with_retry_success_after_failures 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestClickHouseArrayOperations::test_query_interceptor_fixes_queries 
-[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigManager::test_reload_config 
-app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticLogIngestion::test_streaming_log_ingestion 
-app\tests\core\test_config_manager.py::TestConfigurationFunctions::test_get_config 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestEntryConditions::test_entry_conditions_invalid_request 
 app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_triage_result_validation 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_triage_result_validation 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_triage_result_validation 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigManager::test_reload_config 
+app\tests\core\test_config_manager.py::TestConfigurationFunctions::test_get_config 
 app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_triage_result_confidence_validation 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_triage_result_confidence_validation 
-[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_agent.py::test_supervisor_runs_sub_agents_in_order 
-[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_1_complete_agent_lifecycle_request_to_completion 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_triage_result_confidence_validation 
+[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestClickHouseArrayOperations::test_query_interceptor_fixes_queries 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticLogIngestion::test_streaming_log_ingestion 
 app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_key_parameters_model 
-[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigurationFunctions::test_get_config 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigurationFunctions::test_get_config 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_key_parameters_model 
 app\tests\core\test_config_manager.py::TestConfigurationFunctions::test_reload_config 
-app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_2_websocket_real_time_streaming 
-app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_triage_for_classification 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_key_parameters_model 
 app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_user_intent_model 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_user_intent_model 
-[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigurationFunctions::test_reload_config 
-[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_triage_for_classification 
-app\tests\agents\test_triage_sub_agent.py::TestCleanup::test_cleanup_with_metrics 
-app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_optimization_for_ai_workloads 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigurationFunctions::test_reload_config 
+[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestPydanticModels::test_user_intent_model 
 app\tests\core\test_config_manager.py::TestConfigurationIntegration::test_full_configuration_flow 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestCleanup::test_cleanup_with_metrics 
-[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigurationIntegration::test_full_configuration_flow 
+app\tests\agents\test_triage_sub_agent.py::TestCleanup::test_cleanup_with_metrics 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_agent.py::test_supervisor_runs_sub_agents_in_order 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_triage_for_classification 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_1_complete_agent_lifecycle_request_to_completion 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigurationIntegration::test_full_configuration_flow 
 app\tests\core\test_config_manager.py::TestConfigurationIntegration::test_testing_configuration 
-app\tests\agents\test_triage_sub_agent.py::TestRequestHashing::test_hash_generation 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticLogIngestion::test_streaming_log_ingestion 
-[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_optimization_for_ai_workloads 
-app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_data_for_analysis_queries 
-app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticLogIngestion::test_log_pattern_recognition 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticLogIngestion::test_log_pattern_recognition 
-[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_data_for_analysis_queries 
-[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigurationIntegration::test_testing_configuration 
-app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLLMMetricsAggregation::test_llm_cost_optimization_query 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLLMMetricsAggregation::test_llm_cost_optimization_query 
-app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLLMMetricsAggregation::test_llm_usage_patterns 
-app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routing_with_conditional_pipeline 
-[gw5][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routing_with_conditional_pipeline 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestRequestHashing::test_hash_generation 
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_2_websocket_real_time_streaming 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigurationIntegration::test_testing_configuration 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_triage_for_classification 
 app\tests\core\test_config_manager.py::TestConfigurationIntegration::test_configuration_error_handling 
-[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLLMMetricsAggregation::test_llm_usage_patterns 
-app\tests\agents\test_triage_sub_agent.py::TestRequestHashing::test_hash_normalization 
-[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_triage_sub_agent.py::TestRequestHashing::test_hash_normalization 
-app\tests\agents\test_triage_sub_agent_comprehensive.py::TestAdvancedInitialization::test_initialization_configuration_values 
-[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigurationIntegration::test_configuration_error_handling 
+[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticLogIngestion::test_streaming_log_ingestion 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticLogIngestion::test_log_pattern_recognition 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_optimization_for_ai_workloads 
+[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestRealisticLogIngestion::test_log_pattern_recognition 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_config_manager.py::TestConfigurationIntegration::test_configuration_error_handling 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_optimization_for_ai_workloads 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLLMMetricsAggregation::test_llm_cost_optimization_query 
 app\tests\core\test_core_infrastructure_11_20.py::TestConfigValidator::test_valid_config_passes_validation 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_data_for_analysis_queries 
+[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLLMMetricsAggregation::test_llm_cost_optimization_query 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLLMMetricsAggregation::test_llm_usage_patterns 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\core\test_core_infrastructure_11_20.py::TestConfigValidator::test_valid_config_passes_validation 
+app\tests\core\test_core_infrastructure_11_20.py::TestConfigValidator::test_invalid_database_url_rejected 
+[gw4][36m [  0%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestLLMMetricsAggregation::test_llm_usage_patterns 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routes_to_data_for_analysis_queries 
+app\tests\agents\test_supervisor_consolidated_comprehensive.py::TestSupervisorConsolidatedAgentRouting::test_routing_with_conditional_pipeline 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_2_websocket_real_time_streaming 
+app\tests\agents\test_agent_e2e_critical.py::TestAgentE2ECritical::test_3_supervisor_orchestration_logic 
 app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestPerformanceMetricsWithClickHouse::test_metrics_extraction_with_arrays 
-[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestPerformanceM...(truncated)
+[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\core\test_core_infrastructure_11_20.py::TestConfigValidator::test_invalid_database_url_rejected 
+[gw4][36m [  1%] [0m[32mPASSED[0m app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestPerformanceMetricsWithClickHouse::test_metrics_extraction_with_arrays 
+app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestTimeSeriesAnalysis::test_moving_average_calculation 
+app\tests\core\test_core_in...(truncated)
 ```
 
 ### Frontend Output
@@ -147,7 +147,7 @@ app\tests\clickhouse\test_realistic_clickhouse_operations.py::TestPerformanceMet
 ---------------------------------|---------|----------|---------|---------|--------------------------------------------------------------------------------------------------------------
 File                             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                                                            
 ---------------------------------|---------|----------|---------|---------|--------------------------------------------------------------------------------------------------------------
-All files                        |   68.08 |    78.16 |   50.72 |   68.08 |                                                                                                              
+All files                        |   68.08 |     78.2 |   50.72 |   68.08 |                                                                                                              
  frontend                        |     100 |        0 |     100 |     100 |                                                                                                              
   config.ts                      |     100 |        0 |     100 |     100 | 2-3                                                                                                          
  frontend/app                    |    45.9 |      100 |       0 |    45.9 |                                                                                                              
@@ -171,13 +171,13 @@ All files                        |   68.08 |    78.16 |   50.72 |   68.08 |
   LoginButton.tsx                |   18.51 |      100 |       0 |   18.51 | 6-27                                                                                                         
   NavLinks.tsx                   |   41.53 |      100 |       0 |   41.53 | 28-65                                                                                                        
   SubAgentStatus.tsx             |     100 |    94.11 |     100 |     100 | 43                                                                                                           
- frontend/components/chat        |   77.64 |    71.95 |   74.41 |   77.64 |                                                                                                              
+ frontend/components/chat        |   77.64 |     72.1 |   74.41 |   77.64 |                                                                                                              
   ChatHeader.tsx                 |   95.89 |       60 |     100 |   95.89 | 16,19,41,43,45-46                                                                                            
   ChatSidebar.tsx                |    3.11 |      100 |       0 |    3.11 | 13-385                                                                                                       
   ChatWindow.tsx                 |     100 |      100 |     100 |     100 |                                                                                                              
   ExamplePrompts.tsx             |     100 |      100 |     100 |     100 |                                                                                                              
   MainChat.tsx                   |   96.26 |      100 |      25 |   96.26 | 54-58                                                                                                        
-  MessageInput.tsx               |   93.06 |     73.8 |     100 |   93.06 | 51-53,104-105,124-129,131-140                                                                                
+  MessageInput.tsx               |   93.06 |    74.41 |     100 |   93.06 | 51-53,104-105,124-129,131-140                                                                                
   MessageItem.tsx                |   91.66 |       76 |     100 |   91.66 | 28-41,119                                                                                                    
   MessageList.tsx                |   86.06 |    69.23 |   66.66 |   86.06 | 26-38,62-63,108-109                                                                                          
   OverflowPanel.tsx              |   86.41 |       75 |   16.66 |   86.41 | 54-60,67-88,93-98,132-133,218-219                                                                            
@@ -203,74 +203,74 @@ All files                        |   68.08 |    78.16 |   50.72 |   68.08 |
 ## Error Summary
 
 ### Backend Errors
-- [gw3][36m [  2%] [0m[31mFAILED[0m app\tests\agents\test_triage_sub_agent_comprehensive.py::TestValidationPatterns::test_sql_injection_patterns
-- [gw4][36m [  2%] [0m[31mFAILED[0m app\tests\core\test_core_infrastructure_11_20.py::TestSchemaSync::test_schema_validation
-- [gw2][36m [  2%] [0m[31mFAILED[0m app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_submit_background_task_during_shutdown
-- [gw1][36m [  3%] [0m[31mFAILED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_save_state
-- [gw5][36m [  5%] [0m[31mFAILED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_concurrent_research_processing
+- [gw5][36m [  2%] [0m[31mFAILED[0m app\tests\agents\test_triage_sub_agent.py::TestCleanup::test_cleanup_with_metrics
+- [gw3][36m [  2%] [0m[31mFAILED[0m app\tests\core\test_core_infrastructure_11_20.py::TestResourceManager::test_resource_tracking
+- [gw4][36m [  2%] [0m[31mFAILED[0m app\tests\core\test_async_utils.py::TestAsyncTaskPool::test_submit_task_during_shutdown
+- [gw2][36m [  2%] [0m[31mFAILED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgent::test_load_state
+- [gw1][36m [  5%] [0m[31mFAILED[0m app\tests\agents\test_supply_researcher_agent.py::TestSupplyResearcherAgent::test_concurrent_research_processing
 - [gw0][36m [  5%] [0m[31mFAILED[0m app\tests\agents\test_data_sub_agent.py::TestDataEnrichment::test_enrich_with_external_source
-- [31mFAILED[0m app\tests\agents\test_triage_sub_agent_comprehensive.py::[1mTestValidationPatterns::test_sql_injection_patterns[0m - assert True == False
-- [31mFAILED[0m app\tests\core\test_core_infrastructure_11_20.py::[1mTestSchemaSync::test_schema_validation[0m - ImportError: cannot import name 'validate_schema' from 'app.core.schema_syn...
-- [31mFAILED[0m app\tests\core\test_async_utils.py::[1mTestAsyncTaskPool::test_submit_background_task_during_shutdown[0m - TypeError: unbound method dict.keys() needs an argument
-- [31mFAILED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::[1mTestDataSubAgent::test_save_state[0m - AssertionError: assert {} == {'count': 42, 'key': 'value'}
+- [31mFAILED[0m app\tests\agents\test_triage_sub_agent.py::[1mTestCleanup::test_cleanup_with_metrics[0m - AssertionError: Expected 'debug' to have been called.
+- [31mFAILED[0m app\tests\core\test_core_infrastructure_11_20.py::[1mTestResourceManager::test_resource_tracking[0m - AttributeError: 'ResourceTracker' object has no attribute 'track_resource'
+- [31mFAILED[0m app\tests\core\test_async_utils.py::[1mTestAsyncTaskPool::test_submit_task_during_shutdown[0m - TypeError: unbound method dict.keys() needs an argument
+- [31mFAILED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::[1mTestDataSubAgent::test_load_state[0m - AssertionError: assert False
 - [31mFAILED[0m app\tests\agents\test_supply_researcher_agent.py::[1mTestSupplyResearcherAgent::test_concurrent_research_processing[0m - AssertionError: assert 0.5469999999986612 < ((5 * 0.1) * 0.8)
 - [31mFAILED[0m app\tests\agents\test_data_sub_agent.py::[1mTestDataEnrichment::test_enrich_with_external_source[0m - AttributeError: <module 'app.agents.data_sub_agent' from 'C:\\Users\\antho\...
-- [FAIL] TESTS FAILED with exit code 2 after 90.08s
+- [FAIL] TESTS FAILED with exit code 2 after 61.30s
 
 ### Frontend Errors
 - [FAIL] CHECKS FAILED with exit code 1
-- FAIL __tests__/components/UIComponents.test.tsx
-- FAIL __tests__/components/ThinkingIndicator.test.tsx
 - FAIL __tests__/hooks/useAgent.test.tsx
-- FAIL __tests__/integration/critical-integration.test.tsx
-- FAIL __tests__/components/ChatSidebar.test.tsx
-- FAIL __tests__/services/webSocketService.test.ts
-- FAIL __tests__/hooks/additionalHooks.test.tsx
-- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
-- FAIL __tests__/components/ChatHistory.test.tsx
-- FAIL __tests__/components/FinalReportView.test.tsx
-- FAIL __tests__/components/AgentStatusPanel.test.tsx
-- FAIL __tests__/auth/service.test.ts
-- FAIL __tests__/unified-chat-v5.test.tsx
-- FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
-- FAIL __tests__/auth/context.test.tsx (5.956 s)
-- FAIL __tests__/integration/advanced-integration.test.tsx (6.855 s)
-- FAIL __tests__/imports/external-imports.test.tsx (9.1 s)
-- FAIL __tests__/imports/internal-imports.test.tsx (11.403 s)
-- FAIL __tests__/system/startup.test.tsx (13.642 s)
-- FAIL __tests__/components/chat/MainChat.test.tsx (14.524 s)
-- FAIL __tests__/chat/chatUIUXCore.test.tsx
-- FAIL __tests__/chat/ui-improvements.test.tsx
-- FAIL __tests__/components/ChatHistorySection.test.tsx (24.442 s)
-- FAIL __tests__/integration/comprehensive-integration.test.tsx (27.887 s)
-- FAIL __tests__/components/ChatComponents.test.tsx (77.014 s)
-- FAIL __tests__/components/chat/MessageInput.test.tsx (82.178 s)
 - FAIL __tests__/components/UIComponents.test.tsx
-- FAIL __tests__/components/ThinkingIndicator.test.tsx
-- FAIL __tests__/hooks/useAgent.test.tsx
 - FAIL __tests__/integration/critical-integration.test.tsx
-- FAIL __tests__/components/ChatSidebar.test.tsx
-- FAIL __tests__/services/webSocketService.test.ts
-- FAIL __tests__/hooks/additionalHooks.test.tsx
-- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
-- FAIL __tests__/components/ChatHistory.test.tsx
-- FAIL __tests__/components/FinalReportView.test.tsx
-- FAIL __tests__/components/AgentStatusPanel.test.tsx
+- FAIL __tests__/components/ThinkingIndicator.test.tsx
 - FAIL __tests__/auth/service.test.ts
+- FAIL __tests__/services/webSocketService.test.ts
+- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
+- FAIL __tests__/components/FinalReportView.test.tsx
+- FAIL __tests__/components/ChatHistory.test.tsx
+- FAIL __tests__/components/ChatSidebar.test.tsx
+- FAIL __tests__/hooks/additionalHooks.test.tsx
+- FAIL __tests__/components/AgentStatusPanel.test.tsx
 - FAIL __tests__/unified-chat-v5.test.tsx
+- FAIL __tests__/integration/advanced-integration.test.tsx
 - FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
-- FAIL __tests__/auth/context.test.tsx (5.956 s)
-- FAIL __tests__/integration/advanced-integration.test.tsx (6.855 s)
-- FAIL __tests__/imports/external-imports.test.tsx (9.1 s)
-- FAIL __tests__/imports/internal-imports.test.tsx (11.403 s)
-- FAIL __tests__/system/startup.test.tsx (13.642 s)
-- FAIL __tests__/components/chat/MainChat.test.tsx (14.524 s)
+- FAIL __tests__/auth/context.test.tsx
+- FAIL __tests__/imports/external-imports.test.tsx
+- FAIL __tests__/imports/internal-imports.test.tsx (5.379 s)
+- FAIL __tests__/components/ChatHistorySection.test.tsx (9.412 s)
+- FAIL __tests__/system/startup.test.tsx (12.066 s)
 - FAIL __tests__/chat/chatUIUXCore.test.tsx
+- FAIL __tests__/components/chat/MainChat.test.tsx (12.571 s)
 - FAIL __tests__/chat/ui-improvements.test.tsx
-- FAIL __tests__/components/ChatHistorySection.test.tsx (24.442 s)
-- FAIL __tests__/integration/comprehensive-integration.test.tsx (27.887 s)
-- FAIL __tests__/components/ChatComponents.test.tsx (77.014 s)
-- FAIL __tests__/components/chat/MessageInput.test.tsx (82.178 s)
+- FAIL __tests__/integration/comprehensive-integration.test.tsx (25.627 s)
+- FAIL __tests__/components/ChatComponents.test.tsx (30.535 s)
+- FAIL __tests__/components/chat/MessageInput.test.tsx (46.912 s)
+- FAIL __tests__/hooks/useAgent.test.tsx
+- FAIL __tests__/components/UIComponents.test.tsx
+- FAIL __tests__/integration/critical-integration.test.tsx
+- FAIL __tests__/components/ThinkingIndicator.test.tsx
+- FAIL __tests__/auth/service.test.ts
+- FAIL __tests__/services/webSocketService.test.ts
+- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
+- FAIL __tests__/components/FinalReportView.test.tsx
+- FAIL __tests__/components/ChatHistory.test.tsx
+- FAIL __tests__/components/ChatSidebar.test.tsx
+- FAIL __tests__/hooks/additionalHooks.test.tsx
+- FAIL __tests__/components/AgentStatusPanel.test.tsx
+- FAIL __tests__/unified-chat-v5.test.tsx
+- FAIL __tests__/integration/advanced-integration.test.tsx
+- FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
+- FAIL __tests__/auth/context.test.tsx
+- FAIL __tests__/imports/external-imports.test.tsx
+- FAIL __tests__/imports/internal-imports.test.tsx (5.379 s)
+- FAIL __tests__/components/ChatHistorySection.test.tsx (9.412 s)
+- FAIL __tests__/system/startup.test.tsx (12.066 s)
+- FAIL __tests__/chat/chatUIUXCore.test.tsx
+- FAIL __tests__/components/chat/MainChat.test.tsx (12.571 s)
+- FAIL __tests__/chat/ui-improvements.test.tsx
+- FAIL __tests__/integration/comprehensive-integration.test.tsx (25.627 s)
+- FAIL __tests__/components/ChatComponents.test.tsx (30.535 s)
+- FAIL __tests__/components/chat/MessageInput.test.tsx (46.912 s)
 
 
 ---
