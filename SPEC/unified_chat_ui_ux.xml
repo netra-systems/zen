@@ -6,7 +6,6 @@
         <version>5.0</version>
         <created>2025-08-11</created>
         <updated>2025-08-11</updated>
-        <last-major-update>2025-08-11 - Implemented 20+ UI/UX improvements</last-major-update>
         <description>Complete unified chat interface overhaul, adding proper thread management, overflow panel, agent deduplication, and modern visual design</description>
     </metadata>
     
