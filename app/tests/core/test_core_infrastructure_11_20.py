@@ -132,13 +132,13 @@ class TestCustomExceptions:
         
         exc = NetraException(
             message="Test error",
-            error_code=ErrorCode.GENERAL_ERROR,
+            code=ErrorCode.INTERNAL_ERROR,
             severity=ErrorSeverity.HIGH
         )
         
-        assert str(exc) == "Test error"
-        assert exc.error_code == ErrorCode.GENERAL_ERROR
-        assert exc.severity == ErrorSeverity.HIGH
+        assert str(exc) == "INTERNAL_ERROR: Test error"
+        assert exc.error_details.code == ErrorCode.INTERNAL_ERROR.value
+        assert exc.error_details.severity == ErrorSeverity.HIGH.value
     
     def test_authentication_error(self):
         """Test authentication-specific exceptions."""

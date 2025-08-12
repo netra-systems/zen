@@ -9,9 +9,10 @@ describe('MessageService', () => {
     jest.clearAllMocks();
     localStorage.clear();
     // Set up default auth token for all tests
-    localStorage.setItem('auth_token', 'test-token');
-    // Reset the messageService singleton state
-    (messageService as any)._reset();
+    localStorage.setItem('jwt_token', 'test-token');
+    // Reset the messageService singleton state by clearing queued messages and thread states
+    (messageService as any).queuedMessages = [];
+    (messageService as any).threadStates = new Map();
   });
 
   describe('Thread Management', () => {

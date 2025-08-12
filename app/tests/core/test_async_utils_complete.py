@@ -46,12 +46,16 @@ class TestAsyncResourceManagerComplete:
             cleanup_calls.append(2)
             raise ValueError("Cleanup error")  # Should be handled
         
-        resource1 = object()
-        resource2 = object()
+        # Use objects that support weak references
+        class TestResource:
+            pass
+        
+        resource1 = TestResource()
+        resource2 = TestResource()
         
         manager.register_resource(resource1, cleanup1)
         manager.register_resource(resource2, cleanup2)
-        manager.register_resource(object())  # Without cleanup
+        manager.register_resource(TestResource())  # Without cleanup
         
         assert resource1 in manager._resources
         assert resource2 in manager._resources
@@ -62,7 +66,7 @@ class TestAsyncResourceManagerComplete:
         assert cleanup_calls == [1, 2]
         
         # Test no registration during shutdown
-        manager.register_resource(object(), AsyncMock())
+        manager.register_resource(TestResource(), AsyncMock())
         assert len(manager._resources) == 0
         
         # Test idempotent cleanup
@@ -645,7 +649,9 @@ class TestWeakRefBehavior:
         
         # Create resource that will go out of scope
         def create_and_register():
-            resource = object()
+            class TestResource:
+                pass
+            resource = TestResource()
             manager.register_resource(resource)
             return weakref.ref(resource)
         
