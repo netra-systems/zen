@@ -496,6 +496,7 @@ jobs:
             -var="max_instances=${{ steps.config.outputs.max_instances }}" \
             -var="domain=${{ env.STAGING_DOMAIN }}" \
             -var="postgres_password=${{ secrets.STAGING_DB_PASSWORD }}" \
+            -var="clickhouse_password=${{ secrets.CLICKHOUSE_PASSWORD }}" \
             -lock-timeout=120s \
             -out=tfplan
 
@@ -513,31 +514,62 @@ jobs:
           }
           
           # Capture outputs
-          BACKEND_URL=$(terraform output -raw backend_url)
-          FRONTEND_URL=$(terraform output -raw frontend_url)
-          DATABASE_HOST=$(terraform output -raw database_host)
-          REDIS_HOST=$(terraform output -raw redis_host)
+          BACKEND_URL=$(terraform output -raw backend_url 2>/dev/null || echo "")
+          FRONTEND_URL=$(terraform output -raw frontend_url 2>/dev/null || echo "")
+          DATABASE_NAME=$(terraform output -raw database_name 2>/dev/null || echo "")
           
           echo "backend_url=$BACKEND_URL" >> $GITHUB_OUTPUT
           echo "frontend_url=$FRONTEND_URL" >> $GITHUB_OUTPUT
-          echo "database_host=$DATABASE_HOST" >> $GITHUB_OUTPUT
-          echo "redis_host=$REDIS_HOST" >> $GITHUB_OUTPUT
+          echo "database_name=$DATABASE_NAME" >> $GITHUB_OUTPUT
+          
+          # Export connection details for next steps
+          echo "DB_NAME=$DATABASE_NAME" >> $GITHUB_ENV
+          echo "DB_USER=user_pr_${{ github.event.pull_request.number || github.event.inputs.pr_number }}" >> $GITHUB_ENV
 
       - name: Run database migrations
         timeout-minutes: 5  # Migrations should complete quickly
         run: |
-          # Set database URL for migrations
-          export DATABASE_URL="postgresql://staging:${{ secrets.STAGING_DB_PASSWORD }}@${{ steps.terraform.outputs.database_host }}/netra_pr_${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          
+          # Get the SQL instance connection name from shared infrastructure
+          SQL_INSTANCE_CONNECTION=$(cd terraform/staging && terraform output -raw -state=terraform.tfstate sql_instance_connection 2>/dev/null || echo "")
+          
+          if [ -z "$SQL_INSTANCE_CONNECTION" ]; then
+            echo "Warning: Could not get SQL instance connection from Terraform state"
+            SQL_INSTANCE_CONNECTION="${{ env.GCP_PROJECT_ID }}:${{ env.GCP_REGION }}:staging-shared-postgres"
+          fi
+          
+          # Set database URL for migrations using Cloud SQL proxy format
+          export DATABASE_URL="postgresql://user_pr_${PR_NUMBER}:${{ secrets.STAGING_DB_PASSWORD }}@/netra_pr_${PR_NUMBER}?host=/cloudsql/${SQL_INSTANCE_CONNECTION}"
+          
+          echo "Using DATABASE_URL format for Cloud SQL migrations"
+          
+          # Install cloud_sql_proxy if not already installed
+          if ! command -v cloud_sql_proxy &> /dev/null; then
+            echo "Installing Cloud SQL Proxy..."
+            wget -q https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
+            chmod +x cloud_sql_proxy
+            sudo mv cloud_sql_proxy /usr/local/bin/
+          fi
+          
+          # Start Cloud SQL proxy in background
+          cloud_sql_proxy -instances=${SQL_INSTANCE_CONNECTION}=tcp:5432 &
+          PROXY_PID=$!
+          sleep 5
+          
+          # Update DATABASE_URL to use localhost for migration
+          export DATABASE_URL="postgresql://user_pr_${PR_NUMBER}:${{ secrets.STAGING_DB_PASSWORD }}@localhost:5432/netra_pr_${PR_NUMBER}"
           
           # Wait for database to be ready (max 2 minutes)
           echo "Waiting for database to be ready..."
           for i in {1..24}; do
-            if pg_isready -h "${{ steps.terraform.outputs.database_host }}" -p 5432 -U staging 2>/dev/null; then
+            if pg_isready -h localhost -p 5432 -U user_pr_${PR_NUMBER} 2>/dev/null; then
               echo "Database is ready!"
               break
             fi
             if [ $i -eq 24 ]; then
               echo "Database did not become ready in time"
+              kill $PROXY_PID 2>/dev/null || true
               exit 1
             fi
             echo "Attempt $i/24: Database not ready, waiting 5 seconds..."
@@ -548,20 +580,50 @@ jobs:
           cd app
           timeout 180 alembic upgrade head || {
             echo "Database migrations timed out after 3 minutes"
+            kill $PROXY_PID 2>/dev/null || true
             exit 1
           }
+          
+          # Stop Cloud SQL proxy
+          kill $PROXY_PID 2>/dev/null || true
 
       - name: Seed test data
         timeout-minutes: 3  # Data seeding should be quick
         run: |
-          export DATABASE_URL="postgresql://staging:${{ secrets.STAGING_DB_PASSWORD }}@${{ steps.terraform.outputs.database_host }}/netra_pr_${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
-          export REDIS_URL="redis://${{ steps.terraform.outputs.redis_host }}:6379/0"
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          REDIS_DB_INDEX=$((PR_NUMBER % 16))
           
-          timeout 150 python scripts/seed_staging_data.py \
-            --pr-number "${{ github.event.pull_request.number || github.event.inputs.pr_number }}" || {
-            echo "Data seeding timed out after 2.5 minutes"
-            exit 1
-          }
+          # Get connection details from Terraform
+          SQL_INSTANCE_CONNECTION=$(cd terraform/staging && terraform output -raw -state=terraform.tfstate sql_instance_connection 2>/dev/null || echo "")
+          
+          if [ -z "$SQL_INSTANCE_CONNECTION" ]; then
+            SQL_INSTANCE_CONNECTION="${{ env.GCP_PROJECT_ID }}:${{ env.GCP_REGION }}:staging-shared-postgres"
+          fi
+          
+          # Start Cloud SQL proxy for seeding
+          cloud_sql_proxy -instances=${SQL_INSTANCE_CONNECTION}=tcp:5432 &
+          PROXY_PID=$!
+          sleep 5
+          
+          export DATABASE_URL="postgresql://user_pr_${PR_NUMBER}:${{ secrets.STAGING_DB_PASSWORD }}@localhost:5432/netra_pr_${PR_NUMBER}"
+          export REDIS_URL="redis://10.0.0.2:6379/${REDIS_DB_INDEX}"
+          export CLICKHOUSE_PASSWORD="${{ secrets.CLICKHOUSE_PASSWORD }}"
+          export CLICKHOUSE_URL="clickhouse://default:${{ secrets.CLICKHOUSE_PASSWORD }}@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=1"
+          
+          # Check if seed script exists
+          if [ -f "scripts/seed_staging_data.py" ]; then
+            timeout 150 python scripts/seed_staging_data.py \
+              --pr-number "${PR_NUMBER}" || {
+              echo "Data seeding timed out after 2.5 minutes"
+              kill $PROXY_PID 2>/dev/null || true
+              exit 1
+            }
+          else
+            echo "Seed script not found, skipping data seeding"
+          fi
+          
+          # Stop Cloud SQL proxy
+          kill $PROXY_PID 2>/dev/null || true
 
       - name: Wait for services to be healthy
         timeout-minutes: 10  # Services should be up within 10 minutes
@@ -571,26 +633,35 @@ jobs:
           
           echo "Waiting for frontend at $STAGING_URL..."
           for i in {1..30}; do
-            if curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$STAGING_URL" | grep -q "200\|301\|302"; then
-              echo "✅ Frontend is ready!"
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$STAGING_URL" 2>/dev/null || echo "000")
+            if [[ "$HTTP_CODE" == "200" ]] || [[ "$HTTP_CODE" == "301" ]] || [[ "$HTTP_CODE" == "302" ]]; then
+              echo "✅ Frontend is ready! (HTTP $HTTP_CODE)"
               break
             fi
             if [ $i -eq 30 ]; then
-              echo "❌ Frontend did not become ready in time"
+              echo "❌ Frontend did not become ready in time (last HTTP code: $HTTP_CODE)"
+              echo "Checking Cloud Run service status..."
+              gcloud run services describe frontend-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }} \
+                --region=${{ env.GCP_REGION }} --format="value(status.conditions[0].message)" || true
               exit 1
             fi
-            echo "Attempt $i/30: Frontend not ready yet..."
+            echo "Attempt $i/30: Frontend not ready yet (HTTP $HTTP_CODE)..."
             sleep 10
           done
           
           echo "Waiting for API at $API_URL/health..."
           for i in {1..30}; do
-            if curl -s --max-time 10 "$API_URL/health" | grep -q "healthy"; then
+            HEALTH_RESPONSE=$(curl -s --max-time 10 "$API_URL/health" 2>/dev/null || echo "")
+            if echo "$HEALTH_RESPONSE" | grep -q "healthy"; then
               echo "✅ API is ready!"
               break
             fi
             if [ $i -eq 30 ]; then
               echo "❌ API did not become ready in time"
+              echo "Last health response: $HEALTH_RESPONSE"
+              echo "Checking Cloud Run service logs..."
+              gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=backend-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}" \
+                --limit=20 --format=json --project=${{ env.GCP_PROJECT_ID }} | jq -r '.[].textPayload' || true
               exit 1
             fi
             echo "Attempt $i/30: API not ready yet..."
@@ -792,7 +863,8 @@ jobs:
             -var="frontend_image=${{ steps.frontend-build.outputs.frontend_image || 'gcr.io/PROJECT_ID/frontend:latest' }}" \
             -var="max_instances=1" \
             -var="domain=${{ env.STAGING_DOMAIN }}" \
-            -var="postgres_password=${{ secrets.STAGING_DB_PASSWORD }}"
+            -var="postgres_password=${{ secrets.STAGING_DB_PASSWORD }}" \
+            -var="clickhouse_password=${{ secrets.CLICKHOUSE_PASSWORD }}"
 
       - name: Clean up container images and build cache
         run: |
