@@ -84,8 +84,6 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
               ...data,
               // Accumulate partial content with deduplication
               partialContent: (() => {
-                // If new content is complete replacement (starts fresh), use it
-                if (data.is_complete) return data.partialContent;
                 // If new content already contains old content, use new only
                 if (data.partialContent.includes(currentData.partialContent)) return data.partialContent;
                 // Otherwise append new to old

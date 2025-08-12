@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronUp, ChevronDown, Shield, Database, Sparkles, Users, Settings, FileText, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { ChevronUp, ChevronDown, Shield, Database, Sparkles, Users, Settings, FileText, CheckCircle, Loader2 } from 'lucide-react';
 import { FastLayer } from '@/components/chat/layers/FastLayer';
 import { MediumLayer } from '@/components/chat/layers/MediumLayer';
 import { SlowLayer } from '@/components/chat/layers/SlowLayer';
@@ -156,12 +156,6 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
                 <>
                   <CheckCircle className="w-4 h-4" />
                   <span className="text-sm">Completed</span>
-                </>
-              )}
-              {adminStatus === 'failed' && (
-                <>
-                  <AlertCircle className="w-4 h-4" />
-                  <span className="text-sm">Failed</span>
                 </>
               )}
             </div>

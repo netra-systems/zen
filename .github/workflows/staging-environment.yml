@@ -80,6 +80,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0  # Fetch all history for proper change detection
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -113,11 +114,37 @@ jobs:
       - name: Check for backend changes
         id: backend-changes
         run: |
-          # Check if backend files have changed
-          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || git diff --name-only HEAD~1 HEAD || echo "")
+          # Initialize as changed by default (safe for first commits or when unsure)
+          CHANGED="true"
+          
+          # Try to detect changes based on the context
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # For PRs, compare against the base branch
+            echo "Checking PR changes against base branch..."
+            CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD 2>/dev/null || echo "")
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            # For pushes, check if we have a parent commit
+            if git rev-parse HEAD^ >/dev/null 2>&1; then
+              echo "Checking changes in last commit..."
+              CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo "")
+            else
+              echo "First commit or shallow clone detected, assuming changes..."
+              CHANGED_FILES="force-rebuild"
+            fi
+          else
+            # For manual triggers or other events, check against the last commit if available
+            if git rev-parse HEAD^ >/dev/null 2>&1; then
+              CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo "")
+            else
+              CHANGED_FILES="force-rebuild"
+            fi
+          fi
           
           # Check for backend-related changes
-          if echo "$CHANGED_FILES" | grep -E '^(app/|requirements\.txt|Dockerfile\.backend|alembic/)' > /dev/null 2>&1; then
+          if [[ "$CHANGED_FILES" == "force-rebuild" ]]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "🔨 Forcing backend rebuild (unable to determine changes)"
+          elif echo "$CHANGED_FILES" | grep -E '^(app/|requirements\.txt|Dockerfile\.backend|alembic/)' > /dev/null 2>&1; then
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "✅ Backend changes detected"
           else
@@ -156,11 +183,37 @@ jobs:
       - name: Check for frontend changes
         id: frontend-changes
         run: |
-          # Check if frontend files have changed
-          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || git diff --name-only HEAD~1 HEAD || echo "")
+          # Initialize as changed by default (safe for first commits or when unsure)
+          CHANGED="true"
+          
+          # Try to detect changes based on the context
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # For PRs, compare against the base branch
+            echo "Checking PR changes against base branch..."
+            CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD 2>/dev/null || echo "")
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            # For pushes, check if we have a parent commit
+            if git rev-parse HEAD^ >/dev/null 2>&1; then
+              echo "Checking changes in last commit..."
+              CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo "")
+            else
+              echo "First commit or shallow clone detected, assuming changes..."
+              CHANGED_FILES="force-rebuild"
+            fi
+          else
+            # For manual triggers or other events, check against the last commit if available
+            if git rev-parse HEAD^ >/dev/null 2>&1; then
+              CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo "")
+            else
+              CHANGED_FILES="force-rebuild"
+            fi
+          fi
           
           # Check for frontend-related changes
-          if echo "$CHANGED_FILES" | grep -E '^frontend/' > /dev/null 2>&1; then
+          if [[ "$CHANGED_FILES" == "force-rebuild" ]]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "🔨 Forcing frontend rebuild (unable to determine changes)"
+          elif echo "$CHANGED_FILES" | grep -E '^frontend/' > /dev/null 2>&1; then
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "✅ Frontend changes detected"
           else

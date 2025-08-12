@@ -4,7 +4,7 @@ import { TextEncoder, TextDecoder } from 'util';
 import fetch from 'cross-fetch';
 
 // Polyfills
-global.TextEncoder = TextEncoder;
+global.TextEncoder = TextEncoder as any;
 global.TextDecoder = TextDecoder as any;
 global.fetch = fetch;
 
@@ -24,6 +24,9 @@ if (typeof window !== 'undefined') {
   
   // Mock IntersectionObserver for performance
   global.IntersectionObserver = class IntersectionObserver {
+    root = null;
+    rootMargin = '';
+    thresholds = [];
     constructor() {}
     disconnect() {}
     observe() {}
@@ -31,7 +34,7 @@ if (typeof window !== 'undefined') {
     takeRecords() {
       return [];
     }
-  };
+  } as any;
   
   // Mock ResizeObserver for performance
   global.ResizeObserver = class ResizeObserver {
@@ -39,7 +42,7 @@ if (typeof window !== 'undefined') {
     disconnect() {}
     observe() {}
     unobserve() {}
-  };
+  } as any;
 }
 
 // Fast fail for unhandled promises
@@ -160,9 +163,9 @@ Object.defineProperty(window, 'matchMedia', {
 if (!global.crypto) {
   global.crypto = {} as any;
 }
-global.crypto.randomUUID = () => {
-  return 'test-uuid-' + Math.random().toString(36).substr(2, 9);
-};
+global.crypto.randomUUID = (() => {
+  return `test-uuid-${Math.random().toString(36).substr(2, 9)}`;
+}) as any;
 
 // Set default test environment variables
 process.env.NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
