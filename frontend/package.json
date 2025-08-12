@@ -40,7 +40,6 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.5",
     "@radix-ui/react-tabs": "^1.1.12",
-    "@testing-library/react-hooks": "^8.0.1",
     "@types/html2canvas": "^0.5.35",
     "@types/papaparse": "^5.3.16",
     "@types/react-syntax-highlighter": "^15.5.13",

@@ -81,6 +81,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0  # Fetch all history for proper change detection
+      
+      - name: Fetch base branch for comparison
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }}
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -116,23 +121,48 @@ jobs:
         run: |
           # Initialize as changed by default (safe for first commits or when unsure)
           CHANGED="true"
+          CHANGED_FILES=""
           
           # Try to detect changes based on the context
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             # For PRs, compare against the base branch
             echo "Checking PR changes against base branch..."
-            CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD 2>/dev/null || echo "")
-          elif [[ "${{ github.event_name }}" == "push" ]]; then
-            # For pushes, check if we have a parent commit
-            if git rev-parse HEAD^ >/dev/null 2>&1; then
-              echo "Checking changes in last commit..."
-              CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo "")
+            
+            # For synchronize events (new commits pushed to PR), check all changes in the PR
+            if [[ "${{ github.event.action }}" == "synchronize" ]]; then
+              echo "PR synchronized - checking all changes since branch diverged from base..."
+              # Get the merge base and compare all changes
+              MERGE_BASE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} HEAD)
+              CHANGED_FILES=$(git diff --name-only $MERGE_BASE HEAD 2>/dev/null || echo "")
             else
-              echo "First commit or shallow clone detected, assuming changes..."
-              CHANGED_FILES="force-rebuild"
+              # For initial PR open or other events, check against base
+              CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD 2>/dev/null || echo "")
+            fi
+            
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            # For manual triggers, try to find the associated PR and check all its changes
+            PR_NUMBER="${{ github.event.inputs.pr_number }}"
+            if [[ -n "$PR_NUMBER" ]]; then
+              echo "Manual trigger for PR #$PR_NUMBER - checking all PR changes..."
+              # Try to get the base branch from GitHub API or default to main
+              BASE_BRANCH=$(gh pr view $PR_NUMBER --json baseRefName -q .baseRefName 2>/dev/null || echo "main")
+              git fetch origin $BASE_BRANCH:refs/remotes/origin/$BASE_BRANCH 2>/dev/null || true
+              MERGE_BASE=$(git merge-base origin/$BASE_BRANCH HEAD 2>/dev/null || echo "")
+              if [[ -n "$MERGE_BASE" ]]; then
+                CHANGED_FILES=$(git diff --name-only $MERGE_BASE HEAD 2>/dev/null || echo "")
+              else
+                CHANGED_FILES="force-rebuild"
+              fi
+            else
+              # No PR number, check last commit
+              if git rev-parse HEAD^ >/dev/null 2>&1; then
+                CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo "")
+              else
+                CHANGED_FILES="force-rebuild"
+              fi
             fi
           else
-            # For manual triggers or other events, check against the last commit if available
+            # For other events, check last commit
             if git rev-parse HEAD^ >/dev/null 2>&1; then
               CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo "")
             else
@@ -140,17 +170,26 @@ jobs:
             fi
           fi
           
+          # Debug output
+          echo "Event: ${{ github.event_name }}, Action: ${{ github.event.action }}"
+          echo "Changed files detected:"
+          echo "$CHANGED_FILES" | head -20
+          
           # Check for backend-related changes
           if [[ "$CHANGED_FILES" == "force-rebuild" ]]; then
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "🔨 Forcing backend rebuild (unable to determine changes)"
-          elif echo "$CHANGED_FILES" | grep -E '^(app/|requirements\.txt|Dockerfile\.backend|alembic/)' > /dev/null 2>&1; then
+          elif echo "$CHANGED_FILES" | grep -E '^(app/|requirements\.txt|Dockerfile\.backend|alembic/|pyproject\.toml|poetry\.lock)' > /dev/null 2>&1; then
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "✅ Backend changes detected"
+            echo "Backend files changed:"
+            echo "$CHANGED_FILES" | grep -E '^(app/|requirements\.txt|Dockerfile\.backend|alembic/|pyproject\.toml|poetry\.lock)' | head -10
           else
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "ℹ️ No backend changes detected"
           fi
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Build and push backend container
         id: backend-build
@@ -185,29 +224,59 @@ jobs:
         run: |
           # Initialize as changed by default (safe for first commits or when unsure)
           CHANGED="true"
+          CHANGED_FILES=""
           
           # Try to detect changes based on the context
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             # For PRs, compare against the base branch
             echo "Checking PR changes against base branch..."
-            CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD 2>/dev/null || echo "")
-          elif [[ "${{ github.event_name }}" == "push" ]]; then
-            # For pushes, check if we have a parent commit
-            if git rev-parse HEAD^ >/dev/null 2>&1; then
-              echo "Checking changes in last commit..."
-              CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo "")
+            
+            # For synchronize events (new commits pushed to PR), check all changes in the PR
+            if [[ "${{ github.event.action }}" == "synchronize" ]]; then
+              echo "PR synchronized - checking all changes since branch diverged from base..."
+              # Get the merge base and compare all changes
+              MERGE_BASE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} HEAD)
+              CHANGED_FILES=$(git diff --name-only $MERGE_BASE HEAD 2>/dev/null || echo "")
             else
-              echo "First commit or shallow clone detected, assuming changes..."
-              CHANGED_FILES="force-rebuild"
+              # For initial PR open or other events, check against base
+              CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD 2>/dev/null || echo "")
+            fi
+            
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            # For manual triggers, try to find the associated PR and check all its changes
+            PR_NUMBER="${{ github.event.inputs.pr_number }}"
+            if [[ -n "$PR_NUMBER" ]]; then
+              echo "Manual trigger for PR #$PR_NUMBER - checking all PR changes..."
+              # Try to get the base branch from GitHub API or default to main
+              BASE_BRANCH=$(gh pr view $PR_NUMBER --json baseRefName -q .baseRefName 2>/dev/null || echo "main")
+              git fetch origin $BASE_BRANCH:refs/remotes/origin/$BASE_BRANCH 2>/dev/null || true
+              MERGE_BASE=$(git merge-base origin/$BASE_BRANCH HEAD 2>/dev/null || echo "")
+              if [[ -n "$MERGE_BASE" ]]; then
+                CHANGED_FILES=$(git diff --name-only $MERGE_BASE HEAD 2>/dev/null || echo "")
+              else
+                CHANGED_FILES="force-rebuild"
+              fi
+            else
+              # No PR number, check last commit
+              if git rev-parse HEAD^ >/dev/null 2>&1; then
+                CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo "")
+              else
+                CHANGED_FILES="force-rebuild"
+              fi
             fi
           else
-            # For manual triggers or other events, check against the last commit if available
+            # For other events, check last commit
             if git rev-parse HEAD^ >/dev/null 2>&1; then
               CHANGED_FILES=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo "")
             else
               CHANGED_FILES="force-rebuild"
             fi
           fi
+          
+          # Debug output
+          echo "Event: ${{ github.event_name }}, Action: ${{ github.event.action }}"
+          echo "Changed files detected:"
+          echo "$CHANGED_FILES" | head -20
           
           # Check for frontend-related changes
           if [[ "$CHANGED_FILES" == "force-rebuild" ]]; then
@@ -216,10 +285,14 @@ jobs:
           elif echo "$CHANGED_FILES" | grep -E '^frontend/' > /dev/null 2>&1; then
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "✅ Frontend changes detected"
+            echo "Frontend files changed:"
+            echo "$CHANGED_FILES" | grep -E '^frontend/' | head -10
           else
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "ℹ️ No frontend changes detected"
           fi
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Build and push frontend container
         id: frontend-build
