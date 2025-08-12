@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <title>OAuth Environment Isolation and Management</title>
+  <version>1.0.0</version>
+  <created>2025-08-12</created>
+  <purpose>
+    Complete OAuth authentication isolation across development, testing, staging, and production environments,
+    with special handling for dynamic PR staging environments and Google OAuth's exact URL requirements.
+  </purpose>
+
+  <problem_statement>
+    Google OAuth requires exact, full URLs for redirect URIs and doesn't support wildcards.
+    This creates challenges for:
+    - Dynamic PR staging environments (pr-1.staging.netrasystems.ai, pr-2.staging.netrasystems.ai, etc.)
+    - Environment isolation during development and testing
+    - Managing different OAuth clients and secrets per environment
+  </problem_statement>
+
+  <solution_architecture>
+    <approach>OAuth Proxy Service with Environment-Specific Clients</approach>
+    <rationale>
+      - Single OAuth callback URL per environment (no wildcards needed)
+      - Unlimited PR environments without Google Console updates
+      - Centralized token handling with proper security
+      - Clear separation between environments
+    </rationale>
+  </solution_architecture>
+
+  <environment_configuration>
+    <environment name="development">
+      <domain>localhost:3000</domain>
+      <api_domain>localhost:8000</api_domain>
+      <oauth_client>
+        <client_id_env>GOOGLE_OAUTH_CLIENT_ID_DEV</client_id_env>
+        <client_secret_env>GOOGLE_OAUTH_CLIENT_SECRET_DEV</client_secret_env>
+        <redirect_uris>
+          <uri>http://localhost:8000/api/auth/callback</uri>
+          <uri>http://localhost:3000/auth/callback</uri>
+        </redirect_uris>
+        <javascript_origins>
+          <origin>http://localhost:3000</origin>
+          <origin>http://localhost:8000</origin>
+        </javascript_origins>
+      </oauth_client>
+      <features>
+        <dev_login>true</dev_login>
+        <mock_auth>true</mock_auth>
+      </features>
+    </environment>
+
+    <environment name="testing">
+      <domain>test.local</domain>
+      <api_domain>api.test.local</api_domain>
+      <oauth_client>
+        <client_id_env>GOOGLE_OAUTH_CLIENT_ID_TEST</client_id_env>
+        <client_secret_env>GOOGLE_OAUTH_CLIENT_SECRET_TEST</client_secret_env>
+        <redirect_uris>
+          <uri>http://api.test.local/api/auth/callback</uri>
+        </redirect_uris>
+        <javascript_origins>
+          <origin>http://test.local</origin>
+          <origin>http://api.test.local</origin>
+        </javascript_origins>
+      </oauth_client>
+      <features>
+        <dev_login>false</dev_login>
+        <mock_auth>true</mock_auth>
+      </features>
+    </environment>
+
+    <environment name="staging">
+      <domain>*.staging.netrasystems.ai</domain>
+      <api_domain>*.staging.netrasystems.ai</api_domain>
+      <auth_proxy>auth.staging.netrasystems.ai</auth_proxy>
+      <oauth_client>
+        <client_id_env>GOOGLE_OAUTH_CLIENT_ID_STAGING</client_id_env>
+        <client_secret_env>GOOGLE_OAUTH_CLIENT_SECRET_STAGING</client_secret_env>
+        <redirect_uris>
+          <!-- Single proxy endpoint for all PR environments -->
+          <uri>https://auth.staging.netrasystems.ai/callback</uri>
+        </redirect_uris>
+        <javascript_origins>
+          <origin>https://auth.staging.netrasystems.ai</origin>
+        </javascript_origins>
+      </oauth_client>
+      <features>
+        <dev_login>false</dev_login>
+        <mock_auth>false</mock_auth>
+        <pr_environments>true</pr_environments>
+      </features>
+    </environment>
+
+    <environment name="production">
+      <domain>netrasystems.ai</domain>
+      <api_domain>api.netrasystems.ai</api_domain>
+      <oauth_client>
+        <client_id_env>GOOGLE_OAUTH_CLIENT_ID_PROD</client_id_env>
+        <client_secret_env>GOOGLE_OAUTH_CLIENT_SECRET_PROD</client_secret_env>
+        <redirect_uris>
+          <uri>https://api.netrasystems.ai/api/auth/callback</uri>
+          <uri>https://netrasystems.ai/auth/callback</uri>
+        </redirect_uris>
+        <javascript_origins>
+          <origin>https://netrasystems.ai</origin>
+          <origin>https://api.netrasystems.ai</origin>
+        </javascript_origins>
+      </oauth_client>
+      <features>
+        <dev_login>false</dev_login>
+        <mock_auth>false</mock_auth>
+      </features>
+    </environment>
+  </environment_configuration>
+
+  <oauth_proxy_implementation>
+    <description>
+      OAuth proxy service for staging environment to handle dynamic PR URLs
+    </description>
+    
+    <flow>
+      1. PR environment initiates OAuth flow
+      2. State parameter encodes PR number and return URL
+      3. User redirected to Google with auth.staging.netrasystems.ai callback
+      4. Proxy receives callback, decodes state
+      5. Exchange code for token
+      6. Store token in Redis with PR-specific key
+      7. Redirect to PR environment with secure token transfer
+    </flow>
+
+    <state_encoding>
+      <format>base64(json)</format>
+      <fields>
+        <field name="pr_number">PR number for routing</field>
+        <field name="csrf_token">CSRF protection</field>
+        <field name="return_url">Original PR environment URL</field>
+        <field name="timestamp">Request timestamp for expiry</field>
+      </fields>
+    </state_encoding>
+
+    <token_transfer>
+      <method>Secure cookie with subdomain access</method>
+      <cookie_settings>
+        <secure>true</secure>
+        <httponly>true</httponly>
+        <samesite>none</samesite>
+        <domain>.staging.netrasystems.ai</domain>
+        <max_age>300</max_age> <!-- 5 minutes -->
+      </cookie_settings>
+    </token_transfer>
+  </oauth_proxy_implementation>
+
+  <implementation_files>
+    <file path="app/auth/oauth_proxy.py">
+      OAuth proxy service for staging environments
+    </file>
+    <file path="app/auth/environment_config.py">
+      Environment-specific OAuth configuration
+    </file>
+    <file path="app/schemas/AuthEnvironment.py">
+      Pydantic models for environment auth config
+    </file>
+    <file path="scripts/manage_oauth.py">
+      Script for managing OAuth clients programmatically
+    </file>
+    <file path=".env.development">
+      Development environment OAuth credentials
+    </file>
+    <file path=".env.testing">
+      Testing environment OAuth credentials
+    </file>
+    <file path=".env.staging">
+      Staging environment OAuth credentials
+    </file>
+    <file path=".env.production">
+      Production environment OAuth credentials
+    </file>
+  </implementation_files>
+
+  <security_considerations>
+    <consideration>
+      <title>Token Security</title>
+      <description>
+        Tokens must be encrypted in transit and at rest.
+        Use secure cookies with proper flags and short expiry times.
+      </description>
+    </consideration>
+    <consideration>
+      <title>CSRF Protection</title>
+      <description>
+        Include CSRF token in state parameter and validate on callback.
+      </description>
+    </consideration>
+    <consideration>
+      <title>Environment Isolation</title>
+      <description>
+        Each environment uses completely separate OAuth clients.
+        No credential sharing between environments.
+      </description>
+    </consideration>
+    <consideration>
+      <title>PR Number Validation</title>
+      <description>
+        Validate PR numbers against active PRs to prevent unauthorized access.
+      </description>
+    </consideration>
+  </security_considerations>
+
+  <deployment_workflow>
+    <step number="1">
+      <action>PR Created</action>
+      <details>
+        GitHub workflow triggers on PR creation.
+        Generates PR-specific environment variables.
+      </details>
+    </step>
+    <step number="2">
+      <action>Deploy Auth Proxy</action>
+      <details>
+        Deploy or update auth.staging.netrasystems.ai if needed.
+        Single deployment serves all PR environments.
+      </details>
+    </step>
+    <step number="3">
+      <action>Deploy PR Environment</action>
+      <details>
+        Deploy pr-{number}.staging.netrasystems.ai.
+        Configure with PR_NUMBER environment variable.
+      </details>
+    </step>
+    <step number="4">
+      <action>Configure Frontend</action>
+      <details>
+        Set OAuth endpoints to use auth proxy.
+        Configure state parameter with PR number.
+      </details>
+    </step>
+    <step number="5">
+      <action>PR Closed</action>
+      <details>
+        Clean up PR environment.
+        Clear Redis tokens for PR.
+      </details>
+    </step>
+  </deployment_workflow>
+
+  <testing_strategy>
+    <test type="unit">
+      Test OAuth proxy state encoding/decoding
+    </test>
+    <test type="unit">
+      Test environment configuration loading
+    </test>
+    <test type="integration">
+      Test OAuth flow with mock provider
+    </test>
+    <test type="integration">
+      Test PR environment routing
+    </test>
+    <test type="e2e">
+      Test complete OAuth flow in staging
+    </test>
+  </testing_strategy>
+
+  <migration_plan>
+    <phase number="1">
+      <title>Create OAuth Clients</title>
+      <tasks>
+        - Create separate OAuth clients in Google Console for each environment
+        - Document client IDs and store secrets securely
+        - Update secret management system
+      </tasks>
+    </phase>
+    <phase number="2">
+      <title>Implement OAuth Proxy</title>
+      <tasks>
+        - Deploy auth.staging.netrasystems.ai service
+        - Implement state encoding and token transfer
+        - Add Redis for temporary token storage
+      </tasks>
+    </phase>
+    <phase number="3">
+      <title>Update Application Code</title>
+      <tasks>
+        - Update auth routes to use environment-specific config
+        - Implement OAuth proxy client for staging
+        - Update frontend to handle proxy flow
+      </tasks>
+    </phase>
+    <phase number="4">
+      <title>Update CI/CD</title>
+      <tasks>
+        - Update GitHub workflows for PR deployments
+        - Configure environment variables per environment
+        - Add OAuth configuration to deployment scripts
+      </tasks>
+    </phase>
+    <phase number="5">
+      <title>Testing and Validation</title>
+      <tasks>
+        - Test OAuth flow in each environment
+        - Validate PR environment isolation
+        - Security audit of token handling
+      </tasks>
+    </phase>
+  </migration_plan>
+
+  <alternative_solutions>
+    <solution name="Programmatic OAuth Management">
+      <description>
+        Use Google API to programmatically add/remove redirect URIs
+        when PRs are created/closed.
+      </description>
+      <pros>
+        - Direct OAuth flow without proxy
+        - Simpler architecture
+      </pros>
+      <cons>
+        - Requires service account with OAuth admin permissions
+        - API rate limits
+        - Slower PR deployment
+      </cons>
+    </solution>
+    <solution name="Pre-allocated PR Pool">
+      <description>
+        Pre-configure 50-100 PR environments in Google OAuth.
+      </description>
+      <pros>
+        - Simple implementation
+        - No proxy needed
+      </pros>
+      <cons>
+        - Limited number of PRs
+        - Manual configuration
+        - Wasted OAuth entries
+      </cons>
+    </solution>
+  </alternative_solutions>
+
+  <monitoring>
+    <metric name="oauth_flow_success_rate">
+      Success rate of OAuth authentication flows per environment
+    </metric>
+    <metric name="proxy_latency">
+      Latency of OAuth proxy service for staging
+    </metric>
+    <metric name="token_expiry_violations">
+      Number of expired token access attempts
+    </metric>
+    <metric name="pr_environment_auth_attempts">
+      Authentication attempts per PR environment
+    </metric>
+  </monitoring>
+
+  <documentation>
+    <doc type="developer">
+      How to configure OAuth for new environments
+    </doc>
+    <doc type="operations">
+      OAuth client management and rotation procedures
+    </doc>
+    <doc type="security">
+      OAuth security best practices and audit procedures
+    </doc>
+  </documentation>
+</spec>

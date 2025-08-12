@@ -356,7 +356,7 @@ class AnalysisEngine:
             
             for i, val in enumerate(arr):
                 z_score = abs((val - mean) / std)
-                if z_score > 3:
+                if z_score >= 3:
                     outlier_indices.append(i)
         
         return outlier_indices

@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
 from app.auth.auth import oauth_client
+from app.auth.environment_config import auth_env_config
 from app.config import settings
 from app.dependencies import get_db_session, get_security_service
 from app.db.models_postgres import User
@@ -46,24 +47,47 @@ class AuthRoutes:
         # Use the actual request URL to build endpoints (handles dynamic ports)
         base_url = str(request.base_url).rstrip('/')
         
-        return AuthConfigResponse(
-            development_mode=settings.environment == "development",
-            google_client_id=settings.oauth_config.client_id,
+        # Get environment-specific OAuth configuration
+        oauth_config = auth_env_config.get_oauth_config()
+        frontend_config = auth_env_config.get_frontend_config()
+        
+        response = AuthConfigResponse(
+            development_mode=auth_env_config.environment.value == "development",
+            google_client_id=oauth_config.client_id,
             endpoints=AuthEndpoints(
                 login=f"{base_url}/api/auth/login",
                 logout=f"{base_url}/api/auth/logout",
                 callback=f"{base_url}/api/auth/callback",
                 token=f"{base_url}/api/auth/token",
                 user=f"{base_url}/api/users/me",
-                dev_login=f"{base_url}/api/auth/dev_login",
+                dev_login=f"{base_url}/api/auth/dev_login" if oauth_config.allow_dev_login else None,
             ),
-            authorized_javascript_origins=settings.oauth_config.authorized_javascript_origins,
-            authorized_redirect_uris=settings.oauth_config.authorized_redirect_uris,
+            authorized_javascript_origins=oauth_config.javascript_origins,
+            authorized_redirect_uris=oauth_config.redirect_uris,
         )
+        
+        # Add PR-specific configuration if applicable
+        if auth_env_config.is_pr_environment:
+            response.pr_number = auth_env_config.pr_number
+            response.use_proxy = oauth_config.use_proxy
+            response.proxy_url = oauth_config.proxy_url
+        
+        return response
 
     @router.get("/login")
     async def login(request: Request):
-        # Use the actual request URL to build the callback URL dynamically
+        oauth_config = auth_env_config.get_oauth_config()
+        
+        # For PR environments using proxy, redirect to proxy
+        if oauth_config.use_proxy and oauth_config.proxy_url:
+            import urllib.parse
+            pr_number = auth_env_config.pr_number
+            return_url = str(request.base_url).rstrip('/')
+            proxy_url = f"{oauth_config.proxy_url}/initiate?pr_number={pr_number}&return_url={urllib.parse.quote(return_url)}"
+            logger.info(f"PR #{pr_number} OAuth login via proxy: {proxy_url}")
+            return RedirectResponse(url=proxy_url)
+        
+        # Standard OAuth flow
         base_url = str(request.base_url).rstrip('/')
         redirect_uri = f"{base_url}/api/auth/callback"
         logger.info(f"OAuth login initiated with redirect URI: {redirect_uri}")
@@ -109,8 +133,9 @@ class AuthRoutes:
 
     @router.post("/dev_login")
     async def dev_login(request: Request, dev_login_request: DevLoginRequest, db: AsyncSession = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):
-        if settings.environment != "development":
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Dev login is only available in development environment")
+        oauth_config = auth_env_config.get_oauth_config()
+        if not oauth_config.allow_dev_login:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Dev login is not available in this environment")
 
         user = await user_service.get_by_email(db, email=dev_login_request.email)
         if not user:

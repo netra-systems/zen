@@ -109,6 +109,24 @@ jobs:
         run: |
           gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
 
+      - name: Configure OAuth for PR Environment
+        id: oauth
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          
+          # Set OAuth environment variables for this PR
+          echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_ID_STAGING=${{ secrets.GOOGLE_OAUTH_CLIENT_ID_STAGING }}" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_SECRET_STAGING=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET_STAGING }}" >> $GITHUB_ENV
+          echo "USE_OAUTH_PROXY=true" >> $GITHUB_ENV
+          echo "OAUTH_PROXY_URL=https://auth.staging.netrasystems.ai" >> $GITHUB_ENV
+          
+          # Generate URLs for this PR environment
+          echo "frontend_url=https://pr-${PR_NUMBER}.${{ env.STAGING_DOMAIN }}" >> $GITHUB_OUTPUT
+          echo "api_url=https://pr-${PR_NUMBER}-api.${{ env.STAGING_DOMAIN }}" >> $GITHUB_OUTPUT
+          
+          echo "✅ OAuth configured for PR #${PR_NUMBER}"
+
       - name: Load staging configuration
         id: config
         run: |

@@ -633,8 +633,9 @@ class TestSupplyResearcherAgent:
         )
         
         # Mock WebSocket manager
-        mock_ws_manager = Mock()
+        mock_ws_manager = AsyncMock()
         mock_ws_manager.send_agent_update = AsyncMock()
+        mock_ws_manager.send_message = AsyncMock()
         
         # Create agent
         llm_manager = Mock()
@@ -737,7 +738,7 @@ class TestSupplyResearchIntegration:
         scheduler.add_schedule(custom_schedule)
         
         # Mock database and API calls
-        with patch('app.services.supply_research_scheduler.get_db') as mock_get_db:
+        with patch('app.dependencies.get_db') as mock_get_db:
             mock_get_db.return_value = iter([mock_db])
             
             with patch.object(SupplyResearcherAgent, '_call_deep_research_api', new_callable=AsyncMock) as mock_api:

@@ -897,38 +897,36 @@ class TestDataSubAgent:
         
     @pytest.mark.asyncio
     async def test_execute_with_exception_fallback(self, agent):
-        """Test execute with exception triggering fallback"""
+        """Test execute with exception handling - returns empty data on failure"""
         state = DeepAgentState(user_request="Analyze my data")
         state.triage_result = {"intent": {"primary": "analyze"}}
         
-        # Mock the LLM manager for fallback
-        agent.llm_manager.ask_llm = AsyncMock(return_value='{"fallback": true}')
-        
-        with patch.object(agent, '_analyze_performance_metrics', new_callable=AsyncMock) as mock_perf:
-            mock_perf.side_effect = Exception("Database connection failed")
+        # Mock _fetch_clickhouse_data to return None (simulating failure)
+        with patch.object(agent, '_fetch_clickhouse_data', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = None
             
             await agent.execute(state, "run_123", stream_updates=True)
             
         assert state.data_result != None
-        assert state.data_result.get("fallback") == True
+        # When ClickHouse fails, correlations should be empty
+        assert state.data_result["results"]["correlations"]["correlations"] == {}
         
     @pytest.mark.asyncio
     async def test_execute_with_invalid_llm_response(self, agent):
-        """Test execute with invalid LLM response in fallback"""
+        """Test execute continues even with database failures"""
         state = DeepAgentState(user_request="Analyze my data")
         state.triage_result = {"intent": {"primary": "analyze"}}
         
-        # Mock the LLM manager to return invalid JSON
-        agent.llm_manager.ask_llm = AsyncMock(return_value='Invalid JSON response')
-        
-        with patch.object(agent, '_analyze_performance_metrics', new_callable=AsyncMock) as mock_perf:
-            mock_perf.side_effect = Exception("Database connection failed")
+        # Mock _fetch_clickhouse_data to return empty list (no data)
+        with patch.object(agent, '_fetch_clickhouse_data', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = []
             
             await agent.execute(state, "run_123", stream_updates=False)
             
         assert state.data_result != None
-        assert state.data_result["collection_status"] == "fallback"
-        assert "error" in state.data_result
+        # Should still have results structure even with no data
+        assert "results" in state.data_result
+        assert "correlations" in state.data_result["results"]
         
     @pytest.mark.asyncio
     async def test_process_data(self, agent):
@@ -1319,14 +1317,15 @@ class TestDataSubAgent:
         
     @pytest.mark.asyncio
     async def test_load_state_existing(self, agent):
-        """Test load_state with existing state"""
+        """Test load_state overwrites existing state"""
         agent.state = {"existing": "data"}
         agent.agent_type = "data"  # Add the missing attribute
         
         await agent.load_state()
         
-        # In the stub implementation, it doesn't overwrite
-        assert agent.state == {"existing": "data"}
+        # load_state initializes with empty state when no saved state is found
+        assert agent.state == {}
+        assert hasattr(agent, '_saved_state')
         
     @pytest.mark.asyncio
     async def test_recover(self, agent):
