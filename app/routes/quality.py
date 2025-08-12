@@ -448,3 +448,19 @@ async def quality_service_health() -> Dict[str, Any]:
             "error": str(e),
             "timestamp": datetime.utcnow().isoformat()
         }
+
+async def check_quality_thresholds(metric: str, value: float) -> Dict[str, Any]:
+    """Check quality thresholds for testing."""
+    threshold = 0.9
+    return {
+        "metric": metric,
+        "value": value,
+        "threshold": threshold,
+        "alert": value < threshold
+    }
+
+async def check_quality_alerts() -> List[Dict[str, Any]]:
+    """Check quality alerts for testing."""
+    from app.services import quality_service
+    alerts = quality_service.check_thresholds()
+    return alerts

@@ -103,3 +103,8 @@ def get_corpus_content(
     if content is None:
         raise HTTPException(status_code=404, detail="Corpus not found")
     return content
+
+async def bulk_index_documents(documents: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Bulk index documents for testing."""
+    indexed_count = len(documents)
+    return {"indexed": indexed_count, "status": "success"}

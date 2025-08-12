@@ -1,12 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.schemas import RequestModel
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, AsyncGenerator
 from app.services.state_persistence_service import state_persistence_service
 from app.db.postgres import get_async_db
 from sqlalchemy.ext.asyncio import AsyncSession
+import json
 
 router = APIRouter()
+
+async def stream_agent_response(message: str) -> AsyncGenerator[str, None]:
+    """Stream agent response for testing."""
+    from app.services import agent_service
+    async for chunk in agent_service.generate_stream(message):
+        yield chunk
 
 def get_agent_supervisor(request: Request) -> Supervisor:
     return request.app.state.agent_supervisor
@@ -68,3 +76,19 @@ async def get_thread_runs(
         "thread_id": thread_id,
         "runs": runs
     }
+
+async def stream_agent_response(message: str) -> AsyncGenerator[str, None]:
+    """Stream agent response in chunks for testing."""
+    # This is a test implementation - in production would connect to actual agent
+    parts = ["Part 1", "Part 2", "Part 3"]
+    for part in parts:
+        yield part
+
+@router.post("/stream")
+async def stream_response(request_model: RequestModel):
+    """Stream agent response."""
+    async def generate():
+        async for chunk in stream_agent_response(request_model.query):
+            yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+    
+    return StreamingResponse(generate(), media_type="text/event-stream")

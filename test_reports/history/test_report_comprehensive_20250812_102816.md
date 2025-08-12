@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-12T10:29:21.602564  
+**Generated:** 2025-08-12T10:28:16.442573  
 **Test Level:** comprehensive - Full test suite with coverage (30-45 minutes)  
 **Purpose:** Pre-release validation, full system testing
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 6 | 0 | 0 | 0 | 6 | 25.69s | [FAILED] |
-| Frontend  | 176 | 18 | 158 | 0 | 0 | 31.29s | [FAILED] |
+| Backend   | 6 | 0 | 0 | 0 | 6 | 23.29s | [FAILED] |
+| Frontend  | 176 | 18 | 158 | 0 | 0 | 30.97s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,7 +27,7 @@
 - **Purpose:** Pre-release validation, full system testing
 - **Timeout:** 2700s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 56.98s
+- **Total Duration:** 54.27s
 - **Exit Code:** 2
 
 ### Backend Configuration
@@ -90,9 +90,9 @@ created: 6/6 workers
 [31mERROR[0m app\tests\examples\test_pattern_examples.py - Failed: 'performance' not found in `markers` configuration option
 [31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 6 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
 !!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!
-[31m============================= [31m[1m6 errors[0m[31m in 15.03s[0m[31m ==============================[0m
+[31m============================= [31m[1m6 errors[0m[31m in 13.60s[0m[31m ==============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 2 after 24.54s
+[FAIL] TESTS FAILED with exit code 2 after 22.34s
 
 [Report] HTML Report: reports/tests/report.html
 [Coverage] Coverage Report: reports/coverage/html/index.html
@@ -179,64 +179,64 @@ All files                        |   68.09 |    79.24 |   50.72 |   68.09 |
 - [31mERROR[0m app\tests\examples\test_pattern_examples.py - Failed: 'performance' not found in `markers` configuration option
 - [31mERROR[0m app\tests\examples\test_pattern_examples.py - Failed: 'performance' not found in `markers` configuration option
 - [31mERROR[0m app\tests\examples\test_pattern_examples.py - Failed: 'performance' not found in `markers` configuration option
-- [FAIL] TESTS FAILED with exit code 2 after 24.54s
+- [FAIL] TESTS FAILED with exit code 2 after 22.34s
 
 ### Frontend Errors
 - [FAIL] CHECKS FAILED with exit code 1
 - FAIL __tests__/hooks/useAgent.test.tsx
 - FAIL __tests__/integration/critical-integration.test.tsx
 - FAIL __tests__/utils/test-utils.tsx
-- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
 - FAIL __tests__/services/webSocketService.test.ts
-- FAIL __tests__/hooks/additionalHooks.test.tsx
+- FAIL __tests__/auth/service.test.ts
 - FAIL __tests__/components/ThinkingIndicator.test.tsx
 - FAIL __tests__/components/UIComponents.test.tsx
 - FAIL __tests__/components/FinalReportView.test.tsx
 - FAIL __tests__/components/ChatSidebar.test.tsx
 - FAIL __tests__/components/ChatHistory.test.tsx
-- FAIL __tests__/auth/service.test.ts
-- FAIL __tests__/integration/advanced-integration.test.tsx
 - FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
+- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
+- FAIL __tests__/hooks/additionalHooks.test.tsx
 - FAIL __tests__/components/AgentStatusPanel.test.tsx
 - FAIL __tests__/unified-chat-v5.test.tsx
+- FAIL __tests__/integration/advanced-integration.test.tsx
 - FAIL __tests__/auth/context.test.tsx
 - FAIL __tests__/imports/external-imports.test.tsx
-- FAIL __tests__/imports/internal-imports.test.tsx (5.118 s)
-- FAIL __tests__/components/ChatHistorySection.test.tsx (8.458 s)
-- FAIL __tests__/system/startup.test.tsx (12.112 s)
+- FAIL __tests__/imports/internal-imports.test.tsx
+- FAIL __tests__/components/ChatHistorySection.test.tsx (8.015 s)
 - FAIL __tests__/chat/chatUIUXCore.test.tsx
-- FAIL __tests__/components/chat/MainChat.test.tsx (12.432 s)
+- FAIL __tests__/system/startup.test.tsx (11.895 s)
+- FAIL __tests__/components/chat/MainChat.test.tsx (12.322 s)
 - FAIL __tests__/chat/ui-improvements.test.tsx
-- FAIL __tests__/components/chat/MessageInput.test.tsx (17.73 s)
-- FAIL __tests__/components/ChatComponents.test.tsx (25.359 s)
-- FAIL __tests__/integration/comprehensive-integration.test.tsx (25.64 s)
+- FAIL __tests__/components/chat/MessageInput.test.tsx (17.762 s)
+- FAIL __tests__/components/ChatComponents.test.tsx (25.362 s)
+- FAIL __tests__/integration/comprehensive-integration.test.tsx (25.504 s)
 - FAIL __tests__/hooks/useAgent.test.tsx
 - FAIL __tests__/integration/critical-integration.test.tsx
 - FAIL __tests__/utils/test-utils.tsx
-- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
 - FAIL __tests__/services/webSocketService.test.ts
-- FAIL __tests__/hooks/additionalHooks.test.tsx
+- FAIL __tests__/auth/service.test.ts
 - FAIL __tests__/components/ThinkingIndicator.test.tsx
 - FAIL __tests__/components/UIComponents.test.tsx
 - FAIL __tests__/components/FinalReportView.test.tsx
 - FAIL __tests__/components/ChatSidebar.test.tsx
 - FAIL __tests__/components/ChatHistory.test.tsx
-- FAIL __tests__/auth/service.test.ts
-- FAIL __tests__/integration/advanced-integration.test.tsx
 - FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
+- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
+- FAIL __tests__/hooks/additionalHooks.test.tsx
 - FAIL __tests__/components/AgentStatusPanel.test.tsx
 - FAIL __tests__/unified-chat-v5.test.tsx
+- FAIL __tests__/integration/advanced-integration.test.tsx
 - FAIL __tests__/auth/context.test.tsx
 - FAIL __tests__/imports/external-imports.test.tsx
-- FAIL __tests__/imports/internal-imports.test.tsx (5.118 s)
-- FAIL __tests__/components/ChatHistorySection.test.tsx (8.458 s)
-- FAIL __tests__/system/startup.test.tsx (12.112 s)
+- FAIL __tests__/imports/internal-imports.test.tsx
+- FAIL __tests__/components/ChatHistorySection.test.tsx (8.015 s)
 - FAIL __tests__/chat/chatUIUXCore.test.tsx
-- FAIL __tests__/components/chat/MainChat.test.tsx (12.432 s)
+- FAIL __tests__/system/startup.test.tsx (11.895 s)
+- FAIL __tests__/components/chat/MainChat.test.tsx (12.322 s)
 - FAIL __tests__/chat/ui-improvements.test.tsx
-- FAIL __tests__/components/chat/MessageInput.test.tsx (17.73 s)
-- FAIL __tests__/components/ChatComponents.test.tsx (25.359 s)
-- FAIL __tests__/integration/comprehensive-integration.test.tsx (25.64 s)
+- FAIL __tests__/components/chat/MessageInput.test.tsx (17.762 s)
+- FAIL __tests__/components/ChatComponents.test.tsx (25.362 s)
+- FAIL __tests__/integration/comprehensive-integration.test.tsx (25.504 s)
 
 
 ---

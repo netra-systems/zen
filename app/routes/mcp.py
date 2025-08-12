@@ -259,3 +259,8 @@ async def get_mcp_config(
     }
     
     return configs
+
+async def execute_tool(tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    """Execute MCP tool for testing."""
+    from app.services import mcp_service
+    return await mcp_service.execute_tool(tool_name, params)

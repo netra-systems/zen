@@ -1,0 +1,76 @@
+================================================================================
+NETRA AI PLATFORM - UNIFIED TEST RUNNER
+================================================================================
+[INFO] Enhanced Test Reporter enabled
+Running simple test validation...
+
+============================================================
+RUNNING SIMPLE TESTS
+============================================================
+============================================================
+SIMPLE TEST RUNNER - Quick Assessment
+============================================================
+
+Running: app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error
+  [FAIL] test_configuration_error
+       ============================= test session starts =============================
+collected 0 items
+
+=
+
+Running: app/tests/core/test_config_manager.py::TestConfigManager::test_initialization
+  [FAIL] test_initialization
+       ============================= test session starts =============================
+collected 0 items
+
+=
+
+Running: app/tests/services/test_security_service.py::TestSecurityService::test_verify_password
+  [FAIL] test_verify_password
+       ============================= test session starts =============================
+collected 0 items
+
+=
+
+Running: app/tests/routes/test_health_route.py::test_live_endpoint
+  [FAIL] test_live_endpoint
+       ============================= test session starts =============================
+collected 0 items
+
+=
+
+Running: tests/test_system_startup.py::TestSystemStartup::test_configuration_loading
+  [FAIL] test_configuration_loading
+       ============================= test session starts =============================
+collected 0 items
+
+=
+
+============================================================
+SUMMARY
+============================================================
+Passed: 0
+Failed: 5
+Errors: 0
+
+Detailed results saved to: simple_test_results.json
+
+[FAILED] 5 tests need attention
+
+[FAIL] Simple tests completed in 12.93s
+[WARNING] Enhanced reporter failed, using standard: 'charmap' codec can't encode character '\U0001f4ca' in position 2: character maps to <undefined>
+[ARCHIVE] Previous report moved to history: test_report_simple_20250812_101308.md
+
+============================================================
+TEST SUMMARY
+============================================================
+Total Tests: 0
+  Passed:    0
+  Failed:    0
+  Skipped:   0
+  Errors:    0
+============================================================
+Backend:  [FAILED] (0 tests, 6.46s)
+Frontend: [FAILED] (0 tests, 6.46s)
+Overall:  [FAILED] (12.93s)
+============================================================
