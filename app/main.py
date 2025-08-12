@@ -300,6 +300,7 @@ from app.routes.auth import auth as auth_router
 from app.routes.agent_route import router as agent_router
 from app.routes.llm_cache import router as llm_cache_router
 from app.routes.threads_route import router as threads_router
+from app.routes.health_extended import router as health_extended_router
 
 app.include_router(auth_router.router, prefix="/api/auth", tags=["auth"])
 app.include_router(agent_router, prefix="/api/agent", tags=["agent"])
@@ -311,6 +312,7 @@ app.include_router(websockets_router, tags=["websockets"])
 app.include_router(admin.router, prefix="/api", tags=["admin"])
 app.include_router(references.router, prefix="/api", tags=["references"])
 app.include_router(health.router, prefix="/health", tags=["health"])
+app.include_router(health_extended_router, tags=["monitoring"])
 app.include_router(corpus.router, prefix="/api/corpus", tags=["corpus"])
 app.include_router(synthetic_data.router, tags=["synthetic_data"])
 app.include_router(config.router, prefix="/api", tags=["config"])

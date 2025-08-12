@@ -1,12 +1,11 @@
 import React from 'react';
 import { render, screen, waitFor, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AgentStatusPanel } from '@/components/chat/AgentStatusPanel';
+import AgentStatusPanel from '@/components/chat/AgentStatusPanel';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { WebSocketProvider } from '@/providers/WebSocketProvider';
 
-// Mock dependencies
+import { TestProviders } from '../test-utils/providers';// Mock dependencies
 jest.mock('@/store/unified-chat');
 jest.mock('@/hooks/useWebSocket');
 jest.mock('@/components/ui/progress', () => ({
@@ -48,6 +47,13 @@ describe('AgentStatusPanel Component', () => {
   };
 
   beforeEach(() => {
+    // Mock fetch for config
+    global.fetch = jest.fn().mockResolvedValue({
+      json: jest.fn().mockResolvedValue({
+        ws_url: 'ws://localhost:8000/ws'
+      })
+    });
+
     jest.clearAllMocks();
     jest.useFakeTimers();
     (useUnifiedChatStore as jest.Mock).mockReturnValue(mockChatStore);
@@ -60,9 +66,9 @@ describe('AgentStatusPanel Component', () => {
 
   const renderWithProvider = (component: React.ReactElement) => {
     return render(
-      <WebSocketProvider>
+      <TestProviders>
         {component}
-      </WebSocketProvider>
+      </TestProviders>
     );
   };
 

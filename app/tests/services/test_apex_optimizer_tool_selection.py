@@ -132,21 +132,28 @@ class MockLLMConnector:
         # Analyze prompt to determine appropriate tool
         prompt_lower = prompt.lower()
         
-        # Debug output for troubleshooting (disable in production)
-        print(f"DEBUG: Query in prompt: {request.query if 'request' in locals() else 'N/A'}")
-        print(f"DEBUG: Analyzing prompt snippet: {prompt_lower[50:250]}")
+        # Extract just the user query part (after "user query:" and before "available tools:")
+        import re
+        query_match = re.search(r'user query:\s*([^\n]*?)(?:\n|available tools:|$)', prompt_lower)
+        if query_match:
+            user_query = query_match.group(1).strip()
+        else:
+            user_query = prompt_lower
         
-        # Check for specific patterns - more precise matching
+        # Debug output for troubleshooting (disable in production)
+        # print(f"DEBUG: Extracted user query: {user_query}")
+        
+        # Check for specific patterns in the USER QUERY, not the whole prompt
         # Check cost patterns first (most specific combinations)
-        if 'reduce costs' in prompt_lower or 'cost reduction' in prompt_lower or ('cost' in prompt_lower and 'reduce' in prompt_lower):
+        if 'reduce costs' in user_query or 'cost reduction' in user_query or ('cost' in user_query and 'reduce' in user_query):
             return json.dumps(self.response_templates['cost'])
-        elif 'latency' in prompt_lower or 'speed' in prompt_lower or 'response time' in prompt_lower:
+        elif 'latency' in user_query or 'speed' in user_query or 'response time' in user_query:
             return json.dumps(self.response_templates['latency'])
-        elif 'cache' in prompt_lower:
+        elif 'cache' in user_query:
             return json.dumps(self.response_templates['cache'])
-        elif 'model' in prompt_lower and ('new' in prompt_lower or 'analysis' in prompt_lower):
+        elif 'model' in user_query and ('new' in user_query or 'analysis' in user_query or 'effectiveness' in user_query):
             return json.dumps(self.response_templates['model'])
-        elif 'multi' in prompt_lower or ('cost' in prompt_lower and 'latency' in prompt_lower):
+        elif 'multi' in user_query or ('cost' in user_query and 'latency' in user_query):
             return json.dumps(self.response_templates['multi'])
         else:
             # Default to cost optimization
@@ -353,7 +360,17 @@ class TestApexOptimizerToolSelection:
     async def test_tool_selection_cache_optimization(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for cache optimization requests"""
         # Create cache-focused request
-        request = RequestModel(query="Audit and optimize our KV cache configuration")
+        from app.schemas import Workload, DataSource, TimeRange
+        request = RequestModel(
+            user_id="test_user_789",
+            query="Audit and optimize our KV cache configuration",
+            workloads=[Workload(
+                run_id="run_789",
+                query="optimize cache",
+                data_source=DataSource(source_table="cache_metrics"),
+                time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
+            )]
+        )
         from app.services.apex_optimizer_agent.models import BaseMessage
         message = BaseMessage(
             type="human",
@@ -380,7 +397,17 @@ class TestApexOptimizerToolSelection:
     async def test_tool_selection_model_analysis(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for model analysis requests"""
         # Create model analysis request
-        request = RequestModel(query="Analyze effectiveness of new models for our use case")
+        from app.schemas import Workload, DataSource, TimeRange
+        request = RequestModel(
+            user_id="test_user_analysis",
+            query="Analyze effectiveness of new models for our use case",
+            workloads=[Workload(
+                run_id="run_analysis",
+                query="analyze models",
+                data_source=DataSource(source_table="model_metrics"),
+                time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
+            )]
+        )
         from app.services.apex_optimizer_agent.models import BaseMessage
         message = BaseMessage(
             type="human",

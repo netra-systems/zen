@@ -8,15 +8,24 @@ import { render, waitFor, screen, fireEvent, act } from '@testing-library/react'
 import { renderHook } from '@testing-library/react-hooks';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
-import { WebSocketProvider } from '@/providers/WebSocketProvider';
+
 import { AgentProvider } from '@/providers/AgentProvider';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useAgent } from '@/hooks/useAgent';
 import { useAuthStore } from '@/store/authStore';
 import { useChatStore } from '@/store/chatStore';
 import { useThreadStore } from '@/store/threadStore';
-// Mock stores and services that don't exist yet
-const useCorpusStore = { getState: () => ({ documents: [], addDocument: jest.fn() }) };
+import { WebSocketProvider } from '@/providers/WebSocketProvider';
+
+import { TestProviders } from '../test-utils/providers';// Mock stores and services that don't exist yet
+const useCorpusStore = {
+  getState: jest.fn(() => ({
+    documents: [],
+    addDocument: jest.fn((doc: any) => {
+      useCorpusStore.getState().documents.push(doc);
+    })
+  }))
+};
 const useSyntheticDataStore = { getState: () => ({ jobs: [], generateData: jest.fn() }) };
 const useLLMCacheStore = { getState: () => ({ cacheSize: 0, clearCache: jest.fn(), setCacheTTL: jest.fn() }) };
 const useSupplyStore = { getState: () => ({ catalog: { models: [] }, activeModel: null, setCatalog: jest.fn(), switchModel: jest.fn() }) };
@@ -139,6 +148,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
       });
       
       const searchCorpus = async (query: string) => {
+        corpusService.searchDocuments.mockResolvedValueOnce(mockSearchResults);
         const results = await corpusService.searchDocuments(query);
         return results;
       };
@@ -181,9 +191,9 @@ describe('Comprehensive Frontend Integration Tests', () => {
       };
       
       render(
-        <WebSocketProvider>
+        <TestProviders>
           <TestComponent />
-        </WebSocketProvider>
+        </TestProviders>
       );
       
       await server.connected;
@@ -607,9 +617,9 @@ describe('Comprehensive Frontend Integration Tests', () => {
       };
       
       render(
-        <WebSocketProvider>
+        <TestProviders>
           <TestComponent />
-        </WebSocketProvider>
+        </TestProviders>
       );
       
       await server.connected;

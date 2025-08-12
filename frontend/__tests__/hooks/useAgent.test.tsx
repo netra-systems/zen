@@ -14,10 +14,10 @@
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { useAgent } from '@/hooks/useAgent';
-import { WebSocketProvider } from '@/providers/WebSocketProvider';
+
 import { AuthContext } from '@/auth/context';
 
-// Mock WebSocket
+import { TestProviders } from '../test-utils/providers';// Mock WebSocket
 let mockWebSocketInstance: any;
 class MockWebSocket {
   url: string;
@@ -62,7 +62,7 @@ describe('useAgent', () => {
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <AuthContext.Provider value={mockAuthValue}>
-      <WebSocketProvider>{children}</WebSocketProvider>
+      <TestProviders>{children}</TestProviders>
     </AuthContext.Provider>
   );
 

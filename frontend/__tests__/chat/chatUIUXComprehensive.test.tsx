@@ -30,7 +30,7 @@ import { useWebSocket } from '../../hooks/useWebSocket';
 import { useChatWebSocket } from '../../hooks/useChatWebSocket';
 import { WS } from 'jest-websocket-mock';
 
-// Mock WebSocket
+import { TestProviders } from '../test-utils/providers';// Mock WebSocket
 let mockServer: WS;
 
 beforeEach(() => {

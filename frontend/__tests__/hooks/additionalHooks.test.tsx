@@ -1,30 +1,46 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
-// Using Jest, not vitest
+
+import { TestProviders } from '../test-utils/providers';// Using Jest, not vitest
 import { useDemoWebSocket } from '@/hooks/useDemoWebSocket';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { WebSocketProvider } from '@/providers/WebSocketProvider';
+
 import React from 'react';
 
 // Test 65: useDemoWebSocket connection
 describe('test_useDemoWebSocket_connection', () => {
-  let mockWebSocket: any;
-  
   beforeEach(() => {
-    mockWebSocket = {
-      send: jest.fn(),
-      close: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      readyState: WebSocket.OPEN,
-    };
-    
-    global.WebSocket = vi.fn(() => mockWebSocket) as any;
+    // Mock fetch for config
+    global.fetch = jest.fn().mockResolvedValue({
+      json: jest.fn().mockResolvedValue({
+        ws_url: 'ws://localhost:8000/ws'
+      })
+    });
+
+    // Ensure global mockWebSocket exists
+    if (!global.mockWebSocket) {
+      global.mockWebSocket = {
+        send: jest.fn(),
+        close: jest.fn(),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        readyState: WebSocket.OPEN,
+        simulateMessage: jest.fn(),
+        simulateError: jest.fn(),
+        simulateReconnect: jest.fn()
+      };
+      global.WebSocket = jest.fn(() => global.mockWebSocket);
+    } else {
+      // Reset the global mockWebSocket
+      global.mockWebSocket.readyState = WebSocket.OPEN;
+      global.mockWebSocket.send.mockClear();
+      global.mockWebSocket.close.mockClear();
+      global.mockWebSocket.addEventListener.mockClear();
+      global.mockWebSocket.removeEventListener.mockClear();
+    }
   });
 
   it('should establish demo WebSocket connection', async () => {
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WebSocketProvider>{children}</WebSocketProvider>
-    );
+    const wrapper = TestProviders;
     
     const { result } = renderHook(() => useDemoWebSocket(), { wrapper });
     
@@ -38,11 +54,9 @@ describe('test_useDemoWebSocket_connection', () => {
   });
 
   it('should handle message queuing when disconnected', async () => {
-    mockWebSocket.readyState = WebSocket.CONNECTING;
+    global.mockWebSocket.readyState = WebSocket.CONNECTING;
     
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WebSocketProvider>{children}</WebSocketProvider>
-    );
+    const wrapper = TestProviders;
     
     const { result } = renderHook(() => useDemoWebSocket(), { wrapper });
     
@@ -50,46 +64,48 @@ describe('test_useDemoWebSocket_connection', () => {
       result.current.sendMessage({ type: 'demo', content: 'Test message' });
     });
     
-    expect(mockWebSocket.send).not.toHaveBeenCalled();
+    expect(global.mockWebSocket.send).not.toHaveBeenCalled();
     
     // Simulate connection established
-    mockWebSocket.readyState = WebSocket.OPEN;
-    const openHandler = mockWebSocket.addEventListener.mock.calls.find(
+    global.mockWebSocket.readyState = WebSocket.OPEN;
+    const openHandler = global.mockWebSocket.addEventListener.mock.calls.find(
       (call: any[]) => call[0] === 'open'
-    )[1];
+    )?.[1];
     
-    act(() => {
-      openHandler();
-    });
+    if (openHandler) {
+      act(() => {
+        openHandler();
+      });
     
-    await waitFor(() => {
-      expect(mockWebSocket.send).toHaveBeenCalledWith(
-        JSON.stringify({ type: 'demo', content: 'Test message' })
-      );
-    });
+      await waitFor(() => {
+        expect(global.mockWebSocket.send).toHaveBeenCalledWith(
+          JSON.stringify({ type: 'demo', content: 'Test message' })
+        );
+      });
+    }
   });
 
   it('should handle reconnection on disconnect', async () => {
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WebSocketProvider>{children}</WebSocketProvider>
-    );
+    const wrapper = TestProviders;
     
     const { result } = renderHook(() => useDemoWebSocket(), { wrapper });
     
-    const closeHandler = mockWebSocket.addEventListener.mock.calls.find(
+    const closeHandler = global.mockWebSocket.addEventListener.mock.calls.find(
       (call: any[]) => call[0] === 'close'
-    )[1];
+    )?.[1];
     
-    act(() => {
-      closeHandler();
-    });
+    if (closeHandler) {
+      act(() => {
+        closeHandler();
+      });
     
-    expect(result.current.isConnected).toBe(false);
+      expect(result.current.isConnected).toBe(false);
     
-    // Should attempt reconnection
-    await waitFor(() => {
-      expect(global.WebSocket).toHaveBeenCalledTimes(2);
-    });
+      // Should attempt reconnection
+      await waitFor(() => {
+        expect(global.WebSocket).toHaveBeenCalledTimes(2);
+      });
+    }
   });
 });
 
@@ -123,7 +139,7 @@ describe('test_useMediaQuery_responsive', () => {
 
   it('should update on media query change', () => {
     let listener: any;
-    const addEventListenerMock = vi.fn((event: string, handler: any) => {
+    const addEventListenerMock = jest.fn((event: string, handler: any) => {
       if (event === 'change') listener = handler;
     });
     
@@ -149,7 +165,7 @@ describe('test_useMediaQuery_responsive', () => {
 
   it('should handle debouncing for rapid changes', async () => {
     let listener: any;
-    const addEventListenerMock = vi.fn((event: string, handler: any) => {
+    const addEventListenerMock = jest.fn((event: string, handler: any) => {
       if (event === 'change') listener = handler;
     });
     

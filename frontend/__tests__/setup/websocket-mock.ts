@@ -125,6 +125,5 @@ export function waitForWebSocketConnection(timeout = 100): Promise<void> {
 }
 
 // Mock WebSocket provider for React components
-export const MockWebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return <>{children}</>;
-};
+// Note: This component is defined in test-utils/providers.tsx
+// since this file is .ts and cannot contain JSX

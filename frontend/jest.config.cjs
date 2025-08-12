@@ -8,6 +8,10 @@ const config = {
   coverageProvider: 'v8',
   testEnvironment: 'jest-environment-jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/__tests__/setup/',  // Ignore setup files that are not actual tests
+  ],
   moduleNameMapper: {
     '^@/contexts/(.*)$': '<rootDir>/contexts/$1',
     '^@/components/(.*)$': '<rootDir>/components/$1',

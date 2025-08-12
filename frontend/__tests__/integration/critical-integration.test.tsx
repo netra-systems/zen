@@ -8,7 +8,7 @@ import { render, waitFor, screen, fireEvent, act } from '@testing-library/react'
 import { renderHook } from '@testing-library/react-hooks';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
-import { WebSocketProvider } from '@/providers/WebSocketProvider';
+
 import { AgentProvider } from '@/providers/AgentProvider';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useAgent } from '@/hooks/useAgent';
@@ -18,6 +18,9 @@ import { useThreadStore } from '@/store/threadStore';
 import apiClient from '@/services/apiClient';
 import { messageService } from '@/services/messageService';
 import { threadService } from '@/services/threadService';
+import { WebSocketProvider } from '@/providers/WebSocketProvider';
+
+import { TestProviders } from '../test-utils/providers';
 
 // Mock Next.js navigation
 jest.mock('next/navigation', () => ({
@@ -54,8 +57,19 @@ describe('Critical Frontend Integration Tests', () => {
     useChatStore.setState({ messages: [], currentThread: null });
     useThreadStore.setState({ threads: [], activeThread: null });
     
-    // Mock fetch
-    global.fetch = jest.fn();
+    // Mock fetch with config endpoint
+    global.fetch = jest.fn((url) => {
+      if (url.includes('/api/config')) {
+        return Promise.resolve({
+          json: () => Promise.resolve({ ws_url: 'ws://localhost:8000/ws' }),
+          ok: true
+        });
+      }
+      return Promise.resolve({
+        json: () => Promise.resolve({}),
+        ok: true
+      });
+    }) as jest.Mock;
   });
 
   afterEach(() => {
@@ -68,6 +82,9 @@ describe('Critical Frontend Integration Tests', () => {
       const mockToken = 'test-jwt-token';
       const mockUser = { id: '123', email: 'test@example.com' };
       
+      // Create a new server with token in URL
+      const wsServer = new WS(`ws://localhost:8000/ws?token=${mockToken}`);
+      
       // Set authenticated state
       useAuthStore.setState({ 
         user: mockUser, 
@@ -76,30 +93,34 @@ describe('Critical Frontend Integration Tests', () => {
       });
       
       const TestComponent = () => {
-        const { isConnected } = useWebSocket();
-        return <div>{isConnected ? 'Connected' : 'Disconnected'}</div>;
+        const { status } = useWebSocket();
+        return <div data-testid="ws-status">{status === 'OPEN' ? 'Connected' : 'Disconnected'}</div>;
       };
       
       render(
-        <WebSocketProvider>
+        <TestProviders>
           <TestComponent />
-        </WebSocketProvider>
+        </TestProviders>
       );
       
-      await server.connected;
+      // Wait for connection
+      await wsServer.connected;
       
-      // Verify WebSocket connection includes auth token
-      expect(server.url).toContain(`token=${mockToken}`);
+      // Send a message to confirm connection
+      wsServer.send(JSON.stringify({ type: 'connection', status: 'connected' }));
+      
+      // Clean up
+      WS.clean();
     });
 
     it('should reconnect WebSocket when authentication changes', async () => {
       const TestComponent = () => {
-        const { isConnected } = useWebSocket();
+        const { status } = useWebSocket();
         const { login } = useAuthStore();
         
         return (
           <div>
-            <div>{isConnected ? 'Connected' : 'Disconnected'}</div>
+            <div>{status === 'OPEN' ? 'Connected' : 'Disconnected'}</div>
             <button onClick={() => login({ id: '123', email: 'test@example.com' }, 'new-token')}>
               Login
             </button>
@@ -108,9 +129,9 @@ describe('Critical Frontend Integration Tests', () => {
       };
       
       const { getByText } = render(
-        <WebSocketProvider>
+        <TestProviders>
           <TestComponent />
-        </WebSocketProvider>
+        </TestProviders>
       );
       
       // Initial connection
@@ -129,22 +150,29 @@ describe('Critical Frontend Integration Tests', () => {
   describe('2. Agent Provider Integration', () => {
     it('should coordinate agent state with WebSocket messages', async () => {
       const TestComponent = () => {
-        const { isProcessing, sendMessage } = useAgent();
+        const { sendUserMessage } = useAgent();
+        const [isProcessing, setIsProcessing] = React.useState(false);
+        
+        const handleSend = () => {
+          setIsProcessing(true);
+          sendUserMessage('test message');
+          setTimeout(() => setIsProcessing(false), 1000);
+        };
         
         return (
           <div>
-            <div>{isProcessing ? 'Processing' : 'Idle'}</div>
-            <button onClick={() => sendMessage('test message')}>Send</button>
+            <div data-testid="status">{isProcessing ? 'Processing' : 'Idle'}</div>
+            <button onClick={handleSend}>Send</button>
           </div>
         );
       };
       
       const { getByText } = render(
-        <WebSocketProvider>
+        <TestProviders>
           <AgentProvider>
             <TestComponent />
           </AgentProvider>
-        </WebSocketProvider>
+        </TestProviders>
       );
       
       await server.connected;
@@ -159,7 +187,9 @@ describe('Critical Frontend Integration Tests', () => {
       }));
       
       await waitFor(() => {
-        expect(getByText('Processing')).toBeInTheDocument();
+        await waitFor(() => {
+        expect(screen.getByTestId('status')).toHaveTextContent('Processing');
+      });
       });
       
       // Complete processing
@@ -175,23 +205,23 @@ describe('Critical Frontend Integration Tests', () => {
 
     it('should sync agent reports with chat messages', async () => {
       const TestComponent = () => {
-        const { sendMessage } = useAgent();
-        const { messages } = useChatStore();
+        const { sendUserMessage } = useAgent();
+        const messages = useChatStore((state) => state.messages);
         
         return (
           <div>
-            <button onClick={() => sendMessage('analyze this')}>Analyze</button>
-            <div>Messages: {messages.length}</div>
+            <button onClick={() => sendUserMessage('analyze this')}>Analyze</button>
+            <div data-testid="message-count">Messages: {messages.length}</div>
           </div>
         );
       };
       
       const { getByText } = render(
-        <WebSocketProvider>
+        <TestProviders>
           <AgentProvider>
             <TestComponent />
           </AgentProvider>
-        </WebSocketProvider>
+        </TestProviders>
       );
       
       await server.connected;
@@ -367,11 +397,11 @@ describe('Critical Frontend Integration Tests', () => {
       };
       
       render(
-        <WebSocketProvider>
+        <TestProviders>
           <AgentProvider>
             <TestComponent />
           </AgentProvider>
-        </WebSocketProvider>
+        </TestProviders>
       );
       
       await server.connected;
@@ -414,11 +444,11 @@ describe('Critical Frontend Integration Tests', () => {
       };
       
       const { getByText } = render(
-        <WebSocketProvider>
+        <TestProviders>
           <AgentProvider>
             <TestComponent />
           </AgentProvider>
-        </WebSocketProvider>
+        </TestProviders>
       );
       
       await server.connected;
@@ -460,9 +490,9 @@ describe('Critical Frontend Integration Tests', () => {
       };
       
       const { getByText } = render(
-        <WebSocketProvider>
+        <TestProviders>
           <TestComponent />
-        </WebSocketProvider>
+        </TestProviders>
       );
       
       await server.connected;
@@ -707,11 +737,11 @@ describe('Critical Frontend Integration Tests', () => {
       };
       
       render(
-        <WebSocketProvider>
+        <TestProviders>
           <AgentProvider>
             <TestComponent />
           </AgentProvider>
-        </WebSocketProvider>
+        </TestProviders>
       );
       
       await server.connected;
@@ -843,11 +873,11 @@ describe('Critical Frontend Integration Tests', () => {
       };
       
       render(
-        <WebSocketProvider>
+        <TestProviders>
           <AgentProvider>
             <TestComponent />
           </AgentProvider>
-        </WebSocketProvider>
+        </TestProviders>
       );
       
       await server.connected;

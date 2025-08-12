@@ -1,9 +1,14 @@
 // Jest Setup File - Configure test environment
 import '@testing-library/jest-dom';
-import { installWebSocketMock } from './__tests__/setup/websocket-mock';
+import { TextEncoder, TextDecoder } from 'util';
+import { setupMockWebSocket } from './__tests__/setup/websocket-test-utils';
 
-// Install WebSocket mock globally
-installWebSocketMock();
+// Add TextEncoder/TextDecoder polyfills for jsdom
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
+// Setup global WebSocket mock
+setupMockWebSocket();
 
 // Increase default timeout for async operations
 jest.setTimeout(10000);

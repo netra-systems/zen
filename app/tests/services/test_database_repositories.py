@@ -75,38 +75,85 @@ def unit_of_work(mock_session, mock_models):
             
             # MOCK BEHAVIOR: Thread repository create method
             # This simulates database INSERT operation without actual DB call
-            mock_thread_repo.create.side_effect = lambda **kwargs: AsyncMock(
-                id=kwargs.get('id', f"thread_{time.time()}"),
-                user_id=kwargs.get('user_id'),
-                title=kwargs.get('title'),
-                created_at=datetime.now(),
-                updated_at=datetime.now(),
-                is_archived=False,
-                archived_at=None,
-                deleted_at=None
-            )()
+            async def create_thread(data):
+                # Handle both dict argument and **kwargs
+                if isinstance(data, dict):
+                    kwargs = data
+                else:
+                    kwargs = data
+                thread = AsyncMock(
+                    id=kwargs.get('id', f"thread_{time.time()}"),
+                    user_id=kwargs.get('user_id'),
+                    title=kwargs.get('title'),
+                    created_at=datetime.now(),
+                    updated_at=datetime.now(),
+                    is_archived=False,
+                    archived_at=None,
+                    deleted_at=None
+                )
+                # Store the created thread so it can be retrieved later
+                created_threads[thread.id] = thread
+                return thread
+            mock_thread_repo.create.side_effect = create_thread
             
-            mock_thread_repo.update.side_effect = lambda id, updates=None, **kwargs: AsyncMock(
-                id=id,
-                title=updates.get('title', 'Updated Title') if updates else 'Updated Title',
-                updated_at=datetime.now(),
-                created_at=datetime.now() - timedelta(days=1)
-            )()
+            async def update_thread(id, updates=None, **kwargs):
+                return AsyncMock(
+                    id=id,
+                    title=updates.get('title', 'Updated Title') if updates else 'Updated Title',
+                    updated_at=datetime.now() + timedelta(seconds=1),  # Ensure updated_at is later
+                    created_at=datetime.now() - timedelta(days=1)
+                )
+            mock_thread_repo.update.side_effect = update_thread
             
             mock_thread_repo.delete.return_value = True
-            mock_thread_repo.get.return_value = None
-            mock_thread_repo.soft_delete.return_value = None
-            mock_thread_repo.archive.side_effect = lambda id: AsyncMock(
-                id=id,
-                is_archived=True,
-                archived_at=datetime.now()
-            )()
             
-            mock_thread_repo.get_paginated.side_effect = lambda page, page_size: AsyncMock(
-                items=[AsyncMock(id=f"thread_{i}") for i in range(min(page_size, 25 - (page-1)*page_size))],
-                total=25,
-                pages=3
-            )()
+            # Track soft-deleted threads and created threads
+            soft_deleted_threads = {}
+            created_threads = {}
+            
+            async def get_thread(thread_id, include_deleted=False):
+                if thread_id in soft_deleted_threads:
+                    if include_deleted:
+                        return soft_deleted_threads[thread_id]
+                    else:
+                        return None
+                # Check created threads
+                if thread_id in created_threads:
+                    return created_threads[thread_id]
+                # Return None for non-existent threads
+                return None
+            mock_thread_repo.get.side_effect = get_thread
+            
+            async def soft_delete_thread(thread_id):
+                # Move thread from created to soft_deleted
+                if thread_id in created_threads:
+                    thread = created_threads[thread_id]
+                    thread.deleted_at = datetime.now()
+                    soft_deleted_threads[thread_id] = thread
+                    del created_threads[thread_id]
+                else:
+                    # Create a new soft-deleted thread
+                    soft_deleted_threads[thread_id] = AsyncMock(
+                        id=thread_id,
+                        deleted_at=datetime.now()
+                    )
+                return None
+            mock_thread_repo.soft_delete.side_effect = soft_delete_thread
+            async def archive_thread(id):
+                return AsyncMock(
+                    id=id,
+                    is_archived=True,
+                    archived_at=datetime.now()
+                )
+            mock_thread_repo.archive.side_effect = archive_thread
+            
+            async def get_paginated_threads(page, page_size):
+                return AsyncMock(
+                    items=[AsyncMock(id=f"thread_{i}") for i in range(min(page_size, 25 - (page-1)*page_size))],
+                    total=25,
+                    pages=3
+                )
+            mock_thread_repo.get_paginated.side_effect = get_paginated_threads
             
             mock_thread_repo.get_by_user.side_effect = lambda user_id: [
                 AsyncMock(id=f"thread_{i}", user_id=user_id) for i in range(5)
@@ -117,58 +164,77 @@ def unit_of_work(mock_session, mock_models):
             ]
             
             # Setup message repo methods
-            mock_message_repo.create.side_effect = lambda **kwargs: AsyncMock(
-                id=kwargs.get('id', f"msg_{time.time()}"),
-                thread_id=kwargs.get('thread_id'),
-                content=kwargs.get('content'),
-                role=kwargs.get('role'),
-                created_at=datetime.now()
-            )()
+            async def create_message(data=None, **kwargs):
+                # Handle both dict argument and **kwargs
+                if data and isinstance(data, dict):
+                    kwargs = data
+                return AsyncMock(
+                    id=kwargs.get('id', f"msg_{time.time()}"),
+                    thread_id=kwargs.get('thread_id'),
+                    content=kwargs.get('content'),
+                    role=kwargs.get('role'),
+                    created_at=datetime.now()
+                )
+            mock_message_repo.create.side_effect = create_message
             
             mock_message_repo.get_by_thread.side_effect = lambda thread_id: [
                 AsyncMock(id=f"msg_{i}", thread_id=thread_id, content=f"Message {i}") 
                 for i in range(5)
             ]
             
-            mock_message_repo.get_by_thread_paginated.side_effect = lambda thread_id, page, page_size: AsyncMock(
-                items=[AsyncMock(id=f"msg_{i}") for i in range(10)],
-                total=50
-            )()
+            async def get_messages_paginated(thread_id, page, page_size):
+                return AsyncMock(
+                    items=[AsyncMock(id=f"msg_{i}") for i in range(10)],
+                    total=50
+                )
+            mock_message_repo.get_by_thread_paginated.side_effect = get_messages_paginated
             
             mock_message_repo.get_latest.side_effect = lambda thread_id, limit: [
                 AsyncMock(content=f"Message {9-i}") for i in range(limit)
             ]
             
             # Setup run repo methods
-            mock_run_repo.create.side_effect = lambda **kwargs: AsyncMock(
-                id=kwargs.get('id', f"run_{time.time()}"),
-                thread_id=kwargs.get('thread_id'),
-                status=kwargs.get('status'),
-                tools=kwargs.get('tools', []),
-                model=kwargs.get('model'),
-                instructions=kwargs.get('instructions'),
-                completed_at=None,
-                metadata={}
-            )()
+            async def create_run(data=None, **kwargs):
+                # Handle both dict argument and **kwargs
+                if data and isinstance(data, dict):
+                    kwargs = data
+                return AsyncMock(
+                    id=kwargs.get('id', f"run_{time.time()}"),
+                    thread_id=kwargs.get('thread_id'),
+                    status=kwargs.get('status'),
+                    tools=kwargs.get('tools', []),
+                    model=kwargs.get('model'),
+                    instructions=kwargs.get('instructions'),
+                    completed_at=None,
+                    metadata={}
+                )
+            mock_run_repo.create.side_effect = create_run
             
-            mock_run_repo.update_status.side_effect = lambda run_id, status, metadata=None: AsyncMock(
-                id=run_id,
-                status=status,
-                completed_at=datetime.now() if status == "completed" else None,
-                metadata=metadata or {}
-            )()
+            async def update_run_status(run_id, status, metadata=None):
+                return AsyncMock(
+                    id=run_id,
+                    status=status,
+                    completed_at=datetime.now() if status == "completed" else None,
+                    metadata=metadata or {}
+                )
+            mock_run_repo.update_status.side_effect = update_run_status
             
             mock_run_repo.get_active.return_value = [AsyncMock(id="active_run")]
             
             # Setup reference repo methods
-            mock_reference_repo.create.side_effect = lambda **kwargs: AsyncMock(
-                id=kwargs.get('id', f"ref_{time.time()}"),
-                message_id=kwargs.get('message_id'),
-                type=kwargs.get('type'),
-                source=kwargs.get('source'),
-                content=kwargs.get('content'),
-                metadata=kwargs.get('metadata', {})
-            )()
+            async def create_reference(data=None, **kwargs):
+                # Handle both dict argument and **kwargs
+                if data and isinstance(data, dict):
+                    kwargs = data
+                return AsyncMock(
+                    id=kwargs.get('id', f"ref_{time.time()}"),
+                    message_id=kwargs.get('message_id'),
+                    type=kwargs.get('type'),
+                    source=kwargs.get('source'),
+                    content=kwargs.get('content'),
+                    metadata=kwargs.get('metadata', {})
+                )
+            mock_reference_repo.create.side_effect = create_reference
             
             mock_reference_repo.get_by_message.side_effect = lambda message_id: [
                 AsyncMock(id=f"ref_{i}", message_id=message_id) for i in range(3)
@@ -416,7 +482,7 @@ class TestBaseRepository:
             threads = await uow.threads.bulk_create(threads_data)
             
             assert len(threads) == 10
-            assert all(t.id != None for t in threads)
+            assert all(t.id is not None for t in threads)
 
     @pytest.mark.asyncio
     async def test_repository_get_by_id(self, unit_of_work, mock_models):
@@ -510,7 +576,7 @@ class TestBaseRepository:
             
             # Verify deletion
             retrieved = await uow.threads.get(thread.id)
-            assert retrieved == None
+            assert retrieved is None
 
     @pytest.mark.asyncio
     async def test_repository_soft_delete(self, unit_of_work):
@@ -526,15 +592,15 @@ class TestBaseRepository:
             
             # Should not appear in regular queries
             retrieved = await uow.threads.get(thread.id)
-            assert retrieved == None
+            assert retrieved is None
             
             # Should be retrievable with include_deleted
             retrieved = await uow.threads.get(
                 thread.id,
                 include_deleted=True
             )
-            assert retrieved != None
-            assert retrieved.deleted_at != None
+            assert retrieved is not None
+            assert retrieved.deleted_at is not None
 
     @pytest.mark.asyncio
     async def test_repository_pagination(self, unit_of_work):

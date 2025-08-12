@@ -4,7 +4,8 @@ import userEvent from '@testing-library/user-event';
 import MainChat from '@/components/chat/MainChat';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
-import { WebSocketProvider } from '@/providers/WebSocketProvider';
+
+import { TestProviders } from '../../test-utils/providers';
 
 // Mock dependencies
 jest.mock('@/store/unified-chat');
@@ -45,6 +46,13 @@ describe('MainChat', () => {
   };
 
   beforeEach(() => {
+    // Mock fetch for config
+    global.fetch = jest.fn().mockResolvedValue({
+      json: jest.fn().mockResolvedValue({
+        ws_url: 'ws://localhost:8000/ws'
+      })
+    });
+
     jest.clearAllMocks();
     jest.useFakeTimers();
     (useUnifiedChatStore as jest.Mock).mockReturnValue(mockStore);

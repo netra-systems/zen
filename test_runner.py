@@ -967,7 +967,14 @@ class UnifiedTestRunner:
                 
                 return
             except Exception as e:
-                print(f"[WARNING] Enhanced reporter failed, using standard: {e}")
+                # Handle Unicode encoding errors on Windows
+                error_msg = str(e)
+                try:
+                    print(f"[WARNING] Enhanced reporter failed, using standard: {error_msg}")
+                except UnicodeEncodeError:
+                    # Fallback for Unicode issues
+                    safe_msg = error_msg.encode('ascii', 'replace').decode('ascii')
+                    print(f"[WARNING] Enhanced reporter failed, using standard: {safe_msg}")
         
         # Calculate total test counts
         backend_counts = self.results["backend"]["test_counts"]

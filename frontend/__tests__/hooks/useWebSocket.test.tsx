@@ -16,7 +16,7 @@ import React from 'react';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { WebSocketProvider, useWebSocketContext } from '@/providers/WebSocketProvider';
 
-// Mock the WebSocketProvider
+import { TestProviders } from '../test-utils/providers';// Mock the WebSocketProvider
 jest.mock('@/providers/WebSocketProvider', () => ({
   WebSocketProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useWebSocketContext: jest.fn()
@@ -39,14 +39,19 @@ describe('useWebSocket', () => {
   };
 
   beforeEach(() => {
+    // Mock fetch for config
+    global.fetch = jest.fn().mockResolvedValue({
+      json: jest.fn().mockResolvedValue({
+        ws_url: 'ws://localhost:8000/ws'
+      })
+    });
+
     jest.clearAllMocks();
     (useWebSocketContext as jest.Mock).mockReturnValue(mockContext);
   });
 
   it('should return WebSocket context values', () => {
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WebSocketProvider>{children}</WebSocketProvider>
-    );
+    const wrapper = TestProviders;
     
     const { result } = renderHook(() => useWebSocket(), { wrapper });
     
@@ -58,9 +63,7 @@ describe('useWebSocket', () => {
   it('should handle null context gracefully', () => {
     (useWebSocketContext as jest.Mock).mockReturnValue(null);
     
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WebSocketProvider>{children}</WebSocketProvider>
-    );
+    const wrapper = TestProviders;
     
     const { result } = renderHook(() => useWebSocket(), { wrapper });
     
@@ -68,9 +71,7 @@ describe('useWebSocket', () => {
   });
 
   it('should call sendMessage when invoked', () => {
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WebSocketProvider>{children}</WebSocketProvider>
-    );
+    const wrapper = TestProviders;
     
     const { result } = renderHook(() => useWebSocket(), { wrapper });
     
@@ -82,9 +83,7 @@ describe('useWebSocket', () => {
   });
 
   it('should reflect connection state changes', () => {
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WebSocketProvider>{children}</WebSocketProvider>
-    );
+    const wrapper = TestProviders;
     
     const { result, rerender } = renderHook(() => useWebSocket(), { wrapper });
     
@@ -114,9 +113,7 @@ describe('useWebSocket', () => {
     
     (useWebSocketContext as jest.Mock).mockReturnValue(errorContext);
     
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WebSocketProvider>{children}</WebSocketProvider>
-    );
+    const wrapper = TestProviders;
     
     const { result } = renderHook(() => useWebSocket(), { wrapper });
     
@@ -134,9 +131,7 @@ describe('useWebSocket', () => {
     
     (useWebSocketContext as jest.Mock).mockReturnValue(reconnectingContext);
     
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WebSocketProvider>{children}</WebSocketProvider>
-    );
+    const wrapper = TestProviders;
     
     const { result } = renderHook(() => useWebSocket(), { wrapper });
     
@@ -155,9 +150,7 @@ describe('useWebSocket', () => {
     
     (useWebSocketContext as jest.Mock).mockReturnValue(queuedContext);
     
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WebSocketProvider>{children}</WebSocketProvider>
-    );
+    const wrapper = TestProviders;
     
     const { result } = renderHook(() => useWebSocket(), { wrapper });
     
@@ -166,9 +159,7 @@ describe('useWebSocket', () => {
   });
 
   it('should call connect method', () => {
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WebSocketProvider>{children}</WebSocketProvider>
-    );
+    const wrapper = TestProviders;
     
     const { result } = renderHook(() => useWebSocket(), { wrapper });
     
@@ -178,9 +169,7 @@ describe('useWebSocket', () => {
   });
 
   it('should call disconnect method', () => {
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WebSocketProvider>{children}</WebSocketProvider>
-    );
+    const wrapper = TestProviders;
     
     const { result } = renderHook(() => useWebSocket(), { wrapper });
     
@@ -201,9 +190,7 @@ describe('useWebSocket', () => {
     
     (useWebSocketContext as jest.Mock).mockReturnValue(messageContext);
     
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WebSocketProvider>{children}</WebSocketProvider>
-    );
+    const wrapper = TestProviders;
     
     const { result } = renderHook(() => useWebSocket(), { wrapper });
     

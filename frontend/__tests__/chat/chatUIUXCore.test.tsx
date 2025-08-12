@@ -18,7 +18,7 @@ import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 import '@testing-library/jest-dom';
 
-// Mock stores before importing components
+import { TestProviders } from '../test-utils/providers';// Mock stores before importing components
 jest.mock('../../store/authStore', () => ({
   useAuthStore: jest.fn(() => ({
     user: { id: 'test-user', email: 'test@example.com', name: 'Test User' },
@@ -90,6 +90,13 @@ import { useWebSocket } from '../../hooks/useWebSocket';
 describe('Core Chat UI/UX Experience - Working Test Suite', () => {
   
   beforeEach(() => {
+    // Mock fetch for config
+    global.fetch = jest.fn().mockResolvedValue({
+      json: jest.fn().mockResolvedValue({
+        ws_url: 'ws://localhost:8000/ws'
+      })
+    });
+
     jest.clearAllMocks();
   });
 

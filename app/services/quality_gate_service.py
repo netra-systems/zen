@@ -128,11 +128,15 @@ class QualityGateService:
     
     # Circular reasoning patterns
     CIRCULAR_PATTERNS = [
-        r"to improve (.+) you should improve",
-        r"optimize (.+) by optimizing",
-        r"better (.+) through better",
-        r"enhance (.+) by enhancing",
-        r"for better (.+), use better"
+        r"to improve.*you should improve",
+        r"optimize.*by optimizing",
+        r"better.*through better",
+        r"enhance.*by enhancing",
+        r"for better.*use better",
+        r"improve.*to improve",
+        r"increase.*by increasing",
+        r"reduce.*by reducing",
+        r"fix.*by fixing"
     ]
     
     # Domain-specific terms for Netra (indicates good content)
@@ -234,7 +238,7 @@ class QualityGateService:
         try:
             # Calculate content hash for caching
             content_hash = hashlib.md5(content.encode()).hexdigest()
-            cache_key = f"quality:{content_type.value}:{content_hash}"
+            cache_key = f"quality:{content_type.value}:{content_hash}:strict={strict_mode}"
             
             # Check cache
             if cache_key in self.validation_cache:
@@ -513,9 +517,12 @@ class QualityGateService:
             score = found / len(elements)
         else:
             # For other types, check basic completeness
-            if metrics.sentence_count >= 3:
+            sentences = len(re.split(r'[.!?]+', content))
+            words = len(content.split())
+            
+            if sentences >= 3:
                 score += 0.3
-            if metrics.word_count >= 50:
+            if words >= 50:
                 score += 0.3
             if "however" in content_lower or "but" in content_lower:
                 score += 0.2  # Shows consideration of alternatives
@@ -742,7 +749,7 @@ class QualityGateService:
         strict_mode: bool
     ) -> bool:
         """Check if metrics meet thresholds for the content type"""
-        thresholds = self.thresholds.get(content_type, self.thresholds[ContentType.GENERAL])
+        thresholds = self.thresholds.get(content_type, self.thresholds[ContentType.GENERAL]).copy()
         
         # Apply strict mode multiplier
         if strict_mode:
@@ -750,7 +757,9 @@ class QualityGateService:
                          for k, v in thresholds.items()}
         
         # Check overall score
-        if metrics.overall_score < thresholds.get('min_score', 0.5):
+        min_score_threshold = thresholds.get('min_score', 0.5)
+        if metrics.overall_score < min_score_threshold:
+            logger.debug(f"Failed overall score check: {metrics.overall_score} < {min_score_threshold}")
             return False
         
         # Check specific metrics

@@ -739,10 +739,18 @@ class EnhancedTestReporter:
         
         self.save_historical_data()
         
-        print(f"\n📊 Report saved:")
-        print(f"  📄 Latest: {latest_file}")
-        print(f"  📈 Metrics: {metrics_file}")
-        print(f"  📁 History: {self.history_dir}")
+        # Handle Unicode on Windows
+        try:
+            print(f"\n📊 Report saved:")
+            print(f"  📄 Latest: {latest_file}")
+            print(f"  📈 Metrics: {metrics_file}")
+            print(f"  📁 History: {self.history_dir}")
+        except UnicodeEncodeError:
+            # Fallback for systems that can't handle Unicode
+            print(f"\n[REPORT] Report saved:")
+            print(f"  [LATEST] {latest_file}")
+            print(f"  [METRICS] {metrics_file}")
+            print(f"  [HISTORY] {self.history_dir}")
     
     def cleanup_old_reports(self, keep_days: int = 30):
         """Clean up old reports and organize directory structure"""
@@ -756,7 +764,10 @@ class EnhancedTestReporter:
                 file_date = datetime.strptime(timestamp_str, '%Y%m%d_%H%M%S')
                 if file_date < cutoff_date:
                     file.unlink()
-                    print(f"  🗑️ Deleted old report: {file.name}")
+                    try:
+                        print(f"  🗑️ Deleted old report: {file.name}")
+                    except UnicodeEncodeError:
+                        print(f"  [DELETED] {file.name}")
             except:
                 pass
         
@@ -765,14 +776,23 @@ class EnhancedTestReporter:
             # Move to history
             archive_path = self.history_dir / file.name
             shutil.move(str(file), str(archive_path))
-            print(f"  📦 Archived: {file.name}")
+            try:
+                print(f"  📦 Archived: {file.name}")
+            except UnicodeEncodeError:
+                print(f"  [ARCHIVED] {file.name}")
         
         for file in self.reports_dir.glob("test_report_*.json"):
             # Delete old JSON files (we have better metrics now)
             file.unlink()
-            print(f"  🗑️ Deleted old JSON: {file.name}")
+            try:
+                print(f"  🗑️ Deleted old JSON: {file.name}")
+            except UnicodeEncodeError:
+                print(f"  [DELETED] {file.name}")
         
-        print("✅ Cleanup complete!")
+        try:
+            print("✅ Cleanup complete!")
+        except UnicodeEncodeError:
+            print("[COMPLETE] Cleanup finished!")
 
 
 def main():

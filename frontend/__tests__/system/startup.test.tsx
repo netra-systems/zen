@@ -8,7 +8,7 @@ import { render, waitFor, screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import '@testing-library/jest-dom';
 
-// Mock Next.js router
+import { TestProviders } from '../test-utils/providers';// Mock Next.js router
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn(),

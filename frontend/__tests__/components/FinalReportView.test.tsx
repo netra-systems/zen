@@ -3,11 +3,8 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FinalReportView } from '@/components/chat/FinalReportView';
 import { useUnifiedChatStore } from '@/store/unified-chat';
-import { useReportData } from '@/hooks/useReportData';
-
 // Mock dependencies
 jest.mock('@/store/unified-chat');
-jest.mock('@/hooks/useReportData');
 jest.mock('@/components/ui/card', () => ({
   Card: ({ children, className }: any) => <div className={className} data-testid="report-card">{children}</div>,
   CardHeader: ({ children }: any) => <div data-testid="card-header">{children}</div>,
@@ -39,18 +36,11 @@ describe('FinalReportView Component', () => {
     refreshReport: jest.fn()
   };
 
-  const mockReportData = {
-    data: null,
-    loading: false,
-    error: null,
-    refresh: jest.fn(),
-    export: jest.fn()
-  };
+  // Removed mockReportData - not used in the component
 
   beforeEach(() => {
     jest.clearAllMocks();
     (useUnifiedChatStore as jest.Mock).mockReturnValue(mockChatStore);
-    (useReportData as jest.Mock).mockReturnValue(mockReportData);
   });
 
   describe('Report Display and Layout', () => {
@@ -131,12 +121,12 @@ describe('FinalReportView Component', () => {
     });
 
     it('should show loading state while generating report', () => {
-      const loadingReportData = {
-        ...mockReportData,
-        loading: true
+      const loadingStore = {
+        ...mockChatStore,
+        isLoadingReport: true
       };
 
-      (useReportData as jest.Mock).mockReturnValue(loadingReportData);
+      (useUnifiedChatStore as jest.Mock).mockReturnValue(loadingStore);
 
       render(<FinalReportView runId="run-123" />);
 
@@ -146,12 +136,12 @@ describe('FinalReportView Component', () => {
     });
 
     it('should display error state when report generation fails', () => {
-      const errorReportData = {
-        ...mockReportData,
-        error: 'Failed to generate report: Insufficient data'
+      const errorStore = {
+        ...mockChatStore,
+        reportError: 'Failed to generate report: Insufficient data'
       };
 
-      (useReportData as jest.Mock).mockReturnValue(errorReportData);
+      (useUnifiedChatStore as jest.Mock).mockReturnValue(errorStore);
 
       render(<FinalReportView runId="run-123" />);
 

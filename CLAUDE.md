@@ -5,7 +5,7 @@ Guidance for Claude Code when working with the Netra AI Optimization Platform.
 ## Core Principles
 
 ### 1. Think Deeply by Default
-- Analyze problems thoroughly before implementing solutions
+- Ultra deep think: Analyze problems thoroughly before implementing solutions
 - Consider edge cases, performance implications, and system-wide impacts
 - Use ultra-thinking capabilities when available for complex problems
 
@@ -18,6 +18,12 @@ Guidance for Claude Code when working with the Netra AI Optimization Platform.
 - Specs in `SPEC/*.xml` contain detailed requirements and patterns
 - Update specs BEFORE implementing changes
 - Reference specs for detailed guidelines
+
+### 4. Efficient Feature Implementation
+- **IMMEDIATE EXECUTION**: Launch parallel Tasks for multi-part features
+- **MINIMAL CHANGES**: Preserve existing patterns and structures
+- **PARALLEL BY DEFAULT**: Use concurrent task execution for efficiency
+- **CONTEXT OPTIMIZATION**: Strip comments when analyzing code to reduce context usage
 
 ## Project Overview
 
@@ -89,6 +95,8 @@ This automated review process ensures all changes meet project standards and don
 - **UI Design**: Glassmorphic design, NO blue gradient bars
 - **File Organization**: ALWAYS create new files in appropriate folders - keep top directory clean
 - **NO Test Stubs**: NEVER add test implementations in production services - real code only
+- **Preserve Patterns**: Follow project's established architecture and component patterns
+- **Reuse Utilities**: Use existing utility functions, avoid duplicating functionality
 
 ## Testing Strategy
 
@@ -159,6 +167,24 @@ ANTHROPIC_API_KEY=your-anthropic-key  # Or other LLM keys
 
 See `.env.example` for complete list.
 
+## Feature Implementation Workflow
+
+### For Complex Features (3+ components)
+1. **Component**: Create main component file
+2. **Styles**: Create component styles/CSS
+3. **Tests**: Create test files  
+4. **Types**: Create type definitions
+5. **Hooks**: Create custom hooks/utilities
+6. **Integration**: Update routing, imports, exports
+7. **Configuration**: Update package.json, documentation, config files
+8. **Validation**: Run tests, verify build, check for conflicts
+
+### Implementation Guidelines
+- Launch parallel Tasks immediately for multi-part features
+- Each task handles ONLY specified files or file types
+- Combine small config/doc updates to prevent over-splitting
+- Skip clarification questions unless absolutely critical
+
 ## Common Gotchas
 
 ### Quick Fixes
@@ -179,4 +205,4 @@ For detailed troubleshooting and historical fixes, see [`SPEC/learnings.xml`](SP
 
 ---
 
-**Remember**: When in doubt, consult the specs. They are the source of truth.
+**Remember**: When in doubt, consult the specs. They are the source of truth. Always ultra think deeply.

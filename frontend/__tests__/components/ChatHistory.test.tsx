@@ -1,13 +1,12 @@
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ChatHistory } from '@/components/chat/ChatHistory';
+import ChatHistory from '@/components/chat/ChatHistory';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { chatService } from '@/services/chatService';
-import { WebSocketProvider } from '@/providers/WebSocketProvider';
 
-// Mock dependencies
+import { TestProviders } from '../test-utils/providers';// Mock dependencies
 jest.mock('@/store/unified-chat');
 jest.mock('@/hooks/useWebSocket');
 jest.mock('@/services/chatService');
@@ -63,6 +62,13 @@ describe('ChatHistory Component', () => {
   };
 
   beforeEach(() => {
+    // Mock fetch for config
+    global.fetch = jest.fn().mockResolvedValue({
+      json: jest.fn().mockResolvedValue({
+        ws_url: 'ws://localhost:8000/ws'
+      })
+    });
+
     jest.clearAllMocks();
     (useUnifiedChatStore as jest.Mock).mockReturnValue(mockChatStore);
     (useWebSocket as jest.Mock).mockReturnValue(mockWebSocket);
@@ -71,9 +77,9 @@ describe('ChatHistory Component', () => {
 
   const renderWithProvider = (component: React.ReactElement) => {
     return render(
-      <WebSocketProvider>
+      <TestProviders>
         {component}
-      </WebSocketProvider>
+      </TestProviders>
     );
   };
 

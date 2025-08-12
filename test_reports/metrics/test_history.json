@@ -458,6 +458,105 @@
       "failed": 0,
       "coverage": null,
       "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:29:45.364784",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:31:27.701739",
+      "level": "unit",
+      "total": 176,
+      "passed": 172,
+      "failed": 4,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:34:39.726329",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:35:54.769102",
+      "level": "unit",
+      "total": 473,
+      "passed": 192,
+      "failed": 281,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:36:46.402939",
+      "level": "unit",
+      "total": 173,
+      "passed": 170,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:39:28.893011",
+      "level": "unit",
+      "total": 469,
+      "passed": 189,
+      "failed": 280,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:43:49.382106",
+      "level": "unit",
+      "total": 469,
+      "passed": 189,
+      "failed": 280,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:45:06.815239",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:49:55.020812",
+      "level": "comprehensive",
+      "total": 297,
+      "passed": 18,
+      "failed": 277,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:00:53.963926",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:14:32.503142",
+      "level": "comprehensive",
+      "total": 296,
+      "passed": 18,
+      "failed": 276,
+      "coverage": null,
+      "duration": 0
     }
   ],
   "flaky_tests": {},

@@ -5,9 +5,8 @@ import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreads } from '@/hooks/useThreads';
 import { threadService } from '@/services/threadService';
-import { WebSocketProvider } from '@/providers/WebSocketProvider';
 
-// Mock dependencies
+import { TestProviders } from '../test-utils/providers';// Mock dependencies
 jest.mock('@/store/unified-chat');
 jest.mock('@/hooks/useThreads');
 jest.mock('@/services/threadService');
@@ -28,12 +27,7 @@ jest.mock('@/components/ui/input', () => ({
     />
   )
 }));
-jest.mock('@/components/ui/dialog', () => ({
-  Dialog: ({ children, open }: any) => open ? <div data-testid="dialog">{children}</div> : null,
-  DialogContent: ({ children }: any) => <div data-testid="dialog-content">{children}</div>,
-  DialogHeader: ({ children }: any) => <div data-testid="dialog-header">{children}</div>,
-  DialogTitle: ({ children }: any) => <h2 data-testid="dialog-title">{children}</h2>
-}));
+// Dialog component removed - not used in ChatSidebar
 
 describe('ChatSidebar Component', () => {
   const mockChatStore = {
@@ -72,6 +66,13 @@ describe('ChatSidebar Component', () => {
   };
 
   beforeEach(() => {
+    // Mock fetch for config
+    global.fetch = jest.fn().mockResolvedValue({
+      json: jest.fn().mockResolvedValue({
+        ws_url: 'ws://localhost:8000/ws'
+      })
+    });
+
     jest.clearAllMocks();
     (useUnifiedChatStore as jest.Mock).mockReturnValue(mockChatStore);
     (useThreads as jest.Mock).mockReturnValue(mockThreadsHook);
