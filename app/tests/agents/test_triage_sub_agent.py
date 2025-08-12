@@ -257,7 +257,12 @@ class TestJSONExtraction:
         response = '{"category": "Test", "priority": "high",}'
         result = triage_agent._extract_and_validate_json(response)
         
+        print(f"DEBUG: result type: {type(result)}")
+        print(f"DEBUG: result value: {result}")
+        
         assert result != None
+        assert isinstance(result, dict), f"Expected dict but got {type(result)}"
+        assert "category" in result, f"'category' key not found in result: {result.keys()}"
         assert result["category"] == "Test"
     
     def test_extract_json_with_single_quotes(self, triage_agent):

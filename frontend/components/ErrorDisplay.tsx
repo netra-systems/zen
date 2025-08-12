@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Copy, Check } from 'lucide-react';
 
@@ -10,6 +10,16 @@ interface ErrorDisplayProps {
 
 export const ErrorDisplay = ({ error }: ErrorDisplayProps) => {
   const [isCopied, setIsCopied] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   if (!error) return null;
 
@@ -20,7 +30,17 @@ export const ErrorDisplay = ({ error }: ErrorDisplayProps) => {
   const handleCopy = () => {
     navigator.clipboard.writeText(errorMessage);
     setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
+    
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    // Set new timeout with proper cleanup
+    timeoutRef.current = setTimeout(() => {
+      setIsCopied(false);
+      timeoutRef.current = null;
+    }, 2000);
   };
 
   return (

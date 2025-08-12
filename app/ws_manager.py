@@ -260,7 +260,8 @@ class WebSocketManager:
                 # Sanitize text content
                 if "text" in payload and isinstance(payload["text"], str):
                     text = payload["text"]
-                    # Basic HTML entity encoding for safety
+                    # Basic HTML entity encoding for safety (& must be first to avoid double encoding)
+                    text = text.replace("&", "&amp;")
                     text = text.replace("<", "&lt;").replace(">", "&gt;")
                     text = text.replace('"', "&quot;").replace("'", "&#x27;")
                     payload["text"] = text

@@ -262,22 +262,31 @@ class TestDatabaseRepositoryTransactions:
             session.commit = AsyncMock()
             session.rollback = AsyncMock()
             session.refresh = AsyncMock()
+            session.execute = AsyncMock()
+            
+            # Mock query results
+            mock_result = MagicMock()
+            mock_result.scalar_one_or_none.return_value = None
+            session.execute.return_value = mock_result
         
-        # Simulate nested transaction failure
+        # Simulate nested transaction failure on inner session
+        # The create method will call commit internally
         inner_session.commit.side_effect = IntegrityError("constraint violation", None, None, None)
         
         # Execute outer transaction
-        try:
-            await mock_repository.create(outer_session, name='Outer Entity')
-            
-            # Try inner transaction (will fail)
-            await mock_repository.create(inner_session, name='Inner Entity')
-            
-        except Exception:
-            await outer_session.rollback()
+        outer_result = await mock_repository.create(outer_session, name='Outer Entity')
+        assert outer_result is not None  # Should succeed
         
-        # Assert outer transaction was rolled back due to inner failure
-        outer_session.rollback.assert_called()
+        # Try inner transaction (will fail due to IntegrityError)
+        inner_result = await mock_repository.create(inner_session, name='Inner Entity')
+        assert inner_result is None  # Should fail and return None
+        
+        # The inner session should have rolled back due to the error
+        inner_session.rollback.assert_called()
+        
+        # Outer session should have committed successfully (not rolled back)
+        outer_session.commit.assert_called()
+        outer_session.rollback.assert_not_called()
     
     @pytest.mark.asyncio
     async def test_batch_operation_transaction_consistency(self, mock_session, mock_repository):

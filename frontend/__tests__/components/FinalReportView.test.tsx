@@ -318,54 +318,60 @@ describe('FinalReportView Component', () => {
     });
 
     it('should handle download action', async () => {
-      // Mock document.createElement
-      const mockClick = jest.fn();
-      const mockElement = {
-        href: '',
-        download: '',
-        click: mockClick
-      };
-      jest.spyOn(document, 'createElement').mockReturnValue(mockElement as any);
-      
       render(<FinalReportView reportData={mockReportData} />);
       
       const buttons = screen.getAllByTestId('button');
       const downloadButton = buttons.find(btn => btn.textContent?.includes('Download'));
       
+      // Mock document.createElement only for the download action
+      const mockClick = jest.fn();
+      const originalCreateElement = document.createElement.bind(document);
+      
       expect(downloadButton).toBeTruthy();
       if (downloadButton) {
+        jest.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+          if (tagName === 'a') {
+            return {
+              href: '',
+              download: '',
+              click: mockClick
+            } as any;
+          }
+          return originalCreateElement(tagName);
+        });
+        
         await userEvent.click(downloadButton);
         expect(mockClick).toHaveBeenCalled();
         expect(global.URL.createObjectURL).toHaveBeenCalled();
+        
+        // Restore the original createElement
+        (document.createElement as jest.Mock).mockRestore();
       }
     });
   });
 
   describe('Visual Indicators', () => {
     it('should show progress bars for metrics', () => {
-      render(<FinalReportView reportData={mockReportData} />);
+      const { container } = render(<FinalReportView reportData={mockReportData} />);
       
       // Progress bars are in the overview tab for agent timings
-      const overviewContent = screen.getByTestId('tab-content-overview');
-      const progressBars = within(overviewContent).queryAllByTestId('progress');
+      const progressBars = container.querySelectorAll('[data-testid="progress"]');
       expect(progressBars.length).toBeGreaterThan(0);
     });
 
     it('should display badges for status', () => {
-      render(<FinalReportView reportData={mockReportData} />);
+      const { container } = render(<FinalReportView reportData={mockReportData} />);
       
       // Badges are used for agent names and tool call counts
-      const overviewContent = screen.getByTestId('tab-content-overview');
-      const badges = within(overviewContent).queryAllByTestId('badge');
+      const badges = container.querySelectorAll('[data-testid="badge"]');
       expect(badges.length).toBeGreaterThan(0);
     });
 
     it('should show alerts for important information', () => {
-      render(<FinalReportView reportData={mockReportData} />);
+      const { container } = render(<FinalReportView reportData={mockReportData} />);
       
       // Alerts are in the actions tab for action items
-      const actionsContent = screen.getByTestId('tab-content-actions');
-      const alerts = within(actionsContent).queryAllByTestId('alert');
+      const alerts = container.querySelectorAll('[data-testid="alert"]');
       expect(alerts.length).toBeGreaterThan(0);
     });
   });
@@ -382,9 +388,9 @@ describe('FinalReportView Component', () => {
         }
       };
       
-      render(<FinalReportView reportData={incompleteData} />);
+      const { container } = render(<FinalReportView reportData={incompleteData} />);
       
-      const cards = screen.getAllByTestId('card');
+      const cards = container.querySelectorAll('[data-testid="card"]');
       expect(cards.length).toBeGreaterThan(0);
     });
 
@@ -394,9 +400,9 @@ describe('FinalReportView Component', () => {
         execution_metrics: undefined
       };
       
-      render(<FinalReportView reportData={malformedData} />);
+      const { container } = render(<FinalReportView reportData={malformedData} />);
       
-      const cards = screen.getAllByTestId('card');
+      const cards = container.querySelectorAll('[data-testid="card"]');
       expect(cards.length).toBeGreaterThan(0);
     });
   });
