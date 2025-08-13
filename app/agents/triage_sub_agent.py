@@ -176,7 +176,26 @@ class TriageSubAgent(BaseSubAgent):
             r'javascript:',
             r'DROP\s+TABLE',
             r'DELETE\s+FROM',
-            r'INSERT\s+INTO'
+            r'INSERT\s+INTO',
+            r'UNION\s+SELECT',
+            r"'\s*OR\s*'",
+            r";\s*DELETE",
+            r"--\s*$",
+            r"admin'\s*--",
+            r"eval\s*\(",
+            r"document\.cookie",
+            r"<img.*onerror",
+            r"SELECT.*FROM.*users",
+            r"SELECT.*FROM.*secrets",
+            # Command injection patterns
+            r"rm\s+-rf\s+/",
+            r"cat\s+/etc/passwd",
+            r";\s*curl\s+",
+            r"\$\(",
+            r"`.*`",
+            r"/etc/passwd",
+            r"&&\s*rm",
+            r"\|\s*rm"
         ]
         
         for pattern in injection_patterns:
@@ -201,12 +220,13 @@ class TriageSubAgent(BaseSubAgent):
         # Extract model names (common AI model patterns)
         model_patterns = [
             r'gpt-?[0-9]+\.?[0-9]*(?:-?turbo)?',
-            r'claude-?[0-9]+\.?[0-9]*',
-            r'llama-?[0-9]+',
+            r'claude-?[0-9]+(?:-[a-z]+)?',
+            r'llama-?[0-9]+(?:b)?(?:-[a-z]+)?',
             r'mistral',
-            r'gemini',
+            r'gemini(?:-[a-z]+)?',
             r'anthropic',
-            r'openai'
+            r'openai',
+            r'palm-?[0-9]*'
         ]
         
         for pattern in model_patterns:
@@ -214,14 +234,14 @@ class TriageSubAgent(BaseSubAgent):
             entities.models_mentioned.extend(matches)
         
         # Extract metrics
-        metric_keywords = ['latency', 'throughput', 'cost', 'accuracy', 'error rate', 
-                          'response time', 'tokens', 'requests per second', 'rps']
+        metric_keywords = ['latency', 'throughput', 'cost', 'accuracy', 'error', 
+                          'response time', 'tokens', 'requests per second', 'rps', 'memory']
         for keyword in metric_keywords:
             if keyword in request.lower():
                 entities.metrics_mentioned.append(keyword)
         
         # Extract numerical values as potential thresholds/targets
-        number_pattern = r'\b\d+(?:\.\d+)?(?:\s*(?:ms|s|%|tokens?|requests?|USD|dollars?))?'
+        number_pattern = r'\b\d+(?:\.\d+)?(?:\s*(?:ms|s|%|tokens?|requests?|RPS|USD|dollars?))?'
         numbers = re.findall(number_pattern, request)
         for i, num in enumerate(numbers):
             # Check if this number is followed by a unit
@@ -232,6 +252,8 @@ class TriageSubAgent(BaseSubAgent):
                 entities.targets.append({"type": "percentage", "value": num + '%' if not num.endswith('%') else num})
             elif 'token' in remaining_text[:20].lower():
                 entities.thresholds.append({"type": "tokens", "value": num})
+            elif 'RPS' in remaining_text[:10] or 'requests' in remaining_text[:20].lower():
+                entities.thresholds.append({"type": "rate", "value": num})
         
         # Extract time ranges
         time_patterns = [
@@ -364,14 +386,14 @@ class TriageSubAgent(BaseSubAgent):
         """Enhanced JSON extraction with multiple strategies and validation."""
         # Strategy 1: Standard extraction
         result = extract_json_from_response(response)
-        if result:
+        if result and isinstance(result, dict):
             return result
         
         # Strategy 2: Find JSON-like structure with regex
-        json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
-        matches = re.findall(json_pattern, response, re.DOTALL)
-        
-        for match in matches:
+        # Look for content between outermost braces
+        brace_match = re.search(r'\{.*\}', response, re.DOTALL)
+        if brace_match:
+            match = brace_match.group()
             try:
                 # Try to repair common JSON issues
                 repaired = match
@@ -383,26 +405,30 @@ class TriageSubAgent(BaseSubAgent):
                 if isinstance(result, dict):
                     return result
             except json.JSONDecodeError:
-                continue
+                pass
         
         # Strategy 3: Extract key-value pairs manually
         try:
+            # Try to extract individual key-value pairs using regex
+            # This handles both single-line and multi-line JSON
+            pattern = r'"([^"]+)"\s*:\s*"([^"]*)"'
+            matches = re.findall(pattern, response)
+            
+            if matches:
+                result = {key: value for key, value in matches}
+                return result
+                
+            # Fallback to line-by-line extraction for non-standard formats
             lines = response.split('\n')
             result = {}
             
             for line in lines:
                 if ':' in line:
-                    key_match = re.match(r'^\s*"?(\w+)"?\s*:\s*(.+)', line)
+                    # More precise pattern to avoid capturing too much
+                    key_match = re.match(r'^\s*"?(\w+)"?\s*:\s*"([^"]*)"', line)
                     if key_match:
                         key = key_match.group(1)
-                        value = key_match.group(2).strip().strip(',').strip('"')
-                        
-                        # Try to parse value as JSON
-                        try:
-                            value = json.loads(value)
-                        except (json.JSONDecodeError, ValueError):
-                            pass  # Keep as string if not valid JSON
-                        
+                        value = key_match.group(2)
                         result[key] = value
             
             if result:

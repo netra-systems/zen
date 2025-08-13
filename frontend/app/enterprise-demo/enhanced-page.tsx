@@ -99,7 +99,7 @@ const EnhancedEnterpriseDemoPage: NextPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Enhanced Agent Status Panel */}
       <AnimatePresence>
         {isProcessing && <AgentStatusPanel />}
@@ -110,7 +110,7 @@ const EnhancedEnterpriseDemoPage: NextPage = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <Badge variant="secondary" className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white">
+              <Badge variant="secondary" className="glass-accent-purple text-purple-900">
                 <Sparkles className="h-3 w-3 mr-1" />
                 Enterprise Demo
               </Badge>
@@ -168,7 +168,7 @@ const EnhancedEnterpriseDemoPage: NextPage = () => {
                 transition={{ delay: 0.2 }}
                 className="space-y-6"
               >
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-600 to-purple-600 bg-clip-text text-transparent">
                   Experience AI Optimization in Action
                 </h1>
                 <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -194,7 +194,7 @@ const EnhancedEnterpriseDemoPage: NextPage = () => {
                 <Button
                   size="lg"
                   onClick={() => setDemoStep('workload')}
-                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                  className="glass-button-primary hover:shadow-lg"
                 >
                   <Rocket className="mr-2 h-5 w-5" />
                   Start Interactive Demo
@@ -358,7 +358,7 @@ const EnhancedEnterpriseDemoPage: NextPage = () => {
                   </CardContent>
                 </Card>
                 
-                <Card className="border-blue-200 bg-blue-50">
+                <Card className="glass-card border-emerald-200">
                   <CardContent className="p-6 text-center">
                     <div className="text-3xl font-bold text-blue-600">3.2x</div>
                     <div className="text-sm text-gray-600 mt-1">Faster Response</div>
@@ -432,7 +432,7 @@ const EnhancedEnterpriseDemoPage: NextPage = () => {
                   <Button 
                     size="lg"
                     onClick={() => router.push('/chat')}
-                    className="bg-gradient-to-r from-purple-600 to-indigo-600"
+                    className="glass-button-primary"
                   >
                     <Shield className="mr-2 h-5 w-5" />
                     Access Admin Features

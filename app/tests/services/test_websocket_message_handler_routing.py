@@ -6,7 +6,7 @@ Tests message routing, handler registration, broadcast logic, and queue manageme
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from enum import Enum
@@ -55,7 +55,7 @@ class MockMessageHandler(BaseMessageHandler):
         self.handled_messages.append({
             'user_id': user_id,
             'payload': payload,
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now(UTC)
         })
 
 
@@ -101,9 +101,9 @@ class MessageRouter:
                 
             handler = self.handlers[message_type]
             
-            start_time = datetime.utcnow()
+            start_time = datetime.now(UTC)
             await handler.handle(user_id, processed_payload)
-            execution_time = (datetime.utcnow() - start_time).total_seconds()
+            execution_time = (datetime.now(UTC) - start_time).total_seconds()
             
             # Update metrics
             self.routing_metrics['messages_routed'] += 1
@@ -177,7 +177,7 @@ class BroadcastManager:
         self.broadcast_history.append({
             'message_data': message_data,
             'target_users': target_users,
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(UTC),
             'results': delivery_results
         })
         
@@ -401,7 +401,7 @@ class TestWebSocketMessageHandlerRouting:
         message_router.register_handler(low_priority_handler)
         
         # Route messages with different priorities
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         
         tasks = [
             message_router.route_message('user1', 'low_priority', {'priority': 'low'}),
@@ -411,7 +411,7 @@ class TestWebSocketMessageHandlerRouting:
         
         await asyncio.gather(*tasks)
         
-        end_time = datetime.utcnow()
+        end_time = datetime.now(UTC)
         total_time = (end_time - start_time).total_seconds()
         
         # High priority should complete faster than low priority

@@ -164,6 +164,8 @@ class Corpus(Base):
     description = Column(String, nullable=True)
     table_name = Column(String, nullable=True)
     status = Column(String, default="pending")  # e.g., pending, running, completed, failed
+    domain = Column(String, nullable=True, default="general")  # Domain for the corpus
+    metadata_ = Column(JSON, nullable=True)  # Metadata for the corpus
     created_by_id = Column(String, ForeignKey("userbase.id"))
     created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))

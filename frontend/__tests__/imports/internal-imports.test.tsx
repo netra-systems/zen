@@ -5,6 +5,8 @@
 
 import path from 'path';
 
+import { TestProviders } from '../test-utils/providers';
+
 describe('Internal Frontend Module Import Tests', () => {
   // @smoke-test
   describe('Component imports', () => {
@@ -35,13 +37,13 @@ describe('Internal Frontend Module Import Tests', () => {
     });
 
     it('should import chat components', () => {
-      // expect(() => require('@/components/chat/ChatInterface')).not.toThrow(); // Component doesn't exist
       expect(() => require('@/components/chat/MainChat')).not.toThrow();
       expect(() => require('@/components/chat/MessageInput')).not.toThrow();
       expect(() => require('@/components/chat/MessageList')).not.toThrow();
-      // expect(() => require('@/components/chat/Sidebar')).not.toThrow(); // Component doesn't exist
-      // expect(() => require('@/components/ThreadList')).not.toThrow(); // Component doesn't exist
-      // expect(() => require('@/components/ThreadItem')).not.toThrow(); // Component doesn't exist
+      expect(() => require('@/components/chat/ChatWindow')).not.toThrow();
+      expect(() => require('@/components/chat/ChatHeader')).not.toThrow();
+      expect(() => require('@/components/chat/ChatSidebar')).not.toThrow();
+      expect(() => require('@/components/chat/AgentStatusPanel')).not.toThrow();
     });
 
     it('should import layout components', () => {
@@ -137,6 +139,7 @@ describe('Internal Frontend Module Import Tests', () => {
       expect(() => require('@/services/messageService')).not.toThrow();
       expect(() => require('@/services/webSocketService')).not.toThrow();
       expect(() => require('@/services/demoService')).not.toThrow();
+      expect(() => require('@/services/chatService')).not.toThrow();
       
       // Additional services from comprehensive tests
       // Note: Admin services now integrated through agent tools per admin_unified_experience.xml
@@ -153,6 +156,8 @@ describe('Internal Frontend Module Import Tests', () => {
       
       // Verify service exports
       const api = require('@/services/api');
+      expect(api.apiSpecService).toBeDefined();
+      expect(api.getApiUrl).toBeDefined();
       expect(api.apiClient).toBeDefined();
       
       const threadService = require('@/services/threadService');
@@ -181,11 +186,11 @@ describe('Internal Frontend Module Import Tests', () => {
     });
 
     it('should import configuration', () => {
-      expect(() => require('@/config/api')).not.toThrow();
+      expect(() => require('@/config')).not.toThrow();
       
-      const config = require('@/config/api');
-      expect(config.API_BASE_URL).toBeDefined();
-      expect(config.WS_BASE_URL).toBeDefined();
+      const { config } = require('@/config');
+      expect(config.apiUrl).toBeDefined();
+      expect(config.wsUrl).toBeDefined();
     });
   });
 
@@ -235,14 +240,14 @@ describe('Internal Frontend Module Import Tests', () => {
     it('should successfully import all critical internal modules', () => {
       const criticalModules = [
         '@/components/ui/button',
-        '@/components/chat/ChatInterface',
+        '@/components/chat/MainChat',
         '@/providers/WebSocketProvider',
         '@/hooks/useWebSocket',
         '@/hooks/useAgent',
-        '@/store/useThreadStore',
+        '@/store/threadStore',
         '@/services/api',
         '@/lib/utils',
-        '@/config/api'
+        '@/config'
       ];
 
       const failedImports: string[] = [];
@@ -265,8 +270,8 @@ describe('Internal Frontend Module Import Tests', () => {
       const modules = [
         '@/hooks/useWebSocket',
         '@/providers/WebSocketProvider',
-        '@/store/useWebSocketStore',
-        '@/services/websocket'
+        '@/store/chatStore',
+        '@/services/webSocketService'
       ];
 
       // Clear module cache
@@ -307,25 +312,27 @@ describe('Internal Frontend Module Import Tests', () => {
       expect(card.CardDescription).toBeDefined();
       expect(card.CardFooter).toBeDefined();
 
-      // Dialog component
-      const dialog = require('@/components/ui/dialog');
-      expect(dialog.Dialog).toBeDefined();
-      expect(dialog.DialogTrigger).toBeDefined();
-      expect(dialog.DialogContent).toBeDefined();
-      expect(dialog.DialogHeader).toBeDefined();
-      expect(dialog.DialogTitle).toBeDefined();
-      expect(dialog.DialogDescription).toBeDefined();
-      expect(dialog.DialogFooter).toBeDefined();
+      // Input component
+      const input = require('@/components/ui/input');
+      expect(input.Input).toBeDefined();
+      
+      // Tabs component
+      const tabs = require('@/components/ui/tabs');
+      expect(tabs.Tabs).toBeDefined();
+      expect(tabs.TabsList).toBeDefined();
+      expect(tabs.TabsTrigger).toBeDefined();
+      expect(tabs.TabsContent).toBeDefined();
     });
   });
 
   describe('Store state verification', () => {
     it('should have expected state and actions in stores', () => {
-      const { useThreadStore } = require('@/store/useThreadStore');
+      const { useThreadStore } = require('@/store/threadStore');
       const store = useThreadStore.getState();
       
       // Check for expected state properties
       expect(store).toHaveProperty('threads');
+      expect(store).toHaveProperty('currentThreadId');
       expect(store).toHaveProperty('currentThread');
       expect(store).toHaveProperty('setCurrentThread');
       expect(store).toHaveProperty('addThread');
@@ -335,10 +342,25 @@ describe('Internal Frontend Module Import Tests', () => {
   });
 
   describe('Integration test imports', () => {
-    it('should import integration test files', () => {
-      expect(() => require('../integration/critical-integration.test')).not.toThrow();
-      expect(() => require('../integration/advanced-integration.test')).not.toThrow();
-      expect(() => require('../integration/comprehensive-integration.test')).not.toThrow();
+    it('should verify integration test files exist', () => {
+      const fs = require('fs');
+      const path = require('path');
+      
+      const testDir = path.join(__dirname, '..', 'integration');
+      const expectedTests = [
+        'critical-integration.test.tsx',
+        'advanced-integration.test.tsx',
+        'comprehensive-integration.test.tsx'
+      ];
+      
+      expectedTests.forEach(testFile => {
+        const testPath = path.join(testDir, testFile);
+        const exists = fs.existsSync(testPath);
+        if (!exists) {
+          console.log(`Integration test file ${testFile} not found`);
+        }
+        expect(exists).toBe(true);
+      });
     });
   });
 });

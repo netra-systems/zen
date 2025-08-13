@@ -1,6 +1,7 @@
 import 'whatwg-fetch';
 import '@testing-library/jest-dom';
 import fetchMock from 'jest-fetch-mock';
+import React from 'react';
 
 fetchMock.enableMocks();
 
@@ -33,14 +34,60 @@ jest.mock('next/navigation', () => ({
   },
 }));
 
-// Mock WebSocket
-global.WebSocket = jest.fn(() => ({
-  send: jest.fn(),
-  close: jest.fn(),
-  addEventListener: jest.fn(),
-  removeEventListener: jest.fn(),
-  readyState: WebSocket.OPEN,
-})) as any;
+// Enhanced WebSocket Mock with proper timing and state management
+class MockWebSocket {
+  static CONNECTING = 0;
+  static OPEN = 1;
+  static CLOSING = 2;
+  static CLOSED = 3;
+
+  url: string;
+  readyState: number = MockWebSocket.CONNECTING;
+  onopen: ((event: Event) => void) | null = null;
+  onclose: ((event: CloseEvent) => void) | null = null;
+  onerror: ((event: Event) => void) | null = null;
+  onmessage: ((event: MessageEvent) => void) | null = null;
+  send = jest.fn();
+  close = jest.fn((code?: number, reason?: string) => {
+    this.readyState = MockWebSocket.CLOSING;
+    setTimeout(() => {
+      this.readyState = MockWebSocket.CLOSED;
+      if (this.onclose) {
+        this.onclose(new CloseEvent('close', { code, reason }));
+      }
+    }, 0);
+  });
+  
+  addEventListener = jest.fn((event: string, handler: Function) => {
+    if (event === 'open') this.onopen = handler as any;
+    if (event === 'close') this.onclose = handler as any;
+    if (event === 'error') this.onerror = handler as any;
+    if (event === 'message') this.onmessage = handler as any;
+  });
+  
+  removeEventListener = jest.fn();
+
+  constructor(url: string) {
+    this.url = url;
+    // Simulate async connection with proper state transition
+    process.nextTick(() => {
+      this.readyState = MockWebSocket.OPEN;
+      if (this.onopen) {
+        this.onopen(new Event('open'));
+      }
+    });
+  }
+
+  // Helper method for tests to simulate messages
+  simulateMessage(data: any) {
+    if (this.onmessage && this.readyState === MockWebSocket.OPEN) {
+      const messageData = typeof data === 'string' ? data : JSON.stringify(data);
+      this.onmessage(new MessageEvent('message', { data: messageData }));
+    }
+  }
+}
+
+(global as any).WebSocket = MockWebSocket;
 
 // Mock localStorage
 const localStorageMock = {
@@ -106,3 +153,42 @@ afterEach(() => {
   sessionStorage.clear();
   Date.now = originalDateNow;
 });
+
+// Mock the useWebSocket hook to avoid WebSocket connections in tests
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: () => ({
+    sendMessage: jest.fn(),
+    connect: jest.fn(),
+    disconnect: jest.fn(),
+    isConnected: true,
+    connectionState: 'connected',
+    error: null,
+    lastMessage: null,
+    reconnectAttempts: 0,
+    messageQueue: [],
+    status: 'OPEN',
+    messages: [],
+    ws: null,
+    subscribe: jest.fn(),
+    unsubscribe: jest.fn(),
+  })
+}));
+
+// Mock the WebSocketProvider context
+jest.mock('@/providers/WebSocketProvider', () => ({
+  WebSocketProvider: ({ children }: { children: React.ReactNode }) => children,
+  WebSocketContext: React.createContext(null),
+  useWebSocketContext: () => ({
+    sendMessage: jest.fn(),
+    connect: jest.fn(),
+    disconnect: jest.fn(),
+    isConnected: true,
+    connectionState: 'connected',
+    error: null,
+    lastMessage: null,
+    reconnectAttempts: 0,
+    messageQueue: [],
+    status: 'OPEN',
+    messages: [],
+  })
+}));

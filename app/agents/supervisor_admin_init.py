@@ -1,10 +1,23 @@
+# AI AGENT MODIFICATION METADATA
+# ================================
+# Timestamp: 2025-08-12T17:40:00.000000+00:00
+# Agent: Claude Sonnet 4 claude-sonnet-4-20250514
+# Context: Update to use unified supervisor with admin support
+# Git: terra2 | bd8079c0 | modified
+# Change: Refactor | Scope: Component | Risk: Medium
+# Session: supervisor-consolidation | Seq: 3
+# Review: Pending | Score: 87
+# ================================
 """
 Supervisor Agent Initialization with Admin Tool Support
+
+This module provides factory functions for creating supervisor agents
+with admin tool support using the unified supervisor architecture.
 """
 from typing import Optional
 from sqlalchemy.orm import Session
 from app.db.models_postgres import User
-from app.agents.supervisor_consolidated import SupervisorAgent
+from app.agents.supervisor import SupervisorAgent, SupervisorMode, SupervisorConfig, create_supervisor
 from app.agents.admin_tool_dispatcher import AdminToolDispatcher
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.llm.llm_manager import LLMManager
@@ -21,7 +34,8 @@ def create_supervisor_with_admin_support(
     db: Optional[Session] = None,
     user: Optional[User] = None,
     websocket_manager=None,
-    thread_id: Optional[str] = None
+    thread_id: Optional[str] = None,
+    enable_quality_gates: bool = False
 ) -> SupervisorAgent:
     """
     Create a supervisor agent with admin tool support based on user permissions
@@ -38,10 +52,13 @@ def create_supervisor_with_admin_support(
         Configured SupervisorAgent instance
     """
     
-    # Determine which tool dispatcher to use
-    if db and user and PermissionService.is_developer_or_higher(user):
+    # Determine supervisor mode and tool dispatcher
+    has_admin_access = db and user and PermissionService.is_developer_or_higher(user)
+    
+    if has_admin_access:
         logger.info(f"Creating supervisor with admin tools for user {user.email}")
         tool_dispatcher = AdminToolDispatcher(tools, db, user)
+        mode = SupervisorMode.ADMIN_ENABLED
         
         # Log available admin tools
         admin_tools = tool_dispatcher.list_all_tools()
@@ -49,32 +66,26 @@ def create_supervisor_with_admin_support(
     else:
         logger.info("Creating supervisor with standard tools only")
         tool_dispatcher = ToolDispatcher(tools)
+        mode = SupervisorMode.QUALITY_ENHANCED if enable_quality_gates else SupervisorMode.BASIC
     
-    # Create supervisor agent
-    supervisor = SupervisorAgent(
-        llm_manager=llm_manager,
-        tool_dispatcher=tool_dispatcher
+    # Create supervisor configuration
+    config = SupervisorConfig(
+        mode=mode,
+        enable_quality_gates=enable_quality_gates,
+        enable_admin_tools=has_admin_access,
+        enable_circuit_breaker=True
     )
     
-    # Set additional context if provided
-    if websocket_manager:
-        supervisor.websocket_manager = websocket_manager
-    
-    if thread_id:
-        supervisor.thread_id = thread_id
-    
-    if db:
-        supervisor.db_session = db
-    
-    if user:
-        supervisor.user_id = user.id
-        
-        # Set admin context if user has privileges
-        if PermissionService.is_developer_or_higher(user):
-            supervisor.metadata = supervisor.metadata or {}
-            supervisor.metadata["is_admin"] = True
-            supervisor.metadata["user_role"] = user.role
-            supervisor.metadata["user_email"] = user.email
+    # Create unified supervisor agent
+    supervisor = SupervisorAgent(
+        db_session=db,
+        llm_manager=llm_manager,
+        websocket_manager=websocket_manager,
+        tool_dispatcher=tool_dispatcher,
+        config=config,
+        user_id=str(user.id) if user else None,
+        thread_id=thread_id
+    )
     
     return supervisor
 
@@ -172,21 +183,17 @@ async def handle_admin_request(
     
     # Execute through supervisor with admin context
     try:
-        state = await supervisor.execute(
+        state = await supervisor.run(
             user_request=message,
             run_id=run_id,
-            stream_updates=stream_updates,
-            metadata={
-                "admin_request": True,
-                "command_type": command_type,
-                "target_agent": target_agent
-            }
+            stream_updates=stream_updates
         )
         
         return {
             "status": "success",
             "state": state,
-            "admin_action": command_type
+            "admin_action": command_type,
+            "circuit_breaker_status": supervisor.circuit_breaker_status
         }
         
     except Exception as e:

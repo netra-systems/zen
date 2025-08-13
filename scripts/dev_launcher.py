@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Unified development launcher for Netra AI platform.
+Unified development launcher for Netra AI platform with real-time log streaming,
+enhanced backend stability monitoring, and detailed secret loading visibility.
 Starts both backend and frontend with automatic port allocation and service discovery.
 """
 
@@ -13,8 +14,19 @@ import socket
 import argparse
 import subprocess
 import webbrowser
+import threading
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple
+from datetime import datetime
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s | %(levelname)s | %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger(__name__)
 
 # Robust path resolution
 def get_project_root():
@@ -54,20 +66,11 @@ except ImportError:
             sys.path.insert(0, str(scripts_dir))
             from service_discovery import ServiceDiscovery
         else:
-            print("ERROR: Could not import ServiceDiscovery. Please check your installation.")
+            logger.error("Could not import ServiceDiscovery. Please check your installation.")
             sys.exit(1)
 
 def resolve_path(*parts, required=False, search_dirs=None):
-    """Resolve a path robustly, checking multiple locations.
-    
-    Args:
-        *parts: Path components to join
-        required: If True, raise error if path not found
-        search_dirs: Additional directories to search in
-    
-    Returns:
-        Path object if found, None otherwise
-    """
+    """Resolve a path robustly, checking multiple locations."""
     # Default search directories
     if search_dirs is None:
         search_dirs = [
@@ -91,8 +94,332 @@ def resolve_path(*parts, required=False, search_dirs=None):
     # Return the path relative to project root as fallback
     return PROJECT_ROOT / Path(*parts)
 
+class LogStreamer(threading.Thread):
+    """Streams process output in real-time with colored output."""
+    
+    def __init__(self, process, name, color_code=None):
+        super().__init__(daemon=True)
+        self.process = process
+        self.name = name
+        self.color_code = color_code or ""
+        self.reset_code = "\033[0m" if color_code else ""
+        self.running = True
+        self.lines_buffer = []
+        
+    def run(self):
+        """Stream output from process."""
+        try:
+            for line in iter(self.process.stdout.readline, b''):
+                if not self.running:
+                    break
+                if line:
+                    decoded_line = line.decode('utf-8', errors='replace').rstrip()
+                    # Add to buffer for error detection
+                    self.lines_buffer.append(decoded_line)
+                    if len(self.lines_buffer) > 100:
+                        self.lines_buffer.pop(0)
+                    
+                    # Print with color and prefix
+                    print(f"{self.color_code}[{self.name}] {decoded_line}{self.reset_code}")
+        except Exception as e:
+            print(f"[{self.name}] Stream error: {e}")
+    
+    def stop(self):
+        """Stop streaming."""
+        self.running = False
+    
+    def get_recent_errors(self, lines=20):
+        """Get recent error lines from buffer."""
+        error_lines = []
+        for line in self.lines_buffer[-lines:]:
+            lower_line = line.lower()
+            if any(keyword in lower_line for keyword in ['error', 'exception', 'traceback', 'failed']):
+                error_lines.append(line)
+        return error_lines
+
+class ProcessMonitor:
+    """Enhanced process monitor with real-time logging and better crash detection."""
+    
+    def __init__(self, name: str, start_func, restart_delay: int = 5, max_restarts: int = 3, color_code=None):
+        self.name = name
+        self.start_func = start_func
+        self.restart_delay = restart_delay
+        self.max_restarts = max_restarts
+        self.restart_count = 0
+        self.process = None
+        self.monitoring = False
+        self.monitor_thread = None
+        self.last_restart_time = None
+        self.crash_log = []
+        self.log_streamer = None
+        self.color_code = color_code
+        
+    def start(self):
+        """Start the process and begin monitoring."""
+        self.process, self.log_streamer = self.start_func()
+        if self.process:
+            self.monitoring = True
+            self.monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
+            self.monitor_thread.start()
+            return True
+        return False
+    
+    def stop(self):
+        """Stop monitoring and terminate the process."""
+        self.monitoring = False
+        if self.log_streamer:
+            self.log_streamer.stop()
+        if self.process and self.process.poll() is None:
+            if sys.platform == "win32":
+                subprocess.run(
+                    ["taskkill", "/F", "/T", "/PID", str(self.process.pid)],
+                    capture_output=True
+                )
+            else:
+                try:
+                    os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
+                except ProcessLookupError:
+                    pass
+    
+    def _monitor_loop(self):
+        """Enhanced monitoring with better crash detection."""
+        consecutive_failures = 0
+        
+        while self.monitoring:
+            if self.process and self.process.poll() is not None:
+                # Process has stopped
+                exit_code = self.process.returncode
+                crash_time = datetime.now()
+                
+                # Get recent error messages
+                recent_errors = []
+                if self.log_streamer:
+                    recent_errors = self.log_streamer.get_recent_errors()
+                
+                self.crash_log.append({
+                    'time': crash_time,
+                    'exit_code': exit_code,
+                    'restart_count': self.restart_count,
+                    'errors': recent_errors
+                })
+                
+                print(f"\n⚠️  {self.name} process stopped with exit code {exit_code}")
+                if recent_errors:
+                    print(f"   Recent errors:")
+                    for error in recent_errors[:5]:
+                        print(f"     {error}")
+                
+                # Check if we should restart
+                if self.restart_count < self.max_restarts:
+                    # Check for rapid restarts (more than 3 in 1 minute)
+                    recent_crashes = [c for c in self.crash_log 
+                                    if (crash_time - c['time']).total_seconds() < 60]
+                    if len(recent_crashes) >= 3:
+                        print(f"❌ {self.name} is crashing rapidly. Stopping auto-restart.")
+                        self.monitoring = False
+                        break
+                    
+                    print(f"🔄 Attempting to restart {self.name} (attempt {self.restart_count + 1}/{self.max_restarts})")
+                    time.sleep(self.restart_delay)
+                    
+                    # Stop old streamer
+                    if self.log_streamer:
+                        self.log_streamer.stop()
+                    
+                    self.process, self.log_streamer = self.start_func()
+                    if self.process:
+                        self.restart_count += 1
+                        self.last_restart_time = crash_time
+                        consecutive_failures = 0
+                        print(f"✅ {self.name} restarted successfully")
+                    else:
+                        consecutive_failures += 1
+                        print(f"❌ Failed to restart {self.name} (failure {consecutive_failures})")
+                        if consecutive_failures >= 2:
+                            print(f"❌ Multiple restart failures. Stopping {self.name} monitoring.")
+                            self.monitoring = False
+                            break
+                else:
+                    print(f"❌ {self.name} exceeded maximum restart attempts ({self.max_restarts})")
+                    self.monitoring = False
+                    break
+            
+            time.sleep(2)  # Check every 2 seconds
+
+class EnhancedSecretLoader:
+    """Enhanced secret loader with detailed visibility."""
+    
+    def __init__(self, project_id: Optional[str] = None, verbose: bool = False):
+        self.project_id = project_id or os.environ.get('GOOGLE_CLOUD_PROJECT', "304612253870")
+        self.verbose = verbose
+        self.loaded_secrets = {}
+        self.failed_secrets = []
+        
+    def load_from_env_file(self) -> Dict[str, Tuple[str, str]]:
+        """Load secrets from existing .env file."""
+        env_file = PROJECT_ROOT / ".env"
+        loaded = {}
+        
+        if env_file.exists():
+            print("📂 Loading from existing .env file...")
+            with open(env_file, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        key, value = line.split('=', 1)
+                        loaded[key] = (value.strip('"\''), "env_file")
+                        if self.verbose:
+                            # Show masked value for sensitive data
+                            masked_value = value[:3] + "***" if len(value) > 3 else "***"
+                            print(f"   ✓ {key}: {masked_value} (from .env file)")
+        return loaded
+    
+    def load_from_google_secrets(self) -> Dict[str, Tuple[str, str]]:
+        """Load secrets from Google Secret Manager with detailed feedback."""
+        print(f"\n🔐 Loading secrets from Google Cloud Secret Manager...")
+        print(f"   Project ID: {self.project_id}")
+        
+        try:
+            from google.cloud import secretmanager
+            
+            # Create client with timeout
+            import socket
+            socket.setdefaulttimeout(10)
+            client = secretmanager.SecretManagerServiceClient()
+            print("   ✓ Connected to Secret Manager")
+        except ImportError:
+            print("   ❌ Google Cloud SDK not installed")
+            return {}
+        except Exception as e:
+            print(f"   ❌ Failed to connect: {e}")
+            return {}
+        
+        # Define the secrets to fetch
+        secret_mappings = {
+            "gemini-api-key": "GEMINI_API_KEY",
+            "google-client-id": "GOOGLE_CLIENT_ID",
+            "google-client-secret": "GOOGLE_CLIENT_SECRET",
+            "langfuse-secret-key": "LANGFUSE_SECRET_KEY",
+            "langfuse-public-key": "LANGFUSE_PUBLIC_KEY",
+            "clickhouse-default-password": "CLICKHOUSE_DEFAULT_PASSWORD",
+            "clickhouse-development-password": "CLICKHOUSE_DEVELOPMENT_PASSWORD",
+            "jwt-secret-key": "JWT_SECRET_KEY",
+            "fernet-key": "FERNET_KEY",
+            "redis-default": "REDIS_PASSWORD"
+        }
+        
+        loaded = {}
+        print(f"\n   Fetching {len(secret_mappings)} secrets:")
+        
+        for secret_name, env_var in secret_mappings.items():
+            try:
+                name = f"projects/{self.project_id}/secrets/{secret_name}/versions/latest"
+                response = client.access_secret_version(name=name)
+                value = response.payload.data.decode("UTF-8")
+                loaded[env_var] = (value, "google_secret")
+                
+                # Show success with masked value
+                masked_value = value[:3] + "***" if len(value) > 3 else "***"
+                print(f"   ✓ {env_var}: {masked_value} (from Google Secret: {secret_name})")
+                
+            except Exception as e:
+                self.failed_secrets.append((env_var, str(e)))
+                if self.verbose:
+                    print(f"   ✗ {env_var}: Failed - {str(e)[:50]}")
+        
+        return loaded
+    
+    def load_all_secrets(self) -> bool:
+        """Load secrets from all sources with priority."""
+        print("\n🔍 Secret Loading Process Started")
+        print("=" * 60)
+        
+        # First, try to load from existing .env file
+        env_secrets = self.load_from_env_file()
+        
+        # Then try Google Secret Manager
+        google_secrets = self.load_from_google_secrets()
+        
+        # Merge with Google secrets taking priority
+        all_secrets = {**env_secrets, **google_secrets}
+        
+        # Add static configuration
+        static_config = {
+            "CLICKHOUSE_HOST": ("xedvrr4c3r.us-central1.gcp.clickhouse.cloud", "static"),
+            "CLICKHOUSE_PORT": ("8443", "static"),
+            "CLICKHOUSE_USER": ("default", "static"),
+            "CLICKHOUSE_DB": ("default", "static"),
+            "ENVIRONMENT": ("development", "static")
+        }
+        
+        print("\n📝 Adding static configuration:")
+        for key, (value, source) in static_config.items():
+            if key not in all_secrets:
+                all_secrets[key] = (value, source)
+                if self.verbose:
+                    print(f"   ✓ {key}: {value} (static config)")
+        
+        # Set environment variables
+        print("\n🔧 Setting environment variables...")
+        for key, (value, source) in all_secrets.items():
+            os.environ[key] = value
+            self.loaded_secrets[key] = source
+        
+        # Summary
+        print("\n" + "=" * 60)
+        print("📊 Secret Loading Summary:")
+        
+        sources = {}
+        for key, source in self.loaded_secrets.items():
+            sources[source] = sources.get(source, 0) + 1
+        
+        total = len(self.loaded_secrets)
+        print(f"   Total secrets loaded: {total}")
+        for source, count in sources.items():
+            print(f"   - From {source}: {count}")
+        
+        if self.failed_secrets and self.verbose:
+            print(f"\n   ⚠️  Failed to load {len(self.failed_secrets)} secrets:")
+            for secret, error in self.failed_secrets[:3]:
+                print(f"      - {secret}: {error[:50]}")
+        
+        # Write updated .env file
+        self._write_env_file(all_secrets)
+        
+        print("=" * 60)
+        return True
+    
+    def _write_env_file(self, secrets: Dict[str, Tuple[str, str]]):
+        """Write secrets to .env file for persistence."""
+        env_file = PROJECT_ROOT / ".env"
+        print(f"\n💾 Writing secrets to {env_file}")
+        
+        with open(env_file, 'w') as f:
+            f.write("# Auto-generated .env file\n")
+            f.write(f"# Generated at {datetime.now().isoformat()}\n\n")
+            
+            # Group by category
+            categories = {
+                "Google OAuth": ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
+                "API Keys": ["GEMINI_API_KEY"],
+                "ClickHouse": ["CLICKHOUSE_HOST", "CLICKHOUSE_PORT", "CLICKHOUSE_USER", 
+                              "CLICKHOUSE_DEFAULT_PASSWORD", "CLICKHOUSE_DEVELOPMENT_PASSWORD", "CLICKHOUSE_DB"],
+                "Langfuse": ["LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY"],
+                "Security": ["JWT_SECRET_KEY", "FERNET_KEY"],
+                "Redis": ["REDIS_PASSWORD"],
+                "Environment": ["ENVIRONMENT"]
+            }
+            
+            for category, keys in categories.items():
+                f.write(f"\n# {category}\n")
+                for key in keys:
+                    if key in secrets:
+                        value, source = secrets[key]
+                        f.write(f"{key}={value}\n")
+                        # Don't write source comments to keep file cleaner
+
 class DevLauncher:
-    """Manages the development environment launch process."""
+    """Unified launcher with real-time streaming, monitoring, and enhanced secret loading."""
     
     def __init__(self, backend_port: Optional[int] = None, 
                  frontend_port: Optional[int] = None,
@@ -100,9 +427,11 @@ class DevLauncher:
                  verbose: bool = False,
                  backend_reload: bool = True,
                  frontend_reload: bool = True,
-                 load_secrets: bool = False,
+                 load_secrets: bool = True,  # Default to True for dev mode
                  project_id: Optional[str] = None,
-                 no_browser: bool = False):
+                 no_browser: bool = False,
+                 auto_restart: bool = True,
+                 use_turbopack: bool = False):
         """Initialize the development launcher."""
         self.backend_port = backend_port
         self.frontend_port = frontend_port or 3000
@@ -113,15 +442,22 @@ class DevLauncher:
         self.load_secrets = load_secrets
         self.project_id = project_id
         self.no_browser = no_browser
-        self.processes: List[subprocess.Popen] = []
+        self.auto_restart = auto_restart
+        self.use_turbopack = use_turbopack
         self.service_discovery = ServiceDiscovery()
         self.use_emoji = self._check_emoji_support()
         self.project_root = PROJECT_ROOT
+        self.backend_monitor = None
+        self.frontend_monitor = None
+        self.backend_process = None
+        self.backend_streamer = None
+        self.frontend_process = None
+        self.frontend_streamer = None
         
         if self.verbose:
-            print(f"[DEBUG] Project root detected: {self.project_root}")
-            print(f"[DEBUG] Current working directory: {Path.cwd()}")
-            print(f"[DEBUG] Script location: {Path(__file__).resolve()}")
+            logger.info(f"Project root detected: {self.project_root}")
+            logger.info(f"Current working directory: {Path.cwd()}")
+            logger.info(f"Script location: {Path(__file__).resolve()}")
         
         # Register cleanup handler
         signal.signal(signal.SIGINT, self._cleanup_handler)
@@ -170,18 +506,37 @@ class DevLauncher:
     
     def cleanup(self):
         """Clean up all running processes."""
-        for process in self.processes:
-            if process.poll() is None:  # Process is still running
+        if self.backend_monitor:
+            self.backend_monitor.stop()
+        elif self.backend_process:
+            if self.backend_streamer:
+                self.backend_streamer.stop()
+            if self.backend_process.poll() is None:
                 if sys.platform == "win32":
-                    # Windows: terminate process tree
                     subprocess.run(
-                        ["taskkill", "/F", "/T", "/PID", str(process.pid)],
+                        ["taskkill", "/F", "/T", "/PID", str(self.backend_process.pid)],
                         capture_output=True
                     )
                 else:
-                    # Unix: terminate process group
                     try:
-                        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+                        os.killpg(os.getpgid(self.backend_process.pid), signal.SIGTERM)
+                    except ProcessLookupError:
+                        pass
+        
+        if self.frontend_monitor:
+            self.frontend_monitor.stop()
+        elif self.frontend_process:
+            if self.frontend_streamer:
+                self.frontend_streamer.stop()
+            if self.frontend_process.poll() is None:
+                if sys.platform == "win32":
+                    subprocess.run(
+                        ["taskkill", "/F", "/T", "/PID", str(self.frontend_process.pid)],
+                        capture_output=True
+                    )
+                else:
+                    try:
+                        os.killpg(os.getpgid(self.frontend_process.pid), signal.SIGTERM)
                     except ProcessLookupError:
                         pass
         
@@ -204,43 +559,10 @@ class DevLauncher:
         except ImportError:
             errors.append("❌ FastAPI not installed. Run: pip install fastapi")
         
-        # Check Google Cloud SDK if secrets loading is requested
-        if self.load_secrets:
-            # Check if fetch_secrets_to_env.py exists - try PROJECT_ROOT first
-            fetch_script = PROJECT_ROOT / "fetch_secrets_to_env.py"
-            if not fetch_script.exists():
-                # Try scripts directory
-                fetch_script = PROJECT_ROOT / "scripts" / "fetch_secrets_to_env.py"
-            if not fetch_script.exists():
-                # Try resolve_path as last resort
-                fetch_script = resolve_path("fetch_secrets_to_env.py")
-            
-            if not fetch_script or not fetch_script.exists():
-                errors.append("❌ fetch_secrets_to_env.py not found")
-                if self.verbose:
-                    errors.append(f"   Searched in: {PROJECT_ROOT} and {PROJECT_ROOT / 'scripts'}")
-            
-            # Check for project ID
-            if not self.project_id and not os.environ.get('GOOGLE_CLOUD_PROJECT'):
-                errors.append("❌ Google Cloud project ID not specified. Use --project-id or set GOOGLE_CLOUD_PROJECT env var")
-        
-        # Check if frontend directory exists - force using PROJECT_ROOT
+        # Check if frontend directory exists
         frontend_dir = PROJECT_ROOT / "frontend"
         if not frontend_dir.exists():
-            # Try resolve_path as fallback
-            frontend_dir = resolve_path("frontend")
-        
-        if not frontend_dir or not frontend_dir.exists():
             errors.append("❌ Frontend directory not found")
-            if self.verbose:
-                errors.append(f"   Searched in: {PROJECT_ROOT}")
-                errors.append(f"   Current directory: {Path.cwd()}")
-                # List what directories ARE present
-                try:
-                    dirs = [d.name for d in PROJECT_ROOT.iterdir() if d.is_dir()]
-                    errors.append(f"   Available directories: {', '.join(dirs[:10])}")
-                except:
-                    pass
         else:
             # Check if node_modules exists
             node_modules = frontend_dir / "node_modules"
@@ -256,8 +578,8 @@ class DevLauncher:
         self._print("✅", "OK", "All dependencies satisfied")
         return True
     
-    def start_backend(self) -> Optional[subprocess.Popen]:
-        """Start the backend server."""
+    def start_backend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
+        """Start the backend server with real-time log streaming."""
         self._print("\n🚀", "LAUNCH", "Starting backend server...")
         
         # Determine port
@@ -267,22 +589,25 @@ class DevLauncher:
         else:
             port = self.backend_port or 8000
         
-        # Build command
-        # Find run_server.py robustly
-        run_server_path = resolve_path("run_server.py")
-        if not run_server_path or not run_server_path.exists():
-            # Try scripts directory as fallback
-            run_server_path = resolve_path("scripts", "run_server.py")
+        # Store port for later use
+        self.backend_port = port
         
-        if not run_server_path or not run_server_path.exists():
+        # Build command - use enhanced server if available, otherwise fallback to standard
+        run_server_enhanced = resolve_path("scripts", "run_server_enhanced.py")
+        run_server_path = resolve_path("scripts", "run_server.py")
+        
+        if run_server_enhanced and run_server_enhanced.exists():
+            server_script = run_server_enhanced
+            print("   Using enhanced server with health monitoring")
+        elif run_server_path and run_server_path.exists():
+            server_script = run_server_path
+        else:
             self._print("❌", "ERROR", "Could not find run_server.py")
-            if self.verbose:
-                print(f"   Searched in: {PROJECT_ROOT}")
-            return None
+            return None, None
         
         cmd = [
             sys.executable,
-            str(run_server_path),
+            str(server_script),
             "--port", str(port)
         ]
         
@@ -302,31 +627,43 @@ class DevLauncher:
         
         # Start process
         try:
-            # Set environment - do this right before starting the process to ensure
-            # we get any secrets that were loaded
+            # Set environment
             env = os.environ.copy()
             env["BACKEND_PORT"] = str(port)
             
-            # Add project root to PYTHONPATH to ensure app module can be imported
+            # Add project root to PYTHONPATH
             python_path = env.get("PYTHONPATH", "")
             if python_path:
                 env["PYTHONPATH"] = f"{PROJECT_ROOT}{os.pathsep}{python_path}"
             else:
                 env["PYTHONPATH"] = str(PROJECT_ROOT)
+            
             if sys.platform == "win32":
-                # Windows: create new process group
+                # Windows: create new process group with real-time output
                 process = subprocess.Popen(
                     cmd,
                     env=env,
-                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    bufsize=1,
+                    universal_newlines=False
                 )
             else:
-                # Unix: create new process group
+                # Unix: create new process group with real-time output
                 process = subprocess.Popen(
                     cmd,
                     env=env,
-                    preexec_fn=os.setsid
+                    preexec_fn=os.setsid,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    bufsize=1,
+                    universal_newlines=False
                 )
+            
+            # Start log streamer with color
+            log_streamer = LogStreamer(process, "BACKEND", "\033[36m")  # Cyan color
+            log_streamer.start()
             
             # Wait a moment for the server to start
             time.sleep(2)
@@ -334,27 +671,30 @@ class DevLauncher:
             # Check if process is still running
             if process.poll() is not None:
                 self._print("❌", "ERROR", "Backend failed to start")
-                return None
+                return None, None
+            
+            # Write service discovery info
+            self.service_discovery.write_backend_info(port)
             
             self._print("✅", "OK", f"Backend started on port {port}")
             print(f"   API URL: http://localhost:{port}")
             print(f"   WebSocket URL: ws://localhost:{port}/ws")
             
-            return process
+            return process, log_streamer
             
         except Exception as e:
             self._print("❌", "ERROR", f"Failed to start backend: {e}")
-            return None
+            return None, None
     
-    def start_frontend(self) -> Optional[subprocess.Popen]:
-        """Start the frontend server."""
+    def start_frontend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
+        """Start the frontend server with real-time log streaming."""
         self._print("\n🚀", "LAUNCH", "Starting frontend server...")
         
         # Read backend info from service discovery
         backend_info = self.service_discovery.read_backend_info()
         if not backend_info:
             self._print("❌", "ERROR", "Backend service discovery not found. Backend may not be running.")
-            return None
+            return None, None
         
         # Determine port
         if self.dynamic_ports:
@@ -365,34 +705,31 @@ class DevLauncher:
         else:
             port = self.frontend_port
         
-        # Always use dev command for simplicity - we'll control hot reload via env var
-        npm_command = "dev"
-        
-        # Build command based on OS - avoid shell=True with arguments to prevent deprecation warning
-        # Determine frontend path robustly
+        # Build command based on whether to use turbopack
         frontend_path = resolve_path("frontend")
         if not frontend_path or not frontend_path.exists():
             self._print("❌", "ERROR", "Frontend directory not found")
-            if self.verbose:
-                print(f"   Searched in: {PROJECT_ROOT}")
-            return None
+            return None, None
         
         # Check if start_with_discovery.js exists
         start_script = frontend_path / "scripts" / "start_with_discovery.js"
-        if not start_script.exists():
-            self._print("⚠️", "WARN", "start_with_discovery.js not found, using npm directly")
-            # Fallback to npm directly
+        
+        if self.use_turbopack:
+            npm_command = "dev"  # Uses turbopack by default
+            print("   Using Turbopack (experimental)")
+        else:
+            npm_command = "dev"  # Regular Next.js
+        
+        if start_script.exists():
+            if sys.platform == "win32":
+                cmd = ["node", "scripts/start_with_discovery.js", npm_command]
+            else:
+                cmd = ["node", "scripts/start_with_discovery.js", npm_command]
+        else:
             if sys.platform == "win32":
                 cmd = ["npm.cmd", "run", npm_command]
             else:
                 cmd = ["npm", "run", npm_command]
-        else:
-            if sys.platform == "win32":
-                # Windows - use node directly without shell
-                cmd = ["node", "scripts/start_with_discovery.js", npm_command]
-            else:
-                # Unix-like - use node directly without shell
-                cmd = ["node", "scripts/start_with_discovery.js", npm_command]
         
         cwd_path = str(frontend_path)
         
@@ -402,14 +739,13 @@ class DevLauncher:
         
         # Start process
         try:
-            # Set environment with backend URLs - do this right before starting the process
-            # to ensure we get any secrets that were loaded
+            # Set environment with backend URLs
             env = os.environ.copy()
             env["NEXT_PUBLIC_API_URL"] = backend_info["api_url"]
             env["NEXT_PUBLIC_WS_URL"] = backend_info["ws_url"]
             env["PORT"] = str(port)
             
-            # Also ensure PYTHONPATH is set for any Python scripts
+            # Add project root to PYTHONPATH
             python_path = env.get("PYTHONPATH", "")
             if python_path:
                 env["PYTHONPATH"] = f"{PROJECT_ROOT}{os.pathsep}{python_path}"
@@ -417,32 +753,41 @@ class DevLauncher:
                 env["PYTHONPATH"] = str(PROJECT_ROOT)
             
             # Disable hot reload if requested
-            # Next.js respects WATCHPACK_POLLING environment variable
-            # Setting it to a very high value effectively disables file watching
             if not self.frontend_reload:
-                # Disable file watching by setting a very high polling interval
                 env["WATCHPACK_POLLING"] = "false"
-                # Also disable Fast Refresh
                 env["NEXT_DISABLE_FAST_REFRESH"] = "true"
-                print("   Hot reload: DISABLED (dev server without file watching)")
+                print("   Hot reload: DISABLED")
             else:
                 print("   Hot reload: ENABLED")
+            
             if sys.platform == "win32":
-                # Windows: create new process group
+                # Windows: create new process group with real-time output
                 process = subprocess.Popen(
                     cmd,
                     cwd=cwd_path,
                     env=env,
-                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    bufsize=1,
+                    universal_newlines=False
                 )
             else:
-                # Unix: create new process group
+                # Unix: create new process group with real-time output
                 process = subprocess.Popen(
                     cmd,
                     cwd=cwd_path,
                     env=env,
-                    preexec_fn=os.setsid
+                    preexec_fn=os.setsid,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    bufsize=1,
+                    universal_newlines=False
                 )
+            
+            # Start log streamer with color
+            log_streamer = LogStreamer(process, "FRONTEND", "\033[35m")  # Magenta color
+            log_streamer.start()
             
             # Wait for frontend to start
             time.sleep(3)
@@ -450,7 +795,7 @@ class DevLauncher:
             # Check if process is still running
             if process.poll() is not None:
                 self._print("❌", "ERROR", "Frontend failed to start")
-                return None
+                return None, None
             
             self._print("✅", "OK", f"Frontend started on port {port}")
             print(f"   URL: http://localhost:{port}")
@@ -458,11 +803,11 @@ class DevLauncher:
             # Write frontend info to service discovery
             self.service_discovery.write_frontend_info(port)
             
-            return process
+            return process, log_streamer
             
         except Exception as e:
             self._print("❌", "ERROR", f"Failed to start frontend: {e}")
-            return None
+            return None, None
     
     def wait_for_service(self, url: str, timeout: int = 30) -> bool:
         """Wait for a service to become available."""
@@ -478,7 +823,7 @@ class DevLauncher:
                     if response.status == 200:
                         print(f"   Service ready after {attempt} attempts")
                         return True
-            except (urllib.error.URLError, ConnectionError, TimeoutError, OSError) as e:
+            except (urllib.error.URLError, ConnectionError, TimeoutError, OSError):
                 if attempt == 1:
                     print(f"   Waiting for service at {url}...")
                 elif attempt % 10 == 0:
@@ -504,142 +849,62 @@ class DevLauncher:
             self._print("⚠️", "WARN", f"Could not open browser automatically: {e}")
             return False
     
-    def load_secrets_from_gcp(self) -> bool:
-        """Load secrets from Google Cloud Secret Manager."""
-        if not self.load_secrets:
-            return True
-        
-        self._print("\n🔐", "SECRETS", "Loading secrets from Google Cloud Secret Manager...")
-        
-        try:
-            # Run the fetch_secrets_to_env.py script
-            project_id = self.project_id or os.environ.get('GOOGLE_CLOUD_PROJECT')
-            if not project_id:
-                self._print("❌", "ERROR", "No Google Cloud project ID specified")
-                return False
-            
-            print(f"   Project ID: {project_id}")
-            
-            # Build command
-            # Find fetch_secrets_to_env.py robustly
-            fetch_script = resolve_path("fetch_secrets_to_env.py")
-            if not fetch_script or not fetch_script.exists():
-                # Try scripts directory
-                fetch_script = resolve_path("scripts", "fetch_secrets_to_env.py")
-            
-            if not fetch_script or not fetch_script.exists():
-                self._print("⚠️", "WARN", "fetch_secrets_to_env.py not found, skipping secret loading")
-                return False
-            
-            cmd = [sys.executable, str(fetch_script)]
-            
-            # Set environment
-            env = os.environ.copy()
-            env['GOOGLE_CLOUD_PROJECT'] = project_id
-            
-            # Run the script
-            result = subprocess.run(
-                cmd,
-                env=env,
-                capture_output=True,
-                text=True,
-                timeout=30  # Add timeout to prevent hanging
-            )
-            
-            if result.returncode == 0:
-                self._print("✅", "OK", "Secrets loaded successfully")
-                # Load the created .env file into current environment
-                # Try multiple locations for .env file
-                env_file = resolve_path(".env")
-                if env_file and env_file.exists():
-                    with open(env_file, 'r') as f:
-                        for line in f:
-                            line = line.strip()
-                            if line and not line.startswith('#') and '=' in line:
-                                key, value = line.split('=', 1)
-                                os.environ[key] = value.strip('"\'')
-                    print(f"   Loaded {len([k for k in os.environ if k in ['GEMINI_API_KEY', 'GOOGLE_CLIENT_ID', 'JWT_SECRET_KEY']])} key secrets into environment")
-                return True
-            else:
-                self._print("❌", "ERROR", f"Failed to load secrets")
-                if result.stdout:
-                    print(f"   Output: {result.stdout}")
-                if result.stderr:
-                    print(f"   Error: {result.stderr}")
-                return False
-            
-        except subprocess.TimeoutExpired:
-            self._print("❌", "ERROR", "Secret loading timed out after 30 seconds")
-            print("   This usually means Google Cloud authentication is not configured")
-            print("   Try running: gcloud auth application-default login")
-            print("   Or set GOOGLE_APPLICATION_CREDENTIALS to point to a service account key")
-            return False
-        except Exception as e:
-            self._print("❌", "ERROR", f"Failed to load secrets: {e}")
-            print("   Continuing without secrets (some features may not work)")
-            return False
-    
     def run(self):
-        """Run the development environment."""
+        """Run the development environment with enhanced monitoring."""
         print("=" * 60)
-        self._print("🚀", "LAUNCH", "Netra AI Development Environment Launcher")
+        self._print("🚀", "LAUNCH", "Netra AI Development Environment")
         print("=" * 60)
-        
-        # Add diagnostic info in verbose mode
-        if self.verbose:
-            print("\n[DIAGNOSTIC INFO]")
-            print(f"  Python: {sys.version}")
-            print(f"  Platform: {sys.platform}")
-            print(f"  Project Root: {self.project_root}")
-            print(f"  Current Dir: {Path.cwd()}")
-            print(f"  Script Path: {Path(__file__).resolve()}")
-            print("-" * 60)
         
         # Show configuration summary
-        if self.dynamic_ports and not self.backend_reload:
-            self._print("\n🎆", "RECOMMENDED", "Running with RECOMMENDED configuration:")
-            print("   * Dynamic ports: YES (avoiding conflicts)")
-            print("   * Backend hot reload: NO (30-50% faster)")
-            print(f"   * Frontend hot reload: {'YES' if self.frontend_reload else 'NO (faster compilation)'}")
-            if self.load_secrets:
-                print("   * Secret loading: YES (from Google Cloud)")
-            print("   Perfect for first-time setup!\n")
-        elif self.dynamic_ports or not self.backend_reload or not self.frontend_reload:
-            self._print("\n📝", "Configuration", ":")
-            if self.dynamic_ports:
-                print("   * Dynamic ports: YES")
-            print(f"   * Backend hot reload: {'YES' if self.backend_reload else 'NO (faster)'}")
-            print(f"   * Frontend hot reload: {'YES' if self.frontend_reload else 'NO (faster compilation)'}")
-            if self.load_secrets:
-                print("   * Secret loading: YES")
-            print("")
+        self._print("\n📝", "Configuration", ":")
+        print(f"   * Dynamic ports: {'YES' if self.dynamic_ports else 'NO'}")
+        print(f"   * Backend hot reload: {'YES' if self.backend_reload else 'NO'}")
+        print(f"   * Frontend hot reload: {'YES' if self.frontend_reload else 'NO'}")
+        print(f"   * Auto-restart on crash: {'YES' if self.auto_restart else 'NO'}")
+        print(f"   * Real-time log streaming: YES")
+        print(f"   * Turbopack: {'YES (experimental)' if self.use_turbopack else 'NO (webpack)'}")
+        print(f"   * Secret loading: {'YES (Google + env)' if self.load_secrets else 'NO'}")
+        print("")
         
         # Check dependencies
         if not self.check_dependencies():
             self._print("\n❌", "ERROR", "Please install missing dependencies and try again")
             return 1
         
-        # Load secrets if requested
+        # Load secrets (default in dev mode)
         if self.load_secrets:
-            self.load_secrets_from_gcp()
+            secret_loader = EnhancedSecretLoader(self.project_id, self.verbose)
+            secret_loader.load_all_secrets()
         
         # Clear old service discovery
         self.service_discovery.clear_all()
         
-        # Start backend
-        backend_process = self.start_backend()
-        if not backend_process:
-            self._print("❌", "ERROR", "Failed to start backend")
-            self.cleanup()
-            return 1
-        
-        self.processes.append(backend_process)
+        # Create process monitors if auto-restart is enabled
+        if self.auto_restart:
+            self.backend_monitor = ProcessMonitor(
+                "Backend",
+                self.start_backend,
+                restart_delay=5,
+                max_restarts=3,
+                color_code="\033[36m"  # Cyan
+            )
+            
+            if not self.backend_monitor.start():
+                self._print("❌", "ERROR", "Failed to start backend")
+                self.cleanup()
+                return 1
+        else:
+            # Start backend without monitoring
+            self.backend_process, self.backend_streamer = self.start_backend()
+            if not self.backend_process:
+                self._print("❌", "ERROR", "Failed to start backend")
+                self.cleanup()
+                return 1
         
         # Wait for backend to be ready
         backend_info = self.service_discovery.read_backend_info()
         if backend_info:
             self._print("\n⏳", "WAIT", "Waiting for backend to be ready...")
-            # Use /health/live endpoint for liveness check (more reliable in dev)
             backend_url = f"{backend_info['api_url']}/health/live"
             if self.wait_for_service(backend_url, timeout=30):
                 self._print("✅", "OK", "Backend is ready")
@@ -647,13 +912,26 @@ class DevLauncher:
                 self._print("⚠️", "WARN", "Backend health check timed out, continuing anyway...")
         
         # Start frontend
-        frontend_process = self.start_frontend()
-        if not frontend_process:
-            self._print("❌", "ERROR", "Failed to start frontend")
-            self.cleanup()
-            return 1
-        
-        self.processes.append(frontend_process)
+        if self.auto_restart:
+            self.frontend_monitor = ProcessMonitor(
+                "Frontend",
+                self.start_frontend,
+                restart_delay=5,
+                max_restarts=3,
+                color_code="\033[35m"  # Magenta
+            )
+            
+            if not self.frontend_monitor.start():
+                self._print("❌", "ERROR", "Failed to start frontend")
+                self.cleanup()
+                return 1
+        else:
+            # Start frontend without monitoring
+            self.frontend_process, self.frontend_streamer = self.start_frontend()
+            if not self.frontend_process:
+                self._print("❌", "ERROR", "Failed to start frontend")
+                self.cleanup()
+                return 1
         
         # Wait for frontend to be ready
         self._print("\n⏳", "WAIT", "Waiting for frontend to be ready...")
@@ -672,8 +950,7 @@ class DevLauncher:
             if not self.no_browser:
                 self.open_browser(frontend_url)
         else:
-            self._print("⚠️", "WARN", "Frontend readiness check timed out (this is usually OK)")
-            print("   The frontend may still be compiling. You can proceed.")
+            self._print("⚠️", "WARN", "Frontend readiness check timed out")
         
         # Print summary
         print("\n" + "=" * 60)
@@ -681,40 +958,49 @@ class DevLauncher:
         print("=" * 60)
         
         if backend_info:
-            self._print("\nℹ️", "INFO", "Backend:")
+            self._print("\n🔧", "Backend", "")
             print(f"   API: {backend_info['api_url']}")
             print(f"   WebSocket: {backend_info['ws_url']}")
+            print(f"   Logs: Real-time streaming (cyan)")
         
         self._print("\n🌐", "Frontend", "")
         print(f"   URL: http://localhost:{self.frontend_port}")
-        if not self.no_browser and frontend_ready:
-            print("   Browser: Automatically opened")
-        elif self.no_browser:
-            print("   Browser: Manual open required (--no-browser flag used)")
+        print(f"   Logs: Real-time streaming (magenta)")
         
-        self._print("\n📝", "Service Discovery", ":")
-        print(f"   Info stored in: .netra/")
+        if self.auto_restart:
+            self._print("\n🔄", "Auto-Restart", "Enabled")
+            print("   Services will automatically restart if they crash")
         
         print("\n[COMMANDS]:")
         print("   Press Ctrl+C to stop all services")
-        print("   Run 'python scripts/service_discovery.py status' to check service status")
-        
-        self._print("\n📊", "Logs", ":")
-        print("   Backend and frontend logs will appear here")
-        print("-" * 60)
+        print("   Logs are streamed in real-time with color coding")
+        print("-" * 60 + "\n")
         
         # Wait for processes
         try:
             while True:
-                # Check if processes are still running
-                for i, process in enumerate(self.processes):
-                    if process.poll() is not None:
-                        service_name = "Backend" if i == 0 else "Frontend"
-                        self._print(f"\n⚠️", "WARN", f"{service_name} process has stopped")
+                # If not using auto-restart, check if processes are still running
+                if not self.auto_restart:
+                    if self.backend_process and self.backend_process.poll() is not None:
+                        self._print(f"\n⚠️", "WARN", "Backend process has stopped")
+                        self.cleanup()
+                        return 1
+                    if self.frontend_process and self.frontend_process.poll() is not None:
+                        self._print(f"\n⚠️", "WARN", "Frontend process has stopped")
+                        self.cleanup()
+                        return 1
+                else:
+                    # Check if monitors are still running
+                    if self.backend_monitor and not self.backend_monitor.monitoring:
+                        self._print(f"\n⚠️", "WARN", "Backend monitoring stopped (exceeded max restarts)")
+                        self.cleanup()
+                        return 1
+                    if self.frontend_monitor and not self.frontend_monitor.monitoring:
+                        self._print(f"\n⚠️", "WARN", "Frontend monitoring stopped (exceeded max restarts)")
                         self.cleanup()
                         return 1
                 
-                time.sleep(1)
+                time.sleep(2)
                 
         except KeyboardInterrupt:
             self._print("\n\n🔄", "INTERRUPT", "Received interrupt signal")
@@ -723,202 +1009,56 @@ class DevLauncher:
         return 0
 
 
-def run_diagnostic():
-    """Run diagnostic checks to help identify issues."""
-    print("=" * 60)
-    print("NETRA AI DEVELOPMENT LAUNCHER - DIAGNOSTIC MODE")
-    print("=" * 60)
-    
-    print("\n1. ENVIRONMENT INFO:")
-    print(f"   Python Version: {sys.version}")
-    print(f"   Python Executable: {sys.executable}")
-    print(f"   Platform: {sys.platform}")
-    print(f"   Current Directory: {Path.cwd()}")
-    print(f"   Script Location: {Path(__file__).resolve()}")
-    
-    print("\n2. PROJECT STRUCTURE:")
-    project_root = get_project_root()
-    print(f"   Detected Project Root: {project_root}")
-    print(f"   Project Root Exists: {project_root.exists()}")
-    
-    # Check key directories
-    dirs_to_check = ['frontend', 'app', 'scripts', 'alembic', 'terraform-gcp']
-    print("\n   Key Directories:")
-    for dir_name in dirs_to_check:
-        dir_path = project_root / dir_name
-        # Use safe characters for Windows console
-        status = "[OK]" if dir_path.exists() else "[MISSING]"
-        print(f"     {status} {dir_name}: {dir_path.exists()}")
-    
-    # Check key files
-    files_to_check = ['requirements.txt', 'run_server.py', 'package.json', 'CLAUDE.md']
-    print("\n   Key Files:")
-    for file_name in files_to_check:
-        file_path = project_root / file_name
-        status = "[OK]" if file_path.exists() else "[MISSING]"
-        print(f"     {status} {file_name}: {file_path.exists()}")
-    
-    print("\n3. FRONTEND STATUS:")
-    frontend_dir = resolve_path("frontend")
-    if frontend_dir and frontend_dir.exists():
-        print(f"   Frontend Directory: {frontend_dir}")
-        package_json = frontend_dir / "package.json"
-        node_modules = frontend_dir / "node_modules"
-        print(f"   package.json exists: {package_json.exists()}")
-        print(f"   node_modules exists: {node_modules.exists()}")
-        if node_modules.exists():
-            try:
-                module_count = len(list(node_modules.iterdir()))
-                print(f"   node_modules count: {module_count}")
-            except:
-                print("   node_modules count: Unable to count")
-    else:
-        print("   Frontend directory not found!")
-    
-    print("\n4. BACKEND STATUS:")
-    run_server = resolve_path("run_server.py")
-    if run_server and run_server.exists():
-        print(f"   run_server.py: {run_server}")
-    else:
-        print("   run_server.py not found!")
-    
-    # Check Python packages
-    print("\n   Python Packages:")
-    packages = ['fastapi', 'uvicorn', 'sqlalchemy', 'pydantic']
-    for package in packages:
-        try:
-            __import__(package)
-            print(f"     [OK] {package} installed")
-        except ImportError:
-            print(f"     [MISSING] {package} NOT installed")
-    
-    print("\n5. PATH RESOLUTION TEST:")
-    test_paths = [
-        ("frontend",),
-        ("frontend", "package.json"),
-        ("run_server.py",),
-        ("scripts", "service_discovery.py"),
-        (".env",),
-    ]
-    for path_parts in test_paths:
-        resolved = resolve_path(*path_parts)
-        exists = resolved.exists() if resolved else False
-        status = "[OK]" if exists else "[MISSING]"
-        print(f"   {status} {'/'.join(path_parts)}: {resolved if resolved else 'Not found'}")
-    
-    print("\n" + "=" * 60)
-    print("DIAGNOSTIC COMPLETE")
-    print("=" * 60)
-    print("\nIf you see issues above, please:")
-    print("1. Ensure you're in the correct directory")
-    print("2. Run 'pip install -r requirements.txt' for backend deps")
-    print("3. Run 'cd frontend && npm install' for frontend deps")
-    print("4. Check that all project files are present")
-
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="Unified development launcher for Netra AI platform",
+        description="Unified development launcher with real-time streaming and detailed secret loading",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-RECOMMENDED FOR FIRST-TIME DEVELOPERS:
-  python dev_launcher.py --dynamic --no-backend-reload --load-secrets
+RECOMMENDED USAGE:
+  python dev_launcher.py --dynamic --no-backend-reload --auto-restart
   
   This configuration provides:
+    • Real-time log streaming with color coding
     • Automatic port allocation (no conflicts)
     • 30-50% faster performance
-    • Secure secret loading from cloud
-    • Auto-launches browser when ready
+    • Auto-restart on crashes
+    • Automatic Google secret loading (default in dev mode)
+    • Better error detection and reporting
 
 Examples:
-  python dev_launcher.py --dynamic --no-backend-reload  # Best for most developers
-  python dev_launcher.py                    # Start with defaults
-  python dev_launcher.py --dynamic          # Auto port allocation
-  python dev_launcher.py --no-reload        # Maximum performance (no hot reload)
-  python dev_launcher.py --no-frontend-reload  # Frontend dev server without hot reload
-  python dev_launcher.py --no-browser       # Don't open browser automatically
-  python dev_launcher.py --load-secrets --project-id my-project  # With GCP secrets
-  python dev_launcher.py --verbose          # Detailed output
+  python dev_launcher.py                                    # Default: loads secrets, auto-restart, streaming
+  python dev_launcher.py --dynamic --auto-restart          # Best for development
+  python dev_launcher.py --no-secrets                      # Skip secret loading
+  python dev_launcher.py --no-turbopack                    # Use webpack
+  python dev_launcher.py --no-reload                       # Maximum performance
         """
     )
     
-    parser.add_argument(
-        "--backend-port",
-        type=int,
-        help="Backend server port (default: 8000 or dynamic)"
-    )
-    
-    parser.add_argument(
-        "--frontend-port",
-        type=int,
-        default=3000,
-        help="Frontend server port (default: 3000)"
-    )
-    
-    parser.add_argument(
-        "--dynamic",
-        action="store_true",
-        help="Use dynamic port allocation for backend"
-    )
-    
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Show verbose output"
-    )
-    
-    parser.add_argument(
-        "--no-backend-reload",
-        action="store_true",
-        help="Disable backend hot reload (file watching)"
-    )
-    
-    parser.add_argument(
-        "--no-frontend-reload",
-        action="store_true",
-        help="Disable frontend hot reload while keeping dev server (no file watching)"
-    )
-    
-    parser.add_argument(
-        "--no-reload",
-        action="store_true",
-        help="Disable all hot reload for both frontend and backend"
-    )
-    
-    parser.add_argument(
-        "--load-secrets",
-        action="store_true",
-        help="Load secrets from Google Cloud Secret Manager before starting"
-    )
-    
-    parser.add_argument(
-        "--project-id",
-        type=str,
-        help="Google Cloud project ID for secret loading (or set GOOGLE_CLOUD_PROJECT env var)"
-    )
-    
-    parser.add_argument(
-        "--no-browser",
-        action="store_true",
-        help="Don't open the browser automatically after frontend is ready"
-    )
-    
-    parser.add_argument(
-        "--diagnostic",
-        action="store_true",
-        help="Run diagnostic checks to identify configuration issues"
-    )
+    parser.add_argument("--backend-port", type=int, help="Backend server port")
+    parser.add_argument("--frontend-port", type=int, default=3000, help="Frontend server port")
+    parser.add_argument("--dynamic", action="store_true", help="Use dynamic port allocation")
+    parser.add_argument("--verbose", action="store_true", help="Show verbose output")
+    parser.add_argument("--no-backend-reload", action="store_true", help="Disable backend hot reload")
+    parser.add_argument("--no-frontend-reload", action="store_true", help="Disable frontend hot reload")
+    parser.add_argument("--no-reload", action="store_true", help="Disable all hot reload")
+    parser.add_argument("--no-secrets", action="store_true", help="Skip loading secrets from Google Cloud")
+    parser.add_argument("--project-id", type=str, help="Google Cloud project ID")
+    parser.add_argument("--no-browser", action="store_true", help="Don't open browser automatically")
+    parser.add_argument("--no-auto-restart", action="store_true", help="Disable automatic restart on crash")
+    parser.add_argument("--no-turbopack", action="store_true", help="Use webpack instead of turbopack")
     
     args = parser.parse_args()
-    
-    # Run diagnostic mode if requested
-    if args.diagnostic:
-        run_diagnostic()
-        return 0
     
     # Handle reload flags
     backend_reload = not args.no_backend_reload and not args.no_reload
     frontend_reload = not args.no_frontend_reload and not args.no_reload
+    
+    # Default to loading secrets in dev mode (unless --no-secrets is specified)
+    load_secrets = not args.no_secrets
+    
+    # Default to auto-restart unless disabled
+    auto_restart = not args.no_auto_restart
     
     launcher = DevLauncher(
         backend_port=args.backend_port,
@@ -927,9 +1067,11 @@ Examples:
         verbose=args.verbose,
         backend_reload=backend_reload,
         frontend_reload=frontend_reload,
-        load_secrets=args.load_secrets,
+        load_secrets=load_secrets,
         project_id=args.project_id,
-        no_browser=args.no_browser
+        no_browser=args.no_browser,
+        auto_restart=auto_restart,
+        use_turbopack=not args.no_turbopack
     )
     
     sys.exit(launcher.run())

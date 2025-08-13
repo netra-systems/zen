@@ -1,15 +1,15 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T15:35:51.206808  
-**Test Level:** comprehensive - Full test suite with coverage (10-15 minutes)  
+**Generated:** 2025-08-12T13:14:32.511750  
+**Test Level:** comprehensive - Full test suite with coverage (30-45 minutes)  
 **Purpose:** Pre-release validation, full system testing
 
 ## Test Summary
 
-**Total Tests:** 263  
-**Passed:** 15  
-**Failed:** 247  
-**Skipped:** 0  
+**Total Tests:** 296  
+**Passed:** 18  
+**Failed:** 276  
+**Skipped:** 1  
 **Errors:** 1  
 **Overall Status:** [FAILED]
 
@@ -17,17 +17,17 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 1 | 0 | 0 | 0 | 1 | 42.82s | [FAILED] |
-| Frontend  | 262 | 15 | 247 | 0 | 0 | 61.14s | [FAILED] |
+| Backend   | 2 | 0 | 0 | 1 | 1 | 41.02s | [FAILED] |
+| Frontend  | 294 | 18 | 276 | 0 | 0 | 38.18s | [FAILED] |
 
 ## Environment and Configuration
 
 - **Test Level:** comprehensive
-- **Description:** Full test suite with coverage (10-15 minutes)
+- **Description:** Full test suite with coverage (30-45 minutes)
 - **Purpose:** Pre-release validation, full system testing
-- **Timeout:** 900s
+- **Timeout:** 2700s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 103.96s
+- **Total Duration:** 79.20s
 - **Exit Code:** 2
 
 ### Backend Configuration
@@ -61,28 +61,31 @@ Running command:
 platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
 cachedir: .pytest_cache
 metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}
-rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
 configfile: pytest.ini
 plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
 asyncio: mode=Mode.AUTO
 created: 6/6 workers
 
 =================================== ERRORS ====================================
-[31m[1m____________________ ERROR collecting test_mcp_service.py _____________________[0m
-import file mismatch:
-imported module 'test_mcp_service' has this __file__ attribute:
-  C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\mcp\test_mcp_service.py
-which is not the same as the test file we want to collect:
-  C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\test_mcp_service.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+[31m[1m_______ ERROR collecting app/tests/test_real_services_comprehensive.py ________[0m
+ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\test_real_services_comprehensive.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\tests\test_real_services_comprehensive.py:31: in <module>
+    from app.services.database.user_repository import UserRepository
+E   ModuleNotFoundError: No module named 'app.services.database.user_repository'
 - Generated html report: file:///C:/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1/reports/tests/report.html -
 [36m[1m=========================== short test summary info ===========================[0m
-[31mERROR[0m app\test_mcp_service.py
+[31mERROR[0m app/tests/test_real_services_comprehensive.py
 [31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
 !!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!
-[31m============================== [31m[1m1 error[0m[31m in 32.16s[0m[31m ==============================[0m
+[31m======================== [33m1 skipped[0m, [31m[1m1 error[0m[31m in 27.27s[0m[31m =========================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 2 after 41.89s
+[FAIL] TESTS FAILED with exit code 2 after 40.20s
 
 [Report] HTML Report: reports/tests/report.html
 [Coverage] Coverage Report: reports/coverage/html/index.html
@@ -97,133 +100,133 @@ HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test
 > netra-frontend-apex-v1@0.1.0 test
 > jest --coverage --coverageDirectory=../reports/frontend-coverage
 
----------------------------------|---------|----------|---------|---------|----------------------------------------------------------------------------------------------------------
-File                             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                                                        
----------------------------------|---------|----------|---------|---------|----------------------------------------------------------------------------------------------------------
-All files                        |   64.24 |    73.95 |   56.78 |   64.24 |                                                                                                          
- frontend                        |     100 |      100 |     100 |     100 |                                                                                                          
-  config.ts                      |     100 |      100 |     100 |     100 |                                                                                                          
- frontend/app                    |   68.33 |      100 |      20 |   68.33 |                                                                                                          
-  layout.tsx                     |   92.85 |      100 |   33.33 |   92.85 | 10,12                                                                                                    
-  page.tsx                       |   46.87 |      100 |       0 |   46.87 | 8-9,18-32                                                                                                
- frontend/app/chat               |   69.23 |      100 |       0 |   69.23 |                                                                                                          
-  page.tsx                       |   69.23 |      100 |       0 |   69.23 | 10-13                                                                                                    
- frontend/auth                   |   89.79 |    98.33 |   89.47 |   89.79 |                                                                                                          
-  components.tsx                 |     100 |      100 |     100 |     100 |                                                                                                          
-  context.tsx                    |    75.4 |    95.83 |   66.66 |    75.4 | 77-92,108-117,119-122                                                                                    
-  index.ts                       |     100 |      100 |     100 |     100 |                                                                                                          
-  service.ts                     |     100 |      100 |     100 |     100 |                                                                                                          
-  types.ts                       |     100 |      100 |     100 |     100 |                                                                                                          
- frontend/components             |   85.84 |    87.73 |   68.57 |   85.84 |                                                                                                          
-  AppWithLayout.tsx              |   38.46 |      100 |       0 |   38.46 | 16-39                                                                                                    
-  ChatHistorySection.tsx         |   98.89 |    87.87 |     100 |   98.89 | 41,45-46                                                                                                 
-  CorpusAdmin.tsx                |     100 |      100 |     100 |     100 |                                                                                                          
-  ErrorFallback.tsx              |     100 |       80 |     100 |     100 | 17                                                                                                       
-  Footer.tsx                     |     100 |      100 |       0 |     100 |                                                                                                          
-  Header.tsx                     |   77.77 |      100 |   33.33 |   77.77 | 22-27                                                                                                    
-  Icons.tsx                      |   38.09 |      100 |   33.33 |   38.09 | 12-31,37-42                                                                                              
-  LoginButton.tsx                |   66.66 |    66.66 |   33.33 |   66.66 | 19-27                                                                                                    
-  NavLinks.tsx                   |      60 |    66.66 |   33.33 |      60 | 8-9,45-70                                                                                                
-  SubAgentStatus.tsx             |     100 |    89.47 |     100 |     100 | 21,53                                                                                                    
- frontend/components/chat        |   69.53 |    66.49 |   80.39 |   69.53 |                                                                                                          
-  ChatHeader.tsx                 |   95.89 |       60 |     100 |   95.89 | 16,19,41,43,45-46                                                                                        
-  ChatSidebar.tsx                |   14.02 |    38.46 |      60 |   14.02 | 31,56-385                                                                                                
-  ExamplePrompts.tsx             |     100 |    92.85 |     100 |     100 | 18                                                                                                       
-  MainChat.tsx                   |   95.52 |    70.37 |   83.33 |   95.52 | 39,43,60,100-102                                                                                         
-  MessageInput.tsx               |   93.06 |    74.41 |     100 |   93.06 | 51-53,104-105,124-129,131-140                                                                            
-  MessageItem.tsx                |   91.66 |       75 |     100 |   91.66 | 28-41,119                                                                                                
-  MessageList.tsx                |   86.06 |    71.42 |   66.66 |   86.06 | 26-38,93-94,108-109                                                                                      
-  OverflowPanel.tsx              |   39.37 |    47.36 |      50 |   39.37 | 28,41,48-49,60-62,87-95,103-122,128,151-287                                                              
-  PersistentResponseCard.tsx     |   83.47 |    83.33 |     100 |   83.47 | 102-121                                                                                                  
-  RawJsonView.tsx                |   56.25 |      100 |       0 |   56.25 | 10-16                                                                                                    
-  ThinkingIndicator.tsx          |   95.23 |    38.46 |     100 |   95.23 | 31,33,35,44,46,48                                                                                        
- frontend/components/chat/layers |   57.45 |    59.09 |   66.66 |   57.45 |                                                                                                          
-  FastLayer.tsx                  |     100 |    88.88 |     100 |     100 | 16                                                                                                       
-  MediumLayer.tsx                |   34.01 |    38.46 |      50 |   34.01 | 13-14,31,34,55-147                                                                                       
- frontend/components/ui          |   84.63 |    63.81 |   60.86 |   84.63 |                                                                                                          
-  accordion.tsx                  |   83.33 |    58.82 |      50 |   83.33 | 13-17,19,21,51,63-65                                                                                     
-  alert.tsx                      |   88.13 |    53.84 |   57.14 |   88.13 | 8,10,12,43-44,46,51                                                                                      
-  avatar.tsx                     |     100 |      100 |     100 |     100 |                                                                                                          
-  badge.tsx                      |   91.66 |       60 |   66.66 |   91.66 | 9-11                                                                                                     
-  button.tsx                     |     100 |       50 |     100 |     100 | 45                                                                                                       
-  card.tsx                       |     100 |      100 |     100 |     100 |                                                                                                          
-  collapsible.tsx                |     100 |      100 |     100 |     100 |                                                                                                          
-  dropdown-menu.tsx              |      46 |    61.11 |   21.05 |      46 | 12,14-16,18,20,24-25,27-28,32-35,37,39-40,42,87-96,103-115,121-136,142-156,161-196                       
-  input.tsx                      |   91.66 |    57.14 |      75 |   91.66 | 23-24                                                                                                    
-  label.tsx                      |   95.23 |    66.66 |      50 |   95.23 | 6                                                                                                        
-  progress.tsx                   |   94.28 |    66.66 |      75 |  ...(truncated)
+---------------------------------|---------|----------|---------|---------|---------------------------------------------------------------------------------------------------
+File                             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                                                 
+---------------------------------|---------|----------|---------|---------|---------------------------------------------------------------------------------------------------
+All files                        |   66.43 |    78.58 |   50.17 |   66.43 |                                                                                                   
+ frontend                        |     100 |        0 |     100 |     100 |                                                                                                   
+  config.ts                      |     100 |        0 |     100 |     100 | 2-3                                                                                               
+ frontend/app                    |    45.9 |      100 |       0 |    45.9 |                                                                                                   
+  layout.tsx                     |   58.62 |      100 |       0 |   58.62 | 18-29                                                                                             
+  page.tsx                       |   34.37 |      100 |       0 |   34.37 | 10-30                                                                                             
+ frontend/app/chat               |   69.23 |      100 |       0 |   69.23 |                                                                                                   
+  page.tsx                       |   69.23 |      100 |       0 |   69.23 | 8-11                                                                                              
+ frontend/auth                   |   65.64 |    96.66 |   13.33 |   65.64 |                                                                                                   
+  components.tsx                 |     100 |      100 |     100 |     100 |                                                                                                   
+  context.tsx                    |   81.96 |    95.23 |   33.33 |   81.96 | 72-77,94-99,102-111                                                                               
+  index.ts                       |     100 |      100 |     100 |     100 |                                                                                                   
+  service.ts                     |   29.46 |      100 |       0 |   29.46 | 11-16,19-43,46-47,50-52,55-56,59-60,63-64,67-68,71-74,77-101,104-109                              
+  types.ts                       |     100 |      100 |     100 |     100 |                                                                                                   
+ frontend/components             |    93.2 |    98.85 |      90 |    93.2 |                                                                                                   
+  AppWithLayout.tsx              |     100 |      100 |     100 |     100 |                                                                                                   
+  ChatHistorySection.tsx         |     100 |      100 |     100 |     100 |                                                                                                   
+  Footer.tsx                     |     100 |      100 |     100 |     100 |                                                                                                   
+  Header.tsx                     |   48.14 |      100 |       0 |   48.14 | 14-27                                                                                             
+  Icons.tsx                      |     100 |      100 |     100 |     100 |                                                                                                   
+  LoginButton.tsx                |   18.51 |      100 |       0 |   18.51 | 6-27                                                                                              
+  SubAgentStatus.tsx             |     100 |    94.11 |     100 |     100 | 43                                                                                                
+ frontend/components/chat        |   66.85 |    75.63 |   71.11 |   66.85 |                                                                                                   
+  AgentStatusPanel.tsx           |    6.06 |      100 |       0 |    6.06 | 21-361                                                                                            
+  ChatHeader.tsx                 |   95.89 |       60 |     100 |   95.89 | 16,19,41,43,45-46                                                                                 
+  ChatHistory.tsx                |    18.6 |      100 |       0 |    18.6 | 7-41                                                                                              
+  ChatSidebar.tsx                |    3.11 |      100 |       0 |    3.11 | 13-385                                                                                            
+  ChatWindow.tsx                 |     100 |      100 |     100 |     100 |                                                                                                   
+  ExamplePrompts.tsx             |     100 |      100 |     100 |     100 |                                                                                                   
+  MainChat.tsx                   |   96.26 |      100 |      25 |   96.26 | 54-58                                                                                             
+  MessageInput.tsx               |   94.71 |       88 |     100 |   94.71 | 51-53,104-105,127,131-140                                                                         
+  MessageItem.tsx                |   91.66 |       76 |     100 |   91.66 | 28-41,119                                                                                         
+  MessageList.tsx                |   86.06 |    69.23 |   66.66 |   86.06 | 26-38,62-63,108-109                                                                               
+  OverflowPanel.tsx              |   86.41 |       75 |   16.66 |   86.41 | 54-60,67-88,93-98,132-133,218-219                                                                 
+  PersistentResponseCard.tsx     |   99.67 |    65.78 |     100 |   99.67 | 97                                                                                                
+  RawJsonView.tsx                |   56.25 |      100 |       0 |   56.25 | 10-16                                                                                             
+  ThinkingIndicator.tsx          |   95.23 |    38.46 |     100 |   95.23 | 31,33,35,44,46,48                                                                                 
+ frontend/components/chat/layers |   39.03 |      100 |      50 |   39.03 |                                                                                                   
+  FastLayer.tsx                  |     100 |      100 |     100 |     100 |                                                                                                   
+  MediumLayer.tsx                |    5.44 |      100 |       0 |    5.44 | 9-147                                                                                             
+ frontend/components/ui          |   84.03 |    88.23 |   54.16 |   84.03 |                                                                                                   
+  accordion.tsx                  |   19.69 |      100 |       0 |   19.69 | 9-13,15-26,28-48,50-64                                                                            
+  alert.tsx                      |     100 |      100 |     100 |     100 |                                                                                                   
+  avatar.tsx                     |     100 |      100 |     100 |     100 |                                                                                                   
+  badge.tsx                      |   86.11 |      100 |       0 |   86.11 | 30-34                                                                                             
+  button.tsx                     |     100 |       50 |     100 |     100 | 45                                                                                                
+  card.tsx                       |     100 |      100 |     100 |     100 |                                                                                                   
+  collapsible.tsx                |     100 |      100 |     100 |     100 |                                                                                                   
+  dropdown-menu.tsx              |      95 |      100 |       0 |      95 | 172-181                                                                                           
+  input.tsx                      |     100 |      100 |     100 |     100 |                                                                                                   
+  label.tsx                      |     100 |      100 |     100 |     100 |                                                                                                   
+  progress.tsx                   |   25.71 |      100 |       0 |   25.71 | 8-33                                                                                              
+  scroll-area.tsx                |   97.91 |        0 |     100 |   97.91 | 38                                                                                                
+  select.tsx                     |     100 |      100 |     100 |     100 |                    ...(truncated)
 ```
 
 ## Error Summary
 
 ### Backend Errors
 - =================================== ERRORS ====================================
-- [31m[1m____________________ ERROR collecting test_mcp_service.py _____________________[0m
-- [31mERROR[0m app\test_mcp_service.py
-- [FAIL] TESTS FAILED with exit code 2 after 41.89s
+- [31m[1m_______ ERROR collecting app/tests/test_real_services_comprehensive.py ________[0m
+- [31mERROR[0m app/tests/test_real_services_comprehensive.py
+- [FAIL] TESTS FAILED with exit code 2 after 40.20s
 
 ### Frontend Errors
 - [FAIL] CHECKS FAILED with exit code 1
-- FAIL __tests__/auth/service.test.ts
 - FAIL __tests__/hooks/useAgent.test.tsx
-- FAIL __tests__/components/UIComponents.test.tsx
-- FAIL __tests__/hooks/useKeyboardShortcuts.test.tsx
-- FAIL __tests__/components/ThinkingIndicator.test.tsx
-- FAIL __tests__/integration/critical-integration.test.tsx
-- FAIL __tests__/services/webSocketService.test.ts
-- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
-- FAIL __tests__/hooks/additionalHooks.test.tsx
-- FAIL __tests__/components/ChatHistory.test.tsx
-- FAIL __tests__/components/FinalReportView.test.tsx
-- FAIL __tests__/components/ChatWindow.test.tsx
-- FAIL __tests__/components/ChatSidebar.test.tsx
-- FAIL __tests__/components/CorpusAdmin.test.tsx (5.049 s)
-- FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
-- FAIL __tests__/components/AppWithLayout.test.tsx
 - FAIL __tests__/components/AgentStatusPanel.test.tsx
+- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
+- FAIL __tests__/components/ChatHistory.test.tsx
+- FAIL __tests__/hooks/additionalHooks.test.tsx
+- FAIL __tests__/integration/critical-integration.test.tsx
+- FAIL __tests__/components/ThinkingIndicator.test.tsx
+- FAIL __tests__/utils/test-utils.tsx
+- FAIL __tests__/test-utils/providers.tsx
+- FAIL __tests__/setup/websocket-mock.ts
+- FAIL __tests__/services/webSocketService.test.ts
+- FAIL __tests__/components/FinalReportView.test.tsx
+- FAIL __tests__/components/ChatSidebar.test.tsx
+- FAIL __tests__/auth/service.test.ts
+- FAIL __tests__/components/UIComponents.test.tsx
 - FAIL __tests__/unified-chat-v5.test.tsx
-- FAIL __tests__/imports/external-imports.test.tsx (5.21 s)
-- FAIL __tests__/integration/advanced-integration.test.tsx (5.385 s)
-- FAIL __tests__/auth/context.test.tsx (5.784 s)
-- FAIL __tests__/components/ChatComponents.test.tsx
-- FAIL __tests__/imports/internal-imports.test.tsx (6.963 s)
-- FAIL __tests__/components/ChatHistorySection.test.tsx (10.536 s)
-- FAIL __tests__/system/startup.test.tsx (13.1 s)
-- FAIL __tests__/components/chat/MainChat.test.tsx (13.828 s)
+- FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
+- FAIL __tests__/auth/context.test.tsx (5.567 s)
+- FAIL __tests__/integration/advanced-integration.test.tsx (5.693 s)
+- FAIL __tests__/imports/external-imports.test.tsx (6.533 s)
+- FAIL __tests__/imports/internal-imports.test.tsx (6.964 s)
+- FAIL __tests__/components/ChatHistorySection.test.tsx (10.543 s)
+- FAIL __tests__/system/startup.test.tsx (12.714 s)
+- FAIL __tests__/components/chat/MainChat.test.tsx (12.85 s)
 - FAIL __tests__/chat/chatUIUXCore.test.tsx
 - FAIL __tests__/chat/ui-improvements.test.tsx
-- FAIL __tests__/integration/comprehensive-integration.test.tsx (27.061 s)
-- FAIL __tests__/components/chat/MessageInput.test.tsx (53.227 s)
-- FAIL __tests__/auth/service.test.ts
+- FAIL __tests__/components/chat/MessageInput.test.tsx (22.407 s)
+- FAIL __tests__/integration/comprehensive-integration.test.tsx (26.312 s)
+- FAIL __tests__/components/ChatComponents.test.tsx (32.051 s)
 - FAIL __tests__/hooks/useAgent.test.tsx
-- FAIL __tests__/components/UIComponents.test.tsx
-- FAIL __tests__/hooks/useKeyboardShortcuts.test.tsx
-- FAIL __tests__/components/ThinkingIndicator.test.tsx
-- FAIL __tests__/integration/critical-integration.test.tsx
-- FAIL __tests__/services/webSocketService.test.ts
-- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
-- FAIL __tests__/hooks/additionalHooks.test.tsx
-- FAIL __tests__/components/ChatHistory.test.tsx
-- FAIL __tests__/components/FinalReportView.test.tsx
-- FAIL __tests__/components/ChatWindow.test.tsx
-- FAIL __tests__/components/ChatSidebar.test.tsx
-- FAIL __tests__/components/CorpusAdmin.test.tsx (5.049 s)
-- FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
-- FAIL __tests__/components/AppWithLayout.test.tsx
 - FAIL __tests__/components/AgentStatusPanel.test.tsx
+- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
+- FAIL __tests__/components/ChatHistory.test.tsx
+- FAIL __tests__/hooks/additionalHooks.test.tsx
+- FAIL __tests__/integration/critical-integration.test.tsx
+- FAIL __tests__/components/ThinkingIndicator.test.tsx
+- FAIL __tests__/utils/test-utils.tsx
+- FAIL __tests__/test-utils/providers.tsx
+- FAIL __tests__/setup/websocket-mock.ts
+- FAIL __tests__/services/webSocketService.test.ts
+- FAIL __tests__/components/FinalReportView.test.tsx
+- FAIL __tests__/components/ChatSidebar.test.tsx
+- FAIL __tests__/auth/service.test.ts
+- FAIL __tests__/components/UIComponents.test.tsx
 - FAIL __tests__/unified-chat-v5.test.tsx
-- FAIL __tests__/imports/external-imports.test.tsx (5.21 s)
-- FAIL __tests__/integration/advanced-integration.test.tsx (5.385 s)
-- FAIL __tests__/auth/context.test.tsx (5.784 s)
-- FAIL __tests__/components/ChatComponents.test.tsx
-- FAIL __tests__/imports/internal-imports.test.tsx (6.963 s)
-- FAIL __tests__/components/ChatHistorySection.test.tsx (10.536 s)
-- FAIL __tests__/system/startup.test.tsx (13.1 s)
-- FAIL __tests__/components/chat/MainChat.test.tsx (13.828 s)
+- FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
+- FAIL __tests__/auth/context.test.tsx (5.567 s)
+- FAIL __tests__/integration/advanced-integration.test.tsx (5.693 s)
+- FAIL __tests__/imports/external-imports.test.tsx (6.533 s)
+- FAIL __tests__/imports/internal-imports.test.tsx (6.964 s)
+- FAIL __tests__/components/ChatHistorySection.test.tsx (10.543 s)
+- FAIL __tests__/system/startup.test.tsx (12.714 s)
+- FAIL __tests__/components/chat/MainChat.test.tsx (12.85 s)
 - FAIL __tests__/chat/chatUIUXCore.test.tsx
 - FAIL __tests__/chat/ui-improvements.test.tsx
-- FAIL __tests__/integration/comprehensive-integration.test.tsx (27.061 s)
-- FAIL __tests__/components/chat/MessageInput.test.tsx (53.227 s)
+- FAIL __tests__/components/chat/MessageInput.test.tsx (22.407 s)
+- FAIL __tests__/integration/comprehensive-integration.test.tsx (26.312 s)
+- FAIL __tests__/components/ChatComponents.test.tsx (32.051 s)
 
 
 ---

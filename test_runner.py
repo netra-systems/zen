@@ -1,8 +1,29 @@
 #!/usr/bin/env python
 """
 UNIFIED TEST RUNNER - Single Entry Point for all Netra AI Platform Testing
-Replaces all individual test runners with a single, consistent interface.
-Automatically saves reports to test_reports/ folder.
+
+PURPOSE:
+Provides a consistent interface for running different levels of tests,
+from quick smoke tests to comprehensive test suites.
+
+TEST LEVELS:
+- smoke: Quick validation (< 30s) - Run before commits
+- unit: Component testing (1-2 min) - Run during development
+- integration: Feature testing (3-5 min) - Run before merges
+- comprehensive: Full coverage (30-45 min) - Run before releases
+- critical: Essential paths (1-2 min) - Run for hotfixes
+
+KEY FEATURES:
+- Automatic test categorization and organization
+- Parallel execution for faster results
+- Detailed HTML and JSON reports
+- Coverage tracking with targets
+- Smart test selection based on changes
+
+USAGE:
+    python test_runner.py --level smoke        # Quick pre-commit check
+    python test_runner.py --level unit         # Development testing
+    python test_runner.py --level comprehensive # Full validation
 """
 
 import os
@@ -13,10 +34,20 @@ import re
 import shutil
 import argparse
 import subprocess
+import multiprocessing
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional, Tuple
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from collections import defaultdict
 from dotenv import load_dotenv
+
+# Import enhanced reporter if available
+try:
+    from scripts.enhanced_test_reporter import EnhancedTestReporter
+    ENHANCED_REPORTER_AVAILABLE = True
+except ImportError:
+    ENHANCED_REPORTER_AVAILABLE = False
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent
@@ -25,12 +56,16 @@ sys.path.insert(0, str(PROJECT_ROOT))
 # Load environment variables from .env file
 load_dotenv()
 
+# Determine optimal parallelization
+CPU_COUNT = multiprocessing.cpu_count()
+OPTIMAL_WORKERS = min(CPU_COUNT - 1, 8)  # Leave one CPU free
+
 # Define test levels with clear purposes
 TEST_LEVELS = {
     "smoke": {
         "description": "Quick smoke tests for basic functionality (< 30 seconds)",
         "purpose": "Pre-commit validation, basic health checks",
-        "backend_args": ["--category", "smoke", "--fail-fast", "-x"],
+        "backend_args": ["--category", "smoke", "--fail-fast", "-x", "-m", "not real_services"],
         "frontend_args": [],
         "timeout": 30,
         "run_coverage": False,
@@ -39,7 +74,7 @@ TEST_LEVELS = {
     "unit": {
         "description": "Unit tests for isolated components (1-2 minutes)",
         "purpose": "Development validation, component testing",
-        "backend_args": ["--category", "unit", "-v", "--coverage", "--fail-fast", "--parallel=4"],
+        "backend_args": ["--category", "unit", "-v", "--coverage", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}", "-m", "not real_services"],
         "frontend_args": ["--category", "unit"],
         "timeout": 120,
         "run_coverage": True,
@@ -48,18 +83,18 @@ TEST_LEVELS = {
     "integration": {
         "description": "Integration tests for component interaction (3-5 minutes)",
         "purpose": "Feature validation, API testing",
-        "backend_args": ["--category", "integration", "-v", "--coverage", "--fail-fast", "--parallel=4"],
+        "backend_args": ["--category", "integration", "-v", "--coverage", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}", "-m", "not real_services"],
         "frontend_args": ["--category", "integration"],
         "timeout": 300,
         "run_coverage": True,
         "run_both": True
     },
     "comprehensive": {
-        "description": "Full test suite with coverage (10-15 minutes)",
+        "description": "Full test suite with coverage (30-45 minutes)",
         "purpose": "Pre-release validation, full system testing",
-        "backend_args": ["--coverage", "--parallel=6", "--html-output", "--fail-fast"],
+        "backend_args": ["--coverage", f"--parallel={min(6, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast"],
         "frontend_args": ["--coverage"],
-        "timeout": 900,
+        "timeout": 2700,  # 45 minutes to handle real LLM tests
         "run_coverage": True,
         "run_both": True
     },
@@ -73,14 +108,33 @@ TEST_LEVELS = {
         "run_both": False  # Backend only for critical paths
     },
     "all": {
-        "description": "All tests including backend, frontend, e2e, integration (20-30 minutes)",
+        "description": "All tests including backend, frontend, e2e, integration (45-60 minutes)",
         "purpose": "Complete system validation including all test types",
-        "backend_args": ["--coverage", "--parallel=8", "--html-output", "--fail-fast"],
+        "backend_args": ["--coverage", f"--parallel={OPTIMAL_WORKERS}", "--html-output", "--fail-fast"],
         "frontend_args": ["--coverage", "--e2e"],
-        "timeout": 1800,
+        "timeout": 3600,  # 60 minutes for complete test suite
         "run_coverage": True,
         "run_both": True,
         "run_e2e": True
+    },
+    "real_services": {
+        "description": "Tests requiring real external services (LLM, DB, Redis, ClickHouse)",
+        "purpose": "Validation with actual service dependencies",
+        "backend_args": ["-m", "real_services", "-v", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 1800,  # 30 minutes for real service tests
+        "run_coverage": False,
+        "run_both": False,
+        "requires_env": ["ENABLE_REAL_LLM_TESTING=true"]
+    },
+    "mock_only": {
+        "description": "Tests using only mocks, no external dependencies",
+        "purpose": "Fast CI/CD validation without external dependencies",
+        "backend_args": ["-m", "mock_only", "-v", "--coverage", f"--parallel={OPTIMAL_WORKERS}"],
+        "frontend_args": [],
+        "timeout": 300,
+        "run_coverage": True,
+        "run_both": False
     }
 }
 
@@ -92,9 +146,33 @@ RUNNERS = {
 }
 
 class UnifiedTestRunner:
-    """Unified test runner that manages all testing levels and report generation"""
+    """Unified test runner that manages all testing levels and report generation.
+    
+    RESPONSIBILITIES:
+    1. Test Discovery: Find and categorize all tests
+    2. Test Execution: Run tests with appropriate parallelization
+    3. Result Collection: Gather and parse test outputs
+    4. Report Generation: Create HTML, JSON, and markdown reports
+    5. Coverage Analysis: Track code coverage against targets
+    
+    This class orchestrates the entire testing pipeline, making it
+    easy to run appropriate tests for different scenarios.
+    """
     
     def __init__(self):
+        self.cpu_count = CPU_COUNT
+        self.optimal_workers = OPTIMAL_WORKERS
+        self.test_categories = defaultdict(list)  # For organizing tests by category
+        
+        # Initialize enhanced reporter if available
+        self.enhanced_reporter = None
+        if ENHANCED_REPORTER_AVAILABLE:
+            try:
+                self.enhanced_reporter = EnhancedTestReporter()
+                print("[INFO] Enhanced Test Reporter enabled")
+            except Exception as e:
+                print(f"[WARNING] Could not initialize Enhanced Reporter: {e}")
+        
         self.results = {
             "backend": {
                 "status": "pending", 
@@ -128,6 +206,72 @@ class UnifiedTestRunner:
         self.reports_dir.mkdir(exist_ok=True)
         self.history_dir = self.reports_dir / "history"
         self.history_dir.mkdir(exist_ok=True)
+        
+    def categorize_test(self, test_path: str, component: str = "backend") -> str:
+        """Categorize test based on file path and name.
+        
+        CATEGORIZATION LOGIC:
+        Tests are categorized to help understand what's being tested:
+        - unit: Isolated component tests with mocked dependencies
+        - integration: Tests that verify component interactions
+        - service: Business logic layer tests
+        - api/route: HTTP endpoint tests
+        - database: Data access layer tests
+        - agent: AI agent orchestration tests
+        - websocket: Real-time communication tests
+        - auth: Security and authentication tests
+        - llm: Language model integration tests
+        
+        This helps identify test purposes and organize test execution.
+        """
+        path_lower = test_path.lower()
+        
+        if component == "backend":
+            if "unit" in path_lower:
+                return "unit"
+            elif "integration" in path_lower:
+                return "integration"
+            elif "service" in path_lower:
+                return "service"
+            elif "route" in path_lower or "api" in path_lower:
+                return "api"
+            elif "database" in path_lower or "repository" in path_lower:
+                return "database"
+            elif "agent" in path_lower:
+                return "agent"
+            elif "websocket" in path_lower or "ws_" in path_lower:
+                return "websocket"
+            elif "auth" in path_lower or "security" in path_lower:
+                return "auth"
+            elif "llm" in path_lower:
+                return "llm"
+            else:
+                return "other"
+        else:  # frontend
+            if "component" in path_lower:
+                return "component"
+            elif "hook" in path_lower:
+                return "hook"
+            elif "service" in path_lower or "api" in path_lower:
+                return "service"
+            elif "store" in path_lower:
+                return "store"
+            elif "auth" in path_lower:
+                return "auth"
+            elif "websocket" in path_lower or "ws" in path_lower:
+                return "websocket"
+            elif "util" in path_lower or "helper" in path_lower:
+                return "utility"
+            else:
+                return "other"
+    
+    def organize_failures_by_category(self, failures: List[Dict]) -> Dict[str, List[Dict]]:
+        """Organize failures by category for better processing"""
+        organized = defaultdict(list)
+        for failure in failures:
+            category = self.categorize_test(failure.get("test_path", ""), failure.get("component", "backend"))
+            organized[category].append(failure)
+        return dict(organized)
         
     def run_backend_tests(self, args: List[str], timeout: int = 300, real_llm_config: Optional[Dict] = None) -> Tuple[int, str]:
         """Run backend tests with specified arguments"""
@@ -238,9 +382,9 @@ class UnifiedTestRunner:
         start_time = time.time()
         self.results["frontend"]["status"] = "running"
         
-        # Use simple frontend test runner for smoke tests
-        # Check if this is a smoke test (empty args for frontend in smoke tests)
+        # Adjust timeout for smoke tests - they should be fast
         if len(args) == 0 or ("--category" in args and "smoke" in str(args)):
+            timeout = min(timeout, 60)  # Cap smoke tests at 60 seconds
             frontend_script = PROJECT_ROOT / "scripts" / "test_frontend_simple.py"
         else:
             frontend_script = PROJECT_ROOT / RUNNERS["frontend"]
@@ -720,6 +864,22 @@ class UnifiedTestRunner:
         """Parse test counts from pytest/jest output"""
         counts = {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0}
         
+        # Track test files
+        test_files = set()
+        
+        # Count test files first
+        if component == "backend":
+            # Extract test files from pytest output
+            file_pattern = r"(\S+\.py)::"
+            test_files = set(re.findall(file_pattern, output))
+            counts["test_files"] = len(test_files)
+        elif component == "frontend":
+            # Extract test files from Jest output
+            file_pattern = r"(PASS|FAIL)\s+(\S+\.(test|spec)\.(ts|tsx|js|jsx))"
+            for match in re.finditer(file_pattern, output):
+                test_files.add(match.group(2))
+            counts["test_files"] = len(test_files)
+        
         # Common pytest patterns
         patterns = [
             (r"(\d+) passed", "passed"),
@@ -768,6 +928,53 @@ class UnifiedTestRunner:
     def save_test_report(self, level: str, config: Dict, output: str, exit_code: int):
         """Save test report to test_reports directory with latest/history structure"""
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        # Use enhanced reporter if available
+        if self.enhanced_reporter:
+            try:
+                # Generate comprehensive report
+                report_content = self.enhanced_reporter.generate_comprehensive_report(
+                    level=level,
+                    results=self.results,
+                    config=config,
+                    exit_code=exit_code
+                )
+                
+                # Calculate metrics for enhanced reporter
+                backend_counts = self.results["backend"]["test_counts"]
+                frontend_counts = self.results["frontend"]["test_counts"]
+                
+                metrics = {
+                    "total_tests": backend_counts["total"] + frontend_counts["total"],
+                    "passed": backend_counts["passed"] + frontend_counts["passed"],
+                    "failed": backend_counts["failed"] + frontend_counts["failed"],
+                    "coverage": self.results["backend"].get("coverage") or self.results["frontend"].get("coverage")
+                }
+                
+                # Save using enhanced reporter
+                self.enhanced_reporter.save_report(
+                    level=level,
+                    report_content=report_content,
+                    results=self.results,
+                    metrics=metrics
+                )
+                
+                # Also run cleanup periodically
+                import random
+                if random.random() < 0.1:  # 10% chance to run cleanup
+                    print("[INFO] Running report cleanup...")
+                    self.enhanced_reporter.cleanup_old_reports(keep_days=7)
+                
+                return
+            except Exception as e:
+                # Handle Unicode encoding errors on Windows
+                error_msg = str(e)
+                try:
+                    print(f"[WARNING] Enhanced reporter failed, using standard: {error_msg}")
+                except UnicodeEncodeError:
+                    # Fallback for Unicode issues
+                    safe_msg = error_msg.encode('ascii', 'replace').decode('ascii')
+                    print(f"[WARNING] Enhanced reporter failed, using standard: {safe_msg}")
         
         # Calculate total test counts
         backend_counts = self.results["backend"]["test_counts"]
@@ -938,9 +1145,10 @@ class UnifiedTestRunner:
         with open(latest_path, "w", encoding='utf-8') as f:
             f.write(md_content)
         
-        print(f"\n[REPORT] Test report saved:")
-        print(f"  - Latest: {latest_path}")
-        print(f"  - History folder: {self.history_dir}")
+        if not self.enhanced_reporter:
+            print(f"\n[REPORT] Test report saved:")
+            print(f"  - Latest: {latest_path}")
+            print(f"  - History folder: {self.history_dir}")
     
     def _status_badge(self, status) -> str:
         """Convert status to markdown badge"""
@@ -1279,6 +1487,24 @@ Real LLM Testing:
         help="Output file for test results (for CI/CD integration)"
     )
     
+    # CI/CD specific arguments for compatibility with GitHub workflows
+    parser.add_argument(
+        "--shard",
+        type=str,
+        choices=["core", "agents", "websocket", "database", "api", "frontend"],
+        help="Run a specific shard of tests for parallel execution"
+    )
+    parser.add_argument(
+        "--json-output",
+        type=str,
+        help="Path to save JSON test results (alias for --output with JSON format)"
+    )
+    parser.add_argument(
+        "--coverage-output", 
+        type=str,
+        help="Path to save coverage XML report"
+    )
+    
     # Failing test management options
     parser.add_argument(
         "--show-failing",
@@ -1308,6 +1534,11 @@ Real LLM Testing:
     )
     
     args = parser.parse_args()
+    
+    # Handle CI/CD specific argument aliases
+    if args.json_output:
+        args.output = args.json_output
+        args.report_format = "json"
     
     # Print header
     print("=" * 80)
@@ -1411,6 +1642,33 @@ Real LLM Testing:
         config = TEST_LEVELS[args.level]
         level = args.level
         
+        # Handle shard filtering if specified
+        if args.shard:
+            print(f"[SHARD] Running only {args.shard} shard for {level} tests")
+            # Map shards to test categories/patterns
+            shard_mappings = {
+                "core": ["app/core", "app/config", "app/dependencies"],
+                "agents": ["app/agents", "app/services/agent"],
+                "websocket": ["app/ws_manager", "app/services/websocket", "test_websocket"],
+                "database": ["app/db", "app/services/database", "test_database"],
+                "api": ["app/routes", "test_api", "test_auth"],
+                "frontend": ["frontend"]
+            }
+            
+            # Modify backend args to include only shard-specific tests
+            if args.shard in shard_mappings and args.shard != "frontend":
+                shard_patterns = shard_mappings[args.shard]
+                # Add pattern matching to backend args
+                pattern_args = []
+                for pattern in shard_patterns:
+                    pattern_args.extend(["-k", pattern])
+                config['backend_args'] = config.get('backend_args', []) + pattern_args
+                print(f"[SHARD] Test patterns: {', '.join(shard_patterns)}")
+            elif args.shard == "frontend":
+                # Frontend shard runs only frontend tests
+                args.frontend_only = True
+                args.backend_only = False
+        
         print(f"Running {level} tests: {config['description']}")
         print(f"Purpose: {config['purpose']}")
         print(f"Timeout: {config.get('timeout', 300)}s")
@@ -1509,6 +1767,19 @@ Real LLM Testing:
                 with open(args.output, "w", encoding='utf-8') as f:
                     f.write(text_report)
                 print(f"[REPORT] Text report saved to: {args.output}")
+        
+        # Generate coverage report if requested
+        if args.coverage_output:
+            try:
+                # Try to generate coverage XML report
+                coverage_cmd = [sys.executable, "-m", "coverage", "xml", "-o", args.coverage_output]
+                subprocess.run(coverage_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
+                if Path(args.coverage_output).exists():
+                    print(f"[COVERAGE] Coverage report saved to: {args.coverage_output}")
+                else:
+                    print(f"[WARNING] Coverage report generation failed - file not created")
+            except Exception as e:
+                print(f"[WARNING] Could not generate coverage report: {e}")
     
     # Print summary
     runner.print_summary()

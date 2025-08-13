@@ -2,7 +2,7 @@
 
 import json
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional
 import random
 import numpy as np
@@ -108,7 +108,7 @@ class DemoService:
             session_data = {
                 "industry": industry,
                 "user_id": user_id,
-                "started_at": datetime.utcnow().isoformat(),
+                "started_at": datetime.now(UTC).isoformat(),
                 "messages": []
             }
             
@@ -121,7 +121,7 @@ class DemoService:
             session_data["messages"].append({
                 "role": "user",
                 "content": message,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             })
             
             # Simulate multi-agent processing
@@ -145,7 +145,7 @@ class DemoService:
             session_data["messages"].append({
                 "role": "assistant",
                 "content": response,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "agents": agents_involved,
                 "metrics": optimization_metrics
             })
@@ -385,7 +385,7 @@ Provide specific optimization recommendations."""
         """
         try:
             # Generate timestamps
-            end_time = datetime.utcnow()
+            end_time = datetime.now(UTC)
             start_time = end_time - timedelta(hours=duration_hours)
             timestamps = []
             current = start_time
@@ -473,7 +473,7 @@ Provide specific optimization recommendations."""
                 "session_id": session_id,
                 "format": format,
                 "sections": include_sections or ["summary", "metrics", "recommendations"],
-                "generated_at": datetime.utcnow().isoformat(),
+                "generated_at": datetime.now(UTC).isoformat(),
                 "user_id": user_id,
                 "url": report_url
             }
@@ -548,7 +548,7 @@ Provide specific optimization recommendations."""
             feedback_data = {
                 "session_id": session_id,
                 "feedback": feedback,
-                "submitted_at": datetime.utcnow().isoformat()
+                "submitted_at": datetime.now(UTC).isoformat()
             }
             
             await redis.setex(
@@ -577,13 +577,13 @@ Provide specific optimization recommendations."""
         """
         try:
             redis = await self._get_redis()
-            analytics_key = f"demo:analytics:{datetime.utcnow().strftime('%Y%m%d')}"
+            analytics_key = f"demo:analytics:{datetime.now(UTC).strftime('%Y%m%d')}"
             
             interaction_data = {
                 "session_id": session_id,
                 "type": interaction_type,
                 "data": data,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await redis.lpush(analytics_key, json.dumps(interaction_data))
@@ -613,7 +613,7 @@ Provide specific optimization recommendations."""
             conversion_events = 0
             
             # Get data for specified days
-            end_date = datetime.utcnow()
+            end_date = datetime.now(UTC)
             for i in range(days):
                 date = end_date - timedelta(days=i)
                 key = f"demo:analytics:{date.strftime('%Y%m%d')}"

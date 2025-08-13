@@ -11,7 +11,7 @@ class TestWebSocketConnection:
         """Test successful WebSocket connection establishment"""
         client = TestClient(app)
         
-        with patch('app.routes.websockets.websocket_manager') as mock_manager:
+        with patch('app.routes.websockets.manager') as mock_manager:
             mock_manager.connect = AsyncMock()
             mock_manager.disconnect = AsyncMock()
             

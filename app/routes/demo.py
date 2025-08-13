@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
-from datetime import datetime
+from datetime import datetime, UTC
 import uuid
 import json
 import asyncio
@@ -232,7 +232,7 @@ async def export_demo_report(
         return {
             "status": "success",
             "report_url": report_url,
-            "expires_at": datetime.utcnow().isoformat()
+            "expires_at": datetime.now(UTC).isoformat()
         }
         
     except ValueError as e:

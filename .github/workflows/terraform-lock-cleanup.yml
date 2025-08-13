@@ -1,0 +1,271 @@
+name: Terraform Lock Cleanup
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to cleanup (leave empty to cleanup all stale locks)'
+        required: false
+        type: string
+      force:
+        description: 'Force remove locks even if recent'
+        required: false
+        type: boolean
+        default: false
+  schedule:
+    # Run every hour to clean up stale locks
+    - cron: '0 * * * *'
+
+env:
+  GCP_PROJECT_ID: netra-staging
+  GCP_REGION: us-central1
+  STALE_LOCK_MINUTES: 15  # Consider locks stale after 15 minutes for GitHub Actions
+
+jobs:
+  cleanup-terraform-locks:
+    name: Cleanup Terraform Locks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Cleanup Terraform locks
+        run: |
+          echo "================================================"
+          echo "Terraform Lock Cleanup Tool"
+          echo "================================================"
+          echo "Time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo "Mode: ${{ github.event_name }}"
+          echo "Force: ${{ github.event.inputs.force }}"
+          echo ""
+          
+          SPECIFIC_PR="${{ github.event.inputs.pr_number }}"
+          FORCE_REMOVE="${{ github.event.inputs.force }}"
+          STALE_THRESHOLD_MINUTES="${{ env.STALE_LOCK_MINUTES }}"
+          LOCKS_REMOVED=0
+          LOCKS_KEPT=0
+          
+          # Function to check and clean a single lock
+          check_and_clean_lock() {
+            local LOCK_PATH="$1"
+            local PR_NUM="$2"
+            
+            echo "----------------------------------------"
+            echo "Checking PR #${PR_NUM}"
+            
+            if ! gsutil stat "$LOCK_PATH" 2>/dev/null; then
+              echo "  Status: No lock file"
+              return
+            fi
+            
+            # Get lock metadata
+            LOCK_INFO=$(gsutil cat "$LOCK_PATH" 2>/dev/null || echo "{}")
+            LOCK_ID=$(echo "$LOCK_INFO" | jq -r '.ID // "unknown"')
+            LOCK_HOLDER=$(echo "$LOCK_INFO" | jq -r '.Who // "unknown"')
+            LOCK_CREATED=$(echo "$LOCK_INFO" | jq -r '.Created // ""')
+            
+            echo "  Lock ID: $LOCK_ID"
+            echo "  Holder: $LOCK_HOLDER"
+            echo "  Created: $LOCK_CREATED"
+            
+            # Calculate age
+            if [[ -n "$LOCK_CREATED" ]] && [[ "$LOCK_CREATED" != "null" ]]; then
+              LOCK_TIMESTAMP=$(date -d "${LOCK_CREATED}" +%s 2>/dev/null || echo "0")
+              CURRENT_TIME=$(date +%s)
+              AGE_SECONDS=$(( CURRENT_TIME - LOCK_TIMESTAMP ))
+              AGE_MINUTES=$(( AGE_SECONDS / 60 ))
+              echo "  Age: ${AGE_MINUTES} minutes"
+              
+              # Determine if we should remove
+              SHOULD_REMOVE=false
+              REASON=""
+              
+              if [[ "$FORCE_REMOVE" == "true" ]]; then
+                SHOULD_REMOVE=true
+                REASON="Force removal requested"
+              elif echo "$LOCK_HOLDER" | grep -q "runner@"; then
+                # GitHub Actions runner lock
+                if [ $AGE_MINUTES -gt $STALE_THRESHOLD_MINUTES ]; then
+                  SHOULD_REMOVE=true
+                  REASON="Stale GitHub Actions lock (>${STALE_THRESHOLD_MINUTES} min)"
+                fi
+              else
+                # Non-runner lock - use 30 minute threshold
+                if [ $AGE_MINUTES -gt 30 ]; then
+                  SHOULD_REMOVE=true
+                  REASON="Stale lock (>30 min)"
+                fi
+              fi
+              
+              if [ "$SHOULD_REMOVE" = true ]; then
+                echo "  Action: REMOVE - $REASON"
+                if gsutil rm "$LOCK_PATH" 2>/dev/null; then
+                  echo "  Result: ✅ Lock removed successfully"
+                  LOCKS_REMOVED=$((LOCKS_REMOVED + 1))
+                else
+                  echo "  Result: ❌ Failed to remove lock"
+                fi
+              else
+                echo "  Action: KEEP - Lock is active"
+                LOCKS_KEPT=$((LOCKS_KEPT + 1))
+              fi
+            else
+              # Can't determine age from lock metadata, check file stats
+              LOCK_MOD_TIME=$(gsutil stat "$LOCK_PATH" | grep "Creation time:" | cut -d':' -f2- | xargs -I {} date -d "{}" +%s 2>/dev/null || echo "0")
+              if [ "$LOCK_MOD_TIME" -ne "0" ]; then
+                CURRENT_TIME=$(date +%s)
+                AGE_MINUTES=$(( (CURRENT_TIME - LOCK_MOD_TIME) / 60 ))
+                echo "  Age (from file): ${AGE_MINUTES} minutes"
+                
+                if [[ "$FORCE_REMOVE" == "true" ]] || [ $AGE_MINUTES -gt $STALE_THRESHOLD_MINUTES ]; then
+                  echo "  Action: REMOVE - Stale based on file age"
+                  if gsutil rm "$LOCK_PATH" 2>/dev/null; then
+                    echo "  Result: ✅ Lock removed successfully"
+                    LOCKS_REMOVED=$((LOCKS_REMOVED + 1))
+                  else
+                    echo "  Result: ❌ Failed to remove lock"
+                  fi
+                else
+                  echo "  Action: KEEP - Lock is recent"
+                  LOCKS_KEPT=$((LOCKS_KEPT + 1))
+                fi
+              else
+                echo "  Warning: Unable to determine lock age"
+                if [[ "$FORCE_REMOVE" == "true" ]]; then
+                  echo "  Action: REMOVE - Force removal"
+                  gsutil rm "$LOCK_PATH" 2>/dev/null || true
+                  LOCKS_REMOVED=$((LOCKS_REMOVED + 1))
+                else
+                  echo "  Action: KEEP - Unable to verify if stale"
+                  LOCKS_KEPT=$((LOCKS_KEPT + 1))
+                fi
+              fi
+            fi
+          }
+          
+          # Main cleanup logic
+          if [[ -n "$SPECIFIC_PR" ]]; then
+            # Clean specific PR
+            echo "Cleaning locks for PR #${SPECIFIC_PR}"
+            LOCK_FILE="gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/pr-${SPECIFIC_PR}/default.tflock"
+            check_and_clean_lock "$LOCK_FILE" "$SPECIFIC_PR"
+          else
+            # Clean all PRs
+            echo "Scanning all PR environments for stale locks..."
+            echo ""
+            
+            # List all PR directories in the state bucket
+            PR_DIRS=$(gsutil ls "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/" 2>/dev/null | grep "pr-" || echo "")
+            
+            if [[ -z "$PR_DIRS" ]]; then
+              echo "No PR environments found"
+            else
+              for PR_DIR in $PR_DIRS; do
+                # Extract PR number from directory name
+                PR_NUM=$(echo "$PR_DIR" | grep -oP 'pr-\K[0-9]+' || continue)
+                
+                if [[ -n "$PR_NUM" ]]; then
+                  LOCK_FILE="${PR_DIR}default.tflock"
+                  check_and_clean_lock "$LOCK_FILE" "$PR_NUM"
+                fi
+              done
+            fi
+          fi
+          
+          echo ""
+          echo "================================================"
+          echo "Summary"
+          echo "================================================"
+          echo "Locks removed: $LOCKS_REMOVED"
+          echo "Locks kept: $LOCKS_KEPT"
+          echo "Total processed: $((LOCKS_REMOVED + LOCKS_KEPT))"
+          
+          # Set output for potential notifications
+          echo "locks_removed=$LOCKS_REMOVED" >> $GITHUB_OUTPUT
+          echo "locks_kept=$LOCKS_KEPT" >> $GITHUB_OUTPUT
+
+      - name: Report to Slack (if configured)
+        if: env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [[ "${{ steps.cleanup.outputs.locks_removed }}" -gt 0 ]]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data "{\"text\":\"🔓 Terraform Lock Cleanup: Removed ${{ steps.cleanup.outputs.locks_removed }} stale locks\"}" \
+              "$SLACK_WEBHOOK_URL" 2>/dev/null || true
+          fi
+
+  monitor-active-locks:
+    name: Monitor Active Locks
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Check for long-running locks
+        run: |
+          echo "Checking for long-running Terraform operations..."
+          
+          WARNING_THRESHOLD_MINUTES=45
+          CRITICAL_THRESHOLD_MINUTES=90
+          
+          # List all lock files
+          LOCK_FILES=$(gsutil ls -r "gs://${{ env.GCP_PROJECT_ID }}-terraform-state/staging/**/default.tflock" 2>/dev/null || echo "")
+          
+          WARNINGS=0
+          CRITICAL=0
+          
+          for LOCK_FILE in $LOCK_FILES; do
+            if [[ -n "$LOCK_FILE" ]]; then
+              # Get lock age
+              LOCK_INFO=$(gsutil cat "$LOCK_FILE" 2>/dev/null || continue)
+              LOCK_CREATED=$(echo "$LOCK_INFO" | jq -r '.Created // ""')
+              LOCK_HOLDER=$(echo "$LOCK_INFO" | jq -r '.Who // "unknown"')
+              
+              if [[ -n "$LOCK_CREATED" ]] && [[ "$LOCK_CREATED" != "null" ]]; then
+                LOCK_TIMESTAMP=$(date -d "${LOCK_CREATED}" +%s 2>/dev/null || echo "0")
+                CURRENT_TIME=$(date +%s)
+                AGE_MINUTES=$(( (CURRENT_TIME - LOCK_TIMESTAMP) / 60 ))
+                
+                PR_NUM=$(echo "$LOCK_FILE" | grep -oP 'pr-\K[0-9]+' || echo "unknown")
+                
+                if [ $AGE_MINUTES -gt $CRITICAL_THRESHOLD_MINUTES ]; then
+                  echo "🚨 CRITICAL: PR #${PR_NUM} has been locked for ${AGE_MINUTES} minutes by ${LOCK_HOLDER}"
+                  CRITICAL=$((CRITICAL + 1))
+                elif [ $AGE_MINUTES -gt $WARNING_THRESHOLD_MINUTES ]; then
+                  echo "⚠️ WARNING: PR #${PR_NUM} has been locked for ${AGE_MINUTES} minutes by ${LOCK_HOLDER}"
+                  WARNINGS=$((WARNINGS + 1))
+                fi
+              fi
+            fi
+          done
+          
+          if [ $CRITICAL -gt 0 ]; then
+            echo "::error::Found $CRITICAL critical long-running locks (>${CRITICAL_THRESHOLD_MINUTES} minutes)"
+            exit 1
+          elif [ $WARNINGS -gt 0 ]; then
+            echo "::warning::Found $WARNINGS long-running locks (>${WARNING_THRESHOLD_MINUTES} minutes)"
+          else
+            echo "✅ All Terraform locks are within normal time limits"
+          fi

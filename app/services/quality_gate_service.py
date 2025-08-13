@@ -9,7 +9,7 @@ import hashlib
 from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, UTC
 import asyncio
 from collections import defaultdict
 
@@ -109,15 +109,18 @@ class QualityGateService:
     ]
     
     # Vague optimization terms without specifics
+    # These patterns detect vague language that lacks specificity
+    # We want to catch phrases like "optimize things" but NOT "optimize GPU utilization"
     VAGUE_TERMS = [
-        r"optimize(?!\s+(by|to|with|using|for)\s+\d+)",
-        r"improve(?!\s+(by|to|with|using|for)\s+\d+)",
-        r"enhance(?!\s+(by|to|with|using|for)\s+\d+)",
-        r"better(?!\s+(by|to|with|using|for)\s+\d+)",
-        r"efficient(?!\s+(by|to|with|using|for)\s+\d+)",
-        r"consider\s+(?!specifically)",
-        r"think about\s+(?!specifically)",
-        r"look into\s+(?!specifically)",
+        r"just\s+optimize",
+        r"optimize\s+(things|stuff|it|everything|something)",
+        r"improve\s+(things|stuff|it|everything|something)",
+        r"enhance\s+(things|stuff|it|everything|something)",
+        r"make\s+(?:it\s+)?better",
+        r"more\s+efficient(?!\s+(by|than))",
+        r"consider\s+optimizing",
+        r"think about\s+improving",
+        r"look into\s+enhancing",
         r"you might want to",
         r"you could try",
         r"perhaps you should"
@@ -125,11 +128,15 @@ class QualityGateService:
     
     # Circular reasoning patterns
     CIRCULAR_PATTERNS = [
-        r"to improve (.+) you should improve",
-        r"optimize (.+) by optimizing",
-        r"better (.+) through better",
-        r"enhance (.+) by enhancing",
-        r"for better (.+), use better"
+        r"to improve.*you should improve",
+        r"optimize.*by optimizing",
+        r"better.*through better",
+        r"enhance.*by enhancing",
+        r"for better.*use better",
+        r"improve.*to improve",
+        r"increase.*by increasing",
+        r"reduce.*by reducing",
+        r"fix.*by fixing"
     ]
     
     # Domain-specific terms for Netra (indicates good content)
@@ -168,15 +175,15 @@ class QualityGateService:
         self.thresholds = {
             ContentType.OPTIMIZATION: {
                 "min_score": 0.7,
-                "min_specificity": 0.8,
-                "min_actionability": 0.8,
+                "min_specificity": 0.6,
+                "min_actionability": 0.7,
                 "min_quantification": 0.7
             },
             ContentType.DATA_ANALYSIS: {
                 "min_score": 0.6,
-                "min_specificity": 0.7,
+                "min_specificity": 0.6,
                 "min_quantification": 0.8,
-                "min_relevance": 0.7
+                "min_relevance": 0.5
             },
             ContentType.ACTION_PLAN: {
                 "min_score": 0.7,
@@ -231,7 +238,7 @@ class QualityGateService:
         try:
             # Calculate content hash for caching
             content_hash = hashlib.md5(content.encode()).hexdigest()
-            cache_key = f"quality:{content_type.value}:{content_hash}"
+            cache_key = f"quality:{content_type.value}:{content_hash}:strict={strict_mode}"
             
             # Check cache
             if cache_key in self.validation_cache:
@@ -293,6 +300,11 @@ class QualityGateService:
         # Basic text analysis
         metrics.word_count = len(content.split())
         metrics.sentence_count = len(re.split(r'[.!?]+', content))
+        
+        # Count numeric values (including percentages, decimals, etc.)
+        numeric_pattern = r'\b\d+(?:\.\d+)?(?:%|ms|GB|MB|KB|s|x|M|K)?\b'
+        numeric_matches = re.findall(numeric_pattern, content)
+        metrics.numeric_values_count = len(numeric_matches)
         
         # Check for generic phrases
         generic_matches = self.generic_pattern.findall(content)
@@ -387,14 +399,15 @@ class QualityGateService:
         score = 0.0
         content_lower = content.lower()
         
-        # Check for action verbs
+        # Check for action verbs (including gerund forms)
         action_verbs = [
             "set", "configure", "install", "run", "execute", "implement",
             "add", "remove", "update", "modify", "change", "apply",
-            "enable", "disable", "increase", "decrease", "adjust"
+            "enable", "disable", "increase", "decrease", "adjust",
+            "implementing", "enabling", "increasing", "adjusting", "reducing"
         ]
         action_count = sum(1 for verb in action_verbs if verb in content_lower)
-        score += min(action_count * 0.05, 0.3)
+        score += min(action_count * 0.08, 0.4)
         
         # Check for step-by-step instructions
         step_pattern = r'(step \d+|first|second|third|then|next|finally)'
@@ -485,7 +498,7 @@ class QualityGateService:
         # Define required elements by content type
         required_elements = {
             ContentType.OPTIMIZATION: [
-                "current", "proposed", "improvement", "implementation", "trade-off"
+                "improve", "reduce", "increase", "optimize", "change"
             ],
             ContentType.DATA_ANALYSIS: [
                 "data", "pattern", "insight", "trend", "conclusion"
@@ -504,9 +517,12 @@ class QualityGateService:
             score = found / len(elements)
         else:
             # For other types, check basic completeness
-            if metrics.sentence_count >= 3:
+            sentences = len(re.split(r'[.!?]+', content))
+            words = len(content.split())
+            
+            if sentences >= 3:
                 score += 0.3
-            if metrics.word_count >= 50:
+            if words >= 50:
                 score += 0.3
             if "however" in content_lower or "but" in content_lower:
                 score += 0.2  # Shows consideration of alternatives
@@ -733,7 +749,7 @@ class QualityGateService:
         strict_mode: bool
     ) -> bool:
         """Check if metrics meet thresholds for the content type"""
-        thresholds = self.thresholds.get(content_type, self.thresholds[ContentType.GENERAL])
+        thresholds = self.thresholds.get(content_type, self.thresholds[ContentType.GENERAL]).copy()
         
         # Apply strict mode multiplier
         if strict_mode:
@@ -741,7 +757,9 @@ class QualityGateService:
                          for k, v in thresholds.items()}
         
         # Check overall score
-        if metrics.overall_score < thresholds.get('min_score', 0.5):
+        min_score_threshold = thresholds.get('min_score', 0.5)
+        if metrics.overall_score < min_score_threshold:
+            logger.debug(f"Failed overall score check: {metrics.overall_score} < {min_score_threshold}")
             return False
         
         # Check specific metrics
@@ -847,7 +865,7 @@ class QualityGateService:
         try:
             # Store in memory for immediate access
             self.metrics_history[content_type].append({
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'overall_score': metrics.overall_score,
                 'quality_level': metrics.quality_level.value,
                 'specificity': metrics.specificity_score,

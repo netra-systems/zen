@@ -365,7 +365,7 @@ class SupervisorAgent(BaseSubAgent):
                         agent.name,
                         f"Analyzing request and preparing to execute {agent.name}",
                         step_number=state.step_count,
-                        total_steps=len(context.pipeline)
+                        total_steps=1  # Default to 1 if pipeline not available
                     )
                 
                 # Execute the agent (modifies state in place)

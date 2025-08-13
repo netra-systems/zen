@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Message as MessageType } from '@/types/chat';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -12,20 +12,20 @@ interface MessageProps {
   message: MessageType;
 }
 
-export const MessageItem: React.FC<MessageProps> = ({ message }) => {
+export const MessageItem: React.FC<MessageProps> = React.memo(({ message }) => {
   const { type, content, sub_agent_name, tool_info, raw_data, references, error, created_at, id } = message;
   const [isToolExpanded, setIsToolExpanded] = React.useState(false);
   const [isRawExpanded, setIsRawExpanded] = React.useState(false);
 
-  const formatTimestamp = (timestamp: string | undefined) => {
-    if (!timestamp) {
+  const formattedTimestamp = useMemo(() => {
+    if (!created_at) {
       return new Date().toLocaleTimeString('en-US', { 
         hour: '2-digit', 
         minute: '2-digit',
         second: '2-digit'
       });
     }
-    const date = new Date(timestamp);
+    const date = new Date(created_at);
     if (isNaN(date.getTime())) {
       return new Date().toLocaleTimeString('en-US', { 
         hour: '2-digit', 
@@ -38,9 +38,17 @@ export const MessageItem: React.FC<MessageProps> = ({ message }) => {
       minute: '2-digit',
       second: '2-digit'
     });
-  };
+  }, [created_at]);
 
-  const getMessageIcon = () => {
+  const toggleToolExpanded = useCallback(() => {
+    setIsToolExpanded(prev => !prev);
+  }, []);
+
+  const toggleRawExpanded = useCallback(() => {
+    setIsRawExpanded(prev => !prev);
+  }, []);
+
+  const messageIcon = useMemo(() => {
     switch (type) {
       case 'user':
         return <User className="w-4 h-4" />;
@@ -51,7 +59,7 @@ export const MessageItem: React.FC<MessageProps> = ({ message }) => {
       default:
         return <Bot className="w-4 h-4" />;
     }
-  };
+  }, [type]);
 
   const renderContent = () => {
     if (error) {
@@ -66,7 +74,7 @@ export const MessageItem: React.FC<MessageProps> = ({ message }) => {
     if (tool_info) {
       return (
         <div className="space-y-3">
-          <Collapsible open={isToolExpanded} onOpenChange={setIsToolExpanded}>
+          <Collapsible open={isToolExpanded} onOpenChange={toggleToolExpanded}>
             <CollapsibleTrigger className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium text-sm">
               {isToolExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
               <Code className="w-4 h-4" />
@@ -87,14 +95,14 @@ export const MessageItem: React.FC<MessageProps> = ({ message }) => {
         <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{content}</p>
         
         {type === 'user' && references && references.length > 0 && (
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="mt-4 p-3 glass-light rounded-lg border border-emerald-200">
             <div className="flex items-center space-x-2 mb-2">
-              <FileText className="w-4 h-4 text-blue-600" />
-              <span className="font-semibold text-sm text-blue-800">References</span>
+              <FileText className="w-4 h-4 text-emerald-600" />
+              <span className="font-semibold text-sm text-emerald-800">References</span>
             </div>
             <ul className="space-y-1">
               {references.map((ref, index) => (
-                <li key={`${id}-ref-${index}-${ref.substring(0, 20)}`} className="text-sm text-blue-700 flex items-start">
+                <li key={`${id}-ref-${index}-${ref.substring(0, 20)}`} className="text-sm text-emerald-700 flex items-start">
                   <span className="mr-2 text-blue-500">•</span>
                   <span>{ref}</span>
                 </li>
@@ -131,7 +139,7 @@ export const MessageItem: React.FC<MessageProps> = ({ message }) => {
               </Avatar>
               <div>
                 <div className="flex items-center space-x-2">
-                  {getMessageIcon()}
+                  {messageIcon}
                   <CardTitle className="text-base font-semibold text-gray-900">
                     {sub_agent_name || (type === 'user' ? 'You' : 'Netra Agent')}
                   </CardTitle>
@@ -145,7 +153,7 @@ export const MessageItem: React.FC<MessageProps> = ({ message }) => {
             </div>
             <div className="flex items-center space-x-2 text-xs text-gray-500">
               <Clock className="w-3 h-3" />
-              <span>{formatTimestamp(created_at)}</span>
+              <span>{formattedTimestamp}</span>
             </div>
           </div>
         </CardHeader>
@@ -154,7 +162,7 @@ export const MessageItem: React.FC<MessageProps> = ({ message }) => {
           {renderContent()}
           
           {raw_data && (
-            <Collapsible open={isRawExpanded} onOpenChange={setIsRawExpanded} className="mt-4">
+            <Collapsible open={isRawExpanded} onOpenChange={toggleRawExpanded} className="mt-4">
               <CollapsibleTrigger className="flex items-center space-x-2 text-xs text-gray-500 hover:text-gray-700 transition-colors">
                 {isRawExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                 <Code className="w-3 h-3" />
@@ -177,4 +185,6 @@ export const MessageItem: React.FC<MessageProps> = ({ message }) => {
       </Card>
     </motion.div>
   );
-};
+});
+
+MessageItem.displayName = 'MessageItem';

@@ -12,6 +12,13 @@ from typing import Dict, Any
 router = APIRouter()
 logger = central_logger.get_logger(__name__)
 
+@router.get("/")
+async def health() -> Dict[str, str]:
+    """
+    Basic health check endpoint - returns healthy if the application is running.
+    """
+    return {"status": "healthy"}
+
 @router.get("/live")
 async def live() -> Dict[str, str]:
     """
@@ -24,16 +31,27 @@ async def ready() -> Dict[str, str]:
     """
     Readiness probe to check if the application is ready to serve requests.
     """
+    import os
+    
     try:
         # Check Postgres connection
         async with get_db() as db:
             result = await db.execute(text("SELECT 1"))
             result.scalar_one_or_none()
 
-        # Check ClickHouse connection
-        from app.db.clickhouse import get_clickhouse_client
-        async with get_clickhouse_client() as client:
-            client.ping()
+        # Check ClickHouse connection only if not explicitly skipped
+        if os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() != 'true':
+            try:
+                from app.db.clickhouse import get_clickhouse_client
+                async with get_clickhouse_client() as client:
+                    client.ping()
+            except Exception as e:
+                logger.warning(f"ClickHouse check failed (non-critical): {e}")
+                # Don't fail readiness if ClickHouse is not available in staging
+                if settings.environment == "staging":
+                    logger.info("Ignoring ClickHouse failure in staging environment")
+                else:
+                    raise
 
         # If all checks pass, return a success response
         return {"status": "ok"}

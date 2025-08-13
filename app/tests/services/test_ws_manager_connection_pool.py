@@ -6,7 +6,7 @@ Tests connection management, pooling, heartbeat, cleanup, and performance
 import pytest
 import asyncio
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from dataclasses import dataclass
@@ -50,7 +50,7 @@ class MockWebSocket:
         self.sent_messages.append({
             'type': 'text',
             'data': data,
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now(UTC)
         })
         
     async def send_json(self, data: dict):

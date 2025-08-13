@@ -105,7 +105,7 @@ export const ExamplePrompts: React.FC = () => {
             >
               {examplePrompts.map((prompt, index) => (
                 <motion.div
-                  key={index}
+                  key={generateUniqueId('prompt')}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}

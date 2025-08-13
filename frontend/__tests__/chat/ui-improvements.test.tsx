@@ -3,7 +3,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { WebSocketProvider } from '../providers/WebSocketProvider';
 import userEvent from '@testing-library/user-event';
 import { MessageInput } from '@/components/chat/MessageInput';
-// Legacy components removed - using unified MainChat and MessageItem
+
+import { TestProviders } from '../test-utils/providers';// Legacy components removed - using unified MainChat and MessageItem
 // import { ImprovedMessageItem } from '@/components/chat/ImprovedMessageItem';
 // import { ResponsiveMainChat } from '@/components/chat/ResponsiveMainChat';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';

@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T15:31:00.661615  
+**Generated:** 2025-08-12T13:00:53.966935  
 **Test Level:** simple - Simple test validation  
 **Purpose:** Basic functionality check
 
@@ -11,14 +11,14 @@
 **Failed:** 0  
 **Skipped:** 0  
 **Errors:** 0  
-**Overall Status:** [PASSED]
+**Overall Status:** [FAILED]
 
 ### Component Breakdown
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 7.87s | [PASSED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 7.87s | [PASSED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 4.29s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 4.29s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,8 +27,8 @@
 - **Purpose:** Basic functionality check
 - **Timeout:** 300s
 - **Coverage Enabled:** No
-- **Total Duration:** 15.75s
-- **Exit Code:** 0
+- **Total Duration:** 8.59s
+- **Exit Code:** 1
 
 ### Backend Configuration
 ```
@@ -44,49 +44,55 @@
 
 ### Backend Output
 ```
-================================================================================
-NETRA AI PLATFORM - SIMPLE TEST RUNNER
-================================================================================
-[INFO] Starting simple smoke tests at 2025-08-11 15:30:44
-
 ============================================================
-BACKEND SMOKE TESTS
+SIMPLE TEST RUNNER - Quick Assessment
 ============================================================
 
-[INFO] Testing critical imports
-[CMD] python -c <script>
-[SUCCESS] Testing critical imports
+Running: app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error
+  [FAIL] test_configuration_error
+       ============================= test session starts =============================
+collected 0 items
 
-[INFO] Testing configuration loading
-[CMD] python -c <script>
-[SUCCESS] Testing configuration loading
+=
 
-[INFO] Testing health endpoint
-[CMD] python -c <script>
-[SUCCESS] Testing health endpoint
+Running: app/tests/core/test_config_manager.py::TestConfigManager::test_initialization
+  [FAIL] test_initialization
+       ============================= test session starts =============================
+collected 0 items
+
+=
+
+Running: app/tests/services/test_security_service.py::TestSecurityService::test_verify_password
+  [FAIL] test_verify_password
+       ============================= test session starts =============================
+collected 0 items
+
+=
+
+Running: app/tests/routes/test_health_route.py::test_live_endpoint
+  [FAIL] test_live_endpoint
+       ============================= test session starts =============================
+collected 0 items
+
+=
+
+Running: tests/test_system_startup.py::TestSystemStartup::test_configuration_loading
+  [FAIL] test_configuration_loading
+       ============================= test session starts =============================
+collected 0 items
+
+=
 
 ============================================================
-FRONTEND SMOKE TESTS
+SUMMARY
 ============================================================
-[PASS] package.json found
-[PASS] node_modules exists
+Passed: 0
+Failed: 5
+Errors: 0
 
-[INFO] Running TypeScript type checking (informational only)...
+Detailed results saved to: simple_test_results.json
 
-[INFO] TypeScript type checking sample
-[CMD] npx tsc --noEmit 2>&1 | head -5
-[SUCCESS] TypeScript type checking sample
-[INFO] TypeScript errors are expected during development
-
-============================================================
-TEST SUMMARY
-============================================================
-Backend:  [PASSED]
-Frontend: [PASSED]
-Duration: 15.68 seconds
-============================================================
-
-[SUCCESS] All simple tests passed!
+[FAILED] 5 tests need attention
 
 
 ```

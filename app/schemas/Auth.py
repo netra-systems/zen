@@ -25,7 +25,7 @@ class AuthEndpoints(BaseModel):
     callback: str
     token: str
     user: str
-    dev_login: str
+    dev_login: Optional[str] = None
 
 class AuthConfigResponse(BaseModel):
     google_client_id: str
@@ -34,3 +34,7 @@ class AuthConfigResponse(BaseModel):
     user: Optional[User] = None
     authorized_javascript_origins: List[str]
     authorized_redirect_uris: List[str]
+    # PR-specific fields for staging environments
+    pr_number: Optional[str] = None
+    use_proxy: Optional[bool] = False
+    proxy_url: Optional[str] = None

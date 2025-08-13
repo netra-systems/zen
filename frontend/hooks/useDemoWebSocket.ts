@@ -42,7 +42,7 @@ export function useDemoWebSocket(options: DemoWebSocketOptions = {}): DemoWebSoc
   const connect = useCallback(() => {
     try {
       // Clear any existing connection
-      if (wsRef.current?.readyState === WebSocket.OPEN) {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
         wsRef.current.close()
       }
 

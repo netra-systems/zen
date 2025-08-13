@@ -1,0 +1,60 @@
+{
+  "timestamp": "2025-08-12T14:45:01.337552",
+  "level": "simple",
+  "metrics": {
+    "total_tests": 0,
+    "passed": 0,
+    "failed": 0,
+    "coverage": null
+  },
+  "results": {
+    "backend": {
+      "status": "failed",
+      "duration": 11.346558451652527,
+      "exit_code": 1,
+      "output": "============================================================\nSIMPLE TEST RUNNER - Quick Assessment\n============================================================\n\nRunning: app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error\n  [FAIL] test_configuration_error\n       ============================= test session starts =============================\ncollected 0 items\n\n=\n\nRunning: app/tests/core/test_config_manager.py::TestConfigManager::test_initialization\n  [FAIL] test_initialization\n       ============================= test session starts =============================\ncollected 0 items\n\n=\n\nRunning: app/tests/services/test_security_service.py::TestSecurityService::test_verify_password\n  [FAIL] test_verify_password\n       ============================= test session starts =============================\ncollected 0 items\n\n=\n\nRunning: app/tests/routes/test_health_route.py::test_live_endpoint\n  [FAIL] test_live_endpoint\n       ============================= test session starts =============================\ncollected 0 items\n\n=\n\nRunning: tests/test_system_startup.py::TestSystemStartup::test_configuration_loading\n  [FAIL] test_configuration_loading\n       ============================= test session starts =============================\ncollected 0 items\n\n=\n\n============================================================\nSUMMARY\n============================================================\nPassed: 0\nFailed: 5\nErrors: 0\n\nDetailed results saved to: simple_test_results.json\n\n[FAILED] 5 tests need attention\n\n",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0,
+        "test_files": 5
+      },
+      "coverage": null
+    },
+    "frontend": {
+      "status": "failed",
+      "duration": 11.346558451652527,
+      "exit_code": 1,
+      "output": "",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      },
+      "coverage": null
+    },
+    "e2e": {
+      "status": "pending",
+      "duration": 0,
+      "exit_code": null,
+      "output": "",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      },
+      "coverage": null
+    },
+    "overall": {
+      "status": "failed",
+      "start_time": 1755035078.635547,
+      "end_time": 1755035101.3326938
+    }
+  }
+}

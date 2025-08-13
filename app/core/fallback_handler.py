@@ -9,9 +9,8 @@ from enum import Enum
 from dataclasses import dataclass
 import json
 import re
-import logging
+from app.logging_config import central_logger as logger
 
-logger = logging.getLogger(__name__)
 
 
 class FallbackContext(Enum):

@@ -50,6 +50,36 @@ class TestAgentE2ECritical:
             "recommendations": ["Optimize GPU", "Reduce memory usage"]
         }))
         
+        # Mock ask_structured_llm for TriageSubAgent
+        from app.agents.triage_sub_agent import (
+            TriageResult, Priority, Complexity, UserIntent, 
+            ExtractedEntities, TriageMetadata
+        )
+        mock_triage_result = TriageResult(
+            category="Cost Optimization",
+            confidence_score=0.95,
+            priority=Priority.MEDIUM,
+            complexity=Complexity.MODERATE,
+            is_admin_mode=False,
+            extracted_entities=ExtractedEntities(
+                models_mentioned=[],
+                metrics_mentioned=[],
+                time_ranges=[]
+            ),
+            user_intent=UserIntent(
+                primary_intent="optimize",
+                secondary_intents=["analyze"]
+            ),
+            tool_recommendations=[],
+            metadata=TriageMetadata(
+                triage_duration_ms=100,
+                cache_hit=False,
+                fallback_used=False,
+                retry_count=0
+            )
+        )
+        llm_manager.ask_structured_llm = AsyncMock(return_value=mock_triage_result)
+        
         # Mock WebSocket Manager
         websocket_manager = Mock()
         websocket_manager.send_message = AsyncMock()

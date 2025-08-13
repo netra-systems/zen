@@ -3,9 +3,8 @@ Supply Research Service - Business logic for AI supply research operations
 """
 
 import json
-import logging
 from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from decimal import Decimal
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc
@@ -14,8 +13,8 @@ from app.core.exceptions import NetraException
 from app.redis_manager import RedisManager
 from app.db.models_postgres import AISupplyItem, ResearchSession, SupplyUpdateLog, User
 from app.services.permission_service import PermissionService
+from app.logging_config import central_logger as logger
 
-logger = logging.getLogger(__name__)
 
 
 class SupplyResearchService:
@@ -95,13 +94,13 @@ class SupplyResearchService:
                         research_session_id=research_session_id,
                         update_reason="Supply data update",
                         updated_by=updated_by,
-                        updated_at=datetime.utcnow()
+                        updated_at=datetime.now(UTC)
                     )
                     self.db.add(log)
                     changes.append(field)
             
             if changes:
-                existing.last_updated = datetime.utcnow()
+                existing.last_updated = datetime.now(UTC)
                 if 'confidence_score' in data:
                     existing.confidence_score = data['confidence_score']
                 if 'research_source' in data:
@@ -115,7 +114,7 @@ class SupplyResearchService:
                 provider=provider,
                 model_name=model_name,
                 **data,
-                last_updated=datetime.utcnow()
+                last_updated=datetime.now(UTC)
             )
             self.db.add(new_item)
             self.db.commit()
@@ -129,7 +128,7 @@ class SupplyResearchService:
                 research_session_id=research_session_id,
                 update_reason="New supply item created",
                 updated_by=updated_by,
-                updated_at=datetime.utcnow()
+                updated_at=datetime.now(UTC)
             )
             self.db.add(log)
             self.db.commit()
@@ -184,7 +183,7 @@ class SupplyResearchService:
         days_back: int = 7
     ) -> Dict[str, Any]:
         """Calculate price changes over a period"""
-        cutoff_date = datetime.utcnow() - timedelta(days=days_back)
+        cutoff_date = datetime.now(UTC) - timedelta(days=days_back)
         
         # Get price change logs
         query = self.db.query(SupplyUpdateLog).filter(
@@ -321,7 +320,7 @@ class SupplyResearchService:
                 })
         
         # Check for missing updates (models not updated in a while)
-        stale_cutoff = datetime.utcnow() - timedelta(days=30)
+        stale_cutoff = datetime.now(UTC) - timedelta(days=30)
         stale_items = self.db.query(AISupplyItem).filter(
             AISupplyItem.last_updated < stale_cutoff
         ).all()
@@ -340,7 +339,7 @@ class SupplyResearchService:
     async def generate_market_report(self) -> Dict[str, Any]:
         """Generate comprehensive market report"""
         report = {
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
             "sections": {}
         }
         

@@ -9,7 +9,6 @@
 # Review: Pending | Score: 85
 # ================================
 import json
-import logging
 
 from app.llm.llm_manager import LLMManager
 from app.agents.base import BaseSubAgent
@@ -17,8 +16,8 @@ from app.agents.prompts import reporting_prompt_template
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.agents.state import DeepAgentState
 from app.agents.utils import extract_json_from_response
+from app.logging_config import central_logger as logger
 
-logger = logging.getLogger(__name__)
 
 class ReportingSubAgent(BaseSubAgent):
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):

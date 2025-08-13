@@ -151,24 +151,24 @@ async def run_content_generation_job(job_id: str, params: ContentGenParams):
         await update_job_status(job_id, "failed", error=str(e))
         return
 
-    total_tasks = len(list(META_PROMPTS.keys())) * params.get('samples_per_type', 10)
+    total_tasks = len(list(META_PROMPTS.keys())) * params.samples_per_type
     await update_job_status(job_id, "running", progress=0, total_tasks=total_tasks)
 
     # Create a serializable dictionary for generation_config
     generation_config_dict = {
-        'temperature': params.get('temperature', 0.7),
-        'top_p': params.get('top_p'),
-        'top_k': params.get('top_k')
+        'temperature': params.temperature,
+        'top_p': params.top_p,
+        'top_k': params.top_k
     }
     # Filter out None values so the Google API doesn't complain
     generation_config_dict = {k: v for k, v in generation_config_dict.items() if v is not None}
 
 
     workload_types = list(META_PROMPTS.keys())
-    num_processes = min(cpu_count(), params.get('max_cores', 4))
+    num_processes = min(cpu_count(), params.max_cores)
 
     # Prepare tasks with serializable data
-    tasks = [(w_type, generation_config_dict) for w_type in workload_types for _ in range(params.get('samples_per_type', 10))]
+    tasks = [(w_type, generation_config_dict) for w_type in workload_types for _ in range(params.samples_per_type)]
 
     corpus = {key: [] for key in workload_types}
     completed_tasks = 0

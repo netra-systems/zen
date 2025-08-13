@@ -4,12 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useWebSocket } from './useWebSocket';
 import { useChatStore } from '@/store/chat';
 import { Message } from '@/types/chat';
-
-// Counter to ensure unique message IDs
-let messageIdCounter = 0;
+import { generateUniqueId } from '@/lib/utils';
 
 const generateMessageId = () => {
-  return `msg_${Date.now()}_${++messageIdCounter}`;
+  return generateUniqueId('msg');
 };
 
 interface AgentMetrics {

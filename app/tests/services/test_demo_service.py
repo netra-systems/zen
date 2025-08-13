@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import json
 import numpy as np
 
@@ -81,9 +81,9 @@ class TestDemoService:
         existing_session = {
             "industry": "healthcare",
             "user_id": 1,
-            "started_at": datetime.utcnow().isoformat(),
+            "started_at": datetime.now(UTC).isoformat(),
             "messages": [
-                {"role": "user", "content": "Previous message", "timestamp": datetime.utcnow().isoformat()}
+                {"role": "user", "content": "Previous message", "timestamp": datetime.now(UTC).isoformat()}
             ]
         }
         mock_redis_client.get.return_value = json.dumps(existing_session)
@@ -222,7 +222,7 @@ class TestDemoService:
         session_data = {
             "industry": "healthcare",
             "user_id": 1,
-            "started_at": datetime.utcnow().isoformat(),
+            "started_at": datetime.now(UTC).isoformat(),
             "messages": [{"role": "user", "content": "Test"}]
         }
         mock_redis_client.get.return_value = json.dumps(session_data)
@@ -265,11 +265,11 @@ class TestDemoService:
         session_data = {
             "industry": "ecommerce",
             "user_id": 2,
-            "started_at": datetime.utcnow().isoformat(),
+            "started_at": datetime.now(UTC).isoformat(),
             "messages": [
-                {"role": "user", "content": "Message 1", "timestamp": datetime.utcnow().isoformat()},
-                {"role": "assistant", "content": "Response 1", "timestamp": datetime.utcnow().isoformat()},
-                {"role": "user", "content": "Message 2", "timestamp": datetime.utcnow().isoformat()}
+                {"role": "user", "content": "Message 1", "timestamp": datetime.now(UTC).isoformat()},
+                {"role": "assistant", "content": "Response 1", "timestamp": datetime.now(UTC).isoformat()},
+                {"role": "user", "content": "Message 2", "timestamp": datetime.now(UTC).isoformat()}
             ]
         }
         mock_redis_client.get.return_value = json.dumps(session_data)
@@ -334,7 +334,7 @@ class TestDemoService:
         # Verify key format includes date
         key = call_args[0][0]
         assert key.startswith("demo:analytics:")
-        assert datetime.utcnow().strftime("%Y%m%d") in key
+        assert datetime.now(UTC).strftime("%Y%m%d") in key
         
         # Verify data structure
         interaction_data = json.loads(call_args[0][1])
@@ -351,19 +351,19 @@ class TestDemoService:
                 "session_id": "session1",
                 "type": "chat",
                 "data": {"industry": "financial"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }),
             json.dumps({
                 "session_id": "session2",
                 "type": "chat",
                 "data": {"industry": "healthcare"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }),
             json.dumps({
                 "session_id": "session1",
                 "type": "report_export",
                 "data": {"format": "pdf"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             })
         ]
         mock_redis_client.lrange.return_value = analytics_data

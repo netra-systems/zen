@@ -21,16 +21,19 @@ Every pull request automatically gets a dedicated staging environment deployed t
 
 ### 1. PR Created/Updated
 When you create or update a PR, the staging workflow automatically:
-1. Builds Docker containers for backend and frontend
-2. Deploys infrastructure using Terraform
-3. Seeds test data
-4. Runs integration tests
-5. Posts the staging URL as a PR comment
+1. **Cancels any in-progress deployments** for the same PR (only latest commit runs)
+2. Builds Docker containers for backend and frontend **in parallel**
+3. Deploys infrastructure using Terraform
+4. Seeds test data
+5. Runs integration tests
+6. Posts the staging URL as a PR comment
+
+**Note**: If you push multiple commits in quick succession (within ~3 minutes), only the latest commit's workflow will complete. Previous runs are automatically cancelled to save resources and provide faster feedback.
 
 ### 2. Access Your Staging Environment
 Each staging environment gets unique URLs:
-- Frontend: `https://pr-{number}.staging.netra-ai.dev`
-- API: `https://pr-{number}-api.staging.netra-ai.dev`
+- Frontend: `https://pr-{number}.staging.netrasystems.ai`
+- API: `https://pr-{number}-api.staging.netrasystems.ai`
 
 ### 3. Automatic Cleanup
 Environments are automatically destroyed when:
@@ -76,14 +79,31 @@ python test_runner.py --level integration --staging
 
 With specific URLs:
 ```bash
-python test_runner.py --staging-url https://pr-123.staging.netra-ai.dev --staging-api-url https://pr-123-api.staging.netra-ai.dev
+python test_runner.py --staging-url https://pr-123.staging.netrasystems.ai --staging-api-url https://pr-123-api.staging.netrasystems.ai
 ```
 
 ### E2E Testing
 Cypress tests automatically run against staging:
 ```bash
-CYPRESS_BASE_URL=https://pr-123.staging.netra-ai.dev npm run cypress:run
+CYPRESS_BASE_URL=https://pr-123.staging.netrasystems.ai npm run cypress:run
 ```
+
+## Performance Optimizations
+
+### Workflow Concurrency
+- **Automatic Cancellation**: When you push a new commit, any in-progress workflow for the same PR is cancelled
+- **Benefits**: Faster feedback, reduced resource usage, cleaner workflow history
+- **Exception**: Destroy operations are never cancelled to ensure proper cleanup
+
+### Parallel Builds
+- Backend and frontend containers build simultaneously
+- Saves 5-10 minutes per deployment
+- Independent failure detection
+
+### Build Caching
+- Successful builds are cached in Google Cloud Storage
+- If no code changes detected, cached images are reused
+- Saves 10-15 minutes on unchanged components
 
 ## Cost Management
 
@@ -92,6 +112,7 @@ CYPRESS_BASE_URL=https://pr-123.staging.netra-ai.dev npm run cypress:run
 - Automatic cleanup after 7 days
 - Per-PR budget limit of $50/month
 - Daily cleanup job removes stale environments
+- **Workflow cancellation** prevents redundant builds
 
 ### Monitor Costs
 View staging costs in:
@@ -115,7 +136,7 @@ Common issues:
 ### Can't Access Staging URL
 1. Check if deployment completed (see PR comment)
 2. Verify you're authorized (GitHub account linked)
-3. Check health endpoint: `https://pr-{number}-api.staging.netra-ai.dev/health`
+3. Check health endpoint: `https://pr-{number}-api.staging.netrasystems.ai/health`
 
 ### Tests Failing in Staging
 1. Check if services are healthy

@@ -1,0 +1,301 @@
+name: AI Auto-Fix
+
+on:
+  workflow_run:
+    workflows: ["Smoke Tests", "Unit Tests", "Integration Tests"]
+    types: [completed]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      test_run_id:
+        description: 'Test run ID to fix'
+        required: true
+      max_attempts:
+        description: 'Maximum fix attempts'
+        required: false
+        default: '3'
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+
+jobs:
+  check-trigger:
+    name: Check Trigger Conditions
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+      pr_number: ${{ steps.check.outputs.pr_number }}
+      test_failures: ${{ steps.check.outputs.test_failures }}
+      
+    steps:
+      - name: Check Comment Trigger
+        if: github.event_name == 'issue_comment'
+        id: comment-check
+        run: |
+          if [[ "${{ github.event.comment.body }}" == *"@autofix"* ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "pr_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Check Workflow Run Trigger
+        if: github.event_name == 'workflow_run'
+        id: workflow-check
+        run: |
+          if [[ "${{ github.event.workflow_run.conclusion }}" == "failure" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            # Extract PR number from workflow run
+            echo "pr_number=${{ github.event.workflow_run.pull_requests[0].number }}" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Check Manual Trigger
+        if: github.event_name == 'workflow_dispatch'
+        id: manual-check
+        run: |
+          echo "should_run=true" >> $GITHUB_OUTPUT
+          
+      - name: Consolidate Checks
+        id: check
+        run: |
+          if [[ "${{ steps.comment-check.outputs.should_run }}" == "true" ]] || \
+             [[ "${{ steps.workflow-check.outputs.should_run }}" == "true" ]] || \
+             [[ "${{ steps.manual-check.outputs.should_run }}" == "true" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+          
+  analyze-failures:
+    name: Analyze Test Failures
+    needs: check-trigger
+    if: needs.check-trigger.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      fixable_tests: ${{ steps.analyze.outputs.fixable }}
+      fix_strategy: ${{ steps.analyze.outputs.strategy }}
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Download Test Results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-test-results-*'
+          path: test-results/
+          
+      - name: Analyze Failures
+        id: analyze
+        run: |
+          python scripts/ci/analyze_failures.py \
+            --results-dir test-results/ \
+            --output-json failure-analysis.json
+            
+          # Extract fixable tests
+          fixable=$(jq -r '.fixable_tests | @json' failure-analysis.json)
+          echo "fixable=$fixable" >> $GITHUB_OUTPUT
+          
+          # Determine fix strategy
+          high_confidence=$(jq -r '.high_confidence_count' failure-analysis.json)
+          if [ "$high_confidence" -gt 0 ]; then
+            echo "strategy=targeted" >> $GITHUB_OUTPUT
+          else
+            echo "strategy=comprehensive" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Upload Analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-analysis-${{ github.run_id }}
+          path: failure-analysis.json
+          retention-days: 7
+          
+  generate-fixes:
+    name: Generate AI Fixes
+    needs: [check-trigger, analyze-failures]
+    if: needs.analyze-failures.outputs.fixable_tests != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 3
+      matrix:
+        test: ${{ fromJSON(needs.analyze-failures.outputs.fixable_tests) }}
+        
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
+          
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install Dependencies
+        run: |
+          pip install anthropic google-generativeai openai
+          pip install -r requirements.txt
+          
+      - name: Generate Fix - Attempt 1 (Claude)
+        id: fix-claude
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python scripts/ci/generate_fix.py \
+            --test "${{ matrix.test.file }}" \
+            --error "${{ matrix.test.error }}" \
+            --provider claude \
+            --output fix-claude.patch
+        continue-on-error: true
+        
+      - name: Generate Fix - Attempt 2 (Gemini)
+        if: steps.fix-claude.outcome == 'failure'
+        id: fix-gemini
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          python scripts/ci/generate_fix.py \
+            --test "${{ matrix.test.file }}" \
+            --error "${{ matrix.test.error }}" \
+            --provider gemini \
+            --output fix-gemini.patch
+        continue-on-error: true
+        
+      - name: Generate Fix - Attempt 3 (GPT-4)
+        if: steps.fix-claude.outcome == 'failure' && steps.fix-gemini.outcome == 'failure'
+        id: fix-gpt
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python scripts/ci/generate_fix.py \
+            --test "${{ matrix.test.file }}" \
+            --error "${{ matrix.test.error }}" \
+            --provider gpt4 \
+            --output fix-gpt.patch
+        continue-on-error: true
+        
+      - name: Select Best Fix
+        id: select-fix
+        run: |
+          if [ -f "fix-claude.patch" ]; then
+            cp fix-claude.patch selected-fix.patch
+            echo "provider=claude" >> $GITHUB_OUTPUT
+          elif [ -f "fix-gemini.patch" ]; then
+            cp fix-gemini.patch selected-fix.patch
+            echo "provider=gemini" >> $GITHUB_OUTPUT
+          elif [ -f "fix-gpt.patch" ]; then
+            cp fix-gpt.patch selected-fix.patch
+            echo "provider=gpt4" >> $GITHUB_OUTPUT
+          else
+            echo "No fix generated"
+            exit 1
+          fi
+          
+      - name: Apply and Validate Fix
+        id: validate
+        run: |
+          # Apply the patch
+          git apply selected-fix.patch
+          
+          # Run the specific test to validate
+          python -m pytest "${{ matrix.test.file }}" -v
+          
+          # Run smoke tests to ensure no regression
+          python test_runner.py --level smoke
+          
+      - name: Commit Fix
+        if: steps.validate.outcome == 'success'
+        run: |
+          git config user.name "Netra AI Auto-Fix"
+          git config user.email "autofix@netra.ai"
+          
+          git add -A
+          git commit -m "fix: Auto-fix test failure in ${{ matrix.test.name }}
+          
+          Automated fix generated by ${{ steps.select-fix.outputs.provider }}
+          Error type: ${{ matrix.test.error_type }}
+          Confidence: ${{ matrix.test.confidence }}%
+          
+          Original error: ${{ matrix.test.error_summary }}"
+          
+          git push
+          
+      - name: Report Success
+        if: steps.validate.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ needs.check-trigger.outputs.pr_number }},
+              body: `### ✅ Auto-Fix Applied Successfully
+              
+              **Test:** \`${{ matrix.test.name }}\`
+              **Provider:** ${{ steps.select-fix.outputs.provider }}
+              **Confidence:** ${{ matrix.test.confidence }}%
+              
+              The fix has been validated and committed. Tests are re-running.`
+            });
+            
+      - name: Report Failure
+        if: steps.validate.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ needs.check-trigger.outputs.pr_number }},
+              body: `### ⚠️ Auto-Fix Failed
+              
+              **Test:** \`${{ matrix.test.name }}\`
+              **Attempted Providers:** Claude, Gemini, GPT-4
+              
+              Manual intervention required. Creating issue for tracking.`
+            });
+            
+  create-tracking-issue:
+    name: Create Tracking Issue
+    needs: [generate-fixes]
+    if: failure()
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Create Issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Auto-fix failed for tests in PR #${{ needs.check-trigger.outputs.pr_number }}`,
+              body: `## Auto-Fix Failure Report
+              
+              ### Context
+              - **PR:** #${{ needs.check-trigger.outputs.pr_number }}
+              - **Run ID:** ${{ github.run_id }}
+              - **Timestamp:** ${new Date().toISOString()}
+              
+              ### Failed Tests
+              Tests that could not be automatically fixed require manual attention.
+              
+              ### Action Required
+              Please review the test failures and apply manual fixes.
+              
+              cc @${{ github.actor }}`,
+              labels: ['bug', 'auto-fix-failed', 'needs-attention']
+            });
+            
+            console.log(`Created issue #${issue.data.number}`);

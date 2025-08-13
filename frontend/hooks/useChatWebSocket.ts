@@ -35,27 +35,27 @@ export const useChatWebSocket = (runId?: string) => {
     
     // Agent state
     agentStatus: unifiedStore.isProcessing ? 'RUNNING' : 'IDLE',
-    subAgentName: unifiedStore.currentMessage?.fastLayer?.agentName || '',
+    subAgentName: unifiedStore.fastLayerData?.agentName || '',
     
     // Workflow progress (derived from layers)
     workflowProgress: {
-      current_step: unifiedStore.currentMessage?.fastLayer ? 1 : 0,
+      current_step: unifiedStore.fastLayerData ? 1 : 0,
       total_steps: 3 // Fast, Medium, Slow layers
     },
     
     // Tool state
-    activeTools: unifiedStore.currentMessage?.fastLayer?.activeTools || [],
-    toolExecutionStatus: unifiedStore.currentMessage?.fastLayer?.activeTools?.length > 0 ? 'executing' : 'idle',
+    activeTools: unifiedStore.fastLayerData?.activeTools || [],
+    toolExecutionStatus: (unifiedStore.fastLayerData?.activeTools?.length || 0) > 0 ? 'executing' : 'idle',
     
     // Connection state (from WebSocket hook)
     isConnected: true, // WebSocket hook handles reconnection
     
     // Error state
-    errors: unifiedStore.messages?.filter(m => m.type === 'error') || [],
+    errors: [],  // Errors are handled via connectionError
     
     // Streaming state
-    isStreaming: unifiedStore.currentMessage?.mediumLayer?.partialContent ? true : false,
-    streamingMessage: unifiedStore.currentMessage?.mediumLayer?.partialContent || '',
+    isStreaming: unifiedStore.mediumLayerData?.partialContent ? true : false,
+    streamingMessage: unifiedStore.mediumLayerData?.partialContent || '',
     
     // Actions (delegate to unified store)
     addMessage: unifiedStore.addMessage,

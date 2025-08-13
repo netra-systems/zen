@@ -6,7 +6,7 @@ Tests scheduling logic, execution, background tasks, error handling, and time ca
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from typing import Dict, List, Any
 
@@ -187,7 +187,7 @@ class TestResearchSchedule:
             research_type=ResearchType.PRICING
         )
         
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         next_hour = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
         
         # Should be next hour on the hour
@@ -211,7 +211,7 @@ class TestResearchSchedule:
         assert schedule.next_run.second == 0
         
         # Should be today or tomorrow
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         today_2pm = now.replace(hour=14, minute=0, second=0, microsecond=0)
         tomorrow_2pm = today_2pm + timedelta(days=1)
         
@@ -270,7 +270,7 @@ class TestResearchSchedule:
         )
         
         # Set next_run to past time
-        schedule.next_run = datetime.utcnow() - timedelta(minutes=5)
+        schedule.next_run = datetime.now(UTC) - timedelta(minutes=5)
         
         assert schedule.should_run() == True
     
@@ -284,7 +284,7 @@ class TestResearchSchedule:
         )
         
         # Even if time has passed, should not run if disabled
-        schedule.next_run = datetime.utcnow() - timedelta(minutes=5)
+        schedule.next_run = datetime.now(UTC) - timedelta(minutes=5)
         
         assert schedule.should_run() == False
     
@@ -298,27 +298,36 @@ class TestResearchSchedule:
         )
         
         # Set next_run to future time
-        schedule.next_run = datetime.utcnow() + timedelta(minutes=30)
+        schedule.next_run = datetime.now(UTC) + timedelta(minutes=30)
         
         assert schedule.should_run() == False
     
     def test_update_after_run(self):
         """Test updating schedule after successful run"""
-        schedule = ResearchSchedule(
-            name="update_test",
-            frequency=ScheduleFrequency.HOURLY,
-            research_type=ResearchType.PRICING
-        )
-        
-        original_next_run = schedule.next_run
-        original_last_run = schedule.last_run
-        
-        schedule.update_after_run()
-        
-        # Should update last_run and recalculate next_run
-        assert schedule.last_run != original_last_run
-        assert schedule.last_run != None
-        assert schedule.next_run != original_next_run
+        with patch('app.services.supply_research_scheduler.datetime') as mock_datetime:
+            # Mock the initial time to 10:30
+            initial_time = datetime(2024, 1, 1, 10, 30, 0)
+            mock_datetime.utcnow.return_value = initial_time
+            mock_datetime.side_effect = lambda *args, **kw: datetime(*args, **kw)
+            
+            schedule = ResearchSchedule(
+                name="update_test",
+                frequency=ScheduleFrequency.HOURLY,
+                research_type=ResearchType.PRICING
+            )
+            
+            original_next_run = schedule.next_run
+            original_last_run = schedule.last_run
+            
+            # Move time forward by an hour for the update
+            mock_datetime.utcnow.return_value = initial_time + timedelta(hours=1)
+            
+            schedule.update_after_run()
+            
+            # Should update last_run and recalculate next_run
+            assert schedule.last_run != original_last_run
+            assert schedule.last_run != None
+            assert schedule.next_run > original_next_run  # Should be later than original
 
 
 class TestSchedulerInitialization:
@@ -489,7 +498,7 @@ class TestScheduleManagement:
         """Test schedule status includes run history"""
         # Update a schedule to have run history
         schedule = scheduler.schedules[0]
-        schedule.last_run = datetime.utcnow()
+        schedule.last_run = datetime.now(UTC)
         
         status = scheduler.get_schedule_status()
         schedule_status = next(s for s in status if s["name"] == schedule.name)
@@ -567,7 +576,7 @@ class TestScheduledResearchExecution:
                     result = await scheduler._execute_scheduled_research(schedule)
         
         # Should have cached the result
-        cache_key = f"schedule_result:{schedule.name}:{datetime.utcnow().date()}"
+        cache_key = f"schedule_result:{schedule.name}:{datetime.now(UTC).date()}"
         cached_data = await mock_redis.get(cache_key)
         assert cached_data != None
         
@@ -712,7 +721,7 @@ class TestSchedulerLoop:
             frequency=ScheduleFrequency.HOURLY,
             research_type=ResearchType.PRICING
         )
-        test_schedule.next_run = datetime.utcnow() - timedelta(minutes=5)  # Should run
+        test_schedule.next_run = datetime.now(UTC) - timedelta(minutes=5)  # Should run
         scheduler.add_schedule(test_schedule)
         
         scheduler.running = True
@@ -738,7 +747,7 @@ class TestSchedulerLoop:
         """Test scheduler loop when no schedules are due"""
         # Ensure all schedules are in the future
         for schedule in scheduler.schedules:
-            schedule.next_run = datetime.utcnow() + timedelta(hours=1)
+            schedule.next_run = datetime.now(UTC) + timedelta(hours=1)
         
         scheduler.running = True
         
@@ -784,7 +793,7 @@ class TestSchedulerLoop:
         # Disable all schedules
         for schedule in scheduler.schedules:
             schedule.enabled = False
-            schedule.next_run = datetime.utcnow() - timedelta(minutes=5)
+            schedule.next_run = datetime.now(UTC) - timedelta(minutes=5)
         
         scheduler.running = True
         
@@ -876,10 +885,10 @@ class TestResultRetrieval:
         test_result = {
             "schedule_name": "test_schedule",
             "status": "completed",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
-        today = datetime.utcnow().date()
+        today = datetime.now(UTC).date()
         cache_key = f"schedule_result:test_schedule:{today}"
         await mock_redis.set(cache_key, json.dumps(test_result))
         
@@ -894,7 +903,7 @@ class TestResultRetrieval:
         scheduler.redis_manager = mock_redis
         
         # Add results for multiple schedules
-        today = datetime.utcnow().date()
+        today = datetime.now(UTC).date()
         for i, schedule in enumerate(scheduler.schedules[:2]):
             test_result = {
                 "schedule_name": schedule.name,
@@ -916,7 +925,7 @@ class TestResultRetrieval:
         
         # Add results for multiple days
         for days_ago in [0, 1, 2]:
-            date = (datetime.utcnow() - timedelta(days=days_ago)).date()
+            date = (datetime.now(UTC) - timedelta(days=days_ago)).date()
             test_result = {
                 "schedule_name": schedule_name,
                 "day": str(date)
@@ -969,7 +978,7 @@ class TestIntegrationScenarios:
             frequency=ScheduleFrequency.HOURLY,
             research_type=ResearchType.PRICING
         )
-        test_schedule.next_run = datetime.utcnow() - timedelta(minutes=1)
+        test_schedule.next_run = datetime.now(UTC) - timedelta(minutes=1)
         scheduler.add_schedule(test_schedule)
         
         mock_redis = MockRedisManager()
@@ -996,7 +1005,7 @@ class TestIntegrationScenarios:
         assert result["schedule_name"] == "integration_test"
         
         # Verify result was cached
-        cache_key = f"schedule_result:integration_test:{datetime.utcnow().date()}"
+        cache_key = f"schedule_result:integration_test:{datetime.now(UTC).date()}"
         cached_result = await mock_redis.get(cache_key)
         assert cached_result != None
         
@@ -1015,7 +1024,7 @@ class TestIntegrationScenarios:
                 frequency=ScheduleFrequency.HOURLY,
                 research_type=ResearchType.PRICING
             )
-            schedule.next_run = datetime.utcnow() - timedelta(minutes=1)
+            schedule.next_run = datetime.now(UTC) - timedelta(minutes=1)
             scheduler.add_schedule(schedule)
             schedules_to_run.append(schedule)
         

@@ -7,7 +7,7 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { useChatStore } from '@/store/chat';
 import { useAuthStore } from '@/store/authStore';
 
-const mockSendMessage = jest.fn();
+import { TestProviders } from '../test-utils/providers';const mockSendMessage = jest.fn();
 const mockSetProcessing = jest.fn();
 const mockAddMessage = jest.fn();
 
@@ -26,6 +26,13 @@ jest.mock('@/store/authStore');
 
 describe('ExamplePrompts', () => {
   beforeEach(() => {
+    // Mock fetch for config
+    global.fetch = jest.fn().mockResolvedValue({
+      json: jest.fn().mockResolvedValue({
+        ws_url: 'ws://localhost:8000/ws'
+      })
+    });
+
     jest.clearAllMocks();
     // Default mock for authenticated user
     (useAuthStore as jest.Mock).mockReturnValue({

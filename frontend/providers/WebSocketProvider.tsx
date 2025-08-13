@@ -1,5 +1,5 @@
 'use client';
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from 'react';
 import { webSocketService, WebSocketStatus } from '../services/webSocketService';
 import { WebSocketMessage } from '../types/backend_schema_auto_generated';
 import { config as appConfig } from '@/config';
@@ -30,20 +30,58 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const { token } = useContext(AuthContext)!;
   const [status, setStatus] = useState<WebSocketStatus>('CLOSED');
   const [messages, setMessages] = useState<WebSocketMessage[]>([]);
+  const isConnectingRef = useRef(false);
+  const cleanupRef = useRef<() => void>();
+
+  // Memoized message handler to prevent unnecessary re-renders
+  const handleMessage = useCallback((newMessage: WebSocketMessage) => {
+    setMessages((prevMessages) => {
+      // Prevent duplicate messages by checking if message already exists
+      const messageExists = prevMessages.some(msg => 
+        msg.payload?.message_id === newMessage.payload?.message_id &&
+        newMessage.payload?.message_id
+      );
+      
+      if (messageExists) {
+        return prevMessages;
+      }
+      
+      return [...prevMessages, newMessage];
+    });
+  }, []);
+
+  // Memoized status handler
+  const handleStatusChange = useCallback((newStatus: WebSocketStatus) => {
+    setStatus(newStatus);
+  }, []);
 
   useEffect(() => {
-    if (token) {
+    if (token && !isConnectingRef.current) {
+      isConnectingRef.current = true;
+      
       const fetchConfigAndConnect = async () => {
         try {
           const response = await fetch(`${appConfig.apiUrl}/api/config`);
           const config = await response.json();
-          webSocketService.onStatusChange = setStatus;
-          webSocketService.onMessage = (newMessage) => {
-            setMessages((prevMessages) => [...prevMessages, newMessage]);
-          };
+          
+          // Set up event handlers
+          webSocketService.onStatusChange = handleStatusChange;
+          webSocketService.onMessage = handleMessage;
+          
+          // Connect to WebSocket
           webSocketService.connect(`${config.ws_url}?token=${token}`);
+          
+          // Store cleanup function
+          cleanupRef.current = () => {
+            webSocketService.onStatusChange = null;
+            webSocketService.onMessage = null;
+            webSocketService.disconnect();
+          };
+          
         } catch (error) {
           console.error('Failed to fetch config and connect to WebSocket', error);
+        } finally {
+          isConnectingRef.current = false;
         }
       };
 
@@ -51,15 +89,17 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     }
 
     return () => {
-      if (token) {
-        webSocketService.disconnect();
+      if (cleanupRef.current) {
+        cleanupRef.current();
+        cleanupRef.current = undefined;
       }
+      isConnectingRef.current = false;
     };
-  }, [token]);
+  }, [token, handleMessage, handleStatusChange]);
 
-  const sendMessage = (message: WebSocketMessage) => {
+  const sendMessage = useCallback((message: WebSocketMessage) => {
     webSocketService.sendMessage(message);
-  };
+  }, []);
 
   const contextValue = {
     status,

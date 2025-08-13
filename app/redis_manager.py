@@ -1,8 +1,7 @@
 import redis.asyncio as redis
 from app.config import settings
-import logging
+from app.logging_config import central_logger as logger
 
-logger = logging.getLogger(__name__)
 
 class RedisManager:
     def __init__(self):
@@ -38,6 +37,8 @@ class RedisManager:
                 decode_responses=True,
                 username=settings.redis.username,
                 password=settings.redis.password,
+                socket_connect_timeout=10,  # 10 second connection timeout
+                socket_timeout=5,  # 5 second socket timeout
             )
             await self.redis_client.ping()
             logger.info("Redis connected successfully")

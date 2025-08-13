@@ -5,7 +5,7 @@ and real-time quality reporting.
 """
 
 from typing import Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 import json
 
 from app.logging_config import central_logger
@@ -102,13 +102,13 @@ class QualityEnhancedStartAgentHandler(StartAgentHandler):
         """Handle start_agent message with quality tracking"""
         try:
             # Store start time for performance tracking
-            start_time = datetime.utcnow()
+            start_time = datetime.now(UTC)
             
             # Call parent handler
             await super().handle(user_id, payload)
             
             # Calculate response time
-            response_time = (datetime.utcnow() - start_time).total_seconds()
+            response_time = (datetime.now(UTC) - start_time).total_seconds()
             
             # Send quality update
             if hasattr(self.supervisor, 'get_quality_dashboard'):
@@ -234,7 +234,7 @@ class QualityReportHandler(BaseMessageHandler):
                     "payload": {
                         "report": markdown_report,
                         "raw_data": report_data,
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                 }
             )
@@ -246,7 +246,7 @@ class QualityReportHandler(BaseMessageHandler):
     def _format_quality_report(self, data: Dict[str, Any], report_type: str) -> str:
         """Format quality data as markdown report"""
         report = f"# AI Quality Report\n\n"
-        report += f"**Generated:** {datetime.utcnow().isoformat()}\n"
+        report += f"**Generated:** {datetime.now(UTC).isoformat()}\n"
         report += f"**Type:** {report_type.title()}\n\n"
         
         if "overall_stats" in data:

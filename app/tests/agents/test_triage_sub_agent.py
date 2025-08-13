@@ -30,6 +30,8 @@ def mock_llm_manager():
     """Create a mock LLM manager."""
     mock = Mock(spec=LLMManager)
     mock.ask_llm = AsyncMock()
+    # Mock ask_structured_llm to raise an exception so it falls back to regular ask_llm
+    mock.ask_structured_llm = AsyncMock(side_effect=Exception("Structured generation not available in test"))
     return mock
 
 
@@ -259,6 +261,7 @@ class TestJSONExtraction:
         
         assert result != None
         assert result["category"] == "Test"
+        assert result["priority"] == "high"
     
     def test_extract_json_with_single_quotes(self, triage_agent):
         """Test extraction of JSON-like structure with single quotes."""
@@ -279,10 +282,10 @@ class TestCaching:
             "category": "Cost Optimization",
             "metadata": {"cache_hit": False, "triage_duration_ms": 100}
         }
-        mock_redis_manager.get.return_value = json.dumps(cached_result)
+        mock_redis_manager.get = AsyncMock(return_value=json.dumps(cached_result))
         
         # Mock LLM should not be called on cache hit
-        triage_agent.llm_manager.ask_llm.return_value = '{"category": "Different"}'
+        triage_agent.llm_manager.ask_llm = AsyncMock(return_value='{"category": "Different"}')
         
         await triage_agent.execute(sample_state, "test_run", stream_updates=False)
         
@@ -299,13 +302,14 @@ class TestCaching:
     @pytest.mark.asyncio
     async def test_cache_miss_and_store(self, triage_agent, sample_state, mock_redis_manager):
         """Test cache miss leading to LLM call and result caching."""
-        mock_redis_manager.get.return_value = None  # Cache miss
+        mock_redis_manager.get = AsyncMock(return_value=None)  # Cache miss
+        mock_redis_manager.set = AsyncMock(return_value=True)  # Mock the set method
         
         llm_response = json.dumps({
             "category": "Cost Optimization",
             "priority": "high"
         })
-        triage_agent.llm_manager.ask_llm.return_value = llm_response
+        triage_agent.llm_manager.ask_llm = AsyncMock(return_value=llm_response)
         
         await triage_agent.execute(sample_state, "test_run", stream_updates=False)
         
@@ -473,7 +477,8 @@ class TestCleanup:
             }
         }
         
-        with patch('app.agents.triage_sub_agent.logger') as mock_logger:
+        # Patch the instance logger, not the module logger
+        with patch.object(triage_agent, 'logger') as mock_logger:
             await triage_agent.cleanup(sample_state, "test_run")
             
             # Should log debug metrics

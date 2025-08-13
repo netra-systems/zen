@@ -4,9 +4,8 @@ Supply Researcher Agent - Autonomous AI supply information research and updates
 
 import json
 import asyncio
-import logging
 from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from decimal import Decimal
 import re
 import aiohttp
@@ -21,8 +20,8 @@ from app.redis_manager import RedisManager
 from app.db.models_postgres import AISupplyItem, ResearchSession, SupplyUpdateLog
 from app.schemas import SubAgentLifecycle
 from sqlalchemy.orm import Session
+from app.logging_config import central_logger as logger
 
-logger = logging.getLogger(__name__)
 
 
 class ResearchType(Enum):
@@ -266,7 +265,7 @@ class SupplyResearcherAgent(BaseSubAgent):
                     "pricing_input": None,
                     "pricing_output": None,
                     "context_window": None,
-                    "last_updated": datetime.utcnow(),
+                    "last_updated": datetime.now(UTC),
                     "research_source": "Google Deep Research",
                     "confidence_score": 0.8
                 }
@@ -353,7 +352,7 @@ class SupplyResearcherAgent(BaseSubAgent):
                         existing.pricing_output = item_data["pricing_output"]
                     
                     if changes:
-                        existing.last_updated = datetime.utcnow()
+                        existing.last_updated = datetime.now(UTC)
                         existing.research_source = item_data["research_source"]
                         existing.confidence_score = item_data["confidence_score"]
                         
@@ -367,7 +366,7 @@ class SupplyResearcherAgent(BaseSubAgent):
                                 research_session_id=research_session_id,
                                 update_reason="Research update",
                                 updated_by="SupplyResearcherAgent",
-                                updated_at=datetime.utcnow()
+                                updated_at=datetime.now(UTC)
                             )
                             self.db.add(log)
                         
@@ -396,6 +395,18 @@ class SupplyResearcherAgent(BaseSubAgent):
             "updates_count": len(updates_made),
             "updates": updates_made
         }
+    
+    async def _send_update(self, run_id: str, update: Dict[str, Any]) -> None:
+        """Send update via WebSocket manager"""
+        if self.websocket_manager:
+            try:
+                await self.websocket_manager.send_agent_update(
+                    run_id,
+                    "supply_researcher",
+                    update
+                )
+            except Exception as e:
+                logger.error(f"Failed to send WebSocket update: {e}")
     
     async def execute(
         self,
@@ -427,7 +438,7 @@ class SupplyResearcherAgent(BaseSubAgent):
                 query=research_query,
                 status="pending",
                 initiated_by=f"user_{state.user_id}" if hasattr(state, 'user_id') else "system",
-                created_at=datetime.utcnow()
+                created_at=datetime.now(UTC)
             )
             self.db.add(research_session)
             self.db.commit()
@@ -475,7 +486,7 @@ class SupplyResearcherAgent(BaseSubAgent):
             
             # Complete research session
             research_session.status = "completed"
-            research_session.completed_at = datetime.utcnow()
+            research_session.completed_at = datetime.now(UTC)
             self.db.commit()
             
             # Prepare final result
@@ -536,8 +547,11 @@ class SupplyResearcherAgent(BaseSubAgent):
         for provider in providers:
             try:
                 # Create a mock state for scheduled research
-                state = DeepAgentState()
-                state.user_request = f"Update {research_type.value} for {provider}"
+                state = DeepAgentState(
+                    user_request=f"Update {research_type.value} for {provider}",
+                    chat_thread_id=f"scheduled_{research_type.value}",
+                    user_id="scheduler"
+                )
                 
                 # Execute research
                 await self.execute(state, f"scheduled_{provider}_{datetime.now().timestamp()}", False)

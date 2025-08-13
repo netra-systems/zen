@@ -4,9 +4,8 @@ Intercepts and fixes ClickHouse queries with incorrect array syntax
 """
 
 import re
-import logging
+from app.logging_config import central_logger as logger
 
-logger = logging.getLogger(__name__)
 
 
 def fix_clickhouse_array_syntax(query: str) -> str:
@@ -21,18 +20,18 @@ def fix_clickhouse_array_syntax(query: str) -> str:
         The fixed query with proper array element access
     """
     
-    # Pattern to match incorrect array access like metrics.value[idx]
-    # This matches: word.word[identifier]
-    pattern = r'(\w+)\.(\w+)\[(\w+)\]'
+    # Pattern to match incorrect array access like metrics.value[idx] or metrics.value[idx-1]
+    # This matches: word.word[expression] where expression can include operations
+    pattern = r'(\w+)\.(\w+)\[([^\]]+)\]'
     
     def replace_array_access(match):
         """Replace array[index] with arrayElement(array, index)"""
         nested_field = match.group(1)  # e.g., 'metrics'
         array_field = match.group(2)   # e.g., 'value'
-        index_var = match.group(3)      # e.g., 'idx'
+        index_expr = match.group(3)     # e.g., 'idx' or 'position-1'
         
         # Convert to proper ClickHouse syntax
-        replacement = f"arrayElement({nested_field}.{array_field}, {index_var})"
+        replacement = f"arrayElement({nested_field}.{array_field}, {index_expr})"
         
         logger.debug(f"Fixed array access: {match.group(0)} -> {replacement}")
         
@@ -61,8 +60,8 @@ def validate_clickhouse_query(query: str) -> tuple[bool, str]:
         Tuple of (is_valid, error_message)
     """
     
-    # Check for incorrect array access syntax
-    if re.search(r'\w+\.\w+\[\w+\]', query):
+    # Check for incorrect array access syntax (with any expression inside brackets)
+    if re.search(r'\w+\.\w+\[[^\]]+\]', query):
         return False, "Query uses incorrect array syntax. Use arrayElement() instead of []"
     
     # Check for proper nested field access
@@ -122,7 +121,11 @@ class ClickHouseQueryInterceptor:
             # Still try to execute - ClickHouse will provide detailed error
         
         # Execute the fixed query
-        return await self.client.execute_query(query, *args, **kwargs)
+        # Try to call execute_query if it exists, otherwise use execute
+        if hasattr(self.client, 'execute_query'):
+            return await self.client.execute_query(query, *args, **kwargs)
+        else:
+            return await self.client.execute(query, *args, **kwargs)
     
     def get_stats(self) -> dict:
         """
@@ -134,8 +137,34 @@ class ClickHouseQueryInterceptor:
         return {
             "queries_executed": self.queries_executed,
             "queries_fixed": self.queries_fixed,
-            "fix_rate": self.queries_fixed / max(1, self.queries_executed)
+            "fix_rate": self.queries_fixed / max(1, self.queries_executed),
+            "fix_enabled": self.fix_enabled
         }
+    
+    def reset_stats(self):
+        """Reset the statistics counters."""
+        self.queries_fixed = 0
+        self.queries_executed = 0
+    
+    def reset_statistics(self):
+        """Alias for reset_stats() for compatibility."""
+        self.reset_stats()
+    
+    def enable_fixing(self):
+        """Enable automatic query fixing."""
+        self.fix_enabled = True
+    
+    def disable_fixing(self):
+        """Disable automatic query fixing."""
+        self.fix_enabled = False
+    
+    def get_statistics(self) -> dict:
+        """Alias for get_stats() for compatibility."""
+        return self.get_stats()
+    
+    async def execute(self, query: str, *args, **kwargs):
+        """Alias for execute_query for compatibility with different client interfaces."""
+        return await self.execute_query(query, *args, **kwargs)
     
     def __getattr__(self, name):
         """

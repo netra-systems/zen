@@ -59,7 +59,7 @@ class UnitOfWork:
     
     async def commit(self):
         """Commit the transaction"""
-        if self._session and not self._external_session:
+        if self._session:
             try:
                 await self._session.commit()
                 logger.debug("Transaction committed")
@@ -70,7 +70,7 @@ class UnitOfWork:
     
     async def rollback(self):
         """Rollback the transaction"""
-        if self._session and not self._external_session:
+        if self._session:
             try:
                 await self._session.rollback()
                 logger.debug("Transaction rolled back")

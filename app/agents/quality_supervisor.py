@@ -15,7 +15,7 @@ and ensure high-quality outputs from all agents.
 """
 
 from typing import Any, Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 import asyncio
 
 from app.logging_config import central_logger
@@ -373,7 +373,7 @@ class QualityEnhancedSupervisor(SupervisorAgent):
         """Get quality dashboard data"""
         dashboard_data = {
             'quality_stats': self.quality_stats,
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.now(UTC).isoformat()
         }
         
         if self.monitoring_service:

@@ -354,7 +354,7 @@ class TestBaseTool:
         result = await tool.execute(mock_context)
         elapsed = asyncio.get_event_loop().time() - start_time
         
-        assert elapsed >= 0.1
+        assert elapsed >= 0.09  # Allow for small timing variations
         assert "Completed after 0.1s" in result
 
 

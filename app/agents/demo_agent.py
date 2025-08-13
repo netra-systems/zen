@@ -11,7 +11,7 @@
 """Demo-specific agent configuration for enterprise demonstrations."""
 
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 import json
 
 from app.agents.base import BaseSubAgent
@@ -76,7 +76,7 @@ class DemoAgent(BaseSubAgent):
                 "response": enhanced_response,
                 "agent": self.agent_name,
                 "industry": self.industry,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
         except Exception as e:
@@ -317,7 +317,7 @@ Include specific metrics and timelines where possible."""
                 "status": "success",
                 "report": response,
                 "metadata": {
-                    "generated_at": datetime.utcnow().isoformat(),
+                    "generated_at": datetime.now(UTC).isoformat(),
                     "industry": industry,
                     "report_type": "executive_summary",
                     "agent": self.agent_name

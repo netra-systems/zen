@@ -1,5 +1,4 @@
 # app/data/data_copier.py
-import logging
 from typing import Dict, Tuple
 from clickhouse_driver import Client
 from ..config import settings
@@ -10,7 +9,6 @@ from ..db.models_clickhouse import SUPPLY_TABLE_NAME
 
 # TBD if this should use clickhouse driver or connect
 
-logger = logging.getLogger(__name__)
 
 class DataCopier:
     """

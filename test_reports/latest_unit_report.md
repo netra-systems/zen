@@ -1,24 +1,24 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T15:43:22.732391  
+**Generated:** 2025-08-12T12:48:32.489118  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 **Purpose:** Development validation, component testing
 
 ## Test Summary
 
-**Total Tests:** 329  
-**Passed:** 90  
-**Failed:** 238  
+**Total Tests:** 469  
+**Passed:** 189  
+**Failed:** 280  
 **Skipped:** 0  
-**Errors:** 1  
+**Errors:** 0  
 **Overall Status:** [FAILED]
 
 ### Component Breakdown
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 79 | 75 | 3 | 0 | 1 | 26.61s | [FAILED] |
-| Frontend  | 250 | 15 | 235 | 0 | 0 | 45.54s | [FAILED] |
+| Backend   | 174 | 171 | 3 | 0 | 0 | 45.83s | [FAILED] |
+| Frontend  | 295 | 18 | 277 | 0 | 0 | 93.87s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,12 +27,12 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 72.15s
+- **Total Duration:** 139.69s
 - **Exit Code:** 2
 
 ### Backend Configuration
 ```
---category unit -v --coverage --fail-fast --parallel=4
+--category unit -v --coverage --fail-fast --parallel=4 -m not real_services
 ```
 
 ### Frontend Configuration
@@ -55,7 +55,7 @@ Test Configuration:
   Environment: development
 
 Running command:
-  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
+  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
 ================================================================================
 [1m============================= test session starts =============================[0m
 platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
@@ -66,44 +66,57 @@ configfile: pytest.ini
 plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
 asyncio: mode=Mode.AUTO
 created: 4/4 workers
-4 workers [1438 items]
+4 workers [1439 items]
 
 scheduling tests via LoadScheduling
 
-app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_failure_recovery 
 app\tests\services\agents\test_supervisor_service.py::test_supervisor_end_to_end 
-app\tests\services\test_generation_service_fixed.py::TestClickHouseOperationsMocked::test_save_corpus_to_clickhouse_mocked 
+app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_failure_recovery 
 app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_bulk_create 
-[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_supervisor_service.py::test_supervisor_end_to_end 
+app\tests\services\test_generation_service_fixed.py::TestClickHouseOperationsMocked::test_get_corpus_from_clickhouse_mocked 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_generation_service_fixed.py::TestClickHouseOperationsMocked::test_get_corpus_from_clickhouse_mocked 
+app\tests\services\test_generation_service_fixed.py::TestClickHouseOperationsMocked::test_save_corpus_to_clickhouse_mocked 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_bulk_create 
+app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_get_by_id 
 [gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_generation_service_fixed.py::TestClickHouseOperationsMocked::test_save_corpus_to_clickhouse_mocked 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_supervisor_service.py::test_supervisor_end_to_end 
 app\tests\services\test_job_store_service.py::TestJobStore::test_job_store_initialization 
 app\tests\services\agents\test_tools.py::test_tool_dispatcher 
 [gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_job_store_initialization 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_get_by_id 
 app\tests\services\test_job_store_service.py::TestJobStore::test_set_and_get_job 
+app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_get_many 
 [gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_set_and_get_job 
 app\tests\services\test_job_store_service.py::TestJobStore::test_update_job_status 
 [gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_update_job_status 
 app\tests\services\test_job_store_service.py::TestJobStore::test_nonexistent_job 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_get_many 
+app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_update 
 [gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_nonexistent_job 
-app\tests\services\test_job_store_service.py::TestJobStore::test_global_job_store 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_global_job_store 
-app\tests\services\test_key_manager.py::test_load_from_settings_success <- ..\v2\app\tests\services\test_key_manager.py 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_key_manager.py::test_load_from_settings_success <- ..\v2\app\tests\services\test_key_manager.py 
-app\tests\services\test_key_manager.py::test_load_from_settings_jwt_key_too_short <- ..\v2\app\tests\services\test_key_manager.py 
 [gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher 
+app\tests\services\test_job_store_service.py::TestJobStore::test_global_job_store 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_update 
 app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_key_manager.py::test_load_from_settings_jwt_key_too_short <- ..\v2\app\tests\services\test_key_manager.py 
+app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_delete 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_job_store_service.py::TestJobStore::test_global_job_store 
+app\tests\services\test_key_manager.py::test_load_from_settings_success 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_key_manager.py::test_load_from_settings_success 
+app\tests\services\test_key_manager.py::test_load_from_settings_jwt_key_too_short 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_key_manager.py::test_load_from_settings_jwt_key_too_short 
 app\tests\services\test_llm_cache_service.py::test_llm_cache_service_initialization 
-[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
-app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_llm_cache_service.py::test_llm_cache_service_initialization 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_llm_cache_service.py::test_llm_cache_service_initialization 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
 app\tests\services\test_llm_cache_service.py::test_cache_set_and_get 
-[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
+app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_llm_cache_service.py::test_cache_set_and_get 
 app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
-[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
+app\tests\services\test_llm_cache_service.py::test_cache_expiration 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
 app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool 
 [gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic 
+[gw3][36m [  1%] [0m[31mFAILED[0m app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_delete 
 [gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_full 
 [gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_full 
@@ -111,34 +124,24 @@ app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::te
 [gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_validation_missing_required 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_dict_conversion 
 [gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_dict_conversion 
-[gw2][36m [  1%] [0m[31mFAILED[0m app\tests\services\test_llm_cache_service.py::test_cache_set_and_get 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_json_serialization 
 [gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_json_serialization 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases 
 [gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_instantiation 
-[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_instantiation 
+[gw0][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_instantiation 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_get_metadata 
-[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_get_metadata 
-[gw1][36m [  1%] [0m[31mFAILED[0m app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_bulk_create 
+[gw0][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_get_metadata 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper 
-[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper 
+[gw0][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_failure 
-[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_failure 
+[gw0][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_failure 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_concrete_tool_run_method 
-[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_failure_recovery 
 [gw0][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_concrete_tool_run_method 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_with_llm_name 
-app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_timeout_handling 
 [gw0][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_with_llm_name 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_multiple_executions 
-[gw0][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_multiple_executions 
-app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_concurrent_execution 
-[gw0][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_concurrent_execution 
-app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_without_metadata_attribute 
-[gw0][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_without_metadata_attribute 
-app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_inheritance_chain 
-[gw0][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::...(truncated)
+[gw1][36m [  2%] [0m[32mPASSED[0m app\tests\services\t...(truncated)
 ```
 
 ### Frontend Output
@@ -163,257 +166,206 @@ Running: npm run test -- __tests__/unit components/**/*.test.tsx hooks/**/*.test
 [FAIL] CHECKS FAILED with exit code 1
 ================================================================================
 
-FAIL __tests__/auth/service.test.ts
+FAIL __tests__/hooks/additionalHooks.test.tsx (8.936 s)
+  ● test_useDemoWebSocket_connection › should establish demo WebSocket connection
+
+    TypeError: Cannot destructure property 'token' of '(0 , _react.useContext)(...)' as it is undefined.
+
+    [0m [90m 28 |[39m
+     [90m 29 |[39m [36mexport[39m [36mconst[39m [33mWebSocketProvider[39m [33m=[39m ({ children }[33m:[39m [33mWebSocketProviderProps[39m) [33m=>[39m {
+    [31m[1m>[22m[39m[90m 30 |[39m   [36mconst[39m { token } [33m=[39m useContext([33mAuthContext[39m)[33m![39m[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 31 |[39m   [36mconst[39m [status[33m,[39m setStatus] [33m=[39m useState[33m<[39m[33mWebSocketStatus[39m[33m>[39m([32m'CLOSED'[39m)[33m;[39m
+     [90m 32 |[39m   [36mconst[39m [messages[33m,[39m setMessages] [33m=[39m useState[33m<[39m[33mWebSocketMessage[39m[][33m>[39m([])[33m;[39m
+     [90m 33 |[39m[0m
+
+      at token (providers/WebSocketProvider.tsx:30:11)
+      at Object.react-stack-bottom-frame (node_modules/react-dom/cjs/react-dom-client.development.js:23863:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:5529:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:8897:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:10522:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:1522:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:15140:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:14956:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:14936:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:14462:44)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:16216:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:566:34)
+      at process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:859:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:190:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:292:10)
+      at renderHook (node_modules/@testing-library/react/dist/pure.js:340:7)
+      at Object.<anonymous> (__tests__/hooks/additionalHooks.test.tsx:29:34)
+
+  ● test_useDemoWebSocket_connection › should handle message queuing when disconnected
+
+    TypeError: Cannot destructure property 'token' of '(0 , _react.useContext)(...)' as it is undefined.
+
+    [0m [90m 28 |[39m
+     [90m 29 |[39m [36mexport[39m [36mconst[39m [33mWebSocketProvider[39m [33m=[39m ({ children }[33m:[39m [33mWebSocketProviderProps[39m) [33m=>[39m {
+    [31m[1m>[22m[39m[90m 30 |[39m   [36mconst[39m { token } [33m=[39m useContext([33mAuthContext[39m)[33m![39m[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 31 |[39m   [36mconst[39m [status[33m,[39m setStatus] [33m=[39m useState[33m<[39m[33mWebSocketStatus[39m[33m>[39m([32m'CLOSED'[39m)[33m;[39m
+     [90m 32 |[39m   [36mconst[39m [messages[33m,[39m setMessages] [33m=[39m useState[33m<[39m[33mWebSocketMessage[39m[][33m>[39m([])[33m;[39m
+     [90m 33 |[39m[0m
+
+      at token (providers/WebSocketProvider.tsx:30:11)
+      at Object.react-stack-bottom-frame (node_modules/react-dom/cjs/react-dom-client.development.js:23863:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:5529:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:8897:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:10522:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:1522:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:15140:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:14956:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:14936:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:14462:44)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:16216:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:566:34)
+      at process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:859:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:190:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:292:10)
+      at renderHook (node_modules/@testing-library/react/dist/pure.js:340:7)
+      at Object.<anonymous> (__tests__/hooks/additionalHooks.test.tsx:47:34)
+
+  ● test_useDemoWebSocket_connection › should handle reconnection on disconnect
+
+    TypeError: Cannot destructure property 'token' of '(0 , _react.useContext)(...)' as it is undefined.
+
+    [0m [90m 28 |[39m
+     [90m 29 |[39m [36mexport[39m [36mconst[39m [33mWebSocketProvider[39m [33m=[39m ({ children }[33m:[39m [33mWebSocketProviderProps[39m) [33m=>[39m {
+    [31m[1m>[22m[39m[90m 30 |[39m   [36mconst[39m { token } [33m=[39m useContext([33mAuthContext[39m)[33m![39m[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 31 |[39m   [36mconst[39m [status[33m,[39m setStatus] [33m=[39m useState[33m<[39m[33mWebSocketStatus[39m[33m>[39m([32m'CLOSED'[39m)[33m;[39m
+     [90m 32 |[39m   [36mconst[39m [messages[33m,[39m setMessages] [33m=[39m useState[33m<[39m[33mWebSocketMessage[39m[][33m>[39m([])[33m;[39m
+     [90m 33 |[39m[0m
+
+      at token (providers/WebSocketProvider.tsx:30:11)
+      at Object.react-stack-bottom-frame (node_modules/react-dom/cjs/react-dom-client.development.js:23863:20)
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:5529:22)
+      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:8897:19)
+      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:10522:18)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:1522:13)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:15140:22)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:14956:41)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:14936:11)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:14462:44)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:16216:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:566:34)
+      at process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:859:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:190:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:292:10)
+      at renderHook (node_modules/@testing-library/react/dist/pure.js:340:7)
+      at Object.<anonymous> (__tests__/hooks/additionalHooks.test.tsx:77:34)
+
+  ● test_useMediaQuery_responsive › should handle debouncing for rapid changes
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+    [0m [90m 170 |[39m     
+     [90m 171 |[39m     [90m// Should not update immediately[39m
+    [31m[1m>[22m[39m[90m 172 |[39m     expect(result[33m.[39mcurrent)[33m.[39mtoBe([36mfalse[39m)[33m;[39m
+     [90m     |[39m                            [31m[1m^[22m[39m
+     [90m 173 |[39m     
+     [90m 174 |[39m     [90m// Wait for debounce[39m
+     [90m 175 |[39m     [36mawait[39m waitFor(() [33m=>[39m {[0m
+
+      at Object.toBe (__tests__/hooks/additionalHooks.test.tsx:172:28)
+
+FAIL __tests__/hooks/useAgent.test.tsx (9.002 s)
   ● Console
 
     console.error
-      Error: Not implemented: navigation (except hash changes)
-          at Reflect.set (<anonymous>)
-          at Object.<anonymous> (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\__tests__\auth\service.test.ts:46:25) {
-        type: 'not implemented'
-      }
+      An update to WebSocketProvider inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
 
-    [0m [90m 44 |[39m
-     [90m 45 |[39m [36mdelete[39m (window [36mas[39m any)[33m.[39mlocation[33m;[39m
-    [31m[1m>[22m[39m[90m 46 |[39m (window [36mas[39m any)[33m.[39mlocation [33m=[39m {
-     [90m    |[39m                         [31m[1m^[22m[39m
-     [90m 47 |[39m   href[33m:[39m [32m''[39m[33m,[39m
-     [90m 48 |[39m   assign[33m:[39m mockAssign[33m,[39m
-     [90m 49 |[39m   replace[33m:[39m mockReplace[33m,[39m[0m
-
-      at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:78:23)
-      at module.exports (node_modules/jsdom/lib/jsdom/browser/not-implemented.js:12:26)
-      at navigateFetch (node_modules/jsdom/lib/jsdom/living/window/navigation.js:77:3)
-      at exports.navigate (node_modules/jsdom/lib/jsdom/living/window/navigation.js:55:3)
-      at LocationImpl._locationObjectNavigate (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:30:5)
-      at LocationImpl._locationObjectSetterNavigate (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:24:17)
-      at LocationImpl.set href [as href] (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:46:10)
-      at Location.set href [as href] (node_modules/jsdom/lib/jsdom/living/generated/Location.js:125:37)
-          at Reflect.set (<anonymous>)
-      at Window.set location [as location] (node_modules/jsdom/lib/jsdom/browser/Window.js:424:15)
-      at Object.<anonymous> (__tests__/auth/service.test.ts:46:25)
-
-    console.log
-      Attempting dev login...
-
-      at AuthService.log [as handleDevLogin] (auth/service.ts:19:13)
-
-    console.log
-      Attempting dev login...
-
-      at AuthService.log [as handleDevLogin] (auth/service.ts:19:13)
-
-    console.error
-      Error: Not implemented: navigation (except hash changes)
-          at AuthService.handleLogin (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\auth\service.ts:73:25)
-          at Object.handleLogin (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\__tests__\auth\service.test.ts:263:19)
-          at new Promise (<anonymous>) {
-        type: 'not implemented'
-      }
-
-    [0m [90m 74 |[39m       [36mreturn[39m[33m;[39m
-     [90m 75 |[39m     }
-    [31m[1m>[22m[39m[90m 76 |[39m     originalError[33m.[39mcall(console[33m,[39m [33m...[39margs)[33m;[39m
-     [90m    |[39m                   [31m[1m^[22m[39m
-     [90m 77 |[39m   }[33m;[39m
-     [90m 78 |[39m   
-     [90m 79 |[39m   console[33m.[39mwarn [33m=[39m ([33m...[39margs[33m:[39m any[]) [33m=>[39m {[0m
-
-      at console.call [as error] (jest.setup.ts:76:19)
-      at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:78:23)
-      at module.exports (node_modules/jsdom/lib/jsdom/browser/not-implemented.js:12:26)
-      at navigateFetch (node_modules/jsdom/lib/jsdom/living/window/navigation.js:77:3)
-      at exports.navigate (node_modules/jsdom/lib/jsdom/living/window/navigation.js:55:3)
-      at LocationImpl._locationObjectNavigate (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:30:5)
-      at LocationImpl._locationObjectSetterNavigate (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:24:17)
-      at LocationImpl.set href [as href] (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:46:10)
-      at Location.set href [as href] (node_modules/jsdom/lib/jsdom/living/generated/Location.js:125:37)
-      at AuthService.handleLogin (auth/service.ts:73:25)
-      at Object.handleLogin (__tests__/auth/service.test.ts:263:19)
-
-    console.error
-      Error: Not implemented: navigation (except hash changes)
-          at AuthService.handleLogin (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\auth\service.ts:73:25)
-          at Object.handleLogin (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\__tests__\auth\service.test.ts:271:19)
-          at new Promise (<anonymous>) {
-        type: 'not implemented'
-      }
-
-    [0m [90m 74 |[39m       [36mreturn[39m[33m;[39m
-     [90m 75 |[39m     }
-    [31m[1m>[22m[39m[90m 76 |[39m     originalError[33m.[39mcall(console[33m,[39m [33m...[39margs)[33m;[39m
-     [90m    |[39m                   [31m[1m^[22m[39m
-     [90m 77 |[39m   }[33m;[39m
-     [90m 78 |[39m   
-     [90m 79 |[39m   console[33m.[39mwarn [33m=[39m ([33m...[39margs[33m:[39m any[]) [33m=>[39m {[0m
-
-      at console.call [as error] (jest.setup.ts:76:19)
-      at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:78:23)
-      at module.exports (node_modules/jsdom/lib/jsdom/browser/not-implemented.js:12:26)
-      at navigateFetch (node_modules/jsdom/lib/jsdom/living/window/navigation.js:77:3)
-      at exports.navigate (node_modules/jsdom/lib/jsdom/living/window/navigation.js:55:3)
-      at LocationImpl._locationObjectNavigate (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:30:5)
-      at LocationImpl._locationObjectSetterNavigate (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:24:17)
-      at LocationImpl.set href [as href] (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:46:10)
-      at Location.set href [as href] (node_modules/jsdom/lib/jsdom/living/generated/Location.js:125:37)
-      at AuthService.handleLogin (auth/service.ts:73:25)
-      at Object.handleLogin (__tests__/auth/service.test.ts:271:19)
-
-    console.log
-      Attempting dev login...
-
-      at AuthService.log [as handleDevLogin] (auth/service.ts:19:13)
-
-    console.log
-      Attempting dev login...
-
-      at AuthService.log [as handleDevLogin] (auth/service.ts:19:13)
-
-    console.log
-      Dev login successful
-
-      at AuthService.log [as handleDevLogin] (auth/service.ts:30:17)
-
-  ● AuthService › handleLogin › should redirect to login endpoint
-
-    expect(received).toBe(expected) // Object.is equality
-
-    Expected: "http://localhost:8000/auth/login"
-    Received: "http://localhost/"
-
-    [0m [90m 263 |[39m       authService[33m.[39mhandleLogin(mockAuthConfig)[33m;[39m
-     [90m 264 |[39m
-    [31m[1m>[22m[39m[90m 265 |[39m       expect(window[33m.[39mlocation[33m.[39mhref)[33m.[39mtoBe(mockAuthConfig[33m.[39mendpoints[33m.[39mlogin)[33m;[39m
-     [90m     |[39m                                    [31m[1m^[22m[39m
-     [90m 266 |[39m     })[33m;[39m
-     [90m 267 |[39m
-     [90m 268 |[39m     it([32m'should handle login with development mode config'[39m[33m,[39m () [33m=>[39m {[0m
-
-      at Object.toBe (__tests__/auth/service.test.ts:265:36)
-
-  ● AuthService › handleLogin › should handle login with development mode config
-
-    expect(received).toBe(expected) // Object.is equality
-
-    Expected: "http://localhost:8000/auth/login"
-    Received: "http://localhost/"
-
-    [0m [90m 271 |[39m       authService[33m.[39mhandleLogin(devConfig)[33m;[39m
-     [90m 272 |[39m
-    [31m[1m>[22m[39m[90m 273 |[39m       expect(window[33m.[39mlocation[33m.[39mhref)[33m.[39mtoBe(devConfig[33m.[39mendpoints[33m.[39mlogin)[33m;[39m
-     [90m     |[39m                                    [31m[1m^[22m[39m
-     [90m 274 |[39m     })[33m;[39m
-     [90m 275 |[39m   })[33m;[39m
-     [90m 276 |[39m[0m
-
-      at Object.toBe (__tests__/auth/service.test.ts:273:36)
-
-  ● AuthService › handleLogout › should perform logout successfully and redirect
-
-    expect(received).toBe(expected) // Object.is equality
-
-    Expected: "/"
-    Received: "http://localhost/"
-
-    [0m [90m 293 |[39m       )[33m;[39m
-     [90m 294 |[39m       expect(localStorageMock[33m.[39mremoveItem)[33m.[39mtoHaveBeenCalledWith([32m'jwt_token'[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 295 |[39m       expect(window[33m.[39mlocation[33m.[39mhref)[33m.[39mtoBe([32m'/'[39m)[33m;[39m
-     [90m     |[39m                                    [31m[1m^[22m[39m
-     [90m 296 |[39m     })[33m;[39m
-     [90m 297 |[39m
-     [90m 298 |[39m     it([32m'should handle logout failure and still redirect'[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
-
-      at Object.toBe (__tests__/auth/service.test.ts:295:36)
-
-  ● AuthService › handleLogout › should handle logout failure and still redirect
-
-    expect(received).toBe(expected) // Object.is equality
-
-    Expected: "/"
-    Received: "http://localhost/"
-
-    [0m [90m 305 |[39m       expect(consoleErrorSpy)[33m.[39mtoHaveBeenCalledWith([3...(truncated)
+    [0m [90m 120 |[39m       [36mreturn[39m[33m;[39m
+     [90m 121 |[39m     }
+    [31m[...(truncated)
 ```
 
 ## Error Summary
 
 ### Backend Errors
-- [gw2][36m [  1%] [0m[31mFAILED[0m app\tests\services\test_llm_cache_service.py::test_cache_set_and_get
-- [gw1][36m [  1%] [0m[31mFAILED[0m app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_bulk_create
-- [gw3][36m [  3%] [0m[31mERROR[0m app\tests\services\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_cost_optimization
-- [gw0][36m [  5%] [0m[31mFAILED[0m app\tests\services\test_agent_message_processing.py::TestAgentMessageProcessing::test_message_validation
-- =================================== ERRORS ====================================
-- [31m[1m_ ERROR at setup of TestApexOptimizerToolSelection.test_tool_selection_cost_optimization _[0m
-- 2025-08-11 15:42:32.415 | ERROR    | app.services.database.base_repository:bulk_create:192 | Unexpected error bulk creating Thread: 'user_id' is an invalid keyword argument for Thread
-- 2025-08-11 15:42:32.418 | ERROR    | app.services.database.unit_of_work:__aexit__:52 | UnitOfWork rolled back due to exception: assert 0 == 10
-- [31mFAILED[0m app\tests\services\test_llm_cache_service.py::[1mtest_cache_set_and_get[0m - AssertionError: assert None == 'Test LLM response'
-- [31mFAILED[0m app\tests\services\test_database_repositories.py::[1mTestBaseRepository::test_repository_bulk_create[0m - assert 0 == 10
-- [31mFAILED[0m app\tests\services\test_agent_message_processing.py::[1mTestAgentMessageProcessing::test_message_validation[0m - TypeError: AgentService.__init__() takes 2 positional arguments but 3 were given
-- [31mERROR[0m app\tests\services\test_apex_optimizer_tool_selection.py::[1mTestApexOptimizerToolSelection::test_tool_selection_cost_optimization[0m - pydantic_core._pydantic_core.ValidationError: 4 validation errors for Workload
-- [FAIL] TESTS FAILED with exit code 2 after 25.80s
+- [gw3][36m [  1%] [0m[31mFAILED[0m app\tests\services\test_database_repositories.py::TestBaseRepository::test_repository_delete
+- [gw1][36m [  3%] [0m[31mFAILED[0m app\tests\services\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_multi_objective
+- [gw2][36m [ 12%] [0m[31mFAILED[0m app\tests\services\test_quality_gate_service.py::TestQualityGateService::test_validate_with_strict_mode
+- [31mFAILED[0m app\tests\services\test_database_repositories.py::[1mTestBaseRepository::test_repository_delete[0m - AssertionError: assert <AsyncMock id='2318685378016'> is None
+- [31mFAILED[0m app\tests\services\test_apex_optimizer_tool_selection.py::[1mTestApexOptimizerToolSelection::test_tool_selection_multi_objective[0m - pydantic_core._pydantic_core.ValidationError: 2 validation errors for RequestModel
+- [31mFAILED[0m app\tests\services\test_quality_gate_service.py::[1mTestQualityGateService::test_validate_with_strict_mode[0m - AssertionError: assert True == False
+- [FAIL] TESTS FAILED with exit code 2 after 44.14s
 
 ### Frontend Errors
 - [FAIL] CHECKS FAILED with exit code 1
-- FAIL __tests__/auth/service.test.ts
-- FAIL __tests__/hooks/useAgent.test.tsx
-- FAIL __tests__/components/UIComponents.test.tsx
-- FAIL __tests__/hooks/useKeyboardShortcuts.test.tsx
-- FAIL __tests__/components/ThinkingIndicator.test.tsx
-- FAIL __tests__/integration/critical-integration.test.tsx
-- FAIL __tests__/components/FinalReportView.test.tsx
-- FAIL __tests__/components/ChatSidebar.test.tsx
-- FAIL __tests__/components/ChatWindow.test.tsx
-- FAIL __tests__/components/ChatHistory.test.tsx
-- FAIL __tests__/components/AppWithLayout.test.tsx
+- FAIL __tests__/hooks/additionalHooks.test.tsx (8.936 s)
+- FAIL __tests__/hooks/useAgent.test.tsx (9.002 s)
+- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx (11.194 s)
+- FAIL __tests__/integration/critical-integration.test.tsx (11.698 s)
+- FAIL __tests__/auth/context.test.tsx (12.086 s)
+- FAIL __tests__/components/AgentStatusPanel.test.tsx (12.93 s)
+- FAIL __tests__/components/ChatHistory.test.tsx (13.126 s)
+- FAIL __tests__/integration/advanced-integration.test.tsx (13.508 s)
+- FAIL __tests__/setup/websocket-mock.ts
 - FAIL __tests__/services/webSocketService.test.ts
-- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
-- FAIL __tests__/hooks/additionalHooks.test.tsx
-- FAIL __tests__/components/AgentStatusPanel.test.tsx
+- FAIL __tests__/utils/test-utils.tsx
+- FAIL __tests__/components/FinalReportView.test.tsx
+- FAIL __tests__/components/ThinkingIndicator.test.tsx (18.498 s)
+- FAIL __tests__/components/UIComponents.test.tsx
+- FAIL __tests__/components/ChatSidebar.test.tsx
+- FAIL __tests__/auth/service.test.ts
+- FAIL __tests__/system/startup.test.tsx (19.559 s)
 - FAIL __tests__/unified-chat-v5.test.tsx
 - FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
-- FAIL __tests__/components/ChatComponents.test.tsx
-- FAIL __tests__/integration/advanced-integration.test.tsx
-- FAIL __tests__/components/CorpusAdmin.test.tsx
-- FAIL __tests__/imports/external-imports.test.tsx
-- FAIL __tests__/imports/internal-imports.test.tsx
-- FAIL __tests__/auth/context.test.tsx
-- FAIL __tests__/components/ChatHistorySection.test.tsx (7.59 s)
+- FAIL __tests__/components/chat/MainChat.test.tsx (24.467 s)
+- FAIL __tests__/imports/internal-imports.test.tsx (24.813 s)
+- FAIL __tests__/imports/external-imports.test.tsx (26.443 s)
 - FAIL __tests__/chat/chatUIUXCore.test.tsx
-- FAIL __tests__/system/startup.test.tsx (11.654 s)
-- FAIL __tests__/components/chat/MainChat.test.tsx (12.184 s)
 - FAIL __tests__/chat/ui-improvements.test.tsx
-- FAIL __tests__/integration/comprehensive-integration.test.tsx (25.173 s)
-- FAIL __tests__/components/chat/MessageInput.test.tsx (40.523 s)
-- FAIL __tests__/auth/service.test.ts
-- FAIL __tests__/hooks/useAgent.test.tsx
-- FAIL __tests__/components/UIComponents.test.tsx
-- FAIL __tests__/hooks/useKeyboardShortcuts.test.tsx
-- FAIL __tests__/components/ThinkingIndicator.test.tsx
-- FAIL __tests__/integration/critical-integration.test.tsx
-- FAIL __tests__/components/FinalReportView.test.tsx
-- FAIL __tests__/components/ChatSidebar.test.tsx
-- FAIL __tests__/components/ChatWindow.test.tsx
-- FAIL __tests__/components/ChatHistory.test.tsx
-- FAIL __tests__/components/AppWithLayout.test.tsx
+- FAIL __tests__/components/ChatHistorySection.test.tsx (32.377 s)
+- FAIL __tests__/integration/comprehensive-integration.test.tsx (35.062 s)
+- FAIL __tests__/components/chat/MessageInput.test.tsx (45.505 s)
+- FAIL __tests__/components/ChatComponents.test.tsx (85.057 s)
+- FAIL __tests__/hooks/additionalHooks.test.tsx (8.936 s)
+- FAIL __tests__/hooks/useAgent.test.tsx (9.002 s)
+- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx (11.194 s)
+- FAIL __tests__/integration/critical-integration.test.tsx (11.698 s)
+- FAIL __tests__/auth/context.test.tsx (12.086 s)
+- FAIL __tests__/components/AgentStatusPanel.test.tsx (12.93 s)
+- FAIL __tests__/components/ChatHistory.test.tsx (13.126 s)
+- FAIL __tests__/integration/advanced-integration.test.tsx (13.508 s)
+- FAIL __tests__/setup/websocket-mock.ts
 - FAIL __tests__/services/webSocketService.test.ts
-- FAIL __tests__/hooks/useWebSocketLifecycle.test.tsx
-- FAIL __tests__/hooks/additionalHooks.test.tsx
-- FAIL __tests__/components/AgentStatusPanel.test.tsx
+- FAIL __tests__/utils/test-utils.tsx
+- FAIL __tests__/components/FinalReportView.test.tsx
+- FAIL __tests__/components/ThinkingIndicator.test.tsx (18.498 s)
+- FAIL __tests__/components/UIComponents.test.tsx
+- FAIL __tests__/components/ChatSidebar.test.tsx
+- FAIL __tests__/auth/service.test.ts
+- FAIL __tests__/system/startup.test.tsx (19.559 s)
 - FAIL __tests__/unified-chat-v5.test.tsx
 - FAIL __tests__/chat/chatUIUXComprehensive.test.tsx
-- FAIL __tests__/components/ChatComponents.test.tsx
-- FAIL __tests__/integration/advanced-integration.test.tsx
-- FAIL __tests__/components/CorpusAdmin.test.tsx
-- FAIL __tests__/imports/external-imports.test.tsx
-- FAIL __tests__/imports/internal-imports.test.tsx
-- FAIL __tests__/auth/context.test.tsx
-- FAIL __tests__/components/ChatHistorySection.test.tsx (7.59 s)
+- FAIL __tests__/components/chat/MainChat.test.tsx (24.467 s)
+- FAIL __tests__/imports/internal-imports.test.tsx (24.813 s)
+- FAIL __tests__/imports/external-imports.test.tsx (26.443 s)
 - FAIL __tests__/chat/chatUIUXCore.test.tsx
-- FAIL __tests__/system/startup.test.tsx (11.654 s)
-- FAIL __tests__/components/chat/MainChat.test.tsx (12.184 s)
 - FAIL __tests__/chat/ui-improvements.test.tsx
-- FAIL __tests__/integration/comprehensive-integration.test.tsx (25.173 s)
-- FAIL __tests__/components/chat/MessageInput.test.tsx (40.523 s)
+- FAIL __tests__/components/ChatHistorySection.test.tsx (32.377 s)
+- FAIL __tests__/integration/comprehensive-integration.test.tsx (35.062 s)
+- FAIL __tests__/components/chat/MessageInput.test.tsx (45.505 s)
+- FAIL __tests__/components/ChatComponents.test.tsx (85.057 s)
 
 
 ---

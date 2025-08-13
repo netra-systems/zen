@@ -84,10 +84,10 @@ export interface FinalReportEvent {
     recommendations: Recommendation[];
     action_plan: ActionStep[];
     executive_summary?: string;
-    cost_analysis?: any;
-    performance_comparison?: any;
-    confidence_scores?: any;
-    technical_details?: any;
+    cost_analysis?: CostAnalysis;
+    performance_comparison?: PerformanceComparison;
+    confidence_scores?: ConfidenceScores;
+    technical_details?: TechnicalDetails;
   };
 }
 
@@ -119,21 +119,21 @@ export interface ErrorEvent {
 export interface AgentResult {
   agentName: string;
   duration: number;
-  result: any;  // Agent-specific, from backend
-  metrics: any; // Agent-specific, from backend
+  result: AgentResultData;  // Agent-specific, from backend
+  metrics: AgentMetrics; // Agent-specific, from backend
   iteration?: number; // Iteration count for repeated agents
 }
 
 export interface FinalReport {
-  report: any;                        // Complete report object
+  report: ReportData;                        // Complete report object
   recommendations: Recommendation[];   // From backend
   actionPlan: ActionStep[];           // From backend
   agentMetrics: AgentMetric[];       // From backend
   executive_summary?: string;
-  cost_analysis?: any;
-  performance_comparison?: any;
-  confidence_scores?: any;
-  technical_details?: any;
+  cost_analysis?: CostAnalysis;
+  performance_comparison?: PerformanceComparison;
+  confidence_scores?: ConfidenceScores;
+  technical_details?: TechnicalDetails;
 }
 
 export interface Recommendation {
@@ -308,11 +308,11 @@ export interface UnifiedChatState {
   connectionError: string | null;
   
   // Agent deduplication
-  executedAgents: Map<string, any>;
+  executedAgents: Map<string, AgentExecution>;
   agentIterations: Map<string, number>;
   
   // WebSocket event debugging
-  wsEventBuffer: any;
+  wsEventBuffer: WebSocketEventBuffer;
   
   // Performance metrics
   performanceMetrics: {
@@ -412,3 +412,109 @@ export const DEFAULT_UNIFIED_CHAT_CONFIG: UnifiedChatConfig = {
   autoCollapseDelay: 2000,
   performanceMonitoring: true,
 };
+
+// ============================================
+// Specific Type Definitions (replacing 'any')
+// ============================================
+
+export interface CostAnalysis {
+  totalCost: number;
+  costBreakdown: {
+    [category: string]: number;
+  };
+  currency: string;
+  period?: string;
+  savings?: number;
+}
+
+export interface PerformanceComparison {
+  baseline: {
+    latency: number;
+    throughput: number;
+    errorRate: number;
+  };
+  optimized: {
+    latency: number;
+    throughput: number;
+    errorRate: number;
+  };
+  improvements: {
+    latencyReduction: number;
+    throughputIncrease: number;
+    errorReduction: number;
+  };
+}
+
+export interface ConfidenceScores {
+  overall: number;
+  recommendations: {
+    [recommendationId: string]: number;
+  };
+  metrics: {
+    [metricName: string]: number;
+  };
+}
+
+export interface TechnicalDetails {
+  implementation: {
+    [key: string]: unknown;
+  };
+  configuration: {
+    [key: string]: unknown;
+  };
+  dependencies: string[];
+  requirements: string[];
+}
+
+export interface AgentResultData {
+  output?: string;
+  artifacts?: {
+    [key: string]: unknown;
+  };
+  status: 'success' | 'error' | 'partial';
+  data?: {
+    [key: string]: unknown;
+  };
+}
+
+export interface AgentMetrics {
+  executionTime: number;
+  memoryUsage?: number;
+  apiCalls?: number;
+  errorCount?: number;
+  toolsUsed?: string[];
+  performance?: {
+    [metricName: string]: number;
+  };
+}
+
+export interface ReportData {
+  summary: string;
+  findings: {
+    [category: string]: unknown[];
+  };
+  data: {
+    [key: string]: unknown;
+  };
+  metadata: {
+    generatedAt: string;
+    version: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface AgentExecution {
+  name: string;
+  iteration: number;
+  status: 'running' | 'completed' | 'failed';
+  startTime: number;
+  endTime?: number;
+  result?: AgentResultData;
+}
+
+export interface WebSocketEventBuffer {
+  push: (event: unknown) => void;
+  getEvents: () => unknown[];
+  clear: () => void;
+  size: number;
+}

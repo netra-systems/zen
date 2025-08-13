@@ -1,12 +1,40 @@
 """
-Comprehensive tests for Agent Service orchestration, lifecycle management, and concurrent handling
-Tests agent lifecycle, orchestration, concurrent execution, and error recovery
+Comprehensive tests for Agent Service orchestration, lifecycle management, and concurrent handling.
+
+MODULE PURPOSE:
+Tests the AgentService which orchestrates AI agents, manages their lifecycle,
+and handles concurrent execution. This is a CRITICAL component that coordinates
+multiple AI agents to process user requests.
+
+TEST CATEGORIES:
+1. Lifecycle Management: Agent state transitions (IDLE -> RUNNING -> TERMINATED)
+2. Orchestration: Multi-agent coordination and message passing
+3. Concurrency: Parallel agent execution without race conditions
+4. Error Recovery: Graceful handling of agent failures
+
+MOCKING STRATEGY:
+- SupervisorAgent: Mocked with MockSupervisorAgent class
+- Database: Mocked with AsyncMock
+- WebSocket: Mocked for message delivery simulation
+- LLM Calls: Never made - all AI responses are mocked
+
+KEY TEST SCENARIOS:
+- Single agent execution path
+- Multiple concurrent agent requests
+- Agent failure and recovery
+- Resource cleanup on termination
+- Message routing between agents
+
+PERFORMANCE REQUIREMENTS:
+- Unit tests: < 100ms each
+- Integration tests: < 500ms each
+- Concurrent tests: < 1s for 10 parallel operations
 """
 
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from enum import Enum
@@ -30,7 +58,17 @@ class AgentState(Enum):
 
 
 class MockSupervisorAgent:
-    """Mock supervisor agent for testing"""
+    """Mock supervisor agent for testing.
+    
+    This is a TEST DOUBLE that simulates the SupervisorAgent behavior
+    without making actual LLM calls or complex orchestration.
+    
+    MOCK CAPABILITIES:
+    - Simulates agent state transitions
+    - Records execution history for verification
+    - Configurable execution time and failure modes
+    - Thread-safe for concurrent testing
+    """
     
     def __init__(self):
         self.state = AgentState.IDLE
@@ -43,7 +81,15 @@ class MockSupervisorAgent:
         self.failure_message = "Mock agent failure"
         
     async def run(self, user_request: str, run_id: str, stream_updates: bool = False):
-        """Mock agent run method"""
+        """Mock agent run method.
+        
+        SIMULATES: The actual agent.run() without LLM calls
+        EXECUTION TIME: Configurable via self.execution_time (default 0.1s)
+        FAILURE MODE: Set self.should_fail=True to simulate errors
+        
+        Returns:
+            dict: Simulated agent response with status and metadata
+        """
         self.state = AgentState.STARTING
         
         # Simulate startup time
@@ -63,7 +109,7 @@ class MockSupervisorAgent:
                 'user_request': user_request,
                 'run_id': run_id,
                 'stream_updates': stream_updates,
-                'timestamp': datetime.utcnow(),
+                'timestamp': datetime.now(UTC),
                 'user_id': self.user_id,
                 'thread_id': self.thread_id
             }
@@ -94,7 +140,14 @@ class MockSupervisorAgent:
 
 
 class AgentOrchestrator:
-    """Orchestrates multiple agents and their lifecycle"""
+    """Orchestrates multiple agents and their lifecycle.
+    
+    TEST HELPER CLASS: Manages multiple mock agents for testing
+    concurrent scenarios and agent coordination patterns.
+    
+    This is NOT production code - it's a test utility to verify
+    that the real AgentService handles multiple agents correctly.
+    """
     
     def __init__(self):
         self.agents = {}  # user_id -> agent_instance
@@ -159,13 +212,13 @@ class AgentOrchestrator:
         """Execute task using orchestrated agent"""
         agent = await self.get_or_create_agent(user_id)
         
+        # Increment total executions at the start
+        self.orchestration_metrics['total_executions'] += 1
+        
         try:
-            start_time = datetime.utcnow()
+            start_time = datetime.now(UTC)
             result = await agent.run(user_request, run_id, stream_updates)
-            execution_time = (datetime.utcnow() - start_time).total_seconds()
-            
-            # Update metrics
-            self.orchestration_metrics['total_executions'] += 1
+            execution_time = (datetime.now(UTC) - start_time).total_seconds()
             
             # Update average execution time
             total_execs = self.orchestration_metrics['total_executions']
@@ -229,7 +282,16 @@ class TestAgentServiceOrchestration:
     def agent_service(self, mock_supervisor):
         """Create agent service with mocked dependencies"""
         service = AgentService(mock_supervisor)
+        # Create a mock message handler with all required methods
         service.message_handler = MagicMock(spec=MessageHandlerService)
+        service.message_handler.handle_thread_history = AsyncMock()
+        service.message_handler.handle_create_thread = AsyncMock()
+        service.message_handler.handle_switch_thread = AsyncMock()
+        service.message_handler.handle_delete_thread = AsyncMock()
+        service.message_handler.handle_list_threads = AsyncMock()
+        service.message_handler.handle_start_agent = AsyncMock()
+        service.message_handler.handle_user_message = AsyncMock()
+        service.message_handler.handle_stop_agent = AsyncMock()
         return service
     
     @pytest.mark.asyncio
@@ -336,11 +398,27 @@ class TestAgentServiceOrchestration:
             await agent_service.handle_websocket_message(user_id, message)
             
             # Assert corresponding handler was called
-            handler_method = getattr(agent_service.message_handler, f"handle_{message_type}")
-            if payload:
-                handler_method.assert_called_with(user_id, payload, None)
-            else:
+            # Map message types to handler method names
+            method_map = {
+                "get_thread_history": "handle_thread_history",
+                "create_thread": "handle_create_thread",
+                "switch_thread": "handle_switch_thread",
+                "delete_thread": "handle_delete_thread",
+                "list_threads": "handle_list_threads"
+            }
+            handler_name = method_map.get(message_type, f"handle_{message_type}")
+            handler_method = getattr(agent_service.message_handler, handler_name)
+            
+            # Check the expected call based on the handler type
+            if message_type == "get_thread_history":
+                # handle_thread_history takes (user_id, db_session)
                 handler_method.assert_called_with(user_id, None)
+            elif message_type == "list_threads":
+                # handle_list_threads takes (user_id, db_session)
+                handler_method.assert_called_with(user_id, None)
+            else:
+                # Other handlers take (user_id, payload, db_session)
+                handler_method.assert_called_with(user_id, payload, None)
     
     @pytest.mark.asyncio
     async def test_websocket_message_handling_stop_agent(self, agent_service):
@@ -739,3 +817,39 @@ class TestAgentErrorRecovery:
             await circuit_breaker_execute("user1", "circuit_test", "run_circuit")
         
         assert "Circuit breaker open" in str(exc_info.value)
+
+
+class TestAgentServiceBasic:
+    """Basic agent service tests consolidated from other test files"""
+    
+    @pytest.mark.asyncio
+    async def test_run_agent_with_request_model(self):
+        """Test basic run method with RequestModel"""
+        # Arrange
+        mock_supervisor = MagicMock()
+        mock_supervisor.run = AsyncMock(return_value={"status": "started"})
+        agent_service = AgentService(mock_supervisor)
+        
+        from app.schemas import Settings, Workload, DataSource, TimeRange, RequestModel
+        
+        settings = Settings(debug_mode=True)
+        workload = Workload(
+            run_id="test_run",
+            query="test_query",
+            data_source=DataSource(source_table="test_table").model_dump(),
+            time_range=TimeRange(start_time="2024-01-01T00:00:00Z", end_time="2024-01-02T00:00:00Z").model_dump()
+        )
+        request_model = RequestModel(
+            id="test_req",
+            user_id="test_user",
+            query="test query",
+            workloads=[workload]
+        )
+
+        # Act
+        result = await agent_service.run(request_model, "test_run", False)
+
+        # Assert
+        assert result == {"status": "started"}
+        expected_user_request = str(request_model.model_dump())
+        mock_supervisor.run.assert_called_once_with(expected_user_request, "test_run", False)

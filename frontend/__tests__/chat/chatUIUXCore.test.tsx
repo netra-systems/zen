@@ -18,7 +18,7 @@ import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 import '@testing-library/jest-dom';
 
-// Mock stores before importing components
+import { TestProviders } from '../test-utils/providers';// Mock stores before importing components
 jest.mock('../../store/authStore', () => ({
   useAuthStore: jest.fn(() => ({
     user: { id: 'test-user', email: 'test@example.com', name: 'Test User' },
@@ -90,6 +90,13 @@ import { useWebSocket } from '../../hooks/useWebSocket';
 describe('Core Chat UI/UX Experience - Working Test Suite', () => {
   
   beforeEach(() => {
+    // Mock fetch for config
+    global.fetch = jest.fn().mockResolvedValue({
+      json: jest.fn().mockResolvedValue({
+        ws_url: 'ws://localhost:8000/ws'
+      })
+    });
+
     jest.clearAllMocks();
   });
 
@@ -120,11 +127,11 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
     });
 
     test('3. Should handle logout action', async () => {
-      const mockLogout = jest.fn();
+      const mockAuthStore.logout = jest.fn();
       (useAuthStore as jest.Mock).mockReturnValueOnce({
         user: { name: 'Test User' },
         isAuthenticated: true,
-        logout: mockLogout
+        logout: mockAuthStore.logout
       });
       
       render(<ChatHeader />);
@@ -132,7 +139,7 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
       const logoutButton = screen.getByRole('button', { name: /logout/i });
       fireEvent.click(logoutButton);
       
-      expect(mockLogout).toHaveBeenCalled();
+      expect(mockAuthStore.logout).toHaveBeenCalled();
     });
   });
 
@@ -180,11 +187,11 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
     });
 
     test('6. Should create new thread', async () => {
-      const mockAddThread = jest.fn();
+      const mockThreadStore.addThread = jest.fn();
       
       (useThreadStore as jest.Mock).mockReturnValueOnce({
         threads: [],
-        addThread: mockAddThread
+        addThread: mockThreadStore.addThread
       });
       
       render(<ThreadSidebar />);
@@ -192,16 +199,16 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
       const newThreadButton = screen.getByRole('button', { name: /new thread/i });
       fireEvent.click(newThreadButton);
       
-      expect(mockAddThread).toHaveBeenCalled();
+      expect(mockThreadStore.addThread).toHaveBeenCalled();
     });
 
     test('7. Should delete thread with confirmation', async () => {
-      const mockDeleteThread = jest.fn();
+      const mockThreadStore.deleteThread = jest.fn();
       const mockThreads = [{ id: '1', title: 'Thread to Delete' }];
       
       (useThreadStore as jest.Mock).mockReturnValueOnce({
         threads: mockThreads,
-        deleteThread: mockDeleteThread
+        deleteThread: mockThreadStore.deleteThread
       });
       
       render(<ThreadSidebar />);
@@ -213,7 +220,7 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
       const confirmButton = await screen.findByRole('button', { name: /confirm/i });
       fireEvent.click(confirmButton);
       
-      expect(mockDeleteThread).toHaveBeenCalledWith('1');
+      expect(mockThreadStore.deleteThread).toHaveBeenCalledWith('1');
     });
   });
 
@@ -492,9 +499,9 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
     });
 
     test('27. Should clear messages when switching threads', () => {
-      const mockClearMessages = jest.fn();
+      const mockChatStore.clearMessages = jest.fn();
       (useChatStore as jest.Mock).mockReturnValueOnce({
-        clearMessages: mockClearMessages
+        clearMessages: mockChatStore.clearMessages
       });
       
       (useThreadStore as jest.Mock).mockReturnValueOnce({
@@ -508,7 +515,7 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
       const thread = screen.getByTestId('thread-2');
       fireEvent.click(thread);
       
-      expect(mockClearMessages).toHaveBeenCalled();
+      expect(mockChatStore.clearMessages).toHaveBeenCalled();
     });
   });
 

@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Documentation Maintenance</name>
+        <type>process</type>
+        <version>1.0</version>
+        <last_updated>2025-08-12</last_updated>
+        <description>Rules and guidelines for maintaining CLAUDE.md and project documentation</description>
+    </metadata>
+
+    <sections>
+        <section id="claude-md-principles" order="1">
+            <title>CLAUDE.md Maintenance Principles</title>
+            
+            <principle id="keep-focused">
+                <name>Keep It Focused</name>
+                <description>CLAUDE.md should be a quick reference guide, not an encyclopedia</description>
+                <guidelines>
+                    <guideline>Target length: Under 200 lines</guideline>
+                    <guideline>Focus on what developers need immediately</guideline>
+                    <guideline>Link to specs for detailed information</guideline>
+                    <guideline>Remove verbose explanations and historical details</guideline>
+                </guidelines>
+            </principle>
+            
+            <principle id="specs-for-details">
+                <name>Use Specs for Detailed Content</name>
+                <description>Detailed information belongs in SPEC/*.xml files, not CLAUDE.md</description>
+                <guidelines>
+                    <guideline>Move historical learnings to learnings.xml</guideline>
+                    <guideline>Move domain-specific details to relevant domain specs</guideline>
+                    <guideline>Move troubleshooting patterns to dedicated specs</guideline>
+                    <guideline>Keep only quick-fix reminders in CLAUDE.md</guideline>
+                </guidelines>
+            </principle>
+            
+            <principle id="cross-linking">
+                <name>Maintain Strong Cross-Linking</name>
+                <description>All specs should be discoverable from CLAUDE.md</description>
+                <guidelines>
+                    <guideline>Use markdown links with relative paths</guideline>
+                    <guideline>Group specs by domain in tables</guideline>
+                    <guideline>Mark critical specs clearly (🔴 or similar)</guideline>
+                    <guideline>Ensure all active specs are listed</guideline>
+                </guidelines>
+            </principle>
+        </section>
+
+        <section id="update-triggers" order="2">
+            <title>When to Update Documentation</title>
+            
+            <trigger id="new-pattern">
+                <name>New Pattern Discovered</name>
+                <action>Add to relevant spec, link from CLAUDE.md if critical</action>
+                <example>Discovering a new React gotcha → Add to learnings.xml</example>
+            </trigger>
+            
+            <trigger id="repeated-issue">
+                <name>Issue Occurs Multiple Times</name>
+                <action>Document in learnings.xml with clear solution</action>
+                <example>Same error hitting multiple developers → Document fix</example>
+            </trigger>
+            
+            <trigger id="architecture-change">
+                <name>Architecture Changes</name>
+                <action>Update architecture.xml and directory structure in CLAUDE.md</action>
+                <example>New service added → Update quick reference</example>
+            </trigger>
+            
+            <trigger id="new-tool">
+                <name>New Tool or Command Added</name>
+                <action>Add to quick start or testing strategy sections</action>
+                <example>New test level added → Update test runner commands</example>
+            </trigger>
+            
+            <trigger id="spec-created">
+                <name>New Spec Created</name>
+                <action>Add to appropriate section in Specification Map</action>
+                <example>New agent spec → Add to Agents domain</example>
+            </trigger>
+        </section>
+
+        <section id="reorganization-process" order="3">
+            <title>Documentation Reorganization Process</title>
+            
+            <step order="1">
+                <name>Audit Current State</name>
+                <actions>
+                    <action>Review CLAUDE.md length and content</action>
+                    <action>Identify verbose or overly detailed sections</action>
+                    <action>Find duplicate information across specs</action>
+                    <action>Check for outdated information</action>
+                </actions>
+            </step>
+            
+            <step order="2">
+                <name>Categorize Content</name>
+                <categories>
+                    <category>Core Principles - Keep in CLAUDE.md</category>
+                    <category>Quick Reference - Keep in CLAUDE.md</category>
+                    <category>Historical Fixes - Move to learnings.xml</category>
+                    <category>Domain Details - Move to domain specs</category>
+                    <category>Outdated - Remove entirely</category>
+                </categories>
+            </step>
+            
+            <step order="3">
+                <name>Create or Update Specs</name>
+                <actions>
+                    <action>Create new specs for orphaned content</action>
+                    <action>Update existing specs with moved content</action>
+                    <action>Ensure spec metadata is current</action>
+                    <action>Add cross-references between related specs</action>
+                </actions>
+            </step>
+            
+            <step order="4">
+                <name>Rewrite CLAUDE.md</name>
+                <structure>
+                    <section>Core Principles (3-5 principles)</section>
+                    <section>Project Overview (1-2 sentences)</section>
+                    <section>Quick Start (essential commands only)</section>
+                    <section>Specification Map (organized table with links)</section>
+                    <section>Critical Rules (must-do items)</section>
+                    <section>Testing Strategy (command reference)</section>
+                    <section>Quick Reference (common operations)</section>
+                    <section>Common Gotchas (brief with spec links)</section>
+                    <section>Recent Updates (last 3-5 items)</section>
+                </structure>
+            </step>
+            
+            <step order="5">
+                <name>Validate Changes</name>
+                <checklist>
+                    <item>CLAUDE.md under 200 lines?</item>
+                    <item>All specs linked and accessible?</item>
+                    <item>No duplicate information?</item>
+                    <item>Critical information easily findable?</item>
+                    <item>Historical content preserved in specs?</item>
+                </checklist>
+            </step>
+        </section>
+
+        <section id="content-guidelines" order="4">
+            <title>Content Guidelines</title>
+            
+            <guideline id="language">
+                <name>Language and Tone</name>
+                <rules>
+                    <rule>Use concise, direct language</rule>
+                    <rule>Avoid verbose explanations</rule>
+                    <rule>Use bullet points over paragraphs</rule>
+                    <rule>Include code examples only when essential</rule>
+                </rules>
+            </guideline>
+            
+            <guideline id="formatting">
+                <name>Formatting Standards</name>
+                <rules>
+                    <rule>Use tables for structured information</rule>
+                    <rule>Use markdown links for all spec references</rule>
+                    <rule>Use code blocks sparingly</rule>
+                    <rule>Use emojis/icons to highlight critical items</rule>
+                    <rule>Keep line length reasonable for terminal viewing</rule>
+                </rules>
+            </guideline>
+            
+            <guideline id="examples">
+                <name>Example Usage</name>
+                <good>
+                    <example>✅ Quick command: `python test_runner.py --level smoke`</example>
+                    <example>✅ Brief gotcha: "Use generateUniqueId() not Date.now()"</example>
+                    <example>✅ Link to detail: "See [`learnings.xml`](SPEC/learnings.xml)"</example>
+                </good>
+                <bad>
+                    <example>❌ Long historical narrative about a bug fix</example>
+                    <example>❌ Detailed step-by-step troubleshooting guide</example>
+                    <example>❌ Multiple paragraphs explaining a concept</example>
+                </bad>
+            </guideline>
+        </section>
+
+        <section id="spec-organization" order="5">
+            <title>Spec File Organization</title>
+            
+            <rule id="one-topic">
+                <name>One Topic Per Spec</name>
+                <description>Each spec should focus on a single domain or concern</description>
+            </rule>
+            
+            <rule id="naming">
+                <name>Clear Naming</name>
+                <description>Spec names should immediately convey their purpose</description>
+                <examples>
+                    <good>learnings.xml, clickhouse.xml, testing.xml</good>
+                    <bad>misc.xml, utils.xml, other.xml</bad>
+                </examples>
+            </rule>
+            
+            <rule id="metadata">
+                <name>Maintain Metadata</name>
+                <description>Keep spec metadata current with version and last_updated</description>
+            </rule>
+            
+            <rule id="archival">
+                <name>Archive Obsolete Specs</name>
+                <description>Move outdated specs to SPEC/archived/ rather than deleting</description>
+            </rule>
+        </section>
+
+        <section id="review-frequency" order="6">
+            <title>Review Schedule</title>
+            
+            <schedule>
+                <review type="quick" frequency="on-change">
+                    <trigger>Any significant feature addition</trigger>
+                    <action>Update relevant sections immediately</action>
+                </review>
+                
+                <review type="audit" frequency="monthly">
+                    <trigger>Monthly documentation review</trigger>
+                    <action>Check for outdated content and reorganize if needed</action>
+                </review>
+                
+                <review type="reorganization" frequency="quarterly">
+                    <trigger>CLAUDE.md exceeds 250 lines or becomes unwieldy</trigger>
+                    <action>Full reorganization following process above</action>
+                </review>
+            </schedule>
+        </section>
+    </sections>
+</specification>

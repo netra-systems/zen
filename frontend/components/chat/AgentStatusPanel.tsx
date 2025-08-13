@@ -81,7 +81,7 @@ const AgentStatusPanel: React.FC = () => {
           <div className="flex items-center space-x-2">
             <div className="flex-1 bg-gray-200 rounded-full h-2">
               <motion.div 
-                className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"
+                className="bg-gradient-to-r from-emerald-500 to-purple-600 h-2 rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: `${(workflowProgress.current_step / workflowProgress.total_steps) * 100}%` }}
                 transition={{ duration: 0.5 }}
@@ -202,7 +202,7 @@ const AgentStatusPanel: React.FC = () => {
       className="fixed top-20 right-4 w-96 bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden z-40"
     >
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4">
+      <div className="glass-accent-purple backdrop-blur-md text-purple-900 p-4 border-b border-purple-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Brain className="w-5 h-5" />

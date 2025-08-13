@@ -35,6 +35,19 @@
           - pull_request.closed
           - pull_request.merged
         </triggers>
+        <concurrency>
+          <description>
+            Automatic cancellation of superseded workflow runs when new commits are pushed.
+            Only the latest commit's workflow runs to completion, preventing resource waste
+            and ensuring developers always see results from their latest changes.
+          </description>
+          <group>staging-pr-${PR_NUMBER}</group>
+          <cancel_in_progress>true</cancel_in_progress>
+          <exceptions>
+            - Destroy operations use separate concurrency group with cancel_in_progress=false
+            - Ensures cleanup always completes to prevent resource leaks
+          </exceptions>
+        </concurrency>
       </component>
       
       <component name="Terraform">
@@ -64,9 +77,9 @@
     </components>
 
     <workflow>
-      <step order="1">PR opened/updated trigger</step>
+      <step order="1">PR opened/updated trigger (supersedes any running workflows)</step>
       <step order="2">GitHub Action validates PR metadata</step>
-      <step order="3">Build containers (backend + frontend)</step>
+      <step order="3" parallel="true">Build containers (backend + frontend in parallel)</step>
       <step order="4">Terraform plan staging infrastructure</step>
       <step order="5">Apply Terraform with PR-specific namespace</step>
       <step order="6">Deploy containers to Cloud Run</step>
@@ -75,8 +88,31 @@
       <step order="9">Execute test runner suite</step>
       <step order="10">Update PR with staging URL and test results</step>
       <step order="11">Monitor for PR close/merge</step>
-      <step order="12">Destroy infrastructure on PR close</step>
+      <step order="12">Destroy infrastructure on PR close (never cancelled)</step>
     </workflow>
+    
+    <performance_optimizations>
+      <optimization name="parallel_builds">
+        <description>Backend and frontend containers build in parallel to reduce deployment time</description>
+        <implementation>Separate GitHub Actions jobs with needs dependency on check-eligibility only</implementation>
+        <time_saved>~5-10 minutes per deployment</time_saved>
+      </optimization>
+      <optimization name="build_caching">
+        <description>Docker layer caching and build result caching via GCS</description>
+        <implementation>Store successful build SHA and image URL in GCS, skip rebuild if no changes</implementation>
+        <time_saved>~10-15 minutes when no code changes</time_saved>
+      </optimization>
+      <optimization name="workflow_cancellation">
+        <description>Automatic cancellation of superseded workflow runs</description>
+        <implementation>GitHub Actions concurrency groups with cancel-in-progress</implementation>
+        <benefits>
+          - Prevents resource waste on outdated commits
+          - Faster feedback on latest changes
+          - Reduced cloud costs from cancelled builds
+          - Cleaner workflow history
+        </benefits>
+      </optimization>
+    </performance_optimizations>
   </architecture>
 
   <configuration>
@@ -146,7 +182,7 @@
     <variable name="STAGING_ENV" value="true" />
     <variable name="PR_NUMBER" value="${github.event.pull_request.number}" />
     <variable name="PR_BRANCH" value="${github.head_ref}" />
-    <variable name="STAGING_URL" value="https://pr-${PR_NUMBER}.staging.netra-ai.dev" />
+    <variable name="STAGING_URL" value="https://pr-${PR_NUMBER}.staging.netrasystems.ai" />
     <variable name="DATABASE_URL" value="postgresql://staging:${SECRET}@${DB_HOST}/netra_pr_${PR_NUMBER}" />
     <variable name="REDIS_URL" value="redis://${REDIS_HOST}:6379/${PR_NUMBER}" />
     <variable name="CLICKHOUSE_URL" value="clickhouse://${CLICKHOUSE_HOST}/staging_pr_${PR_NUMBER}" />
@@ -283,15 +319,19 @@
   </cleanup>
 
   <implementation_checklist>
-    <task status="pending">Create GitHub Actions workflows</task>
+    <task status="completed">Create GitHub Actions workflows</task>
+    <task status="completed">Implement parallel build jobs for backend/frontend</task>
+    <task status="completed">Add workflow concurrency control for superseding commits</task>
+    <task status="completed">Set up build caching via GCS</task>
+    <task status="completed">Implement automatic cleanup on PR close</task>
+    <task status="completed">Add destroy job protection (no cancellation)</task>
     <task status="pending">Set up Terraform modules</task>
     <task status="pending">Configure GCP project and APIs</task>
     <task status="pending">Create staging configuration file</task>
     <task status="pending">Implement test runner integration</task>
-    <task status="pending">Set up DNS wildcard for *.staging.netra-ai.dev</task>
+    <task status="pending">Set up DNS wildcard for *.staging.netrasystems.ai</task>
     <task status="pending">Create seed data scripts</task>
     <task status="pending">Implement cost monitoring</task>
-    <task status="pending">Create cleanup automation</task>
     <task status="pending">Write staging environment documentation</task>
   </implementation_checklist>
 </specification>

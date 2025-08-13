@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app.db.session import get_db_session
 from app.db.models_postgres import User
 from sqlalchemy import update
+from app.logging_config import central_logger as logger
 
 async def update_development_user():
     # get_db_session is an async generator
@@ -19,9 +20,9 @@ async def update_development_user():
                 .values(is_superuser=True)
             )
             if result.rowcount > 0:
-                print("Development user updated successfully.")
+                logger.info("Development user updated successfully.")
             else:
-                print("Development user not found.")
+                logger.info("Development user not found.")
 
 if __name__ == "__main__":
     # This is the critical change

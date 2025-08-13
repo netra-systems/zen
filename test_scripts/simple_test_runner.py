@@ -43,12 +43,14 @@ def run_tests(test_path: str, max_time: int = 30) -> dict:
     
     try:
         start = time.time()
+        # Run from project root, not test_scripts directory
+        project_root = Path(__file__).parent.parent
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             timeout=max_time,
-            cwd=str(Path(__file__).parent)
+            cwd=str(project_root)
         )
         duration = time.time() - start
         

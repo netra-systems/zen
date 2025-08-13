@@ -4,7 +4,7 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any, List
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 
 
 class TestWebSocketCritical:
@@ -93,7 +93,7 @@ class TestWebSocketCritical:
         async def attempt_connection(attempt_num):
             connection_attempts.append({
                 "attempt": attempt_num,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "success": attempt_num == max_retries - 1
             })
             
@@ -145,7 +145,7 @@ class TestWebSocketCritical:
         broadcast_message = {
             "type": "broadcast",
             "content": "Global announcement",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         # Broadcast to all connections

@@ -1,0 +1,47 @@
+[
+  {
+    "path": "app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error",
+    "passed": 0,
+    "failed": 1,
+    "errors": 0,
+    "duration": 3.888479709625244,
+    "exit_code": 4,
+    "output": "============================= test session starts =============================\ncollected 0 items\n\n============================ no tests ran in 0.00s ============================\n"
+  },
+  {
+    "path": "app/tests/core/test_config_manager.py::TestConfigManager::test_initialization",
+    "passed": 0,
+    "failed": 1,
+    "errors": 0,
+    "duration": 8.582502841949463,
+    "exit_code": 4,
+    "output": "============================= test session starts =============================\ncollected 0 items\n\n============================ no tests ran in 0.00s ============================\n"
+  },
+  {
+    "path": "app/tests/services/test_security_service.py::TestSecurityService::test_verify_password",
+    "passed": 0,
+    "failed": 1,
+    "errors": 0,
+    "duration": 2.9962642192840576,
+    "exit_code": 4,
+    "output": "============================= test session starts =============================\ncollected 0 items\n\n============================ no tests ran in 0.00s ============================\n"
+  },
+  {
+    "path": "app/tests/routes/test_health_route.py::test_live_endpoint",
+    "passed": 0,
+    "failed": 1,
+    "errors": 0,
+    "duration": 3.4705190658569336,
+    "exit_code": 4,
+    "output": "============================= test session starts =============================\ncollected 0 items\n\n============================ no tests ran in 0.00s ============================\n"
+  },
+  {
+    "path": "tests/test_system_startup.py::TestSystemStartup::test_configuration_loading",
+    "passed": 0,
+    "failed": 1,
+    "errors": 0,
+    "duration": 3.648789882659912,
+    "exit_code": 4,
+    "output": "============================= test session starts =============================\ncollected 0 items\n\n============================ no tests ran in 0.00s ============================\n"
+  }
+]

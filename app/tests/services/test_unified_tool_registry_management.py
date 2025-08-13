@@ -6,7 +6,7 @@ Tests unified management, orchestration, lifecycle management, and coordination
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from enum import Enum
@@ -31,7 +31,7 @@ class MockAdvancedTool(BaseTool):
         self.status = ToolStatus.ACTIVE
         self.call_count = 0
         self.last_called = None
-        self.initialization_time = datetime.utcnow()
+        self.initialization_time = datetime.now(UTC)
         self.dependencies = kwargs.get('dependencies', [])
         self.resource_usage = {'memory': 0, 'cpu': 0}
         
@@ -40,7 +40,7 @@ class MockAdvancedTool(BaseTool):
             raise NetraException(f"Tool {self.name} is {self.status.value}")
         
         self.call_count += 1
-        self.last_called = datetime.utcnow()
+        self.last_called = datetime.now(UTC)
         return f"Result from {self.name}: {query}"
     
     async def _arun(self, query: str) -> str:
@@ -109,7 +109,7 @@ class ToolOrchestrator:
         
         self.active_chains[chain_id] = {
             'status': 'running',
-            'start_time': datetime.utcnow(),
+            'start_time': datetime.now(UTC),
             'tools': tools
         }
         
@@ -133,7 +133,7 @@ class ToolOrchestrator:
             raise
         
         finally:
-            self.active_chains[chain_id]['end_time'] = datetime.utcnow()
+            self.active_chains[chain_id]['end_time'] = datetime.now(UTC)
             self.execution_history.append(self.active_chains[chain_id])
 
 
@@ -178,7 +178,7 @@ class ToolLifecycleManager:
             'action': action,
             'from_state': current_state.value,
             'to_state': target_state.value,
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now(UTC)
         })
         
         return True
@@ -196,7 +196,7 @@ class ToolHealthMonitor:
         health_status = {
             'tool_name': tool.name,
             'status': 'healthy',
-            'last_check': datetime.utcnow(),
+            'last_check': datetime.now(UTC),
             'metrics': {}
         }
         
@@ -233,7 +233,7 @@ class ToolHealthMonitor:
             'total_tools': total_tools,
             'healthy_tools': healthy_tools,
             'unhealthy_tools': total_tools - healthy_tools,
-            'last_check': datetime.utcnow(),
+            'last_check': datetime.now(UTC),
             'alerts': len(self.alerts)
         }
 
@@ -249,7 +249,7 @@ class ToolMetricsCollector:
         """Collect metrics from individual tool"""
         metrics = {
             'tool_name': tool.name,
-            'collection_time': datetime.utcnow(),
+            'collection_time': datetime.now(UTC),
             'call_count': getattr(tool, 'call_count', 0),
             'last_called': getattr(tool, 'last_called', None),
             'initialization_time': getattr(tool, 'initialization_time', None)
@@ -265,7 +265,7 @@ class ToolMetricsCollector:
     def collect_all_metrics(self) -> Dict[str, Any]:
         """Collect and aggregate all metrics"""
         self.aggregated_metrics = {
-            'collection_time': datetime.utcnow(),
+            'collection_time': datetime.now(UTC),
             'total_tools': len(self.metrics),
             'total_calls': sum(m.get('call_count', 0) for m in self.metrics.values()),
             'average_calls': 0,
@@ -710,8 +710,8 @@ class TestUnifiedToolRegistryOrchestration:
         # After mock execution
         orchestrator.active_chains['test_chain'] = {
             'status': 'completed',
-            'start_time': datetime.utcnow() - timedelta(seconds=10),
-            'end_time': datetime.utcnow(),
+            'start_time': datetime.now(UTC) - timedelta(seconds=10),
+            'end_time': datetime.now(UTC),
             'tools': ['tool1', 'tool2']
         }
         

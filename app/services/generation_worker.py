@@ -3,6 +3,7 @@
 from app.llm.llm_manager import LLMManager
 from app.config import settings
 from app.data.synthetic.content_generator import generate_content_sample
+from app.logging_config import central_logger as logger
 
 llm_manager = None
 
@@ -12,7 +13,7 @@ def init_worker():
     try:
         llm_manager = LLMManager(settings)
     except Exception as e:
-        print(f"Worker initialization failed: {e}")
+        logger.error(f"Worker initialization failed: {e}")
         raise
 
 def generate_content_for_worker(task_data):

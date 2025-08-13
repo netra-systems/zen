@@ -42,6 +42,9 @@ describe('useChatWebSocket', () => {
     messages: [],
     currentMessage: null,
     isProcessing: false,
+    fastLayerData: null,
+    mediumLayerData: null,
+    slowLayerData: null,
   };
 
   beforeEach(() => {
@@ -217,19 +220,13 @@ describe('useChatWebSocket', () => {
   });
 
   it('should handle workflow progress update', () => {
-    const { rerender } = renderHook(() => useChatWebSocket());
-    
-    // Update unified store to simulate progress
-    mockUnifiedChatStore.currentMessage = {
-      fastLayer: {
-        agentName: 'TestAgent',
-        activeTools: ['tool1']
-      }
+    // Update unified store to simulate progress with fastLayerData
+    mockUnifiedChatStore.fastLayerData = {
+      agentName: 'TestAgent',
+      activeTools: ['tool1']
     };
     
     (useUnifiedChatStore as unknown as jest.Mock).mockReturnValue(mockUnifiedChatStore);
-    
-    rerender();
     
     const { result } = renderHook(() => useChatWebSocket());
     
@@ -238,18 +235,12 @@ describe('useChatWebSocket', () => {
   });
 
   it('should handle streaming updates', () => {
-    const { rerender } = renderHook(() => useChatWebSocket());
-    
-    // Update unified store to simulate streaming
-    mockUnifiedChatStore.currentMessage = {
-      mediumLayer: {
-        partialContent: 'Streaming content...'
-      }
+    // Update unified store to simulate streaming with mediumLayerData
+    mockUnifiedChatStore.mediumLayerData = {
+      partialContent: 'Streaming content...'
     };
     
     (useUnifiedChatStore as unknown as jest.Mock).mockReturnValue(mockUnifiedChatStore);
-    
-    rerender();
     
     const { result } = renderHook(() => useChatWebSocket());
     
@@ -296,20 +287,13 @@ describe('useChatWebSocket', () => {
   });
 
   it('should filter error messages correctly', () => {
-    mockUnifiedChatStore.messages = [
-      { id: '1', type: 'user', content: 'Test' },
-      { id: '2', type: 'error', content: 'Error 1' },
-      { id: '3', type: 'agent', content: 'Response' },
-      { id: '4', type: 'error', content: 'Error 2' }
-    ];
-    
+    // The hook now returns empty errors array by default
     (useUnifiedChatStore as unknown as jest.Mock).mockReturnValue(mockUnifiedChatStore);
     
     const { result } = renderHook(() => useChatWebSocket());
     
-    expect(result.current.errors).toHaveLength(2);
-    expect(result.current.errors[0].type).toBe('error');
-    expect(result.current.errors[1].type).toBe('error');
+    // Errors are handled via connectionError in unified store, not in errors array
+    expect(result.current.errors).toHaveLength(0);
   });
 
   it('should derive agent status from processing state', () => {

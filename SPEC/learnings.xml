@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Learnings and Troubleshooting</name>
+        <type>reference</type>
+        <version>1.0</version>
+        <last_updated>2025-08-12</last_updated>
+        <description>Historical learnings, troubleshooting patterns, and resolved issues</description>
+    </metadata>
+
+    <sections>
+        <section id="common-gotchas" order="1">
+            <title>Common Gotchas and Solutions</title>
+            
+            <item id="react-duplicate-keys">
+                <problem>Using Date.now() for keys creates duplicates in rapid renders</problem>
+                <solution>Always use generateUniqueId() from @/lib/utils</solution>
+                <example>
+                    // ❌ Wrong
+                    key={Date.now()}
+                    
+                    // ✅ Correct
+                    key={generateUniqueId('msg')}
+                </example>
+            </item>
+            
+            <item id="websocket-test-failures">
+                <problem>Hook tests fail without provider</problem>
+                <solution>Wrap with WebSocketProvider in tests</solution>
+                <example>
+                    const wrapper = ({ children }) => (
+                        &lt;WebSocketProvider&gt;{children}&lt;/WebSocketProvider&gt;
+                    );
+                </example>
+            </item>
+            
+            <item id="import-test-failures">
+                <problem>New dependencies not in import tests</problem>
+                <solution>Update app/tests/test_internal_imports.py and app/tests/test_external_imports.py</solution>
+            </item>
+            
+            <item id="test-runner-reliability">
+                <problem>Test runner fails due to argument parsing or Unicode encoding</problem>
+                <critical>Fix test runner FIRST before running actual tests</critical>
+                <issues>
+                    <issue>Unicode emojis cause Windows terminal encoding errors</issue>
+                    <issue>Parallel arguments must be properly formatted (--parallel=auto not --parallel auto)</issue>
+                    <issue>Frontend test args should avoid Jest-specific options in unified runner</issue>
+                </issues>
+            </item>
+        </section>
+
+        <section id="historical-fixes" order="2">
+            <title>Historical Issue Resolutions</title>
+            
+            <fix date="2025-08-11">
+                <title>Running Tests from Subdirectories</title>
+                <problem>Test runner path needs adjustment in subdirectories</problem>
+                <solution>Use relative path ../test_runner.py from subdirectories</solution>
+                <note>Comprehensive tests may timeout with default 2-minute limit</note>
+            </fix>
+            
+            <fix date="2025-01-11">
+                <title>Startup Check False Warnings</title>
+                <problem>Services showing as unavailable despite successful connections</problem>
+                <root-causes>
+                    <cause>Redis set() method parameter mismatch (expire vs ex)</cause>
+                    <cause>Missing Redis delete() method in RedisManager</cause>
+                    <cause>Missing await for async ClickHouse execute_query() method</cause>
+                </root-causes>
+                <solution>Added backward compatibility, implemented delete method, added await</solution>
+                <prevention>Always verify method signatures match between caller and implementation</prevention>
+            </fix>
+            
+            <fix date="2025-01-11">
+                <title>ClickHouse Startup Check</title>
+                <problem>'ClickHouseDatabase' object has no attribute 'execute' error</problem>
+                <root-cause>Using wrong method name - should be execute_query() not execute()</root-cause>
+                <solution>Updated app/startup_checks.py:287 to use client.execute_query()</solution>
+            </fix>
+            
+            <fix date="2025-01-11">
+                <title>Database Schema Migration</title>
+                <problem>Missing tables and columns causing schema validation errors</problem>
+                <tables-added>tool_usage_logs, ai_supply_items, research_sessions, supply_update_logs</tables-added>
+                <columns-added>tool_permissions, plan_expires_at, feature_flags, payment_status, auto_renew, plan_tier, plan_started_at, trial_period</columns-added>
+                <migration>bb39e1c49e2d_add_missing_tables_and_columns.py</migration>
+            </fix>
+            
+            <fix date="2025-08-11">
+                <title>Thread Creation 500 Error</title>
+                <problem>Thread creation failing with '_AsyncGeneratorContextManager' object has no attribute 'execute'</problem>
+                <root-cause>Parameter order mismatch in base_repository.get_by_id()</root-cause>
+                <solution>Fixed parameter order to get_by_id(self, db, entity_id)</solution>
+                <files-changed>
+                    <file>app/services/database/base_repository.py:55-72</file>
+                    <file>app/routes/threads_route.py:81-123</file>
+                </files-changed>
+                <prevention>Added regression test in app/tests/test_thread_repository.py</prevention>
+            </fix>
+            
+            <fix date="2025-08-12">
+                <title>Staging Deployment Configuration Loading Failure</title>
+                <problem>Database URL and other critical configs not loading in Cloud Run staging environment</problem>
+                <symptoms>
+                    <symptom>Error: "database url not configured etc." in Cloud Run logs</symptom>
+                    <symptom>Secrets loading message appears but configs remain unset</symptom>
+                    <symptom>ClickHouse credentials passed but not accessible</symptom>
+                </symptoms>
+                <root-causes>
+                    <cause>StagingConfig class didn't override database_url from base AppConfig (which defaults to None)</cause>
+                    <cause>Critical environment variables (DATABASE_URL, REDIS_URL, etc.) not loaded from environment</cause>
+                    <cause>ConfigManager._load_from_environment_variables() method existed but was never called</cause>
+                    <cause>No mechanism to load non-secret environment variables during config initialization</cause>
+                </root-causes>
+                <solution>
+                    <step>Added __init__ method to StagingConfig to load DATABASE_URL from environment</step>
+                    <step>Created _load_critical_env_vars() method in ConfigManager to load critical env vars</step>
+                    <step>Added redis_url and clickhouse_url fields to base AppConfig</step>
+                    <step>Ensured JWT_SECRET_KEY, FERNET_KEY, and GEMINI_API_KEY are loaded from environment</step>
+                    <step>Added special handling for ClickHouse and LLM configuration from environment</step>
+                    <step>Updated Terraform configuration to pass GEMINI_API_KEY as environment variable</step>
+                </solution>
+                <files-changed>
+                    <file>app/schemas/Config.py - Added __init__ to StagingConfig, added redis_url/clickhouse_url fields</file>
+                    <file>app/config.py - Added _load_critical_env_vars() method and call in _load_configuration()</file>
+                    <file>terraform/staging/main.tf - Added GEMINI_API_KEY environment variable</file>
+                    <file>terraform/staging/variables.tf - Added gemini_api_key variable</file>
+                </files-changed>
+                <prevention>
+                    <action>Always ensure environment-specific configs override base class defaults</action>
+                    <action>Load critical environment variables before attempting to load secrets</action>
+                    <action>Test configuration loading with minimal environment variables set</action>
+                    <action>Document which environment variables are required vs optional for each environment</action>
+                </prevention>
+                <key-insight>
+                    Environment variables for database connections and service URLs are NOT secrets and should be 
+                    loaded separately from the Secret Manager flow. The configuration loading should follow this order:
+                    1. Create base config for environment
+                    2. Load critical environment variables (DATABASE_URL, REDIS_URL, etc.)
+                    3. Load secrets from Secret Manager or environment
+                    4. Validate configuration
+                </key-insight>
+            </fix>
+            
+            <fix date="2025-08-11">
+                <title>Critical E2E Test Coverage Enhancement</title>
+                <problem>Demo brittleness despite 60%+ coverage - tests focused on happy paths</problem>
+                <root-causes>
+                    <cause>WebSocket state desynchronization during reconnections</cause>
+                    <cause>Race conditions in Zustand store updates</cause>
+                    <cause>Agent orchestration failures under load</cause>
+                    <cause>Missing circuit breaker and retry logic tests</cause>
+                    <cause>No tests for memory leaks or performance degradation</cause>
+                </root-causes>
+                <solution>Implemented 50 critical e2e tests for failure scenarios</solution>
+                <test-patterns>
+                    <pattern>Network partition simulation: cy.intercept('**/ws**', { forceNetworkError: true })</pattern>
+                    <pattern>Memory leak detection: Track performance.memory.usedJSHeapSize</pattern>
+                    <pattern>Concurrent update testing: Fire multiple state updates in parallel</pattern>
+                    <pattern>Circuit breaker validation: Track failure counts and verify degradation</pattern>
+                </test-patterns>
+                <files-created>
+                    <file>critical-websocket-resilience.cy.ts - 15 WebSocket tests</file>
+                    <file>critical-state-synchronization.cy.ts - 10 state tests</file>
+                    <file>critical-agent-orchestration-recovery.cy.ts - 10 agent tests</file>
+                </files-created>
+                <prevention>Always test failure scenarios, concurrent operations, network instability, memory usage, error cascades</prevention>
+            </fix>
+            
+            <fix date="2025-08-12">
+                <title>Staging Workflow Concurrency Control</title>
+                <problem>Multiple commits in quick succession cause redundant builds and resource waste</problem>
+                <root-causes>
+                    <cause>No cancellation of in-progress workflows when new commits pushed</cause>
+                    <cause>Parallel workflows consuming resources for outdated commits</cause>
+                    <cause>Developers waiting for outdated workflows to complete</cause>
+                </root-causes>
+                <solution>Added GitHub Actions concurrency groups with cancel-in-progress</solution>
+                <implementation>
+                    <code>
+                        concurrency:
+                          group: staging-pr-${{ github.event.pull_request.number }}
+                          cancel-in-progress: true
+                    </code>
+                    <exception>Destroy operations use separate group with cancel-in-progress: false</exception>
+                </implementation>
+                <benefits>
+                    <benefit>Only latest commit's workflow runs to completion</benefit>
+                    <benefit>Faster feedback on latest changes</benefit>
+                    <benefit>Reduced cloud costs from cancelled builds</benefit>
+                    <benefit>Cleaner workflow history</benefit>
+                </benefits>
+                <prevention>Always use concurrency groups for PR-based workflows to prevent redundant runs</prevention>
+            </fix>
+        </section>
+
+        <section id="test-focus-strategy" order="3">
+            <title>Test Focus Strategy</title>
+            <avoid>
+                <item>Testing basic Python functions</item>
+                <item>Simple getters/setters</item>
+                <item>Trivial utilities</item>
+            </avoid>
+            <focus>
+                <item>Netra-specific business logic and integrations</item>
+                <item>Complex dependency interactions (database, Redis, ClickHouse, LLM providers)</item>
+                <item>Agent orchestration and WebSocket communication</item>
+                <item>API endpoints with authentication and authorization</item>
+                <item>Critical data flows and error handling scenarios</item>
+                <item>Performance and concurrency edge cases</item>
+            </focus>
+        </section>
+    </sections>
+</specification>

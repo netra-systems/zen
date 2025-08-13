@@ -5,6 +5,7 @@ import { AppWithLayout } from '@/components/AppWithLayout';
 import { AuthProvider } from '@/auth';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import './globals.css';
+import '@/styles/glassmorphism.css';
 
 const inter = Inter({ subsets: ['latin'] });
 

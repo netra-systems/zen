@@ -47,7 +47,36 @@
             </requirements>
         </section>
         
-        <section id="structured-generation" order="4">
+        <section id="configuration" order="4">
+            <title>Configuration and Usage</title>
+            <locations>
+                <location>Central LLM Manager: app/llm/llm_manager.py</location>
+                <location>Configuration: app/schemas/Config.py:167-197</location>
+                <location>LLM configs in AppConfig.llm_configs dictionary</location>
+            </locations>
+            <agent-contexts>
+                <context>triage: Message classification and routing</context>
+                <context>data: Data analysis and processing</context>
+                <context>optimizations_core: AI workload optimization</context>
+                <context>actions_to_meet_goals: Goal-driven task execution</context>
+                <context>reporting: Report generation</context>
+                <context>analysis: General analysis tasks</context>
+            </agent-contexts>
+            <adding-provider>
+                <step>Add to Config in app/schemas/Config.py with provider, model_name, generation_config</step>
+                <step>Add SecretReference for API key management</step>
+                <step>Set environment variable for API key</step>
+                <step>Use via: response = await llm_manager.ask_llm(prompt, "config_name")</step>
+            </adding-provider>
+            <features>
+                <feature>Supports Google (Gemini) and OpenAI providers out of the box</feature>
+                <feature>Handles caching, mocking for dev mode, and streaming</feature>
+                <feature>Secrets managed via SecretReference system</feature>
+                <feature>Dev mode can disable LLMs with DEV_MODE_DISABLE_LLM=true</feature>
+            </features>
+        </section>
+        
+        <section id="structured-generation" order="5">
             <title>Structured Generation</title>
             <description>Support for type-safe structured outputs from LLMs using Pydantic models</description>
             <requirements>

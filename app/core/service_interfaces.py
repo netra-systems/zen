@@ -3,7 +3,7 @@
 import abc
 import asyncio
 from typing import Any, Dict, Generic, List, Optional, TypeVar, Union, Protocol
-from datetime import datetime
+from datetime import datetime, UTC
 from contextlib import asynccontextmanager
 
 from pydantic import BaseModel
@@ -142,7 +142,7 @@ class BaseServiceMixin:
                 / self._metrics.requests_total
             )
         
-        self._metrics.last_request_timestamp = datetime.utcnow()
+        self._metrics.last_request_timestamp = datetime.now(UTC)
     
     def _create_background_task(self, coro):
         """Create and track a background task."""
@@ -223,7 +223,7 @@ class BaseService(BaseServiceMixin):
             return ServiceHealth(
                 service_name=self._service_name,
                 status=status,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 dependencies=dependencies,
                 metrics=self._metrics.dict()
             )
@@ -231,7 +231,7 @@ class BaseService(BaseServiceMixin):
             return ServiceHealth(
                 service_name=self._service_name,
                 status="unhealthy",
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 dependencies={},
                 metrics={"error": str(e)}
             )
@@ -458,7 +458,7 @@ class ServiceRegistry:
                 health_results[name] = ServiceHealth(
                     service_name=name,
                     status="unhealthy",
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.now(UTC),
                     dependencies={},
                     metrics={"error": str(e)}
                 )

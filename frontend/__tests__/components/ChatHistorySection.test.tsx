@@ -4,6 +4,11 @@ import userEvent from '@testing-library/user-event';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
 import { ThreadService } from '@/services/threadService';
 import { act } from 'react';
+import { 
+  createMockThreadStore,
+  createMockChatStore,
+  createMockAuthStore
+} from '../utils/storeMocks';
 
 // Mock next/navigation
 const mockRouter = {
@@ -16,16 +21,10 @@ jest.mock('next/navigation', () => ({
   usePathname: () => mockPathname,
 }));
 
-// Mock stores
-const mockSetThreads = jest.fn();
-const mockSetCurrentThread = jest.fn();
-const mockAddThread = jest.fn();
-const mockUpdateThread = jest.fn();
-const mockDeleteThread = jest.fn();
-const mockSetLoading = jest.fn();
-const mockSetError = jest.fn();
-const mockClearMessages = jest.fn();
-const mockLoadMessages = jest.fn();
+// Create mock instances
+let mockThreadStore: ReturnType<typeof createMockThreadStore>;
+let mockChatStore: ReturnType<typeof createMockChatStore>;
+let mockAuthStore: ReturnType<typeof createMockAuthStore>;
 
 jest.mock('@/store/threadStore', () => ({
   useThreadStore: jest.fn(),
@@ -99,26 +98,23 @@ describe('ChatHistorySection', () => {
     mockRouter.push.mockClear();
     mockPathname = '/chat';
     
-    (useThreadStore as unknown as jest.Mock).mockReturnValue({
+    // Create fresh mock instances
+    mockThreadStore = createMockThreadStore({
       threads: mockThreads,
-      currentThreadId: 'thread-1',
-      setThreads: mockSetThreads,
-      setCurrentThread: mockSetCurrentThread,
-      addThread: mockAddThread,
-      updateThread: mockUpdateThread,
-      deleteThread: mockDeleteThread,
-      setLoading: mockSetLoading,
-      setError: mockSetError,
+      currentThread: mockThreads[0],
+      currentThreadId: 'thread-1'
     });
     
-    (useChatStore as unknown as jest.Mock).mockReturnValue({
-      clearMessages: mockClearMessages,
-      loadMessages: mockLoadMessages,
+    mockChatStore = createMockChatStore();
+    
+    mockAuthStore = createMockAuthStore({
+      isAuthenticated: true
     });
     
-    (useAuthStore as unknown as jest.Mock).mockReturnValue({
-      isAuthenticated: true,
-    });
+    // Configure store mocks
+    (useThreadStore as unknown as jest.Mock).mockReturnValue(mockThreadStore);
+    (useChatStore as unknown as jest.Mock).mockReturnValue(mockChatStore);
+    (useAuthStore as unknown as jest.Mock).mockReturnValue(mockAuthStore);
 
     (ThreadService.listThreads as jest.Mock).mockResolvedValue(mockThreads);
     (ThreadService.getThreadMessages as jest.Mock).mockResolvedValue({ messages: [] });
@@ -144,6 +140,12 @@ describe('ChatHistorySection', () => {
     });
 
     it('should highlight the current active thread', () => {
+      // Configure store to have currentThreadId set
+      (useThreadStore as unknown as jest.Mock).mockReturnValue({
+        ...mockThreadStore,
+        currentThreadId: 'thread-1'
+      });
+      
       render(<ChatHistorySection />);
       
       const firstThread = screen.getByText('First Conversation').closest('div[class*="group"]');
@@ -163,13 +165,13 @@ describe('ChatHistorySection', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         threads: [],
         currentThreadId: null,
-        setThreads: mockSetThreads,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
-        updateThread: mockUpdateThread,
-        deleteThread: mockDeleteThread,
-        setLoading: mockSetLoading,
-        setError: mockSetError,
+        setThreads: mockThreadStore.setThreads,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
+        updateThread: mockThreadStore.updateThread,
+        deleteThread: mockThreadStore.deleteThread,
+        setLoading: mockThreadStore.setLoading,
+        setError: mockThreadStore.setError,
       });
 
       render(<ChatHistorySection />);
@@ -192,13 +194,13 @@ describe('ChatHistorySection', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         threads: threadsWithNullTitle,
         currentThreadId: 'thread-1',
-        setThreads: mockSetThreads,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
-        updateThread: mockUpdateThread,
-        deleteThread: mockDeleteThread,
-        setLoading: mockSetLoading,
-        setError: mockSetError,
+        setThreads: mockThreadStore.setThreads,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
+        updateThread: mockThreadStore.updateThread,
+        deleteThread: mockThreadStore.deleteThread,
+        setLoading: mockThreadStore.setLoading,
+        setError: mockThreadStore.setError,
       });
 
       render(<ChatHistorySection />);
@@ -211,7 +213,7 @@ describe('ChatHistorySection', () => {
       
       await waitFor(() => {
         expect(ThreadService.listThreads).toHaveBeenCalledTimes(1);
-        expect(mockSetThreads).toHaveBeenCalledWith(mockThreads);
+        expect(mockThreadStore.setThreads).toHaveBeenCalledWith(mockThreads);
       });
     });
 
@@ -233,8 +235,8 @@ describe('ChatHistorySection', () => {
       render(<ChatHistorySection />);
       
       await waitFor(() => {
-        expect(mockSetError).toHaveBeenCalledWith(errorMessage);
-        expect(mockSetLoading).toHaveBeenCalledWith(false);
+        expect(mockThreadStore.setError).toHaveBeenCalledWith(errorMessage);
+        expect(mockThreadStore.setLoading).toHaveBeenCalledWith(false);
       });
     });
   });
@@ -363,7 +365,7 @@ describe('ChatHistorySection', () => {
       fireEvent.click(deleteButton);
       
       expect(ThreadService.deleteThread).not.toHaveBeenCalled();
-      expect(mockDeleteThread).not.toHaveBeenCalled();
+      expect(mockThreadStore.deleteThread).not.toHaveBeenCalled();
     });
 
     it('should delete thread and update state on confirmation', async () => {
@@ -378,7 +380,7 @@ describe('ChatHistorySection', () => {
       
       await waitFor(() => {
         expect(ThreadService.deleteThread).toHaveBeenCalledWith('thread-1');
-        expect(mockDeleteThread).toHaveBeenCalledWith('thread-1');
+        expect(mockThreadStore.deleteThread).toHaveBeenCalledWith('thread-1');
       });
     });
 
@@ -393,7 +395,7 @@ describe('ChatHistorySection', () => {
       fireEvent.click(deleteButton);
       
       await waitFor(() => {
-        expect(mockClearMessages).toHaveBeenCalled();
+        expect(mockChatStore.clearMessages).toHaveBeenCalled();
       });
     });
 
@@ -409,7 +411,7 @@ describe('ChatHistorySection', () => {
       
       await waitFor(() => {
         expect(ThreadService.deleteThread).toHaveBeenCalledWith('thread-2');
-        expect(mockClearMessages).not.toHaveBeenCalled();
+        expect(mockChatStore.clearMessages).not.toHaveBeenCalled();
       });
     });
 
@@ -425,8 +427,8 @@ describe('ChatHistorySection', () => {
       fireEvent.click(deleteButton);
       
       await waitFor(() => {
-        expect(mockSetError).toHaveBeenCalledWith(errorMessage);
-        expect(mockDeleteThread).not.toHaveBeenCalled();
+        expect(mockThreadStore.setError).toHaveBeenCalledWith(errorMessage);
+        expect(mockThreadStore.deleteThread).not.toHaveBeenCalled();
       });
     });
 
@@ -484,7 +486,7 @@ describe('ChatHistorySection', () => {
       fireEvent.click(deleteButton);
       
       await waitFor(() => {
-        expect(mockDeleteThread).toHaveBeenCalledWith('thread-1');
+        expect(mockThreadStore.deleteThread).toHaveBeenCalledWith('thread-1');
       });
     });
   });
@@ -500,13 +502,13 @@ describe('ChatHistorySection', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         threads: initialThreads,
         currentThreadId: 'thread-1',
-        setThreads: mockSetThreads,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
-        updateThread: mockUpdateThread,
-        deleteThread: mockDeleteThread,
-        setLoading: mockSetLoading,
-        setError: mockSetError,
+        setThreads: mockThreadStore.setThreads,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
+        updateThread: mockThreadStore.updateThread,
+        deleteThread: mockThreadStore.deleteThread,
+        setLoading: mockThreadStore.setLoading,
+        setError: mockThreadStore.setError,
       });
       
       const { container } = render(<ChatHistorySection />);
@@ -556,8 +558,8 @@ describe('ChatHistorySection', () => {
       fireEvent.click(secondThread!);
       
       await waitFor(() => {
-        expect(mockSetCurrentThread).toHaveBeenCalledWith('thread-2');
-        expect(mockClearMessages).toHaveBeenCalled();
+        expect(mockThreadStore.setCurrentThread).toHaveBeenCalledWith('thread-2');
+        expect(mockChatStore.clearMessages).toHaveBeenCalled();
       });
     });
 
@@ -574,20 +576,26 @@ describe('ChatHistorySection', () => {
       
       await waitFor(() => {
         expect(ThreadService.getThreadMessages).toHaveBeenCalledWith('thread-2');
-        expect(mockLoadMessages).toHaveBeenCalledWith(mockMessages);
+        expect(mockChatStore.loadMessages).toHaveBeenCalledWith(mockMessages);
       });
     });
 
     it('should not reload if clicking current thread', async () => {
+      // Configure store to have currentThreadId set to thread-1
+      (useThreadStore as unknown as jest.Mock).mockReturnValue({
+        ...mockThreadStore,
+        currentThreadId: 'thread-1'
+      });
+      
       render(<ChatHistorySection />);
       
       const firstThread = screen.getByText('First Conversation').closest('.group');
       fireEvent.click(firstThread!);
       
-      await waitFor(() => {
-        expect(mockSetCurrentThread).not.toHaveBeenCalled();
-        expect(mockClearMessages).not.toHaveBeenCalled();
-      });
+      // Should return early without making any state changes
+      expect(mockThreadStore.setCurrentThread).not.toHaveBeenCalled();
+      expect(mockChatStore.clearMessages).not.toHaveBeenCalled();
+      expect(ThreadService.getThreadMessages).not.toHaveBeenCalled();
     });
 
     it('should navigate to chat page if not already there', async () => {
@@ -624,7 +632,7 @@ describe('ChatHistorySection', () => {
       fireEvent.click(secondThread!);
       
       await waitFor(() => {
-        expect(mockSetError).toHaveBeenCalledWith(errorMessage);
+        expect(mockThreadStore.setError).toHaveBeenCalledWith(errorMessage);
       });
     });
 
@@ -641,7 +649,7 @@ describe('ChatHistorySection', () => {
       
       // Should show loading state (not currently implemented)
       await waitFor(() => {
-        expect(mockSetCurrentThread).toHaveBeenCalledWith('thread-2');
+        expect(mockThreadStore.setCurrentThread).toHaveBeenCalledWith('thread-2');
       });
       
       resolveMessages!();
@@ -655,7 +663,7 @@ describe('ChatHistorySection', () => {
       fireEvent.click(secondThread!);
       
       await waitFor(() => {
-        expect(mockSetCurrentThread).toHaveBeenCalledWith('thread-2');
+        expect(mockThreadStore.setCurrentThread).toHaveBeenCalledWith('thread-2');
         // expect(ThreadService.updateThreadAccess).toHaveBeenCalledWith('thread-2');
       });
     });
@@ -669,7 +677,7 @@ describe('ChatHistorySection', () => {
       fireEvent.click(secondThread!);
       
       await waitFor(() => {
-        expect(mockSetCurrentThread).toHaveBeenCalledWith('thread-2');
+        expect(mockThreadStore.setCurrentThread).toHaveBeenCalledWith('thread-2');
       });
       
       // Switch back to thread 1
@@ -704,8 +712,9 @@ describe('ChatHistorySection', () => {
       
       await waitFor(() => {
         expect(ThreadService.createThread).toHaveBeenCalledWith('New Conversation');
-        expect(mockAddThread).toHaveBeenCalledWith(newThread);
-        expect(mockSetCurrentThread).toHaveBeenCalledWith('thread-new');
+        expect(mockThreadStore.addThread).toHaveBeenCalledWith(newThread);
+        // setCurrentThread is called via handleSelectThread internally
+        expect(mockThreadStore.setCurrentThread).toHaveBeenCalledWith('thread-new');
       });
     });
 
@@ -719,12 +728,14 @@ describe('ChatHistorySection', () => {
       fireEvent.click(newChatButton);
       
       await waitFor(() => {
-        expect(mockSetError).toHaveBeenCalledWith(errorMessage);
-        expect(mockAddThread).not.toHaveBeenCalled();
+        expect(mockThreadStore.setError).toHaveBeenCalledWith(errorMessage);
+        expect(mockThreadStore.addThread).not.toHaveBeenCalled();
       });
     });
 
     it('should edit thread title', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');
@@ -742,10 +753,13 @@ describe('ChatHistorySection', () => {
       
       await waitFor(() => {
         expect(ThreadService.updateThread).toHaveBeenCalledWith('thread-1', 'Updated Title');
+        expect(mockThreadStore.updateThread).toHaveBeenCalledWith('thread-1', { title: 'Updated Title' });
       });
     });
 
     it('should cancel title editing on Escape', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');
@@ -763,6 +777,8 @@ describe('ChatHistorySection', () => {
     });
 
     it('should handle empty title during editing', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Original Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');
@@ -801,8 +817,7 @@ describe('ChatHistorySection', () => {
     });
 
     it('should update thread title with check button', async () => {
-      const updatedThread = { ...mockThreads[0], title: 'Updated Title' };
-      (ThreadService.updateThread as jest.Mock).mockResolvedValue(updatedThread);
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
       
       render(<ChatHistorySection />);
       
@@ -820,11 +835,13 @@ describe('ChatHistorySection', () => {
       
       await waitFor(() => {
         expect(ThreadService.updateThread).toHaveBeenCalledWith('thread-1', 'Updated Title');
-        expect(mockUpdateThread).toHaveBeenCalledWith('thread-1', { title: 'Updated Title' });
+        expect(mockThreadStore.updateThread).toHaveBeenCalledWith('thread-1', { title: 'Updated Title' });
       });
     });
 
     it('should cancel title editing with X button', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');
@@ -866,14 +883,16 @@ describe('ChatHistorySection', () => {
       fireEvent.keyDown(input, { key: 'Enter' });
       
       await waitFor(() => {
-        expect(mockSetError).toHaveBeenCalledWith(errorMessage);
-        expect(mockUpdateThread).not.toHaveBeenCalled();
+        expect(mockThreadStore.setError).toHaveBeenCalledWith(errorMessage);
+        expect(mockThreadStore.updateThread).not.toHaveBeenCalled();
       });
       
       consoleErrorSpy.mockRestore();
     });
 
     it('should stop propagation on edit button click', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');
@@ -884,7 +903,7 @@ describe('ChatHistorySection', () => {
       
       fireEvent(editButton, clickEvent);
       
-      expect(mockSetCurrentThread).not.toHaveBeenCalled();
+      expect(mockThreadStore.setCurrentThread).not.toHaveBeenCalled();
     });
 
     it('should format dates correctly for different time periods', () => {
@@ -899,13 +918,13 @@ describe('ChatHistorySection', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         threads: threadsWithDates,
         currentThreadId: 'thread-1',
-        setThreads: mockSetThreads,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
-        updateThread: mockUpdateThread,
-        deleteThread: mockDeleteThread,
-        setLoading: mockSetLoading,
-        setError: mockSetError,
+        setThreads: mockThreadStore.setThreads,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
+        updateThread: mockThreadStore.updateThread,
+        deleteThread: mockThreadStore.deleteThread,
+        setLoading: mockThreadStore.setLoading,
+        setError: mockThreadStore.setError,
       });
       
       render(<ChatHistorySection />);
@@ -926,7 +945,7 @@ describe('ChatHistorySection', () => {
       render(<ChatHistorySection />);
       
       await waitFor(() => {
-        expect(mockSetError).toHaveBeenCalledWith('Failed to load conversation history');
+        expect(mockThreadStore.setError).toHaveBeenCalledWith('Failed to load conversation history');
       });
       
       consoleErrorSpy.mockRestore();
@@ -944,7 +963,7 @@ describe('ChatHistorySection', () => {
       fireEvent.click(secondThread!);
       
       await waitFor(() => {
-        expect(mockSetError).toHaveBeenCalledWith('Failed to load conversation');
+        expect(mockThreadStore.setError).toHaveBeenCalledWith('Failed to load conversation');
       });
       
       consoleErrorSpy.mockRestore();
@@ -964,7 +983,7 @@ describe('ChatHistorySection', () => {
       fireEvent.click(deleteButton);
       
       await waitFor(() => {
-        expect(mockSetError).toHaveBeenCalledWith('Failed to delete conversation');
+        expect(mockThreadStore.setError).toHaveBeenCalledWith('Failed to delete conversation');
       });
       
       consoleErrorSpy.mockRestore();
@@ -982,7 +1001,7 @@ describe('ChatHistorySection', () => {
       fireEvent.click(newChatButton);
       
       await waitFor(() => {
-        expect(mockSetError).toHaveBeenCalledWith('Failed to create new conversation');
+        expect(mockThreadStore.setError).toHaveBeenCalledWith('Failed to create new conversation');
       });
       
       consoleErrorSpy.mockRestore();
@@ -1008,7 +1027,7 @@ describe('ChatHistorySection', () => {
       fireEvent.keyDown(input, { key: 'Enter' });
       
       await waitFor(() => {
-        expect(mockSetError).toHaveBeenCalledWith('Failed to update thread title');
+        expect(mockThreadStore.setError).toHaveBeenCalledWith('Failed to update thread title');
       });
       
       consoleErrorSpy.mockRestore();
@@ -1026,6 +1045,8 @@ describe('ChatHistorySection', () => {
     });
 
     it('should handle edit input click propagation', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');
@@ -1038,10 +1059,12 @@ describe('ChatHistorySection', () => {
       
       fireEvent.click(inputContainer!);
       
-      expect(mockSetCurrentThread).not.toHaveBeenCalled();
+      expect(mockThreadStore.setCurrentThread).not.toHaveBeenCalled();
     });
 
     it('should handle whitespace-only title as empty', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Original Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');
@@ -1071,7 +1094,7 @@ describe('ChatHistorySection', () => {
       
       await waitFor(() => {
         expect(ThreadService.getThreadMessages).toHaveBeenCalledWith('thread-2');
-        expect(mockLoadMessages).not.toHaveBeenCalled();
+        expect(mockChatStore.loadMessages).not.toHaveBeenCalled();
       });
     });
 
@@ -1083,13 +1106,13 @@ describe('ChatHistorySection', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         threads: threadsWithUndefinedTitle,
         currentThreadId: 'thread-1',
-        setThreads: mockSetThreads,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
-        updateThread: mockUpdateThread,
-        deleteThread: mockDeleteThread,
-        setLoading: mockSetLoading,
-        setError: mockSetError,
+        setThreads: mockThreadStore.setThreads,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
+        updateThread: mockThreadStore.updateThread,
+        deleteThread: mockThreadStore.deleteThread,
+        setLoading: mockThreadStore.setLoading,
+        setError: mockThreadStore.setError,
       });
 
       render(<ChatHistorySection />);
@@ -1105,13 +1128,13 @@ describe('ChatHistorySection', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         threads: threadsWithNullTitle,
         currentThreadId: 'thread-1',
-        setThreads: mockSetThreads,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
-        updateThread: mockUpdateThread,
-        deleteThread: mockDeleteThread,
-        setLoading: mockSetLoading,
-        setError: mockSetError,
+        setThreads: mockThreadStore.setThreads,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
+        updateThread: mockThreadStore.updateThread,
+        deleteThread: mockThreadStore.deleteThread,
+        setLoading: mockThreadStore.setLoading,
+        setError: mockThreadStore.setError,
       });
 
       render(<ChatHistorySection />);
@@ -1164,7 +1187,7 @@ describe('ChatHistorySection', () => {
       fireEvent.click(secondThread!);
       
       await waitFor(() => {
-        expect(mockSetCurrentThread).toHaveBeenCalledTimes(3);
+        expect(mockThreadStore.setCurrentThread).toHaveBeenCalledTimes(3);
       });
     });
 
@@ -1177,13 +1200,13 @@ describe('ChatHistorySection', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         threads: threadsWithLongTitle,
         currentThreadId: 'thread-1',
-        setThreads: mockSetThreads,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
-        updateThread: mockUpdateThread,
-        deleteThread: mockDeleteThread,
-        setLoading: mockSetLoading,
-        setError: mockSetError,
+        setThreads: mockThreadStore.setThreads,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
+        updateThread: mockThreadStore.updateThread,
+        deleteThread: mockThreadStore.deleteThread,
+        setLoading: mockThreadStore.setLoading,
+        setError: mockThreadStore.setError,
       });
 
       render(<ChatHistorySection />);
@@ -1201,13 +1224,13 @@ describe('ChatHistorySection', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         threads: threadsWithSpecialTitle,
         currentThreadId: 'thread-1',
-        setThreads: mockSetThreads,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
-        updateThread: mockUpdateThread,
-        deleteThread: mockDeleteThread,
-        setLoading: mockSetLoading,
-        setError: mockSetError,
+        setThreads: mockThreadStore.setThreads,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
+        updateThread: mockThreadStore.updateThread,
+        deleteThread: mockThreadStore.deleteThread,
+        setLoading: mockThreadStore.setLoading,
+        setError: mockThreadStore.setError,
       });
 
       render(<ChatHistorySection />);
@@ -1226,13 +1249,13 @@ describe('ChatHistorySection', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         threads: threadsWithInvalidTimestamp,
         currentThreadId: 'thread-1',
-        setThreads: mockSetThreads,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
-        updateThread: mockUpdateThread,
-        deleteThread: mockDeleteThread,
-        setLoading: mockSetLoading,
-        setError: mockSetError,
+        setThreads: mockThreadStore.setThreads,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
+        updateThread: mockThreadStore.updateThread,
+        deleteThread: mockThreadStore.deleteThread,
+        setLoading: mockThreadStore.setLoading,
+        setError: mockThreadStore.setError,
       });
 
       // Should not crash
@@ -1250,8 +1273,8 @@ describe('ChatHistorySection', () => {
       render(<ChatHistorySection />);
       
       await waitFor(() => {
-        expect(mockSetError).toHaveBeenCalledWith('Network timeout');
-        expect(mockSetLoading).toHaveBeenCalledWith(false);
+        expect(mockThreadStore.setError).toHaveBeenCalledWith('Network timeout');
+        expect(mockThreadStore.setLoading).toHaveBeenCalledWith(false);
       });
       
       consoleErrorSpy.mockRestore();
@@ -1261,7 +1284,7 @@ describe('ChatHistorySection', () => {
       const { unmount } = render(<ChatHistorySection />);
       
       await waitFor(() => {
-        expect(mockSetThreads).toHaveBeenCalled();
+        expect(mockThreadStore.setThreads).toHaveBeenCalled();
       });
       
       unmount();
@@ -1276,10 +1299,18 @@ describe('ChatHistorySection', () => {
       mockPathname = '/dashboard';
       (ThreadService.getThreadMessages as jest.Mock).mockResolvedValue({ messages: [] });
       
-      render(<ChatHistorySection />);
+      // Mock router.push to reject, but since the component doesn't await it,
+      // we need to handle the promise rejection to prevent test errors
+      const navigationError = new Error('Navigation failed');
+      let rejectPromise: Promise<never>;
+      mockRouter.push.mockImplementation(() => {
+        rejectPromise = Promise.reject(navigationError);
+        // Catch the rejection to prevent unhandled promise rejection
+        rejectPromise.catch(() => {});
+        return rejectPromise;
+      });
       
-      // Set up the rejection after render but before click
-      mockRouter.push.mockRejectedValueOnce(new Error('Navigation failed'));
+      render(<ChatHistorySection />);
       
       const secondThread = screen.getByText('Second Conversation').closest('.group');
       fireEvent.click(secondThread!);
@@ -1287,13 +1318,19 @@ describe('ChatHistorySection', () => {
       await waitFor(() => {
         expect(mockRouter.push).toHaveBeenCalledWith('/chat');
         // Should still update thread despite navigation failure
-        expect(mockSetCurrentThread).toHaveBeenCalledWith('thread-2');
+        expect(mockThreadStore.setCurrentThread).toHaveBeenCalledWith('thread-2');
       });
+      
+      // Reset mock
+      mockRouter.push.mockClear();
+      mockRouter.push.mockResolvedValue(undefined);
       
       consoleErrorSpy.mockRestore();
     });
 
     it('should handle concurrent edit operations', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
+      
       render(<ChatHistorySection />);
       
       const firstThread = screen.getByText('First Conversation').closest('.group');
@@ -1321,13 +1358,13 @@ describe('ChatHistorySection', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         threads: malformedThreads,
         currentThreadId: 'thread-1',
-        setThreads: mockSetThreads,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
-        updateThread: mockUpdateThread,
-        deleteThread: mockDeleteThread,
-        setLoading: mockSetLoading,
-        setError: mockSetError,
+        setThreads: mockThreadStore.setThreads,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
+        updateThread: mockThreadStore.updateThread,
+        deleteThread: mockThreadStore.deleteThread,
+        setLoading: mockThreadStore.setLoading,
+        setError: mockThreadStore.setError,
       });
 
       // Should not crash
@@ -1347,13 +1384,13 @@ describe('ChatHistorySection', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         threads: manyThreads,
         currentThreadId: 'thread-1',
-        setThreads: mockSetThreads,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
-        updateThread: mockUpdateThread,
-        deleteThread: mockDeleteThread,
-        setLoading: mockSetLoading,
-        setError: mockSetError,
+        setThreads: mockThreadStore.setThreads,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
+        updateThread: mockThreadStore.updateThread,
+        deleteThread: mockThreadStore.deleteThread,
+        setLoading: mockThreadStore.setLoading,
+        setError: mockThreadStore.setError,
       });
 
       const { container } = render(<ChatHistorySection />);
@@ -1364,8 +1401,7 @@ describe('ChatHistorySection', () => {
     });
 
     it('should handle thread update with same data', async () => {
-      const updatedThread = { ...mockThreads[0] }; // Same data
-      (ThreadService.updateThread as jest.Mock).mockResolvedValue(updatedThread);
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'First Conversation' });
       
       render(<ChatHistorySection />);
       
@@ -1391,13 +1427,13 @@ describe('ChatHistorySection', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         threads: threadsWithEmoji,
         currentThreadId: 'thread-1',
-        setThreads: mockSetThreads,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
-        updateThread: mockUpdateThread,
-        deleteThread: mockDeleteThread,
-        setLoading: mockSetLoading,
-        setError: mockSetError,
+        setThreads: mockThreadStore.setThreads,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
+        updateThread: mockThreadStore.updateThread,
+        deleteThread: mockThreadStore.deleteThread,
+        setLoading: mockThreadStore.setLoading,
+        setError: mockThreadStore.setError,
       });
 
       render(<ChatHistorySection />);
@@ -1413,13 +1449,13 @@ describe('ChatHistorySection', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         threads: threadsWithZeroMessages,
         currentThreadId: 'thread-1',
-        setThreads: mockSetThreads,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
-        updateThread: mockUpdateThread,
-        deleteThread: mockDeleteThread,
-        setLoading: mockSetLoading,
-        setError: mockSetError,
+        setThreads: mockThreadStore.setThreads,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
+        updateThread: mockThreadStore.updateThread,
+        deleteThread: mockThreadStore.deleteThread,
+        setLoading: mockThreadStore.setLoading,
+        setError: mockThreadStore.setError,
       });
 
       render(<ChatHistorySection />);
@@ -1437,13 +1473,13 @@ describe('ChatHistorySection', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         threads: threadsWithStatus,
         currentThreadId: 'thread-1',
-        setThreads: mockSetThreads,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
-        updateThread: mockUpdateThread,
-        deleteThread: mockDeleteThread,
-        setLoading: mockSetLoading,
-        setError: mockSetError,
+        setThreads: mockThreadStore.setThreads,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
+        updateThread: mockThreadStore.updateThread,
+        deleteThread: mockThreadStore.deleteThread,
+        setLoading: mockThreadStore.setLoading,
+        setError: mockThreadStore.setError,
       });
 
       render(<ChatHistorySection />);
@@ -1469,7 +1505,7 @@ describe('ChatHistorySection', () => {
       fireEvent.click(secondThread!);
       
       await waitFor(() => {
-        expect(mockLoadMessages).toHaveBeenCalledWith(largeMessages);
+        expect(mockChatStore.loadMessages).toHaveBeenCalledWith(largeMessages);
       });
     });
 
@@ -1507,7 +1543,7 @@ describe('ChatHistorySection', () => {
       
       await waitFor(() => {
         // Double click triggers two separate clicks
-        expect(mockSetCurrentThread).toHaveBeenCalledWith('thread-2');
+        expect(mockThreadStore.setCurrentThread).toHaveBeenCalledWith('thread-2');
       });
     });
 
@@ -1551,13 +1587,13 @@ describe('ChatHistorySection', () => {
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
         threads: largeThreadList,
         currentThreadId: 'thread-1',
-        setThreads: mockSetThreads,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
-        updateThread: mockUpdateThread,
-        deleteThread: mockDeleteThread,
-        setLoading: mockSetLoading,
-        setError: mockSetError,
+        setThreads: mockThreadStore.setThreads,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
+        updateThread: mockThreadStore.updateThread,
+        deleteThread: mockThreadStore.deleteThread,
+        setLoading: mockThreadStore.setLoading,
+        setError: mockThreadStore.setError,
       });
       
       render(<ChatHistorySection />);
@@ -1581,13 +1617,13 @@ describe('ChatHistorySection', () => {
         (useThreadStore as unknown as jest.Mock).mockReturnValue({
           ...update,
           currentThreadId: 'thread-1',
-          setThreads: mockSetThreads,
-          setCurrentThread: mockSetCurrentThread,
-          addThread: mockAddThread,
-          updateThread: mockUpdateThread,
-          deleteThread: mockDeleteThread,
-          setLoading: mockSetLoading,
-          setError: mockSetError,
+          setThreads: mockThreadStore.setThreads,
+          setCurrentThread: mockThreadStore.setCurrentThread,
+          addThread: mockThreadStore.addThread,
+          updateThread: mockThreadStore.updateThread,
+          deleteThread: mockThreadStore.deleteThread,
+          setLoading: mockThreadStore.setLoading,
+          setError: mockThreadStore.setError,
         });
       });
       
@@ -1628,8 +1664,8 @@ describe('ChatHistorySection', () => {
       const initialRenderCount = renderSpy.mock.calls.length;
       
       // Trigger unrelated state update
-      mockSetLoading(true);
-      mockSetLoading(false);
+      mockThreadStore.setLoading(true);
+      mockThreadStore.setLoading(false);
       
       const finalRenderCount = renderSpy.mock.calls.length;
       
@@ -1678,6 +1714,8 @@ describe('ChatHistorySection', () => {
     });
 
     it('should have proper focus management during editing', async () => {
+      (ThreadService.updateThread as jest.Mock).mockResolvedValue({ title: 'Updated Title' });
+      
       render(<ChatHistorySection />);
       
       const thread = screen.getByText('First Conversation').closest('.group');

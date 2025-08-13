@@ -289,7 +289,7 @@ export default function ImplementationRoadmap({
             </div>
             <Button 
               onClick={handleExport}
-              className="bg-gradient-to-r from-blue-600 to-purple-600"
+              className="bg-gradient-to-r from-emerald-600 to-purple-600"
             >
               <Download className="w-4 h-4 mr-2" />
               Export Plan
@@ -575,7 +575,7 @@ export default function ImplementationRoadmap({
               <Button variant="outline">
                 Schedule Call
               </Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600">
+              <Button className="bg-gradient-to-r from-emerald-600 to-purple-600">
                 Start Pilot Program
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>

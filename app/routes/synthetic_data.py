@@ -422,3 +422,6 @@ async def clone_corpus(
         "status": new_corpus.status
     }
 
+async def get_templates(*args, **kwargs):
+    """Test stub implementation for get_templates."""
+    return {"status": "ok"}

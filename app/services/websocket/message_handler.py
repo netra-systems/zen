@@ -7,6 +7,7 @@ from typing import Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.logging_config import central_logger
 from app.services.database.unit_of_work import get_unit_of_work
+from app.db.postgres import get_async_db
 from app.services.websocket.message_queue import message_queue, QueuedMessage, MessagePriority
 from app.ws_manager import manager
 from abc import ABC, abstractmethod
@@ -43,6 +44,10 @@ class StartAgentHandler(BaseMessageHandler):
             request_data = payload.get("request", {})
             user_request = request_data.get("query", "") or request_data.get("user_request", "")
             
+            # Create short-lived database session for initial setup
+            thread_id = None
+            run_id = None
+            
             async with get_unit_of_work() as uow:
                 thread = await uow.threads.get_or_create_for_user(uow.session, user_id)
                 if not thread:
@@ -65,31 +70,38 @@ class StartAgentHandler(BaseMessageHandler):
                     instructions="You are Netra AI Workload Optimization Assistant"
                 )
                 
-                self.supervisor.thread_id = thread.id
-                self.supervisor.user_id = user_id
-                self.supervisor.db_session = uow.session
-                
-                response = await self.supervisor.run(user_request, run.id, stream_updates=True)
-                
+                thread_id = thread.id
+                run_id = run.id
+            
+            # Set supervisor properties without holding database session
+            self.supervisor.thread_id = thread_id
+            self.supervisor.user_id = user_id
+            self.supervisor.db_session = None  # Don't hold long-lived session
+            
+            # Run supervisor without holding database connection
+            response = await self.supervisor.run(user_request, run_id, stream_updates=True)
+            
+            # Create new session for final message storage
+            async with get_unit_of_work() as uow:
                 if response:
                     await uow.messages.create_message(
                         uow.session,
-                        thread_id=thread.id,
+                        thread_id=thread_id,
                         role="assistant",
                         content=json.dumps(response) if isinstance(response, dict) else str(response),
                         assistant_id="netra-assistant",
-                        run_id=run.id
+                        run_id=run_id
                     )
                 
-                await uow.runs.update_status(uow.session, run.id, "completed")
+                await uow.runs.update_status(uow.session, run_id, "completed")
                 
-                await manager.send_message(
-                    user_id,
-                    {
-                        "type": "agent_completed",
-                        "payload": response
-                    }
-                )
+            await manager.send_message(
+                user_id,
+                {
+                    "type": "agent_completed",
+                    "payload": response
+                }
+            )
         except Exception as e:
             logger.error(f"Error handling start_agent for user {user_id}: {e}")
             await manager.send_error(user_id, f"Failed to start agent: {str(e)}")
@@ -111,6 +123,10 @@ class UserMessageHandler(BaseMessageHandler):
             references = payload.get("references", [])
             
             logger.info(f"Processing user message from {user_id}: {text[:100]}...")
+            
+            # Create short-lived database session for initial setup
+            thread_id = None
+            run_id = None
             
             async with get_unit_of_work() as uow:
                 thread = await uow.threads.get_or_create_for_user(uow.session, user_id)
@@ -135,32 +151,39 @@ class UserMessageHandler(BaseMessageHandler):
                     instructions="You are Netra AI Workload Optimization Assistant"
                 )
                 
-                self.supervisor.thread_id = thread.id
-                self.supervisor.user_id = user_id
-                self.supervisor.db_session = uow.session
-                
-                response = await self.supervisor.run(text, run.id, stream_updates=True)
-                
+                thread_id = thread.id
+                run_id = run.id
+            
+            # Set supervisor properties without holding database session
+            self.supervisor.thread_id = thread_id
+            self.supervisor.user_id = user_id
+            self.supervisor.db_session = None  # Don't hold long-lived session
+            
+            # Run supervisor without holding database connection
+            response = await self.supervisor.run(text, run_id, stream_updates=True)
+            
+            # Create new session for final message storage
+            async with get_unit_of_work() as uow:
                 if response:
                     await uow.messages.create_message(
                         uow.session,
-                        thread.id,
+                        thread_id,
                         role="assistant",
                         content=str(response),
                         metadata={"type": "agent_response"},
                         assistant_id="netra-assistant",
-                        run_id=run.id
+                        run_id=run_id
                     )
                 
-                await uow.runs.update_status(uow.session, run.id, "completed")
+                await uow.runs.update_status(uow.session, run_id, "completed")
                 
-                await manager.send_message(
-                    user_id,
-                    {
-                        "type": "agent_completed",
-                        "payload": response
-                    }
-                )
+            await manager.send_message(
+                user_id,
+                {
+                    "type": "agent_completed",
+                    "payload": response
+                }
+            )
                 
         except Exception as e:
             logger.error(f"Error processing user message: {e}")
@@ -270,8 +293,13 @@ class MessageHandlerService:
         logger.info(f"Registered handler for message type: {message_type}")
     
     async def handle_message(self, user_id: str, message: Dict[str, Any]) -> None:
-        """Queue a message for processing"""
+        """Queue a message for processing with validation"""
         try:
+            # Validate message first using manager's validation
+            if not manager.validate_message(message):
+                await manager.send_error(user_id, "Invalid message format")
+                return
+            
             message_type = message.get("type")
             if not message_type:
                 await manager.send_error(user_id, "Message type not specified")
@@ -280,6 +308,9 @@ class MessageHandlerService:
             if message_type not in self.handlers:
                 await manager.send_error(user_id, f"Unknown message type: {message_type}")
                 return
+            
+            # Sanitize message
+            message = manager.sanitize_message(message)
             
             priority = self._determine_priority(message_type)
             

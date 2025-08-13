@@ -18,6 +18,7 @@ describe('ChatHeader', () => {
     });
     render(<ChatHeader />);
     expect(screen.getByText('Test Agent')).toBeInTheDocument();
+    // Status is displayed with specific casing and formatting
     expect(screen.getByText('running')).toBeInTheDocument();
   });
 
@@ -29,6 +30,7 @@ describe('ChatHeader', () => {
     });
     render(<ChatHeader />);
     expect(screen.getByText('Test Agent')).toBeInTheDocument();
+    // Status is displayed as 'Ready' when lifecycle is null
     expect(screen.getByText('Ready')).toBeInTheDocument();
   });
 
@@ -50,6 +52,7 @@ describe('ChatHeader', () => {
     });
     render(<ChatHeader />);
     expect(screen.getByText('Test Agent')).toBeInTheDocument();
+    // Status is displayed with specific casing and formatting
     expect(screen.getByText('active')).toBeInTheDocument();
   });
 });

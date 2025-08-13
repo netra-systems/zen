@@ -109,7 +109,8 @@ class SchemaValidationService:
         try:
             async with engine.connect() as conn:
                 result = await conn.execute(text("SELECT 1"))
-                return result.scalar() == 1
+                scalar_result = result.scalar()
+                return scalar_result == 1
         except Exception as e:
             logger.error(f"Database connectivity check failed: {e}")
             return False

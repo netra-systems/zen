@@ -18,6 +18,9 @@ class AgentState(BaseModel):
     messages: List[BaseMessage]
     next_node: str
     tool_results: Optional[List[Dict]] = None
+    request: Optional[Any] = None  # Added for backward compatibility with tool_dispatcher
+    current_tool_name: Optional[str] = None  # Added for tool_dispatcher
+    current_tool_args: Optional[Dict[str, Any]] = None  # Added for tool_dispatcher
 
 class ToolStatus(str, enum.Enum):
     SUCCESS = "success"

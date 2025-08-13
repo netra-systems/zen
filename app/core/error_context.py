@@ -10,7 +10,7 @@ from uuid import uuid4
 _trace_id_context: ContextVar[Optional[str]] = ContextVar('trace_id', default=None)
 _request_id_context: ContextVar[Optional[str]] = ContextVar('request_id', default=None)
 _user_id_context: ContextVar[Optional[str]] = ContextVar('user_id', default=None)
-_error_context: ContextVar[Dict[str, Any]] = ContextVar('error_context', default=dict)
+_error_context: ContextVar[Dict[str, Any]] = ContextVar('error_context', default={})
 
 
 class ErrorContext:

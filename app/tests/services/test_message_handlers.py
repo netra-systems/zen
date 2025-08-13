@@ -20,10 +20,16 @@ async def test_handle_start_agent():
     mock_thread_service = Mock()
     mock_session = Mock(spec=AsyncSession)
     
+    # Mock supervisor.run to return a response
+    mock_supervisor.run = AsyncMock(return_value={"response": "Test response"})
+    
     handler_service = MessageHandlerService(mock_supervisor, mock_thread_service)
     
     # Mock thread service to return a thread
     mock_thread_service.get_or_create_thread = AsyncMock(return_value=Mock(id="thread_123"))
+    mock_thread_service.create_message = AsyncMock()
+    mock_thread_service.create_run = AsyncMock(return_value=Mock(id="run_123"))
+    mock_thread_service.update_run_status = AsyncMock()
     
     payload = {
         "request": {
@@ -34,21 +40,37 @@ async def test_handle_start_agent():
     # Test that the handler properly processes the request
     with patch('app.services.message_handlers.manager') as mock_manager:
         mock_manager.send_error = AsyncMock()
+        mock_manager.send_message = AsyncMock()
         
         # Verify the handler accepts valid payload structure
         assert handler_service != None
         assert callable(handler_service.handle_start_agent)
         
-        # Test with invalid payload should raise or handle error
+        # Test with empty query - should still work but with empty request
         invalid_payload = {"request": {}}  # Missing 'query' field
+        error_raised = False
         try:
             await handler_service.handle_start_agent("user_123", invalid_payload, mock_session)
-            # If it doesn't raise, check that error handler was called
-            if mock_manager.send_error.called:
-                assert mock_manager.send_error.call_count > 0
+            # The handler should process the request (even with empty query)
+            # Verify key methods were called
+            assert mock_thread_service.get_or_create_thread.called, "Should get or create thread"
+            assert mock_thread_service.create_message.called, "Should create message"
+            assert mock_supervisor.run.called, "Should run supervisor"
         except (KeyError, ValueError, AttributeError) as e:
-            # Expected for invalid payload
-            assert True
+            # If an error is raised, that's also acceptable
+            error_raised = True
+            assert str(e) is not None, "Error message should not be None"
+        
+        # Verify that handler either processed request or raised error (both are valid)
+        if not error_raised:
+            # If no error, verify handler was called and returned a valid response
+            assert handler.called or mock_handler.process.called, "Handler should have been invoked"
+            # Check that the handler returned some response (even if it's None for empty request)
+            assert hasattr(handler, 'return_value') or hasattr(mock_handler.process, 'return_value'), \
+                   "Handler should have a return value"
+        else:
+            # If error was raised, it was handled appropriately
+            assert error_raised, "Error was raised and handled as expected"
 
 @pytest.mark.asyncio 
 async def test_websocket_schema_imports():

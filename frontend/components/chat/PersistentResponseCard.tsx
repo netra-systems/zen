@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronUp, ChevronDown, Shield, Database, Sparkles, Users, Settings, FileText, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { ChevronUp, ChevronDown, Shield, Database, Sparkles, Users, Settings, FileText, CheckCircle, Loader2 } from 'lucide-react';
 import { FastLayer } from '@/components/chat/layers/FastLayer';
 import { MediumLayer } from '@/components/chat/layers/MediumLayer';
 import { SlowLayer } from '@/components/chat/layers/SlowLayer';
@@ -94,7 +94,7 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
           className={cn(
             "px-4 py-3 backdrop-blur-md cursor-pointer flex items-center justify-between transition-colors duration-200",
             isAdminAction 
-              ? "bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 border-b border-purple-200"
+              ? "glass-accent-purple hover:bg-purple-50/30 border-b border-purple-200"
               : "bg-white/95 border-b border-emerald-500/20 hover:bg-emerald-50/50"
           )}
           onClick={onToggleCollapse}
@@ -133,7 +133,7 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
     >
       {/* Admin Header Badge */}
       {isAdminAction && (
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-3">
+        <div className="glass-accent-purple backdrop-blur-md text-purple-900 px-4 py-3 border-b border-purple-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2 px-3 py-1 bg-white/20 rounded-full">
@@ -156,12 +156,6 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
                 <>
                   <CheckCircle className="w-4 h-4" />
                   <span className="text-sm">Completed</span>
-                </>
-              )}
-              {adminStatus === 'failed' && (
-                <>
-                  <AlertCircle className="w-4 h-4" />
-                  <span className="text-sm">Failed</span>
                 </>
               )}
             </div>

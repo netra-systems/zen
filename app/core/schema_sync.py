@@ -4,7 +4,7 @@ import json
 import os
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Type, get_type_hints
 from dataclasses import dataclass, asdict
@@ -15,6 +15,7 @@ import pydantic
 
 from .exceptions import ValidationError, ServiceError
 from .error_context import ErrorContext
+from app.logging_config import central_logger as logger
 
 
 class SchemaValidationLevel(Enum):
@@ -61,7 +62,7 @@ class SchemaExtractor:
             schema['_metadata'] = {
                 'class_name': model_class.__name__,
                 'module': model_class.__module__,
-                'timestamp': datetime.utcnow().isoformat()
+                'timestamp': datetime.now(UTC).isoformat()
             }
             
             return schema
@@ -104,7 +105,7 @@ class SchemaExtractor:
                 schemas = self.extract_schemas_from_module(pattern)
                 all_schemas.update(schemas)
             except Exception as e:
-                print(f"Warning: Could not extract schemas from {pattern}: {e}")
+                logger.warning(f"Warning: Could not extract schemas from {pattern}: {e}")
                 continue
         
         self._extracted_schemas = all_schemas
@@ -205,7 +206,7 @@ class TypeScriptGenerator:
             "/* eslint-disable */",
             "/**",
             " * Auto-generated TypeScript definitions from Pydantic models",
-            f" * Generated at: {datetime.utcnow().isoformat()}",
+            f" * Generated at: {datetime.now(UTC).isoformat()}",
             " * Do not modify this file manually - regenerate using schema sync",
             " */",
             ""
@@ -385,7 +386,7 @@ class SchemaSynchronizer:
         """Perform complete schema synchronization."""
         try:
             report = SyncReport(
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 schemas_processed=0,
                 changes_detected=[],
                 validation_errors=[],
@@ -490,29 +491,96 @@ def create_sync_command():
     
     try:
         report = synchronizer.sync_schemas(force=args.force)
-        
-        print(f"Schema synchronization completed at {report.timestamp}")
-        print(f"Processed {report.schemas_processed} schemas")
-        print(f"Changes detected: {len(report.changes_detected)}")
-        print(f"Files generated: {len(report.files_generated)}")
+                 logger.info(f"Schema synchronization completed at {report.timestamp}")
+        logger.info(f"Processed {report.schemas_processed} schemas")
+        logger.info(f"Changes detected: {len(report.changes_detected)}")
+        logger.info(f"Files generated: {len(report.files_generated)}")
         
         if report.changes_detected:
-            print("\nChanges detected:")
+            logger.info("\nChanges detected:")
             for change in report.changes_detected:
-                print(f"  - {change.schema_name}: {change.description}")
+                logger.info(f"  - {change.schema_name}: {change.description}")
         
         if report.validation_errors:
-            print("\nValidation errors:")
+            logger.error("\nValidation errors:")
             for error in report.validation_errors:
-                print(f"  - {error}")
-        
-        print(f"\nSync {'succeeded' if report.success else 'failed'}")
+                logger.error(f"  - {error}")
+                 logger.error(f"\nSync {'succeeded' if report.success else 'failed'}")
         
         return 0 if report.success else 1
         
     except Exception as e:
-        print(f"Schema synchronization failed: {e}")
+        logger.error(f"Schema synchronization failed: {e}")
         return 1
+
+
+async def validate_schema(db, expected_tables: List[str]):
+    """Validate database schema against expected tables."""
+    # This is a simple implementation for testing
+    # In a real scenario, this would check actual database schema
+    try:
+        result = await db.execute("SELECT table_name, column_name, data_type FROM information_schema.columns")
+        
+        # Handle both async and sync fetchall - check if fetchall is awaitable
+        fetchall_result = result.fetchall()
+        if hasattr(fetchall_result, '__await__'):
+            rows = await fetchall_result
+        else:
+            rows = fetchall_result
+        
+        # Check if all expected tables exist
+        existing_tables = {row[0] for row in rows}
+        missing_tables = set(expected_tables) - existing_tables
+        
+        if missing_tables:
+            raise ValidationError(f"Missing tables: {missing_tables}")
+        
+        return True
+    except ValidationError:
+        raise
+    except Exception as e:
+        raise ValidationError(f"Schema validation failed: {e}")
+
+
+def is_migration_safe(sql: str) -> bool:
+    """Check if a SQL migration is safe to run."""
+    # Convert to uppercase for comparison
+    sql_upper = sql.upper()
+    
+    # List of unsafe operations
+    unsafe_patterns = [
+        'DROP TABLE',
+        'DROP DATABASE',
+        'TRUNCATE',
+        'DELETE FROM',  # without WHERE clause check
+    ]
+    
+    # Check for unsafe patterns
+    for pattern in unsafe_patterns:
+        if pattern in sql_upper:
+            # Special case: DELETE FROM with WHERE is safe
+            if pattern == 'DELETE FROM' and 'WHERE' in sql_upper:
+                continue
+            return False
+    
+    # List of safe operations
+    safe_patterns = [
+        'ALTER TABLE',
+        'ADD COLUMN',
+        'CREATE TABLE',
+        'CREATE INDEX',
+        'INSERT INTO',
+        'UPDATE',
+        'SELECT',
+    ]
+    
+    # Check if it's a known safe operation
+    for pattern in safe_patterns:
+        if pattern in sql_upper:
+            return True
+    
+    # Default to unsafe for unknown operations
+    return False
 
 
 if __name__ == "__main__":

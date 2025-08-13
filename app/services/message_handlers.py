@@ -1,8 +1,17 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
 from app.logging_config import central_logger
 from app.services.thread_service import ThreadService
+from app.schemas.websocket_types import (
+    UserMessagePayload,
+    CreateThreadPayload,
+    SwitchThreadPayload,
+    DeleteThreadPayload,
+    ThreadHistoryResponse,
+    AgentCompletedPayload,
+    AgentStoppedPayload
+)
 from app.ws_manager import manager
 import json
 
@@ -11,7 +20,7 @@ logger = central_logger.get_logger(__name__)
 class MessageHandlerService:
     """Handles different types of WebSocket messages following conventions"""
     
-    def __init__(self, supervisor, thread_service: ThreadService):
+    def __init__(self, supervisor: Any, thread_service: ThreadService):
         self.supervisor = supervisor
         self.thread_service = thread_service
     
@@ -89,7 +98,7 @@ class MessageHandlerService:
     async def handle_user_message(
         self,
         user_id: str,
-        payload: Dict[str, Any],
+        payload: UserMessagePayload,
         db_session: Optional[AsyncSession]
     ) -> None:
         """Handle user_message type"""

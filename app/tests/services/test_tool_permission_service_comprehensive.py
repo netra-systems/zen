@@ -5,7 +5,7 @@ Tests permissions, rate limiting, business requirements, user plans, and tool av
 
 import pytest
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import Mock, MagicMock, AsyncMock, patch
 from typing import Dict, List, Any, Set
 
@@ -24,7 +24,7 @@ class MockRedisClient:
         self.expires = {}
     
     async def get(self, key):
-        if key in self.expires and datetime.utcnow() > self.expires[key]:
+        if key in self.expires and datetime.now(UTC) > self.expires[key]:
             del self.data[key]
             del self.expires[key]
             return None
@@ -33,7 +33,7 @@ class MockRedisClient:
     async def set(self, key, value, ex=None):
         self.data[key] = str(value)
         if ex:
-            self.expires[key] = datetime.utcnow() + timedelta(seconds=ex)
+            self.expires[key] = datetime.now(UTC) + timedelta(seconds=ex)
         return True
     
     async def incr(self, key):
@@ -43,7 +43,7 @@ class MockRedisClient:
     
     async def expire(self, key, seconds):
         if key in self.data:
-            self.expires[key] = datetime.utcnow() + timedelta(seconds=seconds)
+            self.expires[key] = datetime.now(UTC) + timedelta(seconds=seconds)
         return True
 
 
@@ -537,7 +537,7 @@ class TestRateLimiting:
         permissions = ["analytics"]
         
         # Simulate usage that exceeds limit
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         hour_key = f"usage:{sample_context.user_id}:{sample_context.tool_name}:{now.strftime('%Y%m%d%H')}"
         
         # Set usage to exceed hourly limit (100)
@@ -564,7 +564,7 @@ class TestRateLimiting:
     
     async def test_get_usage_count_minute(self, service_with_redis):
         """Test getting usage count for minute period"""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         key = f"usage:user123:tool_test:{now.strftime('%Y%m%d%H%M')}"
         await service_with_redis.redis.set(key, "5")
         
@@ -574,7 +574,7 @@ class TestRateLimiting:
     
     async def test_get_usage_count_hour(self, service_with_redis):
         """Test getting usage count for hour period"""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         key = f"usage:user123:tool_test:{now.strftime('%Y%m%d%H')}"
         await service_with_redis.redis.set(key, "25")
         
@@ -584,7 +584,7 @@ class TestRateLimiting:
     
     async def test_get_usage_count_day(self, service_with_redis):
         """Test getting usage count for day period"""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         key = f"usage:user123:tool_test:{now.strftime('%Y%m%d')}"
         await service_with_redis.redis.set(key, "150")
         
@@ -631,7 +631,7 @@ class TestRecordToolUsage:
         )
         
         # Should have updated all period counters
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         minute_key = f"usage:user123:test_tool:{now.strftime('%Y%m%d%H%M')}"
         hour_key = f"usage:user123:test_tool:{now.strftime('%Y%m%d%H')}"
         day_key = f"usage:user123:test_tool:{now.strftime('%Y%m%d')}"
@@ -654,7 +654,7 @@ class TestRecordToolUsage:
                 "success"
             )
         
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         day_key = f"usage:user123:test_tool:{now.strftime('%Y%m%d')}"
         day_count = await service_with_redis.redis.get(day_key)
         
@@ -741,7 +741,7 @@ class TestCheckToolPermission:
         )
         
         # Set usage to exceed limit
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         hour_key = f"usage:{context.user_id}:{context.tool_name}:{now.strftime('%Y%m%d%H')}"
         await service_with_redis.redis.set(hour_key, "101")  # Exceeds 100/hour limit
         
@@ -1041,7 +1041,7 @@ class TestIntegrationScenarios:
         )
         
         # Set usage near daily limit for data_management (500/day)
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         day_key = f"usage:{context.user_id}:{context.tool_name}:{now.strftime('%Y%m%d')}"
         await service_with_redis.redis.set(day_key, "499")  # Just under limit
         

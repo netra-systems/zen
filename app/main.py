@@ -133,7 +133,7 @@ async def lifespan(app: FastAPI):
     app.state.clickhouse_client = None
     
     # Initialize ClickHouse tables
-    if 'pytest' not in sys.modules:  # Skip during testing
+    if 'pytest' not in sys.modules and os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() != 'true':  # Skip during testing or if explicitly disabled
         try:
             logger.info("Initializing ClickHouse tables...")
             await initialize_clickhouse_tables()
@@ -141,6 +141,8 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error(f"Failed to initialize ClickHouse tables: {e}")
             # Don't fail startup, the app can still work with PostgreSQL
+    elif os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() == 'true':
+        logger.info("Skipping ClickHouse initialization (SKIP_CLICKHOUSE_INIT=true)")
 
     # Initialize Postgres - must be done before startup checks
     app.state.db_session_factory = async_session_factory
@@ -172,6 +174,15 @@ async def lifespan(app: FastAPI):
     app.state.agent_supervisor = Supervisor(app.state.db_session_factory, app.state.llm_manager, websocket_manager, app.state.tool_dispatcher)
     app.state.agent_service = AgentService(app.state.agent_supervisor)
     
+    # Start database connection monitoring
+    if 'pytest' not in sys.modules:  # Skip during testing
+        try:
+            from app.services.database.connection_monitor import start_connection_monitoring
+            app.state.monitoring_task = asyncio.create_task(start_connection_monitoring())
+            logger.info("Database connection monitoring started")
+        except Exception as e:
+            logger.error(f"Failed to start database monitoring: {e}")
+    
     elapsed_time = time.time() - start_time
     logger.info(f"System Ready (Took {elapsed_time:.2f}s).")
 
@@ -180,6 +191,21 @@ async def lifespan(app: FastAPI):
     finally:
         # Shutdown
         logger.info("Application shutdown initiated...")
+        
+        # Stop database monitoring
+        if hasattr(app.state, 'monitoring_task'):
+            try:
+                from app.services.database.connection_monitor import stop_connection_monitoring
+                stop_connection_monitoring()
+                app.state.monitoring_task.cancel()
+                try:
+                    await app.state.monitoring_task
+                except asyncio.CancelledError:
+                    pass
+                logger.info("Database monitoring stopped")
+            except Exception as e:
+                logger.error(f"Error stopping database monitoring: {e}")
+        
         await asyncio.sleep(0.1)
         await app.state.background_task_manager.shutdown()
         await app.state.agent_supervisor.shutdown()
@@ -298,6 +324,8 @@ from app.routes.auth import auth as auth_router
 from app.routes.agent_route import router as agent_router
 from app.routes.llm_cache import router as llm_cache_router
 from app.routes.threads_route import router as threads_router
+from app.routes.health_extended import router as health_extended_router
+from app.routes.monitoring import router as monitoring_router
 
 app.include_router(auth_router.router, prefix="/api/auth", tags=["auth"])
 app.include_router(agent_router, prefix="/api/agent", tags=["agent"])
@@ -309,6 +337,8 @@ app.include_router(websockets_router, tags=["websockets"])
 app.include_router(admin.router, prefix="/api", tags=["admin"])
 app.include_router(references.router, prefix="/api", tags=["references"])
 app.include_router(health.router, prefix="/health", tags=["health"])
+app.include_router(health_extended_router, tags=["monitoring"])
+app.include_router(monitoring_router, prefix="/api", tags=["database-monitoring"])
 app.include_router(corpus.router, prefix="/api/corpus", tags=["corpus"])
 app.include_router(synthetic_data.router, tags=["synthetic_data"])
 app.include_router(config.router, prefix="/api", tags=["config"])

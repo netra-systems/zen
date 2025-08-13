@@ -90,7 +90,7 @@ class StagingDataSeeder:
         # Create admin users
         for i in range(roles.get("admin", 1)):
             user_data = {
-                "email": f"admin{i+1}.pr{self.pr_number}@staging.netra-ai.dev",
+                "email": f"admin{i+1}.pr{self.pr_number}@staging.netrasystems.ai",
                 "username": f"admin{i+1}_pr{self.pr_number}",
                 "full_name": fake.name(),
                 "hashed_password": get_password_hash("TestPassword123!"),
@@ -109,7 +109,7 @@ class StagingDataSeeder:
         # Create manager users
         for i in range(roles.get("manager", 2)):
             user_data = {
-                "email": f"manager{i+1}.pr{self.pr_number}@staging.netra-ai.dev",
+                "email": f"manager{i+1}.pr{self.pr_number}@staging.netrasystems.ai",
                 "username": f"manager{i+1}_pr{self.pr_number}",
                 "full_name": fake.name(),
                 "hashed_password": get_password_hash("TestPassword123!"),
@@ -128,7 +128,7 @@ class StagingDataSeeder:
         # Create regular users
         for i in range(roles.get("user", 7)):
             user_data = {
-                "email": f"user{i+1}.pr{self.pr_number}@staging.netra-ai.dev",
+                "email": f"user{i+1}.pr{self.pr_number}@staging.netrasystems.ai",
                 "username": f"user{i+1}_pr{self.pr_number}",
                 "full_name": fake.name(),
                 "hashed_password": get_password_hash("TestPassword123!"),

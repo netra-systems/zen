@@ -6,7 +6,7 @@ Tests tool selection logic, chaining mechanisms, optimization routing, and perfo
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from enum import Enum
@@ -120,34 +120,50 @@ class MockLLMConnector:
             'prompt': prompt,
             'model_name': model_name,
             'config_name': config_name,
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now(UTC)
         })
         
         if self.should_fail:
             raise NetraException("Mock LLM generation failed")
         
         if self.custom_response:
+            # If custom_response is a string, return it directly (for testing invalid JSON)
+            if isinstance(self.custom_response, str):
+                return self.custom_response
             return json.dumps(self.custom_response)
         
         # Analyze prompt to determine appropriate tool
         prompt_lower = prompt.lower()
         
-        if 'cost' in prompt_lower and 'reduce' in prompt_lower:
-            return json.dumps(self.response_templates['cost'])
-        elif 'latency' in prompt_lower or 'speed' in prompt_lower:
-            return json.dumps(self.response_templates['latency'])
-        elif 'cache' in prompt_lower:
-            return json.dumps(self.response_templates['cache'])
-        elif 'model' in prompt_lower and ('new' in prompt_lower or 'analysis' in prompt_lower):
-            return json.dumps(self.response_templates['model'])
-        elif 'multi' in prompt_lower or ('cost' in prompt_lower and 'latency' in prompt_lower):
+        # Extract just the user query part (after "user query:" and before "available tools:")
+        import re
+        query_match = re.search(r'user query:\s*([^\n]*?)(?:\n|available tools:|$)', prompt_lower)
+        if query_match:
+            user_query = query_match.group(1).strip()
+        else:
+            user_query = prompt_lower
+        
+        # Debug output for troubleshooting (disable in production)
+        # print(f"DEBUG: Extracted user query: {user_query}")
+        
+        # Check for specific patterns in the USER QUERY, not the whole prompt
+        # Check multi-objective patterns first (most specific combinations)
+        if 'multi' in user_query or ('both' in user_query and 'cost' in user_query and 'latency' in user_query) or ('cost' in user_query and 'latency' in user_query):
             return json.dumps(self.response_templates['multi'])
+        elif 'reduce costs' in user_query or 'cost reduction' in user_query or ('cost' in user_query and 'reduce' in user_query):
+            return json.dumps(self.response_templates['cost'])
+        elif 'latency' in user_query or 'speed' in user_query or 'response time' in user_query:
+            return json.dumps(self.response_templates['latency'])
+        elif 'cache' in user_query:
+            return json.dumps(self.response_templates['cache'])
+        elif 'model' in user_query and ('new' in user_query or 'analysis' in user_query or 'effectiveness' in user_query):
+            return json.dumps(self.response_templates['model'])
         else:
             # Default to cost optimization
             return json.dumps(self.response_templates['cost'])
     
-    def set_custom_response(self, response: Dict[str, Any]):
-        """Set custom response for testing"""
+    def set_custom_response(self, response):
+        """Set custom response for testing (can be dict or string for invalid JSON testing)"""
         self.custom_response = response
     
     def get_request_history(self) -> List[Dict[str, Any]]:
@@ -194,7 +210,7 @@ class ToolChain:
                 
                 self.execution_history.append({
                     'tool_name': current_tool,
-                    'timestamp': datetime.utcnow(),
+                    'timestamp': datetime.now(UTC),
                     'success': True,
                     'result': result
                 })
@@ -207,7 +223,7 @@ class ToolChain:
             except Exception as e:
                 self.execution_history.append({
                     'tool_name': current_tool,
-                    'timestamp': datetime.utcnow(),
+                    'timestamp': datetime.now(UTC),
                     'success': False,
                     'error': str(e)
                 })
@@ -265,6 +281,7 @@ class TestApexOptimizerToolSelection:
     def sample_agent_state(self):
         """Create sample agent state"""
         from app.schemas import Workload, DataSource, TimeRange
+        from app.services.apex_optimizer_agent.models import BaseMessage
         request = RequestModel(
             user_id="test_user_123",
             query="Optimize our AI workload to reduce costs by 20%",
@@ -275,7 +292,18 @@ class TestApexOptimizerToolSelection:
                 time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
             )]
         )
-        state = AgentState(request=request)
+        # Create a message with the request
+        message = BaseMessage(
+            type="human",
+            content=request.query,
+            metadata={"request": request.model_dump()}
+        )
+        state = AgentState(
+            messages=[message],
+            next_node="tool_selection",
+            tool_results=None,
+            request=request
+        )
         return state
     
     @pytest.mark.asyncio
@@ -309,7 +337,19 @@ class TestApexOptimizerToolSelection:
                 time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
             )]
         )
-        state = AgentState(request=request)
+        from app.services.apex_optimizer_agent.models import BaseMessage
+        message = BaseMessage(
+            type="human",
+            content=request.query,
+            metadata={"request": request.model_dump()}
+        )
+        state = AgentState(
+            messages=[message],
+            next_node="tool_selection",
+            tool_results=None,
+            request=request
+        )
+        state.request = request
         
         # Execute tool selection
         result = await apex_tool_selector.run(state)
@@ -323,8 +363,30 @@ class TestApexOptimizerToolSelection:
     async def test_tool_selection_cache_optimization(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for cache optimization requests"""
         # Create cache-focused request
-        request = RequestModel(query="Audit and optimize our KV cache configuration")
-        state = AgentState(request=request)
+        from app.schemas import Workload, DataSource, TimeRange
+        request = RequestModel(
+            user_id="test_user_789",
+            query="Audit and optimize our KV cache configuration",
+            workloads=[Workload(
+                run_id="run_789",
+                query="optimize cache",
+                data_source=DataSource(source_table="cache_metrics"),
+                time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
+            )]
+        )
+        from app.services.apex_optimizer_agent.models import BaseMessage
+        message = BaseMessage(
+            type="human",
+            content=request.query,
+            metadata={"request": request.model_dump()}
+        )
+        state = AgentState(
+            messages=[message],
+            next_node="tool_selection",
+            tool_results=None,
+            request=request
+        )
+        state.request = request
         
         # Execute tool selection
         result = await apex_tool_selector.run(state)
@@ -338,8 +400,30 @@ class TestApexOptimizerToolSelection:
     async def test_tool_selection_model_analysis(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for model analysis requests"""
         # Create model analysis request
-        request = RequestModel(query="Analyze effectiveness of new models for our use case")
-        state = AgentState(request=request)
+        from app.schemas import Workload, DataSource, TimeRange
+        request = RequestModel(
+            user_id="test_user_analysis",
+            query="Analyze effectiveness of new models for our use case",
+            workloads=[Workload(
+                run_id="run_analysis",
+                query="analyze models",
+                data_source=DataSource(source_table="model_metrics"),
+                time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
+            )]
+        )
+        from app.services.apex_optimizer_agent.models import BaseMessage
+        message = BaseMessage(
+            type="human",
+            content=request.query,
+            metadata={"request": request.model_dump()}
+        )
+        state = AgentState(
+            messages=[message],
+            next_node="tool_selection",
+            tool_results=None,
+            request=request
+        )
+        state.request = request
         
         # Execute tool selection
         result = await apex_tool_selector.run(state)
@@ -353,8 +437,30 @@ class TestApexOptimizerToolSelection:
     async def test_tool_selection_multi_objective(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for multi-objective optimization"""
         # Create multi-objective request
-        request = RequestModel(query="Optimize for both cost reduction and latency improvement")
-        state = AgentState(request=request)
+        from app.schemas import Workload, DataSource, TimeRange
+        request = RequestModel(
+            user_id="test_user_multi",
+            query="Optimize for both cost reduction and latency improvement",
+            workloads=[Workload(
+                run_id="run_multi",
+                query="multi-objective optimization",
+                data_source=DataSource(source_table="multi_metrics"),
+                time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
+            )]
+        )
+        from app.services.apex_optimizer_agent.models import BaseMessage
+        message = BaseMessage(
+            type="human",
+            content=request.query,
+            metadata={"request": request.model_dump()}
+        )
+        state = AgentState(
+            messages=[message],
+            next_node="tool_selection",
+            tool_results=None,
+            request=request
+        )
+        state.request = request
         
         # Execute tool selection
         result = await apex_tool_selector.run(state)
@@ -368,8 +474,30 @@ class TestApexOptimizerToolSelection:
     async def test_tool_selection_empty_query(self, apex_tool_selector, mock_app_config):
         """Test tool selection with empty query"""
         # Create state with empty query
-        request = RequestModel(query="")
-        state = AgentState(request=request)
+        from app.schemas import Workload, DataSource, TimeRange
+        request = RequestModel(
+            user_id="test_user_empty",
+            query="",
+            workloads=[Workload(
+                run_id="run_empty",
+                query="",
+                data_source=DataSource(source_table="empty_metrics"),
+                time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
+            )]
+        )
+        from app.services.apex_optimizer_agent.models import BaseMessage
+        message = BaseMessage(
+            type="human",
+            content=request.query,
+            metadata={"request": request.model_dump()}
+        )
+        state = AgentState(
+            messages=[message],
+            next_node="tool_selection",
+            tool_results=None,
+            request=request
+        )
+        state.request = request
         
         # Execute tool selection
         result = await apex_tool_selector.run(state)
@@ -413,7 +541,19 @@ class TestApexOptimizerToolSelection:
                 time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
             )]
         )
-        state = AgentState(request=request)
+        from app.services.apex_optimizer_agent.models import BaseMessage
+        message = BaseMessage(
+            type="human",
+            content=request.query,
+            metadata={"request": request.model_dump()}
+        )
+        state = AgentState(
+            messages=[message],
+            next_node="tool_selection",
+            tool_results=None,
+            request=request
+        )
+        state.request = request
         
         # Set custom LLM response
         custom_response = {

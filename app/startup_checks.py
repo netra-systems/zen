@@ -86,13 +86,14 @@ class StartupChecker:
     
     async def check_environment_variables(self):
         """Check required environment variables are set"""
-        # In development mode, DATABASE_URL and SECRET_KEY have defaults in DevelopmentConfig
+        # In development/staging mode, DATABASE_URL and SECRET_KEY might be set differently
         environment = os.getenv("ENVIRONMENT", "development").lower()
         is_dev_mode = environment == "development"
+        is_staging = environment == "staging" or os.getenv("K_SERVICE")  # Cloud Run indicator
         
         required_vars = []
-        # Only require these in production/staging
-        if not is_dev_mode:
+        # Only require these in production
+        if environment == "production":
             required_vars = [
                 "DATABASE_URL",
                 "SECRET_KEY",
@@ -139,14 +140,17 @@ class StartupChecker:
     
     async def check_configuration(self):
         """Validate application configuration"""
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        is_staging = environment == "staging" or os.getenv("K_SERVICE")  # Cloud Run indicator
+        
         try:
             # Configuration is already loaded via pydantic validation
             # Just verify critical settings
-            if not settings.database_url:
+            if not is_staging and not settings.database_url:
                 raise ValueError("DATABASE_URL is not configured")
             
-            # In dev mode, allow the default secret key
-            if settings.environment not in ["development", "testing"]:
+            # In dev/staging mode, allow the default secret key
+            if settings.environment not in ["development", "testing", "staging"]:
                 if not settings.secret_key or len(settings.secret_key) < 32:
                     raise ValueError("SECRET_KEY must be at least 32 characters")
             
@@ -158,14 +162,14 @@ class StartupChecker:
                 name="configuration",
                 success=True,
                 message=f"Configuration valid for {settings.environment} environment",
-                critical=True
+                critical=not is_staging  # Non-critical for staging
             ))
         except Exception as e:
             self.results.append(StartupCheckResult(
                 name="configuration",
                 success=False,
                 message=str(e),
-                critical=True
+                critical=not is_staging  # Non-critical for staging
             ))
 
     async def check_file_permissions(self):
@@ -207,6 +211,9 @@ class StartupChecker:
     
     async def check_database_connection(self):
         """Check PostgreSQL database connection and schema"""
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        is_staging = environment == "staging" or os.getenv("K_SERVICE")  # Cloud Run indicator
+        
         try:
             async with self.app.state.db_session_factory() as db:
                 # Test basic connectivity
@@ -220,7 +227,7 @@ class StartupChecker:
                 
                 for table in critical_tables:
                     result = await db.execute(
-                        text(f"SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = :table)"),
+                        text("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = :table)"),
                         {"table": table}
                     )
                     exists = result.scalar_one()
@@ -231,21 +238,27 @@ class StartupChecker:
                     name="database_connection",
                     success=True,
                     message="PostgreSQL connected and schema valid",
-                    critical=True
+                    critical=not is_staging  # Non-critical for staging
                 ))
         except Exception as e:
             self.results.append(StartupCheckResult(
                 name="database_connection",
                 success=False,
                 message=f"Database check failed: {e}",
-                critical=True
+                critical=not is_staging  # Non-critical for staging
             ))
     
     async def check_redis(self):
         """Check Redis connection"""
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        is_staging = environment == "staging" or os.getenv("K_SERVICE")  # Cloud Run indicator
+        
         try:
+            # Add timeout for staging environment
+            timeout = 5 if is_staging else 30  # Shorter timeout for staging
+            
             redis_manager = self.app.state.redis_manager
-            await redis_manager.connect()
+            await asyncio.wait_for(redis_manager.connect(), timeout=timeout)
             
             # Test write/read
             test_key = "startup_check_test"
@@ -262,10 +275,10 @@ class StartupChecker:
                 name="redis_connection",
                 success=True,
                 message="Redis connected and operational",
-                critical=settings.environment == "production"
+                critical=(environment == "production")  # Only critical in production
             ))
         except Exception as e:
-            critical = settings.environment == "production"
+            critical = environment == "production"  # Only critical in production
             self.results.append(StartupCheckResult(
                 name="redis_connection",
                 success=False,
@@ -277,32 +290,41 @@ class StartupChecker:
 
     async def check_clickhouse(self):
         """Check ClickHouse connection"""
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        is_staging = environment == "staging" or os.getenv("K_SERVICE")  # Cloud Run indicator
+        
         try:
-            from app.db.clickhouse import get_clickhouse_client
-            async with get_clickhouse_client() as client:
-                # Test connectivity
-                client.ping()
-                
-                # Verify tables exist
-                result = await client.execute_query(
-                    "SELECT name FROM system.tables WHERE database = currentDatabase()"
-                )
-                tables = [row.get('name', row) if isinstance(row, dict) else row[0] for row in result]
-                
-                required_tables = ['workload_events']
-                missing_tables = [t for t in required_tables if t not in tables]
-                
-                if missing_tables:
-                    raise ValueError(f"Missing ClickHouse tables: {missing_tables}")
-                
-                self.results.append(StartupCheckResult(
-                    name="clickhouse_connection",
-                    success=True,
-                    message=f"ClickHouse connected with {len(tables)} tables",
-                    critical=False
-                ))
+            # Add timeout for staging environment
+            timeout = 5 if is_staging else 30  # Shorter timeout for staging
+            
+            async def _check():
+                from app.db.clickhouse import get_clickhouse_client
+                async with get_clickhouse_client() as client:
+                    # Test connectivity
+                    client.ping()
+                    
+                    # Verify tables exist
+                    result = await client.execute_query(
+                        "SELECT name FROM system.tables WHERE database = currentDatabase()"
+                    )
+                    return [row.get('name', row) if isinstance(row, dict) else row[0] for row in result]
+            
+            tables = await asyncio.wait_for(_check(), timeout=timeout)
+            
+            required_tables = ['workload_events']
+            missing_tables = [t for t in required_tables if t not in tables]
+            
+            if missing_tables:
+                raise ValueError(f"Missing ClickHouse tables: {missing_tables}")
+            
+            self.results.append(StartupCheckResult(
+                name="clickhouse_connection",
+                success=True,
+                message=f"ClickHouse connected with {len(tables)} tables",
+                critical=False  # Never critical
+            ))
         except Exception as e:
-            critical = settings.environment == "production"
+            critical = environment == "production"  # Only critical in production
             self.results.append(StartupCheckResult(
                 name="clickhouse_connection",
                 success=False,
@@ -323,18 +345,20 @@ class StartupChecker:
                 try:
                     llm = llm_manager.get_llm(llm_name)
                     
-                    # For critical providers, do a simple validation
-                    if llm_name in ['anthropic-claude-3-sonnet', 'anthropic-claude-3-opus']:
-                        # Just check that the LLM object was created
-                        if llm:
-                            available_providers.append(llm_name)
-                        else:
-                            failed_providers.append(f"{llm_name}: not initialized")
-                    else:
+                    # Check if LLM was successfully initialized
+                    if llm is not None:
                         available_providers.append(llm_name)
+                    else:
+                        # LLM was skipped (no API key for optional provider)
+                        logger.info(f"LLM '{llm_name}' not available (optional provider without key)")
                         
                 except Exception as e:
-                    failed_providers.append(f"{llm_name}: {e}")
+                    # Only fail for Google/Gemini providers
+                    config = settings.llm_configs.get(llm_name)
+                    if config and config.provider == "google":
+                        failed_providers.append(f"{llm_name}: {e}")
+                    else:
+                        logger.info(f"Optional LLM '{llm_name}' not available: {e}")
             
             if not available_providers:
                 self.results.append(StartupCheckResult(
@@ -362,7 +386,7 @@ class StartupChecker:
                 name="llm_providers",
                 success=False,
                 message=f"LLM check failed: {e}",
-                critical=settings.environment == "production"
+                critical=(os.getenv("ENVIRONMENT", "development").lower() == "production")
             ))
     
     async def check_memory_and_resources(self):

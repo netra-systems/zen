@@ -6,7 +6,7 @@ This guide will help you set up automatic staging environments step-by-step. Fol
 
 - [ ] A Google Cloud account with billing enabled
 - [ ] A GitHub repository (the Netra project)
-- [ ] A domain name you own (like `netra-ai.dev`)
+- [ ] A domain name you own (like `netrasystems.ai`)
 - [ ] About 2 hours to complete everything
 
 ---
@@ -71,53 +71,96 @@ OR Click each link and press the big "ENABLE" button:
 
 ---
 
-## Step 2: Create Service Account & Get Key 🔑
+## Step 2: Service Accounts Setup 🔑
 
-### 2.1 Create Service Account
+> **⚠️ IMPORTANT: Two Different Service Accounts**
+> 
+> Your staging environment uses **TWO separate service accounts** with different purposes:
+> 
+> 1. **`github-staging-deployer`** - For DEPLOYING infrastructure (used by GitHub Actions)
+> 2. **`staging-environments`** - For RUNNING the applications (used by Cloud Run services)
+> 
+> Think of it like this:
+> - 🔨 **Deployer Account** = Construction crew that builds the house (needs admin permissions)
+> - 🏃 **Runtime Account** = Family that lives in the house (needs limited permissions)
+
+### 2.1 Create the Deployment Service Account (github-staging-deployer)
+
+This account is used by GitHub Actions to deploy your infrastructure.
 
 1. Go to: https://console.cloud.google.com/iam-admin/serviceaccounts
 2. Click "CREATE SERVICE ACCOUNT"
 3. Fill in:
    - Name: `github-staging-deployer`
    - ID: `github-staging-deployer`
+   - Description: `Deploys staging infrastructure from GitHub Actions`
 4. Click "CREATE AND CONTINUE"
 
-### 2.2 Add Permissions
+### 2.2 Add Deployment Permissions
 
-run this command 
-windows PS
-```
-"run.admin","cloudsql.admin","compute.admin","iam.serviceAccountUser","secretmanager.admin","dns.admin","artifactregistry.admin","cloudbuild.builds.editor","redis.admin","monitoring.viewer" | ForEach-Object { gcloud projects add-iam-policy-binding netra-staging --member="serviceAccount:github-staging-deployer@netra-staging.iam.gserviceaccount.com" --role="roles/$_" }
-```
-bash
-```
-for role in run.admin cloudsql.admin compute.admin iam.serviceAccountUser secretmanager.admin dns.admin artifactregistry.admin cloudbuild.builds.editor redis.admin monitoring.viewer; do gcloud projects add-iam-policy-binding netra-staging --member="serviceAccount:github-staging-deployer@netra-staging.iam.gserviceaccount.com" --role="roles/$role"; done
-```
-OR
-Click "ADD ROLE" and add each of these roles (one at a time):
+The deployment account needs broad permissions to create and manage infrastructure:
 
-1. `Cloud Run Admin`
-2. `Cloud SQL Admin`
-3. `Compute Admin`
-4. `Service Account User`
-5. `Secret Manager Admin`
-6. `DNS Administrator`
-7. `Artifact Registry Administrator`
-8. `Cloud Build Editor`
-9. `Redis Admin`
-10. `Monitoring Viewer`
+**Windows PowerShell:**
+```
+"run.admin","cloudsql.admin","compute.admin","iam.serviceAccountUser","secretmanager.admin","dns.admin","artifactregistry.admin","cloudbuild.builds.editor","redis.admin","monitoring.viewer","storage.admin" | ForEach-Object { gcloud projects add-iam-policy-binding netra-staging --member="serviceAccount:github-staging-deployer@netra-staging.iam.gserviceaccount.com" --role="roles/$_" }
+```
+
+**Linux/Mac Bash:**
+```
+for role in run.admin cloudsql.admin compute.admin iam.serviceAccountUser secretmanager.admin dns.admin artifactregistry.admin cloudbuild.builds.editor redis.admin monitoring.viewer storage.admin; do gcloud projects add-iam-policy-binding netra-staging --member="serviceAccount:github-staging-deployer@netra-staging.iam.gserviceaccount.com" --role="roles/$role"; done
+```
+
+**OR manually add these roles:**
+
+1. `Cloud Run Admin` - Deploy Cloud Run services
+2. `Cloud SQL Admin` - Create databases
+3. `Compute Admin` - Manage networking
+4. `Service Account User` - Assign service accounts
+5. `Secret Manager Admin` - Manage secrets
+6. `DNS Administrator` - Configure domains
+7. `Artifact Registry Administrator` - Push Docker images
+8. `Cloud Build Editor` - Build containers
+9. `Redis Admin` - Manage Redis instances
+10. `Monitoring Viewer` - View logs
+11. `Storage Admin` - Manage Terraform state
 
 Click "CONTINUE" then "DONE"
 
-### 2.3 Download the Key
+### 2.3 Download the Deployment Key (For GitHub)
 
-1. Find `github-staging-deployer@netra-staging-123456.iam.gserviceaccount.com` in the list
+1. Find `github-staging-deployer@netra-staging.iam.gserviceaccount.com` in the list
 2. Click the three dots menu (...) 
 3. Click "Manage keys"
 4. Click "ADD KEY" → "Create new key"
 5. Choose "JSON"
 6. Click "CREATE"
 7. **SAVE THIS FILE!** Name it: `gcp-key.json`
+8. **This key will be added to GitHub Secrets later**
+
+### 2.4 Create the Runtime Service Account (staging-environments)
+
+This account is automatically created by Terraform and is used by your Cloud Run services to access resources at runtime.
+
+**The runtime account (`staging-environments`) needs these permissions:**
+
+**Windows PowerShell:**
+```
+"cloudsql.client","redis.editor","run.developer","compute.networkUser","secretmanager.secretAccessor" | ForEach-Object { gcloud projects add-iam-policy-binding netra-staging --member="serviceAccount:staging-environments@netra-staging.iam.gserviceaccount.com" --role="roles/$_" }
+```
+
+**Linux/Mac Bash:**
+```
+for role in cloudsql.client redis.editor run.developer compute.networkUser secretmanager.secretAccessor; do gcloud projects add-iam-policy-binding netra-staging --member="serviceAccount:staging-environments@netra-staging.iam.gserviceaccount.com" --role="roles/$role"; done
+```
+
+**These runtime permissions allow:**
+- `Cloud SQL Client` - Connect to databases
+- `Redis Editor` - Use Redis cache
+- `Cloud Run Developer` - Invoke other services
+- `Compute Network User` - Use VPC connector
+- `Secret Manager Secret Accessor` - Read secrets (API keys, etc.)
+
+> **Note:** The `staging-environments` service account is created automatically when you run Terraform for the shared infrastructure. You don't need to create it manually, but you DO need to grant it the permissions above after Terraform creates it.
 
 ---
 
@@ -299,7 +342,7 @@ Edit `.github/staging.yml` and update this section:
 domain: staging.netrasystems.ai  # PUT YOUR ACTUAL DOMAIN HERE!
 
 # Example:
-# domain: staging.netra-ai.dev
+# domain: staging.netrasystems.ai
 ```
 
 ---
@@ -341,6 +384,24 @@ terraform plan
 ---
 
 ## Step 7: Test Everything! 🧪
+
+### 7.0 Verify Service Accounts Setup
+
+Before testing, ensure both service accounts have the correct permissions:
+
+**Check Deployment Account:**
+```bash
+gcloud projects get-iam-policy netra-staging --filter="bindings.members:serviceAccount:github-staging-deployer@netra-staging.iam.gserviceaccount.com" --format="value(bindings.role)"
+```
+
+Should show: run.admin, cloudsql.admin, compute.admin, etc.
+
+**Check Runtime Account (after Terraform runs):**
+```bash
+gcloud projects get-iam-policy netra-staging --filter="bindings.members:serviceAccount:staging-environments@netra-staging.iam.gserviceaccount.com" --format="value(bindings.role)"
+```
+
+Should show: cloudsql.client, redis.editor, secretmanager.secretAccessor, etc.
 
 ### 7.1 Create a Test Pull Request
 
@@ -393,6 +454,28 @@ terraform plan
 5. Request increase to 20
 
 ### Common Issues & Fixes
+
+**Service Account Permission Errors?**
+
+If you see "Permission denied" or "Access denied" errors:
+
+1. **Secret Manager Access Denied in Cloud Run:**
+   - This means the RUNTIME account (`staging-environments`) lacks permissions
+   - Fix: Grant Secret Manager permissions to the runtime account:
+   ```bash
+   gcloud projects add-iam-policy-binding netra-staging \
+     --member="serviceAccount:staging-environments@netra-staging.iam.gserviceaccount.com" \
+     --role="roles/secretmanager.secretAccessor"
+   ```
+
+2. **Terraform Deployment Fails:**
+   - This means the DEPLOYMENT account (`github-staging-deployer`) lacks permissions
+   - Fix: Ensure all admin roles are granted (see Step 2.2)
+
+3. **Confused About Which Account?**
+   - **Deployment errors** = `github-staging-deployer` needs permissions
+   - **Runtime errors** (app running) = `staging-environments` needs permissions
+   - Check Cloud Run logs to see which account is being used
 
 **GitHub Action not running?**
 - Check: Settings → Actions → General → Actions permissions = "Allow all actions"

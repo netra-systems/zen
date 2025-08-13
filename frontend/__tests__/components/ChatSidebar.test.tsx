@@ -3,13 +3,14 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { useUnifiedChatStore } from '@/store/unified-chat';
-import { useThreads } from '@/hooks/useThreads';
-import { threadService } from '@/services/threadService';
-import { WebSocketProvider } from '@/contexts/WebSocketContext';
+import { useAuthStore } from '@/store/authStore';
+import * as ThreadServiceModule from '@/services/threadService';
+
+import { TestProviders } from '../test-utils/providers';
 
 // Mock dependencies
 jest.mock('@/store/unified-chat');
-jest.mock('@/hooks/useThreads');
+jest.mock('@/store/authStore');
 jest.mock('@/services/threadService');
 jest.mock('@/components/ui/button', () => ({
   Button: ({ children, onClick, variant, size, disabled }: any) => (
@@ -28,61 +29,49 @@ jest.mock('@/components/ui/input', () => ({
     />
   )
 }));
-jest.mock('@/components/ui/dialog', () => ({
-  Dialog: ({ children, open }: any) => open ? <div data-testid="dialog">{children}</div> : null,
-  DialogContent: ({ children }: any) => <div data-testid="dialog-content">{children}</div>,
-  DialogHeader: ({ children }: any) => <div data-testid="dialog-header">{children}</div>,
-  DialogTitle: ({ children }: any) => <h2 data-testid="dialog-title">{children}</h2>
-}));
+// Dialog component removed - not used in ChatSidebar
 
 describe('ChatSidebar Component', () => {
   const mockChatStore = {
-    currentThreadId: 'thread-123',
-    threads: [],
-    isLoadingThreads: false,
-    threadsError: null,
-    setCurrentThread: jest.fn(),
-    createNewThread: jest.fn(),
-    updateThread: jest.fn(),
-    deleteThread: jest.fn(),
-    loadThreads: jest.fn(),
-    searchThreads: jest.fn(),
-    clearThreads: jest.fn()
+    isProcessing: false,
+    activeThreadId: 'thread-123',
+    setActiveThread: jest.fn(),
+    clearMessages: jest.fn(),
+    resetLayers: jest.fn()
   };
 
-  const mockThreadsHook = {
-    threads: [],
-    loading: false,
-    error: null,
-    createThread: jest.fn(),
-    deleteThread: jest.fn(),
-    updateThread: jest.fn(),
-    switchThread: jest.fn(),
-    searchThreads: jest.fn(),
-    loadMoreThreads: jest.fn(),
-    hasMoreThreads: false
+  const mockAuthStore = {
+    isDeveloperOrHigher: jest.fn(() => false)
   };
 
   const mockThreadService = {
-    getThreads: jest.fn(),
-    createThread: jest.fn(),
-    updateThread: jest.fn(),
+    listThreads: jest.fn().mockResolvedValue([]),
+    createThread: jest.fn().mockResolvedValue({ id: 'new-thread', created_at: Date.now(), updated_at: Date.now() }),
+    getThread: jest.fn(),
     deleteThread: jest.fn(),
-    searchThreads: jest.fn()
+    updateThread: jest.fn()
   };
 
   beforeEach(() => {
+    // Mock fetch for config
+    global.fetch = jest.fn().mockResolvedValue({
+      json: jest.fn().mockResolvedValue({
+        ws_url: 'ws://localhost:8000/ws'
+      })
+    });
+
     jest.clearAllMocks();
     (useUnifiedChatStore as jest.Mock).mockReturnValue(mockChatStore);
-    (useThreads as jest.Mock).mockReturnValue(mockThreadsHook);
-    (threadService as any).mockReturnValue(mockThreadService);
+    (useAuthStore as jest.Mock).mockReturnValue(mockAuthStore);
+    // Mock ThreadService
+    (ThreadServiceModule.ThreadService as any) = mockThreadService;
   });
 
   const renderWithProvider = (component: React.ReactElement) => {
     return render(
-      <WebSocketProvider>
+      <TestProviders>
         {component}
-      </WebSocketProvider>
+      </TestProviders>
     );
   };
 

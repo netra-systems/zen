@@ -20,7 +20,7 @@ import struct
 import zlib
 import psutil
 import gc
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 import websockets
@@ -55,7 +55,7 @@ async def test_concurrent_connection_limit_1000_users():
                 mock_ws = AsyncMock()
                 mock_ws.user_id = user_id
                 mock_ws.connection_id = f"{user_id}_conn_{conn_idx}"
-                mock_ws.connected_at = datetime.utcnow()
+                mock_ws.connected_at = datetime.now(UTC)
                 mock_ws.state = websockets.protocol.State.OPEN
                 mock_ws.send = AsyncMock()
                 mock_ws.recv = AsyncMock()

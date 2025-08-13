@@ -1,0 +1,351 @@
+name: 'Lark Notifications'
+
+on:
+  workflow_run:
+    workflows: ['*']
+    types:
+      - completed
+      - requested
+  pull_request:
+    types:
+      - opened
+      - closed
+      - merged
+  issues:
+    types:
+      - opened
+      - closed
+  push:
+    branches:
+      - main
+      - master
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Custom message to send'
+        required: false
+        type: string
+      notification_type:
+        description: 'Type of notification'
+        required: false
+        type: choice
+        options:
+          - info
+          - success
+          - warning
+          - error
+        default: info
+
+jobs:
+  send-notification:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion != 'skipped' }}
+    
+    steps:
+      - name: 'Checkout code'
+        uses: 'actions/checkout@v4'
+        
+      - name: 'Prepare notification data'
+        id: 'prepare'
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          # Set default values
+          TITLE="GitHub Actions Notification"
+          COLOR="blue"
+          STATUS_EMOJI="ℹ️"
+          
+          # Determine notification details based on event type
+          case "${{ github.event_name }}" in
+            "workflow_run")
+              WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
+              WORKFLOW_CONCLUSION="${{ github.event.workflow_run.conclusion }}"
+              WORKFLOW_URL="${{ github.event.workflow_run.html_url }}"
+              COMMIT_MESSAGE="${{ github.event.workflow_run.head_commit.message }}"
+              AUTHOR="${{ github.event.workflow_run.head_commit.author.name }}"
+              
+              TITLE="Workflow: ${WORKFLOW_NAME}"
+              
+              if [[ "${WORKFLOW_CONCLUSION}" == "success" ]]; then
+                COLOR="green"
+                STATUS_EMOJI="✅"
+                STATUS_TEXT="Succeeded"
+              elif [[ "${WORKFLOW_CONCLUSION}" == "failure" ]]; then
+                COLOR="red"
+                STATUS_EMOJI="❌"
+                STATUS_TEXT="Failed"
+              elif [[ "${WORKFLOW_CONCLUSION}" == "cancelled" ]]; then
+                COLOR="yellow"
+                STATUS_EMOJI="⚠️"
+                STATUS_TEXT="Cancelled"
+              else
+                STATUS_EMOJI="🔄"
+                STATUS_TEXT="${WORKFLOW_CONCLUSION}"
+              fi
+              
+              MESSAGE="**Status:** ${STATUS_TEXT}\n**Author:** ${AUTHOR}\n**Commit:** ${COMMIT_MESSAGE}\n**[View Workflow](${WORKFLOW_URL})**"
+              ;;
+              
+            "pull_request")
+              PR_TITLE="${{ github.event.pull_request.title }}"
+              PR_NUMBER="${{ github.event.pull_request.number }}"
+              PR_URL="${{ github.event.pull_request.html_url }}"
+              PR_USER="${{ github.event.pull_request.user.login }}"
+              PR_ACTION="${{ github.event.action }}"
+              
+              TITLE="Pull Request #${PR_NUMBER}: ${PR_TITLE}"
+              
+              if [[ "${PR_ACTION}" == "opened" ]]; then
+                COLOR="blue"
+                STATUS_EMOJI="📝"
+                STATUS_TEXT="Opened"
+              elif [[ "${PR_ACTION}" == "closed" && "${{ github.event.pull_request.merged }}" == "true" ]]; then
+                COLOR="purple"
+                STATUS_EMOJI="🎉"
+                STATUS_TEXT="Merged"
+              elif [[ "${PR_ACTION}" == "closed" ]]; then
+                COLOR="gray"
+                STATUS_EMOJI="🚫"
+                STATUS_TEXT="Closed"
+              fi
+              
+              MESSAGE="**Status:** ${STATUS_TEXT}\n**Author:** ${PR_USER}\n**[View PR](${PR_URL})**"
+              ;;
+              
+            "issues")
+              ISSUE_TITLE="${{ github.event.issue.title }}"
+              ISSUE_NUMBER="${{ github.event.issue.number }}"
+              ISSUE_URL="${{ github.event.issue.html_url }}"
+              ISSUE_USER="${{ github.event.issue.user.login }}"
+              ISSUE_ACTION="${{ github.event.action }}"
+              
+              TITLE="Issue #${ISSUE_NUMBER}: ${ISSUE_TITLE}"
+              
+              if [[ "${ISSUE_ACTION}" == "opened" ]]; then
+                COLOR="orange"
+                STATUS_EMOJI="🐛"
+                STATUS_TEXT="Opened"
+              elif [[ "${ISSUE_ACTION}" == "closed" ]]; then
+                COLOR="green"
+                STATUS_EMOJI="✔️"
+                STATUS_TEXT="Closed"
+              fi
+              
+              MESSAGE="**Status:** ${STATUS_TEXT}\n**Author:** ${ISSUE_USER}\n**[View Issue](${ISSUE_URL})**"
+              ;;
+              
+            "push")
+              COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+              COMMIT_AUTHOR="${{ github.event.head_commit.author.name }}"
+              COMMIT_URL="${{ github.event.head_commit.url }}"
+              BRANCH="${{ github.ref_name }}"
+              
+              TITLE="Push to ${BRANCH}"
+              COLOR="blue"
+              STATUS_EMOJI="🚀"
+              
+              MESSAGE="**Author:** ${COMMIT_AUTHOR}\n**Commit:** ${COMMIT_MESSAGE}\n**[View Commit](${COMMIT_URL})**"
+              ;;
+              
+            "release")
+              RELEASE_NAME="${{ github.event.release.name }}"
+              RELEASE_TAG="${{ github.event.release.tag_name }}"
+              RELEASE_URL="${{ github.event.release.html_url }}"
+              RELEASE_AUTHOR="${{ github.event.release.author.login }}"
+              
+              TITLE="Release: ${RELEASE_NAME} (${RELEASE_TAG})"
+              COLOR="green"
+              STATUS_EMOJI="🎉"
+              
+              MESSAGE="**Published by:** ${RELEASE_AUTHOR}\n**[View Release](${RELEASE_URL})**"
+              ;;
+              
+            "workflow_dispatch")
+              if [[ -n "${{ github.event.inputs.message }}" ]]; then
+                MESSAGE="${{ github.event.inputs.message }}"
+              else
+                MESSAGE="Manual workflow dispatch triggered"
+              fi
+              
+              TITLE="Manual Trigger"
+              
+              case "${{ github.event.inputs.notification_type }}" in
+                "success")
+                  COLOR="green"
+                  STATUS_EMOJI="✅"
+                  ;;
+                "warning")
+                  COLOR="yellow"
+                  STATUS_EMOJI="⚠️"
+                  ;;
+                "error")
+                  COLOR="red"
+                  STATUS_EMOJI="❌"
+                  ;;
+                *)
+                  COLOR="blue"
+                  STATUS_EMOJI="ℹ️"
+                  ;;
+              esac
+              ;;
+          esac
+          
+          # Export variables
+          echo "title=${TITLE}" >> "${GITHUB_OUTPUT}"
+          echo "color=${COLOR}" >> "${GITHUB_OUTPUT}"
+          echo "status_emoji=${STATUS_EMOJI}" >> "${GITHUB_OUTPUT}"
+          echo "message<<EOF" >> "${GITHUB_OUTPUT}"
+          echo "${MESSAGE}" >> "${GITHUB_OUTPUT}"
+          echo "EOF" >> "${GITHUB_OUTPUT}"
+          
+      - name: 'Send to Lark - Card Message'
+        if: ${{ vars.LARK_WEBHOOK_URL || secrets.LARK_WEBHOOK_URL }}
+        env:
+          LARK_WEBHOOK_URL: ${{ secrets.LARK_WEBHOOK_URL || vars.LARK_WEBHOOK_URL }}
+        run: |
+          # Prepare Lark card message
+          CARD_JSON=$(cat <<EOF
+          {
+            "msg_type": "interactive",
+            "card": {
+              "config": {
+                "wide_screen_mode": true
+              },
+              "header": {
+                "title": {
+                  "tag": "plain_text",
+                  "content": "${{ steps.prepare.outputs.status_emoji }} ${{ steps.prepare.outputs.title }}"
+                },
+                "template": "${{ steps.prepare.outputs.color }}"
+              },
+              "elements": [
+                {
+                  "tag": "markdown",
+                  "content": "**Repository:** ${{ github.repository }}\n**Branch:** ${{ github.ref_name }}\n**Event:** ${{ github.event_name }}\n\n${{ steps.prepare.outputs.message }}"
+                },
+                {
+                  "tag": "hr"
+                },
+                {
+                  "tag": "note",
+                  "elements": [
+                    {
+                      "tag": "plain_text",
+                      "content": "Triggered at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+                    }
+                  ]
+                },
+                {
+                  "tag": "action",
+                  "actions": [
+                    {
+                      "tag": "button",
+                      "text": {
+                        "tag": "plain_text",
+                        "content": "View on GitHub"
+                      },
+                      "type": "primary",
+                      "url": "${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          EOF
+          )
+          
+          # Send to Lark
+          response=$(curl -X POST "${LARK_WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            -d "${CARD_JSON}" \
+            -s -w "\nHTTP_STATUS:%{http_code}")
+          
+          http_status=$(echo "${response}" | grep "HTTP_STATUS" | cut -d: -f2)
+          body=$(echo "${response}" | sed '/HTTP_STATUS/d')
+          
+          echo "Response body: ${body}"
+          echo "HTTP Status: ${http_status}"
+          
+          if [[ "${http_status}" != "200" ]]; then
+            echo "Failed to send notification to Lark"
+            exit 1
+          fi
+          
+      - name: 'Send to Lark - Simple Text (Fallback)'
+        if: ${{ failure() && (vars.LARK_WEBHOOK_URL || secrets.LARK_WEBHOOK_URL) }}
+        env:
+          LARK_WEBHOOK_URL: ${{ secrets.LARK_WEBHOOK_URL || vars.LARK_WEBHOOK_URL }}
+        run: |
+          # Fallback to simple text message if card message fails
+          TEXT_JSON=$(cat <<EOF
+          {
+            "msg_type": "text",
+            "content": {
+              "text": "${{ steps.prepare.outputs.status_emoji }} ${{ steps.prepare.outputs.title }}\n\nRepository: ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nEvent: ${{ github.event_name }}\n\n${{ steps.prepare.outputs.message }}\n\nView on GitHub: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
+            }
+          }
+          EOF
+          )
+          
+          curl -X POST "${LARK_WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            -d "${TEXT_JSON}"
+
+  # Optional: Send notifications for specific workflow outcomes
+  notify-on-failure:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure' }}
+    
+    steps:
+      - name: 'Send failure alert to Lark'
+        if: ${{ vars.LARK_WEBHOOK_URL_ALERTS || secrets.LARK_WEBHOOK_URL_ALERTS }}
+        env:
+          LARK_WEBHOOK_URL: ${{ secrets.LARK_WEBHOOK_URL_ALERTS || vars.LARK_WEBHOOK_URL_ALERTS }}
+        run: |
+          # Send urgent alert for workflow failures
+          ALERT_JSON=$(cat <<EOF
+          {
+            "msg_type": "interactive",
+            "card": {
+              "config": {
+                "wide_screen_mode": true
+              },
+              "header": {
+                "title": {
+                  "tag": "plain_text",
+                  "content": "🚨 Workflow Failed: ${{ github.event.workflow_run.name }}"
+                },
+                "template": "red"
+              },
+              "elements": [
+                {
+                  "tag": "markdown",
+                  "content": "**⚠️ URGENT: Workflow failure requires attention**\n\n**Repository:** ${{ github.repository }}\n**Branch:** ${{ github.event.workflow_run.head_branch }}\n**Commit:** ${{ github.event.workflow_run.head_commit.message }}\n**Author:** ${{ github.event.workflow_run.head_commit.author.name }}"
+                },
+                {
+                  "tag": "action",
+                  "actions": [
+                    {
+                      "tag": "button",
+                      "text": {
+                        "tag": "plain_text",
+                        "content": "View Failed Workflow"
+                      },
+                      "type": "danger",
+                      "url": "${{ github.event.workflow_run.html_url }}"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          EOF
+          )
+          
+          curl -X POST "${LARK_WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            -d "${ALERT_JSON}"

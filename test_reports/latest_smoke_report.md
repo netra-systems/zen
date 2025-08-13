@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-11T15:36:23.308557  
+**Generated:** 2025-08-12T12:45:06.820293  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -11,14 +11,14 @@
 **Failed:** 0  
 **Skipped:** 0  
 **Errors:** 0  
-**Overall Status:** [PASSED]
+**Overall Status:** [FAILED]
 
 ### Component Breakdown
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 2 | 2 | 0 | 0 | 0 | 14.56s | [PASSED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
+| Backend   | 2 | 2 | 0 | 0 | 0 | 6.34s | [PASSED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 61.34s | [TIMEOUT] |
 
 ## Environment and Configuration
 
@@ -27,12 +27,12 @@
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
 - **Coverage Enabled:** No
-- **Total Duration:** 14.56s
+- **Total Duration:** 67.68s
 - **Exit Code:** 0
 
 ### Backend Configuration
 ```
---category smoke --fail-fast -x
+--category smoke --fail-fast -x -m not real_services
 ```
 
 ### Frontend Configuration
@@ -55,7 +55,7 @@ Test Configuration:
   Environment: development
 
 Running command:
-  pytest app/tests/routes/test_health_route.py -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
+  pytest app/tests/routes/test_health_route.py -v -x --maxfail=1 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
 ================================================================================
 [1m============================= test session starts =============================[0m
 platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
@@ -70,9 +70,9 @@ asyncio: mode=Mode.AUTO
 app\tests\routes\test_health_route.py::test_basic_import [32mPASSED[0m[32m          [ 50%][0m
 app\tests\routes\test_health_route.py::test_health_endpoint_direct [32mPASSED[0m[32m [100%][0m
 
-[32m============================== [32m[1m2 passed[0m[32m in 0.25s[0m[32m ==============================[0m
+[32m============================== [32m[1m2 passed[0m[32m in 0.06s[0m[32m ==============================[0m
 ================================================================================
-[PASS] ALL TESTS PASSED in 12.67s
+[PASS] ALL TESTS PASSED in 5.54s
 ================================================================================
 
 
@@ -80,7 +80,7 @@ app\tests\routes\test_health_route.py::test_health_endpoint_direct [32mPASSED[
 
 ### Frontend Output
 ```
-
+Tests timed out after 30s
 ```
 
 ---

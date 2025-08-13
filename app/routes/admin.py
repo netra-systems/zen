@@ -4,9 +4,23 @@ from app.auth.auth_dependencies import ActiveUserDep, DeveloperDep, AdminDep, re
 from app import schemas
 from app.config import settings
 from app.services.permission_service import PermissionService
-from typing import List, Dict
+from typing import List, Dict, Any
 
 router = APIRouter()
+
+def verify_admin_role(user: Dict[str, Any]) -> bool:
+    """Verify if a user has admin role."""
+    return user.get("role") == "admin"
+
+async def get_all_users() -> List[Dict[str, Any]]:
+    """Get all users from the system."""
+    from app.services import user_service
+    return await user_service.get_all_users()
+
+async def update_user_role(user_id: str, role: str) -> Dict[str, Any]:
+    """Update user role in the system."""
+    from app.services import user_service
+    return await user_service.update_user_role(user_id, role)
 
 @router.get("/settings", response_model=AppConfig)
 async def get_app_settings(

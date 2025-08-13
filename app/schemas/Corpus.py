@@ -6,6 +6,7 @@ import uuid
 class CorpusBase(BaseModel):
     name: str
     description: Optional[str] = None
+    domain: Optional[str] = "general"
 
 class CorpusCreate(CorpusBase):
     pass

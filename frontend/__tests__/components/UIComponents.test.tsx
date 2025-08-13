@@ -1,11 +1,10 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act, withRouter } from '../utils/test-utils';
 import userEvent from '@testing-library/user-event';
 // Using Jest, not vitest
 import { ErrorFallback } from '@/components/ErrorFallback';
 import { Header } from '@/components/Header';
 import { NavLinks } from '@/components/NavLinks';
-// react-router-dom not used in Next.js
 
 // Test 62: ErrorFallback recovery
 describe('test_ErrorFallback_recovery', () => {
@@ -58,11 +57,7 @@ describe('test_ErrorFallback_recovery', () => {
 // Test 63: Header navigation
 describe('test_Header_navigation', () => {
   it('should render header components correctly', () => {
-    render(
-      <BrowserRouter>
-        <Header />
-      </BrowserRouter>
-    );
+    render(withRouter(<Header />));
     
     expect(screen.getByRole('banner')).toBeInTheDocument();
     expect(screen.getByAltText(/Netra/i)).toBeInTheDocument();
@@ -70,9 +65,7 @@ describe('test_Header_navigation', () => {
 
   it('should handle navigation interactions', async () => {
     render(
-      <BrowserRouter>
-        <Header />
-      </BrowserRouter>
+withRouter(<Header />)
     );
     
     const homeLink = screen.getByRole('link', { name: /Home/i });
@@ -88,9 +81,7 @@ describe('test_Header_navigation', () => {
     window.dispatchEvent(new Event('resize'));
     
     render(
-      <BrowserRouter>
-        <Header />
-      </BrowserRouter>
+withRouter(<Header />)
     );
     
     const menuButton = screen.getByRole('button', { name: /Menu/i });
@@ -105,9 +96,7 @@ describe('test_Header_navigation', () => {
 describe('test_NavLinks_routing', () => {
   it('should render navigation links correctly', () => {
     render(
-      <BrowserRouter>
-        <NavLinks />
-      </BrowserRouter>
+withRouter(<NavLinks />)
     );
     
     expect(screen.getByRole('link', { name: /Dashboard/i })).toBeInTheDocument();
@@ -119,9 +108,7 @@ describe('test_NavLinks_routing', () => {
     window.history.pushState({}, '', '/chat');
     
     render(
-      <BrowserRouter>
-        <NavLinks />
-      </BrowserRouter>
+withRouter(<NavLinks />)
     );
     
     const chatLink = screen.getByRole('link', { name: /Chat/i });
@@ -132,9 +119,7 @@ describe('test_NavLinks_routing', () => {
     const mockNavigate = jest.fn();
     
     render(
-      <BrowserRouter>
-        <NavLinks onNavigate={mockNavigate} />
-      </BrowserRouter>
+withRouter(<NavLinks onNavigate={mockNavigate} />)
     );
     
     const settingsLink = screen.getByRole('link', { name: /Settings/i });
