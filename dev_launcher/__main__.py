@@ -22,28 +22,28 @@ def create_parser() -> argparse.ArgumentParser:
         description="Netra AI Development Launcher - Modular development environment with real-time monitoring",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-RECOMMENDED USAGE:
-  python -m dev_launcher --dynamic --no-backend-reload --load-secrets
+DEFAULT CONFIGURATION (Optimized for Development):
+  python -m dev_launcher
   
-  This configuration provides:
-    • Real-time log streaming with color coding
-    • Automatic port allocation (no conflicts)
-    • 30-50% faster performance (no backend reload)
-    • Hot reload for development (native uvicorn/Next.js reload)
-    • Automatic Google secret loading
-    • Better error detection and reporting
+  This provides:
+    ✅ Dynamic port allocation (no conflicts)
+    ✅ No backend hot reload (30-50% faster)
+    ✅ Automatic Google secret loading
+    ✅ Real-time log streaming with emoji indicators
+    ✅ Professional syntax highlighting
+    ✅ Better error detection and reporting
 
 EXAMPLES:
-  python -m dev_launcher                           # Default: loads secrets, native reload, streaming
-  python -m dev_launcher --dynamic                 # Dynamic port allocation
+  python -m dev_launcher                           # Default: dynamic ports, no backend reload
+  python -m dev_launcher --static                  # Use fixed ports (8000/3000)
+  python -m dev_launcher --backend-reload          # Enable backend hot reload
   python -m dev_launcher --no-secrets              # Skip secret loading
   python -m dev_launcher --no-turbopack            # Use webpack instead of turbopack
-  python -m dev_launcher --no-reload               # Maximum performance (no hot reload)
   python -m dev_launcher --verbose                 # Show detailed debug information
 
 QUICK SHORTCUTS:
-  python -m dev_launcher -d                        # Dynamic ports (short form)
-  python -m dev_launcher -d --no-reload            # Fast mode with dynamic ports
+  python -m dev_launcher                           # Fast mode (default)
+  python -m dev_launcher --dev                     # Development mode with hot reload
         """
     )
     
@@ -63,7 +63,13 @@ QUICK SHORTCUTS:
     port_group.add_argument(
         "-d", "--dynamic",
         action="store_true",
-        help="Use dynamic port allocation to avoid conflicts"
+        default=True,
+        help="Use dynamic port allocation to avoid conflicts (default: enabled)"
+    )
+    port_group.add_argument(
+        "--static",
+        action="store_true",
+        help="Use static ports instead of dynamic allocation"
     )
     
     # Reload configuration
@@ -71,7 +77,13 @@ QUICK SHORTCUTS:
     reload_group.add_argument(
         "--no-backend-reload",
         action="store_true",
-        help="Disable backend hot reload for better performance"
+        default=True,
+        help="Disable backend hot reload for better performance (default: disabled)"
+    )
+    reload_group.add_argument(
+        "--backend-reload",
+        action="store_true",
+        help="Enable backend hot reload"
     )
     reload_group.add_argument(
         "--no-frontend-reload",
@@ -82,6 +94,11 @@ QUICK SHORTCUTS:
         "--no-reload",
         action="store_true",
         help="Disable all hot reload (maximum performance)"
+    )
+    reload_group.add_argument(
+        "--dev",
+        action="store_true",
+        help="Development mode with full hot reload"
     )
     
     # Secret management

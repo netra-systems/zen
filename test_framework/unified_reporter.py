@@ -36,12 +36,12 @@ class UnifiedReporter:
         report = self._create_unified_view(current_results, deltas, level)
         
         # Save unified report
-        with open(self.unified_file, 'w') as f:
+        with open(self.unified_file, 'w', encoding='utf-8') as f:
             f.write(report)
         
         # Generate dashboard
         dashboard = self._create_dashboard()
-        with open(self.dashboard_file, 'w') as f:
+        with open(self.dashboard_file, 'w', encoding='utf-8') as f:
             f.write(dashboard)
         
         return report

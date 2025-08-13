@@ -20,6 +20,7 @@ class CircuitBreakerConfig:
     recovery_timeout: float = 60.0
     half_open_max_calls: int = 3
 
+
 class CircuitBreaker:
     """Circuit breaker implementation for agent failure handling"""
     
