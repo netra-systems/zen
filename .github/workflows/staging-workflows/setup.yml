@@ -16,6 +16,10 @@ on:
       dispatch_action:
         required: false
         type: string
+      branch:
+        required: false
+        type: string
+        description: 'Branch name for deployment'
     outputs:
       environment_name:
         description: 'Staging environment name'
@@ -67,9 +71,23 @@ jobs:
           elif [[ "${{ inputs.event_name }}" == "workflow_dispatch" ]]; then
             PR_NUMBER="${{ inputs.pr_number }}"
             ACTION="${{ inputs.dispatch_action }}"
-            # Fetch PR details for branch and commit
-            BRANCH_NAME=$(gh pr view $PR_NUMBER --json headRefName -q .headRefName)
-            COMMIT_SHA=$(gh pr view $PR_NUMBER --json headRefOid -q .headRefOid)
+            
+            # Use provided branch or fetch from PR
+            if [[ -n "${{ inputs.branch }}" ]]; then
+              BRANCH_NAME="${{ inputs.branch }}"
+              COMMIT_SHA="${{ github.sha }}"
+              # If no PR number, generate one from branch
+              if [[ -z "$PR_NUMBER" ]]; then
+                PR_NUMBER="branch-${BRANCH_NAME//\//-}"
+              fi
+            elif [[ -n "$PR_NUMBER" ]]; then
+              # Fetch PR details for branch and commit
+              BRANCH_NAME=$(gh pr view $PR_NUMBER --json headRefName -q .headRefName)
+              COMMIT_SHA=$(gh pr view $PR_NUMBER --json headRefOid -q .headRefOid)
+            else
+              echo "Error: Either PR number or branch must be provided"
+              exit 1
+            fi
           else
             # repository_dispatch
             PR_NUMBER="${{ inputs.pr_number }}"
@@ -84,8 +102,10 @@ jobs:
             exit 1
           fi
           
-          # Generate environment name
-          ENV_NAME="${{ env.PROJECT_NAME }}-pr-${PR_NUMBER}"
+          # Generate environment name (sanitize for DNS)
+          ENV_NAME="${{ env.PROJECT_NAME }}-${PR_NUMBER//[^a-zA-Z0-9-]/-}"
+          ENV_NAME="${ENV_NAME,,}" # Convert to lowercase
+          ENV_NAME="${ENV_NAME:0:63}" # Truncate to 63 chars
           
           # Output configuration
           echo "environment_name=$ENV_NAME" >> $GITHUB_OUTPUT
