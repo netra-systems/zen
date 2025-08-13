@@ -2,7 +2,11 @@
 
 import asyncio
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.ws_manager import WebSocketManager
+    from app.agents.supervisor.agent_registry import AgentRegistry
 from datetime import datetime, timezone
 from app.logging_config import central_logger
 from app.agents.state import DeepAgentState
@@ -21,7 +25,7 @@ logger = central_logger.get_logger(__name__)
 class ExecutionEngine:
     """Handles agent execution logic."""
     
-    def __init__(self, registry: Any, websocket_manager: Any):
+    def __init__(self, registry: 'AgentRegistry', websocket_manager: 'WebSocketManager'):
         self.registry = registry
         self.websocket_manager = websocket_manager
         self.active_runs: Dict[str, AgentExecutionContext] = {}

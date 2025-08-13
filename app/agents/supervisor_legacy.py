@@ -16,11 +16,8 @@ consolidating multiple supervisor implementations with feature flags and
 circuit breaker patterns for robust agent orchestration.
 """
 
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Dict, List, Optional
 from enum import Enum
-
-if TYPE_CHECKING:
-    from app.ws_manager import WebSocketManager
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import asyncio
@@ -28,8 +25,11 @@ import time
 from contextlib import asynccontextmanager
 
 from app.logging_config import central_logger
-# Avoid circular import - import moved to function body where needed
+from app.ws_manager import WebSocketManager
 from app.agents.quality_supervisor import QualityEnhancedSupervisor
+from app.agents.supervisor_circuit_breaker import (
+    CircuitBreaker, CircuitBreakerConfig, CircuitBreakerState
+)
 from app.agents.state import DeepAgentState
 from app.schemas import SubAgentLifecycle
 from app.llm.llm_manager import LLMManager
@@ -44,14 +44,6 @@ class SupervisorMode(Enum):
     BASIC = "basic"
     QUALITY_ENHANCED = "quality_enhanced"
     ADMIN_ENABLED = "admin_enabled"
-
-
-@dataclass
-class CircuitBreakerConfig:
-    """Configuration for circuit breaker pattern"""
-    failure_threshold: int = 5
-    recovery_timeout: float = 60.0
-    half_open_max_calls: int = 3
 
 
 @dataclass
@@ -70,61 +62,6 @@ class SupervisorConfig:
     def __post_init__(self):
         if self.circuit_breaker_config is None:
             self.circuit_breaker_config = CircuitBreakerConfig()
-
-
-class CircuitBreakerState(Enum):
-    """Circuit breaker states"""
-    CLOSED = "closed"
-    OPEN = "open"
-    HALF_OPEN = "half_open"
-
-
-class CircuitBreaker:
-    """Circuit breaker implementation for agent failure handling"""
-    
-    def __init__(self, config: CircuitBreakerConfig):
-        self.config = config
-        self.state = CircuitBreakerState.CLOSED
-        self.failure_count = 0
-        self.last_failure_time = None
-        self.half_open_calls = 0
-    
-    def can_execute(self) -> bool:
-        """Check if execution is allowed"""
-        if self.state == CircuitBreakerState.CLOSED:
-            return True
-        elif self.state == CircuitBreakerState.OPEN:
-            if self._should_attempt_reset():
-                self.state = CircuitBreakerState.HALF_OPEN
-                self.half_open_calls = 0
-                return True
-            return False
-        elif self.state == CircuitBreakerState.HALF_OPEN:
-            return self.half_open_calls < self.config.half_open_max_calls
-        return False
-    
-    def record_success(self):
-        """Record successful execution"""
-        if self.state == CircuitBreakerState.HALF_OPEN:
-            self.state = CircuitBreakerState.CLOSED
-        self.failure_count = 0
-        self.last_failure_time = None
-    
-    def record_failure(self):
-        """Record failed execution"""
-        self.failure_count += 1
-        self.last_failure_time = time.time()
-        
-        if self.state == CircuitBreakerState.HALF_OPEN:
-            self.state = CircuitBreakerState.OPEN
-        elif self.failure_count >= self.config.failure_threshold:
-            self.state = CircuitBreakerState.OPEN
-    
-    def _should_attempt_reset(self) -> bool:
-        """Check if circuit breaker should attempt reset"""
-        if self.last_failure_time is None:
-            return True
-        return (time.time() - self.last_failure_time) >= self.config.recovery_timeout
 
 
 class SupervisorAgent:

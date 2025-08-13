@@ -1,6 +1,10 @@
 """Refactored Supervisor Agent with modular architecture (<300 lines)."""
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.ws_manager import WebSocketManager
 from datetime import datetime, timezone
 import asyncio
 from app.logging_config import central_logger
@@ -34,7 +38,7 @@ class SupervisorAgent(BaseSubAgent):
     def __init__(self, 
                  db_session: AsyncSession,
                  llm_manager: LLMManager,
-                 websocket_manager: Any,
+                 websocket_manager: 'WebSocketManager',
                  tool_dispatcher: ToolDispatcher):
         super().__init__(
             llm_manager, 

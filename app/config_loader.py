@@ -1,11 +1,14 @@
 """Configuration loader utilities - split from config.py for modularity."""
 
 import os
-from typing import Dict, Any
+from typing import Dict, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.config import Settings
 from app.logging_config import central_logger as logger
 
 
-def load_env_var(env_var: str, config: Any, field_name: str) -> bool:
+def load_env_var(env_var: str, config: 'Settings', field_name: str) -> bool:
     """Load a single environment variable into config."""
     value = os.environ.get(env_var)
     if value and hasattr(config, field_name):
@@ -15,7 +18,7 @@ def load_env_var(env_var: str, config: Any, field_name: str) -> bool:
     return False
 
 
-def set_clickhouse_host(config: Any, value: str) -> None:
+def set_clickhouse_host(config: 'Settings', value: str) -> None:
     """Set ClickHouse host in config."""
     if hasattr(config, 'clickhouse_native'):
         config.clickhouse_native.host = value
@@ -24,7 +27,7 @@ def set_clickhouse_host(config: Any, value: str) -> None:
     logger.debug(f"Set ClickHouse host: {value}")
 
 
-def set_clickhouse_port(config: Any, value: str) -> None:
+def set_clickhouse_port(config: 'Settings', value: str) -> None:
     """Set ClickHouse port in config."""
     try:
         port = int(value)
@@ -37,7 +40,7 @@ def set_clickhouse_port(config: Any, value: str) -> None:
         logger.warning(f"Invalid CLICKHOUSE_PORT: {value}")
 
 
-def set_clickhouse_password(config: Any, value: str) -> None:
+def set_clickhouse_password(config: 'Settings', value: str) -> None:
     """Set ClickHouse password in config."""
     if hasattr(config, 'clickhouse_native'):
         config.clickhouse_native.password = value
@@ -46,7 +49,7 @@ def set_clickhouse_password(config: Any, value: str) -> None:
     logger.debug("Set ClickHouse password")
 
 
-def set_clickhouse_user(config: Any, value: str) -> None:
+def set_clickhouse_user(config: 'Settings', value: str) -> None:
     """Set ClickHouse user in config."""
     if hasattr(config, 'clickhouse_native'):
         config.clickhouse_native.user = value
@@ -55,7 +58,7 @@ def set_clickhouse_user(config: Any, value: str) -> None:
     logger.debug(f"Set ClickHouse user: {value}")
 
 
-def set_gemini_api_key(config: Any, value: str) -> None:
+def set_gemini_api_key(config: 'Settings', value: str) -> None:
     """Set Gemini API key for LLM configs."""
     llm_names = ['default', 'analysis', 'triage', 'data',
                  'optimizations_core', 'actions_to_meet_goals',
@@ -65,7 +68,7 @@ def set_gemini_api_key(config: Any, value: str) -> None:
     logger.debug("Set Gemini API key for LLM configs")
 
 
-def set_llm_api_key(config: Any, llm_name: str, api_key: str) -> None:
+def set_llm_api_key(config: 'Settings', llm_name: str, api_key: str) -> None:
     """Set API key for a specific LLM config."""
     if hasattr(config, 'llm_configs'):
         if llm_name in config.llm_configs:
@@ -87,7 +90,7 @@ def get_critical_vars_mapping() -> Dict[str, str]:
     }
 
 
-def apply_single_secret(config: Any, path: str, field: str, value: Any) -> None:
+def apply_single_secret(config: 'Settings', path: str, field: str, value: str) -> None:
     """Apply a single secret to config at the given path."""
     parts = path.split('.')
     obj = config

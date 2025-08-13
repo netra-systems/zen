@@ -14,7 +14,7 @@ This module wraps the supervisor with quality gates to prevent AI slop
 and ensure high-quality outputs from all agents.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 from datetime import datetime, UTC
 import asyncio
 
@@ -41,7 +41,7 @@ class QualityEnhancedSupervisor:
     def __init__(self,
                  db_session: AsyncSession,
                  llm_manager: LLMManager,
-                 websocket_manager: Any,
+                 websocket_manager: 'WebSocketManager',
                  tool_dispatcher: ToolDispatcher,
                  enable_quality_gates: bool = True,
                  strict_mode: bool = False):

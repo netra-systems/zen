@@ -14,10 +14,10 @@ class LauncherConfig:
     # Port configuration
     backend_port: Optional[int] = None
     frontend_port: int = 3000
-    dynamic_ports: bool = False
+    dynamic_ports: bool = True  # Default to dynamic allocation
     
     # Reload configuration (uses native reload)
-    backend_reload: bool = True
+    backend_reload: bool = False  # Default to no reload for performance
     frontend_reload: bool = True  # Next.js always has reload
     
     # Secret management
@@ -76,9 +76,26 @@ class LauncherConfig:
     @classmethod
     def from_args(cls, args) -> "LauncherConfig":
         """Create configuration from command-line arguments."""
-        # Handle reload flags (native reload)
-        backend_reload = not args.no_backend_reload and not args.no_reload
-        frontend_reload = True  # Next.js always has reload
+        # Handle port configuration
+        dynamic_ports = not args.static if hasattr(args, 'static') else True
+        
+        # Handle reload flags
+        if hasattr(args, 'dev') and args.dev:
+            # Development mode: enable all hot reload
+            backend_reload = True
+            frontend_reload = True
+        elif hasattr(args, 'backend_reload') and args.backend_reload:
+            # Explicit backend reload
+            backend_reload = True
+            frontend_reload = True
+        elif args.no_reload:
+            # No reload at all
+            backend_reload = False
+            frontend_reload = True  # Next.js always has reload
+        else:
+            # Default: no backend reload for performance
+            backend_reload = False
+            frontend_reload = True
         
         # Default to loading secrets unless --no-secrets is specified
         load_secrets = not args.no_secrets if hasattr(args, 'no_secrets') else True
@@ -86,7 +103,7 @@ class LauncherConfig:
         return cls(
             backend_port=args.backend_port,
             frontend_port=args.frontend_port,
-            dynamic_ports=args.dynamic,
+            dynamic_ports=dynamic_ports,
             verbose=args.verbose,
             backend_reload=backend_reload,
             frontend_reload=frontend_reload,

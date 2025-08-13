@@ -5,7 +5,7 @@ Provides endpoints for generating and managing synthetic AI workload data
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Tuple
 from pydantic import BaseModel, Field
 from datetime import datetime
 
@@ -26,7 +26,7 @@ class ToolConfig(BaseModel):
     """Tool configuration for generation"""
     name: str
     type: str
-    latency_ms_range: tuple[int, int] = Field(default=(50, 500))
+    latency_ms_range: Tuple[int, int] = Field(default=(50, 500))
     failure_rate: float = Field(default=0.01, ge=0, le=1)
 
 

@@ -1,6 +1,11 @@
 """Agent registry and management for supervisor."""
 
-from typing import Dict, List, Any
+from typing import Dict, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.llm.llm_manager import LLMManager
+    from app.agents.tool_dispatcher import ToolDispatcher
+    from app.ws_manager import WebSocketManager
 from app.agents.base import BaseSubAgent
 from app.logging_config import central_logger
 
@@ -19,7 +24,7 @@ logger = central_logger.get_logger(__name__)
 class AgentRegistry:
     """Manages agent registration and lifecycle."""
     
-    def __init__(self, llm_manager: Any, tool_dispatcher: Any):
+    def __init__(self, llm_manager: 'LLMManager', tool_dispatcher: 'ToolDispatcher'):
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
         self.agents: Dict[str, BaseSubAgent] = {}
@@ -61,7 +66,7 @@ class AgentRegistry:
         """Get all registered agents"""
         return list(self.agents.values())
     
-    def set_websocket_manager(self, manager: Any) -> None:
+    def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
         """Set websocket manager for all agents"""
         self.websocket_manager = manager
         for agent in self.agents.values():

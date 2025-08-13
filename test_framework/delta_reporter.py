@@ -50,7 +50,13 @@ class DeltaReporter:
         if not previous_results:
             history = self.load_history()
             if history["runs"]:
-                previous_results = history["runs"][-1]["results"]
+                # Check if the last run has results
+                last_run = history["runs"][-1]
+                if "results" in last_run:
+                    previous_results = last_run["results"]
+                else:
+                    # Old format compatibility
+                    return self._all_new_tests(current_results)
             else:
                 return self._all_new_tests(current_results)
         
@@ -297,12 +303,12 @@ class DeltaReporter:
         
         # Save delta report
         delta_content = self.generate_delta_report(deltas)
-        with open(self.delta_file, 'w') as f:
+        with open(self.delta_file, 'w', encoding='utf-8') as f:
             f.write(delta_content)
         
         # Save critical report
         critical_content = self.generate_critical_report(deltas, results)
-        with open(self.critical_file, 'w') as f:
+        with open(self.critical_file, 'w', encoding='utf-8') as f:
             f.write(critical_content)
     
     def get_test_trend(self, test_key: str) -> List[Dict]:

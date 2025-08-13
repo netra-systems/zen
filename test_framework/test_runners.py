@@ -13,7 +13,7 @@ from typing import Tuple, List, Dict, Optional, Any
 from dotenv import load_dotenv
 
 from .test_config import RUNNERS
-from .test_parser import parse_test_counts, parse_coverage, parse_cypress_counts
+from .test_parser import parse_test_counts, parse_coverage, parse_cypress_counts, extract_test_details
 
 # Load environment variables
 load_dotenv()
@@ -107,6 +107,10 @@ def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Opti
             counts = parse_test_counts(result.stdout + result.stderr, "backend")
             results["backend"]["test_counts"] = counts
             
+            # Extract test details for unified reporter
+            test_details = extract_test_details(result.stdout + result.stderr, "backend")
+            results["backend"]["test_details"] = test_details
+            
             # Parse coverage
             coverage = parse_coverage(result.stdout + result.stderr)
             if coverage is not None:
@@ -176,6 +180,10 @@ def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, A
             # Parse test counts from output
             counts = parse_test_counts(result.stdout + result.stderr, "frontend")
             results["frontend"]["test_counts"] = counts
+            
+            # Extract test details for unified reporter
+            test_details = extract_test_details(result.stdout + result.stderr, "frontend")
+            results["frontend"]["test_details"] = test_details
             
             # Parse coverage
             coverage = parse_coverage(result.stdout + result.stderr)
@@ -250,6 +258,10 @@ def run_e2e_tests(args: List[str], timeout: int = 600, results: Dict[str, Any] =
             # Parse test counts from Cypress output
             counts = parse_cypress_counts(result.stdout + result.stderr)
             results["e2e"]["test_counts"] = counts
+            
+            # Extract test details for unified reporter
+            test_details = extract_test_details(result.stdout + result.stderr, "e2e")
+            results["e2e"]["test_details"] = test_details
         
         # Print output with proper encoding handling
         print_output(result.stdout, result.stderr)

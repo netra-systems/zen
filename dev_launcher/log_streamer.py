@@ -41,6 +41,8 @@ class LogStreamer(threading.Thread):
         self.running = True
         self.lines_buffer = deque(maxlen=buffer_size)
         self.error_keywords = ['error', 'exception', 'traceback', 'failed', 'fatal', 'critical']
+        self.warning_keywords = ['warning', 'warn', 'deprecated']
+        self.success_keywords = ['success', 'started', 'running', 'listening', 'ready']
         
     def run(self):
         """Stream output from process."""
@@ -69,9 +71,25 @@ class LogStreamer(threading.Thread):
             logger.error(f"Failed to decode line: {e}")
             return None
     
+    def _get_line_emoji(self, line: str) -> str:
+        """Get emoji indicator for line type."""
+        lower_line = line.lower()
+        if any(kw in lower_line for kw in self.error_keywords):
+            return "❌ "
+        elif any(kw in lower_line for kw in self.warning_keywords):
+            return "⚠️  "
+        elif any(kw in lower_line for kw in self.success_keywords):
+            return "✅ "
+        return ""
+    
+    def _format_content(self, line: str) -> str:
+        """Apply syntax highlighting to line content."""
+        return self._apply_syntax_colors(line)
+    
     def _print_line(self, line: str):
         """Print a line with appropriate formatting."""
-        formatted_line = f"{self.color_code}[{self.name}] {line}{self.reset_code}"
+        emoji = self._get_line_emoji(line)
+        formatted_line = f"{self.color_code}[{self.name}]{self.reset_code} {emoji}{self._format_content(line)}"
         print(formatted_line)
     
     def stop(self):
@@ -113,6 +131,31 @@ class LogStreamer(threading.Thread):
     def has_errors(self) -> bool:
         """Check if any errors have been detected in recent output."""
         return len(self.get_recent_errors()) > 0
+    
+    def _apply_syntax_colors(self, text: str) -> str:
+        """Apply professional syntax highlighting."""
+        # Keywords
+        keywords = ['import', 'from', 'class', 'def', 'return', 'if', 'else', 
+                   'try', 'except', 'finally', 'with', 'as', 'for', 'while']
+        # Numbers
+        import re
+        result = text
+        
+        # Highlight strings (green)
+        result = re.sub(r'(["\'])([^"\']*)(["\'])', 
+                       r'\033[32m\1\2\3\033[0m', result)
+        
+        # Highlight numbers (cyan)
+        result = re.sub(r'\b(\d+)\b', r'\033[36m\1\033[0m', result)
+        
+        # Highlight keywords (blue)
+        for kw in keywords:
+            result = re.sub(rf'\b({kw})\b', r'\033[34m\1\033[0m', result)
+        
+        # Highlight paths (yellow)
+        result = re.sub(r'([/\\][\w/\\.-]+)', r'\033[33m\1\033[0m', result)
+        
+        return result
 
 
 class LogManager:
@@ -189,24 +232,39 @@ class LogManager:
 # ANSI color codes for different services
 class Colors:
     """ANSI color codes for terminal output."""
-    CYAN = "\033[36m"
-    MAGENTA = "\033[35m"
-    YELLOW = "\033[33m"
-    GREEN = "\033[32m"
-    RED = "\033[31m"
-    BLUE = "\033[34m"
+    # Service name colors (distinct)
+    BACKEND = "\033[96m"   # Bright Cyan
+    FRONTEND = "\033[95m"  # Bright Magenta
+    
+    # Standard syntax colors
+    CYAN = "\033[36m"      # Numbers
+    MAGENTA = "\033[35m"   # Special
+    YELLOW = "\033[33m"    # Paths, warnings
+    GREEN = "\033[32m"     # Strings, success
+    RED = "\033[31m"       # Errors
+    BLUE = "\033[34m"      # Keywords
+    WHITE = "\033[37m"     # Default text
+    GRAY = "\033[90m"      # Comments, timestamps
+    
+    # Formatting
     RESET = "\033[0m"
     BOLD = "\033[1m"
+    DIM = "\033[2m"
+    ITALIC = "\033[3m"
+    UNDERLINE = "\033[4m"
     
     @staticmethod
     def get_service_color(service_name: str) -> str:
         """Get appropriate color for a service."""
         service_colors = {
-            "backend": Colors.CYAN,
-            "frontend": Colors.MAGENTA,
+            "backend": Colors.BACKEND + Colors.BOLD,
+            "frontend": Colors.FRONTEND + Colors.BOLD,
             "database": Colors.YELLOW,
             "redis": Colors.GREEN,
             "clickhouse": Colors.BLUE,
+            "postgres": Colors.CYAN,
+            "secret": Colors.GRAY,
+            "health": Colors.GREEN,
         }
         
         service_lower = service_name.lower()
@@ -214,7 +272,7 @@ class Colors:
             if key in service_lower:
                 return color
         
-        return ""  # No color by default
+        return Colors.WHITE  # Default white
 
 
 def setup_logging(verbose: bool = False):
@@ -227,10 +285,31 @@ def setup_logging(verbose: bool = False):
     level = logging.DEBUG if verbose else logging.INFO
     
     # Configure root logger
+    # Custom formatter with colors
+    class ColoredFormatter(logging.Formatter):
+        COLORS = {
+            'DEBUG': Colors.GRAY,
+            'INFO': Colors.WHITE,
+            'WARNING': Colors.YELLOW,
+            'ERROR': Colors.RED,
+            'CRITICAL': Colors.RED + Colors.BOLD,
+        }
+        
+        def format(self, record):
+            color = self.COLORS.get(record.levelname, Colors.WHITE)
+            record.levelname = f"{color}{record.levelname}{Colors.RESET}"
+            record.asctime = f"{Colors.GRAY}{self.formatTime(record)}{Colors.RESET}"
+            return super().format(record)
+    
+    handler = logging.StreamHandler()
+    handler.setFormatter(ColoredFormatter(
+        '%(asctime)s | %(levelname)s | %(message)s',
+        datefmt='%H:%M:%S'
+    ))
+    
     logging.basicConfig(
         level=level,
-        format='%(asctime)s | %(levelname)s | %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        handlers=[handler]
     )
     
     # Suppress noisy loggers
