@@ -166,8 +166,11 @@ class ServicesConfiguration:
                 env_vars["CLICKHOUSE_URL"] = f"clickhouse://{ch_config['user']}@{ch_config['host']}:{ch_config['port']}/{ch_config['database']}"
         
         if self.postgres.mode != ResourceMode.DISABLED:
-            pg_config = self.postgres.get_config()
-            env_vars["DATABASE_URL"] = f"postgresql://{pg_config['user']}:{pg_config['password']}@{pg_config['host']}:{pg_config['port']}/{pg_config['database']}"
+            if self.postgres.mode == ResourceMode.MOCK:
+                env_vars["DATABASE_URL"] = "postgresql://mock:mock@localhost:5432/mock"
+            else:
+                pg_config = self.postgres.get_config()
+                env_vars["DATABASE_URL"] = f"postgresql://{pg_config['user']}:{pg_config['password']}@{pg_config['host']}:{pg_config['port']}/{pg_config['database']}"
         
         # IMPORTANT: Remove all DEV_MODE_DISABLE flags - all services are enabled by default
         # Users should explicitly choose mock or disabled mode if needed

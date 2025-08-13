@@ -211,7 +211,7 @@ class ThreadService:
                             await manager.send_message(
                                 user_id,
                                 {
-                                    "type": "run_started",
+                                    "type": "agent_started",
                                     "payload": {
                                         "run_id": run_id,
                                         "thread_id": thread_id,
@@ -238,7 +238,7 @@ class ThreadService:
                             await manager.send_message(
                                 user_id,
                                 {
-                                    "type": "run_started",
+                                    "type": "agent_started",
                                     "payload": {
                                         "run_id": run_id,
                                         "thread_id": thread_id,

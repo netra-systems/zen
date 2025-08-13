@@ -283,7 +283,7 @@ class ConnectionHealthChecker:
             if async_engine:
                 async with async_engine.connect() as conn:
                     result = await conn.execute(text("SELECT 1"))
-                    await result.fetchone()
+                    result.fetchone()
             
             end_time = time.time()
             test_result["response_time_ms"] = round((end_time - start_time) * 1000, 2)
@@ -318,7 +318,7 @@ class ConnectionHealthChecker:
                     start_time = time.time()
                     async with async_engine.connect() as conn:
                         result = await conn.execute(query)
-                        await result.fetchall()
+                        result.fetchall()
                     end_time = time.time()
                     response_times.append((end_time - start_time) * 1000)
             

@@ -72,7 +72,7 @@ class MessageHandlerService:
         self.supervisor.user_id = user_id
         self.supervisor.db_session = db_session
         
-        response = await self.supervisor.run(user_request, run.id, stream_updates=True)
+        response = await self.supervisor.run(user_request, thread.id, user_id, run.id)
         
         if response:
             await self.thread_service.create_message(
@@ -153,7 +153,7 @@ class MessageHandlerService:
         
         try:
             run_id = run.id if run else user_id
-            response = await self.supervisor.run(text, run_id, stream_updates=True)
+            response = await self.supervisor.run(text, thread.id if thread else user_id, user_id, run_id)
             
             if db_session and response and thread:
                 try:
