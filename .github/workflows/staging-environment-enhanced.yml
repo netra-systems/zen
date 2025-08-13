@@ -262,8 +262,7 @@ jobs:
     needs: [initialize-deployment, commit-monitor]
     if: |
       needs.initialize-deployment.outputs.should_deploy == 'true' && 
-      needs.commit-monitor.outputs.new_commit_detected != 'true' &&
-      (github.event.pull_request.head.sha == '${{ env.DEPLOYMENT_SHA }}' || github.event_name == 'workflow_dispatch')
+      needs.commit-monitor.outputs.new_commit_detected != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
@@ -510,8 +509,7 @@ jobs:
     needs: [initialize-deployment, commit-monitor]
     if: |
       needs.initialize-deployment.outputs.should_deploy == 'true' && 
-      needs.commit-monitor.outputs.new_commit_detected != 'true' &&
-      (github.event.pull_request.head.sha == '${{ env.DEPLOYMENT_SHA }}' || github.event_name == 'workflow_dispatch')
+      needs.commit-monitor.outputs.new_commit_detected != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
@@ -775,8 +773,7 @@ jobs:
     needs: [initialize-deployment, build-backend, build-frontend, commit-monitor]
     if: |
       needs.initialize-deployment.outputs.should_deploy == 'true' && 
-      needs.commit-monitor.outputs.new_commit_detected != 'true' &&
-      (github.event.pull_request.head.sha == '${{ env.DEPLOYMENT_SHA }}' || github.event_name == 'workflow_dispatch')
+      needs.commit-monitor.outputs.new_commit_detected != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
