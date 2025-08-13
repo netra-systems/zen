@@ -8,8 +8,8 @@ import json
 from unittest.mock import AsyncMock, Mock, MagicMock, patch
 from typing import Dict, Any
 
+from app.agents.triage_sub_agent_legacy import TriageSubAgent
 from app.agents.triage_sub_agent import (
-    TriageSubAgent, 
     TriageResult,
     Priority,
     Complexity,

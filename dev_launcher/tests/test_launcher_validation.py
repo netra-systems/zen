@@ -22,10 +22,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 def test_launcher_help():
     """Test that the launcher help works."""
+    # Navigate to parent directory where dev_launcher.py exists
+    parent_dir = Path(__file__).parent.parent.parent
     result = subprocess.run(
-        [sys.executable, "dev_launcher.py", "--help"],
+        [sys.executable, str(parent_dir / "dev_launcher.py"), "--help"],
         capture_output=True,
-        text=True
+        text=True,
+        cwd=parent_dir
     )
     assert result.returncode == 0
     assert "Netra AI Development Launcher" in result.stdout
@@ -155,6 +158,7 @@ def test_process_manager_basic():
 def test_config_env_vars():
     """Test that configuration handles environment variables."""
     from dev_launcher.config import LauncherConfig
+    from unittest.mock import patch
     import os
     
     # Set a test project ID

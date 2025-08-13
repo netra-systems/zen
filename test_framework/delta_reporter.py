@@ -314,7 +314,7 @@ class DeltaReporter:
     def get_test_trend(self, test_key: str) -> List[Dict]:
         """Get historical trend for a specific test."""
         history = self.load_history()
-        if test_key in history["tests"]:
+        if "tests" in history and test_key in history["tests"]:
             return history["tests"][test_key]["runs"]
         return []
     
@@ -322,6 +322,10 @@ class DeltaReporter:
         """Identify tests that have changed status multiple times."""
         history = self.load_history()
         flaky = []
+        
+        # Check if tests key exists (for compatibility)
+        if "tests" not in history:
+            return flaky
         
         for test_key, data in history["tests"].items():
             runs = data["runs"]

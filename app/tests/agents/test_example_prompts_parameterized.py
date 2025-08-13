@@ -40,10 +40,6 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
     Uses pytest.mark.parametrize to generate all 90 test combinations.
     """
     
-    def __init__(self):
-        self.context_generator = ContextGenerator()
-        self.test_runner = TestRunner()
-    
     @pytest.fixture(autouse=True)
     def setup(self):
         """Setup test dependencies"""
@@ -169,10 +165,6 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
 @pytest.mark.real_llm
 class TestPromptGroups(ExamplePromptsTestBase):
     """Test prompts grouped by functionality"""
-    
-    def __init__(self):
-        self.context_generator = ContextGenerator()
-        self.test_runner = TestRunner()
     
     @pytest.fixture(autouse=True)
     def setup(self):

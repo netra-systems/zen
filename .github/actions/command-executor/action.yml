@@ -1,5 +1,5 @@
 name: Command Executor
-description: Execute commands received from Lark
+description: Execute commands (originally from Lark - moved to work_in_progress)
 author: Netra Systems
 
 inputs:

@@ -5,13 +5,13 @@ The actual implementation has been split into multiple modules in the data_sub_a
 """
 
 # Import from the new modular structure for backward compatibility
-from app.agents.data_sub_agent import (
-    DataSubAgent,
+from app.agents.data_sub_agent.agent import DataSubAgent
+from app.agents.data_sub_agent.models import (
     DataAnalysisResponse,
-    AnomalyDetectionResponse,
-    QueryBuilder,
-    AnalysisEngine
+    AnomalyDetectionResponse
 )
+from app.agents.data_sub_agent.query_builder import QueryBuilder
+from app.agents.data_sub_agent.analysis_engine import AnalysisEngine
 
 # Maintain metadata for tracking
 __metadata__ = {

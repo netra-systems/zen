@@ -165,17 +165,7 @@ jobs:
             coverage.xml
             htmlcov/
       
-      - name: Notify Lark on failure
-        if: failure()
-        uses: ./.github/actions/lark-notifier
-        with:
-          type: error
-          status: failure
-          webhook_url: ${{ secrets.LARK_WEBHOOK_URL }}
-          title: Backend Tests Failed
-          message: |
-            Test level: ${{ needs.determine-tests.outputs.test_level }}
-            Failed tests: Check artifacts for details
+      # Lark notification removed - moved to work_in_progress
 
   frontend-tests:
     name: Frontend Tests
@@ -280,12 +270,4 @@ jobs:
               body: summary
             });
       
-      - name: Send Lark summary
-        uses: ./.github/actions/lark-notifier
-        with:
-          type: ${{ contains(needs.*.result, 'failure') && 'error' || 'success' }}
-          status: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
-          webhook_url: ${{ secrets.LARK_WEBHOOK_URL }}
-          bot_url: ${{ secrets.LARK_BOT_URL }}
-          title: Test Suite Completed
-          message: ${{ steps.summary.outputs.summary }}
+      # Lark summary removed - moved to work_in_progress

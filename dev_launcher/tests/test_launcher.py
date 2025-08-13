@@ -31,8 +31,8 @@ class TestLauncherConfig(unittest.TestCase):
         """Test default configuration values."""
         config = LauncherConfig()
         self.assertEqual(config.frontend_port, 3000)
-        self.assertFalse(config.dynamic_ports)
-        self.assertTrue(config.backend_reload)
+        self.assertTrue(config.dynamic_ports)  # Changed: now default is True
+        self.assertFalse(config.backend_reload)  # Changed: now default is False
         self.assertTrue(config.load_secrets)
         self.assertFalse(config.no_browser)
         self.assertFalse(config.verbose)
@@ -71,14 +71,15 @@ class TestLauncherConfig(unittest.TestCase):
         args = Mock(
             backend_port=8080,
             frontend_port=3001,
-            dynamic=True,
+            static=False,  # Changed: use static flag
             verbose=True,
-            no_backend_reload=True,
+            backend_reload=False,  # Changed: use positive flag
             no_reload=False,
             no_secrets=False,
             project_id="test-project",
             no_browser=True,
-            no_turbopack=False
+            no_turbopack=False,
+            dev=False  # Added: dev mode flag
         )
         
         with patch('dev_launcher.config.find_project_root') as mock_root:
@@ -88,9 +89,9 @@ class TestLauncherConfig(unittest.TestCase):
         
         self.assertEqual(config.backend_port, 8080)
         self.assertEqual(config.frontend_port, 3001)
-        self.assertTrue(config.dynamic_ports)
+        self.assertTrue(config.dynamic_ports)  # static=False means dynamic=True
         self.assertTrue(config.verbose)
-        self.assertFalse(config.backend_reload)
+        self.assertFalse(config.backend_reload)  # backend_reload=False
         self.assertTrue(config.no_browser)
 
 

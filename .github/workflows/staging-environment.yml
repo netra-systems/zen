@@ -64,13 +64,7 @@ jobs:
           echo "action=$ACTION" >> $GITHUB_OUTPUT
           echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
       
-      - name: Notify Lark - Starting
-        uses: ./.github/actions/lark-status
-        with:
-          status: starting
-          environment: ${{ steps.config.outputs.environment_name }}
-          action: ${{ steps.config.outputs.action }}
-          webhook_url: ${{ secrets.LARK_WEBHOOK_URL }}
+      # Lark notification removed - moved to work_in_progress
 
   terraform:
     name: Terraform Operations
@@ -120,25 +114,9 @@ jobs:
           echo "$APPLY_OUTPUT"
           
           if [[ $APPLY_EXIT_CODE -ne 0 ]]; then
-            # Extract error details for Lark notification
+            # Lark error notification removed - moved to work_in_progress
             ERROR_MSG=$(echo "$APPLY_OUTPUT" | tail -20)
             LOG_URL=$(echo "$APPLY_OUTPUT" | grep -oP 'https://console\.cloud\.google\.com/logs/viewer\?[^\s]+' | head -1)
-            
-            # Send error to Lark
-            curl -X POST "${{ secrets.LARK_BOT_URL }}/github/error" \
-              -H "Content-Type: application/json" \
-              -d "{
-                \"error\": {
-                  \"type\": \"terraform_apply_failure\",
-                  \"component\": \"staging-deployment\",
-                  \"message\": \"$ERROR_MSG\",
-                  \"logUrl\": \"$LOG_URL\"
-                },
-                \"metadata\": {
-                  \"pr_number\": \"${{ needs.setup.outputs.pr_number }}\",
-                  \"environment\": \"${{ needs.setup.outputs.environment_name }}\"
-                }
-              }"
             
             exit $APPLY_EXIT_CODE
           fi
@@ -178,7 +156,7 @@ jobs:
             
             ### Next Steps:
             - Test your changes in the staging environment
-            - Run \`/staging destroy ${{ needs.setup.outputs.pr_number }}\` in Lark when done
+            - Run staging destroy command when done
             `;
             
             await github.rest.issues.createComment({
@@ -206,11 +184,4 @@ jobs:
             echo "status=cancelled" >> $GITHUB_OUTPUT
           fi
       
-      - name: Send Lark notification
-        uses: ./.github/actions/lark-status
-        with:
-          status: ${{ steps.status.outputs.status }}
-          environment: ${{ needs.setup.outputs.environment_name }}
-          action: ${{ needs.setup.outputs.action }}
-          webhook_url: ${{ secrets.LARK_WEBHOOK_URL }}
-          bot_url: ${{ secrets.LARK_BOT_URL }}
+      # Lark notification removed - moved to work_in_progress
