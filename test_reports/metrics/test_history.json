@@ -1,15 +1,6 @@
 {
   "runs": [
     {
-      "timestamp": "2025-08-12T09:47:04.323858",
-      "level": "unit",
-      "total": 302,
-      "passed": 128,
-      "failed": 174,
-      "coverage": null,
-      "duration": 0
-    },
-    {
       "timestamp": "2025-08-12T09:54:03.999336",
       "level": "smoke",
       "total": 2,
@@ -898,6 +889,15 @@
       "passed": 0,
       "failed": 0,
       "coverage": 26.6,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T16:42:12.588324",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
       "duration": 0
     }
   ],

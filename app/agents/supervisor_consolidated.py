@@ -1,5 +1,6 @@
 """Refactored Supervisor Agent with modular architecture (<300 lines)."""
 
+import uuid
 from typing import Dict, List, Optional, Tuple, Any
 from typing import TYPE_CHECKING
 
@@ -107,6 +108,7 @@ class SupervisorAgent(BaseSubAgent):
         """Run the supervisor agent workflow."""
         self.thread_id = thread_id
         self.user_id = user_id
+        self.current_run_id = run_id
         
         state = await self._initialize_state(user_prompt, thread_id, user_id)
         pipeline = self._get_execution_pipeline(user_prompt, state)
@@ -121,10 +123,8 @@ class SupervisorAgent(BaseSubAgent):
         """Initialize agent state."""
         state = DeepAgentState(
             user_request=prompt,
-            messages=[SystemMessage(content=prompt)],
-            thread_id=thread_id,
-            user_id=user_id,
-            metadata={"original_prompt": prompt}
+            chat_thread_id=thread_id,
+            user_id=user_id
         )
         
         # Try to restore previous state from thread context
@@ -171,8 +171,14 @@ class SupervisorAgent(BaseSubAgent):
     
     async def _finalize_state(self, state: DeepAgentState) -> None:
         """Finalize and persist state."""
-        state.metadata["completed_at"] = datetime.now(timezone.utc).isoformat()
-        await self.state_persistence.persist_state(self.thread_id, state.to_dict())
+        # Save final state to persistence
+        await self.state_persistence.save_agent_state(
+            run_id=self.current_run_id if hasattr(self, 'current_run_id') else str(uuid.uuid4()),
+            thread_id=self.thread_id,
+            user_id=self.user_id,
+            state=state,
+            db_session=self.db_session
+        )
         
         # Send completion message
         if self.websocket_manager:
@@ -203,18 +209,24 @@ class SupervisorAgent(BaseSubAgent):
     
     def _needs_data_analysis(self, state: DeepAgentState) -> bool:
         """Check if data analysis is needed."""
-        metadata = state.metadata or {}
-        return metadata.get("requires_data", False)
+        # Default to True if no triage result yet or analysis is recommended
+        if not state.triage_result:
+            return True
+        return state.triage_result.get("requires_data", True)
     
     def _needs_optimization(self, state: DeepAgentState) -> bool:
         """Check if optimization is needed."""
-        metadata = state.metadata or {}
-        return metadata.get("requires_optimization", False)
+        # Default to True if no triage result yet or optimization is recommended
+        if not state.triage_result:
+            return True
+        return state.triage_result.get("requires_optimization", True)
     
     def _needs_actions(self, state: DeepAgentState) -> bool:
         """Check if action planning is needed."""
-        metadata = state.metadata or {}
-        return metadata.get("requires_actions", False)
+        # Default to True if no triage result yet or actions are recommended
+        if not state.triage_result:
+            return True
+        return state.triage_result.get("requires_actions", True)
     
     def _process_results(self, results: List[AgentExecutionResult],
                         state: DeepAgentState) -> None:

@@ -1,92 +1,88 @@
-# Netra AI Platform - Test Report
+# 📊 Netra AI Platform - Comprehensive Test Report
 
-**Generated:** 2025-08-13T12:55:24.742898  
-**Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
-**Purpose:** Pre-commit validation, basic health checks
+## 🎯 Executive Summary
 
-## Test Summary
+**Generated:** 2025-08-13 16:42:12  
+**Test Level:** `smoke` - Quick smoke tests for basic functionality (< 30 seconds)  
+**Overall Status:** ✅ PASSED
 
-**Total Tests:** 7  
-**Passed:** 7  
-**Failed:** 0  
-**Skipped:** 0  
-**Errors:** 0  
-**Overall Status:** [PASSED]
+### 📈 Key Metrics
+
+| Metric | Value | Change | Trend |
+|--------|-------|--------|-------|
+| **Total Test Files** | 5 | N/A | ➖ |
+| **Total Tests** | 7 | +0 | 📉 |
+| **Pass Rate** | 100.0% | +0.0% | 📉 |
+| **Coverage** | N/A | N/A | ➖ |
+| **Duration** | 7.00s | N/A | ➖ |
+
+## 📊 Test Results Overview
+
+### Summary Statistics
+
+| Status | Count | Percentage | Visual |
+|--------|-------|------------|--------|
+| ✅ **Passed** | 7 | 100.0% | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 |
+| ❌ **Failed** | 0 | 0.0% |  |
+| ⏭️ **Skipped** | 0 | 0.0% |  |
+| 🔥 **Errors** | 0 | 0.0% |  |
 
 ### Component Breakdown
 
-| Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
-|-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 7 | 7 | 0 | 0 | 0 | 14.31s | [PASSED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
+| Component | Files | Tests | Passed | Failed | Coverage | Duration | Status |
+|-----------|-------|-------|--------|--------|----------|----------|--------|
+| **Backend** | 5 | 7 | 7 | 0 | N/A | 7.00s | ✅ PASSED |
+| **Frontend** | 0 | 0 | 0 | 0 | N/A | 0.00s | ⏭️ SKIPPED |
 
-## Environment and Configuration
+## 🏷️ Test Categories
 
-- **Test Level:** smoke
-- **Description:** Quick smoke tests for basic functionality (< 30 seconds)
-- **Purpose:** Pre-commit validation, basic health checks
+*No category data available*
+
+## 🔄 Change Detection
+
+*No significant changes detected*
+
+## ⚡ Performance Analysis
+
+### Test Speed Distribution
+
+*No timing data available*
+
+### Top 5 Slowest Tests
+
+*No timing data available*
+
+## 🐛 Failure Analysis
+
+✅ **No failures detected!**
+
+## 📈 Historical Trends
+
+| Date | Tests | Pass Rate | Coverage | Duration |
+|------|-------|-----------|----------|----------|
+| 08/13 11:34 | 7 | 100.0% | N/A | 0.00s |
+| 08/13 11:34 | 0 | 0.0% | N/A | 0.00s |
+| 08/13 11:35 | 7 | 100.0% | N/A | 0.00s |
+| 08/13 11:35 | 7 | 100.0% | N/A | 0.00s |
+| 08/13 11:50 | 7 | 100.0% | N/A | 0.00s |
+
+
+## 🔧 Environment Configuration
+
+- **Test Level:** `smoke`
+- **Parallelization:** default
+- **Coverage Enabled:** False
 - **Timeout:** 30s
-- **Coverage Enabled:** No
-- **Total Duration:** 14.31s
 - **Exit Code:** 0
 
-### Backend Configuration
-```
---category smoke --fail-fast --markers not real_services
-```
+### Command Configuration
 
-### Frontend Configuration
-```
+**Backend:** `--category smoke --fail-fast --markers not real_services`  
+**Frontend:** ``
 
-```
+## 📝 Recommendations
 
-## Test Output
+- ✅ **Excellent:** Test suite is in good shape. Keep up the good work!
 
-### Backend Output
-```
-Loaded test environment from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.test
-================================================================================
-NETRA AI PLATFORM - BACKEND TEST RUNNER
-================================================================================
-Test Configuration:
-  Category: smoke
-  Parallel: disabled
-  Coverage: disabled
-  Fail Fast: enabled
-  Environment: testing
-
-Running command:
-  pytest app/tests/routes/test_health_route.py app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error app/tests/core/test_config_manager.py::TestConfigManager::test_initialization app/tests/services/test_security_service.py::test_encrypt_and_decrypt tests/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
-================================================================================
-[1m============================= test session starts =============================[0m
-platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
-cachedir: .pytest_cache
-metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}
-rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
-configfile: pytest.ini
-plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
-asyncio: mode=Mode.AUTO
-[1mcollecting ... [0mcollected 7 items
-
-app/tests/routes/test_health_route.py::test_basic_import [32mPASSED[0m[32m          [ 14%][0m
-app/tests/routes/test_health_route.py::test_health_endpoint_direct [32mPASSED[0m[32m [ 28%][0m
-app/tests/routes/test_health_route.py::test_live_endpoint [32mPASSED[0m[32m         [ 42%][0m
-app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error [32mPASSED[0m[32m [ 57%][0m
-app/tests/core/test_config_manager.py::TestConfigManager::test_initialization [32mPASSED[0m[32m [ 71%][0m
-app/tests/services/test_security_service.py::test_encrypt_and_decrypt [32mPASSED[0m[32m [ 85%][0m
-tests/test_system_startup.py::TestSystemStartup::test_configuration_loading [32mPASSED[0m[32m [100%][0m
-
-[32m============================== [32m[1m7 passed[0m[32m in 0.63s[0m[32m ==============================[0m
-================================================================================
-[PASS] ALL TESTS PASSED in 12.93s
-================================================================================
-
-
-```
-
-### Frontend Output
-```
-
-```
 ---
-*Generated by Netra AI Unified Test Runner v3.0*
+*Generated by Enhanced Test Reporter v2.0 | 2025-08-13 16:42:12*
