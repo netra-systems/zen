@@ -1716,7 +1716,6 @@ jobs:
 
       - name: Clean up container images and build cache
         continue-on-error: true
-        continue-on-error: true
         run: |
           PR_NUMBER=${{ github.event.pull_request.number || github.event.inputs.pr_number }}
           

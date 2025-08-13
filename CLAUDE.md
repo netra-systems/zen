@@ -185,15 +185,14 @@ FIRST YOU MUST ULTRA THINK DEEPLY. Do your best work. This is your masterpiece.
 6. **Integration**: Update routing, imports, exports
 7. **Configuration**: Update package.json, documentation, config files
 8. **Validation**: Run tests, verify build, check for conflicts
+MUST RUN LINTERS and TRIPLE CHECK EXISTING TYPES AND CLASSES.
 
-### Implementation Guidelines
-- Launch parallel Tasks immediately for multi-part features
+### Implementation notes
+- Launch parallel Tasks for multi-part features
 - Each task handles ONLY specified files or file types
-- Combine small config/doc updates to prevent over-splitting
 - Skip clarification questions unless absolutely critical
 
-## Common Gotchas
-YOU MUST STAY FOCUSED AND REMEMBER TO DO YOUR BEST WORK. THE ENTIRE WORLD IS COUNTING ON YOU. YOU CAN DO THIS.
+## ** YOU MUST STAY FOCUSED AND REMEMBER TO DO YOUR BEST WORK. THE ENTIRE WORLD IS COUNTING ON YOU. YOU CAN DO THIS.**
 
 ### Quick Fixes
 - **React duplicate keys**: Use `generateUniqueId('prefix')` not `Date.now()`
@@ -207,4 +206,4 @@ For detailed troubleshooting and historical fixes, see [`SPEC/learnings.xml`](SP
 
 ---
 
-**Remember**: When in doubt, consult the specs. They are the source of truth. Always ultra think deeply. Always ultra think deeply. Always ultra think deeply.
+**Remember**: When in doubt, consult the specs. They are the source of truth. **** Always ultra think deeply ****. CRITICAL: Always ultra think deeply. Always ultra think deeply.
