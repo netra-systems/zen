@@ -269,14 +269,45 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_STAGING_PROJECT_ID || secrets.GCP_PROJECT_ID }}
+      
+      - name: Set GCP project environment
+        run: |
+          # Ensure staging project is used
+          PROJECT_ID="${{ secrets.GCP_STAGING_PROJECT_ID || secrets.GCP_PROJECT_ID }}"
+          echo "GCP_PROJECT=$PROJECT_ID" >> $GITHUB_ENV
+          echo "GOOGLE_CLOUD_PROJECT=$PROJECT_ID" >> $GITHUB_ENV
+          echo "CLOUDSDK_CORE_PROJECT=$PROJECT_ID" >> $GITHUB_ENV
+          echo "Using GCP Project: $PROJECT_ID"
       
       - name: Initialize Terraform
         id: init
         working-directory: ./terraform/staging
         run: |
+          # Use staging-specific bucket or fallback to default
+          BUCKET="${{ secrets.TF_STAGING_STATE_BUCKET || secrets.TF_STATE_BUCKET || 'netra-terraform-state' }}"
+          PREFIX="${{ needs.setup.outputs.environment_name }}"
+          
+          echo "::group::Terraform Backend Configuration"
+          echo "Bucket: $BUCKET"
+          echo "Prefix: $PREFIX"
+          echo "Project: ${{ env.GCP_PROJECT }}"
+          echo "::endgroup::"
+          
+          # Verify bucket exists before init
+          if ! gcloud storage buckets describe "gs://$BUCKET" --project="${{ env.GCP_PROJECT }}" 2>/dev/null; then
+            echo "::error::Terraform state bucket '$BUCKET' does not exist in project '${{ env.GCP_PROJECT }}'"
+            echo "::notice::Creating bucket if possible..."
+            gcloud storage buckets create "gs://$BUCKET" \
+              --project="${{ env.GCP_PROJECT }}" \
+              --location="${{ env.GCP_REGION }}" \
+              --uniform-bucket-level-access \
+              --public-access-prevention || exit 1
+          fi
+          
           terraform init \
-            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET || 'netra-terraform-state' }}" \
-            -backend-config="prefix=${{ needs.setup.outputs.environment_name }}" \
+            -backend-config="bucket=$BUCKET" \
+            -backend-config="prefix=$PREFIX" \
             -reconfigure
         continue-on-error: true
       
@@ -286,9 +317,20 @@ jobs:
         run: |
           sleep ${{ env.RETRY_DELAY }}
           rm -rf .terraform
+          
+          # Use same bucket configuration as initial attempt
+          BUCKET="${{ secrets.TF_STAGING_STATE_BUCKET || secrets.TF_STATE_BUCKET || 'netra-terraform-state' }}"
+          PREFIX="${{ needs.setup.outputs.environment_name }}"
+          
+          echo "::group::Retry Terraform Backend Configuration"
+          echo "Bucket: $BUCKET"
+          echo "Prefix: $PREFIX"
+          echo "Project: ${{ env.GCP_PROJECT }}"
+          echo "::endgroup::"
+          
           terraform init \
-            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET || 'netra-terraform-state' }}" \
-            -backend-config="prefix=${{ needs.setup.outputs.environment_name }}" \
+            -backend-config="bucket=$BUCKET" \
+            -backend-config="prefix=$PREFIX" \
             -reconfigure
       
       - name: Terraform Plan
@@ -301,6 +343,7 @@ jobs:
             -var="pr_number=${{ needs.setup.outputs.pr_number }}" \
             -var="branch_name=${{ needs.setup.outputs.branch_name }}" \
             -var="commit_sha=${{ needs.setup.outputs.commit_sha }}" \
+            -var="project_id=${{ env.GCP_PROJECT }}" \
             -out=tfplan \
             -detailed-exitcode
         continue-on-error: true
@@ -325,6 +368,7 @@ jobs:
           terraform destroy \
             -var="environment_name=${{ needs.setup.outputs.environment_name }}" \
             -var="pr_number=${{ needs.setup.outputs.pr_number }}" \
+            -var="project_id=${{ env.GCP_PROJECT }}" \
             -auto-approve
         continue-on-error: true
       
@@ -371,6 +415,9 @@ jobs:
         id: backend
         run: |
           echo "::group::Backend Build"
+          # Determine the correct project ID for staging
+          PROJECT_ID="${{ secrets.GCP_STAGING_PROJECT_ID || secrets.GCP_PROJECT_ID }}"
+          
           # Build backend Docker image
           docker build -t backend:${{ needs.setup.outputs.commit_sha }} \
             --build-arg COMMIT_SHA=${{ needs.setup.outputs.commit_sha }} \
@@ -379,7 +426,7 @@ jobs:
           
           # Tag and push to registry
           docker tag backend:${{ needs.setup.outputs.commit_sha }} \
-            gcr.io/${{ secrets.GCP_PROJECT_ID }}/backend:${{ needs.setup.outputs.environment_name }}
+            gcr.io/${PROJECT_ID}/backend:${{ needs.setup.outputs.environment_name }}
           
           # Deploy to cluster (simplified)
           echo "Backend deployed successfully"
