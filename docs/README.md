@@ -3,9 +3,10 @@
 ## 📚 Documentation Index
 
 ### Getting Started
-- **[DEVELOPMENT_SETUP.md](DEVELOPMENT_SETUP.md)** - Complete local development setup guide
+- **[CUSTOMER_GETTING_STARTED.md](CUSTOMER_GETTING_STARTED.md)** ⭐ - **PRIMARY GUIDE** - Complete getting started for development and usage
+- **[STAGING_SECRETS_GUIDE.md](STAGING_SECRETS_GUIDE.md)** ⭐ - **CRITICAL** - Secrets management for all environments
+- **[DEVELOPMENT_SETUP.md](DEVELOPMENT_SETUP.md)** - Additional development setup details
 - **[DEVELOPER_WELCOME_GUIDE.md](DEVELOPER_WELCOME_GUIDE.md)** - Onboarding guide for new developers
-- **[CUSTOMER_GETTING_STARTED.md](CUSTOMER_GETTING_STARTED.md)** - Customer quickstart guide
 
 ### Staging & Deployment
 - **[STAGING_DEPLOYMENT_COMPLETE_GUIDE.md](STAGING_DEPLOYMENT_COMPLETE_GUIDE.md)** ⭐ - Comprehensive staging deployment guide
@@ -52,14 +53,16 @@
 ## 🚀 Quick Links
 
 ### For Developers
-1. Start with [DEVELOPMENT_SETUP.md](DEVELOPMENT_SETUP.md)
-2. Review [STAGING_DEPLOYMENT_COMPLETE_GUIDE.md](STAGING_DEPLOYMENT_COMPLETE_GUIDE.md)
-3. Check [TESTING_GUIDE.md](TESTING_GUIDE.md)
+1. **Start with [CUSTOMER_GETTING_STARTED.md](CUSTOMER_GETTING_STARTED.md)** - Primary development guide
+2. **Configure secrets with [STAGING_SECRETS_GUIDE.md](STAGING_SECRETS_GUIDE.md)** - Critical for all environments
+3. Review [STAGING_DEPLOYMENT_COMPLETE_GUIDE.md](STAGING_DEPLOYMENT_COMPLETE_GUIDE.md) for cloud deployment
+4. Check [TESTING_GUIDE.md](TESTING_GUIDE.md) for testing practices
 
 ### For DevOps
-1. [STAGING_DEPLOYMENT_COMPLETE_GUIDE.md](STAGING_DEPLOYMENT_COMPLETE_GUIDE.md)
-2. [GOOGLE_SECRET_MANAGER_SETUP.md](GOOGLE_SECRET_MANAGER_SETUP.md)
-3. [STAGING_TROUBLESHOOTING.md](STAGING_TROUBLESHOOTING.md)
+1. **[STAGING_SECRETS_GUIDE.md](STAGING_SECRETS_GUIDE.md)** - Complete secrets architecture
+2. [STAGING_DEPLOYMENT_COMPLETE_GUIDE.md](STAGING_DEPLOYMENT_COMPLETE_GUIDE.md) - Deployment procedures
+3. [GOOGLE_SECRET_MANAGER_SETUP.md](GOOGLE_SECRET_MANAGER_SETUP.md) - Secret Manager setup
+4. [STAGING_TROUBLESHOOTING.md](STAGING_TROUBLESHOOTING.md) - Troubleshooting guide
 
 ### For Product Managers
 1. [ARCHITECTURE.md](ARCHITECTURE.md)
@@ -90,7 +93,7 @@ When making changes:
 3. Update [CLAUDE.md](../CLAUDE.md) for AI assistant context
 4. Include in PR description what docs were updated
 
-## 🔄 Recent Updates (August 2025)
+## 🔄 Recent Updates (December 2025)
 
 ### Staging Environment Enhancements
 - ✅ Automatic `-staging` suffix for secrets
@@ -101,10 +104,12 @@ When making changes:
 - ✅ Comprehensive troubleshooting guide
 
 ### Documentation Improvements
+- ✅ **UPDATED: Unified Getting Started Guide** - Combined development and user documentation
+- ✅ **UPDATED: Comprehensive Secrets Guide** - Complete security architecture for all environments
+- ✅ **ALIGNED: Dev launcher commands** - Updated to match actual `dev_launcher.py` and `test_runner.py`
+- ✅ **ADDED: Security isolation details** - Production secrets isolation architecture
 - ✅ Complete staging deployment guide
-- ✅ Secret management documentation
 - ✅ Troubleshooting guide for staging
-- ✅ Updated developer setup with staging info
 - ✅ Documentation index (this file)
 
 ## 📝 Contributing to Documentation
@@ -130,6 +135,6 @@ When making changes:
 
 ---
 
-**Last Updated**: August 2025
+**Last Updated**: December 2025
 **Maintained By**: Netra Platform Team
 **Version**: 2.0.0

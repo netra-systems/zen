@@ -1,15 +1,126 @@
-# Netra AI Platform - Customer Getting Started Guide
+# Netra AI Platform - Getting Started Guide
 
 ## Welcome to Netra
 
 Netra is your AI optimization copilot - an intelligent platform that analyzes your AI workloads, identifies optimization opportunities, and provides actionable recommendations to reduce costs and improve performance while maintaining quality.
 
-## Quick Start: Your First Optimization
+## Prerequisites
+
+### Required Software
+- **Python 3.9+** (3.11+ recommended for best performance)
+- **Node.js 18+** (for frontend development)
+- **Git** (for version control)
+
+### Optional Services (with automatic fallbacks)
+- **PostgreSQL 14+** - Primary database (falls back to SQLite if unavailable)
+- **Redis 7+** - Caching layer (disabled if unavailable)
+- **ClickHouse** - Analytics database (limited analytics if unavailable)
+
+## Quick Start for Development
+
+### Step 1: Clone and Setup
+```bash
+# Clone repository
+git clone https://github.com/netra-systems/netra-apex.git
+cd netra-core-generation-1
+
+# Setup Python environment
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# macOS/Linux
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
+# Setup frontend
+cd frontend
+npm install
+cd ..
+```
+
+### Step 2: Configure Environment
+Create a `.env` file with your configuration. For development with secrets from Google Secret Manager:
+
+```bash
+# Fetch secrets automatically (requires Google Cloud authentication)
+python scripts/fetch_secrets_to_env.py
+```
+
+Or create `.env` manually:
+```bash
+# Core Configuration
+ENVIRONMENT=development
+DEBUG=true
+LOG_LEVEL=DEBUG
+
+# Database (PostgreSQL or SQLite fallback)
+DATABASE_URL=postgresql+asyncpg://user:pass@localhost:5432/netra_db
+# Or use SQLite: DATABASE_URL=sqlite+aiosqlite:///./netra.db
+
+# Required: Primary LLM API Key
+GEMINI_API_KEY=your-gemini-api-key
+
+# Optional Services
+REDIS_URL=redis://localhost:6379
+CLICKHOUSE_URL=clickhouse://localhost:9000/default
+
+# Security Keys (generate secure keys for production)
+JWT_SECRET_KEY=your-jwt-secret-key
+FERNET_KEY=your-fernet-key
+SECRET_KEY=your-secret-key
+```
+
+### Step 3: Start Development Environment
+
+#### Recommended: Using Dev Launcher
+```bash
+# Best configuration for development
+python dev_launcher.py --dynamic --no-backend-reload --load-secrets
+
+# What this does:
+# - Finds free ports automatically
+# - 30-50% faster without backend reload
+# - Loads secrets from cloud if configured
+# - Starts both frontend and backend
+# - Shows clear status messages
+```
+
+#### Alternative Configurations
+```bash
+# With hot reload (slower but auto-refreshes)
+python dev_launcher.py --dynamic
+
+# Maximum performance (no reload at all)
+python dev_launcher.py --dynamic --no-reload
+
+# Custom ports
+python dev_launcher.py --backend-port 8080 --frontend-port 3001
+
+# Backend only
+python dev_launcher.py --backend-only
+
+# Frontend only  
+python dev_launcher.py --frontend-only
+```
+
+### Step 4: Verify Installation
+```bash
+# Run quick smoke tests (< 30 seconds)
+python test_runner.py --level smoke
+
+# If test runner has issues, use fallback
+python test_runner.py --simple
+```
+
+## Quick Start for Users
 
 ### Step 1: Access the Platform
-1. Navigate to your Netra instance
-2. Sign in using Google OAuth (SSO)
-3. You'll be greeted with the modern chat interface
+1. Navigate to your Netra instance (http://localhost:3000 for development)
+2. Sign in using Google OAuth (SSO) if configured
+3. You'll be greeted with the modern glassmorphic chat interface
 
 ### Step 2: Start Your First Conversation
 Simply describe your optimization goal in natural language. Netra understands context and will guide you through the process.
@@ -305,6 +416,102 @@ Request specific deliverables:
 5. **Iterate**: Continue optimizing based on results
 
 Remember: Netra is your optimization copilot. The more you interact with it, the better it understands your specific needs and constraints. Don't hesitate to ask clarifying questions or request different perspectives on your optimization challenges.
+
+## Development Workflow
+
+### Running Tests
+
+#### Unified Test Runner (Recommended)
+```bash
+# Quick validation before commits (< 30s)
+python test_runner.py --level smoke
+
+# Development testing (1-2 min)
+python test_runner.py --level unit
+
+# Feature validation (3-5 min)
+python test_runner.py --level integration
+
+# Full suite with coverage (10-15 min)
+python test_runner.py --level comprehensive
+
+# Critical paths only (1-2 min)
+python test_runner.py --level critical
+```
+
+### Code Quality
+```bash
+# Python linting
+ruff check app/
+black app/ --check
+mypy app/
+
+# JavaScript/TypeScript linting
+cd frontend
+npm run lint
+npm run typecheck
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### Port Already in Use
+```bash
+# Use dynamic ports to automatically find free ports
+python dev_launcher.py --dynamic
+```
+
+#### Database Connection Errors
+```bash
+# Check PostgreSQL is running
+pg_isready
+
+# Or use SQLite fallback
+export DATABASE_URL=sqlite+aiosqlite:///./netra.db
+```
+
+#### Missing Dependencies
+```bash
+# Reinstall Python dependencies
+pip install -r requirements.txt --force-reinstall
+
+# Reinstall Node dependencies
+cd frontend && rm -rf node_modules package-lock.json
+npm install
+```
+
+#### LLM API Errors
+```bash
+# Disable LLM for development
+export DEV_MODE_DISABLE_LLM=true
+
+# Or mock responses
+export LLM_MOCK_MODE=true
+```
+
+## Important Notes
+
+### Following CLAUDE.md Guidelines
+When developing, always refer to `CLAUDE.md` for:
+- Core principles and conventions
+- Specification map and critical specs
+- Testing strategy and requirements
+- Common operations and quick fixes
+
+### Key Development Patterns
+- **Async First**: Use async/await for all I/O operations
+- **Type Safety**: Pydantic models (backend), TypeScript types (frontend)
+- **Repository Pattern**: All database access through repositories
+- **Error Handling**: Use NetraException with proper context
+- **UI Design**: Glassmorphic design, NO blue gradient bars
+- **NO Test Stubs**: Never add test implementations in production services
+
+### Before Any Code Change
+1. ✅ Consult `SPEC/code_changes.xml`
+2. ✅ Run smoke tests: `python test_runner.py --level smoke`
+3. ✅ Update import tests when adding dependencies
+4. ✅ Check `SPEC/no_test_stubs.xml` - NO test stubs in production
 
 ---
 
