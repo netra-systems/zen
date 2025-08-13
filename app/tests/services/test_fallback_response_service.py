@@ -8,13 +8,12 @@ from unittest.mock import Mock, patch
 import json
 import re
 
-from app.services.fallback_response_service import (
-    FallbackResponseService,
+from app.services.fallback_response_service import FallbackResponseService
+from app.services.fallback_response.models import (
     FailureReason,
-    FallbackContext,
-    ContentType
+    FallbackContext
 )
-from app.services.quality_gate_service import QualityMetrics, QualityLevel
+from app.services.quality_gate_service import ContentType, QualityMetrics, QualityLevel
 
 
 class TestFallbackResponseService:

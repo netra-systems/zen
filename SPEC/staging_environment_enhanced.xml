@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <title>Enhanced Staging Environment System</title>
+  <version>2.0.0</version>
+  <created>2025-08-13</created>
+  <updated>2025-08-13</updated>
+  <purpose>
+    Define a robust, modular staging environment system with improved activation,
+    error handling, and end-to-end deployment capabilities for pull requests and branches.
+  </purpose>
+
+  <improvements_from_v1>
+    <improvement>
+      <title>Modular Workflow Architecture</title>
+      <description>Split monolithic workflow into reusable subworkflows for better maintainability</description>
+      <components>
+        - staging.yml: Main orchestrator
+        - setup.yml: Environment configuration
+        - deploy.yml: Application deployment
+        - destroy.yml: Resource cleanup
+        - notify.yml: Multi-channel notifications
+        - terraform.yml: Infrastructure management
+        - build-backend.yml: Backend build process
+        - build-frontend.yml: Frontend build process
+      </components>
+    </improvement>
+    
+    <improvement>
+      <title>Enhanced Trigger Activation</title>
+      <description>More sophisticated trigger conditions with skip capabilities</description>
+      <features>
+        - Support for reopened PRs
+        - Branch pattern matching (main, develop, release/*)
+        - Documentation-only change detection
+        - Skip keywords in commit messages ([skip staging])
+        - Push events for continuous deployment
+        - Manual workflow_dispatch with optional parameters
+      </features>
+    </improvement>
+    
+    <improvement>
+      <title>Robust Error Handling</title>
+      <description>Comprehensive error recovery and reporting mechanisms</description>
+      <features>
+        - Retry logic for transient failures
+        - Graceful degradation on partial failures
+        - Detailed error reporting to multiple channels
+        - Automatic issue creation for deployment failures
+        - Resource cleanup even on failures
+      </features>
+    </improvement>
+    
+    <improvement>
+      <title>Branch Deployments</title>
+      <description>Support for deploying branches without PRs</description>
+      <use_cases>
+        - Deploy main/develop branches automatically
+        - Manual branch deployments via workflow_dispatch
+        - Repository dispatch for external triggers
+      </use_cases>
+    </improvement>
+  </improvements_from_v1>
+
+  <architecture>
+    <workflow_structure>
+      <layer name="Validation">
+        <purpose>Pre-flight checks before deployment</purpose>
+        <components>
+          - validate-trigger: Check if deployment should proceed
+          - pre-checks: Security scans, configuration validation
+          - resource-limits: Verify cloud quotas
+        </components>
+      </layer>
+      
+      <layer name="Setup">
+        <purpose>Configure deployment parameters</purpose>
+        <components>
+          - environment-name generation (DNS-safe, 63 char limit)
+          - PR/branch resolution
+          - Commit SHA determination
+          - GitHub deployment creation
+        </components>
+      </layer>
+      
+      <layer name="Infrastructure">
+        <purpose>Provision cloud resources</purpose>
+        <components>
+          - Terraform initialization with retry
+          - State management per environment
+          - Output extraction (URLs, cluster names)
+          - Rollback on failure
+        </components>
+      </layer>
+      
+      <layer name="Build">
+        <purpose>Container image creation</purpose>
+        <components>
+          - Parallel backend/frontend builds
+          - Build caching strategies
+          - Multi-stage Dockerfiles
+          - Registry push with retry
+        </components>
+      </layer>
+      
+      <layer name="Deploy">
+        <purpose>Application deployment</purpose>
+        <components>
+          - Kubernetes deployments
+          - Health check verification
+          - Smoke test execution
+          - Rollout monitoring
+        </components>
+      </layer>
+      
+      <layer name="Verify">
+        <purpose>Post-deployment validation</purpose>
+        <components>
+          - Health endpoint checks
+          - Functional smoke tests
+          - Performance baseline tests
+          - Security scanning
+        </components>
+      </layer>
+      
+      <layer name="Notify">
+        <purpose>Multi-channel notifications</purpose>
+        <components>
+          - GitHub PR comments
+          - Slack notifications
+          - Teams notifications
+          - Email alerts for failures
+          - GitHub issue creation
+          - Status check updates
+        </components>
+      </layer>
+    </workflow_structure>
+
+    <concurrency_model>
+      <group>staging-${PR_NUMBER_OR_REF}</group>
+      <behavior>
+        <deploy_operations>
+          - cancel_in_progress: false
+          - reason: Prevent partial deployments
+        </deploy_operations>
+        <destroy_operations>
+          - cancel_in_progress: false
+          - reason: Ensure cleanup completes
+        </destroy_operations>
+      </behavior>
+    </concurrency_model>
+
+    <environment_naming>
+      <pattern>${PROJECT_NAME}-${IDENTIFIER}</pattern>
+      <constraints>
+        - Lowercase only (DNS requirement)
+        - Replace non-alphanumeric with hyphens
+        - Maximum 63 characters (DNS limit)
+        - Must be unique per PR/branch
+      </constraints>
+      <examples>
+        - PR: netra-staging-pr-123
+        - Branch: netra-staging-branch-feature-auth
+      </examples>
+    </environment_naming>
+  </architecture>
+
+  <deployment_triggers>
+    <trigger type="pull_request">
+      <events>opened, synchronize, reopened, closed</events>
+      <branches>main, develop, release/**</branches>
+      <skip_conditions>
+        - Documentation-only changes
+        - [skip staging] in commit message
+        - Draft PR (configurable)
+      </skip_conditions>
+    </trigger>
+    
+    <trigger type="push">
+      <branches>main, develop</branches>
+      <purpose>Continuous deployment for protected branches</purpose>
+    </trigger>
+    
+    <trigger type="workflow_dispatch">
+      <inputs>
+        - action: deploy|destroy|restart|status|rebuild
+        - pr_number: optional
+        - branch: optional
+        - force: bypass checks
+      </inputs>
+    </trigger>
+    
+    <trigger type="repository_dispatch">
+      <events>staging-command, staging-rebuild</events>
+      <purpose>External system integration</purpose>
+    </trigger>
+  </deployment_triggers>
+
+  <error_handling>
+    <retry_strategy>
+      <operations>
+        - Terraform init: 3 retries, 30s delay
+        - Docker push: 3 retries, exponential backoff
+        - Health checks: 5 retries, 10s delay
+      </operations>
+    </retry_strategy>
+    
+    <failure_recovery>
+      <actions>
+        - Capture detailed error logs
+        - Extract cloud console URLs
+        - Create GitHub issue for tracking
+        - Send notifications to relevant channels
+        - Attempt graceful rollback
+        - Cleanup partial resources
+      </actions>
+    </failure_recovery>
+    
+    <monitoring>
+      <metrics>
+        - Deployment success rate
+        - Average deployment time
+        - Resource utilization
+        - Cost per deployment
+      </metrics>
+      <alerts>
+        - Deployment failures
+        - Resource quota exceeded
+        - Unusual deployment duration
+        - Security scan failures
+      </alerts>
+    </monitoring>
+  </error_handling>
+
+  <security>
+    <secrets_management>
+      <storage>GitHub Secrets, Google Secret Manager</storage>
+      <rotation>Automatic rotation every 90 days</rotation>
+      <access>Least privilege principle</access>
+    </secrets_management>
+    
+    <scanning>
+      <container_scanning>Trivy, Snyk</container_scanning>
+      <dependency_scanning>GitHub Dependabot</dependency_scanning>
+      <infrastructure_scanning>Terraform security checks</infrastructure_scanning>
+    </scanning>
+    
+    <network_security>
+      <ingress>HTTPS only with managed certificates</ingress>
+      <egress>Restricted to approved endpoints</egress>
+      <isolation>Per-environment VPC/namespace</isolation>
+    </network_security>
+  </security>
+
+  <cost_optimization>
+    <strategies>
+      <auto_scaling>
+        - Min replicas: 0 (scale to zero)
+        - Max replicas: 3 (prevent runaway costs)
+        - Target CPU: 70%
+      </auto_scaling>
+      
+      <resource_limits>
+        - CPU: 2 cores max per container
+        - Memory: 4GB max per container
+        - Storage: 10GB per environment
+        - Database: Shared pool with isolation
+      </resource_limits>
+      
+      <ttl_management>
+        - Default TTL: 7 days
+        - Weekend extension: Automatic
+        - Manual extension: Via workflow_dispatch
+        - Automatic cleanup: Daily cron job
+      </ttl_management>
+    </strategies>
+  </cost_optimization>
+
+  <testing_integration>
+    <test_levels>
+      <smoke_tests>
+        - Health endpoints
+        - Basic functionality
+        - Critical user paths
+        - Run time: &lt;2 minutes
+      </smoke_tests>
+      
+      <integration_tests>
+        - API contract tests
+        - Database operations
+        - WebSocket functionality
+        - Run time: &lt;10 minutes
+      </integration_tests>
+      
+      <e2e_tests>
+        - Full user workflows
+        - Cross-service operations
+        - Performance baselines
+        - Run time: &lt;30 minutes
+      </e2e_tests>
+    </test_levels>
+    
+    <test_data>
+      <seeding>Automatic on deployment</seeding>
+      <isolation>Per-environment database</isolation>
+      <cleanup>On environment destroy</cleanup>
+    </test_data>
+  </testing_integration>
+
+  <notification_channels>
+    <github>
+      <pr_comments>Deployment status, URLs, instructions</pr_comments>
+      <status_checks>Per-action status updates</status_checks>
+      <deployment_api>Environment tracking</deployment_api>
+      <issues>Automatic creation for failures</issues>
+    </github>
+    
+    <slack>
+      <webhook>Configurable per team</webhook>
+      <format>Rich attachments with actions</format>
+      <channels>#staging-deployments, #alerts</channels>
+    </slack>
+    
+    <teams>
+      <webhook>Microsoft Teams integration</webhook>
+      <cards>Adaptive cards with buttons</cards>
+    </teams>
+    
+    <email>
+      <recipients>PR author, reviewers</recipients>
+      <triggers>Failures only</triggers>
+      <format>HTML with logs attached</format>
+    </email>
+  </notification_channels>
+
+  <maintenance>
+    <cleanup_jobs>
+      <orphaned_resources>
+        - Schedule: Daily at 2 AM UTC
+        - Action: Destroy environments without PRs
+      </orphaned_resources>
+      
+      <expired_environments>
+        - Schedule: Every 6 hours
+        - Action: Destroy environments past TTL
+      </expired_environments>
+      
+      <failed_deployments>
+        - Schedule: Hourly
+        - Action: Cleanup partial resources
+      </failed_deployments>
+    </cleanup_jobs>
+    
+    <monitoring_dashboards>
+      <grafana>
+        - Deployment metrics
+        - Resource utilization
+        - Cost tracking
+        - Error rates
+      </grafana>
+      
+      <github_insights>
+        - Workflow run analytics
+        - Success/failure trends
+        - Duration analysis
+      </github_insights>
+    </monitoring_dashboards>
+  </maintenance>
+
+  <future_enhancements>
+    <planned>
+      - Blue-green deployments
+      - Canary releases
+      - Feature flag integration
+      - A/B testing support
+      - Multi-region deployments
+      - Database branching
+      - Performance regression detection
+      - Cost prediction before deployment
+    </planned>
+  </future_enhancements>
+</specification>

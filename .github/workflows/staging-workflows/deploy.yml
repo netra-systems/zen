@@ -10,6 +10,12 @@ on:
       pr_number:
         required: true
         type: string
+      branch_name:
+        required: false
+        type: string
+      commit_sha:
+        required: false
+        type: string
     outputs:
       backend_url:
         description: 'Backend service URL'
@@ -17,6 +23,9 @@ on:
       frontend_url:
         description: 'Frontend service URL'
         value: ${{ jobs.infrastructure.outputs.frontend_url }}
+      deployment_status:
+        description: 'Overall deployment status'
+        value: ${{ jobs.verify.outputs.status }}
 
 jobs:
   infrastructure:
@@ -34,7 +43,7 @@ jobs:
     uses: ./.github/workflows/staging-workflows/build-backend.yml
     with:
       environment_name: ${{ inputs.environment_name }}
-      commit_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      commit_sha: ${{ inputs.commit_sha || github.event.pull_request.head.sha || github.sha }}
       registry_url: gcr.io
     secrets: inherit
   
@@ -44,7 +53,7 @@ jobs:
     uses: ./.github/workflows/staging-workflows/build-frontend.yml
     with:
       environment_name: ${{ inputs.environment_name }}
-      commit_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      commit_sha: ${{ inputs.commit_sha || github.event.pull_request.head.sha || github.sha }}
       registry_url: gcr.io
       backend_url: ${{ needs.infrastructure.outputs.backend_url }}
     secrets: inherit
@@ -135,9 +144,27 @@ jobs:
           # Add more comprehensive smoke tests here
           echo "Running API smoke tests..."
   
+  verify:
+    name: Verify Deployment
+    needs: [infrastructure, smoke-test]
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.verify.outputs.status }}
+    steps:
+      - name: Verify deployment status
+        id: verify
+        run: |
+          if [[ "${{ needs.smoke-test.result }}" == "success" ]]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "✅ Deployment verified successfully"
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "❌ Deployment verification failed"
+          fi
+  
   comment:
     name: Post Deployment Comment
-    needs: [infrastructure, smoke-test]
+    needs: [infrastructure, smoke-test, verify]
     if: success()
     runs-on: ubuntu-latest
     steps:
