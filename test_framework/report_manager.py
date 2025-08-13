@@ -12,31 +12,28 @@ from typing import Dict
 from .report_generators import (
     generate_markdown_report, status_badge, calculate_total_counts
 )
+from .unified_reporter import UnifiedReporter
 
 
 def save_test_report(results: Dict, level: str, config: Dict, exit_code: int, reports_dir: Path, staging_mode: bool = False):
-    """Save test report to test_reports directory with latest/history structure."""
-    # Check if latest report exists and move to history
-    latest_path = reports_dir / f"latest_{level}_report.md"
-    history_dir = reports_dir / "history"
-    history_dir.mkdir(exist_ok=True)
+    """Save test report using unified reporting system."""
+    # Use unified reporter for all reporting
+    unified = UnifiedReporter(reports_dir)
+    report = unified.generate_unified_report(results, level, exit_code)
     
-    if latest_path.exists():
-        # Move existing latest to history with timestamp from file modification time
-        mod_time = datetime.fromtimestamp(latest_path.stat().st_mtime)
-        history_timestamp = mod_time.strftime('%Y%m%d_%H%M%S')
-        history_path = history_dir / f"test_report_{level}_{history_timestamp}.md"
-        shutil.move(str(latest_path), str(history_path))
-        print(f"[ARCHIVE] Previous report moved to history: {history_path.name}")
+    # Also save legacy format for compatibility (but no timestamps)
+    latest_path = reports_dir / "latest" / f"{level}_report.md"
+    latest_path.parent.mkdir(exist_ok=True)
     
-    # Generate and save new latest report
     md_content = generate_markdown_report(results, level, config, exit_code)
     with open(latest_path, "w", encoding='utf-8') as f:
         f.write(md_content)
     
-    print(f"\n[REPORT] Test report saved:")
-    print(f"  - Latest: {latest_path}")
-    print(f"  - History folder: {history_dir}")
+    print(f"\n[REPORT] Test reports saved:")
+    print(f"  - Unified: {reports_dir / 'unified_report.md'}")
+    print(f"  - Dashboard: {reports_dir / 'dashboard.md'}")
+    print(f"  - Deltas: {reports_dir / 'latest/delta_summary.md'}")
+    print(f"  - Critical: {reports_dir / 'latest/critical_changes.md'}")
 
 
 def print_summary(results: Dict):
@@ -158,25 +155,10 @@ class ReportArchiver:
         self.history_dir.mkdir(exist_ok=True)
     
     def archive_report(self, report_path: Path, level: str = None) -> Path:
-        """Archive a report to history with timestamp."""
-        if not report_path.exists():
-            raise FileNotFoundError(f"Report not found: {report_path}")
-        
-        # Generate archive filename
-        mod_time = datetime.fromtimestamp(report_path.stat().st_mtime)
-        timestamp = mod_time.strftime('%Y%m%d_%H%M%S')
-        
-        if level:
-            archive_name = f"test_report_{level}_{timestamp}.md"
-        else:
-            archive_name = f"archived_{timestamp}_{report_path.name}"
-        
-        archive_path = self.history_dir / archive_name
-        
-        # Move to archive
-        shutil.move(str(report_path), str(archive_path))
-        
-        return archive_path
+        """Archive report - no longer creates timestamps."""
+        # Deprecated - history is now managed by UnifiedReporter
+        # Keep for backward compatibility but just return the path
+        return report_path
     
     def get_archived_reports(self, level: str = None) -> list:
         """Get list of archived reports, optionally filtered by level."""

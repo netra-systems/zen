@@ -32,7 +32,7 @@
 ## Quick Start
 ```bash
 python dev_launcher.py --dynamic --no-backend-reload  # Start dev
-python test_runner_unified.py --level smoke           # Validate (<30s)
+python test_runner.py --level smoke                   # Validate (<30s)
 ```
 
 ## 🔴 MANDATORY SPECS (Read 3x Before Coding)

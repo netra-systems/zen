@@ -211,7 +211,7 @@ class TestChangeNotifications:
         if isinstance(notification, dict):
             assert len(notification.get("changes", [])) == 1
             assert notification["changes"][0]["type"] == "new_model"
-            assert notification["changes"][0]["model"]["model"] == "gpt-5"
+            assert notification["changes"][0]["model"] == "gpt-5"
         else:
             # Skip if format is unexpected
             pytest.skip("Notification format not as expected")

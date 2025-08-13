@@ -1,8 +1,14 @@
-# Test Framework - Advanced Test Organization & Management
+# Test Framework - Unified Test Infrastructure
+
+## ⚠️ IMPORTANT: Single Entry Point
+
+**`test_runner.py`** (in the project root) is the ONLY entry point for all testing in the Netra AI Platform.
+
+DO NOT create alternative test runners. All test execution MUST go through `test_runner.py`.
 
 ## Overview
 
-The Netra Test Framework provides an advanced, modular testing infrastructure designed to improve test organization, execution efficiency, and failure analysis. This framework addresses common testing challenges including flaky tests, slow execution, poor failure diagnostics, and lack of pattern recognition.
+The Netra Test Framework provides a unified, modular testing infrastructure with intelligent test organization, execution efficiency, and comprehensive failure analysis.
 
 ## Key Features
 
@@ -33,14 +39,23 @@ The Netra Test Framework provides an advanced, modular testing infrastructure de
 ## Architecture
 
 ```
+test_runner.py                    # ⭐ SINGLE ENTRY POINT (project root)
 test_framework/
-├── test_suite_orchestrator.py   # Core orchestration engine
+├── __init__.py                  # Module exports
+├── runner.py                    # UnifiedTestRunner class
+├── test_runners.py              # Backend/Frontend/E2E execution
+├── test_config.py               # Test level configurations
+├── test_parser.py               # Output parsing utilities
+├── test_orchestrator.py         # Test orchestration logic
+├── test_suite_orchestrator.py   # Advanced orchestration engine
 ├── failure_pattern_analyzer.py  # Pattern recognition & analysis
-├── modular_test_runner.py      # Main entry point & integration
-├── test_config.json            # Configuration settings
-├── test_profiles.json          # Test profiles with historical data
-├── failure_patterns.json       # Known failure patterns
-└── failure_history.json        # Historical failure data
+├── report_generators.py         # Multi-format report generation
+├── report_manager.py            # Report management
+├── test_discovery.py            # Test discovery engine
+├── test_execution_engine.py     # Execution engine
+├── failing_test_runner.py       # Specialized failing test runner
+├── unified_reporter.py          # Unified reporting
+└── delta_reporter.py            # Change detection
 ```
 
 ## Quick Start
@@ -48,20 +63,23 @@ test_framework/
 ### Basic Usage
 
 ```bash
-# Run smoke tests (quick validation)
-python test_framework/modular_test_runner.py --level smoke
+# Run smoke tests (quick validation) - MANDATORY before commits
+python test_runner.py --level smoke
 
 # Run unit tests with coverage
-python test_framework/modular_test_runner.py --level unit --coverage
+python test_runner.py --level unit
 
 # Run comprehensive tests
-python test_framework/modular_test_runner.py --level comprehensive
+python test_runner.py --level comprehensive
 
-# Run specific categories
-python test_framework/modular_test_runner.py --category api --category auth
+# Run backend tests only
+python test_runner.py --level unit --backend-only
 
-# Analyze previous failures
-python test_framework/modular_test_runner.py --analyze-only
+# Run with real LLM calls
+python test_runner.py --level unit --real-llm
+
+# Run only failing tests
+python test_runner.py --run-failing
 ```
 
 ### Test Levels
@@ -136,24 +154,18 @@ report = analyzer.get_pattern_report()
 - Permission errors
 - Flaky test patterns
 
-### 3. Modular Test Runner
+### 3. Unified Test Runner
 
-The main entry point that integrates all components:
+The ONLY entry point for all testing (use test_runner.py in project root):
 
 ```python
-from test_framework.modular_test_runner import ModularTestRunner, TestRunConfig
+# DO NOT import or use test framework modules directly
+# Always use the test_runner.py CLI:
 
-runner = ModularTestRunner()
+# From command line:
+# python test_runner.py --level unit --parallel auto
 
-config = TestRunConfig(
-    level="unit",
-    parallel=True,
-    fail_fast=False,
-    retry_failed=True,
-    max_workers=4
-)
-
-results = await runner.run_tests(config)
+# The test_runner.py handles all configuration and execution
 ```
 
 ## Test Categories
@@ -311,16 +323,15 @@ test_reports/modular/
 ```yaml
 - name: Run Tests
   run: |
-    python test_framework/modular_test_runner.py \
+    python test_runner.py \
       --level ${{ matrix.level }} \
-      --parallel \
-      --coverage \
+      --parallel auto \
       --fail-fast
   
 - name: Analyze Failures
   if: failure()
   run: |
-    python test_framework/modular_test_runner.py --analyze-only
+    python test_runner.py --show-failing
 ```
 
 ### Jenkins Pipeline
@@ -330,12 +341,12 @@ stage('Test') {
     parallel {
         stage('Unit Tests') {
             steps {
-                sh 'python test_framework/modular_test_runner.py --level unit'
+                sh 'python test_runner.py --level unit'
             }
         }
         stage('Integration Tests') {
             steps {
-                sh 'python test_framework/modular_test_runner.py --level integration'
+                sh 'python test_runner.py --level integration'
             }
         }
     }
@@ -383,8 +394,9 @@ To add new patterns or improve the framework:
 
 1. Add pattern definitions to `failure_pattern_analyzer.py`
 2. Update categorization logic in `test_suite_orchestrator.py`
-3. Add new test levels in `modular_test_runner.py`
-4. Update documentation with new features
+3. Add new test levels in `test_config.py`
+4. Integrate changes through `test_runner.py` (DO NOT create new runners)
+5. Update documentation with new features
 
 ## License
 

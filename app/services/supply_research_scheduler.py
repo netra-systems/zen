@@ -69,7 +69,8 @@ class ResearchSchedule:
         
         elif self.frequency == ScheduleFrequency.WEEKLY:
             # Next specified day of week
-            days_ahead = self.day_of_week - now.weekday()
+            current_weekday = now.weekday()
+            days_ahead = self.day_of_week - current_weekday
             if days_ahead <= 0:  # Target day already happened this week
                 days_ahead += 7
             next_run = now.replace(hour=self.hour, minute=0, second=0, microsecond=0)

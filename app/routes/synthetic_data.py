@@ -12,9 +12,11 @@ from datetime import datetime
 from app import schemas
 from app.services.synthetic_data_service import synthetic_data_service
 from app.services.corpus_service import corpus_service
-from app.dependencies import get_db_session
+from app.dependencies import get_db_session, get_async_db
 from app.auth.auth_dependencies import get_current_user
 from app.db.models_postgres import User
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.services.synthetic_data_service import SyntheticDataService
 
 
 # Request/Response Models
@@ -422,6 +424,11 @@ async def clone_corpus(
         "status": new_corpus.status
     }
 
-async def get_templates(*args, **kwargs):
-    """Test stub implementation for get_templates."""
-    return {"status": "ok"}
+async def get_templates(db: AsyncSession = Depends(get_async_db)):
+    """Get available synthetic data templates."""
+    try:
+        templates = await SyntheticDataService.get_available_templates(db)
+        return {"templates": templates, "status": "ok"}
+    except Exception as e:
+        logger.error(f"Error fetching templates: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))

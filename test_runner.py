@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 """
-UNIFIED TEST RUNNER - Single Entry Point for all Netra AI Platform Testing
+UNIFIED TEST RUNNER - THE ONLY ENTRY POINT for all Netra AI Platform Testing
+
+THIS IS THE SINGLE, AUTHORITATIVE TEST RUNNER FOR THE ENTIRE CODEBASE.
+DO NOT CREATE ALTERNATIVE TEST RUNNERS - USE THIS FILE EXCLUSIVELY.
 
 PURPOSE:
 Provides a consistent interface for running different levels of tests,
