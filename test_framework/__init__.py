@@ -3,7 +3,7 @@
 # Import from refactored modules
 from .runner import UnifiedTestRunner
 from .test_config import TEST_LEVELS, RUNNERS, SHARD_MAPPINGS
-from .test_parser import parse_test_counts, parse_coverage, extract_failing_tests
+from .test_parser import parse_test_counts, parse_coverage, extract_failing_tests, extract_test_details
 from .test_orchestrator import TestOrchestrator
 
 # Import report generators and managers

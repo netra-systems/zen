@@ -16,7 +16,7 @@ consolidating multiple supervisor implementations with feature flags and
 circuit breaker patterns for robust agent orchestration.
 """
 
-from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 from enum import Enum
 
 if TYPE_CHECKING:
@@ -28,7 +28,7 @@ import time
 from contextlib import asynccontextmanager
 
 from app.logging_config import central_logger
-from app.agents.supervisor_consolidated import SupervisorAgent as BaseSupervisorAgent
+# Avoid circular import - import moved to function body where needed
 from app.agents.quality_supervisor import QualityEnhancedSupervisor
 from app.agents.state import DeepAgentState
 from app.schemas import SubAgentLifecycle
@@ -166,8 +166,10 @@ class SupervisorAgent:
         
         logger.info(f"Initialized unified supervisor with mode: {self.config.mode.value}")
     
-    def _create_supervisor_implementation(self) -> Union[BaseSupervisorAgent, QualityEnhancedSupervisor]:
+    def _create_supervisor_implementation(self):
         """Create the appropriate supervisor implementation based on config"""
+        from app.agents.supervisor_consolidated import SupervisorAgent as BaseSupervisorAgent
+        
         if self.config.mode == SupervisorMode.QUALITY_ENHANCED or self.config.enable_quality_gates:
             return QualityEnhancedSupervisor(
                 db_session=self.db_session,
@@ -183,9 +185,7 @@ class SupervisorAgent:
                 db_session=self.db_session,
                 llm_manager=self.llm_manager,
                 websocket_manager=self.websocket_manager,
-                tool_dispatcher=self.tool_dispatcher,
-                user_id=self.user_id,
-                thread_id=self.thread_id
+                tool_dispatcher=self.tool_dispatcher
             )
     
     @asynccontextmanager

@@ -32,7 +32,8 @@
 ## Quick Start
 ```bash
 python dev_launcher.py --dynamic --no-backend-reload  # Start dev
-python test_runner.py --level smoke                   # Validate (<30s)
+python test_runner.py --level unit                    # DEFAULT - Always run for any noticeable changes
+python test_runner.py --level smoke                   # ONLY for most trivial changes (<30s)
 ```
 
 ## 🔴 MANDATORY SPECS (Read 3x Before Coding)
@@ -60,7 +61,8 @@ python test_runner.py --level smoke                   # Validate (<30s)
 ### BEFORE Any Code Change (Non-Negotiable)
 1. **READ** [`type_safety.xml`](SPEC/type_safety.xml) - NO DUPLICATES
 2. **READ** [`conventions.xml`](SPEC/conventions.xml) - 300-LINE LIMIT  
-3. **RUN** `python test_runner.py --level smoke` (<30s validation)
+3. **RUN** `python test_runner.py --level unit` (DEFAULT - Always for any noticeable changes)
+   - Use `--level smoke` ONLY for most trivial changes (<30s validation)
 4. **CHECK** No test stubs in production code
 
 ### AFTER Any Code Change (Automatic)
@@ -103,9 +105,10 @@ python test_runner.py --level smoke                   # Validate (<30s)
 - NO blue gradient bars
 - `generateUniqueId()` for React keys
 
-## Testing (Run smoke BEFORE commits)
+## Testing (ALWAYS run UNIT tests for noticeable changes)
 ```bash
-python test_runner.py --level smoke         # < 30s MANDATORY
+python test_runner.py --level unit          # DEFAULT - Always run for ANY noticeable changes
+python test_runner.py --level smoke         # ONLY for most trivial changes (<30s)
 python test_runner.py --level comprehensive # 97% coverage target
 ```
 
@@ -160,7 +163,7 @@ frontend/
 2. **8-LINE FUNCTIONS** - Every function ≤8 lines (MANDATORY)
 3. **TYPE SAFETY FIRST** - Read [`type_safety.xml`](SPEC/type_safety.xml) 
 4. **NO DUPLICATION** - Extend, don't duplicate
-5. **SMOKE TESTS** - Run before ANY commit
+5. **UNIT TESTS** - Run before ANY commit (smoke only for most trivial)
 6. **ULTRA DEEP THINK** - This is your masterpiece
 
 **Specs = Law. 300 lines = Maximum. 8 lines per function = Maximum. Ultra think = Always.**

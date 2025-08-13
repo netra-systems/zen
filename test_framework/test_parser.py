@@ -223,6 +223,88 @@ def extract_traceback(output: str, test_name: str) -> str:
     
     return '\n'.join(traceback_lines)
 
+def extract_test_details(output: str, component: str) -> List[Dict]:
+    """Extract individual test details with status from output."""
+    test_details = []
+    
+    if component == "backend":
+        # Parse pytest output for all tests
+        # Pattern for passed tests
+        passed_pattern = r"PASSED\s+([^\s]+)::([^\s]+)(?:\[([^\]]+)\])?"
+        for match in re.finditer(passed_pattern, output):
+            test_path = match.group(1)
+            test_name = match.group(2)
+            if match.group(3):  # Parametrized test
+                test_name += f"[{match.group(3)}]"
+            test_details.append({
+                "name": f"{test_path}::{test_name}",
+                "status": "passed",
+                "error": None
+            })
+        
+        # Pattern for failed tests
+        failed_pattern = r"FAILED\s+([^\s]+)::([^\s]+)(?:\[([^\]]+)\])?\s*-\s*(.+)"
+        for match in re.finditer(failed_pattern, output):
+            test_path = match.group(1)
+            test_name = match.group(2)
+            if match.group(3):  # Parametrized test
+                test_name += f"[{match.group(3)}]"
+            error_msg = match.group(4)
+            test_details.append({
+                "name": f"{test_path}::{test_name}",
+                "status": "failed",
+                "error": error_msg[:200]
+            })
+        
+        # Pattern for skipped tests
+        skipped_pattern = r"SKIPPED\s+([^\s]+)::([^\s]+)(?:\[([^\]]+)\])?"
+        for match in re.finditer(skipped_pattern, output):
+            test_path = match.group(1)
+            test_name = match.group(2)
+            if match.group(3):  # Parametrized test
+                test_name += f"[{match.group(3)}]"
+            test_details.append({
+                "name": f"{test_path}::{test_name}",
+                "status": "skipped",
+                "error": None
+            })
+            
+    elif component == "frontend":
+        # Parse Jest output
+        # Pattern for passed tests
+        passed_pattern = r"✓\s+(.+?)\s*\(\d+\s*ms\)"
+        current_file = None
+        
+        # Track current test file being processed
+        file_pattern = r"(PASS|FAIL)\s+(\S+\.(test|spec)\.(ts|tsx|js|jsx))"
+        for match in re.finditer(file_pattern, output):
+            current_file = match.group(2)
+            # Get test section after file declaration
+            file_pos = match.end()
+            next_file = re.search(file_pattern, output[file_pos:])
+            section_end = file_pos + next_file.start() if next_file else len(output)
+            test_section = output[file_pos:section_end]
+            
+            # Extract passed tests in this file
+            for test_match in re.finditer(r"✓\s+(.+?)\s*\(\d+\s*ms\)", test_section):
+                test_name = test_match.group(1).strip()
+                test_details.append({
+                    "name": f"{current_file}::{test_name}",
+                    "status": "passed",
+                    "error": None
+                })
+            
+            # Extract failed tests in this file
+            for test_match in re.finditer(r"✕\s+(.+?)\s*\(\d+\s*ms\)", test_section):
+                test_name = test_match.group(1).strip()
+                test_details.append({
+                    "name": f"{current_file}::{test_name}",
+                    "status": "failed",
+                    "error": "Test failed"
+                })
+    
+    return test_details
+
 def categorize_test(test_path: str, component: str = "backend") -> str:
     """Categorize test based on file path and name.
     

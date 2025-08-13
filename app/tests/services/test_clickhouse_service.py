@@ -2,6 +2,7 @@
 
 import asyncio
 import pytest
+import pytest_asyncio
 import uuid
 import json
 import random
@@ -43,7 +44,7 @@ def clickhouse_client():
     return _get_client
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def real_clickhouse_client():
     """Create a real ClickHouse client using actual cloud configuration."""
     config = settings.clickhouse_https_dev if settings.environment == "development" else settings.clickhouse_https
@@ -272,7 +273,7 @@ class TestBasicOperations:
 class TestWorkloadEventsOperations:
     """Test operations on workload_events table."""
     
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def ensure_workload_table(self):
         """Ensure workload_events table exists."""
         success = await create_workload_events_table_if_missing()

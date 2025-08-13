@@ -1,25 +1,8 @@
-# AI AGENT MODIFICATION METADATA
-# ================================
-# Timestamp: 2025-08-10T18:47:44.451152+00:00
-# Agent: Claude Opus 4.1 claude-opus-4-1-20250805
-# Context: Add baseline agent tracking to supervisor agents
-# Git: v6 | 2c55fb99 | dirty (24 uncommitted)
-# Change: Feature | Scope: Component | Risk: High
-# Session: 8743fc1b-f4dd-445e-b9cf-aa1c8ccb4103 | Seq: 1
-# Review: Pending | Score: 85
-# ================================
-"""Consolidated Supervisor Agent with improved architecture
-
-This module combines the best patterns from both supervisor implementations
-to provide a robust, maintainable agent orchestration system.
-"""
+"""Refactored Supervisor Agent with modular architecture (<300 lines)."""
 
 from typing import Any, Dict, List, Optional, Tuple
-from enum import Enum
-from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import asyncio
-import time
 from app.logging_config import central_logger
 from app.agents.base import BaseSubAgent
 from app.schemas import (
@@ -34,47 +17,19 @@ from app.services.state_persistence_service import state_persistence_service
 from starlette.websockets import WebSocketDisconnect
 from langchain_core.messages import SystemMessage
 
-# Import all sub-agents
-from app.agents.triage_sub_agent import TriageSubAgent
-from app.agents.data_sub_agent import DataSubAgent
-from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-from app.agents.reporting_sub_agent import ReportingSubAgent
-from app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
-from app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent
+# Import modular components
+from app.agents.supervisor.execution_context import (
+    AgentExecutionContext, AgentExecutionResult, 
+    ExecutionStrategy, PipelineStep
+)
+from app.agents.supervisor.agent_registry import AgentRegistry
+from app.agents.supervisor.execution_engine import ExecutionEngine
 
 logger = central_logger.get_logger(__name__)
 
-class ExecutionStrategy(Enum):
-    """Execution strategies for agent pipelines"""
-    SEQUENTIAL = "sequential"
-    PARALLEL = "parallel"
-    CONDITIONAL = "conditional"
-
-@dataclass
-class AgentExecutionContext:
-    """Context for agent execution"""
-    run_id: str
-    thread_id: str
-    user_id: str
-    agent_name: str
-    retry_count: int = 0
-    max_retries: int = 3
-    timeout: Optional[int] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    started_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-
-@dataclass 
-class AgentExecutionResult:
-    """Result of agent execution"""
-    success: bool
-    state: Optional[DeepAgentState] = None
-    error: Optional[str] = None
-    duration: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
 class SupervisorAgent(BaseSubAgent):
-    """Consolidated Supervisor agent with improved lifecycle management"""
+    """Refactored Supervisor agent with modular design."""
     
     def __init__(self, 
                  db_session: AsyncSession,
@@ -93,16 +48,19 @@ class SupervisorAgent(BaseSubAgent):
         self.user_id: Optional[str] = None
         self.state_persistence = state_persistence_service
         
-        # Agent registry
-        self.agents: Dict[str, BaseSubAgent] = {}
-        self._register_default_agents()
+        # Initialize modular components
+        self.registry = AgentRegistry(llm_manager, tool_dispatcher)
+        self.registry.set_websocket_manager(websocket_manager)
+        self.registry.register_default_agents()
         
-        # Execution tracking
-        self.active_runs: Dict[str, AgentExecutionContext] = {}
-        self.run_history: List[AgentExecutionResult] = []
+        self.engine = ExecutionEngine(self.registry, websocket_manager)
         
         # Hooks for extensibility
-        self.hooks = {
+        self.hooks = self._init_hooks()
+    
+    def _init_hooks(self) -> Dict[str, List]:
+        """Initialize event hooks."""
+        return {
             "before_agent": [],
             "after_agent": [],
             "on_error": [],
@@ -110,497 +68,174 @@ class SupervisorAgent(BaseSubAgent):
             "on_complete": []
         }
     
-    def _register_default_agents(self) -> None:
-        """Register default sub-agents"""
-        self.register_agent("triage", TriageSubAgent(self.llm_manager, self.tool_dispatcher))
-        self.register_agent("data", DataSubAgent(self.llm_manager, self.tool_dispatcher))
-        self.register_agent("optimization", OptimizationsCoreSubAgent(self.llm_manager, self.tool_dispatcher))
-        self.register_agent("actions", ActionsToMeetGoalsSubAgent(self.llm_manager, self.tool_dispatcher))
-        self.register_agent("reporting", ReportingSubAgent(self.llm_manager, self.tool_dispatcher))
-        # Admin agents
-        self.register_agent("synthetic_data", SyntheticDataSubAgent(self.llm_manager, self.tool_dispatcher))
-        self.register_agent("corpus_admin", CorpusAdminSubAgent(self.llm_manager, self.tool_dispatcher))
-    
     def register_agent(self, name: str, agent: BaseSubAgent) -> None:
-        """Register a sub-agent"""
-        agent.websocket_manager = self.websocket_manager
-        self.agents[name] = agent
-        logger.info(f"Registered agent: {name}")
+        """Register a sub-agent."""
+        self.registry.register(name, agent)
     
     def register_hook(self, event: str, handler: callable) -> None:
-        """Register an event hook"""
+        """Register an event hook."""
         if event in self.hooks:
             self.hooks[event].append(handler)
     
     @property
+    def agents(self) -> Dict[str, BaseSubAgent]:
+        """Get all registered agents."""
+        return self.registry.agents
+    
+    @property
     def sub_agents(self) -> list:
-        """Backward compatibility property for tests expecting sub_agents attribute"""
-        return list(self.agents.values())
+        """Backward compatibility property."""
+        return self.registry.get_all_agents()
     
     @sub_agents.setter
     def sub_agents(self, agents: list) -> None:
-        """Backward compatibility setter for tests"""
-        self.agents = {f"agent_{i}": agent for i, agent in enumerate(agents)}
+        """Backward compatibility setter."""
+        for i, agent in enumerate(agents):
+            self.registry.register(f"agent_{i}", agent)
     
-    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Execute method for BaseSubAgent compatibility"""
-        # This method is here to satisfy the abstract method requirement
-        # The actual execution logic is in the run method
+    async def execute(self, state: DeepAgentState, 
+                     run_id: str, stream_updates: bool) -> None:
+        """Execute method for BaseSubAgent compatibility."""
         pass
     
-    async def run(self, 
-                  user_request: str, 
-                  run_id: str, 
-                  stream_updates: bool = True) -> DeepAgentState:
-        """Run the supervisor workflow with improved error handling and lifecycle management"""
+    async def run(self, user_prompt: str, thread_id: str, 
+                  user_id: str, run_id: str) -> DeepAgentState:
+        """Run the supervisor agent workflow."""
+        self.thread_id = thread_id
+        self.user_id = user_id
         
+        state = await self._initialize_state(user_prompt, thread_id, user_id)
+        pipeline = self._get_execution_pipeline(user_prompt, state)
+        
+        await self._execute_pipeline(pipeline, state, run_id)
+        await self._finalize_state(state)
+        
+        return state
+    
+    async def _initialize_state(self, prompt: str, 
+                              thread_id: str, user_id: str) -> DeepAgentState:
+        """Initialize agent state."""
+        state = DeepAgentState(
+            messages=[SystemMessage(content=prompt)],
+            thread_id=thread_id,
+            user_id=user_id,
+            metadata={"original_prompt": prompt}
+        )
+        
+        # Try to restore previous state
+        restored = await self.state_persistence.restore_state(thread_id)
+        if restored:
+            state.update_from_dict(restored)
+            logger.info(f"Restored state for thread {thread_id}")
+        
+        return state
+    
+    async def _execute_pipeline(self, pipeline: List[PipelineStep],
+                               state: DeepAgentState, run_id: str) -> None:
+        """Execute the agent pipeline."""
         context = AgentExecutionContext(
             run_id=run_id,
-            thread_id=self.thread_id or "",
-            user_id=self.user_id or run_id,
-            agent_name="Supervisor"
+            thread_id=self.thread_id,
+            user_id=self.user_id,
+            agent_name="supervisor"
         )
         
-        self.active_runs[run_id] = context
+        # Execute hooks
+        await self._run_hooks("before_agent", state)
         
         try:
-            logger.info(f"Supervisor starting for run_id: {run_id}")
-            self.set_state(SubAgentLifecycle.RUNNING)
-            
-            # Send start notification
-            if stream_updates:
-                await self._send_websocket_update(
-                    context.user_id,
-                    "agent_started",
-                    AgentStarted(
-                        run_id=run_id,
-                        agent_name="Supervisor",
-                        timestamp=time.time()
-                    )
-                )
-            
-            # Initialize or load state
-            state = await self._initialize_state(user_request, run_id, context)
-            
-            # Execute the agent pipeline
-            state = await self._execute_pipeline(state, context, stream_updates)
-            
-            # Save final state
-            await self._save_state(state, run_id, context)
-            
-            # Send completion notification
-            if stream_updates:
-                await self._send_websocket_update(
-                    context.user_id,
-                    "agent_completed",
-                    AgentCompleted(
-                        run_id=run_id,
-                        result=state.final_report or "Workflow completed successfully"
-                    )
-                )
-                # Send final report event with full analysis
-                if state.final_report:
-                    await self._send_final_report(
-                        context.user_id,
-                        state.final_report,
-                        metrics=state.metrics if hasattr(state, 'metrics') else None,
-                        recommendations=state.recommendations if hasattr(state, 'recommendations') else None
-                    )
-            
-            # Record successful execution
-            result = AgentExecutionResult(
-                success=True,
-                state=state,
-                duration=(datetime.now(timezone.utc) - context.started_at).total_seconds()
-            )
-            self.run_history.append(result)
-            
-            # Execute completion hooks
-            await self._execute_hooks("on_complete", context, state)
-            
-            logger.info(f"Supervisor completed successfully for run_id: {run_id}")
-            return state
-            
+            results = await self.engine.execute_pipeline(pipeline, context, state)
+            self._process_results(results, state)
+            await self._run_hooks("on_complete", state)
         except Exception as e:
-            logger.error(f"Supervisor failed for run_id {run_id}: {e}", exc_info=True)
-            
-            # Record failed execution
-            result = AgentExecutionResult(
-                success=False,
-                error=str(e),
-                duration=(datetime.now(timezone.utc) - context.started_at).total_seconds()
-            )
-            self.run_history.append(result)
-            
-            # Execute error hooks
-            await self._execute_hooks("on_error", context, e)
-            
-            # Send error notification
-            if stream_updates:
-                await self._send_error(context.user_id, str(e))
-            
+            logger.error(f"Pipeline execution failed: {e}")
+            await self._run_hooks("on_error", state, error=e)
             raise
-            
         finally:
-            # Cleanup
-            self.set_state(SubAgentLifecycle.COMPLETED)
-            if run_id in self.active_runs:
-                del self.active_runs[run_id]
+            await self._run_hooks("after_agent", state)
     
-    async def _initialize_state(self, 
-                                user_request: str, 
-                                run_id: str,
-                                context: AgentExecutionContext) -> DeepAgentState:
-        """Initialize or load agent state"""
-        state = None
+    async def _finalize_state(self, state: DeepAgentState) -> None:
+        """Finalize and persist state."""
+        state.metadata["completed_at"] = datetime.now(timezone.utc).isoformat()
+        await self.state_persistence.persist_state(self.thread_id, state.to_dict())
         
-        # Try to load existing state from previous runs
-        if self.thread_id and self.db_session:
-            thread_context = await self.state_persistence.get_thread_context(self.thread_id)
-            if thread_context and thread_context.get("current_run_id"):
-                state = await self.state_persistence.load_agent_state(
-                    thread_context["current_run_id"],
-                    self.db_session
-                )
-                if state:
-                    logger.info(f"Loaded previous state from run {thread_context['current_run_id']}")
-                    state.user_request = user_request
-        
-        # Create new state if needed
-        if not state:
-            state = DeepAgentState(user_request=user_request)
-        
-        # Save initial state
-        await self._save_state(state, run_id, context)
-        
-        return state
+        # Send completion message
+        if self.websocket_manager:
+            await self._send_completion_message(state)
     
-    async def _execute_pipeline(self, 
-                                state: DeepAgentState,
-                                context: AgentExecutionContext,
-                                stream_updates: bool) -> DeepAgentState:
-        """Execute the agent pipeline with proper error handling"""
+    def _get_execution_pipeline(self, prompt: str, 
+                               state: DeepAgentState) -> List[PipelineStep]:
+        """Determine execution pipeline based on prompt."""
+        pipeline = []
         
-        pipeline = self._get_execution_pipeline(state)
+        # Always start with triage
+        pipeline.append(PipelineStep(agent_name="triage"))
         
-        for step_idx, step in enumerate(pipeline):
-            agent_name = step["agent"]
-            condition = step.get("condition")
-            strategy = step.get("strategy", ExecutionStrategy.SEQUENTIAL)
-            
-            # Check condition if specified
-            if condition and not self._evaluate_condition(condition, state):
-                logger.info(f"Skipping {agent_name} due to condition")
-                continue
-            
-            # Get the agent
-            agent = self.agents.get(agent_name)
-            if not agent:
-                logger.error(f"Agent {agent_name} not found")
-                continue
-            
-            # Execute before hooks
-            await self._execute_hooks("before_agent", context, agent_name)
-            
+        # Determine next steps based on triage results
+        if self._needs_data_analysis(state):
+            pipeline.append(PipelineStep(agent_name="data"))
+        
+        if self._needs_optimization(state):
+            pipeline.append(PipelineStep(agent_name="optimization"))
+        
+        if self._needs_actions(state):
+            pipeline.append(PipelineStep(agent_name="actions"))
+        
+        # Always end with reporting
+        pipeline.append(PipelineStep(agent_name="reporting"))
+        
+        return pipeline
+    
+    def _needs_data_analysis(self, state: DeepAgentState) -> bool:
+        """Check if data analysis is needed."""
+        metadata = state.metadata or {}
+        return metadata.get("requires_data", False)
+    
+    def _needs_optimization(self, state: DeepAgentState) -> bool:
+        """Check if optimization is needed."""
+        metadata = state.metadata or {}
+        return metadata.get("requires_optimization", False)
+    
+    def _needs_actions(self, state: DeepAgentState) -> bool:
+        """Check if action planning is needed."""
+        metadata = state.metadata or {}
+        return metadata.get("requires_actions", False)
+    
+    def _process_results(self, results: List[AgentExecutionResult],
+                        state: DeepAgentState) -> None:
+        """Process execution results."""
+        for result in results:
+            if result.success and result.state:
+                state.merge_from(result.state)
+    
+    async def _run_hooks(self, event: str, state: DeepAgentState, **kwargs) -> None:
+        """Run registered hooks for an event."""
+        for handler in self.hooks.get(event, []):
             try:
-                # Execute the agent with retry logic
-                state = await self._execute_agent_with_retry(
-                    agent, state, context, stream_updates
-                )
-                
-                # Save intermediate state
-                await self._save_state(state, context.run_id, context)
-                
-                # Execute after hooks
-                await self._execute_hooks("after_agent", context, agent_name, state)
-                
+                await handler(state, **kwargs)
             except Exception as e:
-                logger.error(f"Agent {agent_name} failed: {e}")
-                
-                # Check if we should continue or fail the pipeline
-                if step.get("critical", True):
-                    raise
-                else:
-                    logger.warning(f"Continuing pipeline despite {agent_name} failure")
-        
-        return state
+                logger.error(f"Hook {handler.__name__} failed: {e}")
     
-    async def _execute_agent_with_retry(self,
-                                       agent: BaseSubAgent,
-                                       state: DeepAgentState,
-                                       context: AgentExecutionContext,
-                                       stream_updates: bool) -> DeepAgentState:
-        """Execute an agent with retry logic"""
-        
-        retry_count = 0
-        last_error = None
-        
-        while retry_count <= context.max_retries:
-            try:
-                # Set up agent context
-                agent.websocket_manager = self.websocket_manager
-                agent.user_id = context.user_id
-                
-                # Update agent lifecycle
-                agent.set_state(SubAgentLifecycle.RUNNING)
-                
-                # Send update if streaming
-                if stream_updates:
-                    state_obj = SubAgentState(
-                        messages=[SystemMessage(content=f"Starting {agent.name}")],
-                        next_node="",
-                        lifecycle=SubAgentLifecycle.RUNNING
-                    )
-                    await self._send_websocket_update(
-                        context.user_id,
-                        "sub_agent_update",
-                        SubAgentUpdate(
-                            sub_agent_name=agent.name,
-                            state=state_obj
-                        )
-                    )
-                    # Send agent thinking event
-                    await self._send_agent_thinking(
-                        context.user_id,
-                        agent.name,
-                        f"Analyzing request and preparing to execute {agent.name}",
-                        step_number=state.step_count,
-                        total_steps=1  # Default to 1 if pipeline not available
-                    )
-                
-                # Execute the agent (modifies state in place)
-                if context.timeout:
-                    await asyncio.wait_for(
-                        agent.execute(state, context.run_id, stream_updates),
-                        timeout=context.timeout
-                    )
-                else:
-                    await agent.execute(state, context.run_id, stream_updates)
-                
-                # Update agent lifecycle
-                agent.set_state(SubAgentLifecycle.COMPLETED)
-                
-                # Send update if streaming
-                if stream_updates:
-                    state_obj = SubAgentState(
-                        messages=[SystemMessage(content=f"{agent.name} completed")],
-                        next_node="",
-                        lifecycle=SubAgentLifecycle.COMPLETED
-                    )
-                    await self._send_websocket_update(
-                        context.user_id,
-                        "sub_agent_update",
-                        SubAgentUpdate(
-                            sub_agent_name=agent.name,
-                            state=state_obj
-                        )
-                    )
-                
-                return state
-                
-            except asyncio.TimeoutError:
-                last_error = f"Agent {agent.name} timed out after {context.timeout} seconds"
-                logger.error(last_error)
-                
-            except Exception as e:
-                last_error = str(e)
-                logger.error(f"Agent {agent.name} failed (attempt {retry_count + 1}): {e}")
-                
-            # Execute retry hook
-            if retry_count < context.max_retries:
-                await self._execute_hooks("on_retry", context, agent.name, retry_count + 1)
-                retry_count += 1
-                await asyncio.sleep(2 ** retry_count)  # Exponential backoff
-            else:
-                break
-        
-        # All retries exhausted
-        raise Exception(f"Agent {agent.name} failed after {retry_count + 1} attempts: {last_error}")
-    
-    def _get_execution_pipeline(self, state: Optional[DeepAgentState] = None) -> List[Dict[str, Any]]:
-        """Get the execution pipeline based on context"""
-        
-        # Check if we're in admin mode from triage result
-        if state and state.triage_result and isinstance(state.triage_result, dict):
-            is_admin = state.triage_result.get("is_admin_mode", False)
-            category = state.triage_result.get("category", "")
-            
-            # Admin mode pipeline
-            if is_admin:
-                # Route to appropriate admin agent based on category
-                if "synthetic" in category.lower() or "data generation" in category.lower():
-                    return [
-                        {"agent": "triage", "critical": True},
-                        {"agent": "synthetic_data", "critical": True},
-                        {"agent": "reporting", "critical": False}
-                    ]
-                elif "corpus" in category.lower():
-                    return [
-                        {"agent": "triage", "critical": True},
-                        {"agent": "corpus_admin", "critical": True},
-                        {"agent": "reporting", "critical": False}
-                    ]
-                else:
-                    # General admin mode - both agents available
-                    return [
-                        {"agent": "triage", "critical": True},
-                        {"agent": "synthetic_data", "critical": False},
-                        {"agent": "corpus_admin", "critical": False},
-                        {"agent": "reporting", "critical": False}
-                    ]
-        
-        # Default pipeline for non-admin mode
-        return [
-            {"agent": "triage", "critical": True},
-            {"agent": "data", "critical": True},
-            {"agent": "optimization", "critical": True},
-            {"agent": "actions", "critical": True},
-            {"agent": "reporting", "critical": False}
-        ]
-    
-    def _evaluate_condition(self, condition: Dict[str, Any], state: DeepAgentState) -> bool:
-        """Evaluate a pipeline condition"""
-        condition_type = condition.get("type")
-        
-        if condition_type == "has_data":
-            field = condition.get("field")
-            return hasattr(state, field) and getattr(state, field) is not None
-        
-        if condition_type == "equals":
-            field = condition.get("field")
-            value = condition.get("value")
-            return hasattr(state, field) and getattr(state, field) == value
-        
-        return True
-    
-    async def _save_state(self, 
-                         state: DeepAgentState, 
-                         run_id: str,
-                         context: AgentExecutionContext) -> None:
-        """Save agent state to persistence"""
-        if self.thread_id and self.user_id and self.db_session:
-            try:
-                await self.state_persistence.save_agent_state(
-                    run_id=run_id,
-                    thread_id=self.thread_id,
-                    user_id=self.user_id,
-                    state=state,
-                    db_session=self.db_session
-                )
-            except Exception as e:
-                logger.error(f"Failed to save state: {e}")
-    
-    async def _send_websocket_update(self, 
-                                    user_id: str, 
-                                    message_type: str, 
-                                    payload: Any) -> None:
-        """Send WebSocket update with error handling"""
-        try:
-            await self.websocket_manager.send_message(
-                user_id,
-                WebSocketMessage(
-                    type=message_type, 
-                    payload=payload.model_dump() if hasattr(payload, 'model_dump') else payload
-                ).model_dump()
+    async def _send_completion_message(self, state: DeepAgentState) -> None:
+        """Send completion message via WebSocket."""
+        message = WebSocketMessage(
+            type="agent_completed",
+            content=AgentCompleted(
+                agent_name="supervisor",
+                run_id=state.metadata.get("run_id", ""),
+                thread_id=self.thread_id,
+                timestamp=datetime.now(timezone.utc).isoformat(),
+                result=state.to_dict()
             )
-        except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
-            logger.debug(f"WebSocket disconnected when sending {message_type}: {e}")
-        except Exception as e:
-            logger.error(f"Error sending WebSocket message: {e}")
-    
-    async def _send_error(self, user_id: str, error_message: str) -> None:
-        """Send error message via WebSocket"""
-        await self.websocket_manager.send_error(user_id, error_message, "Supervisor")
-    
-    async def _send_agent_thinking(self, user_id: str, agent_name: str, thought: str, step_number: int = None, total_steps: int = None) -> None:
-        """Send agent thinking event for intermediate reasoning"""
-        await self._send_websocket_update(
-            user_id,
-            "agent_thinking",
-            {
-                "agent_name": agent_name,
-                "thought": thought,
-                "step_number": step_number,
-                "total_steps": total_steps,
-                "timestamp": time.time()
-            }
         )
-    
-    async def _send_partial_result(self, user_id: str, agent_name: str, partial_content: str, progress: float = None) -> None:
-        """Send partial result for streaming content updates"""
-        await self._send_websocket_update(
-            user_id,
-            "partial_result",
-            {
-                "agent_name": agent_name,
-                "content": partial_content,
-                "progress": progress,
-                "timestamp": time.time()
-            }
-        )
-    
-    async def _send_tool_executing(self, user_id: str, agent_name: str, tool_name: str, tool_args: dict = None) -> None:
-        """Send tool execution notification"""
-        await self._send_websocket_update(
-            user_id,
-            "tool_executing",
-            {
-                "agent_name": agent_name,
-                "tool_name": tool_name,
-                "tool_args": tool_args or {},
-                "timestamp": time.time()
-            }
-        )
-    
-    async def _send_final_report(self, user_id: str, report: str, metrics: dict = None, recommendations: list = None) -> None:
-        """Send final report with complete analysis results"""
-        await self._send_websocket_update(
-            user_id,
-            "final_report",
-            {
-                "report": report,
-                "metrics": metrics or {},
-                "recommendations": recommendations or [],
-                "timestamp": time.time()
-            }
-        )
-    
-    async def _execute_hooks(self, event: str, *args, **kwargs) -> None:
-        """Execute registered hooks for an event"""
-        for hook in self.hooks.get(event, []):
-            try:
-                if asyncio.iscoroutinefunction(hook):
-                    await hook(*args, **kwargs)
-                else:
-                    hook(*args, **kwargs)
-            except Exception as e:
-                logger.error(f"Hook failed for event {event}: {e}")
-    
-    async def shutdown(self) -> None:
-        """Gracefully shutdown the supervisor"""
-        logger.info("Shutting down supervisor...")
-        
-        # Cancel any active runs
-        for run_id in list(self.active_runs.keys()):
-            context = self.active_runs[run_id]
-            await self._send_error(
-                context.user_id, 
-                "Supervisor shutting down"
-            )
-        
-        self.active_runs.clear()
-        logger.info("Supervisor shutdown complete")
+        await self.websocket_manager.send_to_thread(
+            self.thread_id, message.model_dump())
     
     def get_stats(self) -> Dict[str, Any]:
-        """Get supervisor statistics"""
+        """Get supervisor statistics."""
         return {
-            "active_runs": len(self.active_runs),
-            "total_runs": len(self.run_history),
-            "successful_runs": sum(1 for r in self.run_history if r.success),
-            "failed_runs": sum(1 for r in self.run_history if not r.success),
-            "registered_agents": list(self.agents.keys()),
-            "average_duration": (
-                sum(r.duration for r in self.run_history) / len(self.run_history)
-                if self.run_history else 0
-            )
+            "registered_agents": len(self.registry.agents),
+            "active_runs": len(self.engine.active_runs),
+            "completed_runs": len(self.engine.run_history),
+            "hooks_registered": {k: len(v) for k, v in self.hooks.items()}
         }

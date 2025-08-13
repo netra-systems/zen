@@ -19,7 +19,7 @@ from datetime import datetime, UTC
 import asyncio
 
 from app.logging_config import central_logger
-from app.agents.supervisor_consolidated import SupervisorAgent, AgentExecutionContext
+from app.agents.supervisor.execution_context import AgentExecutionContext
 from app.agents.state import DeepAgentState
 from app.services.quality_gate_service import (
     QualityGateService, ContentType, QualityMetrics, ValidationResult
@@ -35,7 +35,7 @@ from app.agents.tool_dispatcher import ToolDispatcher
 logger = central_logger.get_logger(__name__)
 
 
-class QualityEnhancedSupervisor(SupervisorAgent):
+class QualityEnhancedSupervisor:
     """Supervisor with integrated quality gates and monitoring"""
     
     def __init__(self,
