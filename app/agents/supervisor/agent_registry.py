@@ -32,6 +32,11 @@ class AgentRegistry:
         
     def register_default_agents(self) -> None:
         """Register default sub-agents"""
+        self._register_core_agents()
+        self._register_auxiliary_agents()
+    
+    def _register_core_agents(self) -> None:
+        """Register core workflow agents."""
         self.register("triage", TriageSubAgent(
             self.llm_manager, self.tool_dispatcher))
         self.register("data", DataSubAgent(
@@ -40,6 +45,9 @@ class AgentRegistry:
             self.llm_manager, self.tool_dispatcher))
         self.register("actions", ActionsToMeetGoalsSubAgent(
             self.llm_manager, self.tool_dispatcher))
+    
+    def _register_auxiliary_agents(self) -> None:
+        """Register auxiliary agents."""
         self.register("reporting", ReportingSubAgent(
             self.llm_manager, self.tool_dispatcher))
         self.register("synthetic_data", SyntheticDataSubAgent(

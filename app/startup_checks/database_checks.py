@@ -21,9 +21,18 @@ class DatabaseChecker:
         self.app = app
         self.environment = os.getenv("ENVIRONMENT", "development").lower()
         self.is_staging = self.environment == "staging" or os.getenv("K_SERVICE")
+        self.is_mock = "mock" in os.getenv("DATABASE_URL", "").lower()
     
     async def check_database_connection(self) -> StartupCheckResult:
         """Check PostgreSQL database connection and schema"""
+        if self.is_mock:
+            return StartupCheckResult(
+                name="database_connection",
+                success=True,
+                message="PostgreSQL in mock mode - skipping connection check",
+                critical=False
+            )
+        
         try:
             async with self.app.state.db_session_factory() as db:
                 await self._test_basic_connectivity(db)
@@ -45,6 +54,14 @@ class DatabaseChecker:
     
     async def check_or_create_assistant(self) -> StartupCheckResult:
         """Check if Netra assistant exists, create if not"""
+        if self.is_mock:
+            return StartupCheckResult(
+                name="netra_assistant",
+                success=True,
+                message="PostgreSQL in mock mode - skipping assistant check",
+                critical=False
+            )
+        
         try:
             async with self.app.state.db_session_factory() as db:
                 assistant = await self._find_assistant(db)

@@ -66,4 +66,7 @@ def validate_database_url(database_url: Optional[str], logger: logging.Logger) -
     if not database_url:
         logger.warning("No database URL configured")
         return False
+    if "mock" in database_url.lower():
+        logger.info("Database in mock mode - skipping migrations")
+        return False
     return True
