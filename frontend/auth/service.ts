@@ -8,12 +8,35 @@ const TOKEN_KEY = 'jwt_token';
 const DEV_LOGOUT_FLAG = 'dev_logout_flag';
 
 class AuthService {
-  async getAuthConfig(): Promise<AuthConfigResponse> {
-    const response = await fetch(`${config.apiUrl}/api/auth/config`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch auth config');
+  async getAuthConfig(retries = 3, delay = 1000): Promise<AuthConfigResponse> {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await fetch(`${config.apiUrl}/api/auth/config`);
+        if (!response.ok) {
+          if (i < retries - 1) {
+            logger.warn(`Auth config fetch failed, retrying... (${i + 1}/${retries})`, {
+              component: 'AuthService',
+              status: response.status
+            });
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
+          }
+          throw new Error('Failed to fetch auth config');
+        }
+        return response.json();
+      } catch (error) {
+        if (i < retries - 1) {
+          logger.warn(`Auth config fetch error, retrying... (${i + 1}/${retries})`, {
+            component: 'AuthService',
+            error: error instanceof Error ? error.message : 'Unknown error'
+          });
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        throw error;
+      }
     }
-    return response.json();
+    throw new Error('Failed to fetch auth config after retries');
   }
 
   async handleDevLogin(authConfig: AuthConfigResponse): Promise<{ access_token: string, token_type: string } | null> {

@@ -453,11 +453,20 @@ class DevLauncher:
         backend_info = self.service_discovery.read_backend_info()
         if backend_info:
             self._print("⏳", "WAIT", "Waiting for backend to be ready...")
-            backend_url = f"{backend_info['api_url']}/health/live"
-            if wait_for_service(backend_url, timeout=30):
+            # Check /health/ready instead of /health/live for full readiness
+            backend_ready_url = f"{backend_info['api_url']}/health/ready"
+            if wait_for_service(backend_ready_url, timeout=30):
                 self._print("✅", "OK", "Backend is ready")
+                
+                # Also verify auth config endpoint is accessible
+                auth_config_url = f"{backend_info['api_url']}/api/auth/config"
+                self._print("⏳", "WAIT", "Verifying auth system...")
+                if wait_for_service(auth_config_url, timeout=10):
+                    self._print("✅", "OK", "Auth system is ready")
+                else:
+                    self._print("⚠️", "WARN", "Auth config check timed out")
             else:
-                self._print("⚠️", "WARN", "Backend health check timed out, continuing anyway")
+                self._print("⚠️", "WARN", "Backend readiness check timed out, continuing anyway")
         
         # Start frontend with native reload support (Next.js)
         frontend_process, frontend_streamer = self.start_frontend()
@@ -471,15 +480,19 @@ class DevLauncher:
         self._print("⏳", "WAIT", "Waiting for frontend to be ready...")
         frontend_url = f"http://localhost:{self.config.frontend_port}"
         
-        # Give Next.js time to compile
+        # Give Next.js more time to compile initially
         logger.info("Allowing Next.js to compile...")
-        time.sleep(3)
+        time.sleep(5)
         
         if wait_for_service(frontend_url, timeout=90):
             self._print("✅", "OK", "Frontend is ready")
             
+            # Additional delay to ensure frontend is fully initialized
+            time.sleep(2)
+            
             # Open browser if configured
             if not self.config.no_browser:
+                self._print("🌐", "BROWSER", f"Opening browser at {frontend_url}")
                 open_browser(frontend_url)
         else:
             self._print("⚠️", "WARN", "Frontend readiness check timed out")

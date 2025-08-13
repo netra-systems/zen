@@ -10,7 +10,7 @@ Configure these secrets in your GitHub repository settings:
 - `GCP_STAGING_PROJECT_ID`: Staging-specific GCP project ID (optional, falls back to GCP_PROJECT_ID)
 
 ### Optional Secrets
-- `TF_STATE_BUCKET`: Terraform state bucket name (default: 'netra-terraform-state')
+- `TF_STATE_BUCKET`: Terraform state bucket name (default: 'netra-staging-terraform-state')
 - `TF_STAGING_STATE_BUCKET`: Staging-specific state bucket (falls back to TF_STATE_BUCKET)
 
 ## GCP Permissions Required
