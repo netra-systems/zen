@@ -142,7 +142,7 @@ python database_scripts/run_migrations.py
 #### SQLite Fallback (Automatic)
 If PostgreSQL is not available, the system automatically uses SQLite:
 ```bash
-# SQLite database created at: ./netra_dev.db
+# SQLite database created at: ./netra.db
 ```
 
 ### 5. Redis Setup (Optional)
@@ -217,7 +217,7 @@ LOG_LEVEL=DEBUG
 
 # Database URLs
 DATABASE_URL=postgresql+asyncpg://user:pass@localhost:5432/netra_db
-# Fallback: DATABASE_URL=sqlite+aiosqlite:///./netra_dev.db
+# Fallback: DATABASE_URL=sqlite+aiosqlite:///./netra.db
 
 # Optional Services
 REDIS_URL=redis://localhost:6379
@@ -490,7 +490,7 @@ pg_isready
 psql postgresql://user:pass@localhost:5432/netra_db
 
 # Use SQLite fallback
-export DATABASE_URL=sqlite+aiosqlite:///./netra_dev.db
+export DATABASE_URL=sqlite+aiosqlite:///./netra.db
 ```
 
 #### Missing Dependencies

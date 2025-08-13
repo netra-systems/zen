@@ -459,7 +459,7 @@ ENVIRONMENT=development
 DEBUG=true
 
 # Database Configuration
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/netra_dev
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/netra
 CLICKHOUSE_URL=clickhouse://default:@localhost:9000/default
 REDIS_URL=redis://localhost:6379/0
 

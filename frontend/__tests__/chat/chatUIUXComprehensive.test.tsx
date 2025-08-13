@@ -259,7 +259,7 @@ describe('Core Chat UI/UX Experience - Comprehensive Test Suite', () => {
         { id: 'thread-2', title: 'Thread 2' }
       ];
       
-      const mockSetCurrentThread = jest.fn();
+      const mockThreadStore.setCurrentThread = jest.fn();
       
       // Mock thread store with threads
       (useThreadStore as unknown as jest.Mock).mockReturnValue({
@@ -294,7 +294,7 @@ describe('Core Chat UI/UX Experience - Comprehensive Test Suite', () => {
         { id: 'thread-1', title: 'Thread to Delete' }
       ];
       
-      const mockDeleteThread = jest.fn();
+      const mockThreadStore.deleteThread = jest.fn();
       
       // Mock thread store with threads
       (useThreadStore as unknown as jest.Mock).mockReturnValue({

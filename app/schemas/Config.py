@@ -139,7 +139,7 @@ class AppConfig(BaseModel):
     fernet_key: str = None
     jwt_secret_key: str = None
     api_base_url: str = "http://localhost:8000"
-    database_url: str = None
+    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
     redis_url: str = None  # Added for staging/production Redis URL
     clickhouse_url: str = None  # Added for staging/production ClickHouse URL
     log_level: str = "DEBUG"
@@ -201,7 +201,7 @@ class AppConfig(BaseModel):
 class DevelopmentConfig(AppConfig):
     """Development-specific settings can override defaults."""
     debug: bool = True
-    database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra"
+    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
     dev_user_email: str = "dev@example.com"
     log_level: str = "DEBUG"
     jwt_secret_key: str = "development_secret_key_for_jwt_do_not_use_in_production"

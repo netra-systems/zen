@@ -29,22 +29,19 @@ from app.services.corpus_service import CorpusService
 # from app.services.mcp_service import MCPService
 from app.services.database.message_repository import MessageRepository
 from app.services.database.thread_repository import ThreadRepository
-from app.services.database.user_repository import UserRepository
 # Commented out due to import issues - fix needed
 # from app.services.database.mcp_repository import MCPClientRepository, MCPToolExecutionRepository
 from app.services.cache.llm_cache import LLMCacheManager
 from app.services.quality_monitoring_service import QualityMonitoringService
 from app.services.supply_research_service import SupplyResearchService
 from app.services.supply_catalog_service import SupplyCatalogService
-from app.llm.manager import LLMManager
-from app.core.database import Base, engine, SessionLocal
-from app.core.redis_manager import RedisManager
-from app.clickhouse.client import ClickHouseClient
-from app.schemas.message import MessageCreate
-from app.schemas.thread import ThreadCreate
-from app.schemas.user import UserCreate
-from app.auth.models import User
-from app.models import Thread, Message
+from app.llm.llm_manager import LLMManager
+from app.db.base import Base
+from app.db.postgres import async_engine, Database
+from sqlalchemy.orm import Session
+from app.redis_manager import RedisManager
+from app.db.clickhouse import get_clickhouse_client
+from app.db.models_postgres import User, Thread, Message
 
 
 # Test markers for different service types
@@ -71,17 +68,18 @@ class TestRealServicesComprehensive:
     async def setup(self):
         """Setup test environment with real services"""
         # Initialize database
-        async with engine.begin() as conn:
+        async with async_engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         
         # Initialize services
-        self.db = SessionLocal()
+        db_instance = Database()
+        self.db = db_instance.SessionLocal()
         self.redis = RedisManager()
-        self.clickhouse = ClickHouseClient()
+        # Get ClickHouse client using async context manager in setup
+        self.clickhouse = None  # Will be set in async context
         self.llm_manager = LLMManager()
         
         # Initialize repositories
-        self.user_repo = UserRepository(self.db)
         self.thread_repo = ThreadRepository(self.db)
         self.message_repo = MessageRepository(self.db)
         # Commented out due to import issues - fix needed
@@ -120,13 +118,16 @@ class TestRealServicesComprehensive:
     
     async def _create_test_user(self) -> User:
         """Create a test user for the session"""
-        user_data = UserCreate(
+        user = User(
             username=f"test_user_{int(time.time())}",
             email=f"test_{int(time.time())}@example.com",
             full_name="Test User",
             role="admin"
         )
-        return await self.user_repo.create(user_data)
+        self.db.add(user)
+        self.db.commit()
+        self.db.refresh(user)
+        return user
     
     async def _cleanup(self):
         """Clean up test data"""
@@ -136,7 +137,8 @@ class TestRealServicesComprehensive:
             await self.thread_repo.delete(thread.id)
         
         # Clean up test user
-        await self.user_repo.delete(self.test_user.id)
+        self.db.delete(self.test_user)
+        self.db.commit()
         
         # Close connections
         self.db.close()
@@ -558,30 +560,35 @@ class TestRealDatabaseOperations:
     @pytest.mark.asyncio
     async def test_postgresql_operations(self):
         """Test PostgreSQL operations with real database"""
-        db = SessionLocal()
-        user_repo = UserRepository(db)
+        db_instance = Database()
+        db = db_instance.SessionLocal()
         
         try:
             # Create user
-            user = await user_repo.create(UserCreate(
+            user = User(
                 username="test_pg_user",
                 email="test@pg.com",
                 full_name="Test PG User"
-            ))
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
             assert user.id is not None
             
             # Update user
             user.full_name = "Updated PG User"
-            updated = await user_repo.update(user.id, {"full_name": "Updated PG User"})
-            assert updated.full_name == "Updated PG User"
+            db.commit()
+            db.refresh(user)
+            assert user.full_name == "Updated PG User"
             
             # Query user
-            found = await user_repo.get(user.id)
+            found = db.query(User).filter(User.id == user.id).first()
             assert found is not None
             assert found.username == "test_pg_user"
             
             # Delete user
-            await user_repo.delete(user.id)
+            db.delete(user)
+            db.commit()
             deleted = await user_repo.get(user.id)
             assert deleted is None
             
@@ -625,42 +632,42 @@ class TestRealDatabaseOperations:
     @pytest.mark.asyncio
     async def test_clickhouse_operations(self):
         """Test ClickHouse operations with real database"""
-        clickhouse = ClickHouseClient()
-        
-        try:
-            # Create test table
-            await clickhouse.execute("""
-                CREATE TABLE IF NOT EXISTS test_metrics (
-                    timestamp DateTime,
-                    metric String,
-                    value Float64
-                ) ENGINE = MergeTree()
-                ORDER BY timestamp
-            """)
-            
-            # Insert data
-            data = [
-                {"timestamp": datetime.now(), "metric": "cpu", "value": 75.5},
-                {"timestamp": datetime.now(), "metric": "memory", "value": 82.3},
-                {"timestamp": datetime.now(), "metric": "disk", "value": 45.7}
-            ]
-            await clickhouse.insert_batch("test_metrics", data)
-            
-            # Query data
-            results = await clickhouse.query("""
-                SELECT metric, avg(value) as avg_value
-                FROM test_metrics
-                GROUP BY metric
-            """)
-            
-            assert len(results) == 3
-            assert any(r["metric"] == "cpu" for r in results)
-            
-            # Cleanup
-            await clickhouse.execute("DROP TABLE IF EXISTS test_metrics")
-            
-        finally:
-            await clickhouse.close()
+        # Get ClickHouse client using async context manager
+        async with get_clickhouse_client() as clickhouse:
+            try:
+                # Create test table
+                await clickhouse.execute("""
+                    CREATE TABLE IF NOT EXISTS test_metrics (
+                        timestamp DateTime,
+                        metric String,
+                        value Float64
+                    ) ENGINE = MergeTree()
+                    ORDER BY timestamp
+                """)
+                
+                # Insert data
+                data = [
+                    {"timestamp": datetime.now(), "metric": "cpu", "value": 75.5},
+                    {"timestamp": datetime.now(), "metric": "memory", "value": 82.3},
+                    {"timestamp": datetime.now(), "metric": "disk", "value": 45.7}
+                ]
+                await clickhouse.insert_batch("test_metrics", data)
+                
+                # Query data
+                results = await clickhouse.query("""
+                    SELECT metric, avg(value) as avg_value
+                    FROM test_metrics
+                    GROUP BY metric
+                """)
+                
+                assert len(results) == 3
+                assert any(r["metric"] == "cpu" for r in results)
+                
+                # Cleanup
+                await clickhouse.execute("DROP TABLE IF EXISTS test_metrics")
+                
+            finally:
+                await clickhouse.disconnect()
 
 
 if __name__ == "__main__":

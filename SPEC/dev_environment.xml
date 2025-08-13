@@ -28,6 +28,44 @@
       </implementation>
     </feature>
 
+    <feature id="real-time-log-streaming">
+      <name>Real-Time Log Streaming</name>
+      <description>
+        Streams backend and frontend logs in real-time with color coding for better visibility
+        and debugging. Logs are displayed inline instead of being written to files.
+      </description>
+      <implementation>
+        <file>dev_launcher.py</file>
+        <class>LogStreamer</class>
+        <methods>
+          <method>LogStreamer - Thread-based real-time output streaming</method>
+          <method>Color coding - Cyan for backend, magenta for frontend</method>
+          <method>Error detection - Buffers recent lines for error analysis</method>
+        </methods>
+      </implementation>
+    </feature>
+
+    <feature id="auto-restart">
+      <name>Automatic Service Restart</name>
+      <description>
+        Monitors services and automatically restarts them if they crash, with configurable
+        retry limits and crash detection to prevent rapid restart loops.
+      </description>
+      <implementation>
+        <file>dev_launcher.py</file>
+        <class>ProcessMonitor</class>
+        <methods>
+          <method>ProcessMonitor - Monitors process health and handles restarts</method>
+          <method>Crash detection - Tracks exit codes and recent errors</method>
+          <method>Rapid restart prevention - Stops if 3+ crashes in 1 minute</method>
+        </methods>
+        <options>
+          <option>--auto-restart - Enable automatic restart (default)</option>
+          <option>--no-auto-restart - Disable automatic restart</option>
+        </options>
+      </implementation>
+    </feature>
+
     <feature id="hot-reload-control">
       <name>Hot Reload Control</name>
       <description>
@@ -45,21 +83,29 @@
     </feature>
 
     <feature id="secret-management">
-      <name>Google Cloud Secret Manager Integration</name>
+      <name>Enhanced Secret Management with Visibility</name>
       <description>
-        Automatic loading of secrets from Google Cloud Secret Manager for development.
-        Eliminates manual environment variable management and ensures secure credential handling.
+        Automatic loading of secrets from Google Cloud Secret Manager with detailed visibility
+        of what secrets are loaded and from which sources. Now default behavior in dev mode.
+        Shows masked values and tracks sources (env file, Google Secret, static config).
       </description>
       <implementation>
         <file>dev_launcher.py</file>
+        <class>EnhancedSecretLoader</class>
         <methods>
-          <method>load_secrets_from_gcp() - Fetches and loads secrets</method>
-          <method>--load-secrets flag - Enable secret loading</method>
-          <method>--project-id flag - Specify GCP project</method>
+          <method>load_from_env_file() - Loads from existing .env file</method>
+          <method>load_from_google_secrets() - Fetches from Google Secret Manager</method>
+          <method>load_all_secrets() - Merges all sources with priority</method>
+          <method>Shows masked values and source for each secret</method>
         </methods>
+        <options>
+          <option>Default behavior - Secrets loaded automatically in dev mode</option>
+          <option>--no-secrets flag - Skip secret loading if needed</option>
+          <option>--project-id flag - Specify GCP project</option>
+        </options>
         <dependencies>
-          <dependency>fetch_secrets_to_env.py - Existing secret fetcher script</dependency>
-          <dependency>Google Cloud SDK with authentication</dependency>
+          <dependency>google-cloud-secretmanager - Python SDK</dependency>
+          <dependency>Google Cloud authentication</dependency>
         </dependencies>
       </implementation>
     </feature>
@@ -111,11 +157,13 @@
       </description>
       
       <recommended-command>
-        <command>python dev_launcher.py --dynamic --no-backend-reload --load-secrets</command>
+        <command>python dev_launcher.py --dynamic --no-backend-reload</command>
         <benefits>
           <benefit>--dynamic: Automatically finds free ports, avoiding "port already in use" errors</benefit>
           <benefit>--no-backend-reload: Disables backend hot reload for 30-50% faster startup and response times</benefit>
-          <benefit>--load-secrets: Loads API keys and secrets from Google Cloud (if configured)</benefit>
+          <benefit>Secrets loaded automatically from Google Cloud (default behavior)</benefit>
+          <benefit>Real-time log streaming with color coding</benefit>
+          <benefit>Auto-restart on crash (default behavior)</benefit>
         </benefits>
       </recommended-command>
 
@@ -391,10 +439,34 @@
       </issue>
 
       <issue>
-        <problem>Missing API keys or configuration</problem>
+        <problem>Missing API keys or configuration / "No secrets loaded" warning</problem>
         <solution>
-          1. Create .env file with required keys, OR
-          2. Use Google Cloud secrets: python dev_launcher.py --load-secrets --project-id YOUR_PROJECT
+          Secrets are loaded automatically by default. If they fail:
+          1. Ensure Google Cloud auth: gcloud auth application-default login
+          2. Check project ID is correct (defaults to 304612253870)
+          3. Create .env file as fallback with required keys
+          4. Use --no-secrets to skip if working without secrets
+        </solution>
+        <note>The launcher shows detailed info about which secrets loaded from which sources</note>
+      </issue>
+
+      <issue>
+        <problem>Backend randomly stopping or crashing</problem>
+        <solution>
+          Auto-restart is enabled by default and will restart crashed services up to 3 times.
+          Check the real-time logs (cyan for backend) to see error details.
+          If rapid crashes occur (3+ in 1 minute), auto-restart stops to prevent loops.
+        </solution>
+        <prevention>Monitor the colored log output for early warning signs</prevention>
+      </issue>
+
+      <issue>
+        <problem>Cannot see what's happening with services</problem>
+        <solution>
+          Real-time log streaming is now enabled by default:
+          - Cyan colored output for backend logs
+          - Magenta colored output for frontend logs
+          - Errors are detected and displayed when services crash
         </solution>
       </issue>
     </common-first-time-issues>

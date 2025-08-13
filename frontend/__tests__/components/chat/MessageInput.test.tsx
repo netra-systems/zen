@@ -22,10 +22,10 @@ jest.mock('@/lib/utils');
 
 describe('MessageInput', () => {
   const mockSendMessage = jest.fn();
-  const mockSetProcessing = jest.fn();
-  const mockAddMessage = jest.fn();
-  const mockSetCurrentThread = jest.fn();
-  const mockAddThread = jest.fn();
+  const mockChatStore.setProcessing = jest.fn();
+  const mockChatStore.addMessage = jest.fn();
+  const mockThreadStore.setCurrentThread = jest.fn();
+  const mockThreadStore.addThread = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -37,15 +37,15 @@ describe('MessageInput', () => {
     });
     
     (useChatStore as jest.Mock).mockReturnValue({
-      setProcessing: mockSetProcessing,
+      setProcessing: mockChatStore.setProcessing,
       isProcessing: false,
-      addMessage: mockAddMessage,
+      addMessage: mockChatStore.addMessage,
     });
     
     (useThreadStore as jest.Mock).mockReturnValue({
       currentThreadId: 'thread-1',
-      setCurrentThread: mockSetCurrentThread,
-      addThread: mockAddThread,
+      setCurrentThread: mockThreadStore.setCurrentThread,
+      addThread: mockThreadStore.addThread,
     });
     
     (useAuthStore as jest.Mock).mockReturnValue({
@@ -183,9 +183,9 @@ describe('MessageInput', () => {
 
     it('should prevent sending when processing', async () => {
       (useChatStore as jest.Mock).mockReturnValue({
-        setProcessing: mockSetProcessing,
+        setProcessing: mockChatStore.setProcessing,
         isProcessing: true,
-        addMessage: mockAddMessage,
+        addMessage: mockChatStore.addMessage,
       });
       
       render(<MessageInput />);
@@ -237,9 +237,9 @@ describe('MessageInput', () => {
 
     it('should disable file attachment when processing', () => {
       (useChatStore as jest.Mock).mockReturnValue({
-        setProcessing: mockSetProcessing,
+        setProcessing: mockChatStore.setProcessing,
         isProcessing: true,
-        addMessage: mockAddMessage,
+        addMessage: mockChatStore.addMessage,
       });
       
       render(<MessageInput />);
@@ -536,9 +536,9 @@ describe('MessageInput', () => {
 
     it('should disable voice input when processing', () => {
       (useChatStore as jest.Mock).mockReturnValue({
-        setProcessing: mockSetProcessing,
+        setProcessing: mockChatStore.setProcessing,
         isProcessing: true,
-        addMessage: mockAddMessage,
+        addMessage: mockChatStore.addMessage,
       });
       
       render(<MessageInput />);
@@ -581,8 +581,8 @@ describe('MessageInput', () => {
     it('should create new thread if none exists', async () => {
       (useThreadStore as jest.Mock).mockReturnValue({
         currentThreadId: null,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
       });
       
       (ThreadService.createThread as jest.Mock).mockResolvedValue({
@@ -598,8 +598,8 @@ describe('MessageInput', () => {
       
       await waitFor(() => {
         expect(ThreadService.createThread).toHaveBeenCalledWith('Test message');
-        expect(mockAddThread).toHaveBeenCalled();
-        expect(mockSetCurrentThread).toHaveBeenCalledWith('new-thread-1');
+        expect(mockThreadStore.addThread).toHaveBeenCalled();
+        expect(mockThreadStore.setCurrentThread).toHaveBeenCalledWith('new-thread-1');
       });
     });
 
@@ -627,8 +627,8 @@ describe('MessageInput', () => {
     it('should handle thread creation failure', async () => {
       (useThreadStore as jest.Mock).mockReturnValue({
         currentThreadId: null,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
       });
       
       (ThreadService.createThread as jest.Mock).mockRejectedValue(new Error('Failed to create thread'));
@@ -652,8 +652,8 @@ describe('MessageInput', () => {
     it('should truncate long messages for thread title', async () => {
       (useThreadStore as jest.Mock).mockReturnValue({
         currentThreadId: null,
-        setCurrentThread: mockSetCurrentThread,
-        addThread: mockAddThread,
+        setCurrentThread: mockThreadStore.setCurrentThread,
+        addThread: mockThreadStore.addThread,
       });
       
       const longMessage = 'a'.repeat(100);
@@ -866,9 +866,9 @@ describe('MessageInput', () => {
 
     it('should show processing indicator when agent is thinking', () => {
       (useChatStore as jest.Mock).mockReturnValue({
-        setProcessing: mockSetProcessing,
+        setProcessing: mockChatStore.setProcessing,
         isProcessing: true,
-        addMessage: mockAddMessage,
+        addMessage: mockChatStore.addMessage,
       });
       
       render(<MessageInput />);

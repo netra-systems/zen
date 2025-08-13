@@ -217,6 +217,12 @@ jobs:
     outputs:
       new_commit_detected: ${{ steps.monitor.outputs.new_commit_detected }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      
       - name: Monitor for new commits
         id: monitor
         run: |
