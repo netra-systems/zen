@@ -16,14 +16,14 @@ logger = logging.getLogger(__name__)
 class MultiprocessingResourceManager:
     """Manages multiprocessing resources and ensures proper cleanup."""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.processes: List[multiprocessing.Process] = []
         self.pools: List[multiprocessing.Pool] = []
         self.queues: List[multiprocessing.Queue] = []
         self.locks: List[Any] = []
         self._setup_cleanup_handlers()
     
-    def _setup_cleanup_handlers(self):
+    def _setup_cleanup_handlers(self) -> None:
         """Set up cleanup handlers for various exit scenarios."""
         # Register cleanup on normal exit
         atexit.register(self.cleanup_all)
@@ -34,29 +34,29 @@ class MultiprocessingResourceManager:
         if hasattr(signal, 'SIGINT'):
             signal.signal(signal.SIGINT, self._signal_handler)
     
-    def _signal_handler(self, signum, frame):
+    def _signal_handler(self, signum: int, frame: Any) -> None:
         """Handle signals and cleanup resources."""
         logger.info(f"Received signal {signum}, cleaning up multiprocessing resources...")
         self.cleanup_all()
         sys.exit(0)
     
-    def register_process(self, process: multiprocessing.Process):
+    def register_process(self, process: multiprocessing.Process) -> None:
         """Register a process for cleanup."""
         self.processes.append(process)
     
-    def register_pool(self, pool: multiprocessing.Pool):
+    def register_pool(self, pool: multiprocessing.Pool) -> None:
         """Register a pool for cleanup."""
         self.pools.append(pool)
     
-    def register_queue(self, queue: multiprocessing.Queue):
+    def register_queue(self, queue: multiprocessing.Queue) -> None:
         """Register a queue for cleanup."""
         self.queues.append(queue)
     
-    def register_lock(self, lock: Any):
+    def register_lock(self, lock: Any) -> None:
         """Register a lock/semaphore for cleanup."""
         self.locks.append(lock)
     
-    def cleanup_all(self):
+    def cleanup_all(self) -> None:
         """Clean up all registered multiprocessing resources."""
         # Clean up processes
         for process in self.processes:
@@ -110,7 +110,7 @@ class MultiprocessingResourceManager:
 mp_resource_manager = MultiprocessingResourceManager()
 
 
-def setup_multiprocessing():
+def setup_multiprocessing() -> None:
     """
     Set up multiprocessing with proper configuration for the platform.
     This should be called early in the application startup.
@@ -138,6 +138,6 @@ def setup_multiprocessing():
     logger.info(f"Multiprocessing configured with method: {multiprocessing.get_start_method()}")
 
 
-def cleanup_multiprocessing():
+def cleanup_multiprocessing() -> None:
     """Manually trigger cleanup of all multiprocessing resources."""
     mp_resource_manager.cleanup_all()

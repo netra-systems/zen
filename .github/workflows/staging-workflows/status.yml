@@ -23,7 +23,7 @@ jobs:
       - name: Configure GCP credentials
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
       
       - name: Check GKE cluster
         id: check
@@ -69,7 +69,7 @@ jobs:
       - name: Configure GCP credentials
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
       
       - name: Get GKE credentials
         run: |
@@ -140,7 +140,7 @@ jobs:
       - name: Configure GCP credentials
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
       
       - name: Get Terraform outputs
         id: endpoints

@@ -1,9 +1,18 @@
 import { WebSocketMessage } from '../types/backend_schema_auto_generated';
+import { UnifiedWebSocketEvent } from '../types/unified-chat';
 import { config } from '@/config';
 import { logger } from '@/lib/logger';
 
 export type WebSocketStatus = 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
 export type WebSocketState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
+
+export interface WebSocketError {
+  code: number;
+  message: string;
+  timestamp: number;
+  type: 'connection' | 'parse' | 'auth' | 'timeout' | 'rate_limit' | 'unknown';
+  recoverable: boolean;
+}
 
 interface RateLimitConfig {
   messages: number;
@@ -12,8 +21,8 @@ interface RateLimitConfig {
 
 interface WebSocketOptions {
   onOpen?: () => void;
-  onMessage?: (message: any) => void;
-  onError?: (error: any) => void;
+  onMessage?: (message: WebSocketMessage | UnifiedWebSocketEvent) => void;
+  onError?: (error: WebSocketError) => void;
   onClose?: () => void;
   onReconnect?: () => void;
   onBinaryMessage?: (data: ArrayBuffer) => void;
@@ -27,7 +36,7 @@ class WebSocketService {
   private status: WebSocketStatus = 'CLOSED';
   private state: WebSocketState = 'disconnected';
   private options: WebSocketOptions = {};
-  private messageQueue: any[] = [];
+  private messageQueue: (WebSocketMessage | UnifiedWebSocketEvent)[] = [];
   private reconnectTimer: NodeJS.Timeout | null = null;
   private heartbeatTimer: NodeJS.Timeout | null = null;
   private url: string = '';
@@ -86,13 +95,19 @@ class WebSocketService {
         try {
           const message = JSON.parse(event.data);
           this.onMessage?.(message as WebSocketMessage);
-          options.onMessage?.(message);
+          options.onMessage?.(message as WebSocketMessage | UnifiedWebSocketEvent);
         } catch (error) {
           logger.error('Error parsing WebSocket message', error as Error, {
             component: 'WebSocketService',
             action: 'parse_message_error'
           });
-          options.onError?.({ message: 'Failed to parse message' });
+          options.onError?.({
+            code: 1003,
+            message: 'Failed to parse message',
+            timestamp: Date.now(),
+            type: 'parse',
+            recoverable: true
+          });
         }
       };
 
@@ -118,7 +133,13 @@ class WebSocketService {
         this.status = 'CLOSED';
         this.state = 'disconnected';
         this.onStatusChange?.(this.status);
-        options.onError?.(error);
+        options.onError?.({
+          code: 1006,
+          message: 'WebSocket connection error',
+          timestamp: Date.now(),
+          type: 'connection',
+          recoverable: true
+        });
       };
     } catch (error) {
       logger.error('Failed to connect to WebSocket', error as Error, {
@@ -128,7 +149,13 @@ class WebSocketService {
       this.status = 'CLOSED';
       this.state = 'disconnected';
       this.onStatusChange?.(this.status);
-      options.onError?.(error);
+      options.onError?.({
+        code: 1000,
+        message: (error as Error).message || 'Failed to connect to WebSocket',
+        timestamp: Date.now(),
+        type: 'connection',
+        recoverable: true
+      });
     }
   }
   
@@ -159,7 +186,7 @@ class WebSocketService {
     }, 5000);
   }
 
-  public send(message: any) {
+  public send(message: WebSocketMessage | UnifiedWebSocketEvent | { type: string; [key: string]: unknown }) {
     // Check rate limit if configured
     if (this.options.rateLimit) {
       const now = Date.now();

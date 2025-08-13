@@ -66,7 +66,7 @@ Execute various commands and operations.
 
 Configure these in your GitHub repository settings:
 
-- `GCP_SA_KEY`: Google Cloud Platform service account key
+- `GCP_STAGING_SA_KEY`: Google Cloud Platform service account key
 - `TF_STATE_BUCKET`: Terraform state storage bucket name
 - `GITHUB_TOKEN`: Automatically provided by GitHub Actions
 

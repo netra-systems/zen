@@ -12,14 +12,14 @@ This guide explains how to deploy the Terraform infrastructure using the provide
 
 You need to configure the following secret in your GitHub repository settings:
 
-*   `GCP_SA_KEY`: The Base64 encoded JSON key for your GCP service account.
+*   `GCP_STAGING_SA_KEY`: The Base64 encoded JSON key for your GCP service account.
 
 To add the secret:
 
 1.  Go to your GitHub repository.
 2.  Click on `Settings` > `Secrets and variables` > `Actions`.
 3.  Click on `New repository secret`.
-4.  Enter `GCP_SA_KEY` as the name and the Base64 encoded key as the value.
+4.  Enter `GCP_STAGING_SA_KEY` as the name and the Base64 encoded key as the value.
 
 ## GitHub Action Workflow
 

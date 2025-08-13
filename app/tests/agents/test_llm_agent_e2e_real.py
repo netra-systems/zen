@@ -518,11 +518,11 @@ async def test_end_to_end_optimization_flow():
         supervisor.state_persistence = mock_persistence
         
         # Mock pipeline execution with proper result structure
-        from app.agents.engine import AgentResult
+        from app.schemas.Agent import AgentResult
         supervisor.engine.execute_pipeline = AsyncMock(return_value=[
-            AgentResult(success=True, state=None, message="Triage complete", data=responses[0]),
-            AgentResult(success=True, state=None, message="Analysis complete", data=responses[1]),
-            AgentResult(success=True, state=None, message="Optimization complete", data=responses[2])
+            AgentResult(success=True, output=responses[0]),
+            AgentResult(success=True, output=responses[1]),
+            AgentResult(success=True, output=responses[2])
         ])
         
         # Run full flow

@@ -25,6 +25,8 @@ logger = central_logger.get_logger(__name__)
 class ExecutionEngine:
     """Handles agent execution logic."""
     
+    MAX_HISTORY_SIZE = 100  # Prevent memory leak
+    
     def __init__(self, registry: 'AgentRegistry', websocket_manager: 'WebSocketManager'):
         self.registry = registry
         self.websocket_manager = websocket_manager
@@ -37,7 +39,9 @@ class ExecutionEngine:
         agent = self.registry.get(context.agent_name)
         if not agent:
             return self._create_error_result(f"Agent {context.agent_name} not found")
-        return await self._run_agent_with_timing(agent, context, state)
+        result = await self._run_agent_with_timing(agent, context, state)
+        self._update_history(result)
+        return result
     
     async def _run_agent_with_timing(self, agent, context: AgentExecutionContext,
                                     state: DeepAgentState) -> AgentExecutionResult:
@@ -242,3 +246,9 @@ class ExecutionEngine:
             error="; ".join(errors) if errors else None,
             duration=duration
         )
+    
+    def _update_history(self, result: AgentExecutionResult) -> None:
+        """Update run history with size limit."""
+        self.run_history.append(result)
+        if len(self.run_history) > self.MAX_HISTORY_SIZE:
+            self.run_history = self.run_history[-self.MAX_HISTORY_SIZE:]

@@ -223,7 +223,7 @@
 
     <secrets_and_variables>
         <secrets>
-            <secret name="GCP_SA_KEY" required="true">
+            <secret name="GCP_STAGING_SA_KEY" required="true">
                 GCP Service Account credentials for Terraform
             </secret>
             <secret name="TF_STATE_BUCKET" required="false">

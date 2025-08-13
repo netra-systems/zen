@@ -56,7 +56,7 @@ environments:
       - PROD_SSL_CERT
       - REDIS_URL
       - CLICKHOUSE_URL
-      - PRODUCTION_GCP_SA_KEY
+      - PRODUCTION_GCP_STAGING_SA_KEY
       - ANTHROPIC_API_KEY
       - OPENAI_API_KEY
     variables:

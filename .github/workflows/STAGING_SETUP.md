@@ -5,7 +5,7 @@
 Configure these secrets in your GitHub repository settings:
 
 ### Required Secrets
-- `GCP_SA_KEY`: Service account JSON key with permissions for Terraform and GCS
+- `GCP_STAGING_SA_KEY`: Service account JSON key with permissions for Terraform and GCS
 - `GCP_PROJECT_ID`: Default GCP project ID (production)
 - `GCP_STAGING_PROJECT_ID`: Staging-specific GCP project ID (optional, falls back to GCP_PROJECT_ID)
 
@@ -15,7 +15,7 @@ Configure these secrets in your GitHub repository settings:
 
 ## GCP Permissions Required
 
-The service account in `GCP_SA_KEY` needs:
+The service account in `GCP_STAGING_SA_KEY` needs:
 - Storage Admin (for Terraform state bucket)
 - Compute Admin (for infrastructure)
 - Service Account User

@@ -2,6 +2,82 @@
  * Strong type definitions for Agent operations following Netra conventions.
  */
 
+// Strong type definitions for metadata
+export interface AgentMessageMetadata {
+  model?: string;
+  tokensUsed?: number;
+  processingTime?: number;
+  agentName?: string;
+  runId?: string;
+  stepId?: string;
+  toolCalls?: ToolCall[];
+}
+
+export interface TaskResult {
+  output?: string;
+  data?: Record<string, unknown>;
+  artifacts?: Artifact[];
+  status: 'success' | 'partial' | 'failed';
+}
+
+export interface ToolCall {
+  id: string;
+  name: string;
+  arguments?: Record<string, unknown>;
+  result?: unknown;
+  duration?: number;
+}
+
+export interface Artifact {
+  id: string;
+  type: string;
+  name: string;
+  content?: unknown;
+  url?: string;
+}
+
+export interface AgentStateMetadata {
+  priority?: 'low' | 'medium' | 'high';
+  dependencies?: string[];
+  tags?: string[];
+  version?: string;
+}
+
+export interface ThreadMetadata {
+  userId: string;
+  createdAt: string;
+  lastActivity: string;
+  messageCount: number;
+  tags?: string[];
+  priority?: 'low' | 'medium' | 'high';
+  archived?: boolean;
+}
+
+export interface ErrorDetails {
+  errorType: string;
+  context?: Record<string, unknown>;
+  originalError?: unknown;
+  metadata?: Record<string, string | number | boolean>;
+}
+
+export interface OptimizationMetadata {
+  algorithm?: string;
+  iterations?: number;
+  constraints?: Record<string, unknown>;
+  parameters?: Record<string, unknown>;
+}
+
+export interface WebSocketPayload {
+  [key: string]: string | number | boolean | null | WebSocketPayload | Array<unknown>;
+}
+
+export interface AgentUpdate {
+  type: string;
+  agentId?: string;
+  data: Record<string, unknown>;
+  timestamp: number;
+}
+
 export enum MessageRole {
   USER = 'user',
   ASSISTANT = 'assistant',
@@ -44,12 +120,7 @@ export interface Message {
   reactions?: MessageReaction[];
   editedAt?: Date;
   deletedAt?: Date;
-  metadata?: {
-    model?: string;
-    tokensUsed?: number;
-    processingTime?: number;
-    [key: string]: any;
-  };
+  metadata?: AgentMessageMetadata;
   parentMessageId?: string;
   references?: string[];
 }
@@ -90,7 +161,7 @@ export interface OptimizationResults {
   summary: string;
   confidence: number; // 0-1
   processingTimeMs: number;
-  metadata?: Record<string, any>;
+  metadata?: OptimizationMetadata;
 }
 
 export enum SubAgentStatus {
@@ -111,7 +182,7 @@ export interface SubAgentTask {
   progress?: number; // 0-1
   startedAt?: Date;
   completedAt?: Date;
-  result?: any;
+  result?: TaskResult;
   error?: string;
 }
 
@@ -126,7 +197,7 @@ export interface SubAgentState {
   startedAt?: Date;
   completedAt?: Date;
   lastUpdateAt: Date;
-  metadata?: Record<string, any>;
+  metadata?: AgentStateMetadata;
   capabilities?: string[];
   resourceUsage?: {
     cpu?: number;
@@ -138,7 +209,7 @@ export interface SubAgentState {
 export interface AgentError {
   code: string;
   message: string;
-  details?: any;
+  details?: ErrorDetails;
   timestamp: Date;
   recoverable: boolean;
   suggestedAction?: string;
@@ -156,7 +227,7 @@ export interface Thread {
   participants?: string[];
   tags?: string[];
   archived?: boolean;
-  metadata?: Record<string, any>;
+  metadata?: ThreadMetadata;
 }
 
 export interface AgentConfiguration {
@@ -190,8 +261,8 @@ export interface AgentContextValue {
   clearError: () => void;
   
   // WebSocket
-  sendWsMessage: (type: string, payload: any) => void;
-  subscribeToUpdates: (callback: (update: any) => void) => () => void;
+  sendWsMessage: (type: string, payload: WebSocketPayload) => void;
+  subscribeToUpdates: (callback: (update: AgentUpdate) => void) => () => void;
   
   // Configuration
   configuration: AgentConfiguration;
