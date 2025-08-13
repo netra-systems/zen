@@ -1,6 +1,13 @@
 name: Enhanced Staging Environment Management
 description: Robust staging environment deployment with improved error handling
 
+permissions:
+  contents: read
+  deployments: write
+  pull-requests: write
+  issues: write
+  statuses: write
+
 on:
   pull_request:
     types: [opened, synchronize, reopened, closed]

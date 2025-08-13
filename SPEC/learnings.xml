@@ -193,6 +193,39 @@
                 </benefits>
                 <prevention>Always use concurrency groups for PR-based workflows to prevent redundant runs</prevention>
             </fix>
+            
+            <fix date="2025-08-13">
+                <title>GitHub Actions Deployment Permission Error</title>
+                <problem>RequestError [HttpError]: Resource not accessible by integration when creating deployments</problem>
+                <symptoms>
+                    <symptom>Error 403 when calling github.rest.repos.createDeployment</symptom>
+                    <symptom>Error 403 when calling github.rest.repos.createDeploymentStatus</symptom>
+                    <symptom>Workflow fails at deployment creation step</symptom>
+                </symptoms>
+                <root-cause>Missing required permissions in GitHub Actions workflow file</root-cause>
+                <solution>Added explicit permissions block to workflow file</solution>
+                <implementation>
+                    <code>
+                        permissions:
+                          contents: read
+                          deployments: write
+                          pull-requests: write
+                          issues: write
+                          statuses: write
+                    </code>
+                </implementation>
+                <files-changed>
+                    <file>.github/workflows/staging-environment.yml - Added permissions block at top level</file>
+                </files-changed>
+                <prevention>
+                    <action>Always define explicit permissions for GitHub Actions workflows that use GitHub API</action>
+                    <action>Include 'deployments: write' permission when using deployment API</action>
+                    <action>Include 'pull-requests: write' when commenting on PRs</action>
+                    <action>Include 'issues: write' when managing issue comments</action>
+                    <action>Include 'statuses: write' when updating commit statuses</action>
+                </prevention>
+                <note>This is a recurring issue - always check permissions when workflows fail with 403 errors</note>
+            </fix>
         </section>
 
         <section id="test-focus-strategy" order="3">
