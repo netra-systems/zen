@@ -18,6 +18,14 @@ on:
         required: true
         type: string
 
+# Set permissions for the workflow
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  actions: read
+  statuses: write
+
 # Enhanced concurrency control with commit detection
 concurrency:
   group: staging-pr-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
