@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>GitHub Actions Configuration</name>
+        <type>technical</type>
+        <version>1.0</version>
+        <last_updated>2025-08-13</last_updated>
+        <description>GitHub Actions workflows configuration, permissions, and best practices</description>
+    </metadata>
+
+    <critical_reminders>
+        <reminder priority="HIGHEST">
+            ⚠️ BEFORE ANY GITHUB ACTIONS WORK:
+            1. CHECK learnings.xml for "GitHub Actions Deployment Permission Error" (2025-08-13)
+            2. ALWAYS define explicit permissions block
+            3. NEVER rely on default GITHUB_TOKEN permissions
+        </reminder>
+    </critical_reminders>
+
+    <sections>
+        <section id="permissions" order="1">
+            <title>Required Permissions</title>
+            <description>GitHub Actions workflows MUST explicitly declare permissions</description>
+            
+            <permission_requirements>
+                <requirement id="deployment-apis">
+                    <title>Deployment API Operations</title>
+                    <permissions>
+                        contents: read        # Read repository content
+                        deployments: write    # Create/update deployments
+                        statuses: write       # Update commit statuses
+                    </permissions>
+                    <error_if_missing>RequestError [HttpError]: Resource not accessible by integration (403)</error_if_missing>
+                </requirement>
+                
+                <requirement id="pr-operations">
+                    <title>Pull Request Operations</title>
+                    <permissions>
+                        pull-requests: write  # Comment on PRs, update PR status
+                        issues: write         # Manage issue comments (PRs are issues)
+                    </permissions>
+                </requirement>
+                
+                <requirement id="release-operations">
+                    <title>Release Operations</title>
+                    <permissions>
+                        contents: write       # Create releases, tags
+                        packages: write       # Publish packages
+                    </permissions>
+                </requirement>
+            </permission_requirements>
+
+            <example>
+                <title>Standard Staging Deployment Permissions</title>
+                <code>
+name: Staging Environment
+
+permissions:
+  contents: read
+  deployments: write
+  pull-requests: write
+  issues: write
+  statuses: write
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+                </code>
+            </example>
+        </section>
+
+        <section id="common-errors" order="2">
+            <title>Common Permission Errors</title>
+            
+            <error id="403-deployment">
+                <message>Resource not accessible by integration</message>
+                <cause>Missing 'deployments: write' permission</cause>
+                <solution>Add explicit permissions block with deployments: write</solution>
+                <reference>See learnings.xml - GitHub Actions Deployment Permission Error</reference>
+            </error>
+            
+            <error id="403-pr-comment">
+                <message>HttpError: Resource not accessible by integration when commenting</message>
+                <cause>Missing 'pull-requests: write' or 'issues: write' permission</cause>
+                <solution>Add both pull-requests: write and issues: write</solution>
+            </error>
+        </section>
+
+        <section id="workflow-patterns" order="3">
+            <title>Workflow Patterns</title>
+            
+            <pattern id="concurrency-control">
+                <title>Prevent Redundant Runs</title>
+                <code>
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true  # Cancel old runs when new commit pushed
+                </code>
+                <exception>Set cancel-in-progress: false for destroy/cleanup operations</exception>
+            </pattern>
+            
+            <pattern id="api-calls">
+                <title>GitHub API Calls via github-script</title>
+                <requirements>
+                    - Always use actions/github-script@v7 or later
+                    - Define permissions explicitly
+                    - Handle API errors gracefully
+                </requirements>
+                <code>
+- uses: actions/github-script@v7
+  with:
+    script: |
+      try {
+        const deployment = await github.rest.repos.createDeployment({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          ref: context.sha,
+          environment: 'staging'
+        });
+      } catch (error) {
+        core.setFailed(`Deployment failed: ${error.message}`);
+      }
+                </code>
+            </pattern>
+        </section>
+
+        <section id="environments" order="4">
+            <title>Environment-Specific Workflows</title>
+            
+            <environment id="staging">
+                <workflow_files>
+                    - .github/workflows/staging-environment.yml
+                    - .github/workflows/staging-cleanup.yml
+                </workflow_files>
+                <required_secrets>
+                    - GCP_SA_KEY
+                    - TF_STATE_BUCKET
+                    - GCP_PROJECT_ID
+                </required_secrets>
+                <required_variables>
+                    - CLOUD_PROVIDER
+                    - SLACK_WEBHOOK_URL (optional)
+                </required_variables>
+            </environment>
+            
+            <environment id="production">
+                <workflow_files>
+                    - .github/workflows/production-deploy.yml
+                </workflow_files>
+                <additional_requirements>
+                    - Manual approval required
+                    - Restricted to main branch only
+                    - Full test suite must pass
+                </additional_requirements>
+            </environment>
+        </section>
+
+        <section id="testing-workflows" order="5">
+            <title>Test Automation Workflows</title>
+            
+            <workflow id="test-suite">
+                <file>.github/workflows/test-suite.yml</file>
+                <triggers>
+                    - Pull requests to main/develop
+                    - Push to main/develop
+                    - Manual dispatch
+                </triggers>
+                <levels>
+                    - smoke: Quick validation (<30s)
+                    - unit: Default for all changes
+                    - comprehensive: Full coverage (97% target)
+                </levels>
+            </workflow>
+        </section>
+
+        <section id="best-practices" order="6">
+            <title>Best Practices</title>
+            
+            <practice id="always-check-learnings">
+                <rule>ALWAYS check learnings.xml before modifying workflows</rule>
+                <reason>Contains fixes for recurring issues and known gotchas</reason>
+            </practice>
+            
+            <practice id="explicit-permissions">
+                <rule>NEVER rely on default permissions</rule>
+                <reason>Default permissions change and cause unexpected failures</reason>
+            </practice>
+            
+            <practice id="test-locally">
+                <rule>Test workflow changes with act tool locally when possible</rule>
+                <command>act pull_request -e event.json</command>
+            </practice>
+            
+            <practice id="use-concurrency">
+                <rule>Always use concurrency groups for PR workflows</rule>
+                <reason>Prevents resource waste from redundant runs</reason>
+            </practice>
+        </section>
+
+        <section id="debugging" order="7">
+            <title>Debugging Workflows</title>
+            
+            <technique id="enable-debug-logging">
+                <title>Enable Debug Logging</title>
+                <method>Set repository secrets: ACTIONS_STEP_DEBUG=true, ACTIONS_RUNNER_DEBUG=true</method>
+            </technique>
+            
+            <technique id="check-permissions">
+                <title>Verify Token Permissions</title>
+                <code>
+- name: Check token permissions
+  run: |
+    echo "Token permissions:"
+    echo "${{ toJSON(github.token) }}" | base64 -d | jq -r '.permissions'
+                </code>
+            </technique>
+        </section>
+    </sections>
+
+    <references>
+        <reference>
+            <spec>learnings.xml</spec>
+            <section>GitHub Actions Deployment Permission Error (2025-08-13)</section>
+            <importance>CRITICAL - This is a recurring issue</importance>
+        </reference>
+        <reference>
+            <documentation>https://docs.github.com/en/actions/security-guides/automatic-token-authentication</documentation>
+        </reference>
+    </references>
+</specification>
