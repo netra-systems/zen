@@ -1,9 +1,10 @@
 name: Staging Environment Cleanup
+description: Automated cleanup of orphaned and expired staging environments
 
 on:
   schedule:
-    # Run daily at 2 AM UTC
-    - cron: '0 2 * * *'
+    # Run every 6 hours for timely cleanup
+    - cron: '0 */6 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -12,10 +13,19 @@ on:
         type: boolean
         default: false
       max_age_days:
-        description: 'Maximum age in days'
+        description: 'Maximum age in days before cleanup'
         required: false
         type: string
         default: '7'
+      target:
+        description: 'Specific environment to clean (optional)'
+        required: false
+        type: string
+      force:
+        description: 'Force cleanup even if active'
+        required: false
+        type: boolean
+        default: false
 
 env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
