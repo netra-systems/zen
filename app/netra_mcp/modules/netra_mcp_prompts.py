@@ -6,16 +6,16 @@ from typing import Dict, Any, List, Optional
 class NetraMCPPrompts:
     """Prompt registration for Netra MCP Server"""
     
-    def __init__(self, mcp_instance):
+    def __init__(self, mcp_instance: Any) -> None:
         self.mcp = mcp_instance
         
-    def register_all(self, server):
+    def register_all(self, server: Any) -> None:
         """Register all prompts with the MCP server"""
         self._register_optimization_prompt(server)
         self._register_prompt_optimization(server)
         self._register_model_selection(server)
     
-    def _register_optimization_prompt(self, server):
+    def _register_optimization_prompt(self, server: Any) -> None:
         """Register optimization request prompt"""
         
         @self.mcp.prompt()
@@ -43,7 +43,7 @@ Please provide:
                 }
             ]
     
-    def _register_prompt_optimization(self, server):
+    def _register_prompt_optimization(self, server: Any) -> None:
         """Register prompt optimization prompt"""
         
         @self.mcp.prompt()
@@ -73,7 +73,7 @@ Please provide:
                 }
             ]
     
-    def _register_model_selection(self, server):
+    def _register_model_selection(self, server: Any) -> None:
         """Register model selection prompt"""
         
         @self.mcp.prompt()

@@ -1,51 +1,6 @@
 {
   "runs": [
     {
-      "timestamp": "2025-08-12T05:31:16.372735",
-      "level": "smoke",
-      "total": 2,
-      "passed": 1,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-12T07:27:13.751657",
-      "level": "smoke",
-      "total": 2,
-      "passed": 1,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-12T07:27:28.957269",
-      "level": "simple",
-      "total": 0,
-      "passed": 0,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-12T07:33:14.743589",
-      "level": "smoke",
-      "total": 2,
-      "passed": 1,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-12T07:36:45.735585",
-      "level": "smoke",
-      "total": 2,
-      "passed": 1,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
       "timestamp": "2025-08-12T07:42:18.599470",
       "level": "smoke",
       "total": 2,
@@ -893,6 +848,51 @@
     },
     {
       "timestamp": "2025-08-13T11:10:31.274127",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:16:09.038125",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:17:30.890208",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:17:44.176653",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:22:44.361388",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:28:12.933683",
       "level": "smoke",
       "total": 7,
       "passed": 7,

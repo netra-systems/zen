@@ -1,10 +1,12 @@
 # CLAUDE.md
 
-## 🔴 CRITICAL: MODULE-BASED ARCHITECTURE (300 LINES MAX)
-**MANDATORY**: Every file MUST be ≤300 lines. Plan ALL new code as modular components.
+## 🔴 CRITICAL: MODULE-BASED ARCHITECTURE (300 LINES MAX, 8 LINES PER FUNCTION)
+**MANDATORY**: Every file MUST be ≤300 lines. ALL functions MUST be ≤8 lines.
 - Files exceeding 300 lines MUST be split into focused modules BEFORE implementation
+- Functions exceeding 8 lines MUST be split into smaller functions IMMEDIATELY
 - Plan module boundaries BEFORE coding - don't code first then split
 - Each module = single responsibility, clear interface, testable unit
+- Each function = single task, 8 lines maximum (no exceptions)
 
 ## Core Principles
 
@@ -73,9 +75,10 @@ python test_runner_unified.py --level smoke           # Validate (<30s)
 - **NEVER** copy-paste-modify code  
 - **ALWAYS** extend existing functions with options/parameters
 
-### 300-LINE MODULES (Repeat: This is MANDATORY)
+### 300-LINE MODULES & 8-LINE FUNCTIONS (Repeat: This is MANDATORY)
 - **PLAN** module boundaries BEFORE coding
 - **SPLIT** at 300 lines MAX (not 301, not 350 - exactly 300)
+- **SPLIT** functions at 8 lines MAX (not 9, not 10 - exactly 8)
 - **DESIGN** for modularity from the start
 
 ### NO TEST STUBS
@@ -139,6 +142,7 @@ frontend/
 
 ### Module Design Checklist:
 - [ ] Each file ≤300 lines
+- [ ] Each function ≤8 lines (MANDATORY)
 - [ ] Single responsibility per module
 - [ ] Clear interfaces between modules
 - [ ] No "enhanced" versions of existing code
@@ -153,9 +157,10 @@ frontend/
 ## 🎯 FINAL REMINDERS (Ultra Think 3x)
 
 1. **300-LINE MODULES** - Plan before coding, split at boundaries
-2. **TYPE SAFETY FIRST** - Read [`type_safety.xml`](SPEC/type_safety.xml) 
-3. **NO DUPLICATION** - Extend, don't duplicate
-4. **SMOKE TESTS** - Run before ANY commit
-5. **ULTRA DEEP THINK** - This is your masterpiece
+2. **8-LINE FUNCTIONS** - Every function ≤8 lines (MANDATORY)
+3. **TYPE SAFETY FIRST** - Read [`type_safety.xml`](SPEC/type_safety.xml) 
+4. **NO DUPLICATION** - Extend, don't duplicate
+5. **SMOKE TESTS** - Run before ANY commit
+6. **ULTRA DEEP THINK** - This is your masterpiece
 
-**Specs = Law. 300 lines = Maximum. Ultra think = Always.**
+**Specs = Law. 300 lines = Maximum. 8 lines per function = Maximum. Ultra think = Always.**

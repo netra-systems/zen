@@ -14,6 +14,7 @@ from .process_manager import ProcessManager
 from .log_streamer import LogStreamer, LogManager, Colors, setup_logging
 from .secret_manager import SecretLoader, ServiceDiscovery
 from .service_config import ServicesConfiguration, load_or_create_config, ResourceMode
+from .health_monitor import HealthMonitor, create_url_health_check, create_process_health_check
 from .utils import (
     check_emoji_support,
     print_with_emoji,
@@ -53,6 +54,7 @@ class DevLauncher:
         # Managers
         self.process_manager = ProcessManager()
         self.log_manager = LogManager()
+        self.health_monitor = HealthMonitor(check_interval=30)
         self.service_discovery = ServiceDiscovery(config.project_root)
         self.secret_loader = SecretLoader(
             project_id=config.project_id,
@@ -87,27 +89,40 @@ class DevLauncher:
         
         # Check dependencies
         deps = check_dependencies()
-        all_deps_ok = all([
-            deps.get('uvicorn', False),
-            deps.get('fastapi', False),
-            deps.get('node', False),
-            deps.get('npm', False)
-        ])
+        missing_deps = []
         
-        if not all_deps_ok:
-            self._print("❌", "ERROR", "Missing required dependencies")
+        if not deps.get('uvicorn', False):
+            missing_deps.append('uvicorn (pip install uvicorn)')
+        if not deps.get('fastapi', False):
+            missing_deps.append('fastapi (pip install fastapi)')
+        if not deps.get('node', False):
+            missing_deps.append('Node.js (visit nodejs.org)')
+        if not deps.get('npm', False):
+            missing_deps.append('npm (comes with Node.js)')
+        
+        if missing_deps:
+            self._print("❌", "ERROR", "Missing required dependencies:")
+            for dep in missing_deps:
+                print(f"     • {dep}")
+            print("\nInstall the missing dependencies and try again.")
             return False
         
         # Check project structure
         structure = check_project_structure(self.config.project_root)
-        all_structure_ok = all([
-            structure.get('backend', False),
-            structure.get('frontend', False),
-            structure.get('frontend_deps', False)
-        ])
+        missing_structure = []
         
-        if not all_structure_ok:
-            self._print("❌", "ERROR", "Invalid project structure")
+        if not structure.get('backend', False):
+            missing_structure.append('Backend directory (app/) not found')
+        if not structure.get('frontend', False):
+            missing_structure.append('Frontend directory (frontend/) not found')
+        if not structure.get('frontend_deps', False):
+            missing_structure.append('Frontend dependencies not installed (run: cd frontend && npm install)')
+        
+        if missing_structure:
+            self._print("❌", "ERROR", "Invalid project structure:")
+            for issue in missing_structure:
+                print(f"     • {issue}")
+            print(f"\nMake sure you're running from the project root: {self.config.project_root}")
             return False
         
         self._print("✅", "OK", "Environment check passed")
@@ -220,7 +235,23 @@ class DevLauncher:
             
             # Check if process is still running
             if process.poll() is not None:
+                # Get error output if available
+                error_output = ""
+                try:
+                    if process.stderr:
+                        error_output = process.stderr.read().decode('utf-8', errors='ignore')
+                except:
+                    pass
+                
                 self._print("❌", "ERROR", "Backend failed to start")
+                if error_output:
+                    print("\nError details:")
+                    print(error_output[:500])  # First 500 chars of error
+                print("\nPossible causes:")
+                print("  • Port already in use (try --dynamic flag)")
+                print("  • Python dependencies missing (check requirements.txt)")
+                print("  • Invalid Python syntax in app/main.py")
+                print("  • Database connection issues (check config)")
                 return None, None
             
             # Write service discovery info
@@ -231,10 +262,20 @@ class DevLauncher:
             logger.info(f"Backend WebSocket URL: ws://localhost:{port}/ws")
             logger.info(f"Backend log file: {log_file}")
             
+            # Register health monitoring
+            backend_url = f"http://localhost:{port}/health/live"
+            self.health_monitor.register_service(
+                "Backend",
+                health_check=create_url_health_check(backend_url),
+                recovery_action=lambda: logger.error("Backend needs restart - please restart the launcher"),
+                max_failures=5
+            )
+            
             return process, log_streamer
             
         except Exception as e:
             logger.error(f"Failed to start backend: {e}")
+            self._print("❌", "ERROR", f"Backend startup failed: {str(e)[:100]}")
             return None, None
     
     def start_frontend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
@@ -328,7 +369,23 @@ class DevLauncher:
             
             # Check if process is still running
             if process.poll() is not None:
+                # Get error output if available
+                error_output = ""
+                try:
+                    if process.stderr:
+                        error_output = process.stderr.read().decode('utf-8', errors='ignore')
+                except:
+                    pass
+                
                 self._print("❌", "ERROR", "Frontend failed to start")
+                if error_output:
+                    print("\nError details:")
+                    print(error_output[:500])  # First 500 chars of error
+                print("\nPossible causes:")
+                print("  • Port already in use (try --dynamic flag)")
+                print("  • Node modules not installed (run: cd frontend && npm install)")
+                print("  • Invalid Next.js configuration")
+                print("  • TypeScript compilation errors")
                 return None, None
             
             self._print("✅", "OK", f"Frontend started on port {port}")
@@ -338,10 +395,20 @@ class DevLauncher:
             # Write frontend info to service discovery
             self.service_discovery.write_frontend_info(port)
             
+            # Register health monitoring
+            frontend_url = f"http://localhost:{port}"
+            self.health_monitor.register_service(
+                "Frontend",
+                health_check=create_process_health_check(process),
+                recovery_action=lambda: logger.error("Frontend needs restart - please restart the launcher"),
+                max_failures=5
+            )
+            
             return process, log_streamer
             
         except Exception as e:
             logger.error(f"Failed to start frontend: {e}")
+            self._print("❌", "ERROR", f"Frontend startup failed: {str(e)[:100]}")
             return None, None
     
     def run(self) -> int:
@@ -364,7 +431,10 @@ class DevLauncher:
         
         # Load secrets
         if not self.load_secrets():
-            self._print("⚠️", "WARN", "Failed to load some secrets, continuing anyway")
+            self._print("⚠️", "WARN", "Failed to load some secrets")
+            print("\nNote: The application may not work correctly without secrets.")
+            print("To skip secret loading, use: --no-secrets")
+            print("To configure secrets, see: docs/GOOGLE_SECRET_MANAGER_SETUP.md")
         
         # Clear old service discovery
         self.service_discovery.clear_all()
@@ -414,15 +484,27 @@ class DevLauncher:
         # Show success summary
         self._show_success_summary()
         
+        # Start health monitoring
+        self.health_monitor.start()
+        
         # Wait for processes
         try:
             self.process_manager.wait_for_all()
         except KeyboardInterrupt:
             self._print("\n🔄", "INTERRUPT", "Received interrupt signal")
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            self._print("❌", "ERROR", f"Unexpected error: {str(e)[:100]}")
         
         # Cleanup
+        self.health_monitor.stop()
         self.process_manager.cleanup_all()
         self.log_manager.stop_all()
+        
+        # Check if any services failed
+        if not self.health_monitor.all_healthy():
+            self._print("⚠️", "WARN", "Some services were unhealthy during execution")
+            return 1
         
         return 0
     

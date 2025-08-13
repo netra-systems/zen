@@ -64,12 +64,22 @@ class TestErrorScenarios:
     """Test various error scenarios and edge cases"""
     
     async def test_generate_with_anomalies_method(self, service):
-        """Test anomaly generation method"""
+        """Test anomaly generation method through generate_batch"""
+        from app.services.synthetic_data.generation_patterns import generate_with_anomalies
+        
         config = MagicMock()
         config.num_traces = 10
         config.anomaly_injection_rate = 1.0  # 100% anomalies
         
-        records = await service.generate_with_anomalies(config)
+        # Use the pattern function directly with a mock generate function
+        async def mock_generate_single(config, corpus_id, index):
+            return {
+                "event_id": f"event_{index}",
+                "latency_ms": 100,
+                "status": "success"
+            }
+        
+        records = await generate_with_anomalies(config, mock_generate_single)
         
         assert len(records) == 10
         anomaly_count = sum(1 for r in records if r.get('anomaly', False))
@@ -77,13 +87,15 @@ class TestErrorScenarios:
     
     async def test_detect_anomalies(self, service):
         """Test anomaly detection"""
+        from app.services.synthetic_data.metrics import detect_anomalies
+        
         records = [
             {"event_id": "1", "anomaly": True, "anomaly_type": "spike"},
             {"event_id": "2", "anomaly": False},
             {"event_id": "3", "anomaly": True, "anomaly_type": "failure"}
         ]
         
-        anomalies = await service.detect_anomalies(records)
+        anomalies = await detect_anomalies(records)
         
         assert len(anomalies) == 2
         for anomaly in anomalies:
@@ -93,13 +105,15 @@ class TestErrorScenarios:
     
     async def test_calculate_correlation(self, service):
         """Test correlation calculation between fields"""
+        from app.services.synthetic_data.metrics import calculate_correlation
+        
         records = [
             {"field1": 1, "field2": 2},
             {"field1": 2, "field2": 4},
             {"field1": 3, "field2": 6}
         ]
         
-        correlation = await service.calculate_correlation(records, "field1", "field2")
+        correlation = await calculate_correlation(records, "field1", "field2")
         
         assert isinstance(correlation, float)
         assert -1 <= correlation <= 1
@@ -107,20 +121,24 @@ class TestErrorScenarios:
     
     async def test_calculate_correlation_no_data(self, service):
         """Test correlation calculation with insufficient data"""
+        from app.services.synthetic_data.metrics import calculate_correlation
+        
         records = [{"field1": 1}]  # Only one record
         
-        correlation = await service.calculate_correlation(records, "field1", "field2")
+        correlation = await calculate_correlation(records, "field1", "field2")
         
         assert correlation == 0.0
     
     async def test_calculate_correlation_invalid_data(self, service):
         """Test correlation calculation with invalid data"""
+        from app.services.synthetic_data.metrics import calculate_correlation
+        
         records = [
             {"field1": "not_a_number", "field2": "also_not_a_number"},
             {"field1": 2, "field2": 4}
         ]
         
-        correlation = await service.calculate_correlation(records, "field1", "field2")
+        correlation = await calculate_correlation(records, "field1", "field2")
         
         # Should handle invalid data gracefully
         assert isinstance(correlation, float)

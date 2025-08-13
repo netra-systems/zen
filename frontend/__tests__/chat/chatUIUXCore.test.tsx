@@ -127,11 +127,11 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
     });
 
     test('3. Should handle logout action', async () => {
-      const mockAuthStore.logout = jest.fn();
+      const mockLogout = jest.fn();
       (useAuthStore as jest.Mock).mockReturnValueOnce({
         user: { name: 'Test User' },
         isAuthenticated: true,
-        logout: mockAuthStore.logout
+        logout: mockLogout
       });
       
       render(<ChatHeader />);
@@ -187,11 +187,11 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
     });
 
     test('6. Should create new thread', async () => {
-      const mockThreadStore.addThread = jest.fn();
+      const mockAddThread = jest.fn();
       
       (useThreadStore as jest.Mock).mockReturnValueOnce({
         threads: [],
-        addThread: mockThreadStore.addThread
+        addThread: mockAddThread
       });
       
       render(<ThreadSidebar />);
@@ -203,12 +203,12 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
     });
 
     test('7. Should delete thread with confirmation', async () => {
-      const mockThreadStore.deleteThread = jest.fn();
+      const mockDeleteThread = jest.fn();
       const mockThreads = [{ id: '1', title: 'Thread to Delete' }];
       
       (useThreadStore as jest.Mock).mockReturnValueOnce({
         threads: mockThreads,
-        deleteThread: mockThreadStore.deleteThread
+        deleteThread: mockDeleteThread
       });
       
       render(<ThreadSidebar />);
@@ -499,9 +499,9 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
     });
 
     test('27. Should clear messages when switching threads', () => {
-      const mockChatStore.clearMessages = jest.fn();
+      const mockClearMessages = jest.fn();
       (useChatStore as jest.Mock).mockReturnValueOnce({
-        clearMessages: mockChatStore.clearMessages
+        clearMessages: mockClearMessages
       });
       
       (useThreadStore as jest.Mock).mockReturnValueOnce({

@@ -1,6 +1,6 @@
 """Analysis operations for DataSubAgent."""
 
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any, Tuple, Optional
 from datetime import datetime, timedelta
 
 from app.logging_config import central_logger as logger
@@ -9,7 +9,7 @@ from app.logging_config import central_logger as logger
 class AnalysisOperations:
     """Encapsulate analysis operations."""
     
-    def __init__(self, query_builder, analysis_engine, clickhouse_ops, redis_manager):
+    def __init__(self, query_builder: Any, analysis_engine: Any, clickhouse_ops: Any, redis_manager: Any) -> None:
         self.query_builder = query_builder
         self.analysis_engine = analysis_engine
         self.clickhouse_ops = clickhouse_ops
@@ -279,4 +279,3 @@ class AnalysisOperations:
             "hourly_distribution": hourly_patterns
         }
 
-from typing import Optional

@@ -56,6 +56,7 @@ class ProcessManager:
         """
         with self._lock:
             if name not in self.processes:
+                logger.warning(f"Process {name} not found in manager")
                 return False
             
             process = self.processes[name]
@@ -64,37 +65,47 @@ class ProcessManager:
                 # Process is still running
                 logger.info(f"Terminating {name} (PID: {process.pid})")
                 
-                if sys.platform == "win32":
-                    # Windows: Use taskkill for tree termination
-                    subprocess.run(
-                        ["taskkill", "/F", "/T", "/PID", str(process.pid)],
-                        capture_output=True
-                    )
-                else:
-                    # Unix: Use process group termination
-                    try:
-                        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
-                    except ProcessLookupError:
-                        pass
-                
-                # Wait for termination
                 try:
-                    process.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    # Force kill if still running
                     if sys.platform == "win32":
-                        subprocess.run(
-                            ["taskkill", "/F", "/PID", str(process.pid)],
-                            capture_output=True
+                        # Windows: Use taskkill for tree termination
+                        result = subprocess.run(
+                            ["taskkill", "/F", "/T", "/PID", str(process.pid)],
+                            capture_output=True,
+                            text=True
                         )
+                        if result.returncode != 0:
+                            logger.warning(f"taskkill failed for {name}: {result.stderr}")
                     else:
+                        # Unix: Use process group termination
                         try:
-                            process.kill()
+                            os.killpg(os.getpgid(process.pid), signal.SIGTERM)
                         except ProcessLookupError:
-                            pass
+                            logger.warning(f"Process {name} already terminated")
+                        except Exception as e:
+                            logger.error(f"Error terminating {name}: {e}")
+                    
+                    # Wait for termination
+                    try:
+                        process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        logger.warning(f"Process {name} did not terminate gracefully, forcing...")
+                        # Force kill if still running
+                        if sys.platform == "win32":
+                            subprocess.run(
+                                ["taskkill", "/F", "/PID", str(process.pid)],
+                                capture_output=True
+                            )
+                        else:
+                            try:
+                                process.kill()
+                            except ProcessLookupError:
+                                pass
+                except Exception as e:
+                    logger.error(f"Failed to terminate {name}: {e}")
+                    return False
             
             del self.processes[name]
-            logger.info(f"Process {name} terminated")
+            logger.info(f"Process {name} terminated successfully")
             return True
     
     def cleanup_all(self):
@@ -109,15 +120,39 @@ class ProcessManager:
         
         This blocks until all processes have exited.
         """
+        failed_processes = []
+        
         while self.processes:
             # Check each process
             for name, process in list(self.processes.items()):
                 if process.poll() is not None:
                     # Process has exited
-                    logger.info(f"Process {name} exited with code {process.returncode}")
+                    exit_code = process.returncode
+                    
+                    if exit_code != 0:
+                        logger.error(f"Process {name} exited with error code {exit_code}")
+                        failed_processes.append((name, exit_code))
+                        
+                        # Provide helpful error messages based on exit code
+                        if exit_code == 1:
+                            logger.info(f"  → {name} encountered a general error")
+                        elif exit_code == 2:
+                            logger.info(f"  → {name} had a configuration error")
+                        elif exit_code == 3:
+                            logger.info(f"  → {name} had dependency issues")
+                        elif exit_code < 0:
+                            logger.info(f"  → {name} was terminated by signal {-exit_code}")
+                    else:
+                        logger.info(f"Process {name} exited normally")
+                    
                     with self._lock:
                         if name in self.processes:
                             del self.processes[name]
+            
+            # If all critical processes have failed, exit early
+            if failed_processes and not self.processes:
+                logger.error("All processes have terminated. Check the logs for details.")
+                break
             
             # Small delay to avoid busy waiting
             time.sleep(1)

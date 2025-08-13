@@ -46,6 +46,32 @@ class LauncherConfig:
         # Set project ID from environment if not provided
         if self.project_id is None:
             self.project_id = os.environ.get('GOOGLE_CLOUD_PROJECT', "304612253870")
+        
+        # Validate configuration
+        self._validate()
+    
+    def _validate(self):
+        """Validate configuration values."""
+        # Validate ports
+        if self.backend_port and not (1 <= self.backend_port <= 65535):
+            raise ValueError(f"Invalid backend port: {self.backend_port}. Must be between 1 and 65535.")
+        
+        if not (1 <= self.frontend_port <= 65535):
+            raise ValueError(f"Invalid frontend port: {self.frontend_port}. Must be between 1 and 65535.")
+        
+        # Validate project root exists
+        if not self.project_root.exists():
+            raise ValueError(f"Project root does not exist: {self.project_root}")
+        
+        # Check for required directories
+        backend_dir = self.project_root / "app"
+        frontend_dir = self.project_root / "frontend"
+        
+        if not backend_dir.exists():
+            raise ValueError(f"Backend directory not found: {backend_dir}\nAre you running from the correct directory?")
+        
+        if not frontend_dir.exists():
+            raise ValueError(f"Frontend directory not found: {frontend_dir}\nAre you running from the correct directory?")
     
     @classmethod
     def from_args(cls, args) -> "LauncherConfig":
@@ -83,8 +109,6 @@ class LauncherConfig:
             "project_id": self.project_id,
             "no_browser": self.no_browser,
             "verbose": self.verbose,
-            "max_restarts": self.max_restarts,
-            "restart_delay": self.restart_delay,
             "use_turbopack": self.use_turbopack,
             "project_root": str(self.project_root),
             "log_dir": str(self.log_dir),

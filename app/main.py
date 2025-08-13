@@ -8,6 +8,8 @@ import alembic.script
 from alembic.runtime.migration import MigrationContext
 from sqlalchemy import create_engine
 from pathlib import Path
+from typing import Any, Callable
+import logging as log_module
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -62,7 +64,7 @@ from app.core.error_handlers import (
 )
 from app.core.error_context import ErrorContext
 
-def run_migrations(logger):
+def run_migrations(logger: log_module.Logger) -> None:
     """Run database migrations automatically on startup."""
     try:
         logger.info("Checking database migrations...")
@@ -255,7 +257,7 @@ app = FastAPI(lifespan=lifespan)
 oauth_client.init_app(app)
 
 @app.middleware("http")
-async def cors_redirect_middleware(request: Request, call_next):
+async def cors_redirect_middleware(request: Request, call_next: Callable) -> Any:
     """Handle CORS for redirects (e.g., trailing slash redirects)."""
     response = await call_next(request)
     
@@ -271,7 +273,7 @@ async def cors_redirect_middleware(request: Request, call_next):
     return response
 
 @app.middleware("http")
-async def error_context_middleware(request: Request, call_next):
+async def error_context_middleware(request: Request, call_next: Callable) -> Any:
     """Middleware to set up error context for each request."""
     # Generate trace ID for the request
     trace_id = ErrorContext.generate_trace_id()
@@ -295,7 +297,7 @@ async def error_context_middleware(request: Request, call_next):
     return response
 
 @app.middleware("http")
-async def log_requests(request: Request, call_next):
+async def log_requests(request: Request, call_next: Callable) -> Any:
     logger = central_logger.get_logger("api")
     start_time = time.time()
     

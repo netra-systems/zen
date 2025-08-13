@@ -11,7 +11,9 @@ from fastapi.responses import RedirectResponse
 import httpx
 
 from app.logging_config import central_logger as logger
-from app.services.redis_service import redis_service
+from app.redis_manager import RedisManager
+
+redis_service = RedisManager()
 from app.auth.environment_config import auth_env_config
 
 

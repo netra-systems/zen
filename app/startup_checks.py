@@ -5,6 +5,7 @@ import asyncio
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 import psutil
+from fastapi import FastAPI
 
 from app.logging_config import central_logger
 from app.config import settings
@@ -540,7 +541,7 @@ class StartupChecker:
                 critical=False
             ))
 
-async def run_startup_checks(app):
+async def run_startup_checks(app: FastAPI) -> Dict[str, Any]:
     """Run all startup checks with improved error handling and reporting"""
     checker = StartupChecker(app)
     results = await checker.run_all_checks()

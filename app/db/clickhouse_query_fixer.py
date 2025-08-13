@@ -4,6 +4,7 @@ Intercepts and fixes ClickHouse queries with incorrect array syntax
 """
 
 import re
+from typing import Tuple, Any, Dict
 from app.logging_config import central_logger as logger
 
 
@@ -79,7 +80,7 @@ class ClickHouseQueryInterceptor:
     Can be used as a wrapper around the ClickHouse client.
     """
     
-    def __init__(self, client):
+    def __init__(self, client: Any) -> None:
         """
         Initialize the interceptor with a ClickHouse client.
         
@@ -91,7 +92,7 @@ class ClickHouseQueryInterceptor:
         self.queries_fixed = 0
         self.queries_executed = 0
     
-    async def execute_query(self, query: str, *args, **kwargs):
+    async def execute_query(self, query: str, *args, **kwargs) -> Any:
         """
         Execute a query after fixing any syntax issues.
         
@@ -127,7 +128,7 @@ class ClickHouseQueryInterceptor:
         else:
             return await self.client.execute(query, *args, **kwargs)
     
-    def get_stats(self) -> dict:
+    def get_stats(self) -> Dict[str, Any]:
         """
         Get statistics about query fixing.
         
@@ -141,32 +142,32 @@ class ClickHouseQueryInterceptor:
             "fix_enabled": self.fix_enabled
         }
     
-    def reset_stats(self):
+    def reset_stats(self) -> None:
         """Reset the statistics counters."""
         self.queries_fixed = 0
         self.queries_executed = 0
     
-    def reset_statistics(self):
+    def reset_statistics(self) -> None:
         """Alias for reset_stats() for compatibility."""
         self.reset_stats()
     
-    def enable_fixing(self):
+    def enable_fixing(self) -> None:
         """Enable automatic query fixing."""
         self.fix_enabled = True
     
-    def disable_fixing(self):
+    def disable_fixing(self) -> None:
         """Disable automatic query fixing."""
         self.fix_enabled = False
     
-    def get_statistics(self) -> dict:
+    def get_statistics(self) -> Dict[str, Any]:
         """Alias for get_stats() for compatibility."""
         return self.get_stats()
     
-    async def execute(self, query: str, *args, **kwargs):
+    async def execute(self, query: str, *args, **kwargs) -> Any:
         """Alias for execute_query for compatibility with different client interfaces."""
         return await self.execute_query(query, *args, **kwargs)
     
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         """
         Proxy all other methods to the wrapped client.
         

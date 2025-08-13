@@ -10,6 +10,8 @@ from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.services.synthetic_data_service import SyntheticDataService
+from app.services.synthetic_data.generation_patterns import generate_with_anomalies
+from app.services.synthetic_data.metrics import detect_anomalies, calculate_correlation
 from .test_synthetic_data_service_basic import GenerationConfig, ValidationResult
 
 
@@ -113,9 +115,17 @@ class TestDataQualityValidation:
             anomaly_injection_rate=0.05
         )
         
-        records = await validation_service.generate_with_anomalies(config)
+        # Mock generate function
+        async def mock_generate_fn(config, corpus, idx):
+            return {
+                'trace_id': f'trace_{idx}',
+                'latency_ms': 100,
+                'status': 'success'
+            }
         
-        detected_anomalies = await validation_service.detect_anomalies(records)
+        records = await generate_with_anomalies(config, mock_generate_fn)
+        
+        detected_anomalies = await detect_anomalies(records)
         
         # Should detect approximately 5% anomalies
         anomaly_rate = len(detected_anomalies) / len(records)
@@ -129,7 +139,7 @@ class TestDataQualityValidation:
         )
         
         # Test correlation between complexity and latency
-        correlation = await validation_service.calculate_correlation(
+        correlation = await calculate_correlation(
             records,
             field1="tool_count",
             field2="latency_ms"

@@ -1,6 +1,8 @@
 from contextlib import contextmanager, asynccontextmanager
-from typing import Optional, Generator, AsyncGenerator
+from typing import Optional, Generator, AsyncGenerator, Any
 from sqlalchemy import create_engine, pool, event
+from sqlalchemy.engine import Connection
+from sqlalchemy.pool import Pool, ConnectionPoolEntry, _ConnectionFairy
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import QueuePool, NullPool, AsyncAdaptedQueuePool
@@ -51,7 +53,7 @@ class Database:
     def _setup_connection_events(self):
         """Setup database connection event listeners for monitoring and configuration."""
         @event.listens_for(self.engine, "connect")
-        def receive_connect(dbapi_conn, connection_record):
+        def receive_connect(dbapi_conn: Any, connection_record: ConnectionPoolEntry) -> None:
             connection_record.info['pid'] = dbapi_conn.get_backend_pid() if hasattr(dbapi_conn, 'get_backend_pid') else None
             
             # Set statement timeout for all connections
@@ -63,7 +65,7 @@ class Database:
             logger.debug(f"Database connection established with safety limits: {connection_record.info.get('pid')}")
 
         @event.listens_for(self.engine, "checkout")
-        def receive_checkout(dbapi_conn, connection_record, connection_proxy):
+        def receive_checkout(dbapi_conn: Any, connection_record: ConnectionPoolEntry, connection_proxy: _ConnectionFairy) -> None:
             # Track pool usage for monitoring
             pool = self.engine.pool
             if hasattr(pool, 'size') and hasattr(pool, 'overflow'):
@@ -151,7 +153,7 @@ try:
         
         # Setup async connection events
         @event.listens_for(async_engine.sync_engine, "connect")
-        def receive_async_connect(dbapi_conn, connection_record):
+        def receive_async_connect(dbapi_conn: Any, connection_record: ConnectionPoolEntry) -> None:
             connection_record.info['pid'] = dbapi_conn.get_backend_pid() if hasattr(dbapi_conn, 'get_backend_pid') else None
             
             # Set statement timeout for all async connections
@@ -172,7 +174,7 @@ try:
             logger.debug(f"Async database connection established with safety limits: {connection_record.info.get('pid')}")
 
         @event.listens_for(async_engine.sync_engine, "checkout")
-        def receive_async_checkout(dbapi_conn, connection_record, connection_proxy):
+        def receive_async_checkout(dbapi_conn: Any, connection_record: ConnectionPoolEntry, connection_proxy: _ConnectionFairy) -> None:
             # Track async pool usage for monitoring
             pool = async_engine.pool
             if hasattr(pool, 'size') and hasattr(pool, 'overflow'):

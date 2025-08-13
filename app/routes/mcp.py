@@ -16,6 +16,10 @@ from app.schemas import UserInDB
 from app.services.mcp_service import MCPService, MCPClient
 from app.services.synthetic_data_service import SyntheticDataService
 from app.services.supply_catalog_service import SupplyCatalogService
+from app.services.agent_service import AgentService
+from app.services.thread_service import ThreadService
+from app.services.corpus_service import CorpusService
+from app.services.security_service import SecurityService
 from app.logging_config import CentralLogger
 import os
 
@@ -63,10 +67,10 @@ class MCPPromptGetRequest(BaseModel):
 
 
 async def get_mcp_service(
-    agent_service=Depends(get_agent_service),
-    thread_service=Depends(get_thread_service),
-    corpus_service=Depends(get_corpus_service),
-    security_service=Depends(get_security_service)
+    agent_service: AgentService = Depends(get_agent_service),
+    thread_service: ThreadService = Depends(get_thread_service),
+    corpus_service: CorpusService = Depends(get_corpus_service),
+    security_service: SecurityService = Depends(get_security_service)
 ) -> MCPService:
     """Get or create MCP service instance"""
     global _mcp_service

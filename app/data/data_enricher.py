@@ -1,6 +1,6 @@
 # app/data/data_enricher.py
 import logging
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional, Any
 from clickhouse_driver import Client
 from ..config import settings
 
@@ -8,16 +8,16 @@ class DataEnricher:
     """
     Transforms raw, copied customer data into the structured format required by the analysis engine.
     """
-    def __init__(self, customer_id: str):
+    def __init__(self, customer_id: str) -> None:
         self.netra_creds = settings.clickhouse_native.model_dump()
         self.customer_id = customer_id.replace('-', '_') # Sanitize
         self.client = Client(**self.netra_creds)
         logging.info("DataEnricher initialized.")
 
-    def __enter__(self):
+    def __enter__(self) -> 'DataEnricher':
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Optional[type], exc_val: Optional[Exception], exc_tb: Optional[Any]) -> None:
         self.client.disconnect()
         logging.info("DataEnricher client disconnected.")
 

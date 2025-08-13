@@ -13,7 +13,7 @@ from app.logging_config import central_logger, request_id_context, user_id_conte
 class LoggingMiddleware(BaseHTTPMiddleware):
     """Middleware to add logging context and track request performance."""
     
-    def __init__(self, app):
+    def __init__(self, app) -> None:
         super().__init__(app)
         self.logger = central_logger.get_logger(__name__)
     
@@ -110,7 +110,7 @@ class PerformanceLoggingMiddleware(BaseHTTPMiddleware):
     
     SLOW_REQUEST_THRESHOLD = 1.0  # seconds
     
-    def __init__(self, app):
+    def __init__(self, app) -> None:
         super().__init__(app)
         self.logger = central_logger.get_logger(__name__)
     

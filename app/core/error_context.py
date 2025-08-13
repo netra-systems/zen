@@ -137,7 +137,7 @@ class ErrorContextManager:
         
         return self
     
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Optional[type], exc_val: Optional[Exception], exc_tb: Optional[Any]) -> None:
         """Exit the context manager."""
         # Restore previous values
         if self.previous_trace_id:

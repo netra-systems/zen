@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Type, TypeVar, List
+from typing import Any, Dict, Optional, Type, TypeVar, List, AsyncIterator
 from app.schemas import AppConfig
 from app.schemas.llm_types import (
     GenerationConfig, LLMResponse, LLMStreamChunk, LLMCacheEntry,
@@ -22,15 +22,15 @@ T = TypeVar('T', bound=BaseModel)
 class MockLLM:
     """Mock LLM for when LLMs are disabled in dev mode."""
     
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str) -> None:
         self.model_name = model_name
     
-    async def ainvoke(self, prompt: str):
+    async def ainvoke(self, prompt: str) -> Any:
         class MockResponse:
             content = f"[Dev Mode - LLM Disabled] Mock response for: {prompt[:100]}..."
         return MockResponse()
     
-    async def astream(self, prompt: str):
+    async def astream(self, prompt: str) -> AsyncIterator[Any]:
         for word in f"[Dev Mode - LLM Disabled] Mock streaming response for: {prompt[:50]}...".split():
             yield type('obj', (object,), {'content': word + ' '})()
     
@@ -42,7 +42,7 @@ class MockLLM:
 class MockStructuredLLM:
     """Mock structured LLM for when LLMs are disabled in dev mode."""
     
-    def __init__(self, model_name: str, schema: Type[T]):
+    def __init__(self, model_name: str, schema: Type[T]) -> None:
         self.model_name = model_name
         self.schema = schema
     
@@ -85,12 +85,12 @@ class MockStructuredLLM:
         return self.schema(**mock_data)
 
 class LLMManager:
-    def __init__(self, settings: AppConfig):
+    def __init__(self, settings: AppConfig) -> None:
         self.settings = settings
         self._llm_cache: Dict[str, Any] = {}
         self.enabled = self._check_if_enabled()
 
-    def _check_if_enabled(self):
+    def _check_if_enabled(self) -> None:
         """Check if LLMs should be enabled based on service mode configuration."""
         import os
         
@@ -224,7 +224,7 @@ class LLMManager:
         
         return llm_response
 
-    async def stream_llm(self, prompt: str, llm_config_name: str):
+    async def stream_llm(self, prompt: str, llm_config_name: str) -> AsyncIterator[str]:
         llm = self.get_llm(llm_config_name)
         async for chunk in llm.astream(prompt):
             yield chunk.content
