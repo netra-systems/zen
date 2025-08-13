@@ -133,7 +133,13 @@ async def lifespan(app: FastAPI):
     app.state.clickhouse_client = None
     
     # Initialize ClickHouse tables
-    if 'pytest' not in sys.modules and os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() != 'true':  # Skip during testing or if explicitly disabled
+    skip_clickhouse = (
+        'pytest' in sys.modules or 
+        os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() == 'true' or
+        os.getenv('DEV_MODE_DISABLE_CLICKHOUSE', 'false').lower() == 'true'
+    )
+    
+    if not skip_clickhouse:
         try:
             logger.info("Initializing ClickHouse tables...")
             await initialize_clickhouse_tables()
@@ -141,8 +147,8 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error(f"Failed to initialize ClickHouse tables: {e}")
             # Don't fail startup, the app can still work with PostgreSQL
-    elif os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() == 'true':
-        logger.info("Skipping ClickHouse initialization (SKIP_CLICKHOUSE_INIT=true)")
+    else:
+        logger.info("Skipping ClickHouse initialization (disabled or testing mode)")
 
     # Initialize Postgres - must be done before startup checks
     app.state.db_session_factory = async_session_factory

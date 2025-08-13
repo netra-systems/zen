@@ -336,6 +336,17 @@ class StartupChecker:
 
     async def check_llm_providers(self):
         """Check LLM provider configuration and connectivity"""
+        # Skip LLM check if LLMs are disabled
+        if hasattr(settings, 'dev_mode_llm_enabled') and not settings.dev_mode_llm_enabled:
+            self.results.append(StartupCheckResult(
+                name="llm_providers",
+                success=True,
+                message="LLM providers check skipped (LLMs disabled in dev mode)",
+                critical=False
+            ))
+            logger.info("LLM providers check skipped - LLMs disabled in dev mode")
+            return
+            
         try:
             llm_manager = self.app.state.llm_manager
             available_providers = []

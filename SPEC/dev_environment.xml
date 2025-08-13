@@ -190,10 +190,23 @@
       <setup-steps>
         <step>Install backend dependencies: pip install -r requirements.txt</step>
         <step>Install frontend dependencies: cd frontend && npm install</step>
-        <step>Set up database: python create_db.py && python run_migrations.py</step>
+        <step>Set up database: python database_scripts/create_db.py && python database_scripts/run_migrations.py</step>
         <step>Optional: Configure Google Cloud auth for secrets: gcloud auth application-default login</step>
         <step>Run recommended command above</step>
       </setup-steps>
+      
+      <script-updates>
+        <update file="setup.sh">
+          <change>Fixed path to install_dev_env.py: Now uses scripts/install_dev_env.py</change>
+        </update>
+        <update file="start_dev.sh">
+          <change>Added proper script for starting development environment</change>
+        </update>
+        <update file="run_migrations.py">
+          <change>Fixed alembic.ini path: Now uses config/alembic.ini</change>
+          <change>Uses current system user instead of hardcoded postgres</change>
+        </update>
+      </script-updates>
     </first-time-setup>
 
     <quick-start>
@@ -274,6 +287,86 @@
         <description>Clear service discovery information</description>
       </option>
     </advanced-usage>
+
+    <local-development-mode>
+      <title>Local Development Mode (Without External Services)</title>
+      <description>
+        Run Netra without external service dependencies (ClickHouse, Redis, LLM providers)
+        for offline development and simplified setup.
+      </description>
+      
+      <configuration>
+        <step number="1">
+          <title>Database Setup</title>
+          <description>Create PostgreSQL database using current system user (no superuser required)</description>
+          <commands>
+            <command>python database_scripts/create_db.py</command>
+            <command>python database_scripts/run_migrations.py</command>
+          </commands>
+          <note>Scripts now use os.environ.get('USER') instead of hardcoded 'postgres' user</note>
+          <changes>
+            <change>create_db.py: Now uses current system user from os.environ.get('USER')</change>
+            <change>run_migrations.py: Automatically uses current user in DATABASE_URL</change>
+            <change>No postgres superuser required for local development</change>
+          </changes>
+        </step>
+        
+        <step number="2">
+          <title>Configure Environment Variables</title>
+          <description>Add these to your .env file to disable external services</description>
+          <variables>
+            <variable>
+              <name>DEV_MODE_DISABLE_REDIS</name>
+              <value>true</value>
+              <impact>Disables Redis caching - caching features unavailable</impact>
+            </variable>
+            <variable>
+              <name>DEV_MODE_DISABLE_CLICKHOUSE</name>
+              <value>true</value>
+              <impact>Disables ClickHouse - analytics features limited</impact>
+            </variable>
+            <variable>
+              <name>DEV_MODE_DISABLE_LLM</name>
+              <value>true</value>
+              <impact>Disables LLM providers - AI features unavailable</impact>
+            </variable>
+            <variable>
+              <name>DATABASE_URL</name>
+              <value>postgresql+asyncpg://username@localhost/netra</value>
+              <impact>Use local PostgreSQL instead of cloud database</impact>
+            </variable>
+            <variable>
+              <name>FERNET_KEY</name>
+              <value>Generated encryption key</value>
+              <impact>Required for encryption features</impact>
+            </variable>
+          </variables>
+        </step>
+        
+        <step number="3">
+          <title>Implementation Patterns</title>
+          <patterns>
+            <pattern>
+              <location>app/core/config_validator.py</location>
+              <description>Skip validation for disabled services using dev_mode_*_enabled flags</description>
+            </pattern>
+            <pattern>
+              <location>app/main.py</location>
+              <description>Skip service initialization when DEV_MODE_DISABLE_* environment variables are set</description>
+            </pattern>
+            <pattern>
+              <location>app/startup_checks.py</location>
+              <description>Skip health checks for disabled services during startup</description>
+            </pattern>
+          </patterns>
+        </step>
+      </configuration>
+      
+      <usage>
+        <command>python dev_launcher.py --dynamic --no-backend-reload</command>
+        <description>Start with local development mode (services disabled via .env)</description>
+      </usage>
+    </local-development-mode>
 
     <environment-variables>
       <title>Environment Variables</title>

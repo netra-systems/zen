@@ -1,8 +1,10 @@
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+import os
 
-# Connect to the default database
-conn = psycopg2.connect(dbname="postgres", user="postgres", host="localhost", password="123")
+# Connect to the default database using current user
+user = os.environ.get('USER')
+conn = psycopg2.connect(dbname="postgres", user=user, host="localhost")
 conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 
 # Create a cursor to perform database operations
