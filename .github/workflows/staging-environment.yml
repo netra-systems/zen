@@ -285,7 +285,7 @@ jobs:
         working-directory: ./terraform/staging
         run: |
           # Use staging-specific bucket or fallback to default
-          BUCKET="${{ secrets.TF_STAGING_STATE_BUCKET || secrets.TF_STATE_BUCKET || 'netra-terraform-state' }}"
+          BUCKET="${{ secrets.TF_STAGING_STATE_BUCKET || secrets.TF_STATE_BUCKET || 'netra-staging-terraform-state' }}"
           PREFIX="${{ needs.setup.outputs.environment_name }}"
           
           echo "::group::Terraform Backend Configuration"
@@ -319,7 +319,7 @@ jobs:
           rm -rf .terraform
           
           # Use same bucket configuration as initial attempt
-          BUCKET="${{ secrets.TF_STAGING_STATE_BUCKET || secrets.TF_STATE_BUCKET || 'netra-terraform-state' }}"
+          BUCKET="${{ secrets.TF_STAGING_STATE_BUCKET || secrets.TF_STATE_BUCKET || 'netra-staging-terraform-state' }}"
           PREFIX="${{ needs.setup.outputs.environment_name }}"
           
           echo "::group::Retry Terraform Backend Configuration"
