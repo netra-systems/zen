@@ -17,13 +17,11 @@ on:
       pr_number:
         required: false
         type: string
+      urls:
+        required: false
+        type: string
+        description: 'Multiline string with url=value pairs'
       error_message:
-        required: false
-        type: string
-      backend_url:
-        required: false
-        type: string
-      frontend_url:
         required: false
         type: string
 
@@ -69,10 +67,20 @@ jobs:
             status)
               ACTION_DESC="Status Check"
               ;;
+            rebuild)
+              ACTION_DESC="Rebuild"
+              ;;
             *)
               ACTION_DESC="Operation"
               ;;
           esac
+          
+          # Parse URLs if provided
+          if [[ -n "${{ inputs.urls }}" ]]; then
+            echo "${{ inputs.urls }}" | while IFS='=' read -r key value; do
+              echo "${key}_url=$value" >> $GITHUB_OUTPUT
+            done
+          fi
           
           echo "status_emoji=$STATUS_EMOJI" >> $GITHUB_OUTPUT
           echo "status_color=$STATUS_COLOR" >> $GITHUB_OUTPUT
