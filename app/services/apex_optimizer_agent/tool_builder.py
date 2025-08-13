@@ -9,7 +9,9 @@
 # Review: Pending | Score: 85
 # ================================
 import inspect
-from typing import Any, Dict
+from typing import Any, Dict, Callable, Awaitable, TypeVar, Union
+
+T = TypeVar('T')
 from langchain_core.tools import StructuredTool
 from pydantic import create_model, BaseModel
 import asyncio
@@ -41,8 +43,12 @@ from app.services.apex_optimizer_agent.tools.performance_gains_simulator import 
 from app.services.apex_optimizer_agent.tools.policy_simulator import policy_simulator
 from app.services.apex_optimizer_agent.tools.finish import finish
 
-def create_async_tool_wrapper(tool_func, context, has_args):
-    async def wrapper(**kwargs):
+def create_async_tool_wrapper(
+    tool_func: Callable[..., Awaitable[T]],
+    context: ToolContext,
+    has_args: bool
+) -> Callable[..., Awaitable[T]]:
+    async def wrapper(**kwargs: Any) -> T:
         # LangChain automatically adds this, so we filter it out
         kwargs.pop('callbacks', None)
         tool_name = tool_func.__name__
@@ -66,7 +72,7 @@ def create_async_tool_wrapper(tool_func, context, has_args):
 
 class ToolBuilder:
     @staticmethod
-    def build_all(context: ToolContext) -> Dict[str, Any]:
+    def build_all(context: ToolContext) -> Dict[str, StructuredTool]:
         all_tools = {
             "cost_analyzer": cost_analyzer,
             "latency_analyzer": latency_analyzer,

@@ -6,6 +6,7 @@
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import Papa from 'papaparse';
+import { logger } from '@/lib/logger';
 
 export type ExportFormat = 'pdf' | 'json' | 'csv' | 'pptx' | 'markdown';
 
@@ -372,7 +373,11 @@ export class ExportService {
     options: ExportOptions
   ): Promise<void> {
     // This would require a library like PptxGenJS
-    console.warn('PowerPoint export not yet implemented');
+    logger.warn('PowerPoint export not yet implemented, falling back to JSON', {
+      component: 'ExportService',
+      action: 'powerpoint_export_fallback',
+      metadata: { filename, format: options.format }
+    });
     // For now, export as formatted JSON
     this.exportJSON(data, filename, options);
   }

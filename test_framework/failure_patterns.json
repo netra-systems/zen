@@ -1,0 +1,155 @@
+{
+  "import_missing_module": {
+    "category": "import_error",
+    "description": "Module not found during import",
+    "occurrences": 0,
+    "affected_tests": [],
+    "error_signatures": [
+      "ModuleNotFoundError.*No module named",
+      "ImportError.*cannot import name",
+      "ImportError.*No module named"
+    ],
+    "first_seen": null,
+    "last_seen": null,
+    "suggested_fix": "Check dependencies in requirements.txt and ensure all imports are correct",
+    "confidence": 0.0
+  },
+  "database_connection": {
+    "category": "database_error",
+    "description": "Database connection failure",
+    "occurrences": 0,
+    "affected_tests": [],
+    "error_signatures": [
+      "psycopg2.*could not connect",
+      "sqlalchemy.*OperationalError",
+      "Connection refused.*5432",
+      "database.*does not exist"
+    ],
+    "first_seen": null,
+    "last_seen": null,
+    "suggested_fix": "Ensure database is running and connection string is correct",
+    "confidence": 0.0
+  },
+  "redis_connection": {
+    "category": "connection_error",
+    "description": "Redis connection failure",
+    "occurrences": 0,
+    "affected_tests": [],
+    "error_signatures": [
+      "redis.*ConnectionError",
+      "Connection refused.*6379",
+      "Redis.*not available"
+    ],
+    "first_seen": null,
+    "last_seen": null,
+    "suggested_fix": "Ensure Redis is running or mocked for tests",
+    "confidence": 0.0
+  },
+  "mock_assertion": {
+    "category": "mock_error",
+    "description": "Mock assertion failure",
+    "occurrences": 0,
+    "affected_tests": [],
+    "error_signatures": [
+      "Mock.*assert.*called",
+      "Expected.*but.*called",
+      "mock.*AssertionError"
+    ],
+    "first_seen": null,
+    "last_seen": null,
+    "suggested_fix": "Review mock setup and expected calls",
+    "confidence": 0.0
+  },
+  "timeout_error": {
+    "category": "timeout",
+    "description": "Test timeout",
+    "occurrences": 0,
+    "affected_tests": [],
+    "error_signatures": [
+      "TimeoutError",
+      "timed? out after",
+      "asyncio.*TimeoutError",
+      "deadline.*exceeded"
+    ],
+    "first_seen": null,
+    "last_seen": null,
+    "suggested_fix": "Increase timeout or optimize test performance",
+    "confidence": 0.0
+  },
+  "type_mismatch": {
+    "category": "type_error",
+    "description": "Type mismatch error",
+    "occurrences": 0,
+    "affected_tests": [],
+    "error_signatures": [
+      "TypeError.*expected.*got",
+      "TypeError.*takes.*positional",
+      "TypeError.*missing.*required"
+    ],
+    "first_seen": null,
+    "last_seen": null,
+    "suggested_fix": "Check function signatures and type hints",
+    "confidence": 0.0
+  },
+  "assertion_equality": {
+    "category": "assertion_failure",
+    "description": "Assertion equality failure",
+    "occurrences": 0,
+    "affected_tests": [],
+    "error_signatures": [
+      "AssertionError.*==",
+      "assert.*==.*False",
+      "Expected.*to equal"
+    ],
+    "first_seen": null,
+    "last_seen": null,
+    "suggested_fix": "Review expected vs actual values in assertions",
+    "confidence": 0.0
+  },
+  "fixture_not_found": {
+    "category": "configuration_error",
+    "description": "Pytest fixture not found",
+    "occurrences": 0,
+    "affected_tests": [],
+    "error_signatures": [
+      "fixture.*not found",
+      "fixture.*is not available",
+      "fixture.*cannot be found"
+    ],
+    "first_seen": null,
+    "last_seen": null,
+    "suggested_fix": "Check fixture definitions and imports in conftest.py",
+    "confidence": 0.0
+  },
+  "websocket_closed": {
+    "category": "connection_error",
+    "description": "WebSocket connection closed",
+    "occurrences": 0,
+    "affected_tests": [],
+    "error_signatures": [
+      "WebSocket.*closed",
+      "WebSocket.*disconnected",
+      "Connection.*closed.*unexpectedly"
+    ],
+    "first_seen": null,
+    "last_seen": null,
+    "suggested_fix": "Ensure WebSocket server is running and connection handling is correct",
+    "confidence": 0.0
+  },
+  "permission_denied": {
+    "category": "permission_error",
+    "description": "Permission denied error",
+    "occurrences": 0,
+    "affected_tests": [],
+    "error_signatures": [
+      "PermissionError",
+      "Permission denied",
+      "Access.*denied",
+      "Operation not permitted"
+    ],
+    "first_seen": null,
+    "last_seen": null,
+    "suggested_fix": "Check file/directory permissions and user privileges",
+    "confidence": 0.0
+  }
+}

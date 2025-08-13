@@ -1,16 +1,60 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useWebSocket } from './useWebSocket';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import type { UnifiedWebSocketEvent } from '@/types/unified-chat';
+import { generateUniqueId } from '@/lib/utils';
+import { logger } from '@/lib/logger';
+import { Message } from '@/types/chat';
+import { useChatStore } from '@/store/chat';
 
-export const useChatWebSocket = (runId?: string) => {
+interface AgentMetrics {
+  currentAgent: string | null;
+  previousAgent: string | null;
+  agentStartTime: number;
+  totalStartTime: number;
+  stepCount: number;
+  agentTimings: Map<string, number>;
+  toolCallCount: Map<string, number>;
+}
+
+interface UseChatWebSocketOptions {
+  enhanced?: boolean;
+  runId?: string;
+}
+
+/**
+ * Unified chat WebSocket hook that combines base, enhanced, and compatibility features.
+ * Use the 'enhanced' option to enable advanced metrics and tracking.
+ */
+export const useChatWebSocket = (options: UseChatWebSocketOptions | string = {}) => {
+  // Handle legacy string parameter for backward compatibility
+  const config = typeof options === 'string' 
+    ? { runId: options, enhanced: false } 
+    : { enhanced: false, ...options };
+    
   const { messages } = useWebSocket();
-  const { handleWebSocketEvent } = useUnifiedChatStore();
+  const unifiedStore = useUnifiedChatStore();
+  const chatStore = useChatStore();
+  const { handleWebSocketEvent } = unifiedStore;
   
   // Track the last processed message index to avoid reprocessing
   const lastProcessedIndex = useRef(0);
+  
+  // Enhanced mode: Track agent metrics and timing
+  const [metrics, setMetrics] = useState<AgentMetrics>({
+    currentAgent: null,
+    previousAgent: null,
+    agentStartTime: Date.now(),
+    totalStartTime: Date.now(),
+    stepCount: 0,
+    agentTimings: new Map(),
+    toolCallCount: new Map()
+  });
+
+  // Enhanced mode: Track final report data
+  const [finalReportData, setFinalReportData] = useState<any>(null);
 
   useEffect(() => {
     // Only process new messages
@@ -19,16 +63,123 @@ export const useChatWebSocket = (runId?: string) => {
     newMessages.forEach((wsMessage) => {
       // Route all events through the unified store
       handleWebSocketEvent(wsMessage as UnifiedWebSocketEvent);
+      
+      // Enhanced mode processing
+      if (config.enhanced) {
+        processEnhancedMessage(wsMessage);
+      }
     });
     
     // Update the last processed index
     lastProcessedIndex.current = messages.length;
-  }, [messages, handleWebSocketEvent]);
-
-  // Return unified store state for backward compatibility
-  const unifiedStore = useUnifiedChatStore();
+  }, [messages, handleWebSocketEvent, config.enhanced]);
   
-  return {
+  // Enhanced message processing function
+  const processEnhancedMessage = (wsMessage: any) => {
+    const now = Date.now();
+    
+    if (wsMessage.type === 'sub_agent_update') {
+      const payload = wsMessage.payload as any;
+      const newAgentName = payload?.sub_agent_name;
+      
+      if (newAgentName && newAgentName !== metrics.currentAgent) {
+        // Record timing for previous agent
+        if (metrics.currentAgent) {
+          const duration = now - metrics.agentStartTime;
+          metrics.agentTimings.set(
+            metrics.currentAgent, 
+            (metrics.agentTimings.get(metrics.currentAgent) || 0) + duration
+          );
+          
+          // Add transition message
+          const transitionMessage: Message & any = {
+            id: generateUniqueId('msg'),
+            type: 'system',
+            content: `Transitioning from ${metrics.currentAgent} to ${newAgentName}`,
+            created_at: new Date().toISOString(),
+            sub_agent_name: 'System',
+            displayed_to_user: true,
+            agent_transition: {
+              from: metrics.currentAgent,
+              to: newAgentName,
+              timestamp: new Date().toISOString()
+            }
+          };
+          chatStore.addMessage(transitionMessage);
+        }
+        
+        // Update metrics
+        setMetrics(prev => ({
+          ...prev,
+          previousAgent: prev.currentAgent,
+          currentAgent: newAgentName,
+          agentStartTime: now,
+          stepCount: prev.stepCount + 1
+        }));
+        
+        try {
+          chatStore.setSubAgentName(newAgentName);
+          if (payload?.state) {
+            chatStore.setSubAgentStatus({
+              status: payload.state.lifecycle || 'idle',
+              tools: payload.state.tools || []
+            });
+          }
+        } catch (error) {
+          logger.error('Failed to update agent state', error as Error, {
+            component: 'useChatWebSocket',
+            action: 'update_agent_state_error'
+          });
+        }
+      }
+      
+      // Check for final report data
+      if (payload?.state && (payload.state.data_result || payload.state.optimizations_result || 
+          payload.state.action_plan_result || payload.state.final_report)) {
+        setFinalReportData({
+          ...payload.state,
+          execution_metrics: {
+            total_duration: now - metrics.totalStartTime,
+            agent_timings: Array.from(metrics.agentTimings.entries()),
+            tool_calls: Array.from(metrics.toolCallCount.entries())
+          }
+        });
+      }
+    } else if (wsMessage.type === 'tool_call') {
+      const payload = wsMessage.payload as any;
+      const toolName = payload.tool_name || 'Unknown';
+      
+      // Track tool call count
+      setMetrics(prev => {
+        const newCount = new Map(prev.toolCallCount);
+        newCount.set(toolName, (newCount.get(toolName) || 0) + 1);
+        return { ...prev, toolCallCount: newCount };
+      });
+    } else if (wsMessage.type === 'agent_started') {
+      chatStore.setProcessing(true);
+      setMetrics(prev => ({
+        ...prev,
+        totalStartTime: now,
+        stepCount: 0,
+        agentTimings: new Map(),
+        toolCallCount: new Map()
+      }));
+    } else if (wsMessage.type === 'agent_finished' || wsMessage.type === 'agent_completed') {
+      chatStore.setProcessing(false);
+      
+      // Record final timing for current agent
+      if (metrics.currentAgent) {
+        const duration = now - metrics.agentStartTime;
+        metrics.agentTimings.set(
+          metrics.currentAgent, 
+          (metrics.agentTimings.get(metrics.currentAgent) || 0) + duration
+        );
+      }
+    }
+  };
+
+  // Base return object
+  const baseReturn = {
     // Core state
     messages: unifiedStore.messages,
     isProcessing: unifiedStore.isProcessing,
@@ -80,4 +231,26 @@ export const useChatWebSocket = (runId?: string) => {
     registerTool: () => {},
     executeTool: () => {}
   };
+  
+  // Add enhanced features if enabled
+  if (config.enhanced) {
+    return {
+      ...baseReturn,
+      metrics,
+      finalReportData,
+      currentAgent: metrics.currentAgent,
+      totalDuration: Date.now() - metrics.totalStartTime,
+      stepCount: metrics.stepCount
+    };
+  }
+  
+  return baseReturn;
+};
+
+/**
+ * Alias for backward compatibility with enhanced features enabled by default
+ * @deprecated Use useChatWebSocket({ enhanced: true }) instead
+ */
+export const useEnhancedChatWebSocket = () => {
+  return useChatWebSocket({ enhanced: true });
 };

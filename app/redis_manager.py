@@ -9,20 +9,31 @@ class RedisManager:
         self.enabled = self._check_if_enabled()
 
     def _check_if_enabled(self):
-        """Check if Redis should be enabled based on environment and config."""
+        """Check if Redis should be enabled based on service mode configuration."""
         import os
         
         # Check for test-specific disable flag
         if os.environ.get("TEST_DISABLE_REDIS", "").lower() == "true":
             logger.info("Redis is disabled for testing")
             return False
+        
+        # Check service mode from environment (set by dev launcher)
+        redis_mode = os.environ.get("REDIS_MODE", "shared").lower()
+        
+        if redis_mode == "disabled":
+            logger.info("Redis is disabled (mode: disabled)")
+            return False
+        elif redis_mode == "mock":
+            logger.info("Redis is running in mock mode")
+            # Still return True but the connection will use mock
+            return True
             
         if settings.environment == "development":
             enabled = settings.dev_mode_redis_enabled
             if not enabled:
-                logger.info("Redis is disabled in development mode")
+                logger.info("Redis is disabled in development configuration")
             return enabled
-        # Redis is always enabled in production and testing (unless TEST_DISABLE_REDIS is set)
+        # Redis is always enabled in production and testing
         return True
 
     async def connect(self):

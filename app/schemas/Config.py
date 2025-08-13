@@ -151,19 +151,19 @@ class AppConfig(BaseModel):
     llm_cache_enabled: bool = True
     llm_cache_ttl: int = 3600  # 1 hour default
     
-    # Development Mode Service Settings
-    # All services are enabled by default, can be disabled via environment variables
+    # Service configuration is now managed through dev_launcher service config
+    # Services use the mode specified in the launcher (local/shared/mock)
     dev_mode_redis_enabled: bool = Field(
         default=True, 
-        description="Enable Redis in development mode (default: True). Set DEV_MODE_DISABLE_REDIS=true to disable."
+        description="Redis service status (managed by dev launcher)"
     )
     dev_mode_clickhouse_enabled: bool = Field(
         default=True, 
-        description="Enable ClickHouse in development mode (default: True). Set DEV_MODE_DISABLE_CLICKHOUSE=true to disable."
+        description="ClickHouse service status (managed by dev launcher)"
     )
     dev_mode_llm_enabled: bool = Field(
         default=True, 
-        description="Enable LLMs in development mode (default: True). Set DEV_MODE_DISABLE_LLM=true to disable."
+        description="LLM service status (managed by dev launcher)"
     )
 
     llm_configs: Dict[str, LLMConfig] = {
@@ -230,14 +230,26 @@ class DevelopmentConfig(AppConfig):
     
     def __init__(self, **data):
         import os
-        # Check environment variables to override dev mode settings
-        # Services are enabled by default, only disable if explicitly set
-        if os.environ.get("DEV_MODE_DISABLE_REDIS", "").lower() == "true":
-            data["dev_mode_redis_enabled"] = False
-        if os.environ.get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true":
-            data["dev_mode_clickhouse_enabled"] = False
-        if os.environ.get("DEV_MODE_DISABLE_LLM", "").lower() == "true":
-            data["dev_mode_llm_enabled"] = False
+        # Check service modes from environment (set by dev launcher)
+        redis_mode = os.environ.get("REDIS_MODE", "shared").lower()
+        clickhouse_mode = os.environ.get("CLICKHOUSE_MODE", "shared").lower()
+        llm_mode = os.environ.get("LLM_MODE", "shared").lower()
+        
+        # Services are only disabled if explicitly set to 'disabled' mode
+        data["dev_mode_redis_enabled"] = redis_mode != "disabled"
+        data["dev_mode_clickhouse_enabled"] = clickhouse_mode != "disabled"
+        data["dev_mode_llm_enabled"] = llm_mode != "disabled"
+        
+        # Log service configuration for transparency
+        import logging
+        logger = logging.getLogger(__name__)
+        if redis_mode == "mock":
+            logger.info("Redis running in MOCK mode")
+        if clickhouse_mode == "mock":
+            logger.info("ClickHouse running in MOCK mode")
+        if llm_mode == "mock":
+            logger.info("LLM running in MOCK mode")
+        
         super().__init__(**data)
 
 class ProductionConfig(AppConfig):

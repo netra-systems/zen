@@ -40,4 +40,11 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
 user_service = CRUDUser(User)
 
-# Note: Module-level functions removed - use user_service instance with proper db session
+# Module-level wrapper functions for compatibility
+async def get_all_users(db: AsyncSession) -> List[User]:
+    """Get all users from the system."""
+    return await user_service.get_all_users(db)
+
+async def update_user_role(user_id: str, role: str, db: AsyncSession) -> User:
+    """Update user role in the system."""
+    return await user_service.update_user_role(user_id, role, db)

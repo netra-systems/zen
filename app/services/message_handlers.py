@@ -1,7 +1,10 @@
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, TYPE_CHECKING
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
 from app.logging_config import central_logger
+
+if TYPE_CHECKING:
+    from app.agents.supervisor import SupervisorAgent
 from app.services.thread_service import ThreadService
 from app.schemas.websocket_types import (
     UserMessagePayload,
@@ -20,7 +23,7 @@ logger = central_logger.get_logger(__name__)
 class MessageHandlerService:
     """Handles different types of WebSocket messages following conventions"""
     
-    def __init__(self, supervisor: Any, thread_service: ThreadService):
+    def __init__(self, supervisor: 'SupervisorAgent', thread_service: ThreadService):
         self.supervisor = supervisor
         self.thread_service = thread_service
     

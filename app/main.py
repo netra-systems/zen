@@ -2,16 +2,30 @@ import time
 import sys
 import os
 import asyncio
+import multiprocessing
 import alembic.config
 import alembic.script
 from alembic.runtime.migration import MigrationContext
 from sqlalchemy import create_engine
+from pathlib import Path
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+# Load .env file if it exists
+try:
+    from dotenv import load_dotenv
+    env_path = Path(__file__).parent.parent / '.env'
+    if env_path.exists():
+        load_dotenv(env_path)
+        print(f"Loaded .env file from {env_path}")
+except ImportError:
+    # dotenv not installed, skip
+    pass
+
 # Import unified logging first to ensure interceptor is set up
 from app.logging_config import central_logger
+from app.utils.multiprocessing_cleanup import setup_multiprocessing, cleanup_multiprocessing
 
 # Configure loggers after unified logging is initialized
 import logging
@@ -103,6 +117,9 @@ async def lifespan(app: FastAPI):
     start_time = time.time()
     logger = central_logger.get_logger(__name__)
     logger.info("Application startup...")
+    
+    # Set up multiprocessing properly to avoid semaphore leaks
+    setup_multiprocessing()
     if 'pytest' in sys.modules:
         logger.info(f"pytest in sys.modules")
 
@@ -132,17 +149,20 @@ async def lifespan(app: FastAPI):
     # ClickHouse client managed by central_logger
     app.state.clickhouse_client = None
     
-    # Initialize ClickHouse tables
-    if 'pytest' not in sys.modules and os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() != 'true':  # Skip during testing or if explicitly disabled
+    # Initialize ClickHouse tables based on service mode
+    clickhouse_mode = os.getenv('CLICKHOUSE_MODE', 'shared').lower()
+    if 'pytest' not in sys.modules and clickhouse_mode not in ['disabled', 'mock']:
         try:
-            logger.info("Initializing ClickHouse tables...")
+            logger.info(f"Initializing ClickHouse tables (mode: {clickhouse_mode})...")
             await initialize_clickhouse_tables()
             logger.info("ClickHouse tables initialization complete")
         except Exception as e:
             logger.error(f"Failed to initialize ClickHouse tables: {e}")
             # Don't fail startup, the app can still work with PostgreSQL
-    elif os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() == 'true':
-        logger.info("Skipping ClickHouse initialization (SKIP_CLICKHOUSE_INIT=true)")
+    elif clickhouse_mode == 'disabled':
+        logger.info("Skipping ClickHouse initialization (mode: disabled)")
+    elif clickhouse_mode == 'mock':
+        logger.info("Skipping ClickHouse initialization (mode: mock)")
 
     # Initialize Postgres - must be done before startup checks
     app.state.db_session_factory = async_session_factory
@@ -154,7 +174,15 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.critical(f"CRITICAL: Startup checks failed: {e}")
         logger.info("Application shutting down due to startup failure.")
-        os._exit(1)
+        # Clean up resources before exit
+        try:
+            await redis_manager.disconnect()
+            cleanup_multiprocessing()
+            await central_logger.shutdown()
+        except Exception as cleanup_error:
+            logger.error(f"Error during cleanup: {cleanup_error}")
+        # Use sys.exit instead of os._exit to allow proper cleanup
+        sys.exit(1)
 
     # Perform comprehensive schema validation
     from app.services.schema_validation_service import run_comprehensive_validation
@@ -191,6 +219,9 @@ async def lifespan(app: FastAPI):
     finally:
         # Shutdown
         logger.info("Application shutdown initiated...")
+        
+        # Clean up multiprocessing resources
+        cleanup_multiprocessing()
         
         # Stop database monitoring
         if hasattr(app.state, 'monitoring_task'):

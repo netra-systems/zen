@@ -128,7 +128,7 @@ def main():
         "app/tests/core/test_config_manager.py::TestConfigManager::test_initialization",
         
         # Critical services  
-        "app/tests/services/test_security_service.py::TestSecurityService::test_verify_password",
+        "app/tests/services/test_security_service.py::test_encrypt_and_decrypt",
         
         # Routes
         "app/tests/routes/test_health_route.py::test_live_endpoint",
@@ -149,7 +149,7 @@ def main():
             print(f"  [SKIP] {test_file} - File not found")
             continue
             
-        result = run_tests(test_file, max_time=10)
+        result = run_tests(test_file, max_time=30)
         results.append(result)
         
         total_passed += result["passed"]

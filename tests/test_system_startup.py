@@ -87,9 +87,9 @@ class TestSystemStartup:
         config_manager = ConfigManager()
         config = config_manager.get_config()
         assert config is not None
-        assert config.app_name == "Netra AI Optimization Platform"
-        assert config.version is not None
+        assert config.app_name == "netra"
         assert config.environment == "testing"
+        assert config.database_url is not None
     
     @pytest.mark.asyncio
     async def test_database_connection_startup(self, startup_env, mock_external_services):

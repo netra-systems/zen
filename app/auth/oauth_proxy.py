@@ -3,7 +3,7 @@
 import base64
 import json
 import time
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request, HTTPException, Response
@@ -44,7 +44,7 @@ class OAuthProxyService:
         
         return state_b64
     
-    async def decode_state(self, state: str) -> Dict:
+    async def decode_state(self, state: str) -> Dict[str, Any]:
         """Decode and validate state parameter."""
         try:
             state_bytes = base64.urlsafe_b64decode(state.encode('utf-8'))
@@ -74,13 +74,13 @@ class OAuthProxyService:
             logger.error(f"Failed to decode state: {e}")
             raise HTTPException(status_code=400, detail="Invalid state parameter")
     
-    async def store_token(self, pr_number: str, token_data: Dict) -> str:
+    async def store_token(self, pr_number: str, token_data: Dict[str, Any]) -> str:
         """Store OAuth token temporarily and return transfer key."""
         transfer_key = f"oauth_token:{pr_number}:{int(time.time())}"
         await self.redis.setex(transfer_key, self.token_ttl, json.dumps(token_data))
         return transfer_key
     
-    async def retrieve_token(self, transfer_key: str) -> Optional[Dict]:
+    async def retrieve_token(self, transfer_key: str) -> Optional[Dict[str, Any]]:
         """Retrieve and delete OAuth token."""
         token_json = await self.redis.get(transfer_key)
         if token_json:
@@ -88,7 +88,7 @@ class OAuthProxyService:
             return json.loads(token_json)
         return None
     
-    async def exchange_code_for_token(self, code: str, client_id: str, client_secret: str) -> Dict:
+    async def exchange_code_for_token(self, code: str, client_id: str, client_secret: str) -> Dict[str, Any]:
         """Exchange authorization code for access token."""
         token_url = "https://oauth2.googleapis.com/token"
         
@@ -109,7 +109,7 @@ class OAuthProxyService:
             
             return response.json()
     
-    async def get_user_info(self, access_token: str) -> Dict:
+    async def get_user_info(self, access_token: str) -> Dict[str, Any]:
         """Get user info from Google."""
         user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
         

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { generateUniqueId } from '@/lib/utils';
 import { WebSocketEventBuffer, WSEvent } from '@/lib/circular-buffer';
+import { logger } from '@/lib/logger';
 import type {
   UnifiedChatState,
   UnifiedWebSocketEvent,
@@ -138,11 +139,16 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
         state.wsEventBuffer.push(wsEvent);
         
         // Debug logging to track layer updates
-        console.log('[UnifiedChat] WebSocket Event:', event.type, {
-          payload: event.payload,
-          currentFastLayer: state.fastLayerData,
-          currentMediumLayer: state.mediumLayerData,
-          currentSlowLayer: state.slowLayerData
+        logger.debug('WebSocket Event received', {
+          component: 'UnifiedChatStore',
+          action: 'websocket_event',
+          metadata: {
+            event_type: event.type,
+            payload: event.payload,
+            has_fast_layer: !!state.fastLayerData,
+            has_medium_layer: !!state.mediumLayerData,
+            has_slow_layer: !!state.slowLayerData
+          }
         });
         
         switch (event.type) {

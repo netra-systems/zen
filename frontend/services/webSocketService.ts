@@ -1,5 +1,6 @@
 import { WebSocketMessage } from '../types/backend_schema_auto_generated';
 import { config } from '@/config';
+import { logger } from '@/lib/logger';
 
 export type WebSocketStatus = 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
 export type WebSocketState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
@@ -87,7 +88,10 @@ class WebSocketService {
           this.onMessage?.(message as WebSocketMessage);
           options.onMessage?.(message);
         } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
+          logger.error('Error parsing WebSocket message', error as Error, {
+            component: 'WebSocketService',
+            action: 'parse_message_error'
+          });
           options.onError?.({ message: 'Failed to parse message' });
         }
       };
@@ -106,14 +110,21 @@ class WebSocketService {
       };
 
       this.ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        logger.error('WebSocket error occurred', undefined, {
+          component: 'WebSocketService',
+          action: 'websocket_error',
+          metadata: { error }
+        });
         this.status = 'CLOSED';
         this.state = 'disconnected';
         this.onStatusChange?.(this.status);
         options.onError?.(error);
       };
     } catch (error) {
-      console.error('Failed to connect to WebSocket:', error);
+      logger.error('Failed to connect to WebSocket', error as Error, {
+        component: 'WebSocketService',
+        action: 'connection_failed'
+      });
       this.status = 'CLOSED';
       this.state = 'disconnected';
       this.onStatusChange?.(this.status);

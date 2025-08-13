@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from typing import List, Dict, Any, Optional
 from app.db.clickhouse_base import ClickHouseDatabase
 from app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 from app.config import settings
@@ -8,15 +9,15 @@ from app.logging_config import central_logger as logger
 class MockClickHouseDatabase:
     """Mock ClickHouse client for when ClickHouse is disabled in dev mode."""
     
-    async def execute(self, query, params=None):
+    async def execute(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         logger.debug(f"ClickHouse disabled - Mock execute: {query}")
         return []
     
-    async def execute_query(self, query, params=None):
+    async def execute_query(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         logger.debug(f"ClickHouse disabled - Mock execute_query: {query}")
         return []
     
-    async def fetch(self, query, params=None):
+    async def fetch(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """Mock fetch method for tests that expect this interface."""
         logger.debug(f"ClickHouse disabled - Mock fetch: {query}")
         # Return mock data that would be expected from common queries

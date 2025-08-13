@@ -13,6 +13,7 @@ import sys
 import json
 import asyncio
 import pytest
+import pytest_asyncio
 import time
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
@@ -65,8 +66,18 @@ class TestRealServicesComprehensive:
     """Comprehensive test suite for real service integration"""
     
     @pytest.fixture(autouse=True)
-    async def setup(self):
+    def setup(self):
         """Setup test environment with real services"""
+        # Run async setup in sync context
+        asyncio.run(self._async_setup())
+        
+        yield
+        
+        # Cleanup
+        asyncio.run(self._cleanup())
+    
+    async def _async_setup(self):
+        """Async setup method"""
         # Initialize database
         async with async_engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
@@ -110,11 +121,6 @@ class TestRealServicesComprehensive:
             "total_latency": 0,
             "quality_scores": []
         }
-        
-        yield
-        
-        # Cleanup
-        await self._cleanup()
     
     async def _create_test_user(self) -> User:
         """Create a test user for the session"""
@@ -482,7 +488,7 @@ class TestRealServicesComprehensive:
         assert all(r["avg_latency"] > 0 for r in results)
         assert all(r["total_tokens"] > 0 for r in results)
     
-    def test_print_metrics_summary(self):
+    async def test_print_metrics_summary(self):
         """Print summary of real service test metrics"""
         print("\n" + "="*60)
         print("REAL SERVICE TEST METRICS SUMMARY")

@@ -86,7 +86,6 @@ describe('Internal Frontend Module Import Tests', () => {
       expect(() => require('@/hooks/useError')).not.toThrow();
       expect(() => require('@/hooks/useChatWebSocket')).not.toThrow();
       expect(() => require('@/hooks/useDemoWebSocket')).not.toThrow();
-      expect(() => require('@/hooks/useEnhancedChatWebSocket')).not.toThrow();
       expect(() => require('@/hooks/useWebSocketResilience')).not.toThrow();
       
       // Verify hook exports

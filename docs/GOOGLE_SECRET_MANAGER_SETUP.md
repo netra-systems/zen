@@ -19,6 +19,44 @@ The application automatically appends `-staging` when fetching secrets in the st
 
 **Important**: Google Secret Manager API requires the numerical project ID, not the project name.
 
+## IAM Permissions Requirements
+
+### Critical: Secret Accessor Permission
+**IMPORTANT**: For new developers and service accounts to access secrets, they MUST have the `roles/secretmanager.secretAccessor` role in addition to any other permissions (like Editor or Viewer).
+
+The `secretAccessor` role is **NOT** included in standard Editor or Viewer roles and must be granted separately. Without this permission, developers will encounter "Permission Denied" errors when the application tries to load secrets, even if they have Editor permissions on the project.
+
+### Required IAM Roles for Developers
+1. **Project Editor** (`roles/editor`) - General project access and resource management
+2. **Secret Manager Secret Accessor** (`roles/secretmanager.secretAccessor`) - **CRITICAL**: Required to read secret values
+3. **Cloud Run Developer** (`roles/run.developer`) - Deploy and manage Cloud Run services
+
+### Granting Secret Accessor Permission
+```bash
+# For a user account
+gcloud projects add-iam-policy-binding netra-staging \
+    --member="user:developer@example.com" \
+    --role="roles/secretmanager.secretAccessor"
+
+# For a service account
+gcloud projects add-iam-policy-binding netra-staging \
+    --member="serviceAccount:service-account@netra-staging.iam.gserviceaccount.com" \
+    --role="roles/secretmanager.secretAccessor"
+```
+
+### Verifying Permissions
+```bash
+# Check your current permissions
+gcloud projects get-iam-policy netra-staging \
+    --flatten="bindings[].members" \
+    --filter="bindings.members:$(gcloud config get-value account)" \
+    --format="table(bindings.role)"
+
+# Should include:
+# - roles/editor (or similar)
+# - roles/secretmanager.secretAccessor  <-- CRITICAL
+```
+
 ## Required Secrets (MUST have for deployment to work)
 
 These secrets are critical and must be present for the application to start.
@@ -89,6 +127,7 @@ echo -n "YOUR_API_KEY_HERE" | gcloud secrets create gemini-api-key-staging \
     --replication-policy="automatic"
 
 # Grant access to the service account
+# IMPORTANT: The secretAccessor role is required even if the service account has Editor permissions!
 gcloud secrets add-iam-policy-binding gemini-api-key-staging \
     --member="serviceAccount:staging-environments@netra-staging.iam.gserviceaccount.com" \
     --role="roles/secretmanager.secretAccessor"
@@ -101,7 +140,10 @@ gcloud secrets add-iam-policy-binding gemini-api-key-staging \
 3. Enter the secret name (must match exactly from the table above)
 4. Enter the secret value
 5. Click "Create"
-6. Grant access to the service account `staging-environments@netra-staging.iam.gserviceaccount.com`
+6. **CRITICAL**: Grant `roles/secretmanager.secretAccessor` access to:
+   - The service account `staging-environments@netra-staging.iam.gserviceaccount.com`
+   - Any developers who need to run the application locally with `--load-secrets`
+   - Note: Editor/Viewer roles do NOT include secret access permissions!
 
 ## Batch Creation Script
 
@@ -183,11 +225,20 @@ gcloud secrets get-iam-policy gemini-api-key-staging --project=netra-staging
 
 If secrets are not loading:
 
-1. Check Cloud Run logs for secret loading errors
-2. Verify the service account has `roles/secretmanager.secretAccessor` role
+1. **FIRST CHECK**: Verify the user/service account has `roles/secretmanager.secretAccessor` role
+   - This is the #1 cause of "Permission Denied" errors
+   - Editor/Viewer roles do NOT grant secret access
+   - Run: `gcloud projects get-iam-policy netra-staging --filter="bindings.members:$(gcloud config get-value account)"`
+2. Check Cloud Run logs for secret loading errors
 3. Ensure the `LOAD_SECRETS=true` and `GCP_PROJECT_ID=netra-staging` environment variables are set
 4. Check that secret names match exactly (case-sensitive)
 5. Verify the secrets exist in the correct project
+
+### Common Permission Error
+```
+Error: 403 Permission 'secretmanager.versions.access' denied
+```
+**Solution**: Grant `roles/secretmanager.secretAccessor` to the affected user or service account. Editor permissions alone are NOT sufficient.
 
 ## Environment Variable Fallback
 

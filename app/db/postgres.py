@@ -110,19 +110,37 @@ async_session_factory: Optional[async_sessionmaker] = None
 try:
     db_url = settings.database_url
     if db_url:
+        # Convert sync database URL to async format
+        if db_url.startswith("postgresql://"):
+            async_db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        elif db_url.startswith("postgres://"):
+            async_db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif db_url.startswith("sqlite://"):
+            async_db_url = db_url.replace("sqlite://", "sqlite+aiosqlite://", 1)
+        else:
+            async_db_url = db_url
+        
         # Use AsyncAdaptedQueuePool for proper async connection pooling
-        pool_class = AsyncAdaptedQueuePool if "sqlite" not in db_url else NullPool
-        async_engine = create_async_engine(
-            db_url,
-            echo=DatabaseConfig.ECHO,
-            echo_pool=DatabaseConfig.ECHO_POOL,
-            poolclass=pool_class,
-            pool_size=DatabaseConfig.POOL_SIZE if pool_class == AsyncAdaptedQueuePool else 0,
-            max_overflow=DatabaseConfig.MAX_OVERFLOW if pool_class == AsyncAdaptedQueuePool else 0,
-            pool_timeout=DatabaseConfig.POOL_TIMEOUT,
-            pool_recycle=DatabaseConfig.POOL_RECYCLE,
-            pool_pre_ping=DatabaseConfig.POOL_PRE_PING,
-        )
+        pool_class = AsyncAdaptedQueuePool if "sqlite" not in async_db_url else NullPool
+        
+        # Build engine arguments based on pool class
+        engine_args = {
+            "echo": DatabaseConfig.ECHO,
+            "echo_pool": DatabaseConfig.ECHO_POOL,
+            "poolclass": pool_class,
+        }
+        
+        # Only add pool-specific arguments for non-NullPool
+        if pool_class != NullPool:
+            engine_args.update({
+                "pool_size": DatabaseConfig.POOL_SIZE,
+                "max_overflow": DatabaseConfig.MAX_OVERFLOW,
+                "pool_timeout": DatabaseConfig.POOL_TIMEOUT,
+                "pool_recycle": DatabaseConfig.POOL_RECYCLE,
+                "pool_pre_ping": DatabaseConfig.POOL_PRE_PING,
+            })
+        
+        async_engine = create_async_engine(async_db_url, **engine_args)
         async_session_factory = async_sessionmaker(
             bind=async_engine,
             class_=AsyncSession,

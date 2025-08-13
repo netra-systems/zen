@@ -152,24 +152,7 @@ async def register_client(
         )
 
 
-@router.post("/register-client")
-async def register_mcp_client_legacy(
-    name: str,
-    client_type: str,
-    permissions: Optional[List[str]] = None,
-    metadata: Optional[Dict[str, Any]] = None,
-    db_session: AsyncSession = Depends(get_async_db),
-    user: UserInDB = Depends(get_current_user),
-    mcp_service: MCPService = Depends(get_mcp_service)
-):
-    """Register a new MCP client (legacy endpoint)"""
-    request = MCPClientCreateRequest(
-        name=name,
-        client_type=client_type,
-        permissions=permissions,
-        metadata=metadata
-    )
-    return await register_client(request, db_session, mcp_service, user)
+# Legacy endpoint removed - use proper MCPClientCreateRequest with /clients endpoint
 
 
 @router.post("/sessions")
@@ -290,6 +273,9 @@ async def call_tool(
     current_user: UserInDB = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Execute an MCP tool"""
+    import time
+    start_time = time.time()
+    
     try:
         # Get the MCP server
         server = mcp_service.get_mcp_server()
@@ -309,6 +295,9 @@ async def call_tool(
         # Execute the tool
         result = await tool_func(**request.arguments)
         
+        # Calculate execution time
+        execution_time_ms = int((time.time() - start_time) * 1000)
+        
         # Record execution if session provided
         if request.session_id:
             from datetime import datetime
@@ -320,7 +309,7 @@ async def call_tool(
                 tool_name=request.tool_name,
                 input_params=request.arguments,
                 output_result={"result": result},
-                execution_time_ms=0,  # TODO: measure actual time
+                execution_time_ms=execution_time_ms,
                 status="success"
             )
             await mcp_service.record_tool_execution(db, execution)
@@ -346,7 +335,7 @@ async def call_tool(
                 client_id=str(current_user.id),
                 tool_name=request.tool_name,
                 input_params=request.arguments,
-                execution_time_ms=0,
+                execution_time_ms=int((time.time() - start_time) * 1000),
                 status="error",
                 error=str(e)
             )

@@ -16,8 +16,11 @@ consolidating multiple supervisor implementations with feature flags and
 circuit breaker patterns for robust agent orchestration.
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
 from enum import Enum
+
+if TYPE_CHECKING:
+    from app.ws_manager import WebSocketManager
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import asyncio
@@ -130,7 +133,7 @@ class SupervisorAgent:
     def __init__(self,
                  db_session: AsyncSession,
                  llm_manager: LLMManager = None,
-                 websocket_manager: Any = None,
+                 websocket_manager: Optional['WebSocketManager'] = None,
                  tool_dispatcher: ToolDispatcher = None,
                  config: SupervisorConfig = None,
                  user_id: str = None,
@@ -263,7 +266,7 @@ class SupervisorAgent:
             return self._supervisor_impl.agents
         return {}
     
-    def register_agent(self, name: str, agent: Any) -> None:
+    def register_agent(self, name: str, agent: 'BaseAgent') -> None:
         """Register an agent with the supervisor"""
         if hasattr(self._supervisor_impl, 'register_agent'):
             self._supervisor_impl.register_agent(name, agent)
@@ -296,7 +299,7 @@ class SupervisorAgent:
 
 def create_supervisor(db_session: AsyncSession,
                       llm_manager: LLMManager = None,
-                      websocket_manager: Any = None,
+                      websocket_manager: Optional['WebSocketManager'] = None,
                       tool_dispatcher: ToolDispatcher = None,
                       mode: SupervisorMode = SupervisorMode.BASIC,
                       enable_quality_gates: bool = False,

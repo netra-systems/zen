@@ -2,6 +2,7 @@ import { AuthConfigResponse } from '@/auth';
 import { useContext } from 'react';
 import { AuthContext, AuthContextType } from '@/auth';
 import { config } from '@/config';
+import { logger } from '@/lib/logger';
 
 const TOKEN_KEY = 'jwt_token';
 const DEV_LOGOUT_FLAG = 'dev_logout_flag';
@@ -16,7 +17,7 @@ class AuthService {
   }
 
   async handleDevLogin(authConfig: AuthConfigResponse): Promise<{ access_token: string, token_type: string } | null> {
-    console.log('Attempting dev login...');
+    logger.info('Attempting dev login', { component: 'AuthService', action: 'dev_login' });
     try {
       const response = await fetch(authConfig.endpoints.dev_login, {
         method: 'POST',
@@ -27,17 +28,24 @@ class AuthService {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log('Dev login successful');
+        logger.info('Dev login successful', { component: 'AuthService', action: 'dev_login_success' });
         localStorage.setItem(TOKEN_KEY, data.access_token);
         // Clear the logout flag on successful dev login
         this.clearDevLogoutFlag();
         return data;
       } else {
-        console.error('Dev login failed with status:', response.status);
+        logger.error('Dev login failed', undefined, { 
+          component: 'AuthService', 
+          action: 'dev_login_failed',
+          metadata: { status: response.status }
+        });
         return null;
       }
     } catch (error) {
-      console.error('Error during dev login:', error);
+      logger.error('Error during dev login', error as Error, { 
+        component: 'AuthService', 
+        action: 'dev_login_error'
+      });
       return null;
     }
   }
@@ -87,13 +95,20 @@ class AuthService {
         this.removeToken();
         window.location.href = '/';
       } else {
-        console.error('Logout failed');
+        logger.error('Logout failed', undefined, { 
+          component: 'AuthService', 
+          action: 'logout_failed',
+          metadata: { status: response.status }
+        });
         // Still remove token and redirect on error
         this.removeToken();
         window.location.href = '/';
       }
     } catch (error) {
-      console.error('Error during logout:', error);
+      logger.error('Error during logout', error as Error, { 
+        component: 'AuthService', 
+        action: 'logout_error'
+      });
       // Still remove token and redirect on error
       this.removeToken();
       window.location.href = '/';

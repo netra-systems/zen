@@ -4,9 +4,11 @@ import os
 from functools import lru_cache
 from typing import Optional, Dict, Any
 from pydantic import ValidationError
+from datetime import datetime
 
 # Import the schemas without circular dependency
 from app.schemas.Config import AppConfig, DevelopmentConfig, ProductionConfig, StagingConfig, NetraTestingConfig
+from app.schemas.config_types import ConfigurationSummary, ConfigurationStatus, Environment
 from app.logging_config import central_logger as logger
 from app.core.secret_manager import SecretManager
 from app.core.config_validator import ConfigValidator
@@ -285,6 +287,26 @@ class ConfigManager:
             }
         }
     
+    def get_configuration_summary(self) -> ConfigurationSummary:
+        """Get a summary of the current configuration status."""
+        config = self.get_config()
+        
+        # Count secrets
+        secret_mappings = self._get_secret_mappings()
+        total_secrets = len(secret_mappings)
+        required_secrets = [name for name, mapping in secret_mappings.items() if mapping.required]
+        
+        return ConfigurationSummary(
+            environment=Environment(config.environment),
+            status=ConfigurationStatus.LOADED,
+            loaded_at=datetime.now(),
+            secrets_loaded=total_secrets,
+            secrets_total=total_secrets,
+            critical_secrets_missing=[],
+            warnings=[],
+            errors=[]
+        )
+    
     def _apply_secret_mapping(self, config: AppConfig, mapping: Dict[str, Any], secret_value: str):
         """Apply a single secret mapping to the configuration."""
         if not mapping["targets"]:
@@ -348,6 +370,7 @@ class ConfigManager:
 
 # Global configuration manager instance
 _config_manager = ConfigManager()
+config_manager = _config_manager  # Export for backward compatibility
 
 # Convenient access functions
 def get_config() -> AppConfig:

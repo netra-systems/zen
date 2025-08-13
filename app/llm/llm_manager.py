@@ -1,11 +1,19 @@
-from typing import Any, Dict, Optional, Type, TypeVar
+from typing import Any, Dict, Optional, Type, TypeVar, List
 from app.schemas import AppConfig
+from app.schemas.llm_types import (
+    GenerationConfig, LLMResponse, LLMStreamChunk, LLMCacheEntry,
+    StructuredLLMResponse, LLMConfigInfo, LLMManagerStats, 
+    MockLLMResponse, LLMValidationError, LLMHealthCheck,
+    BatchLLMRequest, BatchLLMResponse, LLMProvider
+)
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 from app.services.llm_cache_service import llm_cache_service
 from app.logging_config import central_logger
 from pydantic import BaseModel
 import json
+import time
+from datetime import datetime
 
 logger = central_logger.get_logger(__name__)
 
@@ -83,16 +91,28 @@ class LLMManager:
         self.enabled = self._check_if_enabled()
 
     def _check_if_enabled(self):
-        """Check if LLMs should be enabled based on environment and config."""
+        """Check if LLMs should be enabled based on service mode configuration."""
+        import os
+        
+        # Check service mode from environment (set by dev launcher)
+        llm_mode = os.environ.get("LLM_MODE", "shared").lower()
+        
+        if llm_mode == "disabled":
+            logger.info("LLMs are disabled (mode: disabled)")
+            return False
+        elif llm_mode == "mock":
+            logger.info("LLMs are running in mock mode")
+            return False  # Use mock implementation
+        
         if self.settings.environment == "development":
             enabled = self.settings.dev_mode_llm_enabled
             if not enabled:
-                logger.info("LLMs are disabled in development mode")
+                logger.info("LLMs are disabled in development configuration")
             return enabled
         # LLMs are always enabled in production and testing
         return True
 
-    def get_llm(self, name: str, generation_config: Optional[Dict[str, Any]] = None) -> Any:
+    def get_llm(self, name: str, generation_config: Optional[GenerationConfig] = None) -> Any:
         # Return mock LLM if disabled in dev mode
         if not self.enabled:
             logger.debug(f"Returning mock LLM for '{name}' - LLMs disabled in dev mode")
@@ -124,7 +144,10 @@ class LLMManager:
         # Merge the default generation config with the override
         final_generation_config = config.generation_config.copy()
         if generation_config:
-            final_generation_config.update(generation_config)
+            if isinstance(generation_config, GenerationConfig):
+                final_generation_config.update(generation_config.model_dump(exclude_unset=True))
+            else:
+                final_generation_config.update(generation_config)
 
         if config.provider == "google":
             # Defer genai.configure until a Google model is actually used
@@ -170,7 +193,7 @@ class LLMManager:
         self._llm_cache[cache_key] = llm
         return llm
 
-    async def ask_llm(self, prompt: str, llm_config_name: str, use_cache: bool = True) -> str:
+    async def ask_llm(self, prompt: str, llm_config_name: str, use_cache: bool = True) -> LLMResponse:
         # Check cache first if enabled
         if use_cache:
             cached_response = await llm_cache_service.get_cached_response(prompt, llm_config_name)
@@ -178,15 +201,28 @@ class LLMManager:
                 return cached_response
         
         # Make LLM call
+        start_time = time.time()
         llm = self.get_llm(llm_config_name)
         response = await llm.ainvoke(prompt)
+        execution_time_ms = (time.time() - start_time) * 1000
+        
         response_content = response.content
+        
+        # Create typed response
+        llm_response = LLMResponse(
+            content=response_content,
+            token_count=getattr(response, 'token_count', None),
+            finish_reason=getattr(response, 'finish_reason', None),
+            model=getattr(response, 'model', llm_config_name),
+            cached=False,
+            execution_time_ms=execution_time_ms
+        )
         
         # Cache the response if appropriate
         if use_cache and llm_cache_service.should_cache_response(prompt, response_content):
             await llm_cache_service.cache_response(prompt, response_content, llm_config_name)
         
-        return response_content
+        return llm_response
 
     async def stream_llm(self, prompt: str, llm_config_name: str):
         llm = self.get_llm(llm_config_name)
@@ -194,7 +230,7 @@ class LLMManager:
             yield chunk.content
     
     def get_structured_llm(self, name: str, schema: Type[T], 
-                          generation_config: Optional[Dict[str, Any]] = None,
+                          generation_config: Optional[GenerationConfig] = None,
                           **kwargs) -> Any:
         """Get an LLM configured for structured output with a Pydantic schema.
         
@@ -273,3 +309,56 @@ class LLMManager:
             except Exception as parse_error:
                 logger.error(f"Fallback parsing also failed: {parse_error}")
                 raise e
+    
+    def get_config_info(self, name: str) -> Optional[LLMConfigInfo]:
+        """Get information about an LLM configuration."""
+        config = self.settings.llm_configs.get(name)
+        if not config:
+            return None
+        
+        return LLMConfigInfo(
+            name=name,
+            provider=LLMProvider(config.provider),
+            model_name=config.model_name,
+            api_key_configured=bool(config.api_key),
+            generation_config=GenerationConfig(**config.generation_config),
+            enabled=bool(config.api_key) if config.provider == "google" else True
+        )
+    
+    def get_manager_stats(self) -> LLMManagerStats:
+        """Get LLM manager statistics."""
+        active_configs = [name for name, config in self.settings.llm_configs.items() 
+                         if config.api_key or config.provider != "google"]
+        
+        return LLMManagerStats(
+            total_requests=0,  # Would need to implement request tracking
+            cached_responses=0,  # Would need to implement cache tracking
+            cache_hit_rate=0.0,
+            average_response_time_ms=0.0,
+            active_configs=active_configs,
+            enabled=self.enabled
+        )
+    
+    async def health_check(self, config_name: str) -> LLMHealthCheck:
+        """Perform health check on an LLM configuration."""
+        start_time = time.time()
+        try:
+            # Simple test prompt
+            test_response = await self.ask_llm("Hello", config_name, use_cache=False)
+            response_time_ms = (time.time() - start_time) * 1000
+            
+            return LLMHealthCheck(
+                config_name=config_name,
+                healthy=bool(test_response.content),
+                response_time_ms=response_time_ms,
+                last_checked=datetime.utcnow()
+            )
+        except Exception as e:
+            response_time_ms = (time.time() - start_time) * 1000
+            return LLMHealthCheck(
+                config_name=config_name,
+                healthy=False,
+                response_time_ms=response_time_ms,
+                error=str(e),
+                last_checked=datetime.utcnow()
+            )

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { authService } from '@/auth';
 import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '@/store/authStore';
+import { logger } from '@/lib/logger';
 export interface AuthContextType {
   user: User | null;
   login: () => void;
@@ -55,18 +56,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Sync with Zustand store
           syncAuthStore(decodedUser, storedToken);
         } catch (e) {
-          console.error("Invalid token:", e);
+          logger.error('Invalid token detected', e as Error, {
+            component: 'AuthContext',
+            action: 'token_validation_failed'
+          });
           authService.removeToken();
           syncAuthStore(null, null);
         }
       } else if (data.development_mode) {
         // Check if user explicitly logged out in dev mode
         const hasLoggedOut = authService.getDevLogoutFlag();
-        console.log('Development mode detected. Has logged out:', hasLoggedOut);
+        logger.debug('Development mode detected', {
+          component: 'AuthContext',
+          action: 'dev_mode_check',
+          metadata: { hasLoggedOut }
+        });
         
         if (!hasLoggedOut) {
           // Only auto-login if user hasn't explicitly logged out
-          console.log('Attempting auto dev login...');
+          logger.info('Attempting auto dev login', {
+            component: 'AuthContext',
+            action: 'auto_dev_login_attempt'
+          });
           const devLoginResponse = await authService.handleDevLogin(data);
           if (devLoginResponse) {
             setToken(devLoginResponse.access_token);
@@ -76,11 +87,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             syncAuthStore(decodedUser, devLoginResponse.access_token);
           }
         } else {
-          console.log('Skipping auto dev login - user has logged out');
+          logger.info('Skipping auto dev login - user has logged out', {
+            component: 'AuthContext',
+            action: 'auto_dev_login_skipped'
+          });
         }
       }
     } catch (error) {
-      console.error("Failed to fetch auth config:", error);
+      logger.error('Failed to fetch auth config', error as Error, {
+        component: 'AuthContext',
+        action: 'fetch_auth_config_failed'
+      });
     } finally {
       setLoading(false);
     }

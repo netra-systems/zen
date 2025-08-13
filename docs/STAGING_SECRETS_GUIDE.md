@@ -34,14 +34,44 @@ The platform uses three isolated security zones:
 
 ## Development Environment Secrets
 
+### IAM Permission Requirements
+
+**CRITICAL**: Before accessing secrets, developers MUST have the `roles/secretmanager.secretAccessor` permission in addition to any project-level permissions (Editor, Viewer, etc.).
+
+#### Required Permissions for Developers
+1. **Project Editor/Viewer** - General project access
+2. **Secret Manager Secret Accessor** (`roles/secretmanager.secretAccessor`) - **ESSENTIAL for reading secrets**
+   - ⚠️ **This is NOT included in Editor or Viewer roles**
+   - ⚠️ **Without this, you will get "Permission Denied" errors**
+
+#### Granting Secret Accessor Permission
+```bash
+# For your own account
+gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+    --member="user:your-email@example.com" \
+    --role="roles/secretmanager.secretAccessor"
+
+# Verify you have the permission
+gcloud projects get-iam-policy YOUR_PROJECT_ID \
+    --flatten="bindings[].members" \
+    --filter="bindings.members:$(gcloud config get-value account)" \
+    --format="table(bindings.role)" | grep secretAccessor
+```
+
 ### Local Development Setup
 
 #### Option 1: Automatic Secret Fetching (Recommended)
 ```bash
-# Requires Google Cloud authentication
+# Requires Google Cloud authentication AND Secret Accessor permission
 gcloud auth application-default login
 
-# Fetch development secrets
+# Verify you have secret access permission first!
+gcloud projects get-iam-policy YOUR_PROJECT_ID \
+    --filter="bindings.members:$(gcloud config get-value account)" \
+    --format="table(bindings.role)" | grep secretAccessor
+
+# If missing, request Secret Accessor permission from your admin
+# Then fetch development secrets
 python scripts/fetch_secrets_to_env.py
 ```
 
