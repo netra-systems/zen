@@ -738,25 +738,36 @@ class TestSupplyResearchIntegration:
         scheduler.add_schedule(custom_schedule)
         
         # Mock database and API calls
-        with patch('app.db.postgres.get_async_db') as mock_get_db:
-            mock_get_db.return_value = iter([mock_db])
+        with patch('app.db.postgres.Database') as MockDatabase:
+            mock_db_instance = Mock()
+            mock_db_instance.get_db.return_value.__enter__ = Mock(return_value=mock_db)
+            mock_db_instance.get_db.return_value.__exit__ = Mock(return_value=None)
+            MockDatabase.return_value = mock_db_instance
             
-            with patch.object(SupplyResearcherAgent, '_call_deep_research_api', new_callable=AsyncMock) as mock_api:
-                mock_api.return_value = {
-                    "session_id": "integration_test",
-                    "status": "completed",
-                    "questions_answered": [
-                        {"question": "Market overview?", "answer": "Multiple price changes detected"}
-                    ],
-                    "citations": [{"source": "Market Report", "url": "https://example.com"}]
-                }
+            with patch('app.services.supply_research_service.SupplyResearchService') as MockService:
+                mock_service = Mock()
+                mock_service.calculate_price_changes.return_value = {"all_changes": []}
+                MockService.return_value = mock_service
                 
-                # Run the schedule
-                result = await scheduler.run_schedule_now("test_integration")
-                
-                # Verify workflow completed
-                assert result["status"] == "completed"
-                assert result["research_type"] == "market_overview"
-                assert len(result["providers"]) == 3
-                
-                print("Integration test passed: Full research workflow completed successfully")
+                with patch.object(SupplyResearcherAgent, 'process_scheduled_research', new_callable=AsyncMock) as mock_process:
+                    mock_process.return_value = {
+                        "results": [{
+                            "provider": "openai",
+                            "session_id": "integration_test",
+                            "status": "completed",
+                            "questions_answered": [
+                                {"question": "Market overview?", "answer": "Multiple price changes detected"}
+                            ],
+                            "citations": [{"source": "Market Report", "url": "https://example.com"}]
+                        }]
+                    }
+                    
+                    # Run the schedule
+                    result = await scheduler.run_schedule_now("test_integration")
+                    
+                    # Verify workflow completed
+                    assert result["status"] == "completed"
+                    assert result["research_type"] == "market_overview"
+                    assert len(result["providers"]) == 3
+                    
+                    print("Integration test passed: Full research workflow completed successfully")

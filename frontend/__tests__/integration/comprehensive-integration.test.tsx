@@ -213,6 +213,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
   describe('2. Synthetic Data Generation Flow', () => {
     it('should generate synthetic data based on templates', async () => {
       jest.setTimeout(10000);
+      jest.setTimeout(10000);
       const TestComponent = () => {
         const [jobStatus, setJobStatus] = React.useState('idle');
         
@@ -483,6 +484,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
 
     it('should handle degraded service states', async () => {
       jest.setTimeout(10000);
+      jest.setTimeout(10000);
       const TestComponent = () => {
         const [health, setHealth] = React.useState<any>(null);
         
@@ -596,6 +598,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
 
   describe('9. Generation Service Integration', () => {
     it('should handle content generation with streaming', async () => {
+      jest.setTimeout(10000);
       jest.setTimeout(10000);
       const TestComponent = () => {
         const [content, setContent] = React.useState('');
@@ -747,6 +750,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
 
   describe('12. Cost Tracking and Budgeting', () => {
     it('should track API usage costs in real-time', async () => {
+      jest.setTimeout(10000);
       jest.setTimeout(10000);
       const TestComponent = () => {
         const [costs, setCosts] = React.useState<any>({ total: 0, breakdown: {} });
@@ -1665,6 +1669,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
   describe('27. Collaboration Features', () => {
     it('should handle real-time collaborative editing', async () => {
       jest.setTimeout(10000);
+      jest.setTimeout(10000);
       const TestComponent = () => {
         const [collaborators, setCollaborators] = React.useState<any[]>([]);
         
@@ -1694,6 +1699,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
     });
 
     it('should synchronize cursor positions between users', async () => {
+      jest.setTimeout(10000);
       jest.setTimeout(10000);
       const TestComponent = () => {
         const [cursors, setCursors] = React.useState<any>({});
@@ -1730,6 +1736,7 @@ describe('Comprehensive Frontend Integration Tests', () => {
 
   describe('28. Real-time Metrics Dashboard', () => {
     it('should display live performance metrics', async () => {
+      jest.setTimeout(10000);
       jest.setTimeout(10000);
       const TestComponent = () => {
         const [metrics, setMetrics] = React.useState({

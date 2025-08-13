@@ -227,7 +227,7 @@ class StartupChecker:
                 
                 for table in critical_tables:
                     result = await db.execute(
-                        text(f"SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = :table)"),
+                        text("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = :table)"),
                         {"table": table}
                     )
                     exists = result.scalar_one()

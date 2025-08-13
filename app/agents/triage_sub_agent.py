@@ -186,7 +186,16 @@ class TriageSubAgent(BaseSubAgent):
             r"document\.cookie",
             r"<img.*onerror",
             r"SELECT.*FROM.*users",
-            r"SELECT.*FROM.*secrets"
+            r"SELECT.*FROM.*secrets",
+            # Command injection patterns
+            r"rm\s+-rf\s+/",
+            r"cat\s+/etc/passwd",
+            r";\s*curl\s+",
+            r"\$\(",
+            r"`.*`",
+            r"/etc/passwd",
+            r"&&\s*rm",
+            r"\|\s*rm"
         ]
         
         for pattern in injection_patterns:
@@ -211,12 +220,13 @@ class TriageSubAgent(BaseSubAgent):
         # Extract model names (common AI model patterns)
         model_patterns = [
             r'gpt-?[0-9]+\.?[0-9]*(?:-?turbo)?',
-            r'claude-?[0-9]+\.?[0-9]*',
-            r'llama-?[0-9]+',
+            r'claude-?[0-9]+(?:-[a-z]+)?',
+            r'llama-?[0-9]+(?:b)?(?:-[a-z]+)?',
             r'mistral',
-            r'gemini',
+            r'gemini(?:-[a-z]+)?',
             r'anthropic',
-            r'openai'
+            r'openai',
+            r'palm-?[0-9]*'
         ]
         
         for pattern in model_patterns:
@@ -224,14 +234,14 @@ class TriageSubAgent(BaseSubAgent):
             entities.models_mentioned.extend(matches)
         
         # Extract metrics
-        metric_keywords = ['latency', 'throughput', 'cost', 'accuracy', 'error rate', 
-                          'response time', 'tokens', 'requests per second', 'rps']
+        metric_keywords = ['latency', 'throughput', 'cost', 'accuracy', 'error', 
+                          'response time', 'tokens', 'requests per second', 'rps', 'memory']
         for keyword in metric_keywords:
             if keyword in request.lower():
                 entities.metrics_mentioned.append(keyword)
         
         # Extract numerical values as potential thresholds/targets
-        number_pattern = r'\b\d+(?:\.\d+)?(?:\s*(?:ms|s|%|tokens?|requests?|USD|dollars?))?'
+        number_pattern = r'\b\d+(?:\.\d+)?(?:\s*(?:ms|s|%|tokens?|requests?|RPS|USD|dollars?))?'
         numbers = re.findall(number_pattern, request)
         for i, num in enumerate(numbers):
             # Check if this number is followed by a unit
@@ -242,6 +252,8 @@ class TriageSubAgent(BaseSubAgent):
                 entities.targets.append({"type": "percentage", "value": num + '%' if not num.endswith('%') else num})
             elif 'token' in remaining_text[:20].lower():
                 entities.thresholds.append({"type": "tokens", "value": num})
+            elif 'RPS' in remaining_text[:10] or 'requests' in remaining_text[:20].lower():
+                entities.thresholds.append({"type": "rate", "value": num})
         
         # Extract time ranges
         time_patterns = [

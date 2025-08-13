@@ -137,10 +137,19 @@ try:
             connection_record.info['pid'] = dbapi_conn.get_backend_pid() if hasattr(dbapi_conn, 'get_backend_pid') else None
             
             # Set statement timeout for all async connections
-            with dbapi_conn.cursor() as cursor:
+            # For asyncpg connections, we need to use the direct execute method
+            cursor = dbapi_conn.cursor()
+            try:
                 cursor.execute(f"SET statement_timeout = {DatabaseConfig.STATEMENT_TIMEOUT}")
                 cursor.execute("SET idle_in_transaction_session_timeout = 60000")  # 60 seconds
                 cursor.execute("SET lock_timeout = 10000")  # 10 seconds
+                dbapi_conn.commit()  # Commit the SET commands
+            except Exception as e:
+                dbapi_conn.rollback()  # Rollback on error
+                logger.error(f"Failed to set connection parameters: {e}")
+                raise
+            finally:
+                cursor.close()
             
             logger.debug(f"Async database connection established with safety limits: {connection_record.info.get('pid')}")
 

@@ -1124,8 +1124,8 @@ class TestSupervisorAdvancedFeatures:
         
         # Supervisor should handle the error gracefully
         try:
-            await supervisor.execute(state, context.run_id, stream_updates=False)
-            result = AgentExecutionResult(success=True, state=state)
+            final_state = await supervisor.run(state.user_request, context.run_id, stream_updates=False)
+            result = AgentExecutionResult(success=True, state=final_state)
         except Exception as e:
             result = AgentExecutionResult(success=False, error=str(e))
         
@@ -1192,7 +1192,13 @@ class TestSupervisorAdvancedFeatures:
                 agent_name="supervisor",
                 started_at=datetime.now(timezone.utc)
             )
-            tasks.append(supervisor.execute(state, run_id, stream_updates=False))
+            async def run_task():
+                try:
+                    final_state = await supervisor.run(state.user_request, run_id, stream_updates=False)
+                    return AgentExecutionResult(success=True, state=final_state)
+                except Exception as e:
+                    return AgentExecutionResult(success=False, error=str(e))
+            tasks.append(run_task())
         
         # Execute concurrently
         results = await asyncio.gather(*tasks, return_exceptions=True)
