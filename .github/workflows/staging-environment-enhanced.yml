@@ -263,7 +263,7 @@ jobs:
     if: |
       needs.initialize-deployment.outputs.should_deploy == 'true' && 
       needs.commit-monitor.outputs.new_commit_detected != 'true' &&
-      (github.event.pull_request.head.sha == env.DEPLOYMENT_SHA || github.event_name == 'workflow_dispatch')
+      (github.event.pull_request.head.sha == '${{ env.DEPLOYMENT_SHA }}' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
@@ -511,7 +511,7 @@ jobs:
     if: |
       needs.initialize-deployment.outputs.should_deploy == 'true' && 
       needs.commit-monitor.outputs.new_commit_detected != 'true' &&
-      (github.event.pull_request.head.sha == env.DEPLOYMENT_SHA || github.event_name == 'workflow_dispatch')
+      (github.event.pull_request.head.sha == '${{ env.DEPLOYMENT_SHA }}' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
@@ -776,7 +776,7 @@ jobs:
     if: |
       needs.initialize-deployment.outputs.should_deploy == 'true' && 
       needs.commit-monitor.outputs.new_commit_detected != 'true' &&
-      (github.event.pull_request.head.sha == env.DEPLOYMENT_SHA || github.event_name == 'workflow_dispatch')
+      (github.event.pull_request.head.sha == '${{ env.DEPLOYMENT_SHA }}' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
@@ -1657,8 +1657,8 @@ jobs:
           
           # Initialize Terraform
           terraform init \
-            -backend-config="bucket=${{ env.GCP_PROJECT_ID }}-terraform-state"
-            -backend-config="prefix=staging/pr-${PR_NUMBER}"
+            -backend-config="bucket=${{ env.GCP_PROJECT_ID }}-terraform-state" \
+            -backend-config="prefix=staging/pr-${PR_NUMBER}" \
             -lock-timeout=120s
           
           # Create secure tfvars file for destroy operation
