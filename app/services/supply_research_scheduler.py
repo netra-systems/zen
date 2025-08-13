@@ -45,9 +45,9 @@ class ResearchSchedule:
         self.research_type = research_type
         self.providers = providers or ["openai", "anthropic", "google", "mistral"]
         self.enabled = enabled
-        self.hour = hour or 2  # Default to 2 AM
-        self.day_of_week = day_of_week or 1  # Default to Monday
-        self.day_of_month = day_of_month or 1  # Default to 1st
+        self.hour = hour if hour is not None else 2  # Default to 2 AM
+        self.day_of_week = day_of_week if day_of_week is not None else 0  # Default to Monday
+        self.day_of_month = day_of_month if day_of_month is not None else 1  # Default to 1st
         self.last_run = None
         self.next_run = self._calculate_next_run()
     

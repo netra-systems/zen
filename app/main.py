@@ -53,6 +53,11 @@ from app.agents.tool_dispatcher import ToolDispatcher
 from app.services.tool_registry import ToolRegistry
 from app.redis_manager import redis_manager
 from app.db.clickhouse_init import initialize_clickhouse_tables
+from app.db.migration_utils import (
+    get_sync_database_url, get_current_revision, get_head_revision,
+    create_alembic_config, needs_migration, execute_migration,
+    log_migration_status, should_continue_on_error, validate_database_url
+)
 
 # Import new error handling components
 from app.core.exceptions import NetraException
@@ -67,48 +72,38 @@ from app.core.error_context import ErrorContext
 def run_migrations(logger: log_module.Logger) -> None:
     """Run database migrations automatically on startup."""
     try:
-        logger.info("Checking database migrations...")
-        
-        # Get the database URL
-        database_url = settings.database_url
-        if not database_url:
-            logger.warning("No database URL configured, skipping migrations")
-            return
-            
-        # Convert async URL to sync for Alembic
-        if database_url.startswith("postgresql+asyncpg://"):
-            sync_database_url = database_url.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
-        else:
-            sync_database_url = database_url
-            
-        # Check current revision
-        engine = create_engine(sync_database_url)
-        with engine.connect() as connection:
-            context = MigrationContext.configure(connection)
-            current_rev = context.get_current_revision()
-            logger.info(f"Current database revision: {current_rev}")
-        
-        # Run migrations
-        alembic_cfg = alembic.config.Config("config/alembic.ini")
-        alembic_cfg.set_main_option("sqlalchemy.url", sync_database_url)
-        
-        # Check if we need to upgrade
-        script = alembic.script.ScriptDirectory.from_config(alembic_cfg)
-        head_rev = script.get_current_head()
-        
-        if current_rev != head_rev:
-            logger.info(f"Migrating database from {current_rev} to {head_rev}...")
-            alembic.config.main(argv=["--raiseerr", "upgrade", "head"])
-            logger.info("Database migrations completed successfully")
-        else:
-            logger.info("Database is already up to date")
-            
+        _check_and_run_migrations(logger)
     except Exception as e:
-        logger.error(f"Failed to run migrations: {e}")
-        if settings.environment == "production":
-            raise
-        else:
-            logger.warning("Continuing without migrations in development mode")
+        _handle_migration_error(logger, e)
+
+def _check_and_run_migrations(logger: log_module.Logger) -> None:
+    """Check and run migrations if needed."""
+    logger.info("Checking database migrations...")
+    if not validate_database_url(settings.database_url, logger):
+        return
+    sync_url = get_sync_database_url(settings.database_url)
+    _perform_migration(logger, sync_url)
+
+def _perform_migration(logger: log_module.Logger, sync_url: str) -> None:
+    """Perform the actual migration."""
+    current = get_current_revision(sync_url)
+    logger.info(f"Current revision: {current}")
+    cfg = create_alembic_config(sync_url)
+    head = get_head_revision(cfg)
+    _execute_if_needed(logger, current, head)
+
+def _execute_if_needed(logger: log_module.Logger, current: str, head: str) -> None:
+    """Execute migration if needed."""
+    log_migration_status(logger, current, head)
+    if needs_migration(current, head):
+        execute_migration(logger)
+
+def _handle_migration_error(logger: log_module.Logger, error: Exception) -> None:
+    """Handle migration errors based on environment."""
+    logger.error(f"Failed to run migrations: {error}")
+    if not should_continue_on_error(settings.environment):
+        raise
+    logger.warning("Continuing without migrations")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

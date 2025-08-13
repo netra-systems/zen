@@ -96,6 +96,12 @@ class TestResearchSchedule:
     
     def test_calculate_next_run_weekly(self):
         """Test next run calculation for weekly frequency"""
+        from datetime import datetime, UTC
+        
+        # Debug: Check current time
+        now = datetime.now(UTC)
+        print(f"Test: Current time is {now}, weekday {now.weekday()}")
+        
         schedule = ResearchSchedule(
             name="weekly_test",
             frequency=ScheduleFrequency.WEEKLY,
@@ -103,6 +109,8 @@ class TestResearchSchedule:
             hour=9,
             day_of_week=0  # Monday
         )
+        
+        print(f"Test: Calculated next_run is {schedule.next_run}, weekday {schedule.next_run.weekday()}")
         
         # Should be Monday at 9 AM
         assert schedule.next_run.hour == 9
