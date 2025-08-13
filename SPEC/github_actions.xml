@@ -133,7 +133,7 @@ concurrency:
                     - .github/workflows/staging-cleanup.yml
                 </workflow_files>
                 <required_secrets>
-                    - GCP_SA_KEY
+                    - GCP_STAGING_SA_KEY
                     - TF_STATE_BUCKET
                     - GCP_PROJECT_ID
                 </required_secrets>

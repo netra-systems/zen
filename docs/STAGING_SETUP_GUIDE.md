@@ -444,7 +444,8 @@ Should show: cloudsql.client, redis.editor, secretmanager.secretAccessor, etc.
 
 #### Error: "Permission denied"
 - Check Step 2.2 - make sure all roles are added
-- Check Step 4.2 - make sure GCP_SA_KEY is correct
+- Check Step 4.2 - make sure GCP_STAGING_SA_KEY is correct
+GCP_STAGING_SA_KEY is CORRECT namge. (GCP_SA_KEY is WRONG)
 
 #### Error: "Invalid domain"
 - Check Step 3 - DNS setup

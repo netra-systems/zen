@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-13T12:45:27.398589  
+**Generated:** 2025-08-13T12:55:24.742898  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -17,7 +17,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 7 | 7 | 0 | 0 | 0 | 8.56s | [PASSED] |
+| Backend   | 7 | 7 | 0 | 0 | 0 | 14.31s | [PASSED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Environment and Configuration
@@ -27,7 +27,7 @@
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
 - **Coverage Enabled:** No
-- **Total Duration:** 8.56s
+- **Total Duration:** 14.31s
 - **Exit Code:** 0
 
 ### Backend Configuration
@@ -76,9 +76,9 @@ app/tests/core/test_config_manager.py::TestConfigManager::test_initialization [
 app/tests/services/test_security_service.py::test_encrypt_and_decrypt [32mPASSED[0m[32m [ 85%][0m
 tests/test_system_startup.py::TestSystemStartup::test_configuration_loading [32mPASSED[0m[32m [100%][0m
 
-[32m============================== [32m[1m7 passed[0m[32m in 0.26s[0m[32m ==============================[0m
+[32m============================== [32m[1m7 passed[0m[32m in 0.63s[0m[32m ==============================[0m
 ================================================================================
-[PASS] ALL TESTS PASSED in 7.64s
+[PASS] ALL TESTS PASSED in 12.93s
 ================================================================================
 
 

@@ -32,7 +32,7 @@ environments:
       - DATABASE_URL
       - REDIS_URL
       - CLICKHOUSE_URL
-      - GCP_SA_KEY
+      - GCP_STAGING_SA_KEY
       - TF_STATE_BUCKET
     variables:
       LOG_LEVEL: info
@@ -52,11 +52,11 @@ environments:
           - main
           - release/*
     secrets:
-      - PROD_DATABASE_URL
+      - PRODUCTION_DATABASE_URL
       - PROD_SSL_CERT
       - REDIS_URL
       - CLICKHOUSE_URL
-      - GCP_SA_KEY
+      - PRODUCTION_GCP_SA_KEY
       - ANTHROPIC_API_KEY
       - OPENAI_API_KEY
     variables:

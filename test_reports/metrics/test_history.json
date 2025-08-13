@@ -1,7 +1,484 @@
 {
   "runs": [
     {
-      "timestamp": "2025-08-13T11:52:34.298504",
+      "timestamp": "2025-08-12T09:47:04.323858",
+      "level": "unit",
+      "total": 302,
+      "passed": 128,
+      "failed": 174,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T09:54:03.999336",
+      "level": "smoke",
+      "total": 2,
+      "passed": 1,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T10:11:25.792399",
+      "level": "unit",
+      "total": 334,
+      "passed": 172,
+      "failed": 161,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T10:13:08.687052",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T10:28:16.435032",
+      "level": "comprehensive",
+      "total": 182,
+      "passed": 18,
+      "failed": 158,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T10:29:21.594518",
+      "level": "comprehensive",
+      "total": 182,
+      "passed": 18,
+      "failed": 158,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T10:34:03.189068",
+      "level": "unit",
+      "total": 411,
+      "passed": 173,
+      "failed": 237,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T10:40:04.179161",
+      "level": "unit",
+      "total": 411,
+      "passed": 173,
+      "failed": 237,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T10:42:56.701135",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T10:50:21.114284",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T10:51:42.261861",
+      "level": "unit",
+      "total": 411,
+      "passed": 173,
+      "failed": 237,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T10:52:44.827375",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T11:05:54.285128",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T11:12:58.439282",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T11:14:02.039449",
+      "level": "mock_only",
+      "total": 8,
+      "passed": 0,
+      "failed": 0,
+      "coverage": 30.05,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T11:17:01.964791",
+      "level": "unit",
+      "total": 453,
+      "passed": 173,
+      "failed": 279,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T11:19:36.544858",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T11:30:17.826295",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T11:37:04.242690",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T11:42:03.979200",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T11:46:42.909432",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T11:47:57.575530",
+      "level": "unit",
+      "total": 453,
+      "passed": 173,
+      "failed": 279,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T11:54:03.435059",
+      "level": "unit",
+      "total": 455,
+      "passed": 176,
+      "failed": 278,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T11:58:36.178781",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T11:59:42.350466",
+      "level": "unit",
+      "total": 168,
+      "passed": 165,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:01:19.319864",
+      "level": "comprehensive",
+      "total": 1,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:02:21.093496",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:14:59.403104",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:16:20.775999",
+      "level": "unit",
+      "total": 461,
+      "passed": 182,
+      "failed": 279,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:18:24.046022",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:19:37.427921",
+      "level": "unit",
+      "total": 461,
+      "passed": 182,
+      "failed": 279,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:22:12.248767",
+      "level": "unit",
+      "total": 298,
+      "passed": 18,
+      "failed": 276,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:23:46.831725",
+      "level": "integration",
+      "total": 131,
+      "passed": 81,
+      "failed": 49,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:24:37.911368",
+      "level": "comprehensive",
+      "total": 2,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:25:43.563138",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:28:11.990433",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:29:45.364784",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:31:27.701739",
+      "level": "unit",
+      "total": 176,
+      "passed": 172,
+      "failed": 4,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:34:39.726329",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:35:54.769102",
+      "level": "unit",
+      "total": 473,
+      "passed": 192,
+      "failed": 281,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:36:46.402939",
+      "level": "unit",
+      "total": 173,
+      "passed": 170,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:39:28.893011",
+      "level": "unit",
+      "total": 469,
+      "passed": 189,
+      "failed": 280,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:43:49.382106",
+      "level": "unit",
+      "total": 469,
+      "passed": 189,
+      "failed": 280,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:45:06.815239",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T12:49:55.020812",
+      "level": "comprehensive",
+      "total": 297,
+      "passed": 18,
+      "failed": 277,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:00:53.963926",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:14:32.503142",
+      "level": "comprehensive",
+      "total": 296,
+      "passed": 18,
+      "failed": 276,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:27:55.147856",
+      "level": "smoke",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:30:54.106849",
+      "level": "unit",
+      "total": 518,
+      "passed": 208,
+      "failed": 310,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:32:24.910592",
+      "level": "unit",
+      "total": 518,
+      "passed": 208,
+      "failed": 310,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:33:48.747813",
+      "level": "unit",
+      "total": 192,
+      "passed": 190,
+      "failed": 2,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:36:48.228888",
+      "level": "unit",
+      "total": 546,
+      "passed": 235,
+      "failed": 311,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:40:00.025328",
+      "level": "unit",
+      "total": 577,
+      "passed": 238,
+      "failed": 339,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T13:44:43.849061",
       "level": "smoke",
       "total": 0,
       "passed": 0,
@@ -10,8 +487,8 @@
       "duration": 0
     },
     {
-      "timestamp": "2025-08-13T11:53:41.947371",
-      "level": "smoke",
+      "timestamp": "2025-08-12T14:09:19.463186",
+      "level": "simple",
       "total": 0,
       "passed": 0,
       "failed": 0,
@@ -19,8 +496,8 @@
       "duration": 0
     },
     {
-      "timestamp": "2025-08-13T12:04:10.963106",
-      "level": "smoke",
+      "timestamp": "2025-08-12T14:45:01.337552",
+      "level": "simple",
       "total": 0,
       "passed": 0,
       "failed": 0,
@@ -28,7 +505,97 @@
       "duration": 0
     },
     {
-      "timestamp": "2025-08-13T12:04:44.940395",
+      "timestamp": "2025-08-12T22:04:46.503414",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T22:09:13.245926",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T22:10:26.196397",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T22:11:48.641985",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T22:13:05.163161",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-12T22:28:09.587017",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T04:47:18.448693",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T04:48:38.577522",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T04:50:23.572867",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T08:48:49.494671",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T08:55:11.048379",
       "level": "smoke",
       "total": 7,
       "passed": 7,
@@ -37,333 +604,301 @@
       "duration": 0
     },
     {
-      "timestamp": "2025-08-13T12:05:46.898354",
+      "timestamp": "2025-08-13T08:55:29.993921",
       "level": "smoke",
-      "results": {
-        "backend": {
-          "status": "passed",
-          "test_counts": {
-            "total": 7,
-            "passed": 7,
-            "failed": 0,
-            "skipped": 0
-          },
-          "test_details": [],
-          "duration": 10.0
-        },
-        "frontend": {
-          "status": "skipped",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0
-          },
-          "test_details": [],
-          "duration": 0
-        }
-      },
-      "summary": {
-        "total": 7,
-        "passed": 7,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 0
-      }
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
     },
     {
-      "timestamp": "2025-08-13T12:06:27.376348",
+      "timestamp": "2025-08-13T09:06:43.411964",
       "level": "smoke",
-      "results": {
-        "backend": {
-          "status": "failed",
-          "duration": 8.408958673477173,
-          "exit_code": 4,
-          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: smoke\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/routes/test_health_route.py app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error app/tests/core/test_config_manager.py::TestConfigManager::test_initialization app/tests/services/test_security_service.py::test_encrypt_and_decrypt tests/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 7.40s\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:350: in <module>\n    from app.routes import supply, generation, admin, references, health, corpus, synthetic_data, config, demo, unified_tools\napp\\routes\\demo.py:12: in <module>\n    from app.services.demo_service import DemoService, get_demo_service\napp\\services\\demo_service.py:6: in <module>\n    from app.services.demo import (\napp\\services\\demo\\__init__.py:5: in <module>\n    from .metrics_generator import MetricsGenerator\nE   ImportError: cannot import name 'MetricsGenerator' from 'app.services.demo.metrics_generator' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\services\\demo\\metrics_generator.py)\n",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 4
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "frontend": {
-          "status": "skipped",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "e2e": {
-          "status": "pending",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "overall": {
-          "status": "failed",
-          "start_time": 1755111978.9603631,
-          "end_time": 1755111987.3733501
-        }
-      },
-      "summary": {
-        "total": 0,
-        "passed": 0,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 0
-      }
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
     },
     {
-      "timestamp": "2025-08-13T12:07:10.294346",
+      "timestamp": "2025-08-13T09:09:10.903968",
       "level": "smoke",
-      "results": {
-        "backend": {
-          "status": "passed",
-          "test_counts": {
-            "total": 7,
-            "passed": 7,
-            "failed": 0,
-            "skipped": 0
-          },
-          "test_details": [],
-          "duration": 10.0
-        },
-        "frontend": {
-          "status": "skipped",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0
-          },
-          "test_details": [],
-          "duration": 0
-        },
-        "e2e": {
-          "status": "skipped",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0
-          },
-          "test_details": [],
-          "duration": 0
-        }
-      },
-      "summary": {
-        "total": 7,
-        "passed": 7,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 0
-      }
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
     },
     {
-      "timestamp": "2025-08-13T12:09:24.896409",
+      "timestamp": "2025-08-13T09:12:00.982667",
       "level": "smoke",
-      "results": {
-        "backend": {
-          "status": "passed",
-          "duration": 8.691866159439087,
-          "exit_code": 0,
-          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: smoke\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/routes/test_health_route.py app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error app/tests/core/test_config_manager.py::TestConfigManager::test_initialization app/tests/services/test_security_service.py::test_encrypt_and_decrypt tests/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\n\u001b[1mcollecting ... \u001b[0mcollected 7 items\n\napp/tests/routes/test_health_route.py::test_basic_import \u001b[32mPASSED\u001b[0m\u001b[32m          [ 14%]\u001b[0m\napp/tests/routes/test_health_route.py::test_health_endpoint_direct \u001b[32mPASSED\u001b[0m\u001b[32m [ 28%]\u001b[0m\napp/tests/routes/test_health_route.py::test_live_endpoint \u001b[32mPASSED\u001b[0m\u001b[32m         [ 42%]\u001b[0m\napp/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error \u001b[32mPASSED\u001b[0m\u001b[32m [ 57%]\u001b[0m\napp/tests/core/test_config_manager.py::TestConfigManager::test_initialization \u001b[32mPASSED\u001b[0m\u001b[32m [ 71%]\u001b[0m\napp/tests/services/test_security_service.py::test_encrypt_and_decrypt \u001b[32mPASSED\u001b[0m\u001b[32m [ 85%]\u001b[0m\ntests/test_system_startup.py::TestSystemStartup::test_configuration_loading \u001b[32mPASSED\u001b[0m\u001b[32m [100%]\u001b[0m\n\n\u001b[32m============================== \u001b[32m\u001b[1m7 passed\u001b[0m\u001b[32m in 0.31s\u001b[0m\u001b[32m ==============================\u001b[0m\n================================================================================\n[PASS] ALL TESTS PASSED in 7.71s\n================================================================================\n\n",
-          "test_counts": {
-            "total": 7,
-            "passed": 7,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 5
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "frontend": {
-          "status": "skipped",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "e2e": {
-          "status": "pending",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "overall": {
-          "status": "passed",
-          "start_time": 1755112156.198544,
-          "end_time": 1755112164.893542
-        }
-      },
-      "summary": {
-        "total": 7,
-        "passed": 7,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 0
-      }
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
     },
     {
-      "timestamp": "2025-08-13T12:12:10.583115",
+      "timestamp": "2025-08-13T09:20:50.119067",
       "level": "smoke",
-      "results": {
-        "backend": {
-          "status": "passed",
-          "duration": 9.070802927017212,
-          "exit_code": 0,
-          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: smoke\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/routes/test_health_route.py app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error app/tests/core/test_config_manager.py::TestConfigManager::test_initialization app/tests/services/test_security_service.py::test_encrypt_and_decrypt tests/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\n\u001b[1mcollecting ... \u001b[0mcollected 7 items\n\napp/tests/routes/test_health_route.py::test_basic_import \u001b[32mPASSED\u001b[0m\u001b[32m          [ 14%]\u001b[0m\napp/tests/routes/test_health_route.py::test_health_endpoint_direct \u001b[32mPASSED\u001b[0m\u001b[32m [ 28%]\u001b[0m\napp/tests/routes/test_health_route.py::test_live_endpoint \u001b[32mPASSED\u001b[0m\u001b[32m         [ 42%]\u001b[0m\napp/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error \u001b[32mPASSED\u001b[0m\u001b[32m [ 57%]\u001b[0m\napp/tests/core/test_config_manager.py::TestConfigManager::test_initialization \u001b[32mPASSED\u001b[0m\u001b[32m [ 71%]\u001b[0m\napp/tests/services/test_security_service.py::test_encrypt_and_decrypt \u001b[32mPASSED\u001b[0m\u001b[32m [ 85%]\u001b[0m\ntests/test_system_startup.py::TestSystemStartup::test_configuration_loading \u001b[32mPASSED\u001b[0m\u001b[32m [100%]\u001b[0m\n\n\u001b[32m============================== \u001b[32m\u001b[1m7 passed\u001b[0m\u001b[32m in 0.19s\u001b[0m\u001b[32m ==============================\u001b[0m\n================================================================================\n[PASS] ALL TESTS PASSED in 7.83s\n================================================================================\n\n",
-          "test_counts": {
-            "total": 7,
-            "passed": 7,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 5
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "frontend": {
-          "status": "skipped",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "e2e": {
-          "status": "pending",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "overall": {
-          "status": "passed",
-          "start_time": 1755112321.5083044,
-          "end_time": 1755112330.581151
-        }
-      },
-      "summary": {
-        "total": 7,
-        "passed": 7,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 0
-      }
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
     },
     {
-      "timestamp": "2025-08-13T12:45:27.374066",
+      "timestamp": "2025-08-13T09:21:29.597921",
       "level": "smoke",
-      "results": {
-        "backend": {
-          "status": "passed",
-          "duration": 8.563633441925049,
-          "exit_code": 0,
-          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: smoke\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/routes/test_health_route.py app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error app/tests/core/test_config_manager.py::TestConfigManager::test_initialization app/tests/services/test_security_service.py::test_encrypt_and_decrypt tests/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\n\u001b[1mcollecting ... \u001b[0mcollected 7 items\n\napp/tests/routes/test_health_route.py::test_basic_import \u001b[32mPASSED\u001b[0m\u001b[32m          [ 14%]\u001b[0m\napp/tests/routes/test_health_route.py::test_health_endpoint_direct \u001b[32mPASSED\u001b[0m\u001b[32m [ 28%]\u001b[0m\napp/tests/routes/test_health_route.py::test_live_endpoint \u001b[32mPASSED\u001b[0m\u001b[32m         [ 42%]\u001b[0m\napp/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error \u001b[32mPASSED\u001b[0m\u001b[32m [ 57%]\u001b[0m\napp/tests/core/test_config_manager.py::TestConfigManager::test_initialization \u001b[32mPASSED\u001b[0m\u001b[32m [ 71%]\u001b[0m\napp/tests/services/test_security_service.py::test_encrypt_and_decrypt \u001b[32mPASSED\u001b[0m\u001b[32m [ 85%]\u001b[0m\ntests/test_system_startup.py::TestSystemStartup::test_configuration_loading \u001b[32mPASSED\u001b[0m\u001b[32m [100%]\u001b[0m\n\n\u001b[32m============================== \u001b[32m\u001b[1m7 passed\u001b[0m\u001b[32m in 0.26s\u001b[0m\u001b[32m ==============================\u001b[0m\n================================================================================\n[PASS] ALL TESTS PASSED in 7.64s\n================================================================================\n\n",
-          "test_counts": {
-            "total": 7,
-            "passed": 7,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 5
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "frontend": {
-          "status": "skipped",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "e2e": {
-          "status": "pending",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "overall": {
-          "status": "passed",
-          "start_time": 1755114318.8064141,
-          "end_time": 1755114327.373045
-        }
-      },
-      "summary": {
-        "total": 7,
-        "passed": 7,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 0
-      }
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T09:25:57.424169",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T09:26:43.570630",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T09:27:57.339204",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T09:32:01.280827",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T09:33:16.179897",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T09:34:45.098609",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T09:35:37.961640",
+      "level": "unit",
+      "total": 68,
+      "passed": 64,
+      "failed": 4,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T09:39:02.972168",
+      "level": "unit",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T09:40:50.541498",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T09:42:07.944145",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T09:43:50.689344",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T09:48:42.196217",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:10:24.353414",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:10:31.274127",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:16:09.038125",
+      "level": "simple",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:17:30.890208",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:17:44.176653",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:22:44.361388",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:28:12.933683",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:31:19.516720",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:33:48.542574",
+      "level": "unit",
+      "total": 158,
+      "passed": 152,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:34:15.620290",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:34:36.583406",
+      "level": "smoke",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:35:07.303065",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:35:56.002585",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T11:50:56.288843",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T13:03:24.001592",
+      "level": "comprehensive",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": 26.6,
+      "duration": 0
     }
   ],
   "flaky_tests": {},
