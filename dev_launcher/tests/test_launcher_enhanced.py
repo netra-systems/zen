@@ -66,23 +66,27 @@ class TestAdvancedProcessManager(unittest.TestCase):
         """Test process restart capability."""
         mock_process = Mock(spec=subprocess.Popen)
         mock_process.pid = 12345
-        mock_process.poll.side_effect = [None, None, 1]  # Running, then fails
+        # First two calls return None (running), third returns 1 (failed)
+        mock_process.poll.side_effect = [None, None, 1]
         
         self.manager.add_process("RestartService", mock_process)
         
-        # Simulate restart logic
-        restart_count = 0
-        max_restarts = 3
+        # Check initial state
+        self.assertTrue(self.manager.is_running("RestartService"))
         
-        while restart_count < max_restarts:
-            if not self.manager.is_running("RestartService"):
-                restart_count += 1
-                new_process = Mock(spec=subprocess.Popen)
-                new_process.pid = 12345 + restart_count
-                new_process.poll.return_value = None
-                self.manager.add_process("RestartService", new_process)
+        # Check again (still running)
+        self.assertTrue(self.manager.is_running("RestartService"))
         
-        self.assertEqual(restart_count, 1)
+        # Third check should show failure
+        self.assertFalse(self.manager.is_running("RestartService"))
+        
+        # Simulate restart
+        new_process = Mock(spec=subprocess.Popen)
+        new_process.pid = 12346
+        new_process.poll.return_value = None
+        self.manager.add_process("RestartService", new_process)
+        
+        # Should be running again
         self.assertTrue(self.manager.is_running("RestartService"))
     
     def test_graceful_shutdown_timeout(self):
@@ -221,8 +225,7 @@ class TestLogStreaming(unittest.TestCase):
         for i, process in enumerate(processes):
             streamer = manager.add_streamer(
                 f"Service{i}",
-                process,
-                verbose=False
+                process
             )
             streamers.append(streamer)
         
@@ -243,7 +246,7 @@ class TestLogStreaming(unittest.TestCase):
         mock_process.stderr.readline.return_value = b""
         
         with patch('builtins.print'):
-            streamer = LogStreamer("ErrorService", mock_process, verbose=False)
+            streamer = LogStreamer(mock_process, "ErrorService")
             
             # Should handle error gracefully
             streamer.start()
@@ -276,7 +279,7 @@ class TestLogStreaming(unittest.TestCase):
             captured_output.append(args[0] if args else "")
         
         with patch('builtins.print', side_effect=capture_print):
-            streamer = LogStreamer("UnicodeService", mock_process, verbose=True)
+            streamer = LogStreamer(mock_process, "UnicodeService")
             streamer.start()
             time.sleep(0.1)
             streamer.stop()

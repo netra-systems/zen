@@ -11,8 +11,8 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock, MagicMock, patch
 from typing import Dict, Any, List
 
+from app.agents.triage_sub_agent_legacy import TriageSubAgent
 from app.agents.triage_sub_agent import (
-    TriageSubAgent, 
     TriageResult,
     Priority,
     Complexity,

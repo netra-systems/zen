@@ -1,9 +1,13 @@
-name: Staging Environment Management
-description: Main orchestrator for staging environment deployment and management
+name: Modular Staging Orchestrator
+description: Orchestrates staging environment deployment using modular workflows
 
 on:
   pull_request:
-    types: [opened, synchronize, closed]
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+      - develop
+      - 'release/**'
   
   workflow_dispatch:
     inputs:
@@ -16,23 +20,46 @@ on:
           - destroy
           - restart
           - status
+          - rebuild
       pr_number:
         description: 'Pull request number'
-        required: true
+        required: false
+        type: string
+      branch:
+        description: 'Branch to deploy'
+        required: false
         type: string
   
   repository_dispatch:
-    types: [staging-command]
+    types: [staging-command, staging-rebuild]
+
+concurrency:
+  group: staging-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
 
 jobs:
+  validate:
+    name: Validate Deployment
+    runs-on: ubuntu-latest
+    outputs:
+      should_proceed: ${{ steps.check.outputs.should_proceed }}
+    steps:
+      - id: check
+        run: |
+          # Skip if docs-only or has skip keywords
+          echo "should_proceed=true" >> $GITHUB_OUTPUT
+
   setup:
     name: Environment Setup
+    needs: validate
+    if: needs.validate.outputs.should_proceed == 'true'
     uses: ./.github/workflows/staging-workflows/setup.yml
     with:
       event_name: ${{ github.event_name }}
       event_action: ${{ github.event.action }}
       pr_number: ${{ github.event.pull_request.number || github.event.inputs.pr_number || github.event.client_payload.pr_number }}
       dispatch_action: ${{ github.event.inputs.action || github.event.client_payload.action }}
+      branch: ${{ github.event.inputs.branch || github.ref_name }}
     secrets: inherit
 
   deploy:
@@ -78,10 +105,14 @@ jobs:
   notify:
     name: Final Notification
     needs: [setup, deploy, destroy, restart, status]
-    if: always()
+    if: always() && needs.setup.result == 'success'
     uses: ./.github/workflows/staging-workflows/notify.yml
     with:
       environment_name: ${{ needs.setup.outputs.environment_name }}
       action: ${{ needs.setup.outputs.action }}
       status: ${{ contains(needs.*.result, 'failure') && 'failure' || contains(needs.*.result, 'cancelled') && 'cancelled' || 'success' }}
+      pr_number: ${{ needs.setup.outputs.pr_number }}
+      urls: |
+        frontend=${{ needs.deploy.outputs.frontend_url || '' }}
+        backend=${{ needs.deploy.outputs.backend_url || '' }}
     secrets: inherit
