@@ -49,7 +49,10 @@ class DevLauncher:
         self.use_emoji = check_emoji_support()
         
         # Load or create service configuration
-        self.services_config = load_or_create_config(interactive=False)
+        # Use interactive=False when running in CI/automation
+        import sys
+        interactive = sys.stdin.isatty()
+        self.services_config = load_or_create_config(interactive=interactive)
         
         # Managers
         self.process_manager = ProcessManager()
