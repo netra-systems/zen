@@ -1,0 +1,111 @@
+# GitHub Environments Configuration
+# Define environment-specific settings and protection rules
+
+environments:
+  development:
+    description: Development environment for testing
+    url: https://dev.netra.ai
+    protection_rules:
+      required_reviewers: 0
+      wait_timer: 0
+    secrets:
+      - DATABASE_URL
+      - REDIS_URL
+      - ANTHROPIC_API_KEY
+    variables:
+      LOG_LEVEL: debug
+      ENABLE_PROFILING: true
+      MAX_WORKERS: 2
+  
+  staging:
+    description: Staging environment for PR previews
+    url: https://staging.netra.ai
+    protection_rules:
+      required_reviewers: 0
+      wait_timer: 0
+      deployment_branch_policy:
+        protected_branches: false
+        custom_branch_policies:
+          - 'feature/*'
+          - 'fix/*'
+    secrets:
+      - DATABASE_URL
+      - REDIS_URL
+      - CLICKHOUSE_URL
+      - GCP_SA_KEY
+      - TF_STATE_BUCKET
+    variables:
+      LOG_LEVEL: info
+      ENABLE_PROFILING: true
+      MAX_WORKERS: 4
+      TERRAFORM_VERSION: 1.5.0
+  
+  production:
+    description: Production environment
+    url: https://app.netra.ai
+    protection_rules:
+      required_reviewers: 2
+      wait_timer: 5  # minutes
+      deployment_branch_policy:
+        protected_branches: true
+        custom_branch_policies:
+          - main
+          - release/*
+    secrets:
+      - PROD_DATABASE_URL
+      - PROD_SSL_CERT
+      - REDIS_URL
+      - CLICKHOUSE_URL
+      - GCP_SA_KEY
+      - ANTHROPIC_API_KEY
+      - OPENAI_API_KEY
+    variables:
+      LOG_LEVEL: warning
+      ENABLE_PROFILING: false
+      MAX_WORKERS: 8
+      ENABLE_MONITORING: true
+      DATADOG_ENV: production
+
+deployment_settings:
+  auto_deploy:
+    enabled: true
+    branches:
+      - main: production
+      - develop: staging
+      - 'release/*': staging
+  
+  rollback:
+    enabled: true
+    max_rollback_count: 3
+    retention_days: 30
+  
+  health_checks:
+    enabled: true
+    endpoints:
+      - /health
+      - /api/health
+      - /metrics
+    timeout: 30
+    retries: 3
+  
+  notifications:
+    slack:
+      enabled: false
+      webhook_url: ${SLACK_WEBHOOK_URL}
+      channels:
+        success: '#deployments'
+        failure: '#alerts'
+    
+    lark:
+      enabled: true
+      bot_url: ${LARK_BOT_URL}
+      channels:
+        success: general
+        failure: alerts
+        staging: staging
+    
+    email:
+      enabled: false
+      recipients:
+        - devops@netra.ai
+      on_failure_only: true

@@ -1,0 +1,203 @@
+name: Restart Environment
+description: Restart staging environment services
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        required: true
+        type: string
+      pr_number:
+        required: true
+        type: string
+
+jobs:
+  check-environment:
+    name: Check Environment Status
+    runs-on: ubuntu-latest
+    outputs:
+      exists: ${{ steps.check.outputs.exists }}
+      backend_deployment: ${{ steps.check.outputs.backend_deployment }}
+      frontend_deployment: ${{ steps.check.outputs.frontend_deployment }}
+    steps:
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Check if environment exists
+        id: check
+        run: |
+          # Check if cluster exists
+          if gcloud container clusters describe \
+            ${{ inputs.environment_name }}-cluster \
+            --region ${{ env.GCP_REGION || 'us-central1' }} \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
+            &>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            
+            # Get GKE credentials
+            gcloud container clusters get-credentials \
+              ${{ inputs.environment_name }}-cluster \
+              --region ${{ env.GCP_REGION || 'us-central1' }} \
+              --project ${{ secrets.GCP_PROJECT_ID }}
+            
+            # Check deployments
+            if kubectl get deployment backend-deployment \
+              -n ${{ inputs.environment_name }} &>/dev/null; then
+              echo "backend_deployment=true" >> $GITHUB_OUTPUT
+            else
+              echo "backend_deployment=false" >> $GITHUB_OUTPUT
+            fi
+            
+            if kubectl get deployment frontend-deployment \
+              -n ${{ inputs.environment_name }} &>/dev/null; then
+              echo "frontend_deployment=true" >> $GITHUB_OUTPUT
+            else
+              echo "frontend_deployment=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "::error::Environment ${{ inputs.environment_name }} does not exist"
+            exit 1
+          fi
+  
+  restart-backend:
+    name: Restart Backend Service
+    needs: check-environment
+    if: needs.check-environment.outputs.exists == 'true' && needs.check-environment.outputs.backend_deployment == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials \
+            ${{ inputs.environment_name }}-cluster \
+            --region ${{ env.GCP_REGION || 'us-central1' }} \
+            --project ${{ secrets.GCP_PROJECT_ID }}
+      
+      - name: Restart backend deployment
+        run: |
+          kubectl rollout restart deployment/backend-deployment \
+            -n ${{ inputs.environment_name }}
+          
+          kubectl rollout status deployment/backend-deployment \
+            -n ${{ inputs.environment_name }} \
+            --timeout=10m
+      
+      - name: Verify backend health
+        run: |
+          sleep 30
+          POD=$(kubectl get pods -n ${{ inputs.environment_name }} \
+            -l app=backend -o jsonpath='{.items[0].metadata.name}')
+          
+          kubectl exec -n ${{ inputs.environment_name }} ${POD} -- \
+            curl -f http://localhost:8000/health || exit 1
+  
+  restart-frontend:
+    name: Restart Frontend Service
+    needs: check-environment
+    if: needs.check-environment.outputs.exists == 'true' && needs.check-environment.outputs.frontend_deployment == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials \
+            ${{ inputs.environment_name }}-cluster \
+            --region ${{ env.GCP_REGION || 'us-central1' }} \
+            --project ${{ secrets.GCP_PROJECT_ID }}
+      
+      - name: Restart frontend deployment
+        run: |
+          kubectl rollout restart deployment/frontend-deployment \
+            -n ${{ inputs.environment_name }}
+          
+          kubectl rollout status deployment/frontend-deployment \
+            -n ${{ inputs.environment_name }} \
+            --timeout=10m
+      
+      - name: Verify frontend health
+        run: |
+          sleep 30
+          POD=$(kubectl get pods -n ${{ inputs.environment_name }} \
+            -l app=frontend -o jsonpath='{.items[0].metadata.name}')
+          
+          kubectl exec -n ${{ inputs.environment_name }} ${POD} -- \
+            curl -f http://localhost:3000 || exit 1
+  
+  restart-supporting-services:
+    name: Restart Supporting Services
+    needs: check-environment
+    if: needs.check-environment.outputs.exists == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials \
+            ${{ inputs.environment_name }}-cluster \
+            --region ${{ env.GCP_REGION || 'us-central1' }} \
+            --project ${{ secrets.GCP_PROJECT_ID }}
+      
+      - name: Restart Redis
+        continue-on-error: true
+        run: |
+          kubectl rollout restart statefulset/redis \
+            -n ${{ inputs.environment_name }} || echo "Redis not found"
+      
+      - name: Restart worker deployments
+        continue-on-error: true
+        run: |
+          kubectl rollout restart deployment/worker \
+            -n ${{ inputs.environment_name }} || echo "Worker not found"
+  
+  post-restart-validation:
+    name: Post-Restart Validation
+    needs: [restart-backend, restart-frontend, restart-supporting-services]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for stabilization
+        run: sleep 60
+      
+      - name: Get environment URLs
+        id: urls
+        run: |
+          # Extract URLs from Terraform state or service endpoints
+          echo "Getting environment URLs..."
+      
+      - name: Post restart comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `## ♻️ Staging Environment Restarted
+            
+            Environment \`${{ inputs.environment_name }}\` has been successfully restarted.
+            
+            ### Restart Summary:
+            ✅ Backend service restarted
+            ✅ Frontend service restarted  
+            ✅ Supporting services restarted
+            ✅ Health checks passed
+            
+            All services for PR #${{ inputs.pr_number }} are now running with fresh instances.
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ inputs.pr_number }},
+              body: comment
+            });

@@ -1,0 +1,236 @@
+name: Notification Handler
+description: Send notifications for staging environment operations
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        required: true
+        type: string
+      action:
+        required: true
+        type: string
+      status:
+        required: true
+        type: string
+        description: 'success, failure, or cancelled'
+      pr_number:
+        required: false
+        type: string
+      error_message:
+        required: false
+        type: string
+      backend_url:
+        required: false
+        type: string
+      frontend_url:
+        required: false
+        type: string
+
+jobs:
+  notify:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare notification data
+        id: prepare
+        run: |
+          # Set status emoji
+          case "${{ inputs.status }}" in
+            success)
+              STATUS_EMOJI="✅"
+              STATUS_COLOR="good"
+              ;;
+            failure)
+              STATUS_EMOJI="❌"
+              STATUS_COLOR="danger"
+              ;;
+            cancelled)
+              STATUS_EMOJI="⚠️"
+              STATUS_COLOR="warning"
+              ;;
+            *)
+              STATUS_EMOJI="ℹ️"
+              STATUS_COLOR="info"
+              ;;
+          esac
+          
+          # Set action description
+          case "${{ inputs.action }}" in
+            deploy)
+              ACTION_DESC="Deployment"
+              ;;
+            destroy)
+              ACTION_DESC="Destruction"
+              ;;
+            restart)
+              ACTION_DESC="Restart"
+              ;;
+            status)
+              ACTION_DESC="Status Check"
+              ;;
+            *)
+              ACTION_DESC="Operation"
+              ;;
+          esac
+          
+          echo "status_emoji=$STATUS_EMOJI" >> $GITHUB_OUTPUT
+          echo "status_color=$STATUS_COLOR" >> $GITHUB_OUTPUT
+          echo "action_desc=$ACTION_DESC" >> $GITHUB_OUTPUT
+      
+      - name: Send Slack notification
+        if: vars.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "${{ steps.prepare.outputs.status_emoji }} Staging Environment ${{ steps.prepare.outputs.action_desc }} ${{ inputs.status }}",
+              "attachments": [
+                {
+                  "color": "${{ steps.prepare.outputs.status_color }}",
+                  "fields": [
+                    {
+                      "title": "Environment",
+                      "value": "${{ inputs.environment_name }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Action",
+                      "value": "${{ inputs.action }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Status",
+                      "value": "${{ inputs.status }}",
+                      "short": true
+                    },
+                    {
+                      "title": "PR",
+                      "value": "#${{ inputs.pr_number }}",
+                      "short": true
+                    }
+                  ],
+                  "footer": "GitHub Actions",
+                  "footer_icon": "https://github.githubassets.com/favicon.ico",
+                  "ts": ${{ github.event.repository.updated_at }}
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      
+      - name: Send email notification
+        if: inputs.status == 'failure' && vars.NOTIFY_EMAIL != ''
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "❌ Staging Environment ${{ inputs.action }} Failed"
+          to: ${{ vars.NOTIFY_EMAIL }}
+          from: GitHub Actions <noreply@github.com>
+          body: |
+            Staging environment operation failed.
+            
+            Environment: ${{ inputs.environment_name }}
+            Action: ${{ inputs.action }}
+            PR: #${{ inputs.pr_number }}
+            
+            Error: ${{ inputs.error_message }}
+            
+            Please check the GitHub Actions logs for more details.
+      
+      - name: Create GitHub issue for failures
+        if: inputs.status == 'failure' && inputs.action == 'deploy'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueTitle = `Staging deployment failed for PR #${{ inputs.pr_number }}`;
+            const issueBody = `## Staging Deployment Failure
+            
+            **Environment:** ${{ inputs.environment_name }}
+            **PR:** #${{ inputs.pr_number }}
+            **Action:** ${{ inputs.action }}
+            **Status:** ${{ inputs.status }}
+            
+            ### Error Details
+            \`\`\`
+            ${{ inputs.error_message }}
+            \`\`\`
+            
+            ### Action Items
+            - [ ] Review error logs
+            - [ ] Fix deployment issues
+            - [ ] Retry deployment
+            
+            ### Links
+            - [View PR](https://github.com/${{ github.repository }}/pull/${{ inputs.pr_number }})
+            - [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              body: issueBody,
+              labels: ['staging', 'deployment-failure', 'bug']
+            });
+      
+      - name: Update PR status check
+        if: inputs.pr_number != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state = '${{ inputs.status }}' === 'success' ? 'success' : 
+                          '${{ inputs.status }}' === 'failure' ? 'failure' : 
+                          'pending';
+            
+            const description = `${{ steps.prepare.outputs.action_desc }} ${{ inputs.status }}`;
+            
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: state,
+              target_url: `https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`,
+              description: description,
+              context: `staging/${{ inputs.action }}`
+            });
+      
+      - name: Send Teams notification
+        if: vars.TEAMS_WEBHOOK_URL != ''
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d '{
+              "@type": "MessageCard",
+              "@context": "http://schema.org/extensions",
+              "themeColor": "${{ steps.prepare.outputs.status_color == 'good' && '00FF00' || steps.prepare.outputs.status_color == 'danger' && 'FF0000' || 'FFFF00' }}",
+              "summary": "Staging Environment ${{ steps.prepare.outputs.action_desc }} ${{ inputs.status }}",
+              "sections": [{
+                "activityTitle": "Staging Environment Update",
+                "activitySubtitle": "${{ inputs.environment_name }}",
+                "activityImage": "https://github.githubassets.com/favicon.ico",
+                "facts": [{
+                  "name": "Status",
+                  "value": "${{ steps.prepare.outputs.status_emoji }} ${{ inputs.status }}"
+                }, {
+                  "name": "Action",
+                  "value": "${{ inputs.action }}"
+                }, {
+                  "name": "PR",
+                  "value": "#${{ inputs.pr_number }}"
+                }],
+                "markdown": true
+              }],
+              "potentialAction": [{
+                "@type": "OpenUri",
+                "name": "View PR",
+                "targets": [{
+                  "os": "default",
+                  "uri": "https://github.com/${{ github.repository }}/pull/${{ inputs.pr_number }}"
+                }]
+              }]
+            }' \
+            "${{ secrets.TEAMS_WEBHOOK_URL }}"

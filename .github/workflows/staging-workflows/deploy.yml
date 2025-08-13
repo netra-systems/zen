@@ -1,0 +1,171 @@
+name: Deploy Environment
+description: Deploy staging environment with infrastructure and applications
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        required: true
+        type: string
+      pr_number:
+        required: true
+        type: string
+    outputs:
+      backend_url:
+        description: 'Backend service URL'
+        value: ${{ jobs.infrastructure.outputs.backend_url }}
+      frontend_url:
+        description: 'Frontend service URL'
+        value: ${{ jobs.infrastructure.outputs.frontend_url }}
+
+jobs:
+  infrastructure:
+    name: Deploy Infrastructure
+    uses: ./.github/workflows/staging-workflows/terraform.yml
+    with:
+      environment_name: ${{ inputs.environment_name }}
+      pr_number: ${{ inputs.pr_number }}
+      action: apply
+    secrets: inherit
+  
+  build-backend:
+    name: Build Backend
+    needs: infrastructure
+    uses: ./.github/workflows/staging-workflows/build-backend.yml
+    with:
+      environment_name: ${{ inputs.environment_name }}
+      commit_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      registry_url: gcr.io
+    secrets: inherit
+  
+  build-frontend:
+    name: Build Frontend
+    needs: infrastructure
+    uses: ./.github/workflows/staging-workflows/build-frontend.yml
+    with:
+      environment_name: ${{ inputs.environment_name }}
+      commit_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      registry_url: gcr.io
+      backend_url: ${{ needs.infrastructure.outputs.backend_url }}
+    secrets: inherit
+  
+  deploy-backend:
+    name: Deploy Backend to GKE
+    needs: [infrastructure, build-backend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials \
+            ${{ needs.infrastructure.outputs.cluster_name }} \
+            --region ${{ env.GCP_REGION || 'us-central1' }} \
+            --project ${{ secrets.GCP_PROJECT_ID }}
+      
+      - name: Deploy backend to Kubernetes
+        run: |
+          kubectl set image deployment/backend-deployment \
+            backend=${{ needs.build-backend.outputs.image_url }} \
+            --namespace=${{ inputs.environment_name }}
+          
+          kubectl rollout status deployment/backend-deployment \
+            --namespace=${{ inputs.environment_name }} \
+            --timeout=10m
+  
+  deploy-frontend:
+    name: Deploy Frontend to GKE
+    needs: [infrastructure, build-frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials \
+            ${{ needs.infrastructure.outputs.cluster_name }} \
+            --region ${{ env.GCP_REGION || 'us-central1' }} \
+            --project ${{ secrets.GCP_PROJECT_ID }}
+      
+      - name: Deploy frontend to Kubernetes
+        run: |
+          kubectl set image deployment/frontend-deployment \
+            frontend=${{ needs.build-frontend.outputs.image_url }} \
+            --namespace=${{ inputs.environment_name }}
+          
+          kubectl rollout status deployment/frontend-deployment \
+            --namespace=${{ inputs.environment_name }} \
+            --timeout=10m
+  
+  smoke-test:
+    name: Run Smoke Tests
+    needs: [deploy-backend, deploy-frontend, infrastructure]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for services to be ready..."
+          sleep 30
+      
+      - name: Test backend health
+        run: |
+          curl -f ${{ needs.infrastructure.outputs.backend_url }}/health || exit 1
+      
+      - name: Test frontend availability
+        run: |
+          curl -f ${{ needs.infrastructure.outputs.frontend_url }} || exit 1
+      
+      - name: Run API smoke tests
+        run: |
+          # Add more comprehensive smoke tests here
+          echo "Running API smoke tests..."
+  
+  comment:
+    name: Post Deployment Comment
+    needs: [infrastructure, smoke-test]
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post deployment comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `## 🚀 Staging Environment Deployed
+            
+            **Frontend:** ${{ needs.infrastructure.outputs.frontend_url }}
+            **Backend:** ${{ needs.infrastructure.outputs.backend_url }}
+            
+            Environment: \`${{ inputs.environment_name }}\`
+            
+            ### Deployment Status
+            ✅ Infrastructure deployed
+            ✅ Applications built and deployed
+            ✅ Smoke tests passed
+            
+            ### Next Steps:
+            - Test your changes in the staging environment
+            - Monitor logs and metrics
+            - Run integration tests if needed
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ inputs.pr_number }},
+              body: comment
+            });

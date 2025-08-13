@@ -1,0 +1,87 @@
+name: Staging Environment Management
+description: Main orchestrator for staging environment deployment and management
+
+on:
+  pull_request:
+    types: [opened, synchronize, closed]
+  
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - deploy
+          - destroy
+          - restart
+          - status
+      pr_number:
+        description: 'Pull request number'
+        required: true
+        type: string
+  
+  repository_dispatch:
+    types: [staging-command]
+
+jobs:
+  setup:
+    name: Environment Setup
+    uses: ./.github/workflows/staging-workflows/setup.yml
+    with:
+      event_name: ${{ github.event_name }}
+      event_action: ${{ github.event.action }}
+      pr_number: ${{ github.event.pull_request.number || github.event.inputs.pr_number || github.event.client_payload.pr_number }}
+      dispatch_action: ${{ github.event.inputs.action || github.event.client_payload.action }}
+    secrets: inherit
+
+  deploy:
+    name: Deploy Environment
+    needs: setup
+    if: needs.setup.outputs.action == 'deploy'
+    uses: ./.github/workflows/staging-workflows/deploy.yml
+    with:
+      environment_name: ${{ needs.setup.outputs.environment_name }}
+      pr_number: ${{ needs.setup.outputs.pr_number }}
+    secrets: inherit
+
+  destroy:
+    name: Destroy Environment
+    needs: setup
+    if: needs.setup.outputs.action == 'destroy'
+    uses: ./.github/workflows/staging-workflows/destroy.yml
+    with:
+      environment_name: ${{ needs.setup.outputs.environment_name }}
+      pr_number: ${{ needs.setup.outputs.pr_number }}
+    secrets: inherit
+
+  restart:
+    name: Restart Environment
+    needs: setup
+    if: needs.setup.outputs.action == 'restart'
+    uses: ./.github/workflows/staging-workflows/restart.yml
+    with:
+      environment_name: ${{ needs.setup.outputs.environment_name }}
+      pr_number: ${{ needs.setup.outputs.pr_number }}
+    secrets: inherit
+
+  status:
+    name: Get Environment Status
+    needs: setup
+    if: needs.setup.outputs.action == 'status'
+    uses: ./.github/workflows/staging-workflows/status.yml
+    with:
+      environment_name: ${{ needs.setup.outputs.environment_name }}
+      pr_number: ${{ needs.setup.outputs.pr_number }}
+    secrets: inherit
+
+  notify:
+    name: Final Notification
+    needs: [setup, deploy, destroy, restart, status]
+    if: always()
+    uses: ./.github/workflows/staging-workflows/notify.yml
+    with:
+      environment_name: ${{ needs.setup.outputs.environment_name }}
+      action: ${{ needs.setup.outputs.action }}
+      status: ${{ contains(needs.*.result, 'failure') && 'failure' || contains(needs.*.result, 'cancelled') && 'cancelled' || 'success' }}
+    secrets: inherit

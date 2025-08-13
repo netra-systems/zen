@@ -1,0 +1,99 @@
+name: Lark Integration Hub
+description: Main workflow for Lark-GitHub integration
+
+on:
+  workflow_run:
+    workflows: ["*"]
+    types: [completed, requested, in_progress]
+  
+  pull_request:
+    types: [opened, closed, reopened, synchronize]
+  
+  repository_dispatch:
+    types: [lark-command]
+  
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'Lark command to execute'
+        required: true
+        type: choice
+        options:
+          - staging-deploy
+          - staging-destroy
+          - run-tests
+          - status-check
+      target:
+        description: 'Target PR number or branch'
+        required: false
+        default: 'main'
+
+env:
+  LARK_BOT_URL: ${{ secrets.LARK_BOT_URL }}
+  LARK_WEBHOOK_URL: ${{ secrets.LARK_WEBHOOK_URL }}
+
+jobs:
+  notify-lark:
+    name: Send Notification to Lark
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Determine notification type
+        id: notification
+        run: |
+          EVENT_NAME="${{ github.event_name }}"
+          WORKFLOW_NAME="${{ github.workflow }}"
+          
+          if [[ "$EVENT_NAME" == "workflow_run" ]]; then
+            echo "type=workflow" >> $GITHUB_OUTPUT
+            echo "status=${{ github.event.workflow_run.conclusion }}" >> $GITHUB_OUTPUT
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            echo "type=pr" >> $GITHUB_OUTPUT
+            echo "status=${{ github.event.action }}" >> $GITHUB_OUTPUT
+          else
+            echo "type=command" >> $GITHUB_OUTPUT
+            echo "status=triggered" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Send to Lark
+        uses: ./.github/actions/lark-notifier
+        with:
+          type: ${{ steps.notification.outputs.type }}
+          status: ${{ steps.notification.outputs.status }}
+          webhook_url: ${{ env.LARK_WEBHOOK_URL }}
+          bot_url: ${{ env.LARK_BOT_URL }}
+          channel: ${{ steps.notification.outputs.type == 'workflow' && github.event.workflow_run.conclusion == 'failure' && 'alerts' || 'general' }}
+
+  handle-command:
+    name: Handle Lark Command
+    runs-on: ubuntu-latest
+    if: github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Parse command
+        id: parse
+        run: |
+          if [[ "${{ github.event_name }}" == "repository_dispatch" ]]; then
+            COMMAND="${{ github.event.client_payload.command }}"
+            PARAMS="${{ toJson(github.event.client_payload.params) }}"
+          else
+            COMMAND="${{ github.event.inputs.command }}"
+            PARAMS='{"target": "${{ github.event.inputs.target }}"}'
+          fi
+          
+          echo "command=$COMMAND" >> $GITHUB_OUTPUT
+          echo "params=$PARAMS" >> $GITHUB_OUTPUT
+      
+      - name: Execute command
+        uses: ./.github/actions/command-executor
+        with:
+          command: ${{ steps.parse.outputs.command }}
+          params: ${{ steps.parse.outputs.params }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}

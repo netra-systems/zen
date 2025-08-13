@@ -1,0 +1,127 @@
+name: Command Executor
+description: Execute commands received from Lark
+author: Netra Systems
+
+inputs:
+  command:
+    description: 'Command to execute'
+    required: true
+  params:
+    description: 'Command parameters as JSON'
+    required: false
+    default: '{}'
+  github_token:
+    description: 'GitHub token for API operations'
+    required: true
+
+outputs:
+  result:
+    description: 'Command execution result'
+    value: ${{ steps.execute.outputs.result }}
+  status:
+    description: 'Execution status (success/failure)'
+    value: ${{ steps.execute.outputs.status }}
+
+runs:
+  using: composite
+  steps:
+    - name: Parse parameters
+      id: parse
+      shell: bash
+      run: |
+        echo "Parsing command: ${{ inputs.command }}"
+        echo "Parameters: ${{ inputs.params }}"
+        
+        # Extract common parameters
+        echo "${{ inputs.params }}" > params.json
+        PR_NUMBER=$(jq -r '.pr_number // .target // empty' params.json)
+        TEST_LEVEL=$(jq -r '.test_level // "smoke"' params.json)
+        
+        echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+        echo "test_level=$TEST_LEVEL" >> $GITHUB_OUTPUT
+    
+    - name: Execute command
+      id: execute
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      run: |
+        COMMAND="${{ inputs.command }}"
+        STATUS="success"
+        RESULT=""
+        
+        case "$COMMAND" in
+          staging-deploy|staging-destroy|staging-restart|staging-status)
+            ACTION="${COMMAND#staging-}"
+            PR_NUMBER="${{ steps.parse.outputs.pr_number }}"
+            
+            if [[ -z "$PR_NUMBER" ]]; then
+              RESULT="Error: PR number is required for staging commands"
+              STATUS="failure"
+            else
+              # Trigger staging workflow
+              gh workflow run staging-environment.yml \
+                -f action="$ACTION" \
+                -f pr_number="$PR_NUMBER"
+              
+              RESULT="Staging $ACTION initiated for PR #$PR_NUMBER"
+            fi
+            ;;
+          
+          run-tests)
+            TEST_LEVEL="${{ steps.parse.outputs.test_level }}"
+            
+            # Trigger test workflow
+            gh workflow run test-suite.yml \
+              -f test_level="$TEST_LEVEL" \
+              -f triggered_by="lark"
+            
+            RESULT="Test suite ($TEST_LEVEL) triggered"
+            ;;
+          
+          cancel-workflow)
+            RUN_ID=$(echo "${{ inputs.params }}" | jq -r '.run_id')
+            
+            if [[ -z "$RUN_ID" ]]; then
+              RESULT="Error: Run ID is required to cancel workflow"
+              STATUS="failure"
+            else
+              gh run cancel "$RUN_ID"
+              RESULT="Workflow run $RUN_ID cancelled"
+            fi
+            ;;
+          
+          retry-workflow)
+            RUN_ID=$(echo "${{ inputs.params }}" | jq -r '.run_id')
+            
+            if [[ -z "$RUN_ID" ]]; then
+              RESULT="Error: Run ID is required to retry workflow"
+              STATUS="failure"
+            else
+              gh run rerun "$RUN_ID"
+              RESULT="Workflow run $RUN_ID restarted"
+            fi
+            ;;
+          
+          status-check)
+            # Get latest workflow runs
+            RUNS=$(gh run list --limit 5 --json status,conclusion,name,databaseId)
+            RESULT="Latest workflow runs: $RUNS"
+            ;;
+          
+          *)
+            RESULT="Unknown command: $COMMAND"
+            STATUS="failure"
+            ;;
+        esac
+        
+        echo "result=$RESULT" >> $GITHUB_OUTPUT
+        echo "status=$STATUS" >> $GITHUB_OUTPUT
+    
+    - name: Report execution result
+      if: always()
+      shell: bash
+      run: |
+        echo "Command: ${{ inputs.command }}"
+        echo "Status: ${{ steps.execute.outputs.status }}"
+        echo "Result: ${{ steps.execute.outputs.result }}"
