@@ -83,7 +83,8 @@ class HeartbeatManager:
             except Exception as e:
                 logger.debug(f"Error stopping heartbeat for {connection_id}: {e}")
         
-        del self.heartbeat_tasks[connection_id]
+        if connection_id in self.heartbeat_tasks:
+            del self.heartbeat_tasks[connection_id]
         if connection_id in self.missed_heartbeats:
             del self.missed_heartbeats[connection_id]
         

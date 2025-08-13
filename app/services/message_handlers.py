@@ -40,32 +40,32 @@ class MessageHandlerService:
         
         # If thread_id provided, use it; otherwise get_or_create
         if thread_id:
-            thread = await self.thread_service.get_thread(db_session, thread_id)
+            thread = await self.thread_service.get_thread(thread_id, db_session)
             # Verify user owns the thread
             if thread and thread.metadata_.get("user_id") != user_id:
                 await manager.send_error(user_id, "Access denied to thread")
                 return
         
         if not thread_id or not thread:
-            thread = await self.thread_service.get_or_create_thread(db_session, user_id)
+            thread = await self.thread_service.get_or_create_thread(user_id, db_session)
         if not thread:
             await manager.send_error(user_id, "Failed to create or retrieve thread")
             return
         
         await self.thread_service.create_message(
-            db_session,
-            thread_id=thread.id,
+            thread.id,
             role="user",
             content=user_request,
-            metadata={"user_id": user_id}
+            metadata={"user_id": user_id},
+            db=db_session
         )
         
         run = await self.thread_service.create_run(
-            db_session,
-            thread_id=thread.id,
+            thread.id,
             assistant_id="netra-assistant",
             model="gpt-4",
-            instructions="You are Netra AI Workload Optimization Assistant"
+            instructions="You are Netra AI Workload Optimization Assistant",
+            db=db_session
         )
         
         self.supervisor.thread_id = thread.id
@@ -76,18 +76,18 @@ class MessageHandlerService:
         
         if response:
             await self.thread_service.create_message(
-                db_session,
-                thread_id=thread.id,
+                thread.id,
                 role="assistant",
                 content=json.dumps(response) if isinstance(response, dict) else str(response),
                 assistant_id="netra-assistant",
-                run_id=run.id
+                run_id=run.id,
+                db=db_session
             )
         
         await self.thread_service.update_run_status(
-            db_session,
-            run_id=run.id,
-            status="completed"
+            run.id,
+            status="completed",
+            db=db_session
         )
         
         await manager.send_message(
@@ -117,30 +117,30 @@ class MessageHandlerService:
             try:
                 # If thread_id provided, use it; otherwise get_or_create
                 if thread_id:
-                    thread = await self.thread_service.get_thread(db_session, thread_id)
+                    thread = await self.thread_service.get_thread(thread_id, db_session)
                     # Verify user owns the thread
                     if thread and thread.metadata_.get("user_id") != user_id:
                         await manager.send_error(user_id, "Access denied to thread")
                         return
                 
                 if not thread:
-                    thread = await self.thread_service.get_or_create_thread(db_session, user_id)
+                    thread = await self.thread_service.get_or_create_thread(user_id, db_session)
                 
                 if thread:
                     await self.thread_service.create_message(
-                        db_session,
                         thread.id,
                         role="user",
                         content=text,
-                        metadata={"references": references} if references else None
+                        metadata={"references": references} if references else None,
+                        db=db_session
                     )
                     
                     run = await self.thread_service.create_run(
-                        db_session,
-                        thread_id=thread.id,
+                        thread.id,
                         assistant_id="netra-assistant",
                         model="gpt-4",
-                        instructions="You are Netra AI Workload Optimization Assistant"
+                        instructions="You are Netra AI Workload Optimization Assistant",
+                        db=db_session
                     )
                     
                     self.supervisor.thread_id = thread.id
@@ -158,20 +158,20 @@ class MessageHandlerService:
             if db_session and response and thread:
                 try:
                     await self.thread_service.create_message(
-                        db_session,
                         thread.id,
                         role="assistant",
                         content=str(response),
                         metadata={"type": "agent_response"},
                         assistant_id="netra-assistant",
-                        run_id=run.id if run else None
+                        run_id=run.id if run else None,
+                        db=db_session
                     )
                     
                     if run:
                         await self.thread_service.update_run_status(
-                            db_session,
-                            run_id=run.id,
-                            status="completed"
+                            run.id,
+                            status="completed",
+                            db=db_session
                         )
                 except Exception as e:
                     logger.error(f"Error persisting assistant message: {e}")
@@ -226,12 +226,12 @@ class MessageHandlerService:
             await manager.send_error(user_id, "Database session not available")
             return
         
-        thread = await self.thread_service.get_or_create_thread(db_session, user_id)
+        thread = await self.thread_service.get_or_create_thread(user_id, db_session)
         if not thread:
             await manager.send_error(user_id, "Failed to retrieve thread history")
             return
         
-        messages = await self.thread_service.get_thread_messages(db_session, thread.id)
+        messages = await self.thread_service.get_thread_messages(thread.id, db=db_session)
         history = []
         
         for msg in messages:

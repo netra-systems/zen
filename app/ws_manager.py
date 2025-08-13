@@ -88,7 +88,7 @@ class WebSocketManager:
         
         return conn_info
 
-    async def disconnect(self, user_id: str, websocket: WebSocket, code: int = 1000, reason: str = "Normal closure"):
+    async def disconnect(self, user_id: str, websocket: WebSocket, code: int = 1000, reason: str = "Normal closure") -> None:
         """Properly disconnect and clean up a WebSocket connection."""
         # Find connection info
         conn_info = await self.connection_manager.find_connection(user_id, websocket)
@@ -184,13 +184,13 @@ class WebSocketManager:
         self._stats["total_messages_received"] += 1
         return True
 
-    async def handle_pong(self, user_id: str, websocket: WebSocket):
+    async def handle_pong(self, user_id: str, websocket: WebSocket) -> None:
         """Handle pong response from client."""
         conn_info = await self.connection_manager.find_connection(user_id, websocket)
         if conn_info:
             await self.heartbeat_manager.handle_pong(conn_info)
 
-    async def _send_system_message(self, conn_info: ConnectionInfo, message: Dict[str, Any]):
+    async def _send_system_message(self, conn_info: ConnectionInfo, message: Dict[str, Any]) -> None:
         """Send a system message to a specific connection."""
         message["system"] = True
         await self._send_to_connection(conn_info, message, retry=False)
@@ -231,7 +231,7 @@ class WebSocketManager:
         
         return False
 
-    async def _send_rate_limit_error(self, conn_info: ConnectionInfo):
+    async def _send_rate_limit_error(self, conn_info: ConnectionInfo) -> None:
         """Send rate limit error to connection."""
         await self._send_system_message(conn_info, {
             "type": "error",
@@ -252,7 +252,7 @@ class WebSocketManager:
             "displayed_to_user": True
         })
 
-    async def send_agent_log(self, user_id: str, log_level: str, message: str, sub_agent_name: str = None):
+    async def send_agent_log(self, user_id: str, log_level: str, message: str, sub_agent_name: str = None) -> None:
         """Send agent log messages for real-time monitoring."""
         await self.send_message(user_id, {
             "type": "agent_log",
@@ -260,7 +260,7 @@ class WebSocketManager:
             "displayed_to_user": True
         })
 
-    async def send_tool_call(self, user_id: str, tool_name: str, tool_args: Dict[str, Any], sub_agent_name: str = None):
+    async def send_tool_call(self, user_id: str, tool_name: str, tool_args: Dict[str, Any], sub_agent_name: str = None) -> None:
         """Send tool call updates."""
         await self.send_message(user_id, {
             "type": "tool_call",
@@ -268,7 +268,7 @@ class WebSocketManager:
             "displayed_to_user": True
         })
 
-    async def send_tool_result(self, user_id: str, tool_name: str, result: Union[str, Dict[str, Any], List[Any]], sub_agent_name: str = None):
+    async def send_tool_result(self, user_id: str, tool_name: str, result: Union[str, Dict[str, Any], List[Any]], sub_agent_name: str = None) -> None:
         """Send tool result updates."""
         await self.send_message(user_id, {
             "type": "tool_result",
@@ -276,7 +276,7 @@ class WebSocketManager:
             "displayed_to_user": True
         })
 
-    async def shutdown(self):
+    async def shutdown(self) -> None:
         """Gracefully shutdown all components."""
         logger.info("Starting WebSocket manager shutdown...")
         

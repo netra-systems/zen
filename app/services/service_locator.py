@@ -165,35 +165,35 @@ service_locator = ServiceLocator()
 
 class IAgentService:
     """Interface for agent service."""
-    async def start_agent(self, *args, **kwargs): raise NotImplementedError
-    async def stop_agent(self, *args, **kwargs): raise NotImplementedError
-    async def get_agent_status(self, *args, **kwargs): raise NotImplementedError
+    async def start_agent(self, *args, **kwargs): pass
+    async def stop_agent(self, *args, **kwargs): pass
+    async def get_agent_status(self, *args, **kwargs): pass
 
 
 class IThreadService:
     """Interface for thread service."""
-    async def create_thread(self, *args, **kwargs): raise NotImplementedError
-    async def get_thread(self, *args, **kwargs): raise NotImplementedError
-    async def switch_thread(self, *args, **kwargs): raise NotImplementedError
-    async def delete_thread(self, *args, **kwargs): raise NotImplementedError
+    async def create_thread(self, *args, **kwargs): pass
+    async def get_thread(self, *args, **kwargs): pass
+    async def switch_thread(self, *args, **kwargs): pass
+    async def delete_thread(self, *args, **kwargs): pass
 
 
 class IMessageHandlerService:
     """Interface for message handler service."""
-    async def handle_message(self, *args, **kwargs): raise NotImplementedError
-    async def process_user_message(self, *args, **kwargs): raise NotImplementedError
+    async def handle_message(self, *args, **kwargs): pass
+    async def process_user_message(self, *args, **kwargs): pass
 
 
 class IMCPService:
     """Interface for MCP service."""
-    async def initialize(self, *args, **kwargs): raise NotImplementedError
-    async def execute_tool(self, *args, **kwargs): raise NotImplementedError
+    async def initialize(self, *args, **kwargs): pass
+    async def execute_tool(self, *args, **kwargs): pass
 
 
 class IWebSocketService:
     """Interface for WebSocket service."""
-    async def send_message(self, *args, **kwargs): raise NotImplementedError
-    async def broadcast(self, *args, **kwargs): raise NotImplementedError
+    async def send_message(self, *args, **kwargs): pass
+    async def broadcast(self, *args, **kwargs): pass
 
 
 # ============================================================================

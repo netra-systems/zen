@@ -120,17 +120,28 @@ class SupervisorAgent(BaseSubAgent):
                               thread_id: str, user_id: str) -> DeepAgentState:
         """Initialize agent state."""
         state = DeepAgentState(
+            user_request=prompt,
             messages=[SystemMessage(content=prompt)],
             thread_id=thread_id,
             user_id=user_id,
             metadata={"original_prompt": prompt}
         )
         
-        # Try to restore previous state
-        restored = await self.state_persistence.restore_state(thread_id)
-        if restored:
-            state.update_from_dict(restored)
-            logger.info(f"Restored state for thread {thread_id}")
+        # Try to restore previous state from thread context
+        thread_context = await self.state_persistence.get_thread_context(thread_id)
+        if thread_context and thread_context.get('current_run_id'):
+            restored = await self.state_persistence.load_agent_state(
+                thread_context['current_run_id'], 
+                self.db_session
+            )
+            if restored:
+                # Merge restored state with new request
+                state.triage_result = restored.triage_result
+                state.data_result = restored.data_result
+                state.optimizations_result = restored.optimizations_result
+                state.action_plan_result = restored.action_plan_result
+                state.report_result = restored.report_result
+                logger.info(f"Restored state for thread {thread_id}")
         
         return state
     

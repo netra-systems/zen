@@ -231,7 +231,7 @@ class TestLogStreaming(unittest.TestCase):
         """Add streamers for all processes."""
         streamers = []
         for i, process in enumerate(processes):
-            streamer = manager.add_streamer(f"Service{i}", process, verbose=False)
+            streamer = manager.add_streamer(f"Service{i}", process)
             streamers.append(streamer)
         return streamers
     
@@ -245,7 +245,7 @@ class TestLogStreaming(unittest.TestCase):
         """Test log streamer error handling."""
         mock_process = self._create_process_with_error()
         with patch('builtins.print'):
-            streamer = LogStreamer("ErrorService", mock_process, verbose=False)
+            streamer = LogStreamer(mock_process, "ErrorService")
             self._test_error_recovery(streamer)
     
     def _create_process_with_error(self):
@@ -291,7 +291,7 @@ class TestLogStreaming(unittest.TestCase):
         def capture(*args, **kwargs):
             captured.append(args[0] if args else "")
         with patch('builtins.print', side_effect=capture):
-            streamer = LogStreamer("UnicodeService", mock_process, verbose=True)
+            streamer = LogStreamer(mock_process, "UnicodeService")
             streamer.start()
             time.sleep(0.1)
             streamer.stop()

@@ -279,7 +279,12 @@ class TestHealthStatusManagement(unittest.TestCase):
     
     def test_health_status_initialization(self):
         """Test health status initialization."""
-        status = HealthStatus()
+        from datetime import datetime
+        status = HealthStatus(
+            is_healthy=True,
+            last_check=datetime.now(),
+            consecutive_failures=0
+        )
         self._assert_initial_status(status)
     
     def _assert_initial_status(self, status):
@@ -290,7 +295,12 @@ class TestHealthStatusManagement(unittest.TestCase):
     
     def test_health_status_updates(self):
         """Test updating health status."""
-        status = HealthStatus()
+        from datetime import datetime
+        status = HealthStatus(
+            is_healthy=True,
+            last_check=datetime.now(),
+            consecutive_failures=0
+        )
         self._update_status_failure(status)
         self._assert_failure_state(status)
     

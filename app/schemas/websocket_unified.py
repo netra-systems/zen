@@ -360,7 +360,7 @@ class WebSocketMessage(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     
     @validator("payload", pre=True)
-    def validate_payload(cls, v, values):
+    def validate_payload(cls, v: Any, values: Dict[str, Any]) -> Any:
         """Ensure payload matches expected type."""
         if isinstance(v, dict):
             # For backward compatibility - convert dict to appropriate model

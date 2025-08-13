@@ -143,6 +143,37 @@
                 </key-insight>
             </fix>
             
+            <fix date="2025-08-13">
+                <title>SQLAlchemy Async Engine SQL Execution</title>
+                <problem>Connection monitor tests failing with "Not an executable object: 'SELECT 1'" errors</problem>
+                <symptoms>
+                    <symptom>ERROR | app.services.database.connection_monitor:_test_connectivity:294 | Connectivity test failed: Not an executable object: 'SELECT 1'</symptom>
+                    <symptom>ERROR | app.services.database.connection_monitor:_test_performance:339 | Performance test failed: Not an executable object: 'SELECT 1'</symptom>
+                </symptoms>
+                <root-causes>
+                    <cause>Raw SQL strings cannot be executed directly with SQLAlchemy async engines</cause>
+                    <cause>conn.execute() requires SQLAlchemy text() objects, not plain strings</cause>
+                    <cause>async_engine.begin() vs async_engine.connect() have different async behaviors</cause>
+                </root-causes>
+                <solution>
+                    <step>Import text from sqlalchemy: from sqlalchemy import text</step>
+                    <step>Wrap all SQL strings with text(): conn.execute(text("SELECT 1"))</step>
+                    <step>Use async_engine.connect() for proper async operations instead of async_engine.begin()</step>
+                </solution>
+                <files-changed>
+                    <file>app/services/database/connection_monitor.py - Added text import, wrapped SQL queries</file>
+                </files-changed>
+                <prevention>
+                    <action>Always use text() wrapper for raw SQL queries with SQLAlchemy</action>
+                    <action>Use async_engine.connect() for async operations with await on results</action>
+                    <action>Use async_engine.begin() for transactional operations with sync results</action>
+                </prevention>
+                <key-insight>
+                    SQLAlchemy async engines require SQL to be wrapped in text() objects for proper execution.
+                    This applies to all raw SQL queries including simple SELECT 1 health checks.
+                </key-insight>
+            </fix>
+            
             <fix date="2025-08-11">
                 <title>Critical E2E Test Coverage Enhancement</title>
                 <problem>Demo brittleness despite 60%+ coverage - tests focused on happy paths</problem>
@@ -225,6 +256,82 @@
                     <action>Include 'statuses: write' when updating commit statuses</action>
                 </prevention>
                 <note>This is a recurring issue - always check permissions when workflows fail with 403 errors</note>
+            </fix>
+            
+            <fix date="2025-08-13">
+                <title>WebSocket Heartbeat KeyError on Disconnect</title>
+                <problem>KeyError when stopping heartbeat for connection during disconnect</problem>
+                <symptoms>
+                    <symptom>KeyError: 'conn_1755126541826' in heartbeat.py line 86</symptom>
+                    <symptom>Error occurs in del self.heartbeat_tasks[connection_id]</symptom>
+                    <symptom>Happens during WebSocket disconnect process</symptom>
+                </symptoms>
+                <root-cause>Race condition between heartbeat loop cleanup and stop_heartbeat_for_connection method</root-cause>
+                <details>
+                    <detail>The heartbeat loop's finally block deletes from heartbeat_tasks dictionary</detail>
+                    <detail>stop_heartbeat_for_connection also tries to delete the same key</detail>
+                    <detail>If heartbeat loop finishes first, stop_heartbeat_for_connection causes KeyError</detail>
+                </details>
+                <solution>Added safety check before deletion in stop_heartbeat_for_connection</solution>
+                <implementation>
+                    <code>
+                        # Before fix:
+                        del self.heartbeat_tasks[connection_id]
+                        
+                        # After fix:
+                        if connection_id in self.heartbeat_tasks:
+                            del self.heartbeat_tasks[connection_id]
+                    </code>
+                </implementation>
+                <files-changed>
+                    <file>app/websocket/heartbeat.py:86-87 - Added safety check before deletion</file>
+                </files-changed>
+                <prevention>
+                    <action>Always check dictionary key existence before deletion in cleanup code</action>
+                    <action>Be aware of race conditions in async cleanup operations</action>
+                    <action>Use safe deletion patterns when multiple code paths can delete the same resource</action>
+                </prevention>
+            </fix>
+            
+            <fix date="2025-08-13">
+                <title>ThreadService Method Parameter Order Error</title>
+                <problem>DB_QUERY_FAILED: Failed to get or create thread for user - AsyncSession object passed as user_id</problem>
+                <symptoms>
+                    <symptom>Error in handle_user_message: AsyncSession object at 0x... shown instead of user_id</symptom>
+                    <symptom>ThreadService methods called with wrong parameter order</symptom>
+                    <symptom>Missing get_thread method in ThreadService</symptom>
+                </symptoms>
+                <root-causes>
+                    <cause>All ThreadService method calls had parameters in wrong order</cause>
+                    <cause>db_session was passed as first argument when it should be last</cause>
+                    <cause>get_thread method was called but not implemented in ThreadService</cause>
+                </root-causes>
+                <solution>
+                    <step>Added missing get_thread method to ThreadService</step>
+                    <step>Fixed parameter order for get_or_create_thread: (user_id, db) not (db, user_id)</step>
+                    <step>Fixed parameter order for get_thread: (thread_id, db) not (db, thread_id)</step>
+                    <step>Fixed create_message to use db= keyword argument as last parameter</step>
+                    <step>Fixed create_run to use db= keyword argument as last parameter</step>
+                    <step>Fixed get_thread_messages to use db= keyword argument as last parameter</step>
+                    <step>Fixed update_run_status to use db= keyword argument as last parameter</step>
+                </solution>
+                <files-changed>
+                    <file>app/services/thread_service.py:75-86 - Added get_thread method</file>
+                    <file>app/services/message_handlers.py - Fixed all ThreadService method calls</file>
+                </files-changed>
+                <prevention>
+                    <action>Always check method signatures before calling them</action>
+                    <action>AsyncSession should typically be the last optional parameter with db= keyword</action>
+                    <action>Entity IDs and required parameters should come first</action>
+                    <action>Test database operations thoroughly with proper parameter validation</action>
+                </prevention>
+                <key-insight>
+                    Repository pattern methods should follow consistent parameter ordering:
+                    1. Required entity identifiers (user_id, thread_id, etc.)
+                    2. Required data parameters
+                    3. Optional parameters with defaults
+                    4. Database session as last optional parameter (db: Optional[AsyncSession] = None)
+                </key-insight>
             </fix>
         </section>
 

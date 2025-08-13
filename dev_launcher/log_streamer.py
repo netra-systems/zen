@@ -83,8 +83,17 @@ class LogStreamer(threading.Thread):
         return ""
     
     def _format_content(self, line: str) -> str:
-        """Apply syntax highlighting to line content."""
-        return self._apply_syntax_colors(line)
+        """Apply standard color based on content type."""
+        lower_line = line.lower()
+        # Apply appropriate color based on message type
+        if any(kw in lower_line for kw in self.error_keywords):
+            return f"{Colors.RED}{line}{Colors.RESET}"
+        elif any(kw in lower_line for kw in self.warning_keywords):
+            return f"{Colors.YELLOW}{line}{Colors.RESET}"
+        elif any(kw in lower_line for kw in self.success_keywords):
+            return f"{Colors.GREEN}{line}{Colors.RESET}"
+        # Default to white/normal text
+        return line
     
     def _print_line(self, line: str):
         """Print a line with appropriate formatting."""
@@ -132,30 +141,6 @@ class LogStreamer(threading.Thread):
         """Check if any errors have been detected in recent output."""
         return len(self.get_recent_errors()) > 0
     
-    def _apply_syntax_colors(self, text: str) -> str:
-        """Apply professional syntax highlighting."""
-        # Keywords
-        keywords = ['import', 'from', 'class', 'def', 'return', 'if', 'else', 
-                   'try', 'except', 'finally', 'with', 'as', 'for', 'while']
-        # Numbers
-        import re
-        result = text
-        
-        # Highlight strings (green)
-        result = re.sub(r'(["\'])([^"\']*)(["\'])', 
-                       r'\033[32m\1\2\3\033[0m', result)
-        
-        # Highlight numbers (cyan)
-        result = re.sub(r'\b(\d+)\b', r'\033[36m\1\033[0m', result)
-        
-        # Highlight keywords (blue)
-        for kw in keywords:
-            result = re.sub(rf'\b({kw})\b', r'\033[34m\1\033[0m', result)
-        
-        # Highlight paths (yellow)
-        result = re.sub(r'([/\\][\w/\\.-]+)', r'\033[33m\1\033[0m', result)
-        
-        return result
 
 
 class LogManager:

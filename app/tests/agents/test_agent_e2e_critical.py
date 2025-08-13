@@ -139,7 +139,7 @@ class TestAgentE2ECritical:
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     # Execute the full agent lifecycle (don't mock the run method)
-                    result_state = await supervisor.run(user_request, run_id, stream_updates=True)
+                    result_state = await supervisor.run(user_request, supervisor.thread_id, supervisor.user_id, run_id)
         
         # Assertions
         assert result_state != None
@@ -190,7 +190,7 @@ class TestAgentE2ECritical:
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     # Test with streaming enabled
-                    await supervisor.run("Test request", run_id, stream_updates=True)
+                    await supervisor.run("Test request", supervisor.thread_id, supervisor.user_id, run_id)
         
         # Verify messages were streamed
         assert len(messages_sent) > 0
@@ -205,7 +205,7 @@ class TestAgentE2ECritical:
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
-                    await supervisor.run("Test request", run_id + "_no_stream", stream_updates=False)
+                    await supervisor.run("Test request", supervisor.thread_id, supervisor.user_id, run_id + "_no_stream")
         
         # Should have fewer or no messages when streaming is disabled
         non_streaming_count = len(messages_sent)
@@ -253,7 +253,7 @@ class TestAgentE2ECritical:
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
-                    state = await supervisor.run("Optimize my GPU utilization", run_id, True)
+                    state = await supervisor.run("Optimize my GPU utilization", supervisor.thread_id, supervisor.user_id, run_id)
         
         # Verify some agents were executed
         assert len(execution_order) > 0
@@ -356,7 +356,7 @@ class TestAgentE2ECritical:
                     with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(side_effect=mock_load_state)):
                         with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                             # First run - state should be saved
-                            state1 = await supervisor.run("Initial request", run_id, False)
+                            state1 = await supervisor.run("Initial request", thread_id, user_id, run_id)
                 
                 # Verify state was saved
                 assert run_id in saved_states
@@ -367,7 +367,7 @@ class TestAgentE2ECritical:
                                 AsyncMock(return_value={"current_run_id": run_id})):
                     
                     # Second run should load previous state
-                    state2 = await supervisor.run("Follow-up request", run_id + "_2", False)
+                    state2 = await supervisor.run("Follow-up request", thread_id, user_id, run_id + "_2")
                     
                     # Verify state continuity
                     assert state2.user_request == "Follow-up request"
@@ -410,7 +410,7 @@ class TestAgentE2ECritical:
         
         # Execute with error
         try:
-            await supervisor.run("Test with error", run_id, True)
+            await supervisor.run("Test with error", supervisor.thread_id, supervisor.user_id, run_id)
         except Exception:
             pass  # Expected to fail
         
@@ -444,7 +444,7 @@ class TestAgentE2ECritical:
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     for i in range(max_retries):
                         try:
-                            await supervisor.run("Test with retry", run_id + f"_retry_{i}", False)
+                            await supervisor.run("Test with retry", supervisor.thread_id, supervisor.user_id, run_id + f"_retry_{i}")
                             break
                         except:
                             continue
@@ -729,7 +729,7 @@ class TestAgentE2ECritical:
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     with pytest.raises(asyncio.TimeoutError):
                         await asyncio.wait_for(
-                            supervisor.run("Test timeout", run_id, False),
+                            supervisor.run("Test timeout", supervisor.thread_id, supervisor.user_id, run_id),
                             timeout=timeout_seconds
                         )
         
@@ -778,7 +778,7 @@ class TestAgentE2ECritical:
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     performance_metrics["start_time"] = datetime.now()
-                    await supervisor.run("Performance test", run_id + "_perf", False)
+                    await supervisor.run("Performance test", supervisor.thread_id, supervisor.user_id, run_id + "_perf")
                     performance_metrics["end_time"] = datetime.now()
         
         # Verify metrics collected - may be less than all agents if some didn't execute
@@ -800,7 +800,7 @@ class TestAgentE2ECritical:
                 with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
                     with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                         with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
-                            return await supervisor.run(request, rid, False)
+                            return await supervisor.run(request, supervisor.thread_id, supervisor.user_id, rid)
             
             tasks = [
                 run_with_mocks(f"Load test {i}", f"{run_id}_load_{load}_{i}")

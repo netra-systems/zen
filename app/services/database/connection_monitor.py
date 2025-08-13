@@ -10,6 +10,7 @@ Provides comprehensive monitoring of database connection pools including:
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timezone
 from sqlalchemy.pool import Pool
+from sqlalchemy import text
 from app.db.postgres import async_engine, Database
 from app.logging_config import central_logger
 from app.core.exceptions import DatabaseError, NetraException
@@ -21,7 +22,7 @@ logger = central_logger.get_logger(__name__)
 class ConnectionPoolMetrics:
     """Collect and track connection pool metrics"""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self._metrics_history: List[Dict[str, Any]] = []
         self._max_history_size = 1000
         self._last_alert_time = 0
@@ -143,7 +144,7 @@ class ConnectionPoolMetrics:
         else:
             return "healthy"
     
-    def _store_metrics(self, metrics: Dict[str, Any]):
+    def _store_metrics(self, metrics: Dict[str, Any]) -> None:
         """Store metrics in history"""
         self._metrics_history.append(metrics)
         
@@ -151,7 +152,7 @@ class ConnectionPoolMetrics:
         if len(self._metrics_history) > self._max_history_size:
             self._metrics_history = self._metrics_history[-self._max_history_size:]
     
-    def _send_alert(self, level: str, issues: List[str]):
+    def _send_alert(self, level: str, issues: List[str]) -> None:
         """Send alert notification with cooldown"""
         current_time = time.time()
         if current_time - self._last_alert_time < self._alert_cooldown:
@@ -214,12 +215,12 @@ class ConnectionPoolMetrics:
 class ConnectionHealthChecker:
     """Perform periodic health checks on database connections"""
     
-    def __init__(self, metrics: ConnectionPoolMetrics):
+    def __init__(self, metrics: ConnectionPoolMetrics) -> None:
         self.metrics = metrics
         self._running = False
         self._check_interval = 60  # 1 minute
         
-    async def start_monitoring(self):
+    async def start_monitoring(self) -> None:
         """Start periodic monitoring"""
         self._running = True
         logger.info("Starting database connection monitoring")
@@ -232,7 +233,7 @@ class ConnectionHealthChecker:
                 logger.error(f"Error in health check monitoring: {e}")
                 await asyncio.sleep(self._check_interval)
     
-    def stop_monitoring(self):
+    def stop_monitoring(self) -> None:
         """Stop periodic monitoring"""
         self._running = False
         logger.info("Stopping database connection monitoring")
@@ -280,8 +281,8 @@ class ConnectionHealthChecker:
             
             # Test async engine connectivity
             if async_engine:
-                async with async_engine.begin() as conn:
-                    result = await conn.execute("SELECT 1")
+                async with async_engine.connect() as conn:
+                    result = await conn.execute(text("SELECT 1"))
                     await result.fetchone()
             
             end_time = time.time()
@@ -307,15 +308,15 @@ class ConnectionHealthChecker:
         try:
             response_times = []
             test_queries = [
-                "SELECT 1",
-                "SELECT NOW()",
-                "SELECT COUNT(*) FROM information_schema.tables"
+                text("SELECT 1"),
+                text("SELECT NOW()"),
+                text("SELECT COUNT(*) FROM information_schema.tables")
             ]
             
             if async_engine:
                 for query in test_queries:
                     start_time = time.time()
-                    async with async_engine.begin() as conn:
+                    async with async_engine.connect() as conn:
                         result = await conn.execute(query)
                         await result.fetchall()
                     end_time = time.time()
@@ -379,7 +380,7 @@ async def get_connection_status() -> Dict[str, Any]:
             context={"error": str(e)}
         )
 
-async def start_connection_monitoring():
+async def start_connection_monitoring() -> None:
     """Start the connection monitoring service"""
     try:
         await health_checker.start_monitoring()
@@ -387,6 +388,6 @@ async def start_connection_monitoring():
         logger.error(f"Error starting connection monitoring: {e}")
         raise
 
-def stop_connection_monitoring():
+def stop_connection_monitoring() -> None:
     """Stop the connection monitoring service"""
     health_checker.stop_monitoring()

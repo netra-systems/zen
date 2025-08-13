@@ -29,7 +29,11 @@ class UnitOfWork:
     async def __aenter__(self):
         """Enter async context"""
         if not self._external_session:
+            if async_session_factory is None:
+                raise RuntimeError("Database not configured - async_session_factory is None")
             self._session = async_session_factory()
+            if not isinstance(self._session, AsyncSession):
+                raise RuntimeError(f"Invalid session type: {type(self._session)}")
         
         self.threads = ThreadRepository()
         self.messages = MessageRepository()
@@ -60,6 +64,9 @@ class UnitOfWork:
     async def commit(self):
         """Commit the transaction"""
         if self._session:
+            if not isinstance(self._session, AsyncSession):
+                logger.error(f"Invalid session type for commit: {type(self._session)}")
+                raise RuntimeError(f"Cannot commit - invalid session type: {type(self._session)}")
             try:
                 await self._session.commit()
                 logger.debug("Transaction committed")
@@ -71,6 +78,9 @@ class UnitOfWork:
     async def rollback(self):
         """Rollback the transaction"""
         if self._session:
+            if not isinstance(self._session, AsyncSession):
+                logger.error(f"Invalid session type for rollback: {type(self._session)}")
+                return  # Can't rollback if not a valid session
             try:
                 await self._session.rollback()
                 logger.debug("Transaction rolled back")
@@ -87,7 +97,11 @@ class UnitOfWork:
     async def initialize(self):
         """Initialize the UnitOfWork - for backward compatibility with tests"""
         if not self._external_session:
+            if async_session_factory is None:
+                raise RuntimeError("Database not configured - async_session_factory is None")
             self._session = async_session_factory()
+            if not isinstance(self._session, AsyncSession):
+                raise RuntimeError(f"Invalid session type: {type(self._session)}")
         
         self.threads = ThreadRepository()
         self.messages = MessageRepository()

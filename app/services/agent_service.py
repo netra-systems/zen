@@ -33,7 +33,7 @@ logger = central_logger.get_logger(__name__)
 class AgentService:
     """Service for managing agent interactions following conventions"""
     
-    def __init__(self, supervisor: Supervisor):
+    def __init__(self, supervisor: Supervisor) -> None:
         self.supervisor = supervisor
         self.thread_service = ThreadService()
         self.message_handler = MessageHandlerService(supervisor, self.thread_service)

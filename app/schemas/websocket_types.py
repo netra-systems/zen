@@ -344,7 +344,7 @@ class MessageValidationResult(BaseModel):
     parsed_payload: Optional[Dict[str, Any]] = Field(default=None)
     
     @validator('message_type', pre=True)
-    def validate_message_type(cls, v):
+    def validate_message_type(cls, v: Any) -> Optional[WebSocketMessageType]:
         if isinstance(v, str):
             try:
                 return WebSocketMessageType(v)

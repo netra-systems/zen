@@ -65,6 +65,10 @@ class DevLauncher:
             project_root=config.project_root
         )
         
+        # Health check info (registered after startup verification)
+        self.backend_health_info = None
+        self.frontend_health_info = None
+        
         # Setup logging
         setup_logging(config.verbose)
         
@@ -143,6 +147,31 @@ class DevLauncher:
         
         self._print("🔐", "SECRETS", "Loading secrets...")
         return self.secret_loader.load_all_secrets()
+    
+    def register_health_monitoring(self):
+        """Register health monitoring after services are verified ready."""
+        self._print("💚", "HEALTH", "Registering health monitoring...")
+        
+        # Register backend health monitoring
+        if self.backend_health_info:
+            backend_url = f"http://localhost:{self.backend_health_info['port']}/health/live"
+            self.health_monitor.register_service(
+                "Backend",
+                health_check=create_url_health_check(backend_url),
+                recovery_action=lambda: logger.error("Backend needs restart - please restart the launcher"),
+                max_failures=5
+            )
+            logger.info("Backend health monitoring registered")
+        
+        # Register frontend health monitoring
+        if self.frontend_health_info:
+            self.health_monitor.register_service(
+                "Frontend",
+                health_check=create_process_health_check(self.frontend_health_info['process']),
+                recovery_action=lambda: logger.error("Frontend needs restart - please restart the launcher"),
+                max_failures=5
+            )
+            logger.info("Frontend health monitoring registered")
     
     def start_backend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
         """
@@ -265,14 +294,11 @@ class DevLauncher:
             logger.info(f"Backend WebSocket URL: ws://localhost:{port}/ws")
             logger.info(f"Backend log file: {log_file}")
             
-            # Register health monitoring
-            backend_url = f"http://localhost:{port}/health/live"
-            self.health_monitor.register_service(
-                "Backend",
-                health_check=create_url_health_check(backend_url),
-                recovery_action=lambda: logger.error("Backend needs restart - please restart the launcher"),
-                max_failures=5
-            )
+            # Store health check info for later registration (after startup verification)
+            self.backend_health_info = {
+                "port": port,
+                "process": process
+            }
             
             return process, log_streamer
             
@@ -398,14 +424,11 @@ class DevLauncher:
             # Write frontend info to service discovery
             self.service_discovery.write_frontend_info(port)
             
-            # Register health monitoring
-            frontend_url = f"http://localhost:{port}"
-            self.health_monitor.register_service(
-                "Frontend",
-                health_check=create_process_health_check(process),
-                recovery_action=lambda: logger.error("Frontend needs restart - please restart the launcher"),
-                max_failures=5
-            )
+            # Store health check info for later registration (after startup verification)
+            self.frontend_health_info = {
+                "port": port,
+                "process": process
+            }
             
             return process, log_streamer
             
@@ -499,6 +522,9 @@ class DevLauncher:
         
         # Show success summary
         self._show_success_summary()
+        
+        # Register health monitoring AFTER services are verified ready
+        self.register_health_monitoring()
         
         # Start health monitoring
         self.health_monitor.start()

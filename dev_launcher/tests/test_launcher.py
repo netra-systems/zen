@@ -368,10 +368,14 @@ class TestIntegration(unittest.TestCase):
         mock_backend = Mock(spec=subprocess.Popen)
         mock_backend.poll.return_value = None
         mock_backend.pid = 12345
+        mock_backend.stdout = Mock()
+        mock_backend.stdout.readline.return_value = b''
         
         mock_frontend = Mock(spec=subprocess.Popen)
         mock_frontend.poll.return_value = None
         mock_frontend.pid = 12346
+        mock_frontend.stdout = Mock()
+        mock_frontend.stdout.readline.return_value = b''
         
         mock_subprocess.side_effect = [mock_backend, mock_frontend]
         

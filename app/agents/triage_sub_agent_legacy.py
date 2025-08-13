@@ -100,7 +100,7 @@ class TriageResult(BaseModel):
     require_approval: bool = False  # Flag for operations requiring user approval
     
     @field_validator('confidence_score')
-    def validate_confidence(cls, v):
+    def validate_confidence(cls, v: float) -> float:
         if not 0 <= v <= 1:
             raise ValueError('Confidence score must be between 0 and 1')
         return v
