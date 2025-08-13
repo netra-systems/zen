@@ -49,7 +49,7 @@ class DevLauncher:
         self.use_emoji = check_emoji_support()
         
         # Load or create service configuration
-        self.services_config = load_or_create_config(interactive=True)
+        self.services_config = load_or_create_config(interactive=False)
         
         # Managers
         self.process_manager = ProcessManager()

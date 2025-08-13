@@ -1,0 +1,14 @@
+{
+  "redis": {
+    "mode": "shared"
+  },
+  "clickhouse": {
+    "mode": "shared"
+  },
+  "postgres": {
+    "mode": "local"
+  },
+  "llm": {
+    "mode": "mock"
+  }
+}
