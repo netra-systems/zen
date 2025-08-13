@@ -54,16 +54,18 @@ python test_runner.py --level smoke                   # ONLY for most trivial ch
 | **Database** | [`clickhouse.xml`](SPEC/clickhouse.xml), [`postgres.xml`](SPEC/postgres.xml) |
 | **WebSocket** | [`websockets.xml`](SPEC/websockets.xml), [`websocket_communication.xml`](SPEC/websocket_communication.xml) |
 | **Security** | [`security.xml`](SPEC/security.xml), [`PRODUCTION_SECRETS_ISOLATION.xml`](SPEC/PRODUCTION_SECRETS_ISOLATION.xml) |
-| **Fixes** | [`learnings.xml`](SPEC/learnings.xml) - Common gotchas |
+| **GitHub Actions** | [`github_actions.xml`](SPEC/github_actions.xml) - **CRITICAL: Check permissions first!** |
+| **⚠️ LEARNINGS** | [`learnings.xml`](SPEC/learnings.xml) - **ALWAYS CHECK FIRST - Contains fixes for recurring issues** |
 
 ## ⚠️ CRITICAL RULES (Memorize These)
 
 ### BEFORE Any Code Change (Non-Negotiable)
-1. **READ** [`type_safety.xml`](SPEC/type_safety.xml) - NO DUPLICATES
-2. **READ** [`conventions.xml`](SPEC/conventions.xml) - 300-LINE LIMIT  
-3. **RUN** `python test_runner.py --level unit` (DEFAULT - Always for any noticeable changes)
+1. **CHECK** [`learnings.xml`](SPEC/learnings.xml) - SEARCH for related issues/fixes FIRST
+2. **READ** [`type_safety.xml`](SPEC/type_safety.xml) - NO DUPLICATES
+3. **READ** [`conventions.xml`](SPEC/conventions.xml) - 300-LINE LIMIT  
+4. **RUN** `python test_runner.py --level unit` (DEFAULT - Always for any noticeable changes)
    - Use `--level smoke` ONLY for most trivial changes (<30s validation)
-4. **CHECK** No test stubs in production code
+5. **CHECK** No test stubs in production code
 
 ### AFTER Any Code Change (Automatic)
 1. **RUN** `code-quality-reviewer` agent
