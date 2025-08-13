@@ -1,15 +1,6 @@
 {
   "runs": [
     {
-      "timestamp": "2025-08-13T11:50:56.288843",
-      "level": "smoke",
-      "total": 7,
-      "passed": 7,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
       "timestamp": "2025-08-13T11:52:34.298504",
       "level": "smoke",
       "total": 0,
@@ -302,6 +293,68 @@
           "status": "passed",
           "start_time": 1755112321.5083044,
           "end_time": 1755112330.581151
+        }
+      },
+      "summary": {
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      }
+    },
+    {
+      "timestamp": "2025-08-13T12:45:27.374066",
+      "level": "smoke",
+      "results": {
+        "backend": {
+          "status": "passed",
+          "duration": 8.563633441925049,
+          "exit_code": 0,
+          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: smoke\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/routes/test_health_route.py app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error app/tests/core/test_config_manager.py::TestConfigManager::test_initialization app/tests/services/test_security_service.py::test_encrypt_and_decrypt tests/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\n\u001b[1mcollecting ... \u001b[0mcollected 7 items\n\napp/tests/routes/test_health_route.py::test_basic_import \u001b[32mPASSED\u001b[0m\u001b[32m          [ 14%]\u001b[0m\napp/tests/routes/test_health_route.py::test_health_endpoint_direct \u001b[32mPASSED\u001b[0m\u001b[32m [ 28%]\u001b[0m\napp/tests/routes/test_health_route.py::test_live_endpoint \u001b[32mPASSED\u001b[0m\u001b[32m         [ 42%]\u001b[0m\napp/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error \u001b[32mPASSED\u001b[0m\u001b[32m [ 57%]\u001b[0m\napp/tests/core/test_config_manager.py::TestConfigManager::test_initialization \u001b[32mPASSED\u001b[0m\u001b[32m [ 71%]\u001b[0m\napp/tests/services/test_security_service.py::test_encrypt_and_decrypt \u001b[32mPASSED\u001b[0m\u001b[32m [ 85%]\u001b[0m\ntests/test_system_startup.py::TestSystemStartup::test_configuration_loading \u001b[32mPASSED\u001b[0m\u001b[32m [100%]\u001b[0m\n\n\u001b[32m============================== \u001b[32m\u001b[1m7 passed\u001b[0m\u001b[32m in 0.26s\u001b[0m\u001b[32m ==============================\u001b[0m\n================================================================================\n[PASS] ALL TESTS PASSED in 7.64s\n================================================================================\n\n",
+          "test_counts": {
+            "total": 7,
+            "passed": 7,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 5
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "skipped",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "passed",
+          "start_time": 1755114318.8064141,
+          "end_time": 1755114327.373045
         }
       },
       "summary": {
