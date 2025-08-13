@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+You are an Elite Engineer.
+
 ## 🔴 CRITICAL: MODULE-BASED ARCHITECTURE (300 LINES MAX, 8 LINES PER FUNCTION)
 **MANDATORY**: Every file MUST be ≤300 lines. ALL functions MUST be ≤8 lines.
 - Files exceeding 300 lines MUST be split into focused modules BEFORE implementation
@@ -13,11 +15,11 @@
 ### 1. ULTRA DEEP THINK (Required 3x)
 - **FIRST**: Ultra deep think BEFORE any implementation
 - **SECOND**: Think deeply about edge cases, performance, system impacts  
-- **THIRD**: Ultra thinking required for complex problems - this is your masterpiece
+- **THIRD**: Ultra thinking required for complex problems - this is your masterpiece. Think deeply while working on code and while testing.
 
 ### 2. Specs are Law
-- `SPEC/*.xml` = Source of truth (not suggestions)
-- Update specs BEFORE code changes
+- `SPEC/*.xml` = Source of truth.
+- Update specs BEFORE AND AFTER code changes
 - Document learnings in specs to prevent regression
 
 ### 3. 300-LINE MODULE ARCHITECTURE  
@@ -27,13 +29,12 @@
 - Each module must have clear interface and single purpose
 
 ## Project Overview
-**Netra AI Optimization Platform** - Enterprise AI workload optimization with multi-agent architecture and WebSocket communication.
+**Netra AI Optimization Platform** - Enterprise AI workload optimization with multi-agent architecture.
 
 ## Quick Start
 ```bash
 python dev_launcher.py --dynamic --no-backend-reload  # Start dev
-python test_runner.py --level unit                    # DEFAULT - Always run for any noticeable changes
-python test_runner.py --level smoke                   # ONLY for most trivial changes (<30s)
+python test_runner.py --level unit                    # DEFAULT tests
 ```
 
 ## 🔴 MANDATORY SPECS (Read 3x Before Coding)
@@ -59,40 +60,33 @@ python test_runner.py --level smoke                   # ONLY for most trivial ch
 
 ## ⚠️ CRITICAL RULES (Memorize These)
 
-### BEFORE Any Code Change (Non-Negotiable)
+### BEFORE and AFTER Any Code Change:
 1. **CHECK** [`learnings.xml`](SPEC/learnings.xml) - SEARCH for related issues/fixes FIRST
-2. **READ** [`type_safety.xml`](SPEC/type_safety.xml) - NO DUPLICATES
+2. **READ** [`type_safety.xml`](SPEC/type_safety.xml) - SINGLE STRONGLY TYPED TYPES ONLY.
 3. **READ** [`conventions.xml`](SPEC/conventions.xml) - 300-LINE LIMIT  
-4. **RUN** `python test_runner.py --level unit` (DEFAULT - Always for any noticeable changes)
-   - Use `--level smoke` ONLY for most trivial changes (<30s validation)
-5. **CHECK** No test stubs in production code
+4. **RUN** `python test_runner.py --level unit` (DEFAULT)
+5. UPDATE specs with POSITIVE wording only.
 
 ### AFTER Any Code Change (Automatic)
 1. **RUN** `code-quality-reviewer` agent
 2. **RUN** `test-debug-expert` agent  
 3. **FIX** all identified issues before proceeding
-
-## 🚫 ANTI-PATTERNS (Never Do These)
-
-### NO DUPLICATION - EVER
-- **NEVER** create "enhanced", "v2", "improved" versions
-- **NEVER** copy-paste-modify code  
+- **ALWAYS** double check you are updating, creating, editing: SINGLE SOURCES OF TRUTH
 - **ALWAYS** extend existing functions with options/parameters
 
 ### 300-LINE MODULES & 8-LINE FUNCTIONS (Repeat: This is MANDATORY)
 - **PLAN** module boundaries BEFORE coding
-- **SPLIT** at 300 lines MAX (not 301, not 350 - exactly 300)
-- **SPLIT** functions at 8 lines MAX (not 9, not 10 - exactly 8)
+- **SPLIT** at 300 lines MAX
+- **SPLIT** functions at 8 lines MAX
 - **DESIGN** for modularity from the start
 
-### NO TEST STUBS
-- **ZERO** test implementations in production services
-- **REAL** code only - no placeholders
+### REAL CODE ALWAYS
+- **REAL** code only - placeholders-are-bad
 - **CHECK** [`no_test_stubs.xml`](SPEC/no_test_stubs.xml) always
 
 ## Key Patterns
 
-### Type Safety (REPEAT: #1 PRIORITY)
+### Type Safety (REPEAT: TOP PRIORITY)
 - Pydantic models (backend)
 - TypeScript types (frontend)  
 - See [`type_safety.xml`](SPEC/type_safety.xml) FIRST
@@ -103,15 +97,13 @@ python test_runner.py --level smoke                   # ONLY for most trivial ch
 - NetraException for errors
 
 ### UI Standards
-- Glassmorphic design ONLY
-- NO blue gradient bars
+- Glassmorphic design
 - `generateUniqueId()` for React keys
 
 ## Testing (ALWAYS run UNIT tests for noticeable changes)
 ```bash
 python test_runner.py --level unit          # DEFAULT - Always run for ANY noticeable changes
-python test_runner.py --level smoke         # ONLY for most trivial changes (<30s)
-python test_runner.py --level comprehensive # 97% coverage target
+python test_runner.py --level comprehensive # ANY MAJOR CHANGES
 ```
 
 ## Directory Structure
@@ -148,10 +140,12 @@ frontend/
 ### Module Design Checklist:
 - [ ] Each file ≤300 lines
 - [ ] Each function ≤8 lines (MANDATORY)
+- [ ] Strong types - all new params must have strong types.
 - [ ] Single responsibility per module
 - [ ] Clear interfaces between modules
-- [ ] No "enhanced" versions of existing code
+- [ ] Single source of truth - update existing items.
 - [ ] Test coverage maintained
+- [ ] Tests pass
 
 ## Quick Fixes
 - **React keys**: `generateUniqueId('prefix')`
@@ -164,7 +158,7 @@ frontend/
 1. **300-LINE MODULES** - Plan before coding, split at boundaries
 2. **8-LINE FUNCTIONS** - Every function ≤8 lines (MANDATORY)
 3. **TYPE SAFETY FIRST** - Read [`type_safety.xml`](SPEC/type_safety.xml) 
-4. **NO DUPLICATION** - Extend, don't duplicate
+4. **EXTEND and UPDATE SINGLE SOURCES OF TRUTH.**
 5. **UNIT TESTS** - Run before ANY commit (smoke only for most trivial)
 6. **ULTRA DEEP THINK** - This is your masterpiece
 
