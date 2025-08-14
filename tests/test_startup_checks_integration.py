@@ -62,32 +62,32 @@ class TestStartupChecker:
     def _setup_success_mocks(self, checker, monkeypatch):
         """Setup mock methods for successful test"""
         async def mock_check():
-            checker.results.append(StartupCheckResult(
+            return StartupCheckResult(
                 name="test_check",
                 success=True,
                 message="Check passed"
-            ))
+            )
         
         self._patch_all_check_methods(monkeypatch, checker, mock_check)
     
     def _setup_failure_mocks(self, checker, monkeypatch):
         """Setup mock methods for failure test"""
         async def mock_success():
-            checker.results.append(StartupCheckResult(
+            return StartupCheckResult(
                 name="success_check", success=True, message="Check passed"
-            ))
+            )
         
         async def mock_critical_failure():
-            checker.results.append(StartupCheckResult(
+            return StartupCheckResult(
                 name="critical_failure", success=False, 
                 message="Critical failure", critical=True
-            ))
+            )
         
         async def mock_non_critical_failure():
-            checker.results.append(StartupCheckResult(
+            return StartupCheckResult(
                 name="non_critical_failure", success=False,
                 message="Non-critical failure", critical=False
-            ))
+            )
         
         monkeypatch.setattr(checker.env_checker, 'check_environment_variables', mock_success)
         monkeypatch.setattr(checker.env_checker, 'check_configuration', mock_critical_failure)

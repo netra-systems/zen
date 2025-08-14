@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-14T00:10:11.474934",
+  "timestamp": "2025-08-14T00:15:15.279200",
   "level": "comprehensive-backend",
   "metrics": {
     "total_tests": 0,
@@ -10,9 +10,9 @@
   "results": {
     "backend": {
       "status": "failed",
-      "duration": 11.009525537490845,
-      "exit_code": 4,
-      "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: 6\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests tests integration_tests -v -n 6 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 --html=reports/tests/report.html --self-contained-html --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 10.13s\n\n[Report] HTML Report: reports/tests/report.html\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:46: in <module>\n    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor\napp\\agents\\supervisor_consolidated.py:12: in <module>\n    from app.agents.base import BaseSubAgent\napp\\agents\\base.py:10: in <module>\n    from app.agents.state import DeepAgentState\napp\\agents\\state.py:95: in <module>\n    class DeepAgentState(BaseModel):\napp\\agents\\state.py:103: in DeepAgentState\n    data_result: Optional[Union[DataAnalysisResponse, AnomalyDetectionResponse]] = None\n                                ^^^^^^^^^^^^^^^^^^^^\nE   NameError: name 'DataAnalysisResponse' is not defined\n",
+      "duration": 2.214277505874634,
+      "exit_code": 15,
+      "output": "\n",
       "test_counts": {
         "total": 0,
         "passed": 0,
@@ -54,8 +54,8 @@
     },
     "overall": {
       "status": "failed",
-      "start_time": 1755155400.460293,
-      "end_time": 1755155411.4728072
+      "start_time": 1755155713.0629132,
+      "end_time": 1755155715.2782056
     }
   }
 }

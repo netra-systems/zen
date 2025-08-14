@@ -296,8 +296,10 @@ class TestReliabilityFeatures:
 class TestFallbackScenarios:
     """Test fallback behavior in various scenarios"""
 
-    async def test_fallback_creates_valid_report(self, reporting_agent, mock_state):
+    @patch('app.agents.input_validation.InputValidator.validate_and_raise')
+    async def test_fallback_creates_valid_report(self, mock_validate, reporting_agent, mock_state):
         """Test fallback creates a valid report structure"""
+        mock_validate.return_value = None  # Bypass validation
         reporting_agent.llm_manager.ask_llm.side_effect = Exception("Test failure")
         
         await reporting_agent.execute(mock_state, "test-run", True)
@@ -308,8 +310,10 @@ class TestFallbackScenarios:
         assert result.metadata.get("fallback_used") is True
 
 
-    async def test_fallback_includes_analysis_summary(self, reporting_agent, mock_state):
+    @patch('app.agents.input_validation.InputValidator.validate_and_raise')
+    async def test_fallback_includes_analysis_summary(self, mock_validate, reporting_agent, mock_state):
         """Test fallback includes summary of available analysis"""
+        mock_validate.return_value = None  # Bypass validation
         reporting_agent.llm_manager.ask_llm.side_effect = Exception("Test failure")
         
         await reporting_agent.execute(mock_state, "test-run", False)

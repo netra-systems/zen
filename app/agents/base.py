@@ -10,6 +10,9 @@ from app.schemas.websocket_unified import WebSocketMessage, WebSocketMessageType
 from app.agents.state import DeepAgentState
 from app.agents.interfaces import BaseAgentProtocol
 from app.logging_config import central_logger
+from app.agents.error_handler import (
+    global_error_handler, ErrorContext, WebSocketError, handle_agent_error
+)
 from langchain_core.messages import SystemMessage
 from starlette.websockets import WebSocketDisconnect
 
@@ -262,7 +265,21 @@ class BaseSubAgent(ABC):
         return run_id
         
     async def _handle_websocket_failure(self, run_id: str, data: Dict[str, Any], error: Exception) -> None:
-        """Handle WebSocket failure with graceful degradation."""
+        """Handle WebSocket failure with graceful degradation and centralized error tracking."""
+        # Create error context for centralized handling
+        context = ErrorContext(
+            agent_name=self.name,
+            operation_name="websocket_update", 
+            run_id=run_id,
+            timestamp=time.time(),
+            additional_data=data
+        )
+        
+        # Use centralized error handler for consistent tracking
+        websocket_error = WebSocketError(f"WebSocket update failed: {str(error)}", context)
+        global_error_handler._store_error(websocket_error)
+        global_error_handler._log_error(websocket_error)
+        
         # Store failed update for potential retry later
         if not hasattr(self, '_failed_updates'):
             self._failed_updates = []
