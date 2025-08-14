@@ -15,6 +15,11 @@ class MockClickHouseDatabase:
     
     async def execute_query(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         logger.debug(f"ClickHouse disabled - Mock execute_query: {query}")
+        # Handle parameter queries for testing
+        if params and "{test_string:" in query and "{test_number:" in query:
+            return [{"str_value": params.get("test_string", ""), "num_value": params.get("test_number", 0)}]
+        elif "'hello_clickhouse' as str_value" in query:
+            return [{"str_value": "hello_clickhouse", "num_value": 42}]
         return []
     
     async def fetch(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
