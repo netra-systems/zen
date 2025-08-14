@@ -14,6 +14,7 @@ from app.schemas import (
     SubAgentLifecycle, WebSocketMessage, AgentStarted, 
     SubAgentUpdate, AgentCompleted, SubAgentState
 )
+from app.schemas.Agent import AgentResult
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.agents.tool_dispatcher import ToolDispatcher
@@ -260,7 +261,7 @@ class SupervisorAgent(BaseSubAgent):
                                 context: Dict[str, str]) -> None:
         """Send completion notification."""
         if self.websocket_manager:
-            await self._send_completion_message(state, context["thread_id"])
+            await self._send_completion_message(state, context["thread_id"], context["run_id"])
     
     def _get_execution_pipeline(self, prompt: str, 
                                state: DeepAgentState) -> List[PipelineStep]:
@@ -326,10 +327,10 @@ class SupervisorAgent(BaseSubAgent):
                     raise
     
     async def _send_completion_message(self, state: DeepAgentState, 
-                                      thread_id: str) -> None:
+                                      thread_id: str, run_id: str) -> None:
         """Send completion message via WebSocket."""
         try:
-            message = self._build_completion_message(state, thread_id)
+            message = self._build_completion_message(state, thread_id, run_id)
             await self.websocket_manager.send_to_thread(
                 thread_id, message.model_dump())
         except WebSocketDisconnect:
@@ -338,20 +339,21 @@ class SupervisorAgent(BaseSubAgent):
             logger.error(f"Failed to send completion: {e}")
     
     def _build_completion_message(self, state: DeepAgentState,
-                                 thread_id: str) -> WebSocketMessage:
+                                 thread_id: str, run_id: str) -> WebSocketMessage:
         """Build completion message."""
-        content = self._create_completion_content(state, thread_id)
+        content = self._create_completion_content(state, thread_id, run_id)
         return WebSocketMessage(type="agent_completed", content=content)
     
     def _create_completion_content(self, state: DeepAgentState, 
-                                  thread_id: str) -> AgentCompleted:
+                                  thread_id: str, run_id: str) -> AgentCompleted:
         """Create completion content."""
         return AgentCompleted(
-            agent_name="supervisor",
-            run_id=state.metadata.get("run_id", ""),
-            thread_id=thread_id,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-            result=state.to_dict()
+            run_id=run_id,
+            result=AgentResult(
+                success=True,
+                output=state.to_dict()
+            ),
+            execution_time_ms=0.0
         )
     
     def get_stats(self) -> Dict[str, Any]:

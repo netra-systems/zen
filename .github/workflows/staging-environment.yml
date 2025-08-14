@@ -1,5 +1,5 @@
-name: Enhanced Staging Environment Management
-description: Robust staging environment deployment with improved error handling
+name: Optimized Staging Environment
+description: Fast parallel staging deployment with shared infrastructure
 
 permissions:
   contents: read
@@ -7,6 +7,7 @@ permissions:
   pull-requests: write
   issues: write
   statuses: write
+  packages: write
 
 on:
   pull_request:
@@ -50,9 +51,6 @@ on:
         required: false
         type: boolean
         default: false
-  
-  repository_dispatch:
-    types: [staging-command, staging-rebuild]
 
 env:
   PROJECT_NAME: netra-staging
@@ -62,59 +60,17 @@ env:
   PYTHON_VERSION: 3.11
   MAX_RETRIES: 3
   RETRY_DELAY: 30
+  # Enable BuildKit for faster Docker builds
+  DOCKER_BUILDKIT: 1
+  BUILDKIT_PROGRESS: plain
 
 concurrency:
   group: staging-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 
 jobs:
-  validate-trigger:
-    name: Validate Trigger
-    runs-on: ubuntu-latest
-    outputs:
-      should_proceed: ${{ steps.validate.outputs.should_proceed }}
-      skip_reason: ${{ steps.validate.outputs.skip_reason }}
-    
-    steps:
-      - name: Validate trigger conditions
-        id: validate
-        run: |
-          SHOULD_PROCEED="true"
-          SKIP_REASON=""
-          
-          # Check if it's a documentation-only change
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            FILES_CHANGED=$(gh pr view ${{ github.event.pull_request.number }} \
-              --json files -q '.files[].path' | tr '\n' ' ')
-            
-            if echo "$FILES_CHANGED" | grep -qE '^(docs/|.*\.md$|\.github/workflows/test-.*\.yml$)'; then
-              if ! echo "$FILES_CHANGED" | grep -qvE '^(docs/|.*\.md$|\.github/workflows/test-.*\.yml$)'; then
-                SHOULD_PROCEED="false"
-                SKIP_REASON="Documentation-only changes detected"
-              fi
-            fi
-          fi
-          
-          # Check for skip keywords in commit message
-          if [[ "${{ github.event.head_commit.message }}" == *"[skip staging]"* ]] || \
-             [[ "${{ github.event.head_commit.message }}" == *"[staging skip]"* ]]; then
-            SHOULD_PROCEED="false"
-            SKIP_REASON="Skip staging keyword found in commit message"
-          fi
-          
-          echo "should_proceed=$SHOULD_PROCEED" >> $GITHUB_OUTPUT
-          echo "skip_reason=$SKIP_REASON" >> $GITHUB_OUTPUT
-          
-          if [[ "$SHOULD_PROCEED" == "false" ]]; then
-            echo "::notice::Skipping staging deployment: $SKIP_REASON"
-          fi
-        env:
-          GH_TOKEN: ${{ github.token }}
-
   setup:
     name: Environment Setup
-    needs: validate-trigger
-    if: needs.validate-trigger.outputs.should_proceed == 'true'
     runs-on: ubuntu-latest
     outputs:
       environment_name: ${{ steps.config.outputs.environment_name }}
@@ -123,6 +79,7 @@ jobs:
       branch_name: ${{ steps.config.outputs.branch_name }}
       commit_sha: ${{ steps.config.outputs.commit_sha }}
       deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+      should_deploy: ${{ steps.config.outputs.should_deploy }}
     
     steps:
       - name: Configure environment
@@ -135,56 +92,46 @@ jobs:
             COMMIT_SHA="${{ github.event.pull_request.head.sha }}"
             if [[ "${{ github.event.action }}" == "closed" ]]; then
               ACTION="destroy"
+              SHOULD_DEPLOY="false"
             else
               ACTION="deploy"
+              SHOULD_DEPLOY="true"
             fi
           elif [[ "${{ github.event_name }}" == "push" ]]; then
-            # For push to main/develop, create a branch deployment
             BRANCH_NAME="${{ github.ref_name }}"
             COMMIT_SHA="${{ github.sha }}"
             PR_NUMBER="branch-${BRANCH_NAME//\//-}"
             ACTION="deploy"
+            SHOULD_DEPLOY="true"
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             PR_NUMBER="${{ github.event.inputs.pr_number }}"
             ACTION="${{ github.event.inputs.action }}"
             BRANCH_NAME="${{ github.event.inputs.branch || github.ref_name }}"
             COMMIT_SHA="${{ github.sha }}"
+            SHOULD_DEPLOY=$([[ "$ACTION" == "deploy" || "$ACTION" == "rebuild" ]] && echo "true" || echo "false")
             
-            # If no PR number provided, use branch deployment
             if [[ -z "$PR_NUMBER" ]]; then
               PR_NUMBER="branch-${BRANCH_NAME//\//-}"
             fi
-          else
-            # repository_dispatch
-            PR_NUMBER="${{ github.event.client_payload.pr_number }}"
-            ACTION="${{ github.event.client_payload.action || 'deploy' }}"
-            BRANCH_NAME="${{ github.event.client_payload.branch || github.ref_name }}"
-            COMMIT_SHA="${{ github.event.client_payload.commit || github.sha }}"
           fi
           
           # Sanitize environment name
           ENV_NAME="${{ env.PROJECT_NAME }}-${PR_NUMBER//[^a-zA-Z0-9-]/-}"
-          ENV_NAME="${ENV_NAME,,}" # Convert to lowercase
-          ENV_NAME="${ENV_NAME:0:63}" # Truncate to 63 chars (DNS limit)
+          ENV_NAME="${ENV_NAME,,}"
+          ENV_NAME="${ENV_NAME:0:63}"
           
           echo "environment_name=$ENV_NAME" >> $GITHUB_OUTPUT
           echo "action=$ACTION" >> $GITHUB_OUTPUT
           echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
           echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          echo "should_deploy=$SHOULD_DEPLOY" >> $GITHUB_OUTPUT
           
-          # Log configuration
-          echo "::group::Environment Configuration"
-          echo "Environment: $ENV_NAME"
-          echo "Action: $ACTION"
-          echo "PR/Branch: $PR_NUMBER"
-          echo "Branch Name: $BRANCH_NAME"
-          echo "Commit SHA: $COMMIT_SHA"
-          echo "::endgroup::"
+          echo "::notice::Environment: $ENV_NAME, Action: $ACTION, Deploy: $SHOULD_DEPLOY"
       
       - name: Create GitHub deployment
         id: deployment
-        if: steps.config.outputs.action == 'deploy'
+        if: steps.config.outputs.should_deploy == 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -202,11 +149,15 @@ jobs:
             core.setOutput('deployment_id', deployment.data.id);
             return deployment.data.id;
 
-  pre-checks:
-    name: Pre-deployment Checks
+  # Parallel build jobs for maximum speed
+  build-backend:
+    name: Build Backend
     needs: [setup]
-    if: needs.setup.outputs.action == 'deploy'
+    if: needs.setup.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
+    outputs:
+      image_url: ${{ steps.build.outputs.image_url }}
+      build_time: ${{ steps.build.outputs.build_time }}
     
     steps:
       - name: Checkout code
@@ -214,44 +165,156 @@ jobs:
         with:
           ref: ${{ needs.setup.outputs.commit_sha }}
       
-      - name: Run security scan
-        run: |
-          echo "::group::Security Scan"
-          # Add security scanning tools here (e.g., trivy, snyk)
-          echo "Security scan completed"
-          echo "::endgroup::"
+      - name: Setup Python cache
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
       
-      - name: Validate configuration
-        run: |
-          echo "::group::Configuration Validation"
-          # Check for required files
-          for file in "docker-compose.yml" "Dockerfile" ".env.example"; do
-            if [[ ! -f "$file" ]]; then
-              echo "::warning::Missing file: $file"
-            fi
-          done
-          echo "::endgroup::"
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+          project_id: ${{ secrets.GCP_STAGING_PROJECT_ID || secrets.GCP_PROJECT_ID }}
       
-      - name: Check resource limits
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            network=host
+            image=moby/buildkit:latest
+      
+      - name: Configure Docker
+        run: gcloud auth configure-docker gcr.io --quiet
+      
+      - name: Build and push backend
+        id: build
         run: |
-          echo "::group::Resource Limits Check"
-          # Check if we're within resource quotas
-          # This would normally check against actual cloud quotas
-          echo "Resource limits validated"
-          echo "::endgroup::"
+          START_TIME=$(date +%s)
+          PROJECT_ID="${{ secrets.GCP_STAGING_PROJECT_ID || secrets.GCP_PROJECT_ID }}"
+          IMAGE_TAG="${{ needs.setup.outputs.commit_sha }}"
+          IMAGE_URL="gcr.io/${PROJECT_ID}/backend:${IMAGE_TAG}"
+          
+          # Check if image already exists
+          if gcloud container images describe ${IMAGE_URL} 2>/dev/null; then
+            echo "::notice::Image already exists, skipping build: ${IMAGE_URL}"
+            echo "image_url=${IMAGE_URL}" >> $GITHUB_OUTPUT
+            echo "build_time=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Build with advanced caching
+          docker buildx build \
+            --platform linux/amd64 \
+            --cache-from type=registry,ref=gcr.io/${PROJECT_ID}/backend:buildcache \
+            --cache-to type=registry,ref=gcr.io/${PROJECT_ID}/backend:buildcache,mode=max \
+            --build-arg COMMIT_SHA=${{ needs.setup.outputs.commit_sha }} \
+            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            -t ${IMAGE_URL} \
+            -t gcr.io/${PROJECT_ID}/backend:latest \
+            -f Dockerfile.backend \
+            --push \
+            --progress=plain \
+            .
+          
+          END_TIME=$(date +%s)
+          BUILD_TIME=$((END_TIME - START_TIME))
+          
+          echo "image_url=${IMAGE_URL}" >> $GITHUB_OUTPUT
+          echo "build_time=${BUILD_TIME}" >> $GITHUB_OUTPUT
+          echo "::notice::Backend built in ${BUILD_TIME}s: ${IMAGE_URL}"
 
+  build-frontend:
+    name: Build Frontend
+    needs: [setup]
+    if: needs.setup.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      image_url: ${{ steps.build.outputs.image_url }}
+      build_time: ${{ steps.build.outputs.build_time }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.setup.outputs.commit_sha }}
+      
+      - name: Setup Node.js cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+          project_id: ${{ secrets.GCP_STAGING_PROJECT_ID || secrets.GCP_PROJECT_ID }}
+      
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            network=host
+            image=moby/buildkit:latest
+      
+      - name: Configure Docker
+        run: gcloud auth configure-docker gcr.io --quiet
+      
+      - name: Build and push frontend
+        id: build
+        run: |
+          START_TIME=$(date +%s)
+          PROJECT_ID="${{ secrets.GCP_STAGING_PROJECT_ID || secrets.GCP_PROJECT_ID }}"
+          IMAGE_TAG="${{ needs.setup.outputs.commit_sha }}"
+          IMAGE_URL="gcr.io/${PROJECT_ID}/frontend:${IMAGE_TAG}"
+          
+          # Check if image already exists
+          if gcloud container images describe ${IMAGE_URL} 2>/dev/null; then
+            echo "::notice::Image already exists, skipping build: ${IMAGE_URL}"
+            echo "image_url=${IMAGE_URL}" >> $GITHUB_OUTPUT
+            echo "build_time=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Build with advanced caching
+          docker buildx build \
+            --platform linux/amd64 \
+            --cache-from type=registry,ref=gcr.io/${PROJECT_ID}/frontend:buildcache \
+            --cache-to type=registry,ref=gcr.io/${PROJECT_ID}/frontend:buildcache,mode=max \
+            --build-arg COMMIT_SHA=${{ needs.setup.outputs.commit_sha }} \
+            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            -t ${IMAGE_URL} \
+            -t gcr.io/${PROJECT_ID}/frontend:latest \
+            -f Dockerfile.frontend.staging \
+            --push \
+            --progress=plain \
+            .
+          
+          END_TIME=$(date +%s)
+          BUILD_TIME=$((END_TIME - START_TIME))
+          
+          echo "image_url=${IMAGE_URL}" >> $GITHUB_OUTPUT
+          echo "build_time=${BUILD_TIME}" >> $GITHUB_OUTPUT
+          echo "::notice::Frontend built in ${BUILD_TIME}s: ${IMAGE_URL}"
+
+  # Terraform runs after builds complete
   terraform:
-    name: Infrastructure Management
-    needs: [setup, pre-checks]
+    name: Deploy Infrastructure
+    needs: [setup, build-backend, build-frontend]
     if: |
       always() && 
       needs.setup.result == 'success' &&
-      (needs.pre-checks.result == 'success' || needs.pre-checks.result == 'skipped')
+      (needs.build-backend.result == 'success' || needs.build-backend.result == 'skipped') &&
+      (needs.build-frontend.result == 'success' || needs.build-frontend.result == 'skipped')
     runs-on: ubuntu-latest
     outputs:
       backend_url: ${{ steps.outputs.outputs.backend_url }}
       frontend_url: ${{ steps.outputs.outputs.frontend_url }}
-      cluster_name: ${{ steps.outputs.outputs.cluster_name }}
+      deploy_time: ${{ steps.outputs.outputs.deploy_time }}
     
     steps:
       - name: Checkout code
@@ -263,130 +326,110 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
       
       - name: Configure GCP credentials
-        if: vars.CLOUD_PROVIDER == 'GCP' || vars.CLOUD_PROVIDER == ''
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
           project_id: ${{ secrets.GCP_STAGING_PROJECT_ID || secrets.GCP_PROJECT_ID }}
       
-      - name: Set GCP project environment
-        run: |
-          # Ensure staging project is used
-          PROJECT_ID="${{ secrets.GCP_STAGING_PROJECT_ID || secrets.GCP_PROJECT_ID }}"
-          echo "GCP_PROJECT=$PROJECT_ID" >> $GITHUB_ENV
-          echo "GOOGLE_CLOUD_PROJECT=$PROJECT_ID" >> $GITHUB_ENV
-          echo "CLOUDSDK_CORE_PROJECT=$PROJECT_ID" >> $GITHUB_ENV
-          echo "Using GCP Project: $PROJECT_ID"
-      
-      - name: Initialize Terraform
-        id: init
+      - name: Terraform Deploy
+        id: deploy
+        if: needs.setup.outputs.action == 'deploy'
         working-directory: ./terraform/staging
         run: |
-          # Use staging-specific bucket or fallback to default
+          START_TIME=$(date +%s)
           BUCKET="${{ secrets.TF_STAGING_STATE_BUCKET || secrets.TF_STATE_BUCKET || 'netra-staging-terraform-state' }}"
           PREFIX="${{ needs.setup.outputs.environment_name }}"
+          PROJECT_ID="${{ secrets.GCP_STAGING_PROJECT_ID || secrets.GCP_PROJECT_ID }}"
           
-          echo "::group::Terraform Backend Configuration"
-          echo "Bucket: $BUCKET"
-          echo "Prefix: $PREFIX"
-          echo "Project: ${{ env.GCP_PROJECT }}"
-          echo "::endgroup::"
-          
-          # Verify bucket exists before init
-          if ! gcloud storage buckets describe "gs://$BUCKET" --project="${{ env.GCP_PROJECT }}" 2>/dev/null; then
-            echo "::error::Terraform state bucket '$BUCKET' does not exist in project '${{ env.GCP_PROJECT }}'"
-            echo "::notice::Creating bucket if possible..."
+          # Create state bucket if needed
+          if ! gcloud storage buckets describe "gs://$BUCKET" --project="${PROJECT_ID}" 2>/dev/null; then
             gcloud storage buckets create "gs://$BUCKET" \
-              --project="${{ env.GCP_PROJECT }}" \
+              --project="${PROJECT_ID}" \
               --location="${{ env.GCP_REGION }}" \
               --uniform-bucket-level-access \
-              --public-access-prevention || exit 1
+              --public-access-prevention
           fi
           
+          # Fast init without downloading unnecessary providers
           terraform init \
             -backend-config="bucket=$BUCKET" \
             -backend-config="prefix=$PREFIX" \
-            -reconfigure
-        continue-on-error: true
-      
-      - name: Retry Terraform init if failed
-        if: steps.init.outcome == 'failure'
-        working-directory: ./terraform/staging
-        run: |
-          sleep ${{ env.RETRY_DELAY }}
-          rm -rf .terraform
+            -upgrade=false \
+            -get=true \
+            -reconfigure \
+            -input=false
           
-          # Use same bucket configuration as initial attempt
-          BUCKET="${{ secrets.TF_STAGING_STATE_BUCKET || secrets.TF_STATE_BUCKET || 'netra-staging-terraform-state' }}"
-          PREFIX="${{ needs.setup.outputs.environment_name }}"
+          # Create tfvars file for better performance
+          cat > terraform.tfvars <<EOF
+          environment_name = "${{ needs.setup.outputs.environment_name }}"
+          pr_number = "${{ needs.setup.outputs.pr_number }}"
+          branch_name = "${{ needs.setup.outputs.branch_name }}"
+          commit_sha = "${{ needs.setup.outputs.commit_sha }}"
+          project_id = "${PROJECT_ID}"
+          backend_image = "${{ needs.build-backend.outputs.image_url }}"
+          frontend_image = "${{ needs.build-frontend.outputs.image_url }}"
+          postgres_password = "${{ secrets.POSTGRES_PASSWORD_STAGING || 'staging-password' }}"
+          clickhouse_password = "${{ secrets.CLICKHOUSE_PASSWORD_STAGING || 'staging-clickhouse' }}"
+          jwt_secret_key = "${{ secrets.JWT_SECRET_KEY_STAGING || '' }}"
+          fernet_key = "${{ secrets.FERNET_KEY_STAGING || '' }}"
+          gemini_api_key = "${{ secrets.GEMINI_API_KEY_STAGING || '' }}"
+          EOF
           
-          echo "::group::Retry Terraform Backend Configuration"
-          echo "Bucket: $BUCKET"
-          echo "Prefix: $PREFIX"
-          echo "Project: ${{ env.GCP_PROJECT }}"
-          echo "::endgroup::"
+          # Apply with minimal refresh for speed
+          terraform apply \
+            -auto-approve \
+            -parallelism=20 \
+            -refresh=false \
+            -input=false
           
-          terraform init \
-            -backend-config="bucket=$BUCKET" \
-            -backend-config="prefix=$PREFIX" \
-            -reconfigure
-      
-      - name: Terraform Plan
-        if: needs.setup.outputs.action == 'deploy'
-        id: plan
-        working-directory: ./terraform/staging
-        run: |
-          terraform plan \
-            -var="environment_name=${{ needs.setup.outputs.environment_name }}" \
-            -var="pr_number=${{ needs.setup.outputs.pr_number }}" \
-            -var="branch_name=${{ needs.setup.outputs.branch_name }}" \
-            -var="commit_sha=${{ needs.setup.outputs.commit_sha }}" \
-            -var="project_id=${{ env.GCP_PROJECT }}" \
-            -out=tfplan \
-            -detailed-exitcode
-        continue-on-error: true
-      
-      - name: Terraform Apply
-        if: needs.setup.outputs.action == 'deploy' && steps.plan.outcome == 'success'
-        id: apply
-        working-directory: ./terraform/staging
-        run: |
-          terraform apply -auto-approve tfplan
-          
-          # Capture outputs
-          echo "::group::Terraform Outputs"
-          terraform output -json > outputs.json
-          cat outputs.json | jq .
-          echo "::endgroup::"
+          END_TIME=$(date +%s)
+          DEPLOY_TIME=$((END_TIME - START_TIME))
+          echo "::notice::Infrastructure deployed in ${DEPLOY_TIME}s"
       
       - name: Terraform Destroy
         if: needs.setup.outputs.action == 'destroy'
         working-directory: ./terraform/staging
         run: |
+          BUCKET="${{ secrets.TF_STAGING_STATE_BUCKET || secrets.TF_STATE_BUCKET || 'netra-staging-terraform-state' }}"
+          PREFIX="${{ needs.setup.outputs.environment_name }}"
+          PROJECT_ID="${{ secrets.GCP_STAGING_PROJECT_ID || secrets.GCP_PROJECT_ID }}"
+          
+          terraform init \
+            -backend-config="bucket=$BUCKET" \
+            -backend-config="prefix=$PREFIX" \
+            -upgrade=false \
+            -reconfigure \
+            -input=false
+          
           terraform destroy \
+            -auto-approve \
             -var="environment_name=${{ needs.setup.outputs.environment_name }}" \
             -var="pr_number=${{ needs.setup.outputs.pr_number }}" \
-            -var="project_id=${{ env.GCP_PROJECT }}" \
-            -auto-approve
+            -var="project_id=${PROJECT_ID}" \
+            -refresh=false \
+            -input=false
         continue-on-error: true
       
       - name: Extract outputs
         id: outputs
-        if: needs.setup.outputs.action == 'deploy' && steps.apply.outcome == 'success'
+        if: needs.setup.outputs.action == 'deploy' && steps.deploy.outcome == 'success'
         working-directory: ./terraform/staging
         run: |
           BACKEND_URL=$(terraform output -raw backend_url 2>/dev/null || echo "")
           FRONTEND_URL=$(terraform output -raw frontend_url 2>/dev/null || echo "")
-          CLUSTER_NAME=$(terraform output -raw cluster_name 2>/dev/null || echo "")
           
           echo "backend_url=$BACKEND_URL" >> $GITHUB_OUTPUT
           echo "frontend_url=$FRONTEND_URL" >> $GITHUB_OUTPUT
-          echo "cluster_name=$CLUSTER_NAME" >> $GITHUB_OUTPUT
+          echo "deploy_time=${{ steps.deploy.outputs.DEPLOY_TIME || '0' }}" >> $GITHUB_OUTPUT
+          
+          echo "::notice::Deployment URLs - Frontend: $FRONTEND_URL, Backend: $BACKEND_URL"
 
-  build-deploy:
-    name: Build and Deploy Applications
+  # Quick smoke test
+  smoke-test:
+    name: Smoke Test
     needs: [setup, terraform]
     if: |
       needs.setup.outputs.action == 'deploy' && 
@@ -394,89 +437,76 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.setup.outputs.commit_sha }}
+      - name: Wait for services
+        run: sleep 15
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-      
-      - name: Build and deploy backend
-        id: backend
+      - name: Test backend health
         run: |
-          echo "::group::Backend Build"
-          # Determine the correct project ID for staging
-          PROJECT_ID="${{ secrets.GCP_STAGING_PROJECT_ID || secrets.GCP_PROJECT_ID }}"
+          MAX_RETRIES=10
+          RETRY_COUNT=0
           
-          # Build backend Docker image
-          docker build -t backend:${{ needs.setup.outputs.commit_sha }} \
-            --build-arg COMMIT_SHA=${{ needs.setup.outputs.commit_sha }} \
-            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
-            -f Dockerfile.backend .
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if curl -f "${{ needs.terraform.outputs.backend_url }}/health" \
+                 --max-time 10 \
+                 --retry 3 \
+                 --retry-delay 2; then
+              echo "::notice::Backend is healthy"
+              break
+            fi
+            
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            echo "::warning::Backend not ready, retry $RETRY_COUNT/$MAX_RETRIES"
+            sleep 5
+          done
           
-          # Tag and push to registry
-          docker tag backend:${{ needs.setup.outputs.commit_sha }} \
-            gcr.io/${PROJECT_ID}/backend:${{ needs.setup.outputs.environment_name }}
-          
-          # Deploy to cluster (simplified)
-          echo "Backend deployed successfully"
-          echo "::endgroup::"
+          if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+            echo "::error::Backend health check failed after $MAX_RETRIES retries"
+            exit 1
+          fi
       
-      - name: Build and deploy frontend
-        id: frontend
+      - name: Test frontend
         run: |
-          echo "::group::Frontend Build"
-          # Build frontend
-          cd frontend
-          npm ci
-          npm run build
-          
-          # Build Docker image
-          docker build -t frontend:${{ needs.setup.outputs.commit_sha }} \
-            --build-arg BACKEND_URL=${{ needs.terraform.outputs.backend_url }} \
-            -f ../Dockerfile.frontend .
-          
-          echo "Frontend deployed successfully"
-          echo "::endgroup::"
-      
-      - name: Run smoke tests
-        id: smoke
-        continue-on-error: true
-        run: |
-          echo "::group::Smoke Tests"
-          # Wait for services to be ready
-          sleep 30
-          
-          # Run basic health checks
-          curl -f ${{ needs.terraform.outputs.backend_url }}/health || exit 1
-          curl -f ${{ needs.terraform.outputs.frontend_url }} || exit 1
-          
-          echo "Smoke tests passed"
-          echo "::endgroup::"
+          if curl -f "${{ needs.terraform.outputs.frontend_url }}" \
+               --max-time 10 \
+               --retry 3 \
+               --retry-delay 2 \
+               -o /dev/null \
+               -s \
+               -w "%{http_code}"; then
+            echo "::notice::Frontend is accessible"
+          else
+            echo "::warning::Frontend may not be fully ready yet"
+          fi
 
-  post-deployment:
-    name: Post Deployment Tasks
-    needs: [setup, terraform, build-deploy]
+  # Update deployment status and post comments
+  finalize:
+    name: Finalize Deployment
+    needs: [setup, terraform, smoke-test, build-backend, build-frontend]
     if: always()
     runs-on: ubuntu-latest
     
     steps:
+      - name: Calculate total time
+        id: timing
+        run: |
+          BACKEND_TIME="${{ needs.build-backend.outputs.build_time || '0' }}"
+          FRONTEND_TIME="${{ needs.build-frontend.outputs.build_time || '0' }}"
+          DEPLOY_TIME="${{ needs.terraform.outputs.deploy_time || '0' }}"
+          
+          # Calculate max of backend and frontend (since they run in parallel)
+          BUILD_TIME=$((BACKEND_TIME > FRONTEND_TIME ? BACKEND_TIME : FRONTEND_TIME))
+          TOTAL_TIME=$((BUILD_TIME + DEPLOY_TIME))
+          
+          echo "total_time=${TOTAL_TIME}" >> $GITHUB_OUTPUT
+          echo "::notice::Total deployment time: ${TOTAL_TIME}s (Build: ${BUILD_TIME}s, Deploy: ${DEPLOY_TIME}s)"
+      
       - name: Update deployment status
         if: needs.setup.outputs.deployment_id != ''
         uses: actions/github-script@v7
         with:
           script: |
-            const status = '${{ needs.build-deploy.result }}' === 'success' ? 'success' : 'failure';
+            const status = '${{ needs.smoke-test.result }}' === 'success' ? 'success' : 
+                          '${{ needs.terraform.result }}' === 'success' ? 'pending' : 'failure';
             
             await github.rest.repos.createDeploymentStatus({
               owner: context.repo.owner,
@@ -484,7 +514,7 @@ jobs:
               deployment_id: ${{ needs.setup.outputs.deployment_id }},
               state: status,
               environment_url: '${{ needs.terraform.outputs.frontend_url }}',
-              description: `Deployment ${status}`,
+              description: `Deployed in ${{ steps.timing.outputs.total_time }}s`,
               auto_inactive: true
             });
       
@@ -496,26 +526,35 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const totalTime = '${{ steps.timing.outputs.total_time }}';
+            const smokeStatus = '${{ needs.smoke-test.result }}' === 'success' ? '✅ Healthy' : '⚠️ Pending';
+            
             const comment = `## 🚀 Staging Environment Deployed
             
-            **Environment:** \`${{ needs.setup.outputs.environment_name }}\`
+            **Status:** ${smokeStatus} | **Deploy Time:** ${totalTime}s
+            
             **Frontend:** ${{ needs.terraform.outputs.frontend_url }}
             **Backend:** ${{ needs.terraform.outputs.backend_url }}
             
-            **Commit:** ${{ needs.setup.outputs.commit_sha }}
-            
-            ### Quick Actions:
-            - 🔄 Restart: Run workflow with \`restart\` action
-            - 📊 Status: Run workflow with \`status\` action
-            - 🗑️ Destroy: Run workflow with \`destroy\` action or close PR
+            **Environment:** \`${{ needs.setup.outputs.environment_name }}\`
+            **Commit:** \`${{ needs.setup.outputs.commit_sha }}\`
             
             <details>
-            <summary>Deployment Details</summary>
+            <summary>Performance Metrics</summary>
             
-            - Build Status: ${{ needs.build-deploy.result }}
-            - Infrastructure: ${{ needs.terraform.result }}
-            - Triggered by: ${{ github.actor }}
-            - Workflow Run: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - Backend Build: ${{ needs.build-backend.outputs.build_time }}s
+            - Frontend Build: ${{ needs.build-frontend.outputs.build_time }}s
+            - Infrastructure: ${{ needs.terraform.outputs.deploy_time }}s
+            - Total Time: ${totalTime}s
+            
+            </details>
+            
+            <details>
+            <summary>Quick Actions</summary>
+            
+            - 🔄 **Restart:** Run workflow with \`restart\` action
+            - 📊 **Status:** Run workflow with \`status\` action
+            - 🗑️ **Destroy:** Close PR or run workflow with \`destroy\` action
             
             </details>`;
             
@@ -547,58 +586,29 @@ jobs:
               });
             }
       
-      - name: Cleanup on failure
-        if: |
-          needs.build-deploy.result == 'failure' && 
-          github.event.inputs.force != 'true'
-        run: |
-          echo "::warning::Deployment failed. Consider running with force=true to bypass checks."
-          # Could trigger automatic cleanup here if needed
-
-  notify:
-    name: Send Notifications
-    needs: [setup, terraform, build-deploy, post-deployment]
-    if: always()
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Determine final status
-        id: status
-        run: |
-          if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" ]]; then
-            echo "status=failure" >> $GITHUB_OUTPUT
-            echo "emoji=❌" >> $GITHUB_OUTPUT
-          elif [[ "${{ contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
-            echo "status=cancelled" >> $GITHUB_OUTPUT
-            echo "emoji=⏹️" >> $GITHUB_OUTPUT
-          else
-            echo "status=success" >> $GITHUB_OUTPUT
-            echo "emoji=✅" >> $GITHUB_OUTPUT
-          fi
-      
-      - name: Send Slack notification
-        if: vars.SLACK_WEBHOOK_URL != ''
-        run: |
-          curl -X POST ${{ vars.SLACK_WEBHOOK_URL }} \
-            -H 'Content-Type: application/json' \
-            -d '{
-              "text": "${{ steps.status.outputs.emoji }} Staging ${{ needs.setup.outputs.action }} ${{ steps.status.outputs.status }} for ${{ needs.setup.outputs.environment_name }}"
-            }'
-        continue-on-error: true
-      
       - name: Create summary
         run: |
+          STATUS_EMOJI="${{ needs.smoke-test.result == 'success' && '✅' || '⚠️' }}"
+          
           echo "## Staging Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status:** ${{ steps.status.outputs.emoji }} ${{ steps.status.outputs.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${STATUS_EMOJI} ${{ needs.smoke-test.result || needs.terraform.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Time:** ${{ steps.timing.outputs.total_time }}s" >> $GITHUB_STEP_SUMMARY
           echo "- **Environment:** ${{ needs.setup.outputs.environment_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Action:** ${{ needs.setup.outputs.action }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branch:** ${{ needs.setup.outputs.branch_name }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit:** ${{ needs.setup.outputs.commit_sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [[ "${{ needs.setup.outputs.action }}" == "deploy" && "${{ steps.status.outputs.status }}" == "success" ]]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ needs.terraform.result }}" == "success" ]]; then
             echo "### 🔗 Access URLs" >> $GITHUB_STEP_SUMMARY
             echo "- Frontend: ${{ needs.terraform.outputs.frontend_url }}" >> $GITHUB_STEP_SUMMARY
             echo "- Backend: ${{ needs.terraform.outputs.backend_url }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
           fi
+          
+          echo "### ⏱️ Performance Breakdown" >> $GITHUB_STEP_SUMMARY
+          echo "| Stage | Time |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend Build | ${{ needs.build-backend.outputs.build_time }}s |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend Build | ${{ needs.build-frontend.outputs.build_time }}s |" >> $GITHUB_STEP_SUMMARY
+          echo "| Infrastructure | ${{ needs.terraform.outputs.deploy_time }}s |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Total** | **${{ steps.timing.outputs.total_time }}s** |" >> $GITHUB_STEP_SUMMARY

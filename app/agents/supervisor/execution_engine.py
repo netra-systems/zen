@@ -170,8 +170,7 @@ class ExecutionEngine:
         return AgentStarted(
             agent_name=context.agent_name,
             run_id=context.run_id,
-            thread_id=context.thread_id,
-            timestamp=datetime.now(timezone.utc).isoformat()
+            timestamp=datetime.now(timezone.utc).timestamp()
         )
     
     async def _send_websocket_message(self, thread_id: str, 

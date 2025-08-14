@@ -295,7 +295,7 @@ class ToolResult(BaseWebSocketPayload):
     """Tool execution result."""
     tool_id: str
     tool_name: str
-    result: Any
+    result: Union[Dict[str, Any], List[Any], str, int, float, bool, None]
     run_id: str
     agent_id: str
     success: bool = True
@@ -360,7 +360,7 @@ class WebSocketMessage(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     
     @validator("payload", pre=True)
-    def validate_payload(cls, v: Any, values: Dict[str, Any]) -> Any:
+    def validate_payload(cls, v: Union[dict, BaseModel], values: Dict[str, Any]) -> Union[dict, BaseModel]:
         """Ensure payload matches expected type."""
         if isinstance(v, dict):
             # For backward compatibility - convert dict to appropriate model
