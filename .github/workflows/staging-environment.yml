@@ -1,4 +1,4 @@
-name: Staging Environment
+name: Staging Environment V2
 description: Fast parallel staging deployment with shared infrastructure
 
 permissions:
