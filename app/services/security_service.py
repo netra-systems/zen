@@ -61,11 +61,25 @@ class SecurityService:
     def get_user_email_from_token(self, token: str) -> Optional[str]:
         try:
             payload = jwt.decode(token, self.key_manager.jwt_secret_key, algorithms=["HS256"])
+            
+            # Manual expiration check due to python-jose bug
+            exp_timestamp = payload.get("exp")
+            if exp_timestamp:
+                from datetime import datetime, UTC
+                current_timestamp = datetime.now(UTC).timestamp()
+                if current_timestamp > exp_timestamp:
+                    logger.info(f"Token manually verified as expired: {token}")
+                    return None
+            
             email: str = payload.get("sub")
             if email is None:
                 return None
             return email
-        except JWTError:
+        except jwt.ExpiredSignatureError:
+            logger.info(f"Token expired during email extraction: {token}")
+            return None
+        except JWTError as e:
+            logger.error(f"JWT decode error during email extraction: {e}")
             return None
 
     async def get_user(self, db_session: AsyncSession, email: str) -> Optional[models_postgres.User]:
@@ -94,6 +108,16 @@ class SecurityService:
     def decode_access_token(self, token: str) -> Optional[dict]:
         try:
             payload = jwt.decode(token, self.key_manager.jwt_secret_key, algorithms=["HS256"])
+            
+            # Manual expiration check due to python-jose bug
+            exp_timestamp = payload.get("exp")
+            if exp_timestamp:
+                from datetime import datetime, UTC
+                current_timestamp = datetime.now(UTC).timestamp()
+                if current_timestamp > exp_timestamp:
+                    logger.info(f"Token manually verified as expired: {token}")
+                    return None
+            
             return payload
         except jwt.ExpiredSignatureError:
             logger.info(f"Token expired: {token}")

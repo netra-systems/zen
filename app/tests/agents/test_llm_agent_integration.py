@@ -106,8 +106,8 @@ class TestLLMAgentIntegration:
         })
         return dispatcher
     
-    @pytest_asyncio.fixture
-    async def supervisor_agent(self, mock_db_session, mock_llm_manager, 
+    @pytest.fixture
+    def supervisor_agent(self, mock_db_session, mock_llm_manager, 
                               mock_websocket_manager, mock_tool_dispatcher):
         """Create supervisor agent with all dependencies mocked"""
         # Patch state persistence to avoid hanging

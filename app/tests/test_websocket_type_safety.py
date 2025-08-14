@@ -11,9 +11,9 @@ from pydantic import ValidationError
 
 from app.schemas.registry import (
     WebSocketMessageType,
-    WebSocketConnectionState,
-    ErrorSeverity
+    WebSocketConnectionState
 )
+from app.core.error_codes import ErrorSeverity
 from app.schemas.Agent import AgentStarted, AgentCompleted, AgentErrorMessage, SubAgentUpdate
 from app.schemas.Tool import ToolStarted, ToolCompleted
 

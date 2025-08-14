@@ -99,11 +99,21 @@ class DatabaseChecker:
         critical_tables = ['assistants', 'threads', 'messages', 'userbase']
         
         for table in critical_tables:
-            result = await db.execute(
-                text("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = :table)"),
-                {"table": table}
-            )
-            exists = result.scalar_one()
+            if "sqlite" in os.getenv("DATABASE_URL", "").lower():
+                # SQLite table existence check
+                result = await db.execute(
+                    text("SELECT name FROM sqlite_master WHERE type='table' AND name = :table"),
+                    {"table": table}
+                )
+                exists = result.scalar_one_or_none() is not None
+            else:
+                # PostgreSQL table existence check
+                result = await db.execute(
+                    text("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = :table)"),
+                    {"table": table}
+                )
+                exists = result.scalar_one()
+            
             if not exists:
                 raise ValueError(f"Critical table '{table}' does not exist")
     

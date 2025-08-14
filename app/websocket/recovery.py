@@ -12,8 +12,9 @@ from dataclasses import dataclass, field
 
 from app.logging_config import central_logger
 from app.agents.state import DeepAgentState
-from app.schemas.registry import WebSocketMessage, ConnectionInfo
-from .error_types import WebSocketError, ErrorSeverity
+from app.schemas.registry import WebSocketMessage
+from .connection import ConnectionInfo
+from .error_types import WebSocketErrorInfo as WebSocketError, ErrorSeverity
 
 logger = central_logger.get_logger(__name__)
 

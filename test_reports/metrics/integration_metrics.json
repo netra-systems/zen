@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-14T16:45:49.140842",
+  "timestamp": "2025-08-14T16:53:36.961164",
   "level": "integration",
   "metrics": {
     "total_tests": 0,
@@ -9,24 +9,22 @@
   },
   "results": {
     "backend": {
-      "status": "failed",
-      "duration": 10.22971224784851,
-      "exit_code": 4,
-      "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: integration\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest integration_tests app/tests/routes -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 9.29s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:32: in <module>\n    app = create_app()\n          ^^^^^^^^^^^^\napp\\core\\app_factory.py:159: in create_app\n    register_api_routes(app)\napp\\core\\app_factory.py:80: in register_api_routes\n    _import_and_register_routes(app)\napp\\core\\app_factory.py:85: in _import_and_register_routes\n    route_modules = _import_route_modules()\n                    ^^^^^^^^^^^^^^^^^^^^^^^\napp\\core\\app_factory.py:92: in _import_route_modules\n    from app.routes import (\napp\\routes\\supply.py:4: in <module>\n    from app.dependencies import DbDep\napp\\dependencies.py:8: in <module>\n    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor\napp\\agents\\supervisor_consolidated.py:12: in <module>\n    from app.agents.base import BaseSubAgent\napp\\agents\\base.py:21: in <module>\n    class BaseSubAgent(ABC):\napp\\agents\\base.py:236: in BaseSubAgent\n    async def _send_update(self, run_id: str, data: Dict[str, Any]) -> None:\n                                                              ^^^\nE   NameError: name 'Any' is not defined\n",
+      "status": "skipped",
+      "duration": 0,
+      "exit_code": null,
+      "output": "",
       "test_counts": {
         "total": 0,
         "passed": 0,
         "failed": 0,
         "skipped": 0,
-        "errors": 0,
-        "test_files": 0
+        "errors": 0
       },
-      "coverage": null,
-      "test_details": []
+      "coverage": null
     },
     "frontend": {
       "status": "failed",
-      "duration": 3.7287423610687256,
+      "duration": 0.6447491645812988,
       "exit_code": 15,
       "output": "\n> netra-frontend-apex-v1@0.1.0 test\n> jest --forceExit --detectOpenHandles --testMatch **/__tests__/integration/**/*.test.[jt]s?(x)\n\n\n",
       "test_counts": {
@@ -56,8 +54,8 @@
     },
     "overall": {
       "status": "failed",
-      "start_time": 1755215135.1786363,
-      "end_time": 1755215149.138838
+      "start_time": 1755215616.314406,
+      "end_time": 1755215616.959155
     }
   }
 }

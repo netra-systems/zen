@@ -150,7 +150,7 @@ async def test_save_and_get_corpus(MockClickHouseDatabase):
 async def test_run_synthetic_data_generation_job_e2e(MockClickHouseDatabase, mock_get_corpus, mock_synth_main, mock_ingest):
     """An end-to-end test for the synthetic data generation job."""
     # Arrange
-    job_store.set("test", {})
+    await job_store.set("test", {})
     mock_db_instance = MagicMock()
     mock_db_instance.command = AsyncMock()
     MockClickHouseDatabase.return_value = mock_db_instance
@@ -160,7 +160,7 @@ async def test_run_synthetic_data_generation_job_e2e(MockClickHouseDatabase, moc
     destination_table = 'dest_table'
     
     mock_get_corpus.return_value = {"greeting": [("hello", "world")]}
-    mock_synth_main.return_value = await asyncio.sleep(0, result=[{"id": i} for i in range(5)])
+    mock_synth_main.return_value = [{"id": i} for i in range(5)]
     mock_ingest.side_effect = [2, 2, 1] 
 
     params = {

@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch, Mock
 
-from app.agents.tool_dispatcher import ProductionTool
+from app.agents.production_tool import ProductionTool
 from app.tests.helpers.tool_dispatcher_assertions import (
     assert_tool_execute_response_success,
     assert_tool_execute_response_error,

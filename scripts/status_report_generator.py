@@ -394,159 +394,272 @@ class StatusReportGenerator:
     def generate_report(self) -> str:
         """Generate the complete status report"""
         spec = self.load_specification()
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        # Gather all data
-        component_health = self.analyze_component_health(spec)
-        wip_items = self.analyze_work_in_progress(spec)
-        integration_status = self.check_integration_status()
-        agent_status = self.check_agent_system()
-        test_coverage = self.check_test_coverage()
-        test_results = self.run_quick_tests()
-        
-        # Calculate health score
+        data = self._gather_report_data(spec)
+        return self._build_complete_report(data)
+    
+    def _gather_report_data(self, spec) -> Dict[str, Any]:
+        """Gather all data needed for the report"""
+        return {
+            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            'component_health': self.analyze_component_health(spec),
+            'wip_items': self.analyze_work_in_progress(spec),
+            'integration_status': self.check_integration_status(),
+            'agent_status': self.check_agent_system(),
+            'test_coverage': self.check_test_coverage(),
+            'test_results': self.run_quick_tests()
+        }
+    
+    def _build_complete_report(self, data: Dict[str, Any]) -> str:
+        """Build the complete status report from gathered data"""
         health_score = self._calculate_health_score(
-            component_health, integration_status, test_results
+            data['component_health'], data['integration_status'], data['test_results']
         )
         
-        # Build report
-        report = f"""# System Status Report
+        header = self._build_report_header(data['timestamp'], health_score, data)
+        executive_summary = self._build_executive_summary(data, health_score)
+        component_details = self._build_component_details(data)
+        integration_section = self._build_integration_section(data['integration_status'])
+        test_section = self._build_test_section(data['test_coverage'], data['test_results'])
+        wip_section = self._build_wip_section(data['wip_items'])
+        recommendations = self._build_recommendations_section(data)
+        appendix = self._build_appendix(data)
+        
+        return header + executive_summary + component_details + integration_section + test_section + wip_section + recommendations + appendix
+    
+    def _build_report_header(self, timestamp: str, health_score: int, data: Dict) -> str:
+        """Build the report header with title and timestamp"""
+        return f"""# System Status Report
 Generated: {timestamp}
 
 ## Executive Summary
 
 ### Overall System Health Score: {health_score}/100
 
-### Key Metrics
-- **Backend Services**: {component_health.get('backend_services', {}).get('total_files', 0)} files analyzed, {component_health.get('backend_services', {}).get('issues_found', 0)} issues found
-- **Frontend Components**: {component_health.get('frontend_components', {}).get('total_files', 0)} files analyzed, {component_health.get('frontend_components', {}).get('issues_found', 0)} issues found
-- **API Endpoints**: {component_health.get('api_endpoints', {}).get('total_files', 0)} files analyzed, {component_health.get('api_endpoints', {}).get('issues_found', 0)} issues found
-- **Test Results**: {test_results['passed']} passed, {test_results['failed']} failed
-
-### Critical Issues Requiring Immediate Attention
 """
-        
-        # Add critical issues
+    
+    def _build_executive_summary(self, data: Dict, health_score: int) -> str:
+        """Build the executive summary section"""
+        metrics = self._build_key_metrics(data)
+        critical_issues = self._build_critical_issues_section(data['wip_items'])
+        wip_summary = self._build_wip_summary(data['wip_items'])
+        return metrics + critical_issues + wip_summary
+    
+    def _build_key_metrics(self, data: Dict) -> str:
+        """Build the key metrics section"""
+        ch = data['component_health']
+        tr = data['test_results']
+        return f"""### Key Metrics
+- **Backend Services**: {ch.get('backend_services', {}).get('total_files', 0)} files analyzed, {ch.get('backend_services', {}).get('issues_found', 0)} issues found
+- **Frontend Components**: {ch.get('frontend_components', {}).get('total_files', 0)} files analyzed, {ch.get('frontend_components', {}).get('issues_found', 0)} issues found
+- **API Endpoints**: {ch.get('api_endpoints', {}).get('total_files', 0)} files analyzed, {ch.get('api_endpoints', {}).get('issues_found', 0)} issues found
+- **Test Results**: {tr['passed']} passed, {tr['failed']} failed
+
+"""
+    
+    def _build_critical_issues_section(self, wip_items: List) -> str:
+        """Build the critical issues section"""
+        critical_count, critical_report = self._extract_critical_issues(wip_items)
+        return f"""### Critical Issues Requiring Immediate Attention
+{critical_report}
+"""
+    
+    def _extract_critical_issues(self, wip_items: List) -> Tuple[int, str]:
+        """Extract and format critical issues"""
         critical_count = 0
+        critical_report = ""
         for item in wip_items:
             if item.get('priority') == 'high' and 'CRITICAL' in item.get('content', ''):
                 critical_count += 1
-                report += f"- **{item['file']}:{item['line']}** - {item['content'][:100]}\n"
+                critical_report += f"- **{item['file']}:{item['line']}** - {item['content'][:100]}\n"
         
         if critical_count == 0:
-            report += "- No critical issues found\n"
+            critical_report += "- No critical issues found\n"
         
-        report += f"""
+        return critical_count, critical_report
+    
+    def _build_wip_summary(self, wip_items: List) -> str:
+        """Build the work-in-progress summary"""
+        high_count = len([i for i in wip_items if i.get('priority') == 'high'])
+        medium_count = len([i for i in wip_items if i.get('priority') == 'medium'])
+        low_count = len([i for i in wip_items if i.get('priority') == 'low'])
+        
+        return f"""
 ### Components Marked as Work-In-Progress
 - **Total WIP Items**: {len(wip_items)}
-- **High Priority**: {len([i for i in wip_items if i.get('priority') == 'high'])}
-- **Medium Priority**: {len([i for i in wip_items if i.get('priority') == 'medium'])}
-- **Low Priority**: {len([i for i in wip_items if i.get('priority') == 'low'])}
+- **High Priority**: {high_count}
+- **Medium Priority**: {medium_count}
+- **Low Priority**: {low_count}
 
-## Component Status Details
-
-### Backend Services
 """
-        
-        # Backend service issues
+    
+    def _build_component_details(self, data: Dict) -> str:
+        """Build the component status details section"""
+        backend_section = self._build_backend_section(data['component_health'])
+        frontend_section = self._build_frontend_section(data['component_health'])
+        agent_section = self._build_agent_section(data['agent_status'])
+        return f"""## Component Status Details
+
+{backend_section}{frontend_section}{agent_section}"""
+    
+    def _build_backend_section(self, component_health: Dict) -> str:
+        """Build the backend services section"""
         backend_issues = component_health.get('backend_services', {}).get('details', [])
-        if backend_issues:
-            for issue in backend_issues[:5]:
-                report += f"- **{issue['type']}**: {issue['file']} (line {issue['line']})\n"
-        else:
-            report += "- All backend services operational\n"
-        
-        report += """
-### Frontend Components
+        issues_text = self._format_component_issues(backend_issues, "All backend services operational")
+        return f"""### Backend Services
+{issues_text}
 """
-        
-        # Frontend component issues
+    
+    def _build_frontend_section(self, component_health: Dict) -> str:
+        """Build the frontend components section"""
         frontend_issues = component_health.get('frontend_components', {}).get('details', [])
-        if frontend_issues:
-            for issue in frontend_issues[:5]:
-                report += f"- **{issue['type']}**: {issue['file']} (line {issue['line']})\n"
-        else:
-            report += "- All frontend components operational\n"
-        
-        report += f"""
-### Agent System
-- **Supervisor Status**: {agent_status['supervisor']['active_version']} version active
-  - Legacy exists: {agent_status['supervisor']['legacy_exists']}
-  - Consolidated exists: {agent_status['supervisor']['consolidated_exists']}
-- **Sub-Agents**: {len(agent_status['sub_agents'])} agents found
+        issues_text = self._format_component_issues(frontend_issues, "All frontend components operational")
+        return f"""### Frontend Components
+{issues_text}
 """
-        
-        for agent in agent_status['sub_agents']:
-            report += f"  - {agent['name']}: Tools={agent['has_tools']}, Error Handling={agent['has_error_handling']}\n"
-        
-        report += f"""
-- **Apex Optimizer Agent**: {'Configured' if agent_status['apex_optimizer']['exists'] else 'Not Found'}
-  - Tool Count: {agent_status['apex_optimizer']['tool_count']}
-  - Sample Tools: {', '.join(agent_status['apex_optimizer']['tools'][:5])}
-
+    
+    def _format_component_issues(self, issues: List, fallback_text: str) -> str:
+        """Format component issues or return fallback text"""
+        if issues:
+            return "\n".join(f"- **{issue['type']}**: {issue['file']} (line {issue['line']})" for issue in issues[:5])
+        return f"- {fallback_text}"
+    
+    def _build_agent_section(self, agent_status: Dict) -> str:
+        """Build the agent system section"""
+        supervisor_info = self._build_supervisor_info(agent_status['supervisor'])
+        sub_agents_info = self._build_sub_agents_info(agent_status['sub_agents'])
+        apex_info = self._build_apex_info(agent_status['apex_optimizer'])
+        return f"""### Agent System
+{supervisor_info}
+{sub_agents_info}
+{apex_info}
+"""
+    
+    def _build_supervisor_info(self, supervisor: Dict) -> str:
+        """Build supervisor status information"""
+        return f"""- **Supervisor Status**: {supervisor['active_version']} version active
+  - Legacy exists: {supervisor['legacy_exists']}
+  - Consolidated exists: {supervisor['consolidated_exists']}"""
+    
+    def _build_sub_agents_info(self, sub_agents: List) -> str:
+        """Build sub-agents information"""
+        agent_lines = [f"  - {agent['name']}: Tools={agent['has_tools']}, Error Handling={agent['has_error_handling']}" for agent in sub_agents]
+        return f"""- **Sub-Agents**: {len(sub_agents)} agents found
+""" + "\n".join(agent_lines)
+    
+    def _build_apex_info(self, apex: Dict) -> str:
+        """Build Apex Optimizer Agent information"""
+        status = 'Configured' if apex['exists'] else 'Not Found'
+        tools_sample = ', '.join(apex['tools'][:5])
+        return f"""- **Apex Optimizer Agent**: {status}
+  - Tool Count: {apex['tool_count']}
+  - Sample Tools: {tools_sample}"""
+    
+    def _build_integration_section(self, integration_status: Dict) -> str:
+        """Build the integration health section"""
+        websocket_info = self._build_websocket_info(integration_status['websocket'])
+        api_sync_info = self._build_api_sync_info(integration_status['api_sync'])
+        oauth_info = self._build_oauth_info(integration_status['oauth'])
+        return f"""
 ## Integration Health
 
-### WebSocket Connection
-- Backend Configured: {integration_status['websocket']['backend_configured']}
-- Frontend Configured: {integration_status['websocket']['frontend_configured']}
-- Heartbeat Enabled: {integration_status['websocket']['heartbeat_enabled']}
-- Authentication Enabled: {integration_status['websocket']['auth_enabled']}
-
-### API Endpoint Synchronization
-- Backend Endpoints: {integration_status['api_sync']['backend_endpoints']}
-- Frontend API Calls: {integration_status['api_sync']['frontend_calls']}
-
-### OAuth Integration
-- Google OAuth Configured: {integration_status['oauth']['google_configured']}
-- Callback Configured: {integration_status['oauth']['callback_configured']}
-- Frontend Login: {integration_status['oauth']['frontend_login']}
-
+{websocket_info}
+{api_sync_info}
+{oauth_info}
+"""
+    
+    def _build_websocket_info(self, websocket: Dict) -> str:
+        """Build WebSocket connection information"""
+        return f"""### WebSocket Connection
+- Backend Configured: {websocket['backend_configured']}
+- Frontend Configured: {websocket['frontend_configured']}
+- Heartbeat Enabled: {websocket['heartbeat_enabled']}
+- Authentication Enabled: {websocket['auth_enabled']}"""
+    
+    def _build_api_sync_info(self, api_sync: Dict) -> str:
+        """Build API endpoint synchronization information"""
+        return f"""### API Endpoint Synchronization
+- Backend Endpoints: {api_sync['backend_endpoints']}
+- Frontend API Calls: {api_sync['frontend_calls']}"""
+    
+    def _build_oauth_info(self, oauth: Dict) -> str:
+        """Build OAuth integration information"""
+        return f"""### OAuth Integration
+- Google OAuth Configured: {oauth['google_configured']}
+- Callback Configured: {oauth['callback_configured']}
+- Frontend Login: {oauth['frontend_login']}"""
+    
+    def _build_test_section(self, test_coverage: Dict, test_results: Dict) -> str:
+        """Build the test coverage status section"""
+        backend_testing = self._build_backend_testing_info(test_coverage['backend'])
+        frontend_testing = self._build_frontend_testing_info(test_coverage['frontend'])
+        quick_results = self._build_quick_results_info(test_results)
+        return f"""
 ## Test Coverage Status
 
-### Backend Testing
-- **Target Coverage**: {test_coverage['backend']['target']}%
-- **Current Coverage**: {test_coverage['backend']['current']}
-- **Test Files**: {test_coverage['backend']['test_files']}
-
-### Frontend Testing
-- **Target Coverage**: {test_coverage['frontend']['target']}%
-- **Current Coverage**: {test_coverage['frontend']['current']}
-- **Test Files**: {test_coverage['frontend']['test_files']}
-
-### Quick Test Results
+{backend_testing}
+{frontend_testing}
+{quick_results}"""
+    
+    def _build_backend_testing_info(self, backend: Dict) -> str:
+        """Build backend testing information"""
+        return f"""### Backend Testing
+- **Target Coverage**: {backend['target']}%
+- **Current Coverage**: {backend['current']}
+- **Test Files**: {backend['test_files']}"""
+    
+    def _build_frontend_testing_info(self, frontend: Dict) -> str:
+        """Build frontend testing information"""
+        return f"""### Frontend Testing
+- **Target Coverage**: {frontend['target']}%
+- **Current Coverage**: {frontend['current']}
+- **Test Files**: {frontend['test_files']}"""
+    
+    def _build_quick_results_info(self, test_results: Dict) -> str:
+        """Build quick test results information"""
+        error_text = "- **Errors**: " + ", ".join(test_results['errors']) + "\n" if test_results['errors'] else ""
+        return f"""### Quick Test Results
 - **Tests Executed**: {test_results['executed']}
 - **Passed**: {test_results['passed']}
 - **Failed**: {test_results['failed']}
-"""
-        
-        if test_results['errors']:
-            report += "- **Errors**: " + ", ".join(test_results['errors']) + "\n"
-        
-        report += """
+{error_text}"""
+    
+    def _build_wip_section(self, wip_items: List) -> str:
+        """Build the work in progress items section"""
+        high_priority_section = self._build_high_priority_section(wip_items)
+        incomplete_section = self._build_incomplete_section(wip_items)
+        return f"""
 ## Work In Progress Items
 
-### High Priority TODOs
-"""
-        
+{high_priority_section}
+{incomplete_section}"""
+    
+    def _build_high_priority_section(self, wip_items: List) -> str:
+        """Build high priority TODOs section"""
         high_priority = [i for i in wip_items if i.get('priority') == 'high'][:10]
-        for item in high_priority:
-            report += f"- {item['file']}:{item['line']} - {item['content'][:100]}\n"
-        
-        if not high_priority:
-            report += "- No high priority items found\n"
-        
-        report += """
-### Incomplete Implementations
-"""
-        
+        if high_priority:
+            items_text = "\n".join(f"- {item['file']}:{item['line']} - {item['content'][:100]}" for item in high_priority)
+        else:
+            items_text = "- No high priority items found"
+        return f"""### High Priority TODOs
+{items_text}"""
+    
+    def _build_incomplete_section(self, wip_items: List) -> str:
+        """Build incomplete implementations section"""
         incomplete = [i for i in wip_items if 'NotImplemented' in i.get('content', '') or 'not implemented' in i.get('content', '').lower()][:5]
-        for item in incomplete:
-            report += f"- {item['file']}:{item['line']} - {item['content'][:100]}\n"
+        if incomplete:
+            items_text = "\n".join(f"- {item['file']}:{item['line']} - {item['content'][:100]}" for item in incomplete)
+        else:
+            items_text = "- No incomplete implementations found"
+        return f"""### Incomplete Implementations
+{items_text}"""
+    
+    def _build_recommendations_section(self, data: Dict) -> str:
+        """Build the recommendations section"""
+        critical_count, _ = self._extract_critical_issues(data['wip_items'])
+        wip_count = len(data['wip_items'])
+        failed_tests = data['test_results']['failed']
         
-        if not incomplete:
-            report += "- No incomplete implementations found\n"
-        
-        report += f"""
+        return f"""
 ## Known Issues and Risks
 
 ### Performance Considerations
@@ -560,7 +673,7 @@ Generated: {timestamp}
 - Check for any exposed secrets or API keys
 
 ### Technical Debt
-- **Total TODO/FIXME items**: {len(wip_items)}
+- **Total TODO/FIXME items**: {wip_count}
 - Consider refactoring components with multiple issues
 - Update deprecated endpoints and functions
 
@@ -568,7 +681,7 @@ Generated: {timestamp}
 
 ### Immediate Actions Required
 1. Address {critical_count} critical issues found in the codebase
-2. Fix {test_results['failed']} failing tests
+2. Fix {failed_tests} failing tests
 3. Complete implementation of NotImplementedError functions
 
 ### Short-term Improvements (1-2 weeks)
@@ -582,24 +695,29 @@ Generated: {timestamp}
 2. Achieve 97% test coverage goal through automated test improvement
 3. Implement comprehensive monitoring and alerting system
 4. Complete Apex Optimizer Agent integration with all 30+ tools
-
+"""
+    
+    def _build_appendix(self, data: Dict) -> str:
+        """Build the appendix section"""
+        total_backend_files = sum(v.get('total_files', 0) for v in data['component_health'].values() if isinstance(v, dict))
+        total_test_files = data['test_coverage']['backend']['test_files'] + data['test_coverage']['frontend']['test_files']
+        
+        return f"""
 ## Appendix
 
 ### Files Analyzed
-- Backend: {sum(v.get('total_files', 0) for v in component_health.values() if isinstance(v, dict))} files
+- Backend: {total_backend_files} files
 - Frontend: Check frontend/components and frontend/app directories
-- Tests: {test_coverage['backend']['test_files'] + test_coverage['frontend']['test_files']} test files
+- Tests: {total_test_files} test files
 
 ### Report Metadata
 - Specification Version: 1.0.0
-- Report Generated: {timestamp}
+- Report Generated: {data['timestamp']}
 - Next Scheduled Report: Weekly
 
 ---
 *This report was automatically generated based on the Status.xml specification*
 """
-        
-        return report
     
     def _calculate_health_score(self, component_health: Dict, integration: Dict, tests: Dict) -> int:
         """Calculate overall system health score (0-100)"""

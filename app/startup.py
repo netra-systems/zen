@@ -25,6 +25,30 @@ from app.db.migration_utils import (
     create_alembic_config, needs_migration, execute_migration,
     log_migration_status, should_continue_on_error, validate_database_url
 )
+from app.core.performance_optimization_manager import performance_manager
+from app.monitoring.performance_monitor import performance_monitor
+from app.db.index_optimizer import index_manager
+
+
+async def _initialize_performance_optimizations(app: FastAPI, logger: logging.Logger) -> None:
+    """Initialize performance optimization components."""
+    try:
+        # Initialize performance optimization manager
+        await performance_manager.initialize()
+        app.state.performance_manager = performance_manager
+        
+        # Run database index optimizations
+        optimization_results = await index_manager.optimize_all_databases()
+        logger.info(f"Database optimization completed: {optimization_results}")
+        
+        # Store optimization components in app state
+        app.state.index_manager = index_manager
+        
+        logger.info("Performance optimizations initialized successfully")
+        
+    except Exception as e:
+        logger.error(f"Failed to initialize performance optimizations: {e}")
+        # Don't fail startup, but log the error
 
 
 def initialize_logging() -> Tuple[float, logging.Logger]:
@@ -231,20 +255,28 @@ def _handle_schema_validation_result(logger: logging.Logger, passed: bool) -> No
             logger.error("Schema validation failed. The application might not work as expected.")
 
 
-def start_monitoring(app: FastAPI, logger: logging.Logger) -> None:
-    """Start database connection monitoring."""
+async def start_monitoring(app: FastAPI, logger: logging.Logger) -> None:
+    """Start comprehensive performance monitoring."""
     if 'pytest' not in sys.modules:
         try:
-            _create_monitoring_task(app, logger)
+            await _create_monitoring_task(app, logger)
+            await _initialize_performance_optimizations(app, logger)
         except Exception as e:
-            logger.error(f"Failed to start database monitoring: {e}")
+            logger.error(f"Failed to start monitoring and optimizations: {e}")
 
 
-def _create_monitoring_task(app: FastAPI, logger: logging.Logger) -> None:
-    """Create monitoring task."""
+async def _create_monitoring_task(app: FastAPI, logger: logging.Logger) -> None:
+    """Create comprehensive monitoring tasks."""
     from app.services.database.connection_monitor import start_connection_monitoring
+    
+    # Start database connection monitoring
     app.state.monitoring_task = asyncio.create_task(start_connection_monitoring())
-    logger.info("Database connection monitoring started")
+    
+    # Start performance monitoring
+    await performance_monitor.start_monitoring()
+    app.state.performance_monitor = performance_monitor
+    
+    logger.info("Comprehensive monitoring started")
 
 
 def log_startup_complete(start_time: float, logger: logging.Logger) -> None:
@@ -276,7 +308,7 @@ async def _run_startup_phase_three(app: FastAPI, logger: logging.Logger) -> None
     await validate_schema(logger)
     register_websocket_handlers(app)
     _create_agent_supervisor(app)
-    start_monitoring(app, logger)
+    await start_monitoring(app, logger)
 
 
 async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:

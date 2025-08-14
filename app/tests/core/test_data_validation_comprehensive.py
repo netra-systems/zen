@@ -25,7 +25,7 @@ class ValidationTestModel(BaseModel):
     required_field: str = Field(..., min_length=1, max_length=100)
     optional_field: Optional[str] = Field(default=None, max_length=50)
     numeric_field: int = Field(..., ge=0, le=1000)
-    email_field: Optional[str] = Field(default=None, regex=r'^[^@]+@[^@]+\.[^@]+$')
+    email_field: Optional[str] = Field(default=None, pattern=r'^[^@]+@[^@]+\.[^@]+$')
 
 
 @pytest.fixture

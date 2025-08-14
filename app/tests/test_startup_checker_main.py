@@ -7,7 +7,8 @@ from app.startup_checks import StartupChecker
 from app.tests.helpers.startup_check_helpers import (
     create_mock_app, setup_all_check_mocks, mock_successful_check,
     mock_critical_failure_check, mock_non_critical_failure_check,
-    mock_exception_check, verify_check_results
+    mock_exception_check, verify_check_results,
+    create_success_check_result, create_failure_check_result
 )
 
 
@@ -28,7 +29,7 @@ class TestStartupCheckerMain:
     async def test_run_all_checks_success(self, checker):
         """Test running all checks successfully."""
         async def mock_check():
-            checker.results.append(create_success_check_result())
+            return create_success_check_result()
         
         setup_all_check_mocks(checker, mock_check)
         
@@ -41,20 +42,23 @@ class TestStartupCheckerMain:
     async def test_run_all_checks_with_failures(self, checker):
         """Test running checks with critical and non-critical failures."""
         async def mock_critical_failure():
-            checker.results.append(create_failure_check_result("critical_check", True))
+            return create_failure_check_result("critical_check", True)
         
         async def mock_non_critical_failure():
-            checker.results.append(create_failure_check_result("non_critical_check", False))
+            return create_failure_check_result("non_critical_check", False)
         
-        checker.check_environment_variables = AsyncMock(side_effect=mock_critical_failure)
-        checker.check_configuration = AsyncMock(side_effect=mock_non_critical_failure)
+        checker.env_checker.check_environment_variables = AsyncMock(side_effect=mock_critical_failure)
+        checker.env_checker.check_configuration = AsyncMock(side_effect=mock_non_critical_failure)
         
         # Setup remaining checks as empty
-        for attr in ['check_file_permissions', 'check_database_connection',
-                    'check_redis', 'check_clickhouse', 'check_llm_providers',
-                    'check_memory_and_resources', 'check_network_connectivity',
-                    'check_or_create_assistant']:
-            setattr(checker, attr, AsyncMock())
+        checker.system_checker.check_file_permissions = AsyncMock()
+        checker.db_checker.check_database_connection = AsyncMock()
+        checker.service_checker.check_redis = AsyncMock()
+        checker.service_checker.check_clickhouse = AsyncMock()
+        checker.service_checker.check_llm_providers = AsyncMock()
+        checker.system_checker.check_memory_and_resources = AsyncMock()
+        checker.system_checker.check_network_connectivity = AsyncMock()
+        checker.db_checker.check_or_create_assistant = AsyncMock()
         
         results = await checker.run_all_checks()
         
@@ -65,14 +69,18 @@ class TestStartupCheckerMain:
     @pytest.mark.asyncio
     async def test_run_all_checks_with_exception(self, checker):
         """Test handling of unexpected exceptions during checks."""
-        checker.check_environment_variables = AsyncMock(side_effect=mock_exception_check)
+        checker.env_checker.check_environment_variables = AsyncMock(side_effect=mock_exception_check)
         
         # Setup remaining checks as empty
-        for attr in ['check_configuration', 'check_file_permissions',
-                    'check_database_connection', 'check_redis', 'check_clickhouse',
-                    'check_llm_providers', 'check_memory_and_resources',
-                    'check_network_connectivity', 'check_or_create_assistant']:
-            setattr(checker, attr, AsyncMock())
+        checker.env_checker.check_configuration = AsyncMock()
+        checker.system_checker.check_file_permissions = AsyncMock()
+        checker.db_checker.check_database_connection = AsyncMock()
+        checker.service_checker.check_redis = AsyncMock()
+        checker.service_checker.check_clickhouse = AsyncMock()
+        checker.service_checker.check_llm_providers = AsyncMock()
+        checker.system_checker.check_memory_and_resources = AsyncMock()
+        checker.system_checker.check_network_connectivity = AsyncMock()
+        checker.db_checker.check_or_create_assistant = AsyncMock()
         
         results = await checker.run_all_checks()
         

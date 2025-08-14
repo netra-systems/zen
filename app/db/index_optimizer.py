@@ -4,7 +4,7 @@ This module provides automated database index creation and optimization
 for improved query performance across PostgreSQL and ClickHouse databases.
 """
 
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Any
 import re
 from dataclasses import dataclass
 from datetime import datetime
@@ -247,7 +247,7 @@ class PostgreSQLIndexOptimizer:
             )
         ]
     
-    async def get_index_usage_stats(self) -> Dict[str, Any]:
+    async def get_index_usage_stats(self) -> "Dict[str, Any]":
         """Get index usage statistics."""
         if not async_engine:
             return {}
@@ -394,7 +394,7 @@ class DatabaseIndexManager:
         self.postgres_optimizer = PostgreSQLIndexOptimizer()
         self.clickhouse_optimizer = ClickHouseIndexOptimizer()
     
-    async def optimize_all_databases(self) -> Dict[str, Any]:
+    async def optimize_all_databases(self) -> "Dict[str, Any]":
         """Run optimization on all databases."""
         results = {
             "postgres": {},
@@ -432,7 +432,7 @@ class DatabaseIndexManager:
         
         return results
     
-    async def get_optimization_report(self) -> Dict[str, Any]:
+    async def get_optimization_report(self) -> "Dict[str, Any]":
         """Generate comprehensive optimization report."""
         report = {
             "timestamp": datetime.now().isoformat(),

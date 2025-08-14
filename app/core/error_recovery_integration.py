@@ -1,59 +1,58 @@
-"""Integration module for comprehensive error recovery system.
+"""Enhanced unified error recovery integration system.
 
-Provides unified interface for error recovery across all system components
-with automatic strategy selection and comprehensive monitoring.
+Provides comprehensive error recovery with advanced strategies including
+exponential backoff, circuit breakers, graceful degradation, and intelligent
+error aggregation across all system components.
 """
 
 import asyncio
 from typing import Any, Dict, Optional, List
 from datetime import datetime
 
-from app.core.error_recovery import (
-    RecoveryContext,
-    OperationType,
-    recovery_manager,
-    recovery_executor
-)
-from app.core.agent_recovery_strategies import (
-    AgentType,
-    agent_recovery_registry
-)
-from app.core.error_logging import (
-    error_logger,
-    log_agent_error,
-    log_database_error,
-    log_api_error
-)
-from app.services.transaction_manager import transaction_manager
-from app.services.compensation_engine import compensation_engine, saga_orchestrator
-from app.services.database.rollback_manager import rollback_manager
-from app.agents.error_handler import global_error_handler
+# Core recovery components
+from app.core.error_recovery import RecoveryContext, OperationType
+from app.core.enhanced_retry_strategies import retry_manager
+from app.core.adaptive_circuit_breakers import circuit_breaker_registry
+from app.core.graceful_degradation import degradation_manager
+from app.core.memory_recovery_strategies import memory_monitor
+from app.core.websocket_recovery_strategies import websocket_recovery_manager
+from app.core.database_recovery_strategies import database_recovery_registry
+from app.core.error_aggregation_system import error_aggregation_system
+
+# Legacy components for compatibility
+from app.core.agent_recovery_strategies import agent_recovery_registry, AgentType
+from app.core.error_logging import error_logger
+
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
 
-class UnifiedErrorRecoverySystem:
-    """Unified interface for comprehensive error recovery."""
+class EnhancedErrorRecoverySystem:
+    """Enhanced unified interface for comprehensive error recovery."""
     
     def __init__(self):
-        """Initialize unified error recovery system."""
-        self.recovery_manager = recovery_manager
-        self.recovery_executor = recovery_executor
-        self.transaction_manager = transaction_manager
-        self.compensation_engine = compensation_engine
-        self.saga_orchestrator = saga_orchestrator
-        self.rollback_manager = rollback_manager
+        """Initialize enhanced error recovery system."""
+        # Core managers
+        self.retry_manager = retry_manager
+        self.circuit_breaker_registry = circuit_breaker_registry
+        self.degradation_manager = degradation_manager
+        self.memory_monitor = memory_monitor
+        self.websocket_manager = websocket_recovery_manager
+        self.database_registry = database_recovery_registry
+        self.error_aggregation = error_aggregation_system
+        
+        # Legacy compatibility
         self.agent_registry = agent_recovery_registry
         self.error_logger = error_logger
         
-        # Integration statistics
+        # Statistics
         self.recovery_stats = {
             'total_recoveries': 0,
             'successful_recoveries': 0,
             'failed_recoveries': 0,
             'recovery_by_type': {},
-            'recovery_by_agent': {}
+            'recovery_by_strategy': {}
         }
     
     async def handle_agent_error(
@@ -64,67 +63,26 @@ class UnifiedErrorRecoverySystem:
         context_data: Optional[Dict] = None,
         user_id: Optional[str] = None
     ) -> Any:
-        """Handle agent error with full recovery pipeline."""
-        # Log error with comprehensive context
-        error_id = log_agent_error(
-            agent_type=agent_type,
-            operation=operation,
-            error=error,
-            user_id=user_id,
-            **(context_data or {})
+        """Handle agent error with enhanced recovery pipeline."""
+        # Log and aggregate error
+        error_data = await self._prepare_error_data(
+            agent_type, operation, error, context_data, user_id
         )
+        await self.error_aggregation.process_error(error_data)
+        
+        # Get circuit breaker for this agent
+        breaker = self.circuit_breaker_registry.get_breaker(f"agent_{agent_type}")
         
         try:
-            # Create recovery context
-            recovery_context = RecoveryContext(
-                operation_id=error_id,
-                operation_type=OperationType.AGENT_EXECUTION,
-                error=error,
-                severity=self._determine_severity(error),
-                metadata={
-                    'agent_type': agent_type,
-                    'operation': operation,
-                    'user_id': user_id,
-                    **(context_data or {})
-                }
+            return await breaker.call(
+                self._execute_agent_recovery,
+                agent_type, operation, error, context_data, user_id
             )
-            
-            # Try agent-specific recovery strategy
-            agent_type_enum = self._get_agent_type_enum(agent_type)
-            if agent_type_enum:
-                result = await self.agent_registry.recover_agent_operation(
-                    agent_type_enum, recovery_context
-                )
-                
-                self._update_recovery_stats(agent_type, True)
-                self.error_logger.log_recovery_attempt(
-                    recovery_context, 'agent_specific_recovery', True
-                )
-                
-                return result
-            
-            # Fallback to general recovery
-            result = await self.recovery_executor.attempt_recovery(recovery_context)
-            
-            success = result.success if result else False
-            self._update_recovery_stats(agent_type, success)
-            
-            if success:
-                self.error_logger.log_recovery_attempt(
-                    recovery_context, 'general_recovery', True
-                )
-                return result.result_data
-            else:
-                self.error_logger.log_recovery_attempt(
-                    recovery_context, 'general_recovery', False,
-                    {'error_message': result.error_message if result else 'Unknown error'}
-                )
-                raise error
-            
-        except Exception as recovery_error:
-            self._update_recovery_stats(agent_type, False)
-            logger.error(f"Recovery failed for agent {agent_type}: {recovery_error}")
-            raise recovery_error
+        except Exception as e:
+            # Try graceful degradation
+            return await self._attempt_agent_degradation(
+                agent_type, operation, error, context_data
+            )
     
     async def handle_database_error(
         self,
