@@ -16,6 +16,7 @@ from app.logging_config import central_logger as logger
 from app.core.reliability import (
     get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
 )
+from app.agents.input_validation import validate_agent_input
 
 from .query_builder import QueryBuilder
 from .analysis_engine import AnalysisEngine
@@ -70,18 +71,58 @@ class DataSubAgent(BaseSubAgent):
             )
         )
     
-    async def _get_cached_schema(self, table_name: str) -> Optional[Dict[str, Any]]:
-        """Get cached schema information for a table with manual caching."""
+    async def _get_cached_schema(self, table_name: str, force_refresh: bool = False) -> Optional[Dict[str, Any]]:
+        """Get cached schema information with TTL and cache invalidation."""
         if not hasattr(self, '_schema_cache'):
             self._schema_cache: Dict[str, Dict[str, Any]] = {}
+            self._schema_cache_timestamps: Dict[str, float] = {}
         
-        if table_name in self._schema_cache:
-            return self._schema_cache[table_name]
+        # Check if cache entry exists and is still valid
+        current_time = time.time()
+        if not force_refresh and table_name in self._schema_cache:
+            cache_time = self._schema_cache_timestamps.get(table_name, 0)
+            cache_age = current_time - cache_time
+            
+            # Cache TTL of 5 minutes for schema info
+            if cache_age < 300:  # 5 minutes
+                return self._schema_cache[table_name]
         
+        # Fetch fresh schema
         schema = await self.clickhouse_ops.get_table_schema(table_name)
         if schema:
             self._schema_cache[table_name] = schema
+            self._schema_cache_timestamps[table_name] = current_time
+            
+            # Cleanup old cache entries to prevent memory leaks
+            await self._cleanup_old_cache_entries(current_time)
+        
         return schema
+    
+    async def _cleanup_old_cache_entries(self, current_time: float) -> None:
+        """Clean up old cache entries to prevent memory leaks."""
+        max_cache_age = 3600  # 1 hour
+        tables_to_remove = []
+        
+        for table_name, timestamp in self._schema_cache_timestamps.items():
+            if current_time - timestamp > max_cache_age:
+                tables_to_remove.append(table_name)
+        
+        for table_name in tables_to_remove:
+            self._schema_cache.pop(table_name, None)
+            self._schema_cache_timestamps.pop(table_name, None)
+    
+    async def invalidate_schema_cache(self, table_name: Optional[str] = None) -> None:
+        """Invalidate schema cache for specific table or all tables."""
+        if not hasattr(self, '_schema_cache'):
+            return
+            
+        if table_name:
+            self._schema_cache.pop(table_name, None)
+            self._schema_cache_timestamps.pop(table_name, None)
+        else:
+            # Clear entire cache
+            self._schema_cache.clear()
+            self._schema_cache_timestamps.clear()
     
     async def _fetch_clickhouse_data(
         self,
@@ -101,6 +142,7 @@ class DataSubAgent(BaseSubAgent):
         except Exception as e:
             logger.debug(f"Failed to send WebSocket update: {e}")
     
+    @validate_agent_input('DataSubAgent')
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False) -> None:
         """Execute advanced data analysis with ClickHouse integration."""
         
@@ -140,3 +182,11 @@ class DataSubAgent(BaseSubAgent):
     def get_circuit_breaker_status(self) -> Dict[str, Any]:
         """Get circuit breaker status."""
         return self.reliability.circuit_breaker.get_status()
+    
+    async def cleanup(self, state: DeepAgentState, run_id: str) -> None:
+        """Enhanced cleanup with cache management."""
+        await super().cleanup(state, run_id)
+        
+        # Clean up old cache entries during cleanup
+        if hasattr(self, '_schema_cache_timestamps'):
+            await self._cleanup_old_cache_entries(time.time())

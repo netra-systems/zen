@@ -43,7 +43,7 @@ class TimeoutConfig(BaseModel):
     """Configuration for timeout behavior."""
     default_timeout: float = Field(default=30.0, description="Default operation timeout")
     long_timeout: float = Field(default=300.0, description="Long operation timeout")
-    recovery_timeout: float = Field(default=45.0, description="Recovery timeout")
+    recovery_timeout: float = Field(default=30.0, description="Recovery timeout")
     
     @classmethod
     def from_env(cls) -> 'TimeoutConfig':
@@ -76,9 +76,9 @@ class AgentConfig(BaseModel):
     timeout: TimeoutConfig = Field(default_factory=TimeoutConfig)
     user: UserConfig = Field(default_factory=UserConfig)
     
-    # Circuit breaker settings
-    failure_threshold: int = Field(default=5, description="Circuit breaker failure threshold")
-    reset_timeout: float = Field(default=60.0, description="Circuit breaker reset timeout")
+    # Circuit breaker settings - optimized for responsive error handling
+    failure_threshold: int = Field(default=3, description="Circuit breaker failure threshold")
+    reset_timeout: float = Field(default=30.0, description="Circuit breaker reset timeout")
     
     # Performance settings
     max_concurrent_operations: int = Field(default=10, description="Max concurrent operations")
@@ -92,8 +92,8 @@ class AgentConfig(BaseModel):
             retry=RetryConfig.from_env(),
             timeout=TimeoutConfig.from_env(),
             user=UserConfig.from_env(),
-            failure_threshold=int(os.getenv('AGENT_FAILURE_THRESHOLD', 5)),
-            reset_timeout=float(os.getenv('AGENT_RESET_TIMEOUT', 60.0)),
+            failure_threshold=int(os.getenv('AGENT_FAILURE_THRESHOLD', 3)),
+            reset_timeout=float(os.getenv('AGENT_RESET_TIMEOUT', 30.0)),
             max_concurrent_operations=int(os.getenv('AGENT_MAX_CONCURRENT', 10)),
             batch_size=int(os.getenv('AGENT_BATCH_SIZE', 100))
         )

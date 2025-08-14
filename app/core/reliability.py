@@ -35,10 +35,10 @@ class ErrorSeverity(Enum):
 
 @dataclass
 class CircuitBreakerConfig:
-    """Configuration for circuit breaker pattern"""
-    failure_threshold: int = 5
-    recovery_timeout: float = 60.0
-    half_open_max_calls: int = 3
+    """Configuration for circuit breaker pattern - optimized for responsive error handling"""
+    failure_threshold: int = 3
+    recovery_timeout: float = 30.0
+    half_open_max_calls: int = 2
     name: str = "default"
 
 
@@ -311,7 +311,8 @@ class AgentReliabilityWrapper:
         # Don't retry validation errors or client errors
         non_retryable = [
             "ValidationError", "ValueError", "TypeError", 
-            "KeyError", "AttributeError", "NotImplementedError"
+            "KeyError", "AttributeError", "NotImplementedError",
+            "PermissionError", "FileNotFoundError", "ImportError"
         ]
         
         error_type = type(error).__name__

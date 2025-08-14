@@ -138,7 +138,7 @@ class UnifiedReporter:
         for i, run in enumerate(reversed(runs), 1):
             timestamp = datetime.fromisoformat(run["timestamp"])
             time_str = timestamp.strftime("%m/%d %H:%M")
-            summary = run["summary"]
+            summary = self._get_run_summary(run)
             
             # Calculate trend
             trend = self._calculate_trend(runs, len(runs) - i)
@@ -178,12 +178,9 @@ class UnifiedReporter:
         
         # Calculate metrics
         if runs:
-            total_failures = sum(r["summary"]["failed"] for r in runs)
+            total_failures = sum(self._get_run_summary(r)["failed"] for r in runs)
             avg_duration = sum(
-                r["results"].get("backend", {}).get("duration", 0) +
-                r["results"].get("frontend", {}).get("duration", 0) +
-                r["results"].get("e2e", {}).get("duration", 0)
-                for r in runs
+                self._get_run_duration(r) for r in runs
             ) / len(runs)
             
             dashboard.append(f"- **Total Failures (last 3 runs)**: {total_failures}\n")
@@ -265,8 +262,8 @@ class UnifiedReporter:
         if index == 0 or index >= len(runs):
             return "—"
         
-        current = runs[index]["summary"]
-        previous = runs[index - 1]["summary"]
+        current = self._get_run_summary(runs[index])
+        previous = self._get_run_summary(runs[index - 1])
         
         if current["failed"] < previous["failed"]:
             return "📈"  # Improving
@@ -274,3 +271,21 @@ class UnifiedReporter:
             return "📉"  # Worsening
         else:
             return "➡️"  # Same
+    
+    def _get_run_summary(self, run: Dict) -> Dict:
+        """Get summary from run, handling both old and new formats."""
+        if "summary" in run:
+            return run["summary"]
+        return self._create_legacy_summary(run)
+    
+    def _create_legacy_summary(self, run: Dict) -> Dict:
+        """Create summary from old format run data."""
+        keys = ["total", "passed", "failed", "skipped", "errors"]
+        return {key: run.get(key, 0) for key in keys}
+    
+    def _get_run_duration(self, run: Dict) -> float:
+        """Get duration from run, handling both old and new formats."""
+        if "results" in run:
+            return sum(run["results"].get(c, {}).get("duration", 0) 
+                      for c in ["backend", "frontend", "e2e"])
+        return run.get("duration", 0)

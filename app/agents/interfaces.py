@@ -20,7 +20,7 @@ class AgentStateProtocol(Protocol):
         """Convert state to dictionary."""
         ...
     
-    def merge_from(self, other: 'AgentStateProtocol') -> None:
+    def merge_from(self, other: "AgentStateProtocol") -> None:
         """Merge state from another state object."""
         ...
 

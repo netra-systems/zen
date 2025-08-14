@@ -12,7 +12,7 @@
 
 import json
 import re
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional, List, Callable, Union
 from app.logging_config import central_logger as logger
 
 
@@ -283,7 +283,7 @@ def try_extraction_strategies(json_str: str, max_retries: int) -> Optional[Dict[
     return execute_strategies(json_str, strategies)
 
 
-def execute_strategies(json_str: str, strategies: list) -> Optional[Dict[str, Any]]:
+def execute_strategies(json_str: str, strategies: List[Callable[[str], Optional[Dict[str, Any]]]]) -> Optional[Dict[str, Any]]:
     """Execute extraction strategies in order."""
     for i, strategy in enumerate(strategies):
         try:
@@ -318,7 +318,7 @@ def extract_complex_field(response: str, pattern: str) -> Dict[str, Any]:
     return result
 
 
-def try_parse_complex_value(value_str: str) -> Any:
+def try_parse_complex_value(value_str: str) -> Union[Dict[str, Any], List[Any], str]:
     """Try to parse complex JSON value."""
     try:
         return json.loads(value_str)
@@ -350,7 +350,7 @@ def extract_with_patterns(response: str, patterns: List[str], existing: Dict[str
     return result
 
 
-def parse_simple_value(value_str: str) -> Any:
+def parse_simple_value(value_str: str) -> Union[str, bool, float, int, None]:
     """Parse simple JSON value."""
     if value_str.startswith('"') and value_str.endswith('"'):
         return value_str[1:-1]

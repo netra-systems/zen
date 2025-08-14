@@ -10,18 +10,9 @@ from app.agents.base import BaseSubAgent
 from app.logging_config import central_logger
 
 # Import all sub-agents
-# Import TriageSubAgent from the .py file, not the module directory
-import sys
-import importlib.util
-import os
-
-# Direct import of TriageSubAgent from the .py file
-triage_file_path = os.path.join(os.path.dirname(__file__), '..', 'triage_sub_agent.py')
-spec = importlib.util.spec_from_file_location("triage_sub_agent_module", triage_file_path)
-triage_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(triage_module)
-TriageSubAgent = triage_module.TriageSubAgent
-from app.agents.data_sub_agent.agent import DataSubAgent
+from app.agents.triage_sub_agent import TriageSubAgent
+# Lazy import DataSubAgent to avoid circular dependency
+# from app.agents.data_sub_agent.agent import DataSubAgent  # Import directly in init_agents
 from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from app.agents.reporting_sub_agent import ReportingSubAgent
@@ -47,6 +38,9 @@ class AgentRegistry:
     
     def _register_core_agents(self) -> None:
         """Register core workflow agents."""
+        # Import DataSubAgent here to avoid circular dependency
+        from app.agents.data_sub_agent.agent import DataSubAgent
+        
         self.register("triage", TriageSubAgent(
             self.llm_manager, self.tool_dispatcher))
         self.register("data", DataSubAgent(
