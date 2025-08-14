@@ -317,6 +317,11 @@ class LLMManager:
         try:
             response = await structured_llm.ainvoke(prompt)
             
+            # Parse any nested JSON strings in the response
+            response_data = response.model_dump()
+            parsed_data = self._parse_nested_json(response_data)
+            response = schema(**parsed_data)
+            
             # Cache the response if appropriate
             if use_cache and llm_cache_service.should_cache_response(prompt, response.model_dump_json()):
                 await llm_cache_service.cache_response(
