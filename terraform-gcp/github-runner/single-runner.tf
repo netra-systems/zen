@@ -58,12 +58,12 @@ RUNNER_DIR="$RUNNER_HOME/actions-runner"
 
 log "Starting enhanced GitHub runner installation with Docker fixes..."
 
-# Step 1: Install all dependencies with retry logic
+# Step 1: Install all dependencies (Docker is optional)
 install_dependencies() {
     log "Installing dependencies..."
     
     # Update package lists
-    apt-get update || { log "ERROR: apt-get update failed"; exit 1; }
+    apt-get update || log "WARNING: apt-get update failed, continuing..."
     
     # Install basic packages
     PACKAGES="curl jq git build-essential libssl-dev libffi-dev python3 python3-venv python3-dev python3-pip"
@@ -72,57 +72,68 @@ install_dependencies() {
         apt-get install -y $pkg || log "WARNING: Failed to install $pkg"
     done
     
-    # Install Docker using official method
-    log "Installing Docker..."
+    # Try to install Docker (non-critical)
+    log "Attempting to install Docker (optional)..."
     
-    # Install prerequisites
-    apt-get install -y \
-        ca-certificates \
-        gnupg \
-        lsb-release
-    
-    # Add Docker's official GPG key
-    mkdir -p /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    
-    # Set up the repository
-    echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-      $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-    
-    # Update and install Docker
-    apt-get update
-    apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin || {
-        log "Failed to install Docker CE, falling back to docker.io..."
-        apt-get install -y docker.io docker-compose
+    install_docker() {
+        # Install prerequisites
+        apt-get install -y \
+            ca-certificates \
+            gnupg \
+            lsb-release || return 1
+        
+        # Add Docker's official GPG key
+        mkdir -p /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg || return 1
+        
+        # Set up the repository
+        echo \
+          "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+          $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+        
+        # Update and install Docker
+        apt-get update
+        apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin || {
+            log "Failed to install Docker CE, trying docker.io..."
+            apt-get install -y docker.io docker-compose || return 1
+        }
+        return 0
     }
     
-    # Setup Docker daemon properly
-    log "Configuring Docker daemon..."
-    systemctl daemon-reload
-    systemctl enable docker
-    systemctl stop docker || true
-    
-    # Clean any stale Docker files
-    rm -f /var/run/docker.pid
-    rm -f /var/run/docker.sock
-    
-    # Start Docker with proper initialization sequence
-    log "Starting Docker services..."
-    
-    # Ensure containerd is running first
-    if systemctl list-units --all | grep -q containerd; then
-        systemctl start containerd || true
-        sleep 2
+    if install_docker; then
+        log "Docker installation successful"
+    else
+        log "WARNING: Docker installation failed, runner will work without Docker support"
+        return 0  # Don't fail the entire script
     fi
     
-    # Start Docker daemon
-    systemctl start docker || {
-        log "Initial Docker start failed, retrying with cleanup..."
-        rm -f /var/run/docker.pid /var/run/docker.sock
+    # Only configure Docker if it was installed
+    if command -v docker &>/dev/null; then
+        log "Configuring Docker daemon..."
         systemctl daemon-reload
-        systemctl start docker
-    }
+        systemctl enable docker || true
+        systemctl stop docker || true
+        
+        # Clean any stale Docker files
+        rm -f /var/run/docker.pid
+        rm -f /var/run/docker.sock
+        
+        # Start Docker with proper initialization sequence
+        log "Starting Docker services..."
+        
+        # Ensure containerd is running first
+        if systemctl list-units --all | grep -q containerd; then
+            systemctl start containerd || true
+            sleep 2
+        fi
+        
+        # Start Docker daemon
+        systemctl start docker || {
+            log "Initial Docker start failed, retrying with cleanup..."
+            rm -f /var/run/docker.pid /var/run/docker.sock
+            systemctl daemon-reload
+            systemctl start docker || log "WARNING: Docker failed to start"
+        }
     
     # Wait for Docker to be ready
     log "Waiting for Docker daemon to be fully ready..."
@@ -186,33 +197,56 @@ install_dependencies() {
         fi
     fi
     
-    # Install Docker buildx - but don't create builder yet
-    log "Installing Docker buildx..."
+    # Install Docker buildx plugin
+    log "Installing Docker buildx plugin..."
     mkdir -p /usr/local/lib/docker/cli-plugins
-    curl -L "https://github.com/docker/buildx/releases/download/v0.11.2/buildx-v0.11.2.linux-amd64" \
+    BUILDX_VERSION="0.11.2"
+    curl -L "https://github.com/docker/buildx/releases/download/v$${BUILDX_VERSION}/buildx-v$${BUILDX_VERSION}.linux-amd64" \
         -o /usr/local/lib/docker/cli-plugins/docker-buildx
     chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
+    
+    # Create symlink for all users
+    ln -sf /usr/local/lib/docker/cli-plugins/docker-buildx /usr/libexec/docker/cli-plugins/docker-buildx 2>/dev/null || true
     
     # Verify Docker is fully operational before creating buildx builder
     log "Verifying Docker readiness before buildx setup..."
     if docker run --rm hello-world &>/dev/null; then
         log "Docker confirmed working with hello-world test"
         
-        # Now safe to create buildx builder
-        log "Creating buildx builder..."
-        docker buildx create --name runner-builder --driver docker-container --use || {
-            log "Buildx builder creation failed, trying cleanup and retry..."
-            docker buildx rm runner-builder 2>/dev/null || true
-            sleep 2
-            docker buildx create --name runner-builder --driver docker-container --use || {
-                log "WARNING: Could not create buildx builder, will retry later"
-            }
-        }
+        # Setup buildx with proper initialization
+        log "Setting up Docker buildx..."
         
-        # Try to bootstrap the builder
-        docker buildx inspect --bootstrap 2>/dev/null || {
-            log "WARNING: Buildx bootstrap failed, will be retried by runner"
-        }
+        # Remove any existing builders first
+        docker buildx rm runner-builder 2>/dev/null || true
+        docker buildx rm default 2>/dev/null || true
+        
+        # Create new builder with retry logic
+        local buildx_retries=3
+        local buildx_success=false
+        
+        for i in $(seq 1 $buildx_retries); do
+            log "Attempting to create buildx builder (attempt $i/$buildx_retries)..."
+            
+            if docker buildx create --name runner-builder --driver docker-container --use; then
+                # Bootstrap the builder to ensure it's ready
+                if docker buildx inspect runner-builder --bootstrap; then
+                    log "Buildx builder created and bootstrapped successfully"
+                    buildx_success=true
+                    break
+                else
+                    log "Builder created but bootstrap failed, retrying..."
+                    docker buildx rm runner-builder 2>/dev/null || true
+                fi
+            fi
+            
+            [ $i -lt $buildx_retries ] && sleep 5
+        done
+        
+        if [ "$buildx_success" != "true" ]; then
+            log "WARNING: Could not fully setup buildx builder, will be configured later"
+            # Use default builder as fallback
+            docker buildx use default 2>/dev/null || true
+        fi
     else
         log "WARNING: Docker not fully ready, skipping buildx builder creation"
     fi
@@ -347,23 +381,46 @@ install_service() {
         sleep 5
     fi
     
-    # Verify buildx for runner - with proper error handling
+    # Setup buildx for runner user with proper error handling
     log "Setting up Docker buildx for runner user..."
+    
+    # First ensure buildx is available to runner user
+    if ! su - $RUNNER_USER -c "docker buildx version" &>/dev/null; then
+        log "Installing buildx for runner user..."
+        mkdir -p $RUNNER_HOME/.docker/cli-plugins
+        cp /usr/local/lib/docker/cli-plugins/docker-buildx $RUNNER_HOME/.docker/cli-plugins/
+        chown -R $RUNNER_USER:$RUNNER_USER $RUNNER_HOME/.docker
+        chmod +x $RUNNER_HOME/.docker/cli-plugins/docker-buildx
+    fi
+    
+    # Setup buildx builder for runner
     if su - $RUNNER_USER -c "docker buildx version" &>/dev/null; then
-        log "Docker buildx is installed"
+        log "Docker buildx is accessible by runner"
         
-        # Check if builder exists
-        if ! su - $RUNNER_USER -c "docker buildx ls | grep -q runner-builder" 2>/dev/null; then
-            log "Creating buildx builder for runner user..."
-            su - $RUNNER_USER -c "docker buildx create --name runner-builder --driver docker-container --use" 2>/dev/null || {
-                log "WARNING: Buildx builder creation failed for runner, may need manual setup"
+        # Check and setup builder
+        if su - $RUNNER_USER -c "docker buildx ls | grep -q runner-builder" 2>/dev/null; then
+            log "Using existing runner-builder"
+            su - $RUNNER_USER -c "docker buildx use runner-builder" 2>/dev/null || {
+                log "Could not use existing builder, recreating..."
+                su - $RUNNER_USER -c "docker buildx rm runner-builder" 2>/dev/null || true
+                su - $RUNNER_USER -c "docker buildx create --name runner-builder --driver docker-container --use" 2>/dev/null || true
             }
         else
-            log "Buildx builder already exists for runner"
-            su - $RUNNER_USER -c "docker buildx use runner-builder" 2>/dev/null || true
+            log "Creating buildx builder for runner user..."
+            su - $RUNNER_USER -c "docker buildx create --name runner-builder --driver docker-container --use" 2>/dev/null || {
+                log "WARNING: Buildx builder creation failed, using default"
+                su - $RUNNER_USER -c "docker buildx use default" 2>/dev/null || true
+            }
+        fi
+        
+        # Verify builder is working
+        if su - $RUNNER_USER -c "docker buildx inspect --bootstrap" &>/dev/null; then
+            log "Buildx builder verified and ready"
+        else
+            log "WARNING: Buildx builder may need manual configuration"
         fi
     else
-        log "WARNING: Docker buildx not accessible by runner user"
+        log "WARNING: Docker buildx still not accessible by runner user"
     fi
     
     cd $RUNNER_DIR
@@ -417,19 +474,40 @@ EOF
 # Main execution
 main() {
     log "==================================================="
-    log "Enhanced GitHub Runner Installation - Docker Fixed"
+    log "GitHub Runner Installation with Docker Support"
     log "==================================================="
     
-    install_dependencies
-    create_runner_user
+    # Install GitHub runner first
+    log "Phase 1: Installing GitHub Runner..."
     
+    # Create runner user first
+    log "Creating runner user..."
+    if ! id "$RUNNER_USER" &>/dev/null; then
+        useradd -m -s /bin/bash $RUNNER_USER
+    fi
+    
+    # Get tokens and install runner
     GITHUB_TOKEN=$(get_github_token)
     REG_TOKEN=$(get_registration_token "$GITHUB_TOKEN")
     
     install_runner
     configure_runner "$REG_TOKEN"
+    
+    # Install dependencies including Docker (non-critical)
+    log "Phase 2: Installing Docker and dependencies (non-critical)..."
+    install_dependencies || log "WARNING: Some dependencies failed to install, continuing..."
+    
+    # Update runner user for Docker if available
+    if command -v docker &>/dev/null; then
+        usermod -aG docker $RUNNER_USER || true
+        chmod 666 /var/run/docker.sock 2>/dev/null || true
+    fi
+    
+    # Install runner service
     install_service
-    setup_monitoring
+    
+    # Setup monitoring (optional)
+    setup_monitoring || log "WARNING: Monitoring setup failed, continuing..."
     
     # Final verification
     log "==================================================="

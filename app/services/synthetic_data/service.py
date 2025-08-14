@@ -4,7 +4,9 @@ Main Synthetic Data Service
 
 import asyncio
 import json
+import random
 import uuid
+import numpy as np
 from datetime import datetime, UTC
 from typing import Dict, List, Optional, Any, AsyncGenerator, Union, TYPE_CHECKING
 
@@ -18,6 +20,11 @@ from .tools import initialize_default_tools, generate_tool_invocations, calculat
 from .content_generator import (
     select_workload_type, generate_timestamp, select_agent_type, 
     generate_content, generate_child_spans
+)
+from .generation_patterns import (
+    generate_with_temporal_patterns as _generate_with_temporal_patterns,
+    generate_with_errors as _generate_with_errors,
+    generate_domain_specific as _generate_domain_specific
 )
 from .validators import validate_schema
 from .corpus_manager import load_corpus
@@ -50,6 +57,82 @@ class SyntheticDataService(RecoveryMixin):
         self.active_jobs: Dict[str, Dict] = {}
         self.corpus_cache: Dict[str, List[Dict]] = {}
         self.default_tools = initialize_default_tools()
+    
+    def _select_workload_type(self) -> str:
+        """Wrapper for select_workload_type"""
+        return select_workload_type()
+    
+    def _select_agent_type(self, workload_type: str) -> str:
+        """Wrapper for select_agent_type"""
+        return select_agent_type(workload_type)
+    
+    async def generate_with_temporal_patterns(self, config) -> List[Dict]:
+        """Generate with temporal patterns"""
+        async def gen_fn(cfg, _, idx):
+            return {"timestamp": datetime.now(UTC).isoformat(), "index": idx}
+        return await _generate_with_temporal_patterns(config, gen_fn)
+    
+    async def generate_tool_invocations(self, count: int, pattern: str):
+        """Generate tool invocations"""
+        invocations = []
+        for i in range(count):
+            inv = generate_tool_invocations(pattern, self.default_tools)
+            for j, item in enumerate(inv[:1]):  # Take first for each iteration
+                item['sequence_number'] = i
+                item['trace_id'] = str(uuid.uuid4())
+                item['invocation_id'] = str(uuid.uuid4())
+                invocations.append(item)
+        return invocations
+    
+    async def generate_with_errors(self, config) -> List[Dict]:
+        """Generate with error scenarios"""
+        async def gen_fn(cfg, _, idx):
+            return {"timestamp": datetime.now(UTC).isoformat(), "index": idx}
+        return await _generate_with_errors(config, gen_fn)
+    
+    async def generate_trace_hierarchies(self, cnt: int, min_d: int, max_d: int):
+        """Generate trace hierarchies"""
+        traces = []
+        for i in range(cnt):
+            trace = {"trace_id": str(uuid.uuid4()), "spans": []}
+            depth = random.randint(min_d, max_d)
+            for j in range(depth):
+                trace["spans"].append({"span_id": str(uuid.uuid4()), "level": j})
+            traces.append(trace)
+        return traces
+    
+    async def generate_domain_specific(self, config) -> List[Dict]:
+        """Generate domain-specific data"""
+        async def gen_fn(cfg, _, idx):
+            return {"timestamp": datetime.now(UTC).isoformat(), "index": idx}
+        return await _generate_domain_specific(config, gen_fn)
+    
+    async def generate_with_distribution(self, config) -> List[Dict]:
+        """Generate with specific distributions"""
+        records = []
+        num_traces = getattr(config, 'num_traces', 10)
+        dist = getattr(config, 'latency_distribution', 'normal')
+        for i in range(num_traces):
+            lat = np.random.normal(100, 20) if dist == 'normal' else random.uniform(50, 150)
+            records.append({"latency_ms": max(0, lat), "index": i})
+        return records
+    
+    async def generate_with_custom_tools(self, config) -> List[Dict]:
+        """Generate with custom tools"""
+        records = []
+        num_traces = getattr(config, 'num_traces', 5)
+        tools = getattr(config, 'tool_catalog', [])
+        for i in range(num_traces):
+            tool_invocations = []
+            if tools:
+                for tool in tools[:2]:  # Use up to 2 tools per record
+                    tool_invocations.append({
+                        "tool_name": tool.get("name"),
+                        "tool_type": tool.get("type"),
+                        "latency_ms": random.randint(10, 100)
+                    })
+            records.append({"tool_invocations": tool_invocations, "index": i})
+        return records
         
     async def generate_synthetic_data(
         self,

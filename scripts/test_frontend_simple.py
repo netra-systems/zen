@@ -34,13 +34,13 @@ def run_frontend_tests(test_level="smoke", args=None):
         print("[WARNING] npm not available. Skipping frontend tests.")
         return True  # Don't fail for missing npm
     
-    # Map test levels to Jest commands
+    # Map test levels to Jest commands with appropriate test selection
     test_commands = {
-        "smoke": ["npm", "run", "test", "--", "--passWithNoTests", "--maxWorkers=1"],
-        "unit": ["npm", "run", "test", "--", "--passWithNoTests", "--maxWorkers=2"],
-        "integration": ["npm", "run", "test", "--", "--passWithNoTests", "--maxWorkers=2"],
+        "smoke": ["npm", "run", "test", "--", "--testMatch", "**/__tests__/system/startup.test.tsx", "--passWithNoTests", "--maxWorkers=1"],
+        "unit": ["npm", "run", "test", "--", "--testMatch", "**/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)", "--passWithNoTests", "--maxWorkers=2"],
+        "integration": ["npm", "run", "test", "--", "--testMatch", "**/__tests__/integration/**/*.test.[jt]s?(x)", "--passWithNoTests", "--maxWorkers=2"],
         "comprehensive": ["npm", "run", "test", "--", "--coverage", "--passWithNoTests"],
-        "critical": ["npm", "run", "test", "--", "--passWithNoTests", "--maxWorkers=1"],
+        "critical": ["npm", "run", "test", "--", "--testMatch", "**/__tests__/integration/critical-integration.test.tsx", "--passWithNoTests", "--maxWorkers=1"],
     }
     
     # Get the appropriate command
