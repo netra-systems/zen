@@ -403,6 +403,43 @@
                     reserved for unit tests where database interaction is not the focus of the test.
                 </key-insight>
             </fix>
+            
+            <fix date="2025-08-14">
+                <title>WebSocketMessage Payload Field Validation Error</title>
+                <problem>Pydantic validation error for WebSocketMessage - payload field required but missing</problem>
+                <symptoms>
+                    <symptom>ERROR | app.agents.supervisor.execution_engine:_log_error:134 | Agent triage failed: 1 validation error for WebSocketMessage</symptom>
+                    <symptom>payload Field required [type=missing, input_value={'type': 'agent_started',...tamp=1755130684.826353)}, input_type=dict]</symptom>
+                    <symptom>Retrying triage (1/3) errors appearing in logs</symptom>
+                </symptoms>
+                <root-causes>
+                    <cause>execution_engine.py was using 'content' field instead of 'payload' field when creating WebSocketMessage</cause>
+                    <cause>WebSocketMessage schema in app.schemas.WebSocket requires 'payload' field (Dict[str, Any])</cause>
+                    <cause>_build_started_message method was passing AgentStarted object instead of dictionary for payload</cause>
+                </root-causes>
+                <solution>
+                    <step>Changed _build_started_message to use 'payload' instead of 'content'</step>
+                    <step>Added .model_dump() to convert AgentStarted Pydantic model to dictionary</step>
+                    <step>Changed from: content=self._create_started_content(context)</step>
+                    <step>Changed to: payload=self._create_started_content(context).model_dump()</step>
+                </solution>
+                <files-changed>
+                    <file>app/agents/supervisor/execution_engine.py:165 - Changed content to payload and added .model_dump()</file>
+                </files-changed>
+                <prevention>
+                    <action>Always check schema requirements when creating WebSocket messages</action>
+                    <action>Use 'payload' field for WebSocketMessage (not 'content')</action>
+                    <action>Convert Pydantic models to dictionaries using .model_dump() when passing as payload</action>
+                    <action>Ensure message structure matches the expected schema from websocket_message_types.py</action>
+                </prevention>
+                <key-insight>
+                    WebSocketMessage requires specific field names. The schema in app.schemas.WebSocket defines:
+                    - type: str (message type)
+                    - payload: Dict[str, Any] (message data as dictionary)
+                    - sender: str | None (optional sender)
+                    Always convert Pydantic models to dictionaries when using as payload.
+                </key-insight>
+            </fix>
         </section>
 
         <section id="test-focus-strategy" order="3">

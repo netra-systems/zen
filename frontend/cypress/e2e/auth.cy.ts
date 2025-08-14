@@ -7,7 +7,7 @@ describe('Authentication', () => {
     // Mock the API response for fetching user data
     cy.intercept('GET', '/api/me', {
       statusCode: 200,
-      body: { id: 1, full_name: 'Test User', email: 'test@example.com' },
+      body: { id: 1, full_name: 'Test User', email: 'test@example.com', picture: 'https://example.com/avatar.jpg' },
     }).as('getUserRequest');
 
     // Click the login button
@@ -16,6 +16,12 @@ describe('Authentication', () => {
     // Mock the successful login
     cy.window().then((win) => {
       win.localStorage.setItem('authToken', 'test-token');
+      win.localStorage.setItem('user', JSON.stringify({
+        id: 1,
+        full_name: 'Test User',
+        email: 'test@example.com',
+        picture: 'https://example.com/avatar.jpg'
+      }));
     });
 
     // Visit the home page, which should now be accessible
@@ -24,12 +30,12 @@ describe('Authentication', () => {
     // Wait for the user request to complete
     cy.wait('@getUserRequest');
 
-    // Verify that the user menu is visible
-    cy.get('button[aria-label="Toggle user menu"]').should('be.visible');
+    // Verify that the user info is visible (user avatar and name)
+    cy.get('img[alt="Test User"]').should('be.visible');
+    cy.contains('Test User').should('be.visible');
 
-    // Log out
-    cy.get('button[aria-label="Toggle user menu"]').click();
-    cy.contains('Logout').click();
+    // Log out using the Logout button
+    cy.get('button').contains('Logout').click();
 
     // Verify that the user is redirected to the login page
     cy.url().should('include', '/login');
