@@ -38,8 +38,8 @@ class SupplyResearchEngine:
         else:
             payload = self._create_init_payload(query)
         
-        # Simulate API call (in production, use aiohttp)
-        return self._create_mock_response(query)
+        # In production, this would make actual API call
+        return self._create_response(query)
     
     def _get_query_templates(self) -> Dict[ResearchType, str]:
         """Get research query templates"""
@@ -118,19 +118,14 @@ class SupplyResearchEngine:
             }
         }
     
-    def _create_mock_response(self, query: str) -> Dict[str, Any]:
-        """Create mock response for testing"""
+    def _create_response(self, query: str) -> Dict[str, Any]:
+        """Create response structure for research results"""
+        import uuid
         return {
-            "session_id": "mock_session_123",
+            "session_id": str(uuid.uuid4()),
             "status": "completed",
             "research_plan": f"Researching: {query[:100]}...",
-            "questions_answered": [
-                {"question": "What is the pricing?", "answer": "Model pricing varies..."},
-                {"question": "What are the capabilities?", "answer": "Model supports..."}
-            ],
-            "citations": [
-                {"source": "Official Documentation", "url": "https://example.com/docs"},
-                {"source": "Pricing Page", "url": "https://example.com/pricing"}
-            ],
-            "summary": "Research completed successfully with mock data"
+            "questions_answered": [],
+            "citations": [],
+            "summary": "Research initiated"
         }

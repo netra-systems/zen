@@ -264,3 +264,11 @@ class CorpusService:
             raise CorpusNotFoundError(f"Corpus {corpus_id} not found")
         
         return await self.search_operations.get_workload_type_analytics(db_corpus)
+    
+    async def incremental_index(self, corpus_id: str, new_documents: List[Dict]) -> Dict:
+        """Incrementally index new documents into existing corpus"""
+        return await self.document_manager.incremental_index(corpus_id, new_documents)
+    
+    async def index_with_deduplication(self, corpus_id: str, documents: List[Dict]) -> Dict:
+        """Index documents with deduplication"""
+        return await self.document_manager.index_with_deduplication(corpus_id, documents)

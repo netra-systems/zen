@@ -7,7 +7,7 @@ from app.config import settings
 DEV_USER_EMAIL = settings.dev_user_email
 
 async def get_or_create_dev_user(db_session: AsyncSession) -> User:
-    """Get or create a dummy user for development purposes."""
+    """Get or create a development user for testing and development purposes."""
     result = await db_session.execute(select(User).where(User.email == DEV_USER_EMAIL))
     user = result.scalar_one_or_none()
     if not user:

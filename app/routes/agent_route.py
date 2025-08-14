@@ -11,7 +11,7 @@ import json
 router = APIRouter()
 
 async def stream_agent_response(message: str) -> AsyncGenerator[str, None]:
-    """Stream agent response for testing."""
+    """Stream agent response using the actual agent service."""
     from app.services import agent_service
     async for chunk in agent_service.generate_stream(message):
         yield chunk
@@ -77,12 +77,6 @@ async def get_thread_runs(
         "runs": runs
     }
 
-async def stream_agent_response(message: str) -> AsyncGenerator[str, None]:
-    """Stream agent response in chunks for testing."""
-    # This is a test implementation - in production would connect to actual agent
-    parts = ["Part 1", "Part 2", "Part 3"]
-    for part in parts:
-        yield part
 
 @router.post("/stream")
 async def stream_response(request_model: RequestModel):

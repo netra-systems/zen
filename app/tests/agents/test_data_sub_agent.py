@@ -23,7 +23,8 @@ from datetime import datetime
 
 # Import the module under test
 try:
-    from app.agents.data_sub_agent import DataSubAgent, QueryBuilder
+    from app.agents.data_sub_agent.agent import DataSubAgent
+    from app.agents.data_sub_agent.query_builder import QueryBuilder
 except ImportError:
     # Create mock classes if imports fail
     class DataSubAgent:

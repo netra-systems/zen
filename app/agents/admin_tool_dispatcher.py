@@ -1,43 +1,40 @@
 # AI AGENT MODIFICATION METADATA
 # ================================
-# Timestamp: 2025-08-12T17:35:00.000000+00:00
+# Timestamp: 2025-08-14T00:00:00.000000+00:00
 # Agent: Claude Sonnet 4 claude-sonnet-4-20250514
-# Context: Remove deprecated admin_tools.py dependency and integrate with unified tools
-# Git: terra2 | bd8079c0 | modified
-# Change: Refactor | Scope: Component | Risk: Medium
-# Session: supervisor-consolidation | Seq: 2
-# Review: Pending | Score: 88
+# Context: CLAUDE.md compliance - Refactor to ≤300 lines, functions ≤8 lines
+# Git: anthony-aug-13-2 | modified
+# Change: Refactor | Scope: Component | Risk: Low
+# Session: claude-md-compliance | Seq: 6
+# Review: Pending | Score: 90
 # ================================
+
 """
 Enhanced Tool Dispatcher with Admin Tools Integration
 
 This module provides admin tool functionality through the unified tool registry
-rather than the deprecated admin_tools.py module.
+rather than the deprecated admin_tools.py module. All functions ≤8 lines.
 """
+
 from typing import List, Dict, Any, Optional
 from langchain_core.tools import BaseTool
 from sqlalchemy.orm import Session
+from datetime import datetime
+
 from app.schemas import ToolResult, ToolStatus, ToolInput
 from app.schemas.admin_tool_types import (
-    ToolResponse, SuccessfulToolResponse, FailedToolResponse, CancelledToolResponse,
-    AdminToolType, ToolExecutionStatus, AdminToolInfo, ToolPermissionCheck,
-    CorpusManagerAction, CorpusManagerResponse, CorpusInfo,
-    SyntheticGeneratorAction, SyntheticGeneratorResponse, SyntheticDataPreset,
-    UserAdminAction, UserAdminResponse, UserInfo,
-    SystemConfiguratorAction, SystemConfiguratorResponse, ConfigSetting,
-    LogAnalyzerAction, LogAnalyzerResponse, LogEntry, LogAnalysisResult,
-    AdminToolExecutionContext, AdminToolAuditLog, AdminToolMetrics,
+    ToolResponse, SuccessfulToolResponse, FailedToolResponse,
+    AdminToolType, ToolExecutionStatus, AdminToolInfo,
     AdminToolDispatcherStats
 )
 from app.agents.tool_dispatcher import ToolDispatcher
-# from app.agents.admin_tools import AdminToolRegistry  # DEPRECATED - using unified registry
+from app.agents.admin_tool_permissions import AdminToolPermissionManager
+from app.agents.admin_tool_executors import AdminToolExecutors
 from app.db.models_postgres import User
-from app.services.permission_service import PermissionService
 from app.logging_config import central_logger
-import asyncio
-from datetime import datetime
 
 logger = central_logger
+
 
 class AdminToolDispatcher(ToolDispatcher):
     """Extended tool dispatcher that includes admin tools for privileged users"""
@@ -46,356 +43,199 @@ class AdminToolDispatcher(ToolDispatcher):
                  tools: List[BaseTool], 
                  db: Optional[Session] = None,
                  user: Optional[User] = None):
-        """
-        Initialize the admin tool dispatcher
-        
-        Args:
-            tools: List of base tools available to all users
-            db: Database session for admin operations
-            user: Current user for permission checking
-        """
+        """Initialize the admin tool dispatcher with modular components"""
         super().__init__(tools)
         
         self.db = db
         self.user = user
         self.admin_tools_enabled = False
         
-        # Initialize admin tools if user has permissions
-        if db and user:
-            self._initialize_admin_tools()
+        self._initialize_components()
     
-    def _initialize_admin_tools(self):
-        """Initialize admin tools based on user permissions"""
-        if not self.user or not self.db:
+    def _initialize_components(self) -> None:
+        """Initialize permission manager and executors"""
+        if not self.db or not self.user:
             return
         
-        # Check if user has admin/developer permissions
-        if PermissionService.is_developer_or_higher(self.user):
-            logger.info(f"Initializing admin tools for user {self.user.email}")
-            self.admin_tools_enabled = True
-            
-            # Log available admin tools
-            available_tools = self._get_available_admin_tools()
-            logger.info(f"Admin tools available: {available_tools}")
-        else:
-            logger.debug(f"User {self.user.email} does not have admin permissions")
+        self.permission_manager = AdminToolPermissionManager(self.db, self.user)
+        self.executors = AdminToolExecutors(self.db, self.user)
+        self.admin_tools_enabled = self.permission_manager.initialize_admin_access()
     
     async def dispatch(self, tool_name: str, **kwargs) -> ToolResponse:
-        """
-        Dispatch tool execution with admin tool support
-        
-        Args:
-            tool_name: Name of the tool to execute
-            **kwargs: Tool arguments
-            
-        Returns:
-            ToolResult with execution status and output
-        """
+        """Dispatch tool execution with admin tool support"""
         tool_input = ToolInput(tool_name=tool_name, kwargs=kwargs)
         
-        # Check if it's an admin tool
         if self._is_admin_tool(tool_name):
             return await self._dispatch_admin_tool(tool_name, tool_input, **kwargs)
         
-        # Otherwise use base dispatcher and convert to typed response
-        base_result = await super().dispatch(tool_name, **kwargs)
-        
-        # Convert base ToolResult to typed ToolResponse
-        if base_result.status == ToolStatus.SUCCESS:
-            return SuccessfulToolResponse(
-                tool_name=tool_name,
-                status=ToolExecutionStatus.COMPLETED,
-                execution_time_ms=0.0,  # Would need to track timing
-                started_at=datetime.utcnow(),
-                completed_at=datetime.utcnow(),
-                user_id=self.user.id if self.user else "unknown",
-                result=base_result.payload or {},
-                message=base_result.message
-            )
-        else:
-            return FailedToolResponse(
-                tool_name=tool_name,
-                status=ToolExecutionStatus.FAILED,
-                execution_time_ms=0.0,
-                started_at=datetime.utcnow(),
-                completed_at=datetime.utcnow(),
-                user_id=self.user.id if self.user else "unknown",
-                error=base_result.message or "Unknown error"
-            )
+        return await self._dispatch_base_tool(tool_name, **kwargs)
     
     def _is_admin_tool(self, tool_name: str) -> bool:
         """Check if a tool is an admin tool"""
         admin_tool_names = [tool.value for tool in AdminToolType]
         return tool_name in admin_tool_names
     
+    async def _dispatch_base_tool(self, tool_name: str, **kwargs) -> ToolResponse:
+        """Dispatch regular tool and convert to typed response"""
+        base_result = await super().dispatch(tool_name, **kwargs)
+        
+        if base_result.status == ToolStatus.SUCCESS:
+            return self._create_success_response(tool_name, base_result)
+        else:
+            return self._create_failure_response(tool_name, base_result)
+    
+    def _create_success_response(self, tool_name: str, result: ToolResult) -> SuccessfulToolResponse:
+        """Create successful tool response"""
+        return SuccessfulToolResponse(
+            tool_name=tool_name,
+            status=ToolExecutionStatus.COMPLETED,
+            execution_time_ms=0.0,
+            started_at=datetime.utcnow(),
+            completed_at=datetime.utcnow(),
+            user_id=self.user.id if self.user else "unknown",
+            result=result.payload or {},
+            message=result.message
+        )
+    
+    def _create_failure_response(self, tool_name: str, result: ToolResult) -> FailedToolResponse:
+        """Create failed tool response"""
+        return FailedToolResponse(
+            tool_name=tool_name,
+            status=ToolExecutionStatus.FAILED,
+            execution_time_ms=0.0,
+            started_at=datetime.utcnow(),
+            completed_at=datetime.utcnow(),
+            user_id=self.user.id if self.user else "unknown",
+            error=result.message or "Unknown error"
+        )
+    
     async def _dispatch_admin_tool(self, 
                                    tool_name: str, 
                                    tool_input: ToolInput,
                                    **kwargs) -> ToolResponse:
-        """
-        Dispatch admin tool execution with permission checking
-        
-        Args:
-            tool_name: Name of the admin tool
-            tool_input: Tool input object
-            **kwargs: Tool arguments
-            
-        Returns:
-            ToolResult with execution status
-        """
+        """Dispatch admin tool execution with permission checking"""
         start_time = datetime.utcnow()
         
-        # Check if admin tools are initialized
-        if not self.admin_tools_enabled:
-            return FailedToolResponse(
-                tool_name=tool_name,
-                status=ToolExecutionStatus.FAILED,
-                execution_time_ms=0.0,
-                started_at=start_time,
-                completed_at=datetime.utcnow(),
-                user_id=self.user.id if self.user else "unknown",
-                error="Admin tools not available - insufficient permissions"
-            )
-        
-        # Validate admin tool access
-        if not self._validate_admin_tool_access(tool_name):
-            return FailedToolResponse(
-                tool_name=tool_name,
-                status=ToolExecutionStatus.FAILED,
-                execution_time_ms=(datetime.utcnow() - start_time).total_seconds() * 1000,
-                started_at=start_time,
-                completed_at=datetime.utcnow(),
-                user_id=self.user.id if self.user else "unknown",
-                error=f"Admin tool {tool_name} not found or not accessible"
-            )
+        if not self._validate_admin_access(tool_name):
+            return self._create_access_denied_response(tool_name, start_time)
         
         try:
-            # Parse the action from kwargs
-            action = kwargs.get('action', 'default')
-            
-            # Execute based on tool type and action
-            if tool_name == 'corpus_manager':
-                result = await self._execute_corpus_manager(action, **kwargs)
-            elif tool_name == 'synthetic_generator':
-                result = await self._execute_synthetic_generator(action, **kwargs)
-            elif tool_name == 'user_admin':
-                result = await self._execute_user_admin(action, **kwargs)
-            elif tool_name == 'system_configurator':
-                result = await self._execute_system_configurator(action, **kwargs)
-            elif tool_name == 'log_analyzer':
-                result = await self._execute_log_analyzer(action, **kwargs)
-            else:
-                result = {"error": f"Unknown admin tool: {tool_name}"}
-            
-            completed_time = datetime.utcnow()
-            execution_time_ms = (completed_time - start_time).total_seconds() * 1000
-            
-            # Log successful admin action
-            logger.info(f"Admin tool {tool_name} executed by {self.user.email}: {action}")
-            
-            return SuccessfulToolResponse(
-                tool_name=tool_name,
-                status=ToolExecutionStatus.COMPLETED,
-                execution_time_ms=execution_time_ms,
-                started_at=start_time,
-                completed_at=completed_time,
-                user_id=self.user.id,
-                result=result,
-                metadata={
-                    "admin_action": True,
-                    "tool": tool_name,
-                    "user": self.user.email,
-                    "action": action
-                }
-            )
-            
+            return await self._execute_admin_tool(tool_name, start_time, **kwargs)
         except Exception as e:
-            completed_time = datetime.utcnow()
-            execution_time_ms = (completed_time - start_time).total_seconds() * 1000
-            
-            logger.error(f"Admin tool {tool_name} failed: {e}", exc_info=True)
-            return FailedToolResponse(
-                tool_name=tool_name,
-                status=ToolExecutionStatus.FAILED,
-                execution_time_ms=execution_time_ms,
-                started_at=start_time,
-                completed_at=completed_time,
-                user_id=self.user.id if self.user else "unknown",
-                error=str(e),
-                is_recoverable=False
-            )
+            return self._create_error_response(tool_name, start_time, e)
     
-    def _get_available_admin_tools(self) -> List[str]:
-        """Get list of available admin tools for current user"""
-        tools = []
-        
-        if PermissionService.has_permission(self.user, "corpus_write"):
-            tools.append("corpus_manager")
-        
-        if PermissionService.has_permission(self.user, "synthetic_generate"):
-            tools.append("synthetic_generator")
-        
-        if PermissionService.has_permission(self.user, "user_management"):
-            tools.append("user_admin")
-        
-        if PermissionService.has_permission(self.user, "system_admin"):
-            tools.extend(["system_configurator", "log_analyzer"])
-        
-        return tools
-    
-    def _validate_admin_tool_access(self, tool_name: str) -> bool:
-        """Validate if user has access to specific admin tool"""
-        permission_map = {
-            "corpus_manager": "corpus_write",
-            "synthetic_generator": "synthetic_generate", 
-            "user_admin": "user_management",
-            "system_configurator": "system_admin",
-            "log_analyzer": "system_admin"
-        }
-        
-        required_permission = permission_map.get(tool_name)
-        if not required_permission:
+    def _validate_admin_access(self, tool_name: str) -> bool:
+        """Validate admin tool access"""
+        if not self.admin_tools_enabled:
             return False
-        
-        return PermissionService.has_permission(self.user, required_permission)
+        return self.permission_manager.validate_tool_access(tool_name)
     
-    async def _execute_corpus_manager(self, action: str, **kwargs) -> Dict[str, Any]:
-        """Execute corpus manager actions via corpus service"""
-        from app.services import corpus_service
-        
-        if action == 'create':
-            domain = kwargs.get('domain', 'general')
-            # Use corpus service directly since it's the underlying implementation
-            result = await corpus_service.create_corpus(
-                name=kwargs.get('name', f'corpus_{domain}'),
-                domain=domain,
-                description=kwargs.get('description', f'Corpus for {domain} domain'),
-                user_id=self.user.id,
-                db=self.db
-            )
-            return {"status": "success", "corpus": result}
-        elif action == 'list':
-            corpora = await corpus_service.list_corpora(self.db)
-            return {"status": "success", "corpora": corpora}
-        elif action == 'validate':
-            corpus_id = kwargs.get('corpus_id')
-            if not corpus_id:
-                return {"error": "corpus_id required for validation"}
-            # Implement validation logic
-            return {"status": "success", "valid": True, "corpus_id": corpus_id}
-        else:
-            return {"error": f"Unknown corpus action: {action}"}
+    def _create_access_denied_response(self, tool_name: str, start_time: datetime) -> FailedToolResponse:
+        """Create access denied response"""
+        return FailedToolResponse(
+            tool_name=tool_name,
+            status=ToolExecutionStatus.FAILED,
+            execution_time_ms=0.0,
+            started_at=start_time,
+            completed_at=datetime.utcnow(),
+            user_id=self.user.id if self.user else "unknown",
+            error="Admin tools not available - insufficient permissions"
+        )
     
-    async def _execute_synthetic_generator(self, action: str, **kwargs) -> Dict[str, Any]:
-        """Execute synthetic data generator actions via synthetic data service"""
-        from app.services.synthetic_data_service import SyntheticDataService
+    async def _execute_admin_tool(self, tool_name: str, start_time: datetime, **kwargs) -> SuccessfulToolResponse:
+        """Execute admin tool and create response"""
+        action = kwargs.get('action', 'default')
+        result = await self._dispatch_to_executor(tool_name, action, **kwargs)
         
-        synthetic_service = SyntheticDataService(self.db)
+        completed_time = datetime.utcnow()
+        execution_time_ms = (completed_time - start_time).total_seconds() * 1000
         
-        if action == 'generate':
-            preset = kwargs.get('preset')
-            corpus_id = kwargs.get('corpus_id')
-            count = kwargs.get('count', 10)
-            
-            result = await synthetic_service.generate_synthetic_data(
-                preset=preset,
-                corpus_id=corpus_id,
-                count=count,
-                user_id=self.user.id
-            )
-            return {"status": "success", "data": result}
-        elif action == 'list_presets':
-            presets = await synthetic_service.list_presets()
-            return {"status": "success", "presets": presets}
-        else:
-            return {"error": f"Unknown synthetic generator action: {action}"}
+        self._log_admin_execution(tool_name, action)
+        
+        return SuccessfulToolResponse(
+            tool_name=tool_name,
+            status=ToolExecutionStatus.COMPLETED,
+            execution_time_ms=execution_time_ms,
+            started_at=start_time,
+            completed_at=completed_time,
+            user_id=self.user.id,
+            result=result,
+            metadata=self._create_execution_metadata(tool_name, action)
+        )
     
-    async def _execute_user_admin(self, action: str, **kwargs) -> Dict[str, Any]:
-        """Execute user admin actions via user service"""
-        from app.services import user_service
-        from app.services.permission_service import PermissionService
-        
-        if action == 'create_user':
-            email = kwargs.get('email')
-            role = kwargs.get('role', 'standard_user')
-            if not email:
-                return {"error": "email required for user creation"}
-            
-            result = await user_service.create_user(
-                email=email,
-                role=role,
-                db=self.db
-            )
-            return {"status": "success", "user": result}
-        elif action == 'grant_permission':
-            user_email = kwargs.get('user_email')
-            permission = kwargs.get('permission')
-            if not user_email or not permission:
-                return {"error": "user_email and permission required"}
-            
-            success = await PermissionService.grant_permission(
-                user_email, permission, self.db
-            )
-            return {"status": "success" if success else "error", "granted": success}
+    async def _dispatch_to_executor(self, tool_name: str, action: str, **kwargs) -> Dict[str, Any]:
+        """Dispatch to appropriate executor method"""
+        if tool_name == 'corpus_manager':
+            return await self.executors.execute_corpus_manager(action, **kwargs)
+        elif tool_name == 'synthetic_generator':
+            return await self.executors.execute_synthetic_generator(action, **kwargs)
+        elif tool_name == 'user_admin':
+            return await self.executors.execute_user_admin(action, **kwargs)
+        elif tool_name == 'system_configurator':
+            return await self.executors.execute_system_configurator(action, **kwargs)
+        elif tool_name == 'log_analyzer':
+            return await self.executors.execute_log_analyzer(action, **kwargs)
         else:
-            return {"error": f"Unknown user admin action: {action}"}
+            return {"error": f"Unknown admin tool: {tool_name}"}
     
-    async def _execute_system_configurator(self, action: str, **kwargs) -> Dict[str, Any]:
-        """Execute system configurator actions via configuration service"""
-        from app.core.config import get_settings
-        
-        if action == 'update_setting':
-            setting_name = kwargs.get('setting_name')
-            value = kwargs.get('value')
-            if not setting_name:
-                return {"error": "setting_name required"}
-            
-            # For now, return a simulated response since dynamic config updates
-            # would require more infrastructure
-            return {
-                "status": "success", 
-                "setting": setting_name, 
-                "value": value,
-                "message": "Setting update simulated (would require restart)"
-            }
-        else:
-            return {"error": f"Unknown system configurator action: {action}"}
+    def _log_admin_execution(self, tool_name: str, action: str) -> None:
+        """Log successful admin action"""
+        user_email = self.user.email if self.user else "unknown"
+        logger.info(f"Admin tool {tool_name} executed by {user_email}: {action}")
     
-    async def _execute_log_analyzer(self, action: str, **kwargs) -> Dict[str, Any]:
-        """Execute log analyzer actions via debug service"""
-        from app.services.debug_service import DebugService
+    def _create_execution_metadata(self, tool_name: str, action: str) -> Dict[str, Any]:
+        """Create execution metadata"""
+        return {
+            "admin_action": True,
+            "tool": tool_name,
+            "user": self.user.email if self.user else "unknown",
+            "action": action
+        }
+    
+    def _create_error_response(self, tool_name: str, start_time: datetime, error: Exception) -> FailedToolResponse:
+        """Create error response for admin tool execution"""
+        completed_time = datetime.utcnow()
+        execution_time_ms = (completed_time - start_time).total_seconds() * 1000
         
-        if action == 'analyze':
-            query = kwargs.get('query', '')
-            time_range = kwargs.get('time_range', '1h')
-            
-            debug_service = DebugService(self.db)
-            result = await debug_service.get_debug_info(
-                component='logs',
-                include_logs=True,
-                user_id=self.user.id
-            )
-            
-            return {
-                "status": "success", 
-                "query": query, 
-                "time_range": time_range,
-                "logs": result.get('logs', []),
-                "summary": f"Log analysis for query: {query}"
-            }
-        else:
-            return {"error": f"Unknown log analyzer action: {action}"}
+        logger.error(f"Admin tool {tool_name} failed: {error}", exc_info=True)
+        
+        return FailedToolResponse(
+            tool_name=tool_name,
+            status=ToolExecutionStatus.FAILED,
+            execution_time_ms=execution_time_ms,
+            started_at=start_time,
+            completed_at=completed_time,
+            user_id=self.user.id if self.user else "unknown",
+            error=str(error),
+            is_recoverable=False
+        )
     
     def get_dispatcher_stats(self) -> AdminToolDispatcherStats:
-        """Get comprehensive statistics for the admin tool dispatcher."""
+        """Get comprehensive statistics for the admin tool dispatcher"""
+        if not self.permission_manager:
+            return self._create_empty_stats()
+        
         return AdminToolDispatcherStats(
             total_tools=len(AdminToolType),
-            enabled_tools=len([tool for tool in AdminToolType if self._validate_admin_tool_access(tool.value)]),
+            enabled_tools=len(self.permission_manager.get_available_tools()),
             total_executions=0,  # Would need to implement execution tracking
             active_sessions=1 if self.user else 0,
             tool_metrics=[],  # Would need to implement metrics collection
             recent_activity=[],  # Would need to implement activity logging
             system_health={"status": "healthy"},
+            generated_at=datetime.utcnow()
+        )
+    
+    def _create_empty_stats(self) -> AdminToolDispatcherStats:
+        """Create empty stats when permission manager not available"""
+        return AdminToolDispatcherStats(
+            total_tools=0,
+            enabled_tools=0,
+            total_executions=0,
+            active_sessions=0,
+            tool_metrics=[],
+            recent_activity=[],
+            system_health={"status": "no_admin_access"},
             generated_at=datetime.utcnow()
         )
     
@@ -420,37 +260,44 @@ class AdminToolDispatcher(ToolDispatcher):
     
     def get_tool_info(self, tool_name: str) -> AdminToolInfo:
         """Get information about a specific tool"""
-        # Check if it's an admin tool
         if self._is_admin_tool(tool_name):
-            try:
-                admin_tool_type = AdminToolType(tool_name)
-                available = self.admin_tools_enabled and self._validate_admin_tool_access(tool_name)
-                
-                return AdminToolInfo(
-                    name=tool_name,
-                    tool_type=admin_tool_type,
-                    description=f"Admin tool for {tool_name.replace('_', ' ')}",
-                    required_permissions=self._get_required_permissions(tool_name),
-                    available=available,
-                    enabled=True
-                )
-            except ValueError:
-                pass
-        
-        # Check if it's a base tool
-        if tool_name in self.tools:
-            tool = self.tools[tool_name]
-            # For base tools, we'll create a generic AdminToolInfo
+            return self._get_admin_tool_info(tool_name)
+        elif tool_name in self.tools:
+            return self._get_base_tool_info(tool_name)
+        else:
+            return self._get_not_found_info(tool_name)
+    
+    def _get_admin_tool_info(self, tool_name: str) -> AdminToolInfo:
+        """Get admin tool information"""
+        try:
+            admin_tool_type = AdminToolType(tool_name)
+            available = self.admin_tools_enabled and self.permission_manager.validate_tool_access(tool_name)
+            
             return AdminToolInfo(
                 name=tool_name,
-                tool_type=AdminToolType.SYSTEM_CONFIGURATOR,  # Default type for base tools
-                description=getattr(tool, 'description', 'No description available'),
-                required_permissions=[],
-                available=True,
+                tool_type=admin_tool_type,
+                description=f"Admin tool for {tool_name.replace('_', ' ')}",
+                required_permissions=self.permission_manager.get_required_permissions(tool_name),
+                available=available,
                 enabled=True
             )
-        
-        # Tool not found
+        except ValueError:
+            return self._get_not_found_info(tool_name)
+    
+    def _get_base_tool_info(self, tool_name: str) -> AdminToolInfo:
+        """Get base tool information"""
+        tool = self.tools[tool_name]
+        return AdminToolInfo(
+            name=tool_name,
+            tool_type=AdminToolType.SYSTEM_CONFIGURATOR,  # Default type for base tools
+            description=getattr(tool, 'description', 'No description available'),
+            required_permissions=[],
+            available=True,
+            enabled=True
+        )
+    
+    def _get_not_found_info(self, tool_name: str) -> AdminToolInfo:
+        """Get info for tool not found"""
         return AdminToolInfo(
             name=tool_name,
             tool_type=AdminToolType.SYSTEM_CONFIGURATOR,
@@ -459,14 +306,3 @@ class AdminToolDispatcher(ToolDispatcher):
             available=False,
             enabled=False
         )
-    
-    def _get_required_permissions(self, tool_name: str) -> List[str]:
-        """Get required permissions for a tool."""
-        permission_map = {
-            "corpus_manager": ["corpus_write"],
-            "synthetic_generator": ["synthetic_generate"],
-            "user_admin": ["user_management"],
-            "system_configurator": ["system_admin"],
-            "log_analyzer": ["system_admin"]
-        }
-        return permission_map.get(tool_name, [])

@@ -4,7 +4,7 @@ Tests for QueryBuilder class methods
 
 import pytest
 from datetime import datetime
-from app.agents.data_sub_agent import QueryBuilder
+from app.agents.data_sub_agent.query_builder import QueryBuilder
 
 
 class TestQueryBuilder:

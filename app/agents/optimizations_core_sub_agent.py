@@ -17,12 +17,30 @@ from app.agents.tool_dispatcher import ToolDispatcher
 from app.agents.state import DeepAgentState
 from app.agents.utils import extract_json_from_response
 from app.logging_config import central_logger as logger
+from app.core.reliability import (
+    get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
+)
 
 
 class OptimizationsCoreSubAgent(BaseSubAgent):
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
         super().__init__(llm_manager, name="OptimizationsCoreSubAgent", description="This agent formulates optimization strategies.")
         self.tool_dispatcher = tool_dispatcher
+        
+        # Initialize reliability wrapper
+        self.reliability = get_reliability_wrapper(
+            "OptimizationsCoreSubAgent",
+            CircuitBreakerConfig(
+                failure_threshold=3,
+                recovery_timeout=30.0,
+                name="OptimizationsCoreSubAgent"
+            ),
+            RetryConfig(
+                max_retries=2,
+                base_delay=1.0,
+                max_delay=10.0
+            )
+        )
 
     async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
         """Check if we have data and triage results to work with."""
@@ -30,34 +48,82 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute the optimizations core logic."""
-        # Update status via WebSocket
-        if stream_updates:
-            await self._send_update(run_id, {
-                "status": "processing",
-                "message": "Formulating optimization strategies based on data analysis..."
-            })
-
-        prompt = optimizations_core_prompt_template.format(
-            data=state.data_result,
-            triage_result=state.triage_result,
-            user_request=state.user_request
-        )
-
-        llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='optimizations_core')
         
-        optimizations_result = extract_json_from_response(llm_response_str)
-        if not optimizations_result:
-            self.logger.warning(f"Could not extract JSON from LLM response for run_id: {run_id}. Using default optimizations.")
-            optimizations_result = {
-                "optimizations": [],
+        async def _execute_optimization():
+            # Update status via WebSocket
+            if stream_updates:
+                await self._send_update(run_id, {
+                    "status": "processing",
+                    "message": "Formulating optimization strategies based on data analysis..."
+                })
+
+            prompt = optimizations_core_prompt_template.format(
+                data=state.data_result,
+                triage_result=state.triage_result,
+                user_request=state.user_request
+            )
+
+            llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='optimizations_core')
+            
+            optimizations_result = extract_json_from_response(llm_response_str)
+            if not optimizations_result:
+                self.logger.warning(f"Could not extract JSON from LLM response for run_id: {run_id}. Using default optimizations.")
+                optimizations_result = {
+                    "optimizations": [],
+                }
+
+            state.optimizations_result = optimizations_result
+            
+            # Update with results
+            if stream_updates:
+                await self._send_update(run_id, {
+                    "status": "processed",
+                    "message": "Optimization strategies formulated successfully",
+                    "result": optimizations_result
+                })
+            
+            return optimizations_result
+        
+        async def _fallback_optimization():
+            """Fallback optimization when main operation fails"""
+            logger.warning(f"Using fallback optimization for run_id: {run_id}")
+            fallback_result = {
+                "optimizations": [
+                    {
+                        "type": "general",
+                        "description": "Basic optimization analysis",
+                        "priority": "medium",
+                        "fallback": True
+                    }
+                ],
+                "metadata": {
+                    "fallback_used": True,
+                    "reason": "Primary optimization analysis failed"
+                }
             }
-
-        state.optimizations_result = optimizations_result
+            state.optimizations_result = fallback_result
+            
+            if stream_updates:
+                await self._send_update(run_id, {
+                    "status": "completed_with_fallback",
+                    "message": "Optimization completed with fallback method",
+                    "result": fallback_result
+                })
+            
+            return fallback_result
         
-        # Update with results
-        if stream_updates:
-            await self._send_update(run_id, {
-                "status": "processed",
-                "message": "Optimization strategies formulated successfully",
-                "result": optimizations_result
-            })
+        # Execute with reliability protection
+        await self.reliability.execute_safely(
+            _execute_optimization,
+            "execute_optimization",
+            fallback=_fallback_optimization,
+            timeout=30.0
+        )
+    
+    def get_health_status(self) -> dict:
+        """Get agent health status"""
+        return self.reliability.get_health_status()
+    
+    def get_circuit_breaker_status(self) -> dict:
+        """Get circuit breaker status"""
+        return self.reliability.circuit_breaker.get_status()

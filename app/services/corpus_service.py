@@ -119,14 +119,8 @@ class CorpusService:
         # Handle both signatures:
         # 1. upload_content(db, corpus_id, records, batch_id, is_final_batch)
         # 2. upload_content(corpus_id, records) - for tests
-        if len(args) >= 3 and hasattr(args[0], 'execute'):
-            # Full signature with db
-            return await self._modular_service.upload_content(*args, **kwargs)
-        elif len(args) == 2:
-            # Test signature without db - mock response
-            return {"status": "success", "records_uploaded": len(args[1])}
-        else:
-            return await self._modular_service.upload_content(*args, **kwargs)
+        # Always route to modular service for proper exception handling
+        return await self._modular_service.upload_content(*args, **kwargs)
     
     async def get_corpus(self, db: Session, corpus_id: str):
         return await self._modular_service.get_corpus(db, corpus_id)
@@ -171,40 +165,13 @@ class CorpusService:
     
     async def incremental_index(self, corpus_id: str, new_documents: List[Dict]) -> Dict:
         """Incrementally index new documents into existing corpus"""
-        # Mock implementation for test compatibility
-        return {
-            "newly_indexed": len(new_documents),
-            "total_indexed": 100 + len(new_documents),
-            "status": "success",
-            "corpus_id": corpus_id
-        }
+        # Delegate to modular service for real implementation
+        return await self._modular_service.incremental_index(corpus_id, new_documents)
     
     async def index_with_deduplication(self, corpus_id: str, documents: List[Dict]) -> Dict:
         """Index documents with deduplication"""
-        # Mock implementation for test compatibility
-        unique_docs = []
-        seen_hashes = set()
-        
-        for doc in documents:
-            # Use compute_content_hash if available (for tests)
-            if hasattr(self, 'compute_content_hash'):
-                doc_hash = self.compute_content_hash(doc['content'])
-            else:
-                doc_hash = hash(doc.get('content', ''))
-            
-            if doc_hash not in seen_hashes:
-                seen_hashes.add(doc_hash)
-                unique_docs.append(doc)
-        
-        return {
-            "corpus_id": corpus_id,
-            "total_documents": len(documents),
-            "unique_documents": len(unique_docs),
-            "indexed_count": len(unique_docs),  # Add for test compatibility
-            "duplicates_removed": len(documents) - len(unique_docs),
-            "duplicates_skipped": len(documents) - len(unique_docs),  # Add for test compatibility
-            "indexed_documents": unique_docs
-        }
+        # Delegate to modular service for real implementation
+        return await self._modular_service.index_with_deduplication(corpus_id, documents)
     
     async def clone_corpus(self, db: Session, source_corpus_id: str, new_name: str, user_id: str):
         return await self._modular_service.clone_corpus(db, source_corpus_id, new_name, user_id)
@@ -315,38 +282,46 @@ class CorpusService:
     
     async def _create_clickhouse_table(self, corpus_id: str, table_name: str, db):
         """Create ClickHouse table for corpus with status updates"""
+        
+        async def _execute_table_creation():
+            """Internal function to execute table creation"""
+            try:
+                async with get_clickhouse_client() as client:
+                    # Simulate table creation query
+                    create_query = f"""
+                    CREATE TABLE IF NOT EXISTS {table_name} (
+                        record_id UUID DEFAULT generateUUIDv4(),
+                        workload_type String,
+                        prompt String,
+                        response String,
+                        metadata String,
+                        created_at DateTime64(3) DEFAULT now()
+                    ) ENGINE = MergeTree()
+                    ORDER BY (workload_type, created_at)
+                    """
+                    # Call execute for test compatibility (tests mock this method)
+                    if hasattr(client, 'execute'):
+                        await client.execute(create_query)
+                    else:
+                        await client.execute_query(create_query)
+                
+                # Update corpus status to AVAILABLE on success
+                from .corpus import CorpusStatus
+                db.query().filter().update({"status": CorpusStatus.AVAILABLE.value})
+                
+            except Exception as e:
+                # Update corpus status to FAILED on error
+                from .corpus import CorpusStatus
+                db.query().filter().update({"status": CorpusStatus.FAILED.value})
+                logger.error(f"Failed to create ClickHouse table {table_name}: {e}")
+        
+        # Try to execute with timeout to prevent blocking
         try:
-            # Mock table creation for test compatibility
-            async with get_clickhouse_client() as client:
-                # Simulate table creation query
-                create_query = f"""
-                CREATE TABLE IF NOT EXISTS {table_name} (
-                    record_id UUID DEFAULT generateUUIDv4(),
-                    workload_type String,
-                    prompt String,
-                    response String,
-                    metadata String,
-                    created_at DateTime64(3) DEFAULT now()
-                ) ENGINE = MergeTree()
-                ORDER BY (workload_type, created_at)
-                """
-                # Call execute for test compatibility (tests mock this method)
-                if hasattr(client, 'execute'):
-                    await client.execute(create_query)
-                else:
-                    await client.execute_query(create_query)
-            
-            # Update corpus status to AVAILABLE on success
-            from .corpus import CorpusStatus
-            db.query().filter().update({"status": CorpusStatus.AVAILABLE.value})
-            
-        except Exception as e:
-            # Update corpus status to FAILED on error
-            from .corpus import CorpusStatus
-            db.query().filter().update({"status": CorpusStatus.FAILED.value})
-            logger.error(f"Failed to create ClickHouse table {table_name}: {e}")
-            # Don't re-raise for test compatibility - let the test continue
-            pass
+            await asyncio.wait_for(_execute_table_creation(), timeout=0.5)
+        except asyncio.TimeoutError:
+            # If timeout, create background task and return immediately
+            asyncio.create_task(_execute_table_creation())
+            logger.info(f"Table creation for {table_name} running in background due to timeout")
 
 
 # Legacy functions for backward compatibility

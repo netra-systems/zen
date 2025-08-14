@@ -1,21 +1,12 @@
-# AI AGENT MODIFICATION METADATA
-# ================================
-# Timestamp: 2025-08-10T18:48:05.516921+00:00
-# Agent: Claude Opus 4.1 claude-opus-4-1-20250805
-# Context: Add baseline agent tracking to agent support files
-# Git: v6 | 2c55fb99 | dirty (32 uncommitted)
-# Change: Feature | Scope: Component | Risk: Medium
-# Session: 3338d1f9-246a-461a-8cae-a81a10615db4 | Seq: 1
-# Review: Pending | Score: 85
-# ================================
+"""Base agent class and interfaces."""
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import asyncio
 import time
 
 from app.llm.llm_manager import LLMManager
-from app.schemas import SubAgentLifecycle, WebSocketMessage, SubAgentUpdate, SubAgentState
-from app.schemas.websocket_unified import WebSocketMessageType
+from app.schemas import SubAgentLifecycle, SubAgentUpdate, SubAgentState
+from app.schemas.websocket_unified import WebSocketMessage, WebSocketMessageType
 from app.agents.state import DeepAgentState
 from app.logging_config import central_logger
 from langchain_core.messages import SystemMessage
@@ -135,14 +126,67 @@ class BaseSubAgent(ABC):
         """Cleanup after execution. Override in subclasses if needed."""
         self.context.clear()  # Clear protected context
 
-    def set_state(self, state: SubAgentLifecycle):
-        self.state = state
+    def set_state(self, new_state: SubAgentLifecycle) -> None:
+        """Set agent state with transition validation."""
+        current_state = self.state
+        
+        # Validate state transition
+        if not self._is_valid_transition(current_state, new_state):
+            self._raise_transition_error(current_state, new_state)
+        
+        self.logger.debug(f"{self.name} transitioning from {current_state} to {new_state}")
+        self.state = new_state
+    
+    def _raise_transition_error(self, from_state: SubAgentLifecycle, to_state: SubAgentLifecycle) -> None:
+        """Raise transition error with proper message"""
+        raise ValueError(
+            f"Invalid state transition from {from_state} to {to_state} "
+            f"for agent {self.name}"
+        )
+    
+    def _is_valid_transition(self, from_state: SubAgentLifecycle, to_state: SubAgentLifecycle) -> bool:
+        """Validate if state transition is allowed."""
+        valid_transitions = self._get_valid_transitions()
+        return to_state in valid_transitions.get(from_state, [])
+    
+    def _get_valid_transitions(self) -> Dict[SubAgentLifecycle, List[SubAgentLifecycle]]:
+        """Get mapping of valid state transitions."""
+        return {
+            SubAgentLifecycle.PENDING: self._get_pending_transitions(),
+            SubAgentLifecycle.RUNNING: self._get_running_transitions(), 
+            SubAgentLifecycle.COMPLETED: [SubAgentLifecycle.SHUTDOWN],
+            SubAgentLifecycle.FAILED: self._get_failed_transitions(),
+            SubAgentLifecycle.SHUTDOWN: []  # Terminal state
+        }
+    
+    def _get_pending_transitions(self) -> List[SubAgentLifecycle]:
+        """Get valid transitions from PENDING state."""
+        return [
+            SubAgentLifecycle.RUNNING,
+            SubAgentLifecycle.FAILED,
+            SubAgentLifecycle.SHUTDOWN
+        ]
+    
+    def _get_running_transitions(self) -> List[SubAgentLifecycle]:
+        """Get valid transitions from RUNNING state.""" 
+        return [
+            SubAgentLifecycle.COMPLETED,
+            SubAgentLifecycle.FAILED,
+            SubAgentLifecycle.SHUTDOWN
+        ]
+    
+    def _get_failed_transitions(self) -> List[SubAgentLifecycle]:
+        """Get valid transitions from FAILED state."""
+        return [
+            SubAgentLifecycle.PENDING,  # Allow retry
+            SubAgentLifecycle.SHUTDOWN
+        ]
 
     def get_state(self) -> SubAgentLifecycle:
         return self.state
     
     async def _send_update(self, run_id: str, data: Dict[str, Any]) -> None:
-        """Send WebSocket update for this agent."""
+        """Send WebSocket update for this agent using unified types."""
         if self.websocket_manager:
             try:
                 # Create a proper BaseMessage object
@@ -163,7 +207,7 @@ class BaseSubAgent(ABC):
                     state=sub_agent_state
                 )
                 
-                # Use payload field consistently
+                # Use unified WebSocketMessage type
                 websocket_message = WebSocketMessage(
                     type=WebSocketMessageType.SUB_AGENT_UPDATE,
                     payload=update_payload.model_dump()

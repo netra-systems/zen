@@ -40,15 +40,3 @@ def read_supply_option(option_id: int, db: DbDep):
         raise HTTPException(status_code=404, detail="Supply option not found")
     return db_option
 
-async def analyze_supply_chain(supplier_id: str) -> Dict[str, Any]:
-    """Analyze supply chain for testing."""
-    from app.services import supply_service
-    return await supply_service.analyze_supplier(supplier_id)
-
-async def validate_supply_chain(chain_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Validate supply chain for testing."""
-    return {
-        "valid": True,
-        "issues": [],
-        "recommendations": ["Consider backup suppliers"]
-    }

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-13T22:28:25.032269",
+  "timestamp": "2025-08-13T23:43:09.527274",
   "level": "smoke",
   "metrics": {
     "total_tests": 0,
@@ -9,24 +9,26 @@
   },
   "results": {
     "backend": {
-      "status": "skipped",
-      "duration": 0,
-      "exit_code": null,
-      "output": "",
+      "status": "failed",
+      "duration": 5.572486400604248,
+      "exit_code": 4,
+      "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: smoke\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/routes/test_health_route.py app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error app/tests/core/test_config_manager.py::TestConfigManager::test_initialization app/tests/services/test_security_service.py::test_encrypt_and_decrypt tests/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 4.91s\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:46: in <module>\n    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor\napp\\agents\\supervisor_consolidated.py:27: in <module>\n    from app.agents.supervisor.execution_context import (\napp\\agents\\supervisor\\__init__.py:5: in <module>\n    from .agent_registry import AgentRegistry\napp\\agents\\supervisor\\agent_registry.py:13: in <module>\n    from app.agents.triage_sub_agent import TriageSubAgent\nE   ImportError: cannot import name 'TriageSubAgent' from 'app.agents.triage_sub_agent' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\triage_sub_agent\\__init__.py)\n",
       "test_counts": {
         "total": 0,
         "passed": 0,
         "failed": 0,
         "skipped": 0,
-        "errors": 0
+        "errors": 0,
+        "test_files": 4
       },
-      "coverage": null
+      "coverage": null,
+      "test_details": []
     },
     "frontend": {
-      "status": "timeout",
-      "duration": 30.011439561843872,
-      "exit_code": -1,
-      "output": "Tests timed out after 30s",
+      "status": "skipped",
+      "duration": 0,
+      "exit_code": null,
+      "output": "",
       "test_counts": {
         "total": 0,
         "passed": 0,
@@ -52,8 +54,8 @@
     },
     "overall": {
       "status": "failed",
-      "start_time": 1755149274.8788483,
-      "end_time": 1755149305.0307643
+      "start_time": 1755153783.9526784,
+      "end_time": 1755153789.5262728
     }
   }
 }

@@ -83,6 +83,3 @@ async def update_ttl(ttl_seconds: int) -> Dict[str, Any]:
         "message": f"TTL updated to {ttl_seconds} seconds"
     }
 
-async def clear_cache_pattern(pattern: str) -> Dict[str, Any]:
-    """Clear cache by pattern for testing."""
-    return await llm_cache_service.clear_pattern(pattern)

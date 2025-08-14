@@ -1,0 +1,390 @@
+
+> netra-frontend-apex-v1@0.1.0 test
+> jest --watchAll=false --bail=false --maxWorkers=2
+
+FAIL __tests__/system/startup.test.tsx (6.793 s)
+  ● Frontend System Startup › WebSocket Connectivity › should establish WebSocket connection on startup
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: StringContaining "/api/config"
+
+    Number of calls: 0
+
+    Ignored nodes: comments, script, style
+    [36m<html>[39m
+      [36m<head />[39m
+      [36m<body>[39m
+        [36m<div>[39m
+          [36m<div>[39m
+            [0mTest App[0m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</body>[39m
+    [36m</html>[39m
+
+    [0m [90m 186 |[39m       [90m// Wait for the async config fetch and connection[39m
+     [90m 187 |[39m       [36mawait[39m waitFor(() [33m=>[39m {
+    [31m[1m>[22m[39m[90m 188 |[39m         expect(fetch)[33m.[39mtoHaveBeenCalledWith(
+     [90m     |[39m                       [31m[1m^[22m[39m
+     [90m 189 |[39m           expect[33m.[39mstringContaining([32m'/api/config'[39m)
+     [90m 190 |[39m         )[33m;[39m
+     [90m 191 |[39m       })[33m;[39m[0m
+
+      at toHaveBeenCalledWith (__tests__/system/startup.test.tsx:188:23)
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at checkRealTimersCallback (node_modules/@testing-library/dom/dist/wait-for.js:118:16)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:579:19)
+
+  ● Frontend System Startup › WebSocket Connectivity › should handle WebSocket heartbeat
+
+    expect(jest.fn()).toHaveBeenCalled()
+
+    Expected number of calls: >= 1
+    Received number of calls:    0
+
+    Ignored nodes: comments, script, style
+    [36m<html>[39m
+      [36m<head />[39m
+      [36m<body>[39m
+        [36m<div>[39m
+          [36m<div>[39m
+            [0mTest[0m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</body>[39m
+    [36m</html>[39m
+
+    [0m [90m 225 |[39m       [90m// Wait for WebSocket connection[39m
+     [90m 226 |[39m       [36mawait[39m waitFor(() [33m=>[39m {
+    [31m[1m>[22m[39m[90m 227 |[39m         expect(global[33m.[39m[33mWebSocket[39m)[33m.[39mtoHaveBeenCalled()[33m;[39m
+     [90m     |[39m                                  [31m[1m^[22m[39m
+     [90m 228 |[39m       })[33m;[39m
+     [90m 229 |[39m       
+     [90m 230 |[39m       [90m// Get the WebSocket instance[39m[0m
+
+      at toHaveBeenCalled (__tests__/system/startup.test.tsx:227:34)
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at node_modules/@testing-library/dom/dist/wait-for.js:82:9
+
+  ● Frontend System Startup › WebSocket Connectivity › should reconnect on connection loss
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 0
+
+    Ignored nodes: comments, script, style
+    [36m<html>[39m
+      [36m<head />[39m
+      [36m<body>[39m
+        [36m<div>[39m
+          [36m<div>[39m
+            [0mTest[0m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</body>[39m
+    [36m</html>[39m
+
+    [0m [90m 279 |[39m       [90m// Wait for initial connection[39m
+     [90m 280 |[39m       [36mawait[39m waitFor(() [33m=>[39m {
+    [31m[1m>[22m[39m[90m 281 |[39m         expect(global[33m.[39m[33mWebSocket[39m)[33m.[39mtoHaveBeenCalledTimes([35m1[39m)[33m;[39m
+     [90m     |[39m                                  [31m[1m^[22m[39m
+     [90m 282 |[39m       })[33m;[39m
+     [90m 283 |[39m       
+     [90m 284 |[39m       [90m// Get the WebSocket instance and simulate connection loss[39m[0m
+
+      at toHaveBeenCalledTimes (__tests__/system/startup.test.tsx:281:34)
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at node_modules/@testing-library/dom/dist/wait-for.js:82:9
+
+  ● Frontend System Startup › Performance Monitoring › should measure startup performance
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+    [0m [90m 437 |[39m
+     [90m 438 |[39m   describe([32m'Performance Monitoring'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 439 |[39m     it([32m'should measure startup performance'[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 440 |[39m       [36mconst[39m startTime [33m=[39m performance[33m.[39mnow()[33m;[39m
+     [90m 441 |[39m       
+     [90m 442 |[39m       [90m// Simulate startup operations[39m[0m
+
+      at it (__tests__/system/startup.test.tsx:439:5)
+      at describe (__tests__/system/startup.test.tsx:438:3)
+      at Object.describe (__tests__/system/startup.test.tsx:32:1)
+
+FAIL __tests__/imports/external-imports.test.tsx
+  ● Console
+
+    console.log
+      @radix-ui/react-popover not installed
+
+      at Object.log (__tests__/imports/external-imports.test.tsx:117:17)
+
+    console.log
+      remark-gfm not installed
+
+      at Object.log (__tests__/imports/external-imports.test.tsx:216:17)
+
+    console.log
+      ESLint config packages not available (dev dependencies)
+
+      at Object.log (__tests__/imports/external-imports.test.tsx:343:17)
+
+    console.log
+      Optional dependencies not installed: [
+        'Optional dependency @tanstack/react-query not installed',
+        'Optional dependency react-query not installed',
+        'Optional dependency @emotion/react not installed',
+        'Optional dependency @emotion/styled not installed'
+      ]
+
+      at Object.log (__tests__/imports/external-imports.test.tsx:399:17)
+
+  ● External NPM Dependencies Import Tests › Development and testing imports › should import React Testing Library
+
+    Hooks cannot be defined inside tests. Hook of type "afterEach" is nested within "should import React Testing Library".
+
+    [0m [90m 274 |[39m         [90m// Just check that the module exists without fully loading it[39m
+     [90m 275 |[39m         jest[33m.[39misolateModules(() [33m=>[39m {
+    [31m[1m>[22m[39m[90m 276 |[39m           [36mconst[39m rtl [33m=[39m require([32m'@testing-library/react'[39m)[33m;[39m
+     [90m     |[39m                       [31m[1m^[22m[39m
+     [90m 277 |[39m           expect(rtl)[33m.[39mtoBeDefined()[33m;[39m
+     [90m 278 |[39m         })[33m;[39m
+     [90m 279 |[39m       } [36mcatch[39m (e) {[0m
+
+      at eventHandler (node_modules/jest-circus/build/jestAdapterInit.js:111:44)
+      at Object.<anonymous> (node_modules/@testing-library/react/dist/index.js:27:5)
+      at require (__tests__/imports/external-imports.test.tsx:276:23)
+      at Object.isolateModules (__tests__/imports/external-imports.test.tsx:275:14)
+
+  ● External NPM Dependencies Import Tests › Development and testing imports › should import React Testing Library
+
+    Hooks cannot be defined inside tests. Hook of type "beforeAll" is nested within "should import React Testing Library".
+
+    [0m [90m 274 |[39m         [90m// Just check that the module exists without fully loading it[39m
+     [90m 275 |[39m         jest[33m.[39misolateModules(() [33m=>[39m {
+    [31m[1m>[22m[39m[90m 276 |[39m           [36mconst[39m rtl [33m=[39m require([32m'@testing-library/react'[39m)[33m;[39m
+     [90m     |[39m                       [31m[1m^[22m[39m
+     [90m 277 |[39m           expect(rtl)[33m.[39mtoBeDefined()[33m;[39m
+     [90m 278 |[39m         })[33m;[39m
+     [90m 279 |[39m       } [36mcatch[39m (e) {[0m
+
+      at eventHandler (node_modules/jest-circus/build/jestAdapterInit.js:111:44)
+      at Object.<anonymous> (node_modules/@testing-library/react/dist/index.js:44:5)
+      at require (__tests__/imports/external-imports.test.tsx:276:23)
+      at Object.isolateModules (__tests__/imports/external-imports.test.tsx:275:14)
+
+  ● External NPM Dependencies Import Tests › Development and testing imports › should import React Testing Library
+
+    Hooks cannot be defined inside tests. Hook of type "afterAll" is nested within "should import React Testing Library".
+
+    [0m [90m 274 |[39m         [90m// Just check that the module exists without fully loading it[39m
+     [90m 275 |[39m         jest[33m.[39misolateModules(() [33m=>[39m {
+    [31m[1m>[22m[39m[90m 276 |[39m           [36mconst[39m rtl [33m=[39m require([32m'@testing-library/react'[39m)[33m;[39m
+     [90m     |[39m                       [31m[1m^[22m[39m
+     [90m 277 |[39m           expect(rtl)[33m.[39mtoBeDefined()[33m;[39m
+     [90m 278 |[39m         })[33m;[39m
+     [90m 279 |[39m       } [36mcatch[39m (e) {[0m
+
+      at eventHandler (node_modules/jest-circus/build/jestAdapterInit.js:111:44)
+      at Object.<anonymous> (node_modules/@testing-library/react/dist/index.js:48:5)
+      at require (__tests__/imports/external-imports.test.tsx:276:23)
+      at Object.isolateModules (__tests__/imports/external-imports.test.tsx:275:14)
+
+  ● External NPM Dependencies Import Tests › Development and testing imports › should import Testing Library user-event
+
+    Hooks cannot be defined inside tests. Hook of type "afterEach" is nested within "should import Testing Library user-event".
+
+    [0m [90m 288 |[39m     it([32m'should import Testing Library user-event'[39m[33m,[39m () [33m=>[39m {
+     [90m 289 |[39m       [36mtry[39m {
+    [31m[1m>[22m[39m[90m 290 |[39m         [36mconst[39m userEvent [33m=[39m require([32m'@testing-library/user-event'[39m)[33m;[39m
+     [90m     |[39m                           [31m[1m^[22m[39m
+     [90m 291 |[39m         expect(userEvent)[33m.[39mtoBeDefined()[33m;[39m
+     [90m 292 |[39m         expect(userEvent[33m.[39m[36mdefault[39m)[33m.[39mtoBeDefined()[33m;[39m
+     [90m 293 |[39m       } [36mcatch[39m (e) {[0m
+
+      at eventHandler (node_modules/jest-circus/build/jestAdapterInit.js:111:44)
+      at Object.<anonymous> (node_modules/@testing-library/user-event/dist/cjs/utils/dataTransfer/Clipboard.js:158:7)
+      at Object.<anonymous> (node_modules/@testing-library/user-event/dist/cjs/event/behavior/click.js:4:1)
+      at Object.<anonymous> (node_modules/@testing-library/user-event/dist/cjs/event/dispatchEvent.js:3:1)
+      at Object.<anonymous> (node_modules/@testing-library/user-event/dist/cjs/document/patchFocus.js:3:21)
+      at Object.<anonymous> (node_modules/@testing-library/user-event/dist/cjs/setup/setup.js:3:18)
+      at Object.<anonymous> (node_modules/@testing-library/user-event/dist/cjs/setup/index.js:3:13)
+      at Object.<anonymous> (node_modules/@testing-library/user-event/dist/cjs/index.js:5:13)
+      at Object.require (__tests__/imports/external-imports.test.tsx:290:27)
+
+  ● External NPM Dependencies Import Tests › Development and testing imports › should import Testing Library user-event
+
+    Hooks cannot be defined inside tests. Hook of type "afterAll" is nested within "should import Testing Library user-event".
+
+    [0m [90m 288 |[39m     it([32m'should import Testing Library user-event'[39m[33m,[39m () [33m=>[39m {
+     [90m 289 |[39m       [36mtry[39m {
+    [31m[1m>[22m[39m[90m 290 |[39m         [36mconst[39m userEvent [33m=[39m require([32m'@testing-library/user-event'[39m)[33m;[39m
+     [90m     |[39m                           [31m[1m^[22m[39m
+     [90m 291 |[39m         expect(userEvent)[33m.[39mtoBeDefined()[33m;[39m
+     [90m 292 |[39m         expect(userEvent[33m.[39m[36mdefault[39m)[33m.[39mtoBeDefined()[33m;[39m
+     [90m 293 |[39m       } [36mcatch[39m (e) {[0m
+
+      at eventHandler (node_modules/jest-circus/build/jestAdapterInit.js:111:44)
+      at Object.<anonymous> (node_modules/@testing-library/user-event/dist/cjs/utils/dataTransfer/Clipboard.js:161:7)
+      at Object.<anonymous> (node_modules/@testing-library/user-event/dist/cjs/event/behavior/click.js:4:1)
+      at Object.<anonymous> (node_modules/@testing-library/user-event/dist/cjs/event/dispatchEvent.js:3:1)
+      at Object.<anonymous> (node_modules/@testing-library/user-event/dist/cjs/document/patchFocus.js:3:21)
+      at Object.<anonymous> (node_modules/@testing-library/user-event/dist/cjs/setup/setup.js:3:18)
+      at Object.<anonymous> (node_modules/@testing-library/user-event/dist/cjs/setup/index.js:3:13)
+      at Object.<anonymous> (node_modules/@testing-library/user-event/dist/cjs/index.js:5:13)
+      at Object.require (__tests__/imports/external-imports.test.tsx:290:27)
+
+FAIL __tests__/components/chat/MainChat.test.tsx (10.922 s)
+  ● MainChat › Agent status updates › should handle toggle collapse manually
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+    [0m [90m 367 |[39m     })[33m;[39m
+     [90m 368 |[39m
+    [31m[1m>[22m[39m[90m 369 |[39m     it([32m'should handle toggle collapse manually'[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 370 |[39m       (useUnifiedChatStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue({
+     [90m 371 |[39m         [33m...[39mmockStore[33m,[39m
+     [90m 372 |[39m         isProcessing[33m:[39m [36mtrue[39m[33m,[39m[0m
+
+      at it (__tests__/components/chat/MainChat.test.tsx:369:5)
+      at describe (__tests__/components/chat/MainChat.test.tsx:246:3)
+      at Object.describe (__tests__/components/chat/MainChat.test.tsx:36:1)
+
+  ● MainChat › Message history loading › should update history when new messages arrive
+
+    expect(element).not.toBeInTheDocument()
+
+    expected document not to contain element, found <div data-testid="example-prompts">Example Prompts</div> instead
+
+    Ignored nodes: comments, script, style
+    [36m<html>[39m
+      [36m<head />[39m
+      [36m<body>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex h-full bg-gradient-to-br from-gray-50 via-white to-gray-50"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col flex-1 max-w-full"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mdata-testid[39m=[32m"chat-header"[39m
+              [36m>[39m
+                [0mChat Header[0m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex-grow overflow-hidden relative"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"h-full overflow-y-auto"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mstyle[39m=[32m"opacity: 1; transform: none;"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mdata-testid[39m=[32m"example-prompts"[39m
+                    [36m>[39m
+                      [0mExample Prompts[0m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"message-list"[39m
+                  [36m>[39m
+                    [0mMessage List[0m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"border-t bg-white/95 backdrop-blur-sm shadow-lg"[39m
+                [33mstyle[39m=[32m"opacity: 0; transform: translateY(20px);"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"px-6 py-4 max-w-5xl mx-auto w-full"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"message-input"[39m
+                  [36m>[39m
+                    [0mMessage Input[0m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</body>[39m
+    [36m</html>[39m
+
+    [0m [90m 580 |[39m       [90m// Example prompts should disappear when there are messages[39m
+     [90m 581 |[39m       [36mawait[39m waitFor(() [33m=>[39m {
+    [31m[1m>[22m[39m[90m 582 |[39m         expect(screen[33m.[39mqueryByTestId([32m'example-prompts'[39m))[33m.[39mnot[33m.[39mtoBeInTheDocument()[33m;[39m
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 583 |[39m       })[33m;[39m
+     [90m 584 |[39m     })[33m;[39m
+     [90m 585 |[39m[0m
+
+      at toBeInTheDocument (__tests__/components/chat/MainChat.test.tsx:582:61)
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at node_modules/@testing-library/dom/dist/wait-for.js:82:9
+
+  ● MainChat › UI layout and responsiveness › should apply correct CSS classes
+
+    expect(element).toHaveClass("flex flex-col h-full")
+
+    Expected the element to have class:
+      flex flex-col h-full
+    Received:
+      flex h-full bg-gradient-to-br from-gray-50 via-white to-gray-50
+
+    [0m [90m 625 |[39m       
+     [90m 626 |[39m       [36mconst[39m mainContainer [33m=[39m container[33m.[39mfirstChild[33m;[39m
+    [31m[1m>[22m[39m[90m 627 |[39m       expect(mainContainer)[33m.[39mtoHaveClass([32m'flex'[39m[33m,[39m [32m'flex-col'[39m[33m,[39m [32m'h-full'[39m)[33m;[39m
+     [90m     |[39m                             [31m[1m^[22m[39m
+     [90m 628 |[39m     })[33m;[39m
+     [90m 629 |[39m
+     [90m 630 |[39m     it([32m'should handle window resize'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at Object.toHaveClass (__tests__/components/chat/MainChat.test.tsx:627:29)
+
+  ● MainChat › Integration with store and hooks › should handle store reset
+
+    expect(element).not.toBeInTheDocument()
+
+    expected document not to contain element, found <div data-collapsed="false" data-testid="response-card"><button>Toggle</button>Response Card</div> instead
+
+    [0m [90m 796 |[39m       [90m// Should show example prompts again[39m
+     [90m 797 |[39m       expect(screen[33m.[39mgetByTestId([32m'example-prompts'[39m))[33m.[39mtoBeInTheDocument()[33m;[39m
+    [31m[1m>[22m[39m[90m 798 |[39m       expect(screen[33m.[39mqueryByTestId([32m'response-card'[39m))[33m.[39mnot[33m.[39mtoBeInTheDocument()[33m;[39m
+     [90m     |[39m                                                         [31m[1m^[22m[39m
+     [90m 799 |[39m     })[33m;[39m
+     [90m 800 |[39m   })[33m;[39m
+     [90m 801 |[39m[0m
+
+      at Object.toBeInTheDocument (__tests__/components/chat/MainChat.test.tsx:798:57)
+
+  ● MainChat › Accessibility › should support keyboard navigation
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+    [0m [90m 808 |[39m     })[33m;[39m
+     [90m 809 |[39m
+    [31m[1m>[22m[39m[90m 810 |[39m     it([32m'should support keyboard navigation'[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 811 |[39m       render([33m<[39m[33mMainChat[39m [33m/[39m[33m>[39m)[33m;[39m
+     [90m 812 |[39m       
+     [90m 813 |[39m       [90m// Tab through components[39m[0m
+
+      at it (__tests__/components/chat/MainChat.test.tsx:810:5)
+      at describe (__tests__/components/chat/MainChat.test.tsx:802:3)
+      at Object.describe (__tests__/components/chat/MainChat.test.tsx:36:1)
+

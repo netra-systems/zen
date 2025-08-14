@@ -17,7 +17,6 @@ from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app import schemas
 from app.schemas.websocket_types import (
     WebSocketMessageIn,
-    ParsedMessage,
     MessageTypeLiteral
 )
 from app.ws_manager import manager
@@ -103,7 +102,7 @@ class AgentService:
             except (WebSocketDisconnect, Exception):
                 logger.warning(f"Could not send error to disconnected user {user_id}")
     
-    def _parse_message(self, message: Union[str, Dict[str, Any]]) -> ParsedMessage:
+    def _parse_message(self, message: Union[str, Dict[str, Any]]) -> Dict[str, Any]:
         """Parse incoming message to dictionary"""
         if isinstance(message, str):
             data = json.loads(message)

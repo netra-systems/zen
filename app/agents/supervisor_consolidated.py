@@ -112,7 +112,25 @@ class SupervisorAgent(BaseSubAgent):
     async def execute(self, state: DeepAgentState, 
                      run_id: str, stream_updates: bool) -> None:
         """Execute method for BaseSubAgent compatibility."""
-        raise NotImplementedError("Use run() method instead")
+        # Delegate to run() method with extracted context from state
+        thread_id = state.chat_thread_id or run_id
+        user_id = state.user_id or "default_user"
+        user_prompt = state.user_request or ""
+        
+        # Execute the main run method
+        updated_state = await self.run(user_prompt, thread_id, user_id, run_id)
+        
+        # Merge results back into the original state
+        if hasattr(state, 'merge_from') and updated_state:
+            state.merge_from(updated_state)
+        else:
+            # Manual merge of key fields if merge_from is not available
+            if updated_state:
+                state.triage_result = updated_state.triage_result or state.triage_result
+                state.data_result = updated_state.data_result or state.data_result
+                state.optimizations_result = updated_state.optimizations_result or state.optimizations_result
+                state.action_plan_result = updated_state.action_plan_result or state.action_plan_result
+                state.report_result = updated_state.report_result or state.report_result
     
     async def run(self, user_prompt: str, thread_id: str, 
                   user_id: str, run_id: str) -> DeepAgentState:

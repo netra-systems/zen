@@ -6,7 +6,7 @@ import pytest
 import json
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime
-from app.agents.data_sub_agent import DataSubAgent
+from app.agents.data_sub_agent.agent import DataSubAgent
 
 
 class TestDataSubAgentBasic:
@@ -16,7 +16,7 @@ class TestDataSubAgentBasic:
         """Test DataSubAgent initialization"""
         mock_llm_manager, mock_tool_dispatcher = mock_dependencies
         
-        with patch('app.agents.data_sub_agent.RedisManager') as mock_redis:
+        with patch('app.agents.data_sub_agent.agent.RedisManager') as mock_redis:
             mock_redis.return_value = Mock()
             agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
             
@@ -31,7 +31,7 @@ class TestDataSubAgentBasic:
         """Test DataSubAgent initialization when Redis fails"""
         mock_llm_manager, mock_tool_dispatcher = mock_dependencies
         
-        with patch('app.agents.data_sub_agent.RedisManager') as mock_redis:
+        with patch('app.agents.data_sub_agent.agent.RedisManager') as mock_redis:
             mock_redis.side_effect = Exception("Redis connection failed")
             agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
             

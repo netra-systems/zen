@@ -4,10 +4,12 @@ from .agent import DataSubAgent
 from .models import DataAnalysisResponse, AnomalyDetectionResponse
 from .query_builder import QueryBuilder
 from .analysis_engine import AnalysisEngine
+from .clickhouse_operations import ClickHouseOperations
 from .data_operations import DataOperations
-from .data_fetching import DataFetching
-from .data_analysis_ops import DataAnalysisOperations
-from .insights_generator import InsightsGenerator
+from .execution_engine import ExecutionEngine
+from .metrics_analyzer import MetricsAnalyzer
+from .performance_data_processor import PerformanceDataProcessor
+from .usage_pattern_processor import UsagePatternProcessor
 
 __all__ = [
     'DataSubAgent',
@@ -15,8 +17,10 @@ __all__ = [
     'AnomalyDetectionResponse',
     'QueryBuilder',
     'AnalysisEngine',
+    'ClickHouseOperations',
     'DataOperations',
-    'DataFetching',
-    'DataAnalysisOperations',
-    'InsightsGenerator'
+    'ExecutionEngine',
+    'MetricsAnalyzer',
+    'PerformanceDataProcessor',
+    'UsagePatternProcessor'
 ]

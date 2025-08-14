@@ -5,7 +5,7 @@ Shared fixtures and test configuration for DataSubAgent comprehensive tests
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime
-from app.agents.data_sub_agent import DataSubAgent
+from app.agents.data_sub_agent.agent import DataSubAgent
 
 
 @pytest.fixture

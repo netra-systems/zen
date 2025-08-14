@@ -307,7 +307,7 @@ class TestAgentE2ECritical:
         tool_dispatcher.dispatch_tool = AsyncMock(side_effect=tool_results)
         
         # Execute a sub-agent that uses tools
-        from app.agents.data_sub_agent import DataSubAgent
+        from app.agents.data_sub_agent.agent import DataSubAgent
         data_agent = DataSubAgent(llm_manager, tool_dispatcher)
         state = DeepAgentState(user_request="Analyze GPU metrics")
         

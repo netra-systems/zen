@@ -283,11 +283,6 @@ class LLMManagerStats(BaseModel):
     avg_response_time_ms: float = 0.0
 
 
-class MockLLMResponse(BaseModel):
-    """Mock response for testing"""
-    content: str
-    model: str = "mock"
-    provider: str = "mock"
 
 
 class LLMValidationError(Exception):
@@ -551,3 +546,11 @@ class BatchLLMResponse(BaseModel):
     responses: List[LLMResponse]
     failed_indices: List[int] = Field(default_factory=list)
     total_time_ms: float
+
+
+class MockLLMResponse(BaseModel):
+    """Mock LLM response for testing"""
+    content: str
+    model: str = "mock-model"
+    usage: TokenUsage = Field(default_factory=lambda: TokenUsage(prompt_tokens=10, completion_tokens=20, total_tokens=30))
+    response_time_ms: float = 100.0

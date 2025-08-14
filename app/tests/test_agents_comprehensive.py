@@ -12,8 +12,8 @@ import json
 
 from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.agents.base import BaseSubAgent
-from app.agents.triage_sub_agent_legacy import TriageSubAgent
-from app.agents.data_sub_agent import DataSubAgent
+from app.agents.triage_sub_agent import TriageSubAgent
+from app.agents.data_sub_agent.agent import DataSubAgent
 from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from app.agents.reporting_sub_agent import ReportingSubAgent

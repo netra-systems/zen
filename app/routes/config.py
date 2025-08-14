@@ -22,8 +22,3 @@ async def get_public_config():
         })
     }
 
-async def update_config(new_config: Dict[str, Any]) -> Dict[str, Any]:
-    """Update configuration for testing."""
-    from app.services import config_service
-    success = await config_service.save_config(new_config)
-    return {"success": success, "config": new_config}

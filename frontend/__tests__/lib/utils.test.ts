@@ -45,8 +45,9 @@ describe('Utils', () => {
       )).toBe('base array classes conditional final');
     });
 
-    it('should deduplicate classes', () => {
-      expect(cn('foo foo bar')).toBe('foo bar');
+    it('should handle duplicate Tailwind classes', () => {
+      expect(cn('text-red-500 text-blue-500')).toBe('text-blue-500');
+      expect(cn('p-4 p-2')).toBe('p-2');
     });
 
     it('should handle responsive tailwind classes', () => {
