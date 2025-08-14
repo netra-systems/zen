@@ -72,7 +72,9 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
                     "optimizations": [],
                 }
 
-            state.optimizations_result = optimizations_result
+            # Convert to typed OptimizationsResult object
+            from app.agents.state import OptimizationsResult
+            state.optimizations_result = self._create_optimizations_result(optimizations_result)
             
             # Update with results
             if stream_updates:
@@ -101,7 +103,9 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
                     "reason": "Primary optimization analysis failed"
                 }
             }
-            state.optimizations_result = fallback_result
+            # Convert to typed OptimizationsResult object
+            from app.agents.state import OptimizationsResult
+            state.optimizations_result = self._create_optimizations_result(fallback_result)
             
             if stream_updates:
                 await self._send_update(run_id, {
@@ -127,3 +131,12 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
     def get_circuit_breaker_status(self) -> dict:
         """Get circuit breaker status"""
         return self.reliability.circuit_breaker.get_status()
+    
+    def _create_optimizations_result(self, data: dict) -> 'OptimizationsResult':
+        """Convert dictionary to OptimizationsResult object."""
+        from app.agents.state import OptimizationsResult
+        return OptimizationsResult(
+            optimization_type=data.get("type", "general"),
+            recommendations=data.get("optimizations", []),
+            metadata=data.get("metadata", {})
+        )

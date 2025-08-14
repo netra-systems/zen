@@ -569,7 +569,11 @@ class TestAgentE2ECritical:
             if agent_name == "Data":
                 state.data_result = {"metrics": "analyzed"}
             elif agent_name == "OptimizationsCore":
-                state.optimizations_result = {"gpu": "optimize"}
+                from app.agents.state import OptimizationsResult
+                state.optimizations_result = OptimizationsResult(
+                    optimization_type="gpu",
+                    recommendations=["optimize"]
+                )
             
             async with execution_lock:
                 concurrent_executions.append({

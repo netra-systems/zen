@@ -24,7 +24,7 @@ from .corpus import (
 # ClickHouse client function for test compatibility
 def get_clickhouse_client():
     """Get ClickHouse client for database operations"""
-    from app.services.database.clickhouse import get_clickhouse_client as clickhouse_get_client
+    from app.db.clickhouse import get_clickhouse_client as clickhouse_get_client
     return clickhouse_get_client()
 
 # Mock VectorStore class for backward compatibility with tests

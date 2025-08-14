@@ -77,7 +77,9 @@ class ReportingSubAgent(BaseSubAgent):
                     "report": "No report could be generated.",
                 }
 
-            state.report_result = report_result
+            # Convert to typed ReportResult object
+            from app.agents.state import ReportResult
+            state.report_result = self._create_report_result(report_result)
             
             # Update with results
             if stream_updates:
@@ -106,7 +108,9 @@ class ReportingSubAgent(BaseSubAgent):
                     "reason": "Primary report generation failed"
                 }
             }
-            state.report_result = fallback_result
+            # Convert to typed ReportResult object
+            from app.agents.state import ReportResult
+            state.report_result = self._create_report_result(fallback_result)
             
             if stream_updates:
                 await self._send_update(run_id, {
@@ -132,3 +136,13 @@ class ReportingSubAgent(BaseSubAgent):
     def get_circuit_breaker_status(self) -> dict:
         """Get circuit breaker status"""
         return self.reliability.circuit_breaker.get_status()
+    
+    def _create_report_result(self, data: dict) -> 'ReportResult':
+        """Convert dictionary to ReportResult object."""
+        from app.agents.state import ReportResult
+        return ReportResult(
+            report_type="analysis",
+            content=data.get("report", "No content available"),
+            sections=data.get("sections", []),
+            metadata=data.get("metadata", {})
+        )

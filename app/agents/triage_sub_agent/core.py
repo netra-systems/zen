@@ -12,6 +12,7 @@ from typing import Optional, Dict, Any
 
 from pydantic import ValidationError
 from app.agents.utils import extract_json_from_response
+from app.agents.config import agent_config
 from app.logging_config import central_logger
 
 from .models import TriageResult, TriageMetadata, Priority, Complexity
@@ -29,8 +30,8 @@ class TriageCore:
     def __init__(self, redis_manager=None):
         """Initialize the triage core"""
         self.redis_manager = redis_manager
-        self.cache_ttl = 3600  # 1 hour cache TTL
-        self.max_retries = 3
+        self.cache_ttl = agent_config.cache.redis_ttl
+        self.max_retries = agent_config.retry.max_retries
         
         # Initialize components
         self.entity_extractor = EntityExtractor()

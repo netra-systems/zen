@@ -1,6 +1,6 @@
 """Advanced data analysis capabilities."""
 
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from datetime import datetime
 import numpy as np
 
@@ -9,21 +9,10 @@ class AnalysisEngine:
     """Advanced data analysis capabilities"""
     
     @staticmethod
-    def calculate_statistics(values: List[float]) -> Dict[str, float]:
+    def calculate_statistics(values: List[float]) -> Optional[Dict[str, float]]:
         """Calculate comprehensive statistics for a metric"""
         if not values:
-            return {
-                "count": 0,
-                "mean": 0,
-                "median": 0,
-                "std_dev": 0,
-                "min": 0,
-                "max": 0,
-                "p25": 0,
-                "p75": 0,
-                "p95": 0,
-                "p99": 0
-            }
+            return None
         
         arr = np.array(values)
         return {

@@ -1,18 +1,12 @@
-"""Agent state management models."""
-from typing import Any, Dict, List, Optional, Union
+"""Agent state management models with immutable patterns."""
+from typing import Any, Dict, List, Optional, Union, ForwardRef
 from pydantic import BaseModel, Field, validator
 from datetime import datetime
-# Use forward references to avoid circular imports
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from app.agents.triage_sub_agent.models import TriageResult
-    from app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse
-else:
-    # Make the types available as strings for runtime
-    TriageResult = 'TriageResult'
-    DataAnalysisResponse = 'DataAnalysisResponse' 
-    AnomalyDetectionResponse = 'AnomalyDetectionResponse'
+# Use forward references to avoid circular dependencies
+TriageResultRef = ForwardRef('TriageResult')
+DataAnalysisResponseRef = ForwardRef('DataAnalysisResponse')
+AnomalyDetectionResponseRef = ForwardRef('AnomalyDetectionResponse')
 
 class OptimizationsResult(BaseModel):
     """Typed model for optimization results."""
@@ -71,8 +65,8 @@ class DeepAgentState(BaseModel):
     user_id: Optional[str] = None
     
     # Typed result fields using proper models
-    triage_result: Optional[Union['TriageResult', Dict[str, Any]]] = None
-    data_result: Optional[Union['DataAnalysisResponse', Dict[str, Any]]] = None
+    triage_result: Optional[Union[TriageResultRef, Dict[str, Any]]] = None
+    data_result: Optional[Union[DataAnalysisResponseRef, Dict[str, Any]]] = None
     optimizations_result: Optional[OptimizationsResult] = None
     action_plan_result: Optional[ActionPlanResult] = None
     report_result: Optional[ReportResult] = None
@@ -147,33 +141,40 @@ class DeepAgentState(BaseModel):
             final_report=None,
             metadata={}
         )
+    
+    def merge_from(self, other_state: 'DeepAgentState') -> 'DeepAgentState':
+        """Create new state with data merged from another state (immutable)."""
+        if not isinstance(other_state, DeepAgentState):
+            raise TypeError("other_state must be a DeepAgentState instance")
+        
+        # Prepare merged data
+        merged_metadata = self.metadata.copy()
+        if other_state.metadata:
+            merged_metadata.update(other_state.metadata)
+        
+        # Create new instance with merged data
+        return self.copy_with_updates(
+            triage_result=other_state.triage_result or self.triage_result,
+            data_result=other_state.data_result or self.data_result,
+            optimizations_result=other_state.optimizations_result or self.optimizations_result,
+            action_plan_result=other_state.action_plan_result or self.action_plan_result,
+            report_result=other_state.report_result or self.report_result,
+            synthetic_data_result=other_state.synthetic_data_result or self.synthetic_data_result,
+            supply_research_result=other_state.supply_research_result or self.supply_research_result,
+            final_report=other_state.final_report or self.final_report,
+            step_count=max(self.step_count, other_state.step_count),
+            metadata=merged_metadata
+        )
 
 
-# Global flag to track if model has been rebuilt
-_model_rebuilt = False
+def try_resolve_forward_refs() -> None:
+    """Attempt to resolve forward references when models are available."""
+    try:
+        # Attempt to resolve forward references
+        DeepAgentState.model_rebuild()
+    except Exception:
+        # Safe to ignore - references will resolve when models are imported
+        pass
 
-def _ensure_model_rebuilt() -> None:
-    """Ensure DeepAgentState model is rebuilt to resolve forward references."""
-    global _model_rebuilt
-    if not _model_rebuilt:
-        try:
-            # Import the models to ensure they're available
-            from app.agents.triage_sub_agent.models import TriageResult
-            from app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse
-            
-            # Rebuild the model now that all dependencies are loaded
-            DeepAgentState.model_rebuild()
-            _model_rebuilt = True
-        except Exception as e:
-            # Log but don't fail - let Pydantic handle it later
-            pass
-
-# Patch DeepAgentState.__new__ to ensure rebuild happens before instantiation
-_original_new = DeepAgentState.__new__
-
-def _patched_new(cls, *args, **kwargs):
-    """Patched __new__ method that ensures model rebuild."""
-    _ensure_model_rebuilt()
-    return _original_new(cls)
-
-DeepAgentState.__new__ = _patched_new
+# Initialize forward reference resolution
+try_resolve_forward_refs()
