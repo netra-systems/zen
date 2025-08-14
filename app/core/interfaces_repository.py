@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .exceptions import ServiceError, RecordNotFoundError
-from .error_context import ErrorContext
+from app.schemas.shared_types import ErrorContext
 from .interfaces_service import (
     BaseServiceInterface, 
     ServiceHealth,

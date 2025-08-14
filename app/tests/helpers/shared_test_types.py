@@ -190,7 +190,7 @@ class TestErrorContext:
     def error_context(self):
         """Provide error context for testing"""
         try:
-            from app.core.error_context import ErrorContext
+            from app.core.error_context import AsyncAsyncErrorContext as ErrorContext
             return ErrorContext()
         except ImportError:
             # Fallback mock if ErrorContext doesn't exist

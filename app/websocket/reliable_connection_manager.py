@@ -16,7 +16,7 @@ from app.core.reliability import (
 from app.core.json_utils import prepare_websocket_message, safe_json_dumps
 from .connection import ConnectionInfo, ConnectionManager
 from .heartbeat import HeartbeatManager
-from .error_handler import ErrorHandler, default_error_handler
+from .error_handler import WebSocketErrorHandler, default_error_handler
 from .reliable_message_handler import ReliableMessageHandler, MessageTypeRouter
 
 logger = central_logger.get_logger(__name__)

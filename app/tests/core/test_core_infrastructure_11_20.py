@@ -144,7 +144,7 @@ class TestCustomExceptions:
     def test_authentication_error(self):
         """Test authentication-specific exceptions."""
         from app.core.exceptions_auth import AuthenticationError
-from app.core.error_codes import ErrorCode
+        from app.core.error_codes import ErrorCode
         
         exc = AuthenticationError("Invalid token")
         assert "Invalid token" in str(exc)

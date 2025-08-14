@@ -193,8 +193,80 @@
       "duration": 0
     },
     {
-      "timestamp": "2025-08-14T16:48:54.492917",
+      "timestamp": "2025-08-14T16:49:01.583953",
       "level": "smoke",
+      "total": 2,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T16:49:22.392514",
+      "level": "real_services",
+      "total": 1,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T16:49:37.723172",
+      "level": "smoke",
+      "total": 2,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T16:49:53.148727",
+      "level": "smoke",
+      "total": 2,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T16:50:10.281777",
+      "level": "real_services",
+      "total": 1,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T16:50:30.619114",
+      "level": "smoke",
+      "total": 2,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T16:50:51.001295",
+      "level": "smoke",
+      "total": 2,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T16:51:17.841348",
+      "level": "smoke",
+      "total": 7,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T16:51:30.336496",
+      "level": "comprehensive-database",
       "total": 0,
       "passed": 0,
       "failed": 0,
@@ -202,9 +274,9 @@
       "duration": 0
     },
     {
-      "timestamp": "2025-08-14T16:49:47.845224",
-      "level": "unit",
-      "total": 4,
+      "timestamp": "2025-08-14T16:52:28.860001",
+      "level": "comprehensive-api",
+      "total": 1,
       "passed": 0,
       "failed": 0,
       "coverage": null,

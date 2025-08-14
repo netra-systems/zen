@@ -1,6 +1,6 @@
 """Refactored DataSubAgent with modular architecture and no test code."""
 
-from typing import Dict, Optional, List, AsyncGenerator, Union
+from typing import Dict, Optional, List, AsyncGenerator, Union, Any
 from functools import lru_cache
 import json
 import asyncio
@@ -240,3 +240,40 @@ class DataSubAgent(BaseSubAgent):
             await websocket.send(json.dumps({"type": "data_result", "data": result}))
         except Exception as e:
             await websocket.send(json.dumps({"type": "error", "message": str(e)}))
+
+    def _validate_data(self, data: Dict[str, Any]) -> bool:
+        """Validate data has required fields."""
+        required_fields = ["input", "type", "timestamp"]
+        return all(field in data for field in required_fields)
+
+    async def _transform_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Transform data and preserve type."""
+        return {
+            "transformed": True,
+            "type": data.get("type", "unknown"),
+            "content": data.get("content", ""),
+            "original": data
+        }
+
+    async def enrich_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Enrich data with metadata."""
+        from datetime import datetime, timezone
+        enriched = data.copy()
+        enriched["metadata"] = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "source": data.get("source", "unknown"),
+            "enriched": True
+        }
+        return enriched
+
+    async def process_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Process individual data item."""
+        return {"status": "processed", "data": data}
+
+    async def process_batch(self, batch_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Process batch of data items."""
+        results = []
+        for item in batch_data:
+            result = await self.process_data(item)
+            results.append(result)
+        return results

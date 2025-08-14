@@ -32,7 +32,7 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "description": "Agent-specific unit tests (2-3 minutes)",
         "purpose": "Quick validation of agent functionality during development",
         "backend_args": [
-            "tests/test_data_sub_agent.py", 
+            "app/tests/agents/test_data_sub_agent.py", 
             "tests/test_actions_sub_agent.py",
             "-v", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}"
         ],

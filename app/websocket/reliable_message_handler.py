@@ -15,7 +15,7 @@ from app.core.reliability import (
 )
 from app.core.json_utils import prepare_websocket_message, safe_json_dumps
 from .validation import MessageValidator, default_message_validator
-from .error_handler import ErrorHandler, default_error_handler
+from .error_handler import WebSocketErrorHandler, default_error_handler
 from .connection import ConnectionInfo
 
 logger = central_logger.get_logger(__name__)
@@ -27,7 +27,7 @@ class ReliableMessageHandler:
     def __init__(
         self,
         validator: Optional[MessageValidator] = None,
-        error_handler: Optional[ErrorHandler] = None
+        error_handler: Optional[WebSocketErrorHandler] = None
     ):
         self.validator = validator or default_message_validator
         self.error_handler = error_handler or default_error_handler

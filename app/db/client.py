@@ -254,11 +254,11 @@ class ClickHouseDatabaseClient:
         circuit = await self._get_circuit()
         
         async def _execute_ch_query() -> List[Dict[str, Any]]:
-            # This would integrate with actual ClickHouse client
-            # For now, return placeholder
-            logger.info(f"Executing ClickHouse query: {query[:100]}...")
-            await asyncio.sleep(0.1)  # Simulate query execution
-            return []
+            """Execute ClickHouse query using configured client."""
+            from app.db.clickhouse import get_clickhouse_client
+            
+            async with get_clickhouse_client() as ch_client:
+                return await ch_client.execute_query(query, params)
         
         try:
             return await circuit.call(_execute_ch_query)

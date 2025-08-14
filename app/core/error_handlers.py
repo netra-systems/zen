@@ -53,8 +53,8 @@ class ErrorResponse(BaseModel):
     model_config = ConfigDict(use_enum_values=True)
 
 
-class ErrorHandler:
-    """Centralized error handling and logging utility."""
+class ApiErrorHandler:
+    """Centralized API error handling and logging utility for FastAPI."""
     
     def __init__(self):
         self._logger = central_logger.get_logger(__name__)
@@ -288,7 +288,7 @@ class ErrorHandler:
 
 
 # Global error handler instance
-_error_handler = ErrorHandler()
+_error_handler = ApiErrorHandler()
 
 
 def handle_exception(

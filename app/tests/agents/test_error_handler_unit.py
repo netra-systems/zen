@@ -9,19 +9,19 @@ from unittest.mock import Mock, AsyncMock, patch
 from dataclasses import asdict
 
 from app.agents.error_handler import (
-    ErrorHandler, 
+    AgentErrorHandler as ErrorHandler, 
     AgentError,
-    ValidationError,
+    AgentValidationError as ValidationError,
     NetworkError,
     DatabaseError, 
-    WebSocketError,
-    ErrorSeverity,
     ErrorCategory,
-    ErrorContext,
     ErrorRecoveryStrategy,
     global_error_handler,
     handle_agent_error
 )
+from app.core.exceptions_websocket import WebSocketError
+from app.core.error_codes import ErrorSeverity
+from app.schemas.shared_types import ErrorContext
 from app.tests.helpers.shared_test_types import TestErrorContext as SharedTestErrorContext
 
 

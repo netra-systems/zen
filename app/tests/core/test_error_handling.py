@@ -25,7 +25,7 @@ from app.core.exceptions import (
     WebSocketError,
 )
 from app.core.error_handlers import (
-    ErrorHandler,
+    ApiErrorHandler,
     ErrorResponse,
     handle_exception,
     get_http_status_code,
@@ -34,7 +34,7 @@ from app.core.error_handlers import (
     http_exception_handler,
     general_exception_handler,
 )
-from app.core.error_context import ErrorContext, ErrorContextManager, get_enriched_error_context
+from app.core.error_context import ErrorContext, AsyncErrorContextManager as ErrorContextManager, get_enriched_error_context
 
 
 class TestErrorCodes:
@@ -207,15 +207,15 @@ class TestNetraExceptions:
         assert exc.error_details.severity == ErrorSeverity.MEDIUM.value
 
 
-class TestErrorHandler:
-    """Test ErrorHandler class."""
+class TestApiErrorHandler:
+    """Test ApiErrorHandler class."""
     
     def setUp(self):
-        self.handler = ErrorHandler()
+        self.handler = ApiErrorHandler()
     
     def test_handle_netra_exception(self):
         """Test handling NetraException."""
-        handler = ErrorHandler()
+        handler = ApiErrorHandler()
         exc = ValidationError("Invalid input")
         
         response = handler.handle_exception(exc)
@@ -227,7 +227,7 @@ class TestErrorHandler:
     
     def test_handle_pydantic_validation_error(self):
         """Test handling Pydantic ValidationError."""
-        handler = ErrorHandler()
+        handler = ApiErrorHandler()
         
         # Create a mock Pydantic validation error
         errors = [
@@ -247,7 +247,7 @@ class TestErrorHandler:
     
     def test_handle_sqlalchemy_integrity_error(self):
         """Test handling SQLAlchemy IntegrityError."""
-        handler = ErrorHandler()
+        handler = ApiErrorHandler()
         exc = IntegrityError("statement", "params", "orig")
         
         response = handler._handle_sqlalchemy_error(exc, "trace-123", "req-123")
@@ -257,7 +257,7 @@ class TestErrorHandler:
     
     def test_handle_http_exception(self):
         """Test handling HTTPException."""
-        handler = ErrorHandler()
+        handler = ApiErrorHandler()
         exc = HTTPException(status_code=404, detail="Not found")
         
         response = handler._handle_http_exception(exc, "trace-123", "req-123")
@@ -268,7 +268,7 @@ class TestErrorHandler:
     
     def test_handle_unknown_exception(self):
         """Test handling unknown exception."""
-        handler = ErrorHandler()
+        handler = ApiErrorHandler()
         exc = ValueError("Unknown error")
         
         response = handler._handle_unknown_exception(exc, "trace-123", "req-123")
@@ -279,7 +279,7 @@ class TestErrorHandler:
     
     def test_get_http_status_code_mapping(self):
         """Test HTTP status code mapping."""
-        handler = ErrorHandler()
+        handler = ApiErrorHandler()
         
         assert handler.get_http_status_code(ErrorCode.AUTHENTICATION_FAILED) == 401
         assert handler.get_http_status_code(ErrorCode.AUTHORIZATION_FAILED) == 403
@@ -376,7 +376,7 @@ class TestErrorContext:
         assert context["additional"] == "data"
 
 
-class TestErrorHandlerFunctions:
+class TestApiErrorHandlerFunctions:
     """Test error handler functions."""
     
     def test_handle_exception_function(self):

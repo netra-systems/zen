@@ -78,16 +78,16 @@ async def mock_exception_check():
 
 def setup_all_check_mocks(checker, check_function):
     """Setup all checker methods with the same mock function."""
-    checker.check_environment_variables = AsyncMock(side_effect=check_function)
-    checker.check_configuration = AsyncMock(side_effect=check_function)
-    checker.check_file_permissions = AsyncMock(side_effect=check_function)
-    checker.check_database_connection = AsyncMock(side_effect=check_function)
-    checker.check_redis = AsyncMock(side_effect=check_function)
-    checker.check_clickhouse = AsyncMock(side_effect=check_function)
-    checker.check_llm_providers = AsyncMock(side_effect=check_function)
-    checker.check_memory_and_resources = AsyncMock(side_effect=check_function)
-    checker.check_network_connectivity = AsyncMock(side_effect=check_function)
-    checker.check_or_create_assistant = AsyncMock(side_effect=check_function)
+    checker.env_checker.check_environment_variables = AsyncMock(side_effect=check_function)
+    checker.env_checker.check_configuration = AsyncMock(side_effect=check_function)
+    checker.system_checker.check_file_permissions = AsyncMock(side_effect=check_function)
+    checker.db_checker.check_database_connection = AsyncMock(side_effect=check_function)
+    checker.service_checker.check_redis = AsyncMock(side_effect=check_function)
+    checker.service_checker.check_clickhouse = AsyncMock(side_effect=check_function)
+    checker.service_checker.check_llm_providers = AsyncMock(side_effect=check_function)
+    checker.system_checker.check_memory_and_resources = AsyncMock(side_effect=check_function)
+    checker.system_checker.check_network_connectivity = AsyncMock(side_effect=check_function)
+    checker.db_checker.check_or_create_assistant = AsyncMock(side_effect=check_function)
 
 
 def verify_check_results(results, expected_total=10, expected_passed=10, 
