@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-14T16:32:12.906246  
+**Generated:** 2025-08-14T16:43:20.846210  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 **Purpose:** Development validation, component testing
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 6.24s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 9.83s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.64s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,8 +27,8 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 6.24s
-- **Exit Code:** 4
+- **Total Duration:** 10.47s
+- **Exit Code:** 255
 
 ### Backend Configuration
 ```
@@ -60,7 +60,7 @@ Running command:
 ================================================================================
 Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 5.65s
+[FAIL] TESTS FAILED with exit code 4 after 9.00s
 [Coverage] Coverage Report: reports/coverage/html/index.html
 ================================================================================
 
@@ -93,15 +93,33 @@ app\schemas\strict_types.py:17: in <module>
     from app.schemas.shared_types import AgentExecutionResult
 app\schemas\shared_types.py:59: in <module>
     class BaseAgentInterface(ABC):
-app\schemas\shared_types.py:63: in BaseAgentInterface
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher) -> None:
-                                                                 ^^^^^^^^^^^^^^
-E   NameError: name 'ToolDispatcher' is not defined
+app\schemas\shared_types.py:67: in BaseAgentInterface
+    async def execute(self, state: 'DeepAgentState', session_id: str, **kwargs) -> Any:
+                                                                                   ^^^
+E   NameError: name 'Any' is not defined
 
 ```
 
 ### Frontend Output
 ```
+================================================================================
+NETRA AI PLATFORM - FRONTEND TEST RUNNER
+================================================================================
+
+================================================================================
+Running Jest Tests
+--------------------------------------------------------------------------------
+Running: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)
+--------------------------------------------------------------------------------
+
+================================================================================
+[FAIL] CHECKS FAILED with exit code 255
+================================================================================
+
+Cleaning up test processes...
+
+'hooks' is not recognized as an internal or external command,
+operable program or batch file.
 
 ```
 ---
