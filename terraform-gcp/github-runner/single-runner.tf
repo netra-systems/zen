@@ -164,90 +164,35 @@ install_dependencies() {
             log "WARNING: Docker not ready after $max_wait seconds, continuing without Docker"
         fi
     
-    # Install Docker buildx plugin
-    log "Installing Docker buildx plugin..."
-    mkdir -p /usr/local/lib/docker/cli-plugins
-    BUILDX_VERSION="0.11.2"
-    curl -L "https://github.com/docker/buildx/releases/download/v$${BUILDX_VERSION}/buildx-v$${BUILDX_VERSION}.linux-amd64" \
-        -o /usr/local/lib/docker/cli-plugins/docker-buildx
-    chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
-    
-    # Create symlink for all users
-    ln -sf /usr/local/lib/docker/cli-plugins/docker-buildx /usr/libexec/docker/cli-plugins/docker-buildx 2>/dev/null || true
-    
-    # Verify Docker is fully operational before creating buildx builder
-    log "Verifying Docker readiness before buildx setup..."
-    if docker run --rm hello-world &>/dev/null; then
-        log "Docker confirmed working with hello-world test"
-        
-        # Setup buildx with proper initialization
-        log "Setting up Docker buildx..."
-        
-        # Remove any existing builders first
-        docker buildx rm runner-builder 2>/dev/null || true
-        docker buildx rm default 2>/dev/null || true
-        
-        # Create new builder with retry logic
-        local buildx_retries=3
-        local buildx_success=false
-        
-        for i in $(seq 1 $buildx_retries); do
-            log "Attempting to create buildx builder (attempt $i/$buildx_retries)..."
+        # Install Docker buildx plugin if Docker is working
+        if [ "$docker_ready" = "true" ]; then
+            log "Installing Docker buildx plugin..."
+            mkdir -p /usr/local/lib/docker/cli-plugins
+            BUILDX_VERSION="0.11.2"
+            curl -L "https://github.com/docker/buildx/releases/download/v$${BUILDX_VERSION}/buildx-v$${BUILDX_VERSION}.linux-amd64" \
+                -o /usr/local/lib/docker/cli-plugins/docker-buildx || log "WARNING: Failed to download buildx"
+            chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx 2>/dev/null || true
             
-            if docker buildx create --name runner-builder --driver docker-container --use; then
-                # Bootstrap the builder to ensure it's ready
-                if docker buildx inspect runner-builder --bootstrap; then
-                    log "Buildx builder created and bootstrapped successfully"
-                    buildx_success=true
-                    break
-                else
-                    log "Builder created but bootstrap failed, retrying..."
-                    docker buildx rm runner-builder 2>/dev/null || true
-                fi
-            fi
+            # Create symlink for all users
+            ln -sf /usr/local/lib/docker/cli-plugins/docker-buildx /usr/libexec/docker/cli-plugins/docker-buildx 2>/dev/null || true
             
-            [ $i -lt $buildx_retries ] && sleep 5
-        done
-        
-        if [ "$buildx_success" != "true" ]; then
-            log "WARNING: Could not fully setup buildx builder, will be configured later"
-            # Use default builder as fallback
-            docker buildx use default 2>/dev/null || true
+            # Try to setup buildx builder
+            log "Setting up Docker buildx..."
+            docker buildx create --name runner-builder --driver docker-container --use 2>/dev/null || {
+                log "WARNING: Buildx builder creation failed, will use default"
+                docker buildx use default 2>/dev/null || true
+            }
+        else
+            log "Skipping buildx setup as Docker is not available"
         fi
     else
-        log "WARNING: Docker not fully ready, skipping buildx builder creation"
+        log "Docker not installed, skipping Docker configuration"
     fi
     
     log "Dependencies installed successfully"
 }
 
-# Step 2: Create and configure runner user
-create_runner_user() {
-    log "Creating runner user..."
-    
-    if ! id "$RUNNER_USER" &>/dev/null; then
-        useradd -m -s /bin/bash $RUNNER_USER
-    fi
-    
-    # Add to docker group
-    usermod -aG docker $RUNNER_USER
-    
-    # Fix Docker permissions
-    chgrp docker /var/run/docker.sock || true
-    chmod 660 /var/run/docker.sock || true
-    
-    # Verify Docker access
-    log "Verifying runner Docker access..."
-    systemctl restart docker
-    sleep 5
-    
-    if su - $RUNNER_USER -c "docker version" &>/dev/null; then
-        log "Runner user has Docker access"
-    else
-        log "WARNING: Runner user Docker access needs fixing"
-        chmod 666 /var/run/docker.sock
-    fi
-}
+# Removed - handled in main function now
 
 # Step 3: Get GitHub token from Secret Manager
 get_github_token() {
@@ -335,59 +280,33 @@ configure_runner() {
     su - $RUNNER_USER -c "cd $RUNNER_DIR && $CONFIG_CMD"
 }
 
-# Step 7: Install as service with Docker verification
+# Step 7: Install as service
 install_service() {
     log "Installing runner as service..."
     
-    # Final Docker check before starting service
-    log "Final Docker verification..."
-    if ! su - $RUNNER_USER -c "docker version" &>/dev/null; then
-        log "Applying final Docker fixes..."
-        systemctl restart docker
-        chmod 666 /var/run/docker.sock
-        sleep 5
-    fi
-    
-    # Setup buildx for runner user with proper error handling
-    log "Setting up Docker buildx for runner user..."
-    
-    # First ensure buildx is available to runner user
-    if ! su - $RUNNER_USER -c "docker buildx version" &>/dev/null; then
-        log "Installing buildx for runner user..."
-        mkdir -p $RUNNER_HOME/.docker/cli-plugins
-        cp /usr/local/lib/docker/cli-plugins/docker-buildx $RUNNER_HOME/.docker/cli-plugins/
-        chown -R $RUNNER_USER:$RUNNER_USER $RUNNER_HOME/.docker
-        chmod +x $RUNNER_HOME/.docker/cli-plugins/docker-buildx
-    fi
-    
-    # Setup buildx builder for runner
-    if su - $RUNNER_USER -c "docker buildx version" &>/dev/null; then
-        log "Docker buildx is accessible by runner"
-        
-        # Check and setup builder
-        if su - $RUNNER_USER -c "docker buildx ls | grep -q runner-builder" 2>/dev/null; then
-            log "Using existing runner-builder"
-            su - $RUNNER_USER -c "docker buildx use runner-builder" 2>/dev/null || {
-                log "Could not use existing builder, recreating..."
-                su - $RUNNER_USER -c "docker buildx rm runner-builder" 2>/dev/null || true
-                su - $RUNNER_USER -c "docker buildx create --name runner-builder --driver docker-container --use" 2>/dev/null || true
-            }
-        else
-            log "Creating buildx builder for runner user..."
-            su - $RUNNER_USER -c "docker buildx create --name runner-builder --driver docker-container --use" 2>/dev/null || {
-                log "WARNING: Buildx builder creation failed, using default"
-                su - $RUNNER_USER -c "docker buildx use default" 2>/dev/null || true
-            }
+    # Only setup Docker if it's available
+    if command -v docker &>/dev/null; then
+        log "Checking Docker access for runner user..."
+        if ! su - $RUNNER_USER -c "docker version" &>/dev/null; then
+            log "Setting up Docker access for runner..."
+            chmod 666 /var/run/docker.sock 2>/dev/null || true
         fi
         
-        # Verify builder is working
-        if su - $RUNNER_USER -c "docker buildx inspect --bootstrap" &>/dev/null; then
-            log "Buildx builder verified and ready"
-        else
-            log "WARNING: Buildx builder may need manual configuration"
+        # Try to setup buildx for runner user
+        if [ -f /usr/local/lib/docker/cli-plugins/docker-buildx ]; then
+            log "Setting up Docker buildx for runner user..."
+            mkdir -p $RUNNER_HOME/.docker/cli-plugins
+            cp /usr/local/lib/docker/cli-plugins/docker-buildx $RUNNER_HOME/.docker/cli-plugins/ 2>/dev/null || true
+            chown -R $RUNNER_USER:$RUNNER_USER $RUNNER_HOME/.docker 2>/dev/null || true
+            chmod +x $RUNNER_HOME/.docker/cli-plugins/docker-buildx 2>/dev/null || true
+            
+            # Try to create builder for runner
+            su - $RUNNER_USER -c "docker buildx create --name runner-builder --driver docker-container --use" 2>/dev/null || {
+                log "WARNING: Buildx setup failed for runner, Docker builds may not work"
+            }
         fi
     else
-        log "WARNING: Docker buildx still not accessible by runner user"
+        log "Docker not available, runner will work without Docker support"
     fi
     
     cd $RUNNER_DIR
@@ -484,25 +403,31 @@ main() {
         log "✓ GitHub runner service is running"
     else
         log "✗ GitHub runner service failed to start"
-        systemctl status actions.runner.* --no-pager
+        systemctl status actions.runner.* --no-pager || true
     fi
     
-    if su - $RUNNER_USER -c "docker version" &>/dev/null; then
-        log "✓ Docker is accessible by runner"
+    # Check Docker only if it was installed
+    if command -v docker &>/dev/null; then
+        if su - $RUNNER_USER -c "docker version" &>/dev/null; then
+            log "✓ Docker is accessible by runner"
+            
+            if su - $RUNNER_USER -c "docker buildx version" &>/dev/null; then
+                log "✓ Docker buildx is available"
+            else
+                log "○ Docker buildx not configured"
+            fi
+        else
+            log "○ Docker installed but not accessible by runner"
+        fi
     else
-        log "✗ Docker access issue detected"
-    fi
-    
-    if su - $RUNNER_USER -c "docker buildx version" &>/dev/null; then
-        log "✓ Docker buildx is available"
-    else
-        log "✗ Docker buildx not available"
+        log "○ Docker not installed (runner will work without Docker support)"
     fi
     
     log "==================================================="
     log "GitHub runner installation completed!"
     log "Instance: $(hostname)"
     log "Logs: $LOG_FILE"
+    log "==================================================="
 }
 
 # Run main
