@@ -225,7 +225,7 @@ class DatabaseConnectionError(NetraException):
 class RecordNotFoundError(NetraException):
     """Raised when a requested record is not found."""
     
-    def __init__(self, resource: str = None, identifier: Any = None, **kwargs):
+    def __init__(self, resource: str = None, identifier: Optional[Union[str, int]] = None, **kwargs):
         message = f"{resource} not found"
         if identifier:
             message += f" (ID: {identifier})"
@@ -243,7 +243,7 @@ class RecordNotFoundError(NetraException):
 class RecordAlreadyExistsError(NetraException):
     """Raised when trying to create a record that already exists."""
     
-    def __init__(self, resource: str = None, identifier: Any = None, **kwargs):
+    def __init__(self, resource: str = None, identifier: Optional[Union[str, int]] = None, **kwargs):
         message = f"{resource} already exists"
         if identifier:
             message += f" (ID: {identifier})"
@@ -501,7 +501,7 @@ class DataParsingError(NetraException):
 class DataValidationError(ValidationError):
     """Raised when data validation fails."""
     
-    def __init__(self, field: str = None, value: Any = None, **kwargs):
+    def __init__(self, field: str = None, value: Optional[Union[str, int, float, bool, dict, list]] = None, **kwargs):
         details = kwargs.get('details', {})
         if field:
             details["field"] = field

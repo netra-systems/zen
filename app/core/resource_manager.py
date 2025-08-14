@@ -17,7 +17,8 @@ class ResourceTracker:
     """Tracks and manages application resources."""
     
     def __init__(self):
-        self._resources: Dict[str, Any] = {}
+        # Using object as the resource type since we store any type of resource
+        self._resources: Dict[str, object] = {}
         self._cleanup_callbacks: Dict[str, Callable[[], Any]] = {}
         self._shutdown_order: List[str] = []
         self._shutdown_in_progress = False
@@ -25,7 +26,7 @@ class ResourceTracker:
     def register(
         self, 
         name: str, 
-        resource: Any, 
+        resource: object, 
         cleanup_callback: Optional[Callable[[], Any]] = None,
         shutdown_priority: int = 0
     ):
@@ -169,7 +170,7 @@ class ApplicationLifecycle:
     def register_resource(
         self,
         name: str,
-        resource: Any,
+        resource: object,
         cleanup_callback: Optional[Callable[[], Any]] = None,
         shutdown_priority: int = 0
     ):
@@ -355,7 +356,7 @@ def get_app_lifecycle() -> ApplicationLifecycle:
 
 def register_resource(
     name: str,
-    resource: Any,
+    resource: object,
     cleanup_callback: Optional[Callable[[], Any]] = None,
     shutdown_priority: int = 0
 ):
