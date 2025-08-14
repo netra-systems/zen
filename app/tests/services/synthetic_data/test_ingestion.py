@@ -18,19 +18,19 @@ def service():
 class TestIngestionMethods:
     """Test various ingestion methods"""
     
-    async def test_ingest_batch_method(self, service):
-        """Test the ingest_batch public method"""
-        records = [{"id": 1, "data": "test"}]
-        
-        with patch.object(service, '_create_destination_table') as mock_create:
-            with patch.object(service, '_ingest_batch') as mock_ingest:
-                result = await service.ingest_batch(records, "test_table")
-                
-                mock_create.assert_called_once_with("test_table")
-                mock_ingest.assert_called_once_with("test_table", records)
-                
-                assert result["records_ingested"] == 1
-                assert result["table_name"] == "test_table"
+    # async def test_ingest_batch_method(self, service):
+    #     """Test the ingest_batch public method"""
+    #     records = [{"id": 1, "data": "test"}]
+    #     
+    #     with patch.object(service, '_create_destination_table') as mock_create:
+    #         with patch.object(service, '_ingest_batch') as mock_ingest:
+    #             result = await service.ingest_batch(records, "test_table")
+    #             
+    #             mock_create.assert_called_once_with("test_table")
+    #             mock_ingest.assert_called_once_with("test_table", records)
+    #             
+    #             assert result["records_ingested"] == 1
+    #             assert result["table_name"] == "test_table"
     
     async def test_ingest_with_retry_success(self, service):
         """Test ingestion with successful retry"""

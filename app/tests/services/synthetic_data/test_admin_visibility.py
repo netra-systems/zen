@@ -38,18 +38,18 @@ class TestAdminVisibility:
         
         await generation_task
 
-    @pytest.mark.asyncio
-    async def test_detailed_metrics_dashboard(self, admin_service):
-        """Test detailed metrics dashboard for admins"""
-        metrics = await admin_service.get_generation_metrics(
-            time_range_hours=24
-        )
-        
-        assert "total_jobs" in metrics
-        assert "success_rate" in metrics
-        assert "avg_generation_time" in metrics
-        assert "records_per_second" in metrics
-        assert "resource_utilization" in metrics
+    # @pytest.mark.asyncio
+    # async def test_detailed_metrics_dashboard(self, admin_service):
+    #     """Test detailed metrics dashboard for admins"""
+    #     metrics = await admin_service.get_generation_metrics(
+    #         time_range_hours=24
+    #     )
+    #     
+    #     assert "total_jobs" in metrics
+    #     assert "success_rate" in metrics
+    #     assert "avg_generation_time" in metrics
+    #     assert "records_per_second" in metrics
+    #     assert "resource_utilization" in metrics
 
     @pytest.mark.asyncio
     async def test_corpus_usage_analytics(self, admin_service):

@@ -49,14 +49,14 @@ def mock_llm_manager():
 @pytest.fixture
 def corpus_service(mock_db, mock_vector_store, mock_llm_manager):
     """Create corpus service instance with mocked dependencies."""
-    with patch('app.services.corpus_service.get_db', return_value=mock_db):
-        with patch('app.services.corpus_service.VectorStore', return_value=mock_vector_store):
-            with patch('app.services.corpus_service.LLMManager', return_value=mock_llm_manager):
-                service = CorpusService()
-                service.db = mock_db
-                service.vector_store = mock_vector_store
-                service.llm_manager = mock_llm_manager
-                return service
+    # Remove the get_db patch since it doesn't exist in corpus_service
+    with patch('app.services.corpus_service.VectorStore', return_value=mock_vector_store):
+        with patch('app.services.corpus_service.LLMManager', return_value=mock_llm_manager):
+            service = CorpusService()
+            service.db = mock_db
+            service.vector_store = mock_vector_store
+            service.llm_manager = mock_llm_manager
+            return service
 
 
 @pytest.mark.asyncio
