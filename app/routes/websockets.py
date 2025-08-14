@@ -106,7 +106,7 @@ async def websocket_endpoint(
                 # Receive message with timeout to allow periodic health checks
                 data = await asyncio.wait_for(
                     websocket.receive_text(),
-                    timeout=manager.HEARTBEAT_TIMEOUT
+                    timeout=30  # 30 second timeout for heartbeat
                 )
                 
                 # Handle pong responses
@@ -134,7 +134,7 @@ async def websocket_endpoint(
                 
             except asyncio.TimeoutError:
                 # Check if connection is still alive
-                if not manager._is_connection_alive(conn_info):
+                if not manager.connection_manager.is_connection_alive(conn_info):
                     logger.warning(f"Connection timeout for user {user_id_str}")
                     break
                 continue
@@ -147,6 +147,6 @@ async def websocket_endpoint(
         await manager.disconnect(user_id_str, websocket, code=1011, reason="Server error")
     finally:
         # Ensure cleanup happens
-        if user_id_str and user_id_str in manager.active_connections:
-            if any(conn.websocket == websocket for conn in manager.active_connections.get(user_id_str, [])):
+        if user_id_str and user_id_str in manager.connection_manager.active_connections:
+            if any(conn.websocket == websocket for conn in manager.connection_manager.active_connections.get(user_id_str, [])):
                 await manager.disconnect(user_id_str, websocket)

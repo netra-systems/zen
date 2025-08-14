@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode, useCa
 import { webSocketService, WebSocketStatus } from '../services/webSocketService';
 import { WebSocketMessage } from '../types/backend_schema_auto_generated';
 import { config as appConfig } from '@/config';
+import { logger } from '@/lib/logger';
 
 interface WebSocketContextType {
   status: WebSocketStatus;
@@ -79,7 +80,10 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           };
           
         } catch (error) {
-          console.error('Failed to fetch config and connect to WebSocket', error);
+          logger.error('Failed to fetch config and connect to WebSocket', error as Error, {
+            component: 'WebSocketProvider',
+            action: 'fetch_config_and_connect'
+          });
         } finally {
           isConnectingRef.current = false;
         }

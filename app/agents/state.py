@@ -9,7 +9,7 @@
 # Review: Pending | Score: 85
 # ================================
 from typing import Any, Dict, List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class DeepAgentState(BaseModel):
     user_request: str
@@ -24,3 +24,8 @@ class DeepAgentState(BaseModel):
     supply_research_result: Optional[Dict[str, Any]] = None
     final_report: Optional[str] = None
     step_count: int = 0  # Added for agent tracking
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert state to dictionary."""
+        return self.model_dump(exclude_none=True)

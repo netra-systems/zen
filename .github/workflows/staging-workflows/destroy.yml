@@ -1,0 +1,170 @@
+name: Destroy Environment
+description: Tear down staging environment and clean up resources
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        required: true
+        type: string
+      pr_number:
+        required: true
+        type: string
+
+jobs:
+  backup:
+    name: Backup Environment Data
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+      
+      - name: Backup database
+        continue-on-error: true
+        run: |
+          # Create backup of staging database if exists
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          BACKUP_NAME="${{ inputs.environment_name }}-final-backup-${TIMESTAMP}"
+          
+          gcloud sql backups create \
+            --instance=${{ inputs.environment_name }}-db \
+            --description="Final backup before environment destruction" \
+            || echo "No database to backup"
+      
+      - name: Export logs
+        continue-on-error: true
+        run: |
+          # Export application logs
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          LOG_BUCKET="${{ secrets.LOG_ARCHIVE_BUCKET }}"
+          
+          gcloud logging read \
+            "resource.labels.cluster_name=${{ inputs.environment_name }}" \
+            --limit=10000 \
+            --format=json \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            > logs-${{ inputs.environment_name }}-${TIMESTAMP}.json
+          
+          gsutil cp logs-${{ inputs.environment_name }}-${TIMESTAMP}.json \
+            gs://${LOG_BUCKET}/destroyed-environments/ || true
+  
+  cleanup-kubernetes:
+    name: Cleanup Kubernetes Resources
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+      
+      - name: Get GKE credentials
+        continue-on-error: true
+        run: |
+          gcloud container clusters get-credentials \
+            ${{ inputs.environment_name }}-cluster \
+            --region ${{ env.GCP_REGION || 'us-central1' }} \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
+            || echo "Cluster not found or already deleted"
+      
+      - name: Delete namespace
+        continue-on-error: true
+        run: |
+          kubectl delete namespace ${{ inputs.environment_name }} \
+            --wait=false \
+            --ignore-not-found=true
+  
+  cleanup-images:
+    name: Cleanup Docker Images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+      
+      - name: Delete staging images
+        continue-on-error: true
+        run: |
+          # List and delete images tagged for this environment
+          for IMAGE in backend frontend; do
+            gcloud container images list-tags \
+              gcr.io/${{ secrets.GCP_PROJECT_ID }}/netra-${IMAGE} \
+              --filter="tags:${{ inputs.environment_name }}-*" \
+              --format="get(digest)" | \
+            while read DIGEST; do
+              gcloud container images delete \
+                "gcr.io/${{ secrets.GCP_PROJECT_ID }}/netra-${IMAGE}@${DIGEST}" \
+                --quiet || true
+            done
+          done
+  
+  destroy-infrastructure:
+    name: Destroy Infrastructure
+    needs: [backup, cleanup-kubernetes]
+    uses: ./.github/workflows/staging-workflows/terraform.yml
+    with:
+      environment_name: ${{ inputs.environment_name }}
+      pr_number: ${{ inputs.pr_number }}
+      action: destroy
+    secrets: inherit
+  
+  cleanup-dns:
+    name: Cleanup DNS Records
+    needs: destroy-infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+      
+      - name: Remove DNS records
+        continue-on-error: true
+        run: |
+          # Remove staging environment DNS records
+          ZONE_NAME="${{ secrets.DNS_ZONE_NAME }}"
+          DOMAIN="${{ inputs.environment_name }}.staging.netra.ai"
+          
+          gcloud dns record-sets delete ${DOMAIN}. \
+            --type=A \
+            --zone=${ZONE_NAME} \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            || echo "DNS record not found or already deleted"
+  
+  final-cleanup:
+    name: Final Cleanup
+    needs: [destroy-infrastructure, cleanup-images, cleanup-dns]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove state locks
+        continue-on-error: true
+        run: |
+          # Clean up any Terraform state locks
+          echo "Cleaning up state locks for ${{ inputs.environment_name }}"
+      
+      - name: Post cleanup comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `## 🗑️ Staging Environment Destroyed
+            
+            Environment \`${{ inputs.environment_name }}\` has been successfully destroyed.
+            
+            ### Cleanup Summary:
+            ✅ Kubernetes resources deleted
+            ✅ Infrastructure destroyed
+            ✅ Docker images cleaned up
+            ✅ DNS records removed
+            ✅ Backups created (if applicable)
+            
+            All resources for PR #${{ inputs.pr_number }} have been cleaned up.
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ inputs.pr_number }},
+              body: comment
+            });

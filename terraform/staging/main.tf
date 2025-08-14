@@ -1,6 +1,5 @@
 # Optimized Staging Terraform Configuration
-# Uses shared infrastructure for fast PR environment provisioning
-# Provisioning time: ~2-3 minutes vs 15-20 minutes
+# Addresses slow planning issues and uses shared infrastructure efficiently
 
 terraform {
   required_version = ">= 1.5.0"
@@ -10,10 +9,14 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 5.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
   
   backend "gcs" {
-    # Configured dynamically
+    # Configured dynamically in CI/CD
   }
 }
 
@@ -22,8 +25,10 @@ provider "google" {
   region  = var.region
 }
 
-# Data source to get shared infrastructure
+# Use data source with count to conditionally read remote state
+# This avoids unnecessary API calls during destroy operations
 data "terraform_remote_state" "shared" {
+  count   = var.action == "destroy" ? 0 : 1
   backend = "gcs"
   config = {
     bucket = "${var.project_id}-terraform-state"
@@ -34,390 +39,292 @@ data "terraform_remote_state" "shared" {
 locals {
   environment_name = "pr-${var.pr_number}"
   
-  # Use data from shared infrastructure
-  vpc_id                  = data.terraform_remote_state.shared.outputs.vpc_id
-  vpc_connector_id        = data.terraform_remote_state.shared.outputs.vpc_connector_id
-  sql_instance_name       = data.terraform_remote_state.shared.outputs.sql_instance_name
-  sql_instance_connection = data.terraform_remote_state.shared.outputs.sql_instance_connection
-  redis_host              = data.terraform_remote_state.shared.outputs.redis_host
-  redis_port              = data.terraform_remote_state.shared.outputs.redis_port
-  ssl_certificate_id      = data.terraform_remote_state.shared.outputs.ssl_certificate_id
-  service_account         = data.terraform_remote_state.shared.outputs.service_account_email
+  # Handle conditional remote state access
+  has_shared = length(data.terraform_remote_state.shared) > 0
+  
+  # Use try() to gracefully handle missing remote state
+  vpc_id                  = try(data.terraform_remote_state.shared[0].outputs.vpc_id, "")
+  vpc_connector_id        = try(data.terraform_remote_state.shared[0].outputs.vpc_connector_id, "")
+  sql_instance_name       = try(data.terraform_remote_state.shared[0].outputs.sql_instance_name, "staging-shared-postgres")
+  sql_instance_connection = try(data.terraform_remote_state.shared[0].outputs.sql_instance_connection, "${var.project_id}:${var.region}:staging-shared-postgres")
+  redis_host              = try(data.terraform_remote_state.shared[0].outputs.redis_host, "10.0.0.10")
+  redis_port              = try(data.terraform_remote_state.shared[0].outputs.redis_port, 6379)
+  service_account         = try(data.terraform_remote_state.shared[0].outputs.service_account_email, "staging-sa@${var.project_id}.iam.gserviceaccount.com")
+  
+  # Calculate Redis DB index
+  redis_db_index = tonumber(regex("[0-9]+", var.pr_number)[0]) % 16
 }
 
-# Only create database and user (seconds vs minutes)
+# Generate random password if not provided
+resource "random_password" "postgres" {
+  count   = var.postgres_password == "" ? 1 : 0
+  length  = 32
+  special = true
+}
+
+# Database resources - these are fast to create/destroy
 resource "google_sql_database" "pr" {
-  name     = "netra_${local.environment_name}"
+  count    = var.action != "destroy" ? 1 : 0
+  name     = "netra_${replace(local.environment_name, "-", "_")}"
   instance = local.sql_instance_name
+  
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "google_sql_user" "pr" {
-  name     = "user_${local.environment_name}"
+  count    = var.action != "destroy" ? 1 : 0
+  name     = "user_${replace(local.environment_name, "-", "_")}"
   instance = local.sql_instance_name
-  password = var.postgres_password
+  password = coalesce(var.postgres_password, try(random_password.postgres[0].result, "staging-default-password"))
+  
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
-# Create PR-specific Redis database index
-locals {
-  # Use PR number mod 16 to get a Redis database index (0-15)
-  redis_db_index = tonumber(var.pr_number) % 16
-}
-
-# Cloud Run service for backend (fast deployment)
-resource "google_cloud_run_service" "backend" {
+# Cloud Run Backend Service
+resource "google_cloud_run_v2_service" "backend" {
+  count    = var.action != "destroy" ? 1 : 0
   name     = "backend-${local.environment_name}"
   location = var.region
   
   template {
-    spec {
-      service_account_name = local.service_account
+    service_account = local.service_account
+    
+    # Use higher parallelism for faster startup
+    max_instance_request_concurrency = 100
+    
+    scaling {
+      min_instance_count = var.min_instances
+      max_instance_count = var.max_instances
+    }
+    
+    vpc_access {
+      connector = local.vpc_connector_id
+      egress    = "ALL_TRAFFIC"
+    }
+    
+    containers {
+      image = var.backend_image
       
-      containers {
-        image = var.backend_image
-        
-        ports {
-          container_port = 8080
+      ports {
+        container_port = 8080
+      }
+      
+      # Optimized resource allocation
+      resources {
+        limits = {
+          cpu    = var.cpu_limit
+          memory = var.memory_limit
         }
-        
-        env {
-          name  = "DATABASE_URL"
-          value = "postgresql://${google_sql_user.pr.name}:${var.postgres_password}@/${google_sql_database.pr.name}?host=/cloudsql/${local.sql_instance_connection}&sslmode=disable"
+        cpu_idle          = true
+        startup_cpu_boost = true
+      }
+      
+      # Environment variables
+      dynamic "env" {
+        for_each = {
+          DATABASE_URL = "postgresql://${try(google_sql_user.pr[0].name, "")}:${coalesce(var.postgres_password, try(random_password.postgres[0].result, ""))}@/${try(google_sql_database.pr[0].name, "")}?host=/cloudsql/${local.sql_instance_connection}&sslmode=disable"
+          REDIS_URL    = "redis://${local.redis_host}:${local.redis_port}/${local.redis_db_index}"
+          REDIS_HOST   = local.redis_host
+          REDIS_PORT   = tostring(local.redis_port)
+          REDIS_DB     = tostring(local.redis_db_index)
+          PR_NUMBER    = var.pr_number
+          ENVIRONMENT  = "staging"
+          
+          # ClickHouse configuration
+          CLICKHOUSE_URL      = coalesce(var.clickhouse_url, "clickhouse://default:${var.clickhouse_password}@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=1")
+          CLICKHOUSE_HOST     = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+          CLICKHOUSE_PORT     = "8443"
+          CLICKHOUSE_SECURE   = "true"
+          CLICKHOUSE_TIMEOUT  = "60"
+          CLICKHOUSE_PASSWORD = var.clickhouse_password
+          CLICKHOUSE_USER     = "default"
+          
+          # GCP configuration
+          GCP_PROJECT_ID                  = var.project_id
+          GCP_PROJECT_ID_NUMERICAL_STAGING = var.project_id_numerical
+          SECRET_MANAGER_PROJECT          = var.project_id
+          LOAD_SECRETS                    = "true"
+          
+          # Database settings
+          POSTGRES_HOST     = "/cloudsql/${local.sql_instance_connection}"
+          POSTGRES_DB       = try(google_sql_database.pr[0].name, "")
+          POSTGRES_USER     = try(google_sql_user.pr[0].name, "")
+          POSTGRES_PASSWORD = coalesce(var.postgres_password, try(random_password.postgres[0].result, ""))
+          
+          # Auth configuration
+          JWT_SECRET_KEY = coalesce(var.jwt_secret_key, "staging-jwt-secret-key-${var.pr_number}")
+          FERNET_KEY     = coalesce(var.fernet_key, "ZmVybmV0LXN0YWdpbmcta2V5LXBsYWNlaG9sZGVyLTEyMw==")
+          GEMINI_API_KEY = coalesce(var.gemini_api_key, "staging-gemini-api-key-placeholder")
+          
+          # Performance settings
+          SKIP_MIGRATION_ON_STARTUP    = "true"
+          SKIP_CLICKHOUSE_INIT        = "false"
+          CLICKHOUSE_CONNECT_TIMEOUT  = "30"
+          LOG_LEVEL                   = "INFO"
         }
-        
-        env {
-          name  = "REDIS_URL"
-          value = "redis://${local.redis_host}:${local.redis_port}/${local.redis_db_index}"
+        content {
+          name  = env.key
+          value = env.value
         }
+      }
+      
+      # Optimized health checks
+      startup_probe {
+        initial_delay_seconds = 10
+        timeout_seconds       = 5
+        period_seconds        = 5
+        failure_threshold     = 10
         
-        env {
-          name  = "REDIS_HOST"
-          value = local.redis_host
+        http_get {
+          path = "/health"
+          port = 8080
         }
+      }
+      
+      liveness_probe {
+        initial_delay_seconds = 30
+        timeout_seconds       = 5
+        period_seconds        = 30
+        failure_threshold     = 3
         
-        env {
-          name  = "REDIS_PORT"
-          value = tostring(local.redis_port)
-        }
-        
-        env {
-          name  = "REDIS_DB"
-          value = tostring(local.redis_db_index)
-        }
-        
-        env {
-          name  = "PR_NUMBER"
-          value = var.pr_number
-        }
-        
-        env {
-          name  = "ENVIRONMENT"
-          value = "staging"
-        }
-        
-        env {
-          name  = "CLICKHOUSE_URL"
-          value = var.clickhouse_url != "" ? var.clickhouse_url : "clickhouse://default:${var.clickhouse_password}@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=1"
-        }
-        
-        env {
-          name  = "CLICKHOUSE_HOST"
-          value = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
-        }
-        
-        env {
-          name  = "CLICKHOUSE_PORT"
-          value = "8443"
-        }
-        
-        env {
-          name  = "CLICKHOUSE_SECURE"
-          value = "true"
-        }
-        
-        env {
-          name  = "CLICKHOUSE_TIMEOUT"
-          value = "60"
-        }
-        
-        env {
-          name  = "CLICKHOUSE_PASSWORD"
-          value = var.clickhouse_password
-        }
-        
-        env {
-          name  = "CLICKHOUSE_DEFAULT_PASSWORD"
-          value = var.clickhouse_password
-        }
-        
-        env {
-          name  = "CLICKHOUSE_USER"
-          value = "default"
-        }
-        
-        env {
-          name  = "SKIP_MIGRATION_ON_STARTUP"
-          value = "true"  # Migrations are run separately in the workflow
-        }
-        
-        env {
-          name  = "LOG_LEVEL"
-          value = "INFO"
-        }
-        
-        env {
-          name  = "SKIP_CLICKHOUSE_INIT"
-          value = "false"
-        }
-        
-        env {
-          name  = "CLICKHOUSE_CONNECT_TIMEOUT"
-          value = "30"  # Increase connection timeout
-        }
-        
-        env {
-          name  = "GCP_PROJECT_ID"
-          value = var.project_id
-        }
-        
-        env {
-          name  = "LOAD_SECRETS"
-          value = "true"
-        }
-        
-        env {
-          name  = "SECRET_MANAGER_PROJECT"
-          value = var.project_id
-        }
-        
-        env {
-          name  = "GCP_PROJECT_ID_NUMERICAL_STAGING"
-          value = var.project_id_numerical  # Numerical project ID for Secret Manager
-        }
-        
-        # Database connection settings for PR isolation
-        env {
-          name  = "POSTGRES_HOST"
-          value = "/cloudsql/${local.sql_instance_connection}"
-        }
-        
-        env {
-          name  = "POSTGRES_DB"
-          value = google_sql_database.pr.name
-        }
-        
-        env {
-          name  = "POSTGRES_USER"
-          value = google_sql_user.pr.name
-        }
-        
-        env {
-          name  = "POSTGRES_PASSWORD"
-          value = var.postgres_password
-        }
-        
-        # Authentication keys for staging - these should be overridden with proper secrets in production
-        env {
-          name  = "JWT_SECRET_KEY"
-          value = var.jwt_secret_key != "" ? var.jwt_secret_key : "staging-jwt-secret-key-${var.pr_number}"
-        }
-        
-        env {
-          name  = "FERNET_KEY"
-          value = var.fernet_key != "" ? var.fernet_key : "ZmVybmV0LXN0YWdpbmcta2V5LXBsYWNlaG9sZGVyLTEyMw=="  # Base64 encoded staging key
-        }
-        
-        # Gemini API key - required for LLM operations
-        # In production this should come from Secret Manager, but for staging we use a placeholder
-        env {
-          name  = "GEMINI_API_KEY"
-          value = var.gemini_api_key != "" ? var.gemini_api_key : "staging-gemini-api-key-placeholder"
-        }
-        
-        # Note: All other secrets including real Gemini API key should be loaded from Secret Manager at runtime
-        # The service account needs access to these secrets in the staging project
-        
-        resources {
-          limits = {
-            cpu    = var.cpu_limit
-            memory = var.memory_limit
-          }
-        }
-        
-        startup_probe {
-          http_get {
-            path = "/health"
-            port = 8080
-          }
-          initial_delay_seconds = 30
-          timeout_seconds       = 10
-          period_seconds        = 10
-          failure_threshold     = 30
-        }
-        
-        liveness_probe {
-          http_get {
-            path = "/health"
-            port = 8080
-          }
-          initial_delay_seconds = 60
-          timeout_seconds       = 10
-          period_seconds        = 30
-          failure_threshold     = 5
+        http_get {
+          path = "/health"
+          port = 8080
         }
       }
     }
     
-    metadata {
-      annotations = {
-        "autoscaling.knative.dev/minScale"        = var.min_instances
-        "autoscaling.knative.dev/maxScale"        = var.max_instances
-        "run.googleapis.com/vpc-access-connector" = local.vpc_connector_id
-        "run.googleapis.com/vpc-access-egress"    = "all-traffic"
-        "run.googleapis.com/cloudsql-instances"   = local.sql_instance_connection
-        "run.googleapis.com/startup-cpu-boost"    = "true"
-      }
+    # Cloud SQL connection
+    annotations = {
+      "run.googleapis.com/cloudsql-instances" = local.sql_instance_connection
     }
   }
   
-  traffic {
-    percent         = 100
-    latest_revision = true
+  # Fast provisioning settings
+  lifecycle {
+    create_before_destroy = false
+    ignore_changes        = [template[0].annotations["run.googleapis.com/client-name"]]
   }
   
-  # Fast provisioning timeout
   timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "2m"
+    create = "3m"
+    update = "3m"
+    delete = "1m"
   }
 }
 
-# Cloud Run service for frontend
-resource "google_cloud_run_service" "frontend" {
+# Cloud Run Frontend Service
+resource "google_cloud_run_v2_service" "frontend" {
+  count    = var.action != "destroy" ? 1 : 0
   name     = "frontend-${local.environment_name}"
   location = var.region
   
   template {
-    spec {
-      service_account_name = local.service_account
-      
-      containers {
-        image = var.frontend_image
-        
-        ports {
-          container_port = 8080
-        }
-        
-        env {
-          name  = "NEXT_PUBLIC_API_URL"
-          value = google_cloud_run_service.backend.status[0].url
-        }
-        
-        resources {
-          limits = {
-            cpu    = "1"
-            memory = "512Mi"
-          }
-        }
-        
-        startup_probe {
-          http_get {
-            path = "/"
-            port = 8080
-          }
-          initial_delay_seconds = 30
-          timeout_seconds       = 10
-          period_seconds        = 10
-          failure_threshold     = 30
-        }
-      }
+    service_account = local.service_account
+    
+    max_instance_request_concurrency = 100
+    
+    scaling {
+      min_instance_count = 0
+      max_instance_count = 3
     }
     
-    metadata {
-      annotations = {
-        "autoscaling.knative.dev/minScale" = "0"
-        "autoscaling.knative.dev/maxScale" = "3"
+    containers {
+      image = var.frontend_image
+      
+      ports {
+        container_port = 8080
+      }
+      
+      resources {
+        limits = {
+          cpu    = "1"
+          memory = "512Mi"
+        }
+        cpu_idle          = true
+        startup_cpu_boost = true
+      }
+      
+      env {
+        name  = "NEXT_PUBLIC_API_URL"
+        value = try(google_cloud_run_v2_service.backend[0].uri, "")
+      }
+      
+      startup_probe {
+        initial_delay_seconds = 10
+        timeout_seconds       = 5
+        period_seconds        = 5
+        failure_threshold     = 10
+        
+        http_get {
+          path = "/"
+          port = 8080
+        }
       }
     }
   }
   
-  traffic {
-    percent         = 100
-    latest_revision = true
+  lifecycle {
+    create_before_destroy = false
+    ignore_changes        = [template[0].annotations["run.googleapis.com/client-name"]]
   }
   
   timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "2m"
+    create = "3m"
+    update = "3m"
+    delete = "1m"
   }
 }
 
-# Allow unauthenticated access to services
+# IAM bindings for public access
 resource "google_cloud_run_service_iam_member" "backend_public" {
-  service  = google_cloud_run_service.backend.name
-  location = google_cloud_run_service.backend.location
+  count    = var.action != "destroy" ? 1 : 0
+  project  = var.project_id
+  location = google_cloud_run_v2_service.backend[0].location
+  service  = google_cloud_run_v2_service.backend[0].name
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
 
 resource "google_cloud_run_service_iam_member" "frontend_public" {
-  service  = google_cloud_run_service.frontend.name
-  location = google_cloud_run_service.frontend.location
+  count    = var.action != "destroy" ? 1 : 0
+  project  = var.project_id
+  location = google_cloud_run_v2_service.frontend[0].location
+  service  = google_cloud_run_v2_service.frontend[0].name
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
 
-# Use regional load balancer (faster than global)
-resource "google_compute_region_network_endpoint_group" "backend" {
-  name                  = "backend-neg-${local.environment_name}"
-  network_endpoint_type = "SERVERLESS"
-  region                = var.region
-  
-  cloud_run {
-    service = google_cloud_run_service.backend.name
-  }
-}
-
-resource "google_compute_region_network_endpoint_group" "frontend" {
-  name                  = "frontend-neg-${local.environment_name}"
-  network_endpoint_type = "SERVERLESS"
-  region                = var.region
-  
-  cloud_run {
-    service = google_cloud_run_service.frontend.name
-  }
-}
-
-# Simple URL map using Cloud Run URLs directly
+# Outputs
 output "frontend_url" {
-  value = google_cloud_run_service.frontend.status[0].url
+  value = try(google_cloud_run_v2_service.frontend[0].uri, "")
 }
 
 output "backend_url" {
-  value = google_cloud_run_service.backend.status[0].url
+  value = try(google_cloud_run_v2_service.backend[0].uri, "")
 }
 
 output "database_name" {
-  value = google_sql_database.pr.name
+  value = try(google_sql_database.pr[0].name, "")
 }
 
 output "database_user" {
-  value = google_sql_user.pr.name
-}
-
-output "sql_instance_connection" {
-  value = local.sql_instance_connection
-}
-
-output "redis_host" {
-  value = local.redis_host
-}
-
-output "redis_port" {
-  value = local.redis_port
+  value = try(google_sql_user.pr[0].name, "")
 }
 
 output "redis_db_index" {
   value = local.redis_db_index
+}
+
+output "deployment_info" {
+  value = {
+    environment = local.environment_name
+    pr_number   = var.pr_number
+    commit_sha  = var.commit_sha
+    deployed_at = timestamp()
+  }
 }

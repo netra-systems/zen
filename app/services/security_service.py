@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, UTC
+from cryptography.fernet import Fernet
 
 from app.db import models_postgres
 from app import schemas
@@ -16,8 +17,30 @@ from app.logging_config import central_logger as logger
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class SecurityService:
-    def __init__(self, key_manager: KeyManager):
-        self.key_manager = key_manager
+    def __init__(self, key_manager: Optional[KeyManager] = None):
+        if key_manager is None:
+            # Create default key manager from settings
+            from app.services.key_manager import KeyManager
+            self.key_manager = KeyManager.load_from_settings(settings)
+        else:
+            self.key_manager = key_manager
+        
+        if hasattr(self.key_manager, 'fernet_key') and self.key_manager.fernet_key:
+            self.fernet = Fernet(self.key_manager.fernet_key)
+        else:
+            self.fernet = None
+
+    def encrypt(self, data: str) -> str:
+        """Encrypt string data using Fernet encryption."""
+        if not self.fernet:
+            raise ValueError("Fernet key not configured")
+        return self.fernet.encrypt(data.encode()).decode()
+    
+    def decrypt(self, encrypted_data: str) -> str:
+        """Decrypt string data using Fernet encryption."""
+        if not self.fernet:
+            raise ValueError("Fernet key not configured")
+        return self.fernet.decrypt(encrypted_data.encode()).decode()
 
     def get_password_hash(self, password: str) -> str:
         return pwd_context.hash(password)

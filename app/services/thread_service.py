@@ -72,6 +72,19 @@ class ThreadService:
                 context={"user_id": user_id, "error": str(e)}
             )
     
+    async def get_thread(self, thread_id: str, db: Optional[AsyncSession] = None) -> Optional[Thread]:
+        """Get a thread by ID using repository pattern"""
+        try:
+            if db:
+                async with get_unit_of_work(db) as uow:
+                    return await uow.threads.get_by_id(db, thread_id)
+            else:
+                async with uow_context() as uow:
+                    return await uow.threads.get_by_id(uow.session, thread_id)
+        except Exception as e:
+            logger.error(f"Error getting thread {thread_id}: {e}")
+            return None
+    
     async def create_message(
         self, 
         thread_id: str,
@@ -198,7 +211,7 @@ class ThreadService:
                             await manager.send_message(
                                 user_id,
                                 {
-                                    "type": "run_started",
+                                    "type": "agent_started",
                                     "payload": {
                                         "run_id": run_id,
                                         "thread_id": thread_id,
@@ -225,7 +238,7 @@ class ThreadService:
                             await manager.send_message(
                                 user_id,
                                 {
-                                    "type": "run_started",
+                                    "type": "agent_started",
                                     "payload": {
                                         "run_id": run_id,
                                         "thread_id": thread_id,

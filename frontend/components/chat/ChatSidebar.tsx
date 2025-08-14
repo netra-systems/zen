@@ -27,6 +27,8 @@ export const ChatSidebar: React.FC = () => {
   const [filterType, setFilterType] = useState<'all' | 'corpus' | 'synthetic' | 'config' | 'users'>('all');
   const [threads, setThreads] = useState<Thread[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoadingThreads, setIsLoadingThreads] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const threadsPerPage = 50;
 
   // Load threads on mount and when filters change
@@ -35,11 +37,19 @@ export const ChatSidebar: React.FC = () => {
   }, [showAllThreads, filterType]);
 
   const loadThreads = async () => {
+    setIsLoadingThreads(true);
+    setLoadError(null);
     try {
       const fetchedThreads = await ThreadService.listThreads();
       setThreads(fetchedThreads);
     } catch (error) {
-      console.error('Failed to load threads:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load threads';
+      console.error('Failed to load threads:', errorMessage);
+      setLoadError(errorMessage);
+      // Set empty threads on error to avoid UI issues
+      setThreads([]);
+    } finally {
+      setIsLoadingThreads(false);
     }
   };
 
@@ -225,14 +235,32 @@ export const ChatSidebar: React.FC = () => {
 
       {/* Thread List */}
       <div className="flex-1 overflow-y-auto">
-        <AnimatePresence mode="popLayout">
-          {sortedThreads.length === 0 ? (
-            <div className="p-4 text-center text-gray-500">
-              <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-20" />
-              <p className="text-sm">No conversations yet</p>
-              <p className="text-xs mt-1">Start a new chat to begin</p>
-            </div>
-          ) : (
+        {loadError && (
+          <div className="p-4 mx-4 mt-2 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">{loadError}</p>
+            <button
+              onClick={loadThreads}
+              className="mt-2 text-xs text-red-700 underline hover:no-underline"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+        
+        {isLoadingThreads ? (
+          <div className="p-4 text-center text-gray-500">
+            <div className="animate-spin w-8 h-8 mx-auto mb-2 border-2 border-gray-300 border-t-emerald-500 rounded-full"></div>
+            <p className="text-sm">Loading conversations...</p>
+          </div>
+        ) : (
+          <AnimatePresence mode="popLayout">
+            {sortedThreads.length === 0 && !loadError ? (
+              <div className="p-4 text-center text-gray-500">
+                <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                <p className="text-sm">No conversations yet</p>
+                <p className="text-xs mt-1">Start a new chat to begin</p>
+              </div>
+            ) : (
             paginatedThreads.map((thread) => (
               <motion.div
                 key={thread.id}
@@ -330,8 +358,9 @@ export const ChatSidebar: React.FC = () => {
                 </button>
               </motion.div>
             ))
-          )}
-        </AnimatePresence>
+            )}
+          </AnimatePresence>
+        )}
       </div>
 
       {/* Pagination Controls */}

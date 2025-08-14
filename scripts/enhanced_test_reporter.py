@@ -22,6 +22,12 @@ import difflib
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+# Import unified reporter
+try:
+    from test_framework.unified_reporter import UnifiedReporter
+except ImportError:
+    UnifiedReporter = None
+
 @dataclass
 class TestMetrics:
     """Comprehensive test metrics"""
@@ -697,20 +703,30 @@ class EnhancedTestReporter:
         return changes
     
     def save_report(self, level: str, report_content: str, results: Dict, metrics: Dict):
-        """Save report with proper organization"""
+        """Save report using unified reporting system"""
         timestamp = datetime.now()
         
-        # Save latest report (overwrite)
+        # Use unified reporter if available
+        if UnifiedReporter:
+            try:
+                unified = UnifiedReporter(self.reports_dir)
+                # Convert metrics to proper format for unified reporter
+                unified_results = {
+                    "backend": results.get("backend", {}),
+                    "frontend": results.get("frontend", {}),
+                    "e2e": results.get("e2e", {})
+                }
+                exit_code = 0 if metrics.get("failed", 0) == 0 else 1
+                unified.generate_unified_report(unified_results, level, exit_code)
+            except Exception as e:
+                print(f"[WARNING] Unified reporter failed: {e}")
+        
+        # Save latest report (overwrite) - no timestamps
         latest_file = self.latest_dir / f"{level}_report.md"
         with open(latest_file, 'w', encoding='utf-8') as f:
             f.write(report_content)
         
-        # Archive previous if exists
-        if latest_file.exists():
-            archive_name = f"{level}_report_{timestamp.strftime('%Y%m%d_%H%M%S')}.md"
-            archive_path = self.history_dir / archive_name
-            # Don't move, just copy for history
-            shutil.copy2(latest_file, archive_path)
+        # No longer archive with timestamps
         
         # Save metrics JSON
         metrics_file = self.metrics_dir / f"{level}_metrics.json"

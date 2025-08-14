@@ -38,7 +38,7 @@ async def test_tool_builder_and_dispatcher():
 
     # Assert the result
     assert result.status == ToolStatus.SUCCESS
-    assert result.payload == "Success"
+    assert result.payload.result == "Success"
 
     # Verify that the _arun method was called
     cost_analyzer_tool._arun.assert_called_once()

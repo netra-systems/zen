@@ -158,9 +158,13 @@ for role in cloudsql.client redis.editor run.developer compute.networkUser secre
 - `Redis Editor` - Use Redis cache
 - `Cloud Run Developer` - Invoke other services
 - `Compute Network User` - Use VPC connector
-- `Secret Manager Secret Accessor` - Read secrets (API keys, etc.)
+- `Secret Manager Secret Accessor` - **CRITICAL**: Read secrets (API keys, etc.)
+  - ⚠️ **This permission is NOT included in Editor or Viewer roles**
+  - ⚠️ **Without this, developers will get "Permission Denied" errors even with Editor access**
 
-> **Note:** The `staging-environments` service account is created automatically when you run Terraform for the shared infrastructure. You don't need to create it manually, but you DO need to grant it the permissions above after Terraform creates it.
+> **IMPORTANT Notes:** 
+> - The `staging-environments` service account is created automatically when you run Terraform for the shared infrastructure. You don't need to create it manually, but you DO need to grant it the permissions above after Terraform creates it.
+> - **The `secretmanager.secretAccessor` role is ESSENTIAL** - it must be explicitly granted even if the account has Editor permissions. This is a common source of "Permission Denied" errors.
 
 ---
 
@@ -440,7 +444,8 @@ Should show: cloudsql.client, redis.editor, secretmanager.secretAccessor, etc.
 
 #### Error: "Permission denied"
 - Check Step 2.2 - make sure all roles are added
-- Check Step 4.2 - make sure GCP_SA_KEY is correct
+- Check Step 4.2 - make sure GCP_STAGING_SA_KEY is correct
+GCP_STAGING_SA_KEY is CORRECT namge. (GCP_SA_KEY is WRONG)
 
 #### Error: "Invalid domain"
 - Check Step 3 - DNS setup

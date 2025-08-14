@@ -140,7 +140,7 @@ describe('Thread Management and Conversation History', () => {
     cy.wait('@createThread');
 
     // Verify message is sent with thread context
-    cy.get('.bg-blue-50').should('contain', firstMessage);
+    cy.contains(firstMessage).should('be.visible');
 
     // Simulate agent response with thread context
     cy.window().then((win) => {
@@ -168,7 +168,7 @@ describe('Thread Management and Conversation History', () => {
     cy.get('button').contains('Send').click();
 
     // Verify conversation maintains context
-    cy.get('.bg-blue-50').eq(1).should('contain', followUp);
+    cy.contains(followUp).should('be.visible');
 
     // Simulate context-aware response
     cy.window().then((win) => {

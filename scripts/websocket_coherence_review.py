@@ -193,7 +193,7 @@ This is an updated review after fixing the 7 critical issues identified in the i
 **Previous:** Missing thread lifecycle events
 **Fixed:** Added events to thread_service.py:
 - `thread_created` - When new thread is created
-- `run_started` - When run begins
+- `agent_started` - When run begins
 
 ## Current Event Inventory
 

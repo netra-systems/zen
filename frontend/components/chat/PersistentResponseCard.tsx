@@ -52,13 +52,15 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
   // Check if this is an admin operation based on agent names
   const adminAgents = ['corpus_manager', 'synthetic_generator', 'user_admin', 'system_configurator', 'log_analyzer'];
   const isAdminAction = slowLayerData?.completedAgents?.some(agent => 
-    adminAgents.includes(agent.agentName.toLowerCase())
+    agent?.agentName && adminAgents.includes(agent.agentName.toLowerCase())
   ) || false;
   
   // Determine admin type from agent names
   const getAdminType = () => {
     if (!slowLayerData?.completedAgents) return undefined;
-    const agents = slowLayerData.completedAgents.map(a => a.agentName.toLowerCase());
+    const agents = slowLayerData.completedAgents
+      .filter(a => a?.agentName)
+      .map(a => a.agentName.toLowerCase());
     if (agents.includes('corpus_manager')) return 'corpus';
     if (agents.includes('synthetic_generator')) return 'synthetic';
     if (agents.includes('user_admin')) return 'users';

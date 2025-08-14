@@ -1,0 +1,94 @@
+name: Lark Status Update
+description: Send status updates to Lark for long-running operations
+author: Netra Systems
+
+inputs:
+  status:
+    description: 'Status (starting, running, success, failure, cancelled)'
+    required: true
+  environment:
+    description: 'Environment name'
+    required: false
+  action:
+    description: 'Action being performed'
+    required: false
+  webhook_url:
+    description: 'Lark webhook URL'
+    required: false
+  bot_url:
+    description: 'Lark bot server URL'
+    required: false
+  details:
+    description: 'Additional details as JSON'
+    required: false
+    default: '{}'
+
+runs:
+  using: composite
+  steps:
+    - name: Format status message
+      id: format
+      shell: bash
+      run: |
+        # Determine emoji and color based on status
+        case "${{ inputs.status }}" in
+          starting)
+            EMOJI="🚀"
+            COLOR="blue"
+            STATUS_TEXT="Starting"
+            ;;
+          running)
+            EMOJI="⚙️"
+            COLOR="blue"
+            STATUS_TEXT="In Progress"
+            ;;
+          success)
+            EMOJI="✅"
+            COLOR="green"
+            STATUS_TEXT="Completed Successfully"
+            ;;
+          failure)
+            EMOJI="❌"
+            COLOR="red"
+            STATUS_TEXT="Failed"
+            ;;
+          cancelled)
+            EMOJI="⚠️"
+            COLOR="yellow"
+            STATUS_TEXT="Cancelled"
+            ;;
+          *)
+            EMOJI="ℹ️"
+            COLOR="gray"
+            STATUS_TEXT="${{ inputs.status }}"
+            ;;
+        esac
+        
+        # Build title
+        if [[ -n "${{ inputs.environment }}" ]]; then
+          TITLE="$EMOJI ${{ inputs.environment }}: $STATUS_TEXT"
+        else
+          TITLE="$EMOJI $STATUS_TEXT"
+        fi
+        
+        # Build message
+        MESSAGE="**Action:** ${{ inputs.action || 'N/A' }}\n"
+        MESSAGE+="**Workflow:** ${{ github.workflow }}\n"
+        MESSAGE+="**Run ID:** ${{ github.run_id }}\n"
+        MESSAGE+="**Actor:** ${{ github.actor }}"
+        
+        echo "title=$TITLE" >> $GITHUB_OUTPUT
+        echo "message=$MESSAGE" >> $GITHUB_OUTPUT
+        echo "color=$COLOR" >> $GITHUB_OUTPUT
+    
+    - name: Send status update
+      uses: ./.github/actions/lark-notifier
+      with:
+        type: status
+        status: ${{ inputs.status }}
+        webhook_url: ${{ inputs.webhook_url }}
+        bot_url: ${{ inputs.bot_url }}
+        channel: ${{ inputs.environment && 'staging' || 'general' }}
+        title: ${{ steps.format.outputs.title }}
+        message: ${{ steps.format.outputs.message }}
+        metadata: ${{ inputs.details }}

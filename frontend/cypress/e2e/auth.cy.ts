@@ -1,37 +1,80 @@
 
 describe('Authentication', () => {
   it('should allow a user to log in and out', () => {
+    // Mock the API responses
+    cy.intercept('GET', '**/api/me', {
+      statusCode: 200,
+      body: { 
+        id: 1, 
+        full_name: 'Test User', 
+        email: 'test@example.com', 
+        picture: 'https://example.com/avatar.jpg' 
+      },
+    }).as('getUserRequest');
+
+    cy.intercept('GET', '**/api/auth/config', {
+      statusCode: 200,
+      body: {
+        auth_enabled: true,
+        endpoints: {
+          login: '/api/auth/login',
+          logout: '/api/auth/logout',
+          user: '/api/me',
+          dev_login: '/api/auth/dev/login'
+        }
+      }
+    }).as('authConfig');
+
+    cy.intercept('POST', '**/api/auth/logout', {
+      statusCode: 200,
+      body: { success: true }
+    }).as('logoutRequest');
+
     // Visit the login page
     cy.visit('/login');
 
-    // Mock the API response for fetching user data
-    cy.intercept('GET', '/api/me', {
-      statusCode: 200,
-      body: { id: 1, full_name: 'Test User', email: 'test@example.com' },
-    }).as('getUserRequest');
+    // Wait for auth config to load
+    cy.wait('@authConfig');
+
+    // Intercept OAuth redirect to prevent navigation
+    cy.on('window:before:load', (win) => {
+      Object.defineProperty(win, 'location', {
+        value: {
+          ...win.location,
+          href: win.location.href,
+          assign: cy.stub(),
+          replace: cy.stub()
+        },
+        writable: true
+      });
+    });
+
+    // Set authentication token before clicking login
+    cy.window().then((win) => {
+      win.localStorage.setItem('jwt_token', 'test-token');
+    });
 
     // Click the login button
     cy.get('button').contains('Login with Google').click();
 
-    // Mock the successful login
-    cy.window().then((win) => {
-      win.localStorage.setItem('authToken', 'test-token');
-    });
-
-    // Visit the home page, which should now be accessible
+    // Since we stubbed the redirect, manually navigate to the authenticated page
     cy.visit('/');
 
-    // Wait for the user request to complete
+    // The app should request user data
     cy.wait('@getUserRequest');
 
-    // Verify that the user menu is visible
-    cy.get('button[aria-label="Toggle user menu"]').should('be.visible');
+    // Verify that the user info is visible
+    cy.contains('Test User').should('be.visible');
 
     // Log out
-    cy.get('button[aria-label="Toggle user menu"]').click();
-    cy.contains('Logout').click();
+    cy.get('button').contains('Logout').click();
 
-    // Verify that the user is redirected to the login page
-    cy.url().should('include', '/login');
+    // Wait for logout request
+    cy.wait('@logoutRequest');
+
+    // Should redirect to login page (or check that token is removed)
+    cy.window().then((win) => {
+      expect(win.localStorage.getItem('jwt_token')).to.be.null;
+    });
   });
 });

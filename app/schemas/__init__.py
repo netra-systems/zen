@@ -95,6 +95,7 @@ from .Tool import (
     ToolInvocation,
     ToolStarted,
     ToolCompleted,
+    SimpleToolPayload,
 )
 from .User import (
     UserBase,
@@ -207,6 +208,7 @@ __all__ = [
     "ToolInvocation",
     "ToolStarted",
     "ToolCompleted",
+    "SimpleToolPayload",
     "UserBase",
     "UserCreate",
     "UserCreateOAuth",

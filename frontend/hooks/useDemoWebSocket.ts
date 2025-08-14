@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { logger } from '@/lib/logger'
 
 interface DemoWebSocketOptions {
   onMessage?: (data: any) => void
@@ -56,7 +57,7 @@ export function useDemoWebSocket(options: DemoWebSocketOptions = {}): DemoWebSoc
       wsRef.current = ws
 
       ws.onopen = () => {
-        console.log('Demo WebSocket connected')
+        logger.info('Demo WebSocket connected', { component: 'useDemoWebSocket', action: 'connection_established' })
         setIsConnected(true)
         setError(null)
         reconnectAttemptsRef.current = 0
@@ -75,18 +76,25 @@ export function useDemoWebSocket(options: DemoWebSocketOptions = {}): DemoWebSoc
           
           onMessage?.(data)
         } catch (err) {
-          console.error('Failed to parse WebSocket message:', err)
+          logger.error('Failed to parse WebSocket message', err as Error, { 
+            component: 'useDemoWebSocket', 
+            action: 'message_parse_error' 
+          })
         }
       }
 
       ws.onerror = (event) => {
-        console.error('Demo WebSocket error:', event)
+        logger.error('Demo WebSocket error', undefined, { 
+          component: 'useDemoWebSocket', 
+          action: 'websocket_error',
+          metadata: { event }
+        })
         setError(new Error('WebSocket connection error'))
         onError?.(event)
       }
 
       ws.onclose = () => {
-        console.log('Demo WebSocket disconnected')
+        logger.info('Demo WebSocket disconnected', { component: 'useDemoWebSocket', action: 'connection_closed' })
         setIsConnected(false)
         wsRef.current = null
         onDisconnect?.()
@@ -95,7 +103,11 @@ export function useDemoWebSocket(options: DemoWebSocketOptions = {}): DemoWebSoc
         if (autoReconnect && reconnectAttemptsRef.current < 5) {
           reconnectAttemptsRef.current++
           const delay = reconnectInterval * Math.pow(2, reconnectAttemptsRef.current - 1)
-          console.log(`Attempting to reconnect in ${delay}ms...`)
+          logger.info(`Attempting to reconnect in ${delay}ms`, { 
+            component: 'useDemoWebSocket', 
+            action: 'reconnect_scheduled',
+            metadata: { delay_ms: delay, attempt: reconnectAttemptsRef.current }
+          })
           
           reconnectTimeoutRef.current = setTimeout(() => {
             connect()
@@ -103,7 +115,10 @@ export function useDemoWebSocket(options: DemoWebSocketOptions = {}): DemoWebSoc
         }
       }
     } catch (err) {
-      console.error('Failed to establish WebSocket connection:', err)
+      logger.error('Failed to establish WebSocket connection', err as Error, { 
+        component: 'useDemoWebSocket', 
+        action: 'connection_failed' 
+      })
       setError(err as Error)
     }
   }, [onConnect, onDisconnect, onError, onMessage, autoReconnect, reconnectInterval])
@@ -126,7 +141,10 @@ export function useDemoWebSocket(options: DemoWebSocketOptions = {}): DemoWebSoc
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(message))
     } else {
-      console.error('WebSocket is not connected')
+      logger.error('WebSocket is not connected', undefined, { 
+        component: 'useDemoWebSocket', 
+        action: 'send_failed_not_connected' 
+      })
       setError(new Error('WebSocket is not connected'))
     }
   }, [])

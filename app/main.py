@@ -2,16 +2,32 @@ import time
 import sys
 import os
 import asyncio
+import multiprocessing
 import alembic.config
 import alembic.script
 from alembic.runtime.migration import MigrationContext
 from sqlalchemy import create_engine
+from pathlib import Path
+from typing import Any, Callable
+import logging as log_module
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+# Load .env file if it exists
+try:
+    from dotenv import load_dotenv
+    env_path = Path(__file__).parent.parent / '.env'
+    if env_path.exists():
+        load_dotenv(env_path)
+        print(f"Loaded .env file from {env_path}")
+except ImportError:
+    # dotenv not installed, skip
+    pass
+
 # Import unified logging first to ensure interceptor is set up
 from app.logging_config import central_logger
+from app.utils.multiprocessing_cleanup import setup_multiprocessing, cleanup_multiprocessing
 
 # Configure loggers after unified logging is initialized
 import logging
@@ -37,6 +53,11 @@ from app.agents.tool_dispatcher import ToolDispatcher
 from app.services.tool_registry import ToolRegistry
 from app.redis_manager import redis_manager
 from app.db.clickhouse_init import initialize_clickhouse_tables
+from app.db.migration_utils import (
+    get_sync_database_url, get_current_revision, get_head_revision,
+    create_alembic_config, needs_migration, execute_migration,
+    log_migration_status, should_continue_on_error, validate_database_url
+)
 
 # Import new error handling components
 from app.core.exceptions import NetraException
@@ -48,51 +69,41 @@ from app.core.error_handlers import (
 )
 from app.core.error_context import ErrorContext
 
-def run_migrations(logger):
+def run_migrations(logger: log_module.Logger) -> None:
     """Run database migrations automatically on startup."""
     try:
-        logger.info("Checking database migrations...")
-        
-        # Get the database URL
-        database_url = settings.database_url
-        if not database_url:
-            logger.warning("No database URL configured, skipping migrations")
-            return
-            
-        # Convert async URL to sync for Alembic
-        if database_url.startswith("postgresql+asyncpg://"):
-            sync_database_url = database_url.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
-        else:
-            sync_database_url = database_url
-            
-        # Check current revision
-        engine = create_engine(sync_database_url)
-        with engine.connect() as connection:
-            context = MigrationContext.configure(connection)
-            current_rev = context.get_current_revision()
-            logger.info(f"Current database revision: {current_rev}")
-        
-        # Run migrations
-        alembic_cfg = alembic.config.Config("config/alembic.ini")
-        alembic_cfg.set_main_option("sqlalchemy.url", sync_database_url)
-        
-        # Check if we need to upgrade
-        script = alembic.script.ScriptDirectory.from_config(alembic_cfg)
-        head_rev = script.get_current_head()
-        
-        if current_rev != head_rev:
-            logger.info(f"Migrating database from {current_rev} to {head_rev}...")
-            alembic.config.main(argv=["--raiseerr", "upgrade", "head"])
-            logger.info("Database migrations completed successfully")
-        else:
-            logger.info("Database is already up to date")
-            
+        _check_and_run_migrations(logger)
     except Exception as e:
-        logger.error(f"Failed to run migrations: {e}")
-        if settings.environment == "production":
-            raise
-        else:
-            logger.warning("Continuing without migrations in development mode")
+        _handle_migration_error(logger, e)
+
+def _check_and_run_migrations(logger: log_module.Logger) -> None:
+    """Check and run migrations if needed."""
+    logger.info("Checking database migrations...")
+    if not validate_database_url(settings.database_url, logger):
+        return
+    sync_url = get_sync_database_url(settings.database_url)
+    _perform_migration(logger, sync_url)
+
+def _perform_migration(logger: log_module.Logger, sync_url: str) -> None:
+    """Perform the actual migration."""
+    current = get_current_revision(sync_url)
+    logger.info(f"Current revision: {current}")
+    cfg = create_alembic_config(sync_url)
+    head = get_head_revision(cfg)
+    _execute_if_needed(logger, current, head)
+
+def _execute_if_needed(logger: log_module.Logger, current: str, head: str) -> None:
+    """Execute migration if needed."""
+    log_migration_status(logger, current, head)
+    if needs_migration(current, head):
+        execute_migration(logger)
+
+def _handle_migration_error(logger: log_module.Logger, error: Exception) -> None:
+    """Handle migration errors based on environment."""
+    logger.error(f"Failed to run migrations: {error}")
+    if not should_continue_on_error(settings.environment):
+        raise
+    logger.warning("Continuing without migrations")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -103,6 +114,9 @@ async def lifespan(app: FastAPI):
     start_time = time.time()
     logger = central_logger.get_logger(__name__)
     logger.info("Application startup...")
+    
+    # Set up multiprocessing properly to avoid semaphore leaks
+    setup_multiprocessing()
     if 'pytest' in sys.modules:
         logger.info(f"pytest in sys.modules")
 
@@ -132,17 +146,20 @@ async def lifespan(app: FastAPI):
     # ClickHouse client managed by central_logger
     app.state.clickhouse_client = None
     
-    # Initialize ClickHouse tables
-    if 'pytest' not in sys.modules and os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() != 'true':  # Skip during testing or if explicitly disabled
+    # Initialize ClickHouse tables based on service mode
+    clickhouse_mode = os.getenv('CLICKHOUSE_MODE', 'shared').lower()
+    if 'pytest' not in sys.modules and clickhouse_mode not in ['disabled', 'mock']:
         try:
-            logger.info("Initializing ClickHouse tables...")
+            logger.info(f"Initializing ClickHouse tables (mode: {clickhouse_mode})...")
             await initialize_clickhouse_tables()
             logger.info("ClickHouse tables initialization complete")
         except Exception as e:
             logger.error(f"Failed to initialize ClickHouse tables: {e}")
             # Don't fail startup, the app can still work with PostgreSQL
-    elif os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() == 'true':
-        logger.info("Skipping ClickHouse initialization (SKIP_CLICKHOUSE_INIT=true)")
+    elif clickhouse_mode == 'disabled':
+        logger.info("Skipping ClickHouse initialization (mode: disabled)")
+    elif clickhouse_mode == 'mock':
+        logger.info("Skipping ClickHouse initialization (mode: mock)")
 
     # Initialize Postgres - must be done before startup checks
     app.state.db_session_factory = async_session_factory
@@ -154,7 +171,15 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.critical(f"CRITICAL: Startup checks failed: {e}")
         logger.info("Application shutting down due to startup failure.")
-        os._exit(1)
+        # Clean up resources before exit
+        try:
+            await redis_manager.disconnect()
+            cleanup_multiprocessing()
+            await central_logger.shutdown()
+        except Exception as cleanup_error:
+            logger.error(f"Error during cleanup: {cleanup_error}")
+        # Use sys.exit instead of os._exit to allow proper cleanup
+        sys.exit(1)
 
     # Perform comprehensive schema validation
     from app.services.schema_validation_service import run_comprehensive_validation
@@ -192,6 +217,9 @@ async def lifespan(app: FastAPI):
         # Shutdown
         logger.info("Application shutdown initiated...")
         
+        # Clean up multiprocessing resources
+        cleanup_multiprocessing()
+        
         # Stop database monitoring
         if hasattr(app.state, 'monitoring_task'):
             try:
@@ -220,11 +248,36 @@ from starlette.responses import RedirectResponse
 
 app = FastAPI(lifespan=lifespan)
 
+# Configure CORS first (before other middleware and routes)
+allowed_origins = []
+if settings.environment == "production":
+    # In production, only allow specific origins from env or default
+    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+    allowed_origins = cors_origins_env.split(",") if cors_origins_env else ["https://netra.ai"]
+else:
+    # In development, allow all origins with wildcard
+    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+    if cors_origins_env:
+        # Use specific origins if configured
+        allowed_origins = cors_origins_env.split(",")
+    else:
+        # Use wildcard to allow all origins in development
+        allowed_origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=["Authorization", "Content-Type", "X-Request-ID", "X-Trace-ID"],
+    expose_headers=["X-Trace-ID", "X-Request-ID"],  # Expose custom headers to frontend
+)
+
 # Initialize OAuth
 oauth_client.init_app(app)
 
 @app.middleware("http")
-async def cors_redirect_middleware(request: Request, call_next):
+async def cors_redirect_middleware(request: Request, call_next: Callable) -> Any:
     """Handle CORS for redirects (e.g., trailing slash redirects)."""
     response = await call_next(request)
     
@@ -240,7 +293,7 @@ async def cors_redirect_middleware(request: Request, call_next):
     return response
 
 @app.middleware("http")
-async def error_context_middleware(request: Request, call_next):
+async def error_context_middleware(request: Request, call_next: Callable) -> Any:
     """Middleware to set up error context for each request."""
     # Generate trace ID for the request
     trace_id = ErrorContext.generate_trace_id()
@@ -264,7 +317,7 @@ async def error_context_middleware(request: Request, call_next):
     return response
 
 @app.middleware("http")
-async def log_requests(request: Request, call_next):
+async def log_requests(request: Request, call_next: Callable) -> Any:
     logger = central_logger.get_logger("api")
     start_time = time.time()
     
@@ -277,34 +330,6 @@ async def log_requests(request: Request, call_next):
     logger.info(f"Request: {request.method} {request.url.path} | Status: {response.status_code} | Duration: {formatted_process_time} | Trace: {trace_id}")
     
     return response
-
-# Configure CORS based on environment
-allowed_origins = []
-if settings.environment == "production":
-    # In production, only allow specific origins from env or default
-    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
-    allowed_origins = cors_origins_env.split(",") if cors_origins_env else ["https://netra.ai"]
-else:
-    # In development, allow localhost with any port and configured origins
-    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
-    configured_origins = cors_origins_env.split(",") if cors_origins_env else []
-    # Add common development patterns
-    allowed_origins = [
-        "http://localhost:*",  # Any localhost port
-        "http://127.0.0.1:*",  # Any 127.0.0.1 port
-        "*"  # Fallback to allow all in development
-    ]
-    if configured_origins:
-        allowed_origins = configured_origins + allowed_origins
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allow_headers=["Authorization", "Content-Type", "X-Request-ID", "X-Trace-ID"],
-    expose_headers=["X-Trace-ID", "X-Request-ID"],  # Expose custom headers to frontend
-)
 
 app.add_middleware(
     SessionMiddleware,

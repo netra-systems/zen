@@ -1,0 +1,126 @@
+name: Terraform Operations
+description: Core Terraform operations for infrastructure management
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        required: true
+        type: string
+      pr_number:
+        required: true
+        type: string
+      action:
+        required: true
+        type: string
+        description: 'init, plan, apply, or destroy'
+      terraform_dir:
+        required: false
+        type: string
+        default: './terraform/staging'
+    outputs:
+      backend_url:
+        description: 'Backend service URL'
+        value: ${{ jobs.terraform.outputs.backend_url }}
+      frontend_url:
+        description: 'Frontend service URL'
+        value: ${{ jobs.terraform.outputs.frontend_url }}
+      cluster_name:
+        description: 'GKE cluster name'
+        value: ${{ jobs.terraform.outputs.cluster_name }}
+
+env:
+  TERRAFORM_VERSION: '1.5.0'
+
+jobs:
+  terraform:
+    name: Terraform ${{ inputs.action }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      backend_url: ${{ steps.outputs.outputs.backend_url }}
+      frontend_url: ${{ steps.outputs.outputs.frontend_url }}
+      cluster_name: ${{ steps.outputs.outputs.cluster_name }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+      
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      
+      - name: Initialize Terraform
+        working-directory: ${{ inputs.terraform_dir }}
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="prefix=${{ inputs.environment_name }}" \
+            -upgrade
+      
+      - name: Validate Terraform
+        if: inputs.action != 'destroy'
+        working-directory: ${{ inputs.terraform_dir }}
+        run: terraform validate
+      
+      - name: Plan Terraform changes
+        if: inputs.action == 'plan' || inputs.action == 'apply'
+        id: plan
+        working-directory: ${{ inputs.terraform_dir }}
+        run: |
+          terraform plan \
+            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+            -var="environment_name=${{ inputs.environment_name }}" \
+            -var="pr_number=${{ inputs.pr_number }}" \
+            -var="region=${{ env.GCP_REGION || 'us-central1' }}" \
+            -out=tfplan \
+            -detailed-exitcode
+      
+      - name: Apply Terraform
+        if: inputs.action == 'apply'
+        id: apply
+        working-directory: ${{ inputs.terraform_dir }}
+        run: |
+          terraform apply -auto-approve tfplan
+      
+      - name: Destroy Terraform
+        if: inputs.action == 'destroy'
+        working-directory: ${{ inputs.terraform_dir }}
+        run: |
+          terraform destroy \
+            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+            -var="environment_name=${{ inputs.environment_name }}" \
+            -var="pr_number=${{ inputs.pr_number }}" \
+            -var="region=${{ env.GCP_REGION || 'us-central1' }}" \
+            -auto-approve
+      
+      - name: Extract outputs
+        if: inputs.action == 'apply'
+        id: outputs
+        working-directory: ${{ inputs.terraform_dir }}
+        run: |
+          BACKEND_URL=$(terraform output -raw backend_url 2>/dev/null || echo "")
+          FRONTEND_URL=$(terraform output -raw frontend_url 2>/dev/null || echo "")
+          CLUSTER_NAME=$(terraform output -raw cluster_name 2>/dev/null || echo "")
+          
+          echo "backend_url=$BACKEND_URL" >> $GITHUB_OUTPUT
+          echo "frontend_url=$FRONTEND_URL" >> $GITHUB_OUTPUT
+          echo "cluster_name=$CLUSTER_NAME" >> $GITHUB_OUTPUT
+      
+      - name: Save Terraform state
+        if: failure() && (inputs.action == 'apply' || inputs.action == 'destroy')
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-state-${{ inputs.environment_name }}
+          path: ${{ inputs.terraform_dir }}/*.tfstate*
+          retention-days: 30

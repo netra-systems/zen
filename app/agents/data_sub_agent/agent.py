@@ -1,0 +1,261 @@
+"""Main DataSubAgent implementation."""
+
+import json
+from typing import Dict, Optional, Any, Tuple, List
+from datetime import datetime, timedelta, UTC
+from functools import lru_cache
+
+from app.llm.llm_manager import LLMManager
+from app.agents.base import BaseSubAgent
+from app.agents.prompts import data_prompt_template
+from app.agents.tool_dispatcher import ToolDispatcher
+from app.agents.state import DeepAgentState
+from app.agents.utils import extract_json_from_response
+from app.db.clickhouse import get_clickhouse_client
+from app.redis_manager import RedisManager
+from app.db.clickhouse_init import create_workload_events_table_if_missing
+from app.logging_config import central_logger as logger
+
+from .query_builder import QueryBuilder
+from .analysis_engine import AnalysisEngine
+from .clickhouse_operations import ClickHouseOperations
+
+
+class DataSubAgent(BaseSubAgent):
+    """Advanced data gathering and analysis agent with ClickHouse integration."""
+    
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
+        super().__init__(
+            llm_manager, 
+            name="DataSubAgent", 
+            description="Advanced data gathering and analysis agent with ClickHouse integration."
+        )
+        self.tool_dispatcher = tool_dispatcher
+        self.query_builder = QueryBuilder()
+        self.analysis_engine = AnalysisEngine()
+        self.clickhouse_ops = ClickHouseOperations()
+        self.redis_manager = None
+        self.cache_ttl = 300  # 5 minutes cache TTL
+        
+        # Initialize Redis for caching if available
+        try:
+            self.redis_manager = RedisManager()
+        except Exception as e:
+            logger.warning(f"Redis not available for DataSubAgent caching: {e}")
+    
+    @lru_cache(maxsize=128)
+    async def _get_cached_schema(self, table_name: str) -> Optional[Dict[str, Any]]:
+        """Get cached schema information for a table"""
+        return await self.clickhouse_ops.get_table_schema(table_name)
+    
+    async def _fetch_clickhouse_data(
+        self,
+        query: str,
+        cache_key: Optional[str] = None
+    ) -> Optional[List[Dict[str, Any]]]:
+        """Execute ClickHouse query with caching support"""
+        return await self.clickhouse_ops.fetch_data(
+            query, cache_key, self.redis_manager, self.cache_ttl
+        )
+    
+    async def _send_update(self, run_id: str, update: Dict[str, Any]):
+        """Send real-time update via WebSocket"""
+        try:
+            if hasattr(self, 'ws_manager') and self.ws_manager:
+                await self.ws_manager.send_agent_update(run_id, "DataSubAgent", update)
+        except Exception as e:
+            logger.debug(f"Failed to send WebSocket update: {e}")
+    
+    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False) -> None:
+        """Execute advanced data analysis with ClickHouse integration"""
+        
+        try:
+            # Send initial update
+            if stream_updates:
+                await self._send_update(run_id, {
+                    "status": "started",
+                    "message": "Starting advanced data analysis..."
+                })
+            
+            # Extract parameters from triage result
+            triage_result = state.triage_result or {}
+            key_params = triage_result.get("key_parameters", {})
+            
+            # Determine analysis parameters
+            user_id = key_params.get("user_id", 1)  # Default user for demo
+            workload_id = key_params.get("workload_id")
+            metric_names = key_params.get("metrics", ["latency_ms", "throughput", "cost_cents"])
+            time_range_str = key_params.get("time_range", "last_24_hours")
+            
+            # Parse time range
+            time_range = self._parse_time_range(time_range_str)
+            
+            # Perform analyses based on intent
+            intent = triage_result.get("intent", {})
+            primary_intent = intent.get("primary", "general")
+            
+            data_result = await self._perform_analysis(
+                primary_intent, user_id, workload_id, 
+                metric_names, time_range, run_id, stream_updates
+            )
+            
+            # Store result in state
+            state.data_result = data_result
+            
+            # Update with results
+            if stream_updates:
+                await self._send_update(run_id, {
+                    "status": "completed",
+                    "message": "Advanced data analysis completed successfully",
+                    "result": data_result
+                })
+            
+            logger.info(f"DataSubAgent completed analysis for run_id: {run_id}")
+            
+        except Exception as e:
+            logger.error(f"DataSubAgent execution failed: {e}")
+            await self._handle_fallback(state, run_id, stream_updates, e)
+    
+    def _parse_time_range(self, time_range_str: str) -> Tuple[datetime, datetime]:
+        """Parse time range string into datetime tuple"""
+        end_time = datetime.now(UTC)
+        if time_range_str == "last_hour":
+            start_time = end_time - timedelta(hours=1)
+        elif time_range_str == "last_24_hours":
+            start_time = end_time - timedelta(days=1)
+        elif time_range_str == "last_week":
+            start_time = end_time - timedelta(weeks=1)
+        elif time_range_str == "last_month":
+            start_time = end_time - timedelta(days=30)
+        else:
+            start_time = end_time - timedelta(days=1)  # Default to last 24 hours
+        return (start_time, end_time)
+    
+    async def _perform_analysis(
+        self, primary_intent: str, user_id: int, workload_id: Optional[str],
+        metric_names: List[str], time_range: Tuple[datetime, datetime],
+        run_id: str, stream_updates: bool
+    ) -> Dict[str, Any]:
+        """Perform analysis based on intent"""
+        
+        from .analysis_operations import AnalysisOperations
+        ops = AnalysisOperations(
+            self.query_builder, self.analysis_engine, 
+            self.clickhouse_ops, self.redis_manager
+        )
+        
+        data_result = {
+            "analysis_type": primary_intent,
+            "parameters": {
+                "user_id": user_id,
+                "workload_id": workload_id,
+                "time_range": {
+                    "start": time_range[0].isoformat(),
+                    "end": time_range[1].isoformat()
+                },
+                "metrics": metric_names
+            },
+            "results": {}
+        }
+        
+        # Execute appropriate analyses
+        if primary_intent in ["optimize", "performance"]:
+            if stream_updates:
+                await self._send_update(run_id, {
+                    "status": "analyzing",
+                    "message": "Analyzing performance metrics..."
+                })
+            
+            perf_analysis = await ops.analyze_performance_metrics(
+                user_id, workload_id, time_range
+            )
+            data_result["results"]["performance"] = perf_analysis
+            
+            # Check for anomalies in key metrics
+            for metric in ["latency_ms", "error_rate"]:
+                anomalies = await ops.detect_anomalies(
+                    user_id, metric, time_range
+                )
+                if anomalies.get("anomaly_count", 0) > 0:
+                    data_result["results"][f"{metric}_anomalies"] = anomalies
+        
+        elif primary_intent == "analyze":
+            if stream_updates:
+                await self._send_update(run_id, {
+                    "status": "analyzing",
+                    "message": "Performing correlation analysis..."
+                })
+            
+            # Correlation analysis
+            correlations = await ops.analyze_correlations(
+                user_id, metric_names, time_range
+            )
+            data_result["results"]["correlations"] = correlations
+            
+            # Usage patterns
+            usage_patterns = await ops.analyze_usage_patterns(user_id)
+            data_result["results"]["usage_patterns"] = usage_patterns
+        
+        elif primary_intent == "monitor":
+            if stream_updates:
+                await self._send_update(run_id, {
+                    "status": "analyzing",
+                    "message": "Checking for anomalies..."
+                })
+            
+            # Anomaly detection for all metrics
+            for metric in metric_names:
+                anomalies = await ops.detect_anomalies(
+                    user_id, metric, time_range, z_score_threshold=2.5
+                )
+                data_result["results"][f"{metric}_monitoring"] = anomalies
+        
+        else:
+            # Default: comprehensive analysis
+            if stream_updates:
+                await self._send_update(run_id, {
+                    "status": "analyzing",
+                    "message": "Performing comprehensive analysis..."
+                })
+            
+            # Performance metrics
+            perf_analysis = await ops.analyze_performance_metrics(
+                user_id, workload_id, time_range
+            )
+            data_result["results"]["performance"] = perf_analysis
+            
+            # Usage patterns
+            usage_patterns = await ops.analyze_usage_patterns(user_id, 7)
+            data_result["results"]["usage_patterns"] = usage_patterns
+        
+        return data_result
+    
+    async def _handle_fallback(
+        self, state: DeepAgentState, run_id: str, 
+        stream_updates: bool, error: Exception
+    ):
+        """Handle fallback to basic LLM-based data gathering"""
+        prompt = data_prompt_template.format(
+            triage_result=state.triage_result,
+            user_request=state.user_request,
+            thread_id=run_id
+        )
+        
+        llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='data')
+        data_result = extract_json_from_response(llm_response_str)
+        
+        if not data_result:
+            data_result = {
+                "collection_status": "fallback",
+                "data": "Limited data available due to connection issues",
+                "error": str(error)
+            }
+        
+        state.data_result = data_result
+        
+        if stream_updates:
+            await self._send_update(run_id, {
+                "status": "completed_with_fallback",
+                "message": "Data gathering completed with fallback method",
+                "result": data_result
+            })

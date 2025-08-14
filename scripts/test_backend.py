@@ -34,7 +34,13 @@ TEST_CATEGORIES = {
     "auth": ["app/tests/test_auth*.py", "app/tests/routes/test_*auth*.py"],
     "database": ["app/tests/services/database", "app/tests/test_database*.py"],
     "critical": ["app/tests/test_api_endpoints_critical.py", "app/tests/test_agent_service_critical.py"],
-    "smoke": ["app/tests/routes/test_health_route.py"],
+    "smoke": [
+        "app/tests/routes/test_health_route.py",
+        "app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error",
+        "app/tests/core/test_config_manager.py::TestConfigManager::test_initialization",
+        "app/tests/services/test_security_service.py::test_encrypt_and_decrypt",
+        "tests/test_system_startup.py::TestSystemStartup::test_configuration_loading"
+    ],
 }
 
 

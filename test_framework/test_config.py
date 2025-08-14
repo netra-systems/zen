@@ -1,0 +1,132 @@
+"""Test configuration and level definitions."""
+
+import multiprocessing
+import os
+from typing import Dict, Any
+
+# Determine optimal parallelization
+CPU_COUNT = multiprocessing.cpu_count()
+OPTIMAL_WORKERS = min(CPU_COUNT - 1, 8)  # Leave one CPU free
+
+# Define test levels with clear purposes
+TEST_LEVELS: Dict[str, Dict[str, Any]] = {
+    "smoke": {
+        "description": "Quick smoke tests for basic functionality (< 30 seconds)",
+        "purpose": "Pre-commit validation, basic health checks",
+        "backend_args": ["--category", "smoke", "--fail-fast", "--markers", "not real_services"],
+        "frontend_args": [],
+        "timeout": 30,
+        "run_coverage": False,
+        "run_both": False  # Only run backend smoke tests for now
+    },
+    "unit": {
+        "description": "Unit tests for isolated components (1-2 minutes)",
+        "purpose": "Development validation, component testing",
+        "backend_args": ["--category", "unit", "-v", "--coverage", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--markers", "not real_services"],
+        "frontend_args": ["--category", "unit"],
+        "timeout": 120,
+        "run_coverage": True,
+        "run_both": True
+    },
+    "integration": {
+        "description": "Integration tests for component interaction (3-5 minutes)",
+        "purpose": "Feature validation, API testing",
+        "backend_args": ["--category", "integration", "-v", "--coverage", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--markers", "not real_services"],
+        "frontend_args": ["--category", "integration"],
+        "timeout": 300,
+        "run_coverage": True,
+        "run_both": True
+    },
+    "comprehensive": {
+        "description": "Full test suite with coverage (30-45 minutes)",
+        "purpose": "Pre-release validation, full system testing",
+        "backend_args": ["--coverage", f"--parallel={min(6, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast"],
+        "frontend_args": ["--coverage"],
+        "timeout": 2700,  # 45 minutes to handle real LLM tests
+        "run_coverage": True,
+        "run_both": True
+    },
+    "critical": {
+        "description": "Critical path tests only (1-2 minutes)",
+        "purpose": "Essential functionality verification",
+        "backend_args": ["--category", "critical", "--fail-fast", "--coverage"],
+        "frontend_args": ["--category", "smoke"],
+        "timeout": 120,
+        "run_coverage": True,
+        "run_both": False  # Backend only for critical paths
+    },
+    "all": {
+        "description": "All tests including backend, frontend, e2e, integration (45-60 minutes)",
+        "purpose": "Complete system validation including all test types",
+        "backend_args": ["--coverage", f"--parallel={OPTIMAL_WORKERS}", "--html-output", "--fail-fast"],
+        "frontend_args": ["--coverage", "--e2e"],
+        "timeout": 3600,  # 60 minutes for complete test suite
+        "run_coverage": True,
+        "run_both": True,
+        "run_e2e": True
+    },
+    "real_services": {
+        "description": "Tests requiring real external services (LLM, DB, Redis, ClickHouse)",
+        "purpose": "Validation with actual service dependencies",
+        "backend_args": ["-m", "real_services", "-v", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 1800,  # 30 minutes for real service tests
+        "run_coverage": False,
+        "run_both": False,
+        "requires_env": ["ENABLE_REAL_LLM_TESTING=true"]
+    },
+    "mock_only": {
+        "description": "Tests using only mocks, no external dependencies",
+        "purpose": "Fast CI/CD validation without external dependencies",
+        "backend_args": ["-m", "mock_only", "-v", "--coverage", f"--parallel={OPTIMAL_WORKERS}"],
+        "frontend_args": [],
+        "timeout": 300,
+        "run_coverage": True,
+        "run_both": False
+    }
+}
+
+# Test runner configurations
+RUNNERS = {
+    "simple": "test_scripts/simple_test_runner.py",
+    "backend": "scripts/test_backend.py", 
+    "frontend": "scripts/test_frontend.py"
+}
+
+# Shard mappings for parallel execution in CI/CD
+SHARD_MAPPINGS = {
+    "core": ["app/core", "app/config", "app/dependencies"],
+    "agents": ["app/agents", "app/services/agent"],
+    "websocket": ["app/ws_manager", "app/services/websocket", "test_websocket"],
+    "database": ["app/db", "app/services/database", "test_database"],
+    "api": ["app/routes", "test_api", "test_auth"],
+    "frontend": ["frontend"]
+}
+
+def configure_staging_environment(staging_url: str, staging_api_url: str):
+    """Configure environment variables for staging testing."""
+    os.environ["STAGING_MODE"] = "true"
+    os.environ["STAGING_URL"] = staging_url
+    os.environ["STAGING_API_URL"] = staging_api_url
+    os.environ["BASE_URL"] = staging_url
+    os.environ["API_BASE_URL"] = staging_api_url
+    os.environ["CYPRESS_BASE_URL"] = staging_url
+    os.environ["CYPRESS_API_URL"] = staging_api_url
+
+def configure_real_llm(model: str, timeout: int, parallel: str):
+    """Configure environment for real LLM testing."""
+    config = {
+        "model": model,
+        "timeout": timeout,
+        "parallel": parallel
+    }
+    
+    # Set environment variables
+    os.environ["TEST_USE_REAL_LLM"] = "true"
+    os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
+    os.environ["TEST_LLM_TIMEOUT"] = str(timeout)
+    
+    if parallel != "auto":
+        os.environ["TEST_PARALLEL"] = str(parallel)
+    
+    return config

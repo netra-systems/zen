@@ -1,5 +1,6 @@
 import json
 import time
+from typing import Dict, Any, List, Tuple
 from app.logging_config import central_logger
 from app.db.clickhouse_base import ClickHouseDatabase
 
@@ -33,9 +34,9 @@ def prepare_data_for_insert(flattened_records: list[dict]) -> tuple[list[str], l
 
     return ordered_columns, data_for_insert
 
-def _flatten_json_first_level(nested_json, sep='_'):
+def _flatten_json_first_level(nested_json: Dict[str, Any], sep: str = '_') -> Dict[str, Any]:
     """Flattens the first level of a nested dictionary."""
-    items = {}
+    items: Dict[str, Any] = {}
     if not isinstance(nested_json, dict):
         return {}
     for k, v in nested_json.items():

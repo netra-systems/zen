@@ -5,8 +5,14 @@ export default defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       // implement node event listeners here
+      on('task', {
+        log(message) {
+          console.log(message);
+          return null;
+        },
+      });
     },
-    baseUrl: 'http://localhost:3002',
+    baseUrl: 'http://localhost:3000',
     supportFile: 'cypress/support/e2e.ts',
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
     watchForFileChanges: false,

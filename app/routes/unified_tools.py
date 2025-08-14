@@ -27,7 +27,7 @@ except Exception as e:
     logger.warning(f"Redis connection failed: {e}")
 
 permission_service = ToolPermissionService(redis_client)
-tool_registry = UnifiedToolRegistry(permission_service)
+tool_registry = UnifiedToolRegistry(permission_service=permission_service)
 
 
 class ToolExecutionRequest(BaseModel):

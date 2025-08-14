@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Staging Environment Workflow</name>
+        <type>operational</type>
+        <version>2.0</version>
+        <last_updated>2025-08-13</last_updated>
+        <description>Enhanced staging environment management with automated deployment, testing, and cleanup</description>
+    </metadata>
+
+    <overview>
+        <purpose>
+            Provides automated staging environments for pull requests and branch deployments
+            with comprehensive error handling, resource management, and notification systems.
+        </purpose>
+        <key_features>
+            - Automatic environment creation for PRs
+            - Branch-based deployments for main/develop
+            - Manual control via workflow_dispatch
+            - Automatic cleanup on PR close
+            - Concurrency control to prevent redundant builds
+            - Comprehensive pre-deployment checks
+            - Terraform-based infrastructure management
+            - Post-deployment smoke testing
+        </key_features>
+    </overview>
+
+    <workflow_triggers>
+        <trigger id="pull-request">
+            <events>opened, synchronize, reopened, closed</events>
+            <behavior>
+                - opened/synchronize/reopened: Deploy staging environment
+                - closed: Destroy staging environment
+            </behavior>
+        </trigger>
+        
+        <trigger id="push">
+            <branches>main, develop</branches>
+            <behavior>Create/update branch-specific staging environment</behavior>
+            <ignored_paths>
+                - **.md
+                - docs/**
+                - .github/workflows/test-*.yml
+            </ignored_paths>
+        </trigger>
+        
+        <trigger id="manual">
+            <type>workflow_dispatch</type>
+            <inputs>
+                - action: deploy, destroy, restart, status, rebuild
+                - pr_number: Optional PR number
+                - branch: Optional branch name
+                - force: Force deployment even if checks fail
+            </inputs>
+        </trigger>
+        
+        <trigger id="repository-dispatch">
+            <types>staging-command, staging-rebuild</types>
+            <payload>
+                - pr_number
+                - action
+                - branch
+                - commit
+            </payload>
+        </trigger>
+    </workflow_triggers>
+
+    <environment_naming>
+        <pattern>netra-staging-{identifier}</pattern>
+        <rules>
+            - PR deployments: netra-staging-{pr_number}
+            - Branch deployments: netra-staging-branch-{branch_name}
+            - Sanitized to lowercase, alphanumeric + hyphens
+            - Maximum 63 characters (DNS limit)
+        </rules>
+        <examples>
+            - PR #123: netra-staging-123
+            - main branch: netra-staging-branch-main
+            - feature/auth: netra-staging-branch-feature-auth
+        </examples>
+    </environment_naming>
+
+    <concurrency_control>
+        <group_pattern>staging-${{ github.event.pull_request.number || github.ref }}</group_pattern>
+        <behavior>
+            - cancel-in-progress: false (prevents accidental resource cleanup)
+            - Only one deployment per PR/branch at a time
+            - New commits wait for previous deployment to complete
+        </behavior>
+        <benefits>
+            - Prevents resource conflicts
+            - Ensures deployment consistency
+            - Avoids partial deployments
+        </benefits>
+    </concurrency_control>
+
+    <jobs>
+        <job id="validate-trigger">
+            <purpose>Check if deployment should proceed</purpose>
+            <skip_conditions>
+                - Documentation-only changes
+                - Commit message contains [skip staging]
+                - Test workflow changes only
+            </skip_conditions>
+        </job>
+        
+        <job id="setup">
+            <purpose>Configure environment variables and create GitHub deployment</purpose>
+            <outputs>
+                - environment_name
+                - action (deploy/destroy)
+                - pr_number
+                - branch_name
+                - commit_sha
+                - deployment_id
+            </outputs>
+            <github_deployment>
+                Creates deployment record for tracking and status updates
+                REQUIRES: deployments: write permission
+            </github_deployment>
+        </job>
+        
+        <job id="pre-checks">
+            <purpose>Validate deployment readiness</purpose>
+            <checks>
+                - Security scanning
+                - Configuration validation
+                - Resource quota verification
+                - Required files presence
+            </checks>
+            <required_files>
+                - docker-compose.yml
+                - Dockerfile
+                - .env.example
+            </required_files>
+        </job>
+        
+        <job id="terraform">
+            <purpose>Manage infrastructure with Terraform</purpose>
+            <steps>
+                1. Initialize Terraform with remote state
+                2. Plan infrastructure changes
+                3. Apply changes (deploy) or Destroy (cleanup)
+                4. Extract outputs (URLs, cluster info)
+            </steps>
+            <state_management>
+                - Backend: GCS bucket
+                - State prefix: environment_name
+                - Locking: Enabled
+            </state_management>
+            <outputs>
+                - backend_url
+                - frontend_url
+                - cluster_name
+            </outputs>
+        </job>
+        
+        <job id="build-deploy">
+            <purpose>Build and deploy applications</purpose>
+            <steps>
+                1. Build backend Docker image
+                2. Build frontend with environment-specific config
+                3. Push images to registry
+                4. Deploy to Kubernetes/Cloud Run
+                5. Run smoke tests
+            </steps>
+            <build_args>
+                - COMMIT_SHA
+                - BUILD_DATE
+                - BACKEND_URL (for frontend)
+            </build_args>
+        </job>
+        
+        <job id="post-deployment">
+            <purpose>Update statuses and notify</purpose>
+            <actions>
+                - Update GitHub deployment status
+                - Post/update PR comment with environment details
+                - Trigger cleanup on failure (optional)
+            </actions>
+            <pr_comment_template>
+                ## 🚀 Staging Environment Deployed
+                
+                **Environment:** `{environment_name}`
+                **Frontend:** {frontend_url}
+                **Backend:** {backend_url}
+                **Commit:** {commit_sha}
+                
+                ### Quick Actions:
+                - 🔄 Restart: Run workflow with `restart` action
+                - 📊 Status: Run workflow with `status` action
+                - 🗑️ Destroy: Run workflow with `destroy` action or close PR
+            </pr_comment_template>
+        </job>
+        
+        <job id="notify">
+            <purpose>Send notifications about deployment status</purpose>
+            <channels>
+                - GitHub Step Summary
+                - Slack webhook (if configured)
+                - PR comment updates
+            </channels>
+            <status_indicators>
+                - ✅ Success
+                - ❌ Failure
+                - ⏹️ Cancelled
+            </status_indicators>
+        </job>
+    </jobs>
+
+    <permissions_required>
+        <critical>MUST be defined explicitly at workflow level</critical>
+        <permission_block>
+            permissions:
+              contents: read        # Read repository content
+              deployments: write    # Create/update deployments
+              pull-requests: write  # Comment on PRs
+              issues: write         # Manage issue comments
+              statuses: write       # Update commit statuses
+        </permission_block>
+        <reference>See learnings.xml - GitHub Actions Deployment Permission Error</reference>
+    </permissions_required>
+
+    <secrets_and_variables>
+        <secrets>
+            <secret name="GCP_STAGING_SA_KEY" required="true">
+                GCP Service Account credentials for Terraform
+            </secret>
+            <secret name="TF_STATE_BUCKET" required="false">
+                Terraform state bucket (defaults to netra-terraform-state)
+            </secret>
+            <secret name="GCP_PROJECT_ID" required="true">
+                GCP project for deployments
+            </secret>
+        </secrets>
+        <variables>
+            <variable name="CLOUD_PROVIDER" required="false">
+                Cloud provider (defaults to GCP)
+            </variable>
+            <variable name="SLACK_WEBHOOK_URL" required="false">
+                Slack webhook for notifications
+            </variable>
+        </variables>
+    </secrets_and_variables>
+
+    <error_handling>
+        <retry_strategy>
+            - MAX_RETRIES: 3
+            - RETRY_DELAY: 30 seconds
+            - Applies to: Terraform init, API calls
+        </retry_strategy>
+        <failure_modes>
+            <mode id="terraform-failure">
+                <behavior>Continue with warning, skip deployment</behavior>
+                <notification>Update PR with error details</notification>
+            </mode>
+            <mode id="build-failure">
+                <behavior>Mark deployment as failed</behavior>
+                <cleanup>Optional automatic cleanup if force != true</cleanup>
+            </mode>
+            <mode id="smoke-test-failure">
+                <behavior>Continue but mark as degraded</behavior>
+                <notification>Include warning in PR comment</notification>
+            </mode>
+        </failure_modes>
+    </error_handling>
+
+    <cleanup_strategy>
+        <automatic>
+            - Trigger: PR closed or merged
+            - Action: Destroy Terraform resources
+            - Timeout: 10 minutes
+            - On failure: Manual cleanup required
+        </automatic>
+        <manual>
+            - Method 1: Run workflow with action=destroy
+            - Method 2: Close PR
+            - Method 3: terraform destroy locally
+        </manual>
+    </cleanup_strategy>
+
+    <usage_examples>
+        <example id="pr-deployment">
+            <scenario>Developer opens PR #123</scenario>
+            <flow>
+                1. Workflow triggered on PR open
+                2. Environment netra-staging-123 created
+                3. Infrastructure provisioned via Terraform
+                4. Applications deployed
+                5. URLs posted to PR comment
+                6. Developer tests changes
+                7. PR closed → environment destroyed
+            </flow>
+        </example>
+        
+        <example id="manual-rebuild">
+            <scenario>Rebuild existing staging environment</scenario>
+            <command>
+                Run workflow manually:
+                - action: rebuild
+                - pr_number: 123
+            </command>
+        </example>
+        
+        <example id="branch-deployment">
+            <scenario>Push to main branch</scenario>
+            <flow>
+                1. Push triggers workflow
+                2. Environment netra-staging-branch-main created/updated
+                3. Persistent staging for main branch
+                4. Manual destroy required
+            </flow>
+        </example>
+    </usage_examples>
+
+    <troubleshooting>
+        <issue id="permission-denied">
+            <error>Resource not accessible by integration</error>
+            <cause>Missing GitHub Actions permissions</cause>
+            <solution>Add explicit permissions block to workflow</solution>
+            <reference>github_actions.xml, learnings.xml</reference>
+        </issue>
+        
+        <issue id="terraform-lock">
+            <error>Error acquiring the state lock</error>
+            <cause>Previous run didn't release lock</cause>
+            <solution>
+                1. Wait for timeout (usually 15 min)
+                2. Or manually unlock: terraform force-unlock {lock_id}
+            </solution>
+        </issue>
+        
+        <issue id="deployment-stuck">
+            <error>Deployment in progress for hours</error>
+            <cause>Concurrency control preventing new runs</cause>
+            <solution>
+                1. Cancel stuck workflow in GitHub Actions tab
+                2. Manually trigger with force=true
+            </solution>
+        </issue>
+    </troubleshooting>
+
+    <best_practices>
+        <practice>Always check learnings.xml before modifying workflow</practice>
+        <practice>Use concurrency control to prevent resource conflicts</practice>
+        <practice>Include skip conditions for non-code changes</practice>
+        <practice>Implement comprehensive error handling and retries</practice>
+        <practice>Provide clear feedback via PR comments</practice>
+        <practice>Clean up resources promptly to control costs</practice>
+        <practice>Test workflow changes in separate branch first</practice>
+    </best_practices>
+
+    <references>
+        <file>.github/workflows/staging-environment.yml</file>
+        <file>.github/workflows/staging-cleanup.yml</file>
+        <spec>github_actions.xml</spec>
+        <spec>learnings.xml#GitHub Actions Deployment Permission Error</spec>
+        <spec>terraform_staging.xml</spec>
+    </references>
+</specification>

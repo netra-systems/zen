@@ -382,22 +382,28 @@ describe('MainChat', () => {
       
       await userEvent.click(toggleButton);
       
-      expect(card).toHaveAttribute('data-collapsed', 'true');
+      await waitFor(() => {
+        expect(card).toHaveAttribute('data-collapsed', 'true');
+      });
       
       await userEvent.click(toggleButton);
       
-      expect(card).toHaveAttribute('data-collapsed', 'false');
+      await waitFor(() => {
+        expect(card).toHaveAttribute('data-collapsed', 'false');
+      });
     });
   });
 
   describe('Error recovery and reconnection', () => {
     it('should handle store errors gracefully', () => {
+      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
       (useUnifiedChatStore as jest.Mock).mockImplementation(() => {
         throw new Error('Store initialization failed');
       });
       
-      // Should not crash the component
-      expect(() => render(<MainChat />)).not.toThrow();
+      // Should crash the component since store is essential
+      expect(() => render(<MainChat />)).toThrow('Store initialization failed');
+      consoleError.mockRestore();
     });
 
     it('should recover from WebSocket errors', async () => {
@@ -571,8 +577,10 @@ describe('MainChat', () => {
       
       rerender(<MainChat />);
       
-      // Example prompts should disappear
-      expect(screen.queryByTestId('example-prompts')).not.toBeInTheDocument();
+      // Example prompts should disappear when there are messages
+      await waitFor(() => {
+        expect(screen.queryByTestId('example-prompts')).not.toBeInTheDocument();
+      });
     });
 
     it('should handle message deletion from history', () => {

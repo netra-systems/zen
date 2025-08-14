@@ -49,7 +49,7 @@ class RealServiceTestMetrics:
             "gpt-4": {"input": 0.03, "output": 0.06},
             "claude-3-sonnet": {"input": 0.003, "output": 0.015},
             "gemini-1.5-flash": {"input": 0.00035, "output": 0.0007},
-            "gemini-1.5-pro": {"input": 0.0035, "output": 0.007}
+            "gemini-2.5-pro": {"input": 0.0035, "output": 0.007}
         }
     
     def track_llm_call(self, model: str, tokens: int, call_type: str = "input"):
@@ -561,7 +561,7 @@ def main():
     parser.add_argument(
         "--model",
         default="gemini-1.5-flash",
-        choices=["gemini-1.5-flash", "gemini-1.5-pro", "gpt-3.5-turbo", "gpt-4", "claude-3-sonnet"],
+        choices=["gemini-1.5-flash", "gemini-2.5-pro", "gpt-3.5-turbo", "gpt-4", "claude-3-sonnet"],
         help="LLM model to use for tests"
     )
     parser.add_argument(

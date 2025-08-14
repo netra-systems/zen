@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
-from typing import List, Optional, Dict, Any, TypedDict
-from pydantic import BaseModel, Field
+from typing import List, Optional, Dict, Any, TypedDict, Union, TypeVar, Generic
+from pydantic import BaseModel, Field, ConfigDict
 from langchain_core.messages import BaseMessage
 
 class SubAgentLifecycle(str, enum.Enum):
@@ -11,25 +11,62 @@ class SubAgentLifecycle(str, enum.Enum):
     FAILED = "failed"
     SHUTDOWN = "shutdown"
 
+class AgentStatus(str, enum.Enum):
+    """Strongly typed agent status"""
+    IDLE = "idle"
+    ACTIVE = "active"
+    PAUSED = "paused"
+    ERROR = "error"
+    COMPLETED = "completed"
+
+class TodoStatus(str, enum.Enum):
+    """Strongly typed todo status"""
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    BLOCKED = "blocked"
+    CANCELLED = "cancelled"
+
+class ToolResultData(BaseModel):
+    """Structured tool result data"""
+    tool_name: str
+    status: str
+    output: Optional[Union[str, dict, list]] = None
+    error: Optional[str] = None
+    execution_time_ms: Optional[float] = None
+    metadata: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict)
+
 class AgentState(BaseModel):
     messages: List[BaseMessage]
     next_node: str
-    tool_results: Optional[List[Dict]] = None
+    tool_results: Optional[List[ToolResultData]] = None
+    metadata: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict)
 
-class Todo(TypedDict):
+class TodoItem(BaseModel):
+    """Individual todo item"""
+    id: str
+    description: str
+    completed: bool = False
+
+class Todo(BaseModel):
+    """Strongly typed todo with proper status enum"""
     id: str
     task: str
-    status: str
-    items: List[str]
+    status: TodoStatus
+    items: List[TodoItem] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: Optional[datetime] = None
 
 class SubAgentState(BaseModel):
     messages: List[BaseMessage]
     next_node: str
-    tool_results: Optional[List[Dict]] = None
+    tool_results: Optional[List[ToolResultData]] = None
     lifecycle: SubAgentLifecycle = SubAgentLifecycle.PENDING
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
     error_message: Optional[str] = None
+    error_details: Optional[Dict[str, Union[str, int, dict]]] = None
+    performance_metrics: Dict[str, Union[int, float]] = Field(default_factory=dict)
 
     def start(self):
         self.lifecycle = SubAgentLifecycle.RUNNING
@@ -53,9 +90,19 @@ class AgentStarted(BaseModel):
     agent_name: str = "Supervisor"
     timestamp: float = Field(default_factory=lambda: datetime.now().timestamp())
 
+class AgentResult(BaseModel):
+    """Structured agent result"""
+    success: bool
+    output: Optional[Union[str, dict, list]] = None
+    error: Optional[str] = None
+    metrics: Dict[str, Union[int, float]] = Field(default_factory=dict)
+    artifacts: List[str] = Field(default_factory=list)
+
 class AgentCompleted(BaseModel):
     run_id: str
-    result: Any
+    result: AgentResult
+    execution_time_ms: float
+    final_state: Optional[AgentState] = None
 
 class AgentErrorMessage(BaseModel):
     run_id: str
@@ -68,4 +115,6 @@ class SubAgentUpdate(BaseModel):
 class SubAgentStatus(BaseModel):
     agent_name: str
     tools: List[str]
-    status: str
+    status: AgentStatus
+    lifecycle: SubAgentLifecycle
+    metrics: Dict[str, Union[int, float]] = Field(default_factory=dict)

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { demoService } from '@/services/demoService'
+import { logger } from '@/lib/logger'
 
 interface ROICalculatorProps {
   industry: string
@@ -95,7 +96,11 @@ export default function ROICalculator({ industry, onComplete }: ROICalculatorPro
         setTimeout(onComplete, 1500)
       }
     } catch (error) {
-      console.error('ROI calculation error:', error)
+      logger.error('ROI calculation failed', error as Error, {
+        component: 'ROICalculator',
+        action: 'calculate_roi_error',
+        metadata: { metrics, industry }
+      })
       // Fallback to local calculation if API fails
         const multiplier = industryMultipliers[industry] || industryMultipliers.default
         

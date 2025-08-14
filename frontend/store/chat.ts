@@ -39,7 +39,7 @@ interface ChatState {
   clearSubAgent: () => void;
   setActiveThread: (threadId: string) => void;
   loadThreadMessages: (messages: Message[]) => void;
-  loadMessages: (messages: any[]) => void;
+  loadMessages: (messages: Message[]) => void;
   addError: (error: string) => void;
   addErrorMessage: (error: string) => void;
   reset: () => void;

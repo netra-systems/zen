@@ -293,7 +293,7 @@ describe('Critical UI/UX Alignment Tests', () => {
         'thread_created',
         'thread_loaded',
         'thread_renamed',
-        'run_started',
+        'agent_started',
         'step_created'
       ];
       

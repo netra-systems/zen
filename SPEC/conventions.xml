@@ -1,95 +1,248 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <specification>
     <metadata>
-        <name>Conventions</name>
+        <name>Coding Conventions</name>
         <type>conventions</type>
-        <version>1.0</version>
+        <version>2.0</version>
+        <description>
+            MANDATORY coding standards for the Netra AI platform.
+            These conventions ensure consistency, maintainability, and prevent regressions.
+        </description>
     </metadata>
     
-    <project-conventions>
-        <convention id="types">
-            <title>Types</title>
-            <rules>
-                <rule location="frontend">types/*.ts</rule>
-                <rule location="backend">schemas.py</rule>
-                <rule priority="high">ALWAYS use existing or add new types using defined locations</rule>
-            </rules>
+    <critical-rules>
+        <rule id="file-size-limit" priority="CRITICAL">
+            <title>300 Line File Limit</title>
+            <description>Every file MUST be 300 lines or less</description>
+            <enforcement>Split large files into focused modules</enforcement>
+        </rule>
+        
+        <rule id="no-duplication" priority="CRITICAL">
+            <title>Prevent Function Duplication</title>
+            <description>NEVER create "enhanced", "v2", or duplicate versions</description>
+            <actions>
+                <action>Search for existing implementations before creating new</action>
+                <action>Extend existing functions with options/parameters</action>
+                <action>Use composition over duplication</action>
+            </actions>
+        </rule>
+        
+        <rule id="no-test-stubs" priority="CRITICAL">
+            <title>No Test Implementations in Production</title>
+            <description>NEVER add test code in production services</description>
+            <reference>SPEC/no_test_stubs.xml</reference>
+        </rule>
+    </critical-rules>
+
+    <type-safety>
+        <convention id="backend-types">
+            <location>app/schemas/</location>
+            <pattern>Pydantic models for all API contracts</pattern>
+            <enforcement>Type hints on ALL functions</enforcement>
         </convention>
         
-        <convention id="single-source-of-truth">
-            <title>Single Sources of Truth</title>
-            <description>Every unique concept is only defined once and then references the rest of the places. E.g. for each frontend concept, e.g. Context, Hooks, Store, etc. etc. MUST be only ONE</description>
+        <convention id="frontend-types">
+            <location>frontend/types/</location>
+            <pattern>TypeScript types matching backend schemas</pattern>
+            <enforcement>Strict mode enabled, no any types</enforcement>
+        </convention>
+        
+        <convention id="single-source-truth">
+            <description>Each concept defined ONCE, referenced everywhere</description>
+            <examples>
+                <example>One WebSocket provider, not multiple</example>
+                <example>One auth context, not duplicates</example>
+                <example>One chat store, not enhanced versions</example>
+            </examples>
+        </convention>
+    </type-safety>
+
+    <async-patterns>
+        <convention id="async-first">
+            <description>Use async/await for ALL I/O operations</description>
+            <backend>
+                <pattern>async def for all database/API operations</pattern>
+                <pattern>AsyncSession for database access</pattern>
+                <pattern>await for all external calls</pattern>
+            </backend>
+            <frontend>
+                <pattern>async functions for API calls</pattern>
+                <pattern>Proper error handling with try/catch</pattern>
+            </frontend>
+        </convention>
+    </async-patterns>
+
+    <error-handling>
+        <convention id="backend-exceptions">
+            <pattern>Use NetraException with proper context</pattern>
+            <example>
+                raise NetraException(
+                    message="Operation failed",
+                    error_code="OP_001",
+                    context={"user_id": user_id}
+                )
+            </example>
+        </convention>
+        
+        <convention id="frontend-errors">
+            <pattern>Centralized error handling with toast notifications</pattern>
+            <pattern>Log errors to console with context</pattern>
+        </convention>
+    </error-handling>
+
+    <imports>
+        <convention id="backend-imports">
+            <rules>
+                <rule>Import at module level, not inside functions</rule>
+                <rule>Group imports: stdlib, third-party, local</rule>
+                <rule>Use absolute imports from app root</rule>
+            </rules>
         </convention>
         
         <convention id="frontend-imports">
-            <title>Frontend Imports</title>
             <rules>
-                <rule>Use tsconfig.json, named exports (export const ...)</rule>
-                <rule>All import paths must be absolute using the @/ alias from tsconfig</rule>
-                <rule>All imports use { item } over defaults</rule>
+                <rule>Use @/ alias for all internal imports</rule>
+                <rule>Named exports only: export const</rule>
+                <rule>Import with braces: {Component}</rule>
+                <rule>NO default exports</rule>
+            </rules>
+        </convention>
+    </imports>
+
+    <database-patterns>
+        <convention id="repository-pattern">
+            <description>ALL database access through repositories</description>
+            <location>app/services/database/</location>
+            <pattern>One repository per entity/domain</pattern>
+        </convention>
+        
+        <convention id="database-sessions">
+            <description>Explicit type hints for sessions</description>
+            <pattern>db_session: AsyncSession = Depends(get_db_session)</pattern>
+            <critical>Missing type hints cause auth failures</critical>
+        </convention>
+    </database-patterns>
+
+    <testing>
+        <convention id="test-coverage">
+            <minimum>Backend: 70%, Frontend: 60%</minimum>
+            <target>97% overall coverage</target>
+            <enforcement>Tests required for all new code</enforcement>
+        </convention>
+        
+        <convention id="test-organization">
+            <pattern>Mirror source structure in tests</pattern>
+            <pattern>One test file per source file</pattern>
+            <pattern>Use descriptive test names</pattern>
+        </convention>
+    </testing>
+
+    <ui-design>
+        <convention id="glassmorphic">
+            <description>Glassmorphic design throughout</description>
+            <rules>
+                <rule>NO blue gradient bars</rule>
+                <rule>Use glass-panel classes</rule>
+                <rule>Consistent blur and transparency</rule>
             </rules>
         </convention>
         
-        <convention id="classes">
-            <title>Classes</title>
-            <rules>
-                <rule>Always use classes (interfaces). All functions must be inside of classes</rule>
-                <rule>Always import at class level</rule>
-            </rules>
+        <convention id="unique-ids">
+            <description>Prevent React key warnings</description>
+            <pattern>Use generateUniqueId() from @/lib/utils</pattern>
+            <critical>NEVER use Date.now() alone</critical>
+        </convention>
+    </ui-design>
+
+    <authentication>
+        <convention id="auth-checks">
+            <description>Check auth before API calls</description>
+            <pattern>
+                if (!isAuthenticated) {
+                    console.error('User must be authenticated');
+                    return;
+                }
+            </pattern>
         </convention>
         
-        <convention id="frontend-architecture">
-            <title>Frontend Architecture</title>
-            <rule>Always prefer typescript classes over react concepts. The core logic is always in typescript, react is just the view related concepts when it make sense</rule>
+        <convention id="auth-ui">
+            <description>Provide feedback for unauthenticated state</description>
+            <examples>
+                <example>Disable inputs when not authenticated</example>
+                <example>Show "Please sign in" messages</example>
+            </examples>
+        </convention>
+    </authentication>
+
+    <websockets>
+        <convention id="websocket-provider">
+            <description>Single WebSocketProvider for entire app</description>
+            <location>frontend/providers/WebSocketProvider.tsx</location>
+            <critical>NO duplicate WebSocket implementations</critical>
         </convention>
         
-        <convention id="react-context">
-            <title>React Context</title>
-            <rule>`createContext`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive</rule>
+        <convention id="message-types">
+            <description>Typed WebSocket messages</description>
+            <backend>app/schemas/websocket_types.py</backend>
+            <frontend>frontend/types/websocket.ts</frontend>
+        </convention>
+    </websockets>
+
+    <naming>
+        <convention id="python-naming">
+            <classes>PascalCase: UserService, NetraException</classes>
+            <functions>snake_case: get_user_by_id</functions>
+            <constants>UPPER_SNAKE: MAX_RETRIES</constants>
+            <files>snake_case: user_service.py</files>
         </convention>
         
-        <convention id="unique-id-generation">
-            <title>Unique ID Generation</title>
-            <description>Prevent React duplicate key warnings by using proper unique ID generation</description>
-            <rules>
-                <rule priority="critical">ALWAYS use generateUniqueId() from @/lib/utils for creating unique IDs in React components</rule>
-                <rule>NEVER use Date.now() alone as it can create duplicates in rapid succession</rule>
-                <rule>The generateUniqueId() function combines timestamp, counter, and random string for guaranteed uniqueness</rule>
-                <rule>Use appropriate prefixes: generateUniqueId('msg') for messages, generateUniqueId('error') for errors, etc.</rule>
-            </rules>
-            <rationale>
-                Using Date.now() alone can create duplicate keys when components are created in rapid succession (same millisecond),
-                causing React warnings and potential rendering issues. The generateUniqueId() utility ensures true uniqueness.
-            </rationale>
+        <convention id="typescript-naming">
+            <components>PascalCase: ChatMessage.tsx</components>
+            <functions>camelCase: getUserById</functions>
+            <constants>UPPER_SNAKE: MAX_RETRIES</constants>
+            <types>PascalCase with I/T prefix: IUser, TResponse</types>
+        </convention>
+    </naming>
+
+    <logging>
+        <convention id="backend-logging">
+            <pattern>Use CentralLogger for all logging</pattern>
+            <levels>
+                <level>DEBUG: Detailed diagnostic info</level>
+                <level>INFO: General informational messages</level>
+                <level>WARNING: Warning messages</level>
+                <level>ERROR: Error messages with context</level>
+            </levels>
         </convention>
         
-        <convention id="ui-layout-architecture">
-            <title>UI Layout Architecture</title>
-            <description>Maintain consistent layout architecture across the application</description>
-            <rules>
-                <rule priority="critical">Chat history MUST be integrated into the main application sidebar, not as a separate sidebar within chat pages</rule>
-                <rule>The main Sidebar component should contain all persistent navigation and history elements</rule>
-                <rule>Avoid dual-sidebar patterns that create disconnected user experiences</rule>
-                <rule>Global navigation elements (chat history, nav links) should be accessible from any page</rule>
-                <rule>Use ChatHistorySection component for thread management in the main sidebar</rule>
-            </rules>
-            <rationale>
-                Users expect chat history to be persistently visible in the main sidebar (similar to ChatGPT/Claude).
-                Dual-sidebar patterns create confusion and poor UX as users can't see their conversation history when navigating to other pages.
-            </rationale>
+        <convention id="frontend-logging">
+            <pattern>Use lib/logger for structured logging</pattern>
+            <production>Minimal console output in production</production>
+        </convention>
+    </logging>
+
+    <dependency-injection>
+        <convention id="singleton-services">
+            <description>Use provider functions for singletons</description>
+            <correct>Depends(get_llm_manager)</correct>
+            <incorrect>Depends(LLMManager)</incorrect>
+            <critical>Direct injection loses configuration</critical>
+        </convention>
+    </dependency-injection>
+
+    <file-organization>
+        <convention id="keep-root-clean">
+            <description>NEVER create files in project root</description>
+            <rule>Place files in appropriate subdirectories</rule>
         </convention>
         
-        <convention id="python-patterns">
-            <title>Python Patterns</title>
-            <rules>
-                <rule>Uses Async Await pattern whenever possible</rule>
-                <rule>All logging uses CentralLogger</rule>
-            </rules>
+        <convention id="logical-grouping">
+            <description>Group related functionality</description>
+            <examples>
+                <example>app/agents/ for all agent code</example>
+                <example>app/services/ for business logic</example>
+                <example>frontend/components/ for UI components</example>
+            </examples>
         </convention>
-        
-        <convention id="testing">
-            <title>Testing</title>
-            <rule location="backend">Backend uses: "testing": schemas.TestingConfig</rule>
-        </convention>
-    </project-conventions>
+    </file-organization>
 </specification>
