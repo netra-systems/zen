@@ -61,6 +61,7 @@ class WebSocketMessageType(str, Enum):
     TOOL_RESULT = "tool_result"
     SUBAGENT_STARTED = "subagent_started"
     SUBAGENT_COMPLETED = "subagent_completed"
+    SUB_AGENT_UPDATE = "sub_agent_update"
     THREAD_HISTORY = "thread_history"
     THREAD_CREATED = "thread_created"
     THREAD_SWITCHED = "thread_switched"
