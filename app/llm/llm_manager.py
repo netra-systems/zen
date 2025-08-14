@@ -208,14 +208,26 @@ class LLMManager:
         
         response_content = response.content
         
-        # Create typed response
+        # Get provider from config
+        config = self.settings.llm_configs.get(llm_config_name)
+        provider = LLMProvider(config.provider) if config else LLMProvider.LOCAL
+        
+        # Create typed response with required fields
+        from app.schemas.llm_types import TokenUsage
         llm_response = LLMResponse(
-            content=response_content,
-            token_count=getattr(response, 'token_count', None),
-            finish_reason=getattr(response, 'finish_reason', None),
-            model=getattr(response, 'model', llm_config_name),
-            cached=False,
-            execution_time_ms=execution_time_ms
+            provider=provider,
+            model=getattr(response, 'model', config.model_name if config else llm_config_name),
+            choices=[{
+                "message": {"content": response_content},
+                "finish_reason": getattr(response, 'finish_reason', 'stop'),
+                "index": 0
+            }],
+            usage=TokenUsage(
+                prompt_tokens=getattr(response, 'prompt_tokens', 0),
+                completion_tokens=getattr(response, 'completion_tokens', 0),
+                total_tokens=getattr(response, 'total_tokens', 0)
+            ),
+            response_time_ms=execution_time_ms
         )
         
         # Cache the response if appropriate
