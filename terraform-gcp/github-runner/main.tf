@@ -77,6 +77,16 @@ resource "google_secret_manager_secret" "github_token" {
 resource "google_secret_manager_secret_version" "github_token" {
   secret      = google_secret_manager_secret.github_token.id
   secret_data = var.github_token
+  
+  lifecycle {
+    create_before_destroy = true
+    precondition {
+      condition     = var.github_token != "" && var.github_token != null
+      error_message = "GitHub token is required. Please set TF_VAR_github_token environment variable with a valid GitHub PAT."
+    }
+  }
+  
+  depends_on = [google_secret_manager_secret.github_token]
 }
 
 # IAM for accessing the secret
@@ -85,6 +95,12 @@ resource "google_secret_manager_secret_iam_member" "github_token_access" {
   secret_id = google_secret_manager_secret.github_token.secret_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.github_runner.email}"
+  
+  depends_on = [
+    google_secret_manager_secret.github_token,
+    google_secret_manager_secret_version.github_token,
+    google_service_account.github_runner
+  ]
 }
 
 # Firewall rule for SSH (optional, for debugging)

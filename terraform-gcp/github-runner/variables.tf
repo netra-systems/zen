@@ -21,6 +21,11 @@ variable "github_token" {
   description = "GitHub Personal Access Token with repo and admin:org scopes"
   type        = string
   sensitive   = true
+  
+  validation {
+    condition     = length(var.github_token) > 0
+    error_message = "GitHub token must be provided. Set it via TF_VAR_github_token environment variable or enter when prompted."
+  }
 }
 
 variable "github_org" {

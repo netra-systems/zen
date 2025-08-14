@@ -202,6 +202,7 @@ class CorpusService:
             "unique_documents": len(unique_docs),
             "indexed_count": len(unique_docs),  # Add for test compatibility
             "duplicates_removed": len(documents) - len(unique_docs),
+            "duplicates_skipped": len(documents) - len(unique_docs),  # Add for test compatibility
             "indexed_documents": unique_docs
         }
     

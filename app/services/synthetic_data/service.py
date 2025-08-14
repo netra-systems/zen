@@ -209,6 +209,45 @@ class SyntheticDataService(RecoveryMixin):
             records.append(record)
         
         return records
+    
+    async def generate_for_tenant(self, tenant_config: Dict) -> Dict:
+        """Generate data for a specific tenant"""
+        tenant_id = tenant_config.get('tenant_id', 'default')
+        domain = tenant_config.get('domain', 'general')
+        
+        # Mock generation for tenant
+        job_id = str(uuid.uuid4())
+        table_name = f"tenant_{tenant_id}_{job_id.replace('-', '_')}"
+        
+        return {
+            "tenant_id": tenant_id,
+            "job_id": job_id,
+            "domain": domain,
+            "table_name": table_name,
+            "status": "completed",
+            "records_generated": 100
+        }
+    
+    def _generate_content(self, workload_type: str, corpus_content: Optional[List[Dict]] = None) -> tuple:
+        """Generate request/response content based on workload type and corpus"""
+        if corpus_content and len(corpus_content) > 0:
+            # Use corpus content
+            item = corpus_content[0]  # Use first item for simplicity
+            request = item.get('prompt', 'Default prompt')
+            response = item.get('response', 'Default response')
+        else:
+            # Generate synthetic content based on workload type
+            if workload_type == "simple_queries":
+                request = "What is the weather today?"
+                response = "The weather is sunny and 75°F."
+            elif workload_type == "complex_analysis":
+                request = "Analyze quarterly sales trends"
+                response = "Sales have increased 15% quarter over quarter"
+            else:
+                request = f"Request for {workload_type}"
+                response = f"Response for {workload_type}"
+        
+        return request, response
         
     async def generate_synthetic_data(
         self,

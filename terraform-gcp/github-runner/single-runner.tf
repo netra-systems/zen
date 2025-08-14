@@ -1,6 +1,14 @@
 # Single GitHub Runner Instance with Docker Fixes
 # This creates one new runner instance with all fixes preloaded
 
+# Add a delay to ensure IAM permissions have propagated
+resource "time_sleep" "wait_for_iam" {
+  depends_on = [
+    google_secret_manager_secret_iam_member.github_token_access
+  ]
+  create_duration = "30s"
+}
+
 resource "google_compute_instance" "github_runner_fixed" {
   name         = "${var.runner_name}-fixed-${formatdate("YYYYMMDD-hhmmss", timestamp())}"
   machine_type = var.machine_type
@@ -200,15 +208,43 @@ install_dependencies() {
 
 # Removed - handled in main function now
 
-# Step 3: Get GitHub token from Secret Manager
+# Step 3: Get GitHub token from Secret Manager with retry logic
 get_github_token() {
     log "Retrieving GitHub token..."
-    local token=$(gcloud secrets versions access latest --secret="github-runner-token" --project="$PROJECT_ID" 2>/dev/null)
-    if [ -z "$token" ]; then
-        log "ERROR: Failed to retrieve GitHub token"
-        exit 1
-    fi
-    echo "$token"
+    
+    # Retry logic for Secret Manager access
+    local max_retries=10
+    local retry_count=0
+    local token=""
+    
+    while [ $retry_count -lt $max_retries ]; do
+        # First check if secret exists
+        if gcloud secrets describe "github-runner-token" --project="$PROJECT_ID" &>/dev/null; then
+            log "Secret exists, attempting to access..."
+            token=$(gcloud secrets versions access latest --secret="github-runner-token" --project="$PROJECT_ID" 2>&1)
+            
+            if [ $? -eq 0 ] && [ -n "$token" ]; then
+                log "Successfully retrieved GitHub token"
+                echo "$token"
+                return 0
+            else
+                log "Attempt $((retry_count + 1)) failed: Could not access secret"
+            fi
+        else
+            log "Secret does not exist yet, waiting... (attempt $((retry_count + 1))/$max_retries)"
+        fi
+        
+        retry_count=$((retry_count + 1))
+        if [ $retry_count -lt $max_retries ]; then
+            sleep 10
+        fi
+    done
+    
+    log "ERROR: Failed to retrieve GitHub token after $max_retries attempts"
+    log "Debugging information:"
+    gcloud secrets describe "github-runner-token" --project="$PROJECT_ID" 2>&1 || log "Secret does not exist"
+    gcloud secrets versions list "github-runner-token" --project="$PROJECT_ID" 2>&1 || log "Cannot list versions"
+    exit 1
 }
 
 # Step 4: Get registration token
@@ -369,9 +405,14 @@ main() {
     log "GitHub Runner Installation with Docker Support"
     log "==================================================="
     
-    # Wait for system to fully initialize
-    log "Waiting for system initialization..."
-    sleep 10
+    # Wait for system to fully initialize and IAM propagation
+    log "Waiting for system initialization and IAM propagation..."
+    sleep 30  # Increased wait time for IAM permissions to propagate
+    
+    # Debug information
+    log "Instance metadata:"
+    log "  Project ID: $PROJECT_ID"
+    log "  Service Account: $(curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/email)"
     
     # Ensure we have necessary tools
     log "Checking system prerequisites..."
@@ -379,6 +420,15 @@ main() {
         log "ERROR: apt-get not found, unsupported system"
         exit 1
     }
+    
+    # Install gcloud if not present
+    if ! command -v gcloud &>/dev/null; then
+        log "Installing Google Cloud SDK..."
+        echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+        apt-get install -y apt-transport-https ca-certificates gnupg
+        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+        apt-get update && apt-get install -y google-cloud-sdk
+    fi
     
     # Update package lists first
     log "Updating package lists..."
@@ -501,7 +551,8 @@ EOT
   depends_on = [
     google_project_service.compute,
     google_secret_manager_secret_version.github_token,
-    google_secret_manager_secret_iam_member.github_token_access
+    google_secret_manager_secret_iam_member.github_token_access,
+    time_sleep.wait_for_iam
   ]
 }
 
