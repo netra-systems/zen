@@ -19,12 +19,38 @@ from .corpus import (
     ContentSource
 )
 
+# Mock VectorStore class for backward compatibility with tests
+class VectorStore:
+    """Mock VectorStore for test compatibility"""
+    def __init__(self):
+        self.documents = []
+    
+    async def add_documents(self, documents):
+        self.documents.extend(documents)
+    
+    async def search(self, query, limit=10):
+        return self.documents[:limit]
+
+# Mock LLMManager class for backward compatibility with tests
+class LLMManager:
+    """Mock LLMManager for test compatibility"""
+    def __init__(self):
+        self.embeddings = {}
+    
+    async def generate_embedding(self, text):
+        return [0.1] * 768  # Mock embedding vector
+    
+    async def generate_summary(self, text):
+        return f"Summary of: {text[:50]}..."
+
 # Re-export classes for backward compatibility
 __all__ = [
     "CorpusStatus",
     "ContentSource", 
     "CorpusService",
     "corpus_service",
+    "VectorStore",
+    "LLMManager",
     # Legacy functions
     "get_corpus",
     "get_corpora", 

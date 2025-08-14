@@ -11,7 +11,7 @@ from pydantic import ValidationError
 
 # Import API schemas
 from app.schemas.Request import RequestModel, StartAgentPayload
-from app.schemas.Generation import GenerationRequest, GenerationResponse
+from app.schemas.Generation import ContentGenParams, LogGenParams, SyntheticDataGenParams
 from app.schemas.Auth import LoginRequest, LoginResponse, TokenData
 from app.schemas.User import UserCreate, UserResponse, UserUpdate
 from app.schemas.Config import ConfigRequest, ConfigResponse
@@ -136,10 +136,10 @@ class TestAPIRequestValidation:
         request_data = APIRequestFactory.create_generation_request()
         
         try:
-            request = GenerationRequest(**request_data)
-            assert request.prompt == "Generate optimization recommendations"
-            assert request.model == "gpt-4"
-            assert request.max_tokens == 1000
+            request = ContentGenParams(**request_data)
+            assert request.samples_per_type == 10
+            assert request.temperature == 0.7
+            assert request.max_cores == 4
         except ValidationError as e:
             pytest.fail(f"Generation request validation failed: {e}")
     
@@ -207,26 +207,24 @@ class TestAPIRequestValidation:
 class TestAPIResponseValidation:
     """Test API response payload validation."""
     
-    def test_generation_response_structure(self):
-        """Test generation response structure."""
-        response_data = {
-            "id": "gen123",
-            "content": "Based on analysis, here are optimization recommendations...",
-            "model": "gpt-4",
-            "tokens_used": 250,
-            "metadata": {
-                "processing_time": 1.5,
-                "cache_hit": False
-            },
-            "created_at": datetime.now().isoformat()
+    def test_synthetic_data_generation_params(self):
+        """Test synthetic data generation parameters validation."""
+        request_data = {
+            "num_traces": 10000,
+            "num_users": 100,
+            "error_rate": 0.05,
+            "event_types": ["search", "login", "purchase"],
+            "source_table": "content_corpus",
+            "destination_table": "synthetic_data"
         }
         
         try:
-            response = GenerationResponse(**response_data)
-            assert response.id == "gen123"
-            assert response.tokens_used == 250
+            request = SyntheticDataGenParams(**request_data)
+            assert request.num_traces == 10000
+            assert request.num_users == 100
+            assert request.error_rate == 0.05
         except ValidationError as e:
-            pytest.fail(f"Generation response validation failed: {e}")
+            pytest.fail(f"Synthetic data generation params validation failed: {e}")
     
     def test_auth_response_structure(self):
         """Test authentication response structure."""

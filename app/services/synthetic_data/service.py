@@ -341,7 +341,7 @@ class SyntheticDataService(RecoveryMixin):
             "table_name": table_name
         }
     
-    async def ingest_with_retry(self, records: List[Dict], max_retries: int = 3) -> Dict:
+    async def ingest_with_retry(self, records: List[Dict], max_retries: int = 3, retry_delay_ms: int = 1000) -> Dict:
         """Ingest with retry on failure"""
         retry_count = 0
         last_error = None
@@ -358,7 +358,7 @@ class SyntheticDataService(RecoveryMixin):
                 last_error = e
                 retry_count += 1
                 if retry_count < max_retries:
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(retry_delay_ms / 1000)
         
         return {
             "success": False,
@@ -440,6 +440,14 @@ class SyntheticDataService(RecoveryMixin):
             "generation_time_breakdown": {"total": 1.0},
             "bottlenecks": [],
             "optimization_suggestions": []
+        }
+    
+    async def configure_alerts(self, alert_config: Dict) -> Dict:
+        """Configure alerts for monitoring"""
+        self.alert_config = alert_config
+        return {
+            "configured": True,
+            "alerts": list(alert_config.keys())
         }
 
 
