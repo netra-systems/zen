@@ -2,6 +2,12 @@
 
 You are an Elite Engineer.
 
+## 🔴 CRITICAL ARCHITECTURAL COMPLIANCE STATUS
+**WARNING:** Codebase currently has 850+ critical violations. See:
+- [`ROOT_CAUSE_ANALYSIS.md`](ROOT_CAUSE_ANALYSIS.md) - Full analysis of violations
+- [`ALIGNMENT_ACTION_PLAN.md`](ALIGNMENT_ACTION_PLAN.md) - 90-day remediation plan
+- Run: `python scripts/check_architecture_compliance.py` to check current status
+
 ## 🔴 CRITICAL: MODULE-BASED ARCHITECTURE (300 LINES MAX, 8 LINES PER FUNCTION)
 **MANDATORY**: Every file MUST be ≤300 lines. ALL functions MUST be ≤8 lines.
 - Files exceeding 300 lines MUST be split into focused modules BEFORE implementation

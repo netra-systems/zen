@@ -11,7 +11,7 @@ set -u
 set -o pipefail
 
 # Enable debug mode if DEBUG environment variable is set
-[[ "${DEBUG:-}" == "true" ]] && set -x
+[[ "$${DEBUG:-}" == "true" ]] && set -x
 
 # --- Configuration Variables ---
 # These variables are expected to be templated by a tool like Terraform.
@@ -21,15 +21,15 @@ RUNNER_NAME="${runner_name}"
 RUNNER_LABELS="${runner_labels}"
 RUNNER_GROUP="${runner_group}"
 PROJECT_ID="${project_id}"
-RUNNER_VERSION="${runner_version:-"2.317.0"}" # Default version if not provided
+RUNNER_VERSION="${runner_version}" # Default version if not provided
 
 # --- Script Variables ---
 RUNNER_USER="runner"
-RUNNER_HOME="/home/$RUNNER_USER"
-RUNNER_DIR="$RUNNER_HOME/actions-runner"
+RUNNER_HOME="/home/$$RUNNER_USER"
+RUNNER_DIR="$$RUNNER_HOME/actions-runner"
 LOG_FILE="/var/log/github-runner-install.log"
 ERROR_LOG="/var/log/github-runner-errors.log"
-DOCKER_REQUIRED="${DOCKER_REQUIRED:-false}"
+DOCKER_REQUIRED="$${DOCKER_REQUIRED:-false}"
 MAX_RETRIES=5
 RETRY_DELAY=10
 
@@ -79,7 +79,7 @@ error_handler() {
     exit $exit_code
 }
 
-trap 'error_handler $LINENO ${BASH_LINENO[0]} "$BASH_COMMAND"' ERR
+trap 'error_handler $$LINENO $${BASH_LINENO[0]} "$$BASH_COMMAND"' ERR
 
 # Check system requirements
 check_system_requirements() {
@@ -131,7 +131,7 @@ install_dependencies() {
         fi
         retry_count=$((retry_count + 1))
         log "Package update failed (attempt $retry_count/$MAX_RETRIES). Retrying..."
-        sleep $RETRY_DELAY
+        sleep $$RETRY_DELAY
     done
     
     # Essential packages (required)
@@ -247,7 +247,7 @@ fix_docker_permissions() {
         # Clean and retry
         systemctl stop docker 2>/dev/null || true
         rm -f /var/run/docker.sock /var/run/docker.pid 2>/dev/null || true
-        sleep $RETRY_DELAY
+        sleep $$RETRY_DELAY
     done
 }
 
@@ -301,7 +301,7 @@ install_docker_buildx() {
     
     mkdir -p "$buildx_dir"
     
-    if curl -fsSL "https://github.com/docker/buildx/releases/download/v${buildx_version}/buildx-v${buildx_version}.linux-amd64" \
+    if curl -fsSL "https://github.com/docker/buildx/releases/download/v$${buildx_version}/buildx-v$${buildx_version}.linux-amd64" \
         -o "$buildx_dir/docker-buildx"; then
         chmod +x "$buildx_dir/docker-buildx"
         log "Docker buildx plugin installed successfully."
@@ -377,7 +377,7 @@ get_github_pat() {
                 return 0
             else
                 log "Failed to access secret (attempt $((retry_count + 1))/$MAX_RETRIES)."
-                log "Response: ${token:0:100}..." # Log first 100 chars for debugging
+                log "Response: $${token:0:100}..." # Log first 100 chars for debugging
             fi
         else
             log "Secret 'github-runner-token' not found (attempt $((retry_count + 1))/$MAX_RETRIES)."
@@ -385,8 +385,8 @@ get_github_pat() {
         
         retry_count=$((retry_count + 1))
         if [[ $retry_count -lt $MAX_RETRIES ]]; then
-            log "Waiting ${RETRY_DELAY} seconds before retry..."
-            sleep $RETRY_DELAY
+            log "Waiting $${RETRY_DELAY} seconds before retry..."
+            sleep $$RETRY_DELAY
         fi
     done
     
@@ -482,7 +482,7 @@ configure_runner() {
         config_cmd+=("--runnergroup \"$RUNNER_GROUP\"")
     fi
 
-    su - "$RUNNER_USER" -c "cd '$RUNNER_DIR' && ${config_cmd[*]}"
+    su - "$$RUNNER_USER" -c "cd '$$RUNNER_DIR' && $${config_cmd[*]}"
 }
 
 # Install and start the runner as a systemd service.
@@ -542,7 +542,7 @@ deploy_helper_scripts() {
     mkdir -p "$scripts_dir"
     
     # Check if scripts are available in the current directory or a known location
-    local source_dir="${SCRIPT_SOURCE_DIR:-$(dirname "$0")}"
+    local source_dir="$${SCRIPT_SOURCE_DIR:-$$(dirname "$$0")}"
     
     if [[ -d "$source_dir" ]]; then
         for script in diagnose-runner.sh fix-runner-issues.sh monitor-runner.sh; do

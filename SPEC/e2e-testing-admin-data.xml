@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>End-to-End Testing Specification - Admin Corpus Generation</name>
+        <Spec-Reference-Name>spec-e2e-testing-admin-data.xml</Spec-Reference-Name>
+        <type>Testing</type>
+        <version>1.0</version>
+        <last-updated>2025-08-14/last-updated>
+        <scope>Admin Corpus Generation</scope>
+        <coverage-target>95%</coverage-target>
+    </metadata>
+    
+    <testing-philosophy>
+        <principles>
+            <principle>Test the complete user journey from UI/UX Chat through Agent usage to generated and persisted corpu</principle>
+            <principle>Validate both functional correctness and non-functional requirements</principle>
+            <principle>Ensure data integrity throughout the entire pipeline</principle>
+            <principle>Verify business value delivery</principle>
+            <principle>Test for resilience, scalability, and performance under realistic conditions</principle>
+        </principles>
+        <approach>
+            <methodology>Behavior-Driven Development (BDD) with performance validation</methodology>
+            <strategy>Risk-based testing with critical path prioritization</strategy>
+            <automation>CI/CD integrated with progressive test execution</automation>
+        </approach>
+    </testing-philosophy>
+    
+    <requirements>
+        <requirement id="corpus-generation" order="1">
+            <title>Corpus Data Generation</title>
+            <test-scenarios>
+                <scenario name="Admin Corpus Generation: Chat basics">
+                    <name>The Chat UI/UX admin interface (inlcuding end to end agent usage) works</name>
+                    <description>An admin user can request via chat thorugh Agents the type of corpus data desired essentially all the configuration options.</description>
+                    <example> Admin prompt: "Create a new corpus with " </example>
+                </scenario>
+                <scenario name="Admin-Corpus-Generation:Chat-discovery">
+                    <name>The Chat UI/UX admin provides config discovery of available options</name>
+                    <example> {insert from corpus config} </example>
+                </scenario>
+            <test-scenarios>
+        </requirement>
+    </requirements>
+   
+
+</specification>

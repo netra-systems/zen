@@ -1,12 +1,12 @@
 # Unified Test Report
-**Level**: comprehensive-websocket | **Time**: 2025-08-14 09:23:40
+**Level**: smoke | **Time**: 2025-08-14 09:40:50
 
-## ⚠️ Test Failures Detected
+## ✅ All Tests Passing
 
 ## Current Run Summary
 | Component | Status | Tests | Passed | Failed | Duration |
 |-----------|--------|-------|--------|--------|----------|
-| Backend | ❌ | 7 | 4 | 1 | 57.9s |
+| Backend | ✅ | 7 | 7 | 0 | 6.5s |
 | Frontend | ⏭️ | 0 | 0 | 0 | 0.0s |
 | E2E | ⏸️ | 0 | 0 | 0 | 0.0s |
 
