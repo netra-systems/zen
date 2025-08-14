@@ -77,8 +77,23 @@ class WebSocketMessagingManager:
         return message
 
     async def send_to_thread(self, thread_id: str, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> bool:
-        """Send message to all users in a specific thread."""
-        return await self.send_to_user(thread_id, message)
+        """Send message to all users in a specific thread/room."""
+        validated_message = self._prepare_message(message)
+        if validated_message is None:
+            return False
+        
+        # Get all connections in the room
+        room_connections = self.core.room_manager.get_room_connections(thread_id)
+        if not room_connections:
+            return False
+            
+        # Send to each user in the room
+        success_count = 0
+        for user_id in room_connections:
+            if await self.send_to_user(user_id, validated_message):
+                success_count += 1
+        
+        return success_count > 0
 
     async def broadcast_to_all(self, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> BroadcastResult:
         """Broadcast message to all connected users."""

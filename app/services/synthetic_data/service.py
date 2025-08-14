@@ -681,6 +681,38 @@ class SyntheticDataService(RecoveryMixin):
             "alert_type": alert_type,
             "message": message
         }
+    
+    async def _ingest_batch(self, batch: List[Dict], table_name: str) -> Dict:
+        """Ingest batch of data to ClickHouse table"""
+        try:
+            await ingest_batch_to_clickhouse(table_name, batch, get_clickhouse_client)
+            return {
+                "status": "success",
+                "records_processed": len(batch),
+                "table_name": table_name
+            }
+        except Exception as e:
+            return {
+                "status": "error",
+                "error": str(e),
+                "records_processed": 0
+            }
+    
+    async def _create_destination_table(self, table_name: str) -> Dict:
+        """Create ClickHouse destination table"""
+        try:
+            await create_destination_table(table_name, get_clickhouse_client)
+            return {
+                "status": "success",
+                "table_name": table_name,
+                "created": True
+            }
+        except Exception as e:
+            return {
+                "status": "error",
+                "table_name": table_name,
+                "error": str(e)
+            }
 
 
 # Create a singleton instance

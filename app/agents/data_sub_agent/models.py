@@ -1,7 +1,7 @@
 """Data models for DataSubAgent."""
 
 from typing import Dict, List, Optional, Any, Union, Literal
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from enum import Enum
 
@@ -85,14 +85,16 @@ class DataAnalysisResponse(BaseModel):
     data_quality: Optional[DataQualityMetrics] = None
     anomaly_detection: Optional['AnomalyDetectionResponse'] = None
     
-    @validator('execution_time_ms')
+    @field_validator('execution_time_ms')
+    @classmethod
     def validate_execution_time(cls, v: float) -> float:
         """Validate execution time is non-negative."""
         if v < 0:
             raise ValueError('Execution time must be non-negative')
         return v
     
-    @validator('affected_rows')
+    @field_validator('affected_rows')
+    @classmethod
     def validate_affected_rows(cls, v: int) -> int:
         """Validate affected rows is non-negative."""
         if v < 0:
@@ -111,8 +113,9 @@ class AnomalyDetectionResponse(BaseModel):
     analysis_period: Dict[str, datetime] = Field(default_factory=dict)
     threshold_used: float = Field(default=2.5)
     
-    @validator('anomaly_count')
-    def validate_anomaly_count(cls, v: int, values: Dict[str, Any]) -> int:
+    @field_validator('anomaly_count')
+    @classmethod
+    def validate_anomaly_count(cls, v: int) -> int:
         """Ensure anomaly count matches detected flag."""
         anomalies_detected = values.get('anomalies_detected', False)
         if anomalies_detected and v == 0:
@@ -131,8 +134,9 @@ class BatchProcessingResult(BaseModel):
     processing_time_ms: float = Field(ge=0.0)
     errors: List[Dict[str, Any]] = Field(default_factory=list)
     
-    @validator('success_rate', pre=True, always=True)
-    def calculate_success_rate(cls, v: float, values: Dict[str, Any]) -> float:
+    @field_validator('success_rate', mode='before')
+    @classmethod
+    def calculate_success_rate(cls, v: float) -> float:
         """Calculate success rate from successful and total items."""
         total = values.get('total_items', 0)
         successful = values.get('successful_items', 0)
@@ -150,8 +154,9 @@ class CacheMetrics(BaseModel):
     cache_misses: int = Field(ge=0)
     average_lookup_time_ms: float = Field(ge=0.0)
     
-    @validator('miss_rate', pre=True, always=True)
-    def calculate_miss_rate(cls, v: float, values: Dict[str, Any]) -> float:
+    @field_validator('miss_rate', mode='before')
+    @classmethod
+    def calculate_miss_rate(cls, v: float) -> float:
         """Calculate miss rate from hit rate."""
         hit_rate = values.get('hit_rate', 0.0)
         return 100.0 - hit_rate

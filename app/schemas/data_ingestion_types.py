@@ -5,7 +5,7 @@ Strong type definitions for data ingestion operations following Netra convention
 from typing import Dict, Any, Optional, List, Union, Literal, TypeVar, Generic
 from datetime import datetime
 from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict, validator
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 import uuid
 
 

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from typing import Optional
 
 class UserBase(BaseModel):
@@ -21,9 +21,7 @@ class User(UserBase):
     is_superuser: bool
     hashed_password: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-        extra = "allow"
+    model_config = ConfigDict(from_attributes=True, extra="allow")
 
 # Alias for backward compatibility
 UserInDB = User

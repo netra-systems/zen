@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 import uuid
 
 class CorpusBase(BaseModel):
@@ -21,9 +21,7 @@ class CorpusInDBBase(CorpusBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
-        extra = "allow"
+    model_config = ConfigDict(from_attributes=True, extra="allow")
 
 class Corpus(CorpusInDBBase):
     pass
@@ -35,6 +33,4 @@ class ContentCorpus(BaseModel):
     response: str
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-        extra = "allow"
+    model_config = ConfigDict(from_attributes=True, extra="allow")

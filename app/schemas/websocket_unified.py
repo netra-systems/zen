@@ -10,7 +10,7 @@ Supersedes:
 """
 
 from typing import Any, Dict, Optional, List, Union, Literal, TypedDict
-from pydantic import BaseModel, Field, ConfigDict, validator
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 from datetime import datetime
 from enum import Enum
 import uuid
@@ -79,6 +79,14 @@ class WebSocketMessageType(str, Enum):
     CORPUS_UPLOAD_FAILED = "corpus:upload_failed"
     CORPUS_GENERATION_PROGRESS = "corpus:generation_progress"
     CORPUS_GENERATION_COMPLETED = "corpus:generation_completed"
+    
+    # Synthetic data / job progress messages
+    PROGRESS = "progress"
+    GENERATION_PROGRESS = "generation_progress"
+    BATCH_COMPLETION = "batch_completion"
+    JOB_STARTED = "job_started"
+    JOB_COMPLETED = "job_completed"
+    JOB_FAILED = "job_failed"
 
 
 class WebSocketConnectionState(str, Enum):
@@ -367,33 +375,6 @@ class WebSocketMessage(BaseModel):
     sender: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     
-    @validator("payload", pre=True)
-    def validate_payload(cls, v: Union[dict, BaseModel], values: Dict[str, Any]) -> Union[dict, BaseModel]:
-        """Ensure payload matches expected type."""
-        if isinstance(v, dict):
-            # For backward compatibility - convert dict to appropriate model
-            msg_type = values.get("type")
-            if msg_type:
-                # Map message types to payload classes
-                payload_map = {
-                    WebSocketMessageType.USER_MESSAGE: UserMessagePayload,
-                    WebSocketMessageType.START_AGENT: StartAgentPayload,
-                    WebSocketMessageType.STOP_AGENT: StopAgentPayload,
-                    WebSocketMessageType.CREATE_THREAD: CreateThreadPayload,
-                    WebSocketMessageType.SWITCH_THREAD: SwitchThreadPayload,
-                    WebSocketMessageType.DELETE_THREAD: DeleteThreadPayload,
-                    WebSocketMessageType.RENAME_THREAD: RenameThreadPayload,
-                    # Add more mappings as needed
-                }
-                
-                payload_class = payload_map.get(msg_type)
-                if payload_class:
-                    try:
-                        return payload_class(**v)
-                    except Exception:
-                        # Fallback to dict if conversion fails
-                        pass
-        return v
 
 
 # ============================================================================

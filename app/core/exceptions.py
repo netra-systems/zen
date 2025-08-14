@@ -3,7 +3,7 @@
 from typing import Any, Dict, Optional, Union, List
 from enum import Enum
 from datetime import datetime, timezone
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class ErrorCode(Enum):
@@ -70,8 +70,7 @@ class ErrorDetails(BaseModel):
     trace_id: Optional[str] = None
     context: Optional[Dict[str, Any]] = None
     
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 # Base Exceptions

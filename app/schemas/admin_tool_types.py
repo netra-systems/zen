@@ -5,7 +5,7 @@ Strong type definitions for Admin Tool Dispatcher operations following Netra con
 from typing import Dict, Any, Optional, List, Union, Literal
 from datetime import datetime
 from enum import Enum
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 import uuid
 
 
@@ -61,8 +61,7 @@ class ToolResponse(BaseModel):
     execution_time_ms: float
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class ToolSuccessResponse(ToolResponse):

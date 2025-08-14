@@ -71,9 +71,19 @@ class MessageValidator:
                     received_data=message
                 )
             
-            # Validate using Pydantic model
+            # Validate using Pydantic model with flexible payload handling
             try:
-                validated_message = WebSocketMessage(**message)
+                # If message doesn't have payload field, create one from the other fields
+                if "payload" not in message:
+                    # Extract type and create payload from remaining fields
+                    payload_data = {k: v for k, v in message.items() if k != "type"}
+                    flexible_message = {
+                        "type": message["type"],
+                        "payload": payload_data
+                    }
+                    validated_message = WebSocketMessage(**flexible_message)
+                else:
+                    validated_message = WebSocketMessage(**message)
             except ValidationError as e:
                 return WebSocketValidationError(
                     error_type="validation_error",

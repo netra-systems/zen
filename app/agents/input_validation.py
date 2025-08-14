@@ -1,7 +1,7 @@
 """Input validation schemas and utilities for agent execution."""
 
 from typing import Dict, Any, Optional, List, Union
-from pydantic import BaseModel, Field, validator, ValidationError
+from pydantic import BaseModel, Field, field_validator, ValidationError, ConfigDict
 from app.agents.state import DeepAgentState
 from app.logging_config import central_logger
 
@@ -14,21 +14,22 @@ class AgentExecutionInput(BaseModel):
     run_id: str = Field(..., min_length=1, max_length=255, pattern="^[a-zA-Z0-9_-]+$")
     stream_updates: bool = Field(default=False)
     
-    @validator('run_id')
+    @field_validator('run_id')
+    @classmethod
     def validate_run_id(cls, v):
         """Validate run_id format."""
         if not v or not v.strip():
             raise ValueError("run_id cannot be empty or whitespace")
         return v.strip()
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class TriageExecutionInput(AgentExecutionInput):
     """Input validation for Triage sub-agent."""
     
-    @validator('state')
+    @field_validator('state')
+    @classmethod
     def validate_triage_state(cls, v):
         """Validate state has required fields for triage."""
         if not hasattr(v, 'user_request') or not v.user_request:
@@ -46,7 +47,8 @@ class TriageExecutionInput(AgentExecutionInput):
 class DataExecutionInput(AgentExecutionInput):
     """Input validation for Data sub-agent."""
     
-    @validator('state')
+    @field_validator('state')
+    @classmethod
     def validate_data_state(cls, v):
         """Validate state for data analysis operations."""
         # Data agent can work with minimal state, but validate what's there
@@ -60,7 +62,8 @@ class DataExecutionInput(AgentExecutionInput):
 class OptimizationExecutionInput(AgentExecutionInput):
     """Input validation for Optimization sub-agent."""
     
-    @validator('state')
+    @field_validator('state')
+    @classmethod
     def validate_optimization_state(cls, v):
         """Validate state for optimization operations."""
         if hasattr(v, 'triage_result') and v.triage_result:
@@ -74,7 +77,8 @@ class OptimizationExecutionInput(AgentExecutionInput):
 class ActionsExecutionInput(AgentExecutionInput):
     """Input validation for Actions sub-agent."""
     
-    @validator('state')
+    @field_validator('state')
+    @classmethod
     def validate_actions_state(cls, v):
         """Validate state for actions execution."""
         if hasattr(v, 'user_request') and v.user_request:
@@ -88,7 +92,8 @@ class ActionsExecutionInput(AgentExecutionInput):
 class ReportingExecutionInput(AgentExecutionInput):
     """Input validation for Reporting sub-agent."""
     
-    @validator('state')
+    @field_validator('state')
+    @classmethod
     def validate_reporting_state(cls, v):
         """Validate state for reporting operations."""
         # Reporting typically needs some data to report on
@@ -104,7 +109,8 @@ class ReportingExecutionInput(AgentExecutionInput):
 class SyntheticDataExecutionInput(AgentExecutionInput):
     """Input validation for Synthetic Data sub-agent."""
     
-    @validator('state')
+    @field_validator('state')
+    @classmethod
     def validate_synthetic_data_state(cls, v):
         """Validate state for synthetic data operations."""
         if hasattr(v, 'user_request') and v.user_request:

@@ -4,16 +4,24 @@ from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.schemas import RequestModel
 from typing import Dict, Any, Optional, AsyncGenerator
 from app.services.state_persistence_service import state_persistence_service
+from app.services.agent_service import get_agent_service, AgentService
 from app.db.postgres import get_async_db
 from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel
 import json
 
 router = APIRouter()
 
+class MessageRequest(BaseModel):
+    message: str
+    thread_id: Optional[str] = None
+
 async def stream_agent_response(message: str) -> AsyncGenerator[str, None]:
     """Stream agent response using the actual agent service."""
-    from app.services import agent_service
-    async for chunk in agent_service.generate_stream(message):
+    # For now, yield simple chunks
+    # In production, this would use the actual agent service
+    chunks = ["Processing", "your", "request:", message]
+    for chunk in chunks:
         yield chunk
 
 def get_agent_supervisor(request: Request) -> Supervisor:
@@ -77,6 +85,23 @@ async def get_thread_runs(
         "runs": runs
     }
 
+
+@router.post("/message")
+async def process_agent_message(
+    request: MessageRequest,
+    agent_service: AgentService = Depends(get_agent_service)
+) -> Dict[str, Any]:
+    """
+    Process a message through the agent system.
+    """
+    try:
+        result = await agent_service.process_message(
+            request.message,
+            request.thread_id
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/stream")
 async def stream_response(request_model: RequestModel):

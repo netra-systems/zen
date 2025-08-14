@@ -15,6 +15,7 @@ from app.websocket.validation import MessageValidator
 from app.websocket.broadcast import BroadcastManager
 from app.websocket.heartbeat import HeartbeatManager
 from app.websocket.error_handler import ErrorHandler
+from app.websocket.room_manager import RoomManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -46,6 +47,7 @@ class WebSocketManagerCore:
         self.rate_limiter = RateLimiter(max_requests=60, window_seconds=60)
         self.message_validator = MessageValidator()
         self.error_handler = ErrorHandler()
+        self.room_manager = RoomManager(self.connection_manager)
         self.broadcast_manager = BroadcastManager(self.connection_manager)
         self.heartbeat_manager = HeartbeatManager(self.connection_manager, self.error_handler)
 

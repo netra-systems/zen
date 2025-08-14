@@ -13,7 +13,7 @@ from functools import wraps
 from contextvars import ContextVar
 
 from loguru import logger
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 # Context variables for request tracking
@@ -107,10 +107,7 @@ class LogEntry(BaseModel):
     context: Dict[str, Any] = Field(default_factory=dict)
     error_details: Optional[Dict[str, Any]] = None
     
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    model_config = ConfigDict()
 
 
 class UnifiedLogger:

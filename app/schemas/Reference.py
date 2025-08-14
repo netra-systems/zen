@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 
 class ReferenceItem(BaseModel):
@@ -7,8 +7,7 @@ class ReferenceItem(BaseModel):
     description: Optional[str] = None
     url: Optional[str] = None
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ReferenceGetResponse(BaseModel):
     references: List[ReferenceItem]

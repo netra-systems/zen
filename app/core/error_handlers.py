@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, ConfigDict
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
@@ -50,8 +50,7 @@ class ErrorResponse(BaseModel):
     timestamp: str
     request_id: Optional[str] = None
     
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class ErrorHandler:

@@ -1,15 +1,15 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-14T09:08:52.634730  
+**Generated:** 2025-08-14T09:21:17.625292  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 **Purpose:** Development validation, component testing
 
 ## Test Summary
 
-**Total Tests:** 217  
-**Passed:** 194  
-**Failed:** 3  
-**Skipped:** 20  
+**Total Tests:** 101  
+**Passed:** 90  
+**Failed:** 4  
+**Skipped:** 7  
 **Errors:** 0  
 **Overall Status:** [FAILED]
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 217 | 194 | 3 | 20 | 0 | 35.01s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.47s | [FAILED] |
+| Backend   | 101 | 90 | 4 | 7 | 0 | 29.92s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Environment and Configuration
 
@@ -27,8 +27,8 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 35.48s
-- **Exit Code:** 15
+- **Total Duration:** 29.92s
+- **Exit Code:** 2
 
 ### Backend Configuration
 ```
@@ -67,150 +67,91 @@ configfile: pytest.ini
 plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
 asyncio: mode=Mode.AUTO
 created: 4/4 workers
-[gw0] node down: Traceback (most recent call last):
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\config\__init__.py", line 712, in _importconftest
-    mod = import_path(
-          ^^^^^^^^^^^^
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\pathlib.py", line 587, in import_path
-    importlib.import_module(module_name)
-  File "C:\Users\antho\miniconda3\Lib\importlib\__init__.py", line 90, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
-  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
-  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
-  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\assertion\rewrite.py", line 186, in exec_module
-    exec(co, module.__dict__)
-  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\conftest.py", line 52, in <module>
-    from app.main import app
-  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\main.py", line 46, in <module>
-    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\agents\supervisor_consolidated.py", line 12, in <module>
-    from app.agents.base import BaseSubAgent
-  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\agents\base.py", line 10, in <module>
-    from app.agents.state import DeepAgentState
-  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\agents\state.py", line 95, in <module>
-    class DeepAgentState(BaseModel):
-  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\agents\state.py", line 125, in DeepAgentState
-    @validator('optimizations_result')
-     ^^^^^^^^^
-NameError: name 'validator' is not defined
+4 workers [1450 items]
 
-The above exception was the direct cause of the following exception:
+scheduling tests via LoadScheduling
 
-Traceback (most recent call last):
-  File "C:\Users\antho\miniconda3\Lib\site-packages\execnet\gateway_base.py", line 1291, in executetask
-    exec(co, loc)
-  File "C:\Users\antho\miniconda3\Lib\site-packages\xdist\remote.py", line 420, in <module>
-    config = _prepareconfig(args, None)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\config\__init__.py", line 342, in _prepareconfig
-    config = pluginmanager.hook.pytest_cmdline_parse(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
-    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
-    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 167, in _multicall
-    raise exception
-  File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 139, in _multicall
-    teardown.throw(exception)
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\helpconfig.py", line 112, in pytest_cmdline_parse
-    config = yield
-             ^^^^^
-  File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
-    res = hook_impl.function(*args)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\config\__init__.py", line 1146, in pytest_cmdline_parse
-    self.parse(args)
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\config\__init__.py", line 1527, in parse
-    self._preparse(args, addopts=addopts)
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\config\__init__.py", line 1431, in _preparse
-    self.hook.pytest_load_initial_conftests(
-  File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
-    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
-    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 167, in _multicall
-    raise exception
-  File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 139, in _multicall
-    teardown.throw(exception)
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\capture.py", line 173, in pytest_load_initial_conftests
-    yield
-  File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
-    res = hook_impl.function(*args)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\config\__init__.py", line 1228, in pytest_load_initial_conftests
-    self.pluginmanager._set_initial_conftests(
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\config\__init__.py", line 583, in _set_initial_conftests
-    self._try_load_conftest(
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\config\__init__.py", line 621, in _try_load_conftest
-    self._loadconftestmodules(
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\config\__init__.py", line 661, in _loadconftestmodules
-    mod = self._importconftest(
-          ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\config\__init__.py", line 720, in _importconftest
-    raise ConftestImportFailure(conftestpath, cause=e) from e
-_pytest.config.ConftestImportFailure: NameError: name 'validator' is not defined (from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\conftest.py)
-
-
-replacing crashed worker gw0
-[gw1] node down: Traceback (most recent call last):
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\config\__init__.py", line 712, in _importconftest
-    mod = import_path(
-          ^^^^^^^^^^^^
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\pathlib.py", line 587, in import_path
-    importlib.import_module(module_name)
-  File "C:\Users\antho\miniconda3\Lib\importlib\__init__.py", line 90, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
-  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
-  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
-  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
-  File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\assertion\rewrite.py", line 186, in exec_module
-    exec(co, module.__dict__)
-  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\conftest.py", line 52, in <module>
-    from app.main import app
-  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\main.py", line 46, in <module>
-    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\agents\supervisor_consolidated.py", line 12, in <module>
-    from app.agents.base import BaseSubAgent
-  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\agents\base.py", line 10, in <module>
-    from app.agents.state import DeepAgentState
-  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\agents\state.py", line 95, in <module>
-    class DeepAgentState(BaseModel):
-  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\agents\state.py", line 125, in DeepAgentState
-    @validator('optimizations_result')
-     ^^^^^^^^^
-NameError: name 'validator' is not defined
-
-The above exception was the direct cause of the fo...(truncated)
+app\tests\services\agents\test_tools.py::test_tool_dispatcher 
+app\tests\services\supply_research_scheduler\test_schedule_management.py::TestScheduleManagement::test_get_schedule_status_with_run_history 
+app\tests\services\synthetic_data\test_table_operations.py::TestTableOperations::test_ingest_batch_with_data 
+app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_fixes_and_executes_query 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\supply_research_scheduler\test_schedule_management.py::TestScheduleManagement::test_get_schedule_status_with_run_history 
+app\tests\services\supply_research_scheduler\test_scheduled_execution.py::TestScheduledResearchExecution::test_execute_scheduled_research_success 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_fixes_and_executes_query 
+app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_passes_through_correct_queries 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_passes_through_correct_queries 
+app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_handles_client_errors 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_handles_client_errors 
+app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_statistics_tracking 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_statistics_tracking 
+app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
+app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_can_be_disabled 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
+app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_can_be_disabled 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
+app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
+app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_with_query_parameters 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
+app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_with_query_parameters 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool 
+app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_concurrent_interceptor_usage 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_full 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_full 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_concurrent_interceptor_usage 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_validation_missing_required 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_validation_missing_required 
+app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_statistics_reset 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_dict_conversion 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_dict_conversion 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_json_serialization 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_statistics_reset 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_json_serialization 
+app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_get_statistics 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryInterceptor::test_interceptor_get_statistics 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_instantiation 
+app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryFixerIntegration::test_end_to_end_query_processing 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryFixerIntegration::test_end_to_end_query_processing 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_instantiation 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_get_metadata 
+app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryFixerIntegration::test_batch_query_processing 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_get_metadata 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryFixerIntegration::test_batch_query_processing 
+app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryFixerIntegration::test_regex_pattern_comprehensive_coverage 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryFixerIntegration::test_regex_pattern_comprehensive_coverage 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper 
+app\tests\services\test_clickhouse_query_fixer.py::TestClickHouseQueryFixerIntegration::test_performance_optimization_caching 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_failure 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_failure 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_concrete_tool_run_method 
+[gw3][36m [  2%] [0m[31mFAILED[0m app\tests\services\synthetic_data\test_table_operations.py::TestTableOperations::test_ingest_batch_with_data 
+[gw0][36m [  2%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_concrete_tool_run_m...(truncated)
 ```
 
 ### Frontend Output
 ```
-
-'hooks' is not recognized as an internal or external command,
-operable program or batch file.
 
 ```
 
 ## Error Summary
 
 ### Backend Errors
-- [gw6][36m [  1%] [0m[31mFAILED[0m app\tests\services\synthetic_data\test_table_operations.py::TestTableOperations::test_ingest_batch_with_data
-- [gw7][36m [  6%] [0m[31mFAILED[0m app\tests\services\test_corpus_service_comprehensive.py::TestIndexOptimization::test_index_performance_monitoring
-- [gw5][36m [ 12%] [0m[31mFAILED[0m app\tests\services\synthetic_data\test_table_operations.py::TestTableOperations::test_create_destination_table
-- [31mFAILED[0m app\tests\services\synthetic_data\test_table_operations.py::[1mTestTableOperations::test_ingest_batch_with_data[0m - AttributeError: 'SyntheticDataService' object has no attribute '_ingest_batch'. Did you mean: 'ingest_batch'?
-- [31mFAILED[0m app\tests\services\test_corpus_service_comprehensive.py::[1mTestIndexOptimization::test_index_performance_monitoring[0m - AttributeError: 'CorpusService' object has no attribute 'get_performance_metrics'
-- [31mFAILED[0m app\tests\services\synthetic_data\test_table_operations.py::[1mTestTableOperations::test_create_destination_table[0m - AttributeError: 'SyntheticDataService' object has no attribute '_create_destination_table'
-- [FAIL] TESTS FAILED with exit code 2 after 34.13s
+- [gw3][36m [  2%] [0m[31mFAILED[0m app\tests\services\synthetic_data\test_table_operations.py::TestTableOperations::test_ingest_batch_with_data
+- [gw1][36m [  2%] [0m[31mFAILED[0m app\tests\services\supply_research_scheduler\test_scheduled_execution.py::TestScheduledResearchExecution::test_execute_scheduled_research_success
+- [gw2][36m [  6%] [0m[31mFAILED[0m app\tests\services\test_corpus_service_comprehensive.py::TestErrorHandling::test_recover_from_partial_batch_failure
+- [gw0][36m [  6%] [0m[31mFAILED[0m app\tests\services\supply_research_scheduler\test_integration.py::TestIntegrationScenarios::test_full_execution_cycle Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env
+- [31mFAILED[0m app\tests\services\synthetic_data\test_table_operations.py::[1mTestTableOperations::test_ingest_batch_with_data[0m - AssertionError: Expected 'execute' to have been called once. Called 0 times.
+- [31mFAILED[0m app\tests\services\supply_research_scheduler\test_scheduled_execution.py::[1mTestScheduledResearchExecution::test_execute_scheduled_research_success[0m - AttributeError: <module 'app.services.supply_research_scheduler' from 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\services\\supply_research_scheduler.py'> does not have the attribute 'SupplyResearchService'
+- [31mFAILED[0m app\tests\services\test_corpus_service_comprehensive.py::[1mTestErrorHandling::test_recover_from_partial_batch_failure[0m - AttributeError: 'CorpusService' object has no attribute 'batch_index_with_recovery'
+- [31mFAILED[0m app\tests\services\supply_research_scheduler\test_integration.py::[1mTestIntegrationScenarios::test_full_execution_cycle[0m - AttributeError: <module 'app.services.supply_research_scheduler' from 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\services\\supply_research_scheduler.py'> does not have the attribute 'SupplyResearchService'
+- [FAIL] TESTS FAILED with exit code 2 after 29.07s
 
 
 ---

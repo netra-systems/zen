@@ -8,7 +8,7 @@ It imports and reuses existing types where possible.
 """
 
 from typing import TypedDict, Literal, Optional, List, Dict, Any, Union
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from datetime import datetime
 from enum import Enum
 
@@ -151,8 +151,8 @@ class WebSocketRequest(BaseModel):
     type: MessageTypeLiteral
     payload: Optional[Dict[str, Union[str, int, float, bool, List[Any], Dict[str, Any]]]] = Field(default_factory=dict)
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "type": "user_message",
                 "payload": {
@@ -161,6 +161,7 @@ class WebSocketRequest(BaseModel):
                 }
             }
         }
+    )
 
 
 class WebSocketResponse(BaseModel):
@@ -169,14 +170,15 @@ class WebSocketResponse(BaseModel):
     payload: Dict[str, Union[str, int, float, bool, list, dict]] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "type": "agent_completed",
                 "payload": {"response": "Analysis complete"},
                 "timestamp": "2025-01-12T10:00:00Z"
             }
         }
+    )
 
 
 class ThreadMessage(BaseModel):
@@ -343,7 +345,8 @@ class MessageValidationResult(BaseModel):
     warnings: List[str] = Field(default_factory=list)
     parsed_payload: Optional[Dict[str, Any]] = Field(default=None)
     
-    @validator('message_type', pre=True)
+    @field_validator('message_type', mode='before')
+    @classmethod
     def validate_message_type(cls, v: Any) -> Optional[WebSocketMessageType]:
         if isinstance(v, str):
             try:
@@ -362,8 +365,4 @@ class EnhancedWebSocketMessage(BaseModel):
     retry_count: int = Field(default=0)
     priority: int = Field(default=0, ge=0, le=10)
     
-    class Config:
-        use_enum_values = True
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    model_config = ConfigDict(use_enum_values=True)

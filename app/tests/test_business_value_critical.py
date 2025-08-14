@@ -265,7 +265,7 @@ class TestBusinessValueCritical:
             with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
                     # Execute the agent workflow
-                    result_state = await supervisor.run(user_request, run_id, stream_updates=True)
+                    result_state = await supervisor.run(user_request, "test_thread", "test_user", run_id)
         
         # Business value assertions
         assert result_state != None
@@ -303,7 +303,7 @@ class TestBusinessValueCritical:
         with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', AsyncMock()):
             with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
-                    result_state = await supervisor.run(user_request, run_id, stream_updates=True)
+                    result_state = await supervisor.run(user_request, "test_thread", "test_user", run_id)
         
         assert result_state != None
         
@@ -330,7 +330,7 @@ class TestBusinessValueCritical:
         with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', AsyncMock()):
             with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
-                    result_state = await supervisor.run(user_request, run_id, stream_updates=False)
+                    result_state = await supervisor.run(user_request, "test_thread", "test_user", run_id)
         
         assert result_state != None
         
@@ -359,7 +359,7 @@ class TestBusinessValueCritical:
         with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', AsyncMock()):
             with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
-                    await supervisor.run("Analyze my workload", run_id, stream_updates=True)
+                    await supervisor.run("Analyze my workload", "test_thread", "test_user", run_id)
         
         # Verify streaming occurred
         assert len(streamed_messages) > 0
@@ -381,7 +381,7 @@ class TestBusinessValueCritical:
         with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', AsyncMock()):
             with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
-                    result_state = await supervisor.run(user_request, run_id, stream_updates=False)
+                    result_state = await supervisor.run(user_request, "test_thread", "test_user", run_id)
         
         assert result_state != None
         
@@ -455,7 +455,7 @@ class TestBusinessValueCritical:
             with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
                     try:
-                        await supervisor.run("Test resilience", run_id, stream_updates=False)
+                        await supervisor.run("Test resilience", "test_thread", "test_user", run_id)
                     except Exception:
                         pass  # Expected to handle or fail gracefully
         
@@ -477,7 +477,7 @@ class TestBusinessValueCritical:
         with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', AsyncMock()):
             with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
-                    result_state = await supervisor.run(user_request, run_id, stream_updates=False)
+                    result_state = await supervisor.run(user_request, "test_thread", "test_user", run_id)
         
         assert result_state != None
         
@@ -559,7 +559,7 @@ class TestBusinessValueCritical:
         with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', AsyncMock()):
             with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
-                    result_state = await supervisor.run(user_request, run_id, stream_updates=True)
+                    result_state = await supervisor.run(user_request, "test_thread", "test_user", run_id)
         
         # Verify complete workflow execution
         assert result_state != None

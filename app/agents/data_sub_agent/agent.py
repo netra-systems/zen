@@ -191,3 +191,11 @@ class DataSubAgent(BaseSubAgent):
         # Clean up old cache entries during cleanup
         if hasattr(self, '_schema_cache_timestamps'):
             await self._cleanup_old_cache_entries(time.time())
+
+    async def process_and_stream(self, data: Dict[str, Any], websocket) -> None:
+        """Process data and stream results via WebSocket for real-time updates."""
+        try:
+            result = await self.analysis_engine.process_data(data)
+            await websocket.send(json.dumps({"type": "data_result", "data": result}))
+        except Exception as e:
+            await websocket.send(json.dumps({"type": "error", "message": str(e)}))
