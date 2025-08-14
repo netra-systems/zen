@@ -22,6 +22,9 @@ concurrency:
   group: smoke-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CONFIG_FILE: .github/workflow-config.yml
+
 permissions:
   contents: read
   statuses: write
@@ -31,19 +34,57 @@ permissions:
 jobs:
   smoke-test:
     name: Quick Validation (<30s)
-    runs-on: warp-custom-default
-    timeout-minutes: 5
+    runs-on: warp-custom-default  # TODO: Use vars.RUNNER_TYPE_DEFAULT when available
+    timeout-minutes: 5  # Overridden by config in steps
     
     outputs:
       status: ${{ steps.test.outcome }}
       duration: ${{ steps.timer.outputs.duration }}
       
     steps:
+      - name: Checkout (for config)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/workflow-config.yml
+          sparse-checkout-cone-mode: false
+          
+      - name: Load Configuration
+        id: config
+        run: |
+          if [ -f "${{ env.CONFIG_FILE }}" ]; then
+            echo "::notice::Loading configuration from ${{ env.CONFIG_FILE }}"
+            # Extract configuration values using yq
+            if ! command -v yq &> /dev/null; then
+              echo "Installing yq..."
+              wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+              chmod +x /usr/local/bin/yq
+            fi
+            
+            PYTHON_VERSION=$(yq '.global.versions.python // "3.11"' ${{ env.CONFIG_FILE }})
+            TIMEOUT=$(yq '.timeouts.smoke // 5' ${{ env.CONFIG_FILE }})
+            RETRY_ATTEMPTS=$(yq '.testing.retry.max_attempts // 3' ${{ env.CONFIG_FILE }})
+            MIN_COVERAGE=$(yq '.testing.coverage.minimum // 80' ${{ env.CONFIG_FILE }})
+            
+            echo "python_version=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+            echo "timeout=$TIMEOUT" >> $GITHUB_OUTPUT
+            echo "retry_attempts=$RETRY_ATTEMPTS" >> $GITHUB_OUTPUT
+            echo "min_coverage=$MIN_COVERAGE" >> $GITHUB_OUTPUT
+            
+            echo "Loaded config: Python=$PYTHON_VERSION, Timeout=${TIMEOUT}m"
+          else
+            echo "::warning::Config file not found at ${{ env.CONFIG_FILE }}, using defaults"
+            echo "python_version=3.11" >> $GITHUB_OUTPUT
+            echo "timeout=5" >> $GITHUB_OUTPUT
+            echo "retry_attempts=3" >> $GITHUB_OUTPUT
+            echo "min_coverage=80" >> $GITHUB_OUTPUT
+          fi
+          
       - name: Start Timer
         id: timer
         run: echo "start=$(date +%s)" >> $GITHUB_OUTPUT
         
-      - name: Checkout
+      - name: Checkout Full Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -51,7 +92,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ steps.config.outputs.python_version || '3.11' }}
           cache: 'pip'
           
       - name: Cache Dependencies

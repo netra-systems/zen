@@ -28,6 +28,9 @@ concurrency:
   group: unit-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CONFIG_FILE: .github/workflow-config.yml
+
 permissions:
   contents: read
   statuses: write
@@ -37,19 +40,51 @@ permissions:
 jobs:
   determine-shards:
     name: Determine Test Shards
-    runs-on: warp-custom-default
+    runs-on: warp-custom-default  # TODO: Use vars.RUNNER_TYPE_DEFAULT when available
     outputs:
       shards: ${{ steps.shards.outputs.matrix }}
       
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/workflow-config.yml
+          sparse-checkout-cone-mode: false
+      
+      - name: Load Configuration
+        id: config
+        run: |
+          if [ -f "${{ env.CONFIG_FILE }}" ]; then
+            echo "::notice::Loading configuration from ${{ env.CONFIG_FILE }}"
+            # Install yq if not available
+            if ! command -v yq &> /dev/null; then
+              wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+              chmod +x /usr/local/bin/yq
+            fi
+            
+            # Extract test shards from config
+            SHARDS=$(yq '.testing.shards.unit | join(",")' ${{ env.CONFIG_FILE }})
+            echo "shards=$SHARDS" >> $GITHUB_OUTPUT
+            echo "Loaded shards: $SHARDS"
+          else
+            echo "::warning::Config file not found, using defaults"
+            echo "shards=core,agents,websocket,database,api" >> $GITHUB_OUTPUT
+          fi
         
       - name: Determine Shards
         id: shards
         run: |
           if [ "${{ inputs.shard }}" == "all" ] || [ -z "${{ inputs.shard }}" ]; then
-            echo 'matrix=["core","agents","websocket","database","api"]' >> $GITHUB_OUTPUT
+            # Use shards from config if available
+            SHARDS="${{ steps.config.outputs.shards }}"
+            if [ -n "$SHARDS" ]; then
+              # Convert comma-separated to JSON array
+              JSON_ARRAY=$(echo "$SHARDS" | awk '{split($0, a, ","); printf "["; for(i=1; i<=length(a); i++) {if(i>1) printf ","; printf "\"%s\"", a[i]}; printf "]"}')
+              echo "matrix=$JSON_ARRAY" >> $GITHUB_OUTPUT
+            else
+              echo 'matrix=["core","agents","websocket","database","api"]' >> $GITHUB_OUTPUT
+            fi
           else
             echo 'matrix=["${{ inputs.shard }}"]' >> $GITHUB_OUTPUT
           fi
@@ -57,8 +92,8 @@ jobs:
   unit-test:
     name: Unit Tests - ${{ matrix.shard }}
     needs: determine-shards
-    runs-on: warp-custom-default
-    timeout-minutes: 10
+    runs-on: warp-custom-default  # TODO: Use vars.RUNNER_TYPE_DEFAULT when available
+    timeout-minutes: 10  # TODO: Load from config
     
     strategy:
       fail-fast: false
@@ -66,7 +101,41 @@ jobs:
         shard: ${{ fromJSON(needs.determine-shards.outputs.shards) }}
         
     steps:
-      - name: Checkout
+      - name: Checkout (for config)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/workflow-config.yml
+          sparse-checkout-cone-mode: false
+      
+      - name: Load Configuration
+        id: config
+        run: |
+          if [ -f "${{ env.CONFIG_FILE }}" ]; then
+            echo "::notice::Loading configuration from ${{ env.CONFIG_FILE }}"
+            # Install yq if not available
+            if ! command -v yq &> /dev/null; then
+              wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+              chmod +x /usr/local/bin/yq
+            fi
+            
+            PYTHON_VERSION=$(yq '.global.versions.python // "3.11"' ${{ env.CONFIG_FILE }})
+            TIMEOUT=$(yq '.timeouts.unit // 10' ${{ env.CONFIG_FILE }})
+            MIN_COVERAGE=$(yq '.testing.coverage.minimum // 80' ${{ env.CONFIG_FILE }})
+            
+            echo "python_version=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+            echo "timeout=$TIMEOUT" >> $GITHUB_OUTPUT
+            echo "min_coverage=$MIN_COVERAGE" >> $GITHUB_OUTPUT
+            
+            echo "Loaded config: Python=$PYTHON_VERSION, Timeout=${TIMEOUT}m"
+          else
+            echo "::warning::Config file not found, using defaults"
+            echo "python_version=3.11" >> $GITHUB_OUTPUT
+            echo "timeout=10" >> $GITHUB_OUTPUT
+            echo "min_coverage=80" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Checkout Full Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -74,7 +143,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ steps.config.outputs.python_version || '3.11' }}
           cache: 'pip'
           
       - name: Cache Dependencies
@@ -133,7 +202,7 @@ jobs:
   unit-test-summary:
     name: Unit Test Summary
     needs: unit-test
-    runs-on: warp-custom-default
+    runs-on: warp-custom-default  # TODO: Use vars.RUNNER_TYPE_DEFAULT when available
     if: always()
     
     steps:

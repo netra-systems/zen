@@ -20,8 +20,8 @@ global:
   # Versioning
   versions:
     python: '3.11'
-    node: '18'
-    terraform: '1.5.0'
+    node: '24.5.0'
+    terraform: '1.12.2'
     docker_buildkit: '1'
   
   # Runner configurations
@@ -177,7 +177,7 @@ ai:
   
   # Auto-fix settings
   autofix:
-    enabled: true
+    enabled: false
     max_attempts: 3
     confidence_threshold: 80
     require_validation: true
@@ -185,7 +185,7 @@ ai:
   
   # Review settings
   review:
-    enabled: true
+    enabled: false
     auto_approve_threshold: 95
     require_human_review: true
 
@@ -371,7 +371,7 @@ environments:
       require_approval: true
     monitoring:
       alerts:
-        enabled: true
+        enabled: false
         channels:
           - pagerduty
           - slack

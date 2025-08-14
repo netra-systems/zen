@@ -50,8 +50,9 @@ on:
     - cron: '0 3 * * 0'  # Weekly comprehensive run on Sunday at 3 AM UTC
 
 env:
-  PYTHON_VERSION: '3.11'
-  NODE_VERSION: '18'
+  CONFIG_FILE: .github/workflow-config.yml
+  PYTHON_VERSION: '3.11'  # Default, overridden by config
+  NODE_VERSION: '18'  # Default, overridden by config
 
 jobs:
   # ==========================================
@@ -60,7 +61,7 @@ jobs:
   
   plan-tests:
     name: 📋 Plan Test Execution
-    runs-on: warp-custom-default
+    runs-on: warp-custom-default  # TODO: Use vars.RUNNER_TYPE_DEFAULT when available
     outputs:
       matrix: ${{ steps.build-matrix.outputs.matrix }}
       execution_mode: ${{ steps.build-matrix.outputs.mode }}
@@ -70,6 +71,44 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/workflow-config.yml
+          sparse-checkout-cone-mode: false
+      
+      - name: Load Configuration
+        id: config
+        run: |
+          if [ -f "${{ env.CONFIG_FILE }}" ]; then
+            echo "::notice::Loading configuration from ${{ env.CONFIG_FILE }}"
+            # Install yq if not available
+            if ! command -v yq &> /dev/null; then
+              wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+              chmod +x /usr/local/bin/yq
+            fi
+            
+            # Extract configuration values
+            PYTHON_VERSION=$(yq '.global.versions.python // "3.11"' ${{ env.CONFIG_FILE }})
+            NODE_VERSION=$(yq '.global.versions.node // "18"' ${{ env.CONFIG_FILE }})
+            TIMEOUT_COMPREHENSIVE=$(yq '.timeouts.comprehensive // 60' ${{ env.CONFIG_FILE }})
+            
+            # Get comprehensive test modules
+            COMP_MODULES=$(yq '.testing.shards.comprehensive.modules | join(",")' ${{ env.CONFIG_FILE }})
+            
+            echo "python_version=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+            echo "node_version=$NODE_VERSION" >> $GITHUB_OUTPUT
+            echo "timeout=$TIMEOUT_COMPREHENSIVE" >> $GITHUB_OUTPUT
+            echo "comprehensive_modules=$COMP_MODULES" >> $GITHUB_OUTPUT
+            
+            # Update env for subsequent steps
+            echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_ENV
+            echo "NODE_VERSION=$NODE_VERSION" >> $GITHUB_ENV
+          else
+            echo "::warning::Config file not found, using defaults"
+            echo "python_version=3.11" >> $GITHUB_OUTPUT
+            echo "node_version=18" >> $GITHUB_OUTPUT
+            echo "timeout=60" >> $GITHUB_OUTPUT
+          fi
       
       - name: Build test matrix
         id: build-matrix
@@ -156,8 +195,8 @@ jobs:
   run-comprehensive-tests:
     name: 🧪 ${{ matrix.module }}
     needs: plan-tests
-    runs-on: warp-custom-default
-    timeout-minutes: 60
+    runs-on: warp-custom-default  # TODO: Use vars.RUNNER_TYPE_DEFAULT when available
+    timeout-minutes: 60  # TODO: Load from config
     
     strategy:
       fail-fast: false
@@ -168,17 +207,37 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Load Configuration
+        id: config
+        run: |
+          if [ -f "${{ env.CONFIG_FILE }}" ]; then
+            # Install yq if not available
+            if ! command -v yq &> /dev/null; then
+              wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+              chmod +x /usr/local/bin/yq
+            fi
+            
+            PYTHON_VERSION=$(yq '.global.versions.python // "3.11"' ${{ env.CONFIG_FILE }})
+            NODE_VERSION=$(yq '.global.versions.node // "18"' ${{ env.CONFIG_FILE }})
+            
+            echo "python_version=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+            echo "node_version=$NODE_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "python_version=3.11" >> $GITHUB_OUTPUT
+            echo "node_version=18" >> $GITHUB_OUTPUT
+          fi
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: ${{ steps.config.outputs.python_version || env.PYTHON_VERSION }}
           cache: 'pip'
       
       - name: Set up Node.js (if needed)
         if: contains(matrix.module, 'frontend')
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ steps.config.outputs.node_version || env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
       
@@ -285,7 +344,7 @@ if data.get('coverage'):
     name: 📊 Aggregate Test Results
     needs: [plan-tests, run-comprehensive-tests]
     if: always()
-    runs-on: warp-custom-default
+    runs-on: warp-custom-default  # TODO: Use vars.RUNNER_TYPE_DEFAULT when available
     
     steps:
       - name: Download all artifacts
@@ -493,7 +552,7 @@ print(f'| {module} | {status} | {tests} | {duration} | {coverage or \"N/A\"} |')
     name: 📢 Send Notifications
     needs: [aggregate-results]
     if: always()
-    runs-on: warp-custom-default
+    runs-on: warp-custom-default  # TODO: Use vars.RUNNER_TYPE_DEFAULT when available
     
     steps:
       - name: Determine notification level
