@@ -125,6 +125,43 @@ python database_scripts/run_migrations.py
 python dev_launcher.py --dynamic --no-backend-reload --load-secrets
 ```
 
+### 🔧 Local Development Mode (Without External Services)
+
+You can run Netra in local development mode without external services (ClickHouse, Redis, LLM providers):
+
+1. **Configure environment variables** in `.env`:
+```bash
+# Disable external services
+DEV_MODE_DISABLE_REDIS=true
+DEV_MODE_DISABLE_CLICKHOUSE=true
+DEV_MODE_DISABLE_LLM=true
+
+# Use local PostgreSQL
+DATABASE_URL=postgresql+asyncpg://yourusername@localhost/netra
+
+# Add encryption key
+FERNET_KEY=<generate-with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())">
+```
+
+2. **Set up local PostgreSQL**:
+```bash
+# Create database (uses current system user, no postgres superuser needed)
+python database_scripts/create_db.py
+
+# Run migrations (automatically uses current user)
+python database_scripts/run_migrations.py
+```
+
+3. **Start services**:
+```bash
+# Frontend
+cd frontend && npm run dev
+
+# Backend (in separate terminal)
+source venv/bin/activate
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
 ### 🔧 Troubleshooting
 
 If the installer fails:
@@ -137,6 +174,12 @@ For database issues:
 - PostgreSQL: The installer will use SQLite if PostgreSQL is unavailable
 - Redis: Optional for development (caching will be disabled)
 - ClickHouse: Optional for development (analytics will be limited)
+
+For local development mode:
+- Services can be disabled via `DEV_MODE_DISABLE_*` environment variables
+- LLM features will be unavailable when `DEV_MODE_DISABLE_LLM=true`
+- Caching will be disabled when `DEV_MODE_DISABLE_REDIS=true`
+- Analytics will be limited when `DEV_MODE_DISABLE_CLICKHOUSE=true`
 
 ## 🏗 Architecture
 

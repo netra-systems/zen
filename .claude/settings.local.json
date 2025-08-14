@@ -25,7 +25,12 @@
       "Bash(timeout 300 python -m pytest --tb=no -q --disable-warnings)",
       "Bash(npx tsc:*)",
       "Bash(mv:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(source:*)",
+      "Bash(set -a)",
+      "Bash(source .env)",
+      "Bash(set +a)",
+      "Bash(uvicorn:*)"
     ],
     "deny": []
   }

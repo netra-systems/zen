@@ -390,7 +390,7 @@ class EnhancedSecretLoader:
         return True
     
     def _write_env_file(self, secrets: Dict[str, Tuple[str, str]]):
-        """Write secrets to .env file for persistence."""
+        """Write secrets to .env file for persistence, preserving all existing variables."""
         env_file = PROJECT_ROOT / ".env"
         print(f"\n[SAVE] Writing secrets to {env_file}")
         
@@ -398,25 +398,41 @@ class EnhancedSecretLoader:
             f.write("# Auto-generated .env file\n")
             f.write(f"# Generated at {datetime.now().isoformat()}\n\n")
             
-            # Group by category
+            # Define known categories for organization
             categories = {
                 "Google OAuth": ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
                 "API Keys": ["GEMINI_API_KEY"],
+                "Database": ["DATABASE_URL", "REDIS_URL", "CLICKHOUSE_URL"],  # Added these
                 "ClickHouse": ["CLICKHOUSE_HOST", "CLICKHOUSE_PORT", "CLICKHOUSE_USER", 
                               "CLICKHOUSE_DEFAULT_PASSWORD", "CLICKHOUSE_DEVELOPMENT_PASSWORD", "CLICKHOUSE_DB"],
                 "Langfuse": ["LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY"],
-                "Security": ["JWT_SECRET_KEY", "FERNET_KEY"],
+                "Security": ["JWT_SECRET_KEY", "FERNET_KEY", "SECRET_KEY"],  # Added SECRET_KEY
                 "Redis": ["REDIS_PASSWORD"],
-                "Environment": ["ENVIRONMENT"]
+                "Environment": ["ENVIRONMENT"],
+                "Development": ["DEBUG", "RELOAD", "ALLOW_DEV_LOGIN", "ALLOW_MOCK_AUTH"],  # Added dev flags
+                "URLs": ["FRONTEND_URL", "API_URL"]  # Added URL configs
             }
             
+            # Track which keys have been written
+            written_keys = set()
+            
+            # Write categorized keys first
             for category, keys in categories.items():
-                f.write(f"\n# {category}\n")
-                for key in keys:
-                    if key in secrets:
-                        value, source = secrets[key]
-                        f.write(f"{key}={value}\n")
-                        # Don't write source comments to keep file cleaner
+                category_has_values = any(key in secrets for key in keys)
+                if category_has_values:
+                    f.write(f"\n# {category}\n")
+                    for key in keys:
+                        if key in secrets:
+                            value, source = secrets[key]
+                            f.write(f"{key}={value}\n")
+                            written_keys.add(key)
+            
+            # Write any remaining keys that weren't in categories
+            uncategorized = {k: v for k, v in secrets.items() if k not in written_keys}
+            if uncategorized:
+                f.write(f"\n# Other Configuration\n")
+                for key, (value, source) in uncategorized.items():
+                    f.write(f"{key}={value}\n")
 
 class DevLauncher:
     """Unified launcher with real-time streaming, monitoring, and enhanced secret loading."""
