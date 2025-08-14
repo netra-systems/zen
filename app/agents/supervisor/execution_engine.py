@@ -162,7 +162,7 @@ class ExecutionEngine:
         """Build agent started message."""
         return WebSocketMessage(
             type="agent_started",
-            content=self._create_started_content(context)
+            payload=self._create_started_content(context).model_dump()
         )
     
     def _create_started_content(self, context: AgentExecutionContext) -> AgentStarted:

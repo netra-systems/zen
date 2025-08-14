@@ -11,13 +11,70 @@ interface ApiResponse<T = any> {
 interface RequestConfig {
   params?: Record<string, any>;
   headers?: Record<string, string>;
+  retry?: boolean;
+  retryCount?: number;
+  retryDelay?: number;
 }
 
 class ApiClientWrapper {
   private baseURL: string;
+  private isConnected: boolean = false;
+  private connectionCheckPromise: Promise<boolean> | null = null;
   
   constructor() {
     this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    this.checkConnection();
+  }
+
+  private async checkConnection(): Promise<boolean> {
+    if (this.connectionCheckPromise) {
+      return this.connectionCheckPromise;
+    }
+    
+    this.connectionCheckPromise = this.performConnectionCheck();
+    const result = await this.connectionCheckPromise;
+    this.connectionCheckPromise = null;
+    return result;
+  }
+
+  private async performConnectionCheck(): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseURL}/health`, {
+        method: 'GET',
+        mode: 'cors',
+      }).catch(() => null);
+      
+      this.isConnected = response?.ok || response?.status === 307 || false;
+      return this.isConnected;
+    } catch {
+      this.isConnected = false;
+      return false;
+    }
+  }
+
+  private async sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private async retryRequest<T>(
+    fn: () => Promise<T>,
+    retries = 3,
+    delay = 1000
+  ): Promise<T> {
+    let lastError: Error | null = null;
+    
+    for (let i = 0; i < retries; i++) {
+      try {
+        return await fn();
+      } catch (error) {
+        lastError = error as Error;
+        if (i < retries - 1) {
+          await this.sleep(delay * Math.pow(2, i));
+        }
+      }
+    }
+    
+    throw lastError;
   }
 
   private async request<T>(
@@ -61,8 +118,23 @@ class ApiClientWrapper {
       options.body = JSON.stringify(data);
     }
 
-    try {
-      const response = await fetch(fullUrl.toString(), options);
+    const shouldRetry = config?.retry !== false;
+    const retryCount = config?.retryCount || 3;
+    const retryDelay = config?.retryDelay || 1000;
+
+    const performFetch = async () => {
+      if (!this.isConnected) {
+        await this.checkConnection();
+        if (!this.isConnected) {
+          throw new Error('Unable to connect to backend API. Please ensure the backend is running.');
+        }
+      }
+
+      const response = await fetch(fullUrl.toString(), options).catch(async (error) => {
+        this.isConnected = false;
+        await this.checkConnection();
+        throw new Error(`Network error: ${error.message || 'Failed to fetch'}`);
+      });
       
       let responseData: T;
       const contentType = response.headers.get('content-type');
@@ -91,11 +163,27 @@ class ApiClientWrapper {
         status: response.status,
         statusText: response.statusText,
       };
+    };
+
+    try {
+      if (shouldRetry) {
+        return await this.retryRequest(
+          performFetch,
+          retryCount,
+          retryDelay
+        );
+      } else {
+        return await performFetch();
+      }
     } catch (error) {
       if (error instanceof Error) {
+        console.error('API Request failed:', {
+          url: fullUrl.toString(),
+          method,
+          error: error.message
+        });
         throw error;
       }
-      // Handle network errors or other unexpected cases
       const errorMessage = String(error) || 'An unexpected error occurred';
       throw new Error(errorMessage);
     }

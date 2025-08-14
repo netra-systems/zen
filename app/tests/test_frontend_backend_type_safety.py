@@ -15,19 +15,23 @@ from app.schemas.websocket_unified import (
     WebSocketMessageType,
     StartAgentPayload,
     UserMessagePayload,
-    ThreadHistoryPayload,
     CreateThreadPayload,
     SwitchThreadPayload,
     DeleteThreadPayload,
     RenameThreadPayload,
-    AgentStartedPayload,
-    AgentCompletedPayload,
-    AgentErrorPayload,
-    ToolStartedPayload,
-    ToolCompletedPayload,
-    StreamChunkPayload,
-    ErrorPayload,
-    BaseWebSocketMessage
+    StopAgentPayload,
+    AgentUpdate,
+    AgentLog,
+    ToolCall,
+    ToolResult,
+    StreamChunk,
+    StreamComplete,
+    BaseWebSocketMessage,
+    BaseWebSocketPayload,
+    ThreadCreated,
+    ThreadDeleted,
+    ThreadRenamed,
+    ThreadList
 )
 from app.schemas.Request import RequestModel, StartAgentPayload as StartAgentPayloadPydantic
 from app.schemas.Message import Message, MessageType
@@ -123,12 +127,8 @@ class FrontendDataMocks:
                 "payload": {}
             },
             {
-                "type": "get_thread_history",
-                "payload": {
-                    "thread_id": "thread456",
-                    "limit": 50,
-                    "offset": 0
-                }
+                "type": "list_threads",
+                "payload": {}
             },
             {
                 "type": "stop_agent",
@@ -243,12 +243,12 @@ class TestFrontendToBackendTypeSafety:
     
     def test_agent_lifecycle_payloads(self):
         """Test agent lifecycle message payloads."""
-        # Test AgentStarted
+        # Test AgentStarted (using actual schema)
         started_data = {
             "run_id": "run123"
         }
         try:
-            started = AgentStartedPayload(**started_data)
+            started = AgentStarted(**started_data)
             assert started.run_id == "run123"
         except ValidationError as e:
             pytest.fail(f"AgentStarted payload validation failed: {e}")
@@ -259,24 +259,23 @@ class TestFrontendToBackendTypeSafety:
             "result": {"analysis": "complete", "findings": 5}
         }
         try:
-            completed = AgentCompletedPayload(**completed_data)
+            completed = AgentCompleted(**completed_data)
             assert completed.run_id == "run123"
             assert completed.result["findings"] == 5
         except ValidationError as e:
             pytest.fail(f"AgentCompleted payload validation failed: {e}")
         
-        # Test AgentError
-        error_data = {
+        # Test AgentUpdate
+        update_data = {
+            "content": "Processing data...",
             "run_id": "run123",
-            "message": "Failed to process request",
-            "code": "PROCESSING_ERROR",
-            "details": {"step": "analysis", "reason": "timeout"}
+            "metadata": {"step": "analysis"}
         }
         try:
-            error = AgentErrorPayload(**error_data)
-            assert error.message == "Failed to process request"
+            update = AgentUpdate(**update_data)
+            assert update.content == "Processing data..."
         except ValidationError as e:
-            pytest.fail(f"AgentError payload validation failed: {e}")
+            pytest.fail(f"AgentUpdate payload validation failed: {e}")
     
     def test_stream_chunk_payload(self):
         """Test streaming chunk payload structure."""
@@ -291,7 +290,7 @@ class TestFrontendToBackendTypeSafety:
         }
         
         try:
-            chunk = StreamChunkPayload(**chunk_data)
+            chunk = StreamChunk(**chunk_data)
             assert chunk.content == "Processing data..."
             assert chunk.index == 0
             assert chunk.finished is False
@@ -301,18 +300,14 @@ class TestFrontendToBackendTypeSafety:
     def test_error_payload_structure(self):
         """Test error payload structure."""
         error_data = {
-            "message": "WebSocket connection failed",
-            "code": "WS_CONNECTION_ERROR",
-            "details": {
-                "reason": "Authentication failed",
-                "timestamp": datetime.now().isoformat()
-            }
+            "run_id": "run123",
+            "message": "WebSocket connection failed"
         }
         
         try:
-            error = ErrorPayload(**error_data)
+            error = AgentErrorMessage(**error_data)
             assert error.message == "WebSocket connection failed"
-            assert error.code == "WS_CONNECTION_ERROR"
+            assert error.run_id == "run123"
         except ValidationError as e:
             pytest.fail(f"Error payload validation failed: {e}")
     
@@ -462,8 +457,8 @@ class TestBackendToFrontendTypeSafety:
     def test_streaming_response_chunks(self):
         """Test streaming response chunk structure."""
         chunks = [
-            StreamChunkPayload(content="Processing", index=0, finished=False),
-            StreamChunkPayload(content=" complete", index=1, finished=True)
+            StreamChunk(content="Processing", index=0, finished=False),
+            StreamChunk(content=" complete", index=1, finished=True)
         ]
         
         for i, chunk in enumerate(chunks):

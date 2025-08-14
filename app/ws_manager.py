@@ -134,6 +134,20 @@ class WebSocketManager:
 
         return success
 
+    async def send_to_thread(self, thread_id: str, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> bool:
+        """Send a message to all users in a specific thread.
+        
+        Args:
+            thread_id: The thread/conversation ID
+            message: The message to send
+            
+        Returns:
+            bool: True if message was sent successfully
+        """
+        # For now, thread_id maps to user_id for WebSocket routing
+        # This can be enhanced to support multiple users per thread
+        return await self.send_message(thread_id, message)
+
     async def broadcast(self, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> BroadcastResult:
         """Broadcast a message to all connected users."""
         # Validate and sanitize message if it's a dict
