@@ -28,7 +28,7 @@ env:
 jobs:
   architecture-health-scan:
     name: Architecture Health Scan
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     permissions:
       contents: read
       issues: write
@@ -396,7 +396,7 @@ except Exception as e:
 
   benchmark-performance:
     name: Benchmark Scan Performance
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     needs: architecture-health-scan
     if: github.ref == 'refs/heads/main'
     

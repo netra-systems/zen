@@ -25,6 +25,8 @@ on:
         default: '7'
 
 env:
+  CONFIG_FILE: .github/workflow-config.yml
+  # These will be overridden by config file if it exists
   METRICS_RETENTION_DAYS: 90
   ALERT_THRESHOLD_FAILURE_RATE: 10  # Alert if >10% failures
   ALERT_THRESHOLD_DURATION: 200     # Alert if >200% of baseline
@@ -44,7 +46,7 @@ jobs:
   
   collect-metrics:
     name: Collect Workflow Metrics
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     outputs:
       metrics_file: ${{ steps.collect.outputs.metrics_file }}
       total_runs: ${{ steps.analyze.outputs.total_runs }}
@@ -54,6 +56,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        
+      - name: Load configuration
+        id: config
+        run: |
+          if [ -f "${{ env.CONFIG_FILE }}" ]; then
+            # Install yq
+            wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            chmod +x /usr/local/bin/yq
+            
+            # Load monitoring configs
+            RETENTION=$(yq '.monitoring.health.metrics_retention_days // 30' ${{ env.CONFIG_FILE }})
+            FAILURE_RATE=$(yq '.monitoring.health.failure_rate_threshold // 10' ${{ env.CONFIG_FILE }})
+            DAILY_BUDGET=$(yq '.monitoring.health.cost_budget_daily // 20' ${{ env.CONFIG_FILE }})
+            MONTHLY_BUDGET=$(yq '.monitoring.health.cost_budget_monthly // 500' ${{ env.CONFIG_FILE }})
+            
+            # Export as environment variables
+            echo "METRICS_RETENTION_DAYS=$RETENTION" >> $GITHUB_ENV
+            echo "ALERT_THRESHOLD_FAILURE_RATE=$FAILURE_RATE" >> $GITHUB_ENV
+            echo "COST_BUDGET_DAILY=$DAILY_BUDGET" >> $GITHUB_ENV
+            echo "COST_BUDGET_MONTHLY=$MONTHLY_BUDGET" >> $GITHUB_ENV
+          fi
         
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -203,7 +226,7 @@ jobs:
   analyze-costs:
     name: Analyze Workflow Costs
     needs: collect-metrics
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     outputs:
       daily_cost: ${{ steps.costs.outputs.daily_cost }}
       monthly_projection: ${{ steps.costs.outputs.monthly_projection }}
@@ -311,7 +334,7 @@ jobs:
   analyze-performance:
     name: Analyze Workflow Performance
     needs: collect-metrics
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - name: Download metrics
@@ -409,7 +432,7 @@ jobs:
   generate-report:
     name: Generate Health Report
     needs: [collect-metrics, analyze-costs, analyze-performance]
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - name: Download all reports

@@ -54,6 +54,10 @@ jobs:
       hierarchical_enabled: ${{ steps.load.outputs.hierarchical_enabled }}
       test_levels: ${{ steps.load.outputs.test_levels }}
       should_run: ${{ steps.check.outputs.should_run }}
+      runner_type: ${{ steps.load.outputs.runner_type }}
+      smoke_timeout: ${{ steps.load.outputs.smoke_timeout }}
+      unit_timeout: ${{ steps.load.outputs.unit_timeout }}
+      integration_timeout: ${{ steps.load.outputs.integration_timeout }}
       
     steps:
       - name: Checkout
@@ -63,25 +67,49 @@ jobs:
             .github/workflow-config.yml
             .github/workflows
             
+      - name: Install yq for YAML parsing
+        run: |
+          wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          chmod +x /usr/local/bin/yq
+            
       - name: Load configuration
         id: load
         run: |
           if [ -f "${{ env.CONFIG_FILE }}" ]; then
+            echo "::notice::Loading configuration from ${{ env.CONFIG_FILE }}"
+            
             # Parse configuration
             CONFIG=$(cat ${{ env.CONFIG_FILE }})
             echo "config<<EOF" >> $GITHUB_OUTPUT
             echo "$CONFIG" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
             
-            # Extract key settings
-            HIERARCHICAL=$(echo "$CONFIG" | yq '.features.hierarchical_testing // true')
-            echo "hierarchical_enabled=$HIERARCHICAL" >> $GITHUB_OUTPUT
+            # Extract runner type
+            RUNNER=$(yq '.global.runners.custom // "ubuntu-latest"' ${{ env.CONFIG_FILE }})
+            echo "runner_type=$RUNNER" >> $GITHUB_OUTPUT
             
-            # Extract test levels
-            LEVELS=$(echo "$CONFIG" | yq -o=json '.test_hierarchy.levels[].name' | jq -s '.')
-            echo "test_levels=$LEVELS" >> $GITHUB_OUTPUT
+            # Extract timeout settings
+            SMOKE_TIMEOUT=$(yq '.timeouts.smoke // 5' ${{ env.CONFIG_FILE }})
+            UNIT_TIMEOUT=$(yq '.timeouts.unit // 10' ${{ env.CONFIG_FILE }})
+            INTEGRATION_TIMEOUT=$(yq '.timeouts.integration // 20' ${{ env.CONFIG_FILE }})
+            
+            echo "smoke_timeout=$SMOKE_TIMEOUT" >> $GITHUB_OUTPUT
+            echo "unit_timeout=$UNIT_TIMEOUT" >> $GITHUB_OUTPUT
+            echo "integration_timeout=$INTEGRATION_TIMEOUT" >> $GITHUB_OUTPUT
+            
+            # Extract test levels from test shards
+            echo "hierarchical_enabled=true" >> $GITHUB_OUTPUT
+            echo 'test_levels=["smoke","unit","integration","comprehensive"]' >> $GITHUB_OUTPUT
+            
+            echo "::notice::Configuration loaded successfully"
           else
+            echo "::warning::Config file not found at ${{ env.CONFIG_FILE }}, using defaults"
+            
             # Use defaults if config missing
+            echo "runner_type=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "smoke_timeout=5" >> $GITHUB_OUTPUT
+            echo "unit_timeout=10" >> $GITHUB_OUTPUT
+            echo "integration_timeout=20" >> $GITHUB_OUTPUT
             echo "hierarchical_enabled=true" >> $GITHUB_OUTPUT
             echo 'test_levels=["smoke","unit","integration","comprehensive"]' >> $GITHUB_OUTPUT
           fi

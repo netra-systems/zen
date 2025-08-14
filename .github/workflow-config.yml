@@ -1,147 +1,378 @@
-# GitHub Workflows Central Configuration
-# MINIMAL CONFIGURATION - Only Staging and Smoke Tests Enabled
-version: 1.0
+# ==========================================
+# CENTRALIZED WORKFLOW CONFIGURATION
+# ==========================================
+# This file contains shared configuration for all GitHub Actions workflows
+# in the Netra repository. All workflows should reference this config
+# to ensure consistency and maintainability.
 
-# Global workflow settings
+# ==========================================
+# GLOBAL SETTINGS
+# ==========================================
 global:
-  enabled: true
-  default_runner: warp-custom-default
-  default_timeout_minutes: 30
-  cancel_in_progress: true
+  # Repository-wide settings
+  repository:
+    default_branch: main
+    protected_branches:
+      - main
+      - develop
+      - release/*
   
-# Feature flags - Most features disabled for minimal setup
-features:
-  hierarchical_testing: false     # Disabled
-  smart_retry: false              # Disabled for simplicity
-  ai_assistance: false            # Disabled - no AI features
-  cost_monitoring: true           # Keep cost monitoring
-  auto_cleanup: true              # Keep cleanup for staging
-  parallel_execution: false       # Disabled for minimal setup
+  # Versioning
+  versions:
+    python: '3.11'
+    node: '18'
+    terraform: '1.5.0'
+    docker_buildkit: '1'
   
-# Test hierarchy - Simplified for smoke only
-test_hierarchy:
-  levels:
-    - name: smoke
-      timeout: 5
-      required: true
-      blocks: []
-      
-# Workflow configurations - Only staging and smoke enabled
-workflows:
-  testing:
-    smoke:
-      enabled: true
-      timeout_minutes: 5
-      retry_count: 1
-      
+  # Runner configurations
+  runners:
+    default: 'warp-custom-default'
+    custom: 'warp-custom-default'
+
+# ==========================================
+# TIMEOUT CONFIGURATIONS
+# ==========================================
+timeouts:
+  # Test workflow timeouts (in minutes)
+  smoke: 5
+  unit: 10
+  integration: 20
+  comprehensive: 60
+  
+  # Deployment timeouts
+  staging_deploy: 30
+  production_deploy: 45
+  rollback: 15
+  
+  # Build timeouts
+  docker_build: 20
+  npm_build: 15
+  python_build: 10
+  
+  # Default timeout for unspecified jobs
+  default: 30
+
+# ==========================================
+# TEST CONFIGURATIONS
+# ==========================================
+testing:
+  # Test shards for parallel execution
+  shards:
     unit:
-      enabled: false
-      
+      - core
+      - agents
+      - websocket
+      - database
+      - api
+    
     integration:
-      enabled: false
-      
+      - backend
+      - frontend
+      - api
+    
     comprehensive:
-      enabled: false
-      
-    on_demand:
-      enabled: false
-      
+      modules:
+        - comprehensive
+        - comprehensive-backend
+        - comprehensive-frontend
+        - comprehensive-core
+        - comprehensive-database
+        - comprehensive-api
+        - comprehensive-agents
+        - comprehensive-websocket
+  
+  # Coverage thresholds
+  coverage:
+    minimum: 80
+    target: 90
+    fail_under: 75
+  
+  # Retry configurations
+  retry:
+    max_attempts: 3
+    delay_seconds: 30
+    backoff_multiplier: 2
+
+# ==========================================
+# DEPLOYMENT CONFIGURATIONS
+# ==========================================
+deployment:
+  # Staging environment settings
+  staging:
+    gcp_region: 'us-central1'
+    project_prefix: 'netra-staging'
+    max_environments: 10
+    auto_cleanup_days: 7
+    resource_limits:
+      cpu: '2'
+      memory: '4Gi'
+      disk: '20Gi'
+  
+  # Production settings (future use)
+  production:
+    gcp_region: 'us-central1'
+    project_prefix: 'netra-prod'
+    min_replicas: 2
+    max_replicas: 10
+    auto_scaling: true
+  
+  # Docker settings
+  docker:
+    registry: 'gcr.io'
+    cache_enabled: true
+    buildkit_enabled: true
+    platforms:
+      - 'linux/amd64'
+
+# ==========================================
+# MONITORING & ALERTS
+# ==========================================
+monitoring:
+  # Workflow health thresholds
+  health:
+    failure_rate_threshold: 10  # percentage
+    cost_budget_daily: 20       # USD
+    cost_budget_monthly: 500    # USD
+    metrics_retention_days: 30
+  
+  # Alert configurations
+  alerts:
+    enabled: true
+    channels:
+      - github_issues
+      - discord
+      - email
+    
+    thresholds:
+      critical_failure_rate: 25
+      high_failure_rate: 15
+      cost_overrun: 1.2  # 120% of budget
+  
+  # Reporting
+  reporting:
+    frequency: 'weekly'
+    include_metrics:
+      - success_rate
+      - average_duration
+      - cost_analysis
+      - failure_patterns
+
+# ==========================================
+# AI/LLM CONFIGURATIONS
+# ==========================================
+ai:
+  # Supported providers
+  providers:
+    - name: 'claude'
+      models: ['claude-3-opus', 'claude-3-sonnet']
+      priority: 1
+    
+    - name: 'gemini'
+      models: ['gemini-2.5-flash', 'gemini-2.5-pro']
+      priority: 2
+    
+    - name: 'openai'
+      models: ['gpt-3.5-turbo', 'gpt-4']
+      priority: 3
+  
+  # Auto-fix settings
+  autofix:
+    enabled: true
+    max_attempts: 3
+    confidence_threshold: 80
+    require_validation: true
+    test_before_commit: true
+  
+  # Review settings
+  review:
+    enabled: true
+    auto_approve_threshold: 95
+    require_human_review: true
+
+# ==========================================
+# CACHING CONFIGURATIONS
+# ==========================================
+caching:
+  # Dependency caching
+  dependencies:
+    python:
+      enabled: true
+      paths:
+        - '~/.cache/pip'
+        - 'venv'
+      key_prefix: 'py-deps'
+    
+    node:
+      enabled: true
+      paths:
+        - '~/.npm'
+        - 'node_modules'
+      key_prefix: 'node-deps'
+    
+    docker:
+      enabled: true
+      registry_cache: true
+      layer_cache: true
+  
+  # Artifact retention
+  artifacts:
+    test_results: 7      # days
+    build_artifacts: 14  # days
+    deployment_logs: 30  # days
+    performance_data: 90 # days
+
+# ==========================================
+# SECURITY CONFIGURATIONS
+# ==========================================
+security:
+  # Secret scanning
+  secret_scanning:
+    enabled: true
+    patterns:
+      - 'api[_-]?key'
+      - 'secret[_-]?key'
+      - 'password'
+      - 'token'
+      - 'credential'
+  
+  # Dependency scanning
+  dependency_scanning:
+    enabled: true
+    check_vulnerabilities: true
+    auto_fix_patches: true
+    severity_threshold: 'medium'
+  
+  # Code scanning
+  code_scanning:
+    enabled: true
+    languages:
+      - python
+      - javascript
+      - typescript
+    tools:
+      - codeql
+      - semgrep
+
+# ==========================================
+# WORKFLOW CONTROL
+# ==========================================
+workflow_control:
+  # Enable/disable workflows via repository variables
+  # Set ENABLE_WORKFLOW_<NAME> = false to disable
+  enabled_by_default: true
+  
+  # Concurrency settings
+  concurrency:
+    default_group: '${{ github.workflow }}-${{ github.ref }}'
+    cancel_in_progress: true
+    max_parallel_jobs: 10
+  
+  # Permissions (default for all workflows)
+  default_permissions:
+    contents: read
+    issues: write
+    pull-requests: write
+    statuses: write
+    actions: read
+    packages: read
+
+# ==========================================
+# NOTIFICATION SETTINGS
+# ==========================================
+notifications:
+  # PR comment settings
+  pr_comments:
+    enabled: true
+    update_existing: true
+    include_coverage: true
+    include_performance: true
+    include_artifacts: true
+  
+  # Commit status settings
+  commit_status:
+    enabled: true
+    include_details: true
+    context_prefix: 'netra'
+  
+  # Discord notifications
+  discord:
+    enabled: '{{ vars.DISCORD_WEBHOOK_URL != "" }}'
+    mention_on_failure: true
+    include_artifacts: false
+
+# ==========================================
+# PERFORMANCE OPTIMIZATIONS
+# ==========================================
+performance:
+  # Parallel execution
+  parallel:
+    matrix_max_parallel: 10
+    test_shards_max: 5
+    build_jobs_max: 3
+  
+  # Resource allocation
+  resources:
+    large_runner_threshold: 30  # minutes
+    use_custom_runners: true
+    prefer_cached_runners: true
+  
+  # Build optimizations
+  build:
+    incremental: true
+    cache_dependencies: true
+    skip_unchanged: true
+    parallel_install: true
+
+# ==========================================
+# REPOSITORY VARIABLES MAPPING
+# ==========================================
+# These can be overridden via GitHub repository variables
+variable_mappings:
+  ENABLE_WORKFLOW_ORCHESTRATOR: workflow_control.orchestrator.enabled
+  ENABLE_WORKFLOW_TESTS: workflow_control.testing.enabled
+  ENABLE_WORKFLOW_STAGING: workflow_control.staging.enabled
+  ENABLE_WORKFLOW_AI: workflow_control.ai.enabled
+  ENABLE_WORKFLOW_MONITORING: workflow_control.monitoring.enabled
+  
+  ALERT_THRESHOLD_FAILURE_RATE: monitoring.health.failure_rate_threshold
+  COST_BUDGET_DAILY: monitoring.health.cost_budget_daily
+  COST_BUDGET_MONTHLY: monitoring.health.cost_budget_monthly
+  
+  DISCORD_WEBHOOK_URL: notifications.discord.webhook_url
+  SLACK_WEBHOOK_URL: notifications.slack.webhook_url
+  
+  RUNNER_TYPE_DEFAULT: global.runners.default
+  RUNNER_TYPE_CUSTOM: global.runners.custom
+
+# ==========================================
+# ENVIRONMENT-SPECIFIC OVERRIDES
+# ==========================================
+environments:
+  development:
+    testing:
+      coverage:
+        minimum: 30
+    monitoring:
+      alerts:
+        enabled: false
+  
   staging:
     deployment:
-      enabled: true
-      auto_deploy_prs: true
-      max_concurrent_environments: 3  # Reduced for cost
-      timeout_minutes: 20
-      
-    cleanup:
-      enabled: true
-      schedule: "0 */6 * * *"
-      max_age_days: 3  # More aggressive cleanup
-      inactive_hours: 12
-      force_cleanup_on_pr_close: true
-      
-    terraform_locks:
-      enabled: true
-      schedule: "0 * * * *"
-      stale_lock_minutes: 15
-      
-  ai:
-    autofix:
-      enabled: false
-      
-    pr_review:
-      enabled: false
-      
-  monitoring:
-    architecture_health:
-      enabled: false
-      
-    workflow_health:
-      enabled: false
-      
-# Minimal execution rules
-execution_rules:
-  skip_all_workflows:
-    - commit_message: "[skip ci]"
-    - commit_message: "[ci skip]"
-    
-# Cost management - Conservative limits
-cost_control:
-  monthly_budget: 200
-  daily_limit: 10
-  per_pr_limit: 20
+      auto_cleanup_days: 3
+    monitoring:
+      alerts:
+        enabled: true
   
-  alerts:
-    - threshold: 80
-      action: notify
-    - threshold: 100
-      action: halt
-      
-  resource_limits:
-    max_staging_environments: 3
-    max_parallel_jobs: 2
-    
-# Minimal retry strategy
-failure_handling:
-  retry_strategy:
-    default_retries: 0
-    retry_delay_seconds: 30
-    
-  cascading_failures:
-    stop_on_first_failure: true
-    cancel_in_flight: true
-    
-# Notifications - Simplified
-notifications:
-  channels:
-    github:
-      enabled: true
-      create_issues: false
-      update_pr_status: true
-      post_comments: false
-      
-# Performance optimization - Basic
-optimization:
-  caching:
-    enabled: true
-    dependency_cache: true
-    docker_layer_cache: false
-    test_result_cache: false
-    cache_retention_days: 3
-    
-  parallelization:
-    max_parallel_jobs: 2
-    auto_shard_tests: false
-    dynamic_allocation: false
-    
-# Security settings - Keep basic security
-security:
-  secret_scanning: true
-  dependency_scanning: true
-  code_scanning: false
-  
-  permissions:
-    default: read
-    required_for_deployment:
-      - contents: write
-      - deployments: write
+  production:
+    testing:
+      coverage:
+        minimum: 90
+    deployment:
+      require_approval: true
+    monitoring:
+      alerts:
+        enabled: true
+        channels:
+          - pagerduty
+          - slack
+          - email
