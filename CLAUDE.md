@@ -2,12 +2,6 @@
 
 You are an Elite Engineer.
 
-## 🔴 CRITICAL ARCHITECTURAL COMPLIANCE STATUS
-**WARNING:** Codebase currently has 850+ critical violations. See:
-- [`ROOT_CAUSE_ANALYSIS.md`](ROOT_CAUSE_ANALYSIS.md) - Full analysis of violations
-- [`ALIGNMENT_ACTION_PLAN.md`](ALIGNMENT_ACTION_PLAN.md) - 90-day remediation plan
-- Run: `python scripts/check_architecture_compliance.py` to check current status
-
 ## 🔴 CRITICAL: MODULE-BASED ARCHITECTURE (300 LINES MAX, 8 LINES PER FUNCTION)
 **MANDATORY**: Every file MUST be ≤300 lines. ALL functions MUST be ≤8 lines.
 - Files exceeding 300 lines MUST be split into focused modules BEFORE implementation
@@ -15,6 +9,7 @@ You are an Elite Engineer.
 - Plan module boundaries BEFORE coding - don't code first then split
 - Each module = single responsibility, clear interface, testable unit
 - Each function = single task, 8 lines maximum (no exceptions)
+- COMPLIANCE STATUS Run: `python scripts/check_architecture_compliance.py` to check current status
 
 ## Core Principles
 
@@ -30,7 +25,7 @@ You are an Elite Engineer.
 
 ### 3. 300-LINE MODULE ARCHITECTURE  
 **CRITICAL**: No file exceeds 300 lines - enforce through modular design:
-- Split by responsibility, not arbitrary line counts
+- Split by responsibility
 - Plan modules during design phase
 - Each module must have clear interface and single purpose
 
@@ -39,8 +34,8 @@ You are an Elite Engineer.
 
 ## Quick Start
 ```bash
-python dev_launcher.py --dynamic --no-backend-reload  # Start dev
-python test_runner.py --level unit                    # DEFAULT tests
+python dev_launcher.py # Start dev
+python test_runner.py --level unit # DEFAULT tests
 ```
 
 ## 🔴 MANDATORY SPECS (Read 3x Before Coding)
@@ -48,7 +43,7 @@ python test_runner.py --level unit                    # DEFAULT tests
 ### Critical Specs - ALWAYS CONSULT FIRST
 | Spec | Purpose | When |
 |------|---------|------|
-| [`type_safety.xml`](SPEC/type_safety.xml) | **#1 PRIORITY** - Type safety, no duplicates | BEFORE any code |
+| [`type_safety.xml`](SPEC/type_safety.xml) | **#1 PRIORITY** - Type safety, duplicate-free | BEFORE any code |
 | [`conventions.xml`](SPEC/conventions.xml) | **#2 PRIORITY** - Standards, 300-line limit | BEFORE any code |
 | [`code_changes.xml`](SPEC/code_changes.xml) | **#3 PRIORITY** - Change checklist | BEFORE changes |
 | [`no_test_stubs.xml`](SPEC/no_test_stubs.xml) | **CRITICAL** - No test stubs in production | Always check |
@@ -74,8 +69,8 @@ python test_runner.py --level unit                    # DEFAULT tests
 5. UPDATE specs with POSITIVE wording only.
 
 ### AFTER Any Code Change (Automatic)
-1. **RUN** `code-quality-reviewer` agent
-2. **RUN** `test-debug-expert` agent  
+1. **RUN** `code-quality-reviewer`
+2. **RUN** `test-debug-expert`  
 3. **FIX** all identified issues before proceeding
 - **ALWAYS** double check you are updating, creating, editing: SINGLE SOURCES OF TRUTH
 - **ALWAYS** extend existing functions with options/parameters
@@ -107,33 +102,7 @@ python test_runner.py --level unit                    # DEFAULT tests
 - `generateUniqueId()` for React keys
 
 ## Testing (ALWAYS run UNIT tests for noticeable changes)
-```bash
-python test_runner.py --level unit          # DEFAULT - Always run for ANY noticeable changes
-python test_runner.py --level comprehensive # ANY MAJOR CHANGES
-```
-
-## Directory Structure
-```
-app/
-├── routes/      # API endpoints
-├── schemas/     # Pydantic models (TYPE SAFETY)
-├── services/    # Business logic (300 LINES MAX)
-├── agents/      # Multi-agent system
-└── ws_manager.py
-
-frontend/
-├── components/  # UI (glassmorphic, 300 LINES MAX)
-├── store/       # Zustand state
-└── lib/utils    # generateUniqueId()
-```
-
-## Common Operations
-| Task | Location |
-|------|----------|
-| API endpoint | `app/routes/` → `schemas/` → `services/` |
-| WebSocket | `app/ws_manager.py` |
-| UI | `frontend/components/` (NO blue gradients) |
-| Database | `app/services/database/` repositories |
+- Choose a category using test discovery
 
 ## 📝 MODULE PLANNING (3rd Reminder: 300 Lines MAX)
 
@@ -153,11 +122,8 @@ frontend/
 - [ ] Test coverage maintained
 - [ ] Tests pass
 
-## Quick Fixes
-- **React keys**: `generateUniqueId('prefix')`
-- **WebSocket tests**: Wrap with `WebSocketProvider`
-- **ClickHouse arrays**: `arrayElement()` not direct indexing
-- **Test stubs**: Remove immediately - REAL code only
+# Tools notes
+- Use tools like read file, replace_all, etc.
 
 ## 🎯 FINAL REMINDERS (Ultra Think 3x)
 
