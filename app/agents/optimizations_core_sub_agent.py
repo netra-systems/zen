@@ -90,14 +90,13 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
             """Fallback optimization when main operation fails"""
             logger.warning(f"Using fallback optimization for run_id: {run_id}")
             fallback_result = {
-                "optimizations": [
-                    {
-                        "type": "general",
-                        "description": "Basic optimization analysis",
-                        "priority": "medium",
-                        "fallback": True
-                    }
+                "optimization_type": "general",
+                "recommendations": [
+                    "Basic optimization analysis - review current resource utilization",
+                    "Consider cost optimization opportunities based on usage patterns",
+                    "Evaluate performance improvements for critical workloads"
                 ],
+                "confidence_score": 0.5,
                 "metadata": {
                     "fallback_used": True,
                     "reason": "Primary optimization analysis failed"
@@ -135,8 +134,31 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
     def _create_optimizations_result(self, data: dict) -> 'OptimizationsResult':
         """Convert dictionary to OptimizationsResult object."""
         from app.agents.state import OptimizationsResult
+        
+        # Fix recommendations field - handle both dict and string formats
+        recommendations = data.get("recommendations", data.get("optimizations", []))
+        
+        # Convert dict recommendations to list of strings
+        if isinstance(recommendations, list):
+            fixed_recommendations = []
+            for rec in recommendations:
+                if isinstance(rec, dict):
+                    # Convert dict to string description
+                    desc = rec.get("description", str(rec))
+                    fixed_recommendations.append(desc)
+                elif isinstance(rec, str):
+                    fixed_recommendations.append(rec)
+                else:
+                    fixed_recommendations.append(str(rec))
+            recommendations = fixed_recommendations
+        elif not isinstance(recommendations, list):
+            recommendations = [str(recommendations)] if recommendations else []
+        
         return OptimizationsResult(
-            optimization_type=data.get("type", "general"),
-            recommendations=data.get("optimizations", []),
+            optimization_type=data.get("optimization_type", data.get("type", "general")),
+            recommendations=recommendations,
+            confidence_score=data.get("confidence_score", 0.8),
+            cost_savings=data.get("cost_savings"),
+            performance_improvement=data.get("performance_improvement"),
             metadata=data.get("metadata", {})
         )

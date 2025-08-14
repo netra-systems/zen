@@ -4,6 +4,7 @@ Handles broadcasting messages to multiple connections efficiently and reliably.
 """
 
 import asyncio
+import json
 import time
 from typing import Dict, List, Any, Union
 
@@ -12,6 +13,7 @@ from starlette.websockets import WebSocketState
 from app.logging_config import central_logger
 from app.schemas.registry import WebSocketMessage
 from app.schemas.websocket_message_types import ServerMessage, BroadcastResult
+from app.core.json_utils import prepare_websocket_message, safe_json_dumps
 from .connection import ConnectionInfo, ConnectionManager
 from .room_manager import RoomManager
 
@@ -206,7 +208,8 @@ class BroadcastManager:
         """
         try:
             if conn_info.websocket.client_state == WebSocketState.CONNECTED:
-                await conn_info.websocket.send_json(message)
+                prepared_message = prepare_websocket_message(message)
+                await conn_info.websocket.send_text(safe_json_dumps(prepared_message))
                 return True
             else:
                 logger.debug(f"Connection {conn_info.connection_id} not in CONNECTED state")

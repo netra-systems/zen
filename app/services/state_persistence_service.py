@@ -6,6 +6,7 @@ and PostgreSQL for long-term storage and querying.
 
 import json
 import time
+from datetime import datetime
 from typing import Any, Dict, Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
@@ -16,6 +17,15 @@ from app.agents.state import DeepAgentState
 import pickle
 
 logger = central_logger.get_logger(__name__)
+
+
+class DateTimeEncoder(json.JSONEncoder):
+    """Custom JSON encoder for datetime objects"""
+    
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
 
 class StatePersistenceService:
     """Service for persisting and retrieving agent state"""
@@ -36,7 +46,7 @@ class StatePersistenceService:
         try:
             # Serialize state for storage
             state_dict = state.model_dump()
-            state_json = json.dumps(state_dict)
+            state_json = json.dumps(state_dict, cls=DateTimeEncoder)
             
             # Save to Redis for fast access
             redis_key = f"agent_state:{run_id}"
@@ -65,7 +75,7 @@ class StatePersistenceService:
             if redis_client:
                 await redis_client.set(
                     thread_key,
-                    json.dumps(thread_context),
+                    json.dumps(thread_context, cls=DateTimeEncoder),
                     ex=self.redis_ttl * 24  # Keep thread context for 24 hours
                 )
             
@@ -123,7 +133,7 @@ class StatePersistenceService:
                     if redis_client:
                         await redis_client.set(
                             redis_key,
-                            json.dumps(state_dict),
+                            json.dumps(state_dict, cls=DateTimeEncoder),
                             ex=self.redis_ttl
                         )
                     
@@ -172,7 +182,7 @@ class StatePersistenceService:
             if redis_client:
                 await redis_client.set(
                     redis_key,
-                    json.dumps(result),
+                    json.dumps(result, cls=DateTimeEncoder),
                     ex=self.redis_ttl
                 )
             
@@ -184,7 +194,7 @@ class StatePersistenceService:
                     friendly_name=f"{agent_name} Result",
                     description=f"Result from {agent_name} for run {run_id}",
                     type="agent_result",
-                    value=json.dumps(result),
+                    value=json.dumps(result, cls=DateTimeEncoder),
                     version="1.0"
                 )
                 db_session.add(reference)
