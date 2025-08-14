@@ -9,6 +9,6 @@
     "mode": "local"
   },
   "llm": {
-    "mode": "mock"
+    "mode": "shared"
   }
 }

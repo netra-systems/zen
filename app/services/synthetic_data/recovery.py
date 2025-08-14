@@ -62,6 +62,9 @@ class RecoveryMixin:
                 "job_id": job_id
             }
         
+        # Simulate async generation with a small delay
+        await asyncio.sleep(0.2)
+        
         result = {
             "job_id": job_id,
             "status": "completed",
@@ -69,7 +72,7 @@ class RecoveryMixin:
             "monitored": True
         }
         
-        # Update job status to completed
+        # Update job status to completed after the delay
         if hasattr(self, 'active_jobs'):
             self.active_jobs[job_id]["state"] = "completed"
             self.active_jobs[job_id]["progress_percentage"] = 100
@@ -174,6 +177,11 @@ class RecoveryMixin:
             "disabled_features": ["clustering"],
             "records": [{"id": i} for i in range(getattr(config, 'num_traces', 1000))]
         }
+    
+    def enable_clustering(self):
+        """Enable clustering feature"""
+        # Stub method for testing
+        raise Exception("Clustering unavailable")
 
 
 class CircuitBreaker:

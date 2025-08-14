@@ -141,22 +141,24 @@ class TestClickHouseConnection:
         """Test basic query execution with real ClickHouse."""
         # Get the actual client
         client = await clickhouse_client()
-        # Test current time query
-        result = await client.execute_query("SELECT now() as current_time")
+        # Test current time query - use fetch method for compatibility
+        result = await client.fetch("SELECT now() as current_time")
         assert len(result) == 1
         assert 'current_time' in result[0]
         
         # Test math operations
-        math_result = await client.execute_query(
+        math_result = await client.fetch(
             "SELECT 2 + 2 as sum, 10 * 5 as product"
         )
+        assert len(math_result) == 1
         assert math_result[0]['sum'] == 4
         assert math_result[0]['product'] == 50
         
         # Test string operations
-        string_result = await client.execute_query(
+        string_result = await client.fetch(
             "SELECT concat('Hello', ' ', 'ClickHouse') as greeting"
         )
+        assert len(string_result) == 1
         assert string_result[0]['greeting'] == 'Hello ClickHouse'
 
     @pytest.mark.asyncio
