@@ -133,12 +133,12 @@ class LLMManager:
         # Check if API key is available for branded LLMs
         # Skip initialization if no key provided for optional providers
         if not config.api_key:
-            if config.provider in ["google", "vertexai"]:
+            if config.provider in [LLMProvider.GOOGLE, LLMProvider.VERTEXAI]:
                 # Gemini/Google/VertexAI is required
-                raise ValueError(f"LLM '{name}': Gemini API key is required for {config.provider} provider")
+                raise ValueError(f"LLM '{name}': Gemini API key is required for {config.provider.value} provider")
             else:
                 # Other providers are optional - skip if no key
-                logger.info(f"Skipping LLM '{name}' initialization - no API key provided for {config.provider}")
+                logger.info(f"Skipping LLM '{name}' initialization - no API key provided for {config.provider.value}")
                 return None
 
         # Merge the default generation config with the override
@@ -149,20 +149,20 @@ class LLMManager:
             else:
                 final_generation_config.update(generation_config)
 
-        if config.provider == "google":
+        if config.provider == LLMProvider.GOOGLE:
             # Defer genai.configure until a Google model is actually used
             llm = ChatGoogleGenerativeAI(
                 model=config.model_name,
                 api_key=config.api_key,
                 **final_generation_config
             )
-        elif config.provider == "openai":
+        elif config.provider == LLMProvider.OPENAI:
             llm = ChatOpenAI(
                 model_name=config.model_name,
                 api_key=config.api_key,
                 **final_generation_config,
             )
-        elif config.provider == "anthropic":
+        elif config.provider == LLMProvider.ANTHROPIC:
             # Import only if needed
             from langchain_anthropic import ChatAnthropic
             llm = ChatAnthropic(
@@ -170,7 +170,7 @@ class LLMManager:
                 api_key=config.api_key,
                 **final_generation_config
             )
-        elif config.provider == "cohere":
+        elif config.provider == LLMProvider.COHERE:
             # Import only if needed
             from langchain_cohere import ChatCohere
             llm = ChatCohere(
@@ -186,7 +186,7 @@ class LLMManager:
                 api_key=config.api_key,
                 **final_generation_config
             )
-        elif config.provider == "vertexai":
+        elif config.provider == LLMProvider.VERTEXAI:
             # Use same implementation as google for now
             # Both use Gemini models but via different endpoints
             logger.info(f"Using Google Gemini for VertexAI provider")

@@ -11,6 +11,7 @@ import asyncio
 from typing import List
 from app.config import settings
 from app.logging_config import central_logger as logger
+from app.schemas.llm_types import LLMProvider
 from .models import StartupCheckResult
 
 
@@ -97,7 +98,7 @@ class ServiceChecker:
                         
                 except Exception as e:
                     config = settings.llm_configs.get(llm_name)
-                    if config and config.provider == "google":
+                    if config and config.provider == LLMProvider.GOOGLE:
                         failed_providers.append(f"{llm_name}: {e}")
                     else:
                         logger.info(f"Optional LLM '{llm_name}' not available: {e}")

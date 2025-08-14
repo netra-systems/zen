@@ -2,6 +2,7 @@ from typing import List, Dict, Optional, Any
 from pydantic import BaseModel, Field
 from .Auth import AuthEndpoints, AuthConfigResponse, DevUser
 from .User import User
+from .llm_types import LLMProvider
 
 class ClickHouseCredentials(BaseModel):
     host: str
@@ -111,7 +112,7 @@ class LangfuseConfig(BaseModel):
     host: str = "https://cloud.langfuse.com/"
 
 class LLMConfig(BaseModel):
-    provider: str = Field(..., description="The LLM provider (e.g., 'google', 'openai').")
+    provider: LLMProvider = Field(..., description="The LLM provider enum.")
     model_name: str = Field(..., description="The name of the model.")
     api_key: Optional[str] = Field(None, description="The API key for the LLM provider.")
     generation_config: Dict[str, Any] = Field({}, description="A dictionary of generation parameters, e.g., temperature, max_tokens.")
@@ -168,32 +169,32 @@ class AppConfig(BaseModel):
 
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(
-            provider="google",
+            provider=LLMProvider.GOOGLE,
             model_name="gemini-2.5-pro",
         ),
         "analysis": LLMConfig(
-            provider="google",
+            provider=LLMProvider.GOOGLE,
             model_name="gemini-2.5-pro",
             generation_config={"temperature": 0.5},
         ),
         "triage": LLMConfig(
-            provider="google",
+            provider=LLMProvider.GOOGLE,
             model_name="gemini-2.5-pro",
         ),
         "data": LLMConfig(
-            provider="google",
+            provider=LLMProvider.GOOGLE,
             model_name="gemini-2.5-pro",
         ),
         "optimizations_core": LLMConfig(
-            provider="google",
+            provider=LLMProvider.GOOGLE,
             model_name="gemini-2.5-pro",
         ),
         "actions_to_meet_goals": LLMConfig(
-            provider="google",
+            provider=LLMProvider.GOOGLE,
             model_name="gemini-2.5-pro",
         ),
         "reporting": LLMConfig(
-            provider="google",
+            provider=LLMProvider.GOOGLE,
             model_name="gemini-2.5-pro",
         ),
     }
