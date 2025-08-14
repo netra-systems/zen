@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-14T15:29:01.690900  
+**Generated:** 2025-08-14T15:44:18.216077  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 **Purpose:** Development validation, component testing
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 1 | 0 | 0 | 0 | 1 | 23.13s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.26s | [FAILED] |
+| Backend   | 1 | 0 | 0 | 0 | 1 | 21.72s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.48s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,8 +27,8 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 23.39s
-- **Exit Code:** 15
+- **Total Duration:** 22.19s
+- **Exit Code:** 255
 
 ### Backend Configuration
 ```
@@ -98,9 +98,9 @@ E   ImportError: cannot import name 'UserUpdate' from 'app.schemas.registry' (C:
 [31mERROR[0m app\tests\services\test_user_service.py
 [31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
 !!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!
-[31m============================== [31m[1m1 error[0m[31m in 15.65s[0m[31m ==============================[0m
+[31m============================== [31m[1m1 error[0m[31m in 11.81s[0m[31m ==============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 2 after 22.35s
+[FAIL] TESTS FAILED with exit code 2 after 20.49s
 [Coverage] Coverage Report: reports/coverage/html/index.html
 ================================================================================
 
@@ -109,6 +109,21 @@ E   ImportError: cannot import name 'UserUpdate' from 'app.schemas.registry' (C:
 
 ### Frontend Output
 ```
+================================================================================
+NETRA AI PLATFORM - FRONTEND TEST RUNNER
+================================================================================
+
+================================================================================
+Running Jest Tests
+--------------------------------------------------------------------------------
+Running: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)
+--------------------------------------------------------------------------------
+
+================================================================================
+[FAIL] CHECKS FAILED with exit code 255
+================================================================================
+
+Cleaning up test processes...
 
 'hooks' is not recognized as an internal or external command,
 operable program or batch file.
@@ -121,7 +136,7 @@ operable program or batch file.
 - =================================== ERRORS ====================================
 - [31m[1m____________ ERROR collecting tests/services/test_user_service.py _____________[0m
 - [31mERROR[0m app\tests\services\test_user_service.py
-- [FAIL] TESTS FAILED with exit code 2 after 22.35s
+- [FAIL] TESTS FAILED with exit code 2 after 20.49s
 
 
 ---

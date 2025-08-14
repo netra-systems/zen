@@ -1,390 +1,6 @@
 {
   "runs": [
     {
-      "timestamp": "2025-08-14T15:17:02.354362",
-      "level": "unit",
-      "results": {
-        "backend": {
-          "status": "failed",
-          "duration": 29.36954140663147,
-          "exit_code": 2,
-          "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m____________ ERROR collecting tests/services/test_user_service.py _____________\u001b[0m\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_user_service.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\python.py:498: in importtestmodule\n    mod = import_path(\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\pathlib.py:587: in import_path\n    importlib.import_module(module_name)\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\assertion\\rewrite.py:186: in exec_module\n    exec(co, module.__dict__)\napp\\tests\\services\\test_user_service.py:14: in <module>\n    from app.schemas.registry import UserCreate, UserUpdate\nE   ImportError: cannot import name 'UserUpdate' from 'app.schemas.registry' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\schemas\\registry.py)\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app\\tests\\services\\test_user_service.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m============================== \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 19.22s\u001b[0m\u001b[31m ==============================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 28.51s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\n",
-          "test_counts": {
-            "total": 1,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 1,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "frontend": {
-          "status": "failed",
-          "duration": 0.2768287658691406,
-          "exit_code": 15,
-          "output": "\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "e2e": {
-          "status": "pending",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "overall": {
-          "status": "failed",
-          "start_time": 1755209792.6947982,
-          "end_time": 1755209822.344376
-        }
-      },
-      "summary": {
-        "total": 1,
-        "passed": 0,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 1
-      }
-    },
-    {
-      "timestamp": "2025-08-14T15:17:02.725528",
-      "level": "unit",
-      "results": {
-        "backend": {
-          "status": "failed",
-          "duration": 9.469900131225586,
-          "exit_code": 15,
-          "output": "\n",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "frontend": {
-          "status": "failed",
-          "duration": 0.3930506706237793,
-          "exit_code": 255,
-          "output": "================================================================================\nNETRA AI PLATFORM - FRONTEND TEST RUNNER\n================================================================================\n\n================================================================================\nRunning Jest Tests\n--------------------------------------------------------------------------------\nRunning: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)\n--------------------------------------------------------------------------------\n\n================================================================================\n[FAIL] CHECKS FAILED with exit code 255\n================================================================================\n\nCleaning up test processes...\n\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "e2e": {
-          "status": "pending",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "overall": {
-          "status": "failed",
-          "start_time": 1755209812.8588834,
-          "end_time": 1755209822.7230077
-        }
-      },
-      "summary": {
-        "total": 0,
-        "passed": 0,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 0
-      }
-    },
-    {
-      "timestamp": "2025-08-14T15:18:10.471018",
-      "level": "unit",
-      "results": {
-        "backend": {
-          "status": "failed",
-          "duration": 23.398849964141846,
-          "exit_code": 2,
-          "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m____________ ERROR collecting tests/services/test_user_service.py _____________\u001b[0m\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_user_service.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\python.py:498: in importtestmodule\n    mod = import_path(\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\pathlib.py:587: in import_path\n    importlib.import_module(module_name)\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\assertion\\rewrite.py:186: in exec_module\n    exec(co, module.__dict__)\napp\\tests\\services\\test_user_service.py:14: in <module>\n    from app.schemas.registry import UserCreate, UserUpdate\nE   ImportError: cannot import name 'UserUpdate' from 'app.schemas.registry' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\schemas\\registry.py)\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app\\tests\\services\\test_user_service.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m============================== \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 15.09s\u001b[0m\u001b[31m ==============================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 22.52s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\n",
-          "test_counts": {
-            "total": 1,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 1,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "frontend": {
-          "status": "failed",
-          "duration": 0.27155399322509766,
-          "exit_code": 15,
-          "output": "\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "e2e": {
-          "status": "pending",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "overall": {
-          "status": "failed",
-          "start_time": 1755209866.7955709,
-          "end_time": 1755209890.468998
-        }
-      },
-      "summary": {
-        "total": 1,
-        "passed": 0,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 1
-      }
-    },
-    {
-      "timestamp": "2025-08-14T15:18:34.940481",
-      "level": "unit",
-      "results": {
-        "backend": {
-          "status": "failed",
-          "duration": 22.257874965667725,
-          "exit_code": 2,
-          "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m____________ ERROR collecting tests/services/test_user_service.py _____________\u001b[0m\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_user_service.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\python.py:498: in importtestmodule\n    mod = import_path(\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\pathlib.py:587: in import_path\n    importlib.import_module(module_name)\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\assertion\\rewrite.py:186: in exec_module\n    exec(co, module.__dict__)\napp\\tests\\services\\test_user_service.py:14: in <module>\n    from app.schemas.registry import UserCreate, UserUpdate\nE   ImportError: cannot import name 'UserUpdate' from 'app.schemas.registry' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\schemas\\registry.py)\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app\\tests\\services\\test_user_service.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m============================== \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 14.80s\u001b[0m\u001b[31m ==============================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 21.50s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\n",
-          "test_counts": {
-            "total": 1,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 1,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "frontend": {
-          "status": "failed",
-          "duration": 0.29914116859436035,
-          "exit_code": 15,
-          "output": "\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "e2e": {
-          "status": "pending",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "overall": {
-          "status": "failed",
-          "start_time": 1755209892.3774958,
-          "end_time": 1755209914.9374976
-        }
-      },
-      "summary": {
-        "total": 1,
-        "passed": 0,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 1
-      }
-    },
-    {
-      "timestamp": "2025-08-14T15:19:20.616934",
-      "level": "unit",
-      "results": {
-        "backend": {
-          "status": "failed",
-          "duration": 21.487110376358032,
-          "exit_code": 2,
-          "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m____________ ERROR collecting tests/services/test_user_service.py _____________\u001b[0m\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_user_service.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\python.py:498: in importtestmodule\n    mod = import_path(\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\pathlib.py:587: in import_path\n    importlib.import_module(module_name)\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\assertion\\rewrite.py:186: in exec_module\n    exec(co, module.__dict__)\napp\\tests\\services\\test_user_service.py:14: in <module>\n    from app.schemas.registry import UserCreate, UserUpdate\nE   ImportError: cannot import name 'UserUpdate' from 'app.schemas.registry' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\schemas\\registry.py)\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app\\tests\\services\\test_user_service.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m============================== \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 13.99s\u001b[0m\u001b[31m ==============================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 20.78s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\n",
-          "test_counts": {
-            "total": 1,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 1,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "frontend": {
-          "status": "failed",
-          "duration": 0.3615868091583252,
-          "exit_code": 255,
-          "output": "================================================================================\nNETRA AI PLATFORM - FRONTEND TEST RUNNER\n================================================================================\n\n================================================================================\nRunning Jest Tests\n--------------------------------------------------------------------------------\nRunning: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)\n--------------------------------------------------------------------------------\n\n================================================================================\n[FAIL] CHECKS FAILED with exit code 255\n================================================================================\n\nCleaning up test processes...\n\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "e2e": {
-          "status": "pending",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "overall": {
-          "status": "failed",
-          "start_time": 1755209938.762687,
-          "end_time": 1755209960.614388
-        }
-      },
-      "summary": {
-        "total": 1,
-        "passed": 0,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 1
-      }
-    },
-    {
-      "timestamp": "2025-08-14T15:25:13.268937",
-      "level": "unit",
-      "results": {
-        "backend": {
-          "status": "failed",
-          "duration": 21.585765838623047,
-          "exit_code": 2,
-          "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m____________ ERROR collecting tests/services/test_user_service.py _____________\u001b[0m\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_user_service.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\python.py:498: in importtestmodule\n    mod = import_path(\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\pathlib.py:587: in import_path\n    importlib.import_module(module_name)\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\assertion\\rewrite.py:186: in exec_module\n    exec(co, module.__dict__)\napp\\tests\\services\\test_user_service.py:14: in <module>\n    from app.schemas.registry import UserCreate, UserUpdate\nE   ImportError: cannot import name 'UserUpdate' from 'app.schemas.registry' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\schemas\\registry.py)\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app\\tests\\services\\test_user_service.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m============================== \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 14.09s\u001b[0m\u001b[31m ==============================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 20.86s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\n",
-          "test_counts": {
-            "total": 1,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 1,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "frontend": {
-          "status": "failed",
-          "duration": 0.29958033561706543,
-          "exit_code": 255,
-          "output": "================================================================================\nNETRA AI PLATFORM - FRONTEND TEST RUNNER\n================================================================================\n\n================================================================================\nRunning Jest Tests\n--------------------------------------------------------------------------------\nRunning: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)\n--------------------------------------------------------------------------------\n\n================================================================================\n[FAIL] CHECKS FAILED with exit code 255\n================================================================================\n\nCleaning up test processes...\n\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "e2e": {
-          "status": "pending",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "overall": {
-          "status": "failed",
-          "start_time": 1755210291.3774602,
-          "end_time": 1755210313.2664444
-        }
-      },
-      "summary": {
-        "total": 1,
-        "passed": 0,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 1
-      }
-    },
-    {
       "timestamp": "2025-08-14T15:26:29.839839",
       "level": "unit",
       "results": {
@@ -651,6 +267,216 @@
     },
     {
       "timestamp": "2025-08-14T15:29:06.838441",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T15:35:39.830522",
+      "level": "unit",
+      "results": {
+        "backend": {
+          "status": "failed",
+          "duration": 17.61283826828003,
+          "exit_code": 2,
+          "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m____________ ERROR collecting tests/services/test_user_service.py _____________\u001b[0m\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_user_service.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\python.py:498: in importtestmodule\n    mod = import_path(\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\pathlib.py:587: in import_path\n    importlib.import_module(module_name)\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\assertion\\rewrite.py:186: in exec_module\n    exec(co, module.__dict__)\napp\\tests\\services\\test_user_service.py:14: in <module>\n    from app.schemas.registry import UserCreate, UserUpdate\nE   ImportError: cannot import name 'UserUpdate' from 'app.schemas.registry' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\schemas\\registry.py)\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app\\tests\\services\\test_user_service.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m============================== \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 10.74s\u001b[0m\u001b[31m ==============================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 16.97s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\n",
+          "test_counts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 1,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "failed",
+          "duration": 0.25490880012512207,
+          "exit_code": 255,
+          "output": "================================================================================\nNETRA AI PLATFORM - FRONTEND TEST RUNNER\n================================================================================\n\n================================================================================\nRunning Jest Tests\n--------------------------------------------------------------------------------\nRunning: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)\n--------------------------------------------------------------------------------\n\n================================================================================\n[FAIL] CHECKS FAILED with exit code 255\n================================================================================\n\nCleaning up test processes...\n\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "failed",
+          "start_time": 1755210921.9582675,
+          "end_time": 1755210939.828517
+        }
+      },
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 1
+      }
+    },
+    {
+      "timestamp": "2025-08-14T15:40:16.594772",
+      "level": "unit",
+      "results": {
+        "backend": {
+          "status": "failed",
+          "duration": 23.50262451171875,
+          "exit_code": 2,
+          "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m____________ ERROR collecting tests/services/test_user_service.py _____________\u001b[0m\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_user_service.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\python.py:498: in importtestmodule\n    mod = import_path(\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\pathlib.py:587: in import_path\n    importlib.import_module(module_name)\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\assertion\\rewrite.py:186: in exec_module\n    exec(co, module.__dict__)\napp\\tests\\services\\test_user_service.py:14: in <module>\n    from app.schemas.registry import UserCreate, UserUpdate\nE   ImportError: cannot import name 'UserUpdate' from 'app.schemas.registry' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\schemas\\registry.py)\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app\\tests\\services\\test_user_service.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m============================== \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 15.13s\u001b[0m\u001b[31m ==============================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 22.36s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\n",
+          "test_counts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 1,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "failed",
+          "duration": 0.3689460754394531,
+          "exit_code": 15,
+          "output": "\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "failed",
+          "start_time": 1755211192.7152088,
+          "end_time": 1755211216.591755
+        }
+      },
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 1
+      }
+    },
+    {
+      "timestamp": "2025-08-14T15:43:36.285411",
+      "level": "comprehensive-websocket",
+      "total": 1,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T15:44:18.174818",
+      "level": "unit",
+      "results": {
+        "backend": {
+          "status": "failed",
+          "duration": 21.715542554855347,
+          "exit_code": 2,
+          "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m____________ ERROR collecting tests/services/test_user_service.py _____________\u001b[0m\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_user_service.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\python.py:498: in importtestmodule\n    mod = import_path(\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\pathlib.py:587: in import_path\n    importlib.import_module(module_name)\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\assertion\\rewrite.py:186: in exec_module\n    exec(co, module.__dict__)\napp\\tests\\services\\test_user_service.py:14: in <module>\n    from app.schemas.registry import UserCreate, UserUpdate\nE   ImportError: cannot import name 'UserUpdate' from 'app.schemas.registry' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\schemas\\registry.py)\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app\\tests\\services\\test_user_service.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m============================== \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 11.81s\u001b[0m\u001b[31m ==============================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 20.49s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\n",
+          "test_counts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 1,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "failed",
+          "duration": 0.47557926177978516,
+          "exit_code": 255,
+          "output": "================================================================================\nNETRA AI PLATFORM - FRONTEND TEST RUNNER\n================================================================================\n\n================================================================================\nRunning Jest Tests\n--------------------------------------------------------------------------------\nRunning: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)\n--------------------------------------------------------------------------------\n\n================================================================================\n[FAIL] CHECKS FAILED with exit code 255\n================================================================================\n\nCleaning up test processes...\n\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "failed",
+          "start_time": 1755211435.9739482,
+          "end_time": 1755211458.1702993
+        }
+      },
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 1
+      }
+    },
+    {
+      "timestamp": "2025-08-14T15:44:50.176792",
       "level": "smoke",
       "total": 7,
       "passed": 7,

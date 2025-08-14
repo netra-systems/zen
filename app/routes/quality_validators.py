@@ -12,20 +12,28 @@ from app.schemas.quality_types import (
     QualityStatistics, AlertAcknowledgementResponse, QualityReport,
     QualityServiceHealth, User
 )
+from .quality_validation_utils import (
+    _get_content_mapping_part1, _get_content_mapping_part2, _build_core_metrics,
+    _build_score_metrics, _build_analysis_metrics, _build_quality_metrics,
+    _build_dashboard_primary_data, _build_dashboard_secondary_data,
+    _build_alert_basic_fields, _build_alert_detail_fields, _build_basic_statistics,
+    _build_detail_statistics, _build_services_status, _build_health_statistics,
+    build_monitoring_response, build_stop_monitoring_response
+)
 
 
 def map_content_type(content_type_str: str) -> ContentType:
     """Map string content type to ContentType enum."""
-    content_type_map = {
-        "optimization": ContentType.OPTIMIZATION,
-        "data_analysis": ContentType.DATA_ANALYSIS,
-        "action_plan": ContentType.ACTION_PLAN,
-        "report": ContentType.REPORT,
-        "triage": ContentType.TRIAGE,
-        "error": ContentType.ERROR_MESSAGE,
-        "general": ContentType.GENERAL
-    }
+    content_type_map = _get_content_type_mapping()
     return content_type_map.get(content_type_str, ContentType.GENERAL)
+
+
+def _get_content_type_mapping() -> Dict[str, ContentType]:
+    """Get content type mapping dictionary."""
+    mapping_part1 = _get_content_mapping_part1()
+    mapping_part2 = _get_content_mapping_part2()
+    mapping_part1.update(mapping_part2)
+    return mapping_part1
 
 
 def format_validation_response(result, user_id: str) -> QualityValidationResponse:
@@ -42,45 +50,52 @@ def format_validation_response(result, user_id: str) -> QualityValidationRespons
 
 def _build_metrics_dict(metrics) -> Dict[str, Any]:
     """Build metrics dictionary from validation result."""
-    return {
-        "overall_score": metrics.overall_score,
-        "quality_level": metrics.quality_level.value,
-        "specificity_score": metrics.specificity_score,
-        "actionability_score": metrics.actionability_score,
-        "quantification_score": metrics.quantification_score,
-        "relevance_score": metrics.relevance_score,
-        "completeness_score": metrics.completeness_score,
-        "novelty_score": metrics.novelty_score
-    }
+    base_metrics = _build_base_metrics(metrics)
+    extended_metrics = _extend_metrics_dict(base_metrics, metrics)
+    return extended_metrics
+
+
+def _build_base_metrics(metrics) -> Dict[str, Any]:
+    """Build base metrics dictionary."""
+    core_metrics = _build_core_metrics(metrics)
+    score_metrics = _build_score_metrics(metrics)
+    core_metrics.update(score_metrics)
+    return core_metrics
 
 
 def _extend_metrics_dict(metrics_dict: Dict[str, Any], metrics) -> Dict[str, Any]:
     """Extend metrics dictionary with additional fields."""
-    metrics_dict.update({
-        "clarity_score": metrics.clarity_score,
-        "word_count": metrics.word_count,
-        "generic_phrase_count": metrics.generic_phrase_count,
-        "circular_reasoning_detected": metrics.circular_reasoning_detected,
-        "hallucination_risk": metrics.hallucination_risk,
-        "redundancy_ratio": metrics.redundancy_ratio,
-        "issues": metrics.issues,
-        "suggestions": metrics.suggestions
-    })
+    additional_metrics = _build_additional_metrics(metrics)
+    metrics_dict.update(additional_metrics)
     return metrics_dict
+
+
+def _build_additional_metrics(metrics) -> Dict[str, Any]:
+    """Build additional metrics dictionary."""
+    analysis_metrics = _build_analysis_metrics(metrics)
+    quality_metrics = _build_quality_metrics(metrics)
+    analysis_metrics.update(quality_metrics)
+    return analysis_metrics
 
 
 def format_dashboard_data(dashboard_data: Dict[str, Any], user: User, period_hours: int) -> QualityDashboardData:
     """Format dashboard data into typed response."""
-    return QualityDashboardData(
-        summary=dashboard_data.get("summary", {}),
-        recent_alerts=[QualityAlert(**alert) for alert in dashboard_data.get("recent_alerts", [])],
-        agent_profiles=dashboard_data.get("agent_profiles", {}),
-        quality_trends=dashboard_data.get("quality_trends", {}),
-        top_issues=dashboard_data.get("top_issues", []),
-        system_health=dashboard_data.get("system_health", {}),
-        period_hours=period_hours,
-        user_id=user.id
-    )
+    base_data = _build_dashboard_base_data(dashboard_data, user, period_hours)
+    extended_data = _build_dashboard_extended_data(dashboard_data, base_data)
+    return extended_data
+
+
+def _build_dashboard_base_data(dashboard_data: Dict[str, Any], user: User, period_hours: int) -> QualityDashboardData:
+    """Build base dashboard data."""
+    primary_data = _build_dashboard_primary_data(dashboard_data)
+    secondary_data = _build_dashboard_secondary_data(dashboard_data, user, period_hours)
+    primary_data.update(secondary_data)
+    return QualityDashboardData(**primary_data)
+
+
+def _build_dashboard_extended_data(dashboard_data: Dict[str, Any], base_data: QualityDashboardData) -> QualityDashboardData:
+    """Build extended dashboard data."""
+    return base_data
 
 
 def _complete_dashboard_data(dashboard_data: QualityDashboardData) -> QualityDashboardData:
@@ -91,19 +106,15 @@ def _complete_dashboard_data(dashboard_data: QualityDashboardData) -> QualityDas
 
 def format_alert_list(all_alerts: List[Any]) -> List[QualityAlert]:
     """Format alert list into typed responses."""
-    return [
-        QualityAlert(
-            id=alert.id,
-            timestamp=alert.timestamp,
-            severity=alert.severity,
-            metric_type=alert.metric_type,
-            agent=alert.agent,
-            message=alert.message,
-            current_value=alert.current_value,
-            threshold=alert.threshold
-        )
-        for alert in all_alerts
-    ]
+    return [_format_single_alert(alert) for alert in all_alerts]
+
+
+def _format_single_alert(alert) -> QualityAlert:
+    """Format single alert into typed response."""
+    basic_fields = _build_alert_basic_fields(alert)
+    detail_fields = _build_alert_detail_fields(alert)
+    basic_fields.update(detail_fields)
+    return QualityAlert(**basic_fields)
 
 
 def _complete_alert_formatting(alerts: List[QualityAlert], all_alerts: List[Any]) -> List[QualityAlert]:
@@ -139,16 +150,16 @@ def format_quality_report(report_type, data: Dict[str, Any], user: User, period_
 
 def format_quality_statistics(stats: Dict[str, Any], content_type: str = None) -> QualityStatistics:
     """Format quality statistics response."""
-    return QualityStatistics(
-        total_validations=stats.get("total_validations", 0),
-        average_score=stats.get("average_score", 0.0),
-        median_score=stats.get("median_score", 0.0),
-        score_distribution=stats.get("score_distribution", {}),
-        pass_rate=stats.get("pass_rate", 0.0),
-        top_issues=stats.get("top_issues", []),
-        improvement_areas=stats.get("improvement_areas", []),
-        content_type_breakdown=stats.get("content_type_breakdown", {})
-    )
+    base_stats = _build_base_statistics(stats)
+    return _complete_statistics_formatting(base_stats, stats, content_type)
+
+
+def _build_base_statistics(stats: Dict[str, Any]) -> QualityStatistics:
+    """Build base statistics object."""
+    basic_stats = _build_basic_statistics(stats)
+    detail_stats = _build_detail_statistics(stats)
+    basic_stats.update(detail_stats)
+    return QualityStatistics(**basic_stats)
 
 
 def _complete_statistics_formatting(stats: QualityStatistics, full_stats: Dict[str, Any], content_type: str = None) -> QualityStatistics:
@@ -167,24 +178,6 @@ def format_service_health(quality_gate_service, monitoring_service, fallback_ser
         statistics=_build_health_statistics(quality_gate_service, monitoring_service),
         timestamp=datetime.now(UTC)
     )
-
-
-def _build_services_status(quality_gate_service, monitoring_service, fallback_service) -> Dict[str, str]:
-    """Build services status dictionary."""
-    return {
-        "quality_gate": "active" if quality_gate_service else "inactive",
-        "monitoring": "active" if monitoring_service.monitoring_active else "inactive",
-        "fallback": "active" if fallback_service else "inactive"
-    }
-
-
-def _build_health_statistics(quality_gate_service, monitoring_service) -> Dict[str, int]:
-    """Build health statistics dictionary."""
-    return {
-        "total_validations": len(quality_gate_service.validation_cache) if quality_gate_service else 0,
-        "active_alerts": len(monitoring_service.active_alerts) if monitoring_service else 0,
-        "monitored_agents": len(monitoring_service.agent_profiles) if monitoring_service else 0
-    }
 
 
 def format_error_health(error_msg: str) -> QualityServiceHealth:
@@ -213,22 +206,3 @@ def prepare_user_context(context: Dict[str, Any], user: User) -> Dict[str, Any]:
         context = {}
     context["user_id"] = user.id
     return context
-
-
-def build_monitoring_response(interval_seconds: int, user: User) -> Dict[str, Any]:
-    """Build monitoring start response."""
-    return {
-        "status": "started",
-        "interval_seconds": interval_seconds,
-        "started_by": user.id,
-        "timestamp": datetime.now(UTC).isoformat()
-    }
-
-
-def build_stop_monitoring_response(user: User) -> Dict[str, Any]:
-    """Build monitoring stop response."""
-    return {
-        "status": "stopped",
-        "stopped_by": user.id,
-        "timestamp": datetime.now(UTC).isoformat()
-    }

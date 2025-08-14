@@ -6,6 +6,7 @@ to ensure security and data integrity.
 
 import json
 from typing import Dict, Any, Union
+from datetime import datetime
 
 from pydantic import ValidationError
 
@@ -17,6 +18,14 @@ from app.schemas.registry import (
 from app.schemas.websocket_message_types import WebSocketValidationError
 
 logger = central_logger.get_logger(__name__)
+
+
+class DateTimeEncoder(json.JSONEncoder):
+    """Custom JSON encoder that handles datetime objects."""
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
 
 
 class MessageValidator:
@@ -92,7 +101,7 @@ class MessageValidator:
                 )
             
             # Size validation (prevent large payloads)
-            message_str = json.dumps(message)
+            message_str = json.dumps(message, cls=DateTimeEncoder)
             if len(message_str) > self.max_message_size:
                 return WebSocketValidationError(
                     error_type="validation_error",

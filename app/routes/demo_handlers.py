@@ -9,8 +9,7 @@ from app.services.demo_service import DemoService
 from app.logging_config import central_logger
 from app.schemas.demo_schemas import (
     DemoChatRequest, DemoChatResponse, ROICalculationRequest, ROICalculationResponse,
-    ExportReportRequest, ExportReportResponse, IndustryTemplate, DemoMetrics,
-    DemoSessionFeedbackResponse, DemoAnalytics
+    ExportReportRequest, IndustryTemplate, DemoMetrics
 )
 
 
@@ -152,7 +151,7 @@ async def handle_export_report(
     background_tasks: BackgroundTasks,
     demo_service: DemoService,
     current_user: Optional[Dict]
-) -> ExportReportResponse:
+) -> Dict[str, str]:
     """Export demo session as a comprehensive report."""
     report_url = await _generate_demo_report(request, demo_service, current_user)
     _track_report_export(background_tasks, demo_service, request)
@@ -192,13 +191,13 @@ def _track_report_export(
     )
 
 
-def _create_export_response(report_url: str) -> ExportReportResponse:
+def _create_export_response(report_url: str) -> Dict[str, str]:
     """Create export response with report URL."""
-    return ExportReportResponse(
-        status="success",
-        report_url=report_url,
-        expires_at=datetime.now(UTC).isoformat()
-    )
+    return {
+        "status": "success",
+        "report_url": report_url,
+        "expires_at": datetime.now(UTC).isoformat()
+    }
 
 
 async def handle_session_status(
@@ -218,14 +217,11 @@ async def handle_session_feedback(
     session_id: str,
     feedback: Dict[str, Any],
     demo_service: DemoService
-) -> DemoSessionFeedbackResponse:
+) -> Dict[str, str]:
     """Submit feedback for a demo session."""
     try:
         await demo_service.submit_feedback(session_id, feedback)
-        return DemoSessionFeedbackResponse(
-            status="success",
-            message="Feedback received"
-        )
+        return {"status": "success", "message": "Feedback received"}
     except Exception as e:
         _log_and_raise_error("Failed to submit feedback", e)
 
@@ -234,12 +230,11 @@ async def handle_demo_analytics(
     days: int,
     demo_service: DemoService,
     current_user: Dict
-) -> DemoAnalytics:
+) -> Dict[str, Any]:
     """Get demo analytics summary (admin only)."""
     _validate_admin_access(current_user)
     try:
-        analytics = await demo_service.get_analytics_summary(days=days)
-        return DemoAnalytics(**analytics)
+        return await demo_service.get_analytics_summary(days=days)
     except Exception as e:
         _log_and_raise_error("Failed to get analytics", e)
 

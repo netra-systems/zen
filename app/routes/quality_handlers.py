@@ -21,8 +21,10 @@ from .quality_validators import (
     _complete_dashboard_data, format_alert_list, _complete_alert_formatting,
     format_acknowledgement_response, format_quality_report, format_quality_statistics,
     _complete_statistics_formatting, format_service_health, format_error_health,
-    apply_alert_filters, prepare_user_context, build_monitoring_response,
-    build_stop_monitoring_response
+    apply_alert_filters, prepare_user_context
+)
+from .quality_validation_utils import (
+    build_monitoring_response, build_stop_monitoring_response
 )
 
 logger = central_logger.get_logger(__name__)
