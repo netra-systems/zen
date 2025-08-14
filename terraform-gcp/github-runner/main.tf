@@ -110,6 +110,7 @@ locals {
     runner_labels     = join(",", var.runner_labels)
     runner_group      = var.runner_group
     project_id        = var.project_id
+    RUNNER_VERSION    = var.runner_version
   })
 }
 
