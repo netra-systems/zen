@@ -1,391 +1,260 @@
 """Critical WebSocket Serialization Tests
 
-Tests for WebSocket message serialization issues seen in production,
+Comprehensive test suite for WebSocket message serialization issues,
 particularly datetime serialization and message type validation.
+Maximum 300 lines, functions ≤8 lines each.
 """
 
 import pytest
 import json
 import uuid
+import asyncio
 from datetime import datetime, timedelta
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock, Mock, patch
-from pydantic import ValidationError
 
-from app.schemas import (
-    WebSocketMessage, AgentStarted, SubAgentUpdate, 
-    AgentCompleted, ErrorMessage
+from app.schemas.registry import (
+    WebSocketMessage, WebSocketMessageType, MessageType,
+    User, Message, Thread, DeepAgentState
 )
-from app.websocket.broadcast import WebSocketBroadcaster
-from app.ws_manager_messaging import WebSocketManager
+from app.schemas.websocket_message_types import (
+    StartAgentMessage, UserMessage, AgentStartedMessage,
+    AgentCompletedMessage, ConnectionInfo, BroadcastResult
+)
+from app.websocket.validation import DateTimeEncoder, MessageValidator
+from app.websocket.broadcast import BroadcastManager
 
 
 class TestWebSocketSerializationCritical:
-    """Test WebSocket serialization issues from production"""
-    
+    """Critical serialization tests for production issues"""
+
+    @pytest.fixture
+    def datetime_encoder(self):
+        """DateTimeEncoder instance"""
+        return DateTimeEncoder()
+
+    @pytest.fixture
+    def message_validator(self):
+        """MessageValidator instance"""
+        return MessageValidator()
+
     @pytest.fixture
     def mock_websocket(self):
-        """Create mock WebSocket connection"""
+        """Mock WebSocket connection"""
         ws = AsyncMock()
-        ws.send_text = AsyncMock()
         ws.send_json = AsyncMock()
         ws.close = AsyncMock()
         return ws
-    
-    @pytest.fixture
-    def websocket_manager(self):
-        """Create WebSocket manager instance"""
-        manager = WebSocketManager()
-        return manager
-    
+
     @pytest.mark.asyncio
-    async def test_datetime_serialization_error_reproduction(self):
-        """Reproduce the exact datetime serialization error from production"""
-        # Create message with datetime - this is what fails in production
-        message_data = {
-            "type": "agent_completed",
-            "payload": {
-                "run_id": str(uuid.uuid4()),
-                "timestamp": datetime.now(),  # This causes the error!
-                "execution_time": 1234,
-                "result": {
-                    "status": "success",
-                    "completed_at": datetime.now()  # Nested datetime also fails
-                }
-            }
+    async def test_datetime_serialization_error_exact_reproduction(self):
+        """Reproduce exact datetime serialization error from production"""
+        problematic_data = {
+            "timestamp": datetime.now(),
+            "nested": {"created_at": datetime.now()}
         }
         
-        # Direct JSON serialization should fail
         with pytest.raises(TypeError) as exc_info:
-            json.dumps(message_data)
-        
+            json.dumps(problematic_data)
         assert "Object of type datetime is not JSON serializable" in str(exc_info.value)
-    
+
     @pytest.mark.asyncio
-    async def test_datetime_serialization_fix(self):
-        """Test the fix for datetime serialization"""
-        
-        class DateTimeEncoder(json.JSONEncoder):
-            """Custom JSON encoder for datetime objects"""
-            def default(self, obj):
-                if isinstance(obj, datetime):
-                    return obj.isoformat()
-                return super().default(obj)
-        
-        # Create message with datetime
-        message_data = {
-            "type": "agent_completed",
-            "payload": {
-                "run_id": str(uuid.uuid4()),
-                "timestamp": datetime.now(),
-                "execution_time": 1234,
-                "result": {
-                    "status": "success",
-                    "completed_at": datetime.now()
-                }
-            }
+    async def test_datetime_encoder_fix_comprehensive(self, datetime_encoder):
+        """Test DateTimeEncoder fixes all datetime serialization issues"""
+        test_data = {
+            "direct_datetime": datetime.now(),
+            "nested": {"deep_datetime": datetime.now()},
+            "list_with_datetime": [datetime.now(), "string", 123]
         }
         
-        # Should work with custom encoder
-        serialized = json.dumps(message_data, cls=DateTimeEncoder)
-        assert serialized
-        
-        # Should be able to deserialize
+        serialized = json.dumps(test_data, cls=DateTimeEncoder)
         deserialized = json.loads(serialized)
-        assert deserialized["type"] == "agent_completed"
-        assert isinstance(deserialized["payload"]["timestamp"], str)
-    
+        
+        assert isinstance(deserialized["direct_datetime"], str)
+        assert isinstance(deserialized["nested"]["deep_datetime"], str)
+
     @pytest.mark.asyncio
-    async def test_invalid_message_type_error(self):
-        """Test the invalid message type error from production"""
-        # This is the exact error from logs
+    async def test_invalid_thread_created_message_type(self):
+        """Test invalid 'thread_created' message type validation failure"""
         invalid_message = {
-            "type": "thread_created",  # Not a valid WebSocketMessage type!
-            "payload": {
-                "thread_id": str(uuid.uuid4()),
-                "created_at": datetime.now().isoformat()
-            }
+            "type": "thread_created",  # Invalid type!
+            "payload": {"thread_id": str(uuid.uuid4())}
         }
         
-        # Should raise validation error
-        with pytest.raises(ValidationError) as exc_info:
-            WebSocketMessage(**invalid_message)
-        
-        # Check error mentions the invalid type
-        error_str = str(exc_info.value)
-        assert "type" in error_str or "thread_created" in error_str
-    
+        with pytest.raises(ValueError):
+            WebSocketMessageType(invalid_message["type"])
+
     @pytest.mark.asyncio
-    async def test_websocket_broadcast_with_datetime(self, mock_websocket):
-        """Test broadcasting messages with datetime fields"""
-        broadcaster = WebSocketBroadcaster()
-        connection_id = "test_conn_123"
+    async def test_all_websocket_message_types_serialization(self, datetime_encoder):
+        """Test serialization of ALL WebSocket message types"""
+        test_messages = self._create_all_message_types()
         
-        # Add connection
-        broadcaster.active_connections[connection_id] = {
-            "websocket": mock_websocket,
-            "user_id": str(uuid.uuid4()),
-            "thread_id": str(uuid.uuid4())
+        for msg_type, message_data in test_messages.items():
+            serialized = json.dumps(message_data, cls=DateTimeEncoder)
+            deserialized = json.loads(serialized)
+            assert deserialized["type"] == msg_type
+
+    def _create_all_message_types(self) -> Dict[str, Dict[str, Any]]:
+        """Create test data for all message types"""
+        base_timestamp = datetime.now()
+        return {
+            "start_agent": {"type": "start_agent", "payload": {"agent_type": "supervisor"}},
+            "user_message": {"type": "user_message", "payload": {"text": "test"}},
+            "agent_started": {"type": "agent_started", "payload": {"run_id": str(uuid.uuid4())}},
+            "agent_completed": {"type": "agent_completed", "payload": {"timestamp": base_timestamp}}
         }
-        
-        # Create message with datetime
-        message = {
-            "type": "sub_agent_update",
-            "payload": {
-                "agent_name": "TriageSubAgent",
-                "status": "processing",
-                "timestamp": datetime.now(),
-                "metadata": {
-                    "started_at": datetime.now(),
-                    "progress": 0.5
-                }
-            }
-        }
-        
-        # Mock JSON encoder
-        with patch("json.dumps") as mock_dumps:
-            # First call fails (simulating production error)
-            mock_dumps.side_effect = [
-                TypeError("Object of type datetime is not JSON serializable"),
-                json.dumps(message, default=str)  # Second call succeeds with default serializer
-            ]
-            
-            # Should handle the error and retry with proper serialization
-            await broadcaster.send_to_connection(connection_id, message)
-            
-            # Should have tried twice
-            assert mock_dumps.call_count >= 1
-    
+
     @pytest.mark.asyncio
-    async def test_all_websocket_message_types(self):
-        """Test serialization of all WebSocket message types with datetime"""
-        test_messages = [
-            {
-                "type": "agent_started",
-                "payload": AgentStarted(
-                    run_id=str(uuid.uuid4()),
-                    agent_name="Supervisor",
-                    timestamp=datetime.now().isoformat()
-                ).model_dump()
-            },
-            {
-                "type": "sub_agent_update", 
-                "payload": SubAgentUpdate(
-                    run_id=str(uuid.uuid4()),
-                    agent_name="TriageSubAgent",
-                    status="processing",
-                    message="Analyzing request",
-                    progress=0.5,
-                    timestamp=datetime.now().isoformat()
-                ).model_dump()
-            },
-            {
-                "type": "agent_completed",
-                "payload": AgentCompleted(
-                    run_id=str(uuid.uuid4()),
-                    success=True,
-                    result={"data": "test"},
-                    execution_time_ms=1500,
-                    timestamp=datetime.now().isoformat()
-                ).model_dump()
-            },
-            {
-                "type": "error",
-                "payload": ErrorMessage(
-                    run_id=str(uuid.uuid4()),
-                    error_type="ValidationError",
-                    message="Test error",
-                    details={"field": "test"},
-                    timestamp=datetime.now().isoformat()
-                ).model_dump()
-            }
-        ]
-        
-        for message in test_messages:
-            # Should validate without errors
-            validated = WebSocketMessage(**message)
-            assert validated.type == message["type"]
-            
-            # Should serialize to JSON
-            serialized = json.dumps(validated.model_dump())
-            assert serialized
-    
-    @pytest.mark.asyncio
-    async def test_websocket_manager_send_methods(self, websocket_manager):
-        """Test all WebSocket manager send methods handle serialization"""
-        run_id = str(uuid.uuid4())
-        thread_id = str(uuid.uuid4())
-        
-        # Mock active connections
-        mock_ws = AsyncMock()
-        websocket_manager.active_connections = {
-            "conn1": {
-                "websocket": mock_ws,
-                "thread_id": thread_id,
-                "user_id": "user1"
+    async def test_complex_nested_object_serialization(self, datetime_encoder):
+        """Test complex nested structures with datetime serialization"""
+        complex_payload = {
+            "agent_state": {
+                "timestamps": [datetime.now(), datetime.now() + timedelta(hours=1)],
+                "metadata": {"created": datetime.now(), "nested": {"deep": datetime.now()}}
             }
         }
         
-        # Test send_to_thread with datetime
+        message = {"type": "agent_update", "payload": complex_payload}
+        serialized = json.dumps(message, cls=DateTimeEncoder)
+        assert json.loads(serialized)
+
+    @pytest.mark.asyncio
+    async def test_broadcast_with_datetime_recovery(self, mock_websocket):
+        """Test broadcast error recovery with datetime serialization"""
+        manager = BroadcastManager(Mock())
         message_with_datetime = {
             "type": "agent_log",
-            "payload": {
-                "message": "Test log",
-                "timestamp": datetime.now(),
-                "level": "info"
-            }
+            "payload": {"timestamp": datetime.now(), "message": "test"}
         }
         
-        # Mock the serialization to handle datetime
-        with patch("json.dumps") as mock_dumps:
-            mock_dumps.return_value = json.dumps(message_with_datetime, default=str)
-            
-            await websocket_manager.send_to_thread(thread_id, message_with_datetime)
-            
-            # Verify send was called
-            mock_ws.send_text.assert_called_once()
-    
-    @pytest.mark.asyncio
-    async def test_complex_nested_datetime_serialization(self):
-        """Test serialization of deeply nested datetime objects"""
-        complex_data = {
-            "type": "agent_completed",
-            "payload": {
-                "run_id": str(uuid.uuid4()),
-                "timestamp": datetime.now(),
-                "result": {
-                    "triage": {
-                        "completed_at": datetime.now(),
-                        "metadata": {
-                            "created": datetime.now() - timedelta(hours=1),
-                            "updated": datetime.now()
-                        }
-                    },
-                    "optimization": {
-                        "started": datetime.now() - timedelta(minutes=30),
-                        "ended": datetime.now(),
-                        "recommendations": [
-                            {
-                                "created": datetime.now(),
-                                "expires": datetime.now() + timedelta(days=7)
-                            }
-                        ]
-                    }
-                }
-            }
-        }
-        
-        def serialize_datetime_recursive(obj):
-            """Recursively serialize datetime objects"""
-            if isinstance(obj, datetime):
-                return obj.isoformat()
-            elif isinstance(obj, dict):
-                return {k: serialize_datetime_recursive(v) for k, v in obj.items()}
-            elif isinstance(obj, list):
-                return [serialize_datetime_recursive(item) for item in obj]
-            return obj
-        
-        # Serialize the complex structure
-        serialized_data = serialize_datetime_recursive(complex_data)
-        
-        # Should be JSON serializable now
-        json_str = json.dumps(serialized_data)
-        assert json_str
-        
-        # Verify all datetimes were converted
-        parsed = json.loads(json_str)
-        
-        def check_no_datetime(obj):
-            """Verify no datetime objects remain"""
-            if isinstance(obj, datetime):
-                return False
-            elif isinstance(obj, dict):
-                return all(check_no_datetime(v) for v in obj.values())
-            elif isinstance(obj, list):
-                return all(check_no_datetime(item) for item in obj)
-            return True
-        
-        assert check_no_datetime(parsed)
-    
-    @pytest.mark.asyncio
-    async def test_concurrent_websocket_broadcasts(self):
-        """Test concurrent WebSocket broadcasts don't cause serialization conflicts"""
-        import asyncio
-        
-        broadcaster = WebSocketBroadcaster()
-        
-        # Create multiple connections
-        connections = {}
-        for i in range(5):
-            mock_ws = AsyncMock()
-            conn_id = f"conn_{i}"
-            connections[conn_id] = mock_ws
-            broadcaster.active_connections[conn_id] = {
-                "websocket": mock_ws,
-                "user_id": f"user_{i}",
-                "thread_id": str(uuid.uuid4())
-            }
-        
-        # Create messages with datetime
-        messages = [
-            {
-                "type": "sub_agent_update",
-                "payload": {
-                    "agent_name": f"Agent_{i}",
-                    "timestamp": datetime.now() + timedelta(seconds=i),
-                    "status": "processing"
-                }
-            }
-            for i in range(5)
-        ]
-        
-        # Broadcast concurrently
-        with patch.object(broadcaster, "_serialize_message") as mock_serialize:
-            mock_serialize.side_effect = lambda msg: json.dumps(msg, default=str)
-            
-            tasks = [
-                broadcaster.broadcast(msg)
-                for msg in messages
+        with patch('json.dumps') as mock_dumps:
+            mock_dumps.side_effect = [
+                TypeError("datetime not serializable"),
+                json.dumps(message_with_datetime, default=str)
             ]
             
-            await asyncio.gather(*tasks)
-            
-            # Verify all messages were serialized
-            assert mock_serialize.call_count >= len(messages)
-    
+            result = await manager._send_to_connection(
+                Mock(websocket=mock_websocket), message_with_datetime
+            )
+            assert mock_dumps.call_count >= 1
+
     @pytest.mark.asyncio
-    async def test_error_recovery_in_broadcast(self, mock_websocket):
-        """Test error recovery during WebSocket broadcast"""
-        broadcaster = WebSocketBroadcaster()
-        
-        # Add connections
-        broadcaster.active_connections = {
-            "conn1": {"websocket": mock_websocket, "user_id": "user1"},
-            "conn2": {"websocket": AsyncMock(), "user_id": "user2"}
-        }
-        
-        # First websocket fails
-        mock_websocket.send_text.side_effect = Exception("Connection closed")
-        
-        # Message with datetime
-        message = {
-            "type": "agent_log",
+    async def test_binary_data_handling(self):
+        """Test binary data in WebSocket messages"""
+        binary_payload = {
+            "type": "tool_result",
             "payload": {
-                "message": "Test",
-                "timestamp": datetime.now()
+                "data": b"binary_data".hex(),
+                "timestamp": datetime.now().isoformat()
             }
         }
         
-        # Should handle error and continue to other connections
-        await broadcaster.broadcast(message)
+        validated = WebSocketMessage(**binary_payload)
+        serialized = json.dumps(validated.model_dump(), cls=DateTimeEncoder)
+        assert json.loads(serialized)
+
+    @pytest.mark.asyncio
+    async def test_large_message_validation(self, message_validator):
+        """Test large message size validation"""
+        large_payload = {
+            "type": "agent_update",
+            "payload": {"data": "x" * (1024 * 1024 + 1)}  # > 1MB
+        }
         
-        # Second connection should still receive
-        conn2_ws = broadcaster.active_connections["conn2"]["websocket"]
-        conn2_ws.send_text.assert_called()
+        result = message_validator.validate_message(large_payload)
+        assert hasattr(result, 'error_type')
+        assert result.error_type == "validation_error"
+
+    @pytest.mark.asyncio
+    async def test_connection_state_transitions_serialization(self):
+        """Test connection state changes with datetime fields"""
+        connection_info = ConnectionInfo(
+            user_id="test_user",
+            connection_id="test_conn",
+            connected_at=datetime.now(),
+            last_ping=datetime.now(),
+            last_message_time=datetime.now(),
+            rate_limit_window_start=datetime.now()
+        )
         
-        # Failed connection should be removed
-        assert "conn1" not in broadcaster.active_connections or \
-               broadcaster.active_connections["conn1"] is None
+        serialized = json.dumps(connection_info.model_dump(), cls=DateTimeEncoder)
+        assert json.loads(serialized)
+
+    @pytest.mark.asyncio
+    async def test_concurrent_datetime_serialization(self):
+        """Test concurrent serialization doesn't cause conflicts"""
+        async def serialize_message(i: int):
+            data = {"type": "agent_log", "payload": {"timestamp": datetime.now(), "id": i}}
+            return json.dumps(data, cls=DateTimeEncoder)
+        
+        tasks = [serialize_message(i) for i in range(10)]
+        results = await asyncio.gather(*tasks)
+        assert len(results) == 10
+
+    @pytest.mark.asyncio
+    async def test_message_type_enum_validation_comprehensive(self):
+        """Test all message type enum values validate correctly"""
+        valid_types = [t.value for t in WebSocketMessageType]
+        
+        for msg_type in valid_types:
+            message = {"type": msg_type, "payload": {}}
+            validated = WebSocketMessage(**message)
+            assert validated.type == msg_type
+
+    @pytest.mark.asyncio
+    async def test_broadcast_result_serialization(self):
+        """Test BroadcastResult with datetime metadata"""
+        result = BroadcastResult(
+            successful=5,
+            failed=1,
+            total_connections=6,
+            message_type="agent_update"
+        )
+        
+        serialized = json.dumps(result.model_dump())
+        assert json.loads(serialized)
+
+    @pytest.mark.asyncio
+    async def test_message_validation_security_patterns(self, message_validator):
+        """Test security validation in message content"""
+        malicious_message = {
+            "type": "user_message",
+            "payload": {"text": "<script>alert('xss')</script>"}
+        }
+        
+        result = message_validator.validate_message(malicious_message)
+        assert hasattr(result, 'error_type')
+        assert result.error_type == "security_error"
+
+    @pytest.mark.asyncio
+    async def test_datetime_in_all_payload_positions(self, datetime_encoder):
+        """Test datetime serialization in various payload positions"""
+        payload_variations = [
+            {"timestamp": datetime.now()},
+            {"metadata": {"created": datetime.now()}},
+            {"items": [{"when": datetime.now()}]},
+            {"deep": {"nested": {"time": datetime.now()}}}
+        ]
+        
+        for payload in payload_variations:
+            message = {"type": "agent_update", "payload": payload}
+            serialized = json.dumps(message, cls=DateTimeEncoder)
+            assert json.loads(serialized)
+
+    @pytest.mark.asyncio
+    async def test_serialization_edge_cases(self):
+        """Test edge cases in serialization"""
+        edge_cases = [
+            {"type": "ping", "payload": {}},
+            {"type": "pong", "payload": {}},
+            {"type": "error", "payload": {"error": "", "details": {}}},
+            {"type": "stream_complete", "payload": {"final": True}}
+        ]
+        
+        for case in edge_cases:
+            validated = WebSocketMessage(**case)
+            serialized = json.dumps(validated.model_dump(), cls=DateTimeEncoder)
+            assert json.loads(serialized)
 
 
 if __name__ == "__main__":

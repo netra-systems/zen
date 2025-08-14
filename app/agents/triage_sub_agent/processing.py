@@ -43,6 +43,15 @@ class TriageProcessor:
                         use_cache=False
                     )
                     triage_result = validated_result.model_dump()
+                except ValidationError as validation_error:
+                    # Try to fix validation errors and retry once
+                    if "Input should be a valid dictionary" in str(validation_error):
+                        self.logger.warning(f"String parameters detected, using fallback processing")
+                        triage_result = await self._fallback_llm_processing(
+                            enhanced_prompt, run_id, validation_error
+                        )
+                    else:
+                        raise validation_error
                 except Exception as struct_error:
                     triage_result = await self._fallback_llm_processing(
                         enhanced_prompt, run_id, struct_error
@@ -102,13 +111,36 @@ Categorize into one of these main categories:
         
         if extracted_json:
             try:
-                validated_result = TriageResult(**extracted_json)
+                # Fix string parameters before validation
+                fixed_json = self._fix_string_parameters(extracted_json)
+                validated_result = TriageResult(**fixed_json)
                 return validated_result.model_dump()
             except ValidationError as e:
                 self.logger.warning(f"Validation error for run_id {run_id}: {e}")
-                return extracted_json
+                # Return fixed JSON even if validation fails
+                return self._fix_string_parameters(extracted_json)
         
         return None
+    
+    def _fix_string_parameters(self, data):
+        """Fix string parameters in tool recommendations - convert JSON strings to dicts"""
+        if not isinstance(data, dict):
+            return data
+        
+        # Fix tool_recommendations parameters field
+        if "tool_recommendations" in data and isinstance(data["tool_recommendations"], list):
+            for rec in data["tool_recommendations"]:
+                if isinstance(rec, dict) and "parameters" in rec:
+                    if isinstance(rec["parameters"], str):
+                        try:
+                            # Parse JSON string to dict
+                            import json
+                            rec["parameters"] = json.loads(rec["parameters"])
+                        except (json.JSONDecodeError, TypeError):
+                            # Fallback to empty dict if parsing fails
+                            rec["parameters"] = {}
+        
+        return data
     
     def enrich_triage_result(self, triage_result, user_request):
         """Enrich triage result with additional analysis"""

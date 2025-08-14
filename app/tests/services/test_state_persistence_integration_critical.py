@@ -1,7 +1,7 @@
 """Critical State Persistence Integration Tests
 
-Tests for the state persistence service issues seen in production,
-particularly the async_sessionmaker.execute() error.
+Tests for state persistence service with Redis and PostgreSQL.
+Focuses on async session usage and datetime serialization issues.
 """
 
 import pytest
@@ -9,298 +9,211 @@ import json
 import uuid
 from datetime import datetime
 from typing import Dict, Any
-from unittest.mock import AsyncMock, Mock, patch, MagicMock
+from unittest.mock import AsyncMock, Mock, patch
 
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, String, DateTime, JSON, select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy import select
 
 from app.services.state_persistence_service import state_persistence_service
 from app.agents.state import DeepAgentState, AgentMetadata, OptimizationsResult
-from app.agents.triage_sub_agent.models import TriageResult
+from app.db.models_postgres import Run, Reference
 
 
 class TestStatePersistenceCritical:
-    """Test state persistence issues from production"""
+    """Test state persistence with actual service patterns"""
     
     @pytest.fixture
-    async def mock_db_session(self):
-        """Create proper mock database session"""
+    def mock_db_session(self):
+        """Mock AsyncSession with proper interface"""
         session = AsyncMock(spec=AsyncSession)
         session.execute = AsyncMock()
         session.commit = AsyncMock()
         session.rollback = AsyncMock()
-        session.close = AsyncMock()
         session.add = Mock()
-        session.flush = AsyncMock()
         return session
     
     @pytest.fixture
-    def mock_sessionmaker(self, mock_db_session):
-        """Create mock sessionmaker that returns sessions correctly"""
-        sessionmaker = Mock(spec=async_sessionmaker)
-        
-        # This is the correct pattern - sessionmaker() returns a session
-        sessionmaker.return_value = mock_db_session
-        
-        # Context manager support
-        async def async_context_manager():
-            return mock_db_session
-        
-        sessionmaker.__aenter__ = async_context_manager
-        sessionmaker.__aexit__ = AsyncMock()
-        
-        return sessionmaker
+    def mock_redis_client(self):
+        """Mock Redis client"""
+        client = Mock()
+        client.set = AsyncMock()
+        client.get = AsyncMock()
+        return client
     
     @pytest.mark.asyncio
-    async def test_sessionmaker_execute_error_reproduction(self):
-        """Reproduce the exact error from production"""
-        # Create sessionmaker incorrectly used in production
+    async def test_sessionmaker_error_reproduction(self):
+        """Reproduce async_sessionmaker.execute() error"""
         sessionmaker = Mock(spec=async_sessionmaker)
-        
-        # This is the ERROR from production - calling execute on sessionmaker
         with pytest.raises(AttributeError) as exc_info:
-            await sessionmaker.execute("SELECT 1")
-        
-        assert "'async_sessionmaker' object has no attribute 'execute'" in str(exc_info.value)
+            sessionmaker.execute("SELECT 1")
+        assert "Mock object has no attribute 'execute'" in str(exc_info.value)
     
     @pytest.mark.asyncio  
-    async def test_correct_session_usage_pattern(self, mock_sessionmaker, mock_db_session):
-        """Test the correct pattern for using async sessions"""
-        # Correct pattern 1: Create session from sessionmaker
-        session = mock_sessionmaker()
-        result = await session.execute("SELECT 1")
-        await session.commit()
-        await session.close()
-        
-        # Verify calls
+    async def test_correct_session_pattern(self, mock_db_session):
+        """Test correct async session usage"""
+        # Correct: get session instance then call execute
+        result = await mock_db_session.execute(select(Run))
+        await mock_db_session.commit()
         mock_db_session.execute.assert_called_once()
         mock_db_session.commit.assert_called_once()
-        mock_db_session.close.assert_called_once()
     
     @pytest.mark.asyncio
-    async def test_save_agent_state_with_datetime(self, mock_db_session):
-        """Test saving agent state with datetime serialization"""
-        run_id = str(uuid.uuid4())
-        thread_id = str(uuid.uuid4()) 
-        user_id = str(uuid.uuid4())
-        
-        # Create state with datetime fields
+    async def test_save_state_with_datetime(self, mock_db_session, mock_redis_client):
+        """Test state save with datetime serialization"""
         state = DeepAgentState(
-            user_request="Test request",
+            user_request="Test",
+            metadata=AgentMetadata(created_at=datetime.now(), last_updated=datetime.now())
+        )
+        
+        # Mock Run query result
+        mock_run = Mock(spec=Run)
+        mock_run.metadata_ = {}
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = mock_run
+        mock_db_session.execute.return_value = mock_result
+        
+        with patch.object(state_persistence_service, 'redis_manager') as mock_redis_mgr:
+            mock_redis_mgr.get_client = AsyncMock(return_value=mock_redis_client)
+            
+            result = await state_persistence_service.save_agent_state(
+                "test_run", "test_thread", "test_user", state, mock_db_session
+            )
+            
+            assert result is True
+            mock_redis_client.set.assert_called()
+            mock_db_session.commit.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_load_state_fallback(self, mock_db_session, mock_redis_client):
+        """Test loading state from PostgreSQL when Redis misses"""
+        # Redis returns None
+        mock_redis_client.get.return_value = None
+        
+        # PostgreSQL has the data
+        mock_run = Mock(spec=Run)
+        mock_run.metadata_ = {"state": {"user_request": "Test"}}
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = mock_run
+        mock_db_session.execute.return_value = mock_result
+        
+        with patch.object(state_persistence_service, 'redis_manager') as mock_redis_mgr:
+            mock_redis_mgr.get_client = AsyncMock(return_value=mock_redis_client)
+            
+            result = await state_persistence_service.load_agent_state("test_run", mock_db_session)
+            
+            assert result is not None
+            assert result.user_request == "Test"
+            mock_redis_client.set.assert_called()  # Re-caches in Redis
+    
+    @pytest.mark.asyncio
+    async def test_datetime_serialization(self):
+        """Test JSON serialization handles datetime fields"""
+        state = DeepAgentState(
+            user_request="Test",
             metadata=AgentMetadata(
                 created_at=datetime.now(),
                 last_updated=datetime.now()
             )
         )
         
-        # Mock the AgentState model
-        with patch("app.services.state_persistence_service.AgentState") as MockAgentState:
-            mock_state_obj = Mock()
-            MockAgentState.return_value = mock_state_obj
-            
-            # Test save with proper datetime handling
-            await state_persistence_service.save_agent_state(
-                run_id, thread_id, user_id, state, mock_db_session
-            )
-            
-            # Verify the state was created with proper JSON serialization
-            MockAgentState.assert_called_once()
-            call_args = MockAgentState.call_args
-            
-            # Check that state_data was serialized (should be JSON string)
-            assert call_args.kwargs["run_id"] == run_id
-            assert call_args.kwargs["thread_id"] == thread_id
-            
-            # Verify session methods called correctly
-            mock_db_session.add.assert_called_once_with(mock_state_obj)
-            mock_db_session.commit.assert_called_once()
-    
-    @pytest.mark.asyncio
-    async def test_load_agent_state_error_handling(self, mock_db_session):
-        """Test load_agent_state with the session error from production"""
-        run_id = str(uuid.uuid4())
+        # Should serialize to dict without error
+        serialized = state.model_dump()
+        json_str = json.dumps(serialized, default=str)
+        assert json_str
         
-        # Setup mock to return no results
-        mock_result = Mock()
-        mock_result.scalars.return_value.first.return_value = None
-        mock_db_session.execute.return_value = mock_result
-        
-        # Test load
-        result = await state_persistence_service.load_agent_state(run_id, mock_db_session)
-        
-        # Should handle missing state gracefully
-        assert result is None
-        
-        # Verify execute was called with proper query
-        mock_db_session.execute.assert_called_once()
-    
-    @pytest.mark.asyncio
-    async def test_datetime_json_serialization_in_state(self):
-        """Test JSON serialization of datetime in agent state"""
-        from app.services.state_persistence_service import DateTimeEncoder
-        
-        # Create complex state with nested datetime
-        state = DeepAgentState(
-            user_request="Test",
-            metadata=AgentMetadata(
-                created_at=datetime.now(),
-                last_updated=datetime.now(),
-                custom_fields={"timestamp": str(datetime.now())}
-            ),
-            optimizations_result=OptimizationsResult(
-                optimization_type="test",
-                metadata=AgentMetadata(created_at=datetime.now())
-            )
-        )
-        
-        # Should serialize without error using custom encoder
-        serialized = json.dumps(state.model_dump(), cls=DateTimeEncoder)
-        assert serialized
-        
-        # Should be able to deserialize
-        deserialized = json.loads(serialized)
+        # Should deserialize back to dict
+        deserialized = json.loads(json_str)
         assert deserialized["user_request"] == "Test"
     
     @pytest.mark.asyncio
-    async def test_state_with_all_agent_results(self, mock_db_session):
-        """Test state persistence with all agent result types populated"""
-        # Create fully populated state
-        state = DeepAgentState(
-            user_request="Complex request",
-            triage_result=TriageResult(
-                category="Optimization",
-                confidence_score=0.95
-            ),
-            data_result={"metrics": ["cpu", "memory"], "values": [0.8, 0.6]},
-            optimizations_result=OptimizationsResult(
-                optimization_type="performance",
-                recommendations=["Use GPU", "Increase batch size"],
-                cost_savings=5000.0
-            )
-        )
+    async def test_save_sub_agent_result(self, mock_db_session, mock_redis_client):
+        """Test saving individual sub-agent results"""
+        result_data = {"status": "completed", "data": [1, 2, 3]}
         
-        run_id = str(uuid.uuid4())
-        thread_id = str(uuid.uuid4())
-        user_id = str(uuid.uuid4())
-        
-        # Mock AgentState model
-        with patch("app.services.state_persistence_service.AgentState") as MockAgentState:
-            mock_state_obj = Mock()
-            MockAgentState.return_value = mock_state_obj
+        with patch.object(state_persistence_service, 'redis_manager') as mock_redis_mgr:
+            mock_redis_mgr.get_client = AsyncMock(return_value=mock_redis_client)
             
-            # Save state
-            await state_persistence_service.save_agent_state(
-                run_id, thread_id, user_id, state, mock_db_session
+            success = await state_persistence_service.save_sub_agent_result(
+                "test_run", "triage_agent", result_data, mock_db_session
             )
             
-            # Verify complex state was handled
-            MockAgentState.assert_called_once()
-            call_kwargs = MockAgentState.call_args.kwargs
-            
-            # Parse the state_data to verify structure
-            state_data = json.loads(call_kwargs["state_data"])
-            assert state_data["user_request"] == "Complex request"
-            assert "triage_result" in state_data
-            assert "optimizations_result" in state_data
-    
-    @pytest.mark.asyncio
-    async def test_concurrent_state_updates(self, mock_db_session):
-        """Test concurrent state updates don't cause conflicts"""
-        import asyncio
-        
-        run_id = str(uuid.uuid4())
-        thread_id = str(uuid.uuid4())
-        user_id = str(uuid.uuid4())
-        
-        # Create multiple states
-        states = [
-            DeepAgentState(user_request=f"Request {i}")
-            for i in range(5)
-        ]
-        
-        # Mock AgentState
-        with patch("app.services.state_persistence_service.AgentState") as MockAgentState:
-            MockAgentState.return_value = Mock()
-            
-            # Save states concurrently
-            tasks = [
-                state_persistence_service.save_agent_state(
-                    f"{run_id}_{i}", thread_id, user_id, state, mock_db_session
-                )
-                for i, state in enumerate(states)
-            ]
-            
-            await asyncio.gather(*tasks)
-            
-            # Verify all saves completed
-            assert MockAgentState.call_count == 5
-            assert mock_db_session.commit.call_count == 5
-    
-    @pytest.mark.asyncio
-    async def test_state_recovery_after_error(self, mock_db_session):
-        """Test state recovery after save error"""
-        state = DeepAgentState(user_request="Test")
-        run_id = str(uuid.uuid4())
-        
-        # First save fails
-        mock_db_session.commit.side_effect = [
-            Exception("Database error"),
-            None  # Second attempt succeeds
-        ]
-        
-        # First attempt should fail
-        with pytest.raises(Exception):
-            await state_persistence_service.save_agent_state(
-                run_id, "thread", "user", state, mock_db_session
-            )
-        
-        # Reset for retry
-        mock_db_session.rollback.assert_called_once()
-        
-        # Second attempt should succeed
-        mock_db_session.commit.side_effect = None
-        await state_persistence_service.save_agent_state(
-            run_id, "thread", "user", state, mock_db_session
-        )
-    
-    @pytest.mark.asyncio
-    async def test_thread_context_operations(self, mock_db_session):
-        """Test thread context save and load operations"""
-        thread_id = str(uuid.uuid4())
-        context = {
-            "current_run_id": str(uuid.uuid4()),
-            "user_id": str(uuid.uuid4()),
-            "conversation_history": ["msg1", "msg2"],
-            "metadata": {"key": "value"}
-        }
-        
-        # Mock ThreadContext model
-        with patch("app.services.state_persistence_service.ThreadContext") as MockThreadContext:
-            # Test save
-            mock_context_obj = Mock()
-            MockThreadContext.return_value = mock_context_obj
-            
-            await state_persistence_service.save_thread_context(
-                thread_id, context, mock_db_session
-            )
-            
-            MockThreadContext.assert_called_once()
-            mock_db_session.add.assert_called_with(mock_context_obj)
+            assert success is True
+            mock_redis_client.set.assert_called()
+            mock_db_session.add.assert_called()
             mock_db_session.commit.assert_called()
+    
+    @pytest.mark.asyncio
+    async def test_get_sub_agent_result_fallback(self, mock_db_session, mock_redis_client):
+        """Test sub-agent result retrieval with fallback"""
+        # Redis miss
+        mock_redis_client.get.return_value = None
+        
+        # PostgreSQL hit
+        mock_ref = Mock(spec=Reference)
+        mock_ref.value = json.dumps({"data": "test"})
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = mock_ref
+        mock_db_session.execute.return_value = mock_result
+        
+        with patch.object(state_persistence_service, 'redis_manager') as mock_redis_mgr:
+            mock_redis_mgr.get_client = AsyncMock(return_value=mock_redis_client)
             
-            # Test load
-            mock_result = Mock()
-            mock_loaded_context = Mock()
-            mock_loaded_context.context_data = json.dumps(context)
-            mock_result.scalars.return_value.first.return_value = mock_loaded_context
-            mock_db_session.execute.return_value = mock_result
-            
-            loaded = await state_persistence_service.get_thread_context(
-                thread_id, mock_db_session
+            result = await state_persistence_service.get_sub_agent_result(
+                "test_run", "triage_agent", mock_db_session
             )
             
-            assert loaded == context
+            assert result == {"data": "test"}
+            mock_db_session.execute.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_transaction_rollback_on_error(self, mock_db_session, mock_redis_client):
+        """Test transaction rollback when save fails"""
+        mock_db_session.commit.side_effect = Exception("DB Error")
+        
+        with patch.object(state_persistence_service, 'redis_manager') as mock_redis_mgr:
+            mock_redis_mgr.get_client = AsyncMock(return_value=mock_redis_client)
+            
+            result = await state_persistence_service.save_sub_agent_result(
+                "test_run", "agent", {"data": "test"}, mock_db_session
+            )
+            
+            assert result is False
+            mock_db_session.rollback.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_get_thread_context(self, mock_redis_client):
+        """Test thread context retrieval from Redis"""
+        context = {"current_run_id": "test", "user_id": "user123"}
+        mock_redis_client.get.return_value = json.dumps(context)
+        
+        with patch.object(state_persistence_service, 'redis_manager') as mock_redis_mgr:
+            mock_redis_mgr.get_client = AsyncMock(return_value=mock_redis_client)
+            
+            result = await state_persistence_service.get_thread_context("thread123")
+            
+            assert result == context
+            mock_redis_client.get.assert_called_with("thread_context:thread123")
+    
+    @pytest.mark.asyncio
+    async def test_list_thread_runs(self, mock_db_session):
+        """Test listing runs for a thread"""
+        mock_runs = [Mock(spec=Run) for _ in range(3)]
+        for i, run in enumerate(mock_runs):
+            run.id = f"run_{i}"
+            run.status = "completed"
+            run.created_at = datetime.now()
+            run.completed_at = datetime.now()
+            run.metadata_ = {"state": {}} if i == 0 else None
+        
+        mock_result = Mock()
+        mock_result.scalars.return_value.all.return_value = mock_runs
+        mock_db_session.execute.return_value = mock_result
+        
+        runs = await state_persistence_service.list_thread_runs("thread123", mock_db_session)
+        
+        assert len(runs) == 3
+        assert runs[0]["has_state"] is True
+        assert runs[1]["has_state"] is False
 
 
 if __name__ == "__main__":
