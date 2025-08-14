@@ -6,6 +6,8 @@ from typing import Dict, Any, Optional, AsyncGenerator
 from app.services.state_persistence_service import state_persistence_service
 from app.services.agent_service import get_agent_service, AgentService
 from app.db.postgres import get_async_db
+from app.dependencies import get_llm_manager
+from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 import json
@@ -16,13 +18,20 @@ class MessageRequest(BaseModel):
     message: str
     thread_id: Optional[str] = None
 
-async def stream_agent_response(message: str) -> AsyncGenerator[str, None]:
+async def stream_agent_response(
+    message: str,
+    thread_id: Optional[str] = None,
+    agent_service: Optional[AgentService] = None
+) -> AsyncGenerator[str, None]:
     """Stream agent response using the actual agent service."""
-    # For now, yield simple chunks
-    # In production, this would use the actual agent service
-    chunks = ["Processing", "your", "request:", message]
-    for chunk in chunks:
-        yield chunk
+    if not agent_service:
+        # Fallback for backward compatibility
+        from app.services.agent_service import generate_stream
+        async for chunk in generate_stream(message, thread_id):
+            yield json.dumps(chunk)
+    else:
+        async for chunk in agent_service.generate_stream(message, thread_id):
+            yield json.dumps(chunk)
 
 def get_agent_supervisor(request: Request) -> Supervisor:
     return request.app.state.agent_supervisor
@@ -104,10 +113,29 @@ async def process_agent_message(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/stream")
-async def stream_response(request_model: RequestModel):
-    """Stream agent response."""
-    async def generate():
-        async for chunk in stream_agent_response(request_model.query):
-            yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+async def stream_response(
+    request_model: RequestModel,
+    db_session: AsyncSession = Depends(get_async_db),
+    llm_manager: LLMManager = Depends(get_llm_manager)
+):
+    """Stream agent response with proper SSE format."""
+    agent_service = get_agent_service(db_session, llm_manager)
     
-    return StreamingResponse(generate(), media_type="text/event-stream")
+    async def generate():
+        async for chunk in stream_agent_response(
+            request_model.query,
+            request_model.id,
+            agent_service
+        ):
+            # Proper SSE format
+            yield f"data: {chunk}\n\n"
+    
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"  # Disable nginx buffering
+        }
+    )
