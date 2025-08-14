@@ -535,6 +535,79 @@ verify_docker_access_for_runner() {
     log "Runner will work but Docker builds may fail."
 }
 
+deploy_helper_scripts() {
+    log "Deploying helper scripts..."
+    
+    local scripts_dir="/opt/github-runner/scripts"
+    mkdir -p "$scripts_dir"
+    
+    # Check if scripts are available in the current directory or a known location
+    local source_dir="${SCRIPT_SOURCE_DIR:-$(dirname "$0")}"
+    
+    if [[ -d "$source_dir" ]]; then
+        for script in diagnose-runner.sh fix-runner-issues.sh monitor-runner.sh; do
+            if [[ -f "$source_dir/$script" ]]; then
+                cp "$source_dir/$script" "$scripts_dir/" 2>/dev/null || true
+                chmod +x "$scripts_dir/$script" 2>/dev/null || true
+                log "Deployed $script"
+            fi
+        done
+        
+        # Create convenience commands
+        if [[ -f "$scripts_dir/diagnose-runner.sh" ]]; then
+            cat > /usr/local/bin/runner-status << 'EOF'
+#!/bin/bash
+/opt/github-runner/scripts/diagnose-runner.sh | grep -E "✓|✗|⚠" | tail -20
+EOF
+            chmod +x /usr/local/bin/runner-status
+            log "Created runner-status command"
+        fi
+        
+        if [[ -f "$scripts_dir/fix-runner-issues.sh" ]]; then
+            cat > /usr/local/bin/runner-fix << 'EOF'
+#!/bin/bash
+/opt/github-runner/scripts/fix-runner-issues.sh
+EOF
+            chmod +x /usr/local/bin/runner-fix
+            log "Created runner-fix command"
+        fi
+        
+        # Setup monitoring service (optional)
+        if [[ -f "$scripts_dir/monitor-runner.sh" ]]; then
+            setup_monitoring_service
+        fi
+    else
+        log "Helper scripts not found in $source_dir, skipping deployment"
+    fi
+}
+
+setup_monitoring_service() {
+    log "Setting up monitoring service..."
+    
+    cat > /etc/systemd/system/github-runner-monitor.service << 'EOF'
+[Unit]
+Description=GitHub Runner Health Monitor
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+ExecStart=/opt/github-runner/scripts/monitor-runner.sh --interval 60
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+User=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    
+    systemctl daemon-reload
+    systemctl enable github-runner-monitor.service 2>/dev/null || true
+    log "Monitoring service configured (start with: systemctl start github-runner-monitor)"
+}
+
 setup_buildx_for_runner() {
     log "Setting up Docker buildx for runner user..."
     
@@ -591,10 +664,13 @@ main() {
     
     install_service
     
+    # Deploy helper scripts if available
+    deploy_helper_scripts
+    
     # Final verification and summary
     log "========================================"
     log "Installation Summary"
-    log "========================================"
+    log "======================================="
     
     # Check runner service
     if systemctl is-active --quiet "actions.runner.*"; then
@@ -624,6 +700,19 @@ main() {
     log "========================================"
     log "GitHub Actions Runner Installation Completed"
     log "========================================"
+    
+    # Run initial diagnostic if script is available
+    if [[ -x "/opt/github-runner/scripts/diagnose-runner.sh" ]]; then
+        log "\nRunning initial diagnostic check..."
+        /opt/github-runner/scripts/diagnose-runner.sh | tail -30 || true
+    fi
+    
+    # Show available commands
+    if [[ -x "/usr/local/bin/runner-status" ]]; then
+        log "\nAvailable commands:"
+        log "  runner-status - Quick health check"
+        log "  runner-fix    - Fix common issues"
+    fi
 }
 
 # Run the main function

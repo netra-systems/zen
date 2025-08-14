@@ -25,6 +25,11 @@ from app.db.postgres import get_async_db
 from app.dependencies import get_llm_manager
 from app.services.thread_service import ThreadService
 from app.services.message_handlers import MessageHandlerService
+from app.services.streaming_service import (
+    StreamingService,
+    TextStreamProcessor,
+    get_streaming_service
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = central_logger.get_logger(__name__)
@@ -149,26 +154,49 @@ class AgentService:
                 "status": "error"
             }
     
-    async def generate_stream(self, message: str) -> AsyncGenerator[str, None]:
+    async def generate_stream(self, message: str, thread_id: Optional[str] = None) -> AsyncGenerator[Dict[str, Any], None]:
         """
-        Generate streaming response for a message.
+        Generate true streaming response for a message.
+        Returns structured chunks with metadata.
         """
         logger.info(f"Starting stream for message: {message[:100]}...")
-        try:
-            # For now, simulate streaming by yielding parts of response
-            response = await self.process_message(message)
+        
+        # Get streaming service
+        streaming_service = get_streaming_service()
+        
+        # Create text processor for the response
+        class AgentResponseProcessor:
+            def __init__(self, supervisor, message, thread_id):
+                self.supervisor = supervisor
+                self.message = message
+                self.thread_id = thread_id
             
-            # Split response into chunks for streaming
-            text = response.get("response", "")
-            chunk_size = max(1, len(text) // 10)  # 10 chunks
-            
-            for i in range(0, len(text), chunk_size):
-                chunk = text[i:i + chunk_size]
-                yield chunk
+            async def process(self, _):
+                # Process message through supervisor
+                result = await self.supervisor.run(
+                    self.message,
+                    self.thread_id or "default",
+                    "default_user",
+                    self.thread_id or "default"
+                )
                 
-        except Exception as e:
-            logger.error(f"Error in generate_stream: {e}", exc_info=True)
-            yield f"Error: {str(e)}"
+                # Extract response content
+                if hasattr(result, 'response'):
+                    content = str(result.response)
+                else:
+                    content = str(result)
+                
+                # Use text processor for chunking
+                text_processor = TextStreamProcessor(chunk_size=5)
+                async for chunk in text_processor.process(content):
+                    yield chunk
+        
+        # Create processor instance
+        processor = AgentResponseProcessor(self.supervisor, message, thread_id)
+        
+        # Generate stream through service
+        async for chunk in streaming_service.create_stream(processor, None):
+            yield chunk.to_dict()
 
 def get_agent_service(
     db_session: AsyncSession = Depends(get_async_db), 
@@ -193,7 +221,7 @@ async def process_message(message: str, thread_id: Optional[str] = None) -> Dict
         result = await agent_service.process_message(message, thread_id)
         return result
 
-async def generate_stream(message: str) -> AsyncGenerator[str, None]:
+async def generate_stream(message: str, thread_id: Optional[str] = None) -> AsyncGenerator[Dict[str, Any], None]:
     """Module-level wrapper for AgentService.generate_stream for test compatibility"""
     from app.db.postgres import get_async_db
     from app.dependencies import get_llm_manager
@@ -202,6 +230,6 @@ async def generate_stream(message: str) -> AsyncGenerator[str, None]:
     async for db in get_async_db():
         llm_manager = get_llm_manager()
         agent_service = get_agent_service(db, llm_manager)
-        async for chunk in agent_service.generate_stream(message):
+        async for chunk in agent_service.generate_stream(message, thread_id):
             yield chunk
         break
