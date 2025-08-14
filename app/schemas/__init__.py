@@ -106,7 +106,7 @@ from .User import (
     User,
     UserInDB,
 )
-from .WebSocket import (
+from .registry import (
     WebSocketError,
     MessageToUser,
     AnalysisRequest,

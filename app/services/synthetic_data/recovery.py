@@ -82,8 +82,36 @@ class RecoveryMixin:
     
     async def generate_with_checkpoints(self, config: Any) -> List[Dict]:
         """Generate data with checkpoint support"""
-        # Stub implementation
-        return [{"id": i} for i in range(getattr(config, 'num_traces', 100))]
+        num_records = getattr(config, 'num_traces', 100)
+        checkpoint_size = min(25, num_records // 4)
+        generated_records = []
+        
+        for batch_start in range(0, num_records, checkpoint_size):
+            batch_records = await self._generate_checkpoint_batch(
+                batch_start, checkpoint_size, num_records
+            )
+            generated_records.extend(batch_records)
+            await self._save_checkpoint(batch_start + len(batch_records))
+        
+        return generated_records
+    
+    async def _generate_checkpoint_batch(self, start: int, size: int, total: int) -> List[Dict]:
+        """Generate a batch with checkpoint metadata"""
+        actual_size = min(size, total - start)
+        return [
+            {
+                "id": start + i,
+                "checkpoint_batch": start // size,
+                "timestamp": datetime.now(UTC).isoformat()
+            }
+            for i in range(actual_size)
+        ]
+    
+    async def _save_checkpoint(self, record_count: int) -> None:
+        """Save checkpoint for resumption"""
+        if not hasattr(self, '_checkpoints'):
+            self._checkpoints = {}
+        self._checkpoints['last_processed'] = record_count
     
     async def resume_from_checkpoint(self, config: Any) -> Dict[str, Any]:
         """Resume generation from checkpoint"""
@@ -207,23 +235,37 @@ class CircuitBreaker:
         
     async def call(self, func):
         """Call function with circuit breaker"""
-        # Use property to check state (handles transition)
         current_state = self.state
-        
         try:
-            if current_state == "open":
-                raise Exception("Circuit breaker is open")
-            result = await func() if asyncio.iscoroutinefunction(func) else func()
-            self.failure_count = 0
-            if current_state == "half_open":
-                self.state = "closed"
+            self._check_circuit_state(current_state)
+            result = await self._execute_function(func)
+            self._handle_success(current_state)
             return result
         except Exception as e:
-            self.failure_count += 1
-            if self.failure_count >= 5:
-                self.state = "open"
-                self._open_time = asyncio.get_event_loop().time()
+            self._handle_failure()
             raise e
+    
+    def _check_circuit_state(self, current_state: str) -> None:
+        """Check if circuit breaker allows execution"""
+        if current_state == "open":
+            raise Exception("Circuit breaker is open")
+    
+    async def _execute_function(self, func):
+        """Execute function based on its type"""
+        return await func() if asyncio.iscoroutinefunction(func) else func()
+    
+    def _handle_success(self, current_state: str) -> None:
+        """Handle successful function execution"""
+        self.failure_count = 0
+        if current_state == "half_open":
+            self.state = "closed"
+    
+    def _handle_failure(self) -> None:
+        """Handle function execution failure"""
+        self.failure_count += 1
+        if self.failure_count >= 5:
+            self.state = "open"
+            self._open_time = asyncio.get_event_loop().time()
 
 
 class Transaction:

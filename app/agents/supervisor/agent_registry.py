@@ -38,7 +38,7 @@ class AgentRegistry:
     def _register_core_agents(self) -> None:
         """Register core workflow agents."""
         # Import DataSubAgent here to avoid circular dependency
-        from app.agents.data_sub_agent.agent import DataSubAgent
+        from app.schemas.shared_types import DataSubAgent
         
         self.register("triage", TriageSubAgent(
             self.llm_manager, self.tool_dispatcher))

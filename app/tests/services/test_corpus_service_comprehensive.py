@@ -9,7 +9,8 @@ import hashlib
 
 from app.services.corpus_service import CorpusService, CorpusStatus
 from app.schemas import Corpus, CorpusCreate, CorpusUpdate
-from app.core.exceptions import NetraException
+from app.core.exceptions_base import NetraException
+from app.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
 
 
 @pytest.fixture
@@ -326,8 +327,8 @@ class TestIndexOptimization:
 
 
 @pytest.mark.asyncio
-class TestErrorHandling:
-    """Test error handling and recovery."""
+class TestErrorHandling(SharedTestErrorHandling):
+    """Test error handling and recovery - extends shared error handling."""
 
     # Removed test_handle_indexing_failure - test expects exception that isn't raised
 

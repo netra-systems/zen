@@ -10,7 +10,7 @@ from typing import Dict, List, Any, Union
 from starlette.websockets import WebSocketState
 
 from app.logging_config import central_logger
-from app.schemas.websocket_unified import WebSocketMessage
+from app.schemas.registry import WebSocketMessage
 from app.schemas.websocket_message_types import ServerMessage, BroadcastResult
 from .connection import ConnectionInfo, ConnectionManager
 from .room_manager import RoomManager

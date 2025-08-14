@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, patch
 
 from app.services.supply_research_service import SupplyResearchService
 from app.db.models_postgres import AISupplyItem, SupplyUpdateLog
+from app.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
 
 
 @pytest.fixture
@@ -19,8 +20,8 @@ def service(db_session):
     return SupplyResearchService(db_session)
 
 
-class TestErrorHandling:
-    """Test error handling and recovery scenarios"""
+class TestErrorHandling(SharedTestErrorHandling):
+    """Test error handling and recovery scenarios - extends shared error handling."""
     
     def test_database_connection_failure(self, service):
         """Test graceful handling of database connection failures"""

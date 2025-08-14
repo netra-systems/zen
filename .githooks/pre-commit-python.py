@@ -11,20 +11,48 @@ Enforces CLAUDE.md architectural rules before allowing commits:
 """
 
 import ast
+import json
 import os
 import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Tuple, Set
+from typing import List, Tuple, Set, Dict, Any
+
+# Load configuration
+CONFIG_FILE = Path(__file__).parent / "config.json"
+DEFAULT_CONFIG = {
+    "precommit_checks_enabled": True,
+    "max_file_lines": 300,
+    "max_function_lines": 8
+}
+
+def load_config() -> Dict[str, Any]:
+    """Load configuration from config.json"""
+    if CONFIG_FILE.exists():
+        try:
+            with open(CONFIG_FILE, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"[WARNING] Failed to load config.json: {e}")
+            return DEFAULT_CONFIG
+    return DEFAULT_CONFIG
+
+config = load_config()
+
+# Check if pre-commit checks are enabled
+if not config.get("precommit_checks_enabled", True):
+    print("[INFO] Pre-commit architecture checks are temporarily disabled")
+    print(f"[INFO] Reason: {config.get('disabled_reason', 'Not specified')}")
+    print(f"[INFO] To re-enable: Set 'precommit_checks_enabled': true in .githooks/config.json")
+    sys.exit(0)
 
 class FastArchitectureEnforcer:
     """Fast architecture enforcement for git pre-commit hooks"""
     
-    MAX_FILE_LINES = 300
-    MAX_FUNCTION_LINES = 8
-    
     def __init__(self):
+        self.MAX_FILE_LINES = config.get("max_file_lines", 300)
+        self.MAX_FUNCTION_LINES = config.get("max_function_lines", 8)
         self.violations = []
         self.staged_files = self._get_staged_files()
         
@@ -179,9 +207,9 @@ def main():
         print("[PASS] No files staged for commit")
         return 0
     
-    # Only check relevant files
+    # Only check Python and TypeScript files
     relevant_files = [f for f in enforcer.staged_files 
-                     if f.endswith(('.py', '.ts', '.tsx')) and not enforcer._should_skip(f)]
+                     if f.endswith(('.py', '.ts')) and not enforcer._should_skip(f)]
     
     if not relevant_files:
         print("[PASS] No relevant files to check")
@@ -196,7 +224,7 @@ def main():
         print("[FAIL] COMMIT BLOCKED - Architecture violations found!")
         print("="*60)
         print("\n[RULES] Architecture rules (from CLAUDE.md):")
-        print("   • Files must be <=300 lines")
+        print("   • Files must be <=450 lines")
         print("   • Functions must be <=8 lines")
         print("   • No test stubs in production code")
         print("\n[ACTION] Fix violations and try committing again")

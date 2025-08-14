@@ -14,7 +14,7 @@ from app.schemas import (
     SubAgentLifecycle, WebSocketMessage, AgentStarted, 
     SubAgentUpdate, AgentCompleted, SubAgentState
 )
-from app.schemas.Agent import AgentResult
+from app.schemas.registry import AgentResult
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.agents.tool_dispatcher import ToolDispatcher

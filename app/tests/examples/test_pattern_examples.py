@@ -10,6 +10,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
 import asyncio
 
+from app.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
+
 
 # ==============================================================================
 # EXAMPLE 1: Clear Unit Test with Explicit Mocking
@@ -227,7 +229,7 @@ class TestAgentPerformance:
 # EXAMPLE 4: Error Handling Test with Clear Scenarios
 # ==============================================================================
 
-class TestErrorHandling:
+class TestErrorHandling(SharedTestErrorHandling):
     """
     Tests for error handling and recovery mechanisms.
     

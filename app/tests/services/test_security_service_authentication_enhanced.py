@@ -16,7 +16,7 @@ from app.services.security_service import SecurityService
 from app.services.key_manager import KeyManager
 from app.db import models_postgres
 from app import schemas
-from app.core.exceptions import NetraException
+from app.core.exceptions_base import NetraException
 from app.config import settings
 
 

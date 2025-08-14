@@ -19,7 +19,7 @@ from app.services.database.unit_of_work import UnitOfWork
 from app.services.database.thread_repository import ThreadRepository
 from app.services.database.message_repository import MessageRepository
 from app.services.database.run_repository import RunRepository
-from app.core.exceptions import NetraException
+from app.core.exceptions_base import NetraException
 
 
 class MockDatabaseModel:

@@ -48,11 +48,46 @@ class User(Base):
     plan_expires_at = Column(DateTime(timezone=True), nullable=True)  # Plan expiration
     feature_flags = Column(JSON, default=dict)  # Enabled feature flags
     tool_permissions = Column(JSON, default=dict)  # Per-tool permission overrides
+    
+    # Plan billing fields
     plan_started_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
     auto_renew = Column(Boolean(), default=False)  # Auto-renewal enabled
     payment_status = Column(String, default="active")  # active, suspended, cancelled
     trial_period = Column(Boolean(), default=False)  # Is in trial period
+    
+    # Relationships
     secrets = relationship("Secret", back_populates="user", cascade="all, delete-orphan")
+
+
+class CorpusAuditLog(Base):
+    """Corpus audit log table for tracking all corpus operations."""
+    __tablename__ = "corpus_audit_logs"
+    
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    timestamp = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), index=True)
+    user_id = Column(String, ForeignKey("userbase.id"), nullable=True, index=True)
+    action = Column(String, nullable=False, index=True)  # create, update, delete, etc.
+    status = Column(String, nullable=False, index=True)  # success, failure, partial, etc.
+    corpus_id = Column(String, nullable=True, index=True)
+    resource_type = Column(String, nullable=False, index=True)  # corpus, document, embedding, etc.
+    resource_id = Column(String, nullable=True, index=True)
+    operation_duration_ms = Column(Float, nullable=True)
+    result_data = Column(JSON, nullable=True)  # Operation results/output
+    
+    # Metadata fields
+    user_agent = Column(String, nullable=True)
+    ip_address = Column(String, nullable=True, index=True)
+    request_id = Column(String, nullable=True, index=True)
+    session_id = Column(String, nullable=True, index=True)
+    configuration = Column(JSON, default=dict)  # Operation configuration
+    performance_metrics = Column(JSON, default=dict)  # Performance data
+    error_details = Column(JSON, nullable=True)  # Error information
+    compliance_flags = Column(ArrayType(String), default=list)  # Compliance indicators
+    
+    # Relationships
+    user = relationship("User", backref="audit_logs")
+
+
 
 class Secret(Base):
     __tablename__ = "secrets"

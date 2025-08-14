@@ -10,7 +10,7 @@ from typing import Dict, Any, Union
 from pydantic import ValidationError
 
 from app.logging_config import central_logger
-from app.schemas.websocket_unified import (
+from app.schemas.registry import (
     WebSocketMessage,
     WebSocketMessageType
 )

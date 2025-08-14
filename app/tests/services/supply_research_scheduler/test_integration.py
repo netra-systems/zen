@@ -23,6 +23,7 @@ from app.tests.services.supply_research_scheduler.test_mocks import (
     MockSupplyResearchService,
     MockAgent
 )
+from app.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling, TestIntegrationScenarios as SharedTestIntegrationScenarios
 
 
 @pytest.fixture
@@ -36,7 +37,7 @@ def scheduler():
         return SupplyResearchScheduler(mock_background_manager, mock_llm_manager)
 
 
-class TestIntegrationScenarios:
+class TestIntegrationScenarios(SharedTestIntegrationScenarios):
     """Test integration scenarios"""
     
     @pytest.mark.asyncio
@@ -125,7 +126,7 @@ class TestIntegrationScenarios:
             assert result["status"] == "completed"
 
 
-class TestErrorHandling:
+class TestErrorHandling(SharedTestErrorHandling):
     """Test comprehensive error handling"""
     
     @pytest.mark.asyncio

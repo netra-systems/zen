@@ -35,7 +35,7 @@ jobs:
     if: |
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@test')) ||
       github.event_name == 'workflow_dispatch'
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     outputs:
       should_run: ${{ steps.parse.outputs.should_run }}
       test_level: ${{ steps.parse.outputs.test_level }}
@@ -142,7 +142,7 @@ jobs:
     name: Notify Test Start
     needs: parse-command
     if: needs.parse-command.outputs.should_run == 'true'
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     
     steps:
       - name: Comment PR
@@ -173,25 +173,25 @@ jobs:
       matrix:
         include:
           - test_level: smoke
-            runner: self-hosted
+            runner: warp-custom-default
             timeout: 5
           - test_level: unit
-            runner: self-hosted
+            runner: warp-custom-default
             timeout: 10
           - test_level: integration
-            runner: self-hosted
+            runner: warp-custom-default
             timeout: 15
           - test_level: comprehensive
-            runner: self-hosted
+            runner: warp-custom-default
             timeout: 30
           - test_level: critical
-            runner: self-hosted
+            runner: warp-custom-default
             timeout: 10
           - test_level: performance
-            runner: self-hosted
+            runner: warp-custom-default
             timeout: 45
           - test_level: security
-            runner: self-hosted
+            runner: warp-custom-default
             timeout: 20
             
     steps:

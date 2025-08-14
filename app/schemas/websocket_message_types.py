@@ -5,39 +5,10 @@ from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from enum import Enum
 
+# Import WebSocketMessage and WebSocketMessageType from single source of truth
+from app.schemas.registry import WebSocketMessage, WebSocketMessageType
 
-class WebSocketMessageType(str, Enum):
-    """All supported WebSocket message types."""
-    # Client to server messages
-    START_AGENT = "start_agent"
-    USER_MESSAGE = "user_message"
-    GET_THREAD_HISTORY = "get_thread_history"
-    STOP_AGENT = "stop_agent"
-    CREATE_THREAD = "create_thread"
-    SWITCH_THREAD = "switch_thread"
-    DELETE_THREAD = "delete_thread"
-    LIST_THREADS = "list_threads"
-    PING = "ping"
-    PONG = "pong"
-    
-    # Server to client messages
-    AGENT_STARTED = "agent_started"
-    AGENT_COMPLETED = "agent_completed"
-    AGENT_STOPPED = "agent_stopped"
-    AGENT_ERROR = "agent_error"
-    AGENT_UPDATE = "agent_update"
-    AGENT_LOG = "agent_log"
-    TOOL_STARTED = "tool_started"
-    TOOL_COMPLETED = "tool_completed"
-    TOOL_CALL = "tool_call"
-    TOOL_RESULT = "tool_result"
-    SUBAGENT_STARTED = "subagent_started"
-    SUBAGENT_COMPLETED = "subagent_completed"
-    THREAD_HISTORY = "thread_history"
-    ERROR = "error"
-    CONNECTION_ESTABLISHED = "connection_established"
-    STREAM_CHUNK = "stream_chunk"
-    STREAM_COMPLETE = "stream_complete"
+# WebSocketMessageType is imported from registry.py - using that as single source
 
 
 class WebSocketConnectionState(str, Enum):
@@ -49,16 +20,7 @@ class WebSocketConnectionState(str, Enum):
     ERROR = "error"
 
 
-class WebSocketMessage(BaseModel):
-    """Base WebSocket message with common fields."""
-    model_config = ConfigDict(extra="allow")
-    
-    type: WebSocketMessageType = Field(description="Message type")
-    timestamp: Optional[float] = Field(default=None, description="Message timestamp")
-    payload: Optional[Dict[str, Any]] = Field(default=None, description="Message payload")
-    system: Optional[bool] = Field(default=False, description="Whether this is a system message")
-    displayed_to_user: Optional[bool] = Field(default=None, description="Whether message should be displayed to user")
-
+# WebSocketMessage is imported from app.schemas.registry (single source of truth)
 
 class ClientMessage(WebSocketMessage):
     """Base class for client-to-server messages."""

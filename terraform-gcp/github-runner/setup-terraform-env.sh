@@ -1,5 +1,5 @@
 #!/bin/bash
-# A simplified script to install and configure a GitHub Actions self-hosted runner.
+# A simplified script to install and configure a GitHub Actions warp-custom-default runner.
 
 # Exit immediately if a command exits with a non-zero status.
 set -e

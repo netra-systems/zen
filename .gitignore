@@ -78,3 +78,4 @@ frontend/cypress/downloads/downloads.htm
 *.tfstate
 terraform-gcp/github-runner/terraform.tfstate.backup
 terraform-gcp/github-runner/terraform.tfvars
+*.exe

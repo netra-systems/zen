@@ -1,6 +1,6 @@
-# GitHub Actions Self-Hosted Runner on Google Cloud Platform
+# GitHub Actions warp-custom-default Runner on Google Cloud Platform
 
-This Terraform module deploys self-hosted GitHub Actions runners on Google Cloud Platform (GCP) with automatic configuration, monitoring, and optional auto-scaling.
+This Terraform module deploys warp-custom-default GitHub Actions runners on Google Cloud Platform (GCP) with automatic configuration, monitoring, and optional auto-scaling.
 
 ## Features
 
@@ -89,7 +89,7 @@ terraform apply
 | `github_org` | GitHub organization name | Required |
 | `github_repo` | GitHub repository (optional) | `""` |
 | `runner_count` | Number of runners | `1` |
-| `runner_labels` | Runner labels | `["self-hosted", "linux", "x64", "gcp"]` |
+| `runner_labels` | Runner labels | `["warp-custom-default", "linux", "x64", "gcp"]` |
 
 ### Instance Configuration
 

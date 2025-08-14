@@ -60,7 +60,7 @@ jobs:
   
   plan-tests:
     name: 📋 Plan Test Execution
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     outputs:
       matrix: ${{ steps.build-matrix.outputs.matrix }}
       execution_mode: ${{ steps.build-matrix.outputs.mode }}
@@ -156,7 +156,7 @@ jobs:
   run-comprehensive-tests:
     name: 🧪 ${{ matrix.module }}
     needs: plan-tests
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     timeout-minutes: 60
     
     strategy:
@@ -285,7 +285,7 @@ if data.get('coverage'):
     name: 📊 Aggregate Test Results
     needs: [plan-tests, run-comprehensive-tests]
     if: always()
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     
     steps:
       - name: Download all artifacts
@@ -449,7 +449,7 @@ print(f'| {module} | {status} | {tests} | {duration} | {coverage or \"N/A\"} |')
           - **LLM Model:** ${{ github.event.inputs.llm_model || 'N/A' }}
           - **Python Version:** ${{ env.PYTHON_VERSION }}
           - **Node Version:** ${{ env.NODE_VERSION }}
-          - **Runner:** self-hosted
+          - **Runner:** warp-custom-default
           - **Triggered By:** ${{ github.actor }}
           
           ---
@@ -493,7 +493,7 @@ print(f'| {module} | {status} | {tests} | {duration} | {coverage or \"N/A\"} |')
     name: 📢 Send Notifications
     needs: [aggregate-results]
     if: always()
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     
     steps:
       - name: Determine notification level

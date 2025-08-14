@@ -21,9 +21,11 @@ import json
 from typing import Dict, Any, List
 from datetime import datetime
 
+from app.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling, TestIntegration as SharedTestIntegration
+
 # Import the module under test
 try:
-    from app.agents.data_sub_agent.agent import DataSubAgent
+    from app.schemas.shared_types import DataSubAgent
     from app.agents.data_sub_agent.query_builder import QueryBuilder
 except ImportError:
     # Create mock classes if imports fail
@@ -299,8 +301,8 @@ class TestDataEnrichment:
         assert "metadata" in enriched
 
 
-class TestErrorHandling:
-    """Test error handling and recovery"""
+class TestErrorHandling(SharedTestErrorHandling):
+    """Test error handling and recovery - extends shared error handling."""
     
     @pytest.mark.asyncio
     async def test_retry_on_failure(self):
@@ -412,7 +414,7 @@ class TestCaching:
         assert result2["new"] == "result"
 
 
-class TestIntegration:
+class TestIntegration(SharedTestIntegration):
     """Integration tests with other components"""
     
     @pytest.mark.asyncio

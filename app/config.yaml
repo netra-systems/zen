@@ -48,7 +48,7 @@ realism:
       family: "llama-3.1"
       name: "llama-3.1-70b-instruct"
       version_id: null
-      pricing: [0.50, 0.50] # Example self-hosted cost
+      pricing: [0.50, 0.50] # Example warp-custom-default cost
 
 # --- Customer Overrides ---
 # Use this section to force specific values for any field in the log schema.

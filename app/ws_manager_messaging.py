@@ -13,7 +13,7 @@ from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
 from app.logging_config import central_logger
-from app.schemas.websocket_unified import WebSocketMessage
+from app.schemas.registry import WebSocketMessage
 from app.schemas.websocket_message_types import (
     ServerMessage, WebSocketValidationError, BroadcastResult
 )
@@ -78,31 +78,15 @@ class WebSocketMessagingManager:
 
     async def send_to_thread(self, thread_id: str, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> bool:
         """Send message to all users in a specific thread/room."""
-        validated_message = self._prepare_message(message)
-        if validated_message is None:
-            return False
-        
-        # Get all connections in the room
-        room_connections = self.core.room_manager.get_room_connections(thread_id)
-        if not room_connections:
-            return False
-            
-        # Send to each user in the room
-        success_count = 0
-        for user_id in room_connections:
-            if await self.send_to_user(user_id, validated_message):
-                success_count += 1
-        
-        return success_count > 0
+        from app.ws_manager_broadcasting import WebSocketBroadcastingManager
+        broadcasting = WebSocketBroadcastingManager(self.core)
+        return await broadcasting.send_to_thread(thread_id, message)
 
     async def broadcast_to_all(self, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> BroadcastResult:
         """Broadcast message to all connected users."""
-        validated_message = self._prepare_message(message)
-        if validated_message is None:
-            return BroadcastResult(successful=0, failed=0, total_connections=0, message_type="invalid")
-        result = await self.core.broadcast_manager.broadcast_to_all(validated_message)
-        self.core.increment_stat("total_messages_sent", result.successful)
-        return result
+        from app.ws_manager_broadcasting import WebSocketBroadcastingManager
+        broadcasting = WebSocketBroadcastingManager(self.core)
+        return await broadcasting.broadcast_to_all(message)
 
     async def handle_incoming_message(self, user_id: str, websocket: WebSocket, 
                                     message: Dict[str, Any]) -> bool:

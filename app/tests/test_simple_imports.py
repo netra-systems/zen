@@ -5,6 +5,8 @@ import json
 from unittest.mock import Mock, patch, AsyncMock
 from fastapi.testclient import TestClient
 
+from app.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
+
 
 class TestConfiguration:
     """Configuration and settings tests"""
@@ -82,7 +84,7 @@ class TestAuthenticationFlow:
     
     def test_user_model_structure(self):
         """Test user model has required fields"""
-        from app.schemas.User import User, UserCreate
+        from app.schemas.registry import User, UserCreate
         
         # Test User schema
         user_fields = User.model_fields.keys()
@@ -155,7 +157,7 @@ class TestWebSocketFunctionality:
     @pytest.mark.asyncio
     async def test_websocket_message_structure(self):
         """Test WebSocket message schemas"""
-        from app.schemas.WebSocket import WebSocketMessage
+        from app.schemas.registry import WebSocketMessage
         
         message_data = {
             "type": "test",
@@ -257,12 +259,12 @@ class TestAPIRoutes:
         assert ws_router != None
 
 
-class TestErrorHandling:
+class TestErrorHandling(SharedTestErrorHandling):
     """Error handling and exception management tests"""
     
     def test_custom_exceptions_import(self):
         """Test custom exceptions can be imported"""
-        from app.core.exceptions import NetraException
+        from app.core.exceptions_base import NetraException
         assert NetraException != None
     
     def test_error_context_handling(self):
@@ -275,7 +277,7 @@ class TestErrorHandling:
     
     def test_exception_structure(self):
         """Test custom exception structure"""
-        from app.core.exceptions import NetraException
+        from app.core.exceptions_base import NetraException
         
         exc = NetraException("Test error")
         assert "Test error" in str(exc)

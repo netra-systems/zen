@@ -248,6 +248,31 @@
                 <prevention>Always use concurrency groups for PR-based workflows to prevent redundant runs</prevention>
             </fix>
             
+            <fix date="2025-08-14">
+                <title>Cloud Run Not Suitable for GitHub Runners</title>
+                <problem>GitHub Runners deployed to Cloud Run fail with "container failed to start and listen on PORT=8080"</problem>
+                <root-causes>
+                    <cause>Cloud Run expects HTTP request/response services on port 8080</cause>
+                    <cause>GitHub Runners are long-running polling processes, not web services</cause>
+                    <cause>Cloud Run terminates containers that don't respond to HTTP health checks</cause>
+                    <cause>Runners need persistent connections to GitHub, incompatible with Cloud Run's request model</cause>
+                </root-causes>
+                <attempted-solution>Created containerized GitHub Runner with Terraform deployment to Cloud Run</attempted-solution>
+                <failure-reason>Cloud Run service creation fails because runner container doesn't expose HTTP endpoint</failure-reason>
+                <correct-solutions>
+                    <option>Google Kubernetes Engine (GKE) - Deploy as Deployment/Job, supports long-running containers</option>
+                    <option>Compute Engine with Container-Optimized OS - Run container directly on VM</option>
+                    <option>GitHub's official actions-runner-controller on Kubernetes</option>
+                </correct-solutions>
+                <key-learning>Cloud Run is for stateless HTTP services only. Use GKE or GCE for continuous/polling workloads</key-learning>
+                <artifacts-created>
+                    <artifact>Dockerfile for GitHub Runner (reusable for GKE/GCE)</artifact>
+                    <artifact>Container entrypoint script with proper signal handling</artifact>
+                    <artifact>Terraform modules (need adaptation for GKE/GCE)</artifact>
+                </artifacts-created>
+                <prevention>Always verify service requirements: Cloud Run = HTTP only, GKE/GCE = any workload type</prevention>
+            </fix>
+            
             <fix date="2025-08-13">
                 <title>GitHub Actions Deployment Permission Error</title>
                 <problem>RequestError [HttpError]: Resource not accessible by integration when creating deployments</problem>
@@ -279,6 +304,55 @@
                     <action>Include 'statuses: write' when updating commit statuses</action>
                 </prevention>
                 <note>This is a recurring issue - always check permissions when workflows fail with 403 errors</note>
+            </fix>
+            
+            <fix date="2025-08-14">
+                <title>Streaming Service Architecture Confusion</title>
+                <problem>generate_stream function was fake - processed entire message then chunked artificially</problem>
+                <symptoms>
+                    <symptom>Function named generate_stream but didn't actually stream</symptom>
+                    <symptom>Entire response processed synchronously then split into chunks</symptom>
+                    <symptom>Module-level wrappers created circular dependencies</symptom>
+                    <symptom>No true async streaming capability</symptom>
+                    <symptom>Poor separation of concerns between streaming and processing</symptom>
+                </symptoms>
+                <root-causes>
+                    <cause>Confusion between streaming and chunking concepts</cause>
+                    <cause>Missing proper streaming infrastructure</cause>
+                    <cause>No clear protocol support (SSE/WebSocket/HTTP)</cause>
+                    <cause>Tight coupling between agent service and streaming logic</cause>
+                </root-causes>
+                <solution>Created dedicated StreamingService with proper async streaming</solution>
+                <implementation>
+                    <file>app/services/streaming_service.py - Production-grade streaming infrastructure</file>
+                    <features>
+                        <feature>True async streaming with StreamChunk objects</feature>
+                        <feature>Protocol support for SSE, WebSocket, HTTP streaming</feature>
+                        <feature>Buffer management and rate limiting</feature>
+                        <feature>Active stream tracking and termination</feature>
+                        <feature>Error recovery with structured error chunks</feature>
+                        <feature>TextStreamProcessor for intelligent text chunking</feature>
+                    </features>
+                    <refactored>
+                        <change>agent_service.py - Now uses StreamingService for clean separation</change>
+                        <change>agent_route.py - Proper SSE format with nginx buffer handling</change>
+                    </refactored>
+                </implementation>
+                <architecture>
+                    <pattern>Client → API Route → AgentService → StreamingService → Processor</pattern>
+                    <benefit>Clear separation of concerns</benefit>
+                    <benefit>Reusable streaming infrastructure</benefit>
+                    <benefit>Protocol-agnostic streaming</benefit>
+                    <benefit>Proper error handling and recovery</benefit>
+                </architecture>
+                <prevention>
+                    <action>Always use StreamingService for any streaming needs</action>
+                    <action>Never fake streaming with post-processing chunking</action>
+                    <action>Ensure proper SSE headers (Cache-Control, X-Accel-Buffering)</action>
+                    <action>Use StreamChunk objects for structured metadata</action>
+                    <action>Implement proper stream lifecycle (start, data, end/error)</action>
+                </prevention>
+                <testing>All 9 streaming service tests pass - see test_streaming_service.py</testing>
             </fix>
             
             <fix date="2025-08-13">

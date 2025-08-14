@@ -23,11 +23,11 @@ from app.services.database.thread_repository import ThreadRepository
 from app.services.database.message_repository import MessageRepository
 from app.services.database.run_repository import RunRepository
 from app.ws_manager import WebSocketManager
-from app.schemas.WebSocket import (
+from app.schemas.registry import (
     WebSocketMessage, AgentStarted, SubAgentUpdate, AgentCompleted
 )
 from starlette.websockets import WebSocketState
-from app.schemas.User import UserBase
+from app.schemas.registry import UserBase
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from app.db.base import Base

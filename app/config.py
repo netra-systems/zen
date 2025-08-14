@@ -2,7 +2,7 @@
 
 import os
 from functools import lru_cache
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Callable, Tuple, List
 from pydantic import ValidationError
 from datetime import datetime
 
@@ -18,11 +18,8 @@ from app.config_loader import (
     get_critical_vars_mapping, apply_single_secret, detect_cloud_run_environment
 )
 from app.config_secrets import get_all_secret_mappings
-
-
-class ConfigurationError(Exception):
-    """Raised when configuration loading or validation fails."""
-    pass
+# Import ConfigurationError from single source of truth
+from app.core.exceptions_config import ConfigurationError
 
 
 class ConfigManager:
@@ -44,29 +41,40 @@ class ConfigManager:
     def _load_configuration(self) -> AppConfig:
         """Load and validate configuration from environment."""
         try:
-            environment = self._get_environment()
-            self._logger.info(f"Loading configuration for: {environment}")
-            
-            # Create base config
-            config = self._create_base_config(environment)
-            
-            # Load critical environment variables (non-secrets like DATABASE_URL, REDIS_URL, etc)
-            self._load_critical_env_vars(config)
-            
-            # Load secrets
-            self._load_secrets_into_config(config)
-            
-            # Validate configuration
-            self._validator.validate_config(config)
-            
-            return config
-            
+            return self._create_validated_config()
         except ValidationError as e:
-            self._logger.error(f"Configuration loading failed: {e}")
-            raise ConfigurationError(f"Failed to load configuration: {e}")
+            return self._handle_validation_error(e)
         except Exception as e:
-            self._logger.error(f"Configuration loading failed: {e}")
-            raise ConfigurationError(f"Failed to load configuration: {e}")
+            return self._handle_general_error(e)
+            
+    def _setup_config_base(self) -> Tuple[str, AppConfig]:
+        """Setup configuration base."""
+        environment = self._get_environment()
+        self._logger.info(f"Loading configuration for: {environment}")
+        config = self._create_base_config(environment)
+        return environment, config
+        
+    def _populate_config(self, config: AppConfig) -> None:
+        """Populate configuration with data."""
+        self._load_critical_env_vars(config)
+        self._load_secrets_into_config(config)
+        
+    def _create_validated_config(self) -> AppConfig:
+        """Create and validate configuration."""
+        environment, config = self._setup_config_base()
+        self._populate_config(config)
+        self._validator.validate_config(config)
+        return config
+        
+    def _handle_validation_error(self, error: ValidationError) -> None:
+        """Handle validation errors."""
+        self._logger.error(f"Configuration loading failed: {error}")
+        raise ConfigurationError(f"Failed to load configuration: {error}")
+        
+    def _handle_general_error(self, error: Exception) -> None:
+        """Handle general configuration errors."""
+        self._logger.error(f"Configuration loading failed: {error}")
+        raise ConfigurationError(f"Failed to load configuration: {error}")
     
     def _get_environment(self) -> str:
         """Determine the current environment."""
@@ -75,19 +83,27 @@ class ConfigManager:
         cloud_env = detect_cloud_run_environment()
         if cloud_env:
             return cloud_env
+        return self._get_default_environment()
+        
+    def _get_default_environment(self) -> str:
+        """Get default environment from env vars."""
         env = os.environ.get("ENVIRONMENT", "development").lower()
         self._logger.debug(f"Environment determined as: {env}")
         return env
     
     def _create_base_config(self, environment: str) -> AppConfig:
         """Create the base configuration object for the environment."""
-        config_classes = {
+        config_classes = self._get_config_classes()
+        return self._init_config(config_classes, environment)
+        
+    def _get_config_classes(self) -> Dict[str, type]:
+        """Get configuration classes mapping."""
+        return {
             "production": ProductionConfig,
             "staging": StagingConfig,
             "testing": NetraTestingConfig,
             "development": DevelopmentConfig
         }
-        return self._init_config(config_classes, environment)
     
     def _init_config(self, config_classes: dict, env: str) -> AppConfig:
         """Initialize config with appropriate class."""
@@ -123,14 +139,37 @@ class ConfigManager:
     
     def _handle_clickhouse_vars(self, config: AppConfig) -> None:
         """Handle ClickHouse environment variables."""
-        if host := os.environ.get("CLICKHOUSE_HOST"):
-            set_clickhouse_host(config, host)
-        if port := os.environ.get("CLICKHOUSE_PORT"):
-            set_clickhouse_port(config, port)
-        if pwd := os.environ.get("CLICKHOUSE_PASSWORD"):
-            set_clickhouse_password(config, pwd)
-        if user := os.environ.get("CLICKHOUSE_USER"):
-            set_clickhouse_user(config, user)
+        clickhouse_vars = self._get_clickhouse_env_vars()
+        self._apply_clickhouse_vars(config, clickhouse_vars)
+        
+    def _get_clickhouse_env_vars(self) -> Dict[str, Optional[str]]:
+        """Get ClickHouse environment variables."""
+        return {
+            "host": os.environ.get("CLICKHOUSE_HOST"),
+            "port": os.environ.get("CLICKHOUSE_PORT"),
+            "password": os.environ.get("CLICKHOUSE_PASSWORD"),
+            "user": os.environ.get("CLICKHOUSE_USER")
+        }
+        
+    def _get_clickhouse_setters(self) -> Dict[str, Callable]:
+        """Get ClickHouse setter functions."""
+        return {
+            "host": set_clickhouse_host,
+            "port": set_clickhouse_port,
+            "password": set_clickhouse_password,
+            "user": set_clickhouse_user
+        }
+        
+    def _apply_clickhouse_var(self, config: AppConfig, key: str, value: Optional[str]) -> None:
+        """Apply single ClickHouse variable."""
+        setters = self._get_clickhouse_setters()
+        if value and key in setters:
+            setters[key](config, value)
+            
+    def _apply_clickhouse_vars(self, config: AppConfig, vars_dict: Dict[str, Optional[str]]) -> None:
+        """Apply ClickHouse variables to config."""
+        for key, value in vars_dict.items():
+            self._apply_clickhouse_var(config, key, value)
     
     def _handle_gemini_var(self, config: AppConfig) -> None:
         """Handle Gemini API key environment variable."""
@@ -150,12 +189,16 @@ class ConfigManager:
         """Load secrets into the configuration object."""
         try:
             secrets = self._load_secrets()
-            if secrets:
-                self._process_secrets(config, secrets)
-            else:
-                self._logger.warning("No secrets loaded")
+            self._handle_loaded_secrets(config, secrets)
         except Exception as e:
             self._logger.error(f"Failed to load secrets: {e}")
+            
+    def _handle_loaded_secrets(self, config: AppConfig, secrets: Dict[str, Any]) -> None:
+        """Handle loaded secrets."""
+        if secrets:
+            self._process_secrets(config, secrets)
+        else:
+            self._logger.warning("No secrets loaded")
     
     def _load_secrets(self) -> Dict[str, Any]:
         """Load secrets from secret manager."""
@@ -185,9 +228,18 @@ class ConfigManager:
     
     def _log_secret_status(self, secrets: Dict) -> None:
         """Log status of critical secrets."""
+        critical, applied, missing = self._analyze_critical_secrets(secrets)
+        self._log_secret_analysis(applied, missing)
+        
+    def _analyze_critical_secrets(self, secrets: Dict) -> Tuple[List[str], List[str], List[str]]:
+        """Analyze critical secrets status."""
         critical = ['gemini-api-key', 'jwt-secret-key', 'fernet-key']
         applied = [s for s in critical if s in secrets]
         missing = [s for s in critical if s not in secrets]
+        return critical, applied, missing
+        
+    def _log_secret_analysis(self, applied: List[str], missing: List[str]) -> None:
+        """Log secret analysis results."""
         if applied:
             self._logger.info(f"Critical secrets applied: {len(applied)}")
         if missing:
@@ -200,77 +252,178 @@ class ConfigManager:
     def get_configuration_summary(self) -> ConfigurationSummary:
         """Get a summary of the current configuration status."""
         config = self.get_config()
+        secret_info = self._analyze_secrets()
+        return self._build_configuration_summary(config, secret_info)
         
-        # Count secrets
+    def _analyze_secrets(self) -> Tuple[int, List[str]]:
+        """Analyze secrets configuration."""
         secret_mappings = self._get_secret_mappings()
         total_secrets = len(secret_mappings)
-        required_secrets = [name for name, mapping in secret_mappings.items() if mapping.required]
+        required_secrets = [name for name, mapping in secret_mappings.items() if mapping.get("required", False)]
+        return total_secrets, required_secrets
         
-        return ConfigurationSummary(
-            environment=Environment(config.environment),
-            status=ConfigurationStatus.LOADED,
-            loaded_at=datetime.now(),
-            secrets_loaded=total_secrets,
-            secrets_total=total_secrets,
-            critical_secrets_missing=[],
-            warnings=[],
-            errors=[]
-        )
+    def _get_basic_fields(self, config: AppConfig) -> Dict[str, Any]:
+        """Get basic configuration fields."""
+        return {
+            "environment": Environment(config.environment),
+            "status": ConfigurationStatus.LOADED,
+            "loaded_at": datetime.now()
+        }
+        
+    def _get_secret_counts(self, secret_info: Tuple[int, List[str]]) -> Dict[str, int]:
+        """Get secret count fields."""
+        total_secrets, required_secrets = secret_info
+        return {
+            "secrets_loaded": total_secrets,
+            "secrets_total": total_secrets
+        }
+        
+    def _get_secret_status_fields(self) -> Dict[str, List]:
+        """Get secret status fields."""
+        return {
+            "critical_secrets_missing": [],
+            "warnings": [],
+            "errors": []
+        }
+        
+    def _get_secret_fields(self, secret_info: Tuple[int, List[str]]) -> Dict[str, Any]:
+        """Get secret-related fields."""
+        counts = self._get_secret_counts(secret_info)
+        status = self._get_secret_status_fields()
+        return {**counts, **status}
+        
+    def _create_summary_fields(self, config: AppConfig, secret_info: Tuple[int, List[str]]) -> Dict[str, Any]:
+        """Create summary fields dictionary."""
+        basic_fields = self._get_basic_fields(config)
+        secret_fields = self._get_secret_fields(secret_info)
+        return {**basic_fields, **secret_fields}
+        
+    def _build_configuration_summary(self, config: AppConfig, secret_info: Tuple[int, List[str]]) -> ConfigurationSummary:
+        """Build configuration summary object."""
+        fields = self._create_summary_fields(config, secret_info)
+        return ConfigurationSummary(**fields)
     
     def _apply_secret_mapping(self, config: AppConfig, mapping: Dict[str, Any], secret_value: str):
         """Apply a single secret mapping to the configuration."""
         if not mapping["targets"]:
-            # Direct field assignment
-            setattr(config, mapping["field"], secret_value)
+            self._apply_direct_mapping(config, mapping, secret_value)
         else:
-            # Nested field assignment
-            for target in mapping["targets"]:
-                self._set_nested_field(config, target, mapping["field"], secret_value)
+            self._apply_nested_mapping(config, mapping, secret_value)
+            
+    def _apply_direct_mapping(self, config: AppConfig, mapping: Dict[str, Any], secret_value: str) -> None:
+        """Apply direct field mapping."""
+        setattr(config, mapping["field"], secret_value)
+        
+    def _apply_nested_mapping(self, config: AppConfig, mapping: Dict[str, Any], secret_value: str) -> None:
+        """Apply nested field mapping."""
+        for target in mapping["targets"]:
+            self._set_nested_field(config, target, mapping["field"], secret_value)
     
+    def _handle_nested_field_error(self, field: str, target_path: str, error: AttributeError) -> None:
+        """Handle nested field setting errors."""
+        self._logger.warning(f"Failed to set field {field} on {target_path}: {error}")
+        
+    def _choose_field_setter(self, config: AppConfig, target_path: str, field: str, value: str) -> None:
+        """Choose appropriate field setter method."""
+        if '.' in target_path:
+            self._set_deep_nested_field(config, target_path, field, value)
+        else:
+            self._set_direct_field(config, target_path, field, value)
+            
     def _set_nested_field(self, config: AppConfig, target_path: str, field: str, value: str):
         """Set a nested field in the configuration object."""
         try:
-            if '.' in target_path:
-                parts = target_path.split('.', 1)
-                parent_attr = getattr(config, parts[0])
-                if isinstance(parent_attr, dict) and parts[1] in parent_attr:
-                    target_obj = parent_attr[parts[1]]
-                    if target_obj and hasattr(target_obj, field):
-                        setattr(target_obj, field, value)
-            else:
-                target_obj = getattr(config, target_path, None)
-                if target_obj and hasattr(target_obj, field):
-                    setattr(target_obj, field, value)
+            self._choose_field_setter(config, target_path, field, value)
         except AttributeError as e:
-            self._logger.warning(f"Failed to set field {field} on {target_path}: {e}")
+            self._handle_nested_field_error(field, target_path, e)
+            
+    def _set_deep_nested_field(self, config: AppConfig, target_path: str, field: str, value: str) -> None:
+        """Set deeply nested field value."""
+        parts = target_path.split('.', 1)
+        parent_attr = getattr(config, parts[0])
+        if isinstance(parent_attr, dict) and parts[1] in parent_attr:
+            target_obj = parent_attr[parts[1]]
+            self._set_field_if_valid(target_obj, field, value)
+            
+    def _set_direct_field(self, config: AppConfig, target_path: str, field: str, value: str) -> None:
+        """Set direct field value."""
+        target_obj = getattr(config, target_path, None)
+        self._set_field_if_valid(target_obj, field, value)
+        
+    def _set_field_if_valid(self, target_obj: Any, field: str, value: str) -> None:
+        """Set field if target object is valid."""
+        if target_obj and hasattr(target_obj, field):
+            setattr(target_obj, field, value)
     
     def _load_from_environment_variables(self, config: AppConfig):
         """Fallback method to load configuration from environment variables."""
-        env_mappings = {
+        env_mappings = self._get_env_mappings()
+        for env_var, (target_path, field) in env_mappings.items():
+            self._apply_env_var_if_present(config, env_var, target_path, field)
+            
+    def _get_oauth_mappings(self) -> Dict[str, Tuple[str, str]]:
+        """Get OAuth environment mappings."""
+        return {
             "GOOGLE_CLIENT_ID": ("oauth_config", "client_id"),
             "GOOGLE_CLIENT_SECRET": ("oauth_config", "client_secret"),
-            "GEMINI_API_KEY": ("llm_configs.default", "api_key"),
+        }
+        
+    def _get_llm_mappings(self) -> Dict[str, Tuple[str, str]]:
+        """Get LLM-related mappings."""
+        return {"GEMINI_API_KEY": ("llm_configs.default", "api_key")}
+        
+    def _get_security_mappings(self) -> Dict[str, Tuple[None, str]]:
+        """Get security-related mappings."""
+        return {
             "JWT_SECRET_KEY": (None, "jwt_secret_key"),
             "FERNET_KEY": (None, "fernet_key"),
             "DATABASE_URL": (None, "database_url"),
             "LOG_LEVEL": (None, "log_level"),
         }
         
-        for env_var, (target_path, field) in env_mappings.items():
-            value = os.environ.get(env_var)
-            if value:
-                if target_path:
-                    if target_path.startswith("llm_configs."):
-                        # Handle LLM config specifically
-                        llm_name = target_path.split(".")[1]
-                        if llm_name in config.llm_configs:
-                            setattr(config.llm_configs[llm_name], field, value)
-                    else:
-                        target_obj = getattr(config, target_path, None)
-                        if target_obj:
-                            setattr(target_obj, field, value)
-                else:
-                    setattr(config, field, value)
+    def _get_core_mappings(self) -> Dict[str, Tuple[Optional[str], str]]:
+        """Get core environment mappings."""
+        llm_mappings = self._get_llm_mappings()
+        security_mappings = self._get_security_mappings()
+        return {**llm_mappings, **security_mappings}
+        
+    def _get_env_mappings(self) -> Dict[str, Tuple[Optional[str], str]]:
+        """Get environment variable mappings."""
+        oauth_mappings = self._get_oauth_mappings()
+        core_mappings = self._get_core_mappings()
+        return {**oauth_mappings, **core_mappings}
+        
+    def _apply_env_var_if_present(self, config: AppConfig, env_var: str, target_path: Optional[str], field: str) -> None:
+        """Apply environment variable if present."""
+        value = os.environ.get(env_var)
+        if value:
+            self._set_config_value(config, target_path, field, value)
+            
+    def _set_config_value(self, config: AppConfig, target_path: Optional[str], field: str, value: str) -> None:
+        """Set configuration value based on target path."""
+        if target_path:
+            self._set_nested_config_value(config, target_path, field, value)
+        else:
+            setattr(config, field, value)
+            
+    def _set_nested_config_value(self, config: AppConfig, target_path: str, field: str, value: str) -> None:
+        """Set nested configuration value."""
+        if target_path.startswith("llm_configs."):
+            self._set_llm_config_value(config, target_path, field, value)
+        else:
+            self._set_object_attribute(config, target_path, field, value)
+            
+    def _set_llm_config_value(self, config: AppConfig, target_path: str, field: str, value: str) -> None:
+        """Set LLM configuration value."""
+        llm_name = target_path.split(".")[1]
+        if llm_name in config.llm_configs:
+            setattr(config.llm_configs[llm_name], field, value)
+            
+    def _set_object_attribute(self, config: AppConfig, target_path: str, field: str, value: str) -> None:
+        """Set object attribute value."""
+        target_obj = getattr(config, target_path, None)
+        if target_obj:
+            setattr(target_obj, field, value)
     
     def reload_config(self):
         """Force reload the configuration (clears cache)."""

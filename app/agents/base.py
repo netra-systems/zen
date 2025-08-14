@@ -6,7 +6,7 @@ import time
 
 from app.llm.llm_manager import LLMManager
 from app.schemas import SubAgentLifecycle, SubAgentUpdate, SubAgentState
-from app.schemas.websocket_unified import WebSocketMessage, WebSocketMessageType
+from app.schemas.registry import WebSocketMessage, WebSocketMessageType
 from app.agents.state import DeepAgentState
 from app.agents.interfaces import BaseAgentProtocol
 from app.logging_config import central_logger

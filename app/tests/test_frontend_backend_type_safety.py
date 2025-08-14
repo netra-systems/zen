@@ -11,7 +11,7 @@ from datetime import datetime
 from pydantic import ValidationError, BaseModel
 
 # Import backend schemas
-from app.schemas.websocket_unified import (
+from app.schemas.registry import (
     WebSocketMessageType,
     StartAgentPayload,
     UserMessagePayload,
@@ -34,7 +34,7 @@ from app.schemas.websocket_unified import (
     ThreadList
 )
 from app.schemas.Request import RequestModel, StartAgentPayload as StartAgentPayloadPydantic
-from app.schemas.Message import Message, MessageType
+from app.schemas.registry import Message, MessageType
 from app.schemas.Agent import AgentStarted, AgentCompleted, AgentErrorMessage
 from app.schemas.Tool import ToolStarted, ToolCompleted, ToolStatus
 

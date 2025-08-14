@@ -5,6 +5,7 @@ Strong type definitions for LLM operations following Netra conventions.
 from typing import Dict, Any, Optional, List, Union, Literal, TypeVar, Generic
 from datetime import datetime
 from enum import Enum
+from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field, ConfigDict
 import uuid
 
@@ -196,7 +197,7 @@ class LLMTool(BaseModel):
 T = TypeVar('T', bound=BaseModel)
 
 
-class LLMInstance(Generic[T]):
+class LLMInstance(ABC, Generic[T]):
     """Generic LLM instance with strong typing"""
     
     def __init__(self, config: LLMConfig):
@@ -208,10 +209,12 @@ class LLMInstance(Generic[T]):
             model=str(config.model)
         )
     
+    @abstractmethod
     async def generate(self, request: LLMRequest) -> LLMResponse:
         """Generate response from LLM"""
-        raise NotImplementedError
+        pass
     
+    @abstractmethod
     async def generate_structured(
         self, 
         request: LLMRequest, 
@@ -219,11 +222,12 @@ class LLMInstance(Generic[T]):
         response_model: type[T]
     ) -> T:
         """Generate structured output matching schema"""
-        raise NotImplementedError
+        pass
     
+    @abstractmethod
     async def stream(self, request: LLMRequest) -> List[LLMStreamChunk]:
         """Stream response from LLM"""
-        raise NotImplementedError
+        pass
     
     def get_metrics(self) -> LLMMetrics:
         """Get usage metrics"""

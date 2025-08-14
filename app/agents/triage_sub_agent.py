@@ -13,7 +13,7 @@ from app.llm.llm_manager import LLMManager
 from app.agents.base import BaseSubAgent
 from app.agents.prompts import triage_prompt_template
 from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.state import DeepAgentState
+from app.schemas.registry import DeepAgentState
 from app.agents.config import agent_config
 from app.redis_manager import RedisManager
 from app.logging_config import central_logger

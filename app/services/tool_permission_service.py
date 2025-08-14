@@ -12,7 +12,7 @@ from app.schemas.ToolPermission import (
 )
 from app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
 from app.logging_config import central_logger
-from app.core.exceptions import NetraException
+from app.core.exceptions_base import NetraException
 import redis
 import json
 from functools import lru_cache

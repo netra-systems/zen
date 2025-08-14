@@ -31,12 +31,23 @@ class DatabaseConnectionError(DatabaseError):
 class RecordNotFoundError(DatabaseError):
     """Raised when a database record is not found."""
     
-    def __init__(self, message: str = None, **kwargs):
-        super().__init__(
-            message=message or "Record not found",
+    def __init__(self, resource: str = None, identifier: str = None, message: str = None, **kwargs):
+        # Support both old and new calling patterns
+        if resource is not None and identifier is not None:
+            formatted_message = f"{resource} not found (ID: {identifier})"
+            details = {"resource": resource, "identifier": str(identifier)}
+        else:
+            formatted_message = message or "Record not found"
+            details = {}
+        
+        # Call NetraException directly to avoid code conflict
+        NetraException.__init__(
+            self,
+            message=formatted_message,
             code=ErrorCode.RECORD_NOT_FOUND,
             severity=ErrorSeverity.MEDIUM,
             user_message="The requested item was not found",
+            details=details,
             **kwargs
         )
 

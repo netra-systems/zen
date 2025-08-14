@@ -1,5 +1,5 @@
 #!/bin/bash
-# Enhanced GitHub Actions self-hosted runner installation script with comprehensive error handling
+# Enhanced GitHub Actions warp-custom-default runner installation script with comprehensive error handling
 # Version: 2.0 - Fixes Docker permissions, resource constraints, and improves error recovery
 
 # Exit immediately if a command exits with a non-zero status.
@@ -11,7 +11,7 @@ set -u
 set -o pipefail
 
 # Enable debug mode if DEBUG environment variable is set
-[[ "$${DEBUG:-}" == "true" ]] && set -x
+[[ "$${"DEBUG:-"}" == "true" ]] && set -x
 
 # --- Configuration Variables ---
 # These variables are expected to be templated by a tool like Terraform.
@@ -29,7 +29,7 @@ RUNNER_HOME="/home/$$RUNNER_USER"
 RUNNER_DIR="$$RUNNER_HOME/actions-runner"
 LOG_FILE="/var/log/github-runner-install.log"
 ERROR_LOG="/var/log/github-runner-errors.log"
-DOCKER_REQUIRED="$${DOCKER_REQUIRED:-false}"
+DOCKER_REQUIRED="$${"DOCKER_REQUIRED:-false"}"
 MAX_RETRIES=5
 RETRY_DELAY=10
 
@@ -301,7 +301,7 @@ install_docker_buildx() {
     
     mkdir -p "$buildx_dir"
     
-    if curl -fsSL "https://github.com/docker/buildx/releases/download/v$${buildx_version}/buildx-v$${buildx_version}.linux-amd64" \
+    if curl -fsSL "https://github.com/docker/buildx/releases/download/v$$buildx_version/buildx-v$$buildx_version.linux-amd64" \
         -o "$buildx_dir/docker-buildx"; then
         chmod +x "$buildx_dir/docker-buildx"
         log "Docker buildx plugin installed successfully."
@@ -355,46 +355,124 @@ create_runner_user() {
 # Retrieve the GitHub Personal Access Token (PAT) from Google Secret Manager.
 get_github_pat() {
     log "Retrieving GitHub PAT from Secret Manager..."
+    log "User runner created successfully."
+    
+    # Debug: Check environment and permissions
+    log "DEBUG: Checking environment..."
+    log "  PROJECT_ID: $PROJECT_ID"
+    log "  Running as: $(whoami)"
+    log "  HOME: $HOME"
     
     # Ensure gcloud is available
     if ! command -v gcloud &>/dev/null; then
         log "Installing Google Cloud SDK..."
         install_gcloud_sdk
+        
+        # Verify installation
+        if ! command -v gcloud &>/dev/null; then
+            log "ERROR: Failed to install gcloud SDK"
+            log "Attempting alternative installation method..."
+            
+            # Alternative installation method
+            curl https://sdk.cloud.google.com | bash
+            export PATH=$PATH:$HOME/google-cloud-sdk/bin
+            
+            if ! command -v gcloud &>/dev/null; then
+                log "ERROR: gcloud SDK installation failed completely"
+                exit 1
+            fi
+        fi
     fi
+    
+    # Debug: Check service account and authentication
+    log "DEBUG: Checking authentication..."
+    local service_account=$(curl -H "Metadata-Flavor: Google" \
+        "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/email" 2>/dev/null || echo "unknown")
+    log "  Service Account: $service_account"
+    
+    # Check if we have the necessary scopes
+    local scopes=$(curl -H "Metadata-Flavor: Google" \
+        "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/scopes" 2>/dev/null || echo "unknown")
+    log "  Scopes: $scopes"
+    
+    # Authenticate using metadata server
+    log "Authenticating with metadata server..."
+    gcloud auth application-default print-access-token &>/dev/null || {
+        log "WARNING: Failed to get access token from metadata"
+    }
     
     local token=""
     local retry_count=0
     
     while [[ $retry_count -lt $MAX_RETRIES ]]; do
-        # Check if secret exists
-        if gcloud secrets describe "github-runner-token" --project="$PROJECT_ID" &>/dev/null; then
-            # Try to access the secret
-            token=$(gcloud secrets versions access latest --secret="github-runner-token" --project="$PROJECT_ID" 2>&1)
-            
-            if [[ $? -eq 0 && -n "$token" && "$token" != *"ERROR"* ]]; then
-                log "Successfully retrieved GitHub PAT."
-                echo "$token"
-                return 0
-            else
-                log "Failed to access secret (attempt $((retry_count + 1))/$MAX_RETRIES)."
-                log "Response: $${token:0:100}..." # Log first 100 chars for debugging
-            fi
+        log "Attempt $((retry_count + 1))/$MAX_RETRIES to retrieve secret..."
+        
+        # First, check if the secret exists and we have permissions
+        log "Checking if secret exists..."
+        local secret_check=$(gcloud secrets describe "github-runner-token" \
+            --project="$PROJECT_ID" \
+            --format="value(name)" 2>&1)
+        
+        if [[ "$secret_check" == *"PERMISSION_DENIED"* ]]; then
+            log "ERROR: Permission denied accessing secret. Service account needs roles/secretmanager.secretAccessor"
+            log "Service account: $service_account"
+            log "Please ensure the following IAM binding exists:"
+            log "  gcloud projects add-iam-policy-binding $PROJECT_ID \\"
+            log "    --member=\"serviceAccount:$service_account\" \\"
+            log "    --role=\"roles/secretmanager.secretAccessor\""
+            exit 1
+        elif [[ "$secret_check" == *"NOT_FOUND"* ]]; then
+            log "ERROR: Secret 'github-runner-token' not found in project $PROJECT_ID"
+            log "Please create the secret with:"
+            log "  echo -n 'YOUR_GITHUB_PAT' | gcloud secrets create github-runner-token \\"
+            log "    --data-file=- --project=$PROJECT_ID"
+            exit 1
+        fi
+        
+        # Try to access the secret
+        token=$(gcloud secrets versions access latest \
+            --secret="github-runner-token" \
+            --project="$PROJECT_ID" 2>&1)
+        local exit_code=$?
+        
+        if [[ $exit_code -eq 0 && -n "$token" && "$token" != *"ERROR"* && "$token" != *"PERMISSION_DENIED"* ]]; then
+            log "Successfully retrieved GitHub PAT."
+            echo "$token"
+            return 0
         else
-            log "Secret 'github-runner-token' not found (attempt $((retry_count + 1))/$MAX_RETRIES)."
+            log "Failed to access secret (attempt $((retry_count + 1))/$MAX_RETRIES)."
+            log "Exit code: $exit_code"
+            log "Response: $$(echo "$$token" | head -c 200)"
+            
+            # Additional diagnostics
+            if [[ "$token" == *"PERMISSION_DENIED"* ]]; then
+                log "ERROR: Permission denied. Checking IAM bindings..."
+                gcloud projects get-iam-policy "$PROJECT_ID" \
+                    --flatten="bindings[].members" \
+                    --filter="bindings.members:serviceAccount:$service_account" \
+                    --format="table(bindings.role)" 2>&1 | head -10 || true
+            fi
         fi
         
         retry_count=$((retry_count + 1))
         if [[ $retry_count -lt $MAX_RETRIES ]]; then
-            log "Waiting $${RETRY_DELAY} seconds before retry..."
-            sleep $$RETRY_DELAY
+            log "Waiting $$RETRY_DELAY seconds before retry..."
+            sleep $RETRY_DELAY
         fi
     done
     
     log "ERROR: Failed to retrieve GitHub PAT after $MAX_RETRIES attempts."
     log "Debug info:"
     log "  Project ID: $PROJECT_ID"
-    log "  Service Account: $(gcloud config get-value account 2>/dev/null || echo 'unknown')"
+    log "  Service Account: $service_account"
+    log "Available secrets in project:"
     gcloud secrets list --project="$PROJECT_ID" 2>&1 | head -5 || true
+    log ""
+    log "Troubleshooting steps:"
+    log "1. Verify the secret exists: gcloud secrets describe github-runner-token --project=$PROJECT_ID"
+    log "2. Check IAM permissions: gcloud projects get-iam-policy $PROJECT_ID"
+    log "3. Ensure service account has roles/secretmanager.secretAccessor role"
+    log "4. Check if the secret has a version: gcloud secrets versions list github-runner-token --project=$PROJECT_ID"
     exit 1
 }
 
@@ -542,7 +620,7 @@ deploy_helper_scripts() {
     mkdir -p "$scripts_dir"
     
     # Check if scripts are available in the current directory or a known location
-    local source_dir="$${SCRIPT_SOURCE_DIR:-$$(dirname "$$0")}"
+    local source_dir="$${"SCRIPT_SOURCE_DIR:-$$(dirname \"$$0\")"}"
     
     if [[ -d "$source_dir" ]]; then
         for script in diagnose-runner.sh fix-runner-issues.sh monitor-runner.sh; do
@@ -715,5 +793,32 @@ main() {
     fi
 }
 
+# Error handler that triggers auto-recovery
+error_handler() {
+    local exit_code=$?
+    log "ERROR: Installation failed with exit code $exit_code at line $1"
+    
+    # Trigger auto-recovery if available
+    if [[ -x "/opt/github-runner/scripts/auto-recovery.sh" ]]; then
+        log "Triggering automatic recovery system..."
+        exec /opt/github-runner/scripts/auto-recovery.sh
+    else
+        log "Auto-recovery script not found. Manual intervention required."
+        log "Check logs at: $LOG_FILE"
+    fi
+    
+    exit $exit_code
+}
+
+# Set error trap
+trap 'error_handler $LINENO' ERR
+
 # Run the main function
-main "$@"
+main "$@" || {
+    # If main fails, trigger recovery
+    if [[ -x "/opt/github-runner/scripts/auto-recovery.sh" ]]; then
+        log "Main installation failed, triggering auto-recovery..."
+        exec /opt/github-runner/scripts/auto-recovery.sh
+    fi
+    exit 1
+}

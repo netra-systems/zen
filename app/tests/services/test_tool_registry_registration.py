@@ -11,7 +11,7 @@ from datetime import datetime, UTC
 
 from langchain_core.tools import BaseTool
 from app.services.tool_registry import ToolRegistry
-from app.core.exceptions import NetraException
+from app.core.exceptions_base import NetraException
 
 
 class MockTool(BaseTool):

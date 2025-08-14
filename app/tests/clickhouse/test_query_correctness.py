@@ -15,6 +15,7 @@ from app.db.models_clickhouse import (
     get_llm_events_table_schema,
     WORKLOAD_EVENTS_TABLE_SCHEMA
 )
+from app.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
 
 
 class TestCorpusQueries:
@@ -445,8 +446,8 @@ class TestNestedArrayQueries:
         assert "has(metrics.name" not in query
 
 
-class TestErrorHandling:
-    """Test query error handling patterns"""
+class TestErrorHandling(SharedTestErrorHandling):
+    """Test query error handling patterns - extends shared error handling."""
     
     def test_null_safety_in_calculations(self):
         """Test 20: Verify z-score calculation in anomaly detection"""

@@ -10,7 +10,7 @@ from typing import Dict, Any, Union, List, Optional, Literal
 from fastapi import WebSocket
 
 from app.logging_config import central_logger
-from app.schemas.websocket_unified import WebSocketMessage
+from app.schemas.registry import WebSocketMessage
 from app.schemas.websocket_message_types import (
     WebSocketValidationError,
     ServerMessage,
@@ -24,6 +24,7 @@ from app.websocket.connection import ConnectionInfo
 from app.ws_manager_core import WebSocketManagerCore
 from app.ws_manager_connections import WebSocketConnectionManager
 from app.ws_manager_messaging import WebSocketMessagingManager
+from app.ws_manager_broadcasting import WebSocketBroadcastingManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -44,6 +45,7 @@ class WebSocketManager:
         self.core = WebSocketManagerCore()
         self.connections = WebSocketConnectionManager(self.core)
         self.messaging = WebSocketMessagingManager(self.core)
+        self.broadcasting = WebSocketBroadcastingManager(self.core)
 
     async def connect_user(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Establish and register a new WebSocket connection for a user."""
@@ -77,7 +79,7 @@ class WebSocketManager:
         Returns:
             bool: True if message was sent successfully
         """
-        return await self.messaging.send_to_thread(thread_id, message)
+        return await self.broadcasting.send_to_thread(thread_id, message)
 
     async def broadcast_to_job(self, job_id: str, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> bool:
         """Send a message to all users connected to a specific job.
@@ -89,7 +91,7 @@ class WebSocketManager:
         Returns:
             bool: True if message was sent successfully
         """
-        return await self.messaging.send_to_thread(job_id, message)
+        return await self.broadcasting.broadcast_to_job(job_id, message)
 
     async def connect_to_job(self, websocket: WebSocket, job_id: str) -> ConnectionInfo:
         """Connect a websocket to a specific job/room.
@@ -114,7 +116,7 @@ class WebSocketManager:
 
     async def broadcast(self, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> BroadcastResult:
         """Broadcast a message to all connected users."""
-        return await self.messaging.broadcast_to_all(message)
+        return await self.broadcasting.broadcast_to_all(message)
 
     async def handle_message(self, user_id: str, websocket: WebSocket, message: Dict[str, Any]) -> bool:
         """Handle incoming WebSocket message with rate limiting and validation."""

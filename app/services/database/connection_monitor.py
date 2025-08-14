@@ -5,7 +5,7 @@ Provides comprehensive monitoring of database connection pools.
 
 from typing import Dict, Any
 from app.logging_config import central_logger
-from app.core.exceptions import DatabaseError
+from app.core.exceptions_database import DatabaseError
 from app.services.database.pool_metrics import ConnectionPoolMetrics
 from app.services.database.health_checker import ConnectionHealthChecker
 

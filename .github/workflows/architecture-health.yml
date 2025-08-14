@@ -1,0 +1,425 @@
+name: Architecture Health Monitor
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily at 9 AM UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      fail_on_violations:
+        description: 'Fail workflow on violations'
+        required: false
+        default: 'false'
+        type: boolean
+      generate_reports:
+        description: 'Generate HTML and JSON reports'
+        required: false
+        default: 'true'
+        type: boolean
+
+env:
+  REPORTS_DIR: reports/architecture-health
+  DASHBOARD_URL: https://netra-ai.github.io/architecture-health
+
+jobs:
+  architecture-health-scan:
+    name: Architecture Health Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+      pages: write
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for trend analysis
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install ast
+
+    - name: Create reports directory
+      run: |
+        mkdir -p ${{ env.REPORTS_DIR }}
+        mkdir -p artifacts
+
+    - name: Run Architecture Health Scan
+      id: health_scan
+      run: |
+        echo "🔍 Running comprehensive architecture health scan..."
+        
+        # Determine if we should fail on violations
+        FAIL_ON_VIOLATIONS="${{ inputs.fail_on_violations }}"
+        if [ "$FAIL_ON_VIOLATIONS" = "true" ]; then
+          FAIL_FLAG="--fail-on-violations"
+        else
+          FAIL_FLAG=""
+        fi
+        
+        # Run the health scan
+        python scripts/architecture_health.py \
+          --path . \
+          --output-html "${{ env.REPORTS_DIR }}/dashboard.html" \
+          --output-json "${{ env.REPORTS_DIR }}/health-report.json" \
+          $FAIL_FLAG | tee scan-output.txt
+        
+        # Extract key metrics for GitHub summary
+        if [ -f "${{ env.REPORTS_DIR }}/health-report.json" ]; then
+          COMPLIANCE_SCORE=$(python -c "import json; data=json.load(open('${{ env.REPORTS_DIR }}/health-report.json')); print(data['metrics']['compliance_scores']['overall_compliance'])")
+          TOTAL_VIOLATIONS=$(python -c "import json; data=json.load(open('${{ env.REPORTS_DIR }}/health-report.json')); print(data['metrics']['violation_counts']['total_violations'])")
+          
+          echo "compliance_score=$COMPLIANCE_SCORE" >> $GITHUB_OUTPUT
+          echo "total_violations=$TOTAL_VIOLATIONS" >> $GITHUB_OUTPUT
+          
+          # Set status based on compliance score
+          if (( $(echo "$COMPLIANCE_SCORE >= 90" | bc -l) )); then
+            echo "status=excellent" >> $GITHUB_OUTPUT
+            echo "status_emoji=🟢" >> $GITHUB_OUTPUT
+          elif (( $(echo "$COMPLIANCE_SCORE >= 70" | bc -l) )); then
+            echo "status=good" >> $GITHUB_OUTPUT
+            echo "status_emoji=🟡" >> $GITHUB_OUTPUT
+          else
+            echo "status=needs_improvement" >> $GITHUB_OUTPUT
+            echo "status_emoji=🔴" >> $GITHUB_OUTPUT
+          fi
+        fi
+      continue-on-error: true
+
+    - name: Generate Trend Analysis
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "📈 Generating trend analysis..."
+        
+        # Create trend data directory if it doesn't exist
+        mkdir -p .github/architecture-trends
+        
+        # Store current metrics with timestamp
+        TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        if [ -f "${{ env.REPORTS_DIR }}/health-report.json" ]; then
+          # Extract key metrics and store in trend file
+          python -c "
+import json
+from datetime import datetime
+
+# Load current report
+with open('${{ env.REPORTS_DIR }}/health-report.json') as f:
+    data = json.load(f)
+
+# Create trend entry
+trend_entry = {
+    'timestamp': '$TIMESTAMP',
+    'commit': '${{ github.sha }}',
+    'compliance_score': data['metrics']['compliance_scores']['overall_compliance'],
+    'total_violations': data['metrics']['violation_counts']['total_violations'],
+    'file_violations': data['metrics']['violation_counts']['file_size_violations'],
+    'function_violations': data['metrics']['violation_counts']['function_complexity_violations'],
+    'duplicate_types': data['metrics']['violation_counts']['duplicate_types'],
+    'test_stubs': data['metrics']['violation_counts']['test_stubs']
+}
+
+# Load existing trends
+trends_file = '.github/architecture-trends/trends.jsonl'
+try:
+    with open(trends_file, 'a') as f:
+        f.write(json.dumps(trend_entry) + '\n')
+except Exception as e:
+    print(f'Error writing trends: {e}')
+    # Create new trends file
+    with open(trends_file, 'w') as f:
+        f.write(json.dumps(trend_entry) + '\n')
+"
+        fi
+
+    - name: Upload Architecture Reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: architecture-health-reports
+        path: |
+          ${{ env.REPORTS_DIR }}/
+          scan-output.txt
+        retention-days: 30
+
+    - name: Comment on PR with Health Summary
+      if: github.event_name == 'pull_request' && always()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          let compliance_score = '${{ steps.health_scan.outputs.compliance_score }}';
+          let total_violations = '${{ steps.health_scan.outputs.total_violations }}';
+          let status_emoji = '${{ steps.health_scan.outputs.status_emoji }}';
+          
+          // Read scan output for detailed summary
+          let scanOutput = '';
+          try {
+            scanOutput = fs.readFileSync('scan-output.txt', 'utf8');
+          } catch (e) {
+            scanOutput = 'Scan output not available';
+          }
+          
+          const dashboardUrl = `${{ env.DASHBOARD_URL }}/pr-${{ github.event.number }}/dashboard.html`;
+          
+          const comment = `## ${status_emoji} Architecture Health Report
+          
+          **Overall Compliance Score:** ${compliance_score}%
+          **Total Violations:** ${total_violations}
+          
+          ### Summary
+          This PR has been scanned for architecture compliance violations:
+          
+          ${status_emoji === '🟢' ? '✅ **Excellent!** Your code meets all architecture standards.' : 
+            status_emoji === '🟡' ? '⚠️ **Good**, but some improvements needed.' : 
+            '❌ **Needs attention** - significant violations found.'}
+          
+          ### Quick Actions
+          - 📊 [View Full Dashboard](${dashboardUrl})
+          - 📄 [Download JSON Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          ### Key Metrics
+          - File size compliance (≤300 lines)
+          - Function complexity (≤8 lines) 
+          - Type safety and duplicates
+          - Test stub detection
+          
+          <details>
+          <summary>📋 Detailed Scan Output</summary>
+          
+          \`\`\`
+          ${scanOutput.substring(0, 4000)}${scanOutput.length > 4000 ? '\n... (truncated)' : ''}
+          \`\`\`
+          </details>
+          
+          ---
+          🤖 *Generated by [Architecture Health Monitor](https://github.com/${{ github.repository }}/actions/workflows/architecture-health.yml)*
+          `;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+    - name: Create GitHub Issue for Critical Violations
+      if: steps.health_scan.outputs.status == 'needs_improvement' && github.ref == 'refs/heads/main'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const compliance_score = '${{ steps.health_scan.outputs.compliance_score }}';
+          const total_violations = '${{ steps.health_scan.outputs.total_violations }}';
+          
+          const issueTitle = `🚨 Architecture Health Alert: ${total_violations} violations found (${compliance_score}% compliance)`;
+          
+          const issueBody = `## 🚨 Architecture Health Alert
+          
+          **Critical violations detected in main branch!**
+          
+          - **Compliance Score:** ${compliance_score}%
+          - **Total Violations:** ${total_violations}
+          - **Commit:** ${{ github.sha }}
+          - **Workflow Run:** ${{ github.run_id }}
+          
+          ### Immediate Actions Required
+          
+          1. **Review Dashboard:** [Architecture Health Dashboard](${{ env.DASHBOARD_URL }}/dashboard.html)
+          2. **Address Critical Issues:** Focus on file size and function complexity violations
+          3. **Update Documentation:** Ensure CLAUDE.md architecture rules are followed
+          
+          ### Next Steps
+          
+          - [ ] Split oversized files (>300 lines) into focused modules
+          - [ ] Refactor complex functions (>8 lines) into smaller units  
+          - [ ] Remove test stubs from production code
+          - [ ] Consolidate duplicate type definitions
+          - [ ] Add missing type annotations
+          
+          ### Resources
+          
+          - [CLAUDE.md Architecture Rules](./CLAUDE.md)
+          - [Alignment Action Plan](./ALIGNMENT_ACTION_PLAN.md)
+          - [Root Cause Analysis](./ROOT_CAUSE_ANALYSIS.md)
+          
+          **Priority:** High
+          **Target:** Achieve >90% compliance within 2 sprints
+          
+          ---
+          🤖 *Auto-generated by Architecture Health Monitor*
+          `;
+          
+          // Check if similar issue already exists
+          const issues = await github.rest.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open',
+            labels: ['architecture-health', 'critical']
+          });
+          
+          const existingIssue = issues.data.find(issue => 
+            issue.title.includes('Architecture Health Alert')
+          );
+          
+          if (existingIssue) {
+            // Update existing issue
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: existingIssue.number,
+              body: `## 📊 Updated Health Report\n\n${issueBody}`
+            });
+          } else {
+            // Create new issue
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              body: issueBody,
+              labels: ['architecture-health', 'critical', 'technical-debt']
+            });
+          }
+
+    - name: Setup Pages for Dashboard
+      if: github.ref == 'refs/heads/main' && inputs.generate_reports != 'false'
+      uses: actions/configure-pages@v4
+
+    - name: Upload Dashboard to Pages
+      if: github.ref == 'refs/heads/main' && inputs.generate_reports != 'false'
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ${{ env.REPORTS_DIR }}
+
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main' && inputs.generate_reports != 'false'
+      id: deployment
+      uses: actions/deploy-pages@v4
+
+    - name: Update Job Summary
+      if: always()
+      run: |
+        echo "## 🏗️ Architecture Health Scan Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Overall Compliance | ${{ steps.health_scan.outputs.compliance_score }}% ${{ steps.health_scan.outputs.status_emoji }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Total Violations | ${{ steps.health_scan.outputs.total_violations }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Status | ${{ steps.health_scan.outputs.status }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Dashboard | [View Dashboard](${{ env.DASHBOARD_URL }}/dashboard.html) |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ steps.health_scan.outputs.status }}" = "needs_improvement" ]; then
+          echo "### ⚠️ Action Required" >> $GITHUB_STEP_SUMMARY
+          echo "Architecture violations detected. Please review the dashboard and address critical issues." >> $GITHUB_STEP_SUMMARY
+        elif [ "${{ steps.health_scan.outputs.status }}" = "good" ]; then
+          echo "### ✅ Good Progress" >> $GITHUB_STEP_SUMMARY
+          echo "Architecture health is good but can be improved further." >> $GITHUB_STEP_SUMMARY
+        else
+          echo "### 🎉 Excellent!" >> $GITHUB_STEP_SUMMARY
+          echo "All architecture standards are being met. Keep up the great work!" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Notify Team on Slack
+      if: failure() || steps.health_scan.outputs.status == 'needs_improvement'
+      uses: 8398a7/action-slack@v3
+      with:
+        status: custom
+        custom_payload: |
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "${{ steps.health_scan.outputs.status_emoji }} Architecture Health Alert"
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Repository:* ${{ github.repository }}"
+                  },
+                  {
+                    "type": "mrkdwn", 
+                    "text": "*Branch:* ${{ github.ref_name }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Compliance Score:* ${{ steps.health_scan.outputs.compliance_score }}%"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Violations:* ${{ steps.health_scan.outputs.total_violations }}"
+                  }
+                ]
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "View Dashboard"
+                    },
+                    "url": "${{ env.DASHBOARD_URL }}/dashboard.html"
+                  },
+                  {
+                    "type": "button", 
+                    "text": {
+                      "type": "plain_text",
+                      "text": "View Workflow"
+                    },
+                    "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                ]
+              }
+            ]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  benchmark-performance:
+    name: Benchmark Scan Performance
+    runs-on: ubuntu-latest
+    needs: architecture-health-scan
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Benchmark Architecture Health Scan
+      run: |
+        echo "⏱️ Benchmarking architecture health scan performance..."
+        
+        # Run multiple iterations to get average performance
+        for i in {1..3}; do
+          echo "Run $i:"
+          time python scripts/architecture_health.py --cli-only --path .
+        done
+        
+        # Performance recommendations
+        echo "## Performance Metrics" >> $GITHUB_STEP_SUMMARY
+        echo "Benchmark completed - 3 runs average" >> $GITHUB_STEP_SUMMARY
+        echo "Target: <30 seconds for full scan" >> $GITHUB_STEP_SUMMARY

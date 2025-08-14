@@ -61,7 +61,7 @@ jobs:
   deploy-backend:
     name: Deploy Backend to GKE
     needs: [infrastructure, build-backend]
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -91,7 +91,7 @@ jobs:
   deploy-frontend:
     name: Deploy Frontend to GKE
     needs: [infrastructure, build-frontend]
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -121,7 +121,7 @@ jobs:
   smoke-test:
     name: Run Smoke Tests
     needs: [deploy-backend, deploy-frontend, infrastructure]
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -147,7 +147,7 @@ jobs:
   verify:
     name: Verify Deployment
     needs: [infrastructure, smoke-test]
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     outputs:
       status: ${{ steps.verify.outputs.status }}
     steps:
@@ -166,7 +166,7 @@ jobs:
     name: Post Deployment Comment
     needs: [infrastructure, smoke-test, verify]
     if: success()
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     steps:
       - name: Post deployment comment
         uses: actions/github-script@v7

@@ -1,0 +1,550 @@
+name: Workflow Health Monitor
+description: Monitor and report on workflow health, performance, and costs
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'  # Every 4 hours
+    - cron: '0 9 * * 1'    # Weekly report on Monday 9 AM
+  workflow_dispatch:
+    inputs:
+      report_type:
+        description: 'Type of report to generate'
+        required: false
+        type: choice
+        options:
+          - summary
+          - detailed
+          - cost
+          - performance
+          - failures
+        default: summary
+      days_back:
+        description: 'Number of days to analyze'
+        required: false
+        type: string
+        default: '7'
+
+env:
+  METRICS_RETENTION_DAYS: 90
+  ALERT_THRESHOLD_FAILURE_RATE: 10  # Alert if >10% failures
+  ALERT_THRESHOLD_DURATION: 200     # Alert if >200% of baseline
+  COST_BUDGET_DAILY: 20
+  COST_BUDGET_MONTHLY: 500
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  # ==========================================
+  # PHASE 1: Data Collection
+  # ==========================================
+  
+  collect-metrics:
+    name: Collect Workflow Metrics
+    runs-on: ubuntu-latest
+    outputs:
+      metrics_file: ${{ steps.collect.outputs.metrics_file }}
+      total_runs: ${{ steps.analyze.outputs.total_runs }}
+      failure_rate: ${{ steps.analyze.outputs.failure_rate }}
+      avg_duration: ${{ steps.analyze.outputs.avg_duration }}
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        run: |
+          pip install pandas matplotlib seaborn requests
+          
+      - name: Collect workflow runs data
+        id: collect
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DAYS_BACK="${{ github.event.inputs.days_back || '7' }}"
+          SINCE_DATE=$(date -d "$DAYS_BACK days ago" --iso-8601)
+          
+          echo "Collecting workflow data since $SINCE_DATE"
+          
+          # Get workflow runs
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "/repos/${{ github.repository }}/actions/runs?created=>=$SINCE_DATE&per_page=100" \
+            > workflow_runs.json
+            
+          # Get workflow metadata
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "/repos/${{ github.repository }}/actions/workflows" \
+            > workflows.json
+            
+          echo "metrics_file=workflow_runs.json" >> $GITHUB_OUTPUT
+          
+      - name: Analyze metrics
+        id: analyze
+        run: |
+          python << 'EOF'
+          import json
+          import os
+          from datetime import datetime, timedelta
+          from collections import defaultdict
+          
+          # Load data
+          with open('workflow_runs.json', 'r') as f:
+              data = json.load(f)
+          
+          runs = data.get('workflow_runs', [])
+          
+          # Basic metrics
+          total_runs = len(runs)
+          successful_runs = sum(1 for r in runs if r['conclusion'] == 'success')
+          failed_runs = sum(1 for r in runs if r['conclusion'] == 'failure')
+          cancelled_runs = sum(1 for r in runs if r['conclusion'] == 'cancelled')
+          
+          # Calculate rates
+          failure_rate = (failed_runs / total_runs * 100) if total_runs > 0 else 0
+          success_rate = (successful_runs / total_runs * 100) if total_runs > 0 else 0
+          
+          # Duration analysis
+          durations = []
+          for run in runs:
+              if run['created_at'] and run['updated_at']:
+                  start = datetime.fromisoformat(run['created_at'].replace('Z', '+00:00'))
+                  end = datetime.fromisoformat(run['updated_at'].replace('Z', '+00:00'))
+                  duration = (end - start).total_seconds() / 60  # in minutes
+                  durations.append(duration)
+          
+          avg_duration = sum(durations) / len(durations) if durations else 0
+          max_duration = max(durations) if durations else 0
+          min_duration = min(durations) if durations else 0
+          
+          # Per-workflow analysis
+          workflow_stats = defaultdict(lambda: {'total': 0, 'success': 0, 'failed': 0, 'duration': []})
+          
+          for run in runs:
+              workflow_name = run['name']
+              workflow_stats[workflow_name]['total'] += 1
+              
+              if run['conclusion'] == 'success':
+                  workflow_stats[workflow_name]['success'] += 1
+              elif run['conclusion'] == 'failure':
+                  workflow_stats[workflow_name]['failed'] += 1
+                  
+              if run['created_at'] and run['updated_at']:
+                  start = datetime.fromisoformat(run['created_at'].replace('Z', '+00:00'))
+                  end = datetime.fromisoformat(run['updated_at'].replace('Z', '+00:00'))
+                  duration = (end - start).total_seconds() / 60
+                  workflow_stats[workflow_name]['duration'].append(duration)
+          
+          # Find problematic workflows
+          problematic_workflows = []
+          for name, stats in workflow_stats.items():
+              if stats['total'] > 0:
+                  fail_rate = stats['failed'] / stats['total'] * 100
+                  if fail_rate > 20:  # >20% failure rate
+                      problematic_workflows.append({
+                          'name': name,
+                          'failure_rate': fail_rate,
+                          'total_runs': stats['total']
+                      })
+          
+          # Save detailed report
+          report = {
+              'summary': {
+                  'total_runs': total_runs,
+                  'successful_runs': successful_runs,
+                  'failed_runs': failed_runs,
+                  'cancelled_runs': cancelled_runs,
+                  'success_rate': success_rate,
+                  'failure_rate': failure_rate,
+                  'avg_duration_minutes': avg_duration,
+                  'max_duration_minutes': max_duration,
+                  'min_duration_minutes': min_duration
+              },
+              'per_workflow': dict(workflow_stats),
+              'problematic_workflows': problematic_workflows,
+              'timestamp': datetime.now().isoformat()
+          }
+          
+          with open('workflow_health_report.json', 'w') as f:
+              json.dump(report, f, indent=2, default=str)
+          
+          # Output key metrics
+          print(f"total_runs={total_runs}", file=open(os.environ['GITHUB_OUTPUT'], 'a'))
+          print(f"failure_rate={failure_rate:.2f}", file=open(os.environ['GITHUB_OUTPUT'], 'a'))
+          print(f"avg_duration={avg_duration:.2f}", file=open(os.environ['GITHUB_OUTPUT'], 'a'))
+          print(f"problematic_count={len(problematic_workflows)}", file=open(os.environ['GITHUB_OUTPUT'], 'a'))
+          EOF
+          
+      - name: Upload metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflow-metrics-${{ github.run_id }}
+          path: |
+            workflow_runs.json
+            workflows.json
+            workflow_health_report.json
+          retention-days: ${{ env.METRICS_RETENTION_DAYS }}
+          
+  # ==========================================
+  # PHASE 2: Cost Analysis
+  # ==========================================
+  
+  analyze-costs:
+    name: Analyze Workflow Costs
+    needs: collect-metrics
+    runs-on: ubuntu-latest
+    outputs:
+      daily_cost: ${{ steps.costs.outputs.daily_cost }}
+      monthly_projection: ${{ steps.costs.outputs.monthly_projection }}
+      cost_status: ${{ steps.costs.outputs.status }}
+      
+    steps:
+      - name: Download metrics
+        uses: actions/download-artifact@v4
+        with:
+          name: workflow-metrics-${{ github.run_id }}
+          
+      - name: Calculate costs
+        id: costs
+        run: |
+          python << 'EOF'
+          import json
+          import os
+          from datetime import datetime, timedelta
+          
+          # Load workflow data
+          with open('workflow_runs.json', 'r') as f:
+              data = json.load(f)
+          
+          runs = data.get('workflow_runs', [])
+          
+          # Cost factors (simplified)
+          COST_PER_MINUTE = {
+              'ubuntu-latest': 0.008,
+              'ubuntu-22.04': 0.008,
+              'ubuntu-20.04': 0.008,
+              'windows-latest': 0.016,
+              'macos-latest': 0.08,
+              'warp-custom-default': 0.012  # Custom runner
+          }
+          
+          # Calculate costs
+          total_cost = 0
+          runner_usage = {}
+          
+          for run in runs:
+              if run['created_at'] and run['updated_at']:
+                  start = datetime.fromisoformat(run['created_at'].replace('Z', '+00:00'))
+                  end = datetime.fromisoformat(run['updated_at'].replace('Z', '+00:00'))
+                  duration_minutes = (end - start).total_seconds() / 60
+                  
+                  # Estimate runner type (would need job details for accuracy)
+                  runner = 'ubuntu-latest'  # Default assumption
+                  cost_per_min = COST_PER_MINUTE.get(runner, 0.008)
+                  
+                  run_cost = duration_minutes * cost_per_min
+                  total_cost += run_cost
+                  
+                  if runner not in runner_usage:
+                      runner_usage[runner] = {'minutes': 0, 'cost': 0}
+                  runner_usage[runner]['minutes'] += duration_minutes
+                  runner_usage[runner]['cost'] += run_cost
+          
+          # Calculate daily average and monthly projection
+          days_analyzed = 7  # From input
+          daily_cost = total_cost / days_analyzed if days_analyzed > 0 else 0
+          monthly_projection = daily_cost * 30
+          
+          # Check budget status
+          daily_budget = float(os.environ.get('COST_BUDGET_DAILY', '20'))
+          monthly_budget = float(os.environ.get('COST_BUDGET_MONTHLY', '500'))
+          
+          if daily_cost > daily_budget:
+              status = 'over_budget'
+          elif daily_cost > daily_budget * 0.8:
+              status = 'near_budget'
+          else:
+              status = 'within_budget'
+          
+          # Save cost report
+          cost_report = {
+              'total_cost': total_cost,
+              'daily_average': daily_cost,
+              'monthly_projection': monthly_projection,
+              'runner_usage': runner_usage,
+              'budget_status': status,
+              'daily_budget': daily_budget,
+              'monthly_budget': monthly_budget
+          }
+          
+          with open('cost_report.json', 'w') as f:
+              json.dump(cost_report, f, indent=2)
+          
+          # Output key metrics
+          print(f"daily_cost={daily_cost:.2f}", file=open(os.environ['GITHUB_OUTPUT'], 'a'))
+          print(f"monthly_projection={monthly_projection:.2f}", file=open(os.environ['GITHUB_OUTPUT'], 'a'))
+          print(f"status={status}", file=open(os.environ['GITHUB_OUTPUT'], 'a'))
+          EOF
+          
+      - name: Upload cost report
+        uses: actions/upload-artifact@v4
+        with:
+          name: cost-report-${{ github.run_id }}
+          path: cost_report.json
+          retention-days: ${{ env.METRICS_RETENTION_DAYS }}
+          
+  # ==========================================
+  # PHASE 3: Performance Analysis
+  # ==========================================
+  
+  analyze-performance:
+    name: Analyze Workflow Performance
+    needs: collect-metrics
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download metrics
+        uses: actions/download-artifact@v4
+        with:
+          name: workflow-metrics-${{ github.run_id }}
+          
+      - name: Analyze performance trends
+        run: |
+          python << 'EOF'
+          import json
+          import matplotlib.pyplot as plt
+          import seaborn as sns
+          from datetime import datetime
+          import pandas as pd
+          
+          # Load data
+          with open('workflow_health_report.json', 'r') as f:
+              report = json.load(f)
+          
+          # Create performance visualizations
+          fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+          
+          # 1. Success rate by workflow
+          workflow_names = []
+          success_rates = []
+          for name, stats in report['per_workflow'].items():
+              if stats['total'] > 0:
+                  workflow_names.append(name[:20])  # Truncate long names
+                  success_rates.append(stats['success'] / stats['total'] * 100)
+          
+          axes[0, 0].bar(workflow_names, success_rates)
+          axes[0, 0].set_title('Success Rate by Workflow')
+          axes[0, 0].set_xlabel('Workflow')
+          axes[0, 0].set_ylabel('Success Rate (%)')
+          axes[0, 0].tick_params(axis='x', rotation=45)
+          axes[0, 0].axhline(y=95, color='g', linestyle='--', label='Target (95%)')
+          axes[0, 0].axhline(y=90, color='y', linestyle='--', label='Warning (90%)')
+          axes[0, 0].legend()
+          
+          # 2. Average duration by workflow
+          workflow_names = []
+          avg_durations = []
+          for name, stats in report['per_workflow'].items():
+              if stats['duration']:
+                  workflow_names.append(name[:20])
+                  avg_durations.append(sum(stats['duration']) / len(stats['duration']))
+          
+          axes[0, 1].bar(workflow_names, avg_durations)
+          axes[0, 1].set_title('Average Duration by Workflow')
+          axes[0, 1].set_xlabel('Workflow')
+          axes[0, 1].set_ylabel('Duration (minutes)')
+          axes[0, 1].tick_params(axis='x', rotation=45)
+          
+          # 3. Run distribution
+          labels = ['Success', 'Failed', 'Cancelled']
+          sizes = [
+              report['summary']['successful_runs'],
+              report['summary']['failed_runs'],
+              report['summary']['cancelled_runs']
+          ]
+          colors = ['#28a745', '#dc3545', '#ffc107']
+          axes[1, 0].pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%')
+          axes[1, 0].set_title('Run Distribution')
+          
+          # 4. Top failures
+          if report['problematic_workflows']:
+              problem_names = [w['name'][:20] for w in report['problematic_workflows'][:5]]
+              failure_rates = [w['failure_rate'] for w in report['problematic_workflows'][:5]]
+              axes[1, 1].barh(problem_names, failure_rates, color='red')
+              axes[1, 1].set_title('Top 5 Problematic Workflows')
+              axes[1, 1].set_xlabel('Failure Rate (%)')
+          else:
+              axes[1, 1].text(0.5, 0.5, 'No problematic workflows', 
+                             ha='center', va='center', transform=axes[1, 1].transAxes)
+              axes[1, 1].set_title('Top 5 Problematic Workflows')
+          
+          plt.tight_layout()
+          plt.savefig('workflow_performance.png', dpi=100, bbox_inches='tight')
+          
+          print("Performance analysis complete")
+          EOF
+          
+      - name: Upload performance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-report-${{ github.run_id }}
+          path: workflow_performance.png
+          retention-days: ${{ env.METRICS_RETENTION_DAYS }}
+          
+  # ==========================================
+  # PHASE 4: Generate Reports and Alerts
+  # ==========================================
+  
+  generate-report:
+    name: Generate Health Report
+    needs: [collect-metrics, analyze-costs, analyze-performance]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download all reports
+        uses: actions/download-artifact@v4
+        with:
+          path: reports/
+          
+      - name: Generate markdown report
+        run: |
+          cat > health_report.md << EOF
+          # 📊 Workflow Health Report
+          
+          **Generated:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Period:** Last ${{ github.event.inputs.days_back || '7' }} days
+          
+          ## 📈 Summary Metrics
+          
+          | Metric | Value | Status |
+          |--------|-------|--------|
+          | Total Runs | ${{ needs.collect-metrics.outputs.total_runs }} | - |
+          | Failure Rate | ${{ needs.collect-metrics.outputs.failure_rate }}% | $([ $(echo "${{ needs.collect-metrics.outputs.failure_rate }} > 10" | bc) -eq 1 ] && echo "⚠️ High" || echo "✅ Normal") |
+          | Avg Duration | ${{ needs.collect-metrics.outputs.avg_duration }} min | - |
+          | Daily Cost | \$${{ needs.analyze-costs.outputs.daily_cost }} | ${{ needs.analyze-costs.outputs.cost_status }} |
+          | Monthly Projection | \$${{ needs.analyze-costs.outputs.monthly_projection }} | - |
+          
+          ## 💰 Cost Analysis
+          
+          - **Daily Average:** \$${{ needs.analyze-costs.outputs.daily_cost }}
+          - **Monthly Projection:** \$${{ needs.analyze-costs.outputs.monthly_projection }}
+          - **Budget Status:** ${{ needs.analyze-costs.outputs.cost_status }}
+          
+          ## 🎯 Action Items
+          
+          $(if [ $(echo "${{ needs.collect-metrics.outputs.failure_rate }} > 10" | bc) -eq 1 ]; then
+            echo "- ⚠️ **High failure rate detected** - Review failing workflows"
+          fi)
+          
+          $(if [ "${{ needs.analyze-costs.outputs.cost_status }}" = "over_budget" ]; then
+            echo "- 🔴 **Over budget** - Immediate action required to reduce costs"
+          elif [ "${{ needs.analyze-costs.outputs.cost_status }}" = "near_budget" ]; then
+            echo "- 🟡 **Near budget limit** - Monitor costs closely"
+          fi)
+          
+          ## 📊 Detailed Reports
+          
+          - [Workflow Metrics](./reports/workflow-metrics-${{ github.run_id }}/workflow_health_report.json)
+          - [Cost Report](./reports/cost-report-${{ github.run_id }}/cost_report.json)
+          - [Performance Chart](./reports/performance-report-${{ github.run_id }}/workflow_performance.png)
+          
+          ---
+          
+          *This report is automatically generated by the Workflow Health Monitor*
+          EOF
+          
+          # Add to GitHub summary
+          cat health_report.md >> $GITHUB_STEP_SUMMARY
+          
+      - name: Check for alerts
+        id: alerts
+        run: |
+          SHOULD_ALERT=false
+          ALERT_MESSAGE=""
+          
+          # Check failure rate
+          if [ $(echo "${{ needs.collect-metrics.outputs.failure_rate }} > ${{ env.ALERT_THRESHOLD_FAILURE_RATE }}" | bc) -eq 1 ]; then
+            SHOULD_ALERT=true
+            ALERT_MESSAGE="High workflow failure rate: ${{ needs.collect-metrics.outputs.failure_rate }}%"
+          fi
+          
+          # Check costs
+          if [ "${{ needs.analyze-costs.outputs.cost_status }}" = "over_budget" ]; then
+            SHOULD_ALERT=true
+            ALERT_MESSAGE="$ALERT_MESSAGE | Daily costs over budget: \$${{ needs.analyze-costs.outputs.daily_cost }}"
+          fi
+          
+          echo "should_alert=$SHOULD_ALERT" >> $GITHUB_OUTPUT
+          echo "alert_message=$ALERT_MESSAGE" >> $GITHUB_OUTPUT
+          
+      - name: Create issue for critical alerts
+        if: steps.alerts.outputs.should_alert == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const alert_message = '${{ steps.alerts.outputs.alert_message }}';
+            
+            // Check for existing open issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['workflow-health', 'alert']
+            });
+            
+            const title = `🚨 Workflow Health Alert - ${new Date().toISOString().split('T')[0]}`;
+            const body = `## Workflow Health Alert
+            
+            ${alert_message}
+            
+            **Detected at:** ${new Date().toISOString()}
+            **Report:** [View Full Report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            
+            ### Metrics
+            - Failure Rate: ${{ needs.collect-metrics.outputs.failure_rate }}%
+            - Daily Cost: \$${{ needs.analyze-costs.outputs.daily_cost }}
+            - Cost Status: ${{ needs.analyze-costs.outputs.cost_status }}
+            
+            ### Recommended Actions
+            1. Review failing workflows
+            2. Optimize expensive workflows
+            3. Consider disabling non-critical workflows temporarily
+            
+            ---
+            *This issue was automatically created by the Workflow Health Monitor*`;
+            
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['workflow-health', 'alert', 'automated']
+              });
+            } else {
+              // Update existing issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues.data[0].number,
+                body: `## Update: ${new Date().toISOString()}\n\n${alert_message}`
+              });
+            }
+            
+      - name: Upload final report
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflow-health-report-${{ github.run_id }}
+          path: health_report.md
+          retention-days: ${{ env.METRICS_RETENTION_DAYS }}

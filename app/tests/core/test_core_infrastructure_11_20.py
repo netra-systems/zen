@@ -128,7 +128,8 @@ class TestCustomExceptions:
     
     def test_netra_exception_structure(self):
         """Test NetraException structure and properties."""
-        from app.core.exceptions import NetraException, ErrorCode, ErrorSeverity
+        from app.core.exceptions_base import NetraException
+from app.core.error_codes import ErrorCode, ErrorSeverity
         
         exc = NetraException(
             message="Test error",
@@ -142,7 +143,8 @@ class TestCustomExceptions:
     
     def test_authentication_error(self):
         """Test authentication-specific exceptions."""
-        from app.core.exceptions import AuthenticationError, ErrorCode
+        from app.core.exceptions_auth import AuthenticationError
+from app.core.error_codes import ErrorCode
         
         exc = AuthenticationError("Invalid token")
         assert "Invalid token" in str(exc)

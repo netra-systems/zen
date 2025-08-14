@@ -51,7 +51,7 @@ runner_name = "gcp-runner"
 runner_count = 1
 
 # Labels for the runners (used for workflow targeting)
-runner_labels = ["self-hosted", "linux", "x64", "gcp", "docker"]
+runner_labels = ["warp-custom-default", "linux", "x64", "gcp", "docker"]
 
 # Runner group (for organization runners only, leave empty for default)
 runner_group = ""

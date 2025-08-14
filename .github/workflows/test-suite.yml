@@ -46,7 +46,7 @@ env:
 jobs:
   determine-tests:
     name: Determine Test Strategy
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     outputs:
       test_level: ${{ steps.strategy.outputs.level }}
       affected_services: ${{ steps.strategy.outputs.services }}
@@ -132,7 +132,7 @@ jobs:
     name: Backend Tests
     needs: determine-tests
     if: needs.determine-tests.outputs.skip != 'true' && contains(needs.determine-tests.outputs.affected_services, 'backend')
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     
     steps:
       - name: Checkout code
@@ -176,7 +176,7 @@ jobs:
     name: Frontend Tests
     needs: determine-tests
     if: needs.determine-tests.outputs.skip != 'true' && contains(needs.determine-tests.outputs.affected_services, 'frontend')
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     
     steps:
       - name: Checkout code
@@ -226,7 +226,7 @@ jobs:
     name: Test Summary
     needs: [determine-tests, backend-tests, frontend-tests]
     if: always() && needs.determine-tests.outputs.skip != 'true'
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     
     steps:
       - name: Download all artifacts

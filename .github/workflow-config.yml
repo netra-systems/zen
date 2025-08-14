@@ -1,0 +1,147 @@
+# GitHub Workflows Central Configuration
+# MINIMAL CONFIGURATION - Only Staging and Smoke Tests Enabled
+version: 1.0
+
+# Global workflow settings
+global:
+  enabled: true
+  default_runner: warp-custom-default
+  default_timeout_minutes: 30
+  cancel_in_progress: true
+  
+# Feature flags - Most features disabled for minimal setup
+features:
+  hierarchical_testing: false     # Disabled
+  smart_retry: false              # Disabled for simplicity
+  ai_assistance: false            # Disabled - no AI features
+  cost_monitoring: true           # Keep cost monitoring
+  auto_cleanup: true              # Keep cleanup for staging
+  parallel_execution: false       # Disabled for minimal setup
+  
+# Test hierarchy - Simplified for smoke only
+test_hierarchy:
+  levels:
+    - name: smoke
+      timeout: 5
+      required: true
+      blocks: []
+      
+# Workflow configurations - Only staging and smoke enabled
+workflows:
+  testing:
+    smoke:
+      enabled: true
+      timeout_minutes: 5
+      retry_count: 1
+      
+    unit:
+      enabled: false
+      
+    integration:
+      enabled: false
+      
+    comprehensive:
+      enabled: false
+      
+    on_demand:
+      enabled: false
+      
+  staging:
+    deployment:
+      enabled: true
+      auto_deploy_prs: true
+      max_concurrent_environments: 3  # Reduced for cost
+      timeout_minutes: 20
+      
+    cleanup:
+      enabled: true
+      schedule: "0 */6 * * *"
+      max_age_days: 3  # More aggressive cleanup
+      inactive_hours: 12
+      force_cleanup_on_pr_close: true
+      
+    terraform_locks:
+      enabled: true
+      schedule: "0 * * * *"
+      stale_lock_minutes: 15
+      
+  ai:
+    autofix:
+      enabled: false
+      
+    pr_review:
+      enabled: false
+      
+  monitoring:
+    architecture_health:
+      enabled: false
+      
+    workflow_health:
+      enabled: false
+      
+# Minimal execution rules
+execution_rules:
+  skip_all_workflows:
+    - commit_message: "[skip ci]"
+    - commit_message: "[ci skip]"
+    
+# Cost management - Conservative limits
+cost_control:
+  monthly_budget: 200
+  daily_limit: 10
+  per_pr_limit: 20
+  
+  alerts:
+    - threshold: 80
+      action: notify
+    - threshold: 100
+      action: halt
+      
+  resource_limits:
+    max_staging_environments: 3
+    max_parallel_jobs: 2
+    
+# Minimal retry strategy
+failure_handling:
+  retry_strategy:
+    default_retries: 0
+    retry_delay_seconds: 30
+    
+  cascading_failures:
+    stop_on_first_failure: true
+    cancel_in_flight: true
+    
+# Notifications - Simplified
+notifications:
+  channels:
+    github:
+      enabled: true
+      create_issues: false
+      update_pr_status: true
+      post_comments: false
+      
+# Performance optimization - Basic
+optimization:
+  caching:
+    enabled: true
+    dependency_cache: true
+    docker_layer_cache: false
+    test_result_cache: false
+    cache_retention_days: 3
+    
+  parallelization:
+    max_parallel_jobs: 2
+    auto_shard_tests: false
+    dynamic_allocation: false
+    
+# Security settings - Keep basic security
+security:
+  secret_scanning: true
+  dependency_scanning: true
+  code_scanning: false
+  
+  permissions:
+    default: read
+    required_for_deployment:
+      - contents: write
+      - deployments: write

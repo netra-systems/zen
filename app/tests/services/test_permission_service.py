@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 # Import the module under test
 from app.services.permission_service import PermissionService, ROLE_HIERARCHY, ROLE_PERMISSIONS
 from app.db.models_postgres import User
+from app.tests.helpers.shared_test_types import TestIntegrationScenarios as SharedTestIntegrationScenarios, TestIntegration as SharedTestIntegration
 
 
 class TestPermissionServiceConstants:
@@ -438,7 +439,7 @@ class TestSecurityEdgeCases:
             db.commit.assert_not_called()
 
 
-class TestIntegrationScenarios:
+class TestIntegrationScenarios(SharedTestIntegrationScenarios):
     """Test real-world integration scenarios"""
     
     def test_new_user_onboarding_flow(self):

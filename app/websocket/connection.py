@@ -14,7 +14,7 @@ from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
 from app.logging_config import central_logger
-from app.schemas.websocket_unified import WebSocketConnectionState
+from app.schemas.registry import WebSocketConnectionState
 
 logger = central_logger.get_logger(__name__)
 

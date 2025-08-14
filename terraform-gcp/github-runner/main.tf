@@ -1,4 +1,4 @@
-# GitHub Actions Self-Hosted Runner on GCP
+# GitHub Actions warp-custom-default Runner on GCP
 terraform {
   required_version = ">= 1.0"
   required_providers {
@@ -34,7 +34,7 @@ resource "google_project_service" "secretmanager" {
 resource "google_service_account" "github_runner" {
   account_id   = "github-runner-sa"
   display_name = "GitHub Actions Runner Service Account"
-  description  = "Service account for GitHub Actions self-hosted runner"
+  description  = "Service account for GitHub Actions warp-custom-default runner"
 }
 
 # IAM roles for the service account
@@ -119,9 +119,10 @@ resource "google_compute_firewall" "github_runner_ssh" {
   target_tags   = ["github-runner"]
 }
 
-# Startup script for the runner
+# Startup script for the runner with auto-recovery
 locals {
-  startup_script = templatefile("${path.module}/scripts/install-runner.sh", {
+  # Use the enhanced install script with auto-recovery as the base
+  base_install_script = templatefile("${path.module}/scripts/install-runner.sh", {
     github_org        = var.github_org
     github_repo       = var.github_repo
     runner_name       = var.runner_name
@@ -131,8 +132,75 @@ locals {
     runner_version    = var.runner_version
   })
   
-  # Additional script to ensure Docker is ready
-  docker_fix_script = file("${path.module}/scripts/fix-docker-daemon.sh")
+  # Startup script that deploys recovery system and runs installation
+  startup_script = <<-EOT
+#!/bin/bash
+# GitHub Runner Startup with Auto-Recovery System
+set -euo pipefail
+
+# Create scripts directory
+mkdir -p /opt/github-runner/scripts
+
+# Deploy the main installation script
+cat > /opt/github-runner/scripts/install-runner.sh << 'INSTALL_EOF'
+${local.base_install_script}
+INSTALL_EOF
+chmod +x /opt/github-runner/scripts/install-runner.sh
+
+# Deploy auto-recovery script
+cat > /opt/github-runner/scripts/auto-recovery.sh << 'RECOVERY_EOF'
+${file("${path.module}/scripts/auto-recovery.sh")}
+RECOVERY_EOF
+chmod +x /opt/github-runner/scripts/auto-recovery.sh
+
+# Deploy diagnostic script
+cat > /opt/github-runner/scripts/diagnose-runner-enhanced.sh << 'DIAG_EOF'
+${file("${path.module}/scripts/diagnose-runner-enhanced.sh")}
+DIAG_EOF
+chmod +x /opt/github-runner/scripts/diagnose-runner-enhanced.sh
+
+# Deploy quick fix script
+cat > /opt/github-runner/scripts/fix-runner-quick.sh << 'FIX_EOF'
+${file("${path.module}/scripts/fix-runner-quick.sh")}
+FIX_EOF
+chmod +x /opt/github-runner/scripts/fix-runner-quick.sh
+
+# Deploy health monitor
+cat > /opt/github-runner/scripts/monitor-runner-health.sh << 'MONITOR_EOF'
+${file("${path.module}/scripts/monitor-runner-health.sh")}
+MONITOR_EOF
+chmod +x /opt/github-runner/scripts/monitor-runner-health.sh
+
+# Create convenience commands
+ln -sf /opt/github-runner/scripts/diagnose-runner-enhanced.sh /usr/local/bin/runner-diagnose
+ln -sf /opt/github-runner/scripts/fix-runner-quick.sh /usr/local/bin/runner-fix
+ln -sf /opt/github-runner/scripts/auto-recovery.sh /usr/local/bin/runner-recover
+
+# Install systemd monitor service
+cat > /etc/systemd/system/github-runner-monitor.service << 'SERVICE_EOF'
+${file("${path.module}/scripts/runner-monitor.service")}
+SERVICE_EOF
+
+systemctl daemon-reload
+systemctl enable github-runner-monitor.service
+
+# Setup cron for periodic checks
+cat > /etc/cron.d/github-runner-recovery << 'CRON_EOF'
+# Auto-recovery checks every 5 minutes
+*/5 * * * * root if ! systemctl is-active --quiet "actions.runner.*"; then /opt/github-runner/scripts/auto-recovery.sh >/dev/null 2>&1; fi
+CRON_EOF
+
+# Run the installation with auto-recovery
+/opt/github-runner/scripts/install-runner.sh || {
+    echo "Installation failed, triggering auto-recovery..."
+    /opt/github-runner/scripts/auto-recovery.sh
+}
+
+# Start health monitor after installation
+systemctl start github-runner-monitor.service || true
+
+echo "GitHub Runner installed with auto-recovery enabled"
+EOT
 }
 
 # Compute instance for GitHub Runner

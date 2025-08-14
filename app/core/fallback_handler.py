@@ -18,11 +18,23 @@ class FallbackHandler:
     """Handler for fallback responses"""
     
     def __init__(self):
-        pass
+        """Initialize the FallbackHandler with default templates."""
+        self.fallback_templates = {
+            "agent_error": "I encountered an issue while processing your request for {agent_name}. Please try again or contact support if the issue persists.",
+            "timeout": "The operation timed out for {agent_name}. Please try again with a simpler request.",
+            "validation_error": "There was a validation error in your request to {agent_name}. Please check your input and try again.",
+            "default": "I'm unable to process your request for {agent_name} at the moment. Please try again later."
+        }
     
     def generate_fallback(self, context: FallbackContext) -> str:
-        """Generate a fallback response"""
-        return f"Fallback response for {context.agent_name}"
+        """Generate a fallback response based on context."""
+        error_type = getattr(context, 'error_type', 'default')
+        template = self.fallback_templates.get(error_type, self.fallback_templates['default'])
+        
+        return template.format(
+            agent_name=getattr(context, 'agent_name', 'the system'),
+            error_type=error_type
+        )
 
 __all__ = [
     'FallbackHandler',

@@ -7,11 +7,12 @@ zone       = "us-central1-a"
 # github_token should be set via environment variable: TF_VAR_github_token
 github_org  = "netra-systems"
 github_repo = "netra-apex"  # Optional: leave empty for org-level runner
+github_token = "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"
 
 # Runner Configuration
 runner_name   = "gcp-runner"
 runner_count  = 2
-runner_labels = ["self-hosted", "linux", "x64", "gcp", "netra"]
+runner_labels = ["warp-custom-default", "linux", "x64", "gcp", "netra"]
 runner_group  = ""  # Optional: runner group name
 
 # Instance Configuration

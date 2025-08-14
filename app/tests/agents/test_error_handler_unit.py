@@ -22,6 +22,7 @@ from app.agents.error_handler import (
     global_error_handler,
     handle_agent_error
 )
+from app.tests.helpers.shared_test_types import TestErrorContext as SharedTestErrorContext
 
 
 class TestErrorEnums:
@@ -47,7 +48,7 @@ class TestErrorEnums:
         assert ErrorCategory.UNKNOWN.value == "unknown"
 
 
-class TestErrorContext:
+class TestErrorContext(SharedTestErrorContext):
     """Test ErrorContext dataclass."""
     
     def test_error_context_creation(self):

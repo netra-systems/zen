@@ -10,7 +10,7 @@ from datetime import datetime
 from pydantic import ValidationError
 
 # Import backend schemas
-from app.schemas.websocket_unified import (
+from app.schemas.registry import (
     WebSocketMessageType,
     StartAgentPayload,
     UserMessagePayload,
@@ -18,7 +18,7 @@ from app.schemas.websocket_unified import (
     StreamChunk,
     AgentUpdate
 )
-from app.schemas.Message import Message, MessageType
+from app.schemas.registry import Message, MessageType
 from app.schemas.Agent import AgentStarted, AgentCompleted
 from app.schemas.Tool import ToolStarted, ToolCompleted, ToolStatus
 
@@ -96,7 +96,7 @@ class TestBasicTypeSafety:
         assert started_json["run_id"] == "run123"
         
         # AgentCompleted response
-        from app.schemas.Agent import AgentResult
+        from app.schemas.registry import AgentResult
         agent_completed = AgentCompleted(
             run_id="run123",
             result=AgentResult(

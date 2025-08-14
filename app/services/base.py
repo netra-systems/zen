@@ -16,7 +16,8 @@ from app.core.service_interfaces import (
     DatabaseService,
     ServiceHealth
 )
-from app.core.exceptions import RecordNotFoundError, ServiceError
+from app.core.exceptions_database import RecordNotFoundError
+from app.core.exceptions_service import ServiceError
 from app.core.error_context import ErrorContext
 from app.logging_config import central_logger
 

@@ -28,7 +28,7 @@ on:
 jobs:
   notify:
     name: Send Notifications
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     steps:
       - name: Prepare notification data
         id: prepare

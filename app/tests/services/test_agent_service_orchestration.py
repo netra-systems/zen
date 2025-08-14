@@ -43,7 +43,7 @@ from app.services.agent_service import AgentService
 from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.services.thread_service import ThreadService
 from app.services.message_handlers import MessageHandlerService
-from app.core.exceptions import NetraException
+from app.core.exceptions_base import NetraException
 from app import schemas
 from starlette.websockets import WebSocketDisconnect
 

@@ -2,7 +2,7 @@ import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock, patch, Mock
 from app.services.message_handlers import MessageHandlerService
-from app.schemas.WebSocket import WebSocketMessage, UserMessage, AgentMessage
+from app.schemas.registry import WebSocketMessage, UserMessage, AgentMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 
 @pytest.mark.asyncio

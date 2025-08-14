@@ -1,13 +1,3 @@
-# AI AGENT MODIFICATION METADATA
-# ================================
-# Timestamp: 2025-08-14T00:00:00.000000+00:00
-# Agent: Claude Sonnet 4 claude-sonnet-4-20250514
-# Context: CLAUDE.md compliance - Split synthetic data agent into modules ≤300 lines
-# Git: anthony-aug-13-2 | modified
-# Change: Refactor | Scope: Component | Risk: Low
-# Session: claude-md-compliance | Seq: 2
-# Review: Pending | Score: 90
-# ================================
 """
 Synthetic Data Generation Utilities
 
@@ -231,14 +221,28 @@ class SyntheticDataGenerator:
     
     def _create_inference_record(self, base_time: datetime, profile: WorkloadProfile, models: List[str]) -> Dict[str, Any]:
         """Create single inference log record"""
-        time_offset = random.randint(0, profile.time_range_days * 86400)
-        timestamp = base_time + timedelta(seconds=time_offset)
-        
+        timestamp = self._calculate_record_timestamp(base_time, profile.time_range_days)
+        base_data = self._create_base_inference_data(timestamp, models)
+        performance_data = self._create_inference_performance_data(profile)
+        return {**base_data, **performance_data}
+    
+    def _calculate_record_timestamp(self, base_time: datetime, time_range_days: int) -> datetime:
+        """Calculate timestamp for record with random offset"""
+        time_offset = random.randint(0, time_range_days * 86400)
+        return base_time + timedelta(seconds=time_offset)
+    
+    def _create_base_inference_data(self, timestamp: datetime, models: List[str]) -> Dict[str, Any]:
+        """Create base inference data fields"""
         return {
             "timestamp": timestamp.isoformat(),
             "model": random.choice(models),
             "tokens_input": random.randint(10, 2000),
-            "tokens_output": random.randint(10, 1000),
+            "tokens_output": random.randint(10, 1000)
+        }
+    
+    def _create_inference_performance_data(self, profile: WorkloadProfile) -> Dict[str, Any]:
+        """Create performance-related inference data"""
+        return {
             "latency_ms": random.gauss(100, 20 * profile.noise_level),
             "status": "success" if random.random() > 0.02 else "error",
             "cost_usd": round(random.uniform(0.01, 1.0), 4)
@@ -246,15 +250,23 @@ class SyntheticDataGenerator:
     
     def _create_performance_record(self, base_time: datetime, profile: WorkloadProfile) -> Dict[str, Any]:
         """Create single performance metric record"""
-        time_offset = random.randint(0, profile.time_range_days * 86400)
-        timestamp = base_time + timedelta(seconds=time_offset)
-        
+        timestamp = self._calculate_record_timestamp(base_time, profile.time_range_days)
+        latency_data = self._create_latency_metrics(profile)
+        system_data = self._create_system_metrics()
+        return {"timestamp": timestamp.isoformat(), **latency_data, **system_data}
+    
+    def _create_latency_metrics(self, profile: WorkloadProfile) -> Dict[str, Any]:
+        """Create latency-related performance metrics"""
         return {
-            "timestamp": timestamp.isoformat(),
             "throughput_rps": random.gauss(1000, 100 * profile.noise_level),
             "p50_latency_ms": random.gauss(50, 10 * profile.noise_level),
             "p95_latency_ms": random.gauss(150, 30 * profile.noise_level),
-            "p99_latency_ms": random.gauss(300, 50 * profile.noise_level),
+            "p99_latency_ms": random.gauss(300, 50 * profile.noise_level)
+        }
+    
+    def _create_system_metrics(self) -> Dict[str, Any]:
+        """Create system resource metrics"""
+        return {
             "error_rate": random.uniform(0, 0.05),
             "cpu_usage": random.uniform(20, 80),
             "memory_usage": random.uniform(30, 70)
@@ -270,12 +282,38 @@ class SyntheticDataGenerator:
         return batch_start % (batch_size * 5) == 0
     
     async def _send_progress_update(self, run_id: str, status: GenerationStatus) -> None:
-        """Send progress update (placeholder for actual implementation)"""
-        # This would integrate with WebSocket manager
+        """Send progress update via WebSocket manager"""
+        try:
+            from app.ws_manager import manager as ws_manager
+            await self._send_websocket_update(ws_manager, run_id, status)
+        except ImportError:
+            logger.debug("WebSocket manager not available, logging progress locally")
+            self._log_progress_update(status)
+    
+    async def _send_websocket_update(self, ws_manager, run_id: str, status: GenerationStatus) -> None:
+        """Send update via WebSocket manager"""
+        message = self._create_progress_message(status)
+        await ws_manager.send_message(run_id, message)
+    
+    def _log_progress_update(self, status: GenerationStatus) -> None:
+        """Log progress update locally"""
         logger.info(
             f"Progress: {status.records_generated:,}/{status.total_records:,} "
             f"({status.progress_percentage:.1f}%)"
         )
+    
+    def _create_progress_message(self, status: GenerationStatus) -> Dict[str, Any]:
+        """Create progress message for WebSocket"""
+        return {
+            "type": "synthetic_data_progress",
+            "data": {
+                "status": status.status,
+                "records_generated": status.records_generated,
+                "total_records": status.total_records,
+                "progress_percentage": status.progress_percentage,
+                "table_name": status.table_name
+            }
+        }
     
     def _create_success_result(
         self,

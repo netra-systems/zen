@@ -7,7 +7,7 @@ from app.db.models_postgres import Thread, Run
 if TYPE_CHECKING:
     from app.agents.supervisor import SupervisorAgent
 from app.services.thread_service import ThreadService
-from app.schemas.websocket_types import (
+from app.schemas.registry import (
     UserMessagePayload,
     CreateThreadPayload,
     SwitchThreadPayload,

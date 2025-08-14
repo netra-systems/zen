@@ -13,6 +13,7 @@ from app.services.synthetic_data_service import SyntheticDataService
 from app.services.corpus_service import CorpusService
 from app.ws_manager import manager as ws_manager
 from app import schemas
+from app.tests.helpers.shared_test_types import TestIntegration as SharedTestIntegration
 from .test_synthetic_data_service_basic import GenerationConfig, ClickHouseService
 
 
@@ -30,7 +31,7 @@ def full_stack():
 
 # ==================== Test Suite: Integration Testing ====================
 
-class TestIntegration:
+class TestIntegration(SharedTestIntegration):
     """Test end-to-end integration scenarios"""
 
     @pytest.mark.asyncio

@@ -43,7 +43,7 @@ env:
 jobs:
   configure:
     name: Configure Environment
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     outputs:
       environment_name: ${{ steps.config.outputs.environment_name }}
       action: ${{ steps.config.outputs.action }}

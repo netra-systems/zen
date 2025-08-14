@@ -1,7 +1,9 @@
 from typing import Optional, List, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.database.unit_of_work import UnitOfWork, get_unit_of_work
-from app.core.exceptions import DatabaseError, RecordNotFoundError, NetraException, ErrorCode, ErrorSeverity
+from app.core.exceptions_database import DatabaseError, RecordNotFoundError
+from app.core.exceptions_base import NetraException
+from app.core.error_codes import ErrorCode, ErrorSeverity
 from app.db.models_postgres import Thread, Message, Assistant, Run
 from app.logging_config import central_logger
 from app.ws_manager import manager

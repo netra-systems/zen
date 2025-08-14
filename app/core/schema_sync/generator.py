@@ -7,7 +7,7 @@ Maintains 8-line function limit and modular design.
 
 from typing import Dict, Any, List
 from datetime import datetime, UTC
-from app.core.exceptions import ServiceError
+from app.core.exceptions_service import ServiceError
 from app.core.error_context import ErrorContext
 from .models import SchemaValidationLevel
 

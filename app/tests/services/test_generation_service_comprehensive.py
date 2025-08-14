@@ -24,7 +24,7 @@ from app.schemas import (
     LogGenParams,
     SyntheticDataGenParams
 )
-from app.core.exceptions import NetraException
+from app.core.exceptions_base import NetraException
 
 
 @pytest.fixture

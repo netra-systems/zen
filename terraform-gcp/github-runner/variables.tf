@@ -55,7 +55,7 @@ variable "runner_count" {
 variable "runner_labels" {
   description = "Labels to apply to runners"
   type        = list(string)
-  default     = ["self-hosted", "linux", "x64", "gcp"]
+  default     = ["warp-custom-default", "linux", "x64", "gcp"]
 }
 
 variable "runner_group" {

@@ -9,7 +9,7 @@ from typing import Dict, Any, List
 from datetime import datetime
 from pydantic import ValidationError
 
-from app.schemas.websocket_unified import (
+from app.schemas.registry import (
     WebSocketMessageType,
     WebSocketConnectionState,
     ErrorSeverity

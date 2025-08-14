@@ -1,7 +1,7 @@
 from typing import List, Dict, Optional, Any
 from pydantic import BaseModel, Field
 from .Auth import AuthEndpoints, AuthConfigResponse, DevUser
-from .User import User
+from .registry import User
 from .llm_types import LLMProvider
 
 class ClickHouseCredentials(BaseModel):

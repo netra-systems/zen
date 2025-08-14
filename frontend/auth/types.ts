@@ -1,4 +1,4 @@
-import { User } from '@/types/User';
+import { User } from '@/types/registry';
 
 export interface AuthEndpoints {
   login: string;

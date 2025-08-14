@@ -9,7 +9,7 @@ import json
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 from datetime import datetime, UTC
-from app.core.exceptions import ServiceError
+from app.core.exceptions_service import ServiceError
 from app.core.error_context import ErrorContext
 from .models import SchemaValidationLevel, SyncReport
 from .extractor import SchemaExtractor

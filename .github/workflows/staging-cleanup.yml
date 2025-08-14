@@ -34,7 +34,7 @@ env:
 jobs:
   cleanup-staging:
     name: Clean Up Stale Staging Environments
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     
     steps:
       - name: Checkout code
@@ -161,7 +161,7 @@ jobs:
 
   monitor-costs:
     name: Monitor Staging Costs
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     needs: cleanup-staging
     
     steps:
@@ -254,7 +254,7 @@ jobs:
   # NEW JOB FOR V4: Analyze historical cleanup patterns
   analyze-cleanup-history:
     name: Analyze Cleanup History
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     needs: cleanup-staging
     if: github.event.schedule == '0 2 * * 0'  # Run weekly on Sundays
     
@@ -308,7 +308,7 @@ jobs:
   # NEW JOB FOR V4: Emergency cleanup with artifact tracking
   emergency-cleanup:
     name: Emergency Cleanup
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.max_age_days == '0'
     
     steps:

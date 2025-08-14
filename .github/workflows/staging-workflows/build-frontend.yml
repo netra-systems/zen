@@ -27,7 +27,7 @@ on:
 jobs:
   build:
     name: Build Frontend Image
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     timeout-minutes: 30
     outputs:
       image_tag: ${{ steps.build.outputs.image_tag }}

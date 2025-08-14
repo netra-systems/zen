@@ -37,7 +37,7 @@ permissions:
 jobs:
   determine-shards:
     name: Determine Test Shards
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     outputs:
       shards: ${{ steps.shards.outputs.matrix }}
       
@@ -57,7 +57,7 @@ jobs:
   unit-test:
     name: Unit Tests - ${{ matrix.shard }}
     needs: determine-shards
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     timeout-minutes: 10
     
     strategy:
@@ -133,7 +133,7 @@ jobs:
   unit-test-summary:
     name: Unit Test Summary
     needs: unit-test
-    runs-on: self-hosted
+    runs-on: warp-custom-default
     if: always()
     
     steps:

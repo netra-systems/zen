@@ -3,7 +3,7 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi.testclient import TestClient
 from app.main import app
-from app.schemas.WebSocket import WebSocketMessage, UserMessage, AgentMessage
+from app.schemas.registry import WebSocketMessage, UserMessage, AgentMessage
 
 @pytest.mark.asyncio
 async def test_websocket_authentication_success():

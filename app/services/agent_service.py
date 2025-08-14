@@ -15,7 +15,7 @@ from app.logging_config import central_logger
 from fastapi import Depends
 from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app import schemas
-from app.schemas.websocket_types import (
+from app.schemas.registry import (
     WebSocketMessageIn,
     MessageTypeLiteral
 )

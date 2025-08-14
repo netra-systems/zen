@@ -17,7 +17,8 @@ from app.core.service_interfaces import (
     ServiceMetrics,
     service_registry,
 )
-from app.core.exceptions import ServiceError, RecordNotFoundError
+from app.core.exceptions_service import ServiceError
+from app.core.exceptions_database import RecordNotFoundError
 
 
 class MockModel:

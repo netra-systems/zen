@@ -1,6 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel
-from .User import User
+from .registry import User
 
 class GoogleUser(BaseModel):
     """

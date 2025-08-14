@@ -40,7 +40,7 @@ jobs:
         contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
       )
     timeout-minutes: 5
-    runs-on: 'self-hosted'
+    runs-on: 'warp-custom-default'
 
     steps:
       - name: 'Checkout repository'
