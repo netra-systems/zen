@@ -127,11 +127,11 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
     });
 
     test('3. Should handle logout action', async () => {
-      const mockAuthStore.logout = jest.fn();
+      const mockLogout = jest.fn();
       (useAuthStore as jest.Mock).mockReturnValueOnce({
         user: { name: 'Test User' },
         isAuthenticated: true,
-        logout: mockAuthStore.logout
+        logout: mockLogout
       });
       
       render(<ChatHeader />);
@@ -139,7 +139,7 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
       const logoutButton = screen.getByRole('button', { name: /logout/i });
       fireEvent.click(logoutButton);
       
-      expect(mockAuthStore.logout).toHaveBeenCalled();
+      expect(mockLogout).toHaveBeenCalled();
     });
   });
 
@@ -187,11 +187,11 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
     });
 
     test('6. Should create new thread', async () => {
-      const mockThreadStore.addThread = jest.fn();
+      const mockAddThread = jest.fn();
       
       (useThreadStore as jest.Mock).mockReturnValueOnce({
         threads: [],
-        addThread: mockThreadStore.addThread
+        addThread: mockAddThread
       });
       
       render(<ThreadSidebar />);
@@ -199,16 +199,16 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
       const newThreadButton = screen.getByRole('button', { name: /new thread/i });
       fireEvent.click(newThreadButton);
       
-      expect(mockThreadStore.addThread).toHaveBeenCalled();
+      expect(mockAddThread).toHaveBeenCalled();
     });
 
     test('7. Should delete thread with confirmation', async () => {
-      const mockThreadStore.deleteThread = jest.fn();
+      const mockDeleteThread = jest.fn();
       const mockThreads = [{ id: '1', title: 'Thread to Delete' }];
       
       (useThreadStore as jest.Mock).mockReturnValueOnce({
         threads: mockThreads,
-        deleteThread: mockThreadStore.deleteThread
+        deleteThread: mockDeleteThread
       });
       
       render(<ThreadSidebar />);
@@ -220,7 +220,7 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
       const confirmButton = await screen.findByRole('button', { name: /confirm/i });
       fireEvent.click(confirmButton);
       
-      expect(mockThreadStore.deleteThread).toHaveBeenCalledWith('1');
+      expect(mockDeleteThread).toHaveBeenCalledWith('1');
     });
   });
 
@@ -499,9 +499,9 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
     });
 
     test('27. Should clear messages when switching threads', () => {
-      const mockChatStore.clearMessages = jest.fn();
+      const mockClearMessages = jest.fn();
       (useChatStore as jest.Mock).mockReturnValueOnce({
-        clearMessages: mockChatStore.clearMessages
+        clearMessages: mockClearMessages
       });
       
       (useThreadStore as jest.Mock).mockReturnValueOnce({
@@ -515,7 +515,7 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
       const thread = screen.getByTestId('thread-2');
       fireEvent.click(thread);
       
-      expect(mockChatStore.clearMessages).toHaveBeenCalled();
+      expect(mockClearMessages).toHaveBeenCalled();
     });
   });
 

@@ -181,6 +181,34 @@ class SyntheticDataService(RecoveryMixin):
             "checkpoints": len(checkpoints),
             "completion_time": datetime.now(UTC).isoformat()
         }
+    
+    async def generate_from_corpus(self, config, corpus_content: List[Dict]) -> List[Dict]:
+        """Generate synthetic data based on corpus content"""
+        num_traces = getattr(config, 'num_traces', 5)
+        records = []
+        
+        for i in range(num_traces):
+            # Select content from corpus
+            if corpus_content:
+                content_item = corpus_content[i % len(corpus_content)]
+                prompt = content_item.get('prompt', f'Generated prompt {i}')
+                response = content_item.get('response', f'Generated response {i}')
+            else:
+                prompt = f'Generated prompt {i}'
+                response = f'Generated response {i}'
+            
+            record = {
+                "index": i,
+                "timestamp": datetime.now(UTC).isoformat(),
+                "trace_id": str(uuid.uuid4()),
+                "span_id": str(uuid.uuid4()),
+                "request": prompt,
+                "response": response,
+                "corpus_source": True
+            }
+            records.append(record)
+        
+        return records
         
     async def generate_synthetic_data(
         self,
