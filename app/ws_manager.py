@@ -8,7 +8,7 @@ rate limiting, and error handling.
 import time
 import asyncio
 import threading
-from typing import Dict, Any, Union, List, Optional
+from typing import Dict, Any, Union, List, Optional, Literal
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
@@ -50,7 +50,7 @@ class WebSocketManager:
                 cls._instance._initialized = False
             return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         if not self._initialized:
             # Initialize component managers
             self.connection_manager = ConnectionManager()
@@ -266,7 +266,7 @@ class WebSocketManager:
             "displayed_to_user": True
         })
 
-    async def send_agent_log(self, user_id: str, log_level: str, message: str, sub_agent_name: str = None) -> None:
+    async def send_agent_log(self, user_id: str, log_level: Literal["debug", "info", "warning", "error", "critical"], message: str, sub_agent_name: Optional[str] = None) -> None:
         """Send agent log messages for real-time monitoring."""
         await self.send_message(user_id, {
             "type": "agent_log",
@@ -274,7 +274,7 @@ class WebSocketManager:
             "displayed_to_user": True
         })
 
-    async def send_tool_call(self, user_id: str, tool_name: str, tool_args: Dict[str, Any], sub_agent_name: str = None) -> None:
+    async def send_tool_call(self, user_id: str, tool_name: str, tool_args: Dict[str, Any], sub_agent_name: Optional[str] = None) -> None:
         """Send tool call updates."""
         await self.send_message(user_id, {
             "type": "tool_call",

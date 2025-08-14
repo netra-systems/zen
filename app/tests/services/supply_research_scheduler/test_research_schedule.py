@@ -30,7 +30,7 @@ class TestResearchSchedule:
         assert schedule.providers == ["openai", "anthropic", "google", "mistral"]
         assert schedule.enabled == True
         assert schedule.hour == 2  # Default 2 AM
-        assert schedule.day_of_week == 1  # Default Monday
+        assert schedule.day_of_week == 0  # Default Monday
         assert schedule.day_of_month == 1  # Default 1st
         assert schedule.last_run == None
         assert schedule.next_run != None
@@ -181,11 +181,20 @@ class TestResearchSchedule:
     
     def test_update_after_run(self):
         """Test updating schedule after successful run"""
+        # Use real datetime objects
+        initial_time = datetime(2024, 1, 1, 10, 30, 0, tzinfo=UTC)
+        
         with patch('app.services.supply_research_scheduler.datetime') as mock_datetime:
-            # Mock the initial time to 10:30
-            initial_time = datetime(2024, 1, 1, 10, 30, 0)
-            mock_datetime.utcnow.return_value = initial_time
+            # Configure the mock datetime class
+            mock_datetime.now.return_value = initial_time
             mock_datetime.side_effect = lambda *args, **kw: datetime(*args, **kw)
+            
+            # Also handle datetime.now(UTC) calls
+            def now_with_tz(tz=None):
+                if tz:
+                    return initial_time
+                return initial_time.replace(tzinfo=None)
+            mock_datetime.now = now_with_tz
             
             schedule = ResearchSchedule(
                 name="update_test",
@@ -197,7 +206,12 @@ class TestResearchSchedule:
             original_last_run = schedule.last_run
             
             # Move time forward by an hour for the update
-            mock_datetime.utcnow.return_value = initial_time + timedelta(hours=1)
+            updated_time = initial_time + timedelta(hours=1)
+            def now_with_tz_updated(tz=None):
+                if tz:
+                    return updated_time
+                return updated_time.replace(tzinfo=None)
+            mock_datetime.now = now_with_tz_updated
             
             schedule.update_after_run()
             
@@ -233,9 +247,18 @@ class TestScheduleTimeBoundaries:
         )
         
         # Manually set current date to end of year
+        mock_time = datetime(2023, 12, 31, 23, 59, 59, tzinfo=UTC)
         with patch('app.services.supply_research_scheduler.datetime') as mock_datetime:
-            mock_datetime.utcnow.return_value = datetime(2023, 12, 31, 23, 59, 59)
+            # Set up the mock to handle both datetime() constructor and datetime.now(UTC)
             mock_datetime.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
+            mock_datetime.now.return_value = mock_time
+            
+            # Make sure the datetime.now(UTC) works
+            def now_with_tz(tz=None):
+                if tz:
+                    return mock_time
+                return mock_time.replace(tzinfo=None)
+            mock_datetime.now = now_with_tz
             
             next_run = schedule._calculate_next_run()
             

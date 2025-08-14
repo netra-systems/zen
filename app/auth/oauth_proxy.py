@@ -23,7 +23,7 @@ router = APIRouter(prefix="/auth/proxy", tags=["auth-proxy"])
 class OAuthProxyService:
     """Handles OAuth flow for dynamic PR environments."""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.redis = redis_service
         self.token_ttl = 300  # 5 minutes
         

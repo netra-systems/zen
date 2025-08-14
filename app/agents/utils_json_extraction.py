@@ -339,7 +339,7 @@ def extract_simple_fields(response: str, existing: Dict[str, Any]) -> Dict[str, 
     return extract_with_patterns(response, patterns, existing)
 
 
-def extract_with_patterns(response: str, patterns: list, existing: Dict[str, Any]) -> Dict[str, Any]:
+def extract_with_patterns(response: str, patterns: List[str], existing: Dict[str, Any]) -> Dict[str, Any]:
     """Extract fields using regex patterns."""
     result = existing.copy()
     for pattern in patterns:
@@ -361,7 +361,7 @@ def parse_simple_value(value_str: str) -> Any:
     return value_str
 
 
-def extract_truncated_array(response: str, field_name: str) -> Optional[list]:
+def extract_truncated_array(response: str, field_name: str) -> Optional[List[Any]]:
     """Extract potentially truncated array field."""
     pattern = rf'"{field_name}"\s*:\s*\[([^\]]*)'
     match = re.search(pattern, response, re.DOTALL)
@@ -370,7 +370,7 @@ def extract_truncated_array(response: str, field_name: str) -> Optional[list]:
     return try_close_truncated_array(match.group(1))
 
 
-def try_close_truncated_array(content: str) -> Optional[list]:
+def try_close_truncated_array(content: str) -> Optional[List[Any]]:
     """Try to close and parse truncated array."""
     array_str = '[' + content
     open_braces = array_str.count('{') - array_str.count('}')
@@ -383,7 +383,7 @@ def try_close_truncated_array(content: str) -> Optional[list]:
         return []
 
 
-def extract_partial_json(response: str, required_fields: list = None) -> Optional[Dict[str, Any]]:
+def extract_partial_json(response: str, required_fields: Optional[List[str]] = None) -> Optional[Dict[str, Any]]:
     """Extract partial JSON from response."""
     if not response:
         return None
@@ -401,7 +401,7 @@ def extract_partial_json(response: str, required_fields: list = None) -> Optiona
     return result if result else None
 
 
-def check_required_fields(result: Dict[str, Any], required_fields: list) -> None:
+def check_required_fields(result: Dict[str, Any], required_fields: Optional[List[str]]) -> None:
     """Log warning if required fields are missing."""
     if required_fields:
         missing = [f for f in required_fields if f not in result]

@@ -23,6 +23,7 @@ from .validators import validate_schema
 from .corpus_manager import load_corpus
 from .ingestion import create_destination_table, ingest_batch_to_clickhouse
 from .metrics import calculate_generation_rate
+from .recovery import RecoveryMixin
 
 from ...db import models_postgres as models
 from ... import schemas
@@ -31,7 +32,7 @@ from ...db.clickhouse import get_clickhouse_client
 from app.logging_config import central_logger
 
 
-class SyntheticDataService:
+class SyntheticDataService(RecoveryMixin):
     """Service for generating synthetic AI workload data"""
     
     def __init__(self):

@@ -70,7 +70,7 @@ class AgentResponseData(BaseModel):
     """Strongly typed agent response"""
     success: bool
     message: str
-    data: Optional[Union[str, dict, list]] = None
+    data: Optional[Union[str, Dict[str, Any], List[Any]]] = None
     metrics: Dict[str, Union[int, float]] = Field(default_factory=dict)
 
 class AgentCompletedPayload(TypedDict):
@@ -135,13 +135,13 @@ MessageTypeLiteral = Literal[
 class WebSocketMessageIn(TypedDict):
     """Incoming WebSocket message structure"""
     type: MessageTypeLiteral
-    payload: Optional[Union[UserMessagePayload, CreateThreadPayload, SwitchThreadPayload, DeleteThreadPayload, Dict[str, Union[str, int, float, bool, list, dict]]]]
+    payload: Optional[Union[UserMessagePayload, CreateThreadPayload, SwitchThreadPayload, DeleteThreadPayload, Dict[str, Union[str, int, float, bool, List[Any], Dict[str, Any]]]]]
 
 
 class WebSocketMessageOut(TypedDict):
     """Outgoing WebSocket message structure"""
     type: MessageTypeLiteral
-    payload: Union[ThreadHistoryResponse, AgentCompletedPayload, AgentStoppedPayload, ErrorPayload, Dict[str, Union[str, int, float, bool, list, dict]]]
+    payload: Union[ThreadHistoryResponse, AgentCompletedPayload, AgentStoppedPayload, ErrorPayload, Dict[str, Union[str, int, float, bool, List[Any], Dict[str, Any]]]]
     timestamp: Optional[str]
 
 
@@ -149,7 +149,7 @@ class WebSocketMessageOut(TypedDict):
 class WebSocketRequest(BaseModel):
     """Base model for WebSocket requests"""
     type: MessageTypeLiteral
-    payload: Optional[Dict[str, Union[str, int, float, bool, list, dict]]] = Field(default_factory=dict)
+    payload: Optional[Dict[str, Union[str, int, float, bool, List[Any], Dict[str, Any]]]] = Field(default_factory=dict)
     
     class Config:
         json_schema_extra = {

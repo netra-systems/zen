@@ -44,37 +44,49 @@ def clickhouse_client():
     return _get_client
 
 
-@pytest_asyncio.fixture
-async def real_clickhouse_client():
+@pytest.fixture
+def real_clickhouse_client(event_loop):
     """Create a real ClickHouse client using actual cloud configuration."""
+    # Skip if ClickHouse is not configured or in pure testing mode
+    if settings.environment == "testing" and not settings.dev_mode_clickhouse_enabled:
+        pytest.skip("ClickHouse disabled in testing mode")
+    
     config = settings.clickhouse_https_dev if settings.environment == "development" else settings.clickhouse_https
     
-    client = ClickHouseDatabase(
-        host=config.host,
-        port=config.port,
-        user=config.user,
-        password=config.password,
-        database=config.database,
-        secure=True
-    )
+    # Skip if pointing to localhost (no real ClickHouse available)
+    if config.host in ["localhost", "127.0.0.1"]:
+        pytest.skip("ClickHouse not available on localhost")
     
-    # Wrap with query interceptor for array syntax fixing
-    interceptor = ClickHouseQueryInterceptor(client)
-    
-    # Test connection
-    result = await interceptor.execute_query("SELECT 1 as test")
-    if not result or result[0]['test'] != 1:
-        pytest.skip("ClickHouse connection test failed")
-    
-    yield interceptor
-    
-    await client.disconnect()
+    try:
+        client = ClickHouseDatabase(
+            host=config.host,
+            port=config.port,
+            user=config.user,
+            password=config.password,
+            database=config.database,
+            secure=True
+        )
+        
+        # Wrap with query interceptor for array syntax fixing
+        interceptor = ClickHouseQueryInterceptor(client)
+        
+        # Test connection using event loop
+        result = event_loop.run_until_complete(interceptor.execute_query("SELECT 1 as test"))
+        if not result or result[0]['test'] != 1:
+            pytest.skip("ClickHouse connection test failed")
+        
+        yield interceptor
+        
+        # Cleanup
+        event_loop.run_until_complete(client.disconnect())
+    except Exception as e:
+        pytest.skip(f"Could not connect to ClickHouse: {e}")
 
 
-@pytest.mark.asyncio
 class TestClickHouseConnection:
     """Test ClickHouse connection management."""
 
+    @pytest.mark.asyncio
     async def test_client_initialization(self, clickhouse_client):
         """Test ClickHouse client initialization with real connection."""
         client = await clickhouse_client()
@@ -85,6 +97,7 @@ class TestClickHouseConnection:
         assert len(result) == 1
         assert result[0]['test'] == 1
 
+    @pytest.mark.asyncio
     async def test_list_corpus_tables(self, real_clickhouse_client):
         """Test listing corpus tables with real ClickHouse."""
         # First create a test corpus table
@@ -123,6 +136,7 @@ class TestClickHouseConnection:
             # Clean up test table
             await real_clickhouse_client.execute_query(f"DROP TABLE IF EXISTS {test_table_name}")
 
+    @pytest.mark.asyncio
     async def test_basic_query_execution(self, clickhouse_client):
         """Test basic query execution with real ClickHouse."""
         # Get the actual client
@@ -145,6 +159,7 @@ class TestClickHouseConnection:
         )
         assert string_result[0]['greeting'] == 'Hello ClickHouse'
 
+    @pytest.mark.asyncio
     async def test_query_with_parameters(self, clickhouse_client):
         """Test query execution with parameters using real ClickHouse."""
         # Get the actual client
@@ -173,6 +188,7 @@ class TestClickHouseConnection:
 class TestBasicOperations:
     """Test basic ClickHouse operations with real database."""
 
+    @pytest.mark.asyncio
     async def test_show_tables(self, real_clickhouse_client):
         """Test showing database tables in real ClickHouse."""
         # Show all tables
@@ -186,6 +202,7 @@ class TestBasicOperations:
         if table_names:
             logger.info(f"Sample tables: {table_names[:5]}")
     
+    @pytest.mark.asyncio
     async def test_database_info(self, real_clickhouse_client):
         """Test getting database information."""
         # Get current database
@@ -218,6 +235,7 @@ class TestBasicOperations:
         except Exception as e:
             logger.warning(f"Could not get database stats: {e}")
     
+    @pytest.mark.asyncio
     async def test_create_and_drop_table(self, real_clickhouse_client):
         """Test creating and dropping a table."""
         test_table = f"test_table_{uuid.uuid4().hex[:8]}"
@@ -284,6 +302,7 @@ class TestWorkloadEventsOperations:
         if not exists:
             pytest.skip("workload_events table not accessible")
     
+    @pytest.mark.asyncio
     async def test_workload_events_operations(self, real_clickhouse_client, ensure_workload_table):
         """Test operations on workload_events table."""
         # Insert test event

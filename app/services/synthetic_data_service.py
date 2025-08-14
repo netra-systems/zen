@@ -11,11 +11,15 @@ from .synthetic_data import (
     validate_data
 )
 
+# Import get_clickhouse_client for test patching
+from ..db.clickhouse import get_clickhouse_client
+
 # Re-export everything for backward compatibility
 __all__ = [
     'SyntheticDataService',
     'synthetic_data_service',
     'WorkloadCategory',
     'GenerationStatus',
-    'validate_data'
+    'validate_data',
+    'get_clickhouse_client'
 ]

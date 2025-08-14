@@ -8,8 +8,8 @@ import alembic.script
 from alembic.runtime.migration import MigrationContext
 from sqlalchemy import create_engine
 from pathlib import Path
-from typing import Any, Callable
-import logging as log_module
+from typing import Any, Callable, Optional
+import logging
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -69,14 +69,14 @@ from app.core.error_handlers import (
 )
 from app.core.error_context import ErrorContext
 
-def run_migrations(logger: log_module.Logger) -> None:
+def run_migrations(logger: logging.Logger) -> None:
     """Run database migrations automatically on startup."""
     try:
         _check_and_run_migrations(logger)
     except Exception as e:
         _handle_migration_error(logger, e)
 
-def _check_and_run_migrations(logger: log_module.Logger) -> None:
+def _check_and_run_migrations(logger: logging.Logger) -> None:
     """Check and run migrations if needed."""
     logger.info("Checking database migrations...")
     if not validate_database_url(settings.database_url, logger):
@@ -84,7 +84,7 @@ def _check_and_run_migrations(logger: log_module.Logger) -> None:
     sync_url = get_sync_database_url(settings.database_url)
     _perform_migration(logger, sync_url)
 
-def _perform_migration(logger: log_module.Logger, sync_url: str) -> None:
+def _perform_migration(logger: logging.Logger, sync_url: str) -> None:
     """Perform the actual migration."""
     current = get_current_revision(sync_url)
     logger.info(f"Current revision: {current}")
@@ -92,13 +92,13 @@ def _perform_migration(logger: log_module.Logger, sync_url: str) -> None:
     head = get_head_revision(cfg)
     _execute_if_needed(logger, current, head)
 
-def _execute_if_needed(logger: log_module.Logger, current: str, head: str) -> None:
+def _execute_if_needed(logger: logging.Logger, current: Optional[str], head: Optional[str]) -> None:
     """Execute migration if needed."""
     log_migration_status(logger, current, head)
     if needs_migration(current, head):
         execute_migration(logger)
 
-def _handle_migration_error(logger: log_module.Logger, error: Exception) -> None:
+def _handle_migration_error(logger: logging.Logger, error: Exception) -> None:
     """Handle migration errors based on environment."""
     logger.error(f"Failed to run migrations: {error}")
     if not should_continue_on_error(settings.environment):
