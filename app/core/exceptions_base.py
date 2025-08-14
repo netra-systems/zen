@@ -36,13 +36,8 @@ class NetraException(Exception):
                            trace_id: Optional[str], context: Optional[Dict[str, Any]]) -> ErrorDetails:
         """Build ErrorDetails object with default values."""
         return ErrorDetails(
-            code=code,
-            message=message or "An internal error occurred",
-            severity=severity,
-            details=details or {},
-            user_message=user_message,
-            trace_id=trace_id,
-            context=context or {}
+            code=code, message=message or "An internal error occurred", severity=severity,
+            details=details or {}, user_message=user_message, trace_id=trace_id, context=context or {}
         )
     
     def to_dict(self) -> Dict[str, Any]:

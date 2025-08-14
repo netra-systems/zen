@@ -20,21 +20,12 @@ class SchemaValidator:
         frontend_types_file: str
     ) -> List[TypeMismatch]:
         """Validate schemas for consistency."""
-        
-        # Parse frontend types
         frontend_types = self.ts_parser.parse_typescript_file(frontend_types_file)
-        
-        mismatches = []
-        
-        # Check each backend schema
-        mismatches.extend(_validate_backend_schemas(
+        backend_mismatches = _validate_backend_schemas(
             backend_schemas, frontend_types, self.compat_checker
-        ))
-        
-        # Check for extra schemas in frontend
-        mismatches.extend(_validate_frontend_schemas(frontend_types, backend_schemas))
-        
-        return mismatches
+        )
+        frontend_mismatches = _validate_frontend_schemas(frontend_types, backend_schemas)
+        return backend_mismatches + frontend_mismatches
 
 
 def validate_type_consistency(
@@ -54,23 +45,10 @@ def _validate_backend_schemas(
 ) -> List[TypeMismatch]:
     """Validate backend schemas against frontend types."""
     mismatches = []
-    
     for schema_name, backend_schema in backend_schemas.items():
-        if schema_name not in frontend_types:
-            mismatches.append(_create_missing_schema_mismatch(schema_name, "frontend"))
-            continue
-        
-        frontend_type = frontend_types[schema_name]
-        
-        # Only validate interfaces (not type aliases)
-        if frontend_type.get('type') != 'interface':
-            continue
-        
-        # Check fields
-        mismatches.extend(_validate_schema_fields(
-            schema_name, backend_schema, frontend_type, compat_checker
+        mismatches.extend(_validate_single_backend_schema(
+            schema_name, backend_schema, frontend_types, compat_checker
         ))
-    
     return mismatches
 
 
@@ -95,27 +73,11 @@ def _validate_schema_fields(
     compat_checker: TypeCompatibilityChecker
 ) -> List[TypeMismatch]:
     """Validate fields between backend schema and frontend type."""
-    mismatches = []
-    
     backend_properties = backend_schema.get('properties', {})
     frontend_fields = frontend_type.get('fields', {})
-    
-    # Check for missing fields in frontend
-    mismatches.extend(_check_missing_frontend_fields(
-        schema_name, backend_properties, frontend_fields
-    ))
-    
-    # Check type compatibility for existing fields
-    mismatches.extend(_check_field_type_compatibility(
+    return _perform_all_field_checks(
         schema_name, backend_properties, frontend_fields, compat_checker
-    ))
-    
-    # Check for extra fields in frontend
-    mismatches.extend(_check_extra_frontend_fields(
-        schema_name, backend_properties, frontend_fields
-    ))
-    
-    return mismatches
+    )
 
 
 def _check_missing_frontend_fields(
@@ -125,18 +87,11 @@ def _check_missing_frontend_fields(
 ) -> List[TypeMismatch]:
     """Check for fields missing in frontend."""
     mismatches = []
-    
     for field_name, field_schema in backend_properties.items():
         if field_name not in frontend_fields:
-            field_path = f"{schema_name}.{field_name}"
-            mismatches.append(TypeMismatch(
-                field_path=field_path,
-                backend_type=field_schema.get('type', 'unknown'),
-                frontend_type="missing",
-                severity=TypeMismatchSeverity.WARNING,
-                message=f"Field {field_name} exists in backend but not in frontend"
+            mismatches.append(_create_missing_field_mismatch(
+                schema_name, field_name, field_schema, "frontend"
             ))
-    
     return mismatches
 
 
@@ -148,25 +103,13 @@ def _check_field_type_compatibility(
 ) -> List[TypeMismatch]:
     """Check type compatibility for existing fields."""
     mismatches = []
-    
     for field_name, field_schema in backend_properties.items():
-        if field_name not in frontend_fields:
-            continue
-        
-        field_path = f"{schema_name}.{field_name}"
-        backend_field_type = get_backend_field_type(field_schema)
-        frontend_field = frontend_fields[field_name]
-        frontend_field_type = frontend_field.get('type', 'unknown')
-        
-        mismatch = compat_checker.check_field_compatibility(
-            backend_field_type,
-            frontend_field_type,
-            field_path
-        )
-        
-        if mismatch:
-            mismatches.append(mismatch)
-    
+        if field_name in frontend_fields:
+            mismatch = _check_single_field_compatibility(
+                schema_name, field_name, field_schema, frontend_fields, compat_checker
+            )
+            if mismatch:
+                mismatches.append(mismatch)
     return mismatches
 
 
@@ -177,18 +120,11 @@ def _check_extra_frontend_fields(
 ) -> List[TypeMismatch]:
     """Check for extra fields in frontend."""
     mismatches = []
-    
     for field_name in frontend_fields:
         if field_name not in backend_properties:
-            field_path = f"{schema_name}.{field_name}"
-            mismatches.append(TypeMismatch(
-                field_path=field_path,
-                backend_type="missing",
-                frontend_type=frontend_fields[field_name].get('type', 'unknown'),
-                severity=TypeMismatchSeverity.INFO,
-                message=f"Field {field_name} exists in frontend but not in backend"
+            mismatches.append(_create_extra_field_mismatch(
+                schema_name, field_name, frontend_fields[field_name]
             ))
-    
     return mismatches
 
 
@@ -210,3 +146,80 @@ def _create_missing_schema_mismatch(schema_name: str, missing_in: str) -> TypeMi
             severity=TypeMismatchSeverity.INFO,
             message=f"Schema {schema_name} exists in frontend but not in backend"
         )
+
+
+def _validate_single_backend_schema(
+    schema_name: str, backend_schema: Dict[str, Any], 
+    frontend_types: Dict[str, Dict[str, Any]], compat_checker: TypeCompatibilityChecker
+) -> List[TypeMismatch]:
+    """Validate a single backend schema against frontend types."""
+    if schema_name not in frontend_types:
+        return [_create_missing_schema_mismatch(schema_name, "frontend")]
+    
+    frontend_type = frontend_types[schema_name]
+    if frontend_type.get('type') != 'interface':
+        return []
+    
+    return _validate_schema_fields(
+        schema_name, backend_schema, frontend_type, compat_checker
+    )
+
+
+def _perform_all_field_checks(
+    schema_name: str, backend_properties: Dict[str, Any],
+    frontend_fields: Dict[str, Any], compat_checker: TypeCompatibilityChecker
+) -> List[TypeMismatch]:
+    """Perform all field validation checks."""
+    mismatches = []
+    mismatches.extend(_check_missing_frontend_fields(
+        schema_name, backend_properties, frontend_fields
+    ))
+    mismatches.extend(_check_field_type_compatibility(
+        schema_name, backend_properties, frontend_fields, compat_checker
+    ))
+    mismatches.extend(_check_extra_frontend_fields(
+        schema_name, backend_properties, frontend_fields
+    ))
+    return mismatches
+
+
+def _create_missing_field_mismatch(
+    schema_name: str, field_name: str, field_schema: Dict[str, Any], missing_in: str
+) -> TypeMismatch:
+    """Create mismatch for missing field."""
+    field_path = f"{schema_name}.{field_name}"
+    return TypeMismatch(
+        field_path=field_path,
+        backend_type=field_schema.get('type', 'unknown'),
+        frontend_type="missing",
+        severity=TypeMismatchSeverity.WARNING,
+        message=f"Field {field_name} exists in backend but not in {missing_in}"
+    )
+
+
+def _check_single_field_compatibility(
+    schema_name: str, field_name: str, field_schema: Dict[str, Any],
+    frontend_fields: Dict[str, Any], compat_checker: TypeCompatibilityChecker
+):
+    """Check compatibility for a single field."""
+    field_path = f"{schema_name}.{field_name}"
+    backend_field_type = get_backend_field_type(field_schema)
+    frontend_field = frontend_fields[field_name]
+    frontend_field_type = frontend_field.get('type', 'unknown')
+    return compat_checker.check_field_compatibility(
+        backend_field_type, frontend_field_type, field_path
+    )
+
+
+def _create_extra_field_mismatch(
+    schema_name: str, field_name: str, frontend_field: Dict[str, Any]
+) -> TypeMismatch:
+    """Create mismatch for extra field in frontend."""
+    field_path = f"{schema_name}.{field_name}"
+    return TypeMismatch(
+        field_path=field_path,
+        backend_type="missing",
+        frontend_type=frontend_field.get('type', 'unknown'),
+        severity=TypeMismatchSeverity.INFO,
+        message=f"Field {field_name} exists in frontend but not in backend"
+    )

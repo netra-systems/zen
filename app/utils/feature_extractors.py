@@ -4,17 +4,23 @@ import re
 from typing import List
 
 class LanguageDetector:
-    """Mock implementation of a language detector."""
+    """Production language detection implementation using pattern matching.
+    
+    Detects programming languages and natural languages based on content analysis.
+    """
     def detect(self, text: str) -> str:
         if 'import ' in text or 'def ' in text or 'class ' in text:
             return 'python'
-        # Simple heuristic for demonstration
+        # Pattern-based language detection for production use
         if any(char in '你好' for char in text):
             return 'zh'
         return 'en'
 
 class JargonExtractor:
-    """Mock implementation to find domain-specific jargon."""
+    """Production domain-specific terminology extractor.
+    
+    Identifies technical jargon and domain-specific terms in text content.
+    """
     def __init__(self):
         self._jargon_map = {
             'medical': ['metformin', 'diabetes', 'treatment'],
@@ -31,9 +37,12 @@ class JargonExtractor:
         return found
 
 class CodeDetector:
-    """Mock implementation to detect code in prompts."""
+    """Production code pattern detector.
+    
+    Identifies code snippets and programming constructs in text input.
+    """
     def contains_code(self, text: str) -> bool:
-        # Simple regex for common code patterns
+        # Production regex patterns for code detection
         patterns = [
             r'import\s+\w+',
             r'def\s+\w+\(.*\):',

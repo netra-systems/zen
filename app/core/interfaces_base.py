@@ -34,21 +34,31 @@ class BaseServiceMixin:
     def _update_metrics(self, success: bool, response_time: float):
         """Update service metrics."""
         self._metrics.requests_total += 1
+        self._update_success_metrics(success)
+        self._update_response_time(response_time)
+        self._metrics.last_request_timestamp = datetime.now(UTC)
+    
+    def _update_success_metrics(self, success: bool):
+        """Update success/failure metrics."""
         if success:
             self._metrics.requests_successful += 1
         else:
             self._metrics.requests_failed += 1
-        
-        # Update average response time
+    
+    def _update_response_time(self, response_time: float):
+        """Update average response time."""
         if self._metrics.requests_total == 1:
             self._metrics.average_response_time = response_time
         else:
-            self._metrics.average_response_time = (
-                (self._metrics.average_response_time * (self._metrics.requests_total - 1) + response_time)
-                / self._metrics.requests_total
-            )
-        
-        self._metrics.last_request_timestamp = datetime.now(UTC)
+            self._calculate_avg_response_time(response_time)
+    
+    def _calculate_avg_response_time(self, response_time: float):
+        """Calculate new average response time."""
+        prev_avg = self._metrics.average_response_time
+        total_requests = self._metrics.requests_total
+        self._metrics.average_response_time = (
+            (prev_avg * (total_requests - 1) + response_time) / total_requests
+        )
     
     def _create_background_task(self, coro):
         """Create and track a background task."""
@@ -87,10 +97,14 @@ class BaseService(BaseServiceMixin):
             await self._initialize_impl()
             self._initialized = True
         except Exception as e:
-            raise ServiceError(
-                message=f"Failed to initialize service {self._service_name}: {e}",
-                context=ErrorContext.get_all_context()
-            )
+            self._raise_initialization_error(e)
+    
+    def _raise_initialization_error(self, error: Exception):
+        """Raise formatted initialization error."""
+        raise ServiceError(
+            message=f"Failed to initialize service {self._service_name}: {error}",
+            context=ErrorContext.get_all_context()
+        )
     
     async def _initialize_impl(self) -> None:
         """Service-specific initialization logic."""
@@ -103,10 +117,14 @@ class BaseService(BaseServiceMixin):
             await self._shutdown_impl()
             self._initialized = False
         except Exception as e:
-            raise ServiceError(
-                message=f"Failed to shutdown service {self._service_name}: {e}",
-                context=ErrorContext.get_all_context()
-            )
+            self._raise_shutdown_error(e)
+    
+    def _raise_shutdown_error(self, error: Exception):
+        """Raise formatted shutdown error."""
+        raise ServiceError(
+            message=f"Failed to shutdown service {self._service_name}: {error}",
+            context=ErrorContext.get_all_context()
+        )
     
     async def _shutdown_impl(self) -> None:
         """Service-specific shutdown logic."""
@@ -115,30 +133,38 @@ class BaseService(BaseServiceMixin):
     async def health_check(self) -> ServiceHealth:
         """Perform health check and return status."""
         try:
-            # Basic health check - override in subclasses for specific checks
             dependencies = await self._check_dependencies()
-            
-            status = "healthy"
-            for dep_name, dep_status in dependencies.items():
-                if dep_status != "healthy":
-                    status = "degraded"
-                    break
-            
-            return ServiceHealth(
-                service_name=self._service_name,
-                status=status,
-                timestamp=datetime.now(UTC),
-                dependencies=dependencies,
-                metrics=self._metrics.model_dump()
-            )
+            status = self._determine_health_status(dependencies)
+            return self._create_health_response(status, dependencies)
         except Exception as e:
-            return ServiceHealth(
-                service_name=self._service_name,
-                status="unhealthy",
-                timestamp=datetime.now(UTC),
-                dependencies={},
-                metrics={"error": str(e)}
-            )
+            return self._create_unhealthy_response(e)
+    
+    def _determine_health_status(self, dependencies: Dict[str, str]) -> str:
+        """Determine overall health status from dependencies."""
+        for dep_status in dependencies.values():
+            if dep_status != "healthy":
+                return "degraded"
+        return "healthy"
+    
+    def _create_health_response(self, status: str, dependencies: Dict[str, str]) -> ServiceHealth:
+        """Create healthy service health response."""
+        return ServiceHealth(
+            service_name=self._service_name,
+            status=status,
+            timestamp=datetime.now(UTC),
+            dependencies=dependencies,
+            metrics=self._metrics.model_dump()
+        )
+    
+    def _create_unhealthy_response(self, error: Exception) -> ServiceHealth:
+        """Create unhealthy service health response."""
+        return ServiceHealth(
+            service_name=self._service_name,
+            status="unhealthy",
+            timestamp=datetime.now(UTC),
+            dependencies={},
+            metrics={"error": str(error)}
+        )
     
     async def _check_dependencies(self) -> Dict[str, str]:
         """Check service dependencies - override in subclasses."""

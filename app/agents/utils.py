@@ -1,11 +1,11 @@
 # AI AGENT MODIFICATION METADATA
 # ================================
-# Timestamp: 2025-08-13T00:00:00.000000+00:00
-# Agent: Claude Opus 4.1 claude-opus-4-1-20250805
-# Context: Refactored to comply with 8-line function limit - imports from utils_json_extraction
-# Git: v6 | dirty
+# Timestamp: 2025-08-14T00:00:00.000000+00:00
+# Agent: Claude Sonnet 4.1 claude-sonnet-4-20250514
+# Context: Updated imports for modular JSON utilities - maintains backward compatibility
+# Git: anthony-aug-13-2 | clean
 # Change: Refactor | Scope: Component | Risk: Low
-# Session: compliance-fix | Seq: 2
+# Session: architecture-compliance | Seq: 4
 # Review: Pending | Score: 95
 # ================================
 """Utility functions for agent operations - compliant with 8-line limit."""

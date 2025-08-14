@@ -10,12 +10,8 @@ from datetime import datetime, timezone
 from enum import Enum
 
 
-class ErrorSeverity(Enum):
-    """Error severity levels."""
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
+# Import ErrorSeverity from single source of truth
+from app.core.error_codes import ErrorSeverity
 
 
 @dataclass

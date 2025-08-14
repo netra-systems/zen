@@ -48,40 +48,8 @@ class QualitySupervisor:
         return json.loads(quality_check)
 
 
-class AdminToolDispatcher:
-    """Mock admin tool dispatcher for testing"""
-    def __init__(self, llm_manager, tool_dispatcher):
-        self.llm_manager = llm_manager
-        self.tool_dispatcher = tool_dispatcher
-        self.audit_logger = None
-    
-    async def dispatch_admin_operation(self, operation):
-        """Dispatch admin operations with security checks"""
-        user_role = operation.get("user_role", "admin")
-        
-        # Security validation
-        if operation["type"] == "delete_all_data" and user_role != "admin":
-            raise PermissionError("Insufficient permissions for destructive operation")
-        
-        # Map operation to tool
-        tool_mapping = {
-            "create_user": "admin_user_management",
-            "delete_user": "admin_user_management",
-            "system_config": "admin_system_config"
-        }
-        
-        tool_name = tool_mapping.get(operation["type"])
-        if not tool_name:
-            raise ValueError(f"Unknown operation type: {operation['type']}")
-        
-        # Execute tool
-        result = await self.tool_dispatcher.execute_tool(tool_name, operation["params"])
-        
-        # Audit logging
-        if self.audit_logger:
-            await self.audit_logger.log_admin_operation(operation, result)
-        
-        return result
+# Import real AdminToolDispatcher for proper testing
+from app.agents.admin_tool_dispatcher import AdminToolDispatcher
 
 
 class TestQualitySupervisorValidation:

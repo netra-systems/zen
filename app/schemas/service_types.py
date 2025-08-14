@@ -33,8 +33,8 @@ class OperationType(str, Enum):
     BATCH_DELETE = "batch_delete"
 
 
-class ValidationError(BaseModel):
-    """Structured validation error"""
+class ServiceValidationError(BaseModel):
+    """Structured validation error for service responses"""
     field: str
     message: str
     code: str
@@ -46,7 +46,7 @@ class ServiceResponse(BaseModel, Generic[TypeVar('T')]):
     """Generic service response wrapper"""
     success: bool
     data: Optional[TypeVar('T')] = None
-    errors: List[ValidationError] = Field(default_factory=list)
+    errors: List[ServiceValidationError] = Field(default_factory=list)
     warnings: List[str] = Field(default_factory=list)
     metadata: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=datetime.utcnow)

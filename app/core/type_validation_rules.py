@@ -9,19 +9,7 @@ class TypeCompatibilityChecker:
     """Checks type compatibility between backend and frontend."""
     
     def __init__(self):
-        self.type_mappings = {
-            # Python -> TypeScript mappings
-            'str': 'string',
-            'int': 'number',
-            'float': 'number',
-            'bool': 'boolean',
-            'datetime': 'string',  # Usually serialized as ISO string
-            'date': 'string',
-            'UUID': 'string',
-            'Any': 'any',
-            'Dict': 'Record<string, any>',
-            'List': 'Array',
-        }
+        self.type_mappings = _get_default_type_mappings()
     
     def check_field_compatibility(
         self, 
@@ -51,24 +39,14 @@ class TypeCompatibilityChecker:
     
     def _normalize_backend_type(self, backend_type: str) -> str:
         """Normalize backend type for comparison."""
-        # Handle Optional types
-        if backend_type.startswith('Optional[') and backend_type.endswith(']'):
-            inner_type = backend_type[9:-1]
-            return self._normalize_backend_type(inner_type)
-        
-        # Handle Union types
-        if backend_type.startswith('Union[') and backend_type.endswith(']'):
+        if _is_optional_type(backend_type):
+            return self._normalize_backend_type(_extract_optional_inner(backend_type))
+        if _is_union_type(backend_type):
             return _handle_union_type(backend_type, self._normalize_backend_type)
-        
-        # Handle List/Array types
-        if backend_type.startswith('List[') and backend_type.endswith(']'):
+        if _is_list_type(backend_type):
             return _handle_list_type(backend_type, self._normalize_backend_type)
-        
-        # Handle Dict types
-        if backend_type.startswith('Dict[') and backend_type.endswith(']'):
+        if _is_dict_type(backend_type):
             return 'Record<string, any>'
-        
-        # Apply basic mappings
         return self.type_mappings.get(backend_type, backend_type)
     
     def _normalize_frontend_type(self, frontend_type: str) -> str:
@@ -79,14 +57,9 @@ class TypeCompatibilityChecker:
 
 def _are_types_compatible(backend_type: str, frontend_type: str) -> bool:
     """Check if two normalized types are compatible."""
-    # Exact match or any type
-    if backend_type == frontend_type or 'any' in [backend_type, frontend_type]:
+    if _are_exact_or_any_match(backend_type, frontend_type):
         return True
-    # Check specific type compatibilities
-    return (_check_number_compatibility(backend_type, frontend_type) or
-            _check_string_compatibility(backend_type, frontend_type) or
-            _are_array_types_compatible(backend_type, frontend_type) or
-            _are_object_types_compatible(backend_type, frontend_type))
+    return _check_specific_compatibilities(backend_type, frontend_type)
 
 
 def _check_number_compatibility(backend_type: str, frontend_type: str) -> bool:
@@ -135,19 +108,11 @@ def _create_type_mismatch(
     normalized_frontend: str
 ) -> TypeMismatch:
     """Create a TypeMismatch object for incompatible types."""
-    # Determine severity
     severity = _determine_mismatch_severity(normalized_backend, normalized_frontend)
-    
-    # Generate suggestion
     suggestion = _generate_type_suggestion(normalized_backend, normalized_frontend)
-    
-    return TypeMismatch(
-        field_path=field_path,
-        backend_type=backend_type,
-        frontend_type=frontend_type,
-        severity=severity,
-        message=f"Type mismatch: backend expects {backend_type}, frontend has {frontend_type}",
-        suggestion=suggestion
+    message = f"Type mismatch: backend expects {backend_type}, frontend has {frontend_type}"
+    return _build_type_mismatch_object(
+        field_path, backend_type, frontend_type, severity, message, suggestion
     )
 
 
@@ -212,3 +177,72 @@ def _generate_type_suggestion(backend_type: str, frontend_type: str) -> Optional
         return f"Change frontend type to array: {backend_type}"
     
     return f"Update frontend type to match backend: {backend_type}"
+
+
+def _get_default_type_mappings() -> dict:
+    """Get default type mappings from Python to TypeScript."""
+    return {
+        'str': 'string',
+        'int': 'number',
+        'float': 'number',
+        'bool': 'boolean',
+        'datetime': 'string',  # Usually serialized as ISO string
+        'date': 'string',
+        'UUID': 'string',
+        'Any': 'any',
+        'Dict': 'Record<string, any>',
+        'List': 'Array',
+    }
+
+
+def _is_optional_type(backend_type: str) -> bool:
+    """Check if type is Optional."""
+    return backend_type.startswith('Optional[') and backend_type.endswith(']')
+
+
+def _extract_optional_inner(backend_type: str) -> str:
+    """Extract inner type from Optional type."""
+    return backend_type[9:-1]
+
+
+def _is_union_type(backend_type: str) -> bool:
+    """Check if type is Union."""
+    return backend_type.startswith('Union[') and backend_type.endswith(']')
+
+
+def _is_list_type(backend_type: str) -> bool:
+    """Check if type is List."""
+    return backend_type.startswith('List[') and backend_type.endswith(']')
+
+
+def _is_dict_type(backend_type: str) -> bool:
+    """Check if type is Dict."""
+    return backend_type.startswith('Dict[') and backend_type.endswith(']')
+
+
+def _are_exact_or_any_match(backend_type: str, frontend_type: str) -> bool:
+    """Check if types are exact match or have any type."""
+    return backend_type == frontend_type or 'any' in [backend_type, frontend_type]
+
+
+def _check_specific_compatibilities(backend_type: str, frontend_type: str) -> bool:
+    """Check all specific type compatibility rules."""
+    return (_check_number_compatibility(backend_type, frontend_type) or
+            _check_string_compatibility(backend_type, frontend_type) or
+            _are_array_types_compatible(backend_type, frontend_type) or
+            _are_object_types_compatible(backend_type, frontend_type))
+
+
+def _build_type_mismatch_object(
+    field_path: str, backend_type: str, frontend_type: str,
+    severity, message: str, suggestion: Optional[str]
+) -> TypeMismatch:
+    """Build TypeMismatch object with provided parameters."""
+    return TypeMismatch(
+        field_path=field_path,
+        backend_type=backend_type,
+        frontend_type=frontend_type,
+        severity=severity,
+        message=message,
+        suggestion=suggestion
+    )

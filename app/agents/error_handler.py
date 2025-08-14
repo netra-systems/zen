@@ -10,12 +10,8 @@ from app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class ErrorSeverity(Enum):
-    """Error severity classification."""
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
+# Import ErrorSeverity from single source of truth
+from app.core.error_codes import ErrorSeverity
 
 
 class ErrorCategory(Enum):
@@ -67,8 +63,8 @@ class AgentError(Exception):
         self.timestamp = time.time()
 
 
-class ValidationError(AgentError):
-    """Error for input validation failures."""
+class AgentValidationError(AgentError):
+    """Error for agent input validation failures."""
     
     def __init__(self, message: str, context: Optional[ErrorContext] = None):
         super().__init__(

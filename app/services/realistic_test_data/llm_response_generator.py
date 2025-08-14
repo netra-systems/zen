@@ -8,13 +8,13 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional, Tuple
 import numpy as np
 
-from .models import ConfigManager
+from .models import RealisticTestDataConfigManager
 
 
 class LLMResponseGenerator:
     """Generates realistic LLM responses"""
     
-    def __init__(self, config_manager: ConfigManager):
+    def __init__(self, config_manager: RealisticTestDataConfigManager):
         """Initialize LLM response generator"""
         self.config = config_manager
     

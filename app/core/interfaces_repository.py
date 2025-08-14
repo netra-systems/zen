@@ -31,22 +31,30 @@ class DatabaseService(BaseService):
     @asynccontextmanager
     async def get_db_session(self):
         """Get a database session with proper error handling."""
-        if not self._session_factory:
-            raise ServiceError(
-                message=f"Database session factory not configured for {self.service_name}"
-            )
+        self._validate_session_factory()
         
         async with self._session_factory() as session:
             try:
                 yield session
             except Exception as e:
-                await session.rollback()
-                raise ServiceError(
-                    message=f"Database operation failed for {self.service_name}: {e}",
-                    context=ErrorContext.get_all_context()
-                )
+                await self._handle_session_error(session, e)
             finally:
                 await session.close()
+    
+    def _validate_session_factory(self):
+        """Validate session factory is configured."""
+        if not self._session_factory:
+            raise ServiceError(
+                message=f"Database session factory not configured for {self.service_name}"
+            )
+    
+    async def _handle_session_error(self, session: AsyncSession, error: Exception):
+        """Handle database session error."""
+        await session.rollback()
+        raise ServiceError(
+            message=f"Database operation failed for {self.service_name}: {error}",
+            context=ErrorContext.get_all_context()
+        )
 
 
 class CRUDService(DatabaseService, Generic[T, ID, CreateSchema, UpdateSchema, ResponseSchema]):
@@ -60,17 +68,21 @@ class CRUDService(DatabaseService, Generic[T, ID, CreateSchema, UpdateSchema, Re
     async def create(self, data: CreateSchema, **context) -> ResponseSchema:
         """Create a new entity."""
         async with self.get_db_session() as session:
-            # Convert Pydantic model to dict for SQLAlchemy
-            entity_data = data.model_dump() if hasattr(data, 'model_dump') else data
-            
-            # Create entity
-            entity = self._model_class(**entity_data)
-            session.add(entity)
-            await session.commit()
-            await session.refresh(entity)
-            
-            # Convert to response schema
+            entity_data = self._extract_entity_data(data)
+            entity = await self._create_and_persist_entity(session, entity_data)
             return self._to_response_schema(entity)
+    
+    def _extract_entity_data(self, data: CreateSchema) -> dict:
+        """Extract entity data from schema."""
+        return data.model_dump() if hasattr(data, 'model_dump') else data
+    
+    async def _create_and_persist_entity(self, session: AsyncSession, entity_data: dict):
+        """Create and persist entity to database."""
+        entity = self._model_class(**entity_data)
+        session.add(entity)
+        await session.commit()
+        await session.refresh(entity)
+        return entity
     
     async def get_by_id(self, entity_id: ID, **context) -> Optional[ResponseSchema]:
         """Get entity by ID."""
@@ -89,37 +101,43 @@ class CRUDService(DatabaseService, Generic[T, ID, CreateSchema, UpdateSchema, Re
     ) -> List[ResponseSchema]:
         """Get multiple entities with pagination and filtering."""
         async with self.get_db_session() as session:
-            query = session.query(self._model_class)
-            
-            # Apply filters if provided
-            if filters:
-                query = self._apply_filters(query, filters)
-            
-            # Apply pagination
-            entities = await query.offset(skip).limit(limit).all()
-            
+            query = self._build_query(session, filters)
+            entities = await self._execute_paginated_query(query, skip, limit)
             return [self._to_response_schema(entity) for entity in entities]
+    
+    def _build_query(self, session: AsyncSession, filters: Optional[Dict[str, Any]]):
+        """Build database query with optional filters."""
+        query = session.query(self._model_class)
+        if filters:
+            query = self._apply_filters(query, filters)
+        return query
+    
+    async def _execute_paginated_query(self, query, skip: int, limit: int):
+        """Execute query with pagination."""
+        return await query.offset(skip).limit(limit).all()
     
     async def update(self, entity_id: ID, data: UpdateSchema, **context) -> ResponseSchema:
         """Update an existing entity."""
         async with self.get_db_session() as session:
-            entity = await session.get(self._model_class, entity_id)
-            if not entity:
-                raise RecordNotFoundError(
-                    self._model_class.__name__,
-                    entity_id
-                )
-            
-            # Update fields
-            update_data = data.model_dump(exclude_unset=True) if hasattr(data, 'model_dump') else data
-            for field, value in update_data.items():
-                if hasattr(entity, field):
-                    setattr(entity, field, value)
-            
+            entity = await self._get_entity_or_raise(session, entity_id)
+            self._update_entity_fields(entity, data)
             await session.commit()
             await session.refresh(entity)
-            
             return self._to_response_schema(entity)
+    
+    async def _get_entity_or_raise(self, session: AsyncSession, entity_id: ID):
+        """Get entity or raise RecordNotFoundError."""
+        entity = await session.get(self._model_class, entity_id)
+        if not entity:
+            raise RecordNotFoundError(self._model_class.__name__, entity_id)
+        return entity
+    
+    def _update_entity_fields(self, entity, data: UpdateSchema):
+        """Update entity fields from data."""
+        update_data = data.model_dump(exclude_unset=True) if hasattr(data, 'model_dump') else data
+        for field, value in update_data.items():
+            if hasattr(entity, field):
+                setattr(entity, field, value)
     
     async def delete(self, entity_id: ID, **context) -> bool:
         """Delete an entity."""
@@ -141,13 +159,16 @@ class CRUDService(DatabaseService, Generic[T, ID, CreateSchema, UpdateSchema, Re
     def _to_response_schema(self, entity) -> ResponseSchema:
         """Convert database entity to response schema."""
         if hasattr(entity, '__dict__'):
-            # Convert SQLAlchemy model to dict, then to response schema
-            entity_dict = {
-                column.name: getattr(entity, column.name)
-                for column in entity.__table__.columns
-            }
+            entity_dict = self._extract_entity_dict(entity)
             return self._response_schema(**entity_dict)
         return self._response_schema.from_orm(entity)
+    
+    def _extract_entity_dict(self, entity) -> dict:
+        """Extract entity attributes as dictionary."""
+        return {
+            column.name: getattr(entity, column.name)
+            for column in entity.__table__.columns
+        }
     
     def _apply_filters(self, query, filters: Dict[str, Any]):
         """Apply filters to query - override in subclasses for complex filtering."""
@@ -189,14 +210,22 @@ class ServiceRegistry:
         """Perform health check on all services."""
         health_results = {}
         for name, service in self._services.items():
-            try:
-                health_results[name] = await service.health_check()
-            except Exception as e:
-                health_results[name] = ServiceHealth(
-                    service_name=name,
-                    status="unhealthy",
-                    timestamp=datetime.now(UTC),
-                    dependencies={},
-                    metrics={"error": str(e)}
-                )
+            health_results[name] = await self._check_service_health(name, service)
         return health_results
+    
+    async def _check_service_health(self, name: str, service: BaseServiceInterface) -> ServiceHealth:
+        """Check health of individual service."""
+        try:
+            return await service.health_check()
+        except Exception as e:
+            return self._create_unhealthy_service_health(name, e)
+    
+    def _create_unhealthy_service_health(self, name: str, error: Exception) -> ServiceHealth:
+        """Create unhealthy service health response."""
+        return ServiceHealth(
+            service_name=name,
+            status="unhealthy",
+            timestamp=datetime.now(UTC),
+            dependencies={},
+            metrics={"error": str(error)}
+        )

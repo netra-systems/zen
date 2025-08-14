@@ -104,6 +104,5 @@ if __name__ == "__main__":
         "app.main:app",
         host=args.host,
         port=port,
-        reload=not args.no_reload,
-        lifespan="on"
+        reload=not args.no_reload
     )

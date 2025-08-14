@@ -36,8 +36,8 @@ class CorpusNotAvailableError(CorpusBaseException):
     pass
 
 
-class ValidationError(CorpusBaseException):
-    """Raised when validation fails"""
+class CorpusValidationError(CorpusBaseException):
+    """Raised when corpus validation fails"""
     pass
 
 

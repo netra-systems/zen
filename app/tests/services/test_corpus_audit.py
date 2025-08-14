@@ -11,8 +11,10 @@ from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.audit.corpus_audit import (
-    CorpusAuditLogger, CorpusAuditRepository, AuditTimer, create_audit_logger
+    CorpusAuditLogger, create_audit_logger
 )
+from app.services.audit.repository import CorpusAuditRepository
+from app.services.audit.utils import AuditTimer
 from app.schemas.registry import (
     CorpusAuditAction, CorpusAuditStatus, CorpusAuditMetadata,
     CorpusAuditSearchFilter, CorpusAuditRecord

@@ -1,24 +1,24 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-14T14:13:29.794569  
+**Generated:** 2025-08-14T15:29:01.690900  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 **Purpose:** Development validation, component testing
 
 ## Test Summary
 
-**Total Tests:** 0  
+**Total Tests:** 1  
 **Passed:** 0  
 **Failed:** 0  
 **Skipped:** 0  
-**Errors:** 0  
+**Errors:** 1  
 **Overall Status:** [FAILED]
 
 ### Component Breakdown
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 6.68s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.25s | [FAILED] |
+| Backend   | 1 | 0 | 0 | 0 | 1 | 23.13s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.26s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,7 +27,7 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 6.93s
+- **Total Duration:** 23.39s
 - **Exit Code:** 15
 
 ### Backend Configuration
@@ -44,6 +44,7 @@
 
 ### Backend Output
 ```
+Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env
 Loaded test environment from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.test
 ================================================================================
 NETRA AI PLATFORM - BACKEND TEST RUNNER
@@ -58,27 +59,51 @@ Test Configuration:
 Running command:
   pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
 ================================================================================
-Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env
+[1m============================= test session starts =============================[0m
+platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
+configfile: pytest.ini
+plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO
+created: 4/4 workers
+
+=================================== ERRORS ====================================
+[31m[1m____________ ERROR collecting tests/services/test_user_service.py _____________[0m
+ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\services\test_user_service.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\..\miniconda3\Lib\site-packages\_pytest\python.py:498: in importtestmodule
+    mod = import_path(
+..\..\..\..\miniconda3\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:935: in _load_unlocked
+    ???
+..\..\..\..\miniconda3\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+app\tests\services\test_user_service.py:14: in <module>
+    from app.schemas.registry import UserCreate, UserUpdate
+E   ImportError: cannot import name 'UserUpdate' from 'app.schemas.registry' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\schemas\registry.py)
+[36m[1m=========================== short test summary info ===========================[0m
+[31mERROR[0m app\tests\services\test_user_service.py
+[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
+!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!
+[31m============================== [31m[1m1 error[0m[31m in 15.65s[0m[31m ==============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 6.07s
+[FAIL] TESTS FAILED with exit code 2 after 22.35s
 [Coverage] Coverage Report: reports/coverage/html/index.html
 ================================================================================
 
-ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\conftest.py'.
-app\tests\conftest.py:52: in <module>
-    from app.main import app
-app\main.py:36: in <module>
-    from app.shutdown import run_complete_shutdown
-app\shutdown.py:12: in <module>
-    from app.ws_manager import manager as websocket_manager
-app\ws_manager.py:14: in <module>
-    from app.schemas.websocket_message_types import (
-app\schemas\websocket_message_types.py:127: in <module>
-    class AgentLogMessage(ServerMessage):
-app\schemas\websocket_message_types.py:129: in AgentLogMessage
-    type: Literal[WebSocketMessageType.AGENT_LOG] = WebSocketMessageType.AGENT_LOG
-                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   AttributeError: type object 'WebSocketMessageType' has no attribute 'AGENT_LOG'
 
 ```
 
@@ -89,5 +114,15 @@ E   AttributeError: type object 'WebSocketMessageType' has no attribute 'AGENT_L
 operable program or batch file.
 
 ```
+
+## Error Summary
+
+### Backend Errors
+- =================================== ERRORS ====================================
+- [31m[1m____________ ERROR collecting tests/services/test_user_service.py _____________[0m
+- [31mERROR[0m app\tests\services\test_user_service.py
+- [FAIL] TESTS FAILED with exit code 2 after 22.35s
+
+
 ---
 *Generated by Netra AI Unified Test Runner v3.0*

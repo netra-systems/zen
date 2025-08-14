@@ -169,6 +169,11 @@ class SecretLoader:
     def load_all_secrets(self) -> bool:
         """
         Load secrets from all sources with priority.
+        Priority order:
+        1. .env.development.local (Terraform-generated, highest priority)
+        2. Google Secret Manager
+        3. .env file
+        4. Static config
         
         Returns:
             True if secrets were loaded successfully
@@ -176,16 +181,23 @@ class SecretLoader:
         logger.info("Secret Loading Process Started")
         logger.info("=" * 60)
         
-        # First, try to load from existing .env file
+        # First, try to load from Terraform-generated .env.development.local
+        terraform_env_file = self.project_root / ".env.development.local"
+        terraform_secrets = {}
+        if terraform_env_file.exists():
+            logger.info("Found Terraform-generated .env.development.local - using as primary config")
+            terraform_secrets = self.load_from_env_file(terraform_env_file)
+        
+        # Then, try to load from existing .env file
         env_secrets = self.load_from_env_file()
         
         # Then try Google Secret Manager
         google_secrets = {}
-        if self.project_id:
+        if self.project_id and not terraform_secrets:  # Skip Google if we have Terraform config
             google_secrets = self.load_from_google_secrets()
         
-        # Merge with Google secrets taking priority
-        all_secrets = {**env_secrets, **google_secrets}
+        # Merge with priority: terraform > google > env
+        all_secrets = {**env_secrets, **google_secrets, **terraform_secrets}
         
         # Add static configuration
         static_config = self._get_static_config()

@@ -2,12 +2,13 @@
 Admin Corpus WebSocket Messages
 
 WebSocket message types for admin corpus operations.
-All models follow Pydantic with strong typing.
+All models follow Pydantic with strong typing per type_safety.xml.
+Maximum 300 lines per conventions.xml, each function ≤8 lines.
 """
 
 from typing import Dict, Any, List, Optional, Literal
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 
 
@@ -25,6 +26,8 @@ class CorpusIntent(str, Enum):
 
 class CorpusDiscoveryRequest(BaseModel):
     """Request for corpus discovery operations"""
+    model_config = ConfigDict(extra="forbid")
+    
     message_type: Literal["corpus_discovery_request"] = "corpus_discovery_request"
     intent: Literal["discover", "suggest", "validate"]
     category: Optional[str] = None
@@ -36,6 +39,8 @@ class CorpusDiscoveryRequest(BaseModel):
 
 class CorpusDiscoveryResponse(BaseModel):
     """Response for corpus discovery operations"""
+    model_config = ConfigDict(extra="forbid")
+    
     message_type: Literal["corpus_discovery_response"] = "corpus_discovery_response"
     intent: str
     category: Optional[str] = None
@@ -48,6 +53,8 @@ class CorpusDiscoveryResponse(BaseModel):
 
 class CorpusGenerationRequest(BaseModel):
     """Request for corpus generation"""
+    model_config = ConfigDict(extra="forbid")
+    
     message_type: Literal["corpus_generation_request"] = "corpus_generation_request"
     domain: str
     workload_types: List[str]
@@ -60,6 +67,8 @@ class CorpusGenerationRequest(BaseModel):
 
 class CorpusGenerationResponse(BaseModel):
     """Response for corpus generation"""
+    model_config = ConfigDict(extra="forbid")
+    
     message_type: Literal["corpus_generation_response"] = "corpus_generation_response"
     success: bool
     corpus_id: Optional[str] = None

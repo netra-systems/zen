@@ -268,8 +268,7 @@ class ConfigurationSuggestionEngine:
     def _merge_domain_settings(self, config: Dict, domain_settings: Dict) -> Dict[str, Any]:
         """Merge domain-specific settings into configuration"""
         for key, value in domain_settings.items():
-            if key not in config:
-                config[key] = value
+            if key not in config: config[key] = value
         return config
     
     async def _apply_domain_rules(self, config: Dict, domain: str) -> Dict[str, Any]:
@@ -284,8 +283,7 @@ class ConfigurationSuggestionEngine:
     
     def get_auto_complete_options(self, partial: str, category: str) -> List[str]:
         """Get auto-complete options for partial input"""
-        options = self._get_category_options(category)
-        return [opt for opt in options if opt.startswith(partial.lower())]
+        return [opt for opt in self._get_category_options(category) if opt.startswith(partial.lower())]
     
     def _get_category_options(self, category: str) -> List[str]:
         """Get available options for a category"""
@@ -298,8 +296,6 @@ class ConfigurationSuggestionEngine:
     
     async def generate_config_preview(self, suggestions: List[ConfigurationSuggestion]) -> Dict[str, Any]:
         """Generate configuration preview from suggestions"""
-        preview = {}
-        for suggestion in suggestions:
-            preview[suggestion.parameter] = suggestion.suggested_value
+        preview = {s.parameter: s.suggested_value for s in suggestions}
         preview["_metadata"] = {"generated_by": "suggestion_engine", "suggestion_count": len(suggestions)}
         return preview

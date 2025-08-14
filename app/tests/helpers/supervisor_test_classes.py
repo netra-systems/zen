@@ -27,40 +27,9 @@ class QualitySupervisor:
         return json.loads(result)
 
 
-class AdminToolDispatcher:
-    """Mock AdminToolDispatcher for testing."""
-    
-    def __init__(self, llm_manager, tool_dispatcher):
-        self.llm_manager = llm_manager
-        self.tool_dispatcher = tool_dispatcher
-        self.audit_logger = None
-    
-    async def dispatch_admin_operation(self, operation):
-        """Dispatch admin operation with security checks."""
-        self._validate_permissions(operation)
-        result = await self._execute_operation(operation)
-        await self._log_operation(operation)
-        return result
-    
-    def _validate_permissions(self, operation):
-        """Validate user permissions."""
-        if operation.get("user_role") == "viewer" and operation["type"] == "delete_all_data":
-            raise PermissionError("Insufficient permissions")
-    
-    async def _execute_operation(self, operation):
-        """Execute the operation."""
-        tool_name = "admin_user_management" if operation["type"] == "create_user" else operation["type"]
-        return await self.tool_dispatcher.execute_tool(tool_name, operation["params"])
-    
-    async def _log_operation(self, operation):
-        """Log operation if audit logger exists."""
-        if self.audit_logger:
-            await self.audit_logger.log({
-                "operation": operation["type"],
-                "user_id": operation.get("user_id"),
-                "params": operation["params"],
-                "timestamp": time.time()
-            })
+# Import real AdminToolDispatcher - tests should use actual implementation
+# If mocking is needed, use unittest.mock.Mock or pytest fixtures
+from app.agents.admin_tool_dispatcher import AdminToolDispatcher
 
 
 class CorpusAdminSubAgent:

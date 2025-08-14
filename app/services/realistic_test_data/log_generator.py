@@ -8,13 +8,13 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any
 
-from .models import ConfigManager
+from .models import RealisticTestDataConfigManager
 
 
 class LogGenerator:
     """Generates realistic log data with various patterns"""
     
-    def __init__(self, config_manager: ConfigManager):
+    def __init__(self, config_manager: RealisticTestDataConfigManager):
         """Initialize log generator"""
         self.config = config_manager
     
