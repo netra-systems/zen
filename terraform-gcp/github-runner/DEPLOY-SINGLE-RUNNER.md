@@ -42,10 +42,10 @@ nano terraform.tfvars
 terraform init
 
 # Plan the deployment (shows what will be created)
-terraform plan -target=google_compute_instance.github_runner_fixed
+terraform plan -target="google_compute_instance.github_runner_fixed"
 
 # Deploy the single runner with Docker fixes
-terraform apply -target=google_compute_instance.github_runner_fixed -auto-approve
+terraform apply -target="google_compute_instance.github_runner_fixed" -auto-approve
 ```
 
 ### 4. Verify deployment
@@ -122,7 +122,7 @@ Edit `single-runner.tf` to customize:
 To remove the single runner:
 
 ```bash
-terraform destroy -target=google_compute_instance.github_runner_fixed
+terraform destroy -target="google_compute_instance.github_runner_fixed"
 ```
 
 ## Notes
