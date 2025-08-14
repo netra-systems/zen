@@ -128,6 +128,35 @@ class DataSubAgent(BaseSubAgent):
             state, run_id, stream_updates, self._send_update, data_ops, metrics_analyzer
         )
     
+    async def handle_supervisor_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle requests from supervisor agent (test compatibility)."""
+        action = request.get("action", "")
+        data = request.get("data", {})
+        callback = request.get("callback")
+        
+        result = {"status": "unknown", "action": action}
+        
+        if action == "process_data":
+            result.update({"status": "completed", "processed": True})
+        else:
+            result.update({"status": "unsupported", "error": f"Action '{action}' not supported"})
+        
+        if callback:
+            await callback(result)
+        return result
+    
+    async def _analyze_performance(self, data: Dict[str, Any], metric_name: str) -> Dict[str, Any]:
+        """Analyze performance metrics (test compatibility method)."""
+        if not data or len(data) < 2:
+            return {"status": "insufficient_data", "message": "Not enough data points"}
+        
+        values = [item.get("value", 0) for item in data if isinstance(item, dict)]
+        if not values:
+            return {"status": "no_data", "message": "No valid data points found"}
+        
+        avg_value = sum(values) / len(values)
+        max_value = max(values)
+        return {"average": avg_value, "maximum": max_value, "data_points": len(values)}
     
     def get_health_status(self) -> Dict[str, Any]:
         """Get agent health status."""

@@ -23,16 +23,9 @@ from .intent_detector import IntentDetector
 from .tool_recommender import ToolRecommender
 from .core import TriageCore
 
-# Import TriageSubAgent from parent level
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-try:
-    from triage_sub_agent import TriageSubAgent
-except ImportError:
-    # Fallback import for tests
-    TriageSubAgent = None
+# Note: TriageSubAgent is in the parent triage_sub_agent.py file
+# Import it when needed to avoid circular imports
+TriageSubAgent = None
 
 __all__ = [
     "Priority",
@@ -49,6 +42,5 @@ __all__ = [
     "RequestValidator",
     "IntentDetector",
     "ToolRecommender",
-    "TriageCore",
-    "TriageSubAgent"
+    "TriageCore"
 ]

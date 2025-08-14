@@ -220,25 +220,11 @@ class SyntheticDataSubAgent(BaseSubAgent):
     def _create_parsing_prompt(self, user_request: str) -> str:
         """Create prompt for parsing user request"""
         return f"""
-Analyze the following user request for synthetic data generation and extract parameters:
+Analyze this request for synthetic data parameters: {user_request}
 
-User Request: {user_request}
+Return JSON with fields: workload_type (inference_logs|training_data|performance_metrics|cost_data|custom), volume (100-1000000), time_range_days (1-365), distribution (normal|uniform|exponential), noise_level (0.0-0.5), custom_parameters.
 
-Return a JSON object with these fields:
-{{
-    "workload_type": "inference_logs|training_data|performance_metrics|cost_data|custom",
-    "volume": <number between 100 and 1000000>,
-    "time_range_days": <number between 1 and 365>,
-    "distribution": "normal|uniform|exponential",
-    "noise_level": <number between 0.0 and 0.5>,
-    "custom_parameters": {{
-        "models": [<list of model names if mentioned>],
-        "use_cases": [<list of use cases if mentioned>],
-        "avg_tokens_per_request": <number if mentioned, otherwise 500>
-    }}
-}}
-
-Be conservative with volume - default to 1000 if not specified.
+Default volume to 1000 if not specified.
 """
     
     def _get_default_profile(self) -> WorkloadProfile:
@@ -278,20 +264,7 @@ Be conservative with volume - default to 1000 if not specified.
     def _generate_approval_message(self, profile: WorkloadProfile) -> str:
         """Generate user-friendly approval message"""
         workload_type = profile.workload_type.value.replace('_', ' ').title()
-        return f"""
-**📊 Synthetic Data Generation Request**
-
-**Type:** {workload_type}
-**Volume:** {profile.volume:,} records
-**Time Range:** {profile.time_range_days} days
-**Distribution:** {profile.distribution}
-
-This will generate synthetic data to simulate your workload patterns.
-The data will be stored in a unique table for analysis.
-
-**Do you approve this synthetic data generation?**
-Reply with 'approve' to proceed or 'modify' to adjust parameters.
-"""
+        return f"""📊 Synthetic Data Request: {workload_type}, {profile.volume:,} records, {profile.time_range_days} days, {profile.distribution} distribution. Approve to proceed or reply 'modify' to adjust."""
     
     def _create_approval_result(self, profile: WorkloadProfile, message: str) -> SyntheticDataResult:
         """Create approval required result"""
@@ -329,27 +302,16 @@ Reply with 'approve' to proceed or 'modify' to adjust parameters.
     async def cleanup(self, state: DeepAgentState, run_id: str) -> None:
         """Cleanup after execution"""
         await super().cleanup(state, run_id)
-        self._log_final_metrics(state)
-    
-    def _log_final_metrics(self, state: DeepAgentState) -> None:
-        """Log final generation metrics"""
-        if not self._has_valid_result(state):
-            return
         
-        result = state.synthetic_data_result
-        metadata = result.get('metadata', {})
-        status = result.get('generation_status', {})
-        
-        self.logger.info(
-            f"Synthetic data generation completed: "
-            f"table={metadata.get('table_name')}, "
-            f"records={status.get('records_generated')}"
-        )
-    
-    def _has_valid_result(self, state: DeepAgentState) -> bool:
-        """Check if state has valid synthetic data result"""
-        return (
-            hasattr(state, 'synthetic_data_result') and
-            state.synthetic_data_result and
-            isinstance(state.synthetic_data_result, dict)
-        )
+        # Log final metrics
+        if (hasattr(state, 'synthetic_data_result') and 
+            state.synthetic_data_result and 
+            isinstance(state.synthetic_data_result, dict)):
+            result = state.synthetic_data_result
+            metadata = result.get('metadata', {})
+            status = result.get('generation_status', {})
+            self.logger.info(
+                f"Synthetic data generation completed: "
+                f"table={metadata.get('table_name')}, "
+                f"records={status.get('records_generated')}"
+            )
