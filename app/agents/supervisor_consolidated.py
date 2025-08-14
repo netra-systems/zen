@@ -342,7 +342,7 @@ class SupervisorAgent(BaseSubAgent):
                                  thread_id: str, run_id: str) -> WebSocketMessage:
         """Build completion message."""
         content = self._create_completion_content(state, thread_id, run_id)
-        return WebSocketMessage(type="agent_completed", content=content)
+        return WebSocketMessage(type="agent_completed", payload=content.model_dump())
     
     def _create_completion_content(self, state: DeepAgentState, 
                                   thread_id: str, run_id: str) -> AgentCompleted:
