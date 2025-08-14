@@ -16,7 +16,8 @@ This module contains the execution logic for individual admin tools.
 All functions are ≤8 lines as per CLAUDE.md requirements.
 """
 
-from typing import Dict, Any
+from typing import Dict
+from app.schemas.shared_types import ToolResult
 from sqlalchemy.orm import Session
 from app.db.models_postgres import User
 from app.logging_config import central_logger
@@ -31,7 +32,7 @@ class AdminToolExecutors:
         self.db = db
         self.user = user
     
-    async def execute_corpus_manager(self, action: str, **kwargs) -> Dict[str, Any]:
+    async def execute_corpus_manager(self, action: str, **kwargs) -> ToolResult:
         """Execute corpus manager actions via corpus service"""
         if action == 'create':
             return await self._create_corpus(**kwargs)
@@ -42,7 +43,7 @@ class AdminToolExecutors:
         else:
             return {"error": f"Unknown corpus action: {action}"}
     
-    async def _create_corpus(self, **kwargs) -> Dict[str, Any]:
+    async def _create_corpus(self, **kwargs) -> ToolResult:
         """Create new corpus"""
         from app.services import corpus_service
         
@@ -56,14 +57,14 @@ class AdminToolExecutors:
         )
         return {"status": "success", "corpus": result}
     
-    async def _list_corpora(self) -> Dict[str, Any]:
+    async def _list_corpora(self) -> ToolResult:
         """List all available corpora"""
         from app.services import corpus_service
         
         corpora = await corpus_service.list_corpora(self.db)
         return {"status": "success", "corpora": corpora}
     
-    async def _validate_corpus(self, **kwargs) -> Dict[str, Any]:
+    async def _validate_corpus(self, **kwargs) -> ToolResult:
         """Validate corpus by ID"""
         corpus_id = kwargs.get('corpus_id')
         if not corpus_id:
@@ -72,7 +73,7 @@ class AdminToolExecutors:
         # Implement validation logic
         return {"status": "success", "valid": True, "corpus_id": corpus_id}
     
-    async def execute_synthetic_generator(self, action: str, **kwargs) -> Dict[str, Any]:
+    async def execute_synthetic_generator(self, action: str, **kwargs) -> ToolResult:
         """Execute synthetic data generator actions"""
         if action == 'generate':
             return await self._generate_synthetic_data(**kwargs)

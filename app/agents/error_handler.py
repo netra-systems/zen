@@ -2,7 +2,7 @@
 
 import asyncio
 import time
-from typing import Dict, Any, Optional, Callable, Awaitable, List, Union
+from typing import Dict, Optional, Callable, Awaitable, List, Union
 from enum import Enum
 from dataclasses import dataclass
 from app.logging_config import central_logger
@@ -36,7 +36,7 @@ class ErrorContext:
     timestamp: float
     retry_count: int = 0
     max_retries: int = 3
-    additional_data: Dict[str, Any] = None
+    additional_data: Dict[str, Union[str, int, float, bool]] = None
     
     def __post_init__(self):
         if self.additional_data is None:
@@ -290,7 +290,7 @@ class ErrorHandler:
             recoverable=True
         )
     
-    def get_error_stats(self) -> Dict[str, Any]:
+    def get_error_stats(self) -> Dict[str, Union[int, Dict[str, int], List[Dict[str, Union[str, float]]]]]:
         """Get error statistics."""
         if not self.error_history:
             return {"total_errors": 0}
@@ -300,7 +300,7 @@ class ErrorHandler:
             if time.time() - e.timestamp < 3600  # Last hour
         ]
         
-        category_counts = {}
+        category_counts: Dict[str, int] = {}
         severity_counts = {}
         
         for error in recent_errors:

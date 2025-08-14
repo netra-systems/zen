@@ -1,7 +1,6 @@
 """Critical Pydantic Validation Tests for Agent System
 
-This test suite addresses the CRITICAL validation errors seen in production
-where LLM returns strings instead of dicts for nested fields.
+This addresses CRITICAL validation errors where LLM returns strings instead of dicts.
 """
 
 import pytest
@@ -42,9 +41,9 @@ class TestPydanticValidationCritical:
         return Mock(spec=ToolDispatcher)
     
     @pytest.mark.asyncio
-    async def test_triage_tool_recommendations_string_parameters_error(self):
-        """Test exact error: tool_recommendations.parameters as string instead of dict"""
-        # This is the EXACT error from production logs
+    async def test_triage_malformed_parameters_fallback_handling(self):
+        """Test production fallback behavior for malformed tool parameters"""
+        # This tests the actual production scenario: malformed strings get converted to empty dicts
         invalid_llm_response = {
             "category": "Cost Optimization",
             "confidence_score": 0.95,
@@ -54,26 +53,24 @@ class TestPydanticValidationCritical:
                 {
                     "tool_name": "optimize_performance",
                     "relevance_score": 0.9,
-                    # ERROR: This is a string, not a dict!
-                    "parameters": '{ "performance_goal": "3x", "budget_constraint": "no_increase" }'
+                    # Malformed JSON triggers fallback to empty dict
+                    "parameters": '{ "performance_goal": "3x", "budget_constraint": '
                 },
                 {
                     "tool_name": "analyze_metrics",
                     "relevance_score": 0.8,
-                    # ERROR: This is also a string!
-                    "parameters": '{ "metric": "latency" }'
+                    # Invalid string triggers fallback to empty dict
+                    "parameters": 'invalid_json_string'
                 }
             ]
         }
         
-        # This should raise validation error
-        with pytest.raises(ValidationError) as exc_info:
-            TriageResult(**invalid_llm_response)
+        # Should succeed with fallback handling (production behavior)
+        result = TriageResult(**invalid_llm_response)
         
-        # Verify the exact error message matches production
-        error = exc_info.value
-        assert "Input should be a valid dictionary" in str(error)
-        assert "tool_recommendations" in str(error)
+        # Verify fallback behavior: malformed strings become empty dicts
+        assert result.tool_recommendations[0].parameters == {}
+        assert result.tool_recommendations[1].parameters == {}
     
     @pytest.mark.asyncio
     async def test_triage_string_parameters_recovery(self):

@@ -193,6 +193,17 @@ except Exception as e:
     async_session_factory = None
 
 
+def validate_session(session: any) -> bool:
+    """Validate that a session is a proper AsyncSession instance."""
+    return isinstance(session, AsyncSession)
+
+def get_session_validation_error(session: any) -> str:
+    """Get descriptive error for invalid session type."""
+    if session is None:
+        return "Session is None"
+    actual_type = type(session).__name__
+    return f"Expected AsyncSession, got {actual_type}"
+
 @asynccontextmanager
 async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
     """
@@ -203,6 +214,11 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
         raise RuntimeError("Database not configured")
 
     async with async_session_factory() as session:
+        if not validate_session(session):
+            error_msg = get_session_validation_error(session)
+            logger.error(f"Invalid session type: {error_msg}")
+            raise RuntimeError(f"Database session error: {error_msg}")
+        
         try:
             yield session
             await session.commit()
@@ -210,8 +226,6 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
             await session.rollback()
             logger.error(f"Async DB session error: {e}", exc_info=True)
             raise
-        finally:
-            await session.close()
 
 async def close_async_db():
     """Close all async database connections."""

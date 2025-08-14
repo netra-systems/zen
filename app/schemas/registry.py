@@ -74,14 +74,24 @@ class WebSocketMessageType(str, Enum):
     AGENT_ERROR = "agent_error"
     AGENT_UPDATE = "agent_update"
     AGENT_LOG = "agent_log"
+    AGENT_THINKING = "agent_thinking"
     TOOL_STARTED = "tool_started"
     TOOL_COMPLETED = "tool_completed"
     TOOL_CALL = "tool_call"
     TOOL_RESULT = "tool_result"
+    TOOL_EXECUTING = "tool_executing"
     SUBAGENT_STARTED = "subagent_started" 
     SUBAGENT_COMPLETED = "subagent_completed"
     SUB_AGENT_UPDATE = "sub_agent_update"
     THREAD_HISTORY = "thread_history"
+    THREAD_CREATED = "thread_created"
+    THREAD_UPDATED = "thread_updated"
+    THREAD_DELETED = "thread_deleted"
+    THREAD_LOADED = "thread_loaded"
+    THREAD_RENAMED = "thread_renamed"
+    STEP_CREATED = "step_created"
+    PARTIAL_RESULT = "partial_result"
+    FINAL_REPORT = "final_report"
     ERROR = "error"
     CONNECTION_ESTABLISHED = "connection_established"
     STREAM_CHUNK = "stream_chunk"
@@ -105,16 +115,38 @@ MessageTypeLiteral = Literal[
     "create_thread",
     "switch_thread",
     "delete_thread",
+    "rename_thread",
     "list_threads",
+    "ping",
+    "pong",
+    "agent_started",
     "agent_completed",
     "agent_stopped",
-    "thread_history",
-    "error",
+    "agent_error",
     "agent_update",
+    "agent_log",
+    "agent_thinking",
     "tool_started",
     "tool_completed",
+    "tool_call",
+    "tool_result",
+    "tool_executing",
     "subagent_started",
-    "subagent_completed"
+    "subagent_completed",
+    "sub_agent_update",
+    "thread_history",
+    "thread_created",
+    "thread_updated", 
+    "thread_deleted",
+    "thread_loaded",
+    "thread_renamed",
+    "step_created",
+    "partial_result",
+    "final_report",
+    "error",
+    "connection_established",
+    "stream_chunk",
+    "stream_complete"
 ]
 
 
@@ -180,6 +212,12 @@ class Message(BaseModel):
     metadata: Optional[MessageMetadata] = None
     references: Optional[List[str]] = None
     attachments: Optional[List[Dict[str, Any]]] = None
+    
+    model_config = ConfigDict(
+        json_encoders={
+            datetime: lambda v: v.isoformat() if v else None
+        }
+    )
 
 
 class ThreadMetadata(BaseModel):
@@ -202,6 +240,12 @@ class Thread(BaseModel):
     is_active: bool = True
     last_message: Optional[Message] = None
     participants: Optional[List[str]] = None
+    
+    model_config = ConfigDict(
+        json_encoders={
+            datetime: lambda v: v.isoformat() if v else None
+        }
+    )
 
 
 # ============================================================================
@@ -342,7 +386,12 @@ class BaseWebSocketPayload(BaseModel):
     timestamp: Optional[datetime] = Field(default_factory=datetime.utcnow)
     correlation_id: Optional[str] = Field(default_factory=lambda: str(uuid.uuid4()))
     
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(
+        extra="forbid",
+        json_encoders={
+            datetime: lambda v: v.isoformat() if v else None
+        }
+    )
 
 
 class CreateThreadPayload(BaseWebSocketPayload):
@@ -415,6 +464,12 @@ class WebSocketError(BaseModel):
     details: Optional[Dict[str, Any]] = None
     trace_id: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+    
+    model_config = ConfigDict(
+        json_encoders={
+            datetime: lambda v: v.isoformat() if v else None
+        }
+    )
 
 
 class UserMessagePayload(BaseWebSocketPayload):
@@ -443,7 +498,12 @@ class WebSocketMessage(BaseModel):
     sender: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     
-    model_config = ConfigDict(use_enum_values=True)
+    model_config = ConfigDict(
+        use_enum_values=True,
+        json_encoders={
+            datetime: lambda v: v.isoformat() if v else None
+        }
+    )
 
 
 # Additional WebSocket message types for backward compatibility

@@ -129,7 +129,7 @@ class TestCustomExceptions:
     def test_netra_exception_structure(self):
         """Test NetraException structure and properties."""
         from app.core.exceptions_base import NetraException
-from app.core.error_codes import ErrorCode, ErrorSeverity
+        from app.core.error_codes import ErrorCode, ErrorSeverity
         
         exc = NetraException(
             message="Test error",

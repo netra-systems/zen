@@ -18,6 +18,8 @@ from app.schemas import (
     SubAgentLifecycle, WebSocketMessage, AgentStarted,
     SubAgentUpdate, AgentCompleted, SubAgentState
 )
+from app.llm.fallback_handler import LLMFallbackHandler, FallbackConfig
+from app.core.reliability import CircuitBreaker, CircuitBreakerConfig
 
 logger = central_logger.get_logger(__name__)
 
@@ -32,6 +34,7 @@ class ExecutionEngine:
         self.websocket_manager = websocket_manager
         self.active_runs: Dict[str, AgentExecutionContext] = {}
         self.run_history: List[AgentExecutionResult] = []
+        self._init_fallback_mechanisms()
         
     async def execute_agent(self, context: AgentExecutionContext,
                            state: DeepAgentState) -> AgentExecutionResult:
@@ -96,7 +99,7 @@ class ExecutionEngine:
         """Execute a single pipeline step."""
         if step.strategy == ExecutionStrategy.PARALLEL:
             return await self._execute_parallel(step, context, state)
-        return await self.execute_agent(context, state)
+        return await self._execute_with_fallback(context, state)
     
     async def _execute_parallel(self, step: PipelineStep,
                                context: AgentExecutionContext,
@@ -105,7 +108,7 @@ class ExecutionEngine:
         tasks = []
         for agent_name in step.metadata.get("parallel_agents", []):
             ctx = self._create_agent_context(context, agent_name)
-            tasks.append(self.execute_agent(ctx, state))
+            tasks.append(self._execute_with_fallback(ctx, state))
         results = await asyncio.gather(*tasks, return_exceptions=True)
         return self._merge_parallel_results(results)
     
@@ -123,11 +126,11 @@ class ExecutionEngine:
                                      state: DeepAgentState,
                                      error: Exception,
                                      start_time: float) -> AgentExecutionResult:
-        """Handle execution errors with retry logic."""
+        """Handle execution errors with comprehensive fallback."""
         self._log_error(context.agent_name, error)
         if self._can_retry(context):
             return await self._retry_execution(context, state)
-        return self._create_failure_result(error, time.time() - start_time)
+        return await self._create_fallback_result(context, state, error, start_time)
     
     def _log_error(self, agent_name: str, error: Exception) -> None:
         """Log execution error."""
@@ -251,3 +254,194 @@ class ExecutionEngine:
         self.run_history.append(result)
         if len(self.run_history) > self.MAX_HISTORY_SIZE:
             self.run_history = self.run_history[-self.MAX_HISTORY_SIZE:]
+    
+    def _init_fallback_mechanisms(self) -> None:
+        """Initialize fallback mechanisms for graceful degradation."""
+        fallback_config = FallbackConfig(
+            max_retries=2,
+            base_delay=0.5,
+            max_delay=10.0,
+            timeout=30.0
+        )
+        self.fallback_handler = LLMFallbackHandler(fallback_config)
+        
+        # Agent-specific circuit breakers
+        self.agent_circuit_breakers: Dict[str, CircuitBreaker] = {}
+    
+    def _get_agent_circuit_breaker(self, agent_name: str) -> CircuitBreaker:
+        """Get or create circuit breaker for agent."""
+        if agent_name not in self.agent_circuit_breakers:
+            config = CircuitBreakerConfig(
+                failure_threshold=3,
+                recovery_timeout=60.0,
+                name=f"agent_{agent_name}"
+            )
+            self.agent_circuit_breakers[agent_name] = CircuitBreaker(config)
+        return self.agent_circuit_breakers[agent_name]
+    
+    async def _execute_with_fallback(self, context: AgentExecutionContext,
+                                   state: DeepAgentState) -> AgentExecutionResult:
+        """Execute agent with comprehensive fallback handling."""
+        circuit_breaker = self._get_agent_circuit_breaker(context.agent_name)
+        
+        # Check circuit breaker state
+        if circuit_breaker.is_open():
+            logger.warning(f"Circuit breaker open for {context.agent_name}, using fallback")
+            return await self._create_circuit_breaker_fallback(context, state)
+        
+        async def _agent_operation():
+            return await self.execute_agent(context, state)
+        
+        try:
+            result = await self.fallback_handler.execute_with_fallback(
+                _agent_operation,
+                f"execute_{context.agent_name}",
+                context.agent_name,
+                self._get_agent_fallback_type(context.agent_name)
+            )
+            
+            if isinstance(result, AgentExecutionResult):
+                if result.success:
+                    circuit_breaker.record_success()
+                else:
+                    circuit_breaker.record_failure()
+                return result
+            else:
+                # Fallback response was used
+                return self._wrap_fallback_response(result, context)
+                
+        except Exception as e:
+            circuit_breaker.record_failure()
+            return await self._create_final_fallback(context, state, e)
+    
+    def _get_agent_fallback_type(self, agent_name: str) -> str:
+        """Get appropriate fallback type for agent."""
+        fallback_mapping = {
+            "TriageSubAgent": "triage",
+            "DataSubAgent": "data_analysis",
+            "SupplyResearcherAgent": "data_analysis",
+            "SyntheticDataGenerator": "data_analysis"
+        }
+        return fallback_mapping.get(agent_name, "general")
+    
+    def _wrap_fallback_response(self, fallback_data: dict,
+                              context: AgentExecutionContext) -> AgentExecutionResult:
+        """Wrap fallback response in AgentExecutionResult."""
+        return AgentExecutionResult(
+            success=True,  # Fallback is considered successful
+            state=None,
+            duration=0.1,
+            metadata={
+                "fallback_used": True,
+                "agent_name": context.agent_name,
+                "fallback_data": fallback_data
+            }
+        )
+    
+    async def _create_circuit_breaker_fallback(self, context: AgentExecutionContext,
+                                             state: DeepAgentState) -> AgentExecutionResult:
+        """Create fallback when circuit breaker is open."""
+        fallback_type = self._get_agent_fallback_type(context.agent_name)
+        fallback_data = self.fallback_handler._create_fallback_response(fallback_type)
+        
+        await self._send_fallback_notification(context, "circuit_breaker")
+        
+        return AgentExecutionResult(
+            success=True,  # Graceful degradation
+            state=state,
+            duration=0.05,
+            metadata={
+                "circuit_breaker_fallback": True,
+                "agent_name": context.agent_name,
+                "fallback_data": fallback_data
+            }
+        )
+    
+    async def _create_final_fallback(self, context: AgentExecutionContext,
+                                   state: DeepAgentState,
+                                   error: Exception) -> AgentExecutionResult:
+        """Create final fallback when all else fails."""
+        logger.error(f"Final fallback for {context.agent_name}: {error}")
+        
+        fallback_data = {
+            "message": f"Unable to complete {context.agent_name} operation",
+            "status": "degraded",
+            "error": str(error),
+            "fallback_used": True
+        }
+        
+        await self._send_fallback_notification(context, "final_fallback")
+        
+        return AgentExecutionResult(
+            success=False,
+            state=state,
+            duration=0.01,
+            error=str(error),
+            metadata={
+                "final_fallback": True,
+                "agent_name": context.agent_name,
+                "fallback_data": fallback_data
+            }
+        )
+    
+    async def _create_fallback_result(self, context: AgentExecutionContext,
+                                    state: DeepAgentState,
+                                    error: Exception,
+                                    start_time: float) -> AgentExecutionResult:
+        """Create fallback result after retries exhausted."""
+        fallback_type = self._get_agent_fallback_type(context.agent_name)
+        fallback_data = self.fallback_handler._create_fallback_response(fallback_type, error)
+        
+        await self._send_fallback_notification(context, "retry_exhausted")
+        
+        return AgentExecutionResult(
+            success=True,  # Graceful degradation is success
+            state=state,
+            duration=time.time() - start_time,
+            metadata={
+                "fallback_after_retry": True,
+                "agent_name": context.agent_name,
+                "original_error": str(error),
+                "fallback_data": fallback_data
+            }
+        )
+    
+    async def _send_fallback_notification(self, context: AgentExecutionContext,
+                                        fallback_type: str) -> None:
+        """Send notification about fallback usage."""
+        if not self.websocket_manager:
+            return
+        
+        message = WebSocketMessage(
+            type="agent_fallback",
+            payload={
+                "agent_name": context.agent_name,
+                "run_id": context.run_id,
+                "fallback_type": fallback_type,
+                "timestamp": datetime.now(timezone.utc).timestamp(),
+                "message": f"{context.agent_name} is using fallback response"
+            }
+        )
+        
+        try:
+            await self.websocket_manager.send_to_thread(
+                context.thread_id, message.model_dump())
+        except Exception as e:
+            logger.debug(f"Failed to send fallback notification: {e}")
+    
+    def get_fallback_health_status(self) -> Dict[str, any]:
+        """Get health status of fallback mechanisms."""
+        return {
+            "fallback_handler": self.fallback_handler.get_health_status(),
+            "circuit_breakers": {
+                agent: cb.get_status()
+                for agent, cb in self.agent_circuit_breakers.items()
+            }
+        }
+    
+    def reset_fallback_mechanisms(self) -> None:
+        """Reset all fallback mechanisms."""
+        self.fallback_handler.reset_circuit_breakers()
+        for cb in self.agent_circuit_breakers.values():
+            cb.reset()
+        logger.info("All fallback mechanisms reset")

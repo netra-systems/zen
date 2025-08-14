@@ -6,6 +6,7 @@ This module defines all the Pydantic models and enums used by the triage system.
 from typing import Optional, Dict, Any, List
 from enum import Enum
 from pydantic import BaseModel, Field, field_validator
+from app.core.json_parsing_utils import parse_dict_field
 
 
 class Priority(str, Enum):
@@ -61,6 +62,12 @@ class ToolRecommendation(BaseModel):
     tool_name: str
     relevance_score: float = Field(ge=0.0, le=1.0)
     parameters: Dict[str, Any] = Field(default_factory=dict)
+    
+    @field_validator('parameters', mode='before')
+    @classmethod
+    def parse_parameters(cls, v: Any) -> Dict[str, Any]:
+        """Parse parameters field from JSON string if needed"""
+        return parse_dict_field(v)
 
 
 class ValidationStatus(BaseModel):

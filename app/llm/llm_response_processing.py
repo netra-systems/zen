@@ -10,6 +10,7 @@ from app.services.llm_cache_service import llm_cache_service
 from app.logging_config import central_logger
 import json
 import time
+from pydantic import ValidationError
 
 logger = central_logger.get_logger(__name__)
 T = TypeVar('T', bound=BaseModel)
@@ -201,3 +202,39 @@ async def get_cached_structured_response(cache_key: str, llm_config_name: str,
         except Exception as e:
             logger.warning(f"Failed to parse cached structured response: {e}")
     return None
+
+
+def fix_validation_errors(data: Dict[str, Any], error: ValidationError) -> Dict[str, Any]:
+    """Fix common validation errors in LLM responses."""
+    if "Input should be a valid dictionary" in str(error):
+        return fix_string_parameters_to_dict(data)
+    elif "Input should be a valid string" in str(error):
+        return fix_dict_recommendations_to_strings(data)
+    return data
+
+
+def fix_string_parameters_to_dict(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Fix tool_recommendations.parameters from string to dict."""
+    if "tool_recommendations" in data and isinstance(data["tool_recommendations"], list):
+        for rec in data["tool_recommendations"]:
+            if isinstance(rec, dict) and "parameters" in rec:
+                if isinstance(rec["parameters"], str):
+                    try:
+                        rec["parameters"] = json.loads(rec["parameters"])
+                    except (json.JSONDecodeError, TypeError):
+                        rec["parameters"] = {}
+    return data
+
+
+def fix_dict_recommendations_to_strings(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Fix recommendations from dict list to string list."""
+    if "recommendations" in data and isinstance(data["recommendations"], list):
+        fixed_recs = []
+        for rec in data["recommendations"]:
+            if isinstance(rec, dict):
+                desc = rec.get("description", str(rec))
+                fixed_recs.append(desc)
+            else:
+                fixed_recs.append(str(rec))
+        data["recommendations"] = fixed_recs
+    return data

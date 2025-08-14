@@ -90,7 +90,8 @@ class StatePersistenceService:
                     run.metadata_["state"] = state_dict
                     run.metadata_["thread_id"] = thread_id
                     run.metadata_["user_id"] = user_id
-                    await db_session.commit()
+                    # Don't commit here - let caller manage transaction
+                    await db_session.flush()
                     logger.info(f"Persisted state for run {run_id} to database")
             
             logger.info(f"Successfully saved agent state for run {run_id}")
@@ -198,7 +199,8 @@ class StatePersistenceService:
                     version="1.0"
                 )
                 db_session.add(reference)
-                await db_session.commit()
+                # Don't commit here - let caller manage transaction
+                await db_session.flush()
                 logger.info(f"Saved {agent_name} result for run {run_id}")
             
             return True

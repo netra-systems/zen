@@ -4,10 +4,19 @@ Following Netra conventions with strong typing.
 """
 
 from typing import Dict, Any, Optional, List, Union, Literal, TYPE_CHECKING
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from app.core.json_parsing_utils import parse_dict_field
 
 if TYPE_CHECKING:
     from app.schemas.llm_types import LLMMessage, LLMConfig
+else:
+    # Import the actual types for runtime resolution
+    try:
+        from app.schemas.llm_types import LLMMessage, LLMConfig
+    except ImportError:
+        # If imports fail, define placeholder types
+        LLMMessage = 'LLMMessage'
+        LLMConfig = 'LLMConfig'
 
 
 class StructuredOutputSchema(BaseModel):
@@ -17,6 +26,12 @@ class StructuredOutputSchema(BaseModel):
     parameters: Dict[str, Any]  # JSON Schema
     strict: bool = Field(default=True)
     examples: List[Dict[str, Any]] = Field(default_factory=list)
+    
+    @field_validator('parameters', mode='before')
+    @classmethod
+    def parse_parameters(cls, v: Any) -> Dict[str, Any]:
+        """Parse parameters field from JSON string if needed"""
+        return parse_dict_field(v)
 
 
 class LLMFunction(BaseModel):
@@ -25,6 +40,12 @@ class LLMFunction(BaseModel):
     description: str
     parameters: Dict[str, Any]  # JSON Schema
     required: List[str] = Field(default_factory=list)
+    
+    @field_validator('parameters', mode='before')
+    @classmethod
+    def parse_parameters(cls, v: Any) -> Dict[str, Any]:
+        """Parse parameters field from JSON string if needed"""
+        return parse_dict_field(v)
 
 
 class LLMTool(BaseModel):
@@ -35,8 +56,8 @@ class LLMTool(BaseModel):
 
 class LLMRequest(BaseModel):
     """Request to LLM"""
-    messages: List['LLMMessage']
-    config: Optional['LLMConfig'] = None
+    messages: List[LLMMessage]
+    config: Optional[LLMConfig] = None
     stream: bool = Field(default=False)
     tools: Optional[List[Dict[str, Any]]] = None
     tool_choice: Optional[Union[str, Dict[str, str]]] = None

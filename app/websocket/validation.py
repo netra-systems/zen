@@ -31,15 +31,18 @@ class DateTimeEncoder(json.JSONEncoder):
 class MessageValidator:
     """Validates and sanitizes WebSocket messages."""
     
-    def __init__(self, max_message_size: int = 1024 * 1024, max_text_length: int = 10000):
+    def __init__(self, max_message_size: int = 1024 * 1024, max_text_length: int = 10000, 
+                 allow_unknown_types: bool = False):
         """Initialize message validator.
         
         Args:
             max_message_size: Maximum message size in bytes (default 1MB)
             max_text_length: Maximum text field length in characters (default 10KB)
+            allow_unknown_types: Allow unknown message types with warning (default False)
         """
         self.max_message_size = max_message_size
         self.max_text_length = max_text_length
+        self.allow_unknown_types = allow_unknown_types
     
     def validate_message(self, message: Dict[str, Any]) -> Union[bool, WebSocketValidationError]:
         """Validate incoming WebSocket message using strong types.
@@ -73,12 +76,15 @@ class MessageValidator:
             try:
                 WebSocketMessageType(message_type)
             except ValueError:
-                return WebSocketValidationError(
-                    error_type="type_error",
-                    message=f"Invalid message type: {message_type}",
-                    field="type",
-                    received_data=message
-                )
+                if self.allow_unknown_types:
+                    logger.warning(f"Unknown message type allowed: {message_type}")
+                else:
+                    return WebSocketValidationError(
+                        error_type="type_error",
+                        message=f"Invalid message type: {message_type}",
+                        field="type",
+                        received_data=message
+                    )
             
             # Validate using Pydantic model with flexible payload handling
             try:
@@ -293,7 +299,56 @@ class MessageValidator:
             return True
         except ValueError:
             return False
+    
+    def handle_unknown_message_type(self, message: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle unknown message type by creating a fallback structure.
+        
+        Args:
+            message: Message with unknown type
+            
+        Returns:
+            Fallback message structure
+        """
+        fallback_message = {
+            "type": "error",
+            "payload": {
+                "error": f"Unknown message type: {message.get('type', 'undefined')}",
+                "original_type": message.get('type', 'undefined'),
+                "original_payload": message.get('payload', {}),
+                "fallback_applied": True,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        }
+        
+        logger.warning(f"Applied fallback for unknown message type: {message.get('type')}")
+        return fallback_message
+    
+    def create_graceful_validation_result(self, message: Dict[str, Any], 
+                                        validation_error: WebSocketValidationError) -> Dict[str, Any]:
+        """Create a graceful validation result for invalid messages.
+        
+        Args:
+            message: Original message that failed validation
+            validation_error: The validation error that occurred
+            
+        Returns:
+            Graceful error message structure
+        """
+        return {
+            "type": "error",
+            "payload": {
+                "error": validation_error.message,
+                "error_type": validation_error.error_type,
+                "field": validation_error.field,
+                "original_message": message,
+                "validation_failed": True,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        }
 
 
 # Default validator instance
 default_message_validator = MessageValidator()
+
+# Flexible validator instance that allows unknown types for development
+flexible_message_validator = MessageValidator(allow_unknown_types=True)

@@ -11,6 +11,7 @@ from typing import Dict, Optional, Set
 from dataclasses import dataclass, field
 
 from app.logging_config import central_logger
+from app.core.json_utils import prepare_websocket_message, safe_json_dumps
 from .connection import ConnectionInfo, ConnectionManager
 from .error_handler import ErrorHandler, WebSocketError, ErrorSeverity
 
@@ -212,7 +213,8 @@ class HeartbeatManager:
             if conn_info.websocket.client_state != WebSocketState.CONNECTED:
                 raise ConnectionError("WebSocket already closed")
             
-            await conn_info.websocket.send_json(ping_message)
+            prepared_message = prepare_websocket_message(ping_message)
+            await conn_info.websocket.send_text(safe_json_dumps(prepared_message))
         except ConnectionError:
             # Re-raise connection errors for proper handling
             raise

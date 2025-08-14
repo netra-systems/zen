@@ -3,16 +3,30 @@ Shared production types and classes to eliminate duplicate type definitions.
 Single source of truth for production types used across multiple modules.
 """
 
-from typing import Dict, Optional, Any, List, AsyncGenerator, Union
+from typing import Dict, Optional, List, AsyncGenerator, Union
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field
 from datetime import datetime
 from enum import Enum
 
 from app.llm.llm_manager import LLMManager
-from app.agents.base import BaseSubAgent
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.state import DeepAgentState
+# Avoid circular imports by using TYPE_CHECKING
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.agents.base import BaseSubAgent
+    from app.agents.tool_dispatcher import ToolDispatcher
+    from app.agents.state import DeepAgentState
+
+# Type aliases for common patterns to replace Any usage
+PrimitiveType = Union[str, int, float, bool, None]
+JsonCompatibleDict = Dict[str, PrimitiveType]
+NestedJsonDict = Dict[str, Union[PrimitiveType, List[PrimitiveType], Dict[str, PrimitiveType]]]
+ExecutionResult = Union[JsonCompatibleDict, List[JsonCompatibleDict], str, bool, None]
+ToolParameters = Dict[str, Union[str, int, float, bool]]
+ToolResult = Dict[str, Union[str, int, float, bool, List[str]]]
+AgentState = 'DeepAgentState'  # Forward reference
+AgentExecutionResult = ExecutionResult
 
 
 class AgentStatus(str, Enum):
@@ -27,8 +41,8 @@ class AgentStatus(str, Enum):
 class ProcessingResult(BaseModel):
     """Standard processing result structure"""
     status: str = Field(..., description="Processing status")
-    data: Optional[Dict[str, Any]] = Field(default=None, description="Result data")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Processing metadata")
+    data: Optional[Dict[str, Union[str, int, float, bool]]] = Field(default=None, description="Result data")
+    metadata: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict, description="Processing metadata")
     errors: List[str] = Field(default_factory=list, description="Error messages")
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="Processing timestamp")
 
@@ -38,7 +52,7 @@ class ErrorContext(BaseModel):
     trace_id: str = Field(..., description="Unique trace identifier")
     operation: str = Field(..., description="Operation being performed")
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="Error timestamp")
-    details: Dict[str, Any] = Field(default_factory=dict, description="Error details")
+    details: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict, description="Error details")
     user_id: Optional[str] = Field(default=None, description="User identifier")
 
 

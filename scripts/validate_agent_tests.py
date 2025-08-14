@@ -338,6 +338,24 @@ async def main():
         print(f"Found {len(test_files)} critical test files:")
         for f in test_files:
             print(f"  {f.relative_to(validator.project_root)}")
+        
+        # Test structure validation on first file
+        if test_files:
+            test_file = test_files[0]
+            print(f"\nAnalyzing structure of: {test_file.name}")
+            valid, issues = validator.validate_test_structure(test_file)
+            print(f"  Valid: {valid}")
+            if issues:
+                print(f"  Issues: {issues}")
+            
+            async_count = validator.analyze_async_usage([test_file])
+            assertion_count = validator.check_test_assertions(test_file)
+            mock_ratio = validator.analyze_mock_usage([test_file])
+            
+            print(f"  Async tests: {async_count}")
+            print(f"  Assertions: {assertion_count}")
+            print(f"  Mock ratio: {mock_ratio:.2f}")
+        
         return
     
     result = await validator.validate_all_tests()

@@ -252,3 +252,6 @@ from app.schemas.llm_response_types import (
     E2ETestInfrastructure,
     E2ETestResult
 )
+
+# Models will be rebuilt by importing the rebuilder module when needed
+# This ensures proper resolution of forward references

@@ -13,6 +13,7 @@ from app.logging_config import central_logger
 from app.core.reliability import (
     get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
 )
+from app.core.json_utils import prepare_websocket_message, safe_json_dumps
 from .validation import MessageValidator, default_message_validator
 from .error_handler import ErrorHandler, default_error_handler
 from .connection import ConnectionInfo
@@ -222,7 +223,8 @@ class ReliableMessageHandler:
             # Check if connection is still open
             from starlette.websockets import WebSocketState
             if conn_info.websocket.client_state == WebSocketState.CONNECTED:
-                await conn_info.websocket.send_json(error_response)
+                prepared_message = prepare_websocket_message(error_response)
+                await conn_info.websocket.send_text(safe_json_dumps(prepared_message))
             else:
                 logger.debug(f"Cannot send error response to {conn_info.connection_id}: connection closed")
                 

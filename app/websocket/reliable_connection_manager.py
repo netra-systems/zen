@@ -13,6 +13,7 @@ from app.logging_config import central_logger
 from app.core.reliability import (
     get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
 )
+from app.core.json_utils import prepare_websocket_message, safe_json_dumps
 from .connection import ConnectionInfo, ConnectionManager
 from .heartbeat import HeartbeatManager
 from .error_handler import ErrorHandler, default_error_handler
@@ -242,7 +243,8 @@ class ReliableConnectionManager:
                 raise ConnectionError(f"Connection {connection_id} is not alive")
             
             # Send message
-            await conn_info.websocket.send_json(message)
+            prepared_message = prepare_websocket_message(message)
+            await conn_info.websocket.send_text(safe_json_dumps(prepared_message))
             return True
         
         async def _fallback_send_message():

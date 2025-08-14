@@ -196,6 +196,66 @@ class StreamCompleteMessage(ServerMessage):
     payload: Dict[str, Any] = Field(description="Stream completion data")
 
 
+class ThreadCreatedMessage(ServerMessage):
+    """Message indicating thread has been created."""
+    type: Literal[WebSocketMessageType.THREAD_CREATED] = WebSocketMessageType.THREAD_CREATED
+    payload: Dict[str, Any] = Field(description="Thread creation data")
+
+
+class ThreadUpdatedMessage(ServerMessage):
+    """Message indicating thread has been updated."""
+    type: Literal[WebSocketMessageType.THREAD_UPDATED] = WebSocketMessageType.THREAD_UPDATED
+    payload: Dict[str, Any] = Field(description="Thread update data")
+
+
+class ThreadDeletedMessage(ServerMessage):
+    """Message indicating thread has been deleted."""
+    type: Literal[WebSocketMessageType.THREAD_DELETED] = WebSocketMessageType.THREAD_DELETED
+    payload: Dict[str, Any] = Field(description="Thread deletion data")
+
+
+class ThreadLoadedMessage(ServerMessage):
+    """Message indicating thread has been loaded."""
+    type: Literal[WebSocketMessageType.THREAD_LOADED] = WebSocketMessageType.THREAD_LOADED
+    payload: Dict[str, Any] = Field(description="Thread loading data")
+
+
+class ThreadRenamedMessage(ServerMessage):
+    """Message indicating thread has been renamed."""
+    type: Literal[WebSocketMessageType.THREAD_RENAMED] = WebSocketMessageType.THREAD_RENAMED
+    payload: Dict[str, Any] = Field(description="Thread rename data")
+
+
+class StepCreatedMessage(ServerMessage):
+    """Message indicating step has been created."""
+    type: Literal[WebSocketMessageType.STEP_CREATED] = WebSocketMessageType.STEP_CREATED
+    payload: Dict[str, Any] = Field(description="Step creation data")
+
+
+class ToolExecutingMessage(ServerMessage):
+    """Message indicating tool is executing."""
+    type: Literal[WebSocketMessageType.TOOL_EXECUTING] = WebSocketMessageType.TOOL_EXECUTING
+    payload: Dict[str, Any] = Field(description="Tool execution data")
+
+
+class AgentThinkingMessage(ServerMessage):
+    """Message indicating agent is thinking."""
+    type: Literal[WebSocketMessageType.AGENT_THINKING] = WebSocketMessageType.AGENT_THINKING
+    payload: Dict[str, Any] = Field(description="Agent thinking data")
+
+
+class PartialResultMessage(ServerMessage):
+    """Message with partial result data."""
+    type: Literal[WebSocketMessageType.PARTIAL_RESULT] = WebSocketMessageType.PARTIAL_RESULT
+    payload: Dict[str, Any] = Field(description="Partial result data")
+
+
+class FinalReportMessage(ServerMessage):
+    """Message with final report data."""
+    type: Literal[WebSocketMessageType.FINAL_REPORT] = WebSocketMessageType.FINAL_REPORT
+    payload: Dict[str, Any] = Field(description="Final report data")
+
+
 # Union types for message validation
 ClientMessageUnion = Union[
     StartAgentMessage,
@@ -217,13 +277,23 @@ ServerMessageUnion = Union[
     AgentErrorMessage,
     AgentUpdateMessage,
     AgentLogMessage,
+    AgentThinkingMessage,
     ToolStartedMessage,
     ToolCompletedMessage,
     ToolCallMessage,
     ToolResultMessage,
+    ToolExecutingMessage,
     SubAgentStartedMessage,
     SubAgentCompletedMessage,
     ThreadHistoryMessage,
+    ThreadCreatedMessage,
+    ThreadUpdatedMessage,
+    ThreadDeletedMessage,
+    ThreadLoadedMessage,
+    ThreadRenamedMessage,
+    StepCreatedMessage,
+    PartialResultMessage,
+    FinalReportMessage,
     ErrorMessage,
     ConnectionEstablishedMessage,
     StreamChunkMessage,
@@ -235,7 +305,12 @@ WebSocketMessageUnion = Union[ClientMessageUnion, ServerMessageUnion]
 
 class ConnectionInfo(BaseModel):
     """Typed connection information."""
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        json_encoders={
+            datetime: lambda v: v.isoformat() if v else None
+        }
+    )
     
     user_id: str = Field(description="User ID for this connection")
     connection_id: str = Field(description="Unique connection identifier")
@@ -256,6 +331,12 @@ class RateLimitInfo(BaseModel):
     current_count: int = Field(description="Current request count")
     window_start: datetime = Field(description="Current window start time")
     is_limited: bool = Field(description="Whether currently rate limited")
+    
+    model_config = ConfigDict(
+        json_encoders={
+            datetime: lambda v: v.isoformat() if v else None
+        }
+    )
 
 
 class WebSocketStats(BaseModel):

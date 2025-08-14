@@ -1,6 +1,6 @@
 """Refactored DataSubAgent with modular architecture and no test code."""
 
-from typing import Dict, Optional, Any, List, AsyncGenerator
+from typing import Dict, Optional, List, AsyncGenerator, Union
 from functools import lru_cache
 import json
 import asyncio
@@ -9,6 +9,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 from app.llm.llm_manager import LLMManager
 from app.agents.base import BaseSubAgent
+from app.schemas.strict_types import TypedAgentResult
+from app.core.type_validators import agent_type_safe
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.agents.state import DeepAgentState
 from app.agents.config import agent_config
@@ -25,6 +27,7 @@ from .clickhouse_operations import ClickHouseOperations
 from .execution_engine import ExecutionEngine
 from .data_operations import DataOperations
 from .metrics_analyzer import MetricsAnalyzer
+from .models import DataAnalysisResponse, AnomalyDetectionResponse
 
 
 class DataSubAgent(BaseSubAgent):
@@ -144,36 +147,74 @@ class DataSubAgent(BaseSubAgent):
             logger.debug(f"Failed to send WebSocket update: {e}")
     
     @validate_agent_input('DataSubAgent')
-    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False) -> None:
+    @agent_type_safe
+    async def execute(self, state: DeepAgentState, run_id: str, 
+                     stream_updates: bool = False) -> TypedAgentResult:
         """Execute advanced data analysis with ClickHouse integration."""
+        start_time = time.time()
         
-        # Initialize execution engine with required dependencies
-        execution_engine = ExecutionEngine(
-            self.clickhouse_ops,
-            self.query_builder, 
-            self.analysis_engine,
-            self.redis_manager,
-            self.llm_manager
-        )
-        
-        # Initialize operations modules
-        data_ops = DataOperations(
-            self.query_builder,
-            self.analysis_engine,
-            self.clickhouse_ops,
-            self.redis_manager
-        )
-        
-        metrics_analyzer = MetricsAnalyzer(
-            self.query_builder,
-            self.analysis_engine,
-            self.clickhouse_ops
-        )
-        
-        # Delegate execution to engine
-        await execution_engine.execute_analysis(
-            state, run_id, stream_updates, self._send_update, data_ops, metrics_analyzer
-        )
+        try:
+            # Initialize execution engine with required dependencies
+            execution_engine = ExecutionEngine(
+                self.clickhouse_ops,
+                self.query_builder, 
+                self.analysis_engine,
+                self.redis_manager,
+                self.llm_manager
+            )
+            
+            # Initialize operations modules
+            data_ops = DataOperations(
+                self.query_builder,
+                self.analysis_engine,
+                self.clickhouse_ops,
+                self.redis_manager
+            )
+            
+            metrics_analyzer = MetricsAnalyzer(
+                self.query_builder,
+                self.analysis_engine,
+                self.clickhouse_ops
+            )
+            
+            # Delegate execution to engine
+            await execution_engine.execute_analysis(
+                state, run_id, stream_updates, self._send_update, data_ops, metrics_analyzer
+            )
+            
+            # Ensure typed result
+            data_result = self._ensure_data_result(state.data_result)
+            state.data_result = data_result
+            
+            return self._create_success_result(start_time, data_result)
+            
+        except Exception as e:
+            logger.error(f"Data analysis execution failed for run_id {run_id}: {e}")
+            return self._create_failure_result(f"Data analysis failed: {e}", start_time)
+    
+    def _ensure_data_result(self, result) -> Union[DataAnalysisResponse, AnomalyDetectionResponse]:
+        """Ensure result is a proper data analysis result object."""
+        if isinstance(result, (DataAnalysisResponse, AnomalyDetectionResponse)):
+            return result
+        elif isinstance(result, dict):
+            try:
+                # Try DataAnalysisResponse first
+                return DataAnalysisResponse(**result)
+            except Exception:
+                try:
+                    # Try AnomalyDetectionResponse as fallback
+                    return AnomalyDetectionResponse(**result)
+                except Exception as e:
+                    logger.warning(f"Failed to convert dict to typed result: {e}")
+                    return DataAnalysisResponse(
+                        query="unknown",
+                        error=str(e)
+                    )
+        else:
+            return DataAnalysisResponse(
+                query="unknown",
+                error="Invalid result type"
+            )
     
     
     def get_health_status(self) -> Dict[str, Any]:

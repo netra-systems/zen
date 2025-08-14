@@ -16,7 +16,7 @@ from typing import Any, Callable, Dict, Optional, TypeVar, Union
 from dataclasses import dataclass, field
 
 from app.logging_config import central_logger
-from app.core.exceptions_service import ServiceException
+from app.core.exceptions_service import ServiceError
 
 logger = central_logger.get_logger(__name__)
 
@@ -77,7 +77,7 @@ class CircuitMetrics:
     failure_types: Dict[str, int] = field(default_factory=dict)
 
 
-class CircuitBreakerOpenError(ServiceException):
+class CircuitBreakerOpenError(ServiceError):
     """Exception raised when circuit breaker is open."""
     
     def __init__(self, circuit_name: str) -> None:

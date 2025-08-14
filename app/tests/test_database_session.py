@@ -33,11 +33,11 @@ class TestDatabaseConnectionPooling:
         active_sessions = []
         
         try:
-            # Attempt to acquire sessions
+            # Attempt to acquire sessions using proper async context
             for _ in range(max_connections):
-                session = async_session_factory()
-                active_sessions.append(session)
-                await session.execute("SELECT 1")
+                async with async_session_factory() as session:
+                    active_sessions.append(session)
+                    await session.execute("SELECT 1")
             
             # Should handle gracefully
             assert len(active_sessions) <= max_connections
@@ -45,12 +45,8 @@ class TestDatabaseConnectionPooling:
             # Expected when pool is exhausted
             pass
         finally:
-            # Clean up connections
-            for session in active_sessions:
-                try:
-                    await session.close()
-                except Exception:
-                    pass
+            # Sessions auto-close with async context manager
+            pass
 
     async def test_session_context_manager(self):
         """Test session context manager functionality."""
@@ -71,9 +67,8 @@ class TestDatabaseConnectionPooling:
             pytest.skip("Async session factory not available")
         
         try:
-            session = async_session_factory()
-            assert isinstance(session, AsyncSession)
-            await session.close()
+            async with async_session_factory() as session:
+                assert isinstance(session, AsyncSession)
         except Exception as e:
             pytest.skip(f"Cannot create session: {e}")
 
@@ -84,11 +79,10 @@ class TestDatabaseConnectionPooling:
             
         async def execute_query(query_id: int):
             try:
-                session = async_session_factory()
-                result = await session.execute(f"SELECT {query_id}")
-                value = result.scalar()
-                await session.close()
-                return value
+                async with async_session_factory() as session:
+                    result = await session.execute(f"SELECT {query_id}")
+                    value = result.scalar()
+                    return value
             except Exception:
                 return None
         
@@ -130,11 +124,10 @@ class TestSessionManagement:
     async def test_async_db_generator(self):
         """Test the async database generator function."""
         try:
-            async for session in get_async_db():
+            async with get_async_db() as session:
                 assert isinstance(session, AsyncSession)
                 result = await session.execute("SELECT 1")
                 assert result.scalar() == 1
-                break
         except Exception as e:
             pytest.skip(f"Database not available: {e}")
 

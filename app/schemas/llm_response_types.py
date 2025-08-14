@@ -11,15 +11,25 @@ import uuid
 if TYPE_CHECKING:
     from app.schemas.llm_types import LLMProvider, TokenUsage
     from app.schemas.llm_request_types import LLMRequest
+else:
+    # Import the actual types for runtime resolution
+    try:
+        from app.schemas.llm_types import LLMProvider, TokenUsage
+        from app.schemas.llm_request_types import LLMRequest
+    except ImportError:
+        # If imports fail, define placeholder types
+        LLMProvider = 'LLMProvider'
+        TokenUsage = 'TokenUsage'
+        LLMRequest = 'LLMRequest'
 
 
 class LLMResponse(BaseModel):
     """Response from LLM"""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    provider: 'LLMProvider'
+    provider: LLMProvider
     model: str
     choices: List[Dict[str, Any]]  # Provider-specific format
-    usage: 'TokenUsage'
+    usage: TokenUsage
     created_at: datetime = Field(default_factory=datetime.utcnow)
     response_time_ms: float
     cached: bool = Field(default=False)
@@ -33,13 +43,13 @@ class LLMStreamChunk(BaseModel):
     delta: Dict[str, Any]
     index: int
     finish_reason: Optional[str] = None
-    usage: Optional['TokenUsage'] = None
+    usage: Optional[TokenUsage] = None
 
 
 class LLMCache(BaseModel):
     """Cache entry for LLM responses"""
     key: str
-    request: 'LLMRequest'
+    request: LLMRequest
     response: LLMResponse
     created_at: datetime = Field(default_factory=datetime.utcnow)
     expires_at: Optional[datetime] = None
@@ -68,7 +78,7 @@ class MockLLMResponse(BaseModel):
     """Mock LLM response for testing"""
     content: str
     model: str = "mock-model"
-    usage: 'TokenUsage' = Field(default_factory=_default_token_usage)
+    usage: TokenUsage = Field(default_factory=_default_token_usage)
     response_time_ms: float = 100.0
 
 

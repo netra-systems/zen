@@ -8,6 +8,7 @@ from app.agents.state import DeepAgentState
 from app.agents.prompts import data_prompt_template
 from app.agents.utils import extract_json_from_response
 from app.logging_config import central_logger as logger
+from app.llm.fallback_handler import LLMFallbackHandler, FallbackConfig
 
 
 class ExecutionEngine:
@@ -26,6 +27,7 @@ class ExecutionEngine:
         self.analysis_engine = analysis_engine
         self.redis_manager = redis_manager
         self.llm_manager = llm_manager
+        self._init_fallback_handler()
     
     async def execute_analysis(
         self,
@@ -266,16 +268,12 @@ class ExecutionEngine:
         send_update_fn: Callable,
         error: Exception
     ) -> None:
-        """Handle execution error with fallback."""
-        fallback_result = await self._execute_llm_fallback(state, run_id, error)
+        """Handle execution error with comprehensive fallback."""
+        fallback_result = await self._execute_comprehensive_fallback(state, run_id, error)
         state.data_result = fallback_result
         
         if stream_updates:
-            await send_update_fn(run_id, {
-                "status": "completed_with_fallback",
-                "message": "Data gathering completed with fallback method",
-                "result": fallback_result
-            })
+            await self._send_fallback_completion(run_id, send_update_fn, fallback_result)
     
     async def _execute_llm_fallback(
         self,
@@ -301,3 +299,115 @@ class ExecutionEngine:
             }
         
         return data_result
+    
+    def _init_fallback_handler(self) -> None:
+        """Initialize fallback handler for data operations."""
+        fallback_config = FallbackConfig(
+            max_retries=2,
+            base_delay=1.0,
+            max_delay=15.0,
+            timeout=45.0,
+            use_circuit_breaker=True
+        )
+        self.fallback_handler = LLMFallbackHandler(fallback_config)
+    
+    async def _execute_comprehensive_fallback(
+        self,
+        state: DeepAgentState,
+        run_id: str,
+        error: Exception
+    ) -> Dict[str, Any]:
+        """Execute comprehensive fallback strategy."""
+        logger.warning(f"Executing fallback for data analysis {run_id}: {error}")
+        
+        async def _llm_fallback_operation():
+            return await self._execute_llm_fallback(state, run_id, error)
+        
+        try:
+            # Try LLM fallback with handler protection
+            result = await self.fallback_handler.execute_with_fallback(
+                _llm_fallback_operation,
+                "data_analysis_fallback",
+                "data_analysis",
+                "data_analysis"
+            )
+            
+            if isinstance(result, dict):
+                return self._enrich_fallback_result(result, error)
+            else:
+                return self._create_emergency_data_fallback(state, error)
+                
+        except Exception as fallback_error:
+            logger.error(f"Fallback also failed for {run_id}: {fallback_error}")
+            return self._create_emergency_data_fallback(state, fallback_error)
+    
+    def _enrich_fallback_result(self, result: Dict[str, Any], original_error: Exception) -> Dict[str, Any]:
+        """Enrich fallback result with metadata and context."""
+        if "metadata" not in result:
+            result["metadata"] = {}
+        
+        result["metadata"].update({
+            "fallback_used": True,
+            "original_error": str(original_error),
+            "fallback_type": "llm_analysis",
+            "data_quality": "degraded"
+        })
+        
+        return result
+    
+    def _create_emergency_data_fallback(self, state: DeepAgentState, error: Exception) -> Dict[str, Any]:
+        """Create emergency fallback when all analysis methods fail."""
+        triage_result = state.triage_result or {}
+        category = triage_result.get("category", "Unknown")
+        
+        return {
+            "analysis_type": "emergency_fallback",
+            "category": category,
+            "insights": [
+                f"Analysis for {category} request is temporarily unavailable",
+                "System is experiencing technical difficulties",
+                "Please try again in a few minutes"
+            ],
+            "recommendations": [
+                "Check system status",
+                "Retry with simpler parameters",
+                "Contact support if issue persists"
+            ],
+            "data": {
+                "status": "emergency_fallback",
+                "error": str(error),
+                "available": False
+            },
+            "metadata": {
+                "fallback_used": True,
+                "fallback_type": "emergency",
+                "data_quality": "unavailable",
+                "confidence": 0.0
+            }
+        }
+    
+    async def _send_fallback_completion(
+        self,
+        run_id: str,
+        send_update_fn: Callable,
+        result: Dict[str, Any]
+    ) -> None:
+        """Send completion update for fallback results."""
+        fallback_type = result.get("metadata", {}).get("fallback_type", "unknown")
+        
+        if fallback_type == "emergency":
+            status = "completed_with_emergency_fallback"
+            message = "Analysis completed using emergency fallback"
+        else:
+            status = "completed_with_fallback"
+            message = "Data analysis completed with limited capabilities"
+        
+        await send_update_fn(run_id, {
+            "status": status,
+            "message": message,
+            "result": result
+        })
+    
+    def get_fallback_health_status(self) -> Dict[str, Any]:
+        """Get health status of fallback mechanisms."""
+        return self.fallback_handler.get_health_status()

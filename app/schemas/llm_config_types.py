@@ -8,12 +8,20 @@ from pydantic import BaseModel, Field, ConfigDict
 
 if TYPE_CHECKING:
     from app.schemas.llm_types import LLMProvider, LLMModel
+else:
+    # Import the actual types for runtime resolution
+    try:
+        from app.schemas.llm_types import LLMProvider, LLMModel
+    except ImportError:
+        # If imports fail, define placeholder types
+        LLMProvider = 'LLMProvider'
+        LLMModel = 'LLMModel'
 
 
 class LLMConfig(BaseModel):
     """Configuration for LLM instance"""
-    provider: 'LLMProvider'
-    model: Union['LLMModel', str]  # Allow string for custom models
+    provider: LLMProvider
+    model: Union[LLMModel, str]  # Allow string for custom models
     api_key: Optional[str] = Field(default=None, exclude=True)  # Exclude from serialization
     api_base: Optional[str] = None
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
@@ -31,13 +39,13 @@ class LLMConfig(BaseModel):
 
 class LLMManagerConfig(BaseModel):
     """Configuration for LLM Manager"""
-    default_provider: 'LLMProvider'
-    default_model: Union['LLMModel', str]
-    providers: Dict['LLMProvider', LLMConfig]
+    default_provider: LLMProvider
+    default_model: Union[LLMModel, str]
+    providers: Dict[LLMProvider, LLMConfig]
     cache_enabled: bool = Field(default=True)
     cache_ttl_seconds: int = Field(default=3600)
     max_cache_size_mb: int = Field(default=100)
-    fallback_providers: List['LLMProvider'] = Field(default_factory=list)
+    fallback_providers: List[LLMProvider] = Field(default_factory=list)
     rate_limit_per_minute: Optional[int] = None
     concurrent_requests: int = Field(default=10, gt=0)
     health_check_interval_seconds: int = Field(default=300)

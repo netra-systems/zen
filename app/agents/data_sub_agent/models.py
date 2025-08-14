@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Any, Union, Literal
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from enum import Enum
+from app.core.json_parsing_utils import parse_dict_field, parse_string_list_field
 
 
 class AnomalySeverity(str, Enum):
@@ -77,6 +78,24 @@ class DataAnalysisResponse(BaseModel):
     error: Optional[str] = Field(default=None, description="Error message if any")
     execution_time_ms: float = Field(default=0.0, description="Query execution time")
     affected_rows: int = Field(default=0, description="Number of rows processed")
+    
+    @field_validator('insights', mode='before')
+    @classmethod
+    def parse_insights(cls, v: Any) -> Dict[str, Any]:
+        """Parse insights field from JSON string if needed"""
+        return parse_dict_field(v)
+    
+    @field_validator('metadata', mode='before')
+    @classmethod
+    def parse_metadata(cls, v: Any) -> Dict[str, Any]:
+        """Parse metadata field from JSON string if needed"""
+        return parse_dict_field(v)
+    
+    @field_validator('recommendations', mode='before')
+    @classmethod
+    def parse_recommendations(cls, v: Any) -> List[str]:
+        """Parse recommendations field, converting dicts to strings"""
+        return parse_string_list_field(v)
     
     # Enhanced structured fields
     performance_metrics: Optional[PerformanceMetrics] = None

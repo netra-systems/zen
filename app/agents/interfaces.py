@@ -1,7 +1,15 @@
 """Interface definitions to break circular dependencies."""
 
-from typing import Protocol, Dict, Any, Optional, List
+from typing import Protocol, Dict, Optional, List, Union
 from abc import ABC, abstractmethod
+from datetime import datetime
+
+from app.agents.triage_sub_agent.models import TriageResult
+from app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse
+from app.schemas.strict_types import (
+    StrictParameterType, StrictReturnType, AgentExecutionContext,
+    AgentExecutionMetrics, TypedAgentResult
+)
 
 
 class AgentStateProtocol(Protocol):
@@ -10,13 +18,13 @@ class AgentStateProtocol(Protocol):
     user_request: str
     chat_thread_id: Optional[str]
     user_id: Optional[str]
-    triage_result: Optional[Dict[str, Any]]
-    data_result: Optional[Dict[str, Any]]
-    optimizations_result: Optional[Dict[str, Any]]
-    action_plan_result: Optional[Dict[str, Any]]
-    report_result: Optional[Dict[str, Any]]
+    triage_result: Optional[TriageResult]
+    data_result: Optional[Union[DataAnalysisResponse, AnomalyDetectionResponse]]
+    optimizations_result: Optional[Dict[str, Union[str, float, List[str]]]]
+    action_plan_result: Optional[Dict[str, Union[str, List[str]]]]
+    report_result: Optional[Dict[str, Union[str, datetime, List[str]]]]
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> Dict[str, Union[str, int, float, bool, None]]:
         """Convert state to dictionary."""
         ...
     
@@ -32,8 +40,12 @@ class BaseAgentProtocol(Protocol):
     description: str
     
     async def execute(self, state: AgentStateProtocol, 
-                     run_id: str, stream_updates: bool = False) -> None:
-        """Execute the agent."""
+                     run_id: str, stream_updates: bool = False) -> TypedAgentResult:
+        """Execute the agent with typed return."""
+        ...
+    
+    def get_execution_metrics(self) -> AgentExecutionMetrics:
+        """Get execution metrics for the agent."""
         ...
 
 
@@ -45,8 +57,13 @@ class ToolDispatcherProtocol(Protocol):
         ...
     
     async def dispatch_tool(self, tool_name: str, 
-                           parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """Dispatch a tool call."""
+                           parameters: Dict[str, StrictParameterType]
+                           ) -> Dict[str, StrictReturnType]:
+        """Dispatch a tool call with typed parameters."""
+        ...
+    
+    async def list_available_tools(self) -> List[str]:
+        """List all available tool names."""
         ...
 
 
@@ -54,12 +71,12 @@ class WebSocketManagerProtocol(Protocol):
     """Protocol for WebSocket manager interface."""
     
     async def send_agent_update(self, run_id: str, agent_name: str, 
-                               update: Dict[str, Any]) -> None:
+                               update: Dict[str, Union[str, float, bool]]) -> None:
         """Send agent update via WebSocket."""
         ...
     
     async def send_to_thread(self, thread_id: str, 
-                            message: Dict[str, Any]) -> None:
+                            message: Dict[str, Union[str, int, bool]]) -> None:
         """Send message to thread."""
         ...
 
@@ -67,8 +84,10 @@ class WebSocketManagerProtocol(Protocol):
 class DatabaseSessionProtocol(Protocol):
     """Protocol for database session interface."""
     
-    async def execute(self, query: str, parameters: Dict[str, Any] = None) -> Any:
-        """Execute database query."""
+    async def execute(self, query: str, 
+                     parameters: Optional[Dict[str, Union[str, int, float]]] = None
+                     ) -> List[Dict[str, Union[str, int, float, datetime]]]:
+        """Execute database query with typed parameters."""
         ...
     
     async def commit(self) -> None:
@@ -101,9 +120,18 @@ class BaseAgent(ABC):
     
     @abstractmethod
     async def execute(self, state: AgentStateProtocol, 
-                     run_id: str, stream_updates: bool = False) -> None:
+                     run_id: str, stream_updates: bool = False) -> TypedAgentResult:
         """Execute the agent - must be implemented by subclasses."""
         pass
+    
+    def get_execution_metrics(self) -> AgentExecutionMetrics:
+        """Get execution metrics for the agent."""
+        return AgentExecutionMetrics(
+            execution_time_ms=0.0,
+            llm_tokens_used=0,
+            database_queries=0,
+            websocket_messages_sent=0
+        )
 
 
 class StatePersistenceProtocol(Protocol):
@@ -111,8 +139,8 @@ class StatePersistenceProtocol(Protocol):
     
     async def save_agent_state(self, run_id: str, thread_id: str, 
                               user_id: str, state: AgentStateProtocol, 
-                              db_session: DatabaseSessionProtocol) -> None:
-        """Save agent state."""
+                              db_session: DatabaseSessionProtocol) -> bool:
+        """Save agent state with typed return."""
         ...
     
     async def load_agent_state(self, run_id: str, 
@@ -120,6 +148,7 @@ class StatePersistenceProtocol(Protocol):
         """Load agent state."""
         ...
     
-    async def get_thread_context(self, thread_id: str) -> Optional[Dict[str, Any]]:
-        """Get thread context."""
+    async def get_thread_context(self, thread_id: str
+                                ) -> Optional[Dict[str, Union[str, int, datetime]]]:
+        """Get thread context with typed return."""
         ...

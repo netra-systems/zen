@@ -142,11 +142,8 @@ class TestFailureRecovery:
         """Test recovery from triage agent failure."""
         setup = orchestration_setup
         state = DeepAgentState(user_request="")  # Invalid request
-        
         agent = setup['agents']['triage']
         agent.websocket_manager = setup['websocket']
-        
-        # Should handle gracefully without raising
         await agent.run(state, setup['run_id'], True)
         assert agent.state in [SubAgentLifecycle.FAILED, SubAgentLifecycle.COMPLETED]
     
@@ -154,21 +151,19 @@ class TestFailureRecovery:
         """Test timeout handling in optimization step."""
         setup = orchestration_setup
         state = DeepAgentState(user_request="Complex optimization request")
-        
         agent = setup['agents']['optimization']
         agent.websocket_manager = setup['websocket']
-        
-        # Simulate timeout scenario
+        self._simulate_timeout_scenario(agent)
+        await agent.run(state, setup['run_id'], True)
+        assert agent.state in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED]
+    
+    def _simulate_timeout_scenario(self, agent):
+        """Simulate timeout scenario for testing."""
         original_execute = agent.execute
         async def timeout_execute(*args):
             await asyncio.sleep(0.1)  # Simulate slow execution
             return await original_execute(*args)
-        
         agent.execute = timeout_execute
-        
-        # Should complete or fail gracefully
-        await agent.run(state, setup['run_id'], True)
-        assert agent.state in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED]
 
 
 class TestConcurrentRequests:
@@ -177,14 +172,19 @@ class TestConcurrentRequests:
     async def test_concurrent_triage_requests(self, orchestration_setup):
         """Test multiple concurrent triage requests."""
         setup = orchestration_setup
+        tasks = self._create_concurrent_tasks(setup)
+        await asyncio.gather(*tasks, return_exceptions=True)
+        assert setup['agents']['triage'].state in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED]
+    
+    def _create_concurrent_tasks(self, setup):
+        """Create concurrent task list for testing."""
         tasks = []
         for i in range(3):
             state = DeepAgentState(user_request=f"Optimize workload {i}")
             agent = setup['agents']['triage']
             agent.websocket_manager, agent.user_id = setup['websocket'], f"user-{i}"
             tasks.append(asyncio.create_task(agent.run(state, f"run-{i}", True)))
-        await asyncio.gather(*tasks, return_exceptions=True)
-        assert setup['agents']['triage'].state in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED]
+        return tasks
     
     async def test_resource_constraint_handling(self, orchestration_setup):
         """Test handling of resource constraints."""
@@ -227,17 +227,28 @@ class TestWorkflowValidation:
         """Test metrics collection across complete workflow."""
         setup = orchestration_setup
         state = DeepAgentState(user_request="Comprehensive workflow test")
+        metrics = await self._execute_and_collect_metrics(setup, state)
+        self._validate_workflow_metrics(metrics)
+    
+    async def _execute_and_collect_metrics(self, setup, state):
+        """Execute workflow and collect metrics."""
         metrics = {'agents_executed': 0, 'total_duration': 0, 'success_count': 0}
-        
         for agent_name, agent in setup['agents'].items():
             agent.websocket_manager = setup['websocket']
             start_time = asyncio.get_event_loop().time()
             await agent.run(state, setup['run_id'], True)
-            metrics['agents_executed'] += 1
-            metrics['total_duration'] += asyncio.get_event_loop().time() - start_time
-            if agent.state == SubAgentLifecycle.COMPLETED:
-                metrics['success_count'] += 1
-        
+            self._update_agent_metrics(metrics, agent.state, start_time)
+        return metrics
+    
+    def _update_agent_metrics(self, metrics, agent_state, start_time):
+        """Update metrics for executed agent."""
+        metrics['agents_executed'] += 1
+        metrics['total_duration'] += asyncio.get_event_loop().time() - start_time
+        if agent_state == SubAgentLifecycle.COMPLETED:
+            metrics['success_count'] += 1
+    
+    def _validate_workflow_metrics(self, metrics):
+        """Validate collected workflow metrics."""
         assert metrics['agents_executed'] == 5  # All workflow agents
         assert metrics['total_duration'] > 0    # Should have execution time
         assert metrics['success_count'] >= 0    # At least some success

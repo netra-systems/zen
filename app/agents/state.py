@@ -1,7 +1,8 @@
 """Agent state management models with immutable patterns."""
-from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
+from typing import Dict, List, Optional, Union, Any, TYPE_CHECKING
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
+from app.core.json_parsing_utils import parse_string_list_field
 
 # Import actual types needed at runtime
 from app.agents.triage_sub_agent.models import TriageResult
@@ -50,6 +51,12 @@ class OptimizationsResult(BaseModel):
     performance_improvement: Optional[float] = None
     confidence_score: float = Field(ge=0.0, le=1.0, default=0.8)
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
+    
+    @field_validator('recommendations', mode='before')
+    @classmethod
+    def parse_recommendations(cls, v: Any) -> List[str]:
+        """Parse recommendations field, converting dicts to strings"""
+        return parse_string_list_field(v)
 
 
 class ActionPlanResult(BaseModel):
@@ -60,6 +67,18 @@ class ActionPlanResult(BaseModel):
     required_resources: List[str] = Field(default_factory=list)
     success_metrics: List[str] = Field(default_factory=list)
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
+    
+    @field_validator('required_resources', mode='before')
+    @classmethod
+    def parse_required_resources(cls, v: Any) -> List[str]:
+        """Parse required_resources field, converting dicts to strings"""
+        return parse_string_list_field(v)
+    
+    @field_validator('success_metrics', mode='before')
+    @classmethod
+    def parse_success_metrics(cls, v: Any) -> List[str]:
+        """Parse success_metrics field, converting dicts to strings"""
+        return parse_string_list_field(v)
 
 
 class ReportResult(BaseModel):
@@ -70,6 +89,12 @@ class ReportResult(BaseModel):
     attachments: List[str] = Field(default_factory=list)
     generated_at: datetime = Field(default_factory=datetime.utcnow)
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
+    
+    @field_validator('attachments', mode='before')
+    @classmethod
+    def parse_attachments(cls, v: Any) -> List[str]:
+        """Parse attachments field, converting dicts to strings"""
+        return parse_string_list_field(v)
 
 
 class SyntheticDataResult(BaseModel):
@@ -98,10 +123,9 @@ class DeepAgentState(BaseModel):
     chat_thread_id: Optional[str] = None
     user_id: Optional[str] = None
     
-    # Typed result fields - using Any for now to avoid circular dependencies
-    # These will be validated at runtime when the actual models are available
-    triage_result: Optional[Any] = None
-    data_result: Optional[Any] = None
+    # Strongly typed result fields with proper type unions
+    triage_result: Optional[TriageResult] = None
+    data_result: Optional[Union['DataAnalysisResponse', 'AnomalyDetectionResponse']] = None
     optimizations_result: Optional[OptimizationsResult] = None
     action_plan_result: Optional[ActionPlanResult] = None
     report_result: Optional[ReportResult] = None
@@ -145,11 +169,12 @@ class DeepAgentState(BaseModel):
         
         return v
     
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert state to dictionary."""
+    def to_dict(self) -> Dict[str, Union[str, int, float, bool, None]]:
+        """Convert state to dictionary with typed values."""
         return self.model_dump(exclude_none=True)
     
-    def copy_with_updates(self, **updates: Any) -> 'DeepAgentState':
+    def copy_with_updates(self, **updates: Union[str, int, float, bool, None]
+                         ) -> 'DeepAgentState':
         """Create a new instance with updated fields (immutable pattern)."""
         current_data = self.model_dump()
         current_data.update(updates)

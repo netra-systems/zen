@@ -17,6 +17,7 @@ from app.schemas.registry import WebSocketMessage
 from app.schemas.websocket_message_types import (
     ServerMessage, WebSocketValidationError, BroadcastResult
 )
+from app.core.json_utils import prepare_websocket_message, safe_json_dumps
 from app.websocket.connection import ConnectionInfo
 from app.ws_manager_core import WebSocketManagerCore
 
@@ -155,7 +156,8 @@ class WebSocketMessagingManager:
     async def _send_if_connected(self, conn_info: ConnectionInfo, message: Union[Dict[str, Any], Any]) -> bool:
         """Send message if connection is active."""
         if conn_info.websocket.client_state == WebSocketState.CONNECTED:
-            await conn_info.websocket.send_json(message)
+            prepared_message = prepare_websocket_message(message)
+            await conn_info.websocket.send_text(safe_json_dumps(prepared_message))
             return True
         return False
 

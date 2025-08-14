@@ -1,6 +1,6 @@
 """Base agent class and interfaces."""
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, List, Union
 import asyncio
 import time
 
@@ -9,6 +9,8 @@ from app.schemas import SubAgentLifecycle, SubAgentUpdate, SubAgentState
 from app.schemas.registry import WebSocketMessage, WebSocketMessageType
 from app.agents.state import DeepAgentState
 from app.agents.interfaces import BaseAgentProtocol
+from app.schemas.strict_types import TypedAgentResult, AgentExecutionMetrics
+from app.core.type_validators import agent_type_safe, StrictTypeChecker
 from app.logging_config import central_logger
 from app.agents.error_handler import (
     global_error_handler, ErrorContext, WebSocketError, handle_agent_error
@@ -66,6 +68,32 @@ class BaseSubAgent(ABC):
         
         # Cleanup
         await self.cleanup(state, run_id)
+    
+    def get_execution_metrics(self) -> AgentExecutionMetrics:
+        """Get execution metrics for the agent."""
+        return getattr(self, '_execution_metrics', AgentExecutionMetrics(execution_time_ms=0.0))
+    
+    def _create_failure_result(self, error_message: str, start_time: float) -> TypedAgentResult:
+        """Create a failure result with metrics."""
+        execution_time = (time.time() - start_time) * 1000
+        return TypedAgentResult(
+            success=False,
+            agent_name=self.name,
+            execution_time_ms=execution_time,
+            error_message=error_message,
+            metrics=self.get_execution_metrics()
+        )
+    
+    def _create_success_result(self, start_time: float, result_data=None) -> TypedAgentResult:
+        """Create a success result with metrics."""
+        execution_time = (time.time() - start_time) * 1000
+        return TypedAgentResult(
+            success=True,
+            agent_name=self.name,
+            execution_time_ms=execution_time,
+            result_data=result_data,
+            metrics=self.get_execution_metrics()
+        )
     
     async def run(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Main run method with lifecycle management."""
