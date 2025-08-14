@@ -354,7 +354,9 @@ class LLMManager:
                     # Try to parse as JSON
                     try:
                         if value.strip().startswith(('{', '[')):
-                            result[key] = json.loads(value)
+                            parsed = json.loads(value)
+                            # Recursively parse in case of nested JSON strings
+                            result[key] = self._parse_nested_json(parsed)
                         else:
                             result[key] = value
                     except (json.JSONDecodeError, ValueError):

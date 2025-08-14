@@ -212,7 +212,7 @@ jobs:
           python -m pytest "${{ matrix.test.file }}" -v
           
           # Run smoke tests to ensure no regression
-          python test_runner.py --level smoke
+          python test_runner.py --level smoke --json-output smoke-results.json
           
       - name: Commit Fix
         if: steps.validate.outcome == 'success'
