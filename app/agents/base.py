@@ -156,15 +156,22 @@ class BaseSubAgent(ABC):
                 )
                 # Get user_id from supervisor if available, otherwise use run_id
                 ws_user_id = getattr(self.websocket_manager, '_current_user_id', run_id) if hasattr(self.websocket_manager, '_current_user_id') else run_id
+                
+                # Create properly typed SubAgentUpdate payload
+                update_payload = SubAgentUpdate(
+                    sub_agent_name=self.name,
+                    state=sub_agent_state
+                )
+                
+                # Use payload field consistently
+                websocket_message = WebSocketMessage(
+                    type=WebSocketMessageType.SUB_AGENT_UPDATE,
+                    payload=update_payload.model_dump()
+                )
+                
                 await self.websocket_manager.send_message(
                     ws_user_id,
-                    WebSocketMessage(
-                        type=WebSocketMessageType.SUB_AGENT_UPDATE,
-                        payload=SubAgentUpdate(
-                            sub_agent_name=self.name,
-                            state=sub_agent_state
-                        ).model_dump()
-                    ).model_dump()
+                    websocket_message.model_dump()
                 )
             except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
                 self.logger.debug(f"WebSocket disconnected when sending update: {e}")

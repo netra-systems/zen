@@ -58,11 +58,13 @@ class TestIntegration:
         
         jobs = []
         for config in tenant_configs:
-            job = await full_stack["generation"].generate_for_tenant(
-                GenerationConfig(num_traces=500),
-                tenant_id=config["tenant_id"],
-                domain=config["domain"]
-            )
+            # Pass config dict with embedded GenerationConfig
+            tenant_config = {
+                "tenant_id": config["tenant_id"],
+                "domain": config["domain"],
+                "config": GenerationConfig(num_traces=500)
+            }
+            job = await full_stack["generation"].generate_for_tenant(tenant_config)
             jobs.append(job)
         
         # Verify isolation

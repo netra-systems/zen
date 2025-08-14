@@ -13,6 +13,9 @@ from app.agents.data_sub_agent.models import (
 from app.agents.data_sub_agent.query_builder import QueryBuilder
 from app.agents.data_sub_agent.analysis_engine import AnalysisEngine
 
+# Import ClickHouse initialization function for test compatibility
+from app.db.clickhouse_init import create_workload_events_table_if_missing
+
 # Maintain metadata for tracking
 __metadata__ = {
     "timestamp": "2025-08-13",
@@ -39,5 +42,6 @@ __all__ = [
     'DataAnalysisResponse',
     'AnomalyDetectionResponse',
     'QueryBuilder',
-    'AnalysisEngine'
+    'AnalysisEngine',
+    'create_workload_events_table_if_missing'
 ]

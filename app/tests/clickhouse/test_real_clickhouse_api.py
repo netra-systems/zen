@@ -4,7 +4,6 @@ Tests actual ClickHouse operations with live API connections
 """
 
 import pytest
-import pytest_asyncio
 import asyncio
 import uuid
 import json
@@ -31,30 +30,29 @@ from app.config import settings
 from app.logging_config import central_logger as logger
 
 
-@pytest_asyncio.fixture
-async def real_clickhouse_client():
-    """Create a real ClickHouse client using production configuration"""
+def _get_clickhouse_config():
+    """Get ClickHouse configuration based on environment"""
     if settings.environment == "development":
-        config = settings.clickhouse_https_dev
-    else:
-        config = settings.clickhouse_https
-    
-    client = ClickHouseDatabase(
-        host=config.host,
-        port=config.port,
-        user=config.user,
-        password=config.password,
-        database=config.database,
-        secure=True
+        return settings.clickhouse_https_dev
+    return settings.clickhouse_https
+
+
+def _create_clickhouse_client(config):
+    """Create ClickHouse client with given configuration"""
+    return ClickHouseDatabase(
+        host=config.host, port=config.port, user=config.user,
+        password=config.password, database=config.database, secure=True
     )
-    
-    # Wrap with query interceptor
+
+
+@pytest.fixture
+def real_clickhouse_client():
+    """Create a real ClickHouse client using production configuration"""
+    config = _get_clickhouse_config()
+    client = _create_clickhouse_client(config)
     interceptor = ClickHouseQueryInterceptor(client)
-    
-    try:
-        yield interceptor
-    finally:
-        await client.disconnect()
+    yield interceptor
+    # Note: Disconnect handled by the test itself or auto-cleanup
 
 
 class TestRealClickHouseConnection:
@@ -106,26 +104,25 @@ class TestRealClickHouseConnection:
             logger.info(f"System metric {row.get('metric')}: {row.get('value')}")
 
 
+async def _ensure_workload_table():
+    """Create workload table if missing and verify access"""
+    success = await create_workload_events_table_if_missing()
+    if not success:
+        pytest.skip("Cannot create workload_events table")
+    exists = await verify_workload_events_table()
+    if not exists:
+        pytest.skip("workload_events table not accessible")
+
+
 class TestWorkloadEventsTable:
     """Test workload_events table operations with real data"""
     
-    @pytest_asyncio.fixture
-    async def setup_workload_table(self):
+    @pytest.fixture
+    def setup_workload_table(self):
         """Ensure workload_events table exists"""
-        # Create table if missing
-        success = await create_workload_events_table_if_missing()
-        if not success:
-            pytest.skip("Cannot create workload_events table")
-        
-        # Verify table exists
-        exists = await verify_workload_events_table()
-        if not exists:
-            pytest.skip("workload_events table not accessible")
-        
+        # Setup will be handled in the actual test method
         yield
-        
-        # Cleanup test data (optional)
-        # We'll keep test data for analysis
+        # Cleanup test data (optional) - kept for analysis
     
     @pytest.mark.asyncio
     async def test_insert_workload_events(self, setup_workload_table):

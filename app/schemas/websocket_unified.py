@@ -72,6 +72,13 @@ class WebSocketMessageType(str, Enum):
     CONNECTION_ESTABLISHED = "connection_established"
     STREAM_CHUNK = "stream_chunk"
     STREAM_COMPLETE = "stream_complete"
+    
+    # Corpus-related messages
+    CORPUS_UPLOAD_PROGRESS = "corpus:upload_progress"
+    CORPUS_UPLOAD_COMPLETED = "corpus:upload_completed"
+    CORPUS_UPLOAD_FAILED = "corpus:upload_failed"
+    CORPUS_GENERATION_PROGRESS = "corpus:generation_progress"
+    CORPUS_GENERATION_COMPLETED = "corpus:generation_completed"
 
 
 class WebSocketConnectionState(str, Enum):

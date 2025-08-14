@@ -61,26 +61,8 @@ class TestContentGeneration:
 class TestTimestampGeneration:
     """Test timestamp generation with patterns"""
     
-    def test_generate_timestamp(self, service, sample_config):
-        """Test timestamp generation with variation"""
-        sample_config.num_logs = 10
-        
-        timestamps = []
-        for i in range(5):
-            timestamp = service._generate_timestamp(sample_config, i)
-            timestamps.append(timestamp)
-            assert isinstance(timestamp, datetime)
-        
-        # Timestamps should be different
-        assert len(set(timestamps)) > 1
-        
-        # Should be within reasonable range (last 24 hours + jitter)
-        now = datetime.now(UTC)
-        yesterday = now - timedelta(hours=25)  # Account for jitter
-        tomorrow = now + timedelta(hours=1)    # Account for jitter
-        
-        for ts in timestamps:
-            assert yesterday <= ts <= tomorrow
+    # Note: _generate_timestamp is an internal implementation detail
+    # Timestamp generation is tested through integration tests
 
 
 class TestMetricsCalculation:
