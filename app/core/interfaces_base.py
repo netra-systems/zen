@@ -5,7 +5,7 @@ from typing import Dict
 from datetime import datetime, UTC
 
 from .exceptions import ServiceError
-from .error_context import ErrorContext
+from app.schemas.shared_types import ErrorContext
 from .interfaces_service import (
     BaseServiceInterface, 
     ServiceHealth, 

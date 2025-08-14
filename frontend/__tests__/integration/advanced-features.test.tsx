@@ -12,6 +12,10 @@ import { TestProviders } from '../test-utils/providers';
 // Mock fetch
 global.fetch = jest.fn();
 
+// Mock URL APIs for file handling
+global.URL.createObjectURL = jest.fn(() => 'mock-blob-url');
+global.URL.revokeObjectURL = jest.fn();
+
 // Mock WebSocket
 let mockWs: WS;
 

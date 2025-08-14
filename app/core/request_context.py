@@ -7,7 +7,7 @@ import logging
 from typing import Any, Callable, Optional, Tuple
 from fastapi import Request
 
-from app.core.error_context import ErrorContext
+from app.core.error_context import AsyncErrorContext as ErrorContext
 from app.logging_config import central_logger
 
 

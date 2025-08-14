@@ -1,6 +1,6 @@
 """Base agent class and interfaces."""
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, List, Union
+from typing import Optional, Dict, List, Union, Any, TYPE_CHECKING
 import asyncio
 import time
 
@@ -233,7 +233,7 @@ class BaseSubAgent(ABC):
     def get_state(self) -> SubAgentLifecycle:
         return self.state
     
-    async def _send_update(self, run_id: str, data: Dict[str, Any]) -> None:
+    async def _send_update(self, run_id: str, data: "Dict[str, Any]") -> None:
         """Send WebSocket update with proper error recovery."""
         if not self.websocket_manager:
             return
@@ -258,7 +258,7 @@ class BaseSubAgent(ABC):
                 self.logger.error(f"Unexpected error in WebSocket update: {e}")
                 return
                 
-    async def _attempt_websocket_update(self, run_id: str, data: Dict[str, Any]) -> None:
+    async def _attempt_websocket_update(self, run_id: str, data: "Dict[str, Any]") -> None:
         """Attempt to send WebSocket update."""
         message_content = data.get("message", "")
         message = SystemMessage(content=message_content)
@@ -292,7 +292,7 @@ class BaseSubAgent(ABC):
             return getattr(self.websocket_manager, '_current_user_id', run_id)
         return run_id
         
-    async def _handle_websocket_failure(self, run_id: str, data: Dict[str, Any], error: Exception) -> None:
+    async def _handle_websocket_failure(self, run_id: str, data: "Dict[str, Any]", error: Exception) -> None:
         """Handle WebSocket failure with graceful degradation and centralized error tracking."""
         # Create error context for centralized handling
         context = ErrorContext(

@@ -3,20 +3,21 @@ Shared production types and classes to eliminate duplicate type definitions.
 Single source of truth for production types used across multiple modules.
 """
 
-from typing import Dict, Optional, List, AsyncGenerator, Union
+from typing import Dict, Optional, List, AsyncGenerator, Union, Any
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field
 from datetime import datetime
 from enum import Enum
+import asyncio
 
-from app.llm.llm_manager import LLMManager
 # Avoid circular imports by using TYPE_CHECKING
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from app.agents.state import DeepAgentState
+    from app.llm.llm_manager import LLMManager
     from app.agents.base import BaseSubAgent
     from app.agents.tool_dispatcher import ToolDispatcher
-    from app.agents.state import DeepAgentState
 
 # Type aliases for common patterns to replace Any usage
 PrimitiveType = Union[str, int, float, bool, None]
@@ -26,7 +27,7 @@ ExecutionResult = Union[JsonCompatibleDict, List[JsonCompatibleDict], str, bool,
 ToolParameters = Dict[str, Union[str, int, float, bool]]
 ToolResult = Dict[str, Union[str, int, float, bool, List[str]]]
 AgentState = 'DeepAgentState'  # Forward reference
-AgentExecutionResult = ExecutionResult
+# AgentExecutionResult moved to strict_types.py to avoid circular imports
 
 
 class AgentStatus(str, Enum):
@@ -48,19 +49,40 @@ class ProcessingResult(BaseModel):
 
 
 class ErrorContext(BaseModel):
-    """Standard error context for consistent error handling"""
+    """Standard error context for consistent error handling across all modules"""
+    # Core identifiers  
     trace_id: str = Field(..., description="Unique trace identifier")
     operation: str = Field(..., description="Operation being performed")
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="Error timestamp")
-    details: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict, description="Error details")
     user_id: Optional[str] = Field(default=None, description="User identifier")
+    
+    # Additional context for compatibility with existing code
+    correlation_id: Optional[str] = Field(default=None, description="Correlation identifier")
+    request_id: Optional[str] = Field(default=None, description="Request identifier")
+    session_id: Optional[str] = Field(default=None, description="Session identifier")
+    
+    # Agent-specific context
+    agent_name: Optional[str] = Field(default=None, description="Agent name")
+    operation_name: Optional[str] = Field(default=None, description="Operation name")
+    run_id: Optional[str] = Field(default=None, description="Run identifier")
+    retry_count: int = Field(default=0, description="Retry count")
+    max_retries: int = Field(default=3, description="Maximum retries")
+    
+    # General context data
+    details: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict, description="Error details")
+    additional_data: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict, description="Additional context data")
+    
+    # Compatibility fields for existing code
+    component: Optional[str] = Field(default=None, description="Component name")
+    severity: Optional[str] = Field(default=None, description="Error severity")
+    error_code: Optional[str] = Field(default=None, description="Error code")
 
 
 class BaseAgentInterface(ABC):
     """Base interface for agent implementations to ensure consistency"""
     
     @abstractmethod
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: 'ToolDispatcher') -> None:
+    def __init__(self, llm_manager: 'LLMManager', tool_dispatcher: 'ToolDispatcher') -> None:
         pass
     
     @abstractmethod
@@ -70,105 +92,6 @@ class BaseAgentInterface(ABC):
     @abstractmethod
     def _init_components(self) -> None:
         pass
-
-
-class DataSubAgent(BaseSubAgent):
-    """
-    Canonical DataSubAgent implementation - single source of truth.
-    Advanced data gathering and analysis agent with ClickHouse integration.
-    """
-    
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher) -> None:
-        super().__init__(
-            llm_manager, 
-            name="DataSubAgent", 
-            description="Advanced data gathering and analysis agent with ClickHouse integration."
-        )
-        self.tool_dispatcher = tool_dispatcher
-        self.status = AgentStatus.INITIALIZING
-        self._init_components()
-        self._init_redis()
-        self._init_reliability()
-        self.status = AgentStatus.READY
-        
-    def _init_components(self) -> None:
-        """Initialize core components."""
-        from app.agents.data_sub_agent.query_builder import QueryBuilder
-        from app.agents.data_sub_agent.analysis_engine import AnalysisEngine
-        from app.agents.data_sub_agent.clickhouse_operations import ClickHouseOperations
-        from app.agents.config import agent_config
-        
-        self.query_builder = QueryBuilder()
-        self.analysis_engine = AnalysisEngine()
-        self.clickhouse_ops = ClickHouseOperations()
-        self.cache_ttl = getattr(agent_config.cache, 'default_ttl', 300)
-        
-    def _init_redis(self) -> None:
-        """Initialize Redis connection."""
-        from app.redis_manager import RedisManager
-        from app.logging_config import central_logger as logger
-        
-        self.redis_manager: Optional[RedisManager] = None
-        try:
-            self.redis_manager = RedisManager()
-        except Exception as e:
-            logger.warning(f"Redis not available for DataSubAgent caching: {e}")
-    
-    def _init_reliability(self) -> None:
-        """Initialize reliability components."""
-        try:
-            from app.core.reliability import get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
-            
-            self.circuit_breaker = get_reliability_wrapper(
-                CircuitBreakerConfig(failure_threshold=5, recovery_timeout=60)
-            )
-            self.retry_config = RetryConfig(max_attempts=3, base_delay=1.0)
-        except Exception as e:
-            from app.logging_config import central_logger as logger
-            logger.warning(f"Reliability components not available: {e}")
-            self.circuit_breaker = None
-            self.retry_config = None
-    
-    async def execute(self, state: DeepAgentState, session_id: str, 
-                     stream_updates: bool = False, **kwargs) -> ProcessingResult:
-        """Execute data analysis task."""
-        self.status = AgentStatus.PROCESSING
-        
-        try:
-            # Implementation would go here
-            result = ProcessingResult(
-                status="success",
-                data={"analysis": "completed"},
-                metadata={"session_id": session_id, "agent": "DataSubAgent"}
-            )
-            self.status = AgentStatus.READY
-            return result
-            
-        except Exception as e:
-            self.status = AgentStatus.ERROR
-            return ProcessingResult(
-                status="error",
-                errors=[str(e)],
-                metadata={"session_id": session_id, "agent": "DataSubAgent"}
-            )
-    
-    async def process_with_retry(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Process data with retry logic."""
-        max_retries = getattr(self, 'config', {}).get('max_retries', 3)
-        
-        for attempt in range(max_retries):
-            try:
-                return await self._process_internal(data)
-            except Exception as e:
-                if attempt == max_retries - 1:
-                    raise e
-                await asyncio.sleep(2 ** attempt)  # Exponential backoff
-        
-        return {"success": False, "error": "Max retries exceeded"}
-    
-    async def _process_internal(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Internal processing method - to be implemented by subclasses."""
-        return {"success": True, "data": data}
 
 
 class ToolExecutionContext(BaseModel):

@@ -1,8 +1,8 @@
 {
-  "timestamp": "2025-08-14T06:28:16.898527",
+  "timestamp": "2025-08-14T16:48:25.460600",
   "level": "comprehensive-database",
   "metrics": {
-    "total_tests": 2,
+    "total_tests": 0,
     "passed": 0,
     "failed": 0,
     "coverage": null
@@ -10,15 +10,15 @@
   "results": {
     "backend": {
       "status": "failed",
-      "duration": 77.20496678352356,
-      "exit_code": 2,
-      "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests tests integration_tests -v -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -k database or repository or clickhouse or postgres --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m________________ ERROR collecting tests/test_data_sub_agent.py ________________\u001b[0m\nimport file mismatch:\nimported module 'test_data_sub_agent' has this __file__ attribute:\n  C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_data_sub_agent.py\nwhich is not the same as the test file we want to collect:\n  C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\tests\\test_data_sub_agent.py\nHINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m tests/test_data_sub_agent.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m=================== \u001b[33m1 skipped\u001b[0m, \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 61.53s (0:01:01)\u001b[0m\u001b[31m ====================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 75.97s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\n",
+      "duration": 5.4851109981536865,
+      "exit_code": 4,
+      "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests tests integration_tests -v -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -k database or repository or clickhouse or postgres --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 4.78s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:30: in <module>\n    from app.core.app_factory import create_app\napp\\core\\app_factory.py:9: in <module>\n    from app.core.lifespan_manager import lifespan\napp\\core\\lifespan_manager.py:9: in <module>\n    from app.shutdown import run_complete_shutdown\napp\\shutdown.py:12: in <module>\n    from app.ws_manager import manager as websocket_manager\napp\\ws_manager.py:21: in <module>\n    from app.websocket.connection import ConnectionInfo\napp\\websocket\\__init__.py:12: in <module>\n    from .heartbeat import HeartbeatManager\napp\\websocket\\heartbeat.py:16: in <module>\n    from .error_handler import ErrorHandler\nE   ImportError: cannot import name 'ErrorHandler' from 'app.websocket.error_handler' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\websocket\\error_handler.py)\n",
       "test_counts": {
-        "total": 2,
+        "total": 0,
         "passed": 0,
         "failed": 0,
-        "skipped": 1,
-        "errors": 1,
+        "skipped": 0,
+        "errors": 0,
         "test_files": 0
       },
       "coverage": null,
@@ -54,8 +54,8 @@
     },
     "overall": {
       "status": "failed",
-      "start_time": 1755178019.6935604,
-      "end_time": 1755178096.8985271
+      "start_time": 1755215299.9724677,
+      "end_time": 1755215305.459591
     }
   }
 }

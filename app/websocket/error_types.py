@@ -15,8 +15,8 @@ from app.core.error_codes import ErrorSeverity
 
 
 @dataclass
-class WebSocketError:
-    """Represents a WebSocket error with context."""
+class WebSocketErrorInfo:
+    """Represents WebSocket error information with context data (not an exception)."""
     error_id: str = field(default_factory=lambda: f"err_{int(time.time() * 1000)}")
     connection_id: Optional[str] = None
     user_id: Optional[str] = None

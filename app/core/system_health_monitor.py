@@ -1,62 +1,32 @@
-"""System-wide health monitoring and alerting.
+"""Enhanced system-wide health monitoring and alerting.
 
 This module provides comprehensive health monitoring for all system components
-including agents, WebSocket connections, databases, and external services.
+including databases, Redis, WebSocket connections, and system resources.
 """
 
 import asyncio
 import time
-from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
-from enum import Enum
-from dataclasses import dataclass, field
+from typing import Dict, Any, List, Optional, Callable
+from datetime import datetime
 
 from app.logging_config import central_logger
-from .reliability import get_system_health
+from .health_types import HealthStatus, ComponentHealth, SystemAlert, HealthCheckResult
+from .health_checkers import (
+    check_postgres_health, check_clickhouse_health, check_redis_health,
+    check_websocket_health, check_system_resources
+)
+from .alert_manager import AlertManager
 
 logger = central_logger.get_logger(__name__)
 
 
-class HealthStatus(Enum):
-    """Overall health status levels."""
-    HEALTHY = "healthy"
-    DEGRADED = "degraded"
-    UNHEALTHY = "unhealthy"
-    CRITICAL = "critical"
-
-
-@dataclass
-class ComponentHealth:
-    """Health status for a system component."""
-    name: str
-    status: HealthStatus
-    health_score: float  # 0.0 to 1.0
-    last_check: datetime
-    error_count: int = 0
-    uptime: float = 0.0  # in seconds
-    metadata: Dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass
-class SystemAlert:
-    """System health alert."""
-    alert_id: str
-    component: str
-    severity: str
-    message: str
-    timestamp: datetime
-    resolved: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
-
-
 class SystemHealthMonitor:
-    """Monitors overall system health and generates alerts."""
+    """Enhanced system health monitor with comprehensive checks and alerting."""
     
     def __init__(self, check_interval: int = 30):
         self.check_interval = check_interval
         self.component_health: Dict[str, ComponentHealth] = {}
-        self.alerts: List[SystemAlert] = []
-        self.max_alert_history = 1000
+        self.alert_manager = AlertManager()
         
         # Health thresholds
         self.health_thresholds = {
@@ -70,33 +40,30 @@ class SystemHealthMonitor:
         self._running = False
         self.start_time = time.time()
         
-        # Alert callbacks
-        self.alert_callbacks: List[callable] = []
-        
         # Component checkers
-        self.component_checkers: Dict[str, callable] = {}
+        self.component_checkers: Dict[str, Callable] = {}
         self._register_default_checkers()
     
-    def register_component_checker(self, component_name: str, checker_func: callable):
+    def register_component_checker(self, component_name: str, checker_func: Callable) -> None:
         """Register a health checker for a component."""
         self.component_checkers[component_name] = checker_func
         logger.debug(f"Registered health checker for component: {component_name}")
     
-    def register_alert_callback(self, callback: callable):
+    def register_alert_callback(self, callback: Callable) -> None:
         """Register a callback function for alerts."""
-        self.alert_callbacks.append(callback)
+        self.alert_manager.register_alert_callback(callback)
         logger.debug("Registered alert callback")
     
-    async def start_monitoring(self):
+    async def start_monitoring(self) -> None:
         """Start system health monitoring."""
         if self._running:
             return
         
         self._running = True
         self._monitoring_task = asyncio.create_task(self._monitoring_loop())
-        logger.info("System health monitoring started")
+        logger.info("Enhanced system health monitoring started")
     
-    async def stop_monitoring(self):
+    async def stop_monitoring(self) -> None:
         """Stop system health monitoring."""
         if not self._running:
             return
@@ -110,33 +77,35 @@ class SystemHealthMonitor:
             except asyncio.CancelledError:
                 pass
         
-        logger.info("System health monitoring stopped")
+        logger.info("Enhanced system health monitoring stopped")
     
-    async def _monitoring_loop(self):
-        """Main monitoring loop."""
+    async def _monitoring_loop(self) -> None:
+        """Main monitoring loop with enhanced error handling."""
         while self._running:
             try:
                 await self._perform_health_checks()
                 await self._evaluate_system_health()
+                await self._check_thresholds()
                 await asyncio.sleep(self.check_interval)
             except asyncio.CancelledError:
                 break
             except Exception as e:
                 logger.error(f"Error in health monitoring loop: {e}")
-                await asyncio.sleep(5)  # Brief delay before retry
+                await asyncio.sleep(5)
     
-    async def _perform_health_checks(self):
+    async def _perform_health_checks(self) -> None:
         """Perform health checks on all registered components."""
         check_tasks = []
         
         for component_name, checker_func in self.component_checkers.items():
             task = asyncio.create_task(
-                self._check_component_health(component_name, checker_func)
+                self._execute_health_check(component_name, checker_func)
             )
             check_tasks.append(task)
         
         if check_tasks:
-            await asyncio.gather(*check_tasks, return_exceptions=True)
+            results = await asyncio.gather(*check_tasks, return_exceptions=True)
+            await self._process_check_results(results)
     
     async def _check_component_health(self, component_name: str, checker_func: callable):
         """Check health of a specific component."""

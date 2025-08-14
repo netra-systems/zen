@@ -1,126 +1,87 @@
-# Netra AI Platform - Test Report
+# 📊 Netra AI Platform - Comprehensive Test Report
 
-**Generated:** 2025-08-14T16:43:20.846210  
-**Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
-**Purpose:** Development validation, component testing
+## 🎯 Executive Summary
 
-## Test Summary
+**Generated:** 2025-08-14 16:49:47  
+**Test Level:** `unit` - Unit tests for isolated components (1-2 minutes)  
+**Overall Status:** ❌ FAILED
 
-**Total Tests:** 0  
-**Passed:** 0  
-**Failed:** 0  
-**Skipped:** 0  
-**Errors:** 0  
-**Overall Status:** [FAILED]
+### 📈 Key Metrics
+
+| Metric | Value | Change | Trend |
+|--------|-------|--------|-------|
+| **Total Test Files** | 0 | N/A | ➖ |
+| **Total Tests** | 4 | N/A | ➖ |
+| **Pass Rate** | 0.0% | N/A | ➖ |
+| **Coverage** | N/A | N/A | ➖ |
+| **Duration** | 46.62s | N/A | ➖ |
+
+## 📊 Test Results Overview
+
+### Summary Statistics
+
+| Status | Count | Percentage | Visual |
+|--------|-------|------------|--------|
+| ✅ **Passed** | 0 | 0.0% |  |
+| ❌ **Failed** | 0 | 0.0% |  |
+| ⏭️ **Skipped** | 0 | 0.0% |  |
+| 🔥 **Errors** | 4 | 100.0% | 🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧 |
 
 ### Component Breakdown
 
-| Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
-|-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 9.83s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.64s | [FAILED] |
+| Component | Files | Tests | Passed | Failed | Coverage | Duration | Status |
+|-----------|-------|-------|--------|--------|----------|----------|--------|
+| **Backend** | 0 | 4 | 0 | 0 | N/A | 46.07s | ❌ FAILED |
+| **Frontend** | 0 | 0 | 0 | 0 | N/A | 0.56s | ❌ FAILED |
 
-## Environment and Configuration
+## 🏷️ Test Categories
 
-- **Test Level:** unit
-- **Description:** Unit tests for isolated components (1-2 minutes)
-- **Purpose:** Development validation, component testing
+*No category data available*
+
+## 🔄 Change Detection
+
+*First run or no historical data available*
+
+## ⚡ Performance Analysis
+
+### Test Speed Distribution
+
+*No timing data available*
+
+### Top 5 Slowest Tests
+
+*No timing data available*
+
+## 🐛 Failure Analysis
+
+✅ **No failures detected!**
+
+## 📈 Historical Trends
+
+| Date | Tests | Pass Rate | Coverage | Duration |
+|------|-------|-----------|----------|----------|
+| 08/14 16:46 | 0 | 0.0% | N/A | 0.00s |
+| 08/14 16:47 | 0 | 0.0% | N/A | 0.00s |
+| 08/14 16:47 | 0 | 0.0% | N/A | 0.00s |
+| 08/14 16:48 | 0 | 0.0% | N/A | 0.00s |
+
+
+## 🔧 Environment Configuration
+
+- **Test Level:** `unit`
+- **Parallelization:** default
+- **Coverage Enabled:** True
 - **Timeout:** 120s
-- **Coverage Enabled:** Yes
-- **Total Duration:** 10.47s
 - **Exit Code:** 255
 
-### Backend Configuration
-```
---category unit -v --coverage --fail-fast --parallel=4 --markers not real_services
-```
+### Command Configuration
 
-### Frontend Configuration
-```
---category unit
-```
+**Backend:** `--category unit -v --coverage --fail-fast --parallel=4 --markers not real_services`  
+**Frontend:** `--category unit`
 
-## Test Output
+## 📝 Recommendations
 
-### Backend Output
-```
-Loaded test environment from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.test
-================================================================================
-NETRA AI PLATFORM - BACKEND TEST RUNNER
-================================================================================
-Test Configuration:
-  Category: unit
-  Parallel: 4
-  Coverage: enabled
-  Fail Fast: enabled
-  Environment: testing
+- ✅ **Excellent:** Test suite is in good shape. Keep up the good work!
 
-Running command:
-  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
-================================================================================
-Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env
-================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 9.00s
-[Coverage] Coverage Report: reports/coverage/html/index.html
-================================================================================
-
-ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\conftest.py'.
-app\tests\conftest.py:52: in <module>
-    from app.main import app
-app\main.py:32: in <module>
-    app = create_app()
-          ^^^^^^^^^^^^
-app\core\app_factory.py:159: in create_app
-    register_api_routes(app)
-app\core\app_factory.py:80: in register_api_routes
-    _import_and_register_routes(app)
-app\core\app_factory.py:85: in _import_and_register_routes
-    route_modules = _import_route_modules()
-                    ^^^^^^^^^^^^^^^^^^^^^^^
-app\core\app_factory.py:92: in _import_route_modules
-    from app.routes import (
-app\routes\supply.py:4: in <module>
-    from app.dependencies import DbDep
-app\dependencies.py:8: in <module>
-    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-app\agents\supervisor_consolidated.py:12: in <module>
-    from app.agents.base import BaseSubAgent
-app\agents\base.py:11: in <module>
-    from app.agents.interfaces import BaseAgentProtocol
-app\agents\interfaces.py:9: in <module>
-    from app.schemas.strict_types import (
-app\schemas\strict_types.py:17: in <module>
-    from app.schemas.shared_types import AgentExecutionResult
-app\schemas\shared_types.py:59: in <module>
-    class BaseAgentInterface(ABC):
-app\schemas\shared_types.py:67: in BaseAgentInterface
-    async def execute(self, state: 'DeepAgentState', session_id: str, **kwargs) -> Any:
-                                                                                   ^^^
-E   NameError: name 'Any' is not defined
-
-```
-
-### Frontend Output
-```
-================================================================================
-NETRA AI PLATFORM - FRONTEND TEST RUNNER
-================================================================================
-
-================================================================================
-Running Jest Tests
---------------------------------------------------------------------------------
-Running: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)
---------------------------------------------------------------------------------
-
-================================================================================
-[FAIL] CHECKS FAILED with exit code 255
-================================================================================
-
-Cleaning up test processes...
-
-'hooks' is not recognized as an internal or external command,
-operable program or batch file.
-
-```
 ---
-*Generated by Netra AI Unified Test Runner v3.0*
+*Generated by Enhanced Test Reporter v2.0 | 2025-08-14 16:49:47*

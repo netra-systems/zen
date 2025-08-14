@@ -14,7 +14,12 @@ from app.agents.data_sub_agent.models import (
     DataAnalysisResponse, AnomalyDetectionResponse, PerformanceMetrics
 )
 from app.schemas.websocket_message_types import WebSocketMessage
-from app.schemas.shared_types import AgentExecutionResult
+# Define AgentExecutionResult locally to avoid circular imports
+from typing import Union, Dict, List
+
+JsonCompatibleDict = Dict[str, Union[str, int, float, bool, None]]
+ExecutionResult = Union[JsonCompatibleDict, List[JsonCompatibleDict], str, bool, None]
+AgentExecutionResult = ExecutionResult
 
 
 class StrictAgentState(Protocol):

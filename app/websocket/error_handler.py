@@ -9,17 +9,18 @@ import time
 
 from app.logging_config import central_logger
 from .connection import ConnectionInfo
-from .error_types import WebSocketError, ErrorSeverity
+from .error_types import WebSocketErrorInfo, ErrorSeverity
+from app.core.exceptions_websocket import WebSocketError
 
 logger = central_logger.get_logger(__name__)
 
 
-class ErrorHandler:
+class WebSocketErrorHandler:
     """Handles WebSocket errors with logging, tracking, and recovery."""
     
     def __init__(self):
         """Initialize error handler."""
-        self.error_history: Dict[str, WebSocketError] = {}
+        self.error_history: Dict[str, WebSocketErrorInfo] = {}
         self.error_patterns: Dict[str, int] = {}  # Track common error patterns
         self.connection_errors: Dict[str, int] = {}  # Track errors per connection
         self.recovery_timestamps: Dict[str, float] = {}  # Track last recovery attempt time
@@ -33,7 +34,7 @@ class ErrorHandler:
             "rate_limit_errors": 0
         }
     
-    async def handle_error(self, error: WebSocketError, conn_info: Optional[ConnectionInfo] = None) -> bool:
+    async def handle_error(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo] = None) -> bool:
         """Handle a WebSocket error with appropriate logging and recovery.
         
         Args:
@@ -76,7 +77,7 @@ class ErrorHandler:
     
     async def handle_connection_error(self, conn_info: ConnectionInfo, error_message: str, 
                                     error_type: str = "connection_error", 
-                                    severity: ErrorSeverity = ErrorSeverity.MEDIUM) -> WebSocketError:
+                                    severity: ErrorSeverity = ErrorSeverity.MEDIUM) -> WebSocketErrorInfo:
         """Handle a connection-specific error.
         
         Args:
@@ -88,7 +89,7 @@ class ErrorHandler:
         Returns:
             The created WebSocketError
         """
-        error = WebSocketError(
+        error = WebSocketErrorInfo(
             connection_id=conn_info.connection_id,
             user_id=conn_info.user_id,
             error_type=error_type,
@@ -107,7 +108,7 @@ class ErrorHandler:
         return error
     
     async def handle_validation_error(self, user_id: str, message: str, 
-                                    validation_details: Dict[str, Any]) -> WebSocketError:
+                                    validation_details: Dict[str, Any]) -> WebSocketErrorInfo:
         """Handle a message validation error.
         
         Args:
@@ -118,7 +119,7 @@ class ErrorHandler:
         Returns:
             The created WebSocketError
         """
-        error = WebSocketError(
+        error = WebSocketErrorInfo(
             user_id=user_id,
             error_type="validation_error",
             message=message,
@@ -131,7 +132,7 @@ class ErrorHandler:
         await self.handle_error(error)
         return error
     
-    async def handle_rate_limit_error(self, conn_info: ConnectionInfo, limit_info: Dict[str, Any]) -> WebSocketError:
+    async def handle_rate_limit_error(self, conn_info: ConnectionInfo, limit_info: Dict[str, Any]) -> WebSocketErrorInfo:
         """Handle a rate limiting error.
         
         Args:
@@ -141,7 +142,7 @@ class ErrorHandler:
         Returns:
             The created WebSocketError
         """
-        error = WebSocketError(
+        error = WebSocketErrorInfo(
             connection_id=conn_info.connection_id,
             user_id=conn_info.user_id,
             error_type="rate_limit_error",
@@ -155,7 +156,7 @@ class ErrorHandler:
         await self.handle_error(error, conn_info)
         return error
     
-    def _log_error(self, error: WebSocketError, conn_info: Optional[ConnectionInfo] = None):
+    def _log_error(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo] = None):
         """Log error with appropriate level and context."""
         log_context = {
             "error_id": error.error_id,
@@ -186,7 +187,7 @@ class ErrorHandler:
         else:
             logger.info(log_message, extra=log_context)
     
-    async def _attempt_recovery(self, error: WebSocketError, conn_info: Optional[ConnectionInfo] = None) -> bool:
+    async def _attempt_recovery(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo] = None) -> bool:
         """Attempt to recover from an error with rate limiting."""
         error.retry_count += 1
         
@@ -232,7 +233,7 @@ class ErrorHandler:
             logger.error(f"Error during recovery attempt for {error.error_id}: {recovery_error}")
             return False
     
-    async def _recover_connection_error(self, error: WebSocketError, conn_info: Optional[ConnectionInfo] = None) -> bool:
+    async def _recover_connection_error(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo] = None) -> bool:
         """Attempt to recover from a connection error."""
         if not conn_info:
             return False
@@ -242,13 +243,13 @@ class ErrorHandler:
         logger.info(f"Connection error recovery: marking connection {conn_info.connection_id} for cleanup")
         return False  # Connection needs to be cleaned up
     
-    async def _recover_rate_limit_error(self, error: WebSocketError, conn_info: Optional[ConnectionInfo] = None) -> bool:
+    async def _recover_rate_limit_error(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo] = None) -> bool:
         """Attempt to recover from a rate limit error."""
         # For rate limit errors, recovery means waiting and then allowing normal operation
         logger.info(f"Rate limit error recovery: connection {error.connection_id} can resume after window")
         return True
     
-    async def _recover_heartbeat_error(self, error: WebSocketError, conn_info: Optional[ConnectionInfo] = None) -> bool:
+    async def _recover_heartbeat_error(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo] = None) -> bool:
         """Attempt to recover from a heartbeat error."""
         if not conn_info:
             return False
@@ -312,4 +313,7 @@ class ErrorHandler:
 
 
 # Default error handler instance
-default_error_handler = ErrorHandler()
+default_error_handler = WebSocketErrorHandler()
+
+# Alias for backward compatibility
+ErrorHandler = WebSocketErrorHandler

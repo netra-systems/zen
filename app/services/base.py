@@ -18,7 +18,7 @@ from app.core.service_interfaces import (
 )
 from app.core.exceptions_database import RecordNotFoundError
 from app.core.exceptions_service import ServiceError
-from app.core.error_context import ErrorContext
+from app.core.error_context import AsyncErrorContext as ErrorContext
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

@@ -13,7 +13,9 @@ from dataclasses import dataclass, field
 from app.logging_config import central_logger
 from app.core.json_utils import prepare_websocket_message, safe_json_dumps
 from .connection import ConnectionInfo, ConnectionManager
-from .error_handler import ErrorHandler, WebSocketError, ErrorSeverity
+from .error_handler import WebSocketErrorHandler
+from .error_types import ErrorSeverity
+from app.core.exceptions_websocket import WebSocketError
 
 logger = central_logger.get_logger(__name__)
 
@@ -29,7 +31,7 @@ class HeartbeatConfig:
 class HeartbeatManager:
     """Manages WebSocket heartbeat functionality."""
     
-    def __init__(self, connection_manager: ConnectionManager, error_handler: Optional[ErrorHandler] = None):
+    def __init__(self, connection_manager: ConnectionManager, error_handler: Optional[WebSocketErrorHandler] = None):
         """Initialize heartbeat manager.
         
         Args:

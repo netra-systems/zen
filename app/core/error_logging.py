@@ -44,8 +44,8 @@ class ErrorCategory(Enum):
 
 
 @dataclass
-class ErrorContext:
-    """Rich context information for error logging."""
+class DetailedErrorContext:
+    """Rich context information for error logging with extensive metadata."""
     # Core identifiers
     error_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     correlation_id: Optional[str] = None
@@ -128,7 +128,7 @@ class ErrorLogger:
         self.max_aggregations = max_aggregations
         self.error_aggregations: Dict[str, ErrorAggregation] = {}
         self.correlation_tracking: Dict[str, List[str]] = defaultdict(list)
-        self.context_stack: List[ErrorContext] = []
+        self.context_stack: List[DetailedErrorContext] = []
         
         # Performance tracking
         self.logging_metrics = {
@@ -144,9 +144,9 @@ class ErrorLogger:
         severity: Optional[ErrorSeverity] = None,
         category: Optional[ErrorCategory] = None,
         **kwargs
-    ) -> ErrorContext:
+    ) -> DetailedErrorContext:
         """Create rich error context from exception and additional data."""
-        context = ErrorContext(
+        context = DetailedErrorContext(
             severity=severity or self._determine_severity(error),
             category=category or self._determine_category(error),
             error_code=self._determine_error_code(error),
@@ -167,7 +167,7 @@ class ErrorLogger:
     def log_error(
         self,
         error: Exception,
-        context: Optional[ErrorContext] = None,
+        context: Optional[DetailedErrorContext] = None,
         **kwargs
     ) -> str:
         """Log error with comprehensive context."""
@@ -198,7 +198,7 @@ class ErrorLogger:
         details: Optional[Dict] = None
     ) -> None:
         """Log error recovery attempts."""
-        context = ErrorContext(
+        context = DetailedErrorContext(
             correlation_id=recovery_context.operation_id,
             operation_type=recovery_context.operation_type,
             operation_id=recovery_context.operation_id,
@@ -265,7 +265,7 @@ class ErrorLogger:
     @contextmanager
     def error_context(self, **context_kwargs):
         """Context manager for maintaining error context across operations."""
-        context = ErrorContext(**context_kwargs)
+        context = DetailedErrorContext(**context_kwargs)
         self.context_stack.append(context)
         try:
             yield context
@@ -361,13 +361,13 @@ class ErrorLogger:
         error_type = type(error).__name__
         return code_mapping.get(error_type)
     
-    def _update_metrics(self, context: ErrorContext) -> None:
+    def _update_metrics(self, context: DetailedErrorContext) -> None:
         """Update logging metrics."""
         self.logging_metrics['total_errors_logged'] += 1
         self.logging_metrics['errors_by_severity'][context.severity.value] += 1
         self.logging_metrics['errors_by_category'][context.category.value] += 1
     
-    def _aggregate_error(self, error: Exception, context: ErrorContext) -> None:
+    def _aggregate_error(self, error: Exception, context: DetailedErrorContext) -> None:
         """Aggregate error for pattern analysis."""
         signature = self._create_error_signature(error, context)
         
@@ -402,7 +402,7 @@ class ErrorLogger:
         if len(self.error_aggregations) > self.max_aggregations:
             self._cleanup_old_aggregations()
     
-    def _create_error_signature(self, error: Exception, context: ErrorContext) -> str:
+    def _create_error_signature(self, error: Exception, context: DetailedErrorContext) -> str:
         """Create a signature for error aggregation."""
         components = [
             type(error).__name__,
@@ -439,7 +439,7 @@ class ErrorLogger:
     def _prepare_log_data(
         self,
         error: Optional[Exception],
-        context: ErrorContext
+        context: DetailedErrorContext
     ) -> Dict[str, Any]:
         """Prepare structured log data."""
         log_data = context.to_dict()

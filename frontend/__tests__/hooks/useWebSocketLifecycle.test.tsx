@@ -3,18 +3,56 @@ import React from 'react';
 import { AuthContext } from '@/auth/context';
 import { WebSocketProvider, useWebSocketContext } from '@/providers/WebSocketProvider';
 
+// Mock the logger
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn()
+  }
+}));
+
+// Mock the config
+jest.mock('@/config', () => ({
+  config: {
+    apiUrl: 'http://localhost:8000'
+  }
+}));
+
 // Mock the webSocketService
+const mockWebSocketService = {
+  connect: jest.fn().mockImplementation((url) => {
+    // Simulate the connection process
+    mockWebSocketService.status = 'CONNECTING';
+    if (mockWebSocketService.onStatusChange) {
+      mockWebSocketService.onStatusChange('CONNECTING');
+    }
+    
+    // Simulate connection established
+    setTimeout(() => {
+      mockWebSocketService.status = 'OPEN';
+      if (mockWebSocketService.onStatusChange) {
+        mockWebSocketService.onStatusChange('OPEN');
+      }
+    }, 10);
+  }),
+  disconnect: jest.fn().mockImplementation(() => {
+    mockWebSocketService.status = 'CLOSED';
+    if (mockWebSocketService.onStatusChange) {
+      mockWebSocketService.onStatusChange('CLOSED');
+    }
+  }),
+  sendMessage: jest.fn(),
+  send: jest.fn(),
+  onStatusChange: null as ((status: string) => void) | null,
+  onMessage: null as ((message: any) => void) | null,
+  status: 'CLOSED',
+  state: 'disconnected'
+};
+
 jest.mock('@/services/webSocketService', () => ({
-  webSocketService: {
-    connect: jest.fn(),
-    disconnect: jest.fn(),
-    sendMessage: jest.fn(),
-    send: jest.fn(),
-    onStatusChange: null,
-    onMessage: null,
-    status: 'CLOSED',
-    state: 'disconnected'
-  },
+  webSocketService: mockWebSocketService,
   WebSocketStatus: {
     CONNECTING: 'CONNECTING',
     OPEN: 'OPEN',
@@ -23,30 +61,51 @@ jest.mock('@/services/webSocketService', () => ({
   }
 }));
 
-// Mock fetch for config
-global.fetch = jest.fn().mockResolvedValue({
-  ok: true,
-  json: jest.fn().mockResolvedValue({
-    ws_url: 'ws://localhost:8000/ws'
-  })
-});
+// Mock fetch for config - will be reset in beforeEach
+const mockFetch = jest.fn();
 
 const mockAuthContextValue = {
   token: 'test-token-123',
   user: null,
-  isAuthenticated: true,
+  loading: false,
+  authConfig: null,
   login: jest.fn(),
-  logout: jest.fn(),
-  refreshToken: jest.fn()
+  logout: jest.fn()
 };
 
 describe('useWebSocket Hook Lifecycle', () => {
   let wrapper: React.ComponentType<{ children: React.ReactNode }>;
-  const mockWebSocketService = require('@/services/webSocketService').webSocketService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers();
+    jest.useRealTimers(); // Use real timers since we need actual async behavior
+    
+    // Reset mock WebSocket service
+    mockWebSocketService.connect.mockClear();
+    mockWebSocketService.disconnect.mockClear();
+    mockWebSocketService.sendMessage.mockClear();
+    mockWebSocketService.send.mockClear();
+    mockWebSocketService.onStatusChange = null;
+    mockWebSocketService.onMessage = null;
+    mockWebSocketService.status = 'CLOSED';
+    mockWebSocketService.state = 'disconnected';
+    
+    // Re-implement the connect mock to ensure it's fresh for each test
+    mockWebSocketService.connect.mockImplementation((url) => {
+      // Simulate the connection process
+      mockWebSocketService.status = 'CONNECTING';
+      if (mockWebSocketService.onStatusChange) {
+        mockWebSocketService.onStatusChange('CONNECTING');
+      }
+      
+      // Simulate connection established
+      setTimeout(() => {
+        mockWebSocketService.status = 'OPEN';
+        if (mockWebSocketService.onStatusChange) {
+          mockWebSocketService.onStatusChange('OPEN');
+        }
+      }, 10);
+    });
     
     // Ensure global mockWebSocket exists
     if (!global.mockWebSocket) {
@@ -70,6 +129,15 @@ describe('useWebSocket Hook Lifecycle', () => {
       global.mockWebSocket.removeEventListener.mockClear();
     }
     
+    // Reset fetch mock to default success
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        ws_url: 'ws://localhost:8000/ws'
+      })
+    });
+    global.fetch = mockFetch;
+    
     // Create wrapper with auth context
     wrapper = ({ children }: { children: React.ReactNode }) => (
       <AuthContext.Provider value={mockAuthContextValue}>
@@ -79,16 +147,30 @@ describe('useWebSocket Hook Lifecycle', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    // Cleanup any pending timers
+    jest.clearAllTimers();
   });
 
   describe('Hook Initialization and Cleanup', () => {
     it('should initialize WebSocket connection on mount', async () => {
+      // Add console log to debug
+      console.log('Starting test: should initialize WebSocket connection on mount');
+      console.log('Auth context token:', mockAuthContextValue.token);
+      console.log('mockFetch calls before render:', mockFetch.mock.calls.length);
+      console.log('mockWebSocketService.connect calls before render:', mockWebSocketService.connect.mock.calls.length);
+
       const { result } = renderHook(() => useWebSocketContext(), { wrapper });
 
+      console.log('After renderHook - result.current:', result.current);
+      console.log('mockFetch calls after render:', mockFetch.mock.calls.length);
+      console.log('mockWebSocketService.connect calls after render:', mockWebSocketService.connect.mock.calls.length);
+
+      // Wait for the async fetch and connect to complete
       await waitFor(() => {
+        console.log('In waitFor - mockFetch calls:', mockFetch.mock.calls.length);
+        console.log('In waitFor - mockWebSocketService.connect calls:', mockWebSocketService.connect.mock.calls.length);
         expect(mockWebSocketService.connect).toHaveBeenCalled();
-      });
+      }, { timeout: 3000 });
       
       expect(result.current.status).toBe('CLOSED');
       expect(result.current.messages).toEqual([]);
@@ -102,18 +184,23 @@ describe('useWebSocket Hook Lifecycle', () => {
         expect(mockWebSocketService.connect).toHaveBeenCalledWith(
           expect.stringContaining('token=test-token-123')
         );
-      });
+      }, { timeout: 3000 });
     });
 
-    it('should cleanup WebSocket connection on unmount', () => {
+    it('should cleanup WebSocket connection on unmount', async () => {
       const { unmount } = renderHook(() => useWebSocketContext(), { wrapper });
+
+      // Wait for connection to be established
+      await waitFor(() => {
+        expect(mockWebSocketService.connect).toHaveBeenCalled();
+      }, { timeout: 3000 });
 
       unmount();
 
       expect(mockWebSocketService.disconnect).toHaveBeenCalled();
     });
 
-    it('should handle rapid mount/unmount cycles', () => {
+    it('should handle rapid mount/unmount cycles', async () => {
       const connections: any[] = [];
 
       // Mount and unmount multiple times rapidly
@@ -125,8 +212,10 @@ describe('useWebSocket Hook Lifecycle', () => {
         unmount();
       }
 
-      // Should handle cleanup gracefully without errors
-      expect(mockWebSocketService.disconnect).toHaveBeenCalledTimes(5);
+      // Wait for all async operations to complete
+      await waitFor(() => {
+        expect(mockWebSocketService.disconnect).toHaveBeenCalledTimes(5);
+      }, { timeout: 3000 });
     });
 
     it('should preserve connection across component re-renders', async () => {
@@ -149,7 +238,7 @@ describe('useWebSocket Hook Lifecycle', () => {
       await waitFor(() => {
         // Should only connect once
         expect(mockWebSocketService.connect).toHaveBeenCalledTimes(1);
-      });
+      }, { timeout: 3000 });
     });
   });
 
@@ -163,15 +252,14 @@ describe('useWebSocket Hook Lifecycle', () => {
       // Wait for the service to set up the callback
       await waitFor(() => {
         expect(mockWebSocketService.connect).toHaveBeenCalled();
-      });
+      }, { timeout: 3000 });
 
       // Now trigger status changes using the callback that was set
       act(() => {
         // The WebSocketProvider sets onStatusChange during connect
         // We need to manually call it since we're mocking
-        const mockService = require('@/services/webSocketService').webSocketService;
-        if (mockService.onStatusChange) {
-          mockService.onStatusChange('CONNECTING');
+        if (mockWebSocketService.onStatusChange) {
+          mockWebSocketService.onStatusChange('CONNECTING');
         }
       });
 
@@ -181,9 +269,8 @@ describe('useWebSocket Hook Lifecycle', () => {
 
       // Simulate open status
       act(() => {
-        const mockService = require('@/services/webSocketService').webSocketService;
-        if (mockService.onStatusChange) {
-          mockService.onStatusChange('OPEN');
+        if (mockWebSocketService.onStatusChange) {
+          mockWebSocketService.onStatusChange('OPEN');
         }
       });
 
@@ -228,15 +315,14 @@ describe('useWebSocket Hook Lifecycle', () => {
       // Wait for the service to set up the callback
       await waitFor(() => {
         expect(mockWebSocketService.connect).toHaveBeenCalled();
-      });
+      }, { timeout: 3000 });
 
       // Simulate receiving a message
       const testMessage = { type: 'test', payload: { data: 'test' } };
       
       act(() => {
-        const mockService = require('@/services/webSocketService').webSocketService;
-        if (mockService.onMessage) {
-          mockService.onMessage(testMessage);
+        if (mockWebSocketService.onMessage) {
+          mockWebSocketService.onMessage(testMessage);
         }
       });
 
@@ -249,9 +335,8 @@ describe('useWebSocket Hook Lifecycle', () => {
       const testMessage2 = { type: 'test2', payload: { data: 'test2' } };
       
       act(() => {
-        const mockService = require('@/services/webSocketService').webSocketService;
-        if (mockService.onMessage) {
-          mockService.onMessage(testMessage2);
+        if (mockWebSocketService.onMessage) {
+          mockWebSocketService.onMessage(testMessage2);
         }
       });
 
@@ -272,6 +357,9 @@ describe('useWebSocket Hook Lifecycle', () => {
 
       const { result } = renderHook(() => useWebSocketContext(), { wrapper: noTokenWrapper });
 
+      // Wait a bit to ensure any async operations complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       // Should not attempt to connect without token
       expect(mockWebSocketService.connect).not.toHaveBeenCalled();
       // But should still provide context
@@ -280,24 +368,23 @@ describe('useWebSocket Hook Lifecycle', () => {
     });
 
     it('should handle config fetch failure', async () => {
-      global.fetch = jest.fn().mockRejectedValueOnce(new Error('Network error'));
-
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const mockLogger = require('@/lib/logger').logger;
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+      global.fetch = mockFetch;
 
       const { result } = renderHook(() => useWebSocketContext(), { wrapper });
 
       await waitFor(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect(mockLogger.error).toHaveBeenCalledWith(
           'Failed to fetch config and connect to WebSocket',
-          expect.any(Error)
+          expect.any(Error),
+          expect.any(Object)
         );
-      });
+      }, { timeout: 3000 });
 
       // Should still provide a valid context even if connection fails
       expect(result.current.status).toBe('CLOSED');
       expect(result.current.messages).toEqual([]);
-
-      consoleErrorSpy.mockRestore();
     });
 
     it('should cleanup on token change', async () => {

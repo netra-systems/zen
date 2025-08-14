@@ -2,9 +2,9 @@
 
 import asyncio
 import time
-from typing import Dict, Optional, Callable, Awaitable, List, Union
+from uuid import uuid4
+from typing import Dict, Optional, Callable, Awaitable, List, Union, Any
 from enum import Enum
-from dataclasses import dataclass
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -27,40 +27,12 @@ class ErrorCategory(Enum):
     UNKNOWN = "unknown"
 
 
-@dataclass
-class ErrorContext:
-    """Context information for error handling."""
-    agent_name: str
-    operation_name: str
-    run_id: str
-    timestamp: float
-    retry_count: int = 0
-    max_retries: int = 3
-    additional_data: Dict[str, Union[str, int, float, bool]] = None
-    
-    def __post_init__(self):
-        if self.additional_data is None:
-            self.additional_data = {}
+# Import ErrorContext from single source of truth
+from app.schemas.shared_types import ErrorContext
 
 
-class AgentError(Exception):
-    """Base exception for agent errors with context."""
-    
-    def __init__(
-        self, 
-        message: str, 
-        severity: ErrorSeverity = ErrorSeverity.MEDIUM,
-        category: ErrorCategory = ErrorCategory.UNKNOWN,
-        context: Optional[ErrorContext] = None,
-        recoverable: bool = True
-    ):
-        super().__init__(message)
-        self.message = message
-        self.severity = severity
-        self.category = category
-        self.context = context
-        self.recoverable = recoverable
-        self.timestamp = time.time()
+# Import AgentError from canonical location
+from app.core.exceptions_agent import AgentError
 
 
 class AgentValidationError(AgentError):
@@ -102,17 +74,8 @@ class DatabaseError(AgentError):
         )
 
 
-class WebSocketError(AgentError):
-    """Error for WebSocket-related failures."""
-    
-    def __init__(self, message: str, context: Optional[ErrorContext] = None):
-        super().__init__(
-            message,
-            severity=ErrorSeverity.LOW,
-            category=ErrorCategory.WEBSOCKET,
-            context=context,
-            recoverable=True
-        )
+# Import WebSocketError from canonical location
+from app.core.exceptions_websocket import WebSocketError
 
 
 class ErrorRecoveryStrategy:
@@ -164,7 +127,7 @@ class ErrorRecoveryStrategy:
         return error.severity in [ErrorSeverity.LOW, ErrorSeverity.MEDIUM]
 
 
-class ErrorHandler:
+class AgentErrorHandler:
     """Centralized error handler for all agent operations."""
     
     def __init__(self):
@@ -322,7 +285,7 @@ class ErrorHandler:
 
 
 # Global error handler instance
-global_error_handler = ErrorHandler()
+global_error_handler = AgentErrorHandler()
 
 
 def handle_agent_error(operation_name: str):
@@ -330,10 +293,11 @@ def handle_agent_error(operation_name: str):
     def decorator(func):
         async def wrapper(self, *args, **kwargs):
             context = ErrorContext(
+                trace_id=str(uuid4()),
+                operation=operation_name,
                 agent_name=getattr(self, 'name', 'Unknown'),
                 operation_name=operation_name,
-                run_id=kwargs.get('run_id', 'unknown'),
-                timestamp=time.time()
+                run_id=kwargs.get('run_id', 'unknown')
             )
             
             max_attempts = 3

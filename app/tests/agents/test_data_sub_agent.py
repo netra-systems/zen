@@ -25,7 +25,7 @@ from app.tests.helpers.shared_test_types import TestErrorHandling as SharedTestE
 
 # Import the module under test
 try:
-    from app.schemas.shared_types import DataSubAgent
+    from app.agents.data_sub_agent.agent import DataSubAgent
     from app.agents.data_sub_agent.query_builder import QueryBuilder
 except ImportError:
     # Create mock classes if imports fail

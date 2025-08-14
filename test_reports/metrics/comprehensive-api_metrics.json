@@ -1,0 +1,61 @@
+{
+  "timestamp": "2025-08-14T16:45:49.230779",
+  "level": "comprehensive-api",
+  "metrics": {
+    "total_tests": 0,
+    "passed": 0,
+    "failed": 0,
+    "coverage": null
+  },
+  "results": {
+    "backend": {
+      "status": "failed",
+      "duration": 8.58684778213501,
+      "exit_code": 15,
+      "output": "\n",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0,
+        "test_files": 0
+      },
+      "coverage": null,
+      "test_details": []
+    },
+    "frontend": {
+      "status": "skipped",
+      "duration": 0,
+      "exit_code": null,
+      "output": "",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      },
+      "coverage": null
+    },
+    "e2e": {
+      "status": "pending",
+      "duration": 0,
+      "exit_code": null,
+      "output": "",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      },
+      "coverage": null
+    },
+    "overall": {
+      "status": "failed",
+      "start_time": 1755215140.6419258,
+      "end_time": 1755215149.2287736
+    }
+  }
+}

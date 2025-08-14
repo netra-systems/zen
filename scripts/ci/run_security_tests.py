@@ -104,22 +104,22 @@ def run_security_tests(output_file: Path) -> int:
             if result.returncode == 0:
                 test_result["status"] = "passed"
                 results["summary"]["passed"] += 1
-                print(f"  ✅ Passed in {test_result['duration']:.2f}s")
+                print(f"  [PASS] Passed in {test_result['duration']:.2f}s")
             else:
                 test_result["status"] = "failed"
                 results["summary"]["failed"] += 1
-                print(f"  ❌ Failed in {test_result['duration']:.2f}s")
+                print(f"  [FAIL] Failed in {test_result['duration']:.2f}s")
                 
         except subprocess.TimeoutExpired:
             test_result["status"] = "timeout"
             test_result["duration"] = 180
             results["summary"]["failed"] += 1
-            print(f"  ⏱️ Timeout after 180s")
+            print(f"  [TIMEOUT] Timeout after 180s")
         except Exception as e:
             test_result["status"] = "error"
             test_result["error"] = str(e)
             results["summary"]["failed"] += 1
-            print(f"  🔥 Error: {e}")
+            print(f"  [ERROR] Error: {e}")
         
         results["tests"].append(test_result)
         results["summary"]["total"] += 1
@@ -160,7 +160,7 @@ def run_security_tests(output_file: Path) -> int:
                 print(f"  Found {len(bandit_data['results'])} potential security issues")
         
     except Exception as e:
-        print(f"  ⚠️ Could not run static security analysis: {e}")
+        print(f"  [WARNING] Could not run static security analysis: {e}")
     
     # Calculate security metrics
     results["summary"]["success_rate"] = (
@@ -183,7 +183,7 @@ def run_security_tests(output_file: Path) -> int:
     print(f"Success Rate: {results['summary']['success_rate']:.1f}%")
     
     if results["vulnerabilities"]:
-        print(f"\n⚠️ Static Analysis Issues: {len(results['vulnerabilities'])}")
+        print(f"\n[WARNING] Static Analysis Issues: {len(results['vulnerabilities'])}")
         severity_counts = {}
         for vuln in results["vulnerabilities"]:
             severity = vuln["severity"]
@@ -192,7 +192,7 @@ def run_security_tests(output_file: Path) -> int:
             print(f"  - {severity}: {count}")
     
     if results["summary"]["security_issues"]:
-        print(f"\n🔒 Security Test Issues: {len(results['summary']['security_issues'])}")
+        print(f"\n[SECURITY] Security Test Issues: {len(results['summary']['security_issues'])}")
         for issue in results["summary"]["security_issues"][:5]:
             print(f"  - {issue['test']}: {issue['issue']}")
     
