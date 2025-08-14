@@ -68,10 +68,15 @@ def handle_generic_type(annotation: Any) -> Any:
 def parse_nested_json_value(value: str) -> Any:
     """Parse JSON string value with error handling."""
     try:
-        if value.strip().startswith(('{', '[')):
-            return json.loads(value)
-    except (json.JSONDecodeError, ValueError):
-        pass
+        # Handle JSON strings that might have extra whitespace
+        trimmed = value.strip()
+        if trimmed.startswith(('{', '[')):
+            parsed = json.loads(trimmed)
+            # Recursively parse any nested JSON strings in the result
+            return parse_nested_json_recursive(parsed)
+    except (json.JSONDecodeError, ValueError) as e:
+        # Log but don't fail - return original value
+        logger.debug(f"Could not parse nested JSON: {e}")
     return value
 
 
@@ -156,7 +161,7 @@ async def create_llm_response(response: Any, config: Any, llm_config_name: str,
     )
 
 
-async def attempt_json_fallback_parse(text_response: str, schema: Type[T]) -> T:
+def attempt_json_fallback_parse(text_response: str, schema: Type[T]) -> T:
     """Attempt to parse text response as JSON for structured output."""
     if text_response.strip().startswith('{'):
         data = json.loads(text_response)

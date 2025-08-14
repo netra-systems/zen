@@ -483,6 +483,15 @@
       "failed": 0,
       "coverage": null,
       "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T16:00:28.479467",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
     }
   ],
   "flaky_tests": {},
