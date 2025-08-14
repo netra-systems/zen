@@ -67,7 +67,7 @@ class TestDataSubAgentInitialization:
         assert agent.name == "DataSubAgent"
         assert agent.tool_dispatcher == mock_tool_dispatcher
         
-    @patch('app.agents.data_sub_agent.RedisManager')
+    @patch('app.agents.data_sub_agent.agent.RedisManager')
     def test_initialization_with_redis(self, mock_redis):
         """Test DataSubAgent initializes with components"""
         mock_llm_manager = Mock()
@@ -526,7 +526,7 @@ class TestStateManagement:
         agent.context["last_processed"] = "item_123"
         
         # Mock Redis for state persistence
-        with patch('app.agents.data_sub_agent.RedisManager') as MockRedis:
+        with patch('app.agents.data_sub_agent.agent.RedisManager') as MockRedis:
             mock_redis = Mock()
             MockRedis.return_value = mock_redis
             mock_redis.set = AsyncMock()
@@ -567,7 +567,7 @@ class TestStateManagement:
         agent.context["pending_items"] = list(range(51, 100))
         
         # Mock Redis for state persistence
-        with patch('app.agents.data_sub_agent.RedisManager') as MockRedis:
+        with patch('app.agents.data_sub_agent.agent.RedisManager') as MockRedis:
             mock_redis = Mock()
             MockRedis.return_value = mock_redis
             mock_redis.set = AsyncMock()

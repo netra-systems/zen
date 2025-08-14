@@ -35,6 +35,7 @@
             <goal>Quality gate integration for output validation</goal>
             <goal>Synthetic data generation for consistent testing</goal>
             <goal>Fast feedback loops with quick test mode</goal>
+            <goal>When fixing tests align tests with latest code. Update tests as needed to test real latest code.</goal>
         </goals>
     </overview>
     

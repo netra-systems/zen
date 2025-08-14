@@ -133,27 +133,78 @@ class SyntheticDataService(RecoveryMixin):
                     })
             records.append({"tool_invocations": tool_invocations, "index": i})
         return records
+    
+    async def generate_incremental(self, config, checkpoint_callback=None) -> Dict:
+        """Generate data incrementally with checkpoints"""
+        num_traces = getattr(config, 'num_traces', 100)
+        checkpoint_interval = getattr(config, 'checkpoint_interval', 25)
+        
+        total_generated = 0
+        checkpoints = []
+        
+        while total_generated < num_traces:
+            # Generate a batch
+            batch_size = min(checkpoint_interval, num_traces - total_generated)
+            batch = []
+            
+            for i in range(batch_size):
+                record = {
+                    "index": total_generated + i,
+                    "timestamp": datetime.now(UTC).isoformat(),
+                    "trace_id": str(uuid.uuid4()),
+                    "data": f"incremental_record_{total_generated + i}"
+                }
+                batch.append(record)
+            
+            total_generated += len(batch)
+            
+            # Create checkpoint data
+            checkpoint_data = {
+                "batch_number": len(checkpoints) + 1,
+                "records_in_batch": len(batch),
+                "total_generated": total_generated,
+                "timestamp": datetime.now(UTC).isoformat(),
+                "data": batch
+            }
+            
+            checkpoints.append(checkpoint_data)
+            
+            # Call checkpoint callback if provided
+            if checkpoint_callback:
+                await checkpoint_callback(checkpoint_data)
+            
+            # Small delay to simulate processing
+            await asyncio.sleep(0.01)
+        
+        return {
+            "total_generated": total_generated,
+            "checkpoints": len(checkpoints),
+            "completion_time": datetime.now(UTC).isoformat()
+        }
         
     async def generate_synthetic_data(
         self,
-        db: Session,
         config: schemas.LogGenParams,
-        user_id: str,
-        corpus_id: Optional[str] = None
+        db: Optional[Session] = None,
+        user_id: Optional[str] = None,
+        corpus_id: Optional[str] = None,
+        job_id: Optional[str] = None
     ) -> Dict:
         """
         Generate synthetic data based on configuration
         
         Args:
-            db: Database session
             config: Generation configuration
-            user_id: User ID initiating generation
+            db: Optional database session
+            user_id: Optional user ID initiating generation
             corpus_id: Optional corpus to use for content
+            job_id: Optional job ID (will be generated if not provided)
             
         Returns:
             Job information dictionary
         """
-        job_id = str(uuid.uuid4())
+        if job_id is None:
+            job_id = str(uuid.uuid4())
         
         # Create destination table name
         table_name = f"netra_synthetic_data_{job_id.replace('-', '_')}"
@@ -171,17 +222,19 @@ class SyntheticDataService(RecoveryMixin):
             "user_id": user_id
         }
         
-        # Create database record
-        db_synthetic_data = models.Corpus(
-            name=f"Synthetic Data {datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}",
-            description=f"Synthetic data generation job {job_id}",
-            table_name=table_name,
-            status="pending",
-            created_by_id=user_id
-        )
-        db.add(db_synthetic_data)
-        db.commit()
-        db.refresh(db_synthetic_data)
+        # Create database record if db session provided
+        db_synthetic_data = None
+        if db is not None:
+            db_synthetic_data = models.Corpus(
+                name=f"Synthetic Data {datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}",
+                description=f"Synthetic data generation job {job_id}",
+                table_name=table_name,
+                status="pending",
+                created_by_id=user_id
+            )
+            db.add(db_synthetic_data)
+            db.commit()
+            db.refresh(db_synthetic_data)
         
         # Check for alert conditions
         if hasattr(self, 'alert_config'):
@@ -190,8 +243,9 @@ class SyntheticDataService(RecoveryMixin):
                 await self.send_alert("slow_generation", f"Large generation job started: {config.num_traces} traces")
         
         # Start generation in background
+        synthetic_data_id = db_synthetic_data.id if db_synthetic_data else None
         asyncio.create_task(
-            self._generate_worker(job_id, config, corpus_id or config.corpus_id, db, db_synthetic_data.id)
+            self._generate_worker(job_id, config, corpus_id or getattr(config, 'corpus_id', None), db, synthetic_data_id)
         )
         
         return {
@@ -206,16 +260,17 @@ class SyntheticDataService(RecoveryMixin):
         job_id: str,
         config: schemas.LogGenParams,
         corpus_id: Optional[str],
-        db: Session,
-        synthetic_data_id: str
+        db: Optional[Session],
+        synthetic_data_id: Optional[str]
     ):
         """Worker function for generating synthetic data"""
         try:
             self.active_jobs[job_id]["status"] = GenerationStatus.RUNNING.value
             
-            # Update database status
-            db.query(models.Corpus).filter(models.Corpus.id == synthetic_data_id).update({"status": "running"})
-            db.commit()
+            # Update database status if db session available
+            if db is not None and synthetic_data_id is not None:
+                db.query(models.Corpus).filter(models.Corpus.id == synthetic_data_id).update({"status": "running"})
+                db.commit()
             
             # Send WebSocket update
             await manager.broadcast({
@@ -251,11 +306,12 @@ class SyntheticDataService(RecoveryMixin):
                 
                 progress = (self.active_jobs[job_id]["records_generated"] / total_records * 100)
                 
-                # Update database
-                db.query(models.Corpus).filter(models.Corpus.id == synthetic_data_id).update({
-                    "status": f"running: {progress:.2f}%"
-                })
-                db.commit()
+                # Update database if available
+                if db is not None and synthetic_data_id is not None:
+                    db.query(models.Corpus).filter(models.Corpus.id == synthetic_data_id).update({
+                        "status": f"running: {progress:.2f}%"
+                    })
+                    db.commit()
                 
                 # Send progress update via WebSocket
                 if self.active_jobs[job_id]["records_generated"] % 100 == 0:
@@ -275,9 +331,10 @@ class SyntheticDataService(RecoveryMixin):
             self.active_jobs[job_id]["status"] = GenerationStatus.COMPLETED.value
             self.active_jobs[job_id]["end_time"] = datetime.now(UTC)
             
-            # Update database
-            db.query(models.Corpus).filter(models.Corpus.id == synthetic_data_id).update({"status": "completed"})
-            db.commit()
+            # Update database if available
+            if db is not None and synthetic_data_id is not None:
+                db.query(models.Corpus).filter(models.Corpus.id == synthetic_data_id).update({"status": "completed"})
+                db.commit()
             
             # Send completion notification
             await manager.broadcast({
@@ -298,9 +355,10 @@ class SyntheticDataService(RecoveryMixin):
             self.active_jobs[job_id]["status"] = GenerationStatus.FAILED.value
             self.active_jobs[job_id]["errors"].append(str(e))
             
-            # Update database
-            db.query(models.Corpus).filter(models.Corpus.id == synthetic_data_id).update({"status": "failed"})
-            db.commit()
+            # Update database if available
+            if db is not None and synthetic_data_id is not None:
+                db.query(models.Corpus).filter(models.Corpus.id == synthetic_data_id).update({"status": "failed"})
+                db.commit()
             
             # Send error notification
             await manager.broadcast({

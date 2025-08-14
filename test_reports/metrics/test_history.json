@@ -1,60 +1,6 @@
 {
   "runs": [
     {
-      "timestamp": "2025-08-12T10:52:44.827375",
-      "level": "smoke",
-      "total": 2,
-      "passed": 2,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-12T11:05:54.285128",
-      "level": "smoke",
-      "total": 2,
-      "passed": 2,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-12T11:12:58.439282",
-      "level": "smoke",
-      "total": 2,
-      "passed": 2,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-12T11:14:02.039449",
-      "level": "mock_only",
-      "total": 8,
-      "passed": 0,
-      "failed": 0,
-      "coverage": 30.05,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-12T11:17:01.964791",
-      "level": "unit",
-      "total": 453,
-      "passed": 173,
-      "failed": 279,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-12T11:19:36.544858",
-      "level": "smoke",
-      "total": 2,
-      "passed": 2,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
       "timestamp": "2025-08-12T11:30:17.826295",
       "level": "smoke",
       "total": 2,
@@ -897,6 +843,60 @@
       "total": 257,
       "passed": 240,
       "failed": 4,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T22:43:36.650901",
+      "level": "comprehensive-agents",
+      "total": 17,
+      "passed": 12,
+      "failed": 2,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T22:46:17.253059",
+      "level": "comprehensive-database",
+      "total": 16,
+      "passed": 11,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T22:48:06.946204",
+      "level": "comprehensive-agents",
+      "total": 62,
+      "passed": 58,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T22:48:47.765298",
+      "level": "comprehensive-database",
+      "total": 23,
+      "passed": 18,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T22:49:35.565896",
+      "level": "comprehensive-agents",
+      "total": 65,
+      "passed": 61,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-13T22:51:30.305392",
+      "level": "comprehensive-agents",
+      "total": 77,
+      "passed": 73,
+      "failed": 3,
       "coverage": null,
       "duration": 0
     }

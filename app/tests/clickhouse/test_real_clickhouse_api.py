@@ -109,7 +109,7 @@ class TestRealClickHouseConnection:
 class TestWorkloadEventsTable:
     """Test workload_events table operations with real data"""
     
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def setup_workload_table(self):
         """Ensure workload_events table exists"""
         # Create table if missing

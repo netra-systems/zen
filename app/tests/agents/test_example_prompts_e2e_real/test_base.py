@@ -367,7 +367,7 @@ class BaseExamplePromptsTest:
             with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
                 with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                     with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=context_with_run_id)):
-                        result_state = await supervisor.run(prompt, run_id, stream_updates=True)
+                        result_state = await supervisor.run(prompt, supervisor.thread_id, supervisor.user_id, run_id)
             
             end_time = datetime.now()
             execution_time = (end_time - start_time).total_seconds()

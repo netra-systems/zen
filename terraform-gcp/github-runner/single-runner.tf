@@ -44,6 +44,12 @@ log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
 
+# Ensure script is running as root
+if [ "$EUID" -ne 0 ]; then 
+    log "ERROR: This script must be run as root"
+    exit 1
+fi
+
 # Variables
 GITHUB_ORG="${var.github_org}"
 GITHUB_REPO="${var.github_repo}"
@@ -363,13 +369,50 @@ main() {
     log "GitHub Runner Installation with Docker Support"
     log "==================================================="
     
+    # Wait for system to fully initialize
+    log "Waiting for system initialization..."
+    sleep 10
+    
+    # Ensure we have necessary tools
+    log "Checking system prerequisites..."
+    which apt-get || {
+        log "ERROR: apt-get not found, unsupported system"
+        exit 1
+    }
+    
+    # Update package lists first
+    log "Updating package lists..."
+    apt-get update || {
+        log "ERROR: Failed to update package lists"
+        exit 1
+    }
+    
     # Install GitHub runner first
     log "Phase 1: Installing GitHub Runner..."
     
-    # Create runner user first
+    # Create runner user first with proper error handling
     log "Creating runner user..."
     if ! id "$RUNNER_USER" &>/dev/null; then
-        useradd -m -s /bin/bash $RUNNER_USER
+        log "User $RUNNER_USER does not exist, creating..."
+        # Ensure passwd package is installed
+        apt-get install -y passwd || true
+        if ! useradd -m -s /bin/bash $RUNNER_USER; then
+            log "ERROR: Failed to create user $RUNNER_USER with useradd"
+            # Try alternative method
+            log "Trying alternative user creation method..."
+            adduser --disabled-password --gecos "" --shell /bin/bash $RUNNER_USER || {
+                log "ERROR: Both useradd and adduser failed"
+                # Check if user was partially created
+                if id "$RUNNER_USER" &>/dev/null; then
+                    log "User exists but creation reported failure, continuing..."
+                else
+                    exit 1
+                fi
+            }
+        fi
+        log "User $RUNNER_USER created successfully"
+    else
+        log "User $RUNNER_USER already exists"
     fi
     
     # Get tokens and install runner
