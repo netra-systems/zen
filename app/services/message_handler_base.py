@@ -1,0 +1,110 @@
+"""Base message handler methods extracted for modularity"""
+
+from typing import Dict, Any, Optional
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.logging_config import central_logger
+from app.db.models_postgres import Thread, Run
+from app.ws_manager import manager
+import json
+
+logger = central_logger.get_logger(__name__)
+
+class MessageHandlerBase:
+    """Base methods for message handling"""
+    
+    @staticmethod
+    def extract_user_request(payload: Dict[str, Any]) -> str:
+        """Extract user request from payload"""
+        request_data = payload.get("request", {})
+        return request_data.get("query", "") or request_data.get("user_request", "")
+    
+    @staticmethod
+    async def validate_thread_access(
+        thread_service, user_id: str, thread_id: str, db_session: AsyncSession
+    ) -> Optional[Thread]:
+        """Validate user has access to thread"""
+        thread = await thread_service.get_thread(thread_id, db_session)
+        if thread and thread.metadata_.get("user_id") != user_id:
+            await manager.send_error(user_id, "Access denied to thread")
+            return None
+        return thread
+    
+    @staticmethod
+    async def get_or_create_thread(
+        thread_service, user_id: str, db_session: AsyncSession
+    ) -> Optional[Thread]:
+        """Get or create thread for user"""
+        thread = await thread_service.get_or_create_thread(user_id, db_session)
+        if not thread:
+            await manager.send_error(user_id, "Failed to create or retrieve thread")
+        return thread
+    
+    @staticmethod
+    async def create_user_message(
+        thread_service, thread: Thread, content: str, 
+        user_id: str, db_session: AsyncSession, metadata: Dict = None
+    ) -> None:
+        """Create user message in thread"""
+        if metadata is None:
+            metadata = {"user_id": user_id}
+        await thread_service.create_message(
+            thread.id, role="user", content=content,
+            metadata=metadata, db=db_session
+        )
+    
+    @staticmethod
+    async def create_run(
+        thread_service, thread: Thread, db_session: AsyncSession
+    ) -> Run:
+        """Create run for thread"""
+        return await thread_service.create_run(
+            thread.id, assistant_id="netra-assistant", model="gpt-4",
+            instructions="You are Netra AI Workload Optimization Assistant",
+            db=db_session
+        )
+    
+    @staticmethod
+    def configure_supervisor(supervisor, user_id: str, thread: Thread, db_session: AsyncSession) -> None:
+        """Configure supervisor with context"""
+        supervisor.thread_id = thread.id
+        supervisor.user_id = user_id
+        supervisor.db_session = db_session
+    
+    @staticmethod
+    async def save_response(
+        thread_service, thread: Thread, response: Any, 
+        run: Run, db_session: AsyncSession
+    ) -> None:
+        """Save assistant response if present"""
+        if not response:
+            return
+        content = json.dumps(response) if isinstance(response, dict) else str(response)
+        await thread_service.create_message(
+            thread.id, role="assistant", content=content,
+            assistant_id="netra-assistant", run_id=run.id, db=db_session
+        )
+    
+    @staticmethod
+    async def complete_run(thread_service, run: Run, db_session: AsyncSession) -> None:
+        """Mark run as completed"""
+        await thread_service.update_run_status(
+            run.id, status="completed", db=db_session
+        )
+    
+    @staticmethod
+    async def send_completion(user_id: str, response: Any) -> None:
+        """Send completion message to user"""
+        await manager.send_message(
+            user_id, {"type": "agent_completed", "payload": response}
+        )
+    
+    @staticmethod
+    def convert_response_to_dict(response: Any) -> Any:
+        """Convert response to dictionary if needed"""
+        if hasattr(response, 'model_dump'):
+            return response.model_dump()
+        elif hasattr(response, 'dict'):
+            return response.dict()
+        elif hasattr(response, '__dict__'):
+            return response.__dict__
+        return response

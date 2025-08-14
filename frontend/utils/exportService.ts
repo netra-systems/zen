@@ -22,16 +22,38 @@ interface ExportOptions {
   };
 }
 
+export interface ExportRecommendation {
+  id: string;
+  title: string;
+  description: string;
+  impact: 'high' | 'medium' | 'low';
+  category: string;
+  priority?: number;
+}
+
+export interface ExportSectionContent {
+  text?: string;
+  data?: Record<string, unknown>;
+  rows?: Array<Record<string, unknown>>;
+  value?: number | string;
+}
+
+export interface ExportSection {
+  title: string;
+  content: ExportSectionContent | string | Array<Record<string, unknown>>;
+  type?: 'text' | 'table' | 'chart' | 'metrics';
+}
+
+export interface ExportMetrics {
+  [key: string]: string | number | boolean;
+}
+
 interface ReportData {
   title?: string;
   summary?: string;
-  sections?: Array<{
-    title: string;
-    content: any;
-    type?: 'text' | 'table' | 'chart' | 'metrics';
-  }>;
-  recommendations?: any[];
-  metrics?: Record<string, any>;
+  sections?: ExportSection[];
+  recommendations?: ExportRecommendation[];
+  metrics?: ExportMetrics;
   timestamp?: number;
 }
 
@@ -188,13 +210,13 @@ export class ExportService {
       pdf.setFontSize(11);
       pdf.setTextColor(0, 0, 0);
       
-      data.recommendations.forEach((rec: any, index: number) => {
+      data.recommendations.forEach((rec: ExportRecommendation, index: number) => {
         if (yPosition > pageHeight - 30) {
           pdf.addPage();
           yPosition = margin;
         }
         
-        const recText = `${index + 1}. ${rec.title || rec}`;
+        const recText = `${index + 1}. ${rec.title}`;
         const recLines = pdf.splitTextToSize(recText, pageWidth - 2 * margin - 10);
         pdf.text(recLines, margin + 5, yPosition);
         yPosition += recLines.length * 6 + 5;
@@ -243,7 +265,7 @@ export class ExportService {
    */
   private static exportCSV(data: ReportData, filename: string): void {
     // Flatten data for CSV export
-    const flatData: any[] = [];
+    const flatData: Array<Record<string, string | number>> = [];
     
     // Add metrics as rows
     if (data.metrics) {
@@ -258,11 +280,11 @@ export class ExportService {
 
     // Add recommendations
     if (data.recommendations) {
-      data.recommendations.forEach((rec: any, index: number) => {
+      data.recommendations.forEach((rec: ExportRecommendation, index: number) => {
         flatData.push({
           Category: 'Recommendation',
           Key: `Recommendation ${index + 1}`,
-          Value: rec.title || rec
+          Value: rec.title
         });
       });
     }

@@ -4,6 +4,27 @@
  * Replaces console.log/warn/error with proper logging patterns
  */
 
+export interface WebSocketEventData {
+  eventType: string;
+  payload?: unknown;
+  timestamp: number;
+  connectionId?: string;
+  error?: string;
+}
+
+export interface UserActionDetails {
+  actionType: string;
+  target?: string;
+  metadata?: Record<string, string | number | boolean>;
+  timestamp?: number;
+}
+
+export interface ErrorBoundaryInfo {
+  componentStack?: string;
+  errorBoundary?: string;
+  props?: Record<string, unknown>;
+}
+
 export enum LogLevel {
   DEBUG = 0,
   INFO = 1,
@@ -18,7 +39,7 @@ interface LogContext {
   userId?: string;
   sessionId?: string;
   traceId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface LogEntry {
@@ -222,7 +243,7 @@ class FrontendLogger {
     });
   }
 
-  websocketEvent(event: string, data?: any, context?: LogContext): void {
+  websocketEvent(event: string, data?: WebSocketEventData, context?: LogContext): void {
     this.debug(`WebSocket: ${event}`, {
       ...context,
       action: 'websocket_event',
@@ -234,7 +255,7 @@ class FrontendLogger {
     });
   }
 
-  userAction(action: string, details?: any, context?: LogContext): void {
+  userAction(action: string, details?: UserActionDetails, context?: LogContext): void {
     this.info(`User Action: ${action}`, {
       ...context,
       action: 'user_interaction',
@@ -247,7 +268,7 @@ class FrontendLogger {
   }
 
   // Error boundary logging
-  errorBoundary(error: Error, errorInfo: any, component?: string): void {
+  errorBoundary(error: Error, errorInfo: ErrorBoundaryInfo, component?: string): void {
     this.error('React Error Boundary caught an error', error, {
       component,
       action: 'error_boundary',

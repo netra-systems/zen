@@ -176,6 +176,11 @@ class SupervisorAgent(BaseSubAgent):
     def _apply_restored_fields(self, state: DeepAgentState, 
                               restored: DeepAgentState) -> None:
         """Apply restored fields to state."""
+        self._restore_core_fields(state, restored)
+        self._restore_report_field(state, restored)
+    
+    def _restore_core_fields(self, state: DeepAgentState, restored: DeepAgentState) -> None:
+        """Restore core workflow fields."""
         if restored.triage_result:
             state.triage_result = restored.triage_result
         if restored.data_result:
@@ -184,6 +189,9 @@ class SupervisorAgent(BaseSubAgent):
             state.optimizations_result = restored.optimizations_result
         if restored.action_plan_result:
             state.action_plan_result = restored.action_plan_result
+    
+    def _restore_report_field(self, state: DeepAgentState, restored: DeepAgentState) -> None:
+        """Restore report field."""
         if restored.report_result:
             state.report_result = restored.report_result
     
@@ -332,15 +340,18 @@ class SupervisorAgent(BaseSubAgent):
     def _build_completion_message(self, state: DeepAgentState,
                                  thread_id: str) -> WebSocketMessage:
         """Build completion message."""
-        return WebSocketMessage(
-            type="agent_completed",
-            content=AgentCompleted(
-                agent_name="supervisor",
-                run_id=state.metadata.get("run_id", ""),
-                thread_id=thread_id,
-                timestamp=datetime.now(timezone.utc).isoformat(),
-                result=state.to_dict()
-            )
+        content = self._create_completion_content(state, thread_id)
+        return WebSocketMessage(type="agent_completed", content=content)
+    
+    def _create_completion_content(self, state: DeepAgentState, 
+                                  thread_id: str) -> AgentCompleted:
+        """Create completion content."""
+        return AgentCompleted(
+            agent_name="supervisor",
+            run_id=state.metadata.get("run_id", ""),
+            thread_id=thread_id,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            result=state.to_dict()
         )
     
     def get_stats(self) -> Dict[str, Any]:

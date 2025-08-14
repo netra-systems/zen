@@ -8,7 +8,9 @@ import atexit
 import signal
 import sys
 import logging
-from typing import List, Any
+from typing import List, Union, Optional
+from types import FrameType
+import multiprocessing.synchronize
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +22,7 @@ class MultiprocessingResourceManager:
         self.processes: List[multiprocessing.Process] = []
         self.pools: List[multiprocessing.Pool] = []
         self.queues: List[multiprocessing.Queue] = []
-        self.locks: List[Any] = []
+        self.locks: List[Union[multiprocessing.synchronize.Lock, multiprocessing.synchronize.Semaphore, multiprocessing.synchronize.RLock]] = []
         self._setup_cleanup_handlers()
     
     def _setup_cleanup_handlers(self) -> None:
@@ -34,7 +36,7 @@ class MultiprocessingResourceManager:
         if hasattr(signal, 'SIGINT'):
             signal.signal(signal.SIGINT, self._signal_handler)
     
-    def _signal_handler(self, signum: int, frame: Any) -> None:
+    def _signal_handler(self, signum: int, frame: Optional[FrameType]) -> None:
         """Handle signals and cleanup resources."""
         logger.info(f"Received signal {signum}, cleaning up multiprocessing resources...")
         self.cleanup_all()
@@ -52,7 +54,7 @@ class MultiprocessingResourceManager:
         """Register a queue for cleanup."""
         self.queues.append(queue)
     
-    def register_lock(self, lock: Any) -> None:
+    def register_lock(self, lock: Union[multiprocessing.synchronize.Lock, multiprocessing.synchronize.Semaphore, multiprocessing.synchronize.RLock]) -> None:
         """Register a lock/semaphore for cleanup."""
         self.locks.append(lock)
     

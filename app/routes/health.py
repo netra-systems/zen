@@ -34,10 +34,13 @@ async def ready() -> Dict[str, str]:
     import os
     
     try:
-        # Check Postgres connection
-        async with get_db() as db:
-            result = await db.execute(text("SELECT 1"))
-            result.scalar_one_or_none()
+        # Skip database check if in mock mode
+        database_url = os.getenv("DATABASE_URL", "")
+        if "mock" not in database_url.lower():
+            # Check Postgres connection
+            async with get_db() as db:
+                result = await db.execute(text("SELECT 1"))
+                result.scalar_one_or_none()
 
         # Check ClickHouse connection only if not explicitly skipped
         if os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() != 'true':

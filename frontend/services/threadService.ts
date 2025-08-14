@@ -1,12 +1,35 @@
 import { apiClient } from '@/services/apiClientWrapper';
 
+export interface ThreadMetadata {
+  userId?: string;
+  createdAt?: string;
+  lastActivity?: string;
+  messageCount?: number;
+  tags?: string[];
+  priority?: 'low' | 'medium' | 'high';
+  archived?: boolean;
+  [key: string]: string | number | boolean | string[] | undefined;
+}
+
+export interface MessageMetadata {
+  references?: string[];
+  attachments?: Array<{
+    id: string;
+    filename: string;
+    mimeType: string;
+    size: number;
+  }>;
+  editedAt?: string;
+  [key: string]: unknown;
+}
+
 export interface Thread {
   id: string;
   object?: string;
   title?: string;
   created_at: number;
   updated_at?: number;
-  metadata?: any;
+  metadata?: ThreadMetadata;
   message_count: number;
 }
 
@@ -15,7 +38,7 @@ export interface ThreadMessage {
   role: string;
   content: string;
   created_at: number;
-  metadata?: any;
+  metadata?: MessageMetadata;
 }
 
 export interface ThreadMessagesResponse {
@@ -24,7 +47,7 @@ export interface ThreadMessagesResponse {
   total: number;
   limit: number;
   offset: number;
-  metadata?: any;
+  metadata?: ThreadMetadata;
 }
 
 export class ThreadService {
@@ -40,7 +63,7 @@ export class ThreadService {
     return response.data;
   }
 
-  static async createThread(title?: string, metadata?: any): Promise<Thread> {
+  static async createThread(title?: string, metadata?: ThreadMetadata): Promise<Thread> {
     const response = await apiClient.post<Thread>('/api/threads', {
       title,
       metadata
@@ -48,7 +71,7 @@ export class ThreadService {
     return response.data;
   }
 
-  static async updateThread(threadId: string, title?: string, metadata?: any): Promise<Thread> {
+  static async updateThread(threadId: string, title?: string, metadata?: ThreadMetadata): Promise<Thread> {
     const response = await apiClient.put<Thread>(`/api/threads/${threadId}`, {
       title,
       metadata

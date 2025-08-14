@@ -248,6 +248,31 @@ from starlette.responses import RedirectResponse
 
 app = FastAPI(lifespan=lifespan)
 
+# Configure CORS first (before other middleware and routes)
+allowed_origins = []
+if settings.environment == "production":
+    # In production, only allow specific origins from env or default
+    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+    allowed_origins = cors_origins_env.split(",") if cors_origins_env else ["https://netra.ai"]
+else:
+    # In development, allow all origins with wildcard
+    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+    if cors_origins_env:
+        # Use specific origins if configured
+        allowed_origins = cors_origins_env.split(",")
+    else:
+        # Use wildcard to allow all origins in development
+        allowed_origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=["Authorization", "Content-Type", "X-Request-ID", "X-Trace-ID"],
+    expose_headers=["X-Trace-ID", "X-Request-ID"],  # Expose custom headers to frontend
+)
+
 # Initialize OAuth
 oauth_client.init_app(app)
 
@@ -305,34 +330,6 @@ async def log_requests(request: Request, call_next: Callable) -> Any:
     logger.info(f"Request: {request.method} {request.url.path} | Status: {response.status_code} | Duration: {formatted_process_time} | Trace: {trace_id}")
     
     return response
-
-# Configure CORS based on environment
-allowed_origins = []
-if settings.environment == "production":
-    # In production, only allow specific origins from env or default
-    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
-    allowed_origins = cors_origins_env.split(",") if cors_origins_env else ["https://netra.ai"]
-else:
-    # In development, allow localhost with any port and configured origins
-    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
-    configured_origins = cors_origins_env.split(",") if cors_origins_env else []
-    # Add common development patterns
-    allowed_origins = [
-        "http://localhost:*",  # Any localhost port
-        "http://127.0.0.1:*",  # Any 127.0.0.1 port
-        "*"  # Fallback to allow all in development
-    ]
-    if configured_origins:
-        allowed_origins = configured_origins + allowed_origins
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allow_headers=["Authorization", "Content-Type", "X-Request-ID", "X-Trace-ID"],
-    expose_headers=["X-Trace-ID", "X-Request-ID"],  # Expose custom headers to frontend
-)
 
 app.add_middleware(
     SessionMiddleware,

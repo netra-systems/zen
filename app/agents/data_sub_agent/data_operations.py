@@ -1,11 +1,15 @@
 """Unified data operations module - combines data fetching and analysis operations."""
 
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List, Optional, Tuple, TYPE_CHECKING
 from datetime import datetime
 
 from .data_fetching import DataFetching
 from .data_analysis_ops import DataAnalysisOperations
 from .insights_generator import InsightsGenerator
+
+if TYPE_CHECKING:
+    from .query_builder import QueryBuilder
+    from .analysis_engine import AnalysisEngine
 
 
 class DataOperations:
@@ -36,22 +40,22 @@ class DataOperations:
         return await self.data_fetching.validate_query_parameters(user_id, workload_id, metrics)
     
     # Delegate analysis operations to DataAnalysisOperations
-    async def analyze_performance_metrics(self, user_id: int, workload_id: Optional[str], time_range: Tuple[datetime, datetime], query_builder: Any, analysis_engine: Any) -> Dict[str, Any]:
+    async def analyze_performance_metrics(self, user_id: int, workload_id: Optional[str], time_range: Tuple[datetime, datetime], query_builder: 'QueryBuilder', analysis_engine: 'AnalysisEngine') -> Dict[str, Any]:
         return await self.analysis_ops.analyze_performance_metrics(
             user_id, workload_id, time_range, query_builder, analysis_engine
         )
     
-    async def detect_anomalies(self, user_id: int, metric_name: str, time_range: Tuple[datetime, datetime], query_builder: Any, z_score_threshold: float = 2.0) -> Dict[str, Any]:
+    async def detect_anomalies(self, user_id: int, metric_name: str, time_range: Tuple[datetime, datetime], query_builder: 'QueryBuilder', z_score_threshold: float = 2.0) -> Dict[str, Any]:
         return await self.analysis_ops.detect_anomalies(
             user_id, metric_name, time_range, query_builder, z_score_threshold
         )
     
-    async def analyze_correlations(self, user_id: int, metrics: List[str], time_range: Tuple[datetime, datetime], query_builder: Any) -> Dict[str, Any]:
+    async def analyze_correlations(self, user_id: int, metrics: List[str], time_range: Tuple[datetime, datetime], query_builder: 'QueryBuilder') -> Dict[str, Any]:
         return await self.analysis_ops.analyze_correlations(
             user_id, metrics, time_range, query_builder
         )
     
-    async def analyze_usage_patterns(self, user_id: int, query_builder: Any, days_back: int = 30) -> Dict[str, Any]:
+    async def analyze_usage_patterns(self, user_id: int, query_builder: 'QueryBuilder', days_back: int = 30) -> Dict[str, Any]:
         return await self.analysis_ops.analyze_usage_patterns(
             user_id, query_builder, days_back
         )

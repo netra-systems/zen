@@ -333,6 +333,76 @@
                     4. Database session as last optional parameter (db: Optional[AsyncSession] = None)
                 </key-insight>
             </fix>
+            
+            <fix date="2025-08-14">
+                <title>CORS Headers Missing on API Endpoints</title>
+                <problem>CORS policy blocking frontend requests to backend API endpoints</problem>
+                <symptoms>
+                    <symptom>Error: "No 'Access-Control-Allow-Origin' header is present on the requested resource"</symptom>
+                    <symptom>Frontend at localhost:59490 unable to call backend at localhost:59409</symptom>
+                    <symptom>Affects authentication endpoints like /api/auth/dev_login</symptom>
+                </symptoms>
+                <root-causes>
+                    <cause>CORS middleware configuration using incorrect wildcard pattern in list</cause>
+                    <cause>FastAPI CORSMiddleware does not handle patterns like "http://localhost:*" in allowed_origins list</cause>
+                    <cause>CORS middleware was added after other middleware, affecting order of execution</cause>
+                </root-causes>
+                <solution>
+                    <step>Simplified development CORS configuration to use ["*"] wildcard directly</step>
+                    <step>Moved CORS middleware configuration to be first middleware added to app</step>
+                    <step>Removed duplicate CORS configuration code</step>
+                    <step>Ensured CORS is configured before OAuth initialization and other middleware</step>
+                </solution>
+                <files-changed>
+                    <file>app/main.py:251-274 - Moved and simplified CORS configuration</file>
+                    <file>app/main.py:309-334 - Removed duplicate CORS configuration</file>
+                </files-changed>
+                <prevention>
+                    <action>Always configure CORS middleware as first middleware in FastAPI app</action>
+                    <action>Use ["*"] for development instead of pattern strings in allowed_origins</action>
+                    <action>Test CORS with OPTIONS preflight requests during development</action>
+                    <action>Verify CORS headers with curl -v to see actual response headers</action>
+                </prevention>
+                <key-insight>
+                    FastAPI's CORSMiddleware requires exact origin matching or wildcard ["*"].
+                    Pattern strings like "http://localhost:*" are not supported.
+                    Middleware order matters - CORS should be configured early in the stack.
+                </key-insight>
+            </fix>
+            
+            <fix date="2025-08-14">
+                <title>Development Database Configuration - Use Real Postgres</title>
+                <problem>Mock database being used in development environment instead of real Postgres</problem>
+                <symptoms>
+                    <symptom>Database features working in tests but failing in development</symptom>
+                    <symptom>State persistence issues in development environment</symptom>
+                    <symptom>Connection monitor skipping monitoring in mock mode</symptom>
+                </symptoms>
+                <root-causes>
+                    <cause>.dev_services.json configured with postgres mode set to "mock"</cause>
+                    <cause>dev_launcher/service_config.py sets mock DATABASE_URL when mode is MOCK</cause>
+                    <cause>Mock database only suitable for specific testing scenarios</cause>
+                </root-causes>
+                <solution>
+                    <step>Changed .dev_services.json postgres mode from "mock" to "local"</step>
+                    <step>Ensures real Postgres database used in development environment</step>
+                    <step>DATABASE_URL properly configured as postgresql://postgres:postgres@localhost:5432/netra_dev</step>
+                </solution>
+                <files-changed>
+                    <file>.dev_services.json - Changed postgres mode from "mock" to "local"</file>
+                </files-changed>
+                <prevention>
+                    <action>Always use real databases in development environment</action>
+                    <action>Mock databases should only be used for specific unit tests</action>
+                    <action>Verify .dev_services.json configuration before running dev_launcher</action>
+                    <action>Integration and E2E tests should use real database connections</action>
+                </prevention>
+                <key-insight>
+                    Development environments should mirror production as closely as possible. Using real databases
+                    in development catches issues early that mock databases would miss. Mock databases should be
+                    reserved for unit tests where database interaction is not the focus of the test.
+                </key-insight>
+            </fix>
         </section>
 
         <section id="test-focus-strategy" order="3">
