@@ -1,13 +1,13 @@
 # Unified Test Report
-**Level**: comprehensive-agents | **Time**: 2025-08-13 22:59:39
+**Level**: unit | **Time**: 2025-08-13 23:27:43
 
 ## ⚠️ Test Failures Detected
 
 ## Current Run Summary
 | Component | Status | Tests | Passed | Failed | Duration |
 |-----------|--------|-------|--------|--------|----------|
-| Backend | ❌ | 87 | 83 | 3 | 75.7s |
-| Frontend | ⏭️ | 0 | 0 | 0 | 0.0s |
+| Backend | ❌ | 265 | 248 | 4 | 36.7s |
+| Frontend | ❌ | 0 | 0 | 0 | 0.7s |
 | E2E | ⏸️ | 0 | 0 | 0 | 0.0s |
 
 ## Failed Tests
