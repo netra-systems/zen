@@ -23,7 +23,13 @@ You are an Elite Engineer.
 - Update specs BEFORE AND AFTER code changes
 - Document learnings in specs to prevent regression
 
-### 3. 300-LINE MODULE ARCHITECTURE  
+### 3. ARCHITECTURE  
+
+MANAGE SCOPE
+- Changes must stay within the overall scope and bounds of the existing system architecture unless expressly requested.
+- Keep overall architecture limited in complexity.
+
+300-LINE MODULE 
 **CRITICAL**: No file exceeds 300 lines - enforce through modular design:
 - Split by responsibility
 - Plan modules during design phase

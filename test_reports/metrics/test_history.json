@@ -1,70 +1,6 @@
 {
   "runs": [
     {
-      "timestamp": "2025-08-14T15:35:39.830522",
-      "level": "unit",
-      "results": {
-        "backend": {
-          "status": "failed",
-          "duration": 17.61283826828003,
-          "exit_code": 2,
-          "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m____________ ERROR collecting tests/services/test_user_service.py _____________\u001b[0m\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_user_service.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\python.py:498: in importtestmodule\n    mod = import_path(\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\pathlib.py:587: in import_path\n    importlib.import_module(module_name)\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\assertion\\rewrite.py:186: in exec_module\n    exec(co, module.__dict__)\napp\\tests\\services\\test_user_service.py:14: in <module>\n    from app.schemas.registry import UserCreate, UserUpdate\nE   ImportError: cannot import name 'UserUpdate' from 'app.schemas.registry' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\schemas\\registry.py)\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app\\tests\\services\\test_user_service.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m============================== \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 10.74s\u001b[0m\u001b[31m ==============================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 16.97s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\n",
-          "test_counts": {
-            "total": 1,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 1,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "frontend": {
-          "status": "failed",
-          "duration": 0.25490880012512207,
-          "exit_code": 255,
-          "output": "================================================================================\nNETRA AI PLATFORM - FRONTEND TEST RUNNER\n================================================================================\n\n================================================================================\nRunning Jest Tests\n--------------------------------------------------------------------------------\nRunning: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)\n--------------------------------------------------------------------------------\n\n================================================================================\n[FAIL] CHECKS FAILED with exit code 255\n================================================================================\n\nCleaning up test processes...\n\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "e2e": {
-          "status": "pending",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "overall": {
-          "status": "failed",
-          "start_time": 1755210921.9582675,
-          "end_time": 1755210939.828517
-        }
-      },
-      "summary": {
-        "total": 1,
-        "passed": 0,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 1
-      }
-    },
-    {
       "timestamp": "2025-08-14T15:40:16.594772",
       "level": "unit",
       "results": {
@@ -465,6 +401,68 @@
           "status": "failed",
           "start_time": 1755214239.7550538,
           "end_time": 1755214246.4653547
+        }
+      },
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      }
+    },
+    {
+      "timestamp": "2025-08-14T16:32:12.881249",
+      "level": "unit",
+      "results": {
+        "backend": {
+          "status": "failed",
+          "duration": 6.236086130142212,
+          "exit_code": 4,
+          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 5.65s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:32: in <module>\n    app = create_app()\n          ^^^^^^^^^^^^\napp\\core\\app_factory.py:159: in create_app\n    register_api_routes(app)\napp\\core\\app_factory.py:80: in register_api_routes\n    _import_and_register_routes(app)\napp\\core\\app_factory.py:85: in _import_and_register_routes\n    route_modules = _import_route_modules()\n                    ^^^^^^^^^^^^^^^^^^^^^^^\napp\\core\\app_factory.py:92: in _import_route_modules\n    from app.routes import (\napp\\routes\\supply.py:4: in <module>\n    from app.dependencies import DbDep\napp\\dependencies.py:8: in <module>\n    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor\napp\\agents\\supervisor_consolidated.py:12: in <module>\n    from app.agents.base import BaseSubAgent\napp\\agents\\base.py:11: in <module>\n    from app.agents.interfaces import BaseAgentProtocol\napp\\agents\\interfaces.py:9: in <module>\n    from app.schemas.strict_types import (\napp\\schemas\\strict_types.py:17: in <module>\n    from app.schemas.shared_types import AgentExecutionResult\napp\\schemas\\shared_types.py:59: in <module>\n    class BaseAgentInterface(ABC):\napp\\schemas\\shared_types.py:63: in BaseAgentInterface\n    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher) -> None:\n                                                                 ^^^^^^^^^^^^^^\nE   NameError: name 'ToolDispatcher' is not defined\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "skipped",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "failed",
+          "start_time": 1755214326.6421657,
+          "end_time": 1755214332.8792508
         }
       },
       "summary": {

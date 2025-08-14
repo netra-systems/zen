@@ -311,3 +311,139 @@ class SystemHealthMonitor:
 
 # Global system health monitor instance
 system_health_monitor = SystemHealthMonitor()
+
+
+# Agent metrics integration functions
+def get_agent_metrics_collector():
+    """Get agent metrics collector instance."""
+    from app.services.metrics.agent_metrics import agent_metrics_collector
+    return agent_metrics_collector
+
+
+# Enhanced SystemHealthMonitor with agent metrics integration
+class EnhancedSystemHealthMonitor(SystemHealthMonitor):
+    """Extended system health monitor with agent metrics integration."""
+    
+    def _register_default_checkers(self):
+        """Register default health checkers including agent metrics."""
+        # Register agent metrics health checker
+        self.register_component_checker("agent_metrics", self._check_agent_health)
+        logger.debug("Registered default health checkers with agent metrics")
+    
+    async def _check_agent_health(self) -> Dict[str, Any]:
+        """Check overall agent system health."""
+        try:
+            metrics_collector = get_agent_metrics_collector()
+            system_overview = await metrics_collector.get_system_overview()
+            
+            # Calculate overall health score based on system metrics
+            error_rate = system_overview.get("system_error_rate", 0.0)
+            active_agents = system_overview.get("active_agents", 0)
+            unhealthy_agents = system_overview.get("unhealthy_agents", 0)
+            
+            # Health score calculation
+            if active_agents == 0:
+                health_score = 1.0  # No agents running, assume healthy
+            else:
+                error_penalty = min(0.5, error_rate * 2)  # Cap at 50% penalty
+                unhealthy_penalty = min(0.3, (unhealthy_agents / active_agents) * 0.5)
+                health_score = max(0.0, 1.0 - error_penalty - unhealthy_penalty)
+            
+            return {
+                "health_score": health_score,
+                "error_count": system_overview.get("total_failures", 0),
+                "metadata": {
+                    "total_operations": system_overview.get("total_operations", 0),
+                    "system_error_rate": error_rate,
+                    "active_agents": active_agents,
+                    "unhealthy_agents": unhealthy_agents,
+                    "active_operations": system_overview.get("active_operations", 0)
+                }
+            }
+        except Exception as e:
+            logger.error(f"Error checking agent health: {e}")
+            return {"health_score": 0.0, "error_count": 1, "metadata": {"error": str(e)}}
+    
+    async def get_agent_health_details(self) -> Dict[str, Any]:
+        """Get detailed agent health information."""
+        try:
+            metrics_collector = get_agent_metrics_collector()
+            all_metrics = metrics_collector.get_all_agent_metrics()
+            
+            agent_health_scores = {}
+            unhealthy_agents = []
+            
+            for agent_name, metrics in all_metrics.items():
+                health_score = metrics_collector.get_health_score(agent_name)
+                agent_health_scores[agent_name] = health_score
+                
+                if health_score < 0.7:
+                    unhealthy_agents.append({
+                        "name": agent_name,
+                        "health_score": health_score,
+                        "error_rate": metrics.error_rate,
+                        "total_operations": metrics.total_operations,
+                        "avg_execution_time_ms": metrics.avg_execution_time_ms
+                    })
+            
+            return {
+                "agent_count": len(all_metrics),
+                "healthy_agents": len([s for s in agent_health_scores.values() if s >= 0.7]),
+                "degraded_agents": len([s for s in agent_health_scores.values() if 0.5 <= s < 0.7]),
+                "unhealthy_agents": len([s for s in agent_health_scores.values() if s < 0.5]),
+                "agent_health_scores": agent_health_scores,
+                "unhealthy_agent_details": unhealthy_agents
+            }
+        except Exception as e:
+            logger.error(f"Error getting agent health details: {e}")
+            return {"error": str(e)}
+
+    async def _evaluate_system_health(self):
+        """Evaluate overall system health and trigger system-wide alerts."""
+        try:
+            # Get current component health
+            total_components = len(self.component_health)
+            if total_components == 0:
+                return
+            
+            healthy_count = len([h for h in self.component_health.values() 
+                               if h.status == HealthStatus.HEALTHY])
+            critical_count = len([h for h in self.component_health.values() 
+                                if h.status == HealthStatus.CRITICAL])
+            
+            # Calculate system health percentage
+            system_health_pct = healthy_count / total_components
+            
+            # Trigger system-wide alerts if needed
+            if critical_count > 0 and system_health_pct < 0.5:
+                await self._trigger_system_wide_alert(
+                    "critical", 
+                    f"System health critical: {critical_count} critical components, "
+                    f"{system_health_pct:.1%} healthy"
+                )
+            elif system_health_pct < 0.7:
+                await self._trigger_system_wide_alert(
+                    "warning",
+                    f"System health degraded: {system_health_pct:.1%} healthy components"
+                )
+                
+        except Exception as e:
+            logger.error(f"Error evaluating system health: {e}")
+    
+    async def _trigger_system_wide_alert(self, severity: str, message: str):
+        """Trigger a system-wide alert."""
+        alert = SystemAlert(
+            alert_id=f"system_wide_{severity}_{int(time.time())}",
+            component="system",
+            severity=severity,
+            message=message,
+            timestamp=datetime.utcnow(),
+            metadata={"alert_type": "system_wide"}
+        )
+        
+        await self._emit_alert(alert)
+
+
+# Replace global instance with enhanced version
+system_health_monitor = EnhancedSystemHealthMonitor()
+

@@ -12,8 +12,9 @@ from dataclasses import dataclass, field
 
 from app.logging_config import central_logger
 from .reliability import (
-    get_reliability_wrapper, CircuitBreakerConfig, RetryConfig, ErrorSeverity
+    get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
 )
+from .error_codes import ErrorSeverity
 
 logger = central_logger.get_logger(__name__)
 

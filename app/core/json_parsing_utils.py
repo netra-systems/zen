@@ -18,6 +18,7 @@ def safe_json_parse(value: Any, fallback: Any = None) -> Any:
         return fallback if fallback is not None else {}
     return _try_json_parse(value, fallback)
 
+
 def _try_json_parse(value: str, fallback: Any) -> Any:
     """Helper to attempt JSON parsing with error handling."""
     try:
@@ -38,6 +39,7 @@ def parse_dict_field(value: Any) -> Dict[str, Any]:
     logger.warning(f"Expected dict or string, got {type(value)}")
     return {}
 
+
 def _parse_string_to_dict(value: str) -> Dict[str, Any]:
     """Helper to parse string to dict."""
     parsed = safe_json_parse(value, {})
@@ -56,6 +58,7 @@ def parse_list_field(value: Any) -> List[Any]:
     logger.warning(f"Expected list or string, got {type(value)}")
     return []
 
+
 def _parse_string_to_list(value: str) -> List[Any]:
     """Helper to parse string to list."""
     parsed = safe_json_parse(value, [])
@@ -66,95 +69,87 @@ def _parse_string_to_list(value: str) -> List[Any]:
 
 
 def parse_string_list_field(value: Any) -> List[str]:
-    """
-    Parse a field that should be a list of strings.
-    Handles various input formats and ensures string output.
-    """
+    """Parse a field that should be a list of strings."""
     if isinstance(value, list):
-        # Convert all items to strings
         return [str(item) for item in value]
-    
     if isinstance(value, str):
-        # Try to parse as JSON first, but only if it looks like JSON
-        if value.strip().startswith(('[', '{')):
-            parsed = safe_json_parse(value, None)
-            if isinstance(parsed, list):
-                return [str(item) for item in parsed]
-        # Single string becomes list with one item
-        return [value]
-    
+        return _parse_string_to_string_list(value)
     if isinstance(value, dict):
-        # Convert dict values to strings or use description field
-        if "description" in value:
-            return [str(value["description"])]
-        return [str(v) for v in value.values() if v is not None]
-    
-    logger.warning(f"Expected list/string/dict, got {type(value)}")
-    return []
+        return _parse_dict_to_string_list(value)
+    return _handle_unexpected_type(value)
+
+
+def _parse_string_to_string_list(value: str) -> List[str]:
+    """Helper to parse string to string list."""
+    if value.strip().startswith(('[', '{')):
+        parsed = safe_json_parse(value, None)
+        if isinstance(parsed, list):
+            return [str(item) for item in parsed]
+    return [value]
+
+
+def _parse_dict_to_string_list(value: Dict[str, Any]) -> List[str]:
+    """Helper to parse dict to string list."""
+    if "description" in value:
+        return [str(value["description"])]
+    return [str(v) for v in value.values() if v is not None]
 
 
 def fix_tool_parameters(data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Fix tool recommendation parameters that come as JSON strings.
-    
-    Args:
-        data: Data dictionary containing tool_recommendations
-        
-    Returns:
-        Fixed data dictionary
-    """
+    """Fix tool recommendation parameters that come as JSON strings."""
     if not isinstance(data, dict):
         return data
-    
-    # Fix tool_recommendations parameters field
     if "tool_recommendations" in data and isinstance(data["tool_recommendations"], list):
-        for rec in data["tool_recommendations"]:
-            if isinstance(rec, dict) and "parameters" in rec:
-                rec["parameters"] = parse_dict_field(rec["parameters"])
-    
+        _fix_tool_params_list(data["tool_recommendations"])
     return data
 
 
+def _fix_tool_params_list(tool_list: List[Any]) -> None:
+    """Helper to fix parameters in tool list."""
+    for rec in tool_list:
+        if isinstance(rec, dict) and "parameters" in rec:
+            rec["parameters"] = parse_dict_field(rec["parameters"])
+
+
 def fix_list_recommendations(data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Fix recommendations field that should be list of strings.
-    
-    Args:
-        data: Data dictionary containing recommendations
-        
-    Returns:
-        Fixed data dictionary
-    """
+    """Fix recommendations field that should be list of strings."""
     if not isinstance(data, dict):
         return data
-    
     if "recommendations" in data:
         data["recommendations"] = parse_string_list_field(data["recommendations"])
-    
     return data
 
 
 def comprehensive_json_fix(data: Any) -> Any:
-    """
-    Apply comprehensive JSON string parsing fixes to data.
-    
-    Args:
-        data: Input data (dict, list, or other)
-        
-    Returns:
-        Fixed data with JSON strings parsed
-    """
+    """Apply comprehensive JSON string parsing fixes to data."""
     if isinstance(data, dict):
-        # Fix known problematic fields
-        data = fix_tool_parameters(data)
-        data = fix_list_recommendations(data)
-        
-        # Recursively fix nested structures
-        for key, value in data.items():
-            data[key] = comprehensive_json_fix(value)
-    
+        return _fix_dict_data(data)
     elif isinstance(data, list):
-        # Fix each item in list
-        data = [comprehensive_json_fix(item) for item in data]
-    
+        return [comprehensive_json_fix(item) for item in data]
     return data
+
+
+def _fix_dict_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Helper to fix dictionary data."""
+    data = fix_tool_parameters(data)
+    data = fix_list_recommendations(data)
+    for key, value in data.items():
+        data[key] = comprehensive_json_fix(value)
+    return data
+
+
+def _handle_unexpected_type(value: Any) -> List[str]:
+    """Helper to handle unexpected types in string list parsing."""
+    logger.warning(f"Expected list/string/dict, got {type(value)}")
+    return []
+def _handle_unexpected_type(value: Any) -> List[str]:
+    """Helper to handle unexpected types in string list parsing."""
+    logger.warning(f"Expected list/string/dict, got {type(value)}")
+    return []
+
+
+def _handle_json_error(value: str, error: Exception, fallback: Any) -> Any:
+    """Helper to handle JSON parsing errors."""
+    logger.warning(f"Failed to parse JSON string: {value[:100]}... Error: {error}")
+    return fallback if fallback is not None else {}
+

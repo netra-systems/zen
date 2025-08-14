@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from app.core.circuit_breaker import (
     CircuitBreaker, CircuitConfig, CircuitBreakerOpenError, circuit_registry
 )
-from app.core.async_retry_logic import RetryConfig, retry_async
+from app.core.async_retry_logic import with_retry
 from app.llm.llm_manager import LLMManager
 from app.schemas.llm_types import GenerationConfig, LLMResponse
 from app.logging_config import central_logger
@@ -208,24 +208,17 @@ class RetryableLLMClient(ResilientLLMClient):
     
     def __init__(self, llm_manager: LLMManager) -> None:
         super().__init__(llm_manager)
-        self.retry_config = RetryConfig(
-            max_attempts=3,
-            initial_delay=1.0,
-            max_delay=10.0,
-            backoff_factor=2.0
-        )
+        pass  # Use decorators for retry logic
     
+    @with_retry(max_attempts=3, delay=1.0, backoff_factor=2.0)
     async def ask_llm_with_retry(self, 
                                 prompt: str, 
                                 llm_config_name: str, 
                                 use_cache: bool = True) -> str:
         """Ask LLM with retry logic and circuit breaker."""
-        @retry_async(self.retry_config)
-        async def _request_with_retry() -> str:
-            return await self.ask_llm(prompt, llm_config_name, use_cache)
-        
-        return await _request_with_retry()
+        return await self.ask_llm(prompt, llm_config_name, use_cache)
     
+    @with_retry(max_attempts=3, delay=1.0, backoff_factor=2.0)
     async def ask_structured_llm_with_retry(self, 
                                            prompt: str, 
                                            llm_config_name: str, 
@@ -233,13 +226,9 @@ class RetryableLLMClient(ResilientLLMClient):
                                            use_cache: bool = True,
                                            **kwargs) -> T:
         """Ask structured LLM with retry logic."""
-        @retry_async(self.retry_config)
-        async def _request_with_retry() -> T:
-            return await self.ask_structured_llm(
-                prompt, llm_config_name, schema, use_cache, **kwargs
-            )
-        
-        return await _request_with_retry()
+        return await self.ask_structured_llm(
+            prompt, llm_config_name, schema, use_cache, **kwargs
+        )
 
 
 @asynccontextmanager

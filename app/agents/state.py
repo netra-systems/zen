@@ -250,3 +250,10 @@ def rebuild_model() -> None:
 
 # Initialize model rebuild
 rebuild_model()
+
+# Force model rebuild to resolve forward references
+try:
+    DeepAgentState.model_rebuild()
+except Exception:
+    # Safe to ignore - will rebuild when dependencies are available
+    pass

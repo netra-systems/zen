@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-14T16:30:46.491348  
+**Generated:** 2025-08-14T16:32:12.906246  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 **Purpose:** Development validation, component testing
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 6.34s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.37s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 6.24s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Environment and Configuration
 
@@ -27,8 +27,8 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 6.71s
-- **Exit Code:** 15
+- **Total Duration:** 6.24s
+- **Exit Code:** 4
 
 ### Backend Configuration
 ```
@@ -60,7 +60,7 @@ Running command:
 ================================================================================
 Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 5.63s
+[FAIL] TESTS FAILED with exit code 4 after 5.65s
 [Coverage] Coverage Report: reports/coverage/html/index.html
 ================================================================================
 
@@ -91,17 +91,17 @@ app\agents\interfaces.py:9: in <module>
     from app.schemas.strict_types import (
 app\schemas\strict_types.py:17: in <module>
     from app.schemas.shared_types import AgentExecutionResult
-app\schemas\shared_types.py:13: in <module>
-    from app.agents.base import BaseSubAgent
-E   ImportError: cannot import name 'BaseSubAgent' from partially initialized module 'app.agents.base' (most likely due to a circular import) (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\agents\base.py)
+app\schemas\shared_types.py:59: in <module>
+    class BaseAgentInterface(ABC):
+app\schemas\shared_types.py:63: in BaseAgentInterface
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher) -> None:
+                                                                 ^^^^^^^^^^^^^^
+E   NameError: name 'ToolDispatcher' is not defined
 
 ```
 
 ### Frontend Output
 ```
-
-'hooks' is not recognized as an internal or external command,
-operable program or batch file.
 
 ```
 ---

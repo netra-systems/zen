@@ -15,7 +15,7 @@ from aiohttp import ClientSession, ClientTimeout, ClientError
 from app.core.circuit_breaker import (
     CircuitBreaker, CircuitConfig, CircuitBreakerOpenError, circuit_registry
 )
-from app.core.async_retry_logic import RetryConfig, retry_async
+from app.core.async_retry_logic import with_retry
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -296,28 +296,16 @@ class RetryableHTTPClient(ResilientHTTPClient):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.retry_config = RetryConfig(
-            max_attempts=3,
-            initial_delay=1.0,
-            max_delay=10.0,
-            backoff_factor=2.0
-        )
     
+    @with_retry(max_attempts=3, delay=1.0, backoff_factor=2.0)
     async def get_with_retry(self, *args, **kwargs) -> Dict[str, Any]:
         """GET request with retry logic."""
-        @retry_async(self.retry_config)
-        async def _request_with_retry():
-            return await self.get(*args, **kwargs)
-        
-        return await _request_with_retry()
+        return await self.get(*args, **kwargs)
     
+    @with_retry(max_attempts=3, delay=1.0, backoff_factor=2.0)
     async def post_with_retry(self, *args, **kwargs) -> Dict[str, Any]:
         """POST request with retry logic."""
-        @retry_async(self.retry_config)
-        async def _request_with_retry():
-            return await self.post(*args, **kwargs)
-        
-        return await _request_with_retry()
+        return await self.post(*args, **kwargs)
 
 
 class HTTPClientManager:

@@ -60,11 +60,11 @@ class BaseAgentInterface(ABC):
     """Base interface for agent implementations to ensure consistency"""
     
     @abstractmethod
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher) -> None:
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: 'ToolDispatcher') -> None:
         pass
     
     @abstractmethod
-    async def execute(self, state: DeepAgentState, session_id: str, **kwargs) -> Any:
+    async def execute(self, state: 'DeepAgentState', session_id: str, **kwargs) -> Any:
         pass
     
     @abstractmethod
