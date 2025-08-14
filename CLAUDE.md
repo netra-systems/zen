@@ -32,6 +32,109 @@ You are an Elite Engineer.
 ## Project Overview
 **Netra AI Optimization Platform** - Enterprise AI workload optimization with multi-agent architecture.
 
+## Project Directory Structure
+
+```
+root/
+├── app/                      # Main backend application
+│   ├── agents/              # AI agent implementations
+│   │   ├── admin_tool_dispatcher/   # Admin tool dispatch modules
+│   │   ├── corpus_admin/            # Corpus administration agents
+│   │   ├── data_sub_agent/          # Data processing sub-agents
+│   │   ├── supervisor/              # Supervisor agent modules
+│   │   ├── supply_researcher/       # Supply research agents
+│   │   └── triage_sub_agent/        # Triage sub-agent modules
+│   ├── auth/                # Authentication & authorization
+│   ├── core/                # Core utilities & exceptions
+│   │   ├── exceptions_*.py         # Categorized exception handlers
+│   │   ├── interfaces_*.py         # Interface definitions
+│   │   └── system_health_monitor.py # System monitoring
+│   ├── db/                  # Database layer
+│   │   ├── clickhouse.py           # ClickHouse connection
+│   │   ├── postgres.py             # PostgreSQL connection
+│   │   └── models_*.py             # Database models
+│   ├── llm/                 # LLM integration layer
+│   ├── middleware/          # FastAPI middleware
+│   ├── routes/              # API route definitions
+│   │   ├── admin.py               # Admin endpoints
+│   │   ├── corpus.py              # Corpus management
+│   │   ├── synthetic_data.py      # Synthetic data endpoints
+│   │   └── websockets.py          # WebSocket endpoints
+│   ├── schemas/             # Pydantic models & types
+│   │   ├── llm_*.py               # LLM-related types
+│   │   ├── admin_*.py             # Admin schemas
+│   │   └── websocket_*.py         # WebSocket message types
+│   ├── services/            # Business logic services
+│   │   ├── audit/                 # Audit service modules
+│   │   └── metrics/               # Metrics collection
+│   ├── startup_checks/      # Startup validation modules
+│   ├── tests/               # Backend test suite
+│   │   ├── e2e/                   # End-to-end tests
+│   │   └── unit/                  # Unit tests
+│   ├── websocket/           # WebSocket management
+│   │   ├── connection.py          # Connection handling
+│   │   ├── rate_limiter.py        # Rate limiting
+│   │   └── validation.py          # Message validation
+│   ├── main.py              # FastAPI app entry point
+│   └── config.py            # Application configuration
+│
+├── frontend/                 # Next.js frontend application
+│   ├── app/                 # Next.js app directory
+│   ├── components/          # React components
+│   │   └── chat/           # Chat UI components
+│   │       └── admin/      # Admin UI components
+│   ├── hooks/               # Custom React hooks
+│   ├── services/            # Frontend services
+│   ├── store/               # State management
+│   ├── types/               # TypeScript type definitions
+│   └── utils/               # Frontend utilities
+│
+├── scripts/                  # Utility & automation scripts
+│   ├── architecture_*.py    # Architecture compliance tools
+│   ├── test_runner.py       # Test execution script
+│   ├── dev_launcher.py      # Development server launcher
+│   └── check_architecture_compliance.py # Compliance checker
+│
+├── dev_launcher/            # Development launcher module
+│   ├── launcher.py          # Main launcher logic
+│   ├── process_manager.py   # Process management
+│   └── secret_manager.py    # Secret handling
+│
+├── test_framework/          # Test framework utilities
+│   ├── runner.py            # Test runner core
+│   ├── test_discovery.py    # Test discovery logic
+│   └── unified_reporter.py  # Test reporting
+│
+├── SPEC/                    # Specification documents
+│   ├── type_safety.xml      # Type safety rules
+│   ├── conventions.xml      # Coding conventions
+│   ├── learnings.xml        # Documented learnings
+│   └── *.xml                # Other spec files
+│
+├── docs/                    # Documentation
+│   ├── API_DOCUMENTATION.md
+│   ├── ARCHITECTURE.md
+│   └── TESTING_GUIDE.md
+│
+├── terraform-gcp/           # GCP infrastructure as code
+├── terraform-dev-postgres/  # PostgreSQL dev setup
+├── .github/                 # GitHub Actions workflows
+├── config/                  # Configuration files
+├── alembic/                 # Database migrations
+└── requirements.txt         # Python dependencies
+```
+
+### Key Directory Purposes
+
+- **app/**: Core backend application with FastAPI
+- **frontend/**: Next.js-based web interface
+- **agents/**: Multi-agent AI system implementations
+- **services/**: Business logic and external integrations
+- **schemas/**: Type definitions and data models
+- **scripts/**: Development and maintenance utilities
+- **SPEC/**: Living documentation and specifications
+- **test_framework/**: Custom testing infrastructure
+
 ## Quick Start
 ```bash
 python dev_launcher.py # Start dev
