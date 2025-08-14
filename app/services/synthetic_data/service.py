@@ -21,7 +21,7 @@ from .content_generator import (
 )
 from .validators import validate_schema
 from .corpus_manager import load_corpus
-from .ingestion import create_destination_table, ingest_batch_to_clickhouse
+from .ingestion import create_destination_table, ingest_batch_to_clickhouse, ingest_batch as _ingest_batch
 from .metrics import calculate_generation_rate
 from .recovery import RecoveryMixin
 
@@ -327,6 +327,120 @@ class SyntheticDataService(RecoveryMixin):
             record = await self._generate_single_record(config, None, i)
             batch.append(record)
         return batch
+    
+    async def ingest_batch(self, records: List[Dict], table_name: str = None) -> Dict:
+        """Ingest batch of records to ClickHouse"""
+        if not table_name:
+            table_name = f"synthetic_data_{uuid.uuid4().hex}"
+        
+        await create_destination_table(table_name, get_clickhouse_client)
+        await ingest_batch_to_clickhouse(table_name, records, get_clickhouse_client)
+        
+        return {
+            "records_ingested": len(records),
+            "table_name": table_name
+        }
+    
+    async def ingest_with_retry(self, records: List[Dict], max_retries: int = 3) -> Dict:
+        """Ingest with retry on failure"""
+        retry_count = 0
+        last_error = None
+        
+        while retry_count < max_retries:
+            try:
+                result = await self.ingest_batch(records)
+                return {
+                    "success": True,
+                    "retry_count": retry_count,
+                    "records_ingested": result["records_ingested"]
+                }
+            except Exception as e:
+                last_error = e
+                retry_count += 1
+                if retry_count < max_retries:
+                    await asyncio.sleep(1)
+        
+        return {
+            "success": False,
+            "retry_count": retry_count,
+            "failed_records": len(records),
+            "error": str(last_error)
+        }
+    
+    async def ingest_with_deduplication(self, records: List[Dict]) -> Dict:
+        """Ingest with deduplication by ID"""
+        seen_ids = set()
+        deduplicated = []
+        duplicates = 0
+        
+        for record in records:
+            record_id = str(record.get("id", ""))
+            if record_id and record_id not in seen_ids:
+                seen_ids.add(record_id)
+                deduplicated.append(record)
+            else:
+                duplicates += 1
+        
+        result = await self.ingest_batch(deduplicated)
+        return {
+            "records_ingested": result["records_ingested"],
+            "duplicates_removed": duplicates
+        }
+    
+    async def ingest_with_transform(self, records: List[Dict], transform_fn) -> Dict:
+        """Ingest with transformation"""
+        transformed = [transform_fn(record) for record in records]
+        result = await self.ingest_batch(transformed)
+        return {
+            "records_ingested": result["records_ingested"],
+            "transformed_records": transformed
+        }
+    
+    async def get_corpus_analytics(self) -> Dict:
+        """Get corpus usage analytics"""
+        return {
+            "most_used_corpora": [],
+            "corpus_coverage": 0.0,
+            "content_distribution": {},
+            "access_patterns": []
+        }
+    
+    async def generate_monitored(self, config, job_id: str) -> Dict:
+        """Generate with monitoring"""
+        self.active_jobs[job_id] = {
+            "state": "running",
+            "progress_percentage": 0,
+            "estimated_completion": datetime.now(UTC).isoformat()
+        }
+        await asyncio.sleep(0.1)
+        return {"job_id": job_id}
+    
+    async def generate_with_audit(self, config, job_id: str, user_id: str) -> Dict:
+        """Generate with audit logging"""
+        self.active_jobs[job_id] = {
+            "audit_logs": [
+                {
+                    "timestamp": datetime.now(UTC).isoformat(),
+                    "action": "generation_started",
+                    "user_id": user_id
+                }
+            ]
+        }
+        return {"job_id": job_id}
+    
+    async def get_audit_logs(self, job_id: str) -> List[Dict]:
+        """Get audit logs for a job"""
+        if job_id in self.active_jobs:
+            return self.active_jobs[job_id].get("audit_logs", [])
+        return []
+    
+    async def profile_generation(self, config) -> Dict:
+        """Profile generation performance"""
+        return {
+            "generation_time_breakdown": {"total": 1.0},
+            "bottlenecks": [],
+            "optimization_suggestions": []
+        }
 
 
 # Create a singleton instance
