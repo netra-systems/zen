@@ -289,6 +289,14 @@ class WebSocketManager:
             "payload": {"tool_name": tool_name, "result": result, "sub_agent_name": sub_agent_name, "timestamp": time.time()},
             "displayed_to_user": True
         })
+    
+    async def send_sub_agent_update(self, user_id: str, sub_agent_name: str, state: Dict[str, Any]) -> None:
+        """Send sub-agent status updates."""
+        await self.send_message(user_id, {
+            "type": "sub_agent_update",
+            "payload": {"sub_agent_name": sub_agent_name, "state": state, "timestamp": time.time()},
+            "displayed_to_user": True
+        })
 
     async def shutdown(self) -> None:
         """Gracefully shutdown all components."""

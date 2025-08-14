@@ -319,7 +319,7 @@
           <cost_per_fix>~$0.15</cost_per_fix>
         </provider>
         
-        <provider name="gemini" model="gemini-1.5-pro" priority="2">
+        <provider name="gemini" model="gemini-2.5-pro" priority="2">
           <capabilities>
             <capability>Quick syntax fixes</capability>
             <capability>Simple test updates</capability>

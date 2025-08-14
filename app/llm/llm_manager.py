@@ -133,9 +133,9 @@ class LLMManager:
         # Check if API key is available for branded LLMs
         # Skip initialization if no key provided for optional providers
         if not config.api_key:
-            if config.provider == "google":
-                # Gemini/Google is required
-                raise ValueError(f"LLM '{name}': Gemini API key is required for Google provider")
+            if config.provider in ["google", "vertexai"]:
+                # Gemini/Google/VertexAI is required
+                raise ValueError(f"LLM '{name}': Gemini API key is required for {config.provider} provider")
             else:
                 # Other providers are optional - skip if no key
                 logger.info(f"Skipping LLM '{name}' initialization - no API key provided for {config.provider}")
@@ -182,6 +182,16 @@ class LLMManager:
             # Import only if needed
             from langchain_mistralai import ChatMistralAI
             llm = ChatMistralAI(
+                model=config.model_name,
+                api_key=config.api_key,
+                **final_generation_config
+            )
+        elif config.provider == "vertexai":
+            # Use same implementation as google for now
+            # Both use Gemini models but via different endpoints
+            logger.info(f"Using Google Gemini for VertexAI provider")
+            from langchain_google_genai import ChatGoogleGenerativeAI
+            llm = ChatGoogleGenerativeAI(
                 model=config.model_name,
                 api_key=config.api_key,
                 **final_generation_config

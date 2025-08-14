@@ -5,20 +5,65 @@ Base test class with shared utility methods for example prompts E2E tests
 import pytest
 import uuid
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
+from typing import List, Optional, Union
 import random
 from unittest.mock import patch, AsyncMock
 
 from app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
 from app.services.corpus_service import CorpusService
 from app.services.state_persistence_service import state_persistence_service
+from app.schemas.llm_types import (
+    CostOptimizationContext,
+    LatencyOptimizationContext,
+    CapacityPlanningContext,
+    FunctionOptimizationContext,
+    ModelSelectionContext,
+    AuditContext,
+    MultiObjectiveContext,
+    ToolMigrationContext,
+    RollbackAnalysisContext,
+    DefaultContext,
+    TestInfrastructure,
+    TestResult,
+    CostMetrics,
+    FeatureMetrics,
+    LatencyMetrics,
+    InfrastructureConfig,
+    UsageMetrics,
+    RateLimitConfig,
+    FunctionMetrics,
+    ModelInfo,
+    EvaluationMetrics,
+    WorkloadCharacteristics,
+    CacheConfiguration,
+    OptimizationObjectives,
+    OptimizationConstraints,
+    CurrentSystemState,
+    AgentTool,
+    MigrationCriteria,
+    ComparisonMetrics,
+    MetricsComparison,
+    SystemInfo,
+    SystemMetrics
+)
 from .conftest import EXAMPLE_PROMPTS
 
 
 class BaseExamplePromptsTest:
     """Base class for example prompts E2E tests with shared utility methods"""
     
-    def generate_synthetic_context(self, prompt_type: str) -> Dict[str, Any]:
+    def generate_synthetic_context(self, prompt_type: str) -> Union[
+        CostOptimizationContext,
+        LatencyOptimizationContext,
+        CapacityPlanningContext,
+        FunctionOptimizationContext,
+        ModelSelectionContext,
+        AuditContext,
+        MultiObjectiveContext,
+        ToolMigrationContext,
+        RollbackAnalysisContext,
+        DefaultContext
+    ]:
         """Generate synthetic context data for a given prompt type"""
         context_generators = {
             "cost_optimization": self._generate_cost_context,
@@ -34,219 +79,230 @@ class BaseExamplePromptsTest:
         
         return context_generators.get(prompt_type, self._generate_default_context)()
     
-    def _generate_cost_context(self) -> Dict[str, Any]:
+    def _generate_cost_context(self) -> CostOptimizationContext:
         """Generate synthetic cost optimization context"""
-        return {
-            "current_costs": {
-                "daily": random.uniform(100, 1000),
-                "monthly": random.uniform(3000, 30000),
-                "per_request": random.uniform(0.001, 0.01)
+        return CostOptimizationContext(
+            current_costs=CostMetrics(
+                daily=random.uniform(100, 1000),
+                monthly=random.uniform(3000, 30000),
+                per_request=random.uniform(0.001, 0.01)
+            ),
+            features={
+                "feature_X": FeatureMetrics(
+                    current_latency=random.uniform(100, 400),
+                    acceptable_latency=500,
+                    usage_percentage=random.uniform(10, 40)
+                ),
+                "feature_Y": FeatureMetrics(
+                    current_latency=200,
+                    required_latency=200,
+                    usage_percentage=random.uniform(20, 60)
+                )
             },
-            "features": {
-                "feature_X": {
-                    "current_latency": random.uniform(100, 400),
-                    "acceptable_latency": 500,
-                    "usage_percentage": random.uniform(10, 40)
-                },
-                "feature_Y": {
-                    "current_latency": 200,
-                    "required_latency": 200,
-                    "usage_percentage": random.uniform(20, 60)
-                }
-            },
-            "models_in_use": ["gpt-4", "claude-2", "gpt-3.5-turbo"],
-            "total_requests_daily": random.randint(10000, 1000000)
-        }
+            models_in_use=["gpt-4", "claude-2", "gpt-3.5-turbo"],
+            total_requests_daily=random.randint(10000, 1000000)
+        )
     
-    def _generate_latency_context(self) -> Dict[str, Any]:
+    def _generate_latency_context(self) -> LatencyOptimizationContext:
         """Generate synthetic latency optimization context"""
-        return {
-            "current_latency": {
-                "p50": random.uniform(100, 300),
-                "p95": random.uniform(300, 800),
-                "p99": random.uniform(500, 1500)
-            },
-            "target_improvement": 3.0,
-            "budget_constraint": "maintain_current",
-            "infrastructure": {
-                "gpu_type": random.choice(["A100", "V100", "T4"]),
-                "gpu_count": random.randint(1, 8),
-                "memory_gb": random.choice([16, 32, 64, 128])
-            }
-        }
+        return LatencyOptimizationContext(
+            current_latency=LatencyMetrics(
+                p50=random.uniform(100, 300),
+                p95=random.uniform(300, 800),
+                p99=random.uniform(500, 1500)
+            ),
+            target_improvement=3.0,
+            budget_constraint="maintain_current",
+            infrastructure=InfrastructureConfig(
+                gpu_type=random.choice(["A100", "V100", "T4"]),
+                gpu_count=random.randint(1, 8),
+                memory_gb=random.choice([16, 32, 64, 128])
+            )
+        )
     
-    def _generate_capacity_context(self) -> Dict[str, Any]:
+    def _generate_capacity_context(self) -> CapacityPlanningContext:
         """Generate synthetic capacity planning context"""
-        return {
-            "current_usage": {
-                "requests_per_day": random.randint(10000, 100000),
-                "peak_rps": random.randint(10, 1000),
-                "average_rps": random.randint(5, 500)
+        return CapacityPlanningContext(
+            current_usage=UsageMetrics(
+                requests_per_day=random.randint(10000, 100000),
+                peak_rps=random.randint(10, 1000),
+                average_rps=random.randint(5, 500)
+            ),
+            expected_growth=1.5,  # 50% increase
+            rate_limits={
+                "gpt-4": RateLimitConfig(rpm=10000, tpm=150000),
+                "claude-2": RateLimitConfig(rpm=5000, tpm=100000)
             },
-            "expected_growth": 1.5,  # 50% increase
-            "rate_limits": {
-                "gpt-4": {"rpm": 10000, "tpm": 150000},
-                "claude-2": {"rpm": 5000, "tpm": 100000}
-            },
-            "cost_per_1k_tokens": {
+            cost_per_1k_tokens={
                 "gpt-4": 0.03,
                 "claude-2": 0.024
             }
-        }
+        )
     
-    def _generate_function_context(self) -> Dict[str, Any]:
+    def _generate_function_context(self) -> FunctionOptimizationContext:
         """Generate synthetic function optimization context"""
-        return {
-            "function_name": "user_authentication",
-            "current_metrics": {
-                "avg_execution_time_ms": random.uniform(50, 200),
-                "memory_usage_mb": random.uniform(100, 500),
-                "success_rate": random.uniform(0.95, 0.999),
-                "daily_invocations": random.randint(10000, 1000000)
-            },
-            "bottlenecks": [
+        return FunctionOptimizationContext(
+            function_name="user_authentication",
+            current_metrics=FunctionMetrics(
+                avg_execution_time_ms=random.uniform(50, 200),
+                memory_usage_mb=random.uniform(100, 500),
+                success_rate=random.uniform(0.95, 0.999),
+                daily_invocations=random.randint(10000, 1000000)
+            ),
+            bottlenecks=[
                 "database_queries",
                 "token_generation",
                 "cache_misses"
             ],
-            "optimization_methods_available": [
+            optimization_methods_available=[
                 "caching",
                 "batching",
                 "async_processing",
                 "connection_pooling"
             ]
-        }
+        )
     
-    def _generate_model_context(self) -> Dict[str, Any]:
+    def _generate_model_context(self) -> ModelSelectionContext:
         """Generate synthetic model selection context"""
-        return {
-            "current_models": {
-                "primary": "gpt-4",
-                "fallback": "gpt-3.5-turbo"
-            },
-            "candidate_models": ["gpt-4o", "claude-3-sonnet"],
-            "evaluation_metrics": {
-                "quality_threshold": 0.9,
-                "latency_target_ms": 200,
-                "cost_budget_daily": 500
-            },
-            "workload_characteristics": {
-                "avg_prompt_tokens": random.randint(100, 1000),
-                "avg_completion_tokens": random.randint(50, 500),
-                "complexity": random.choice(["low", "medium", "high"])
-            }
-        }
+        return ModelSelectionContext(
+            current_models=ModelInfo(
+                primary="gpt-4",
+                fallback="gpt-3.5-turbo"
+            ),
+            candidate_models=["gpt-4o", "claude-3-sonnet"],
+            evaluation_metrics=EvaluationMetrics(
+                quality_threshold=0.9,
+                latency_target_ms=200,
+                cost_budget_daily=500
+            ),
+            workload_characteristics=WorkloadCharacteristics(
+                avg_prompt_tokens=random.randint(100, 1000),
+                avg_completion_tokens=random.randint(50, 500),
+                complexity=random.choice(["low", "medium", "high"])
+            )
+        )
     
-    def _generate_audit_context(self) -> Dict[str, Any]:
+    def _generate_audit_context(self) -> AuditContext:
         """Generate synthetic audit context"""
-        return {
-            "kv_cache_instances": random.randint(5, 20),
-            "cache_configurations": [
-                {
-                    "name": f"cache_{i}",
-                    "size_mb": random.randint(100, 1000),
-                    "hit_rate": random.uniform(0.3, 0.9),
-                    "ttl_seconds": random.choice([60, 300, 3600])
-                }
+        return AuditContext(
+            kv_cache_instances=random.randint(5, 20),
+            cache_configurations=[
+                CacheConfiguration(
+                    name=f"cache_{i}",
+                    size_mb=random.randint(100, 1000),
+                    hit_rate=random.uniform(0.3, 0.9),
+                    ttl_seconds=random.choice([60, 300, 3600])
+                )
                 for i in range(random.randint(3, 8))
             ],
-            "optimization_opportunities": [
+            optimization_opportunities=[
                 "increase_ttl",
                 "implement_lru",
                 "add_compression",
                 "optimize_key_structure"
             ]
-        }
+        )
     
-    def _generate_multi_objective_context(self) -> Dict[str, Any]:
+    def _generate_multi_objective_context(self) -> MultiObjectiveContext:
         """Generate synthetic multi-objective optimization context"""
-        return {
-            "objectives": {
-                "cost_reduction": 0.2,  # 20%
-                "latency_improvement": 2.0,  # 2x
-                "usage_increase": 0.3  # 30%
-            },
-            "constraints": {
-                "min_quality_score": 0.85,
-                "max_error_rate": 0.01,
-                "budget_limit": 10000
-            },
-            "current_state": {
-                "daily_cost": random.uniform(500, 2000),
-                "avg_latency_ms": random.uniform(100, 500),
-                "daily_requests": random.randint(10000, 100000)
-            }
-        }
+        return MultiObjectiveContext(
+            objectives=OptimizationObjectives(
+                cost_reduction=0.2,  # 20%
+                latency_improvement=2.0,  # 2x
+                usage_increase=0.3  # 30%
+            ),
+            constraints=OptimizationConstraints(
+                min_quality_score=0.85,
+                max_error_rate=0.01,
+                budget_limit=10000
+            ),
+            current_state=CurrentSystemState(
+                daily_cost=random.uniform(500, 2000),
+                avg_latency_ms=random.uniform(100, 500),
+                daily_requests=random.randint(10000, 100000)
+            )
+        )
     
-    def _generate_tool_migration_context(self) -> Dict[str, Any]:
+    def _generate_tool_migration_context(self) -> ToolMigrationContext:
         """Generate synthetic tool migration context"""
-        return {
-            "agent_tools": [
-                {
-                    "name": f"tool_{i}",
-                    "current_model": random.choice(["gpt-4", "gpt-3.5", "claude-2"]),
-                    "usage_frequency": random.choice(["high", "medium", "low"]),
-                    "complexity": random.choice(["simple", "moderate", "complex"])
-                }
+        return ToolMigrationContext(
+            agent_tools=[
+                AgentTool(
+                    name=f"tool_{i}",
+                    current_model=random.choice(["gpt-4", "gpt-3.5", "claude-2"]),
+                    usage_frequency=random.choice(["high", "medium", "low"]),
+                    complexity=random.choice(["simple", "moderate", "complex"])
+                )
                 for i in range(random.randint(5, 15))
             ],
-            "new_model": "GPT-5",
-            "migration_criteria": {
-                "min_quality_improvement": 0.1,
-                "max_cost_increase": 1.5,
-                "verbosity_options": ["concise", "standard", "detailed"]
-            }
-        }
+            new_model="GPT-5",
+            migration_criteria=MigrationCriteria(
+                min_quality_improvement=0.1,
+                max_cost_increase=1.5,
+                verbosity_options=["concise", "standard", "detailed"]
+            )
+        )
     
-    def _generate_rollback_context(self) -> Dict[str, Any]:
+    def _generate_rollback_context(self) -> RollbackAnalysisContext:
         """Generate synthetic rollback analysis context"""
-        return {
-            "upgrade_timestamp": (datetime.now() - timedelta(days=1)).isoformat(),
-            "upgraded_model": "GPT-5",
-            "previous_model": "GPT-4",
-            "metrics_comparison": {
-                "before": {
-                    "quality_score": random.uniform(0.8, 0.9),
-                    "cost_per_1k_tokens": 0.03,
-                    "avg_latency_ms": random.uniform(100, 200)
-                },
-                "after": {
-                    "quality_score": random.uniform(0.82, 0.95),
-                    "cost_per_1k_tokens": 0.06,
-                    "avg_latency_ms": random.uniform(80, 180)
-                }
-            },
-            "affected_endpoints": random.randint(10, 50)
-        }
+        return RollbackAnalysisContext(
+            upgrade_timestamp=(datetime.now() - timedelta(days=1)).isoformat(),
+            upgraded_model="GPT-5",
+            previous_model="GPT-4",
+            metrics_comparison=MetricsComparison(
+                before=ComparisonMetrics(
+                    quality_score=random.uniform(0.8, 0.9),
+                    cost_per_1k_tokens=0.03,
+                    avg_latency_ms=random.uniform(100, 200)
+                ),
+                after=ComparisonMetrics(
+                    quality_score=random.uniform(0.82, 0.95),
+                    cost_per_1k_tokens=0.06,
+                    avg_latency_ms=random.uniform(80, 180)
+                )
+            ),
+            affected_endpoints=random.randint(10, 50)
+        )
     
-    def _generate_default_context(self) -> Dict[str, Any]:
+    def _generate_default_context(self) -> DefaultContext:
         """Generate default synthetic context"""
-        return {
-            "system_info": {
-                "version": "1.0.0",
-                "environment": "production",
-                "region": random.choice(["us-east-1", "us-west-2", "eu-west-1"])
-            },
-            "metrics": {
-                "uptime_percentage": random.uniform(99.0, 99.99),
-                "error_rate": random.uniform(0.001, 0.01),
-                "avg_response_time_ms": random.uniform(50, 500)
-            }
-        }
+        return DefaultContext(
+            system_info=SystemInfo(
+                version="1.0.0",
+                environment="production",
+                region=random.choice(["us-east-1", "us-west-2", "eu-west-1"])
+            ),
+            metrics=SystemMetrics(
+                uptime_percentage=random.uniform(99.0, 99.99),
+                error_rate=random.uniform(0.001, 0.01),
+                avg_response_time_ms=random.uniform(50, 500)
+            )
+        )
     
-    def create_prompt_variation(self, base_prompt: str, variation_num: int, context: Dict[str, Any]) -> str:
+    def create_prompt_variation(self, base_prompt: str, variation_num: int, context: Union[
+        CostOptimizationContext,
+        LatencyOptimizationContext,
+        CapacityPlanningContext,
+        FunctionOptimizationContext,
+        ModelSelectionContext,
+        AuditContext,
+        MultiObjectiveContext,
+        ToolMigrationContext,
+        RollbackAnalysisContext,
+        DefaultContext
+    ]) -> str:
         """Create a unique variation of the base prompt"""
         variations = {
             0: lambda p, c: p,  # Original
-            1: lambda p, c: f"{p} Also, my current budget is ${c.get('current_costs', {}).get('daily', 500)}/day.",
+            1: lambda p, c: f"{p} Also, my current budget is ${getattr(getattr(c, 'current_costs', None), 'daily', 500)}/day." if hasattr(c, 'current_costs') else p,
             2: lambda p, c: f"URGENT: {p} Need solution within 24 hours.",
-            3: lambda p, c: f"{p} PS: We're using {c.get('infrastructure', {}).get('gpu_type', 'A100')} GPUs.",
+            3: lambda p, c: f"{p} PS: We're using {getattr(getattr(c, 'infrastructure', None), 'gpu_type', 'A100')} GPUs." if hasattr(c, 'infrastructure') else p,
             4: lambda p, c: p.replace("I need", "Our team needs").replace("my", "our"),
-            5: lambda p, c: f"Context: Running in {c.get('system_info', {}).get('region', 'us-east-1')}. {p}",
-            6: lambda p, c: f"{p} (Error rate must stay below {c.get('constraints', {}).get('max_error_rate', 0.01)})",
+            5: lambda p, c: f"Context: Running in {getattr(getattr(c, 'system_info', None), 'region', 'us-east-1')}. {p}" if hasattr(c, 'system_info') else p,
+            6: lambda p, c: f"{p} (Error rate must stay below {getattr(getattr(c, 'constraints', None), 'max_error_rate', 0.01)})" if hasattr(c, 'constraints') else p,
             7: lambda p, c: p.upper(),  # Urgency through caps
             8: lambda p, c: f"Following up on yesterday's discussion: {p}",
-            9: lambda p, c: f"{p} Note: We have {c.get('infrastructure', {}).get('gpu_count', 4)} GPUs available."
+            9: lambda p, c: f"{p} Note: We have {getattr(getattr(c, 'infrastructure', None), 'gpu_count', 4)} GPUs available." if hasattr(c, 'infrastructure') else p
         }
         
         return variations.get(variation_num, variations[0])(base_prompt, context)
@@ -260,12 +316,34 @@ class BaseExamplePromptsTest:
         # If we have a reasonable response, consider it valid for mock testing
         return True
     
-    async def generate_corpus_if_needed(self, corpus_service: CorpusService, context: Dict[str, Any]):
+    async def generate_corpus_if_needed(self, corpus_service: CorpusService, context: Union[
+        CostOptimizationContext,
+        LatencyOptimizationContext,
+        CapacityPlanningContext,
+        FunctionOptimizationContext,
+        ModelSelectionContext,
+        AuditContext,
+        MultiObjectiveContext,
+        ToolMigrationContext,
+        RollbackAnalysisContext,
+        DefaultContext
+    ]):
         """Generate default corpus data if none exists"""
         # For now, skip corpus generation in tests
         pass
     
-    async def run_single_test(self, prompt: str, context: Dict[str, Any], infra: Dict[str, Any]) -> Dict[str, Any]:
+    async def run_single_test(self, prompt: str, context: Union[
+        CostOptimizationContext,
+        LatencyOptimizationContext,
+        CapacityPlanningContext,
+        FunctionOptimizationContext,
+        ModelSelectionContext,
+        AuditContext,
+        MultiObjectiveContext,
+        ToolMigrationContext,
+        RollbackAnalysisContext,
+        DefaultContext
+    ], infra: TestInfrastructure) -> TestResult:
         """Run a single E2E test with real LLM calls"""
         supervisor = infra["supervisor"]
         quality_service = infra["quality_service"]
@@ -278,7 +356,8 @@ class BaseExamplePromptsTest:
         run_id = str(uuid.uuid4())
         
         # Add run_id to context to avoid KeyError
-        context_with_run_id = {**context, 'run_id': run_id}
+        context_dict = context.model_dump()
+        context_with_run_id = {**context_dict, 'run_id': run_id}
         
         # Execute with real LLM calls
         start_time = datetime.now()
@@ -325,20 +404,25 @@ class BaseExamplePromptsTest:
                 content_type
             )
             
-            return {
-                "success": True,
-                "prompt": prompt,
-                "execution_time": execution_time,
-                "quality_passed": quality_passed,
-                "response_length": len(response_text),
-                "state": result_state,
-                "response": response_text
-            }
+            return TestResult(
+                success=True,
+                prompt=prompt,
+                execution_time=execution_time,
+                quality_passed=quality_passed,
+                response_length=len(response_text),
+                state=result_state,
+                response=response_text,
+                error=None
+            )
             
         except Exception as e:
-            return {
-                "success": False,
-                "prompt": prompt,
-                "error": str(e),
-                "execution_time": (datetime.now() - start_time).total_seconds()
-            }
+            return TestResult(
+                success=False,
+                prompt=prompt,
+                error=str(e),
+                execution_time=(datetime.now() - start_time).total_seconds(),
+                quality_passed=False,
+                response_length=0,
+                response="",
+                state=None
+            )

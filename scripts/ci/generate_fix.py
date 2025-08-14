@@ -107,7 +107,7 @@ class AIFixGenerator:
             return FixResult(False, "", "google-generativeai package not installed", 0, "gemini")
             
         genai.configure(api_key=self.api_key)
-        model = genai.GenerativeModel('gemini-1.5-pro')
+        model = genai.GenerativeModel('gemini-2.5-pro')
         
         # Build prompt
         prompt = self._build_prompt(test_file, error, context)

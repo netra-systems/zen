@@ -21,8 +21,8 @@ class TestLatencyOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("latency_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[1], 0, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_2_variation_1(self, setup_real_infrastructure):
@@ -31,8 +31,8 @@ class TestLatencyOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("latency_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[1], 1, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_2_variation_2(self, setup_real_infrastructure):
@@ -41,8 +41,8 @@ class TestLatencyOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("latency_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[1], 2, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_2_variation_3(self, setup_real_infrastructure):
@@ -51,8 +51,8 @@ class TestLatencyOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("latency_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[1], 3, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_2_variation_4(self, setup_real_infrastructure):
@@ -61,8 +61,8 @@ class TestLatencyOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("latency_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[1], 4, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_2_variation_5(self, setup_real_infrastructure):
@@ -71,8 +71,8 @@ class TestLatencyOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("latency_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[1], 5, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_2_variation_6(self, setup_real_infrastructure):
@@ -81,8 +81,8 @@ class TestLatencyOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("latency_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[1], 6, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_2_variation_7(self, setup_real_infrastructure):
@@ -91,8 +91,8 @@ class TestLatencyOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("latency_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[1], 7, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_2_variation_8(self, setup_real_infrastructure):
@@ -101,8 +101,8 @@ class TestLatencyOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("latency_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[1], 8, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_2_variation_9(self, setup_real_infrastructure):
@@ -111,8 +111,8 @@ class TestLatencyOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("latency_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[1], 9, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
 
 
 @pytest.mark.real_llm
@@ -128,8 +128,8 @@ class TestFunctionOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("function_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[3], 0, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_4_variation_1(self, setup_real_infrastructure):
@@ -138,8 +138,8 @@ class TestFunctionOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("function_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[3], 1, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_4_variation_2(self, setup_real_infrastructure):
@@ -148,8 +148,8 @@ class TestFunctionOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("function_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[3], 2, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_4_variation_3(self, setup_real_infrastructure):
@@ -158,8 +158,8 @@ class TestFunctionOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("function_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[3], 3, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_4_variation_4(self, setup_real_infrastructure):
@@ -168,8 +168,8 @@ class TestFunctionOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("function_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[3], 4, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_4_variation_5(self, setup_real_infrastructure):
@@ -178,8 +178,8 @@ class TestFunctionOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("function_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[3], 5, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_4_variation_6(self, setup_real_infrastructure):
@@ -188,8 +188,8 @@ class TestFunctionOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("function_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[3], 6, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_4_variation_7(self, setup_real_infrastructure):
@@ -198,8 +198,8 @@ class TestFunctionOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("function_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[3], 7, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_4_variation_8(self, setup_real_infrastructure):
@@ -208,8 +208,8 @@ class TestFunctionOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("function_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[3], 8, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
     
     @pytest.mark.asyncio
     async def test_prompt_4_variation_9(self, setup_real_infrastructure):
@@ -218,5 +218,5 @@ class TestFunctionOptimization(BaseExamplePromptsTest):
         context = self.generate_synthetic_context("function_optimization")
         prompt = self.create_prompt_variation(EXAMPLE_PROMPTS[3], 9, context)
         result = await self.run_single_test(prompt, context, infra)
-        assert result["success"], f"Test failed: {result.get('error')}"
-        assert result["quality_passed"], "Response quality check failed"
+        assert result.success, f"Test failed: {result.error}"
+        assert result.quality_passed, "Response quality check failed"
