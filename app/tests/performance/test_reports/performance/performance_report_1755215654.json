@@ -1,14 +1,14 @@
 {
   "test_run": {
-    "timestamp": "2025-08-14 16:55:41",
-    "status": "passed",
-    "exit_code": 0
+    "timestamp": "2025-08-14 16:54:14",
+    "status": "failed",
+    "exit_code": 4
   },
   "system_metrics": {
-    "execution_time_seconds": 14.80901050567627,
-    "memory_usage_mb": 500.4921875,
-    "cpu_percent_avg": 84.8,
-    "timestamp": "2025-08-14 16:55:41"
+    "execution_time_seconds": 4.673278570175171,
+    "memory_usage_mb": 36.5,
+    "cpu_percent_avg": 55.0,
+    "timestamp": "2025-08-14 16:54:14"
   },
   "test_categories": {
     "large_scale_generation": {

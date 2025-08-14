@@ -135,7 +135,7 @@ class SupervisorAgent(BaseSubAgent):
         async with self._execution_lock:
             context = self._create_run_context(thread_id, user_id, run_id)
             state = await self.state_manager.initialize_state(
-                user_prompt, thread_id, user_id
+                user_prompt, thread_id, user_id, run_id
             )
             pipeline = self.pipeline_builder.get_execution_pipeline(
                 user_prompt, state

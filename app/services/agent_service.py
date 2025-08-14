@@ -224,12 +224,11 @@ async def process_message(message: str, thread_id: Optional[str] = None) -> Dict
 async def generate_stream(message: str, thread_id: Optional[str] = None) -> AsyncGenerator[Dict[str, Any], None]:
     """Module-level wrapper for AgentService.generate_stream for test compatibility"""
     from app.db.postgres import get_async_db
-    from app.dependencies import get_llm_manager
+    from app.config import settings
     
     # Create dependencies
-    async for db in get_async_db():
-        llm_manager = get_llm_manager()
+    async with get_async_db() as db:
+        llm_manager = LLMManager(settings)
         agent_service = get_agent_service(db, llm_manager)
         async for chunk in agent_service.generate_stream(message, thread_id):
             yield chunk
-        break

@@ -9,6 +9,14 @@ import '@testing-library/jest-dom';
 import apiClient from '@/services/apiClient';
 import { TestProviders } from '../test-utils/providers';
 
+// Mock apiClient
+jest.mock('@/services/apiClient', () => ({
+  get: jest.fn(),
+  post: jest.fn(),
+  put: jest.fn(),
+  delete: jest.fn(),
+}));
+
 // Mock stores
 const createMockStore = (initialState: any) => {
   let state = initialState;

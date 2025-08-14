@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
+import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import { createTestSetup, createWebSocketMessage } from './setup';
 
 describe('Collaborative Features Integration', () => {

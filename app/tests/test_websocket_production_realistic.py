@@ -56,7 +56,7 @@ async def test_concurrent_connection_limit_1000_users():
                 mock_ws.user_id = user_id
                 mock_ws.connection_id = f"{user_id}_conn_{conn_idx}"
                 mock_ws.connected_at = datetime.now(UTC)
-                mock_ws.state = websockets.protocol.State.OPEN
+                mock_ws.state = websockets.State.OPEN
                 mock_ws.send = AsyncMock()
                 mock_ws.recv = AsyncMock()
                 mock_ws.close = AsyncMock()
@@ -393,10 +393,10 @@ async def test_protocol_version_mismatch():
             
             # Simulate handshake
             if should_succeed:
-                mock_ws.state = websockets.protocol.State.OPEN
+                mock_ws.state = websockets.State.OPEN
                 handshake_result = 'success'
             else:
-                mock_ws.state = websockets.protocol.State.CLOSED
+                mock_ws.state = websockets.State.CLOSED
                 handshake_result = 'failed'
                 
                 # Should handle gracefully
@@ -410,9 +410,9 @@ async def test_protocol_version_mismatch():
             
             # Verify behavior
             if should_succeed:
-                assert mock_ws.state == websockets.protocol.State.OPEN
+                assert mock_ws.state == websockets.State.OPEN
             else:
-                assert mock_ws.state == websockets.protocol.State.CLOSED
+                assert mock_ws.state == websockets.State.CLOSED
                 assert mock_ws.close_code == 1002
                 assert 'protocol_mismatch' in mock_ws.close_reason
         
@@ -706,7 +706,7 @@ async def test_rapid_connect_disconnect_cycles():
                 # Connect
                 start_connect = time.time()
                 mock_ws = AsyncMock()
-                mock_ws.state = websockets.protocol.State.OPEN
+                mock_ws.state = websockets.State.OPEN
                 await asyncio.sleep(0.001)  # Simulate connection time
                 connection_times.append(time.time() - start_connect)
                 
@@ -716,7 +716,7 @@ async def test_rapid_connect_disconnect_cycles():
                 # Disconnect
                 start_disconnect = time.time()
                 await mock_ws.close()
-                mock_ws.state = websockets.protocol.State.CLOSED
+                mock_ws.state = websockets.State.CLOSED
                 disconnection_times.append(time.time() - start_disconnect)
                 
             except Exception as e:

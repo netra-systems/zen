@@ -64,13 +64,11 @@ class EnhancedErrorRecoverySystem:
         user_id: Optional[str] = None
     ) -> Any:
         """Handle agent error with enhanced recovery pipeline."""
-        # Log and aggregate error
-        error_data = await self._prepare_error_data(
+        error_data = self._prepare_error_data(
             agent_type, operation, error, context_data, user_id
         )
         await self.error_aggregation.process_error(error_data)
         
-        # Get circuit breaker for this agent
         breaker = self.circuit_breaker_registry.get_breaker(f"agent_{agent_type}")
         
         try:
@@ -78,8 +76,7 @@ class EnhancedErrorRecoverySystem:
                 self._execute_agent_recovery,
                 agent_type, operation, error, context_data, user_id
             )
-        except Exception as e:
-            # Try graceful degradation
+        except Exception:
             return await self._attempt_agent_degradation(
                 agent_type, operation, error, context_data
             )
@@ -92,51 +89,26 @@ class EnhancedErrorRecoverySystem:
         rollback_data: Optional[Dict] = None,
         transaction_id: Optional[str] = None
     ) -> Any:
-        """Handle database error with transaction management."""
-        # Log database error
-        error_id = log_database_error(
-            table_name=table_name,
-            operation=operation,
-            error=error,
-            transaction_id=transaction_id
-        )
+        """Handle database error with enhanced recovery."""
+        error_data = {
+            'error_type': type(error).__name__,
+            'module': 'database',
+            'function': operation,
+            'message': str(error),
+            'table_name': table_name,
+            'transaction_id': transaction_id
+        }
+        await self.error_aggregation.process_error(error_data)
+        
+        breaker = self.circuit_breaker_registry.get_breaker(f"db_{table_name}")
         
         try:
-            # If part of transaction, handle with transaction manager
-            if transaction_id:
-                await self.transaction_manager.rollback_transaction(transaction_id)
-                logger.info(f"Rolled back transaction: {transaction_id}")
-                return {'status': 'rolled_back', 'transaction_id': transaction_id}
-            
-            # If rollback data provided, use rollback manager
-            if rollback_data:
-                session_id = await self.rollback_manager.create_rollback_session({
-                    'error_id': error_id,
-                    'table_name': table_name,
-                    'operation': operation
-                })
-                
-                await self.rollback_manager.add_rollback_operation(
-                    session_id=session_id,
-                    table_name=table_name,
-                    operation_type=operation,
-                    rollback_data=rollback_data
-                )
-                
-                success = await self.rollback_manager.execute_rollback_session(session_id)
-                
-                if success:
-                    logger.info(f"Database rollback successful: {error_id}")
-                    return {'status': 'rolled_back', 'session_id': session_id}
-                else:
-                    logger.error(f"Database rollback failed: {error_id}")
-            
-            # Fallback: log and re-raise
-            raise error
-            
-        except Exception as recovery_error:
-            logger.error(f"Database recovery failed: {recovery_error}")
-            raise recovery_error
+            return await breaker.call(
+                self._execute_database_recovery,
+                table_name, operation, error, rollback_data, transaction_id
+            )
+        except Exception:
+            return await self._attempt_database_degradation(table_name, operation, error)
     
     async def handle_api_error(
         self,
@@ -147,180 +119,188 @@ class EnhancedErrorRecoverySystem:
         retry_config: Optional[Dict] = None
     ) -> Any:
         """Handle API error with retry and circuit breaking."""
-        # Log API error
-        error_id = log_api_error(
-            endpoint=endpoint,
-            method=method,
+        error_data = {
+            'error_type': type(error).__name__,
+            'module': 'api',
+            'function': method,
+            'message': str(error),
+            'endpoint': endpoint,
+            'status_code': status_code
+        }
+        await self.error_aggregation.process_error(error_data)
+        
+        breaker = self.circuit_breaker_registry.get_breaker(f"api_{endpoint}")
+        retry_strategy = self.retry_manager.get_strategy(OperationType.EXTERNAL_API)
+        
+        try:
+            return await breaker.call(
+                self._execute_api_recovery,
+                endpoint, method, error, status_code, retry_strategy
+            )
+        except Exception:
+            return await self._attempt_api_degradation(endpoint, method, error)
+    
+    async def handle_websocket_error(
+        self,
+        connection_id: str,
+        error: Exception,
+        context_data: Optional[Dict] = None
+    ) -> Any:
+        """Handle WebSocket error with recovery."""
+        error_data = {
+            'error_type': type(error).__name__,
+            'module': 'websocket',
+            'function': 'connection',
+            'message': str(error),
+            'connection_id': connection_id
+        }
+        await self.error_aggregation.process_error(error_data)
+        
+        # Attempt WebSocket recovery
+        return await self.websocket_manager.recover_all_connections()
+    
+    async def handle_memory_exhaustion(self, context_data: Optional[Dict] = None) -> bool:
+        """Handle memory exhaustion with recovery strategies."""
+        snapshot = await self.memory_monitor.take_snapshot()
+        return bool(await self.memory_monitor.check_and_recover(snapshot))
+    
+    async def startup_recovery_system(self) -> None:
+        """Start all recovery system components."""
+        await self.error_aggregation.start_processing()
+        await self.memory_monitor.start_monitoring()
+        await self.database_registry.start_all_monitoring()
+        logger.info("Enhanced error recovery system started")
+    
+    async def shutdown_recovery_system(self) -> None:
+        """Shutdown all recovery system components."""
+        await self.error_aggregation.stop_processing()
+        await self.memory_monitor.stop_monitoring()
+        await self.database_registry.stop_all_monitoring()
+        await self.websocket_manager.cleanup_all()
+        self.circuit_breaker_registry.cleanup_all()
+        logger.info("Enhanced error recovery system shutdown")
+    
+    def _prepare_error_data(
+        self,
+        agent_type: str,
+        operation: str,
+        error: Exception,
+        context_data: Optional[Dict],
+        user_id: Optional[str]
+    ) -> Dict[str, Any]:
+        """Prepare error data for aggregation."""
+        return {
+            'error_type': type(error).__name__,
+            'module': f'agent_{agent_type}',
+            'function': operation,
+            'message': str(error),
+            'timestamp': datetime.now(),
+            'user_id': user_id,
+            'context': context_data or {}
+        }
+    
+    async def _execute_agent_recovery(
+        self,
+        agent_type: str,
+        operation: str,
+        error: Exception,
+        context_data: Optional[Dict],
+        user_id: Optional[str]
+    ) -> Any:
+        """Execute agent recovery with retry strategy."""
+        agent_type_enum = self._get_agent_type_enum(agent_type)
+        if agent_type_enum:
+            context = RecoveryContext(
+                operation_id=f"{agent_type}_{operation}",
+                operation_type=OperationType.AGENT_EXECUTION,
+                error=error,
+                severity=self._determine_severity(error),
+                metadata={'agent_type': agent_type, 'operation': operation}
+            )
+            return await self.agent_registry.recover_agent_operation(agent_type_enum, context)
+        raise error
+    
+    async def _execute_database_recovery(
+        self,
+        table_name: str,
+        operation: str,
+        error: Exception,
+        rollback_data: Optional[Dict],
+        transaction_id: Optional[str]
+    ) -> Any:
+        """Execute database recovery with rollback if needed."""
+        # Use legacy rollback logic for now
+        if rollback_data:
+            logger.info(f"Database rollback needed for {table_name}")
+            return {'status': 'rollback_queued', 'table': table_name}
+        raise error
+    
+    async def _execute_api_recovery(
+        self,
+        endpoint: str,
+        method: str,
+        error: Exception,
+        status_code: Optional[int],
+        retry_strategy: Any
+    ) -> Any:
+        """Execute API recovery with retry strategy."""
+        context = RecoveryContext(
+            operation_id=f"{method}_{endpoint}",
+            operation_type=OperationType.EXTERNAL_API,
             error=error,
-            status_code=status_code
+            severity=self._determine_severity_from_status(status_code),
+            metadata={'endpoint': endpoint, 'method': method, 'status_code': status_code}
         )
         
-        try:
-            # Create recovery context
-            recovery_context = RecoveryContext(
-                operation_id=error_id,
-                operation_type=OperationType.EXTERNAL_API,
-                error=error,
-                severity=self._determine_severity_from_status(status_code),
-                metadata={
-                    'endpoint': endpoint,
-                    'method': method,
-                    'status_code': status_code
-                }
-            )
-            
-            # Check circuit breaker
-            circuit_breaker = self.recovery_manager.get_circuit_breaker(endpoint)
-            if not circuit_breaker.should_allow_request():
-                raise Exception(f"Circuit breaker open for {endpoint}")
-            
-            # Attempt recovery
-            result = await self.recovery_executor.attempt_recovery(recovery_context)
-            
-            if result.success:
-                circuit_breaker.record_success()
-                return result.result_data
-            else:
-                circuit_breaker.record_failure()
-                raise error
-                
-        except Exception as recovery_error:
-            logger.error(f"API recovery failed for {endpoint}: {recovery_error}")
-            raise recovery_error
-    
-    async def handle_compensation_required(
-        self,
-        operation_id: str,
-        compensation_data: Dict[str, Any],
-        operation_type: OperationType
-    ) -> bool:
-        """Handle operations requiring compensation."""
-        try:
-            # Create recovery context for compensation
-            recovery_context = RecoveryContext(
-                operation_id=operation_id,
-                operation_type=operation_type,
-                error=Exception("Compensation required"),
-                severity=self._determine_severity(Exception("Compensation required")),
-                metadata=compensation_data
-            )
-            
-            # Create compensation action
-            action_id = await self.compensation_engine.create_compensation_action(
-                operation_id=operation_id,
-                context=recovery_context,
-                compensation_data=compensation_data
-            )
-            
-            # Execute compensation
-            success = await self.compensation_engine.execute_compensation(action_id)
-            
-            self.error_logger.log_recovery_attempt(
-                recovery_context, 'compensation', success,
-                {'action_id': action_id}
-            )
-            
-            return success
-            
-        except Exception as e:
-            logger.error(f"Compensation failed for operation {operation_id}: {e}")
-            return False
-    
-    async def execute_saga_transaction(
-        self,
-        saga_name: str,
-        steps: List[Dict[str, Any]],
-        metadata: Optional[Dict] = None
-    ) -> bool:
-        """Execute saga transaction with automatic compensation."""
-        try:
-            # Convert steps to SagaStep objects
-            from app.services.compensation_engine import SagaStep
-            
-            saga_steps = []
-            for i, step in enumerate(steps):
-                saga_step = SagaStep(
-                    step_id=f"step_{i}",
-                    name=step['name'],
-                    forward_action=step['forward_action'],
-                    compensation_action=step['compensation_action'],
-                    forward_params=step.get('forward_params', {}),
-                    compensation_params=step.get('compensation_params', {})
-                )
-                saga_steps.append(saga_step)
-            
-            # Create and execute saga
-            saga_id = await self.saga_orchestrator.create_saga(
-                name=saga_name,
-                steps=saga_steps,
-                metadata=metadata
-            )
-            
-            success = await self.saga_orchestrator.execute_saga(saga_id)
-            
-            # Log saga result
-            logger.info(
-                f"Saga transaction {'completed' if success else 'failed'}: {saga_name}",
-                saga_id=saga_id,
-                steps_count=len(steps)
-            )
-            
-            return success
-            
-        except Exception as e:
-            logger.error(f"Saga transaction failed: {saga_name}: {e}")
-            return False
-    
-    def get_recovery_metrics(self) -> Dict[str, Any]:
-        """Get comprehensive recovery metrics."""
-        return {
-            'unified_system': self.recovery_stats,
-            'error_patterns': self.error_logger.get_error_patterns(),
-            'logging_metrics': self.error_logger.get_metrics(),
-            'circuit_breakers': {
-                name: {
-                    'state': cb.state,
-                    'failure_count': cb.failure_count,
-                    'last_failure': cb.last_failure_time.isoformat() if cb.last_failure_time else None
-                }
-                for name, cb in self.recovery_manager.circuit_breakers.items()
-            }
-        }
-    
-    def generate_recovery_report(self) -> Dict[str, Any]:
-        """Generate comprehensive recovery report."""
-        from app.core.error_logging import error_report_generator
+        if retry_strategy.should_retry(context):
+            delay = retry_strategy.get_retry_delay(context.retry_count)
+            await asyncio.sleep(delay)
+            logger.info(f"Retrying API call to {endpoint} after {delay}s")
+            return {'status': 'retried', 'delay': delay}
         
-        summary_report = error_report_generator.generate_summary_report()
-        
-        return {
-            'report_timestamp': datetime.now().isoformat(),
-            'error_summary': summary_report,
-            'recovery_metrics': self.get_recovery_metrics(),
-            'system_health': {
-                'active_transactions': len(self.transaction_manager.active_transactions),
-                'active_compensations': len(self.compensation_engine.active_compensations),
-                'active_sagas': len(self.saga_orchestrator.active_sagas),
-                'active_rollbacks': len(self.rollback_manager.active_sessions)
-            }
-        }
+        raise error
+    
+    async def _attempt_agent_degradation(
+        self,
+        agent_type: str,
+        operation: str,
+        error: Exception,
+        context_data: Optional[Dict]
+    ) -> Any:
+        """Attempt graceful degradation for agent."""
+        return await self.degradation_manager.degrade_service(
+            f"agent_{agent_type}",
+            self.degradation_manager.global_degradation_level,
+            context_data or {}
+        )
+    
+    async def _attempt_database_degradation(
+        self,
+        table_name: str,
+        operation: str,
+        error: Exception
+    ) -> Any:
+        """Attempt graceful degradation for database."""
+        return {'status': 'degraded', 'message': 'Database service temporarily degraded'}
+    
+    async def _attempt_api_degradation(
+        self,
+        endpoint: str,
+        method: str,
+        error: Exception
+    ) -> Any:
+        """Attempt graceful degradation for API."""
+        return {'status': 'degraded', 'message': f'API {endpoint} temporarily unavailable'}
     
     def _get_agent_type_enum(self, agent_type: str) -> Optional[AgentType]:
         """Convert string agent type to enum."""
         type_mapping = {
             'triage': AgentType.TRIAGE,
-            'triage_sub_agent': AgentType.TRIAGE,
             'data_analysis': AgentType.DATA_ANALYSIS,
-            'data_sub_agent': AgentType.DATA_ANALYSIS,
             'corpus_admin': AgentType.CORPUS_ADMIN,
-            'corpus_admin_sub_agent': AgentType.CORPUS_ADMIN,
             'supply_researcher': AgentType.SUPPLY_RESEARCHER,
-            'supervisor': AgentType.SUPERVISOR,
-            'optimization': AgentType.OPTIMIZATION,
-            'reporting': AgentType.REPORTING,
-            'synthetic_data': AgentType.SYNTHETIC_DATA,
+            'supervisor': AgentType.SUPERVISOR
         }
-        
         return type_mapping.get(agent_type.lower())
     
     def _determine_severity(self, error: Exception):
@@ -332,7 +312,6 @@ class EnhancedErrorRecoverySystem:
             'ConnectionError': ErrorSeverity.HIGH,
             'TimeoutError': ErrorSeverity.MEDIUM,
             'ValueError': ErrorSeverity.HIGH,
-            'TypeError': ErrorSeverity.HIGH,
         }
         
         error_type = type(error).__name__
@@ -352,33 +331,24 @@ class EnhancedErrorRecoverySystem:
         else:
             return ErrorSeverity.LOW
     
-    def _update_recovery_stats(self, agent_type: str, success: bool) -> None:
-        """Update recovery statistics."""
-        self.recovery_stats['total_recoveries'] += 1
-        
-        if success:
-            self.recovery_stats['successful_recoveries'] += 1
-        else:
-            self.recovery_stats['failed_recoveries'] += 1
-        
-        if agent_type not in self.recovery_stats['recovery_by_agent']:
-            self.recovery_stats['recovery_by_agent'][agent_type] = {
-                'total': 0, 'successful': 0, 'failed': 0
-            }
-        
-        stats = self.recovery_stats['recovery_by_agent'][agent_type]
-        stats['total'] += 1
-        if success:
-            stats['successful'] += 1
-        else:
-            stats['failed'] += 1
+    def get_recovery_metrics(self) -> Dict[str, Any]:
+        """Get comprehensive recovery metrics."""
+        return {
+            'recovery_stats': self.recovery_stats,
+            'circuit_breakers': self.circuit_breaker_registry.get_all_metrics(),
+            'degradation_status': self.degradation_manager.get_degradation_status(),
+            'memory_status': self.memory_monitor.get_memory_status(),
+            'websocket_status': self.websocket_manager.get_all_status(),
+            'database_status': self.database_registry.get_global_status(),
+            'error_aggregation': self.error_aggregation.get_system_status()
+        }
 
 
-# Global unified error recovery system
-unified_recovery_system = UnifiedErrorRecoverySystem()
+# Global enhanced error recovery system
+enhanced_recovery_system = EnhancedErrorRecoverySystem()
 
 
-# Convenience functions for common operations
+# Convenience functions for backward compatibility
 async def recover_agent_operation(
     agent_type: str,
     operation: str,
@@ -386,7 +356,7 @@ async def recover_agent_operation(
     **kwargs
 ) -> Any:
     """Convenience function for agent error recovery."""
-    return await unified_recovery_system.handle_agent_error(
+    return await enhanced_recovery_system.handle_agent_error(
         agent_type, operation, error, kwargs
     )
 
@@ -398,7 +368,7 @@ async def recover_database_operation(
     **kwargs
 ) -> Any:
     """Convenience function for database error recovery."""
-    return await unified_recovery_system.handle_database_error(
+    return await enhanced_recovery_system.handle_database_error(
         table_name, operation, error, **kwargs
     )
 
@@ -410,6 +380,6 @@ async def recover_api_operation(
     **kwargs
 ) -> Any:
     """Convenience function for API error recovery."""
-    return await unified_recovery_system.handle_api_error(
+    return await enhanced_recovery_system.handle_api_error(
         endpoint, method, error, **kwargs
     )

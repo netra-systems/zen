@@ -71,6 +71,11 @@ class MessageValidator:
                     received_data=message
                 )
             
+            # SECURITY VALIDATION FIRST - Check for malicious content before anything else
+            security_error = self._validate_payload_content(message)
+            if security_error:
+                return security_error
+            
             # Validate message type using enum
             message_type = message.get("type")
             try:
@@ -114,11 +119,6 @@ class MessageValidator:
                     message=f"Message too large: {len(message_str)} bytes",
                     received_data=message
                 )
-            
-            # Input sanitization for text fields
-            validation_error = self._validate_payload_content(message)
-            if validation_error:
-                return validation_error
             
             return True
             
@@ -200,12 +200,12 @@ class MessageValidator:
             if "payload" in sanitized and isinstance(sanitized["payload"], dict):
                 payload = sanitized["payload"].copy()
                 
-                # Sanitize text content
+                # Sanitize text content first
                 if "text" in payload and isinstance(payload["text"], str):
                     payload["text"] = self._sanitize_text(payload["text"])
                 
-                # Sanitize other string fields recursively
-                payload = self._sanitize_dict_strings(payload)
+                # Sanitize other string fields recursively (excluding "text" to avoid double sanitization)
+                payload = self._sanitize_dict_strings_except_text(payload)
                 
                 sanitized["payload"] = payload
             
@@ -224,10 +224,17 @@ class MessageValidator:
         Returns:
             Sanitized text
         """
-        # Basic HTML entity encoding for safety (& must be first to avoid double encoding)
-        text = text.replace("&", "&amp;")
+        # More robust check for already encoded text
+        # If text contains HTML entities, assume it's already been sanitized
+        html_entities = ["&lt;", "&gt;", "&amp;", "&quot;", "&#x27;"]
+        if any(entity in text for entity in html_entities):
+            return text  # Already encoded, don't double-encode
+        
+        # Basic HTML entity encoding for safety - encode dangerous characters
+        # Order matters: do < and > first, then other chars to avoid conflicts
         text = text.replace("<", "&lt;").replace(">", "&gt;")
         text = text.replace('"', "&quot;").replace("'", "&#x27;")
+        # NOTE: Not encoding & to &amp; to avoid double-encoding issues
         
         # Remove null bytes and other control characters
         text = text.replace("\x00", "")
@@ -255,6 +262,32 @@ class MessageValidator:
                 sanitized[key] = self._sanitize_text(value)
             elif isinstance(value, dict):
                 sanitized[key] = self._sanitize_dict_strings(value)
+            elif isinstance(value, list):
+                sanitized[key] = self._sanitize_list(value)
+            else:
+                sanitized[key] = value
+        
+        return sanitized
+    
+    def _sanitize_dict_strings_except_text(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Recursively sanitize string values in a dictionary, excluding 'text' field.
+        
+        Args:
+            data: Dictionary to sanitize
+            
+        Returns:
+            Sanitized dictionary with 'text' field unchanged
+        """
+        sanitized = {}
+        
+        for key, value in data.items():
+            if key == "text":
+                # Don't re-sanitize the text field
+                sanitized[key] = value
+            elif isinstance(value, str):
+                sanitized[key] = self._sanitize_text(value)
+            elif isinstance(value, dict):
+                sanitized[key] = self._sanitize_dict_strings_except_text(value)
             elif isinstance(value, list):
                 sanitized[key] = self._sanitize_list(value)
             else:

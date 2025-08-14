@@ -113,16 +113,18 @@ def _execute_security_test(cmd: List[str]) -> subprocess.CompletedProcess:
     )
 
 def _process_test_output(result: subprocess.CompletedProcess, test_result: Dict[str, Any]) -> None:
-    """Process test output for security issues"""
-    output_lower = result.stdout.lower() + result.stderr.lower()
-    security_patterns = _get_security_issue_patterns()
-    
-    for issue_name, pattern in security_patterns:
-        if pattern in output_lower:
-            test_result["security_checks"].append({
-                "check": issue_name,
-                "found": True
-            })
+    """Process test output for security issues - only for failed tests"""
+    # Only check for security issues if test failed (passing tests shouldn't be flagged)
+    if result.returncode != 0:
+        output_lower = result.stdout.lower() + result.stderr.lower()
+        security_patterns = _get_security_issue_patterns()
+        
+        for issue_name, pattern in security_patterns:
+            if pattern in output_lower:
+                test_result["security_checks"].append({
+                    "check": issue_name,
+                    "found": True
+                })
 
 def _get_security_issue_patterns() -> List[Tuple[str, str]]:
     """Get security issue patterns to check for"""

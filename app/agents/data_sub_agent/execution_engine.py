@@ -1,11 +1,12 @@
 """Execution engine that breaks down the massive execute() function into ≤8 line functions."""
 
-from typing import Dict, Optional, Any, Tuple, List, Callable
+from typing import Dict, Optional, Any, Tuple, List, Callable, TYPE_CHECKING
 from datetime import datetime, timedelta, UTC
 
 from app.llm.llm_manager import LLMManager
-from app.agents.state import DeepAgentState
 from app.agents.prompts import data_prompt_template
+
+from app.schemas.registry import DeepAgentState
 from app.agents.utils import extract_json_from_response
 from app.logging_config import central_logger as logger
 from app.llm.fallback_handler import LLMFallbackHandler, FallbackConfig
@@ -31,7 +32,7 @@ class ExecutionEngine:
     
     async def execute_analysis(
         self,
-        state: DeepAgentState,
+        state: "DeepAgentState",
         run_id: str,
         stream_updates: bool,
         send_update_fn: Callable,
@@ -63,7 +64,7 @@ class ExecutionEngine:
                 "message": "Starting advanced data analysis..."
             })
     
-    def _extract_analysis_params(self, state: DeepAgentState) -> Dict[str, Any]:
+    def _extract_analysis_params(self, state: "DeepAgentState") -> Dict[str, Any]:
         """Extract analysis parameters from triage result."""
         triage_result = state.triage_result or {}
         key_params = triage_result.get("key_parameters", {})
@@ -241,7 +242,7 @@ class ExecutionEngine:
                 "message": message
             })
     
-    def _store_result_in_state(self, state: DeepAgentState, result: Dict[str, Any]) -> None:
+    def _store_result_in_state(self, state: 'DeepAgentState', result: Dict[str, Any]) -> None:
         """Store analysis result in agent state."""
         state.data_result = result
     
@@ -262,7 +263,7 @@ class ExecutionEngine:
     
     async def _handle_execution_error(
         self,
-        state: DeepAgentState,
+        state: 'DeepAgentState',
         run_id: str,
         stream_updates: bool,
         send_update_fn: Callable,
@@ -277,7 +278,7 @@ class ExecutionEngine:
     
     async def _execute_llm_fallback(
         self,
-        state: DeepAgentState,
+        state: 'DeepAgentState',
         run_id: str,
         error: Exception
     ) -> Dict[str, Any]:
@@ -313,7 +314,7 @@ class ExecutionEngine:
     
     async def _execute_comprehensive_fallback(
         self,
-        state: DeepAgentState,
+        state: 'DeepAgentState',
         run_id: str,
         error: Exception
     ) -> Dict[str, Any]:
@@ -355,7 +356,7 @@ class ExecutionEngine:
         
         return result
     
-    def _create_emergency_data_fallback(self, state: DeepAgentState, error: Exception) -> Dict[str, Any]:
+    def _create_emergency_data_fallback(self, state: 'DeepAgentState', error: Exception) -> Dict[str, Any]:
         """Create emergency fallback when all analysis methods fail."""
         triage_result = state.triage_result or {}
         category = triage_result.get("category", "Unknown")

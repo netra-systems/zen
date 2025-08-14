@@ -16,7 +16,7 @@ from app.core.type_validation import (
     validate_type_consistency,
     generate_validation_report
 )
-from app.core.exceptions_base import ValidationError as NetraValidationError
+from app.core.exceptions_config import ValidationError as NetraValidationError
 
 
 class TestTypeMismatchSeverity:

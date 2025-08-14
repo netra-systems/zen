@@ -57,6 +57,7 @@ class WebSocketMessageType(str, Enum):
     # Client to server
     START_AGENT = "start_agent"
     USER_MESSAGE = "user_message"
+    CHAT_MESSAGE = "chat_message"  # Alternative message type for compatibility
     STOP_AGENT = "stop_agent"
     CREATE_THREAD = "create_thread"
     SWITCH_THREAD = "switch_thread"

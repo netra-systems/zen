@@ -6,10 +6,11 @@ from app.core.json_parsing_utils import parse_string_list_field
 
 # Import actual types needed at runtime
 from app.agents.triage_sub_agent.models import TriageResult
+from app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse
 
 # Import types only for type checking to avoid circular dependencies  
 if TYPE_CHECKING:
-    from app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse
+    pass
 
 
 class AgentMetadata(BaseModel):
@@ -124,8 +125,8 @@ class DeepAgentState(BaseModel):
     user_id: Optional[str] = None
     
     # Strongly typed result fields with proper type unions
-    triage_result: Optional[TriageResult] = None
-    data_result: Optional[Union['DataAnalysisResponse', 'AnomalyDetectionResponse']] = None
+    triage_result: Optional["TriageResult"] = None
+    data_result: Optional[Union["DataAnalysisResponse", "AnomalyDetectionResponse"]] = None
     optimizations_result: Optional[OptimizationsResult] = None
     action_plan_result: Optional[ActionPlanResult] = None
     report_result: Optional[ReportResult] = None

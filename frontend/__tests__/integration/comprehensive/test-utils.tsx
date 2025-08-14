@@ -21,7 +21,7 @@ import { useChatStore } from '@/store/chatStore';
 import { useThreadStore } from '@/store/threadStore';
 import apiClient from '@/services/apiClient';
 
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '../../test-utils/providers';
 
 /**
  * Common mock for Next.js navigation

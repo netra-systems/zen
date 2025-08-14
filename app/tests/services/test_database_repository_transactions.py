@@ -54,7 +54,7 @@ class MockRepository(BaseRepository[MockDatabaseModel]):
             # Create mock entity directly without calling super()
             entity = MockDatabaseModel(**kwargs)
             db.add(entity)
-            await db.commit()
+            await db.flush()  # Use flush instead of commit to match BaseRepository
             return entity
         except (IntegrityError, SQLAlchemyError):
             await db.rollback()
@@ -445,6 +445,7 @@ class TestUnitOfWorkTransactions:
         """Mock async session factory"""
         session = AsyncMock(spec=AsyncSession)
         session.add = MagicMock()
+        session.begin = AsyncMock()  # Add missing begin method
         session.commit = AsyncMock()
         session.rollback = AsyncMock()
         session.close = AsyncMock()

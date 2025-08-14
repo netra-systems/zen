@@ -64,6 +64,36 @@ async def get_corpus_from_clickhouse(table_name: str) -> dict:
         if 'db' in locals() and db:
             db.disconnect()
 
+def _process_sample_record(w_type: str, sample, timestamp):
+    """Process a single sample record efficiently."""
+    actual_sample = sample
+    if isinstance(actual_sample, list) and len(actual_sample) == 1 and isinstance(actual_sample[0], tuple):
+        actual_sample = actual_sample[0]
+
+    if isinstance(actual_sample, (list, tuple)) and len(actual_sample) == 2:
+        prompt_text, response_text = actual_sample
+        return ContentCorpus(
+            workload_type=w_type,
+            prompt=prompt_text,
+            response=response_text,
+            record_id=uuid.uuid4(),
+            created_at=timestamp
+        )
+    
+    central_logger.get_logger(__name__).warning(f"Skipping malformed sample for workload '{w_type}': {sample}")
+    return None
+
+
+async def _insert_record_batch(db, table_name: str, records):
+    """Insert a batch of records efficiently."""
+    if not records:
+        return
+    
+    record_data = [list(record.model_dump().values()) for record in records]
+    field_names = list(ContentCorpus.model_fields.keys())
+    await db.insert_data(table_name, record_data, field_names)
+
+
 async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str = None):
     """Saves the generated content corpus to a specified ClickHouse table."""
     if job_id:
@@ -87,33 +117,30 @@ async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str =
         table_schema = get_content_corpus_schema(table_name)
         await db.command(table_schema)
         
+        # Process records in optimized batches
         records = []
+        batch_timestamp = pd.Timestamp.now().to_pydatetime()
+        
+        # Pre-calculate total samples for better memory management
+        total_samples = sum(len(samples) for samples in corpus.values())
+        batch_size = min(1000, max(100, total_samples // 10))  # Adaptive batch size
+        
         for w_type, samples in corpus.items():
             for sample in samples:
-                actual_sample = sample
-                if isinstance(actual_sample, list) and len(actual_sample) == 1 and isinstance(actual_sample[0], tuple):
-                    actual_sample = actual_sample[0]
-
-                if isinstance(actual_sample, (list, tuple)) and len(actual_sample) == 2:
-                    prompt_text, response_text = actual_sample
-                    record = ContentCorpus(
-                        workload_type=w_type,
-                        prompt=prompt_text,
-                        response=response_text,
-                        record_id=uuid.uuid4(),
-                        created_at=pd.Timestamp.now().to_pydatetime()
-                    )
-                    records.append(record)
-                else:
-                    central_logger.get_logger(__name__).warning(f"Skipping malformed sample for workload '{w_type}': {sample}")
-                    continue
-
-        if not records:
-            central_logger.get_logger(__name__).info(f"No valid records to insert into ClickHouse table: {table_name}")
-            return
-
-        await db.insert_data(table_name, [list(record.model_dump().values()) for record in records], list(ContentCorpus.model_fields.keys()))
-        central_logger.get_logger(__name__).info(f"Successfully saved {len(records)} records to ClickHouse table: {table_name}")
+                processed_record = _process_sample_record(w_type, sample, batch_timestamp)
+                if processed_record:
+                    records.append(processed_record)
+                
+                # Insert in batches for better memory usage and performance
+                if len(records) >= batch_size:
+                    await _insert_record_batch(db, table_name, records)
+                    records = []  # Clear batch
+        
+        # Insert remaining records
+        if records:
+            await _insert_record_batch(db, table_name, records)
+            
+        central_logger.get_logger(__name__).info(f"Successfully saved corpus to ClickHouse table: {table_name}")
 
     except Exception as e:
         central_logger.get_logger(__name__).exception(f"Failed to save corpus to ClickHouse table {table_name}")
@@ -135,6 +162,13 @@ def _next_item(it):
         return next(it)
     except StopIteration:
         return _sentinel
+
+def _process_result_batch(corpus, batch):
+    """Process a batch of results efficiently."""
+    for result in batch:
+        if result and result.get('type') in corpus:
+            corpus[result['type']].append(result['data'])
+
 
 def run_generation_in_pool(tasks, num_processes):
     with Pool(processes=num_processes, initializer=init_worker) as pool:
@@ -177,15 +211,29 @@ async def run_content_generation_job(job_id: str, params: ContentGenParams):
         loop = asyncio.get_event_loop()
         blocking_generator = run_generation_in_pool(tasks, num_processes)
         
+        # Process results in batches for better performance
+        batch_size = min(50, num_processes * 10)  # Adaptive batch size
+        batch = []
+        
         while True:
             result = await loop.run_in_executor(None, _next_item, blocking_generator)
             if result is _sentinel:
                 break
 
             if result and result.get('type') in corpus:
-                corpus[result['type']].append(result['data'])
+                batch.append(result)
             
-            completed_tasks += 1
+            # Process batch when full or periodically update status
+            if len(batch) >= batch_size:
+                _process_result_batch(corpus, batch)
+                completed_tasks += len(batch)
+                await update_job_status(job_id, "running", progress=completed_tasks)
+                batch = []
+        
+        # Process remaining batch
+        if batch:
+            _process_result_batch(corpus, batch)
+            completed_tasks += len(batch)
             await update_job_status(job_id, "running", progress=completed_tasks)
 
     except Exception as e:

@@ -134,9 +134,21 @@ def check_payload_completeness() -> List[Dict]:
 def generate_report(backend_events: Dict, frontend_handlers: Dict, 
                    structure_issues: List, payload_issues: List) -> str:
     """Generate the coherence review report"""
+    header = _build_report_header()
+    fixes_section = _build_fixes_section()
+    inventory_section = _build_event_inventory(backend_events, frontend_handlers)
+    alignment_section = _build_alignment_section(backend_events, frontend_handlers)
+    issues_section = _build_issues_section(structure_issues, payload_issues)
+    recommendations_section = _build_recommendations_section()
+    conclusion_section = _build_conclusion_section()
     
-    report = f"""# WebSocket System Coherence Review Report - UPDATED
-**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  
+    return header + fixes_section + inventory_section + alignment_section + issues_section + recommendations_section + conclusion_section
+
+def _build_report_header() -> str:
+    """Build the report header with timestamp and status"""
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    return f"""# WebSocket System Coherence Review Report - UPDATED
+**Date:** {timestamp}  
 **Status:** Post-Fix Review
 **Scope:** Agent-to-Frontend Communication Analysis
 
@@ -147,17 +159,43 @@ This is an updated review after fixing the 7 critical issues identified in the i
 ### Fix Status
 ✅ **All 7 critical issues have been addressed**
 
-## Issues Fixed
+"""
 
-### 1. ✅ Event Structure Mismatch - FIXED
+def _build_fixes_section() -> str:
+    """Build the issues fixed section"""
+    structure_fix = _build_structure_fix_section()
+    events_fix = _build_events_fix_section()
+    payloads_fix = _build_payloads_fix_section()
+    systems_fix = _build_systems_fix_section()
+    alignment_fix = _build_alignment_fix_section()
+    accumulation_fix = _build_accumulation_fix_section()
+    thread_fix = _build_thread_fix_section()
+    
+    return f"""## Issues Fixed
+
+{structure_fix}
+{events_fix}
+{payloads_fix}
+{systems_fix}
+{alignment_fix}
+{accumulation_fix}
+{thread_fix}"""
+
+def _build_structure_fix_section() -> str:
+    """Build the event structure fix section"""
+    return """### 1. ✅ Event Structure Mismatch - FIXED
 **Previous:** Backend used two different message structures
-**Fixed:** All messages now use consistent `{{type, payload}}` structure
+**Fixed:** All messages now use consistent `{type, payload}` structure
 - Standardized ws_manager.py
 - Updated message_handler.py
 - Fixed quality_message_handler.py
 - Updated message_handlers.py
 
-### 2. ✅ Missing Unified Events - IMPLEMENTED
+"""
+
+def _build_events_fix_section() -> str:
+    """Build the missing events fix section"""
+    return """### 2. ✅ Missing Unified Events - IMPLEMENTED
 **Previous:** Frontend expected events that backend never sent
 **Fixed:** Added all missing events to supervisor_consolidated.py:
 - `agent_thinking` - Shows intermediate reasoning
@@ -165,54 +203,79 @@ This is an updated review after fixing the 7 critical issues identified in the i
 - `tool_executing` - Tool execution notifications
 - `final_report` - Complete analysis results
 
-### 3. ✅ Incomplete Event Payloads - FIXED
+"""
+
+def _build_payloads_fix_section() -> str:
+    """Build the incomplete payloads fix section"""
+    return """### 3. ✅ Incomplete Event Payloads - FIXED
 **Previous:** AgentStarted missing fields
 **Fixed:** Updated AgentStarted schema to include:
 - agent_name (default: "Supervisor")
 - timestamp (auto-generated)
 
-### 4. ✅ Duplicate WebSocket Systems - REMOVED
+"""
+
+def _build_systems_fix_section() -> str:
+    """Build the duplicate systems fix section"""
+    return """### 4. ✅ Duplicate WebSocket Systems - REMOVED
 **Previous:** Two competing WebSocket systems in frontend
 **Fixed:** Consolidated to unified-chat.ts only
 - Simplified useChatWebSocket.ts to route all events to unified store
 - Removed legacy event handling logic
 - Maintained backward compatibility through adapter pattern
 
-### 5. ✅ Event Name Misalignment - ALIGNED
+"""
+
+def _build_alignment_fix_section() -> str:
+    """Build the event name alignment fix section"""
+    return """### 5. ✅ Event Name Misalignment - ALIGNED
 **Previous:** Backend sent "agent_finished", frontend expected "agent_completed"
 **Fixed:** Changed all backend events to use "agent_completed"
 
-### 6. ✅ Layer Data Accumulation Bug - FIXED
+"""
+
+def _build_accumulation_fix_section() -> str:
+    """Build the layer data accumulation fix section"""
+    return """### 6. ✅ Layer Data Accumulation Bug - FIXED
 **Previous:** Duplicate content in medium layer
 **Fixed:** Improved deduplication logic:
 - Check for complete replacement flag
 - Detect if new content contains old
 - Only append when truly incremental
 
-### 7. ✅ Thread Management Events - ADDED
+"""
+
+def _build_thread_fix_section() -> str:
+    """Build the thread management events fix section"""
+    return """### 7. ✅ Thread Management Events - ADDED
 **Previous:** Missing thread lifecycle events
 **Fixed:** Added events to thread_service.py:
 - `thread_created` - When new thread is created
 - `agent_started` - When run begins
 
-## Current Event Inventory
+"""
+
+def _build_event_inventory(backend_events: Dict, frontend_handlers: Dict) -> str:
+    """Build the current event inventory section"""
+    backend_list = _format_event_list(backend_events, "occurrences")
+    frontend_list = _format_event_list(frontend_handlers, "files")
+    
+    return f"""## Current Event Inventory
 
 ### Backend Events Sent
-"""
-    
-    # List backend events
-    for event, files in sorted(backend_events.items()):
-        report += f"- `{event}` ({len(files)} occurrences)\n"
-    
-    report += "\n### Frontend Handlers Available\n"
-    
-    # List frontend handlers
-    for handler, files in sorted(frontend_handlers.items()):
-        report += f"- `{handler}` ({len(files)} files)\n"
-    
-    # Check alignment
-    report += "\n## Event Alignment Status\n\n"
-    
+{backend_list}
+### Frontend Handlers Available
+{frontend_list}"""
+
+def _format_event_list(events_dict: Dict, count_type: str) -> str:
+    """Format events dictionary into a list"""
+    lines = []
+    for event, files in sorted(events_dict.items()):
+        lines.append(f"- `{event}` ({len(files)} {count_type})")
+    return "\n".join(lines) + "\n"
+
+def _build_alignment_section(backend_events: Dict, frontend_handlers: Dict) -> str:
+    """Build the event alignment status section"""
     backend_set = set(backend_events.keys())
     frontend_set = set(frontend_handlers.keys())
     
@@ -220,60 +283,121 @@ This is an updated review after fixing the 7 critical issues identified in the i
     only_frontend = frontend_set - backend_set
     matched = backend_set & frontend_set
     
-    report += f"- **Matched Events:** {len(matched)}\n"
-    report += f"- **Backend Only:** {len(only_backend)}\n"
-    report += f"- **Frontend Only:** {len(only_frontend)}\n\n"
+    alignment_stats = _build_alignment_stats(matched, only_backend, only_frontend)
+    backend_only_section = _build_backend_only_section(only_backend)
+    frontend_only_section = _build_frontend_only_section(only_frontend)
     
-    if only_backend:
-        report += "### Events Sent But Not Handled\n"
-        for event in sorted(only_backend):
-            report += f"- `{event}`\n"
-        report += "\n"
-    
-    if only_frontend:
-        report += "### Handlers Without Backend Events\n"
-        for event in sorted(only_frontend):
-            report += f"- `{event}`\n"
-        report += "\n"
-    
-    # Structure issues
-    if structure_issues:
-        report += "## Remaining Structure Issues\n\n"
-        for issue in structure_issues:
-            report += f"- **{issue['file']}**: {issue['issue']} ({issue['severity']})\n"
-    else:
-        report += "## Structure Issues\n\n✅ No structure issues found\n"
-    
-    # Payload issues
-    if payload_issues:
-        report += "\n## Remaining Payload Issues\n\n"
-        for issue in payload_issues:
-            report += f"- **{issue['file']}**: {issue['issue']} ({issue['severity']})\n"
-    else:
-        report += "\n## Payload Issues\n\n✅ No payload issues found\n"
-    
-    report += """
-## Testing Recommendations
+    return f"""\n## Event Alignment Status
 
-### Backend Tests Needed
+{alignment_stats}{backend_only_section}{frontend_only_section}"""
+
+def _build_alignment_stats(matched: Set, only_backend: Set, only_frontend: Set) -> str:
+    """Build alignment statistics"""
+    return f"""- **Matched Events:** {len(matched)}
+- **Backend Only:** {len(only_backend)}
+- **Frontend Only:** {len(only_frontend)}
+
+"""
+
+def _build_backend_only_section(only_backend: Set) -> str:
+    """Build section for events sent but not handled"""
+    if only_backend:
+        event_list = "\n".join(f"- `{event}`" for event in sorted(only_backend))
+        return f"""### Events Sent But Not Handled
+{event_list}
+
+"""
+    return ""
+
+def _build_frontend_only_section(only_frontend: Set) -> str:
+    """Build section for handlers without backend events"""
+    if only_frontend:
+        handler_list = "\n".join(f"- `{event}`" for event in sorted(only_frontend))
+        return f"""### Handlers Without Backend Events
+{handler_list}
+
+"""
+    return ""
+
+def _build_issues_section(structure_issues: List, payload_issues: List) -> str:
+    """Build the remaining issues section"""
+    structure_section = _build_structure_issues_section(structure_issues)
+    payload_section = _build_payload_issues_section(payload_issues)
+    return structure_section + payload_section
+
+def _build_structure_issues_section(structure_issues: List) -> str:
+    """Build structure issues section"""
+    if structure_issues:
+        issues_list = "\n".join(f"- **{issue['file']}**: {issue['issue']} ({issue['severity']})" for issue in structure_issues)
+        return f"""## Remaining Structure Issues
+
+{issues_list}
+"""
+    return """## Structure Issues
+
+✅ No structure issues found
+"""
+
+def _build_payload_issues_section(payload_issues: List) -> str:
+    """Build payload issues section"""
+    if payload_issues:
+        issues_list = "\n".join(f"- **{issue['file']}**: {issue['issue']} ({issue['severity']})" for issue in payload_issues)
+        return f"""\n## Remaining Payload Issues
+
+{issues_list}
+"""
+    return """\n## Payload Issues
+
+✅ No payload issues found
+"""
+
+def _build_recommendations_section() -> str:
+    """Build the testing recommendations section"""
+    backend_tests = _build_backend_tests_section()
+    frontend_tests = _build_frontend_tests_section()
+    integration_tests = _build_integration_tests_section()
+    next_steps = _build_next_steps_section()
+    
+    return f"""\n## Testing Recommendations
+
+{backend_tests}
+{frontend_tests}
+{integration_tests}
+{next_steps}"""
+
+def _build_backend_tests_section() -> str:
+    """Build backend tests needed section"""
+    return """### Backend Tests Needed
 1. Verify all events use `{type, payload}` structure
 2. Test event emission timing and order
 3. Validate payload completeness
 4. Test error event handling
 
-### Frontend Tests Needed
+"""
+
+def _build_frontend_tests_section() -> str:
+    """Build frontend tests needed section"""
+    return """### Frontend Tests Needed
 1. Test unified store event handling
 2. Verify layer data accumulation
 3. Test backward compatibility
 4. Validate UI updates for each event
 
-### Integration Tests Needed
+"""
+
+def _build_integration_tests_section() -> str:
+    """Build integration tests needed section"""
+    return """### Integration Tests Needed
 1. Full agent execution flow
 2. Thread lifecycle events
 3. Tool execution visibility
 4. Error recovery scenarios
 
-## Next Steps
+"""
+
+def _build_next_steps_section() -> str:
+    """Build next steps section"""
+    return """## Next Steps
 
 1. **Run smoke tests** to verify basic functionality
 2. **Test agent workflows** end-to-end
@@ -281,7 +405,11 @@ This is an updated review after fixing the 7 critical issues identified in the i
 4. **Add e2e tests** for critical event flows
 5. **Document event catalog** in SPEC/websocket_communication.xml
 
-## Conclusion
+"""
+
+def _build_conclusion_section() -> str:
+    """Build the conclusion section"""
+    return """## Conclusion
 
 All 7 critical issues have been successfully addressed:
 - ✅ Event structure standardized
@@ -297,8 +425,6 @@ The WebSocket communication system should now provide proper real-time updates t
 ---
 *Updated review generated after implementing fixes*
 """
-    
-    return report
 
 def main():
     print("Running WebSocket Coherence Review...")

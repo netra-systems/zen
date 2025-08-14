@@ -232,7 +232,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         token_payload = schemas.TokenPayload(sub="test@example.com")
         
         # Create token with short expiry
-        short_expiry = timedelta(seconds=0.1)
+        short_expiry = timedelta(seconds=1)
         token = enhanced_security_service.create_access_token(token_payload, short_expiry)
         
         # Token should be valid initially
@@ -241,7 +241,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         
         # Wait for expiry
         import time
-        time.sleep(0.2)
+        time.sleep(1.1)
         
         # Token should be expired
         expired_email = enhanced_security_service.get_user_email_from_token(token)
@@ -426,6 +426,7 @@ class TestSecurityServicePermissions:
         """Create security service with permission features"""
         key_manager = MagicMock()
         key_manager.jwt_secret_key = "test_key_for_permissions"
+        key_manager.fernet_key = Fernet.generate_key()
         return EnhancedSecurityService(key_manager)
     
     @pytest.fixture
@@ -574,6 +575,7 @@ class TestSecurityServiceOAuth:
         """Create security service for OAuth testing"""
         key_manager = MagicMock()
         key_manager.jwt_secret_key = "oauth_test_key"
+        key_manager.fernet_key = Fernet.generate_key()
         return EnhancedSecurityService(key_manager)
     
     @pytest.mark.asyncio
@@ -641,6 +643,7 @@ class TestSecurityServiceConcurrency:
         """Create security service for concurrency testing"""
         key_manager = MagicMock()
         key_manager.jwt_secret_key = "concurrent_test_key_that_is_sufficiently_long_for_security"
+        key_manager.fernet_key = Fernet.generate_key()
         return EnhancedSecurityService(key_manager)
     
     @pytest.mark.asyncio
