@@ -9,7 +9,7 @@ import json
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 from app.services.corpus_service import CorpusService
-from app.agents.data_sub_agent import QueryBuilder
+from app.agents.data_sub_agent.query_builder import QueryBuilder
 from app.db.models_clickhouse import (
     get_content_corpus_schema,
     get_llm_events_table_schema,

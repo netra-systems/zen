@@ -11,7 +11,8 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 import numpy as np
 from app.services.corpus_service import CorpusService
-from app.agents.data_sub_agent import QueryBuilder, AnalysisEngine
+from app.agents.data_sub_agent.query_builder import QueryBuilder
+from app.agents.data_sub_agent.analysis_engine import AnalysisEngine
 from app.db.clickhouse import get_clickhouse_client
 from app.db.models_clickhouse import get_content_corpus_schema
 
