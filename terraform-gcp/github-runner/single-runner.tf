@@ -135,67 +135,34 @@ install_dependencies() {
             systemctl start docker || log "WARNING: Docker failed to start"
         }
     
-    # Wait for Docker to be ready
-    log "Waiting for Docker daemon to be fully ready..."
-    local max_wait=90
-    local count=0
-    local docker_ready=false
-    
-    while [ $count -lt $max_wait ]; do
-        # Check if Docker socket exists
-        if [ -S /var/run/docker.sock ]; then
-            # Try to run a simple Docker command
-            if docker version &>/dev/null 2>&1; then
-                log "Docker API is responding"
-                # Final verification with actual container run
-                if docker run --rm hello-world &>/dev/null 2>&1; then
-                    log "Docker daemon is fully operational"
-                    docker_ready=true
-                    break
-                else
-                    log "Docker API responds but cannot run containers yet"
+        # Wait for Docker to be ready
+        log "Waiting for Docker daemon to be fully ready..."
+        local max_wait=30  # Reduced wait time since Docker is optional
+        local count=0
+        local docker_ready=false
+        
+        while [ $count -lt $max_wait ]; do
+            # Check if Docker socket exists
+            if [ -S /var/run/docker.sock ]; then
+                # Try to run a simple Docker command
+                if docker version &>/dev/null 2>&1; then
+                    log "Docker API is responding"
+                    # Final verification with actual container run
+                    if docker run --rm hello-world &>/dev/null 2>&1; then
+                        log "Docker daemon is fully operational"
+                        docker_ready=true
+                        break
+                    fi
                 fi
             fi
+            
+            sleep 2
+            count=$((count + 1))
+        done
+        
+        if [ "$docker_ready" != "true" ]; then
+            log "WARNING: Docker not ready after $max_wait seconds, continuing without Docker"
         fi
-        
-        # Check service status
-        if [ $((count % 15)) -eq 0 ] && [ $count -gt 0 ]; then
-            log "Docker service status check..."
-            if systemctl is-active --quiet docker; then
-                log "Docker service is active, waiting for full initialization..."
-                # Try restarting docker socket
-                systemctl restart docker.socket 2>/dev/null || true
-            else
-                log "Docker service not active, attempting restart..."
-                systemctl restart docker
-            fi
-        fi
-        
-        sleep 2
-        count=$((count + 1))
-        [ $((count % 10)) -eq 0 ] && log "Still waiting for Docker... ($count/$max_wait)"
-    done
-    
-    if [ "$docker_ready" != "true" ]; then
-        log "WARNING: Docker not fully ready after $max_wait seconds"
-        systemctl status docker --no-pager
-        
-        # Final attempt - full Docker restart
-        log "Attempting final Docker restart..."
-        systemctl stop docker
-        sleep 2
-        rm -f /var/run/docker.pid /var/run/docker.sock
-        systemctl start docker
-        sleep 10
-        
-        if docker run --rm hello-world &>/dev/null 2>&1; then
-            log "Docker is now working after final restart"
-            docker_ready=true
-        else
-            log "WARNING: Docker still having issues, continuing with installation"
-            log "Manual intervention may be required"
-        fi
-    fi
     
     # Install Docker buildx plugin
     log "Installing Docker buildx plugin..."
