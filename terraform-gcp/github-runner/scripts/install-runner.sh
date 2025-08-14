@@ -10,7 +10,7 @@ RUNNER_GROUP="${runner_group}"
 PROJECT_ID="${project_id}"
 
 # Runner configuration
-RUNNER_VERSION="2.319.1"
+RUNNER_VERSION="${runner_version}"
 RUNNER_USER="runner"
 RUNNER_HOME="/home/$RUNNER_USER"
 RUNNER_DIR="$RUNNER_HOME/actions-runner"
@@ -99,10 +99,10 @@ install_runner() {
     su - $RUNNER_USER -c "
         mkdir -p $RUNNER_DIR
         cd $RUNNER_DIR
-        curl -o actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz -L \
-            https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
-        tar xzf actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
-        rm actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
+        curl -o actions-runner-linux-x64-$RUNNER_VERSION.tar.gz -L \
+            https://github.com/actions/runner/releases/download/v$RUNNER_VERSION/actions-runner-linux-x64-$RUNNER_VERSION.tar.gz
+        tar xzf actions-runner-linux-x64-$RUNNER_VERSION.tar.gz
+        rm actions-runner-linux-x64-$RUNNER_VERSION.tar.gz
     "
 }
 
@@ -206,25 +206,25 @@ EOF
 cleanup_runner() {
     log "Setting up cleanup hook..."
     
-    cat > /usr/local/bin/cleanup-runner.sh <<'EOF'
+    cat > /usr/local/bin/cleanup-runner.sh <<EOF
 #!/bin/bash
-GITHUB_TOKEN=$(gcloud secrets versions access latest --secret="github-runner-token" --project="${PROJECT_ID}")
+GITHUB_TOKEN=\$(gcloud secrets versions access latest --secret="github-runner-token" --project="$PROJECT_ID")
 
-if [ -n "${GITHUB_REPO}" ]; then
-    REMOVE_TOKEN=$(curl -sX POST \
-        -H "Authorization: token $GITHUB_TOKEN" \
-        -H "Accept: application/vnd.github.v3+json" \
-        "https://api.github.com/repos/${GITHUB_ORG}/${GITHUB_REPO}/actions/runners/remove-token" | jq -r .token)
+if [ -n "$GITHUB_REPO" ]; then
+    REMOVE_TOKEN=\$(curl -sX POST \\
+        -H "Authorization: token \$GITHUB_TOKEN" \\
+        -H "Accept: application/vnd.github.v3+json" \\
+        "https://api.github.com/repos/$GITHUB_ORG/$GITHUB_REPO/actions/runners/remove-token" | jq -r .token)
 else
-    REMOVE_TOKEN=$(curl -sX POST \
-        -H "Authorization: token $GITHUB_TOKEN" \
-        -H "Accept: application/vnd.github.v3+json" \
-        "https://api.github.com/orgs/${GITHUB_ORG}/actions/runners/remove-token" | jq -r .token)
+    REMOVE_TOKEN=\$(curl -sX POST \\
+        -H "Authorization: token \$GITHUB_TOKEN" \\
+        -H "Accept: application/vnd.github.v3+json" \\
+        "https://api.github.com/orgs/$GITHUB_ORG/actions/runners/remove-token" | jq -r .token)
 fi
 
-if [ -n "$REMOVE_TOKEN" ] && [ "$REMOVE_TOKEN" != "null" ]; then
-    cd ${RUNNER_DIR}
-    ./config.sh remove --token $REMOVE_TOKEN
+if [ -n "\$REMOVE_TOKEN" ] && [ "\$REMOVE_TOKEN" != "null" ]; then
+    cd $RUNNER_DIR
+    ./config.sh remove --token \$REMOVE_TOKEN
 fi
 EOF
     

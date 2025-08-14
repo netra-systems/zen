@@ -75,3 +75,4 @@ terraform/staging/shared-infrastructure/.terraform/providers/registry.terraform.
 .dev_services.json
 frontend/cypress/downloads/downloads.htm
 /terraform-gcp/github-runner/.terraform/providers
+*.tfstate
