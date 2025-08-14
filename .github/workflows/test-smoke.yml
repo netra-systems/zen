@@ -31,7 +31,7 @@ permissions:
 jobs:
   smoke-test:
     name: Quick Validation (<30s)
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 5
     
     outputs:

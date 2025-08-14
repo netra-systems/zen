@@ -71,7 +71,7 @@ concurrency:
 jobs:
   setup:
     name: Environment Setup
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       environment_name: ${{ steps.config.outputs.environment_name }}
       action: ${{ steps.config.outputs.action }}
@@ -154,7 +154,7 @@ jobs:
     name: Build Backend
     needs: [setup]
     if: needs.setup.outputs.should_deploy == 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       image_url: ${{ steps.build.outputs.image_url }}
       build_time: ${{ steps.build.outputs.build_time }}
@@ -229,7 +229,7 @@ jobs:
     name: Build Frontend
     needs: [setup]
     if: needs.setup.outputs.should_deploy == 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       image_url: ${{ steps.build.outputs.image_url }}
       build_time: ${{ steps.build.outputs.build_time }}
@@ -310,7 +310,7 @@ jobs:
       needs.setup.result == 'success' &&
       (needs.build-backend.result == 'success' || needs.build-backend.result == 'skipped') &&
       (needs.build-frontend.result == 'success' || needs.build-frontend.result == 'skipped')
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       backend_url: ${{ steps.outputs.outputs.backend_url }}
       frontend_url: ${{ steps.outputs.outputs.frontend_url }}
@@ -434,7 +434,7 @@ jobs:
     if: |
       needs.setup.outputs.action == 'deploy' && 
       needs.terraform.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     
     steps:
       - name: Wait for services
@@ -483,7 +483,7 @@ jobs:
     name: Finalize Deployment
     needs: [setup, terraform, smoke-test, build-backend, build-frontend]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     
     steps:
       - name: Calculate total time
