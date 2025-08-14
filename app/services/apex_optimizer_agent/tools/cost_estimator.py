@@ -25,7 +25,8 @@ class CostEstimator(BaseTool):
         response = await llm.ainvoke(estimation_prompt)
         
         try:
-            estimated_cost = float(response.content)
+            content = response.content if hasattr(response, 'content') else str(response)
+            estimated_cost = float(content)
         except (ValueError, TypeError):
             estimated_cost = 0.01  # Default value if parsing fails
             

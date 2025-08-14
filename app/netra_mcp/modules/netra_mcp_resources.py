@@ -1,0 +1,221 @@
+"""Netra MCP Server Resources Registration"""
+
+import json
+from datetime import datetime, timedelta
+from typing import Dict, Any
+
+from app.logging_config import CentralLogger
+
+logger = CentralLogger()
+
+
+class NetraMCPResources:
+    """Resource registration for Netra MCP Server"""
+    
+    def __init__(self, mcp_instance):
+        self.mcp = mcp_instance
+        
+    def register_all(self, server):
+        """Register all resources with the MCP server"""
+        self._register_optimization_history(server)
+        self._register_model_configs(server)
+        self._register_agent_catalog(server)
+        self._register_current_metrics(server)
+    
+    def _register_optimization_history(self, server):
+        """Register optimization history resource"""
+        
+        @self.mcp.resource("netra://optimization/history")
+        async def get_optimization_history() -> str:
+            """Get historical optimization results and recommendations"""
+            try:
+                if server.corpus_service:
+                    end_date = datetime.utcnow()
+                    start_date = end_date - timedelta(days=30)
+                    
+                    history_data = await server.corpus_service.get_optimization_history(
+                        start_date=start_date.isoformat(),
+                        end_date=end_date.isoformat()
+                    )
+                    
+                    if history_data and "optimizations" in history_data:
+                        return json.dumps(history_data, indent=2)
+                
+                # Fallback to sample data if service not available
+                history = {
+                    "optimizations": [
+                        {
+                            "id": "opt-001",
+                            "date": "2025-08-10",
+                            "type": "prompt_optimization",
+                            "model": "claude-3-opus",
+                            "cost_reduction": "45%",
+                            "performance_gain": "20%"
+                        },
+                        {
+                            "id": "opt-002",
+                            "date": "2025-08-11",
+                            "type": "model_selection",
+                            "original": "gpt-4",
+                            "recommended": "claude-3-sonnet",
+                            "cost_reduction": "60%",
+                            "quality_maintained": True
+                        }
+                    ],
+                    "total_savings": "$12,450",
+                    "average_optimization": "52%"
+                }
+                
+                return json.dumps(history, indent=2)
+            except Exception as e:
+                logger.error(f"Error retrieving optimization history: {e}")
+                return json.dumps({"error": str(e)}, indent=2)
+    
+    def _register_model_configs(self, server):
+        """Register model configuration resource"""
+        
+        @self.mcp.resource("netra://config/models")
+        async def get_model_configurations() -> str:
+            """Get configured model parameters and settings"""
+            configs = {
+                "models": {
+                    "claude-3-opus": {
+                        "context_window": 200000,
+                        "max_output": 4096,
+                        "price_per_1k_input": 0.015,
+                        "price_per_1k_output": 0.075,
+                        "rate_limit": 100
+                    },
+                    "gpt-4": {
+                        "context_window": 128000,
+                        "max_output": 4096,
+                        "price_per_1k_input": 0.03,
+                        "price_per_1k_output": 0.06,
+                        "rate_limit": 500
+                    },
+                    "gemini-pro": {
+                        "context_window": 32000,
+                        "max_output": 2048,
+                        "price_per_1k_input": 0.00025,
+                        "price_per_1k_output": 0.0005,
+                        "rate_limit": 1000
+                    }
+                }
+            }
+            
+            return json.dumps(configs, indent=2)
+    
+    def _register_agent_catalog(self, server):
+        """Register agent catalog resource"""
+        
+        @self.mcp.resource("netra://agents/catalog")
+        async def get_agent_catalog() -> str:
+            """Get detailed catalog of available agents"""
+            catalog = {
+                "agents": {
+                    "SupervisorAgent": {
+                        "description": "Main orchestrator for multi-agent workflows",
+                        "capabilities": [
+                            "Task decomposition",
+                            "Agent coordination",
+                            "Result aggregation",
+                            "Error recovery"
+                        ],
+                        "input_schema": {
+                            "type": "object",
+                            "properties": {
+                                "task": {"type": "string"},
+                                "context": {"type": "object"},
+                                "goals": {"type": "array"}
+                            }
+                        },
+                        "example_usage": {
+                            "task": "Optimize our LLM usage for cost",
+                            "context": {"current_spend": 50000},
+                            "goals": ["reduce_cost", "maintain_quality"]
+                        }
+                    },
+                    "OptimizationsCoreSubAgent": {
+                        "description": "Core optimization engine",
+                        "capabilities": [
+                            "Prompt optimization",
+                            "Model selection",
+                            "Batch processing strategies",
+                            "Caching recommendations"
+                        ],
+                        "optimization_strategies": [
+                            "prompt_compression",
+                            "model_downgrade",
+                            "response_caching",
+                            "batch_aggregation"
+                        ]
+                    }
+                }
+            }
+            
+            return json.dumps(catalog, indent=2)
+    
+    def _register_current_metrics(self, server):
+        """Register current metrics resource"""
+        
+        @self.mcp.resource("netra://metrics/current")
+        async def get_current_metrics() -> str:
+            """Get current system metrics and performance indicators"""
+            try:
+                metrics = {"timestamp": datetime.utcnow().isoformat()}
+                
+                if server.thread_service:
+                    thread_metrics = await server.thread_service.get_metrics()
+                    if thread_metrics:
+                        metrics.update({
+                            "active_threads": thread_metrics.get("active_threads", 0),
+                            "queue_depth": thread_metrics.get("queue_depth", 0)
+                        })
+                
+                if server.llm_manager:
+                    llm_metrics = await server.llm_manager.get_metrics()
+                    if llm_metrics:
+                        metrics.update({
+                            "throughput": {
+                                "requests_per_minute": llm_metrics.get("rpm", 0),
+                                "tokens_per_minute": llm_metrics.get("tpm", 0)
+                            },
+                            "latency": {
+                                "p50": llm_metrics.get("latency_p50", 0),
+                                "p95": llm_metrics.get("latency_p95", 0),
+                                "p99": llm_metrics.get("latency_p99", 0)
+                            },
+                            "cost": {
+                                "last_hour": llm_metrics.get("cost_last_hour", 0),
+                                "today": llm_metrics.get("cost_today", 0),
+                                "this_month": llm_metrics.get("cost_month", 0)
+                            },
+                            "error_rate": llm_metrics.get("error_rate", 0)
+                        })
+                
+                # Fallback to sample data if services not available
+                if "throughput" not in metrics:
+                    metrics.update({
+                        "throughput": {
+                            "requests_per_minute": 1250,
+                            "tokens_per_minute": 450000
+                        },
+                        "latency": {
+                            "p50": 120,
+                            "p95": 450,
+                            "p99": 890
+                        },
+                        "cost": {
+                            "last_hour": 125.50,
+                            "today": 2450.75,
+                            "this_month": 45600.00
+                        },
+                        "error_rate": 0.02,
+                        "active_threads": 45,
+                        "queue_depth": 12
+                    })
+                
+                return json.dumps(metrics, indent=2)
+            except Exception as e:
+                logger.error(f"Error retrieving current metrics: {e}")
+                return json.dumps({"error": str(e)}, indent=2)

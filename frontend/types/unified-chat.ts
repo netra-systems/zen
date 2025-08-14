@@ -213,7 +213,7 @@ export interface ThreadRenamedEvent {
 // ============================================
 
 export interface RunStartedEvent {
-  type: 'run_started';
+  type: 'agent_started';
   payload: {
     run_id: string;
     thread_id: string;

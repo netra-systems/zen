@@ -11,4 +11,5 @@ class LogAnalyzer(BaseTool):
         prompt = f'Analyze the following logs and return a summary in JSON format: {context.logs}'
         llm = context.llm_manager.get_llm(self.llm_name or "default")
         response = await llm.ainvoke(prompt)
-        return json.loads(response.content)
+        content = response.content if hasattr(response, 'content') else str(response)
+        return json.loads(content)

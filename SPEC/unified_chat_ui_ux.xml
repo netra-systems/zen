@@ -202,7 +202,7 @@
             </event>
             
             <!-- Run and Step Events -->
-            <event type="run_started">
+            <event type="agent_started">
                 <payload>
                     <field name="run_id" type="string">Unique run identifier</field>
                     <field name="thread_id" type="string">Associated thread</field>
@@ -1084,7 +1084,7 @@
         <phase number="6" name="WebSocket Integration">
             <task>Update WebSocketProvider for thread-specific connections</task>
             <task>Handle thread_created and thread_loaded events</task>
-            <task>Implement run_started and step_created events</task>
+            <task>Implement agent_started and step_created events</task>
             <task>Add reconnection logic when switching threads</task>
             <task>Create event buffer for overflow panel</task>
         </phase>

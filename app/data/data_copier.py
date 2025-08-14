@@ -1,5 +1,5 @@
 # app/data/data_copier.py
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional, Any
 from clickhouse_driver import Client
 from ..config import settings
 # For using remote() copy between clickhouse the driver is better then connect it seems.
@@ -14,7 +14,7 @@ class DataCopier:
     """
     Handles the connection to source/destination ClickHouse instances and manages data transfer.
     """
-    def __init__(self, customer_id: str):
+    def __init__(self, customer_id: str) -> None:
         self.source_creds = settings.clickhouse_native.model_dump()
         self.dest_creds = settings.clickhouse_native.model_dump()
         self.customer_id = customer_id
@@ -23,10 +23,10 @@ class DataCopier:
         self.dest_client = Client(**self.dest_creds)
         logging.info("DataCopier initialized and clients connected.")
 
-    def __enter__(self):
+    def __enter__(self) -> 'DataCopier':
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Optional[type], exc_val: Optional[Exception], exc_tb: Optional[Any]) -> None:
         self.source_client.disconnect()
         self.dest_client.disconnect()
         logging.info("DataCopier clients disconnected.")

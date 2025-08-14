@@ -203,7 +203,7 @@ class ProcessMonitor:
                     'errors': recent_errors
                 })
                 
-                print(f"\n⚠️  {self.name} process stopped with exit code {exit_code}")
+                print(f"\n[WARNING] {self.name} process stopped with exit code {exit_code}")
                 if recent_errors:
                     print(f"   Recent errors:")
                     for error in recent_errors[:5]:
@@ -219,7 +219,7 @@ class ProcessMonitor:
                         self.monitoring = False
                         break
                     
-                    print(f"🔄 Attempting to restart {self.name} (attempt {self.restart_count + 1}/{self.max_restarts})")
+                    print(f"[RESTART] Attempting to restart {self.name} (attempt {self.restart_count + 1}/{self.max_restarts})")
                     time.sleep(self.restart_delay)
                     
                     # Stop old streamer
@@ -231,7 +231,7 @@ class ProcessMonitor:
                         self.restart_count += 1
                         self.last_restart_time = crash_time
                         consecutive_failures = 0
-                        print(f"✅ {self.name} restarted successfully")
+                        print(f"[OK] {self.name} restarted successfully")
                     else:
                         consecutive_failures += 1
                         print(f"❌ Failed to restart {self.name} (failure {consecutive_failures})")
@@ -261,7 +261,7 @@ class EnhancedSecretLoader:
         loaded = {}
         
         if env_file.exists():
-            print("📂 Loading from existing .env file...")
+            print("[ENV] Loading from existing .env file...")
             with open(env_file, 'r') as f:
                 for line in f:
                     line = line.strip()
@@ -271,12 +271,12 @@ class EnhancedSecretLoader:
                         if self.verbose:
                             # Show masked value for sensitive data
                             masked_value = value[:3] + "***" if len(value) > 3 else "***"
-                            print(f"   ✓ {key}: {masked_value} (from .env file)")
+                            print(f"   [OK] {key}: {masked_value} (from .env file)")
         return loaded
     
     def load_from_google_secrets(self) -> Dict[str, Tuple[str, str]]:
         """Load secrets from Google Secret Manager with detailed feedback."""
-        print(f"\n🔐 Loading secrets from Google Cloud Secret Manager...")
+        print(f"\n[SECRETS] Loading secrets from Google Cloud Secret Manager...")
         print(f"   Project ID: {self.project_id}")
         
         try:
@@ -286,7 +286,7 @@ class EnhancedSecretLoader:
             import socket
             socket.setdefaulttimeout(10)
             client = secretmanager.SecretManagerServiceClient()
-            print("   ✓ Connected to Secret Manager")
+            print("   [OK] Connected to Secret Manager")
         except ImportError:
             print("   ❌ Google Cloud SDK not installed")
             return {}
@@ -320,18 +320,18 @@ class EnhancedSecretLoader:
                 
                 # Show success with masked value
                 masked_value = value[:3] + "***" if len(value) > 3 else "***"
-                print(f"   ✓ {env_var}: {masked_value} (from Google Secret: {secret_name})")
+                print(f"   [OK] {env_var}: {masked_value} (from Google Secret: {secret_name})")
                 
             except Exception as e:
                 self.failed_secrets.append((env_var, str(e)))
                 if self.verbose:
-                    print(f"   ✗ {env_var}: Failed - {str(e)[:50]}")
+                    print(f"   [FAIL] {env_var}: Failed - {str(e)[:50]}")
         
         return loaded
     
     def load_all_secrets(self) -> bool:
         """Load secrets from all sources with priority."""
-        print("\n🔍 Secret Loading Process Started")
+        print("\n[SECRETS] Loading Process Started")
         print("=" * 60)
         
         # First, try to load from existing .env file
@@ -352,22 +352,22 @@ class EnhancedSecretLoader:
             "ENVIRONMENT": ("development", "static")
         }
         
-        print("\n📝 Adding static configuration:")
+        print("\n[CONFIG] Adding static configuration:")
         for key, (value, source) in static_config.items():
             if key not in all_secrets:
                 all_secrets[key] = (value, source)
                 if self.verbose:
-                    print(f"   ✓ {key}: {value} (static config)")
+                    print(f"   [OK] {key}: {value} (static config)")
         
         # Set environment variables
-        print("\n🔧 Setting environment variables...")
+        print("\n[ENV] Setting environment variables...")
         for key, (value, source) in all_secrets.items():
             os.environ[key] = value
             self.loaded_secrets[key] = source
         
         # Summary
         print("\n" + "=" * 60)
-        print("📊 Secret Loading Summary:")
+        print("[SUMMARY] Secret Loading Summary:")
         
         sources = {}
         for key, source in self.loaded_secrets.items():
@@ -379,7 +379,7 @@ class EnhancedSecretLoader:
             print(f"   - From {source}: {count}")
         
         if self.failed_secrets and self.verbose:
-            print(f"\n   ⚠️  Failed to load {len(self.failed_secrets)} secrets:")
+            print(f"\n   [WARNING] Failed to load {len(self.failed_secrets)} secrets:")
             for secret, error in self.failed_secrets[:3]:
                 print(f"      - {secret}: {error[:50]}")
         
@@ -392,7 +392,7 @@ class EnhancedSecretLoader:
     def _write_env_file(self, secrets: Dict[str, Tuple[str, str]]):
         """Write secrets to .env file for persistence, preserving all existing variables."""
         env_file = PROJECT_ROOT / ".env"
-        print(f"\n💾 Writing secrets to {env_file}")
+        print(f"\n[SAVE] Writing secrets to {env_file}")
         
         with open(env_file, 'w') as f:
             f.write("# Auto-generated .env file\n")
@@ -487,7 +487,7 @@ class DevLauncher:
         """Check if the terminal supports emoji output."""
         try:
             # Try to encode an emoji
-            "✅".encode(sys.stdout.encoding or 'utf-8')
+            "[OK]".encode(sys.stdout.encoding or 'utf-8')
             # Check if we're on Windows terminal that supports emojis
             if sys.platform == "win32":
                 # Windows Terminal and VS Code terminal support emojis
@@ -516,7 +516,7 @@ class DevLauncher:
     
     def _cleanup_handler(self, signum, frame):
         """Handle cleanup on exit."""
-        self._print("🛑", "STOP", "\nShutting down development environment...")
+        self._print("[STOP]", "STOP", "\nShutting down development environment...")
         self.cleanup()
         sys.exit(0)
     
@@ -558,7 +558,7 @@ class DevLauncher:
         
         # Clear service discovery
         self.service_discovery.clear_all()
-        self._print("✅", "OK", "Cleanup complete")
+        self._print("[OK]", "OK", "Cleanup complete")
     
     def check_dependencies(self) -> bool:
         """Check if all required dependencies are available."""
@@ -591,12 +591,12 @@ class DevLauncher:
                 print(f"  {error}")
             return False
         
-        self._print("✅", "OK", "All dependencies satisfied")
+        self._print("[OK]", "OK", "All dependencies satisfied")
         return True
     
     def start_backend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
         """Start the backend server with real-time log streaming."""
-        self._print("\n🚀", "LAUNCH", "Starting backend server...")
+        self._print("\n[START]", "LAUNCH", "Starting backend server...")
         
         # Determine port
         if self.dynamic_ports:
@@ -692,7 +692,7 @@ class DevLauncher:
             # Write service discovery info
             self.service_discovery.write_backend_info(port)
             
-            self._print("✅", "OK", f"Backend started on port {port}")
+            self._print("[OK]", "OK", f"Backend started on port {port}")
             print(f"   API URL: http://localhost:{port}")
             print(f"   WebSocket URL: ws://localhost:{port}/ws")
             
@@ -704,7 +704,7 @@ class DevLauncher:
     
     def start_frontend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
         """Start the frontend server with real-time log streaming."""
-        self._print("\n🚀", "LAUNCH", "Starting frontend server...")
+        self._print("\n[START]", "LAUNCH", "Starting frontend server...")
         
         # Read backend info from service discovery
         backend_info = self.service_discovery.read_backend_info()
@@ -813,7 +813,7 @@ class DevLauncher:
                 self._print("❌", "ERROR", "Frontend failed to start")
                 return None, None
             
-            self._print("✅", "OK", f"Frontend started on port {port}")
+            self._print("[OK]", "OK", f"Frontend started on port {port}")
             print(f"   URL: http://localhost:{port}")
             
             # Write frontend info to service discovery
@@ -859,20 +859,20 @@ class DevLauncher:
             
             # Open the default browser
             webbrowser.open(url)
-            self._print("🌐", "BROWSER", f"Opening browser at {url}")
+            self._print("[WEB]", "BROWSER", f"Opening browser at {url}")
             return True
         except Exception as e:
-            self._print("⚠️", "WARN", f"Could not open browser automatically: {e}")
+            self._print("[WARNING]", "WARN", f"Could not open browser automatically: {e}")
             return False
     
     def run(self):
         """Run the development environment with enhanced monitoring."""
         print("=" * 60)
-        self._print("🚀", "LAUNCH", "Netra AI Development Environment")
+        self._print("[LAUNCH]", "LAUNCH", "Netra AI Development Environment")
         print("=" * 60)
         
         # Show configuration summary
-        self._print("\n📝", "Configuration", ":")
+        self._print("\n[CONFIG]", "Configuration", ":")
         print(f"   * Dynamic ports: {'YES' if self.dynamic_ports else 'NO'}")
         print(f"   * Backend hot reload: {'YES' if self.backend_reload else 'NO'}")
         print(f"   * Frontend hot reload: {'YES' if self.frontend_reload else 'NO'}")
@@ -920,12 +920,12 @@ class DevLauncher:
         # Wait for backend to be ready
         backend_info = self.service_discovery.read_backend_info()
         if backend_info:
-            self._print("\n⏳", "WAIT", "Waiting for backend to be ready...")
+            self._print("\n[WAIT]", "WAIT", "Waiting for backend to be ready...")
             backend_url = f"{backend_info['api_url']}/health/live"
             if self.wait_for_service(backend_url, timeout=30):
-                self._print("✅", "OK", "Backend is ready")
+                self._print("[OK]", "OK", "Backend is ready")
             else:
-                self._print("⚠️", "WARN", "Backend health check timed out, continuing anyway...")
+                self._print("[WARNING]", "WARN", "Backend health check timed out, continuing anyway...")
         
         # Start frontend
         if self.auto_restart:
@@ -950,7 +950,7 @@ class DevLauncher:
                 return 1
         
         # Wait for frontend to be ready
-        self._print("\n⏳", "WAIT", "Waiting for frontend to be ready...")
+        self._print("\n[WAIT]", "WAIT", "Waiting for frontend to be ready...")
         frontend_url = f"http://localhost:{self.frontend_port}"
         
         # Give Next.js a bit more time to compile initially
@@ -959,14 +959,14 @@ class DevLauncher:
         
         frontend_ready = False
         if self.wait_for_service(frontend_url, timeout=90):
-            self._print("✅", "OK", "Frontend is ready")
+            self._print("[OK]", "OK", "Frontend is ready")
             frontend_ready = True
             
             # Automatically open browser when frontend is ready
             if not self.no_browser:
                 self.open_browser(frontend_url)
         else:
-            self._print("⚠️", "WARN", "Frontend readiness check timed out")
+            self._print("[WARNING]", "WARN", "Frontend readiness check timed out")
         
         # Print summary
         print("\n" + "=" * 60)
@@ -974,17 +974,17 @@ class DevLauncher:
         print("=" * 60)
         
         if backend_info:
-            self._print("\n🔧", "Backend", "")
+            self._print("\n[BACKEND]", "Backend", "")
             print(f"   API: {backend_info['api_url']}")
             print(f"   WebSocket: {backend_info['ws_url']}")
             print(f"   Logs: Real-time streaming (cyan)")
         
-        self._print("\n🌐", "Frontend", "")
+        self._print("\n[FRONTEND]", "Frontend", "")
         print(f"   URL: http://localhost:{self.frontend_port}")
         print(f"   Logs: Real-time streaming (magenta)")
         
         if self.auto_restart:
-            self._print("\n🔄", "Auto-Restart", "Enabled")
+            self._print("\n[AUTO]", "Auto-Restart", "Enabled")
             print("   Services will automatically restart if they crash")
         
         print("\n[COMMANDS]:")
@@ -998,28 +998,28 @@ class DevLauncher:
                 # If not using auto-restart, check if processes are still running
                 if not self.auto_restart:
                     if self.backend_process and self.backend_process.poll() is not None:
-                        self._print(f"\n⚠️", "WARN", "Backend process has stopped")
+                        self._print(f"\n[WARNING]", "WARN", "Backend process has stopped")
                         self.cleanup()
                         return 1
                     if self.frontend_process and self.frontend_process.poll() is not None:
-                        self._print(f"\n⚠️", "WARN", "Frontend process has stopped")
+                        self._print(f"\n[WARNING]", "WARN", "Frontend process has stopped")
                         self.cleanup()
                         return 1
                 else:
                     # Check if monitors are still running
                     if self.backend_monitor and not self.backend_monitor.monitoring:
-                        self._print(f"\n⚠️", "WARN", "Backend monitoring stopped (exceeded max restarts)")
+                        self._print(f"\n[WARNING]", "WARN", "Backend monitoring stopped (exceeded max restarts)")
                         self.cleanup()
                         return 1
                     if self.frontend_monitor and not self.frontend_monitor.monitoring:
-                        self._print(f"\n⚠️", "WARN", "Frontend monitoring stopped (exceeded max restarts)")
+                        self._print(f"\n[WARNING]", "WARN", "Frontend monitoring stopped (exceeded max restarts)")
                         self.cleanup()
                         return 1
                 
                 time.sleep(2)
                 
         except KeyboardInterrupt:
-            self._print("\n\n🔄", "INTERRUPT", "Received interrupt signal")
+            self._print("\n\n[INTERRUPT]", "INTERRUPT", "Received interrupt signal")
         
         self.cleanup()
         return 0

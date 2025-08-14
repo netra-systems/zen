@@ -45,9 +45,9 @@ class ResearchSchedule:
         self.research_type = research_type
         self.providers = providers or ["openai", "anthropic", "google", "mistral"]
         self.enabled = enabled
-        self.hour = hour or 2  # Default to 2 AM
-        self.day_of_week = day_of_week or 1  # Default to Monday
-        self.day_of_month = day_of_month or 1  # Default to 1st
+        self.hour = hour if hour is not None else 2  # Default to 2 AM
+        self.day_of_week = day_of_week if day_of_week is not None else 0  # Default to Monday
+        self.day_of_month = day_of_month if day_of_month is not None else 1  # Default to 1st
         self.last_run = None
         self.next_run = self._calculate_next_run()
     
@@ -69,7 +69,8 @@ class ResearchSchedule:
         
         elif self.frequency == ScheduleFrequency.WEEKLY:
             # Next specified day of week
-            days_ahead = self.day_of_week - now.weekday()
+            current_weekday = now.weekday()
+            days_ahead = self.day_of_week - current_weekday
             if days_ahead <= 0:  # Target day already happened this week
                 days_ahead += 7
             next_run = now.replace(hour=self.hour, minute=0, second=0, microsecond=0)

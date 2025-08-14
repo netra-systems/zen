@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import Mock
 
-from app.agents.triage_sub_agent import TriageSubAgent
+from app.agents.triage_sub_agent_legacy import TriageSubAgent
 from app.agents.utils import extract_json_from_response
 
 

@@ -209,7 +209,7 @@ python scripts/run_real_service_tests_enhanced.py --model gemini-1.5-flash
 | Model | Input Cost | Output Cost | Avg Test Cost |
 |-------|------------|-------------|---------------|
 | gemini-1.5-flash | $0.00035 | $0.0007 | $0.01/test |
-| gemini-1.5-pro | $0.0035 | $0.007 | $0.05/test |
+| gemini-2.5-pro | $0.0035 | $0.007 | $0.05/test |
 | gpt-3.5-turbo | $0.0005 | $0.0015 | $0.02/test |
 | gpt-4 | $0.03 | $0.06 | $0.10/test |
 | claude-3-sonnet | $0.003 | $0.015 | $0.04/test |

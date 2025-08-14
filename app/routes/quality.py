@@ -17,6 +17,12 @@ from app.services.fallback_response_service import FallbackResponseService
 from app.redis_manager import get_redis_manager, RedisManager
 from app.dependencies import DbDep
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.schemas.quality_types import (
+    User, QualityValidationRequest, QualityValidationResponse,
+    QualityAlert, AlertAcknowledgement, AlertAcknowledgementResponse,
+    QualityDashboardData, QualityReport, QualityReportType,
+    QualityStatistics, QualityServiceHealth, QualityThresholdCheck
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -28,34 +34,14 @@ monitoring_service = QualityMonitoringService()
 fallback_service = FallbackResponseService()
 
 
-class QualityValidationRequest(BaseModel):
-    """Request model for content validation"""
-    content: str = Field(..., description="Content to validate")
-    content_type: str = Field("general", description="Type of content")
-    strict_mode: bool = Field(False, description="Apply strict validation")
-    context: Optional[Dict[str, Any]] = Field(None, description="Additional context")
-
-
-class QualityReportType(str, Enum):
-    """Types of quality reports"""
-    SUMMARY = "summary"
-    DETAILED = "detailed"
-    AGENT_SPECIFIC = "agent_specific"
-    TREND_ANALYSIS = "trend_analysis"
-
-
-class AlertAcknowledgement(BaseModel):
-    """Model for acknowledging alerts"""
-    alert_id: str = Field(..., description="Alert ID to acknowledge")
-    action: str = Field(..., description="Action to take: acknowledge or resolve")
-    notes: Optional[str] = Field(None, description="Optional notes")
+# Remove local definitions - using typed versions from schemas
 
 
 @router.get("/dashboard")
 async def get_quality_dashboard(
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     period_hours: int = Query(24, description="Period in hours for data")
-) -> Dict[str, Any]:
+) -> QualityDashboardData:
     """
     Get comprehensive quality dashboard data
     
@@ -64,11 +50,18 @@ async def get_quality_dashboard(
     try:
         dashboard_data = await monitoring_service.get_dashboard_data()
         
-        # Add user-specific context
-        dashboard_data["user_id"] = current_user["id"]
-        dashboard_data["period_hours"] = period_hours
-        
-        return dashboard_data
+        # Convert to typed response
+        return QualityDashboardData(
+            summary=dashboard_data.get("summary", {}),
+            recent_alerts=[QualityAlert(**alert) for alert in dashboard_data.get("recent_alerts", [])],
+            agent_profiles=dashboard_data.get("agent_profiles", {}),
+            quality_trends=dashboard_data.get("quality_trends", {}),
+            top_issues=dashboard_data.get("top_issues", []),
+            system_health=dashboard_data.get("system_health", {}),
+            period_hours=period_hours,
+            user_id=current_user.id,
+            generated_at=datetime.now(UTC)
+        )
         
     except Exception as e:
         logger.error(f"Error getting dashboard data: {str(e)}")
@@ -78,8 +71,8 @@ async def get_quality_dashboard(
 @router.post("/validate")
 async def validate_content(
     request: QualityValidationRequest,
-    current_user: dict = Depends(get_current_user)
-) -> Dict[str, Any]:
+    current_user: User = Depends(get_current_user)
+) -> QualityValidationResponse:
     """
     Validate content quality on-demand
     
@@ -100,7 +93,7 @@ async def validate_content(
         
         # Add user context
         context = request.context or {}
-        context["user_id"] = current_user["id"]
+        context["user_id"] = current_user.id
         
         # Validate content
         result = await quality_gate_service.validate_content(
@@ -110,9 +103,9 @@ async def validate_content(
             strict_mode=request.strict_mode
         )
         
-        return {
-            "passed": result.passed,
-            "metrics": {
+        return QualityValidationResponse(
+            passed=result.passed,
+            metrics={
                 "overall_score": result.metrics.overall_score,
                 "quality_level": result.metrics.quality_level.value,
                 "specificity_score": result.metrics.specificity_score,
@@ -130,9 +123,11 @@ async def validate_content(
                 "issues": result.metrics.issues,
                 "suggestions": result.metrics.suggestions
             },
-            "retry_suggested": result.retry_suggested,
-            "retry_adjustments": result.retry_prompt_adjustments
-        }
+            retry_suggested=result.retry_suggested,
+            retry_adjustments=result.retry_prompt_adjustments,
+            validation_id=f"val_{int(datetime.now(UTC).timestamp())}",
+            timestamp=datetime.now(UTC)
+        )
         
     except Exception as e:
         logger.error(f"Error validating content: {str(e)}")
@@ -142,7 +137,7 @@ async def validate_content(
 @router.get("/agents/{agent_name}/report")
 async def get_agent_quality_report(
     agent_name: str,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     period_hours: int = Query(24, description="Period in hours")
 ) -> Dict[str, Any]:
     """
@@ -167,11 +162,11 @@ async def get_agent_quality_report(
 
 @router.get("/alerts")
 async def get_quality_alerts(
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     severity: Optional[str] = Query(None, description="Filter by severity"),
     acknowledged: Optional[bool] = Query(None, description="Filter by acknowledged status"),
     limit: int = Query(50, description="Maximum alerts to return")
-) -> List[Dict[str, Any]]:
+) -> List[QualityAlert]:
     """
     Get quality alerts
     
@@ -187,21 +182,21 @@ async def get_quality_alerts(
         if acknowledged is not None:
             all_alerts = [a for a in all_alerts if a.acknowledged == acknowledged]
         
-        # Convert to dict format
+        # Convert to typed format
         return [
-            {
-                "id": alert.id,
-                "timestamp": alert.timestamp.isoformat(),
-                "severity": alert.severity.value,
-                "metric_type": alert.metric_type.value,
-                "agent": alert.agent,
-                "message": alert.message,
-                "current_value": alert.current_value,
-                "threshold": alert.threshold,
-                "details": alert.details,
-                "acknowledged": alert.acknowledged,
-                "resolved": alert.resolved
-            }
+            QualityAlert(
+                id=alert.id,
+                timestamp=alert.timestamp,
+                severity=alert.severity,
+                metric_type=alert.metric_type,
+                agent=alert.agent,
+                message=alert.message,
+                current_value=alert.current_value,
+                threshold=alert.threshold,
+                details=alert.details,
+                acknowledged=alert.acknowledged,
+                resolved=alert.resolved
+            )
             for alert in all_alerts
         ]
         
@@ -213,8 +208,8 @@ async def get_quality_alerts(
 @router.post("/alerts/acknowledge")
 async def acknowledge_alert(
     request: AlertAcknowledgement,
-    current_user: dict = Depends(get_current_user)
-) -> Dict[str, Any]:
+    current_user: User = Depends(get_current_user)
+) -> AlertAcknowledgementResponse:
     """
     Acknowledge or resolve a quality alert
     
@@ -231,13 +226,13 @@ async def acknowledge_alert(
         if not success:
             raise HTTPException(status_code=404, detail="Alert not found")
         
-        return {
-            "success": True,
-            "alert_id": request.alert_id,
-            "action": request.action,
-            "user_id": current_user["id"],
-            "timestamp": datetime.now(UTC).isoformat()
-        }
+        return AlertAcknowledgementResponse(
+            success=True,
+            alert_id=request.alert_id,
+            action=request.action,
+            user_id=current_user.id,
+            timestamp=datetime.now(UTC)
+        )
         
     except HTTPException:
         raise
@@ -250,8 +245,8 @@ async def acknowledge_alert(
 async def generate_quality_report(
     report_type: QualityReportType = Query(QualityReportType.SUMMARY),
     period_days: int = Query(7, description="Period in days"),
-    current_user: dict = Depends(get_current_user)
-) -> Dict[str, Any]:
+    current_user: User = Depends(get_current_user)
+) -> QualityReport:
     """
     Generate a comprehensive quality report
     
@@ -299,13 +294,13 @@ async def generate_quality_report(
         else:
             data = {"error": "Unknown report type"}
         
-        return {
-            "report_type": report_type.value,
-            "generated_at": datetime.now(UTC).isoformat(),
-            "generated_by": current_user["id"],
-            "period_days": period_days,
-            "data": data
-        }
+        return QualityReport(
+            report_type=report_type,
+            generated_at=datetime.now(UTC),
+            generated_by=current_user.id,
+            period_days=period_days,
+            data=data
+        )
         
     except Exception as e:
         logger.error(f"Error generating report: {str(e)}")
@@ -314,9 +309,9 @@ async def generate_quality_report(
 
 @router.get("/statistics")
 async def get_quality_statistics(
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     content_type: Optional[str] = Query(None, description="Filter by content type")
-) -> Dict[str, Any]:
+) -> QualityStatistics:
     """
     Get quality statistics
     
@@ -339,11 +334,20 @@ async def get_quality_statistics(
         
         stats = await quality_gate_service.get_quality_stats(ct)
         
-        return {
-            "statistics": stats,
-            "timestamp": datetime.now(UTC).isoformat(),
-            "content_type_filter": content_type
-        }
+        # Convert stats to typed response
+        return QualityStatistics(
+            total_validations=stats.get("total_validations", 0),
+            average_score=stats.get("average_score", 0.0),
+            median_score=stats.get("median_score", 0.0),
+            score_distribution=stats.get("score_distribution", {}),
+            pass_rate=stats.get("pass_rate", 0.0),
+            top_issues=stats.get("top_issues", []),
+            improvement_areas=stats.get("improvement_areas", []),
+            content_type_breakdown=stats.get("content_type_breakdown", {}),
+            agent_performance=stats.get("agent_performance", {}),
+            timestamp=datetime.now(UTC),
+            content_type_filter=content_type
+        )
         
     except Exception as e:
         logger.error(f"Error getting statistics: {str(e)}")
@@ -353,7 +357,7 @@ async def get_quality_statistics(
 @router.post("/monitoring/start")
 async def start_quality_monitoring(
     background_tasks: BackgroundTasks,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     interval_seconds: int = Query(60, description="Monitoring interval in seconds")
 ) -> Dict[str, Any]:
     """
@@ -363,8 +367,8 @@ async def start_quality_monitoring(
     Admin only endpoint.
     """
     try:
-        # Check if user is admin (you'd implement proper role checking)
-        if current_user.get("role") != "admin":
+        # Check if user is admin
+        if current_user.role != "admin":
             raise HTTPException(status_code=403, detail="Admin access required")
         
         background_tasks.add_task(
@@ -375,7 +379,7 @@ async def start_quality_monitoring(
         return {
             "status": "started",
             "interval_seconds": interval_seconds,
-            "started_by": current_user["id"],
+            "started_by": current_user.id,
             "timestamp": datetime.now(UTC).isoformat()
         }
         
@@ -388,7 +392,7 @@ async def start_quality_monitoring(
 
 @router.post("/monitoring/stop")
 async def stop_quality_monitoring(
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """
     Stop quality monitoring
@@ -398,14 +402,14 @@ async def stop_quality_monitoring(
     """
     try:
         # Check if user is admin
-        if current_user.get("role") != "admin":
+        if current_user.role != "admin":
             raise HTTPException(status_code=403, detail="Admin access required")
         
         await monitoring_service.stop_monitoring()
         
         return {
             "status": "stopped",
-            "stopped_by": current_user["id"],
+            "stopped_by": current_user.id,
             "timestamp": datetime.now(UTC).isoformat()
         }
         
@@ -417,37 +421,37 @@ async def stop_quality_monitoring(
 
 
 @router.get("/health")
-async def quality_service_health() -> Dict[str, Any]:
+async def quality_service_health() -> QualityServiceHealth:
     """
     Check quality service health
     
     Returns the health status of all quality services.
     """
     try:
-        health = {
-            "status": "healthy",
-            "services": {
+        return QualityServiceHealth(
+            status="healthy",
+            services={
                 "quality_gate": "active" if quality_gate_service else "inactive",
                 "monitoring": "active" if monitoring_service.monitoring_active else "inactive",
                 "fallback": "active" if fallback_service else "inactive"
             },
-            "statistics": {
+            statistics={
                 "total_validations": len(quality_gate_service.validation_cache) if quality_gate_service else 0,
                 "active_alerts": len(monitoring_service.active_alerts) if monitoring_service else 0,
                 "monitored_agents": len(monitoring_service.agent_profiles) if monitoring_service else 0
             },
-            "timestamp": datetime.now(UTC).isoformat()
-        }
-        
-        return health
+            timestamp=datetime.now(UTC)
+        )
         
     except Exception as e:
         logger.error(f"Error checking health: {str(e)}")
-        return {
-            "status": "unhealthy",
-            "error": str(e),
-            "timestamp": datetime.now(UTC).isoformat()
-        }
+        return QualityServiceHealth(
+            status="unhealthy",
+            services={},
+            statistics={},
+            timestamp=datetime.now(UTC),
+            error=str(e)
+        )
 
 async def check_quality_thresholds(metric: str, value: float) -> Dict[str, Any]:
     """Check quality thresholds for testing."""

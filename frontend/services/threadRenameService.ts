@@ -4,6 +4,7 @@
  */
 
 import { ThreadService } from './threadService';
+import { logger } from '@/lib/logger';
 
 interface ThreadRenameConfig {
   maxTitleLength: number;
@@ -65,7 +66,11 @@ export class ThreadRenameService {
 
       return generatedTitle;
     } catch (error) {
-      console.error('Failed to auto-rename thread:', error);
+      logger.error('Failed to auto-rename thread', error as Error, {
+        component: 'ThreadRenameService',
+        action: 'auto_rename_failed',
+        metadata: { threadId, messageContent: message.content.substring(0, 100) }
+      });
       return this.getFallbackTitle();
     } finally {
       this.renamingInProgress.delete(threadId);
@@ -170,7 +175,11 @@ export class ThreadRenameService {
 
       return true;
     } catch (error) {
-      console.error('Failed to manually rename thread:', error);
+      logger.error('Failed to manually rename thread', error as Error, {
+        component: 'ThreadRenameService',
+        action: 'manual_rename_failed',
+        metadata: { threadId, newTitle }
+      });
       return false;
     }
   }

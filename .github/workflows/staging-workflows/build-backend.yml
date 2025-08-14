@@ -1,0 +1,83 @@
+name: Build Backend
+description: Build and push backend Docker image
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        required: true
+        type: string
+      commit_sha:
+        required: true
+        type: string
+      registry_url:
+        required: true
+        type: string
+    outputs:
+      image_tag:
+        description: 'Docker image tag'
+        value: ${{ jobs.build.outputs.image_tag }}
+      image_url:
+        description: 'Full Docker image URL'
+        value: ${{ jobs.build.outputs.image_url }}
+
+jobs:
+  build:
+    name: Build Backend Image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      image_tag: ${{ steps.build.outputs.image_tag }}
+      image_url: ${{ steps.build.outputs.image_url }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit_sha }}
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+      
+      - name: Configure Docker for GCR
+        run: |
+          gcloud auth configure-docker gcr.io
+      
+      - name: Generate image tag
+        id: tag
+        run: |
+          SHORT_SHA=$(echo "${{ inputs.commit_sha }}" | cut -c1-7)
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          IMAGE_TAG="${{ inputs.environment_name }}-${SHORT_SHA}-${TIMESTAMP}"
+          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+      
+      - name: Build and push Docker image
+        id: build
+        run: |
+          IMAGE_TAG="${{ steps.tag.outputs.image_tag }}"
+          IMAGE_URL="${{ inputs.registry_url }}/${{ secrets.GCP_PROJECT_ID }}/netra-backend:$IMAGE_TAG"
+          
+          # Build with cache
+          docker buildx build \
+            --platform linux/amd64 \
+            --cache-from type=registry,ref=${{ inputs.registry_url }}/${{ secrets.GCP_PROJECT_ID }}/netra-backend:cache \
+            --cache-to type=registry,ref=${{ inputs.registry_url }}/${{ secrets.GCP_PROJECT_ID }}/netra-backend:cache,mode=max \
+            --build-arg COMMIT_SHA=${{ inputs.commit_sha }} \
+            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+            --tag $IMAGE_URL \
+            --push \
+            --file app/Dockerfile \
+            ./app
+          
+          echo "image_url=$IMAGE_URL" >> $GITHUB_OUTPUT

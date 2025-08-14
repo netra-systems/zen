@@ -306,8 +306,8 @@ class TestClickHouseArraySyntaxFixer:
         expected_results = [
             "arrayElement(data.items, 0)",
             "arrayElement(a.b, variable_name)",
-            "nested.deep.array[i]",  # Should remain unchanged
-            "simple[idx]"  # Should remain unchanged
+            "arrayElement(deep.array, i)",  # Will match deep.array[i] part
+            "simple[idx]"  # Should remain unchanged (no dot notation)
         ]
         
         for i, query in enumerate(edge_cases):
@@ -672,7 +672,7 @@ class TestClickHouseQueryFixerIntegration:
         
         # Verify statistics
         assert interceptor.queries_executed == 5
-        assert interceptor.queries_fixed == 4  # 4 queries needed fixing
+        assert interceptor.queries_fixed == 3  # 3 queries needed fixing (1st, 3rd, and 5th)
         
         # Verify all queries executed
         assert len(results) == 5

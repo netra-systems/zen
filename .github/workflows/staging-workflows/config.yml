@@ -1,0 +1,30 @@
+name: Shared Configuration
+description: Shared configuration values for staging workflows
+
+on:
+  workflow_call:
+    outputs:
+      project_name:
+        description: 'Project name prefix'
+        value: netra-staging
+      gcp_region:
+        description: 'GCP region for deployment'
+        value: us-central1
+      terraform_version:
+        description: 'Terraform version to use'
+        value: '1.5.0'
+      node_version:
+        description: 'Node.js version for frontend builds'
+        value: '20'
+      python_version:
+        description: 'Python version for backend builds'
+        value: '3.11'
+      docker_registry:
+        description: 'Docker registry URL'
+        value: gcr.io
+      build_timeout:
+        description: 'Build timeout in minutes'
+        value: 30
+      deploy_timeout:
+        description: 'Deployment timeout in minutes'
+        value: 45

@@ -40,3 +40,19 @@ def test_health_endpoint_direct():
     response = client.get("/health/live")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_live_endpoint():
+    """Test the live health endpoint"""
+    import os
+    os.environ["TESTING"] = "1"
+    os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+    os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
+    
+    from fastapi.testclient import TestClient
+    from app.main import app
+    
+    client = TestClient(app)
+    response = client.get("/health/live")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}

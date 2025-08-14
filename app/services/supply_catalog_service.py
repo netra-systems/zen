@@ -64,7 +64,7 @@ class SupplyCatalogService:
             SupplyOptionCreate(provider="OpenAI", family="GPT-4", name="gpt-4o", cost_per_million_tokens_usd={"prompt": 5.00, "completion": 15.00}, quality_score=0.97),
             SupplyOptionCreate(provider="Anthropic", family="Claude 3", name="claude-3-opus-20240229", cost_per_million_tokens_usd={"prompt": 15.00, "completion": 75.00}, quality_score=0.98),
             SupplyOptionCreate(provider="Anthropic", family="Claude 3", name="claude-3-sonnet-20240229", cost_per_million_tokens_usd={"prompt": 3.00, "completion": 15.00}, quality_score=0.92),
-            SupplyOptionCreate(provider="Google", family="Gemini", name="gemini-1.5-pro-latest", cost_per_million_tokens_usd={"prompt": 3.50, "completion": 10.50}, quality_score=0.96),
+            SupplyOptionCreate(provider="Google", family="Gemini", name="gemini-2.5-pro-latest", cost_per_million_tokens_usd={"prompt": 3.50, "completion": 10.50}, quality_score=0.96),
         ]
         
         logger.info("Autofilling supply catalog with default models.")

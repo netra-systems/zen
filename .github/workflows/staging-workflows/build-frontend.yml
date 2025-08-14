@@ -1,0 +1,117 @@
+name: Build Frontend
+description: Build and push frontend Docker image
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        required: true
+        type: string
+      commit_sha:
+        required: true
+        type: string
+      registry_url:
+        required: true
+        type: string
+      backend_url:
+        required: true
+        type: string
+    outputs:
+      image_tag:
+        description: 'Docker image tag'
+        value: ${{ jobs.build.outputs.image_tag }}
+      image_url:
+        description: 'Full Docker image URL'
+        value: ${{ jobs.build.outputs.image_url }}
+
+jobs:
+  build:
+    name: Build Frontend Image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      image_tag: ${{ steps.build.outputs.image_tag }}
+      image_url: ${{ steps.build.outputs.image_url }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit_sha }}
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+      
+      - name: Configure Docker for GCR
+        run: |
+          gcloud auth configure-docker gcr.io
+      
+      - name: Generate image tag
+        id: tag
+        run: |
+          SHORT_SHA=$(echo "${{ inputs.commit_sha }}" | cut -c1-7)
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          IMAGE_TAG="${{ inputs.environment_name }}-${SHORT_SHA}-${TIMESTAMP}"
+          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+      
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run lint
+      
+      - name: Run tests
+        working-directory: ./frontend
+        run: |
+          npm run test:ci
+      
+      - name: Build application
+        working-directory: ./frontend
+        env:
+          NEXT_PUBLIC_API_URL: ${{ inputs.backend_url }}
+          NEXT_PUBLIC_WS_URL: ${{ inputs.backend_url }}
+          NEXT_PUBLIC_ENVIRONMENT: staging
+        run: |
+          npm run build
+      
+      - name: Build and push Docker image
+        id: build
+        run: |
+          IMAGE_TAG="${{ steps.tag.outputs.image_tag }}"
+          IMAGE_URL="${{ inputs.registry_url }}/${{ secrets.GCP_PROJECT_ID }}/netra-frontend:$IMAGE_TAG"
+          
+          # Build with cache
+          docker buildx build \
+            --platform linux/amd64 \
+            --cache-from type=registry,ref=${{ inputs.registry_url }}/${{ secrets.GCP_PROJECT_ID }}/netra-frontend:cache \
+            --cache-to type=registry,ref=${{ inputs.registry_url }}/${{ secrets.GCP_PROJECT_ID }}/netra-frontend:cache,mode=max \
+            --build-arg COMMIT_SHA=${{ inputs.commit_sha }} \
+            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+            --build-arg NEXT_PUBLIC_API_URL=${{ inputs.backend_url }} \
+            --tag $IMAGE_URL \
+            --push \
+            --file frontend/Dockerfile \
+            ./frontend
+          
+          echo "image_url=$IMAGE_URL" >> $GITHUB_OUTPUT
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build-${{ steps.tag.outputs.image_tag }}
+          path: |
+            frontend/.next
+            frontend/out
+          retention-days: 7

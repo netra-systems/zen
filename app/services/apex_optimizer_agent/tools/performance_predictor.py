@@ -26,7 +26,8 @@ class PerformancePredictor(BaseTool):
         response = await llm.ainvoke(prediction_prompt)
         
         try:
-            predicted_latency = int(response.content)
+            content = response.content if hasattr(response, 'content') else str(response)
+            predicted_latency = int(content)
         except (ValueError, TypeError):
             predicted_latency = 250  # Default value if parsing fails
             

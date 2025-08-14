@@ -1,0 +1,236 @@
+name: Environment Status
+description: Check and report staging environment status
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        required: true
+        type: string
+      pr_number:
+        required: true
+        type: string
+
+jobs:
+  check-infrastructure:
+    name: Check Infrastructure
+    runs-on: ubuntu-latest
+    outputs:
+      cluster_exists: ${{ steps.check.outputs.cluster_exists }}
+      cluster_status: ${{ steps.check.outputs.cluster_status }}
+      node_count: ${{ steps.check.outputs.node_count }}
+    steps:
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+      
+      - name: Check GKE cluster
+        id: check
+        run: |
+          if gcloud container clusters describe \
+            ${{ inputs.environment_name }}-cluster \
+            --region ${{ env.GCP_REGION || 'us-central1' }} \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
+            &>/dev/null; then
+            
+            echo "cluster_exists=true" >> $GITHUB_OUTPUT
+            
+            STATUS=$(gcloud container clusters describe \
+              ${{ inputs.environment_name }}-cluster \
+              --region ${{ env.GCP_REGION || 'us-central1' }} \
+              --project ${{ secrets.GCP_PROJECT_ID }} \
+              --format="value(status)")
+            echo "cluster_status=$STATUS" >> $GITHUB_OUTPUT
+            
+            NODE_COUNT=$(gcloud container clusters describe \
+              ${{ inputs.environment_name }}-cluster \
+              --region ${{ env.GCP_REGION || 'us-central1' }} \
+              --project ${{ secrets.GCP_PROJECT_ID }} \
+              --format="value(currentNodeCount)")
+            echo "node_count=$NODE_COUNT" >> $GITHUB_OUTPUT
+          else
+            echo "cluster_exists=false" >> $GITHUB_OUTPUT
+            echo "cluster_status=NOT_FOUND" >> $GITHUB_OUTPUT
+            echo "node_count=0" >> $GITHUB_OUTPUT
+          fi
+  
+  check-services:
+    name: Check Services
+    needs: check-infrastructure
+    if: needs.check-infrastructure.outputs.cluster_exists == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      backend_status: ${{ steps.services.outputs.backend_status }}
+      frontend_status: ${{ steps.services.outputs.frontend_status }}
+      backend_replicas: ${{ steps.services.outputs.backend_replicas }}
+      frontend_replicas: ${{ steps.services.outputs.frontend_replicas }}
+    steps:
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+      
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials \
+            ${{ inputs.environment_name }}-cluster \
+            --region ${{ env.GCP_REGION || 'us-central1' }} \
+            --project ${{ secrets.GCP_PROJECT_ID }}
+      
+      - name: Check service deployments
+        id: services
+        run: |
+          # Check backend
+          if kubectl get deployment backend-deployment \
+            -n ${{ inputs.environment_name }} &>/dev/null; then
+            
+            BACKEND_STATUS=$(kubectl get deployment backend-deployment \
+              -n ${{ inputs.environment_name }} \
+              -o jsonpath='{.status.conditions[?(@.type=="Available")].status}')
+            echo "backend_status=$BACKEND_STATUS" >> $GITHUB_OUTPUT
+            
+            BACKEND_REPLICAS=$(kubectl get deployment backend-deployment \
+              -n ${{ inputs.environment_name }} \
+              -o jsonpath='{.status.readyReplicas}/{.status.replicas}')
+            echo "backend_replicas=$BACKEND_REPLICAS" >> $GITHUB_OUTPUT
+          else
+            echo "backend_status=NOT_DEPLOYED" >> $GITHUB_OUTPUT
+            echo "backend_replicas=0/0" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check frontend
+          if kubectl get deployment frontend-deployment \
+            -n ${{ inputs.environment_name }} &>/dev/null; then
+            
+            FRONTEND_STATUS=$(kubectl get deployment frontend-deployment \
+              -n ${{ inputs.environment_name }} \
+              -o jsonpath='{.status.conditions[?(@.type=="Available")].status}')
+            echo "frontend_status=$FRONTEND_STATUS" >> $GITHUB_OUTPUT
+            
+            FRONTEND_REPLICAS=$(kubectl get deployment frontend-deployment \
+              -n ${{ inputs.environment_name }} \
+              -o jsonpath='{.status.readyReplicas}/{.status.replicas}')
+            echo "frontend_replicas=$FRONTEND_REPLICAS" >> $GITHUB_OUTPUT
+          else
+            echo "frontend_status=NOT_DEPLOYED" >> $GITHUB_OUTPUT
+            echo "frontend_replicas=0/0" >> $GITHUB_OUTPUT
+          fi
+  
+  check-endpoints:
+    name: Check Endpoints
+    needs: check-infrastructure
+    if: needs.check-infrastructure.outputs.cluster_exists == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      backend_url: ${{ steps.endpoints.outputs.backend_url }}
+      frontend_url: ${{ steps.endpoints.outputs.frontend_url }}
+      backend_health: ${{ steps.endpoints.outputs.backend_health }}
+      frontend_health: ${{ steps.endpoints.outputs.frontend_health }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.5.0'
+          terraform_wrapper: false
+      
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+      
+      - name: Get Terraform outputs
+        id: endpoints
+        working-directory: ./terraform/staging
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="prefix=${{ inputs.environment_name }}"
+          
+          BACKEND_URL=$(terraform output -raw backend_url 2>/dev/null || echo "")
+          FRONTEND_URL=$(terraform output -raw frontend_url 2>/dev/null || echo "")
+          
+          echo "backend_url=$BACKEND_URL" >> $GITHUB_OUTPUT
+          echo "frontend_url=$FRONTEND_URL" >> $GITHUB_OUTPUT
+          
+          # Check health endpoints
+          if [[ -n "$BACKEND_URL" ]]; then
+            if curl -f -s -o /dev/null -w "%{http_code}" ${BACKEND_URL}/health | grep -q "200"; then
+              echo "backend_health=HEALTHY" >> $GITHUB_OUTPUT
+            else
+              echo "backend_health=UNHEALTHY" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "backend_health=UNKNOWN" >> $GITHUB_OUTPUT
+          fi
+          
+          if [[ -n "$FRONTEND_URL" ]]; then
+            if curl -f -s -o /dev/null -w "%{http_code}" ${FRONTEND_URL} | grep -q "200"; then
+              echo "frontend_health=HEALTHY" >> $GITHUB_OUTPUT
+            else
+              echo "frontend_health=UNHEALTHY" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "frontend_health=UNKNOWN" >> $GITHUB_OUTPUT
+          fi
+  
+  generate-report:
+    name: Generate Status Report
+    needs: [check-infrastructure, check-services, check-endpoints]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate status report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const infrastructure = ${{ toJSON(needs.check-infrastructure.outputs) }};
+            const services = ${{ toJSON(needs.check-services.outputs) }};
+            const endpoints = ${{ toJSON(needs.check-endpoints.outputs) }};
+            
+            let statusEmoji = '🟢';
+            let statusText = 'Healthy';
+            
+            if (infrastructure.cluster_exists !== 'true') {
+              statusEmoji = '⚫';
+              statusText = 'Not Deployed';
+            } else if (services.backend_status !== 'True' || services.frontend_status !== 'True') {
+              statusEmoji = '🟡';
+              statusText = 'Partial';
+            } else if (endpoints.backend_health !== 'HEALTHY' || endpoints.frontend_health !== 'HEALTHY') {
+              statusEmoji = '🔴';
+              statusText = 'Unhealthy';
+            }
+            
+            const comment = `## ${statusEmoji} Staging Environment Status: ${statusText}
+            
+            Environment: \`${{ inputs.environment_name }}\`
+            
+            ### Infrastructure
+            - **Cluster**: ${infrastructure.cluster_exists === 'true' ? '✅ Exists' : '❌ Not Found'}
+            - **Status**: ${infrastructure.cluster_status || 'N/A'}
+            - **Nodes**: ${infrastructure.node_count || '0'}
+            
+            ### Services
+            - **Backend**: ${services.backend_status === 'True' ? '✅' : '❌'} ${services.backend_status || 'Not Deployed'} (${services.backend_replicas || '0/0'} replicas)
+            - **Frontend**: ${services.frontend_status === 'True' ? '✅' : '❌'} ${services.frontend_status || 'Not Deployed'} (${services.frontend_replicas || '0/0'} replicas)
+            
+            ### Endpoints
+            - **Backend URL**: ${endpoints.backend_url || 'Not Available'}
+              - Health: ${endpoints.backend_health === 'HEALTHY' ? '✅' : '❌'} ${endpoints.backend_health || 'Unknown'}
+            - **Frontend URL**: ${endpoints.frontend_url || 'Not Available'}
+              - Health: ${endpoints.frontend_health === 'HEALTHY' ? '✅' : '❌'} ${endpoints.frontend_health || 'Unknown'}
+            
+            ---
+            _Status check completed at ${new Date().toISOString()}_
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ inputs.pr_number }},
+              body: comment
+            });

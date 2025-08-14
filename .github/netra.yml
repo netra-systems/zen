@@ -79,7 +79,7 @@ auto_fix:
       
     - name: gemini
       priority: 2
-      model: gemini-1.5-pro
+      model: gemini-2.5-pro
       enabled: true
       
     - name: gpt4

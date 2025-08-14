@@ -12,8 +12,8 @@ describe('User Profile and Settings Management', () => {
 
   it('should display and update user profile information', () => {
     // Navigate to profile settings
-    cy.get('button[aria-label="Toggle user menu"]').click();
-    cy.contains('Settings').click();
+    // Note: User menu navigation not available in current UI
+    cy.visit('/settings');
 
     // Verify profile information is displayed
     cy.get('input[name="full_name"]').should('have.value', 'Test User');
@@ -43,15 +43,14 @@ describe('User Profile and Settings Management', () => {
     // Verify success message
     cy.contains('Profile updated successfully').should('be.visible');
 
-    // Verify updated name in header
-    cy.get('button[aria-label="Toggle user menu"]').click();
-    cy.contains(newName).should('be.visible');
+    // Verify updated name is saved
+    cy.reload();
+    cy.get('input[name="full_name"]').should('have.value', newName);
   });
 
   it('should manage API keys and credentials', () => {
     // Navigate to API settings
-    cy.get('button[aria-label="Toggle user menu"]').click();
-    cy.contains('Settings').click();
+    cy.visit('/settings');
     cy.get('button').contains('API Keys').click();
 
     // Mock API keys endpoint
@@ -162,8 +161,7 @@ describe('User Profile and Settings Management', () => {
 
   it('should manage notification preferences', () => {
     // Navigate to notification settings
-    cy.get('button[aria-label="Toggle user menu"]').click();
-    cy.contains('Settings').click();
+    cy.visit('/settings');
     cy.get('button').contains('Notifications').click();
 
     // Mock notifications settings endpoint
@@ -250,8 +248,7 @@ describe('User Profile and Settings Management', () => {
 
   it('should manage application preferences and themes', () => {
     // Navigate to preferences
-    cy.get('button[aria-label="Toggle user menu"]').click();
-    cy.contains('Settings').click();
+    cy.visit('/settings');
     cy.get('button').contains('Preferences').click();
 
     // Mock preferences endpoint
@@ -318,8 +315,7 @@ describe('User Profile and Settings Management', () => {
 
   it('should handle password change', () => {
     // Navigate to security settings
-    cy.get('button[aria-label="Toggle user menu"]').click();
-    cy.contains('Settings').click();
+    cy.visit('/settings');
     cy.get('button').contains('Security').click();
 
     // Fill in password change form
@@ -367,8 +363,7 @@ describe('User Profile and Settings Management', () => {
 
   it('should manage two-factor authentication', () => {
     // Navigate to security settings
-    cy.get('button[aria-label="Toggle user menu"]').click();
-    cy.contains('Settings').click();
+    cy.visit('/settings');
     cy.get('button').contains('Security').click();
 
     // Mock 2FA status
@@ -457,8 +452,7 @@ describe('User Profile and Settings Management', () => {
 
   it('should export and delete user data', () => {
     // Navigate to privacy settings
-    cy.get('button[aria-label="Toggle user menu"]').click();
-    cy.contains('Settings').click();
+    cy.visit('/settings');
     cy.get('button').contains('Privacy').click();
 
     // Request data export
@@ -531,8 +525,7 @@ describe('User Profile and Settings Management', () => {
 
   it('should manage session and device management', () => {
     // Navigate to security settings
-    cy.get('button[aria-label="Toggle user menu"]').click();
-    cy.contains('Settings').click();
+    cy.visit('/settings');
     cy.get('button').contains('Security').click();
     cy.get('button').contains('Active Sessions').click();
 

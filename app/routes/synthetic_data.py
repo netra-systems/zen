@@ -3,18 +3,22 @@ Synthetic Data Generation API Routes
 Provides endpoints for generating and managing synthetic AI workload data
 """
 
-from fastapi import APIRouter, Depends, Request, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Tuple
 from pydantic import BaseModel, Field
 from datetime import datetime
 
 from app import schemas
 from app.services.synthetic_data_service import synthetic_data_service
-from app.services.corpus_service import corpus_service
-from app.dependencies import get_db_session
+from app.dependencies import get_db_session, get_async_db
 from app.auth.auth_dependencies import get_current_user
 from app.db.models_postgres import User
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.services.synthetic_data_service import SyntheticDataService
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # Request/Response Models
@@ -22,7 +26,7 @@ class ToolConfig(BaseModel):
     """Tool configuration for generation"""
     name: str
     type: str
-    latency_ms_range: tuple[int, int] = Field(default=(50, 500))
+    latency_ms_range: Tuple[int, int] = Field(default=(50, 500))
     failure_rate: float = Field(default=0.01, ge=0, le=1)
 
 
@@ -87,41 +91,51 @@ async def generate_synthetic_data(
     db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Initiate synthetic data generation job
-    
-    Creates a background task to generate synthetic AI workload data
-    based on the provided configuration. Data is streamed to ClickHouse
-    in real-time with progress updates via WebSocket.
-    """
+    """Initiate synthetic data generation job"""
+    config = _build_generation_config(request)
+    result = await _execute_generation(db, config, current_user.id, request.corpus_id)
+    return _build_generation_response(result, request.scale_parameters.num_traces)
+
+
+def _build_generation_config(request: GenerationRequest) -> schemas.LogGenParams:
+    """Build generation config from request"""
+    return schemas.LogGenParams(
+        num_logs=request.scale_parameters.num_traces,
+        corpus_id=request.corpus_id
+    )
+
+
+async def _execute_generation(
+    db: Session,
+    config: schemas.LogGenParams,
+    user_id: int,
+    corpus_id: Optional[str]
+) -> Dict:
+    """Execute data generation"""
     try:
-        # Convert request to internal schema
-        config = schemas.LogGenParams(
-            num_logs=request.scale_parameters.num_traces,
-            corpus_id=request.corpus_id
-        )
-        
-        # Generate synthetic data
-        result = await synthetic_data_service.generate_synthetic_data(
+        return await synthetic_data_service.generate_synthetic_data(
             db=db,
             config=config,
-            user_id=current_user.id,
-            corpus_id=request.corpus_id
+            user_id=user_id,
+            corpus_id=corpus_id
         )
-        
-        # Calculate estimated duration (rough estimate)
-        estimated_duration = request.scale_parameters.num_traces / 100  # 100 records/second estimate
-        
-        return GenerationResponse(
-            job_id=result["job_id"],
-            status=result["status"],
-            estimated_duration_seconds=int(estimated_duration),
-            websocket_channel=result["websocket_channel"],
-            table_name=result["table_name"]
-        )
-        
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+def _build_generation_response(
+    result: Dict,
+    num_traces: int
+) -> GenerationResponse:
+    """Build generation response"""
+    duration = num_traces / 100
+    return GenerationResponse(
+        job_id=result["job_id"],
+        status=result["status"],
+        estimated_duration_seconds=int(duration),
+        websocket_channel=result["websocket_channel"],
+        table_name=result["table_name"]
+    )
 
 
 @router.get("/status/{job_id}", response_model=JobStatusResponse)
@@ -129,33 +143,43 @@ async def get_generation_status(
     job_id: str,
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Get generation job status
-    
-    Returns the current status and progress of a generation job.
-    """
-    job_status = await synthetic_data_service.get_job_status(job_id)
-    
-    if not job_status:
+    """Get generation job status"""
+    job_status = await _fetch_job_status(job_id, current_user.id)
+    return _build_status_response(job_id, job_status)
+
+
+async def _fetch_job_status(job_id: str, user_id: int) -> Dict:
+    """Fetch and validate job status"""
+    status = await synthetic_data_service.get_job_status(job_id)
+    if not status:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
-    
-    # Check if user owns this job
-    if job_status.get("user_id") != current_user.id:
+    if status.get("user_id") != user_id:
         raise HTTPException(status_code=403, detail="Access denied")
-    
+    return status
+
+
+def _build_status_response(job_id: str, status: Dict) -> JobStatusResponse:
+    """Build status response"""
+    progress = _calculate_progress(status)
     return JobStatusResponse(
         job_id=job_id,
-        status=job_status["status"],
-        progress_percentage=(
-            job_status["records_generated"] / job_status["config"].num_logs * 100
-            if job_status["config"] else 0
-        ),
-        records_generated=job_status["records_generated"],
-        records_ingested=job_status["records_ingested"],
-        errors=job_status["errors"],
-        started_at=job_status["start_time"],
-        completed_at=job_status.get("end_time")
+        status=status["status"],
+        progress_percentage=progress,
+        records_generated=status["records_generated"],
+        records_ingested=status["records_ingested"],
+        errors=status["errors"],
+        started_at=status["start_time"],
+        completed_at=status.get("end_time")
     )
+
+
+def _calculate_progress(status: Dict) -> float:
+    """Calculate generation progress"""
+    if not status.get("config"):
+        return 0
+    generated = status["records_generated"]
+    total = status["config"].num_logs
+    return (generated / total * 100) if total > 0 else 0
 
 
 @router.post("/cancel/{job_id}")
@@ -163,30 +187,25 @@ async def cancel_generation(
     job_id: str,
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Cancel running generation job
-    
-    Stops a running generation job and returns the number of records
-    that were completed before cancellation.
-    """
-    job_status = await synthetic_data_service.get_job_status(job_id)
-    
-    if not job_status:
-        raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
-    
-    # Check if user owns this job
-    if job_status.get("user_id") != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied")
-    
+    """Cancel running generation job"""
+    status = await _fetch_job_status(job_id, current_user.id)
+    await _cancel_job(job_id)
+    return _build_cancel_response(job_id, status)
+
+
+async def _cancel_job(job_id: str):
+    """Cancel job execution"""
     success = await synthetic_data_service.cancel_job(job_id)
-    
     if not success:
         raise HTTPException(status_code=400, detail="Failed to cancel job")
-    
+
+
+def _build_cancel_response(job_id: str, status: Dict) -> Dict:
+    """Build cancellation response"""
     return {
         "job_id": job_id,
         "status": "cancelled",
-        "records_completed": job_status["records_generated"]
+        "records_completed": status["records_generated"]
     }
 
 
@@ -197,231 +216,68 @@ async def preview_synthetic_data(
     sample_size: int = Query(10, ge=1, le=100),
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Preview sample generated data before full generation
-    
-    Generates a small sample of synthetic data to preview the output
-    before committing to a full generation job.
-    """
-    samples = await synthetic_data_service.get_preview(
+    """Preview sample generated data"""
+    samples = await _get_preview_samples(corpus_id, workload_type, sample_size)
+    characteristics = _calculate_characteristics(samples)
+    return PreviewResponse(
+        samples=samples,
+        estimated_characteristics=characteristics
+    )
+
+
+async def _get_preview_samples(
+    corpus_id: Optional[str],
+    workload_type: str,
+    sample_size: int
+) -> List[Dict]:
+    """Get preview samples"""
+    return await synthetic_data_service.get_preview(
         corpus_id=corpus_id,
         workload_type=workload_type,
         sample_size=sample_size
     )
-    
-    # Calculate estimated characteristics
-    total_latency = sum(
-        s["metrics"]["total_latency_ms"] for s in samples
-    ) / len(samples) if samples else 0
-    
-    tool_diversity = len(set(
-        tool for s in samples 
-        for tool in s["tool_invocations"]
-    )) if samples else 0
-    
-    estimated_characteristics = {
-        "avg_latency_ms": total_latency,
-        "tool_diversity": tool_diversity,
+
+
+def _calculate_characteristics(samples: List[Dict]) -> Dict:
+    """Calculate sample characteristics"""
+    if not samples:
+        return {"avg_latency_ms": 0, "tool_diversity": 0, "sample_count": 0}
+    latency = _calculate_avg_latency(samples)
+    diversity = _calculate_tool_diversity(samples)
+    return {
+        "avg_latency_ms": latency,
+        "tool_diversity": diversity,
         "sample_count": len(samples)
     }
-    
-    return PreviewResponse(
-        samples=samples,
-        estimated_characteristics=estimated_characteristics
-    )
 
 
-# Corpus Management Endpoints
-@router.post("/corpus/create")
-async def create_corpus(
-    corpus_data: schemas.CorpusCreate,
-    content_source: str = Query("upload", pattern="^(upload|generate|import)$"),
-    db: Session = Depends(get_db_session),
-    current_user: User = Depends(get_current_user),
-):
-    """
-    Create new corpus table in ClickHouse
-    
-    Creates a new corpus for storing content that will be used
-    in synthetic data generation.
-    """
-    from ..services.corpus_service import ContentSource
-    
-    source = ContentSource[content_source.upper()]
-    
-    corpus = await corpus_service.create_corpus(
-        db=db,
-        corpus_data=corpus_data,
-        user_id=current_user.id,
-        content_source=source
-    )
-    
-    return {
-        "corpus_id": corpus.id,
-        "table_name": corpus.table_name,
-        "status": corpus.status
-    }
+def _calculate_avg_latency(samples: List[Dict]) -> float:
+    """Calculate average latency"""
+    total = sum(s["metrics"]["total_latency_ms"] for s in samples)
+    return total / len(samples)
 
 
-@router.post("/corpus/{corpus_id}/upload")
-async def upload_corpus_content(
-    corpus_id: str,
-    records: List[Dict],
-    batch_id: Optional[str] = None,
-    is_final_batch: bool = False,
-    db: Session = Depends(get_db_session),
-    current_user: User = Depends(get_current_user),
-):
-    """
-    Upload content to corpus
-    
-    Uploads content records to a corpus. Supports batch uploads
-    where multiple requests can be made with the same batch_id.
-    """
-    # Verify corpus ownership
-    corpus = await corpus_service.get_corpus(db, corpus_id)
-    if not corpus:
-        raise HTTPException(status_code=404, detail="Corpus not found")
-    
-    if corpus.created_by_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied")
-    
-    result = await corpus_service.upload_content(
-        db=db,
-        corpus_id=corpus_id,
-        records=records,
-        batch_id=batch_id,
-        is_final_batch=is_final_batch
-    )
-    
-    return result
+def _calculate_tool_diversity(samples: List[Dict]) -> int:
+    """Calculate tool diversity"""
+    tools = set()
+    for sample in samples:
+        tools.update(sample.get("tool_invocations", []))
+    return len(tools)
 
 
-@router.get("/corpus/{corpus_id}/content")
-async def get_corpus_content(
-    corpus_id: str,
-    limit: int = Query(100, ge=1, le=1000),
-    offset: int = Query(0, ge=0),
-    workload_type: Optional[str] = None,
-    db: Session = Depends(get_db_session),
-    current_user: User = Depends(get_current_user),
-):
-    """
-    Get corpus content
-    
-    Retrieves content from a corpus with optional filtering.
-    """
-    # Verify corpus ownership
-    corpus = await corpus_service.get_corpus(db, corpus_id)
-    if not corpus:
-        raise HTTPException(status_code=404, detail="Corpus not found")
-    
-    if corpus.created_by_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied")
-    
-    content = await corpus_service.get_corpus_content(
-        db=db,
-        corpus_id=corpus_id,
-        limit=limit,
-        offset=offset,
-        workload_type=workload_type
-    )
-    
-    return {"content": content}
+# Corpus endpoints moved to synthetic_data_corpus.py for modularity
+
+@router.get("/templates")
+async def get_templates(db: AsyncSession = Depends(get_async_db)):
+    """Get available templates"""
+    return await _fetch_templates(db)
 
 
-@router.get("/corpus/{corpus_id}/statistics")
-async def get_corpus_statistics(
-    corpus_id: str,
-    db: Session = Depends(get_db_session),
-    current_user: User = Depends(get_current_user),
-):
-    """
-    Get corpus statistics
-    
-    Returns statistical information about a corpus including
-    record counts, workload distribution, and content metrics.
-    """
-    # Verify corpus ownership
-    corpus = await corpus_service.get_corpus(db, corpus_id)
-    if not corpus:
-        raise HTTPException(status_code=404, detail="Corpus not found")
-    
-    if corpus.created_by_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied")
-    
-    stats = await corpus_service.get_corpus_statistics(db, corpus_id)
-    
-    if not stats:
-        raise HTTPException(status_code=500, detail="Failed to get statistics")
-    
-    return stats
-
-
-@router.delete("/corpus/{corpus_id}")
-async def delete_corpus(
-    corpus_id: str,
-    db: Session = Depends(get_db_session),
-    current_user: User = Depends(get_current_user),
-):
-    """
-    Delete corpus
-    
-    Deletes a corpus and its associated ClickHouse table.
-    """
-    # Verify corpus ownership
-    corpus = await corpus_service.get_corpus(db, corpus_id)
-    if not corpus:
-        raise HTTPException(status_code=404, detail="Corpus not found")
-    
-    if corpus.created_by_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied")
-    
-    success = await corpus_service.delete_corpus(db, corpus_id)
-    
-    if not success:
-        raise HTTPException(status_code=500, detail="Failed to delete corpus")
-    
-    return {"message": "Corpus deleted successfully"}
-
-
-@router.post("/corpus/{corpus_id}/clone")
-async def clone_corpus(
-    corpus_id: str,
-    new_name: str,
-    db: Session = Depends(get_db_session),
-    current_user: User = Depends(get_current_user),
-):
-    """
-    Clone an existing corpus
-    
-    Creates a copy of an existing corpus with a new name.
-    """
-    # Verify corpus exists and user has access
-    corpus = await corpus_service.get_corpus(db, corpus_id)
-    if not corpus:
-        raise HTTPException(status_code=404, detail="Corpus not found")
-    
-    # For cloning, we allow if user owns it or it's public (simplified for now)
-    if corpus.created_by_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied")
-    
-    new_corpus = await corpus_service.clone_corpus(
-        db=db,
-        source_corpus_id=corpus_id,
-        new_name=new_name,
-        user_id=current_user.id
-    )
-    
-    if not new_corpus:
-        raise HTTPException(status_code=500, detail="Failed to clone corpus")
-    
-    return {
-        "corpus_id": new_corpus.id,
-        "table_name": new_corpus.table_name,
-        "status": new_corpus.status
-    }
-
-async def get_templates(*args, **kwargs):
-    """Test stub implementation for get_templates."""
-    return {"status": "ok"}
+async def _fetch_templates(db: AsyncSession) -> Dict:
+    """Fetch synthetic data templates"""
+    try:
+        templates = await SyntheticDataService.get_available_templates(db)
+        return {"templates": templates, "status": "ok"}
+    except Exception as e:
+        logger.error(f"Error fetching templates: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))

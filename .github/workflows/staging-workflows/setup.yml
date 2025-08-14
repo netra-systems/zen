@@ -1,0 +1,135 @@
+name: Environment Setup
+description: Configure environment parameters and determine action
+
+on:
+  workflow_call:
+    inputs:
+      event_name:
+        required: true
+        type: string
+      event_action:
+        required: false
+        type: string
+      pr_number:
+        required: false
+        type: string
+      dispatch_action:
+        required: false
+        type: string
+      branch:
+        required: false
+        type: string
+        description: 'Branch name for deployment'
+    outputs:
+      environment_name:
+        description: 'Staging environment name'
+        value: ${{ jobs.configure.outputs.environment_name }}
+      action:
+        description: 'Action to perform'
+        value: ${{ jobs.configure.outputs.action }}
+      pr_number:
+        description: 'Pull request number'
+        value: ${{ jobs.configure.outputs.pr_number }}
+      branch_name:
+        description: 'Branch name for the PR'
+        value: ${{ jobs.configure.outputs.branch_name }}
+      commit_sha:
+        description: 'Commit SHA to deploy'
+        value: ${{ jobs.configure.outputs.commit_sha }}
+
+env:
+  PROJECT_NAME: netra-staging
+
+jobs:
+  configure:
+    name: Configure Environment
+    runs-on: ubuntu-latest
+    outputs:
+      environment_name: ${{ steps.config.outputs.environment_name }}
+      action: ${{ steps.config.outputs.action }}
+      pr_number: ${{ steps.config.outputs.pr_number }}
+      branch_name: ${{ steps.config.outputs.branch_name }}
+      commit_sha: ${{ steps.config.outputs.commit_sha }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Configure environment parameters
+        id: config
+        run: |
+          # Determine PR number and action based on trigger
+          if [[ "${{ inputs.event_name }}" == "pull_request" ]]; then
+            PR_NUMBER="${{ inputs.pr_number }}"
+            if [[ "${{ inputs.event_action }}" == "closed" ]]; then
+              ACTION="destroy"
+            else
+              ACTION="deploy"
+            fi
+            BRANCH_NAME="${{ github.head_ref }}"
+            COMMIT_SHA="${{ github.event.pull_request.head.sha }}"
+          elif [[ "${{ inputs.event_name }}" == "workflow_dispatch" ]]; then
+            PR_NUMBER="${{ inputs.pr_number }}"
+            ACTION="${{ inputs.dispatch_action }}"
+            
+            # Use provided branch or fetch from PR
+            if [[ -n "${{ inputs.branch }}" ]]; then
+              BRANCH_NAME="${{ inputs.branch }}"
+              COMMIT_SHA="${{ github.sha }}"
+              # If no PR number, generate one from branch
+              if [[ -z "$PR_NUMBER" ]]; then
+                PR_NUMBER="branch-${BRANCH_NAME//\//-}"
+              fi
+            elif [[ -n "$PR_NUMBER" ]]; then
+              # Fetch PR details for branch and commit
+              BRANCH_NAME=$(gh pr view $PR_NUMBER --json headRefName -q .headRefName)
+              COMMIT_SHA=$(gh pr view $PR_NUMBER --json headRefOid -q .headRefOid)
+            else
+              echo "Error: Either PR number or branch must be provided"
+              exit 1
+            fi
+          else
+            # repository_dispatch
+            PR_NUMBER="${{ inputs.pr_number }}"
+            ACTION="${{ inputs.dispatch_action }}"
+            BRANCH_NAME=$(gh pr view $PR_NUMBER --json headRefName -q .headRefName)
+            COMMIT_SHA=$(gh pr view $PR_NUMBER --json headRefOid -q .headRefOid)
+          fi
+          
+          # Validate PR number
+          if [[ -z "$PR_NUMBER" ]]; then
+            echo "Error: PR number is required"
+            exit 1
+          fi
+          
+          # Generate environment name (sanitize for DNS)
+          ENV_NAME="${{ env.PROJECT_NAME }}-${PR_NUMBER//[^a-zA-Z0-9-]/-}"
+          ENV_NAME="${ENV_NAME,,}" # Convert to lowercase
+          ENV_NAME="${ENV_NAME:0:63}" # Truncate to 63 chars
+          
+          # Output configuration
+          echo "environment_name=$ENV_NAME" >> $GITHUB_OUTPUT
+          echo "action=$ACTION" >> $GITHUB_OUTPUT
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          
+          # Log configuration
+          echo "::notice::Environment: $ENV_NAME"
+          echo "::notice::Action: $ACTION"
+          echo "::notice::PR: #$PR_NUMBER"
+          echo "::notice::Branch: $BRANCH_NAME"
+          echo "::notice::Commit: $COMMIT_SHA"
+        env:
+          GH_TOKEN: ${{ github.token }}
+      
+      - name: Validate action
+        run: |
+          ACTION="${{ steps.config.outputs.action }}"
+          VALID_ACTIONS="deploy destroy restart status"
+          
+          if [[ ! " $VALID_ACTIONS " =~ " $ACTION " ]]; then
+            echo "Error: Invalid action '$ACTION'"
+            echo "Valid actions: $VALID_ACTIONS"
+            exit 1
+          fi

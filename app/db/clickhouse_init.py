@@ -27,12 +27,24 @@ async def initialize_clickhouse_tables() -> None:
     This function should be called on application startup.
     """
     # Skip initialization in test mode or when ClickHouse is disabled
+    import os
+    
     if settings.environment == "testing":
         logger.info("Skipping ClickHouse initialization in testing environment")
         return
     
+    # Check service mode from environment (set by dev launcher)
+    clickhouse_mode = os.environ.get("CLICKHOUSE_MODE", "shared").lower()
+    
+    if clickhouse_mode == "disabled":
+        logger.info("ClickHouse is disabled (mode: disabled) - skipping initialization")
+        return
+    elif clickhouse_mode == "mock":
+        logger.info("ClickHouse is running in mock mode - skipping initialization")
+        return
+    
     if settings.environment == "development" and not settings.dev_mode_clickhouse_enabled:
-        logger.info("ClickHouse disabled in development mode - skipping initialization")
+        logger.info("ClickHouse disabled in development configuration - skipping initialization")
         return
     
     try:

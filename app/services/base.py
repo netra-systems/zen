@@ -1,6 +1,7 @@
 """Enhanced base service classes using the new service interfaces."""
 
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+from uuid import UUID
 from datetime import datetime, UTC
 
 from fastapi.encoders import jsonable_encoder
@@ -27,7 +28,13 @@ UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 
 
 class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
-    """Legacy CRUD base class - maintained for backward compatibility."""
+    """Legacy CRUD base class - DEPRECATED
+    
+    This class is deprecated. Use the new service interfaces from app.core.service_interfaces
+    or EnhancedCRUDService for new implementations.
+    
+    TODO: Migrate app.services.user_service to use EnhancedCRUDService
+    """
     
     def __init__(self, model: Type[ModelType]):
         """
@@ -35,10 +42,18 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         **Parameters**
         * `model`: A SQLAlchemy model class
         * `schema`: A Pydantic model (schema) class
+        
+        DEPRECATED: Use EnhancedCRUDService or proper service interfaces instead.
         """
+        import warnings
+        warnings.warn(
+            "CRUDBase is deprecated. Use EnhancedCRUDService or proper service interfaces.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         self.model = model
 
-    async def get(self, db: AsyncSession, id: Any) -> Optional[ModelType]:
+    async def get(self, db: AsyncSession, id: Union[int, str, UUID]) -> Optional[ModelType]:
         result = await db.execute(select(self.model).filter(self.model.id == id))
         return result.scalars().first()
 

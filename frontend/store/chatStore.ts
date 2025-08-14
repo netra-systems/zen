@@ -34,7 +34,7 @@ interface ChatState {
   queuedSubAgents: string[];
   
   // Actions
-  addMessage: (message: any) => void;
+  addMessage: (message: Message) => void;
   updateAgentStatus: (status: AgentStatus, progress?: number) => void;
   setCurrentRunId: (runId: string | null) => void;
   setProcessing: (isProcessing: boolean) => void;

@@ -88,7 +88,8 @@ class PolicyProposer(BaseTool):
         llm = context.llm_manager.get_llm(self.llm_name or "default")
         response = await llm.ainvoke(prompt)
         try:
-            return PredictedOutcome.model_validate_json(response.content)
+            content = response.content if hasattr(response, 'content') else str(response)
+            return PredictedOutcome.model_validate_json(content)
         except Exception as e:
             # Handle parsing errors
             return None

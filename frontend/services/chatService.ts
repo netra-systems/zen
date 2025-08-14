@@ -1,4 +1,5 @@
 import { messageService } from './messageService';
+import { logger } from '@/lib/logger';
 
 export const chatService = {
   // Wrap messageService methods for backward compatibility
@@ -14,7 +15,11 @@ export const chatService = {
   
   clearChat: async (threadId: string) => {
     // Implementation would clear all messages in a thread
-    console.warn('clearChat not implemented');
+    logger.warn('clearChat method not implemented', {
+      component: 'chatService',
+      action: 'clear_chat_not_implemented',
+      metadata: { threadId }
+    });
     return { success: true };
   }
 };

@@ -10,7 +10,7 @@
 # ================================
 from typing import List, Dict, Any, Optional
 from langchain_core.tools import BaseTool
-from app.schemas import ToolResult, ToolStatus, ToolInput
+from app.schemas import ToolResult, ToolStatus, ToolInput, SimpleToolPayload
 from app.agents.state import DeepAgentState
 from app.logging_config import central_logger
 
@@ -66,7 +66,9 @@ class ToolDispatcher:
         try:
             # Tools expect the kwargs as a single dict argument
             result = await tool.arun(kwargs)
-            return ToolResult(tool_input=tool_input, status=ToolStatus.SUCCESS, payload=result)
+            # Use SimpleToolPayload for structured result handling
+            payload = SimpleToolPayload(result=result)
+            return ToolResult(tool_input=tool_input, status=ToolStatus.SUCCESS, payload=payload)
         except Exception as e:
             return ToolResult(tool_input=tool_input, status=ToolStatus.ERROR, message=str(e))
     

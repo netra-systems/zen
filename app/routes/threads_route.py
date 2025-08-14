@@ -6,7 +6,7 @@ Handles thread CRUD operations and thread history.
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
-from app.db.postgres import get_async_db as get_db
+from app.dependencies import DbDep
 from app.services.database.thread_repository import ThreadRepository
 from app.services.database.message_repository import MessageRepository
 from app.logging_config import central_logger
@@ -44,7 +44,7 @@ class ThreadResponse(BaseModel):
 
 @router.get("/", response_model=List[ThreadResponse])
 async def list_threads(
-    db: AsyncSession = Depends(get_db),
+    db: DbDep,
     current_user = Depends(get_current_active_user),
     limit: int = Query(20, le=100),
     offset: int = Query(0, ge=0)
@@ -81,7 +81,7 @@ async def list_threads(
 @router.post("/", response_model=ThreadResponse)
 async def create_thread(
     thread_data: ThreadCreate,
-    db: AsyncSession = Depends(get_db),
+    db: DbDep,
     current_user = Depends(get_current_active_user)
 ):
     """Create a new thread"""
@@ -128,7 +128,7 @@ async def create_thread(
 @router.get("/{thread_id}", response_model=ThreadResponse)
 async def get_thread(
     thread_id: str,
-    db: AsyncSession = Depends(get_db),
+    db: DbDep,
     current_user = Depends(get_current_active_user)
 ):
     """Get a specific thread"""
@@ -167,7 +167,7 @@ async def get_thread(
 async def update_thread(
     thread_id: str,
     thread_update: ThreadUpdate,
-    db: AsyncSession = Depends(get_db),
+    db: DbDep,
     current_user = Depends(get_current_active_user)
 ):
     """Update a thread"""
@@ -219,7 +219,7 @@ async def update_thread(
 @router.delete("/{thread_id}")
 async def delete_thread(
     thread_id: str,
-    db: AsyncSession = Depends(get_db),
+    db: DbDep,
     current_user = Depends(get_current_active_user)
 ):
     """Delete (archive) a thread"""
@@ -252,7 +252,7 @@ async def delete_thread(
 @router.get("/{thread_id}/messages")
 async def get_thread_messages(
     thread_id: str,
-    db: AsyncSession = Depends(get_db),
+    db: DbDep,
     current_user = Depends(get_current_active_user),
     limit: int = Query(50, le=100),
     offset: int = Query(0, ge=0)
@@ -305,7 +305,7 @@ async def get_thread_messages(
 @router.post("/{thread_id}/auto-rename")
 async def auto_rename_thread(
     thread_id: str,
-    db: AsyncSession = Depends(get_db),
+    db: DbDep,
     current_user = Depends(get_current_active_user)
 ):
     """Automatically generate a title for thread based on first message"""

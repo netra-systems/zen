@@ -1,8 +1,10 @@
 from contextlib import contextmanager, asynccontextmanager
-from typing import Optional, Generator, AsyncGenerator
+from typing import Optional, Generator, AsyncGenerator, Union
 from sqlalchemy import create_engine, pool, event
+from sqlalchemy.engine import Connection
+from sqlalchemy.pool import Pool, ConnectionPoolEntry, _ConnectionFairy
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import QueuePool, NullPool, AsyncAdaptedQueuePool
 from app.config import settings
 from app.logging_config import central_logger
@@ -51,7 +53,7 @@ class Database:
     def _setup_connection_events(self):
         """Setup database connection event listeners for monitoring and configuration."""
         @event.listens_for(self.engine, "connect")
-        def receive_connect(dbapi_conn, connection_record):
+        def receive_connect(dbapi_conn: Connection, connection_record: ConnectionPoolEntry) -> None:
             connection_record.info['pid'] = dbapi_conn.get_backend_pid() if hasattr(dbapi_conn, 'get_backend_pid') else None
             
             # Set statement timeout for all connections
@@ -63,7 +65,7 @@ class Database:
             logger.debug(f"Database connection established with safety limits: {connection_record.info.get('pid')}")
 
         @event.listens_for(self.engine, "checkout")
-        def receive_checkout(dbapi_conn, connection_record, connection_proxy):
+        def receive_checkout(dbapi_conn: Connection, connection_record: ConnectionPoolEntry, connection_proxy: _ConnectionFairy) -> None:
             # Track pool usage for monitoring
             pool = self.engine.pool
             if hasattr(pool, 'size') and hasattr(pool, 'overflow'):
@@ -104,25 +106,43 @@ class Database:
             logger.info("Database connections closed")
 
 # PostgreSQL async engine with proper configuration
-async_engine: Optional[any] = None
+async_engine: Optional[AsyncEngine] = None
 async_session_factory: Optional[async_sessionmaker] = None
 
 try:
     db_url = settings.database_url
     if db_url:
+        # Convert sync database URL to async format
+        if db_url.startswith("postgresql://"):
+            async_db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        elif db_url.startswith("postgres://"):
+            async_db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif db_url.startswith("sqlite://"):
+            async_db_url = db_url.replace("sqlite://", "sqlite+aiosqlite://", 1)
+        else:
+            async_db_url = db_url
+        
         # Use AsyncAdaptedQueuePool for proper async connection pooling
-        pool_class = AsyncAdaptedQueuePool if "sqlite" not in db_url else NullPool
-        async_engine = create_async_engine(
-            db_url,
-            echo=DatabaseConfig.ECHO,
-            echo_pool=DatabaseConfig.ECHO_POOL,
-            poolclass=pool_class,
-            pool_size=DatabaseConfig.POOL_SIZE if pool_class == AsyncAdaptedQueuePool else 0,
-            max_overflow=DatabaseConfig.MAX_OVERFLOW if pool_class == AsyncAdaptedQueuePool else 0,
-            pool_timeout=DatabaseConfig.POOL_TIMEOUT,
-            pool_recycle=DatabaseConfig.POOL_RECYCLE,
-            pool_pre_ping=DatabaseConfig.POOL_PRE_PING,
-        )
+        pool_class = AsyncAdaptedQueuePool if "sqlite" not in async_db_url else NullPool
+        
+        # Build engine arguments based on pool class
+        engine_args = {
+            "echo": DatabaseConfig.ECHO,
+            "echo_pool": DatabaseConfig.ECHO_POOL,
+            "poolclass": pool_class,
+        }
+        
+        # Only add pool-specific arguments for non-NullPool
+        if pool_class != NullPool:
+            engine_args.update({
+                "pool_size": DatabaseConfig.POOL_SIZE,
+                "max_overflow": DatabaseConfig.MAX_OVERFLOW,
+                "pool_timeout": DatabaseConfig.POOL_TIMEOUT,
+                "pool_recycle": DatabaseConfig.POOL_RECYCLE,
+                "pool_pre_ping": DatabaseConfig.POOL_PRE_PING,
+            })
+        
+        async_engine = create_async_engine(async_db_url, **engine_args)
         async_session_factory = async_sessionmaker(
             bind=async_engine,
             class_=AsyncSession,
@@ -133,7 +153,7 @@ try:
         
         # Setup async connection events
         @event.listens_for(async_engine.sync_engine, "connect")
-        def receive_async_connect(dbapi_conn, connection_record):
+        def receive_async_connect(dbapi_conn: Connection, connection_record: ConnectionPoolEntry) -> None:
             connection_record.info['pid'] = dbapi_conn.get_backend_pid() if hasattr(dbapi_conn, 'get_backend_pid') else None
             
             # Set statement timeout for all async connections
@@ -154,7 +174,7 @@ try:
             logger.debug(f"Async database connection established with safety limits: {connection_record.info.get('pid')}")
 
         @event.listens_for(async_engine.sync_engine, "checkout")
-        def receive_async_checkout(dbapi_conn, connection_record, connection_proxy):
+        def receive_async_checkout(dbapi_conn: Connection, connection_record: ConnectionPoolEntry, connection_proxy: _ConnectionFairy) -> None:
             # Track async pool usage for monitoring
             pool = async_engine.pool
             if hasattr(pool, 'size') and hasattr(pool, 'overflow'):

@@ -64,10 +64,10 @@ async def test_handle_start_agent():
         # Verify that handler either processed request or raised error (both are valid)
         if not error_raised:
             # If no error, verify handler was called and returned a valid response
-            assert handler.called or mock_handler.process.called, "Handler should have been invoked"
-            # Check that the handler returned some response (even if it's None for empty request)
-            assert hasattr(handler, 'return_value') or hasattr(mock_handler.process, 'return_value'), \
-                   "Handler should have a return value"
+            assert mock_supervisor.run.called, "Supervisor should have been invoked"
+            # Check that the supervisor returned some response (even if it's None for empty request)
+            assert hasattr(mock_supervisor.run, 'return_value'), \
+                   "Supervisor should have a return value"
         else:
             # If error was raised, it was handled appropriately
             assert error_raised, "Error was raised and handled as expected"

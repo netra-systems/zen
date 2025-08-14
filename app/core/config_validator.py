@@ -49,7 +49,8 @@ class ConfigValidator:
             # In Cloud Run/staging, database URL might be set via env var
             if not is_cloud_run and config.environment not in ["staging", "development"]:
                 errors.append("Database URL is not configured")
-        elif not config.database_url.startswith(("postgresql://", "postgresql+asyncpg://")):
+        elif config.environment != "testing" and not config.database_url.startswith(("postgresql://", "postgresql+asyncpg://")):
+            # Allow SQLite for testing environment
             errors.append("Database URL must be a PostgreSQL connection string")
             
         # Skip ClickHouse validation if ClickHouse is disabled in dev mode

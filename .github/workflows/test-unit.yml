@@ -101,11 +101,11 @@ jobs:
             --level unit \
             --shard ${{ matrix.shard }} \
             --json-output test-results-${{ matrix.shard }}.json \
-            --coverage-output coverage-${{ matrix.shard }}.xml
+            --html-output test-report-${{ matrix.shard }}.html
         continue-on-error: true
         
       - name: Upload Coverage
-        if: always()
+        if: always() && hashFiles('coverage-${{ matrix.shard }}.xml') != ''
         uses: codecov/codecov-action@v4
         with:
           files: ./coverage-${{ matrix.shard }}.xml
@@ -120,6 +120,7 @@ jobs:
           name: unit-test-results-${{ matrix.shard }}-${{ github.sha }}
           path: |
             test-results-${{ matrix.shard }}.json
+            test-report-${{ matrix.shard }}.html
             coverage-${{ matrix.shard }}.xml
           retention-days: 7
           

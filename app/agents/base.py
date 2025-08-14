@@ -15,6 +15,7 @@ import time
 
 from app.llm.llm_manager import LLMManager
 from app.schemas import SubAgentLifecycle, WebSocketMessage, SubAgentUpdate, SubAgentState
+from app.schemas.websocket_unified import WebSocketMessageType
 from app.agents.state import DeepAgentState
 from app.logging_config import central_logger
 from langchain_core.messages import SystemMessage
@@ -158,7 +159,7 @@ class BaseSubAgent(ABC):
                 await self.websocket_manager.send_message(
                     ws_user_id,
                     WebSocketMessage(
-                        type="sub_agent_update",
+                        type=WebSocketMessageType.SUB_AGENT_UPDATE,
                         payload=SubAgentUpdate(
                             sub_agent_name=self.name,
                             state=sub_agent_state

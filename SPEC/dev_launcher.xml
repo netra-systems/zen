@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <name>Dev Launcher</name>
+    <version>1.0.0</version>
+    <description>
+        Development environment launcher with real-time logging, health monitoring,
+        and multi-service orchestration.
+    </description>
+    
+    <architecture>
+        <components>
+            <component name="DevLauncher" file="dev_launcher/launcher.py">
+                <responsibility>Main orchestrator for development services</responsibility>
+                <max_lines>300</max_lines>
+            </component>
+            <component name="LogStreamer" file="dev_launcher/log_streamer.py">
+                <responsibility>Real-time log streaming with color coding</responsibility>
+                <max_lines>300</max_lines>
+            </component>
+            <component name="HealthMonitor" file="dev_launcher/health_monitor.py">
+                <responsibility>Service health monitoring and recovery</responsibility>
+                <max_lines>300</max_lines>
+            </component>
+            <component name="ProcessManager" file="dev_launcher/process_manager.py">
+                <responsibility>Subprocess lifecycle management</responsibility>
+                <max_lines>300</max_lines>
+            </component>
+        </components>
+    </architecture>
+    
+    <logging_requirements>
+        <requirement id="LOG-001" priority="CRITICAL">
+            <description>Service name appears in its designated color</description>
+            <implementation>
+                - Backend service name: Bright Cyan (only the service name)
+                - Frontend service name: Bright Magenta (only the service name)
+                - Other services: Use designated colors from Colors class
+            </implementation>
+        </requirement>
+        
+        <requirement id="LOG-002" priority="CRITICAL">
+            <description>Log content uses standard color scheme</description>
+            <implementation>
+                - After the service name, ALL log content uses standard terminal colors
+                - Errors: Red
+                - Warnings: Yellow
+                - Success: Green
+                - Info: White/Default
+                - Debug: Gray
+                - NO syntax highlighting for regular log output
+                - Path highlighting only for actual file paths
+            </implementation>
+        </requirement>
+        
+        <requirement id="LOG-003">
+            <description>Log format structure</description>
+            <format>[SERVICE_NAME] log_content_here</format>
+            <example>
+                - Colored: [BACKEND] (in cyan)
+                - Standard: "Server started on port 8000" (in default colors)
+            </example>
+        </requirement>
+    </logging_requirements>
+    
+    <health_monitoring>
+        <requirement id="HEALTH-001" priority="CRITICAL">
+            <description>Health checks wait for startup completion</description>
+            <implementation>
+                - Health monitoring MUST NOT start immediately after service launch
+                - MUST wait for startup checks to pass before beginning health monitoring
+                - Backend: Wait for /health/ready endpoint to respond successfully
+                - Frontend: Wait for initial compilation and readiness check
+                - Only AFTER startup verification should health monitoring begin
+            </implementation>
+        </requirement>
+        
+        <requirement id="HEALTH-002">
+            <description>Startup grace period</description>
+            <implementation>
+                - Backend: 30 second grace period for initial startup
+                - Frontend: 90 second grace period for Next.js compilation
+                - Health checks begin AFTER grace period AND readiness confirmation
+            </implementation>
+        </requirement>
+        
+        <requirement id="HEALTH-003">
+            <description>Health check intervals</description>
+            <implementation>
+                - Default check interval: 30 seconds
+                - Only check health AFTER service is confirmed ready
+                - Track consecutive failures before triggering recovery
+                - Max failures before recovery: 5
+            </implementation>
+        </requirement>
+    </health_monitoring>
+    
+    <service_startup_sequence>
+        <step order="1">Environment check</step>
+        <step order="2">Load secrets if configured</step>
+        <step order="3">Start backend process</step>
+        <step order="4">Wait for backend readiness (/health/ready)</step>
+        <step order="5">Verify auth system (/api/auth/config)</step>
+        <step order="6">Start frontend process</step>
+        <step order="7">Wait for frontend readiness</step>
+        <step order="8">ONLY NOW start health monitoring</step>
+    </service_startup_sequence>
+    
+    <color_codes>
+        <service name="BACKEND" color="\033[96m" description="Bright Cyan"/>
+        <service name="FRONTEND" color="\033[95m" description="Bright Magenta"/>
+        <standard name="ERROR" color="\033[31m" description="Red"/>
+        <standard name="WARNING" color="\033[33m" description="Yellow"/>
+        <standard name="SUCCESS" color="\033[32m" description="Green"/>
+        <standard name="INFO" color="\033[37m" description="White"/>
+        <standard name="DEBUG" color="\033[90m" description="Gray"/>
+        <standard name="RESET" color="\033[0m" description="Reset to default"/>
+    </color_codes>
+    
+    <testing>
+        <test_file>dev_launcher/tests/test_launcher.py</test_file>
+        <test_file>dev_launcher/tests/test_launcher_health.py</test_file>
+        <test_scenarios>
+            <scenario>Verify service name color isolation</scenario>
+            <scenario>Verify health check startup delay</scenario>
+            <scenario>Verify startup sequence order</scenario>
+        </test_scenarios>
+    </testing>
+</specification>

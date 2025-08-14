@@ -1,13 +1,14 @@
+from typing import Any, Optional
 from authlib.integrations.starlette_client import OAuth
 from app.config import settings
 
 class OAuthClient:
     """OAuth client wrapper to properly expose the Google OAuth client"""
-    def __init__(self):
+    def __init__(self) -> None:
         self.oauth = None
         self.google = None
     
-    def init_app(self, app):
+    def init_app(self, app: Any) -> OAuth:
         """Initialize OAuth with the FastAPI app"""
         # Create OAuth instance
         self.oauth = OAuth()

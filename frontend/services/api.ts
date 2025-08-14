@@ -1,4 +1,5 @@
 import { config } from '@/config';
+import { logger } from '@/lib/logger';
 
 class ApiSpecService {
   private spec: any = null;
@@ -11,13 +12,20 @@ class ApiSpecService {
     try {
       const response = await fetch(`${config.apiUrl}/openapi.json`);
       if (!response.ok) {
-        console.error('Failed to fetch openapi.json', response.status, response.statusText);
+        logger.error('Failed to fetch openapi.json', undefined, {
+          component: 'ApiSpecService',
+          action: 'fetch_openapi_json',
+          metadata: { status: response.status, statusText: response.statusText }
+        });
         return null;
       }
       this.spec = await response.json();
       return this.spec;
     } catch (error) {
-      console.error('Error fetching openapi.json', error);
+      logger.error('Error fetching openapi.json', error as Error, {
+        component: 'ApiSpecService',
+        action: 'fetch_openapi_json_error'
+      });
       return null;
     }
   }

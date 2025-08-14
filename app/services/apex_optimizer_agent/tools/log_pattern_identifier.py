@@ -52,7 +52,8 @@ class LogPatternIdentifier(BaseTool):
             Respond with a single JSON object where keys are the pattern identifiers (e.g., "pattern_0"). Each value should be an object containing "name" and "description".
             """
             response = await llm.ainvoke(prompt)
-            descriptions = json.loads(response.content) if response.content else {}
+            content = response.content if hasattr(response, 'content') else str(response)
+            descriptions = json.loads(content) if content else {}
 
         patterns = []
         pattern_descriptions = []

@@ -12,7 +12,8 @@ def mock_tool(a: int, b: int) -> int:
 async def test_tool_dispatcher():
     dispatcher = ToolDispatcher(tools=[mock_tool])
     result = await dispatcher.dispatch("mock_tool", a=1, b=2)
-    assert result.payload == 3
+    assert result.status == "success"
+    assert result.payload.result == 3  # Access as attribute of SimpleToolPayload
     assert result.tool_input.tool_name == "mock_tool"
 
 @pytest.mark.asyncio
