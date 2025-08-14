@@ -337,7 +337,7 @@ class TestIntegrationWithAgents:
     @pytest.mark.asyncio
     async def test_triage_result_with_nested_json_parameters(self, llm_manager):
         """Test TriageResult validation with nested JSON in tool_recommendations."""
-        from app.agents.triage.models import TriageResult
+        from app.agents.triage_sub_agent.models import TriageResult
         
         # Simulate the exact error case: parameters as JSON string
         raw_response = {
@@ -367,7 +367,7 @@ class TestIntegrationWithAgents:
     @pytest.mark.asyncio
     async def test_data_agent_structured_response(self):
         """Test that data agent can use structured responses."""
-        from app.agents.data_sub_agent import DataAnalysisResponse
+        from app.agents.data_sub_agent.models import DataAnalysisResponse
         
         # Verify the model is properly defined
         response = DataAnalysisResponse(
