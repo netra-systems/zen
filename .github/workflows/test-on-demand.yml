@@ -227,7 +227,7 @@ jobs:
             python test_runner.py \
               --level ${{ needs.parse-command.outputs.test_level }} \
               --json-output test-results.json \
-              --coverage-output coverage.xml
+              --html-output test-report.html
           fi
         continue-on-error: true
         
@@ -245,7 +245,6 @@ jobs:
           else
             python scripts/ci/generate_report.py \
               --input test-results.json \
-              --coverage coverage.xml \
               --format markdown \
               --output report.md
           fi
@@ -259,7 +258,7 @@ jobs:
             test-results.json
             performance-results.json
             security-results.json
-            coverage.xml
+            test-report.html
             report.md
           retention-days: 30
           

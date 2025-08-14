@@ -193,12 +193,33 @@ class LLMManager:
         self._llm_cache[cache_key] = llm
         return llm
 
-    async def ask_llm(self, prompt: str, llm_config_name: str, use_cache: bool = True) -> LLMResponse:
+    async def ask_llm(self, prompt: str, llm_config_name: str, use_cache: bool = True) -> str:
+        """Ask LLM and return response content as string for backward compatibility."""
+        response = await self.ask_llm_full(prompt, llm_config_name, use_cache)
+        return response.choices[0]["message"]["content"] if isinstance(response, LLMResponse) else response
+    
+    async def ask_llm_full(self, prompt: str, llm_config_name: str, use_cache: bool = True) -> LLMResponse:
+        """Ask LLM and return full LLMResponse object with metadata."""
         # Check cache first if enabled
         if use_cache:
             cached_response = await llm_cache_service.get_cached_response(prompt, llm_config_name)
             if cached_response:
-                return cached_response
+                # Return cached response as simple string-based response
+                config = self.settings.llm_configs.get(llm_config_name)
+                provider = LLMProvider(config.provider) if config else LLMProvider.LOCAL
+                from app.schemas.llm_types import TokenUsage
+                return LLMResponse(
+                    provider=provider,
+                    model=config.model_name if config else llm_config_name,
+                    choices=[{
+                        "message": {"content": cached_response},
+                        "finish_reason": "stop",
+                        "index": 0
+                    }],
+                    usage=TokenUsage(),
+                    response_time_ms=0,
+                    cached=True
+                )
         
         # Make LLM call
         start_time = time.time()
@@ -314,6 +335,8 @@ class LLMManager:
                 # Attempt to parse as JSON
                 if text_response.strip().startswith('{'):
                     data = json.loads(text_response)
+                    # Parse nested JSON strings
+                    data = self._parse_nested_json(data)
                     return schema(**data)
                 else:
                     # If not JSON, raise the original error
@@ -321,6 +344,28 @@ class LLMManager:
             except Exception as parse_error:
                 logger.error(f"Fallback parsing also failed: {parse_error}")
                 raise e
+    
+    def _parse_nested_json(self, data: Any) -> Any:
+        """Recursively parse JSON strings within a data structure."""
+        if isinstance(data, dict):
+            result = {}
+            for key, value in data.items():
+                if isinstance(value, str):
+                    # Try to parse as JSON
+                    try:
+                        if value.strip().startswith(('{', '[')):
+                            result[key] = json.loads(value)
+                        else:
+                            result[key] = value
+                    except (json.JSONDecodeError, ValueError):
+                        result[key] = value
+                else:
+                    result[key] = self._parse_nested_json(value)
+            return result
+        elif isinstance(data, list):
+            return [self._parse_nested_json(item) for item in data]
+        else:
+            return data
     
     def get_config_info(self, name: str) -> Optional[LLMConfigInfo]:
         """Get information about an LLM configuration."""
@@ -361,7 +406,7 @@ class LLMManager:
             
             return LLMHealthCheck(
                 config_name=config_name,
-                healthy=bool(test_response.content),
+                healthy=bool(test_response),
                 response_time_ms=response_time_ms,
                 last_checked=datetime.utcnow()
             )

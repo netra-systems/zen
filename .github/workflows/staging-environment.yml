@@ -1,4 +1,4 @@
-name: Optimized Staging Environment
+name: Staging Environment
 description: Fast parallel staging deployment with shared infrastructure
 
 permissions:

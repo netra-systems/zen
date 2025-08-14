@@ -141,7 +141,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov pytest-xdist pytest-timeout
+          pip install -r requirements-dev.txt
       
       - name: Run tests
         id: test
@@ -150,10 +150,8 @@ jobs:
           
           # Run test suite with appropriate level
           python test_runner.py --level "$TEST_LEVEL" \
-            --parallel \
-            --coverage \
-            --junit-xml=test-results.xml \
-            --coverage-xml=coverage.xml
+            --json-output test-results.json \
+            --html-output test-report.html
       
       - name: Upload test results
         if: always()
@@ -161,8 +159,8 @@ jobs:
         with:
           name: backend-test-results
           path: |
-            test-results.xml
-            coverage.xml
+            test-results.json
+            test-report.html
             htmlcov/
       
       # Lark notification removed - moved to work_in_progress
