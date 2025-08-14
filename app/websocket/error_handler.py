@@ -4,6 +4,8 @@ Provides centralized error handling, logging, and recovery mechanisms.
 """
 
 from typing import Dict, Any, Optional
+import asyncio
+import time
 
 from app.logging_config import central_logger
 from .connection import ConnectionInfo
@@ -20,6 +22,8 @@ class ErrorHandler:
         self.error_history: Dict[str, WebSocketError] = {}
         self.error_patterns: Dict[str, int] = {}  # Track common error patterns
         self.connection_errors: Dict[str, int] = {}  # Track errors per connection
+        self.recovery_timestamps: Dict[str, float] = {}  # Track last recovery attempt time
+        self.recovery_backoff: Dict[str, float] = {}  # Track backoff delays
         self._stats = {
             "total_errors": 0,
             "critical_errors": 0,
@@ -183,19 +187,46 @@ class ErrorHandler:
             logger.info(log_message, extra=log_context)
     
     async def _attempt_recovery(self, error: WebSocketError, conn_info: Optional[ConnectionInfo] = None) -> bool:
-        """Attempt to recover from an error."""
+        """Attempt to recover from an error with rate limiting."""
         error.retry_count += 1
         
+        # Implement rate limiting with exponential backoff
+        recovery_key = f"{error.error_type}:{error.connection_id or error.user_id}"
+        current_time = time.time()
+        
+        # Check if we're attempting recovery too soon
+        if recovery_key in self.recovery_timestamps:
+            last_attempt = self.recovery_timestamps[recovery_key]
+            backoff_delay = self.recovery_backoff.get(recovery_key, 1.0)
+            
+            time_since_last = current_time - last_attempt
+            if time_since_last < backoff_delay:
+                logger.debug(f"Recovery rate limited for {recovery_key}, waiting {backoff_delay - time_since_last:.1f}s")
+                return False
+        
+        # Update recovery tracking
+        self.recovery_timestamps[recovery_key] = current_time
+        
+        # Calculate exponential backoff (max 60 seconds)
+        current_backoff = self.recovery_backoff.get(recovery_key, 1.0)
+        next_backoff = min(current_backoff * 2, 60.0)
+        self.recovery_backoff[recovery_key] = next_backoff
+        
         try:
+            # Add delay before recovery attempt
+            await asyncio.sleep(min(error.retry_count * 0.5, 5.0))
+            
             # Implement recovery strategies based on error type
             if error.error_type == "connection_error":
                 return await self._recover_connection_error(error, conn_info)
             elif error.error_type == "rate_limit_error":
                 return await self._recover_rate_limit_error(error, conn_info)
+            elif error.error_type == "heartbeat_error":
+                return await self._recover_heartbeat_error(error, conn_info)
             else:
-                # Generic recovery - just log and continue
-                logger.info(f"Generic recovery attempted for error {error.error_id}")
-                return True
+                # Generic recovery with delay
+                logger.info(f"Generic recovery attempted for error {error.error_id} after {current_backoff:.1f}s backoff")
+                return False  # Don't auto-recover unknown errors
                 
         except Exception as recovery_error:
             logger.error(f"Error during recovery attempt for {error.error_id}: {recovery_error}")
@@ -215,6 +246,20 @@ class ErrorHandler:
         """Attempt to recover from a rate limit error."""
         # For rate limit errors, recovery means waiting and then allowing normal operation
         logger.info(f"Rate limit error recovery: connection {error.connection_id} can resume after window")
+        return True
+    
+    async def _recover_heartbeat_error(self, error: WebSocketError, conn_info: Optional[ConnectionInfo] = None) -> bool:
+        """Attempt to recover from a heartbeat error."""
+        if not conn_info:
+            return False
+        
+        # For heartbeat errors, check if connection is truly dead
+        from starlette.websockets import WebSocketState
+        if conn_info.websocket.client_state != WebSocketState.CONNECTED:
+            logger.info(f"Heartbeat error: connection {conn_info.connection_id} is closed, cannot recover")
+            return False
+        
+        logger.info(f"Heartbeat error recovery: connection {conn_info.connection_id} may continue")
         return True
     
     def get_error_stats(self) -> Dict[str, Any]:
@@ -251,8 +296,19 @@ class ErrorHandler:
         for error_id in errors_to_remove:
             del self.error_history[error_id]
         
-        if errors_to_remove:
-            logger.info(f"Cleaned up {len(errors_to_remove)} old error records")
+        # Clean up old recovery tracking
+        recovery_keys_to_remove = []
+        for key, timestamp in self.recovery_timestamps.items():
+            if timestamp < cutoff_time:
+                recovery_keys_to_remove.append(key)
+        
+        for key in recovery_keys_to_remove:
+            del self.recovery_timestamps[key]
+            if key in self.recovery_backoff:
+                del self.recovery_backoff[key]
+        
+        if errors_to_remove or recovery_keys_to_remove:
+            logger.info(f"Cleaned up {len(errors_to_remove)} old error records and {len(recovery_keys_to_remove)} recovery trackers")
 
 
 # Default error handler instance
