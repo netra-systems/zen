@@ -105,7 +105,9 @@ class TestAdminVisibility:
         # Trigger alert condition
         with patch.object(admin_service, 'send_alert') as mock_alert:
             await admin_service.generate_synthetic_data(
-                GenerationConfig(num_traces=10000)  # Will be slow
+                db=AsyncMock(),
+                config=GenerationConfig(num_traces=10000),  # Will be slow
+                user_id="admin_user"
             )
             
             mock_alert.assert_called()
@@ -113,15 +115,13 @@ class TestAdminVisibility:
     @pytest.mark.asyncio
     async def test_job_cancellation_by_admin(self, admin_service):
         """Test admin ability to cancel running jobs"""
-        job_id = str(uuid.uuid4())
-        
-        # Start long-running job
-        generation_task = asyncio.create_task(
-            admin_service.generate_synthetic_data(
-                GenerationConfig(num_traces=100000),
-                job_id=job_id
-            )
+        # Start long-running job and get its job_id
+        job_result = await admin_service.generate_synthetic_data(
+            db=AsyncMock(),
+            config=GenerationConfig(num_traces=100000),
+            user_id="admin_user"
         )
+        job_id = job_result["job_id"]
         
         await asyncio.sleep(0.1)
         
@@ -130,8 +130,6 @@ class TestAdminVisibility:
         
         assert result["cancelled"] == True
         assert result["records_completed"] < 100000
-        
-        generation_task.cancel()
 
     @pytest.mark.asyncio
     async def test_resource_usage_tracking(self, admin_service):
