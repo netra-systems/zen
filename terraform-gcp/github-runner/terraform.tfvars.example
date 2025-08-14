@@ -1,36 +1,139 @@
-# GCP Configuration
+# ===================================================================
+# GitHub Runner Terraform Configuration
+# ===================================================================
+# Copy this file to terraform.tfvars and fill in your values
+# 
+# IMPORTANT: Never commit terraform.tfvars to version control
+# Add terraform.tfvars to .gitignore
+# ===================================================================
+
+# ===================================================================
+# REQUIRED VARIABLES - Must be set
+# ===================================================================
+
+# GCP Project ID where resources will be created
+# Find this in GCP Console or run: gcloud config get-value project
 project_id = "your-gcp-project-id"
-region     = "us-central1"
-zone       = "us-central1-a"
 
-# GitHub Configuration
-# github_token should be set via environment variable: TF_VAR_github_token
-github_org  = "your-github-org"
-github_repo = "your-repo-name"  # Optional: leave empty for org-level runner
+# GitHub organization name (e.g., "mycompany" from github.com/mycompany)
+github_org = "your-github-org"
 
-# Runner Configuration
-runner_name   = "gcp-runner"
-runner_count  = 2
-runner_labels = ["self-hosted", "linux", "x64", "gcp", "netra"]
-runner_group  = ""  # Optional: runner group name
+# GitHub Personal Access Token
+# Required scopes: repo, admin:org (for org runners), workflow
+# Create at: https://github.com/settings/tokens/new
+# SECURITY: Use environment variable instead: export TF_VAR_github_token="ghp_..."
+github_token = "ghp_your_token_here"
 
+# ===================================================================
+# OPTIONAL VARIABLES - Customize as needed
+# ===================================================================
+
+# -----------------------------
+# Regional Configuration
+# -----------------------------
+# GCP region for resources
+region = "us-central1"
+
+# GCP zone for compute instances
+zone = "us-central1-a"
+
+# -----------------------------
+# GitHub Runner Configuration
+# -----------------------------
+# Repository name (leave empty for org-level runners)
+# Example: "my-repo" for github.com/myorg/my-repo
+github_repo = ""
+
+# Base name for runners (will be suffixed with unique ID)
+runner_name = "gcp-runner"
+
+# Number of runners to create (ignored if autoscaling is enabled)
+runner_count = 1
+
+# Labels for the runners (used for workflow targeting)
+runner_labels = ["self-hosted", "linux", "x64", "gcp", "docker"]
+
+# Runner group (for organization runners only, leave empty for default)
+runner_group = ""
+
+# GitHub Actions runner version
+# Check latest: https://github.com/actions/runner/releases
+runner_version = "2.327.1"
+
+# -----------------------------
 # Instance Configuration
-machine_type     = "e2-standard-2"  # 2 vCPUs, 8GB RAM
-boot_disk_size   = 50
-boot_disk_type   = "pd-standard"    # Use "pd-ssd" for better performance
-use_preemptible  = false             # Set to true for cost savings (70% cheaper)
+# -----------------------------
+# Machine type for runner instances
+# Options: e2-micro, e2-small, e2-medium, e2-standard-2, e2-standard-4, etc.
+machine_type = "e2-standard-2"
 
+# Boot disk configuration
+boot_disk_image = "ubuntu-os-cloud/ubuntu-2204-lts"
+boot_disk_size  = 50  # GB
+boot_disk_type  = "pd-standard"  # pd-standard or pd-ssd
+
+# Use preemptible instances for cost savings (may be interrupted)
+use_preemptible = false
+
+# -----------------------------
 # Autoscaling Configuration
+# -----------------------------
+# Enable autoscaling based on CPU utilization
 enable_autoscaling = false
-min_runners        = 1
-max_runners        = 5
 
-# Network Configuration
-enable_ssh        = false  # Enable for debugging
-ssh_source_ranges = ["0.0.0.0/0"]  # Restrict in production
+# Autoscaling limits (only used if enable_autoscaling = true)
+min_runners = 1
+max_runners = 5
 
-# Storage Configuration
+# -----------------------------
+# Network & Security
+# -----------------------------
+# Enable SSH access to runners (for debugging)
+enable_ssh = false
+
+# Source IP ranges allowed for SSH (if enabled)
+# Use your IP or VPN CIDR for security
+ssh_source_ranges = ["0.0.0.0/0"]
+
+# -----------------------------
+# Storage & Retention
+# -----------------------------
+# Days to retain artifacts in storage bucket
 artifact_retention_days = 30
 
+# -----------------------------
 # Environment
-environment = "production"
+# -----------------------------
+# Environment name for tagging and organization
+environment = "production"  # dev, staging, production
+
+# ===================================================================
+# GCP AUTHENTICATION TROUBLESHOOTING
+# ===================================================================
+# If you encounter "invalid_grant" or "reauth related error":
+#
+# 1. Re-authenticate with GCP:
+#    gcloud auth application-default login
+#
+# 2. Set your project:
+#    gcloud config set project YOUR_PROJECT_ID
+#
+# 3. Enable required APIs:
+#    gcloud services enable compute.googleapis.com
+#    gcloud services enable secretmanager.googleapis.com
+#    gcloud services enable iam.googleapis.com
+#
+# 4. If using service account, ensure it has proper permissions:
+#    - Compute Admin
+#    - Secret Manager Admin
+#    - Service Account User
+#    - IAM Service Account Admin
+#
+# 5. For persistent issues, try:
+#    gcloud auth application-default revoke
+#    gcloud auth application-default login --no-launch-browser
+#
+# 6. Verify credentials:
+#    gcloud auth list
+#    gcloud config list
+# ===================================================================

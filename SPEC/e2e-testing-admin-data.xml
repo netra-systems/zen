@@ -36,9 +36,172 @@
                 </scenario>
                 <scenario name="Admin-Corpus-Generation:Chat-discovery">
                     <name>The Chat UI/UX admin provides config discovery of available options</name>
-                    <example> {insert from corpus config} </example>
+                    <description>Admin can discover all corpus generation configurations through natural language chat, with intelligent suggestions and auto-completion</description>
+                    
+                    <discovery-categories>
+                        <category name="Workload Types">
+                            <description>AI workload patterns available for corpus generation</description>
+                            <options>
+                                <option value="simple_chat">Basic question-answer interactions</option>
+                                <option value="rag_pipeline">Retrieval-augmented generation workflows</option>
+                                <option value="tool_use">Single tool invocation patterns</option>
+                                <option value="multi_turn_tool_use">Complex multi-turn tool interactions</option>
+                                <option value="failed_request">Error scenarios and recovery patterns</option>
+                                <option value="custom_domain">Domain-specific workloads (finance, healthcare, etc.)</option>
+                            </options>
+                        </category>
+                        
+                        <category name="Generation Parameters">
+                            <description>Configuration options for content generation</description>
+                            <parameters>
+                                <param name="samples_per_type" default="10" range="1-100">Number of samples per workload type</param>
+                                <param name="temperature" default="0.7" range="0.0-2.0">Creativity/randomness control</param>
+                                <param name="top_p" optional="true" range="0.0-1.0">Nucleus sampling probability</param>
+                                <param name="top_k" optional="true" range="1-100">Top-k sampling control</param>
+                                <param name="max_cores" default="4" range="1-16">CPU cores for parallel generation</param>
+                                <param name="clickhouse_table" default="content_corpus">Target table name</param>
+                            </parameters>
+                        </category>
+                        
+                        <category name="Synthetic Data Options">
+                            <description>Options for generating synthetic optimization data</description>
+                            <parameters>
+                                <param name="num_traces" default="10000" range="1-100000">Number of traces to generate</param>
+                                <param name="num_users" default="100" range="1-10000">Unique users to simulate</param>
+                                <param name="error_rate" default="0.05" range="0.0-1.0">Fraction of error traces</param>
+                                <param name="event_types" default="['search', 'login', 'purchase', 'logout']">Event type list</param>
+                                <param name="source_table" default="content_corpus">Source corpus table</param>
+                                <param name="destination_table" default="synthetic_data">Output table name</param>
+                            </parameters>
+                        </category>
+                        
+                        <category name="Corpus Operations">
+                            <description>Available corpus management operations</description>
+                            <operations>
+                                <operation value="create">Create new corpus with specified domain</operation>
+                                <operation value="update">Modify existing corpus content</operation>
+                                <operation value="delete">Remove corpus data</operation>
+                                <operation value="search">Query corpus content</operation>
+                                <operation value="index">Build search indices</operation>
+                                <operation value="optimize">Optimize corpus storage and retrieval</operation>
+                            </operations>
+                        </category>
+                        
+                        <category name="Admin Tool Types">
+                            <description>Available admin tool categories through chat</description>
+                            <tools>
+                                <tool value="corpus_management">Full corpus CRUD operations</tool>
+                                <tool value="synthetic_data">Generate test data</tool>
+                                <tool value="user_admin">User management</tool>
+                                <tool value="system_config">Configuration management</tool>
+                                <tool value="monitoring">System metrics and logs</tool>
+                                <tool value="security">Security policy configuration</tool>
+                                <tool value="data_export">Export corpus data</tool>
+                                <tool value="backup_restore">Backup operations</tool>
+                                <tool value="performance_tuning">Optimization settings</tool>
+                            </tools>
+                        </category>
+                    </discovery-categories>
+                    
+                    <chat-examples>
+                        <example>
+                            <user>What corpus generation options are available?</user>
+                            <assistant>I can help you generate corpus data with these workload types:
+• simple_chat - Basic Q&A interactions
+• rag_pipeline - RAG workflows  
+• tool_use - Single tool patterns
+• multi_turn_tool_use - Complex tool chains
+• failed_request - Error scenarios
+• custom_domain - Domain-specific (finance, healthcare)
+
+Configuration options include:
+• samples_per_type: 1-100 (default: 10)
+• temperature: 0.0-2.0 (default: 0.7)
+• max_cores: 1-16 (default: 4)
+
+Would you like to create a corpus with specific settings?</assistant>
+                        </example>
+                        
+                        <example>
+                            <user>Create a corpus for financial services with high quality</user>
+                            <assistant>I'll create a financial services corpus with high quality settings:
+                                
+Configuration:
+• Domain: financial_services
+• Workload types: custom_domain (finance-specific)
+• Samples per type: 50 (increased for better coverage)
+• Temperature: 0.5 (lower for consistency)
+• Top_p: 0.9 (focused sampling)
+• Max cores: 8 (faster generation)
+• Table: financial_corpus
+
+This will generate realistic financial scenarios including:
+- Investment portfolio analysis
+- Risk assessment queries
+- Market trend predictions
+- Regulatory compliance checks
+- Transaction fraud detection
+
+Shall I proceed with generation?</assistant>
+                        </example>
+                        
+                        <example>
+                            <user>Generate synthetic data for load testing</user>
+                            <assistant>I'll configure synthetic data generation for load testing:
+
+Parameters:
+• num_traces: 50000 (high volume)
+• num_users: 500 (diverse user base)
+• error_rate: 0.02 (2% realistic errors)
+• event_types: ["api_call", "db_query", "cache_hit", "ml_inference"]
+• source_table: content_corpus
+• destination_table: load_test_data
+
+Temporal patterns:
+• Peak hours: 9am-11am, 2pm-4pm
+• Gradual ramp-up/down
+• Burst patterns every 30 min
+
+This will create realistic load patterns. Ready to generate?</assistant>
+                        </example>
+                        
+                        <example>
+                            <user>Show me corpus optimization options</user>
+                            <assistant>Available corpus optimization operations:
+
+1. **Index optimization**
+   - Build vector embeddings
+   - Create full-text search indices
+   - Generate similarity matrices
+
+2. **Storage optimization**
+   - Compress old data
+   - Partition by date/domain
+   - Archive inactive corpora
+
+3. **Query optimization**
+   - Cache frequent queries
+   - Pre-compute aggregations
+   - Optimize retrieval paths
+
+4. **Quality improvements**
+   - Deduplicate entries
+   - Validate schemas
+   - Enrich with metadata
+
+Which optimization would you like to apply?</assistant>
+                        </example>
+                    </chat-examples>
+                    
+                    <validation-rules>
+                        <rule>Admin must have corpus_management permission</rule>
+                        <rule>Generation parameters must be within valid ranges</rule>
+                        <rule>Table names must follow naming conventions</rule>
+                        <rule>Resource limits enforced (CPU, memory, storage)</rule>
+                        <rule>Audit log created for all operations</rule>
+                    </validation-rules>
                 </scenario>
-            <test-scenarios>
+            </test-scenarios>
         </requirement>
     </requirements>
    
