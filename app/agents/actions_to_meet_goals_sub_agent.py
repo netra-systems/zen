@@ -19,6 +19,7 @@ from app.agents.utils import extract_json_from_response, extract_partial_json
 from app.logging_config import central_logger as logger
 from app.core.reliability_utils import create_agent_reliability_wrapper
 from app.core.fallback_utils import create_agent_fallback_strategy
+from app.agents.input_validation import validate_agent_input
 
 
 class ActionsToMeetGoalsSubAgent(BaseSubAgent):
@@ -26,13 +27,15 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
         super().__init__(llm_manager, name="ActionsToMeetGoalsSubAgent", description="This agent creates a plan of action.")
         self.tool_dispatcher = tool_dispatcher
         
-        # Initialize reliability wrapper
+        # Initialize reliability wrapper and fallback strategy
         self.reliability = create_agent_reliability_wrapper("ActionsToMeetGoalsSubAgent")
+        self.fallback_strategy = create_agent_fallback_strategy("ActionsToMeetGoalsSubAgent")
 
     async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
         """Check if we have optimizations and data results to work with."""
         return state.optimizations_result is not None and state.data_result is not None
     
+    @validate_agent_input('ActionsToMeetGoalsSubAgent')
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute the actions to meet goals logic."""
         
@@ -108,12 +111,10 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
         
         async def _fallback_action_plan():
             """Fallback action plan when main operation fails"""
-            logger.warning(f"Using fallback action plan for run_id: {run_id}")
-            fallback_result = self._get_default_action_plan()
-            fallback_result["metadata"] = {
-                "fallback_used": True,
-                "reason": "Primary action plan generation failed"
-            }
+            fallback_result = self.fallback_strategy.create_default_fallback_result(
+                "action_plan_generation",
+                **self._get_default_action_plan()
+            )
             state.action_plan_result = fallback_result
             
             if stream_updates:
@@ -125,11 +126,18 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
             
             return fallback_result
         
-        # Execute with reliability protection
-        await self.reliability.execute_safely(
+        # Execute with unified fallback strategy
+        result = await self.fallback_strategy.execute_with_fallback(
             _execute_action_plan,
-            "execute_action_plan",
-            fallback=_fallback_action_plan,
+            _fallback_action_plan,
+            "action_plan_generation",
+            run_id
+        )
+        
+        # Apply reliability protection as well
+        await self.reliability.execute_safely(
+            lambda: result,
+            "execute_action_plan_with_fallback",
             timeout=45.0
         )
     

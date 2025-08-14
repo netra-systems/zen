@@ -23,9 +23,7 @@ from .intent_detector import IntentDetector
 from .tool_recommender import ToolRecommender
 from .core import TriageCore
 
-# Note: TriageSubAgent is in the parent triage_sub_agent.py file
-# Import it when needed to avoid circular imports
-TriageSubAgent = None
+# Note: TriageSubAgent is imported directly where needed to avoid circular imports
 
 __all__ = [
     "Priority",

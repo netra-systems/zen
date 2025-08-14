@@ -1,135 +1,6 @@
 {
   "runs": [
     {
-      "timestamp": "2025-08-14T00:06:30.421974",
-      "level": "unit",
-      "total": 0,
-      "passed": 0,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T00:07:30.134967",
-      "level": "unit",
-      "total": 276,
-      "passed": 255,
-      "failed": 4,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T00:07:59.765727",
-      "level": "comprehensive-agents",
-      "total": 1,
-      "passed": 0,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T00:08:30.382425",
-      "level": "comprehensive-database",
-      "total": 1,
-      "passed": 0,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T00:08:44.922504",
-      "level": "unit",
-      "total": 0,
-      "passed": 0,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T00:09:01.793749",
-      "level": "unit",
-      "total": 0,
-      "passed": 0,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T00:09:52.745771",
-      "level": "unit",
-      "total": 0,
-      "passed": 0,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T00:10:11.474934",
-      "level": "comprehensive-backend",
-      "total": 0,
-      "passed": 0,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T00:10:55.845938",
-      "level": "comprehensive-backend",
-      "results": {
-        "backend": {
-          "status": "failed",
-          "duration": 15.312922477722168,
-          "exit_code": 15,
-          "output": "\n",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "frontend": {
-          "status": "skipped",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "e2e": {
-          "status": "pending",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        }
-      },
-      "summary": {
-        "total": 0,
-        "passed": 0,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 0
-      }
-    },
-    {
       "timestamp": "2025-08-14T00:10:55.945226",
       "level": "unit",
       "results": {
@@ -196,6 +67,408 @@
       "failed": 0,
       "coverage": null,
       "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T00:11:39.855028",
+      "level": "unit",
+      "results": {
+        "backend": {
+          "status": "failed",
+          "duration": 2.7689602375030518,
+          "exit_code": 15,
+          "output": "\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "failed",
+          "duration": 0.0200655460357666,
+          "exit_code": 15,
+          "output": "\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "failed",
+          "start_time": 1755155497.0612562,
+          "end_time": 1755155499.8540144
+        }
+      },
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      }
+    },
+    {
+      "timestamp": "2025-08-14T00:11:40.187366",
+      "level": "unit",
+      "results": {
+        "backend": {
+          "status": "failed",
+          "duration": 36.34500074386597,
+          "exit_code": 2,
+          "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m____ ERROR collecting tests/services/test_supply_research_service_basic.py ____\u001b[0m\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_supply_research_service_basic.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\python.py:498: in importtestmodule\n    mod = import_path(\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\pathlib.py:587: in import_path\n    importlib.import_module(module_name)\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\assertion\\rewrite.py:186: in exec_module\n    exec(co, module.__dict__)\napp\\tests\\services\\test_supply_research_service_basic.py:14: in <module>\n    from app.tests.conftest import get_test_db_session\nE   ImportError: cannot import name 'get_test_db_session' from 'app.tests.conftest' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py)\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app\\tests\\services\\test_supply_research_service_basic.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m============================== \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 22.41s\u001b[0m\u001b[31m ==============================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 34.96s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\n",
+          "test_counts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 1,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "failed",
+          "duration": 1.1142933368682861,
+          "exit_code": 255,
+          "output": "================================================================================\nNETRA AI PLATFORM - FRONTEND TEST RUNNER\n================================================================================\n\n================================================================================\nRunning Jest Tests\n--------------------------------------------------------------------------------\nRunning: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)\n--------------------------------------------------------------------------------\n\n================================================================================\n[FAIL] CHECKS FAILED with exit code 255\n================================================================================\n\nCleaning up test processes...\n\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "failed",
+          "start_time": 1755155462.7079248,
+          "end_time": 1755155500.1722286
+        }
+      },
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 1
+      }
+    },
+    {
+      "timestamp": "2025-08-14T00:12:19.569840",
+      "level": "comprehensive",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T00:12:19.783053",
+      "level": "unit",
+      "results": {
+        "backend": {
+          "status": "failed",
+          "duration": 14.82422137260437,
+          "exit_code": 4,
+          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 13.77s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:46: in <module>\n    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor\napp\\agents\\supervisor_consolidated.py:12: in <module>\n    from app.agents.base import BaseSubAgent\napp\\agents\\base.py:10: in <module>\n    from app.agents.state import DeepAgentState\napp\\agents\\state.py:7: in <module>\n    from app.agents.triage_sub_agent.models import TriageResult\napp\\agents\\triage_sub_agent\\__init__.py:27: in <module>\n    from ..triage_sub_agent import TriageSubAgent\nE   ImportError: cannot import name 'TriageSubAgent' from partially initialized module 'app.agents.triage_sub_agent' (most likely due to a circular import) (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\triage_sub_agent\\__init__.py)\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "failed",
+          "duration": 0.690662145614624,
+          "exit_code": 15,
+          "output": "\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "failed",
+          "start_time": 1755155524.2485957,
+          "end_time": 1755155539.768998
+        }
+      },
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      }
+    },
+    {
+      "timestamp": "2025-08-14T00:12:20.184874",
+      "level": "unit",
+      "results": {
+        "backend": {
+          "status": "failed",
+          "duration": 33.72070598602295,
+          "exit_code": 15,
+          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n[gw0] node down: Traceback (most recent call last):\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 712, in _importconftest\n    mod = import_path(\n          ^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\pathlib.py\", line 587, in import_path\n    importlib.import_module(module_name)\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\importlib\\__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\assertion\\rewrite.py\", line 186, in exec_module\n    exec(co, module.__dict__)\n  File \"C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py\", line 52, in <module>\n    from app.main import app\n  File \"C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\main.py\", line 46, in <module>\n    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor\n  File \"C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\supervisor_consolidated.py\", line 12, in <module>\n    from app.agents.base import BaseSubAgent\n  File \"C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\base.py\", line 10, in <module>\n    from app.agents.state import DeepAgentState\n  File \"C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\state.py\", line 7, in <module>\n    from app.agents.triage_sub_agent.models import TriageResult\n  File \"C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\triage_sub_agent\\__init__.py\", line 27, in <module>\n    from ..triage_sub_agent import TriageSubAgent\nImportError: cannot import name 'TriageSubAgent' from partially initialized module 'app.agents.triage_sub_agent' (most likely due to a circular import) (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\triage_sub_agent\\__init__.py)\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\execnet\\gateway_base.py\", line 1291, in executetask\n    exec(co, loc)\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\xdist\\remote.py\", line 420, in <module>\n    config = _prepareconfig(args, None)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 342, in _prepareconfig\n    config = pluginmanager.hook.pytest_cmdline_parse(\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_hooks.py\", line 512, in __call__\n    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_manager.py\", line 120, in _hookexec\n    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 167, in _multicall\n    raise exception\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 139, in _multicall\n    teardown.throw(exception)\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\helpconfig.py\", line 112, in pytest_cmdline_parse\n    config = yield\n             ^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 121, in _multicall\n    res = hook_impl.function(*args)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 1146, in pytest_cmdline_parse\n    self.parse(args)\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 1527, in parse\n    self._preparse(args, addopts=addopts)\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 1431, in _preparse\n    self.hook.pytest_load_initial_conftests(\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_hooks.py\", line 512, in __call__\n    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_manager.py\", line 120, in _hookexec\n    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 167, in _multicall\n    raise exception\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 139, in _multicall\n    teardown.throw(exception)\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\capture.py\", line 173, in pytest_load_initial_conftests\n    yield\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 121, in _multicall\n    res = hook_impl.function(*args)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 1228, in pytest_load_initial_conftests\n    self.pluginmanager._set_initial_conftests(\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 583, in _set_initial_conftests\n    self._try_load_conftest(\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 621, in _try_load_conftest\n    self._loadconftestmodules(\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 661, in _loadconftestmodules\n    mod = self._importconftest(\n          ^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 720, in _importconftest\n    raise ConftestImportFailure(conftestpath, cause=e) from e\n_pytest.config.ConftestImportFailure: ImportError: cannot import name 'TriageSubAgent' from partially initialized module 'app.agents.triage_sub_agent' (most likely due to a circular import) (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\triage_sub_agent\\__init__.py) (from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py)\n\n\nreplacing crashed worker gw0\n[gw1] node down: Traceback (most recent call last):\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 712, in _importconftest\n    mod = import_path(\n          ^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\pathlib.py\", line 587, in import_path\n    importlib.import_module(module_name)\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\importlib\\__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\assertion\\rewrite.py\", line 186, in exec_module\n    exec(co, module.__dict__)\n  File \"C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py\", line 52, in <module>\n    from app.main import app\n  File \"C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\main.py\", line 46, in <module>\n    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor\n  File \"C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\supervisor_consolidated.py\", line 12, in <module>\n    from app.agents.base import BaseSubAgent\n  File \"C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\base.py\", line 10, in <module>\n    from app.agents.state import DeepAgentState\n  File \"C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\state.py\", line 7, in <module>\n    from app.agents.triage_sub_agent.models import TriageResult\n  File \"C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\triage_sub_agent\\__init__.py\", line 27, in <module>\n    from ..triage_sub_agent import TriageSubAgent\nImportError: cannot import name 'TriageSubAgent' from partially initialized module 'app.agents.triage_sub_agent' (most likely due to a circular import) (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\triage_sub_agent\\__init__.py)\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\execnet\\gateway_base.py\", line 1291, in executetask\n    exec(co, loc)\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\xdist\\remote.py\", line 420, in <module>\n    config = _prepareconfig(args, None)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 342, in _prepareconfig\n    config = pluginmanager.hook.pytest_cmdline_parse(\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_hooks.py\", line 512, in __call__\n    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_manager.py\", line 120, in _hookexec\n    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 167, in _multicall\n    raise exception\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 139, in _multicall\n    teardown.throw(exception)\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\helpconfig.py\", line 112, in pytest_cmdline_parse\n    config = yield\n             ^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 121, in _multicall\n    res = hook_impl.function(*args)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 1146, in pytest_cmdline_parse\n    self.parse(args)\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 1527, in parse\n    self._preparse(args, addopts=addopts)\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 1431, in _preparse\n    self.hook.pytest_load_initial_conftests(\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_hooks.py\", line 512, in __call__\n    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_manager.py\", line 120, in _hookexec\n    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 167, in _multicall\n    raise exception\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 139, in _multicall\n    teardown.throw(exception)\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\capture.py\", line 173, in pytest_load_initial_conftests\n    yield\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 121, in _multicall\n    res = hook_impl.function(*args)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 1228, in pytest_load_initial_conftests\n    self.pluginmanager._set_initial_conftests(\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 583, in _set_initial_conftests\n    self._try_load_conftest(\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 621, in _try_load_conftest\n    self._loadconftestmodules(\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 661, in _loadconftestmodules\n    mod = self._importconftest(\n          ^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\config\\__init__.py\", line 720, in _importconftest\n    raise ConftestImportFailure(conftestpath, cause=e) from e\n_pytest.config.ConftestImportFailure: ImportError: cannot import name 'TriageSubAgent' from partially initialized module 'app.agents.triage_sub_agent' (most likely due to a circular import) (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\triage_sub_agent\\__init__.py) (from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py)\n\n\nreplacing crashed worker gw1\n\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"<string>\", line 5, in <module>\nOSError: [Errno 22] Invalid argument\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "failed",
+          "duration": 0.34985804557800293,
+          "exit_code": 15,
+          "output": "\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "failed",
+          "start_time": 1755155506.099933,
+          "end_time": 1755155540.1803217
+        }
+      },
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      }
+    },
+    {
+      "timestamp": "2025-08-14T00:12:30.822920",
+      "level": "smoke",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T00:12:35.065998",
+      "level": "unit",
+      "results": {
+        "backend": {
+          "status": "failed",
+          "duration": 8.952322959899902,
+          "exit_code": 4,
+          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 8.16s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:46: in <module>\n    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor\napp\\agents\\supervisor_consolidated.py:27: in <module>\n    from app.agents.supervisor.execution_context import PipelineStep\napp\\agents\\supervisor\\__init__.py:5: in <module>\n    from .agent_registry import AgentRegistry\napp\\agents\\supervisor\\agent_registry.py:13: in <module>\n    from app.agents.triage_sub_agent import TriageSubAgent\nE   ImportError: cannot import name 'TriageSubAgent' from 'app.agents.triage_sub_agent' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\triage_sub_agent\\__init__.py)\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "failed",
+          "duration": 0.3679375648498535,
+          "exit_code": 255,
+          "output": "================================================================================\nNETRA AI PLATFORM - FRONTEND TEST RUNNER\n================================================================================\n\n================================================================================\nRunning Jest Tests\n--------------------------------------------------------------------------------\nRunning: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)\n--------------------------------------------------------------------------------\n\n================================================================================\n[FAIL] CHECKS FAILED with exit code 255\n================================================================================\n\nCleaning up test processes...\n\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "failed",
+          "start_time": 1755155545.7239542,
+          "end_time": 1755155555.0472097
+        }
+      },
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      }
+    },
+    {
+      "timestamp": "2025-08-14T00:12:44.256350",
+      "level": "unit",
+      "results": {
+        "backend": {
+          "status": "failed",
+          "duration": 8.73720383644104,
+          "exit_code": 4,
+          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 8.01s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:46: in <module>\n    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor\napp\\agents\\supervisor_consolidated.py:27: in <module>\n    from app.agents.supervisor.execution_context import PipelineStep\napp\\agents\\supervisor\\__init__.py:5: in <module>\n    from .agent_registry import AgentRegistry\napp\\agents\\supervisor\\agent_registry.py:13: in <module>\n    from app.agents.triage_sub_agent import TriageSubAgent\nE   ImportError: cannot import name 'TriageSubAgent' from 'app.agents.triage_sub_agent' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\triage_sub_agent\\__init__.py)\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "failed",
+          "duration": 0.3389608860015869,
+          "exit_code": 15,
+          "output": "\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "failed",
+          "start_time": 1755155555.1751652,
+          "end_time": 1755155564.2543387
+        }
+      },
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      }
     }
   ],
   "flaky_tests": {},

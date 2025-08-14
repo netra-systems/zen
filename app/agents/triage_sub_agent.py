@@ -20,6 +20,7 @@ from app.logging_config import central_logger
 from app.core.reliability import (
     get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
 )
+from app.agents.input_validation import validate_agent_input
 
 # Import from modular structure
 from app.agents.triage_sub_agent.models import (
@@ -81,6 +82,7 @@ class TriageSubAgent(BaseSubAgent):
         
         return True
 
+    @validate_agent_input('TriageSubAgent')
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute the enhanced triage logic with structured generation"""
         async def _execute_triage():
